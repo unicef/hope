@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const REVERT_MARK_PAYMENT_AS_FAILED = gql`
   mutation revertMarkPayAsFailed(

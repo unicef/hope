@@ -3,147 +3,144 @@
 exports[`containers/tables/population/HouseholdTable should render loading 1`] = `
 <div>
   <div
-    class="sc-bdVaJa ksQzqc"
+    class="sc-beySPh jDojEa"
   >
     <div
-      class="makeStyles-root-13"
+      class="sc-fsYfdN iJWUfq"
     >
       <div
-        class="MuiPaper-root makeStyles-paper-14 MuiPaper-elevation1 MuiPaper-rounded"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-qZrbh lhqvQi css-1ps6pg7-MuiPaper-root"
       >
         <div
-          class="MuiTableContainer-root"
+          class="MuiTableContainer-root sc-csKJxZ css-rorn0c-MuiTableContainer-root"
         >
           <div
-            class="MuiBox-root MuiBox-root-19"
+            class="sc-eTNRI gzFCin MuiBox-root css-0"
           >
             <div
-              class="MuiToolbar-root MuiToolbar-regular makeStyles-root-20 MuiToolbar-gutters"
+              class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
             >
               <h6
-                class="MuiTypography-root makeStyles-title-22 MuiTypography-h6"
+                class="MuiTypography-root MuiTypography-h6 css-cdr39q-MuiTypography-root"
                 data-cy="table-title"
               >
                 Households
               </h6>
             </div>
             <div
-              class="MuiBox-root MuiBox-root-23"
+              class="sc-eTNRI gzFCin MuiBox-root css-1ruxp1v"
             />
           </div>
           <table
-            aria-label="enhanced table"
-            aria-labelledby="tableTitle"
-            class="MuiTable-root makeStyles-table-15"
-            data-cy="table-title"
+            class="MuiTable-root sc-jsEeTM sc-brSamD euROHP ejYVTE css-b1kpk9-MuiTable-root"
           >
             <thead
-              class="MuiTableHead-root"
+              class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
             >
               <tr
-                class="MuiTableRow-root MuiTableRow-head"
+                class="MuiTableRow-root MuiTableRow-head css-n2dwpd-MuiTableRow-root"
               >
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
                   data-cy="sanction-list-possible-match"
                   scope="col"
                 >
                   <span
-                    class="sc-bZQynM fgJQBP"
+                    class="sc-iBdnpw jMIPuq"
                     data-cy="table-label"
                   />
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
                   data-cy="household-id"
                   scope="col"
                 >
                   <span
-                    class="sc-bZQynM fgJQBP"
+                    class="sc-iBdnpw jMIPuq"
                     data-cy="table-label"
                   >
                     Household ID
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
                   data-cy="status"
                   scope="col"
                 >
                   <span
-                    class="sc-bZQynM fgJQBP"
+                    class="sc-iBdnpw jMIPuq"
                     data-cy="table-label"
                   >
                     Status
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
                   data-cy="household-head-name"
                   scope="col"
                 >
                   <span
-                    class="sc-bZQynM fgJQBP"
+                    class="sc-iBdnpw jMIPuq"
                     data-cy="table-label"
                   >
                     Head of Household
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
                   data-cy="household-size"
                   scope="col"
                 >
                   <span
-                    class="sc-bZQynM fgJQBP"
+                    class="sc-iBdnpw jMIPuq"
                     data-cy="table-label"
                   >
                     Household Size
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
                   data-cy="household-location"
                   scope="col"
                 >
                   <span
-                    class="sc-bZQynM fgJQBP"
+                    class="sc-iBdnpw jMIPuq"
                     data-cy="table-label"
                   >
                     Administrative Level 2
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
                   data-cy="household-residence-status"
                   scope="col"
                 >
                   <span
-                    class="sc-bZQynM fgJQBP"
+                    class="sc-iBdnpw jMIPuq"
                     data-cy="table-label"
                   >
                     Residence Status
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-1azl6jz-MuiTableCell-root"
                   data-cy="household-total-cash-received"
                   scope="col"
                 >
                   <span
-                    class="sc-bZQynM fgJQBP"
+                    class="sc-iBdnpw jMIPuq"
                     data-cy="table-label"
                   >
                     Total Cash Received
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-1azl6jz-MuiTableCell-root"
                   data-cy="household-registration-date"
                   scope="col"
                 >
                   <span
-                    class="sc-bZQynM fgJQBP"
+                    class="sc-iBdnpw jMIPuq"
                     data-cy="table-label"
                   >
                     Registration Date
@@ -152,154 +149,144 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
               </tr>
             </thead>
             <tbody
-              class="MuiTableBody-root"
+              class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root"
+                class="MuiTableRow-root sc-kFCroH eTsYhL css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
-                style="height: 70px; min-height: 70px;"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq ePBmkq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root"
+                class="MuiTableRow-root sc-kFCroH eTsYhL css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
-                style="height: 70px; min-height: 70px;"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq ePBmkq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root"
+                class="MuiTableRow-root sc-kFCroH eTsYhL css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
-                style="height: 70px; min-height: 70px;"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq ePBmkq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root"
+                class="MuiTableRow-root sc-kFCroH eTsYhL css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
-                style="height: 70px; min-height: 70px;"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq ePBmkq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root"
+                class="MuiTableRow-root sc-kFCroH eTsYhL css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
-                style="height: 70px; min-height: 70px;"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq ePBmkq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root"
+                class="MuiTableRow-root sc-kFCroH eTsYhL css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
-                style="height: 70px; min-height: 70px;"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq ePBmkq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root"
+                class="MuiTableRow-root sc-kFCroH eTsYhL css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
-                style="height: 70px; min-height: 70px;"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq ePBmkq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root"
+                class="MuiTableRow-root sc-kFCroH eTsYhL css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
-                style="height: 70px; min-height: 70px;"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq ePBmkq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root"
+                class="MuiTableRow-root sc-kFCroH eTsYhL css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
-                style="height: 70px; min-height: 70px;"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq ePBmkq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root"
+                class="MuiTableRow-root sc-kFCroH eTsYhL css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
-                style="height: 70px; min-height: 70px;"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq ePBmkq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
@@ -308,43 +295,47 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
           </table>
         </div>
         <div
-          class="MuiTablePagination-root"
+          class="MuiTablePagination-root css-jtlhu6-MuiTablePagination-root"
           data-cy="table-pagination"
         >
           <div
-            class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"
+            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular MuiTablePagination-toolbar css-wogcmv-MuiToolbar-root-MuiTablePagination-toolbar"
           >
             <div
-              class="MuiTablePagination-spacer"
+              class="MuiTablePagination-spacer css-1psng7p-MuiTablePagination-spacer"
             />
             <p
-              class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
-              id="mui-5806"
+              class="MuiTablePagination-selectLabel css-pdct74-MuiTablePagination-selectLabel"
+              id=":r4:"
             >
               Rows per page:
             </p>
             <div
-              class="MuiInputBase-root MuiTablePagination-input MuiTablePagination-selectRoot"
+              class="MuiInputBase-root MuiInputBase-colorPrimary MuiTablePagination-input css-16c50h-MuiInputBase-root-MuiTablePagination-select"
             >
               <div
+                aria-controls=":r5:"
+                aria-expanded="false"
                 aria-haspopup="listbox"
-                aria-labelledby="mui-5806 mui-73230"
-                class="MuiSelect-root MuiSelect-select MuiTablePagination-select MuiSelect-selectMenu MuiInputBase-input"
-                id="mui-73230"
-                role="button"
+                aria-labelledby=":r4: :r3:"
+                class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-194a1fa-MuiSelect-select-MuiInputBase-input"
+                id=":r3:"
+                role="combobox"
                 tabindex="0"
               >
                 10
               </div>
               <input
                 aria-hidden="true"
-                class="MuiSelect-nativeInput"
+                aria-invalid="false"
+                class="MuiSelect-nativeInput css-yf8vq0-MuiSelect-nativeInput"
                 tabindex="-1"
                 value="10"
               />
               <svg
                 aria-hidden="true"
-                class="MuiSvgIcon-root MuiSelect-icon MuiTablePagination-selectIcon"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-pqjvzy-MuiSvgIcon-root-MuiSelect-icon"
+                data-testid="ArrowDropDownIcon"
                 focusable="false"
                 viewBox="0 0 24 24"
               >
@@ -354,58 +345,50 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
               </svg>
             </div>
             <p
-              class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
+              class="MuiTablePagination-displayedRows css-levciy-MuiTablePagination-displayedRows"
             >
-              1-NaN of undefined
+              0–0 of 0
             </p>
             <div
-              class="MuiTablePagination-actions"
+              class="MuiBox-root css-nkn1dz"
             >
               <button
-                aria-label="Previous page"
-                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit Mui-disabled Mui-disabled"
+                aria-label="previous page"
+                class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
                 disabled=""
                 tabindex="-1"
-                title="Previous page"
                 type="button"
               >
-                <span
-                  class="MuiIconButton-label"
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+                  data-testid="KeyboardArrowLeftIcon"
+                  focusable="false"
+                  viewBox="0 0 24 24"
                 >
-                  <svg
-                    aria-hidden="true"
-                    class="MuiSvgIcon-root"
-                    focusable="false"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z"
-                    />
-                  </svg>
-                </span>
+                  <path
+                    d="M15.41 16.59 10.83 12l4.58-4.59L14 6l-6 6 6 6z"
+                  />
+                </svg>
               </button>
               <button
-                aria-label="Next page"
-                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit Mui-disabled Mui-disabled"
+                aria-label="next page"
+                class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
                 disabled=""
                 tabindex="-1"
-                title="Next page"
                 type="button"
               >
-                <span
-                  class="MuiIconButton-label"
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+                  data-testid="KeyboardArrowRightIcon"
+                  focusable="false"
+                  viewBox="0 0 24 24"
                 >
-                  <svg
-                    aria-hidden="true"
-                    class="MuiSvgIcon-root"
-                    focusable="false"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z"
-                    />
-                  </svg>
-                </span>
+                  <path
+                    d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"
+                  />
+                </svg>
               </button>
             </div>
           </div>
@@ -419,7 +402,7 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
 exports[`containers/tables/population/HouseholdTable should render with data 1`] = `
 <div>
   <div
-    class="sc-bdVaJa ksQzqc"
+    class="sc-beySPh jDojEa"
   >
     <div>
       Unexpected error

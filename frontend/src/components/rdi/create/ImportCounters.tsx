@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 
 export interface ImportCountersPropTypes {
@@ -13,7 +13,7 @@ export function ImportCounters({
   const { t } = useTranslation();
   return (
     <>
-      <div data-cy='number-of-households'>
+      <div data-cy="number-of-households">
         {numberOfHouseholds}{' '}
         {t(
           'Household'
@@ -21,7 +21,7 @@ export function ImportCounters({
             .concat(' available to import'),
         )}
       </div>
-      <div data-cy='number-of-individuals'>
+      <div data-cy="number-of-individuals">
         {numberOfIndividuals}{' '}
         {t(
           'Individual'

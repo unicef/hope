@@ -5,46 +5,45 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
-import React, { useState } from 'react';
+} from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
-import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
-import { GreyText } from '../../../core/GreyText';
-import { LoadingButton } from '../../../core/LoadingButton';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Action, PaymentPlanQuery } from '@generated/graphql';
+import { GreyText } from '@core/GreyText';
+import { LoadingButton } from '@core/LoadingButton';
 
 export interface LockPaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const LockPaymentPlan = ({
+export function LockPaymentPlan({
   paymentPlan,
-}: LockPaymentPlanProps): React.ReactElement => {
+}: LockPaymentPlanProps): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
-  const {
-    mutatePaymentPlanAction: lock,
-    loading: loadingLock,
-  } = usePaymentPlanAction(
-    Action.Lock,
-    paymentPlan.id,
-    () => showMessage(t('Payment Plan has been locked.')),
-    () => setLockDialogOpen(false),
-  );
+  const { mutatePaymentPlanAction: lock, loading: loadingLock } =
+    usePaymentPlanAction(
+      Action.Lock,
+      paymentPlan.id,
+      () => showMessage(t('Payment Plan has been locked.')),
+      () => setLockDialogOpen(false),
+    );
 
   return (
     <>
       <Box p={2}>
         <Button
-          color='primary'
-          variant='contained'
+          color="primary"
+          variant="contained"
           onClick={() => setLockDialogOpen(true)}
-          data-cy='button-lock-plan'
+          data-cy="button-lock-plan"
         >
           {t('Lock')}
         </Button>
@@ -52,9 +51,9 @@ export const LockPaymentPlan = ({
       <Dialog
         open={lockDialogOpen}
         onClose={() => setLockDialogOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
-        maxWidth='md'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
+        maxWidth="md"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Lock Payment Plan')}</DialogTitle>
@@ -88,11 +87,11 @@ export const LockPaymentPlan = ({
             <Button onClick={() => setLockDialogOpen(false)}>CANCEL</Button>
             <LoadingButton
               loading={loadingLock}
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
               onClick={() => lock()}
-              data-cy='button-submit'
+              data-cy="button-submit"
             >
               {t('Lock')}
             </LoadingButton>
@@ -101,4 +100,4 @@ export const LockPaymentPlan = ({
       </Dialog>
     </>
   );
-};
+}

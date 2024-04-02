@@ -4,27 +4,28 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
-import React, { useState } from 'react';
+} from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DialogDescription } from '../../../containers/dialogs/DialogDescription';
-import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import { DialogDescription } from '@containers/dialogs/DialogDescription';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   RegistrationDetailedFragment,
   useRerunDedupeMutation,
-} from '../../../__generated__/graphql';
-import { LoadingButton } from '../../core/LoadingButton';
-import { useProgramContext } from "../../../programContext";
+} from '@generated/graphql';
+import { LoadingButton } from '@core/LoadingButton';
+import { useProgramContext } from '../../../programContext';
 
 interface RerunDedupeProps {
   registration: RegistrationDetailedFragment;
 }
 
-export function RerunDedupe({
+export const RerunDedupe = ({
   registration,
-}: RerunDedupeProps): React.ReactElement {
+}: RerunDedupeProps): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -44,18 +45,19 @@ export function RerunDedupe({
   return (
     <span>
       <Button
-          color='primary'
-          variant='contained'
-          onClick={() => setOpen(true)}
-          disabled={!isActiveProgram}
+        color="primary"
+        variant="contained"
+        onClick={() => setOpen(true)}
+        disabled={!isActiveProgram}
+        data-cy="button-rerun-dedupe"
       >
         {t('Rerun Deduplication')}
       </Button>
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Rerun Deduplication')}</DialogTitle>
@@ -70,9 +72,10 @@ export function RerunDedupe({
             <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <LoadingButton
               loading={loading}
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
+              data-cy="button-rerun-dedupe-confirm"
               onClick={rerunDedupe}
             >
               {t('Rerun')}
@@ -82,4 +85,4 @@ export function RerunDedupe({
       </Dialog>
     </span>
   );
-}
+};

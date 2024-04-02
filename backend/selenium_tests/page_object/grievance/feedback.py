@@ -1,3 +1,5 @@
+from time import sleep
+
 from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -8,9 +10,9 @@ class Feedback(BaseComponents):
     buttonSubmitNewFeedback = 'a[data-cy="button-submit-new-feedback"]'
     filterSearch = 'div[data-cy="filters-search"]'
     filterIssueType = 'div[data-cy="filters-issue-type"]'
-    filterCreatedBy = 'div[data-cy="filters-created-by"]'
-    filterCreationDateFrom = 'div[data-cy="filters-creation-date-from"]'
-    filterCreationDateTo = 'div[data-cy="filters-creation-date-to"]'
+    filterCreatedBy = 'div[data-cy="Created by-input"]'
+    filterCreationDateFrom = 'div[data-cy="date-picker-filter"]'
+    filterCreationDateTo = 'div[data-cy="date-picker-filter"]'
     buttonClear = 'button[data-cy="button-filters-clear"]'
     buttonApply = 'button[data-cy="button-filters-apply"]'
     tableTitle = 'h6[data-cy="table-title"]'
@@ -24,6 +26,7 @@ class Feedback(BaseComponents):
     dateTitleFilterPopup = 'div[class="MuiPaper-root MuiPopover-paper MuiPaper-elevation8 MuiPaper-rounded"]'
     issueTypeFilter = 'div[data-cy="filters-issue-type"]'
     option = 'li[role="option"]'
+    tableRowLoading = 'tr[data-cy="table-row"]'
 
     # Texts
     textTitle = "Feedback"
@@ -52,10 +55,10 @@ class Feedback(BaseComponents):
         return self.wait_for(self.filterCreatedBy)
 
     def getFilterCreationDateFrom(self) -> WebElement:
-        return self.wait_for(self.filterCreationDateFrom)
+        return self.get_elements(self.filterCreationDateFrom)[0]
 
     def getFilterCreationDateTo(self) -> WebElement:
-        return self.wait_for(self.filterCreationDateTo)
+        return self.get_elements(self.filterCreationDateTo)[1]
 
     def getButtonClear(self) -> WebElement:
         return self.wait_for(self.buttonClear)
@@ -70,25 +73,32 @@ class Feedback(BaseComponents):
         return self.wait_for(self.tableTitle)
 
     def getFeedbackID(self) -> WebElement:
-        return self.wait_for(self.tableColumns).eq(0)
+        return self.get_elements(self.tableColumns)[0]
 
     def getIssueType(self) -> WebElement:
-        return self.wait_for(self.tableColumns).eq(1)
+        return self.get_elements(self.tableColumns)[1]
 
     def getHouseholdID(self) -> WebElement:
-        return self.wait_for(self.tableColumns).eq(2)
+        return self.get_elements(self.tableColumns)[2]
 
     def getLinkedGrievance(self) -> WebElement:
-        return self.wait_for(self.tableColumns).eq(3)
+        return self.get_elements(self.tableColumns)[3]
 
     def getCreatedBy(self) -> WebElement:
-        return self.wait_for(self.tableColumns).eq(4)
+        return self.get_elements(self.tableColumns)[4]
 
     def getCreationDate(self) -> WebElement:
-        return self.wait_for(self.tableColumns).eq(5)
+        return self.get_elements(self.tableColumns)[5]
 
-    def getRows(self) -> WebElement:
-        return self.wait_for(self.tableRow)
+    def getRows(self) -> list[WebElement]:
+        return self.get_elements(self.tableRow)
+
+    def getRow(self, number: int) -> WebElement:
+        for _ in range(10):
+            if len(self.get_elements(self.tableRow)) == number + 1:
+                break
+            sleep(1)
+        return self.get_elements(self.tableRow)[number]
 
     def getDaysFilterPopup(self) -> WebElement:
         return self.wait_for(self.daysFilterPopup)
@@ -101,6 +111,12 @@ class Feedback(BaseComponents):
 
     def getIssueTypeFilter(self) -> WebElement:
         return self.wait_for(self.issueTypeFilter)
+
+    def disappearTableRowLoading(self) -> WebElement:
+        return self.wait_for_disappear(self.tableRowLoading)
+
+    def getTableRowLoading(self) -> WebElement:
+        return self.wait_for(self.tableRowLoading)
 
     def getOption(self) -> WebElement:
         return self.wait_for(self.option)

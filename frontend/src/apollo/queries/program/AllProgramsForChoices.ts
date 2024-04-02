@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const AllProgramsForChoices = gql`
   query AllProgramsForChoices(
@@ -45,7 +45,6 @@ export const AllProgramsForChoices = gql`
           id
           name
           status
-          individualDataNeeded
           dataCollectingType {
             id
             code

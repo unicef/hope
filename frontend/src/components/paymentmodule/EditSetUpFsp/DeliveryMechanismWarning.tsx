@@ -1,7 +1,7 @@
-import { Box } from '@material-ui/core';
-import React from 'react';
+import { Box } from '@mui/material';
+import * as React from 'react';
 import styled from 'styled-components';
-import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 
 const WarningBox = styled(Box)`
   width: 70%;
@@ -18,20 +18,20 @@ interface DeliveryMechanismWarningProps {
   warning: string;
 }
 
-export const DeliveryMechanismWarning = ({
+export function DeliveryMechanismWarning({
   warning,
-}: DeliveryMechanismWarningProps): React.ReactElement => {
+}: DeliveryMechanismWarningProps): React.ReactElement {
   return (
     <WarningBox
-      data-cy='warning-box'
+      data-cy="warning-box"
       mt={4}
       mb={4}
       p={3}
-      display='flex'
-      alignItems='center'
+      display="flex"
+      alignItems="center"
     >
       <ErrorOutline />
       {warning}
     </WarningBox>
   );
-};
+}

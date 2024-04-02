@@ -1,13 +1,13 @@
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   LookUpPaymentRecordsQueryVariables,
   PaymentRecordAndPaymentNode,
   useAllPaymentRecordsAndPaymentsQuery,
   useLookUpPaymentRecordsQuery,
-} from '../../../../__generated__/graphql';
-import { UniversalTable } from '../../../../containers/tables/UniversalTable';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { UniversalTable } from '@containers/tables/UniversalTable';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './LookUpPaymentRecordTableHeadCells';
 import { LookUpPaymentRecordTableRow } from './LookUpPaymentRecordTableRow';
 
@@ -34,8 +34,8 @@ export function LookUpPaymentRecordTable({
 
   const handleCheckboxClick = (
     _event:
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>
-      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    | React.MouseEvent<HTMLButtonElement, MouseEvent>
+    | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
     selectedPaymentRecord,
   ): void => {
     const selectedIndex = selected.indexOf(selectedPaymentRecord);
@@ -65,12 +65,12 @@ export function LookUpPaymentRecordTable({
   if (isEditTicket) {
     return (
       <UniversalTable<
-        PaymentRecordAndPaymentNode,
-        LookUpPaymentRecordsQueryVariables
+      PaymentRecordAndPaymentNode,
+      LookUpPaymentRecordsQueryVariables
       >
         headCells={headCells}
         query={useLookUpPaymentRecordsQuery}
-        queriedObjectName='allPaymentRecords'
+        queriedObjectName="allPaymentRecords"
         initialVariables={initialVariables}
         renderRow={(row) => (
           <LookUpPaymentRecordTableRow
@@ -86,12 +86,12 @@ export function LookUpPaymentRecordTable({
   }
   return (
     <UniversalTable<
-      PaymentRecordAndPaymentNode,
-      LookUpPaymentRecordsQueryVariables
+    PaymentRecordAndPaymentNode,
+    LookUpPaymentRecordsQueryVariables
     >
       headCells={headCells}
       query={useAllPaymentRecordsAndPaymentsQuery}
-      queriedObjectName='allPaymentRecordsAndPayments'
+      queriedObjectName="allPaymentRecordsAndPayments"
       initialVariables={initialVariables}
       onSelectAllClick={handleSelectAllCheckboxesClick}
       numSelected={numSelected}

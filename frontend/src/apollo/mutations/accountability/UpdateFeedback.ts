@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const UPDATE_FEEDBACK_TICKET_MUTATION = gql`
   mutation UpdateFeedbackTicket($input: UpdateFeedbackInput!) {

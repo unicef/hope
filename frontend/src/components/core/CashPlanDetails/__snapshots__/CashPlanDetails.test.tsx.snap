@@ -3,36 +3,36 @@
 exports[`components/core/CashPlanDetails should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root sc-bdVaJa iGsvgX MuiPaper-elevation1 MuiPaper-rounded"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-beySPh ehchJK css-1ps6pg7-MuiPaper-root"
   >
     <div
-      class="MuiBox-root MuiBox-root-1"
+      class="MuiBox-root css-qfdd9t"
       style="width: 100%;"
     >
       <div
-        class="MuiBox-root MuiBox-root-2"
+        class="MuiBox-root css-j7qwjs"
       >
         <div
-          class="sc-gzVnrw AoKEu"
+          class="sc-iBdnpw fIJfic"
         >
           <h6
-            class="MuiTypography-root MuiTypography-h6"
+            class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
           >
             Payment Plan Details
           </h6>
         </div>
         <div
-          class="sc-ifAKCX iZCSws"
+          class="sc-eDLKkx dztDbI"
         >
           <div
-            class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6"
+            class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6 css-zow5z4-MuiGrid-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
             >
               <div>
                 <span
-                  class="sc-htpNat hcDmtB"
+                  class="sc-dmyCSP edirvw"
                   color="textSecondary"
                 >
                   Status
@@ -41,11 +41,12 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-Status"
                 >
                   <div
-                    class="sc-EHOje gFjtOh"
+                    class="sc-jTQCzO eAkjXM"
                   >
                     <div
-                      class="sc-bZQynM kQLhqL"
+                      class="sc-gLLuof bfnybE"
                       data-cy="status-container"
+                      status="DISTRIBUTION_COMPLETED"
                     >
                       DISTRIBUTION COMPLETED
                     </div>
@@ -54,11 +55,11 @@ exports[`components/core/CashPlanDetails should render 1`] = `
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
             >
               <div>
                 <span
-                  class="sc-htpNat hcDmtB"
+                  class="sc-dmyCSP edirvw"
                   color="textSecondary"
                 >
                   Plan Start Date
@@ -67,7 +68,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-Plan Start Date"
                 >
                   <span
-                    class="sc-bxivhb fpUyDK"
+                    class="sc-hLQSwg hXyiIZ"
                     color="textSecondary"
                   >
                     <time
@@ -80,11 +81,11 @@ exports[`components/core/CashPlanDetails should render 1`] = `
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
             >
               <div>
                 <span
-                  class="sc-htpNat hcDmtB"
+                  class="sc-dmyCSP edirvw"
                   color="textSecondary"
                 >
                   Plan End Date
@@ -93,7 +94,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-Plan End Date"
                 >
                   <span
-                    class="sc-bxivhb fpUyDK"
+                    class="sc-hLQSwg hXyiIZ"
                     color="textSecondary"
                   >
                     <time
@@ -106,11 +107,11 @@ exports[`components/core/CashPlanDetails should render 1`] = `
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
             >
               <div>
                 <span
-                  class="sc-htpNat hcDmtB"
+                  class="sc-dmyCSP edirvw"
                   color="textSecondary"
                 >
                   Payment Plan Name
@@ -119,7 +120,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-Payment Plan Name"
                 >
                   <span
-                    class="sc-bxivhb fpUyDK"
+                    class="sc-hLQSwg hXyiIZ"
                     color="textSecondary"
                   >
                     Military citizen until amount.
@@ -128,11 +129,11 @@ exports[`components/core/CashPlanDetails should render 1`] = `
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
             >
               <div>
                 <span
-                  class="sc-htpNat hcDmtB"
+                  class="sc-dmyCSP edirvw"
                   color="textSecondary"
                 >
                   delivery type
@@ -141,7 +142,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-delivery type"
                 >
                   <span
-                    class="sc-bxivhb fpUyDK"
+                    class="sc-hLQSwg hXyiIZ"
                     color="textSecondary"
                   >
                     Voucher
@@ -150,11 +151,11 @@ exports[`components/core/CashPlanDetails should render 1`] = `
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
             >
               <div>
                 <span
-                  class="sc-htpNat hcDmtB"
+                  class="sc-dmyCSP edirvw"
                   color="textSecondary"
                 >
                   assistance through
@@ -167,11 +168,11 @@ exports[`components/core/CashPlanDetails should render 1`] = `
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
             >
               <div>
                 <span
-                  class="sc-htpNat hcDmtB"
+                  class="sc-dmyCSP edirvw"
                   color="textSecondary"
                 >
                   dispertion date
@@ -180,7 +181,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-dispertion date"
                 >
                   <span
-                    class="sc-bxivhb fpUyDK"
+                    class="sc-hLQSwg hXyiIZ"
                     color="textSecondary"
                   >
                     <time
@@ -193,11 +194,11 @@ exports[`components/core/CashPlanDetails should render 1`] = `
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
             >
               <div>
                 <span
-                  class="sc-htpNat hcDmtB"
+                  class="sc-dmyCSP edirvw"
                   color="textSecondary"
                 >
                   fc id
@@ -206,7 +207,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-fc id"
                 >
                   <span
-                    class="sc-bxivhb fpUyDK"
+                    class="sc-hLQSwg hXyiIZ"
                     color="textSecondary"
                   >
                     62947144
@@ -215,11 +216,11 @@ exports[`components/core/CashPlanDetails should render 1`] = `
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
             >
               <div>
                 <span
-                  class="sc-htpNat hcDmtB"
+                  class="sc-dmyCSP edirvw"
                   color="textSecondary"
                 >
                   dp id
@@ -228,7 +229,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-dp id"
                 >
                   <span
-                    class="sc-bxivhb fpUyDK"
+                    class="sc-hLQSwg hXyiIZ"
                     color="textSecondary"
                   >
                     27371694
@@ -237,11 +238,11 @@ exports[`components/core/CashPlanDetails should render 1`] = `
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
             >
               <div>
                 <span
-                  class="sc-htpNat hcDmtB"
+                  class="sc-dmyCSP edirvw"
                   color="textSecondary"
                 >
                   Target population(s)
@@ -250,12 +251,12 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   data-cy="label-Target population(s)"
                 >
                   <span
-                    class="sc-bxivhb fpUyDK"
+                    class="sc-hLQSwg hXyiIZ"
                     color="textSecondary"
                   >
                     <span>
                       <a
-                        class="sc-bwzfXH kVuoVk"
+                        class="sc-guDLey ibjlhn"
                         href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6ZGRlODE4MDUtMWQ0Ny00YzY0LTgzYTMtMzQ3NWEzMGVmZTJk"
                       >
                         Floor anyone remain play most.
@@ -264,7 +265,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                     </span>
                     <span>
                       <a
-                        class="sc-bwzfXH kVuoVk"
+                        class="sc-guDLey ibjlhn"
                         href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MTdlM2VmMjAtNjczMy00ZDNhLWFiMDUtZjVkOTgzZjViMjI1"
                       >
                         Former center score fire role.
@@ -273,7 +274,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                     </span>
                     <span>
                       <a
-                        class="sc-bwzfXH kVuoVk"
+                        class="sc-guDLey ibjlhn"
                         href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MjRkMTdhODktMjg4OC00NDI0LTgxMDAtYmU3MTZjOWFkNDk3"
                       >
                         Stock before maybe campaign blue history recently.
@@ -282,7 +283,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                     </span>
                     <span>
                       <a
-                        class="sc-bwzfXH kVuoVk"
+                        class="sc-guDLey ibjlhn"
                         href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6NzNiNTFhNjctZmRmNy00ODkwLWIyOWItMjhhYzk4NTc4OGRk"
                       >
                         Eight affect late place.
@@ -291,7 +292,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                     </span>
                     <span>
                       <a
-                        class="sc-bwzfXH kVuoVk"
+                        class="sc-guDLey ibjlhn"
                         href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6ZjZkZjc2MDctMzMyZi00NDYwLWJiMzgtMTZiZGM4MGVkNTkz"
                       >
                         Seek development woman once worker.
@@ -304,11 +305,11 @@ exports[`components/core/CashPlanDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="sc-htoDjs eWsWTE"
+            class="sc-fsYfdN eoQjuz"
           >
             <div>
               <span
-                class="sc-htpNat hcDmtB"
+                class="sc-dmyCSP edirvw"
                 color="textSecondary"
               >
                 Total Number of Households
@@ -317,7 +318,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                 data-cy="label-Total Number of Households"
               >
                 <div
-                  class="sc-dnqmqq dXXPUY"
+                  class="sc-qZrbh hnKrjX"
                 >
                   5
                 </div>

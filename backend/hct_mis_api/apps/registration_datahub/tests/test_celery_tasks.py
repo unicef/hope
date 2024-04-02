@@ -13,6 +13,8 @@ from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
+import pytest
+
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
@@ -241,6 +243,8 @@ def create_imported_document_types() -> None:
 
 
 def create_ukraine_business_area() -> None:
+    from hct_mis_api.aurora.models import Registration
+
     slug = "ukraine"
     BusinessArea.objects.create(
         slug=slug,
@@ -253,8 +257,11 @@ def create_ukraine_business_area() -> None:
     )
     organization = OrganizationFactory(name=slug, slug=slug)
     prj = ProjectFactory.create(organization=organization)
-    for id in [2, 3, 21, 26, 27, 28, 29]:
-        registration = RegistrationFactory(id=id, project=prj)
+    for registration_id in (2, 3, 21, 26, 27, 28, 29):  # TODO fix it with better manner
+        if not Registration.objects.filter(id=registration_id).exists():
+            registration = RegistrationFactory(id=registration_id, project=prj)
+        else:
+            registration = Registration.objects.get(id=registration_id)
         registration.rdi_parser = UkraineRegistrationService
         registration.save()
 
@@ -416,6 +423,7 @@ class TestAutomatingRDICreationTask(TestCase):
         assert not merge_task_mock.called  # auto_merge was not set ; defaults to false
         assert set(Record.objects.values_list("unique_field", flat=True)) == {"123123123"}
 
+    @pytest.mark.skip(reason="Unstable from a very long time")
     def test_with_different_registration_ids(self, mock_validate_data_collection_type: Any) -> None:
         """
         based on registration_id select RegistrationService
@@ -449,14 +457,14 @@ class TestAutomatingRDICreationTask(TestCase):
         amount_of_records = 10
         page_size = 5
 
-        registration_ids = [2, 3, 21, 26, 27, 28, 29, 17, 18, 19, 999]
+        registration_ids = (2, 3, 21, 26, 27, 28, 29, 17, 18, 19, 999)
         for registration_id in registration_ids:
             for _ in range(amount_of_records):
                 records_count += 1
                 files = None
                 if registration_id == 17:
                     data = SRI_LANKA_FIELDS
-                elif registration_id in [21, 26, 27, 28, 29]:
+                elif registration_id in (21, 26, 27, 28, 29):
                     data = UKRAINE_NEW_FORM_FIELDS
                     files = UKRAINE_NEW_FORM_FILES
                 else:

@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { render } from '../../../../testUtils/testUtils';
 import { PaymentVerificationSection } from './PaymentVerificationSection';
 import { fakeChartPaymentVerification } from '../../../../../fixtures/dashboard/fakeChartPaymentVerification';
