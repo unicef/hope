@@ -859,5 +859,8 @@
   "Payment Plans pending for Authorization": "Payment Plans pending for Authorization",
   "Payment Plans pending for Release": "Payment Plans pending for Release",
   "Payment Verification Plans Overview": "Payment Verification Plans Overview",
-  "Selected Plans IDs": "Selected Plans IDs"
+  "Selected Plans IDs": "Selected Plans IDs",
+  "Payment Plan(s) Approved": "Payment Plan(s) Approved",
+  "Payment Plan(s) Authorized": "Payment Plan(s) Authorized",
+  "Payment Plan(s) Released": "Payment Plan(s) Released"
 }

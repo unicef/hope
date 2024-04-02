@@ -11,6 +11,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { ApprovePaymentPlansModal } from '@components/managerialConsole/ApprovePaymentPlansModal';
 import { UniversalMoment } from '@components/core/UniversalMoment';
+import { useSnackbar } from '@hooks/useSnackBar';
 
 interface ApprovalSectionProps {
   selectedApproved: any[];
@@ -41,6 +42,7 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
   bulkAction,
 }) => {
   const { t } = useTranslation();
+  const { showMessage } = useSnackbar();
   const handleSelectAllApproved = () => {
     const ids = inApprovalData.results.map((plan) => plan.id);
     handleSelectAll(ids, selectedApproved, setSelectedApproved);
@@ -61,13 +63,18 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
         <ApprovePaymentPlansModal
           selectedPlansIds={selectedApproved}
           selectedPlansUnicefIds={selectedPlansUnicefIds}
-          onApprove={(_, comment) =>
-            bulkAction.mutateAsync({
-              ids: selectedApproved,
-              action: 'APPROVE',
-              comment: comment,
-            })
-          }
+          onApprove={async (_, comment) => {
+            try {
+              await bulkAction.mutateAsync({
+                ids: selectedApproved,
+                action: 'APPROVE',
+                comment: comment,
+              });
+              showMessage(t('Payment Plan(s) Approved'));
+            } catch (e) {
+              showMessage(e.message);
+            }
+          }}
         />
       }
     >

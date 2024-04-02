@@ -11,6 +11,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { ReleasePaymentPlansModal } from '@components/managerialConsole/ReleasePaymentPlansModal';
 import { UniversalMoment } from '@components/core/UniversalMoment';
+import { useSnackbar } from '@hooks/useSnackBar';
 
 interface ReleaseSectionProps {
   selectedInReview: any[];
@@ -41,6 +42,7 @@ export const ReleaseSection: React.FC<ReleaseSectionProps> = ({
   bulkAction,
 }) => {
   const { t } = useTranslation();
+  const { showMessage } = useSnackbar();
   const handleSelectAllReviewed = () => {
     const ids = inReviewData?.results?.map((plan) => plan.id);
     handleSelectAll(ids, selectedInReview, setSelectedInReview);
@@ -60,13 +62,18 @@ export const ReleaseSection: React.FC<ReleaseSectionProps> = ({
         <ReleasePaymentPlansModal
           selectedPlansIds={selectedInReview}
           selectedPlansUnicefIds={selectedPlansUnicefIds}
-          onRelease={(_, comment) =>
-            bulkAction.mutateAsync({
-              ids: selectedInReview,
-              action: 'REVIEW',
-              comment: comment,
-            })
-          }
+          onRelease={async (_, comment) => {
+            try {
+              await bulkAction.mutateAsync({
+                ids: selectedInReview,
+                action: 'REVIEW',
+                comment: comment,
+              });
+              showMessage(t('Payment Plan(s) Released'));
+            } catch (e) {
+              showMessage(e.message);
+            }
+          }}
         />
       }
     >

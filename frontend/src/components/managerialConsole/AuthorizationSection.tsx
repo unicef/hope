@@ -11,6 +11,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { AuthorizePaymentPlansModal } from '@components/managerialConsole/AuthorizePaymentPlansModal';
 import { UniversalMoment } from '@components/core/UniversalMoment';
+import { useSnackbar } from '@hooks/useSnackBar';
 
 interface AuthorizationSectionProps {
   selectedAuthorized: any[];
@@ -41,6 +42,7 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
   bulkAction,
 }) => {
   const { t } = useTranslation();
+  const { showMessage } = useSnackbar();
   const handleSelectAllAuthorized = () => {
     const ids = inAuthorizationData.results.map((plan) => plan.id);
     return handleSelectAll(ids, selectedAuthorized, setSelectedAuthorized);
@@ -61,12 +63,17 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
         <AuthorizePaymentPlansModal
           selectedPlansIds={selectedAuthorized}
           selectedPlansUnicefIds={selectedPlansUnicefIds}
-          onAuthorize={(_, comment) => {
-            return bulkAction.mutateAsync({
-              ids: selectedAuthorized,
-              action: 'AUTHORIZE',
-              comment: comment,
-            });
+          onAuthorize={async (_, comment) => {
+            try {
+              await bulkAction.mutateAsync({
+                ids: selectedAuthorized,
+                action: 'AUTHORIZE',
+                comment: comment,
+              });
+              showMessage(t('Payment Plan(s) Authorized'));
+            } catch (e) {
+              showMessage(e.message);
+            }
           }}
         />
       }
