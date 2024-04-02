@@ -56,6 +56,7 @@ RUN python3 -m venv --copies $VIRTUAL_ENV &&\
     python3 -m venv --copies $POETRY_HOME &&\
     $POETRY_HOME/bin/pip install lockfile==0.12.2 &&\
     $POETRY_HOME/bin/pip install poetry==1.3.0 &&\
+    $POETRY_HOME/bin/pip install pdm &&\
     poetry config virtualenvs.create false &&\
     poetry config cache-dir /var/cache/poetry
 
