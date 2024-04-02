@@ -90,6 +90,7 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
             <TableCell>{t('Payment Plan ID')}</TableCell>
             <TableCell>{t('Programme Name')}</TableCell>
             <TableCell>{t('Last Modified Date')}</TableCell>
+            <TableCell>{t('Created by)')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -114,6 +115,7 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
                   {plan.last_approval_process_date}
                 </UniversalMoment>
               </TableCell>
+              <TableCell>{plan.last_approval_process_by}</TableCell>
             </TableRow>
           ))}
         </TableBody>
