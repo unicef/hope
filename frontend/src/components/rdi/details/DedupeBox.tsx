@@ -18,7 +18,7 @@ const Bold = styled.span`
 
 const BoldGrey = styled.span`
   font-weight: bold;
-  font-size: 14px
+  font-size: 14px;
   color: rgba(37, 59, 70, 0.6);
 `;
 
@@ -37,13 +37,15 @@ export interface Props {
   }[];
 }
 
-export function DedupeBox({ label, options }: Props): React.ReactElement {
+export const DedupeBox = ({ label, options }: Props): React.ReactElement => {
   return (
     <GreyBox>
       <Grid container>
         <Grid item xs={3}>
           <Box display="flex" alignItems="flex-start">
-            <Label data-cy={`label-${label}`} color="textSecondary">{label}</Label>
+            <Label data-cy={`label-${label}`} color="textSecondary">
+              {label}
+            </Label>
           </Box>
         </Grid>
         <Grid item xs={9}>
@@ -52,14 +54,20 @@ export function DedupeBox({ label, options }: Props): React.ReactElement {
               <Grid key={option.name} container>
                 <Grid item xs={4}>
                   <BoldGrey>
-                    <Small data-cy={`label-${option.name}`}>{option.name}</Small>
+                    <Small data-cy={`label-${option.name}`}>
+                      {option.name}
+                    </Small>
                   </BoldGrey>
                 </Grid>
                 <Grid item xs={4}>
-                  <Bold data-cy={`percentage-${option.name}`}>{option.percent.toFixed(2)}%</Bold>
+                  <Bold data-cy={`percentage-${option.name}`}>
+                    {option.percent.toFixed(2)}%
+                  </Bold>
                 </Grid>
                 <Grid item xs={4}>
-                  <BoldGrey  data-cy={`value-${option.name}`}>{option.value}</BoldGrey>
+                  <BoldGrey data-cy={`value-${option.name}`}>
+                    {option.value}
+                  </BoldGrey>
                 </Grid>
               </Grid>
             ))}
@@ -68,4 +76,4 @@ export function DedupeBox({ label, options }: Props): React.ReactElement {
       </Grid>
     </GreyBox>
   );
-}
+};
