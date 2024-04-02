@@ -90,7 +90,7 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
             <TableCell>{t('Payment Plan ID')}</TableCell>
             <TableCell>{t('Programme Name')}</TableCell>
             <TableCell>{t('Last Modified Date')}</TableCell>
-            <TableCell>{t('Created by)')}</TableCell>
+            <TableCell>{t('Created by')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
