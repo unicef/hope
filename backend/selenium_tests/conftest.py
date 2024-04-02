@@ -246,7 +246,6 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
 
 # make a screenshot with a name of the test, date and time
 def screenshot(driver: Chrome, node_id: str) -> None:
-    # sleep(1)
     if not os.path.exists("screenshot"):
         os.makedirs("screenshot")
     file_name = f'{node_id}_{datetime.today().strftime("%Y-%m-%d_%H.%M")}.png'.replace("/", "_").replace("::", "__")
