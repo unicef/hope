@@ -98,7 +98,6 @@ WORKDIR /fe-build
 RUN mkdir -p /backend/hct_mis_api/apps/web/templates/web
 # Network timeout is needed by the cross-platform build
 RUN yarn install --frozen-lockfile --network-timeout 600000
-RUN yarn install --frozen-lockfile
 COPY ./frontend ./
 RUN NODE_ENV="production" yarn build
 
