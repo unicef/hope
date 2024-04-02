@@ -102,11 +102,12 @@ export const ManagerialConsolePage: React.FC = () => {
         params.action,
         params.comment,
       ),
-    onSuccess: (params) => {
+    onSuccess: () => {
       refetch();
-      showMessage(`Action (${params.action}) completed successfully`);
+      showMessage(t('Action completed successfully'));
     },
   });
+
   if (inApprovalLoading || inAuthorizationLoading || inReviewLoading) {
     return <LoadingComponent />;
   }
