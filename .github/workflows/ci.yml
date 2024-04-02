@@ -157,6 +157,7 @@ jobs:
         run: |
           docker buildx create --use
           docker buildx build \
+            --progress=plain \
             --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dev \
             --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dev \
             --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dist \
