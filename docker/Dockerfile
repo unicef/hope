@@ -41,8 +41,8 @@ RUN apt-get update \
 
 ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
     VIRTUAL_ENV=/opt/venv \
-    POETRY_HOME=/opt/poetry \
-    PATH=/opt/venv/bin:/opt/poetry/bin:${PATH} \
+    PDM_HOME=/opt/pdm \
+    PATH=/opt/venv/bin:/opt/pdm/bin:${PATH} \
     XDG_RUNTIME_DIR=/run/user/"${UID}"
 
 WORKDIR /code
@@ -52,16 +52,13 @@ COPY --from=waitforit /data/waitforit /usr/local/bin/waitforit
 # Dist builder image
 FROM base as builder
 
-RUN python3 -m venv --copies $VIRTUAL_ENV &&\
-    python3 -m venv --copies $POETRY_HOME &&\
-    $POETRY_HOME/bin/pip install lockfile==0.12.2 &&\
-    $POETRY_HOME/bin/pip install poetry==1.3.0 &&\
-    $POETRY_HOME/bin/pip install pdm &&\
-    poetry config virtualenvs.create false &&\
-    poetry config cache-dir /var/cache/poetry
+WORKDIR $VIRTUAL_ENV
+RUN pip install pdm
 
-COPY backend/pyproject.toml backend/poetry.lock ./
-RUN poetry install --without dev
+ADD backend/pyproject.toml ./
+ADD backend/pdm.toml.template ./pdm.toml
+ADD backend/pdm.lock ./
+RUN pdm sync --prod --no-editable --no-self
 
 # Dev image
 FROM builder AS dev
