@@ -49,4 +49,4 @@ class PaymentPlanSerializer(serializers.ModelSerializer):
 class PaymentPlanBulkActionSerializer(serializers.Serializer):
     ids = serializers.ListField(child=serializers.CharField())
     action = serializers.ChoiceField(PaymentPlan.Action.choices)
-    comment = serializers.CharField(required=False)
+    comment = serializers.CharField(required=False, allow_blank=True)
