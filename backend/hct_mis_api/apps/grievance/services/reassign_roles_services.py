@@ -1,5 +1,5 @@
 from collections import Counter
-from typing import TYPE_CHECKING, Dict, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 from uuid import UUID
 
 from django.core.exceptions import ValidationError
@@ -31,7 +31,7 @@ def reassign_roles_on_disable_individual_service(
     user: "AbstractUser",
     program_or_qs: Union["Program", QuerySet["Program"]],
     individual_key: str = "individual",
-) -> Household:
+) -> Optional[Household]:
     roles_to_bulk_update = []
     roles_to_delete = []
     for role_data in role_reassign_data.values():
