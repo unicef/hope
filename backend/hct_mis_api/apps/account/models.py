@@ -19,9 +19,8 @@ from django.db import models
 from django.db.models import JSONField, Q, QuerySet
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
 from model_utils.models import UUIDModel
-from mptt.fields import TreeForeignKey
-from mptt.models import MPTTModel
 from natural_keys import NaturalKeyModel
 
 from hct_mis_api.apps.account.fields import ChoiceArrayField
@@ -37,6 +36,8 @@ from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
     StartEndSpaceValidator,
 )
+from mptt.fields import TreeForeignKey
+from mptt.models import MPTTModel
 
 logger = logging.getLogger(__name__)
 
