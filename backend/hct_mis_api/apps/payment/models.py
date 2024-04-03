@@ -1022,13 +1022,13 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
             if self.status == PaymentPlan.Status.IN_APPROVAL:
                 return {
                     "modified_date": approval_process.sent_for_approval_date,
-                    "modified_by": approval_process.sent_for_approval_by.username,
+                    "modified_by": approval_process.sent_for_approval_by,
                 }
             if self.status == PaymentPlan.Status.IN_AUTHORIZATION:
                 if approval := approval_process.approvals.filter(type=Approval.APPROVAL).order_by("created_at").last():
                     return {
                         "modified_date": approval.created_at,
-                        "modified_by": approval.created_by.username,
+                        "modified_by": approval.created_by,
                     }
             if self.status == PaymentPlan.Status.IN_REVIEW:
                 if (
@@ -1038,7 +1038,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
                 ):
                     return {
                         "modified_date": approval.created_at,
-                        "modified_by": approval.created_by.username,
+                        "modified_by": approval.created_by,
                     }
         return {
             "modified_date": self.updated_at,

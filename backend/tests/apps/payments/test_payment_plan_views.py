@@ -143,7 +143,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         assert response_json[0]["last_approval_process_date"] == approval_process.sent_for_approval_date.strftime(
             "%Y-%m-%dT%H:%M:%SZ"
         )
-        assert response_json[0]["last_approval_process_by"] == approval_process.sent_for_approval_by.username
+        assert response_json[0]["last_approval_process_by"] == str(approval_process.sent_for_approval_by)
 
         self.payment_plan1.status = PaymentPlan.Status.IN_AUTHORIZATION
         self.payment_plan1.save()
@@ -154,7 +154,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         assert response_json[0]["last_approval_process_date"] == approval_approval.created_at.strftime(
             "%Y-%m-%dT%H:%M:%S.%fZ"
         )
-        assert response_json[0]["last_approval_process_by"] == approval_approval.created_by.username
+        assert response_json[0]["last_approval_process_by"] == str(approval_approval.created_by)
 
         self.payment_plan1.status = PaymentPlan.Status.IN_REVIEW
         self.payment_plan1.save()
@@ -165,7 +165,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         assert response_json[0]["last_approval_process_date"] == approval_authorization.created_at.strftime(
             "%Y-%m-%dT%H:%M:%S.%fZ"
         )
-        assert response_json[0]["last_approval_process_by"] == approval_authorization.created_by.username
+        assert response_json[0]["last_approval_process_by"] == str(approval_authorization.created_by)
 
     def _bulk_approve_action_response(self) -> Any:
         ApprovalProcessFactory(payment_plan=self.payment_plan1)

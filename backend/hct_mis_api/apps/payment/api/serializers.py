@@ -1,3 +1,5 @@
+from typing import Optional
+
 from rest_framework import serializers
 
 from hct_mis_api.apps.account.api.fields import Base64ModelField
@@ -21,6 +23,7 @@ class PaymentPlanSerializer(serializers.ModelSerializer):
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
     program = serializers.CharField(source="program.name")
     program_id = Base64ModelField(model_name="Program")
+    last_approval_process_by = serializers.SerializerMethodField()
 
     class Meta:
         model = PaymentPlan
@@ -44,6 +47,9 @@ class PaymentPlanSerializer(serializers.ModelSerializer):
             "last_approval_process_date",
             "last_approval_process_by",
         )
+
+    def get_last_approval_process_by(self, obj: PaymentPlan) -> Optional[str]:
+        return str(obj.last_approval_process_by) if obj.last_approval_process_by else None
 
 
 class PaymentPlanBulkActionSerializer(serializers.Serializer):
