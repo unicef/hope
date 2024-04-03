@@ -271,7 +271,7 @@ jobs:
 
           IFS=',' read -ra pipelines <<< "$pipelineId"
           for pipeline in "${pipelines[@]}"; do
-            jsonBody='{"variables": {"sha": {"isSecret": false, "value": "${{ github.sha }}"}, "tag": {"isSecret": false, "value": "core-${{ github.sha }}-dist"}}}'
+            jsonBody='{"variables": {"sha": {"isSecret": false, "value": "${{ github.sha }}"}, "tag": {"isSecret": false, "value": "core-${{ github.sha }}"}}}'
             contentLength=$(echo -n $jsonBody | wc -c)
             project=ICTD-HCT-MIS
             organization=unicef
