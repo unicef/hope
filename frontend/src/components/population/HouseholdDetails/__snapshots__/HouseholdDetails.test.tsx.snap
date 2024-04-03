@@ -3,7 +3,7 @@
 exports[`components/population/HouseholdDetails should render 1`] = `
 <div>
   <div
-    class="sc-dmXWDj kFRrsp"
+    class="sc-khjJXk tvvl"
   >
     <div
       class="sc-hLQSwg iuGfmc"
@@ -15,7 +15,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
       </h6>
     </div>
     <div
-      class="sc-khjJXk BQFRq"
+      class="sc-fLseNd cNwQYY"
     >
       <div
         class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-acctgf-MuiGrid-root"
@@ -393,7 +393,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
     </div>
   </div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fLseNd fUGlYL css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-bBkKde dYlPxU css-1ps6pg7-MuiPaper-root"
   >
     <div
       class="sc-hLQSwg iuGfmc"

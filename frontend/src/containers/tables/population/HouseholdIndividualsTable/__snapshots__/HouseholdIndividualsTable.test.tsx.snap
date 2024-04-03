@@ -3,16 +3,16 @@
 exports[`components/tables/population/HouseholdIndividualsTable should render 1`] = `
 <div>
   <div
-    class="sc-iBdnpw dcYiFg"
+    class="sc-fsYfdN iJWUfq"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN bNxSeJ css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-qZrbh lhqvQi css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-csKJxZ css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="sc-csKJxZ enzmTw MuiBox-root css-0"
+          class="sc-eTNRI gzFCin MuiBox-root css-0"
         >
           <div
             class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
@@ -25,11 +25,11 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
             </h6>
           </div>
           <div
-            class="sc-csKJxZ enzmTw MuiBox-root css-1ruxp1v"
+            class="sc-eTNRI gzFCin MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root sc-qZrbh sc-eTNRI haQfFY bGeKmT css-b1kpk9-MuiTable-root"
+          class="MuiTable-root sc-jsEeTM sc-brSamD euROHP ejYVTE css-b1kpk9-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -42,7 +42,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 scope="col"
               >
                 <span
-                  class="sc-gLLuof cPzlH"
+                  class="sc-iBdnpw jMIPuq"
                   data-cy="table-label"
                 >
                   Individual ID
@@ -53,7 +53,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 scope="col"
               >
                 <span
-                  class="sc-gLLuof cPzlH"
+                  class="sc-iBdnpw jMIPuq"
                   data-cy="table-label"
                 >
                   Individual
@@ -64,7 +64,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 scope="col"
               >
                 <span
-                  class="sc-gLLuof cPzlH"
+                  class="sc-iBdnpw jMIPuq"
                   data-cy="table-label"
                 >
                   Status
@@ -75,7 +75,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 scope="col"
               >
                 <span
-                  class="sc-gLLuof cPzlH"
+                  class="sc-iBdnpw jMIPuq"
                   data-cy="table-label"
                 >
                   Role
@@ -86,7 +86,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 scope="col"
               >
                 <span
-                  class="sc-gLLuof cPzlH"
+                  class="sc-iBdnpw jMIPuq"
                   data-cy="table-label"
                 >
                   Relationship to HoH
@@ -97,7 +97,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 scope="col"
               >
                 <span
-                  class="sc-gLLuof cPzlH"
+                  class="sc-iBdnpw jMIPuq"
                   data-cy="table-label"
                 >
                   Date of Birth
@@ -108,7 +108,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 scope="col"
               >
                 <span
-                  class="sc-gLLuof cPzlH"
+                  class="sc-iBdnpw jMIPuq"
                   data-cy="table-label"
                 >
                   Gender
@@ -120,7 +120,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-hLQSwg fjpYDR css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-eDLKkx iaLNcu css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
@@ -142,10 +142,10 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-guDLey iyWGpP"
+                  class="sc-dmyCSP hOZlyZ"
                 >
                   <div
-                    class="sc-dmyCSP ljkNfL"
+                    class="sc-hLQSwg bHPHDR"
                     data-cy="status-container"
                     status="ACTIVE"
                   >
