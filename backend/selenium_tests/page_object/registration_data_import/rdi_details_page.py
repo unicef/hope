@@ -23,6 +23,8 @@ class RDIDetailsPage(BaseComponents):
     tableRow = 'tr[data-cy="table-row"]'
     buttonRefuseRdi = 'button[data-cy="button-refuse-rdi"]'
     buttonMergeRdi = 'button[data-cy="button-merge-rdi"]'
+    buttonMerge = 'button[data-cy="button-merge"]'
+    buttonViewTickets = 'a[data-cy="button-view-tickets"]'
 
     # Texts
     buttonRefuseRdiText = "REFUSE IMPORT"
@@ -78,6 +80,12 @@ class RDIDetailsPage(BaseComponents):
 
     def getButtonMergeRdi(self) -> WebElement:
         return self.wait_for(self.buttonMergeRdi)
+
+    def getButtonMerge(self) -> WebElement:
+        return self.wait_for(self.buttonMerge)
+
+    def getButtonViewTickets(self) -> WebElement:
+        return self.wait_for(self.buttonViewTickets)
 
     def getImportedIndividualsTable(self) -> WebElement:
         return self.wait_for(self.importedIndividualsTable)
