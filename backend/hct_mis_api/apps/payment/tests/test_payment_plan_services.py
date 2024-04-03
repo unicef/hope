@@ -1,6 +1,7 @@
 from datetime import timedelta
 from typing import Any
 from unittest import mock
+from unittest.mock import patch
 
 from django.utils import timezone
 
@@ -526,7 +527,10 @@ class TestPaymentPlanServices(APITestCase):
     @flaky(max_runs=5, min_passes=1)
     @freeze_time("2023-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    def test_split(self, get_exchange_rate_mock: Any) -> None:
+    @patch("hct_mis_api.apps.payment.models.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
+    def test_split(self, min_no_of_payments_in_chunk_mock: Any, get_exchange_rate_mock: Any) -> None:
+        min_no_of_payments_in_chunk_mock.__get__ = mock.Mock(return_value=2)
+
         pp = PaymentPlanFactory(
             start_date=timezone.datetime(2021, 6, 10, tzinfo=utc),
             end_date=timezone.datetime(2021, 7, 10, tzinfo=utc),
