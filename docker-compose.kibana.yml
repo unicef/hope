@@ -3,7 +3,7 @@ version: "3.7"
 services:
   kibana:
     container_name: kibana
-    image: docker.elastic.co/kibana/kibana:7.4.0
+    image: docker.elastic.co/kibana/kibana:8.11.0
     restart: always
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
