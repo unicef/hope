@@ -863,5 +863,8 @@
   "Payment Plan(s) Approved": "Payment Plan(s) Approved",
   "Payment Plan(s) Authorized": "Payment Plan(s) Authorized",
   "Payment Plan(s) Released": "Payment Plan(s) Released",
-  "Action completed successfully": "Action completed successfully"
+  "Action completed successfully": "Action completed successfully",
+  "Sent for Approval by": "Sent for Approval by",
+  "Approved by": "Approved by",
+  "Authorized by": "Authorized by"
 }

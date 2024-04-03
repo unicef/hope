@@ -17,13 +17,19 @@ export const bulkActionPaymentPlansManagerial = async (
   action,
   comment,
 ) => {
-  const response = await api.post(
-    `/api/rest/${businessAreaSlug}/payments/payment-plans-managerial/bulk-action/`,
+  const payload: { ids: typeof ids; action: typeof action; comment?: string } =
     {
       ids,
       action,
-      comment,
-    },
+    };
+
+  if (comment) {
+    payload.comment = comment;
+  }
+
+  const response = await api.post(
+    `/api/rest/${businessAreaSlug}/payments/payment-plans-managerial/bulk-action/`,
+    payload,
   );
   return response.data;
 };

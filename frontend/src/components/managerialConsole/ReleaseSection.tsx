@@ -12,6 +12,8 @@ import { useTranslation } from 'react-i18next';
 import { ReleasePaymentPlansModal } from '@components/managerialConsole/ReleasePaymentPlansModal';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { BlackLink } from '@components/core/BlackLink';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface ReleaseSectionProps {
   selectedInReview: any[];
@@ -42,6 +44,7 @@ export const ReleaseSection: React.FC<ReleaseSectionProps> = ({
   bulkAction,
 }) => {
   const { t } = useTranslation();
+  const { businessArea } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const handleSelectAllReviewed = () => {
     const ids = inReviewData?.results?.map((plan) => plan.id);
@@ -70,6 +73,7 @@ export const ReleaseSection: React.FC<ReleaseSectionProps> = ({
                 comment: comment,
               });
               showMessage(t('Payment Plan(s) Released'));
+              setSelectedInReview([]);
             } catch (e) {
               showMessage(e.message);
             }
@@ -89,7 +93,7 @@ export const ReleaseSection: React.FC<ReleaseSectionProps> = ({
             <TableCell>{t('Payment Plan ID')}</TableCell>
             <TableCell>{t('Programme Name')}</TableCell>
             <TableCell>{t('Last Modified Date')}</TableCell>
-            <TableCell>{t('Created by')}</TableCell>
+            <TableCell>{t('Authorized by')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -103,7 +107,14 @@ export const ReleaseSection: React.FC<ReleaseSectionProps> = ({
                   }
                 />
               </TableCell>
-              <TableCell>{plan.unicef_id}</TableCell>
+              <TableCell>
+                <BlackLink
+                  to={`/${businessArea}/programs/${plan.program_id}/payment-module/${plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${plan.id}`}
+                  newTab={true}
+                >
+                  {plan.unicef_id}
+                </BlackLink>
+              </TableCell>
               <TableCell>{plan.program}</TableCell>
               <TableCell>
                 <UniversalMoment>

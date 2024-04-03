@@ -12,6 +12,8 @@ import { useTranslation } from 'react-i18next';
 import { AuthorizePaymentPlansModal } from '@components/managerialConsole/AuthorizePaymentPlansModal';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { BlackLink } from '@components/core/BlackLink';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface AuthorizationSectionProps {
   selectedAuthorized: any[];
@@ -42,6 +44,7 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
   bulkAction,
 }) => {
   const { t } = useTranslation();
+  const { businessArea } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const handleSelectAllAuthorized = () => {
     const ids = inAuthorizationData.results.map((plan) => plan.id);
@@ -71,6 +74,7 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
                 comment: comment,
               });
               showMessage(t('Payment Plan(s) Authorized'));
+              setSelectedAuthorized([]);
             } catch (e) {
               showMessage(e.message);
             }
@@ -90,7 +94,7 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
             <TableCell>{t('Payment Plan ID')}</TableCell>
             <TableCell>{t('Programme Name')}</TableCell>
             <TableCell>{t('Last Modified Date')}</TableCell>
-            <TableCell>{t('Created by')}</TableCell>
+            <TableCell>{t('Approved by')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -108,7 +112,14 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
                   }
                 />
               </TableCell>
-              <TableCell>{plan.unicef_id}</TableCell>
+              <TableCell>
+                <BlackLink
+                  to={`/${businessArea}/programs/${plan.program_id}/payment-module/${plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${plan.id}`}
+                  newTab={true}
+                >
+                  {plan.unicef_id}
+                </BlackLink>
+              </TableCell>
               <TableCell>{plan.program}</TableCell>
               <TableCell>
                 <UniversalMoment>

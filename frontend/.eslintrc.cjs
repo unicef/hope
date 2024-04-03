@@ -77,7 +77,7 @@ module.exports = {
       1,
       { extensions: ['.js', '.jsx', '.ts', '.tsx'] },
     ],
-    'react/prop-types': 'warn',
+    'react/prop-types': 'off',
     'react/react-in-jsx-scope': 'off',
     'import/extensions': 'off',
     'import/no-named-as-default': 'off',

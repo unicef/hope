@@ -56,27 +56,33 @@ export const ManagerialConsolePage: React.FC = () => {
 
   const permissions = usePermissions();
 
-  const { refetch } = useQuery({
-    queryKey: ['paymentPlans', businessArea],
-    queryFn: () => fetchPaymentPlansManagerial(businessArea),
-  });
-
-  const { data: inApprovalData, isLoading: inApprovalLoading } = useQuery({
+  const {
+    data: inApprovalData,
+    isLoading: inApprovalLoading,
+    refetch: refetchInApproval,
+  } = useQuery({
     queryKey: ['paymentPlansInApproval', businessArea],
     queryFn: () =>
       fetchPaymentPlansManagerial(businessArea, { status: 'IN_APPROVAL' }),
   });
 
-  const { data: inAuthorizationData, isLoading: inAuthorizationLoading } =
-    useQuery({
-      queryKey: ['paymentPlansInAuthorization', businessArea],
-      queryFn: () =>
-        fetchPaymentPlansManagerial(businessArea, {
-          status: 'IN_AUTHORIZATION',
-        }),
-    });
+  const {
+    data: inAuthorizationData,
+    isLoading: inAuthorizationLoading,
+    refetch: refetchInAuthorization,
+  } = useQuery({
+    queryKey: ['paymentPlansInAuthorization', businessArea],
+    queryFn: () =>
+      fetchPaymentPlansManagerial(businessArea, {
+        status: 'IN_AUTHORIZATION',
+      }),
+  });
 
-  const { data: inReviewData, isLoading: inReviewLoading } = useQuery({
+  const {
+    data: inReviewData,
+    isLoading: inReviewLoading,
+    refetch: refetchInReview,
+  } = useQuery({
     queryKey: ['paymentPlansInReview', businessArea],
     queryFn: () =>
       fetchPaymentPlansManagerial(businessArea, { status: 'IN_REVIEW' }),
@@ -91,7 +97,9 @@ export const ManagerialConsolePage: React.FC = () => {
         params.comment,
       ),
     onSuccess: () => {
-      refetch();
+      refetchInApproval();
+      refetchInAuthorization();
+      refetchInReview();
       showMessage(t('Action completed successfully'));
     },
   });

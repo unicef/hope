@@ -8,10 +8,13 @@ import {
   TableRow,
   Checkbox,
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ApprovePaymentPlansModal } from '@components/managerialConsole/ApprovePaymentPlansModal';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { BlackLink } from '@components/core/BlackLink';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface ApprovalSectionProps {
   selectedApproved: any[];
@@ -42,6 +45,8 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
   bulkAction,
 }) => {
   const { t } = useTranslation();
+  const { businessArea } = useBaseUrl();
+  const navigate = useNavigate();
   const { showMessage } = useSnackbar();
   const handleSelectAllApproved = () => {
     const ids = inApprovalData.results.map((plan) => plan.id);
@@ -71,6 +76,7 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
                 comment: comment,
               });
               showMessage(t('Payment Plan(s) Approved'));
+              setSelectedApproved([]);
             } catch (e) {
               showMessage(e.message);
             }
@@ -90,7 +96,7 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
             <TableCell>{t('Payment Plan ID')}</TableCell>
             <TableCell>{t('Programme Name')}</TableCell>
             <TableCell>{t('Last Modified Date')}</TableCell>
-            <TableCell>{t('Created by')}</TableCell>
+            <TableCell>{t('Sent for Approval by')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -104,7 +110,14 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
                   }
                 />
               </TableCell>
-              <TableCell>{plan.unicef_id}</TableCell>
+              <TableCell>
+                <BlackLink
+                  to={`/${businessArea}/programs/${plan.program_id}/payment-module/${plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${plan.id}`}
+                  newTab={true}
+                >
+                  {plan.unicef_id}
+                </BlackLink>
+              </TableCell>
               <TableCell>{plan.program}</TableCell>
               <TableCell>
                 <UniversalMoment>
