@@ -7,8 +7,8 @@ import {
   TableHead,
   TableRow,
   Checkbox,
+  Box,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ApprovePaymentPlansModal } from '@components/managerialConsole/ApprovePaymentPlansModal';
 import { UniversalMoment } from '@components/core/UniversalMoment';
@@ -46,7 +46,6 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
 }) => {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
-  const navigate = useNavigate();
   const { showMessage } = useSnackbar();
   const handleSelectAllApproved = () => {
     const ids = inApprovalData.results.map((plan) => plan.id);
@@ -87,16 +86,26 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell padding="checkbox">
-              <Checkbox
-                checked={allSelected && selectedApproved.length > 0}
-                onClick={handleSelectAllApproved}
-              />
+            <TableCell padding="checkbox" style={{ width: '10%' }}>
+              <Box sx={{ flex: 1 }}>
+                <Checkbox
+                  checked={allSelected && selectedApproved.length > 0}
+                  onClick={handleSelectAllApproved}
+                />
+              </Box>
             </TableCell>
-            <TableCell>{t('Payment Plan ID')}</TableCell>
-            <TableCell>{t('Programme Name')}</TableCell>
-            <TableCell>{t('Last Modified Date')}</TableCell>
-            <TableCell>{t('Sent for Approval by')}</TableCell>
+            <TableCell align="left" style={{ width: '22.5%' }}>
+              <Box sx={{ flex: 1 }}>{t('Payment Plan ID')}</Box>
+            </TableCell>
+            <TableCell align="left" style={{ width: '22.5%' }}>
+              <Box sx={{ flex: 1 }}>{t('Programme Name')}</Box>
+            </TableCell>
+            <TableCell align="left" style={{ width: '22.5%' }}>
+              <Box sx={{ flex: 1 }}>{t('Last Modified Date')}</Box>
+            </TableCell>
+            <TableCell align="left" style={{ width: '22.5%' }}>
+              <Box sx={{ flex: 1 }}>{t('Sent for Approval by')}</Box>
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -110,7 +119,7 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
                   }
                 />
               </TableCell>
-              <TableCell>
+              <TableCell align="left">
                 <BlackLink
                   to={`/${businessArea}/programs/${plan.program_id}/payment-module/${plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${plan.id}`}
                   newTab={true}
@@ -118,13 +127,15 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
                   {plan.unicef_id}
                 </BlackLink>
               </TableCell>
-              <TableCell>{plan.program}</TableCell>
-              <TableCell>
+              <TableCell align="left">{plan.program}</TableCell>
+              <TableCell align="left">
                 <UniversalMoment>
                   {plan.last_approval_process_date}
                 </UniversalMoment>
               </TableCell>
-              <TableCell>{plan.last_approval_process_by}</TableCell>
+              <TableCell align="left">
+                {plan.last_approval_process_by}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

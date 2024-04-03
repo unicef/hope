@@ -2,7 +2,6 @@ import {
   bulkActionPaymentPlansManagerial,
   fetchPaymentPlansManagerial,
 } from '@api/paymentModuleApi';
-import { BaseSection } from '@components/core/BaseSection';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { ApprovalSection } from '@components/managerialConsole/ApprovalSection';

@@ -7,6 +7,7 @@ import {
   TableHead,
   TableRow,
   Checkbox,
+  Box,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { ReleasePaymentPlansModal } from '@components/managerialConsole/ReleasePaymentPlansModal';
@@ -84,16 +85,26 @@ export const ReleaseSection: React.FC<ReleaseSectionProps> = ({
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell padding="checkbox">
-              <Checkbox
-                checked={allSelected && selectedInReview.length > 0}
-                onClick={handleSelectAllReviewed}
-              />
+            <TableCell padding="checkbox" style={{ width: '10%' }}>
+              <Box sx={{ flex: 1 }}>
+                <Checkbox
+                  checked={allSelected && selectedInReview.length > 0}
+                  onClick={handleSelectAllReviewed}
+                />
+              </Box>
             </TableCell>
-            <TableCell>{t('Payment Plan ID')}</TableCell>
-            <TableCell>{t('Programme Name')}</TableCell>
-            <TableCell>{t('Last Modified Date')}</TableCell>
-            <TableCell>{t('Authorized by')}</TableCell>
+            <TableCell align="left" style={{ width: '22.5%' }}>
+              <Box sx={{ flex: 1 }}>{t('Payment Plan ID')}</Box>
+            </TableCell>
+            <TableCell align="left" style={{ width: '22.5%' }}>
+              <Box sx={{ flex: 1 }}>{t('Programme Name')}</Box>
+            </TableCell>
+            <TableCell align="left" style={{ width: '22.5%' }}>
+              <Box sx={{ flex: 1 }}>{t('Last Modified Date')}</Box>
+            </TableCell>
+            <TableCell align="left" style={{ width: '22.5%' }}>
+              <Box sx={{ flex: 1 }}>{t('Authorized by')}</Box>
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -107,7 +118,7 @@ export const ReleaseSection: React.FC<ReleaseSectionProps> = ({
                   }
                 />
               </TableCell>
-              <TableCell>
+              <TableCell align="left">
                 <BlackLink
                   to={`/${businessArea}/programs/${plan.program_id}/payment-module/${plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${plan.id}`}
                   newTab={true}
@@ -115,13 +126,15 @@ export const ReleaseSection: React.FC<ReleaseSectionProps> = ({
                   {plan.unicef_id}
                 </BlackLink>
               </TableCell>
-              <TableCell>{plan.program}</TableCell>
-              <TableCell>
+              <TableCell align="left">{plan.program}</TableCell>
+              <TableCell align="left">
                 <UniversalMoment>
                   {plan.last_approval_process_date}
                 </UniversalMoment>
               </TableCell>
-              <TableCell>{plan.last_approval_process_by}</TableCell>
+              <TableCell align="left">
+                {plan.last_approval_process_by}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

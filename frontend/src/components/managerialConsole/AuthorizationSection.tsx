@@ -7,6 +7,7 @@ import {
   TableHead,
   TableRow,
   Checkbox,
+  Box,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { AuthorizePaymentPlansModal } from '@components/managerialConsole/AuthorizePaymentPlansModal';
@@ -85,16 +86,26 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell padding="checkbox">
-              <Checkbox
-                checked={allSelected && selectedAuthorized.length > 0}
-                onClick={handleSelectAllAuthorized}
-              />
+            <TableCell padding="checkbox" style={{ width: '10%' }}>
+              <Box sx={{ flex: 1 }}>
+                <Checkbox
+                  checked={allSelected && selectedAuthorized.length > 0}
+                  onClick={handleSelectAllAuthorized}
+                />
+              </Box>
             </TableCell>
-            <TableCell>{t('Payment Plan ID')}</TableCell>
-            <TableCell>{t('Programme Name')}</TableCell>
-            <TableCell>{t('Last Modified Date')}</TableCell>
-            <TableCell>{t('Approved by')}</TableCell>
+            <TableCell align="left" style={{ width: '22.5%' }}>
+              <Box sx={{ flex: 1 }}>{t('Payment Plan ID')}</Box>
+            </TableCell>
+            <TableCell align="left" style={{ width: '22.5%' }}>
+              <Box sx={{ flex: 1 }}>{t('Programme Name')}</Box>
+            </TableCell>
+            <TableCell align="left" style={{ width: '22.5%' }}>
+              <Box sx={{ flex: 1 }}>{t('Last Modified Date')}</Box>
+            </TableCell>
+            <TableCell align="left" style={{ width: '22.5%' }}>
+              <Box sx={{ flex: 1 }}>{t('Approved by')}</Box>
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -112,7 +123,7 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
                   }
                 />
               </TableCell>
-              <TableCell>
+              <TableCell align="left">
                 <BlackLink
                   to={`/${businessArea}/programs/${plan.program_id}/payment-module/${plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${plan.id}`}
                   newTab={true}
@@ -120,13 +131,15 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
                   {plan.unicef_id}
                 </BlackLink>
               </TableCell>
-              <TableCell>{plan.program}</TableCell>
-              <TableCell>
+              <TableCell align="left">{plan.program}</TableCell>
+              <TableCell align="left">
                 <UniversalMoment>
                   {plan.last_approval_process_date}
                 </UniversalMoment>
               </TableCell>
-              <TableCell>{plan.last_approval_process_by}</TableCell>
+              <TableCell align="left">
+                {plan.last_approval_process_by}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
