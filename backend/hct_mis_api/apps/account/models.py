@@ -19,8 +19,9 @@ from django.db import models
 from django.db.models import JSONField, Q, QuerySet
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-
 from model_utils.models import UUIDModel
+from mptt.fields import TreeForeignKey
+from mptt.models import MPTTModel
 from natural_keys import NaturalKeyModel
 
 from hct_mis_api.apps.account.fields import ChoiceArrayField
@@ -36,8 +37,6 @@ from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
     StartEndSpaceValidator,
 )
-from mptt.fields import TreeForeignKey
-from mptt.models import MPTTModel
 
 logger = logging.getLogger(__name__)
 
@@ -317,39 +316,39 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         return list of permissions based on User Role BA and User Partner
         if program_id is in arguments need to check if user.partner.permissions json has program_id
         """
-        has_program_access = True
-        # Partner is_unicef has access to all Programs and check perms based on user perms
-        if not self.partner.is_unicef:
-            # check program access and partner roles permissions list
-            if program_id:
-                has_program_access = str(program_id) in self.get_partner_programs_areas_dict(
-                    business_area_slug=business_area_slug
-                )
-
-            partner_role_ids_per_ba = self.get_partner_role_ids_list(business_area_slug=business_area_slug)
-
-            all_partner_roles_permissions_list = list(
-                Role.objects.filter(id__in=partner_role_ids_per_ba).values_list("permissions", flat=True)
-            )
-        else:
-            # default perms for is_unicef partner
-            all_partner_roles_permissions_list = [DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER]
-
         user_roles_query = UserRole.objects.filter(user=self, business_area__slug=business_area_slug).exclude(
             expiry_date__lt=timezone.now()
         )
         all_user_roles_permissions_list = list(
             Role.objects.filter(user_roles__in=user_roles_query).values_list("permissions", flat=True)
         )
-        return (
-            list(
-                set(
-                    [perm for perms in all_partner_roles_permissions_list for perm in perms]
-                    + [perm for perms in all_user_roles_permissions_list if perms for perm in perms]
+
+        # Regular user, need to check access to the program
+        if not self.partner.is_unicef:
+            # Check program access
+            if program_id:
+                has_program_access = str(program_id) in self.get_partner_programs_areas_dict(
+                    business_area_slug=business_area_slug
                 )
+                if not has_program_access:
+                    return []
+
+            # Prepare partner permissions
+            partner_role_ids_per_ba = self.get_partner_role_ids_list(business_area_slug=business_area_slug)
+            all_partner_roles_permissions_list = list(
+                Role.objects.filter(id__in=partner_role_ids_per_ba).values_list("permissions", flat=True)
             )
-            if has_program_access
-            else list()
+        elif all_user_roles_permissions_list:
+            # Default partner permissions for UNICEF partner with access to business area
+            all_partner_roles_permissions_list = [DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER]
+        else:
+            all_partner_roles_permissions_list = []
+
+        return list(
+            set(
+                [perm for perms in all_partner_roles_permissions_list for perm in perms]
+                + [perm for perms in all_user_roles_permissions_list if perms for perm in perms]
+            )
         )
 
     @property
@@ -359,48 +358,10 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             | Q(id__in=self.partner.business_area_ids)
         ).distinct()
 
-    @test_conditional(lru_cache())
-    def cached_has_partner_roles_for_business_area_and_permission(
-        self, business_area: BusinessArea, permission: str
-    ) -> bool:
-        return Role.objects.filter(
-            id__in=self.get_partner_role_ids_list(business_area_id=business_area.pk), permissions__contains=[permission]
-        ).exists()
-
-    @test_conditional(lru_cache())
-    def cached_has_user_roles_for_business_area_and_permission(
-        self, business_area: BusinessArea, permission: str
-    ) -> bool:
-        user_roles_query = UserRole.objects.filter(user=self, business_area=business_area).exclude(
-            expiry_date__lt=timezone.now()
-        )
-        return Role.objects.filter(
-            user_roles__in=user_roles_query,
-            permissions__contains=[permission],
-        ).exists()
-
     def has_permission(
         self, permission: str, business_area: BusinessArea, program_id: Optional[UUID] = None, write: bool = False
     ) -> bool:
-        has_user_roles = self.cached_has_user_roles_for_business_area_and_permission(
-            business_area=business_area,
-            permission=permission,
-        )
-
-        if self.partner.is_unicef:
-            return has_user_roles
-
-        has_partner_roles = self.cached_has_partner_roles_for_business_area_and_permission(
-            business_area=business_area,
-            permission=permission,
-        )
-        has_role_access = has_user_roles or has_partner_roles
-
-        if not program_id:
-            return has_role_access
-
-        has_program_access = str(program_id) in self.get_partner_programs_areas_dict(business_area_id=business_area.pk)
-        return has_program_access and has_role_access
+        return permission in self.permissions_in_business_area(business_area.slug, program_id)
 
     def get_partner_areas_ids_per_program(self, program_id: UUID, business_area_id: UUID) -> List:
         partner_areas_ids_per_program = self.get_partner_programs_areas_dict(business_area_id=business_area_id).get(
