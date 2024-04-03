@@ -48,7 +48,7 @@ DEFAULTS = {
     "AZURE_CLIENT_SECRET": (str, ""),
     "AZURE_TENANT_KEY": (str, ""),
     "SANCTION_LIST_CC_MAIL": (str, "dfam-cashassistance@unicef.org"),
-    "ELASTICSEARCH_HOST": (str, "elasticsearch:9200"),
+    "ELASTICSEARCH_HOST": (str, "http://elasticsearch:9200"),
     "RAPID_PRO_URL": (str, "https://rapidpro.io"),
     "DATAMART_USER": (str, ""),
     "DATAMART_URL": (str, "https://datamart-dev.unicef.io"),
@@ -573,6 +573,8 @@ SANCTION_LIST_CC_MAIL = env("SANCTION_LIST_CC_MAIL")
 
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL_AUTOSYNC = False
+print("********************")
+print(env("ELASTICSEARCH_HOST"))
 ELASTICSEARCH_HOST = env("ELASTICSEARCH_HOST")
 ELASTICSEARCH_INDEX_PREFIX = env("ELASTICSEARCH_INDEX_PREFIX", default="")
 ELASTICSEARCH_DSL = {
