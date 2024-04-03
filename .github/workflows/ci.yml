@@ -156,7 +156,9 @@ jobs:
       - name: Push dist
         run: |
           docker buildx create --use
-          docker buildx build \
+
+          # Base part of the command
+          build_command="docker buildx build \
             --progress=plain \
             --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dev \
             --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dev \
@@ -168,18 +170,15 @@ jobs:
             -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }} \
             -f ./docker/Dockerfile \
             --target dist \
-            --push \
-            ./
-
-          # Builds from master branch are tagged with the version number
+            --push ./"
+          
           if [ "${{ github.ref }}" = "refs/heads/master" ]; then
             version=$(python3 -c "import sys; version=None; [version:=line.split('=')[1].strip().strip('\"') for line in open('backend/pyproject.toml', 'r') if line.strip().startswith('version =')]; print(version if version else sys.exit(1))")
             tagged_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-$version
-            echo Will tag ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }} as $tagged_image
-            docker tag ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }} $tagged_image
-            docker push $tagged_image
+            build_command="$build_command -t $tagged_image"
           fi
-
+          
+          eval $build_command
 
   unit_tests:
     runs-on: ubuntu-latest
