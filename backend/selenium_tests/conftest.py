@@ -8,16 +8,15 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
-
-from page_object.programme_population.households_details import HouseholdsDetails
-from page_object.programme_population.individuals import Individuals
-from page_object.programme_population.households import Households
 from page_object.admin_panel.admin_panel import AdminPanel
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from page_object.grievance.feedback import Feedback
 from page_object.grievance.new_feedback import NewFeedback
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
+from page_object.programme_population.households import Households
+from page_object.programme_population.households_details import HouseholdsDetails
+from page_object.programme_population.individuals import Individuals
 from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
@@ -134,7 +133,6 @@ def pageDetailsRegistrationDataImport(request: FixtureRequest, browser: Chrome) 
 @pytest.fixture
 def pageHouseholds(request: FixtureRequest, browser: Chrome) -> Households:
     yield Households(browser)
-
 
 
 @pytest.fixture

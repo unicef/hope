@@ -1,5 +1,6 @@
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
+
 default_url = "http://localhost:8080"
 url = input(f"Url of page (default is {default_url}):")
 if not url:
