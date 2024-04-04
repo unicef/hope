@@ -5,6 +5,7 @@ from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
+    AdminUrlNodeMixin,
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
     Permissions,
@@ -23,7 +24,7 @@ class CountAndPercentageNode(graphene.ObjectType):
     percentage = graphene.Float()
 
 
-class RegistrationDataImportNode(BaseNodePermissionMixin, DjangoObjectType):
+class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.RDI_VIEW_DETAILS),)
 
     batch_duplicates_count_and_percentage = graphene.Field(CountAndPercentageNode)

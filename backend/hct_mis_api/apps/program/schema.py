@@ -22,6 +22,7 @@ from graphene_django import DjangoObjectType
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
+    AdminUrlNodeMixin,
     BaseNodePermissionMixin,
     BasePermission,
     DjangoPermissionFilterConnectionField,
@@ -60,7 +61,7 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 
 
-class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
+class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(
             Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
