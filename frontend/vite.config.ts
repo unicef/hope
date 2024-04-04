@@ -1,4 +1,5 @@
 import { defineConfig, splitVendorChunkPlugin } from 'vite';
+import polyfillNode from 'rollup-plugin-polyfill-node';
 import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
@@ -6,7 +7,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 export default defineConfig({
   assetsInclude: ['**/*.png'],
   base: '',
-  plugins: [tsconfigPaths(), react(), splitVendorChunkPlugin()],
+  plugins: [tsconfigPaths(), react(), splitVendorChunkPlugin(), polyfillNode()],
   resolve: {
     mainFields: [],
   },
