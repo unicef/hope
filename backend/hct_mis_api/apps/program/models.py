@@ -25,6 +25,7 @@ from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
+    AdminUrlMixin,
     ConcurrencyModel,
     SoftDeletableIsVisibleManager,
     TimeStampedUUIDModel,
@@ -35,7 +36,7 @@ from hct_mis_api.apps.utils.validators import (
 )
 
 
-class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
+class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel, AdminUrlMixin):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "name",

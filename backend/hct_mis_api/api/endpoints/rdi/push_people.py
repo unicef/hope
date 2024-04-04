@@ -108,7 +108,7 @@ class PeopleUploadMixin:
         individual_fields = [field.name for field in ImportedIndividual._meta.get_fields()]
         individual_data = {field: value for field, value in person_data.items() if field in individual_fields}
         person_type = person_data.get("type")
-        individual_data.pop("relationship")
+        individual_data.pop("relationship", None)
         relationship = NON_BENEFICIARY if person_type is NON_BENEFICIARY else HEAD
 
         ind = ImportedIndividual.objects.create(
