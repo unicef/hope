@@ -205,6 +205,8 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     @property
     def is_social_worker_program(self) -> bool:
+        if self.data_collecting_type is None:
+            return False
         return self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
 
     class Meta:
