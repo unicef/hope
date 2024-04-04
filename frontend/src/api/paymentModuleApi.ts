@@ -5,7 +5,7 @@ export const fetchPaymentPlansManagerial = async (
   params = {},
 ) => {
   const response = await api.get(
-    `/api/rest/${businessAreaSlug}/payments/payment-plans-managerial/`,
+    `${businessAreaSlug}/payments/payment-plans-managerial/`,
     params,
   );
   return response;
@@ -28,7 +28,7 @@ export const bulkActionPaymentPlansManagerial = async (
   }
 
   const response = await api.post(
-    `/api/rest/${businessAreaSlug}/payments/payment-plans-managerial/bulk-action/`,
+    `${businessAreaSlug}/payments/payment-plans-managerial/bulk-action/`,
     payload,
   );
   return response.data;

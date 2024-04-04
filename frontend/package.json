@@ -44,7 +44,6 @@
     "apollo-cache-persist": "^0.1.1",
     "apollo-upload-client": "^18.0.1",
     "apollo3-cache-persist": "^0.14.1",
-    "axios": "^1.6.8",
     "camelcase": "^8.0.0",
     "chart.js": "^4.4.1",
     "chartjs-plugin-annotation": "^3.0.1",
