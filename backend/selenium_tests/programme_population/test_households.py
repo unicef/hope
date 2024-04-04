@@ -1,19 +1,29 @@
 import pytest
 from page_object.programme_population.households import Households
+
 from page_object.programme_population.households_details import HouseholdsDetails
+from django.conf import settings
+from django.core.management import call_command
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
+@pytest.fixture
+def create_programs() -> None:
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
+    return
+
+
 @pytest.mark.usefixtures("login")
 class TestSmokeHouseholds:
-    def test_smoke_page_households(self, pageHouseholds: Households) -> None:
+    def test_smoke_page_households(self, create_programs: None, pageHouseholds: Households) -> None:
         pageHouseholds.selectGlobalProgramFilter("Test Programm").click()
         pageHouseholds.getNavProgrammePopulation().click()
         pageHouseholds.getNavHouseholds().click()
 
     def test_smoke_page_households_details(
-        self, pageHouseholds: Households, pageHouseholdsDetails: HouseholdsDetails
+            self, create_programs: None, pageHouseholds: Households, pageHouseholdsDetails: HouseholdsDetails
     ) -> None:
         pageHouseholds.selectGlobalProgramFilter("Test Programm").click()
         pageHouseholds.getNavProgrammePopulation().click()
