@@ -661,24 +661,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.unsuccessful_payments_for_follow_up().count()
 
     def resolve_can_send_to_payment_gateway(self, info: Any) -> bool:
-        if self.status != PaymentPlan.Status.ACCEPTED:
-            return False
-
-        if self.splits.exists():
-            has_payment_gateway_fsp = self.delivery_mechanisms.filter(
-                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                financial_service_provider__payment_gateway_id__isnull=False,
-            ).exists()
-            has_not_sent_to_payment_gateway_splits = self.splits.filter(
-                sent_to_payment_gateway=False,
-            ).exists()
-            return has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
-        else:
-            return self.delivery_mechanisms.filter(
-                sent_to_payment_gateway=False,
-                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                financial_service_provider__payment_gateway_id__isnull=False,
-            ).exists()
+        return self.can_send_to_payment_gateway  # type: ignore
 
     def resolve_can_split(self, info: Any) -> bool:
         if self.status != PaymentPlan.Status.ACCEPTED:
