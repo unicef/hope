@@ -7,11 +7,11 @@ pytestmark = pytest.mark.django_db(transaction=True)
 @pytest.mark.usefixtures("login")
 class TestSmokeIndividuals:
     def test_smoke_page_individuals(self, pageIndividuals: Individuals) -> None:
+        pageIndividuals.selectGlobalProgramFilter("Test Programm").click()
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavHouseholds().click()
 
-    def test_smoke_page_individuals_details(
-        self, pageIndividuals: Individuals
-    ) -> None:
+    def test_smoke_page_individuals_details(self, pageIndividuals: Individuals) -> None:
+        pageIndividuals.selectGlobalProgramFilter("Test Programm").click()
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavHouseholds().click()
