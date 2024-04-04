@@ -1,6 +1,7 @@
 from time import sleep
 
 from page_object.base_components import BaseComponents
+from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
 
@@ -25,6 +26,9 @@ class RDIDetailsPage(BaseComponents):
     buttonMergeRdi = 'button[data-cy="button-merge-rdi"]'
     buttonMerge = 'button[data-cy="button-merge"]'
     buttonViewTickets = 'a[data-cy="button-view-tickets"]'
+    buttonHouseholds = 'button[data-cy="tab-Households"]'
+    buttonIndividuals = 'button[data-cy="tab-Individuals"]'
+    importedHouseholdsRow = './/tr[@data-cy="imported-households-row"]'
 
     # Texts
     buttonRefuseRdiText = "REFUSE IMPORT"
@@ -76,7 +80,7 @@ class RDIDetailsPage(BaseComponents):
         return self.wait_for(self.buttonRefuseRdi)
 
     def getTablePagination(self) -> WebElement:
-        return self.wait_for(self.tablePagination)
+        return self.get(self.tablePagination)
 
     def getButtonMergeRdi(self) -> WebElement:
         return self.wait_for(self.buttonMergeRdi)
@@ -87,12 +91,30 @@ class RDIDetailsPage(BaseComponents):
     def getButtonViewTickets(self) -> WebElement:
         return self.wait_for(self.buttonViewTickets)
 
+    def getButtonHouseholds(self) -> WebElement:
+        return self.wait_for(self.buttonHouseholds)
+
+    def getButtonIndividuals(self) -> WebElement:
+        return self.wait_for(self.buttonIndividuals)
+
     def getImportedIndividualsTable(self) -> WebElement:
         return self.wait_for(self.importedIndividualsTable)
 
-    def waitFotStatus(self, status: str, timeout: int = 60) -> None:
+    def getImportedHouseholdsRow(self, number: int) -> WebElement:
+        self.wait_for(self.importedHouseholdsRow, By.XPATH)
+        return self.get_elements(self.importedHouseholdsRow, By.XPATH)[number]
+
+    def waitForStatus(self, status: str, timeout: int = 60) -> None:
         for _ in range(timeout):
             sleep(1)
             if self.getStatusContainer().text == status:
                 break
             self.driver.refresh()
+
+    def waitForNumberOfRows(self, string: str, timeout: int = 60) -> bool:
+        for _ in range(timeout):
+            sleep(1)
+            if string in self.get('//*[@data-cy="table-pagination"]/div/p[2]', By.XPATH).text:
+                return True
+        print(self.get('//*[@data-cy="table-pagination"]/div/p[2]', By.XPATH).text)
+        return False

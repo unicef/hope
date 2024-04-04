@@ -8,6 +8,10 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
+
+from page_object.programme_population.households_details import HouseholdsDetails
+from page_object.programme_population.individuals import Individuals
+from page_object.programme_population.households import Households
 from page_object.admin_panel.admin_panel import AdminPanel
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from page_object.grievance.feedback import Feedback
@@ -61,11 +65,6 @@ def driver() -> Chrome:
     chrome_options.add_argument(
         "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
     )
-
-    # chrome_options.add_argument("--allow-file-access-from-files")
-    # chrome_options.add_argument("--disable-dev-shm-usage")
-    # chrome_options.add_argument("--enable-resources-file-sharing")
-    # chrome_options.add_argument("--regulatory-label-dir")
     chrome_options.add_argument("--enable-logging")
     chrome_options.add_argument("--window-size=1920,1080")
     return webdriver.Chrome(options=chrome_options)
@@ -130,6 +129,22 @@ def pageRegistrationDataImport(request: FixtureRequest, browser: Chrome) -> Regi
 @pytest.fixture
 def pageDetailsRegistrationDataImport(request: FixtureRequest, browser: Chrome) -> RDIDetailsPage:
     yield RDIDetailsPage(browser)
+
+
+@pytest.fixture
+def pageHouseholds(request: FixtureRequest, browser: Chrome) -> Households:
+    yield Households(browser)
+
+
+
+@pytest.fixture
+def pageHouseholdsDetails(request: FixtureRequest, browser: Chrome) -> HouseholdsDetails:
+    yield HouseholdsDetails(browser)
+
+
+@pytest.fixture
+def pageIndividuals(request: FixtureRequest, browser: Chrome) -> Individuals:
+    yield Individuals(browser)
 
 
 @pytest.fixture
