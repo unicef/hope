@@ -229,7 +229,7 @@ class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
             **validated_data, business_area_slug=self.business_area.slug
         )
         info = self.save_households(rdi_datahub, program.id, households)
-        validated_data.pop("import_done")
+        validated_data.pop("import_done", None)
         rdi_mis = RegistrationDataImport.objects.create(
             **validated_data,
             imported_by=created_by,
