@@ -212,6 +212,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                     <span
                       class="sc-jsEeTM LpRDg"
                       color="textSecondary"
+                      data-cy="label-Within Batch"
                     >
                       Within Batch
                     </span>
@@ -230,10 +231,11 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
                       >
                         <span
-                          class="sc-fsYfdN hDMTaH"
+                          class="sc-fsYfdN fYeQos"
                         >
                           <span
                             class="sc-qZrbh gfiEBP"
+                            data-cy="label-Unique"
                           >
                             Unique
                           </span>
@@ -244,6 +246,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                       >
                         <span
                           class="sc-iBdnpw kmdfPc"
+                          data-cy="percentage-Unique"
                         >
                           66.67
                           %
@@ -253,7 +256,8 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
                       >
                         <span
-                          class="sc-fsYfdN hDMTaH"
+                          class="sc-fsYfdN fYeQos"
+                          data-cy="value-Unique"
                         >
                           4
                         </span>
@@ -266,10 +270,11 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
                       >
                         <span
-                          class="sc-fsYfdN hDMTaH"
+                          class="sc-fsYfdN fYeQos"
                         >
                           <span
                             class="sc-qZrbh gfiEBP"
+                            data-cy="label-Duplicates"
                           >
                             Duplicates
                           </span>
@@ -280,6 +285,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                       >
                         <span
                           class="sc-iBdnpw kmdfPc"
+                          data-cy="percentage-Duplicates"
                         >
                           33.33
                           %
@@ -289,7 +295,8 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
                       >
                         <span
-                          class="sc-fsYfdN hDMTaH"
+                          class="sc-fsYfdN fYeQos"
+                          data-cy="value-Duplicates"
                         >
                           2
                         </span>
@@ -314,6 +321,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                     <span
                       class="sc-jsEeTM LpRDg"
                       color="textSecondary"
+                      data-cy="label-In Population"
                     >
                       In Population
                     </span>
@@ -332,10 +340,11 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
                       >
                         <span
-                          class="sc-fsYfdN hDMTaH"
+                          class="sc-fsYfdN fYeQos"
                         >
                           <span
                             class="sc-qZrbh gfiEBP"
+                            data-cy="label-Unique"
                           >
                             Unique
                           </span>
@@ -346,6 +355,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                       >
                         <span
                           class="sc-iBdnpw kmdfPc"
+                          data-cy="percentage-Unique"
                         >
                           100.00
                           %
@@ -355,7 +365,8 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
                       >
                         <span
-                          class="sc-fsYfdN hDMTaH"
+                          class="sc-fsYfdN fYeQos"
+                          data-cy="value-Unique"
                         >
                           6
                         </span>
@@ -368,10 +379,11 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
                       >
                         <span
-                          class="sc-fsYfdN hDMTaH"
+                          class="sc-fsYfdN fYeQos"
                         >
                           <span
                             class="sc-qZrbh gfiEBP"
+                            data-cy="label-Duplicates"
                           >
                             Duplicates
                           </span>
@@ -382,6 +394,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                       >
                         <span
                           class="sc-iBdnpw kmdfPc"
+                          data-cy="percentage-Duplicates"
                         >
                           0.00
                           %
@@ -391,7 +404,8 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
                       >
                         <span
-                          class="sc-fsYfdN hDMTaH"
+                          class="sc-fsYfdN fYeQos"
+                          data-cy="value-Duplicates"
                         >
                           0
                         </span>
@@ -404,10 +418,11 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
                       >
                         <span
-                          class="sc-fsYfdN hDMTaH"
+                          class="sc-fsYfdN fYeQos"
                         >
                           <span
                             class="sc-qZrbh gfiEBP"
+                            data-cy="label-Need Adjudication"
                           >
                             Need Adjudication
                           </span>
@@ -418,6 +433,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                       >
                         <span
                           class="sc-iBdnpw kmdfPc"
+                          data-cy="percentage-Need Adjudication"
                         >
                           0.00
                           %
@@ -427,7 +443,8 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
                       >
                         <span
-                          class="sc-fsYfdN hDMTaH"
+                          class="sc-fsYfdN fYeQos"
+                          data-cy="value-Need Adjudication"
                         >
                           0
                         </span>
