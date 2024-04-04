@@ -30,7 +30,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Full Name"
           >
-            Alicja Kowalska
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Alicja Kowalska
+            </span>
           </div>
         </div>
       </div>
@@ -47,7 +52,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Given Name"
           >
-            Alicja
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Alicja
+            </span>
           </div>
         </div>
       </div>
@@ -81,7 +91,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Family Name"
           >
-            Kowalska
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Kowalska
+            </span>
           </div>
         </div>
       </div>
@@ -98,7 +113,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Gender"
           >
-            Female
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Female
+            </span>
           </div>
         </div>
       </div>
@@ -115,7 +135,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Age"
           >
-            80
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              80
+            </span>
           </div>
         </div>
       </div>
@@ -132,11 +157,16 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Date of Birth"
           >
-            <time
-              datetime="-894672000000"
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
             >
-              26 Aug 1941
-            </time>
+              <time
+                datetime="-894672000000"
+              >
+                26 Aug 1941
+              </time>
+            </span>
           </div>
         </div>
       </div>
@@ -153,7 +183,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Estimated Date of Birth"
           >
-            No
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              No
+            </span>
           </div>
         </div>
       </div>
@@ -170,7 +205,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Marital Status"
           >
-            Married
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Married
+            </span>
           </div>
         </div>
       </div>
@@ -187,7 +227,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Work Status"
           >
-            Not provided
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Not provided
+            </span>
           </div>
         </div>
       </div>
@@ -204,7 +249,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Pregnant"
           >
-            Yes
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Yes
+            </span>
           </div>
         </div>
       </div>
@@ -221,7 +271,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Household ID"
           >
-            -
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              -
+            </span>
           </div>
         </div>
       </div>
@@ -238,7 +293,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Role"
           >
-            Alternate collector
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Alternate collector
+            </span>
           </div>
         </div>
       </div>
@@ -255,7 +315,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Relationship to HOH"
           >
-            Not a Family Member. Can only act as a recipient.
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Not a Family Member. Can only act as a recipient.
+            </span>
           </div>
         </div>
       </div>
@@ -313,7 +378,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Seeing disability severity"
           >
-            None
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              None
+            </span>
           </div>
         </div>
       </div>
@@ -330,7 +400,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Hearing disability severity"
           >
-            None
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              None
+            </span>
           </div>
         </div>
       </div>
@@ -347,7 +422,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Physical disability severity"
           >
-            None
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              None
+            </span>
           </div>
         </div>
       </div>
@@ -364,7 +444,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Remembering or concentrating disability severity"
           >
-            None
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              None
+            </span>
           </div>
         </div>
       </div>
@@ -381,7 +466,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Self-care disability severity"
           >
-            None
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              None
+            </span>
           </div>
         </div>
       </div>
@@ -398,7 +488,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Communicating disability severity"
           >
-            None
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              None
+            </span>
           </div>
         </div>
       </div>
@@ -415,7 +510,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Disability"
           >
-            Not Disabled
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Not Disabled
+            </span>
           </div>
         </div>
       </div>
@@ -445,7 +545,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
               <div
                 data-cy="label-National ID"
               >
-                WSH221365
+                <span
+                  class="sc-dmyCSP bGPBYf"
+                  color="textSecondary"
+                >
+                  WSH221365
+                </span>
               </div>
             </div>
           </div>
@@ -459,7 +564,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             <div
               data-cy="label-issued"
             >
-              Poland
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                Poland
+              </span>
             </div>
           </div>
         </div>
@@ -501,7 +611,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Phone Number"
           >
-            +48503123555
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              +48503123555
+            </span>
           </div>
         </div>
       </div>
@@ -518,7 +633,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Alternate Phone Number"
           >
-            -
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              -
+            </span>
           </div>
         </div>
       </div>
