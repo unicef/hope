@@ -42,8 +42,9 @@ RUN apt-get update \
 ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
     VIRTUAL_ENV=/opt/venv \
     PDM_HOME=/opt/pdm \
-    PATH=/opt/venv/bin:/opt/pdm/bin:${PATH} \
-    XDG_RUNTIME_DIR=/run/user/"${UID}"
+    XDG_RUNTIME_DIR=/run/user/"${UID}" \
+    PYTHONPATH=$PYTHONPATH:/opt/venv/__pypackages__/3.11/lib:/code/src \
+    PATH=$PATH:/opt/venv/__pypackages__/3.11/bin
 
 WORKDIR /code
 
@@ -70,7 +71,7 @@ RUN apt-get update \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-RUN poetry install
+RUN pdm sync --no-editable --no-self
 COPY ./backend ./
 
 COPY ./docker/entrypoint.sh /bin/
