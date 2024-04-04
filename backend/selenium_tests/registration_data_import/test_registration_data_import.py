@@ -151,4 +151,4 @@ class TestRegistrationDataImport:
         pageDetailsRegistrationDataImport.getButtonHouseholds().click()
         hausehold_id = pageDetailsRegistrationDataImport.getImportedHouseholdsRow(0).find_elements("tag name", "td")[1].text
         pageDetailsRegistrationDataImport.getImportedHouseholdsRow(0).find_elements("tag name", "td")[1].click()
-        assert hausehold_id in pageHouseholdsDetails.pageHeaderTitle().text
+        assert hausehold_id in pageHouseholdsDetails.getPageHeaderTitle().text
