@@ -122,8 +122,6 @@
     "jest-watch-typeahead": "^2.2.2",
     "prettier": "3.2.5",
     "react-test-renderer": "^18.2.0",
-    "rollup": "^4.14.0",
-    "rollup-plugin-polyfill-node": "^0.13.0",
     "ts-jest": "^29.1.2",
     "typescript": "^5.3.3"
   }
