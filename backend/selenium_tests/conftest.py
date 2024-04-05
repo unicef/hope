@@ -71,8 +71,8 @@ def driver() -> Chrome:
 
 @pytest.fixture(autouse=True)
 def browser(driver: Chrome) -> Chrome:
-    # driver.live_server = LiveServer("localhost")
-    driver.live_server = LiveServer("0.0.0.0:8080")
+    driver.live_server = LiveServer("localhost")
+    # driver.live_server = LiveServer("0.0.0.0:8080")
     yield driver
     driver.close()
     pytest.CSRF = ""
