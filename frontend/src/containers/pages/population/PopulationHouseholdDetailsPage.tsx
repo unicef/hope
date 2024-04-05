@@ -29,7 +29,7 @@ import { isPermissionDeniedError, renderSomethingOrDash } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { PaymentRecordHouseholdTable } from '../../tables/payments/PaymentRecordAndPaymentHouseholdTable';
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
-import { HouseholdIndividualsTable } from '../../tables/population/HouseholdIndividualsTable/HouseholdIndividualsTable';
+import { HouseholdMembersTable } from '../../tables/population/HouseholdMembersTable.tsx/HouseholdMembersTable';
 import { AdminButton } from '@core/AdminButton';
 
 const Container = styled.div`
@@ -164,7 +164,7 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
       <HouseholdCompositionTable household={household as HouseholdNode} />
       <Container>
         {household?.individuals?.edges?.length ? (
-          <HouseholdIndividualsTable
+          <HouseholdMembersTable
             choicesData={choicesData}
             household={household as HouseholdNode}
           />

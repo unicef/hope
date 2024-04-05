@@ -18,6 +18,7 @@ import {
   IndividualNode,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Bold } from '@components/core/Bold';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
@@ -40,12 +41,6 @@ const headCells: HeadCell<IndividualNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Role',
-    id: 'role',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
     label: 'Relationship to HoH',
     id: 'relationship',
     numeric: false,
@@ -64,14 +59,14 @@ const headCells: HeadCell<IndividualNode>[] = [
   },
 ];
 
-interface HouseholdIndividualsTableProps {
+interface HouseholdMembersTableProps {
   household: HouseholdNode;
   choicesData: HouseholdChoiceDataQuery;
 }
-export function HouseholdIndividualsTable({
+export const HouseholdMembersTable = ({
   household,
   choicesData,
-}: HouseholdIndividualsTableProps): ReactElement {
+}: HouseholdMembersTableProps): ReactElement => {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const [page, setPage] = useState(0);
@@ -85,7 +80,6 @@ export function HouseholdIndividualsTable({
   const relationshipChoicesDict = choicesToDict(
     choicesData?.relationshipChoices,
   );
-  const roleChoicesDict = choicesToDict(choicesData?.roleChoices);
   const allIndividuals = household?.individuals?.edges?.map(
     (edge) => edge.node,
   );
@@ -100,56 +94,73 @@ export function HouseholdIndividualsTable({
   const totalCount = allIndividuals.length;
   return (
     <TableComponent<IndividualNode>
-      title="Individuals in Household"
+      title="Household Members"
       data={allIndividuals.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage,
       )}
       allowSort={false}
-      renderRow={(row) => (
-        <ClickableTableRow
-          hover
-          onClick={() => handleClick(row)}
-          role="checkbox"
-          key={row.id}
-        >
-          <TableCell align="left">
-            <BlackLink to={`/${baseUrl}/population/individuals/${row.id}`}>
-              {row.unicefId}
-            </BlackLink>
-          </TableCell>
-          <TableCell align="left">{row.fullName}</TableCell>
-          <TableCell align="left">
-            <StatusBox
-              status={row.status}
-              statusToColor={populationStatusToColor}
-            />
-          </TableCell>
-          <TableCell align="left">{roleChoicesDict[row.role]}</TableCell>
-          <TableCell align="left">
-            {household?.id === row?.household?.id
-              ? relationshipChoicesDict[row.relationship]
-              : relationshipChoicesDict.NON_BENEFICIARY}
-          </TableCell>
-          <TableCell align="left">
-            <UniversalMoment>{row.birthDate}</UniversalMoment>
-          </TableCell>
-          <TableCell align="left">{sexToCapitalize(row.sex)}</TableCell>
-        </ClickableTableRow>
-      )}
+      renderRow={(row) => {
+        const isHead = row.relationship === 'HEAD';
+
+        const renderTableCellContent = (content: React.ReactNode) => {
+          return isHead ? <Bold>{content}</Bold> : content;
+        };
+
+        return (
+          <ClickableTableRow
+            hover
+            onClick={() => handleClick(row)}
+            role="checkbox"
+            key={row.id}
+          >
+            <TableCell align="left">
+              {renderTableCellContent(
+                <BlackLink to={`/${baseUrl}/population/individuals/${row.id}`}>
+                  {row.unicefId}
+                </BlackLink>,
+              )}
+            </TableCell>
+            <TableCell align="left">
+              {renderTableCellContent(row.fullName)}
+            </TableCell>
+            <TableCell align="left">
+              <StatusBox
+                status={row.status}
+                statusToColor={populationStatusToColor}
+              />
+            </TableCell>
+            <TableCell align="left">
+              {renderTableCellContent(
+                household?.id === row?.household?.id
+                  ? relationshipChoicesDict[row.relationship]
+                  : relationshipChoicesDict.NON_BENEFICIARY,
+              )}
+            </TableCell>
+            <TableCell align="left">
+              {renderTableCellContent(
+                <UniversalMoment>{row.birthDate}</UniversalMoment>,
+              )}
+            </TableCell>
+            <TableCell align="left">
+              {renderTableCellContent(sexToCapitalize(row.sex))}
+            </TableCell>
+          </ClickableTableRow>
+        );
+      }}
       headCells={headCells}
       rowsPerPageOptions={totalCount < 5 ? [totalCount] : [5, 10, 15]}
       rowsPerPage={totalCount > 5 ? rowsPerPage : totalCount}
       page={page}
       itemsCount={totalCount}
-      handleChangePage={(event, newPage) => {
+      handleChangePage={(_event, newPage) => {
         setPage(newPage);
       }}
       handleChangeRowsPerPage={(event) => {
         setRowsPerPage(Number(event.target.value));
         setPage(0);
       }}
-      handleRequestSort={(event, property) => {
+      handleRequestSort={(_event, property) => {
         let direction = 'asc';
         if (property === orderBy) {
           direction = orderDirection === 'asc' ? 'desc' : 'asc';
@@ -161,4 +172,4 @@ export function HouseholdIndividualsTable({
       order={orderDirection as Order}
     />
   );
-}
+};
