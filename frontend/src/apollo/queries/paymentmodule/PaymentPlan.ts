@@ -28,6 +28,7 @@ export const PAYMENT_PLAN_QUERY = gql`
         id
         name
       }
+      adminUrl
       currency
       currencyName
       startDate
@@ -174,6 +175,7 @@ export const PAYMENT_PLAN_QUERY = gql`
           node {
             id
             unicefId
+            adminUrl
             status
             sampleSize
             receivedCount
