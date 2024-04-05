@@ -1802,8 +1802,8 @@ CORE_FIELDS_ATTRIBUTES = [
     {
         "id": "8ef6fd85-032f-42cf-8f1f-3398f88316af",
         "type": TYPE_STRING,
-        "name": "program_registration_id",
-        "lookup": "program_registration_id",
+        "name": "registration_id",
+        "lookup": "registration_id",
         "label": {"English(EN)": "Program registration id"},
         "hint": "",
         "required": False,
