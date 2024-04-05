@@ -51,6 +51,7 @@ export function MergeRegistrationDataImportDialog({
         variant="contained"
         onClick={() => setOpen(true)}
         disabled={!isActiveProgram}
+        data-cy="button-merge-rdi"
       >
         {t('Merge')}
       </Button>
@@ -78,13 +79,16 @@ export function MergeRegistrationDataImportDialog({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
+            <Button data-cy="button-cancel" onClick={() => setOpen(false)}>
+              {t('CANCEL')}
+            </Button>
             <LoadingButton
               loading={loading}
               type="submit"
               color="primary"
               variant="contained"
               onClick={merge}
+              data-cy="button-merge"
             >
               {t('MERGE')}
             </LoadingButton>

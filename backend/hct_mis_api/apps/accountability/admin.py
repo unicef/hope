@@ -7,7 +7,7 @@ from django.http import HttpRequest
 from adminfilters.autocomplete import AutoCompleteFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 
-from hct_mis_api.apps.accountability.models import Message
+from hct_mis_api.apps.accountability.models import Feedback, Message, Survey
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, IsOriginalAdminMixin
 
 
@@ -69,3 +69,13 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase, IsOriginalAdmi
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return self.model.original_and_repr_objects.get_queryset()
+
+
+@admin.register(Survey)
+class SurveyAdmin(HOPEModelAdminBase):
+    pass
+
+
+@admin.register(Feedback)
+class FeedbackAdmin(HOPEModelAdminBase):
+    pass

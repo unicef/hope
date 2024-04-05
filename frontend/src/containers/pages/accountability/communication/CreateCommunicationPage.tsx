@@ -46,6 +46,8 @@ import { FormikSliderField } from '@shared/Formik/FormikSliderField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { CommunicationSteps, CommunicationTabsValues } from '@utils/constants';
 import { getPercentage } from '@utils/utils';
+import { AdminButton } from '@core/AdminButton';
+import * as React from 'react';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
 const SampleSizeTabs = ['Full List', 'Random Sampling'];
@@ -147,17 +149,22 @@ export const CreateCommunicationPage = (): React.ReactElement => {
     }
   }, [activeStep, formValues, loadSampleSize]);
 
-  const [loadAvailableFlows, { data: flowsData }] =
-    useSurveyAvailableFlowsLazyQuery({
-      fetchPolicy: 'network-only',
-    });
+  const [
+    loadAvailableFlows,
+    { data: flowsData, loading: flowsLoading, error: flowsError },
+  ] = useSurveyAvailableFlowsLazyQuery({
+    fetchPolicy: 'network-only',
+  });
 
   useEffect(() => {
     loadAvailableFlows();
   }, [loadAvailableFlows]);
 
   useEffect(() => {
-    if (!flowsData?.surveyAvailableFlows?.length) {
+    if (
+      (flowsData?.surveyAvailableFlows === null || flowsError) &&
+      !flowsLoading
+    ) {
       navigate(`/error/${businessArea}`, {
         state: {
           errorMessage: t(
@@ -167,7 +174,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
         },
       });
     }
-  }, [flowsData, businessArea, baseUrl, navigate, t]);
+  }, [flowsData, flowsError, flowsLoading, businessArea, baseUrl, navigate, t]);
 
   const validationSchema = useCallback(() => {
     const datum = {

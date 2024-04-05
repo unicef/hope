@@ -13,12 +13,12 @@ import * as Yup from 'yup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useSnackbar } from '@hooks/useSnackBar';
 
-function RefuseRdiForm({
+const RefuseRdiForm = ({
   registration,
   refuseMutate,
   open,
   onClose,
-}): React.ReactElement {
+}): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { id, name } = registration;
@@ -70,8 +70,15 @@ function RefuseRdiForm({
               />
             </DialogContent>
             <DialogActions>
-              <Button onClick={onClose}>Cancel</Button>
-              <Button onClick={submitForm} color="primary" variant="contained">
+              <Button data-cy="button-cancel" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                data-cy="button-save"
+                onClick={submitForm}
+                color="primary"
+                variant="contained"
+              >
                 Save
               </Button>
             </DialogActions>
@@ -80,6 +87,6 @@ function RefuseRdiForm({
       )}
     </Formik>
   );
-}
+};
 
 export { RefuseRdiForm };

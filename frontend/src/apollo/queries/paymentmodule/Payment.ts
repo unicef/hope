@@ -26,6 +26,7 @@ export const Payment = gql`
         statusDate
         receivedAmount
         isManuallyEditable
+        adminUrl
       }
       currency
       entitlementQuantity
@@ -86,6 +87,7 @@ export const Payment = gql`
       additionalDocumentNumber
       reasonForUnsuccessfulPayment
       snapshotCollectorFullName
+      adminUrl
     }
   }
 `;
