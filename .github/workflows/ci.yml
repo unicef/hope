@@ -238,12 +238,12 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: cov-unit-${{ github.sha }}
-          path: ./data/cov-unit
+          path: ./data/
       - name: Download e2e coverage artifact
         uses: actions/download-artifact@v2
         with:
           name: cov-e2e-${{ github.sha }}
-          path: ./data/cov-e2e
+          path: ./data/
       - name: Combine
         run: |
           docker run --rm -v $(pwd)/data:/data ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
