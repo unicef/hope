@@ -37,7 +37,7 @@ services:
     command: |
       bash -c "
         waitforit -host=db -port=5432 -timeout=30
-        pytest -svvv selenium_tests --html=./report/report.html
+        COVERAGE_FILE=./report/cov-e2e pytest --randomly-seed=37 -svvv selenium_tests --html=./report/report.html
       "
     depends_on:
       db:
