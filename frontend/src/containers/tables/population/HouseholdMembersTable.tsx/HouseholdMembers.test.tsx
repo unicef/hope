@@ -2,7 +2,7 @@ import * as React from 'react';
 import { fakeHousehold } from '../../../../../fixtures/population/fakeHousehold';
 import { fakeHouseholdChoices } from '../../../../../fixtures/population/fakeHouseholdChoices';
 import { render } from '../../../../testUtils/testUtils';
-import { HouseholdIndividualsTable } from './HouseholdIndividualsTable';
+import { HouseholdIndividualsTable } from './HouseholdMembersTable';
 
 describe('components/tables/population/HouseholdIndividualsTable', () => {
   it('should render', () => {
