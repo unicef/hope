@@ -13,7 +13,7 @@ else
   case "$1" in
     "test")
       wait_for_db db
-      pytest \
+      COVERAGE_FILE=./test-coverage/cov-unit pytest \
         -n auto \
         --reruns 3 \
         --reruns-delay 1 \
