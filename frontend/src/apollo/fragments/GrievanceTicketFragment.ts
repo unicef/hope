@@ -37,6 +37,7 @@ export const grievanceTicketDetailed = gql`
       lastName
       email
     }
+    adminUrl
     individual {
       ...individualDetailed
       householdsAndRoles {

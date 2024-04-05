@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 from django.core.exceptions import PermissionDenied
 from django.db.models import Model
 
+import graphene
 from graphene import Mutation
 from graphene.relay import ClientIDMutation
 from graphene.types.argument import to_arguments
@@ -341,6 +342,15 @@ def hopeOneOfPermissionClass(*permissions: Permissions) -> Type[BasePermission]:
             return check_permissions(user, permissions, **kwargs)
 
     return XDPerm
+
+
+class AdminUrlNodeMixin:
+    admin_url = graphene.String()
+
+    def resolve_admin_url(self, info: Any, **kwargs: Any) -> Optional[graphene.String]:
+        if info.context.user.is_superuser:
+            return self.admin_url
+        return None
 
 
 class BaseNodePermissionMixin:
