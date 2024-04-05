@@ -3,7 +3,6 @@ from selenium.webdriver.remote.webelement import WebElement
 
 
 class HouseholdsDetails(BaseComponents):
-    mainContent = 'div[data-cy="main-content"]'
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
     labelHouseholdSize = 'div[data-cy="label-Household Size"]'
@@ -113,9 +112,6 @@ class HouseholdsDetails(BaseComponents):
 
     def getNavResourcesReleaseNote(self) -> WebElement:
         return self.wait_for(self.navResourcesReleaseNote)
-
-    def getMainContent(self) -> WebElement:
-        return self.wait_for(self.mainContent)
 
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)

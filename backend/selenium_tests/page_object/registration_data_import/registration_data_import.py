@@ -6,7 +6,6 @@ from selenium.webdriver.remote.webelement import WebElement
 
 class RegistrationDataImport(BaseComponents):
     # Locators
-    mainContent = 'div[data-cy="main-content"]'
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
     buttonImport = 'button[data-cy="button-import"]'
@@ -45,9 +44,6 @@ class RegistrationDataImport(BaseComponents):
     inputFileText = "UPLOAD FILE"
 
     # Elements
-
-    def getMainContent(self) -> WebElement:
-        return self.wait_for(self.mainContent)
 
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
