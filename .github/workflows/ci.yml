@@ -247,7 +247,7 @@ jobs:
       - name: Combine
         run: |
           docker run --rm -v $(pwd)/data:/cov ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
-            sh -c "cd /cov && ls -la ; coverage combine ./cov-unit-${{ github.sha }} ./cov-e2e-${{ github.sha }}"
+            sh -c "cd /cov && ls -la ; coverage combine ./cov-unit ./cov-e2e"
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
