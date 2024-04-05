@@ -30,6 +30,7 @@ from graphql_relay import to_global_id
 from graphql_relay.connection.arrayconnection import connection_from_list_slice
 
 from hct_mis_api.apps.account.permissions import (
+    AdminUrlNodeMixin,
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
     Permissions,
@@ -329,7 +330,7 @@ class PaymentHouseholdSnapshotNode(BaseNodePermissionMixin, DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
+class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PM_VIEW_DETAILS),)
     payment_plan_hard_conflicted = graphene.Boolean()
     payment_plan_hard_conflicted_data = graphene.List(PaymentConflictDataNode)
@@ -527,7 +528,7 @@ class ReconciliationSummaryNode(graphene.ObjectType):
     reconciled = graphene.Int()
 
 
-class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
+class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PM_VIEW_DETAILS),)
     dispersion_start_date = graphene.Date()
     dispersion_end_date = graphene.Date()
@@ -675,7 +676,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return True
 
 
-class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
+class PaymentVerificationNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS),)
     is_manually_editable = graphene.Boolean()
     payment = graphene.Field(GenericPaymentNode)
@@ -689,7 +690,7 @@ class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.get_payment
 
 
-class PaymentVerificationPlanNode(DjangoObjectType):
+class PaymentVerificationPlanNode(AdminUrlNodeMixin, DjangoObjectType):
     excluded_admin_areas_filter = graphene.List(graphene.String)
     age_filter = graphene.Field(AgeFilterObject)
     xlsx_file_was_downloaded = graphene.Boolean()
@@ -708,7 +709,7 @@ class PaymentVerificationPlanNode(DjangoObjectType):
         return self.has_xlsx_payment_verification_plan_file
 
 
-class PaymentRecordNode(BaseNodePermissionMixin, DjangoObjectType):
+class PaymentRecordNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS),)
     verification = graphene.Field(PaymentVerificationNode)
     unicef_id = graphene.String(source="ca_id")
@@ -728,7 +729,7 @@ class PaymentVerificationLogEntryNode(LogEntryNode):
         connection_class = ExtendedConnection
 
 
-class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
+class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, graphene.ObjectType):
     """
     for CashPlan and PaymentPlan models
     """
