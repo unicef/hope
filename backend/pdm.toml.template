@@ -1,5 +1,0 @@
-[python]
-use_venv = false
-
-[venv]
-in_project = true
