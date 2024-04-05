@@ -1,4 +1,3 @@
-import os
 import random
 from datetime import datetime
 
@@ -7,17 +6,9 @@ from dateutil.relativedelta import relativedelta
 from helpers.date_time_format import FormatTime
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
-from selenium.webdriver import Chrome, Keys
+from selenium.webdriver import Keys
 
 pytestmark = pytest.mark.django_db(transaction=True)
-
-
-def screenshot(driver: Chrome, node_id: str) -> None:
-    if not os.path.exists("screenshot"):
-        os.makedirs("screenshot")
-    file_name = f'{node_id}_{datetime.today().strftime("%Y-%m-%d_%H:%M")}.png'.replace("/", "_").replace("::", "__")
-    file_path = os.path.join("screenshot", file_name)
-    driver.get_screenshot_as_file(file_path)
 
 
 @pytest.mark.usefixtures("login")

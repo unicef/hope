@@ -138,7 +138,7 @@ class RDIPeopleSerializer(PeopleUploadMixin, serializers.ModelSerializer):
         rdi_datahub = RegistrationDataImportDatahub.objects.create(
             **validated_data, business_area_slug=self.business_area.slug
         )
-        validated_data.pop("import_done")
+        validated_data.pop("import_done", None)
         rdi_mis = RegistrationDataImport.objects.create(
             **validated_data,
             imported_by=created_by,

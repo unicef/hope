@@ -96,7 +96,8 @@ FROM node:18.19.0-buster-slim AS frontend-builder
 
 WORKDIR /fe-build
 COPY ./frontend/package.json ./frontend/yarn.lock ./
-RUN yarn install --frozen-lockfile
+# Network timeout is needed by the cross-platform build
+RUN yarn install --frozen-lockfile --network-timeout 600000
 COPY ./frontend ./
 RUN NODE_ENV="production" NODE_OPTIONS="--max-old-space-size=4096" yarn build
 
