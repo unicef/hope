@@ -1,7 +1,8 @@
-import pytest
-from page_object.programme_population.individuals import Individuals
 from django.conf import settings
 from django.core.management import call_command
+
+import pytest
+from page_object.programme_population.individuals import Individuals
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -12,11 +13,13 @@ def create_programs() -> None:
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
     return
 
+
 @pytest.fixture
 def add_households() -> None:
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data-cypress.json")
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data-cypress.json")
     return
+
 
 @pytest.mark.usefixtures("login")
 class TestSmokeIndividuals:
@@ -29,8 +32,3 @@ class TestSmokeIndividuals:
         pageIndividuals.selectGlobalProgramFilter("Test Programm").click()
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavHouseholds().click()
-
-
-class Test2:
-    def test_2(self, create_programs: None, add_households: None, pageIndividuals: Individuals) -> None:
-        input("enter")

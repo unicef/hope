@@ -1,9 +1,9 @@
-import pytest
-from page_object.programme_population.households import Households
-
-from page_object.programme_population.households_details import HouseholdsDetails
 from django.conf import settings
 from django.core.management import call_command
+
+import pytest
+from page_object.programme_population.households import Households
+from page_object.programme_population.households_details import HouseholdsDetails
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -23,7 +23,7 @@ class TestSmokeHouseholds:
         pageHouseholds.getNavHouseholds().click()
 
     def test_smoke_page_households_details(
-            self, create_programs: None, pageHouseholds: Households, pageHouseholdsDetails: HouseholdsDetails
+        self, create_programs: None, pageHouseholds: Households, pageHouseholdsDetails: HouseholdsDetails
     ) -> None:
         pageHouseholds.selectGlobalProgramFilter("Test Programm").click()
         pageHouseholds.getNavProgrammePopulation().click()

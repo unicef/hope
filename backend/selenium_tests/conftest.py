@@ -34,6 +34,10 @@ from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Country
 
 
+def pytest_addoption(parser) -> None:  # type: ignore
+    parser.addoption("--mapping", action="store_true", default=False, help="Enable mapping mode")
+
+
 def pytest_configure() -> None:
     pytest.SELENIUM_PATH = os.path.dirname(__file__)
     pytest.CSRF = ""
@@ -70,9 +74,11 @@ def driver() -> Chrome:
 
 
 @pytest.fixture(autouse=True)
-def browser(driver: Chrome) -> Chrome:
-    driver.live_server = LiveServer("localhost")
-    # driver.live_server = LiveServer("0.0.0.0:8080")
+def browser(request: FixtureRequest, driver: Chrome) -> Chrome:
+    if request.config.getoption("--mapping"):
+        driver.live_server = LiveServer("0.0.0.0:8080")
+    else:
+        driver.live_server = LiveServer("localhost")
     yield driver
     driver.close()
     pytest.CSRF = ""
