@@ -4,7 +4,6 @@ from hct_mis_api.apps.core.utils import get_count_and_percentage
 
 
 class TestCoreUtils(TestCase):
-
     def test_get_count_and_percentage(self) -> None:
         self.assertEqual(get_count_and_percentage(1), {"count": 1, "percentage": 100.0})
         self.assertEqual(get_count_and_percentage(0), {"count": 0, "percentage": 0.0})
