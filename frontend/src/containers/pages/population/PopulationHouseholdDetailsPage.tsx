@@ -31,6 +31,7 @@ import { PaymentRecordHouseholdTable } from '../../tables/payments/PaymentRecord
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
 import { HouseholdMembersTable } from '../../tables/population/HouseholdMembersTable.tsx/HouseholdMembersTable';
 import { AdminButton } from '@core/AdminButton';
+import { CollectorsTable } from '@containers/tables/population/CollectorsTable.tsx';
 
 const Container = styled.div`
   padding: 20px;
@@ -165,6 +166,12 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
       <Container>
         {household?.individuals?.edges?.length ? (
           <HouseholdMembersTable
+            choicesData={choicesData}
+            household={household as HouseholdNode}
+          />
+        ) : null}
+        {household?.individuals?.edges?.length ? (
+          <CollectorsTable
             choicesData={choicesData}
             household={household as HouseholdNode}
           />
