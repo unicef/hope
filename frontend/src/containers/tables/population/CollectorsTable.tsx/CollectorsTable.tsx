@@ -1,30 +1,25 @@
 import TableCell from '@mui/material/TableCell';
-import { ReactElement, useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BlackLink } from '@components/core/BlackLink';
-import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { Order, TableComponent } from '@components/core/Table/TableComponent';
-import { UniversalMoment } from '@components/core/UniversalMoment';
-import {
-  choicesToDict,
-  populationStatusToColor,
-  sexToCapitalize,
-} from '@utils/utils';
+import { choicesToDict } from '@utils/utils';
 import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
   IndividualNode,
+  IndividualRoleInHouseholdRole,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Bold } from '@components/core/Bold';
+import { BlackLink } from '@components/core/BlackLink';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
     disablePadding: false,
-    label: 'Individual ID',
-    id: 'unicefId',
+    label: 'Role',
+    id: 'role',
     numeric: false,
   },
   {
@@ -35,38 +30,20 @@ const headCells: HeadCell<IndividualNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Status',
-    id: 'status',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
-    label: 'Relationship to HoH',
+    label: 'Relationship to Household',
     id: 'relationship',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
-    label: 'Date of Birth',
-    id: 'birthDate',
-    numeric: true,
-  },
-  {
-    disablePadding: false,
-    label: 'Gender',
-    id: 'sex',
     numeric: false,
   },
 ];
 
-interface HouseholdMembersTableProps {
+interface CollectorsTableProps {
   household: HouseholdNode;
   choicesData: HouseholdChoiceDataQuery;
 }
-export const HouseholdMembersTable = ({
+export const CollectorsTable = ({
   household,
   choicesData,
-}: HouseholdMembersTableProps): ReactElement => {
+}: CollectorsTableProps): ReactElement => {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const [page, setPage] = useState(0);
@@ -77,25 +54,46 @@ export const HouseholdMembersTable = ({
     navigate(`/${baseUrl}/population/individuals/${row.id}`);
   };
 
+  const roleChoicesDict = choicesToDict(choicesData?.roleChoices);
   const relationshipChoicesDict = choicesToDict(
     choicesData?.relationshipChoices,
   );
-  const allIndividuals = household?.individuals?.edges?.map(
-    (edge) => edge.node,
-  );
+
+  const allCollectors =
+    household?.individuals?.edges
+      ?.map((edge) => edge.node)
+      .filter(
+        (el) =>
+          el.role === IndividualRoleInHouseholdRole.Alternate ||
+          el.role === IndividualRoleInHouseholdRole.Primary,
+      ) || [];
+
   if (orderBy) {
     if (orderDirection === 'asc') {
-      allIndividuals.sort((a, b) => (a[orderBy] < b[orderBy] ? 1 : -1));
+      allCollectors.sort((a, b) => (a[orderBy] < b[orderBy] ? 1 : -1));
     } else {
-      allIndividuals.sort((a, b) => (a[orderBy] > b[orderBy] ? 1 : -1));
+      allCollectors.sort((a, b) => (a[orderBy] > b[orderBy] ? 1 : -1));
     }
   }
 
-  const totalCount = allIndividuals.length;
+  const sortedCollectors = allCollectors.sort((a, b) => {
+    if (a.role === IndividualRoleInHouseholdRole.Primary) {
+      return -1;
+    } else if (b.role === IndividualRoleInHouseholdRole.Primary) {
+      return 1;
+    } else if (a.role === IndividualRoleInHouseholdRole.Alternate) {
+      return -1;
+    } else if (b.role === IndividualRoleInHouseholdRole.Alternate) {
+      return 1;
+    } else {
+      return 0;
+    }
+  });
+  const totalCount = allCollectors.length;
   return (
     <TableComponent<IndividualNode>
-      title="Household Members"
-      data={allIndividuals.slice(
+      title="Collectors"
+      data={sortedCollectors.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage,
       )}
@@ -107,6 +105,30 @@ export const HouseholdMembersTable = ({
           return isHead ? <Bold>{content}</Bold> : content;
         };
 
+        const renderRelationship = (): string | React.ReactElement => {
+          if (!row.household) {
+            return 'Not a beneficiary';
+          }
+          if (household?.id !== row?.household?.id) {
+            return (
+              <BlackLink
+                to={`/${baseUrl}/population/household/${row.household.id}`}
+              >
+                Member of {row.household.unicefId}
+              </BlackLink>
+            );
+          }
+          if (household?.id === row?.household?.id) {
+            return (
+              <span>
+                {renderTableCellContent(
+                  relationshipChoicesDict[row.relationship],
+                )}
+              </span>
+            );
+          }
+        };
+
         return (
           <ClickableTableRow
             hover
@@ -114,37 +136,9 @@ export const HouseholdMembersTable = ({
             role="checkbox"
             key={row.id}
           >
-            <TableCell align="left">
-              {renderTableCellContent(
-                <BlackLink to={`/${baseUrl}/population/individuals/${row.id}`}>
-                  {row.unicefId}
-                </BlackLink>,
-              )}
-            </TableCell>
-            <TableCell align="left">
-              {renderTableCellContent(row.fullName)}
-            </TableCell>
-            <TableCell align="left">
-              <StatusBox
-                status={row.status}
-                statusToColor={populationStatusToColor}
-              />
-            </TableCell>
-            <TableCell align="left">
-              {renderTableCellContent(
-                household?.id === row?.household?.id
-                  ? relationshipChoicesDict[row.relationship]
-                  : relationshipChoicesDict.NON_BENEFICIARY,
-              )}
-            </TableCell>
-            <TableCell align="right">
-              {renderTableCellContent(
-                <UniversalMoment>{row.birthDate}</UniversalMoment>,
-              )}
-            </TableCell>
-            <TableCell align="left">
-              {renderTableCellContent(sexToCapitalize(row.sex))}
-            </TableCell>
+            <TableCell align="left">{roleChoicesDict[row.role]}</TableCell>
+            <TableCell align="left">{row.fullName}</TableCell>
+            <TableCell align="left">{renderRelationship()}</TableCell>
           </ClickableTableRow>
         );
       }}
