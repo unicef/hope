@@ -47,6 +47,19 @@ snapshots['TestCopyProgram::test_copy_program_not_authenticated 1'] = {
     ]
 }
 
+snapshots['TestCopyProgram::test_copy_program_with_existing_name 1'] = {
+    'data': {
+        'copyProgram': {
+            'program': None,
+            'validationErrors': {
+                '__all__': [
+                    'Program for name: initial name and business_area: afghanistan already exists.'
+                ]
+            }
+        }
+    }
+}
+
 snapshots['TestCopyProgram::test_copy_program_without_permissions 1'] = {
     'data': {
         'copyProgram': None
@@ -81,7 +94,8 @@ snapshots['TestCopyProgram::test_copy_with_permissions 1'] = {
                 'populationGoal': 150000,
                 'sector': 'EDUCATION',
                 'startDate': '2019-12-20'
-            }
+            },
+            'validationErrors': None
         }
     }
 }
