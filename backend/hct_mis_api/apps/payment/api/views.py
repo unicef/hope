@@ -86,20 +86,20 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
     )
     def bulk_action(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            action_name = serializer.validated_data["action"]
-            comment = serializer.validated_data.get("comment", "")
-            input_data = {"action": action_name, "comment": comment}
-            business_area = self.get_business_area()
+        serializer.is_valid(raise_exception=True)
+        action_name = serializer.validated_data["action"]
+        comment = serializer.validated_data.get("comment", "")
+        input_data = {"action": action_name, "comment": comment}
+        business_area = self.get_business_area()
 
-            with transaction.atomic():
-                for payment_plan_id_str in serializer.validated_data["ids"]:
-                    self._perform_payment_plan_status_action(
-                        payment_plan_id_str,
-                        input_data,
-                        business_area,
-                        request,
-                    )
+        with transaction.atomic():
+            for payment_plan_id_str in serializer.validated_data["ids"]:
+                self._perform_payment_plan_status_action(
+                    payment_plan_id_str,
+                    input_data,
+                    business_area,
+                    request,
+                )
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
