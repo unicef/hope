@@ -41,8 +41,8 @@ RUN apt-get update \
 
 ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
     VIRTUAL_ENV=/opt/venv \
-    PDM_HOME=/opt/pdm \
-    PATH=/opt/venv/bin:/opt/pdm/bin:${PATH} \
+    PATH=/opt/venv/bin:/code/__pypackages__/3.11/bin:${PATH} \
+    PYTHONPATH=$PYTHONPATH:__pypackages__/3.11/lib:/code \
     XDG_RUNTIME_DIR=/run/user/"${UID}"
 
 WORKDIR /code
@@ -54,11 +54,11 @@ FROM base as builder
 
 
 RUN python3 -m venv --copies $VIRTUAL_ENV &&\
-    python3 -m venv --copies $PDM_HOME &&\
     pip install pdm &&\
     pdm config cache_dir /var/cache/pdm &&\
     pdm config python.use_venv false
 
+WORKDIR $VIRTUAL_ENV
 COPY backend/pyproject.toml backend/pdm.lock ./
 RUN pdm sync --prod --no-editable --no-self
 
