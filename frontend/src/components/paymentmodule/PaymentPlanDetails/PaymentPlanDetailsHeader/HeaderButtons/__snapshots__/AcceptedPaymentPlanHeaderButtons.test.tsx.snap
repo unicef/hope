@@ -66,17 +66,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
     </div>
     <div
       class="MuiBox-root css-1ynyhby"
-    >
-      <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium css-dl1jos-MuiButtonBase-root-MuiButton-root"
-        data-cy="button-send-to-payment-gateway"
-        disabled=""
-        tabindex="-1"
-        type="button"
-      >
-        Send to FSP
-      </button>
-    </div>
+    />
   </div>
 </div>
 `;
