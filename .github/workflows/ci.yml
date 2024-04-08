@@ -223,6 +223,14 @@ jobs:
           dist_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist dev_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
             -f ./deployment/docker-compose.selenium.yml \
             run selenium
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: true
+          files: ./backend/coverage.xml
+          flags: e2e
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
 
   trivy:
     runs-on: ubuntu-latest
