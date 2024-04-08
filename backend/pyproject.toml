@@ -375,7 +375,7 @@ dependencies = [
     "django-debug-toolbar<5.0.0,>=4.3.0",
     "django-graphiql-debug-toolbar<1.0.0,>=0.2.0",
 ]
-requires-python = "==3.11.7"
+requires-python = ">=3.11"
 readme = "README.md"
 license = {text = "None"}
 
