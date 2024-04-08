@@ -58,9 +58,7 @@ class TestApproveDeleteHousehold(APITestCase):
 
         program2 = ProgramFactory(name="Test program TWO", business_area=cls.business_area)
         # household_test_1 has representation in program2
-        create_household(
-            household_args={"size": 1, "unicef_id": cls.household_test_1.unicef_id, "program": program2}
-        )
+        create_household(household_args={"size": 1, "unicef_id": cls.household_test_1.unicef_id, "program": program2})
 
     def test_approve_delete_household(self) -> None:
         self.create_user_role_with_permissions(
