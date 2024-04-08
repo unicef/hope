@@ -48,14 +48,19 @@ class TestApproveDeleteHousehold(APITestCase):
         )
         cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="sfds323")
 
-        cls.program_one = ProgramFactory(
-            name="Test program ONE",
-            business_area=cls.business_area,
+        program_one = ProgramFactory(name="Test program ONE", business_area=cls.business_area)
+        cls.household, _ = create_household(household_args={"size": 1, "program": program_one})
+        cls.household_withdraw, _ = create_household(
+            household_args={"size": 1, "withdrawn": True, "program": program_one}
         )
-        cls.household, _ = create_household(household_args={"size": 1})
-        cls.household_withdraw, _ = create_household(household_args={"size": 1, "withdrawn": True})
-        cls.household_test_1, _ = create_household(household_args={"size": 1})
-        cls.household_test_2, _ = create_household(household_args={"size": 1})
+        cls.household_test_1, _ = create_household(household_args={"size": 1, "program": program_one})
+        cls.household_test_2, _ = create_household(household_args={"size": 1, "program": program_one})
+
+        program2 = ProgramFactory(name="Test program TWO", business_area=cls.business_area)
+        # household_test_1 has representation in program2
+        create_household(
+            household_args={"size": 1, "unicef_id": cls.household_test_1.unicef_id, "program": program2}
+        )
 
     def test_approve_delete_household(self) -> None:
         self.create_user_role_with_permissions(
