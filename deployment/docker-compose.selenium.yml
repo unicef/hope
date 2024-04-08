@@ -27,6 +27,7 @@ services:
       - CELERY_TASK_ALWAYS_EAGER=true
     image: ${dev_backend_image}
     volumes:
+      - ../backend:/code/
       - ../backend/report/screenshot/:/code/screenshot/
       - ../backend/report/:/code/report/
       - backend-data:/data
