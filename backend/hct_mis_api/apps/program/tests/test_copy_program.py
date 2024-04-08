@@ -41,6 +41,7 @@ class TestCopyProgram(APITestCase):
           populationGoal
           administrativeAreasOfImplementation
         }
+      validationErrors
       }
     }
     """
@@ -247,4 +248,15 @@ class TestCopyProgram(APITestCase):
             request_string=self.COPY_PROGRAM_MUTATION,
             context={"user": user},
             variables=copy_data_incompatible,
+        )
+
+    def test_copy_program_with_existing_name(self) -> None:
+        user = UserFactory.create()
+        self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        copy_data_existing_name = {**self.copy_data}
+        copy_data_existing_name["programData"]["name"] = "initial name"
+        self.snapshot_graphql_request(
+            request_string=self.COPY_PROGRAM_MUTATION,
+            context={"user": user},
+            variables=copy_data_existing_name,
         )

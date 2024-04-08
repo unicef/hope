@@ -9619,7 +9619,7 @@ export type CopyProgramMutationVariables = Exact<{
 }>;
 
 
-export type CopyProgramMutation = { __typename?: 'Mutations', copyProgram?: { __typename?: 'CopyProgram', program?: { __typename?: 'ProgramNode', id: string } | null } | null };
+export type CopyProgramMutation = { __typename?: 'Mutations', copyProgram?: { __typename?: 'CopyProgram', validationErrors?: any | null, program?: { __typename?: 'ProgramNode', id: string } | null } | null };
 
 export type CreateProgramMutationVariables = Exact<{
   programData: CreateProgramInput;
@@ -14486,6 +14486,7 @@ export const CopyProgramDocument = gql`
     program {
       id
     }
+    validationErrors
   }
 }
     `;
