@@ -42,17 +42,22 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                   <div
                     data-cy="label-status"
                   >
-                    <div
-                      class="sc-eDLKkx deAQag"
+                    <span
+                      class="sc-dmyCSP bGPBYf"
+                      color="textSecondary"
                     >
                       <div
-                        class="sc-jTQCzO cQZnmW"
-                        data-cy="status-container"
-                        status="MERGED"
+                        class="sc-eDLKkx deAQag"
                       >
-                        MERGED
+                        <div
+                          class="sc-jTQCzO cQZnmW"
+                          data-cy="status-container"
+                          status="MERGED"
+                        >
+                          MERGED
+                        </div>
                       </div>
-                    </div>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -153,11 +158,16 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                   <div
                     data-cy="label-Total Number of Households"
                   >
-                    <div
-                      class="sc-csKJxZ hPFNA-D"
+                    <span
+                      class="sc-dmyCSP bGPBYf"
+                      color="textSecondary"
                     >
-                      2
-                    </div>
+                      <div
+                        class="sc-csKJxZ hPFNA-D"
+                      >
+                        2
+                      </div>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -180,11 +190,16 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                   <div
                     data-cy="label-Total Number of Individuals"
                   >
-                    <div
-                      class="sc-csKJxZ hPFNA-D"
+                    <span
+                      class="sc-dmyCSP bGPBYf"
+                      color="textSecondary"
                     >
-                      6
-                    </div>
+                      <div
+                        class="sc-csKJxZ hPFNA-D"
+                      >
+                        6
+                      </div>
+                    </span>
                   </div>
                 </div>
               </div>
