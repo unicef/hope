@@ -34,10 +34,8 @@ export function AcceptedPaymentPlanHeaderButtons({
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
 
-  const [
-    mutateExport,
-    { loading: loadingExport },
-  ] = useExportXlsxPpListPerFspMutation();
+  const [mutateExport, { loading: loadingExport }] =
+    useExportXlsxPpListPerFspMutation();
 
   const {
     mutatePaymentPlanAction: sendToPaymentGateway,
@@ -113,16 +111,18 @@ export function AcceptedPaymentPlanHeaderButtons({
           </Box>
         )}
         <Box m={2}>
-          <Button
-            type="button"
-            color="primary"
-            variant="contained"
-            onClick={() => sendToPaymentGateway()}
-            data-cy="button-send-to-payment-gateway"
-            disabled={!canSendToPaymentGateway || LoadingSendToPaymentGateway}
-          >
-            {t('Send to FSP')}
-          </Button>
+          {canSendToPaymentGateway && (
+            <Button
+              type="button"
+              color="primary"
+              variant="contained"
+              onClick={() => sendToPaymentGateway()}
+              data-cy="button-send-to-payment-gateway"
+              disabled={LoadingSendToPaymentGateway}
+            >
+              {t('Send to FSP')}
+            </Button>
+          )}
         </Box>
       </>
     </Box>
