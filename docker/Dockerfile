@@ -40,9 +40,10 @@ RUN apt-get update \
   && chown -R hope:hope /code /tmp /data /run/user/"${UID}"
 
 ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
-    VIRTUAL_ENV=/opt/venv \
-    PATH=/opt/venv/bin:/code/__pypackages__/3.11/bin:${PATH} \
-    PYTHONPATH=$PYTHONPATH:__pypackages__/3.11/lib:/code \
+    PDM_PACKAGES_PATH=/opt/pdm \
+    PYPACKAGES=/opt/pdm/__pypackages__/3.11 \
+    PYTHONPATH=${PYTHONPATH}:/opt/pdm/__pypackages__/3.11/lib:/code: \
+    PATH=${PATH}:/opt/pdm/__pypackages__/3.11/bin \
     XDG_RUNTIME_DIR=/run/user/"${UID}"
 
 WORKDIR /code
@@ -52,14 +53,14 @@ COPY --from=waitforit /data/waitforit /usr/local/bin/waitforit
 # Dist builder image
 FROM base as builder
 
-
-RUN python3 -m venv --copies $VIRTUAL_ENV &&\
-    pip install pdm &&\
+RUN pip install pdm==2.13.3 &&\
     pdm config cache_dir /var/cache/pdm &&\
-    pdm config python.use_venv false
+    pdm config python.use_venv false &&\
+    pdm config venv.in_project false
 
-WORKDIR $VIRTUAL_ENV
+WORKDIR $PDM_PACKAGES_PATH
 COPY backend/pyproject.toml backend/pdm.lock ./
+
 RUN pdm sync --prod --no-editable --no-self
 
 # Dev image
@@ -72,7 +73,10 @@ RUN apt-get update \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
+WORKDIR $PDM_PACKAGES_PATH
 RUN pdm sync --no-editable --no-self
+
+WORKDIR /code
 COPY ./backend ./
 
 COPY ./docker/entrypoint.sh /bin/
@@ -82,14 +86,13 @@ ENTRYPOINT ["entrypoint.sh"]
 FROM base AS be-dist
 
 COPY --chown=hope:hope ./backend ./
-COPY --chown=hope:hope --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
+COPY --chown=hope:hope --from=builder $PDM_PACKAGES_PATH $PDM_PACKAGES_PATH
 COPY --chown=hope:hope --from=certs /data/psql-cert.crt /code/psql-cert.crt
 
 USER hope
 
 COPY ./docker/entrypoint.sh /bin/
 ENTRYPOINT ["entrypoint.sh"]
-
 
 # Frontend builder
 FROM node:18.19.0-buster-slim AS frontend-builder
