@@ -200,7 +200,6 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          fail_ci_if_error: true
           files: ./backend/coverage.xml
           flags: unittests
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -226,7 +225,6 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          fail_ci_if_error: true
           files: ./backend/coverage.xml
           flags: e2e
           token: ${{ secrets.CODECOV_TOKEN }}
