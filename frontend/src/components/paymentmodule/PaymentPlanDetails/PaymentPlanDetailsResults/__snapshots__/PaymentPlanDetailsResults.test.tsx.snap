@@ -181,11 +181,16 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
                   <div
                     data-cy="label-Total Number of Households"
                   >
-                    <div
-                      class="sc-iBdnpw laLuMi"
+                    <span
+                      class="sc-guDLey cyWTlF"
+                      color="textSecondary"
                     >
-                      1
-                    </div>
+                      <div
+                        class="sc-iBdnpw laLuMi"
+                      >
+                        1
+                      </div>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -206,11 +211,16 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
                   <div
                     data-cy="label-Targeted Individuals"
                   >
-                    <div
-                      class="sc-iBdnpw laLuMi"
+                    <span
+                      class="sc-guDLey cyWTlF"
+                      color="textSecondary"
                     >
-                      3
-                    </div>
+                      <div
+                        class="sc-iBdnpw laLuMi"
+                      >
+                        3
+                      </div>
+                    </span>
                   </div>
                 </div>
               </div>

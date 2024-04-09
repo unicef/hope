@@ -125,8 +125,8 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
                   variant="fullWidth"
                   aria-label="full width tabs example"
                 >
-                  <Tab label={t('Households')} />
-                  <Tab label={t('Individuals')} />
+                  <Tab data-cy="tab-Households" label={t('Households')} />
+                  <Tab data-cy="tab-Individuals" label={t('Individuals')} />
                 </StyledTabs>
               </TabsContainer>
               <TabPanel value={selectedTab} index={0}>

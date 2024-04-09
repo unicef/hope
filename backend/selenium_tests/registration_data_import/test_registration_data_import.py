@@ -2,12 +2,24 @@ from django.conf import settings
 from django.core.management import call_command
 
 import pytest
+from elasticsearch_dsl import connections
+from page_object.programme_population.households_details import HouseholdsDetails
 from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True)
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+
+pytestmark = pytest.mark.django_db(transaction=True, databases=["registration_datahub", "default"])
+
+
+@pytest.fixture
+def registration_datahub(db) -> None:  # type: ignore
+    connections.create_connection(alias="registration_datahub", hosts=["elasticsearch:9200"], timeout=20)
+    rebuild_search_index()
+    yield
+    connections.remove_connection(alias="registration_datahub")
 
 
 @pytest.fixture
@@ -101,3 +113,44 @@ class TestSmokeRegistrationDataImport:
             pageDetailsRegistrationDataImport.buttonRefuseRdiText
             in pageDetailsRegistrationDataImport.getButtonRefuseRdi().text
         )
+
+
+class TestRegistrationDataImport:
+    def test_smoke_registration_data_import_happy_path(
+        self,
+        registration_datahub: None,
+        login: None,
+        create_programs: None,
+        add_rdi: None,
+        pageRegistrationDataImport: RegistrationDataImport,
+        pageDetailsRegistrationDataImport: RDIDetailsPage,
+        pageHouseholdsDetails: HouseholdsDetails,
+    ) -> None:
+        # Go to Registration Data Import
+        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm").click()
+        pageRegistrationDataImport.getNavRegistrationDataImport().click()
+        assert pageRegistrationDataImport.titleText in pageRegistrationDataImport.getPageHeaderTitle().text
+        pageRegistrationDataImport.getButtonImport().click()
+        pageRegistrationDataImport.getImportTypeSelect().click()
+        pageRegistrationDataImport.getExcelItem().click()
+        pageRegistrationDataImport.upload_file(f"{pytest.SELENIUM_PATH}/helpers/rdi_import_50_hh_50_ind.xlsx")
+        pageRegistrationDataImport.getInputName().send_keys("Test 1234 !")
+        assert pageRegistrationDataImport.buttonImportFileIsEnabled()
+        assert "50" in pageRegistrationDataImport.getNumberOfHouseholds().text
+        assert "208" in pageRegistrationDataImport.getNumberOfIndividuals().text
+        pageRegistrationDataImport.getButtonImportFile().click()
+        pageRegistrationDataImport.disappearButtonImportFile()
+        pageDetailsRegistrationDataImport.waitForStatus("IN REVIEW")
+        assert "50" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfHouseholds().text
+        assert "208" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfIndividuals().text
+        pageDetailsRegistrationDataImport.getButtonMergeRdi().click()
+        pageDetailsRegistrationDataImport.getButtonMerge().click()
+        pageDetailsRegistrationDataImport.waitForStatus("MERGED")
+        assert "VIEW TICKETS" in pageDetailsRegistrationDataImport.getButtonViewTickets().text
+        pageDetailsRegistrationDataImport.getButtonIndividuals().click()
+        pageDetailsRegistrationDataImport.getButtonHouseholds().click()
+        hausehold_id = (
+            pageDetailsRegistrationDataImport.getImportedHouseholdsRow(0).find_elements("tag name", "td")[1].text
+        )
+        pageDetailsRegistrationDataImport.getImportedHouseholdsRow(0).find_elements("tag name", "td")[1].click()
+        assert hausehold_id in pageHouseholdsDetails.getPageHeaderTitle().text
