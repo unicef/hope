@@ -22,6 +22,7 @@ import { decodeIdString } from '@utils/utils';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
+import { AccessTypes } from '@containers/pages/program/AccessTypes';
 
 export const EditProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -80,6 +81,7 @@ export const EditProgramPage = (): ReactElement => {
     frequencyOfPayments = 'REGULAR',
     version,
     partners,
+    // accessType = AccessTypes.NonePartners, // TODO fetch from api
   } = data.program;
 
   const handleSubmit = async (values): Promise<void> => {
@@ -91,6 +93,10 @@ export const EditProgramPage = (): ReactElement => {
     const populationGoalParsed = !Number.isNaN(populationGoalValue)
       ? populationGoalValue
       : 0;
+    const partnersToSet =
+      values.accessType === AccessTypes.OnlySelectedPartners
+        ? values.partners
+        : [];
 
     try {
       const response = await mutate({
@@ -100,6 +106,7 @@ export const EditProgramPage = (): ReactElement => {
             ...values,
             budget: budgetToFixed,
             populationGoal: populationGoalParsed,
+            partners: partnersToSet,
           },
           version,
         },
@@ -129,6 +136,7 @@ export const EditProgramPage = (): ReactElement => {
       adminAreas: partner.adminAreas.flatMap((area) => area.ids),
       areaAccess: partner.areaAccess,
     })),
+    accessType: AccessTypes.NonePartners, // TODO fetch from program object
   };
   initialValues.budget =
     data.program.budget === '0.00' ? '' : data.program.budget;
@@ -150,7 +158,7 @@ export const EditProgramPage = (): ReactElement => {
       'cashPlus',
       'frequencyOfPayments',
     ],
-    ['partners'],
+    ['partners', 'accessType'],
   ];
 
   const { allAreasTree } = treeData;
@@ -164,7 +172,13 @@ export const EditProgramPage = (): ReactElement => {
       }}
       validationSchema={programValidationSchema(t)}
     >
-      {({ submitForm, values, validateForm, setFieldTouched }) => {
+      {({
+        submitForm,
+        values,
+        validateForm,
+        setFieldTouched,
+        setFieldValue,
+      }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
           .map((partner) => ({
@@ -236,6 +250,7 @@ export const EditProgramPage = (): ReactElement => {
                   step={step}
                   setStep={setStep}
                   submitForm={submitForm}
+                  setFieldValue={setFieldValue}
                 />
               )}
             </Box>

@@ -15,6 +15,7 @@ import { DividerLine } from '@core/DividerLine';
 import { DeleteProgramPartner } from './DeleteProgramPartner';
 import { AreaTreeNode } from './AreaTreeNode';
 import { LabelizedField } from '@components/core/LabelizedField';
+import { GreyText } from '@core/GreyText';
 
 interface ProgramPartnerCardProps {
   values;
@@ -24,6 +25,7 @@ interface ProgramPartnerCardProps {
   allAreasTreeData: AllAreasTreeQuery['allAreasTree'];
   partnerChoices: UserPartnerChoicesQuery['userPartnerChoices'];
   setFieldValue;
+  canDeleteProgramPartner: boolean;
 }
 
 const BiggestText = styled(Box)`
@@ -50,6 +52,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   allAreasTreeData,
   partnerChoices,
   setFieldValue,
+  canDeleteProgramPartner,
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [isAdminAreaExpanded, setIsAdminAreaExpanded] = useState(false);
@@ -59,6 +62,9 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
       allAreasTreeData,
       values.partners[index]?.adminAreas,
     ),
+  );
+  const description = t(
+    'Provide info about Programme Partner and set Area Access',
   );
   const businessAreaOptionLabel = (
     <Box display="flex" flexDirection="column">
@@ -212,13 +218,17 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
             color="primary"
             choices={partnerChoices}
             component={FormikSelectField}
+            required
           />
         </Grid>
         <DeleteProgramPartner
           // TODO: add permission
-          canDeleteProgramPartner
+          canDeleteProgramPartner={canDeleteProgramPartner}
           handleDeleteProgramPartner={handleDeleteProgramPartner}
         />
+      </Box>
+      <Box mt={2}>
+        <GreyText>{description}</GreyText>
       </Box>
       <Box mt={2}>
         <BiggestText>{t('Area Access')}</BiggestText>

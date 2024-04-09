@@ -20,6 +20,7 @@ import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { useNavigate } from 'react-router-dom';
+import { AccessTypes } from '@containers/pages/program/AccessTypes';
 
 export const CreateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -50,6 +51,10 @@ export const CreateProgramPage = (): ReactElement => {
     const populationGoalParsed = !Number.isNaN(populationGoalValue)
       ? populationGoalValue
       : 0;
+    const partnersToSet =
+      values.accessType === AccessTypes.OnlySelectedPartners
+        ? values.partners
+        : [];
 
     try {
       const response = await mutate({
@@ -59,6 +64,7 @@ export const CreateProgramPage = (): ReactElement => {
             budget: budgetToFixed,
             populationGoal: populationGoalParsed,
             businessAreaSlug: businessArea,
+            partners: partnersToSet,
           },
         },
         refetchQueries: () => [
@@ -89,6 +95,7 @@ export const CreateProgramPage = (): ReactElement => {
     cashPlus: false,
     frequencyOfPayments: 'REGULAR',
     partners: [],
+    accessType: AccessTypes.NonePartners,
   };
 
   const stepFields = [
@@ -106,7 +113,7 @@ export const CreateProgramPage = (): ReactElement => {
       'cashPlus',
       'frequencyOfPayments',
     ],
-    ['partners'],
+    ['partners', 'accessType'],
   ];
 
   if (treeLoading || userPartnerChoicesLoading) return <LoadingComponent />;
@@ -133,7 +140,13 @@ export const CreateProgramPage = (): ReactElement => {
       }}
       validationSchema={programValidationSchema(t)}
     >
-      {({ submitForm, values, validateForm, setFieldTouched }) => {
+      {({
+        submitForm,
+        values,
+        validateForm,
+        setFieldTouched,
+        setFieldValue,
+      }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
           .map((partner) => ({
@@ -198,6 +211,7 @@ export const CreateProgramPage = (): ReactElement => {
                   step={step}
                   setStep={setStep}
                   submitForm={submitForm}
+                  setFieldValue={setFieldValue}
                 />
               )}
             </Box>

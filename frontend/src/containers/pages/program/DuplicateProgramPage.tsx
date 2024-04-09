@@ -20,6 +20,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
+import { AccessTypes } from '@containers/pages/program/AccessTypes';
 
 export const DuplicateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -46,6 +47,10 @@ export const DuplicateProgramPage = (): ReactElement => {
     const budgetToFixed = !Number.isNaN(budgetValue)
       ? budgetValue.toFixed(2)
       : 0;
+    const partnersToSet =
+      values.accessType === AccessTypes.OnlySelectedPartners
+        ? values.partners
+        : [];
 
     try {
       const response = await mutate({
@@ -55,6 +60,7 @@ export const DuplicateProgramPage = (): ReactElement => {
             ...values,
             budget: budgetToFixed,
             businessAreaSlug: businessArea,
+            partners: partnersToSet,
           },
         },
         refetchQueries: () => [
@@ -88,6 +94,7 @@ export const DuplicateProgramPage = (): ReactElement => {
     cashPlus = false,
     frequencyOfPayments = 'REGULAR',
     partners,
+    // accessType = AccessTypes.NonePartners, // TODO fetch from api
   } = data.program;
 
   const initialValues = {
@@ -108,6 +115,7 @@ export const DuplicateProgramPage = (): ReactElement => {
       adminAreas: partner.adminAreas,
       areaAccess: partner.areaAccess,
     })),
+    accessType: AccessTypes.NonePartners, // TODO fetch from program object
   };
   initialValues.budget =
     data.program.budget === '0.00' ? '' : data.program.budget;
@@ -127,7 +135,7 @@ export const DuplicateProgramPage = (): ReactElement => {
       'cashPlus',
       'frequencyOfPayments',
     ],
-    ['partners'],
+    ['partners', 'accessType'],
   ];
 
   const { allAreasTree } = treeData;
@@ -141,7 +149,13 @@ export const DuplicateProgramPage = (): ReactElement => {
       }}
       validationSchema={programValidationSchema(t)}
     >
-      {({ submitForm, values, validateForm, setFieldTouched }) => {
+      {({
+        submitForm,
+        values,
+        validateForm,
+        setFieldTouched,
+        setFieldValue,
+      }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
           .map((partner) => ({
@@ -213,6 +227,7 @@ export const DuplicateProgramPage = (): ReactElement => {
                   step={step}
                   setStep={setStep}
                   submitForm={submitForm}
+                  setFieldValue={setFieldValue}
                 />
               )}
             </Box>
