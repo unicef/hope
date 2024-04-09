@@ -110,8 +110,8 @@ export function AcceptedPaymentPlanHeaderButtons({
             </Button>
           </Box>
         )}
-        <Box m={2}>
-          {canSendToPaymentGateway && (
+        {canSendToPaymentGateway && (
+          <Box m={2}>
             <Button
               type="button"
               color="primary"
@@ -122,8 +122,8 @@ export function AcceptedPaymentPlanHeaderButtons({
             >
               {t('Send to FSP')}
             </Button>
-          )}
-        </Box>
+          </Box>
+        )}
       </>
     </Box>
   );
