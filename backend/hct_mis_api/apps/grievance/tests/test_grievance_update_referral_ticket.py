@@ -144,7 +144,7 @@ class TestGrievanceUpdateReferralTicketQuery(APITestCase):
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        extras = {
+        extras: Dict = {
             "household": self.id_to_base64(self.household.id, "HouseholdNode"),
             "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
         }
