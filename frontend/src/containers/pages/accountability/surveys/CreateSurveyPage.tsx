@@ -214,7 +214,16 @@ export const CreateSurveyPage = (): React.ReactElement => {
         },
       });
     }
-  }, [flowsData, category, businessArea, navigate, t, baseUrl, flowsError]);
+  }, [
+    flowsData,
+    category,
+    businessArea,
+    navigate,
+    t,
+    baseUrl,
+    flowsError,
+    flowsLoading,
+  ]);
 
   if (permissions === null || !adminAreasData) return null;
   if (
