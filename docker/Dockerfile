@@ -39,11 +39,12 @@ RUN apt-get update \
   && mkdir -p -m 0700 /run/user/"${UID}" \
   && chown -R hope:hope /code /tmp /data /run/user/"${UID}"
 
+ENV PDM_PROJECT=/opt/pdm
+ENV PYPACKAGES=$PDM_PROJECT/__pypackages__/3.11
 ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
-    PDM_PACKAGES_PATH=/opt/pdm \
-    PYPACKAGES=/opt/pdm/__pypackages__/3.11 \
-    PYTHONPATH=${PYTHONPATH}:/opt/pdm/__pypackages__/3.11/lib:/code: \
-    PATH=${PATH}:/opt/pdm/__pypackages__/3.11/bin \
+    PDM_PROJECT=/opt/pdm \
+    PYTHONPATH=$PYTHONPATH:$PYPACKAGES/lib:/code: \
+    PATH=$PATH:$PYPACKAGES/bin \
     XDG_RUNTIME_DIR=/run/user/"${UID}"
 
 WORKDIR /code
@@ -56,9 +57,10 @@ FROM base as builder
 RUN pip install pdm==2.13.3 &&\
     pdm config cache_dir /var/cache/pdm &&\
     pdm config python.use_venv false &&\
-    pdm config venv.in_project false
+    pdm config venv.in_project false &&\
+    pdm config install.cache true
 
-WORKDIR $PDM_PACKAGES_PATH
+WORKDIR $PDM_PROJECT
 COPY backend/pyproject.toml backend/pdm.lock ./
 
 RUN pdm sync --prod --no-editable --no-self
@@ -73,7 +75,7 @@ RUN apt-get update \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-WORKDIR $PDM_PACKAGES_PATH
+WORKDIR $PDM_PROJECT
 RUN pdm sync --no-editable --no-self
 
 WORKDIR /code
@@ -86,7 +88,7 @@ ENTRYPOINT ["entrypoint.sh"]
 FROM base AS be-dist
 
 COPY --chown=hope:hope ./backend ./
-COPY --chown=hope:hope --from=builder $PDM_PACKAGES_PATH $PDM_PACKAGES_PATH
+COPY --chown=hope:hope --from=builder $PDM_PROJECT $PDM_PROJECT
 COPY --chown=hope:hope --from=certs /data/psql-cert.crt /code/psql-cert.crt
 
 USER hope

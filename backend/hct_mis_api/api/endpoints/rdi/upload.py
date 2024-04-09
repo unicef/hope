@@ -238,7 +238,7 @@ class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
             number_of_households=info.households,
             datahub_id=str(rdi_datahub.pk),
             business_area=self.business_area,
-            program=program
+            program=program,
         )
         rdi_datahub.hct_id = rdi_mis.id
         rdi_datahub.save()
