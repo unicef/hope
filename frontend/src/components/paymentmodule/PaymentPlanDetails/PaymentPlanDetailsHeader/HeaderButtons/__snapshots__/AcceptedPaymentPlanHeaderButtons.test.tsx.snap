@@ -64,9 +64,6 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
         Export Xlsx
       </button>
     </div>
-    <div
-      class="MuiBox-root css-1ynyhby"
-    />
   </div>
 </div>
 `;
