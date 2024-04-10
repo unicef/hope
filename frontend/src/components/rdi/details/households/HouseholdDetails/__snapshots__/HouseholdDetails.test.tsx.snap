@@ -33,7 +33,12 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-Household Size"
             >
-              4
+              <span
+                class="sc-hLQSwg hXyiIZ"
+                color="textSecondary"
+              >
+                4
+              </span>
             </div>
           </div>
         </div>
@@ -50,7 +55,12 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-Country"
             >
-              Isle of Man
+              <span
+                class="sc-hLQSwg hXyiIZ"
+                color="textSecondary"
+              >
+                Isle of Man
+              </span>
             </div>
           </div>
         </div>
@@ -67,7 +77,12 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-Residence Status"
             >
-              Displaced  |  Refugee / Asylum Seeker
+              <span
+                class="sc-hLQSwg hXyiIZ"
+                color="textSecondary"
+              >
+                Displaced  |  Refugee / Asylum Seeker
+              </span>
             </div>
           </div>
         </div>
@@ -84,7 +99,12 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-Country of Origin"
             >
-              San Marino
+              <span
+                class="sc-hLQSwg hXyiIZ"
+                color="textSecondary"
+              >
+                San Marino
+              </span>
             </div>
           </div>
         </div>
@@ -101,12 +121,17 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-Head of Household"
             >
-              <a
-                class="sc-guDLey ibjlhn"
-                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpmM2U0ODBiZC05MDYyLTRkMjktODljYy1kMWM3MGRhZDRmMjk="
+              <span
+                class="sc-hLQSwg hXyiIZ"
+                color="textSecondary"
               >
-                Agata Kowalska
-              </a>
+                <a
+                  class="sc-guDLey ibjlhn"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpmM2U0ODBiZC05MDYyLTRkMjktODljYy1kMWM3MGRhZDRmMjk="
+                >
+                  Agata Kowalska
+                </a>
+              </span>
             </div>
           </div>
         </div>
@@ -123,7 +148,12 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-FEMALE CHILD HEADED HOUSEHOLD"
             >
-              No
+              <span
+                class="sc-hLQSwg hXyiIZ"
+                color="textSecondary"
+              >
+                No
+              </span>
             </div>
           </div>
         </div>
@@ -140,7 +170,12 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-CHILD HEADED HOUSEHOLD"
             >
-              No
+              <span
+                class="sc-hLQSwg hXyiIZ"
+                color="textSecondary"
+              >
+                No
+              </span>
             </div>
           </div>
         </div>
@@ -157,7 +192,12 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-ADMINISTRATIVE LEVEL 1"
             >
-              Nangarhar
+              <span
+                class="sc-hLQSwg hXyiIZ"
+                color="textSecondary"
+              >
+                Nangarhar
+              </span>
             </div>
           </div>
         </div>
@@ -174,7 +214,12 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-ADMINISTRATIVE LEVEL 2"
             >
-              Achin
+              <span
+                class="sc-hLQSwg hXyiIZ"
+                color="textSecondary"
+              >
+                Achin
+              </span>
             </div>
           </div>
         </div>

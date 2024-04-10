@@ -34,6 +34,7 @@ export const CashPlan = gql`
           node {
             id
             unicefId
+            adminUrl
             status
             sampleSize
             receivedCount

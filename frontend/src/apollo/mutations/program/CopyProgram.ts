@@ -6,6 +6,7 @@ export const COPY_PROGRAM_MUTATION = gql`
       program {
         id
       }
+      validationErrors
     }
   }
 `;

@@ -21,7 +21,6 @@ variables:
     sentryEnvironment: "production"
   isTraining: $[eq(variables['Build.SourceBranchName'], 'master')]
   isStaging: $[eq(variables['Build.SourceBranchName'], 'staging')]
-  isEphemeral: $[eq(variables['Build.SourceBranchName'], 'global-program-filter')]
   isDev: $[eq(variables['Build.SourceBranchName'], 'develop')]
   tag: $(Build.SourceVersion)
   additionalTag: $(Build.SourceBranchName)

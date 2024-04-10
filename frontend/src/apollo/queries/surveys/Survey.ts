@@ -7,6 +7,7 @@ export const Survey = gql`
       unicefId
       category
       title
+      adminUrl
       createdBy {
         id
         firstName
