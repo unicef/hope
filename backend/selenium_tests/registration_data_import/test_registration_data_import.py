@@ -16,7 +16,7 @@ pytestmark = pytest.mark.django_db(transaction=True, databases=["registration_da
 
 @pytest.fixture
 def registration_datahub(db) -> None:  # type: ignore
-    connections.create_connection(alias="registration_datahub", hosts=["elasticsearch:9200"], timeout=20)
+    connections.create_connection(alias="registration_datahub", hosts=[settings.ELASTICSEARCH_HOST], timeout=20)
     rebuild_search_index()
     yield
     connections.remove_connection(alias="registration_datahub")
