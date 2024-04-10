@@ -30,7 +30,8 @@ services:
       dockerfile: docker/Dockerfile
       target: dev
     volumes:
-      - ./backend/screenshot/:/code/screenshot/
+      - ./backend/report/screenshot/:/code/screenshot/
+      - ./backend/report/:/code/report/
       - backend-data:/data
       - type: volume
         source: backend-web-app
@@ -40,7 +41,7 @@ services:
     command: |
       sh -c "
         waitforit -host=db -port=5432 -timeout=30 &&
-        pytest -svvv selenium_tests
+        pytest -svvv selenium_tests --html=./report/report.html
       "
     depends_on:
       db:

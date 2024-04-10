@@ -1,11 +1,12 @@
 import { MockedProvider } from '@apollo/react-testing';
-import React from 'react';
+import * as React from 'react';
 import { act } from '@testing-library/react';
 import wait from 'waait';
 import { ProgrammesTable } from '.';
 import { render, ApolloLoadingLink } from '../../../testUtils/testUtils';
 import { fakeProgramChoices } from '../../../../fixtures/programs/fakeProgramChoices';
 import { fakeApolloAllPrograms } from '../../../../fixtures/programs/fakeApolloAllPrograms';
+import {ApolloLink} from "@apollo/client";
 
 describe('containers/tables/ProgrammesTable', () => {
   const initialFilter = {
@@ -18,14 +19,14 @@ describe('containers/tables/ProgrammesTable', () => {
     numberOfHouseholdsMax: '',
     budgetMin: '',
     budgetMax: '',
-    dataCollectingType: ''
+    dataCollectingType: '',
   };
 
   it('should render with data', async () => {
     const { container } = render(
       <MockedProvider addTypename={false} mocks={fakeApolloAllPrograms}>
         <ProgrammesTable
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           filter={initialFilter}
           choicesData={fakeProgramChoices}
         />
@@ -39,12 +40,11 @@ describe('containers/tables/ProgrammesTable', () => {
   it('should render loading', () => {
     const { container } = render(
       <MockedProvider
-        link={new ApolloLoadingLink()}
         addTypename={false}
         mocks={fakeApolloAllPrograms}
       >
         <ProgrammesTable
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           filter={initialFilter}
           choicesData={fakeProgramChoices}
         />

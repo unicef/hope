@@ -1,1 +1,1 @@
-import { HouseholdQuestionnaire } from './HouseholdQuestionnaire';
+export { HouseholdQuestionnaire } from './HouseholdQuestionnaire';

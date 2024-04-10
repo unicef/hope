@@ -531,7 +531,7 @@ def reassign_roles_on_disable_individual(
     program_id: Optional["UUID"],
     info: Optional[Any] = None,
     is_new_ticket: bool = False,
-) -> Household:
+) -> Optional[Household]:
     roles_to_bulk_update = []
     roles_to_delete = []
     for role_data in role_reassign_data.values():
@@ -670,7 +670,7 @@ def withdraw_individual(
     individual_to_remove: Individual,
     info: Any,
     old_individual_to_remove: Individual,
-    removed_individual_household: Household,
+    removed_individual_household: Optional[Household],
     program_id: Optional["UUID"],
 ) -> None:
     individual_to_remove.withdraw()
@@ -691,7 +691,7 @@ def mark_as_duplicate_individual(
     individual_to_remove: Individual,
     info: Any,
     old_individual_to_remove: Individual,
-    removed_individual_household: Household,
+    removed_individual_household: Optional[Household],
     unique_individual: Individual,
     program_id: Optional["UUID"],
 ) -> None:
@@ -705,7 +705,7 @@ def log_and_withdraw_household_if_needed(
     individual_to_remove: Individual,
     info: Any,
     old_individual_to_remove: Individual,
-    removed_individual_household: Household,
+    removed_individual_household: Optional[Household],
     program_id: Optional["UUID"],
 ) -> None:
     log_create(
@@ -716,9 +716,10 @@ def log_and_withdraw_household_if_needed(
         old_individual_to_remove,
         individual_to_remove,
     )
-    removed_individual_household.refresh_from_db()
-    if removed_individual_household and removed_individual_household.active_individuals.count() == 0:
-        removed_individual_household.withdraw()
+    if removed_individual_household:
+        removed_individual_household.refresh_from_db()
+        if removed_individual_household.active_individuals.count() == 0:
+            removed_individual_household.withdraw()
 
 
 def save_images(flex_fields: Dict, associated_with: str) -> None:

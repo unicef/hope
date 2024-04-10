@@ -1,10 +1,10 @@
 import camelCase from 'lodash/camelCase';
-import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
+import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
   GrievanceSteps,
-} from '../../../utils/constants';
+} from '@utils/constants';
 
 export function isEmpty(value): boolean {
   return value === undefined || value === null || value === '';
@@ -41,7 +41,7 @@ export function validate(
         errors.selectedHousehold = 'Household is Required';
       }
       if (
-        //xD
+        // xD
         values.selectedHousehold &&
         !values.householdDataUpdateFields?.[0]?.fieldName
       ) {
@@ -241,7 +241,7 @@ export function validateUsingSteps(
   const issueType = values.issueType?.toString();
   const errors: { [key: string]: string | { [key: string]: string } } = {};
 
-  //TODO: enable this when questionnaire verification is required
+  // TODO: enable this when questionnaire verification is required
   // const verficationStepFields = [
   //   'size',
   //   'maleChildrenCount',
@@ -274,7 +274,7 @@ export function validateUsingSteps(
         errors.selectedHousehold = 'Household is Required';
       }
       if (
-        //xD
+        // xD
         values.selectedHousehold &&
         !values.householdDataUpdateFields?.[0]?.fieldName &&
         activeStep === GrievanceSteps.Description
@@ -505,7 +505,7 @@ export function validateUsingSteps(
   ) {
     // const MIN_SELECTED_ITEMS = 5;
     // const selectedItems = verficationStepFields.filter((item) => values[item]);
-    //TODO: enable this when questionnaire verification is required
+    // TODO: enable this when questionnaire verification is required
     // if (selectedItems.length < MIN_SELECTED_ITEMS) {
     //   setValidateData(true);
     //   errors.verificationRequired = 'Select correctly minimum 5 questions';

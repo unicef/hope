@@ -1,13 +1,13 @@
-import { Box } from '@material-ui/core';
-import EditIcon from '@material-ui/icons/EditRounded';
-import React from 'react';
+import { Box } from '@mui/material';
+import EditIcon from '@mui/icons-material/EditRounded';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useHistory, useParams } from 'react-router-dom';
-import { FeedbackQuery } from '../../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../core/BreadCrumbs';
-import { PageHeader } from '../../core/PageHeader';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { ButtonTooltip } from '../../core/ButtonTooltip';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { FeedbackQuery } from '@generated/graphql';
+import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import { PageHeader } from '@core/PageHeader';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ButtonTooltip } from '@core/ButtonTooltip';
 import { useProgramContext } from '../../../programContext';
 
 interface FeedbackDetailsToolbarProps {
@@ -15,14 +15,14 @@ interface FeedbackDetailsToolbarProps {
   canEdit: boolean;
 }
 
-export const FeedbackDetailsToolbar = ({
+export function FeedbackDetailsToolbar({
   feedback,
   canEdit,
-}: FeedbackDetailsToolbarProps): React.ReactElement => {
+}: FeedbackDetailsToolbarProps): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl } = useBaseUrl();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { isActiveProgram } = useProgramContext();
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -42,16 +42,16 @@ export const FeedbackDetailsToolbar = ({
       title={`Feedback ID: ${feedback.unicefId}`}
       breadCrumbs={breadCrumbsItems}
     >
-      <Box display='flex' alignItems='center'>
+      <Box display="flex" alignItems="center">
         {canEdit && (
           <Box mr={3}>
             <ButtonTooltip
-              color='primary'
-              variant='outlined'
+              color="primary"
+              variant="outlined"
               component={Link}
               to={`/${baseUrl}/grievance/feedback/edit-ticket/${id}`}
               startIcon={<EditIcon />}
-              data-cy='button-edit'
+              data-cy="button-edit"
               title={t('Program has to be active to edit a Feedback')}
               disabled={!isActiveProgram}
             >
@@ -63,8 +63,7 @@ export const FeedbackDetailsToolbar = ({
           <Box mr={3}>
             <ButtonTooltip
               onClick={() =>
-                history.push({
-                  pathname: `/${baseUrl}/grievance/new-ticket`,
+                navigate(`/${baseUrl}/grievance/new-ticket`, {
                   state: {
                     selectedHousehold: feedback?.householdLookup,
                     selectedIndividual: feedback?.individualLookup,
@@ -73,9 +72,9 @@ export const FeedbackDetailsToolbar = ({
                   },
                 })
               }
-              variant='contained'
-              color='primary'
-              data-cy='button-create-linked-ticket'
+              variant="contained"
+              color="primary"
+              data-cy="button-create-linked-ticket"
               title={t(
                 'Program has to be active to create a Linked Ticket to Feedback',
               )}
@@ -88,4 +87,4 @@ export const FeedbackDetailsToolbar = ({
       </Box>
     </PageHeader>
   );
-};
+}

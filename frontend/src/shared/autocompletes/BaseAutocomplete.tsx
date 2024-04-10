@@ -1,9 +1,12 @@
-import CircularProgress from '@material-ui/core/CircularProgress';
-import React, { useEffect, useRef } from 'react';
-import TextField from '../TextField';
-import { StyledAutocomplete } from './StyledAutocomplete';
+import * as React from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
+import { useEffect, useRef } from 'react';
+import { StyledAutocomplete, StyledTextField } from './StyledAutocomplete';
 
-export const BaseAutocomplete = ({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type OptionType = any;
+
+export function BaseAutocomplete({
   value,
   disabled,
   label,
@@ -31,10 +34,10 @@ export const BaseAutocomplete = ({
   loading: boolean;
   allEdges;
   handleChange: (event, newValue) => void;
-  //eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handleClose: (_: any, reason: string) => void;
-  handleOptionSelected: (option, value) => boolean;
-  handleOptionLabel: (option) => string;
+  handleOptionSelected: (option: OptionType, value: OptionType) => boolean;
+  handleOptionLabel: (option: OptionType) => string;
   handleOpen: () => void;
   open: boolean;
   data;
@@ -42,7 +45,7 @@ export const BaseAutocomplete = ({
   onInputTextChange: (value) => void;
   debouncedInputText: string;
   startAdornment?: React.ReactNode;
-}): React.ReactElement => {
+}): React.ReactElement {
   const prevValueRef = useRef(value);
 
   useEffect(() => {
@@ -70,35 +73,27 @@ export const BaseAutocomplete = ({
     <StyledAutocomplete
       key={prevValueRef.current}
       freeSolo={false}
+      filterOptions={(x) => x}
       value={value}
       data-cy={dataCy}
       open={open}
-      options={[{ value: '', label: '' }, ...allEdges]}
-      filterOptions={(options, params) => {
-        const filtered = options.filter(
-          (option) =>
-            option.value !== '' &&
-            (params.inputValue === '' ||
-              (option.label &&
-                option.label
-                  .toLowerCase()
-                  .includes(params.inputValue.toLowerCase()))),
-        );
-        return filtered;
-      }}
+      options={allEdges}
       onChange={handleChange}
       onOpen={handleOpen}
       onClose={handleClose}
-      getOptionSelected={handleOptionSelected}
+      isOptionEqualToValue={(option, selectedValue) =>
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        handleOptionSelected(option as any, selectedValue as any)
+      }
       getOptionLabel={handleOptionLabel}
       disabled={disabled}
       loading={loading}
       renderInput={(params) => (
-        <TextField
+        <StyledTextField
           {...params}
           label={label}
-          variant='outlined'
-          margin='dense'
+          variant="outlined"
+          size="small"
           data-cy={`${label}-input`}
           value={inputValue}
           onChange={(e) => onInputTextChange(e.target.value)}
@@ -108,7 +103,7 @@ export const BaseAutocomplete = ({
             endAdornment: (
               <>
                 {loading ? (
-                  <CircularProgress color='inherit' size={20} />
+                  <CircularProgress color="inherit" size={20} />
                 ) : null}
                 {params.InputProps.endAdornment}
               </>
@@ -118,4 +113,4 @@ export const BaseAutocomplete = ({
       )}
     />
   );
-};
+}

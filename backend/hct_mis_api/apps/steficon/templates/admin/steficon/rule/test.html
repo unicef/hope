@@ -63,7 +63,6 @@
         {% if target_population%}
             <ul>
             <li><b>Target Population</b>: {{ target_population }}</li>
-            <ul><li><b>Individual_data</b>: {{ target_population.program.individual_data_needed|default_if_none:"False" }}</li>
             </ul>
             <li><b>Business Area</b>: {{ target_population.business_area }}</li>
             <li><b>Program</b>: {{ target_population.program }}</li>

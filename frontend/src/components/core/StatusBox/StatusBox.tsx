@@ -1,47 +1,54 @@
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 import { theme as themeObj } from '../../../theme';
-import { opacityToHex } from '../../../utils/utils';
+import { opacityToHex } from '@utils/utils';
 
 interface Props {
   status: string;
   statusToColor: (theme: typeof themeObj, status: string) => string;
-  statusNameMapping?: Function;
+  statusNameMapping?: (status: string) => string;
   dataCy?: string;
 }
 const StatusContainer = styled.div`
   min-width: 120px;
-  max-width: 200px;
+  max-width: 300px;
 `;
 
-const StatusBoxContainer = styled.div`
-  color: ${({ status, statusToColor, theme }) => statusToColor(theme, status)};
-  background-color: ${({ status, statusToColor, theme }) =>
-    `${statusToColor(theme, status)}${opacityToHex(0.15)}`};
+interface StatusBoxContainerProps {
+  status: string;
+  $statusToColor: (theme: any, status: string) => string;
+  theme: any;
+}
+
+const StatusBoxContainer = styled.div<StatusBoxContainerProps>`
+  color: ${({ status, $statusToColor, theme }) =>
+    $statusToColor(theme, status)};
+  background-color: ${({ status, $statusToColor, theme }) =>
+    `${$statusToColor(theme, status)}${opacityToHex(0.15)}`};
   border-radius: 16px;
   font-family: Roboto;
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 1.2px;
   line-height: 16px;
-  padding: ${({ theme }) => theme.spacing(1)}px;
+  padding: 4px;
   text-align: center;
   margin-right: 20px;
 `;
 
-export function StatusBox({
+export const StatusBox = ({
   status,
   statusToColor,
   statusNameMapping,
   dataCy,
-}: Props): React.ReactElement {
+}: Props): React.ReactElement => {
   const underscoreRemoveRegex = /_/g;
   if (!status) return <>-</>;
   return (
     <StatusContainer>
       <StatusBoxContainer
         status={status}
-        statusToColor={statusToColor}
+        $statusToColor={statusToColor}
         data-cy={dataCy || 'status-container'}
       >
         {statusNameMapping
@@ -50,4 +57,4 @@ export function StatusBox({
       </StatusBoxContainer>
     </StatusContainer>
   );
-}
+};

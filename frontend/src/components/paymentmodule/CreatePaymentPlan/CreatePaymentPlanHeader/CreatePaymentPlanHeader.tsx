@@ -1,11 +1,11 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
-import { PageHeader } from '../../../core/PageHeader';
-import { LoadingButton } from '../../../core/LoadingButton';
+import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import { PageHeader } from '@core/PageHeader';
+import { LoadingButton } from '@core/LoadingButton';
 
 interface CreatePaymentPlanHeaderProps {
   handleSubmit: () => Promise<void>;
@@ -14,12 +14,12 @@ interface CreatePaymentPlanHeaderProps {
   loadingCreate: boolean;
 }
 
-export const CreatePaymentPlanHeader = ({
+export function CreatePaymentPlanHeader({
   handleSubmit,
   baseUrl,
   permissions,
   loadingCreate,
-}: CreatePaymentPlanHeaderProps): React.ReactElement => {
+}: CreatePaymentPlanHeaderProps): React.ReactElement {
   const { t } = useTranslation();
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -38,7 +38,7 @@ export const CreatePaymentPlanHeader = ({
           : null
       }
     >
-      <Box display='flex' mt={2} mb={2}>
+      <Box display="flex" mt={2} mb={2}>
         <Box mr={3}>
           <Button component={Link} to={`/${baseUrl}/payment-module`}>
             {t('Cancel')}
@@ -46,14 +46,14 @@ export const CreatePaymentPlanHeader = ({
         </Box>
         <LoadingButton
           loading={loadingCreate}
-          variant='contained'
-          color='primary'
+          variant="contained"
+          color="primary"
           onClick={handleSubmit}
-          data-cy='button-save-payment-plan'
+          data-cy="button-save-payment-plan"
         >
           {t('Save')}
         </LoadingButton>
       </Box>
     </PageHeader>
   );
-};
+}

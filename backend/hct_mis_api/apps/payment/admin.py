@@ -12,7 +12,7 @@ from django.utils.safestring import mark_safe
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import confirm_action
-from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
 from adminfilters.querystring import QueryStringFilter
@@ -56,17 +56,16 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
         "status",
         "cash_plan_name",
         "target_population",
+        "business_area",
     )
     list_filter = (
         DepotManager,
         QueryStringFilter,
         ("status", ChoicesFieldComboFilter),
-        ("business_area", AutoCompleteFilter),
-        ("target_population", AutoCompleteFilter),
-        ("parent", AutoCompleteFilter),
-        ("service_provider", AutoCompleteFilter),
-        # ValueFilter.factory("cash_plan__id", "CashPlan ID"),
-        # ValueFilter.factory("target_population__id", "TargetPopulation ID"),
+        ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
+        ("target_population", LinkedAutoCompleteFilter.factory(parent="business_area")),
+        ("parent", LinkedAutoCompleteFilter.factory(parent="business_area")),
+        ("service_provider", LinkedAutoCompleteFilter.factory(parent="business_area")),
     )
     advanced_filter_fields = (
         "status",
@@ -133,13 +132,10 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
 
 @admin.register(PaymentVerificationPlan)
 class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    # TODO: fix filtering
     list_display = ("payment_plan_obj", "status", "verification_channel")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("verification_channel", ChoicesFieldComboFilter),
-        # ("payment_plan", AutoCompleteFilter),
-        # ("payment_plan__business_area", AutoCompleteFilter),
     )
     date_hierarchy = "updated_at"
     search_fields = ("payment_plan__name",)
@@ -188,25 +184,22 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
 @admin.register(PaymentVerification)
 class PaymentVerificationAdmin(HOPEModelAdminBase):
-    # TODO: update filter and get_qs
-    list_display = ("household", "status", "received_amount", "payment_plan_name")
+    list_display = ("household", "status", "received_amount", "payment_plan_name", "business_area")
 
     list_filter = (
         DepotManager,
         QueryStringFilter,
         ("status", ChoicesFieldComboFilter),
-        # ("payment_verification_plan__payment_plan_obj", AutoCompleteFilter),
-        # ("payment_verification_plan__payment_plan_obj__business_area", AutoCompleteFilter),
         ("payment__household__unicef_id", ValueFilter),
     )
     date_hierarchy = "updated_at"
     raw_id_fields = ("payment_verification_plan", "payment_content_type")
 
-    def payment_plan_name(self, obj: Any) -> str:
+    def payment_plan_name(self, obj: PaymentVerification) -> str:
         payment_plan = obj.payment_verification_plan.payment_plan_obj
         return getattr(payment_plan, "name", "~no name~")
 
-    def household(self, obj: Any) -> str:
+    def household(self, obj: PaymentVerification) -> str:
         payment = obj.payment_obj
         return payment.household.unicef_id if payment else ""
 
@@ -214,11 +207,12 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
         return (
             super()
             .get_queryset(request)
-            .select_related(
-                "payment_verification_plan",
-                # "payment_verification_plan__payment_plan_obj",
-                # "payment_obj",
-                # "payment_obj__household",
+            .select_related("payment_verification_plan")
+            .prefetch_related(
+                "payment_obj",
+                "payment_obj__household",
+                "payment_verification_plan__payment_plan_obj",
+                "payment_verification_plan__payment_plan_obj__business_area",
             )
         )
 
@@ -244,9 +238,6 @@ class CashPlanAdmin(HOPEModelAdminBase):
     )
     raw_id_fields = ("business_area", "program", "service_provider")
     search_fields = ("name",)
-
-    def verification_status(self, obj: Any) -> Optional[str]:
-        return obj.get_payment_verification_summary.status if obj.get_payment_verification_summary else None
 
     @button()
     def payments(self, request: HttpRequest, pk: str) -> TemplateResponse:
@@ -326,7 +317,6 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
     )
     list_filter = (("created_by", AutoCompleteFilter),)
     search_fields = ("name",)
-    # filter_horizontal = ("core_fields",)
     fields = ("name", "columns", "core_fields")
 
     def total_selected_columns(self, obj: Any) -> str:
@@ -358,6 +348,7 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
 class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
     list_display = ("financial_service_provider", "delivery_mechanism", "xlsx_template", "created_by")
     fields = ("financial_service_provider", "delivery_mechanism", "xlsx_template")
+    autocomplete_fields = ("financial_service_provider", "xlsx_template")
 
     def save_model(
         self, request: HttpRequest, obj: FinancialServiceProviderXlsxTemplate, form: "Form", change: bool
@@ -420,6 +411,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
     )
     search_fields = ("name",)
     # filter_horizontal = ("delivery_mechanisms",)
+    filter_horizontal = ("allowed_business_areas",)
     autocomplete_fields = ("created_by",)
     list_select_related = ("created_by",)
     fields = (
@@ -428,6 +420,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         ("distribution_limit",),
         ("communication_channel", "fsp_xlsx_templates"),
         ("data_transfer_configuration",),
+        ("allowed_business_areas",),
     )
 
     readonly_fields = ("fsp_xlsx_templates",)

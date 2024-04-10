@@ -1,11 +1,11 @@
-import React, { ReactElement, useState } from 'react';
-import { ActivityLogTablePaymentVerification } from '../../components/core/ActivityLogTablePaymentVerification/ActivityLogTablePaymentVerification';
-import { decodeIdString } from '../../utils/utils';
+import { ReactElement, useState } from 'react';
+import { ActivityLogTablePaymentVerification } from '@components/core/ActivityLogTablePaymentVerification/ActivityLogTablePaymentVerification';
+import { decodeIdString } from '@utils/utils';
 import {
   PaymentVerificationLogEntryNode,
   useAllPaymentVerificationLogEntriesQuery,
-} from '../../__generated__/graphql';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface UniversalActivityLogTablePaymentVerificationProps {
   objectId: string;

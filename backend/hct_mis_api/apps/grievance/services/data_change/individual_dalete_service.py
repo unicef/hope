@@ -44,11 +44,8 @@ class IndividualDeleteService(DataChangeService):
 
         if not ticket_details or ticket_details.approve_status is False:
             return
-        household = None
         details = self.grievance_ticket.ticket_details
         individual_to_remove = details.individual
-        if individual_to_remove.household:
-            household = individual_to_remove.household
         individual_to_remove = Individual.objects.select_for_update().get(id=individual_to_remove.id)
         old_individual_to_remove = Individual.objects.get(id=individual_to_remove.id)
         household_to_remove = reassign_roles_on_disable_individual_service(
@@ -66,8 +63,8 @@ class IndividualDeleteService(DataChangeService):
             old_individual_to_remove,
             individual_to_remove,
         )
-        household_to_remove.refresh_from_db()
-        if household_to_remove.active_individuals.count() == 0:
-            household_to_remove.withdraw()
-        if household:
-            recalculate_data(household)
+        if household_to_remove:
+            household_to_remove.refresh_from_db()
+            if household_to_remove.active_individuals.count() == 0:
+                household_to_remove.withdraw()
+            recalculate_data(household_to_remove)

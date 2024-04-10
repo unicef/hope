@@ -15,6 +15,8 @@ class ProgrammeDetails(BaseComponents):
     labelTotalNumberOfHouseholds = 'div[data-cy="label-Total Number of Households"]'
     labelDescription = 'div[data-cy="label-Description"]'
     labelAreaAccess = 'div[data-cy="label-Area Access"]'
+    labelAdminArea1 = 'div[data-cy="labelized-field-container-admin-area-1-total-count"]'
+    labelAdminArea2 = 'div[data-cy="label-Admin Area 2"]'
     labelPartnerName = 'h6[data-cy="label-partner-name"]'
 
     def getLabelPartnerName(self) -> WebElement:
@@ -22,6 +24,12 @@ class ProgrammeDetails(BaseComponents):
 
     def getLabelAreaAccess(self) -> WebElement:
         return self.wait_for(self.labelAreaAccess)
+
+    def getLabelAdminArea1(self) -> WebElement:
+        return self.wait_for(self.labelAdminArea1)
+
+    def getLabelAdminArea2(self) -> WebElement:
+        return self.wait_for(self.labelAdminArea2)
 
     def getProgramStatus(self) -> WebElement:
         return self.wait_for(self.programStatus)

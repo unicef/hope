@@ -29,7 +29,7 @@ from hct_mis_api.apps.payment.models import (
 
 
 def create_child_payment_plans(pp: PaymentPlan) -> None:
-    PaymentPlanFactory(
+    fpp1 = PaymentPlanFactory(
         id="56aca38c-dc16-48a9-ace4-70d88b41d462",
         dispersion_start_date=datetime(2020, 8, 10),
         dispersion_end_date=datetime(2020, 12, 10),
@@ -38,7 +38,10 @@ def create_child_payment_plans(pp: PaymentPlan) -> None:
         is_follow_up=True,
         source_payment_plan=pp,
     )
-    PaymentPlanFactory(
+    fpp1.unicef_id = "PP-0060-20-00000003"
+    fpp1.save()
+
+    fpp2 = PaymentPlanFactory(
         id="5b04f7c3-579a-48dd-a232-424daaefffe7",
         dispersion_start_date=datetime(2020, 8, 10),
         dispersion_end_date=datetime(2020, 12, 10),
@@ -47,6 +50,8 @@ def create_child_payment_plans(pp: PaymentPlan) -> None:
         is_follow_up=True,
         source_payment_plan=pp,
     )
+    fpp2.unicef_id = "PP-0060-20-00000004"
+    fpp2.save()
 
 
 class TestPaymentPlanQueries(APITestCase):
@@ -393,7 +398,7 @@ class TestPaymentPlanQueries(APITestCase):
 
         assert len(pp_query) == 2
 
-        for parent_pp_id in ["PP-01", "PP-02"]:
+        for parent_pp_id in ("PP-01", "PP-02"):
             parent_pp = [pp for pp in pp_query if pp["node"]["unicefId"] == parent_pp_id][0]["node"]
             assert parent_pp["isFollowUp"] is False
             assert parent_pp["sourcePaymentPlan"] is None
@@ -403,7 +408,7 @@ class TestPaymentPlanQueries(APITestCase):
 
             if parent_pp_id == "PP-01":
                 assert follow_ups["totalCount"] == 2
-                for unicef_id in ["PP-0060-20-00000003", "PP-0060-20-00000004"]:
+                for unicef_id in ("PP-0060-20-00000003", "PP-0060-20-00000004"):
                     assert len([i for i in follow_ups["edges"] if i["node"]["unicefId"] == unicef_id]) == 1
 
             if parent_pp_id == "PP-02":

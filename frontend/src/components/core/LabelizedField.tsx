@@ -1,5 +1,4 @@
-import { TFunctionResult } from 'i18next';
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 import { MiśTheme } from '../../theme';
 
@@ -18,7 +17,7 @@ const Value = styled.span`
 
 export interface Props {
   value?: React.ReactNode;
-  children?: React.ReactElement | string | number | boolean | TFunctionResult;
+  children?: React.ReactNode;
   label: string;
   dataCy?: string;
   dashed?: boolean;
@@ -44,12 +43,12 @@ export function LabelizedField({
   if (shouldDisplayDash) {
     displayValue = '-';
   } else if (children === undefined) {
-    displayValue = <Value color='textSecondary'>{value}</Value>;
+    displayValue = <Value color="textSecondary">{value}</Value>;
   }
 
   return (
     <div data-cy={dataCy && `labelized-field-container-${dataCy}`}>
-      <Label color='textSecondary'>{label}</Label>
+      <Label color="textSecondary">{label}</Label>
       <div data-cy={`label-${label}`}>{displayValue}</div>
     </div>
   );

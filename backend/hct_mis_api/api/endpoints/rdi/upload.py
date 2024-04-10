@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from django_countries import Countries
-from drf_yasg.utils import swagger_auto_schema
+from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -88,11 +88,12 @@ class HouseholdValidator:
 class DocumentSerializer(serializers.ModelSerializer):
     type = serializers.ChoiceField(
         choices=[(IDENTIFICATION_TYPE_TO_KEY_MAPPING[value], label) for (value, label) in IDENTIFICATION_TYPE_CHOICE],
-        allow_blank=True,
-        required=False,
+        required=True,
     )
     country = serializers.ChoiceField(choices=Countries())
     image = serializers.CharField(allow_blank=True, required=False)
+    document_number = serializers.CharField(required=True)
+    doc_date = serializers.DateField(required=True)
 
     class Meta:
         model = ImportedDocument
@@ -228,6 +229,7 @@ class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
             **validated_data, business_area_slug=self.business_area.slug
         )
         info = self.save_households(rdi_datahub, program.id, households)
+        validated_data.pop("import_done", None)
         rdi_mis = RegistrationDataImport.objects.create(
             **validated_data,
             imported_by=created_by,
@@ -247,7 +249,7 @@ class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
 class UploadRDIView(HOPEAPIBusinessAreaView):
     permission = Grant.API_RDI_UPLOAD
 
-    @swagger_auto_schema(request_body=RDINestedSerializer)
+    @extend_schema(request=RDINestedSerializer)
     @atomic()
     @atomic(using="registration_datahub")
     def post(self, request: "Request", business_area: "BusinessArea") -> Response:

@@ -1,10 +1,10 @@
-import { Grid, MenuItem } from '@material-ui/core';
-import ViewModuleRoundedIcon from '@material-ui/icons/ViewModuleRounded';
-import React from 'react';
+import ViewModuleRoundedIcon from '@mui/icons-material/ViewModuleRounded';
+import { Grid, MenuItem } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
-import { AssigneeAutocomplete } from '../../shared/autocompletes/AssigneeAutocomplete';
-import { createHandleApplyFilterChange } from '../../utils/utils';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { AssigneeAutocomplete } from '@shared/autocompletes/AssigneeAutocomplete';
+import { createHandleApplyFilterChange } from '@utils/utils';
 import { FiltersSection } from './FiltersSection';
 import { SearchTextField } from './SearchTextField';
 import { SelectFilter } from './SelectFilter';
@@ -24,22 +24,19 @@ export function ActivityLogPageFilters({
   setAppliedFilter,
 }: ActivityLogPageFiltersProps): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
-  const {
-    handleFilterChange,
-    applyFilterChanges,
-    clearFilter,
-  } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -63,13 +60,13 @@ export function ActivityLogPageFilters({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid container alignItems='flex-end' spacing={3}>
+      <Grid container alignItems="center" spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
-            data-cy='filters-search'
+            data-cy="filters-search"
           />
         </Grid>
         <Grid item xs={3}>
@@ -98,7 +95,7 @@ export function ActivityLogPageFilters({
           <AssigneeAutocomplete
             label={t('User')}
             filter={filter}
-            name='userId'
+            name="userId"
             value={filter.userId}
             setFilter={setFilter}
             initialFilter={initialFilter}

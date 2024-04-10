@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const ALL_PROGRAMS_QUERY = gql`
   query AllPrograms(
@@ -56,7 +56,6 @@ export const ALL_PROGRAMS_QUERY = gql`
           populationGoal
           sector
           totalNumberOfHouseholds
-          individualDataNeeded
           totalNumberOfHouseholdsWithTpInProgram
         }
       }

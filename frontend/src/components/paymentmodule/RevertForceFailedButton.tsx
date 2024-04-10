@@ -1,17 +1,18 @@
-import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
-import React, { useState } from 'react';
+import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Field, Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { DialogFooter } from '../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { FormikDateField } from '../../shared/Formik/FormikDateField';
-import { useRevertMarkPayAsFailedMutation } from '../../__generated__/graphql';
+import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { FormikDateField } from '@shared/Formik/FormikDateField';
+import { useRevertMarkPayAsFailedMutation } from '@generated/graphql';
 
 export interface RevertForceFailedButtonProps {
   paymentId: string;
@@ -54,10 +55,10 @@ export function RevertForceFailedButton({
     <Box>
       <Box p={2}>
         <Button
-          color='primary'
-          variant='contained'
+          color="primary"
+          variant="contained"
           onClick={() => setOpenModal(true)}
-          data-cy='button-revert-mark-as-failed'
+          data-cy="button-revert-mark-as-failed"
           disabled={disabled}
         >
           {t('Revert mark as failed')}
@@ -75,9 +76,9 @@ export function RevertForceFailedButton({
           <Dialog
             open={isOpenModal}
             onClose={() => setOpenModal(false)}
-            scroll='paper'
-            aria-labelledby='form-dialog-title'
-            maxWidth='md'
+            scroll="paper"
+            aria-labelledby="form-dialog-title"
+            maxWidth="md"
           >
             <DialogTitleWrapper>
               <DialogTitle>{t('Revert mark as failed')}</DialogTitle>
@@ -85,21 +86,21 @@ export function RevertForceFailedButton({
             <DialogContent>
               <Form>
                 <Field
-                  name='deliveredQuantity'
+                  name="deliveredQuantity"
                   label={t('Delivered Quantity')}
-                  type='number'
+                  type="number"
                   required
                   fullWidth
-                  variant='outlined'
+                  variant="outlined"
                   component={FormikTextField}
                 />
                 <Field
-                  name='deliveryDate'
+                  name="deliveryDate"
                   label={t('Delivery Date')}
                   component={FormikDateField}
                   required
                   fullWidth
-                  decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
+                  decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
                 />
               </Form>
             </DialogContent>
@@ -114,11 +115,11 @@ export function RevertForceFailedButton({
                   {t('CANCEL')}
                 </Button>
                 <Button
-                  type='submit'
-                  color='primary'
-                  variant='contained'
+                  type="submit"
+                  color="primary"
+                  variant="contained"
                   onClick={submitForm}
-                  data-cy='button-submit'
+                  data-cy="button-submit"
                   disabled={loading}
                 >
                   {t('Revert mark as failed')}
