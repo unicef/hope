@@ -238,7 +238,7 @@ def mark_as_duplicate_individual_and_reassign_roles(
 def mark_as_duplicate_individual(
     individual_to_remove: Individual,
     unique_individual: Individual,
-    household: Household,
+    household: Optional[Household],
     user: AbstractUser,
     program: "Program",
 ) -> None:
@@ -253,7 +253,8 @@ def mark_as_duplicate_individual(
         old_individual,
         individual_to_remove,
     )
-    household.refresh_from_db()
     individual_marked_as_duplicated.send(sender=Individual, instance=individual_to_remove)
-    if household.active_individuals.count() == 0:
-        household.withdraw()
+    if household:
+        household.refresh_from_db()
+        if household.active_individuals.count() == 0:
+            household.withdraw()

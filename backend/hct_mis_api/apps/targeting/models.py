@@ -30,6 +30,7 @@ from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingIndividualRuleFilterBlockBase,
 )
 from hct_mis_api.apps.utils.models import (
+    AdminUrlMixin,
     ConcurrencyModel,
     RepresentationManager,
     TimeStampedUUIDModel,
@@ -48,7 +49,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyModel):
+class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin):
     """Model for target populations.
 
     Has N:N association with households.

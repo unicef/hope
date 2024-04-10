@@ -2,6 +2,7 @@ import zipfile
 from io import BytesIO
 from pathlib import Path
 from typing import Any
+from unittest import mock
 from unittest.mock import patch
 
 from django.conf import settings
@@ -249,7 +250,10 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
                     file_list_fsp,
                 )
 
-    def test_export_payment_plan_payment_list_per_split(self) -> None:
+    @patch("hct_mis_api.apps.payment.models.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
+    def test_export_payment_plan_payment_list_per_split(self, min_no_of_payments_in_chunk_mock: Any) -> None:
+        min_no_of_payments_in_chunk_mock.__get__ = mock.Mock(return_value=2)
+
         financial_service_provider1 = FinancialServiceProviderFactory(
             delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH]
         )

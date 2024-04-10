@@ -17,9 +17,22 @@ import {
   Route,
   RouterProvider,
   Routes,
+  useNavigate,
+  useParams,
 } from 'react-router-dom';
 import { Providers } from './providers';
 import * as Sentry from '@sentry/react';
+
+const RedirectToPrograms: React.FC = () => {
+  const navigate = useNavigate();
+  const { businessArea } = useParams();
+
+  React.useEffect(() => {
+    navigate(`/${businessArea}/programs/all/list`);
+  }, [navigate, businessArea]);
+
+  return null;
+};
 
 const Root: React.FC = () => (
   <Routes>
@@ -54,6 +67,7 @@ const Root: React.FC = () => (
       />
     </Route>
     <Route path="/" element={<DefaultRoute />} />
+    <Route path="/:businessArea" element={<RedirectToPrograms />} />
   </Routes>
 );
 

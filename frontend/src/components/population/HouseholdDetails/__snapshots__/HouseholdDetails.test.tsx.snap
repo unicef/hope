@@ -33,7 +33,12 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             <div
               data-cy="label-Household Size"
             >
-              4
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                4
+              </span>
             </div>
           </div>
         </div>
@@ -50,7 +55,12 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             <div
               data-cy="label-Residence Status"
             >
-              None
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                None
+              </span>
             </div>
           </div>
         </div>
@@ -67,12 +77,17 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             <div
               data-cy="label-Head of Household"
             >
-              <a
-                class="sc-beySPh hDnmZE"
-                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/population/individuals/SW5kaXZpZHVhbE5vZGU6Y2MwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAx"
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
               >
-                Jan Kowalski
-              </a>
+                <a
+                  class="sc-beySPh hDnmZE"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/population/individuals/SW5kaXZpZHVhbE5vZGU6Y2MwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAx"
+                >
+                  Jan Kowalski
+                </a>
+              </span>
             </div>
           </div>
         </div>
@@ -89,7 +104,12 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             <div
               data-cy="label-FEMALE CHILD HEADED HOUSEHOLD"
             >
-              No
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                No
+              </span>
             </div>
           </div>
         </div>
@@ -106,7 +126,12 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             <div
               data-cy="label-CHILD HEADED HOUSEHOLD"
             >
-              No
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                No
+              </span>
             </div>
           </div>
         </div>
@@ -157,7 +182,12 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             <div
               data-cy="label-Address"
             >
-              Ohio
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                Ohio
+              </span>
             </div>
           </div>
         </div>
@@ -276,7 +306,12 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             <div
               data-cy="label-Geolocation"
             >
-              -
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                -
+              </span>
             </div>
           </div>
         </div>
@@ -344,7 +379,12 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             <div
               data-cy="label-IS THIS A RETURNEE HOUSEHOLD?"
             >
-              No
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                No
+              </span>
             </div>
           </div>
         </div>
@@ -420,37 +460,42 @@ exports[`components/population/HouseholdDetails should render 1`] = `
           <div
             data-cy="label-Cash received"
           >
-            <div
-              class="MuiBox-root css-19idom"
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
             >
               <div
-                class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
+                class="MuiBox-root css-19idom"
               >
                 <div
-                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                  class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
                 >
                   <div
-                    class="MuiBox-root css-j7qwjs"
+                    class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
                   >
                     <div
-                      class="MuiBox-root css-0"
+                      class="MuiBox-root css-j7qwjs"
                     >
-                      USD 5,755.00
-                    </div>
-                    <div
-                      class="MuiBox-root css-0"
-                    >
-                      (AZN 92.00)
-                    </div>
-                    <div
-                      class="MuiBox-root css-0"
-                    >
-                      (COP 3,177.00)
+                      <div
+                        class="MuiBox-root css-0"
+                      >
+                        USD 5,755.00
+                      </div>
+                      <div
+                        class="MuiBox-root css-0"
+                      >
+                        (AZN 92.00)
+                      </div>
+                      <div
+                        class="MuiBox-root css-0"
+                      >
+                        (COP 3,177.00)
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </span>
           </div>
         </div>
       </div>
@@ -470,11 +515,16 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             <div
               data-cy="label-Total Cash Received"
             >
-              <div
-                class="sc-eTNRI iQIAhw"
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
               >
-                USD 0.00
-              </div>
+                <div
+                  class="sc-eTNRI iQIAhw"
+                >
+                  USD 0.00
+                </div>
+              </span>
             </div>
           </div>
         </div>

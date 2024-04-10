@@ -36,6 +36,7 @@ from hct_mis_api.apps.household.signals import (
 )
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
+    AdminUrlMixin,
     ConcurrencyModel,
     RepresentationManager,
     SoftDeletableIsOriginalModel,
@@ -332,6 +333,7 @@ class Household(
     AbstractSyncable,
     ConcurrencyModel,
     UnicefIdentifiedModel,
+    AdminUrlMixin,
 ):
     class CollectType(models.TextChoices):
         STANDARD = "STANDARD", "Standard"
@@ -839,6 +841,7 @@ class Individual(
     AbstractSyncable,
     ConcurrencyModel,
     UnicefIdentifiedModel,
+    AdminUrlMixin,
 ):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [

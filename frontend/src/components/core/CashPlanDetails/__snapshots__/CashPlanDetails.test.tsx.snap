@@ -40,17 +40,22 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                 <div
                   data-cy="label-Status"
                 >
-                  <div
-                    class="sc-jTQCzO eAkjXM"
+                  <span
+                    class="sc-hLQSwg hXyiIZ"
+                    color="textSecondary"
                   >
                     <div
-                      class="sc-gLLuof bfnybE"
-                      data-cy="status-container"
-                      status="DISTRIBUTION_COMPLETED"
+                      class="sc-jTQCzO eAkjXM"
                     >
-                      DISTRIBUTION COMPLETED
+                      <div
+                        class="sc-gLLuof bfnybE"
+                        data-cy="status-container"
+                        status="DISTRIBUTION_COMPLETED"
+                      >
+                        DISTRIBUTION COMPLETED
+                      </div>
                     </div>
-                  </div>
+                  </span>
                 </div>
               </div>
             </div>
@@ -317,11 +322,16 @@ exports[`components/core/CashPlanDetails should render 1`] = `
               <div
                 data-cy="label-Total Number of Households"
               >
-                <div
-                  class="sc-qZrbh hnKrjX"
+                <span
+                  class="sc-hLQSwg hXyiIZ"
+                  color="textSecondary"
                 >
-                  5
-                </div>
+                  <div
+                    class="sc-qZrbh hnKrjX"
+                  >
+                    5
+                  </div>
+                </span>
               </div>
             </div>
           </div>
