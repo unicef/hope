@@ -179,7 +179,7 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
             }
         }
     """
-    permissions = JSONField(default=dict, blank=True)
+    permissions = JSONField(default=dict, blank=True)  # TODO: remove after partner-permission-and-access migration
 
     def __str__(self) -> str:
         return f"{self.name} [Sub-Partner of {self.parent.name}]" if self.parent else self.name
@@ -355,8 +355,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     @property
     def business_areas(self) -> QuerySet[BusinessArea]:
         return BusinessArea.objects.filter(
-            Q(Q(user_roles__user=self) & ~Q(user_roles__expiry_date__lt=timezone.now()))
-            | Q(id__in=self.partner.business_area_ids)
+            Q(Q(user_roles__user=self) & ~Q(user_roles__expiry_date__lt=timezone.now())) | Q(partners=self.partner)
         ).distinct()
 
     def has_permission(

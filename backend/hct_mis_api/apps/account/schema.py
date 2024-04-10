@@ -33,8 +33,9 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.geo.schema import AreaGroupNode
+from hct_mis_api.apps.geo.schema import AreaGroupNode, AreaNode
 from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.program.models import ProgramPartnerThrough
 
 logger = logging.getLogger(__name__)
 
@@ -136,6 +137,13 @@ class JSONLazyString(graphene.Scalar):
     @staticmethod
     def parse_value(value: Any) -> Dict:
         return json.loads(value)
+
+
+class ProgramPartnerThroughNode(DjangoObjectType):
+    class Meta:
+        model = ProgramPartnerThrough
+
+    areas = graphene.List(AreaNode)
 
 
 class PartnerNodeForProgram(DjangoObjectType):

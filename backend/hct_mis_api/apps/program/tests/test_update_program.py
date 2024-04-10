@@ -14,9 +14,10 @@ from hct_mis_api.apps.core.fixtures import (
     generate_data_collecting_types,
 )
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 
 
 class TestUpdateProgram(APITestCase):
@@ -111,6 +112,67 @@ class TestUpdateProgram(APITestCase):
         else:
             assert updated_program.status == Program.DRAFT
             assert updated_program.name == "initial name"
+
+    def test_update_program_partners(self) -> None:
+        area1 = AreaFactory()
+        area2 = AreaFactory()
+        area_to_de_unselected = AreaFactory()
+        existing_partner = PartnerFactory(name="Other Partner")
+        program_partner = ProgramPartnerThrough.objects.create(
+            program=self.program,
+            partner=self.partner,
+        )
+        program_partner.areas.set([area1, area_to_de_unselected])
+        program_partner_to_be_deleted = ProgramPartnerThrough.objects.create(
+            program=self.program,
+            partner=existing_partner,
+        )
+        partner_to_be_added = PartnerFactory(name="Partner to be added")
+        self.create_user_role_with_permissions(
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.business_area,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "name": "updated name",
+                    "status": Program.DRAFT,
+                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
+                    "dataCollectingTypeCode": "partial_individuals",
+                    "partnersAccess": [
+                        {
+                            "partner": str(self.partner.id),
+                            "areas": [str(area1.id), str(area2.id)],
+                        },
+                        {
+                            "partner": str(partner_to_be_added.id),
+                            "areas": [str(area1.id), str(area2.id)],
+                        },
+                    ],
+                },
+                "version": self.program.version,
+            },
+        )
+
+        updated_program = Program.objects.get(id=self.program.id)
+        self.assertEqual(updated_program.status, Program.DRAFT)
+        self.assertEqual(updated_program.name, "updated name")
+        self.assertEqual(updated_program.partners.count(), 2)
+        self.assertEqual(updated_program.program_partner_through.count(), 2)
+        self.assertEqual(updated_program.program_partner_through.first().areas.count(), 2)
+        self.assertEqual(updated_program.program_partner_through.last().areas.count(), 2)
+        self.assertIn(area1, updated_program.program_partner_through.first().areas.all())
+        self.assertIn(area2, updated_program.program_partner_through.first().areas.all())
+        self.assertIn(area1, updated_program.program_partner_through.last().areas.all())
+        self.assertIn(area2, updated_program.program_partner_through.last().areas.all())
+        self.assertNotIn(area_to_de_unselected, updated_program.program_partner_through.first().areas.all())
+        self.assertNotIn(area_to_de_unselected, updated_program.program_partner_through.last().areas.all())
+        self.assertFalse(ProgramPartnerThrough.objects.filter(id=program_partner_to_be_deleted.id).exists())
 
     def test_update_active_program_with_dct(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
