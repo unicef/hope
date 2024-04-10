@@ -1063,7 +1063,8 @@ export type CopyProgramInput = {
   frequencyOfPayments?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
-  partners?: InputMaybe<Array<InputMaybe<PartnerProgramInput>>>;
+  partnerAccess?: InputMaybe<Scalars['String']['input']>;
+  partners?: InputMaybe<Array<InputMaybe<ProgramPartnerThroughInput>>>;
   populationGoal?: InputMaybe<Scalars['Int']['input']>;
   programmeCode?: InputMaybe<Scalars['String']['input']>;
   sector?: InputMaybe<Scalars['String']['input']>;
@@ -1236,7 +1237,8 @@ export type CreateProgramInput = {
   endDate?: InputMaybe<Scalars['Date']['input']>;
   frequencyOfPayments?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
-  partnersAccess?: InputMaybe<Array<InputMaybe<ProgramPartnerThroughInput>>>;
+  partnerAccess?: InputMaybe<Scalars['String']['input']>;
+  partners?: InputMaybe<Array<InputMaybe<ProgramPartnerThroughInput>>>;
   populationGoal?: InputMaybe<Scalars['Int']['input']>;
   programmeCode?: InputMaybe<Scalars['String']['input']>;
   sector?: InputMaybe<Scalars['String']['input']>;
@@ -4526,12 +4528,6 @@ export type PartnerNodeForProgramUserSetArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-export type PartnerProgramInput = {
-  adminAreas?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  areaAccess?: InputMaybe<Scalars['String']['input']>;
-  id: Scalars['String']['input'];
 };
 
 export type PartnerType = {
@@ -8539,7 +8535,8 @@ export type UpdateProgramInput = {
   frequencyOfPayments?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
-  partnersAccess?: InputMaybe<Array<InputMaybe<ProgramPartnerThroughInput>>>;
+  partnerAccess?: InputMaybe<Scalars['String']['input']>;
+  partners?: InputMaybe<Array<InputMaybe<ProgramPartnerThroughInput>>>;
   populationGoal?: InputMaybe<Scalars['Int']['input']>;
   programmeCode?: InputMaybe<Scalars['String']['input']>;
   sector?: InputMaybe<Scalars['String']['input']>;
@@ -23681,7 +23678,6 @@ export type ResolversTypes = {
   PaginatedCashPlanAndPaymentPlanNode: ResolverTypeWrapper<PaginatedCashPlanAndPaymentPlanNode>;
   PaginatedPaymentRecordsAndPaymentsNode: ResolverTypeWrapper<PaginatedPaymentRecordsAndPaymentsNode>;
   PartnerNodeForProgram: ResolverTypeWrapper<PartnerNodeForProgram>;
-  PartnerProgramInput: PartnerProgramInput;
   PartnerType: ResolverTypeWrapper<PartnerType>;
   PaymentConflictDataNode: ResolverTypeWrapper<PaymentConflictDataNode>;
   PaymentDeliveryType: PaymentDeliveryType;
@@ -24167,7 +24163,6 @@ export type ResolversParentTypes = {
   PaginatedCashPlanAndPaymentPlanNode: PaginatedCashPlanAndPaymentPlanNode;
   PaginatedPaymentRecordsAndPaymentsNode: PaginatedPaymentRecordsAndPaymentsNode;
   PartnerNodeForProgram: PartnerNodeForProgram;
-  PartnerProgramInput: PartnerProgramInput;
   PartnerType: PartnerType;
   PaymentConflictDataNode: PaymentConflictDataNode;
   PaymentDetailsApproveMutation: PaymentDetailsApproveMutation;

@@ -617,7 +617,8 @@ input CopyProgramInput {
   administrativeAreasOfImplementation: String
   businessAreaSlug: String
   dataCollectingTypeCode: String
-  partners: [PartnerProgramInput]
+  partners: [ProgramPartnerThroughInput]
+  partnerAccess: String
   programmeCode: String
 }
 
@@ -779,7 +780,8 @@ input CreateProgramInput {
   administrativeAreasOfImplementation: String
   businessAreaSlug: String
   dataCollectingTypeCode: String
-  partnersAccess: [ProgramPartnerThroughInput]
+  partners: [ProgramPartnerThroughInput]
+  partnerAccess: String
   programmeCode: String
 }
 
@@ -2813,12 +2815,6 @@ type PartnerNodeForProgram {
   programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   adminAreas: [AreaGroupNode]
   areaAccess: String
-}
-
-input PartnerProgramInput {
-  id: String!
-  areaAccess: String
-  adminAreas: [String]
 }
 
 type PartnerType {
@@ -5051,7 +5047,8 @@ input UpdateProgramInput {
   populationGoal: Int
   administrativeAreasOfImplementation: String
   dataCollectingTypeCode: String
-  partnersAccess: [ProgramPartnerThroughInput]
+  partners: [ProgramPartnerThroughInput]
+  partnerAccess: String
   programmeCode: String
 }
 
