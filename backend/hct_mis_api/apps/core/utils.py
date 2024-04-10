@@ -303,6 +303,7 @@ def nested_dict_get(dictionary: Dict, path: str) -> Optional[str]:
 
 
 def get_count_and_percentage(count: int, all_items_count: int = 1) -> Dict[str, Union[int, float]]:
+    all_items_count = all_items_count or 1  # fix division by zero
     percentage = (count / all_items_count) * 100
     return {"count": count, "percentage": percentage}
 

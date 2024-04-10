@@ -1,9 +1,10 @@
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
 
-url = input("Url of page (default is localhost:3000/):")
+default_url = "http://localhost:8080"
+url = input(f"Url of page (default is {default_url}):")
 if not url:
-    url = "http://localhost:3000/"
+    url = default_url
 
 driver = Chrome()
 

@@ -6,6 +6,7 @@ export const Feedback = gql`
       id
       unicefId
       issueType
+      adminUrl
       householdLookup {
         id
         unicefId

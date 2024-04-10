@@ -30,7 +30,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Full Name"
           >
-            Jan Romaniak
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Jan Romaniak
+            </span>
           </div>
         </div>
       </div>
@@ -47,7 +52,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Given Name"
           >
-            Jan
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Jan
+            </span>
           </div>
         </div>
       </div>
@@ -81,7 +91,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Family Name"
           >
-            Romaniak
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Romaniak
+            </span>
           </div>
         </div>
       </div>
@@ -98,7 +113,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Gender"
           >
-            Male
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Male
+            </span>
           </div>
         </div>
       </div>
@@ -115,7 +135,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Age"
           >
-            121
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              121
+            </span>
           </div>
         </div>
       </div>
@@ -132,11 +157,16 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Date of Birth"
           >
-            <time
-              datetime="-2176675200000"
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
             >
-              10 Jan 1901
-            </time>
+              <time
+                datetime="-2176675200000"
+              >
+                10 Jan 1901
+              </time>
+            </span>
           </div>
         </div>
       </div>
@@ -153,7 +183,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Estimated Date of Birth"
           >
-            No
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              No
+            </span>
           </div>
         </div>
       </div>
@@ -170,7 +205,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Marital Status"
           >
-            Married
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Married
+            </span>
           </div>
         </div>
       </div>
@@ -187,7 +227,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Work Status"
           >
-            Not provided
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Not provided
+            </span>
           </div>
         </div>
       </div>
@@ -204,7 +249,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Pregnant"
           >
-            No
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              No
+            </span>
           </div>
         </div>
       </div>
@@ -221,12 +271,17 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Household ID"
           >
-            <a
-              class="sc-beySPh hDnmZE"
-              href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/population/household/SG91c2Vob2xkTm9kZTowMTk1YTEzYi0wYThkLTRiYTEtYjM0OS00MDY4YWNmOTViNDE="
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
             >
-              HH-20-0000.0002
-            </a>
+              <a
+                class="sc-beySPh hDnmZE"
+                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/population/household/SG91c2Vob2xkTm9kZTowMTk1YTEzYi0wYThkLTRiYTEtYjM0OS00MDY4YWNmOTViNDE="
+              >
+                HH-20-0000.0002
+              </a>
+            </span>
           </div>
         </div>
       </div>
@@ -243,7 +298,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Role"
           >
-            None
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              None
+            </span>
           </div>
         </div>
       </div>
@@ -260,7 +320,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Relationship to HOH"
           >
-            Brother / Sister
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Brother / Sister
+            </span>
           </div>
         </div>
       </div>
@@ -294,7 +359,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Linked Households"
           >
-            -
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              -
+            </span>
           </div>
         </div>
       </div>
@@ -335,7 +405,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Seeing disability severity"
           >
-            None
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              None
+            </span>
           </div>
         </div>
       </div>
@@ -352,7 +427,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Hearing disability severity"
           >
-            None
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              None
+            </span>
           </div>
         </div>
       </div>
@@ -369,7 +449,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Physical disability severity"
           >
-            None
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              None
+            </span>
           </div>
         </div>
       </div>
@@ -386,7 +471,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Remembering or concentrating disability severity"
           >
-            None
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              None
+            </span>
           </div>
         </div>
       </div>
@@ -403,7 +493,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Self-care disability severity"
           >
-            None
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              None
+            </span>
           </div>
         </div>
       </div>
@@ -420,7 +515,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Communicating disability severity"
           >
-            None
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              None
+            </span>
           </div>
         </div>
       </div>
@@ -437,7 +537,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Disability"
           >
-            Not Disabled
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Not Disabled
+            </span>
           </div>
         </div>
       </div>
@@ -467,7 +572,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
               <div
                 data-cy="label-National ID"
               >
-                WSH221365
+                <span
+                  class="sc-dmyCSP bGPBYf"
+                  color="textSecondary"
+                >
+                  WSH221365
+                </span>
               </div>
             </div>
           </div>
@@ -481,7 +591,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
             <div
               data-cy="label-issued"
             >
-              Poland
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                Poland
+              </span>
             </div>
           </div>
         </div>
@@ -523,7 +638,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Phone Number"
           >
-            +48734123423
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              +48734123423
+            </span>
           </div>
         </div>
       </div>
@@ -540,7 +660,12 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Alternative Phone Number"
           >
-            -
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              -
+            </span>
           </div>
         </div>
       </div>
@@ -564,11 +689,16 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Date of last screening against sanctions list"
           >
-            <time
-              datetime="1644305739718"
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
             >
-              8 Feb 2022
-            </time>
+              <time
+                datetime="1644305739718"
+              >
+                8 Feb 2022
+              </time>
+            </span>
           </div>
         </div>
       </div>
