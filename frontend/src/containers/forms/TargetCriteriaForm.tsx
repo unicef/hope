@@ -123,13 +123,11 @@ export const TargetCriteriaForm = ({
   householdFiltersAvailable,
 }: TargetCriteriaFormPropTypes): React.ReactElement => {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
-  const {
-    selectedProgram: { id },
-  } = useProgramContext();
+  const { businessArea, programId } = useBaseUrl();
+
   const { data, loading } = useCachedImportedIndividualFieldsQuery(
     businessArea,
-    id,
+    programId,
   );
 
   const filtersArrayWrapperRef = useRef(null);
@@ -153,6 +151,9 @@ export const TargetCriteriaForm = ({
     };
     setHouseholdData(filteredHouseholdData);
   }, [data, loading]);
+
+  if (!data) return null;
+
   const validate = ({
     filters,
     individualsFiltersBlocks,

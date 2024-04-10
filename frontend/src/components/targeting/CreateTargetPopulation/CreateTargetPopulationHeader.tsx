@@ -34,24 +34,12 @@ export function CreateTargetPopulationHeader({
 
   return (
     <PageHeader
-      title={
-        <Field
-          name="name"
-          label={t('Enter Target Population Name')}
-          type="text"
-          fullWidth
-          required
-          component={FormikTextField}
-          variant="standard"
-          data-cy="input-name"
-        />
-      }
+      title={t('New Target Population')}
       breadCrumbs={
         hasPermissions(PERMISSIONS.TARGETING_VIEW_LIST, permissions)
           ? breadCrumbsItems
           : null
       }
-      hasInputComponent
     >
       <>
         <Box m={2}>
