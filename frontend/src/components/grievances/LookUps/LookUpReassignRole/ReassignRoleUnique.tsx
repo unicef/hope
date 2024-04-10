@@ -1,15 +1,16 @@
 import { Formik } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   GrievanceTicketDocument,
   useReassignRoleGrievanceMutation,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
+import { Button } from '@mui/material';
 
-const ReassignRoleButton = styled.button`
+const ReassignRoleButton = styled(Button)`
   padding: 25px;
   margin-top: 25px;
   width: 100%;
@@ -24,12 +25,12 @@ const ReassignRoleButton = styled.button`
   background: #fff;
 `;
 
-export const ReassignRoleUnique = ({
+export function ReassignRoleUnique({
   individualRole,
   ticket,
   household,
   individual,
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { showMessage } = useSnackbar();
@@ -67,15 +68,15 @@ export const ReassignRoleUnique = ({
     >
       {({ submitForm }) => (
         <ReassignRoleButton
-          type='submit'
-          color='primary'
-          variant='contained'
+          type="submit"
+          color="primary"
           onClick={submitForm}
-          data-cy='button-submit'
+          data-cy="button-submit"
+          variant="contained"
         >
           {t('Reassign To Unique Individual')}
         </ReassignRoleButton>
       )}
     </Formik>
   );
-};
+}

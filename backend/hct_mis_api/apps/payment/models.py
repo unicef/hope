@@ -51,6 +51,7 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
 )
 from hct_mis_api.apps.core.field_attributes.fields_types import _HOUSEHOLD, _INDIVIDUAL
+from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.household.models import (
@@ -390,6 +391,7 @@ class PaymentPlanSplitPayments(TimeStampedUUIDModel):
 
 class PaymentPlanSplit(TimeStampedUUIDModel):
     MAX_CHUNKS = 50
+    MIN_NO_OF_PAYMENTS_IN_CHUNK = 10
 
     class SplitType(models.TextChoices):
         BY_RECORDS = "BY_RECORDS", "By Records"
@@ -1014,6 +1016,28 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         # TODO will update after add feature with 'program_cycle' and migrate all data
         return self.program_cycle.program if self.program_cycle else self.program
 
+    @property
+    def can_send_to_payment_gateway(self) -> bool:
+        status_accepted = self.status == PaymentPlan.Status.ACCEPTED
+        if self.splits.exists():
+            has_payment_gateway_fsp = self.delivery_mechanisms.filter(
+                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+                financial_service_provider__payment_gateway_id__isnull=False,
+            ).exists()
+            has_not_sent_to_payment_gateway_splits = self.splits.filter(
+                sent_to_payment_gateway=False,
+            ).exists()
+            return status_accepted and has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
+        else:
+            return (
+                status_accepted
+                and self.delivery_mechanisms.filter(
+                    sent_to_payment_gateway=False,
+                    financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+                    financial_service_provider__payment_gateway_id__isnull=False,
+                ).exists()
+            )
+
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     COLUMNS_CHOICES = (
@@ -1199,7 +1223,7 @@ class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
         return f"{self.financial_service_provider.name} - {self.xlsx_template} - {self.delivery_mechanism}"
 
 
-class FinancialServiceProvider(TimeStampedUUIDModel):
+class FinancialServiceProvider(LimitBusinessAreaModelMixin, TimeStampedUUIDModel):
     COMMUNICATION_CHANNEL_API = "API"
     COMMUNICATION_CHANNEL_SFTP = "SFTP"
     COMMUNICATION_CHANNEL_XLSX = "XLSX"
@@ -1460,6 +1484,11 @@ class CashPlan(ConcurrencyModel, GenericPaymentPlan):
     def unicef_id(self) -> str:
         # TODO: maybe 'ca_id' rename to 'unicef_id'?
         return self.ca_id
+
+    @property
+    def verification_status(self) -> Optional[str]:
+        summary = self.payment_verification_summary.first()
+        return getattr(summary, "status", None)
 
     class Meta:
         verbose_name = "Cash Plan"

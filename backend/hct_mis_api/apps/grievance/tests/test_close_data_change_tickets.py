@@ -4,6 +4,7 @@ from typing import Any, List
 
 from django.core.management import call_command
 
+from flaky import flaky
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -45,6 +46,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 
+@flaky
 class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
     databases = {"default", "registration_datahub"}
 

@@ -493,7 +493,6 @@
   "model": "household.individualidentity",
   "pk": 7,
   "fields": {
-    "partner": 1,
     "individual": "bc5a5b20-74a4-4d48-ab63-99a0c913850d",
     "number": "johniak pany",
     "country": "d1eb1574-8146-4c70-a804-caf163d451a6"

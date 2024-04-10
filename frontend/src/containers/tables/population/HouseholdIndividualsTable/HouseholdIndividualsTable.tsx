@@ -1,26 +1,23 @@
-import TableCell from '@material-ui/core/TableCell';
-import React, { ReactElement, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { BlackLink } from '../../../../components/core/BlackLink';
-import { StatusBox } from '../../../../components/core/StatusBox';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { HeadCell } from '../../../../components/core/Table/EnhancedTableHead';
-import {
-  Order,
-  TableComponent,
-} from '../../../../components/core/Table/TableComponent';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import TableCell from '@mui/material/TableCell';
+import { ReactElement, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { BlackLink } from '@components/core/BlackLink';
+import { StatusBox } from '@components/core/StatusBox';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import { Order, TableComponent } from '@components/core/Table/TableComponent';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 import {
   choicesToDict,
   populationStatusToColor,
   sexToCapitalize,
-} from '../../../../utils/utils';
+} from '@utils/utils';
 import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
   IndividualNode,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
@@ -75,14 +72,14 @@ export function HouseholdIndividualsTable({
   household,
   choicesData,
 }: HouseholdIndividualsTableProps): ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
   const handleClick = (row): void => {
-    history.push(`/${baseUrl}/population/individuals/${row.id}`);
+    navigate(`/${baseUrl}/population/individuals/${row.id}`);
   };
 
   const relationshipChoicesDict = choicesToDict(
@@ -94,58 +91,52 @@ export function HouseholdIndividualsTable({
   );
   if (orderBy) {
     if (orderDirection === 'asc') {
-      allIndividuals.sort((a, b) => {
-        return a[orderBy] < b[orderBy] ? 1 : -1;
-      });
+      allIndividuals.sort((a, b) => (a[orderBy] < b[orderBy] ? 1 : -1));
     } else {
-      allIndividuals.sort((a, b) => {
-        return a[orderBy] > b[orderBy] ? 1 : -1;
-      });
+      allIndividuals.sort((a, b) => (a[orderBy] > b[orderBy] ? 1 : -1));
     }
   }
 
   const totalCount = allIndividuals.length;
   return (
     <TableComponent<IndividualNode>
-      title='Individuals in Household'
+      title="Individuals in Household"
       data={allIndividuals.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage,
       )}
       allowSort={false}
-      renderRow={(row) => {
-        return (
-          <ClickableTableRow
-            hover
-            onClick={() => handleClick(row)}
-            role='checkbox'
-            key={row.id}
-          >
-            <TableCell align='left'>
-              <BlackLink to={`/${baseUrl}/population/individuals/${row.id}`}>
-                {row.unicefId}
-              </BlackLink>
-            </TableCell>
-            <TableCell align='left'>{row.fullName}</TableCell>
-            <TableCell align='left'>
-              <StatusBox
-                status={row.status}
-                statusToColor={populationStatusToColor}
-              />
-            </TableCell>
-            <TableCell align='left'>{roleChoicesDict[row.role]}</TableCell>
-            <TableCell align='left'>
-              {household?.id === row?.household?.id
-                ? relationshipChoicesDict[row.relationship]
-                : relationshipChoicesDict.NON_BENEFICIARY}
-            </TableCell>
-            <TableCell align='left'>
-              <UniversalMoment>{row.birthDate}</UniversalMoment>
-            </TableCell>
-            <TableCell align='left'>{sexToCapitalize(row.sex)}</TableCell>
-          </ClickableTableRow>
-        );
-      }}
+      renderRow={(row) => (
+        <ClickableTableRow
+          hover
+          onClick={() => handleClick(row)}
+          role="checkbox"
+          key={row.id}
+        >
+          <TableCell align="left">
+            <BlackLink to={`/${baseUrl}/population/individuals/${row.id}`}>
+              {row.unicefId}
+            </BlackLink>
+          </TableCell>
+          <TableCell align="left">{row.fullName}</TableCell>
+          <TableCell align="left">
+            <StatusBox
+              status={row.status}
+              statusToColor={populationStatusToColor}
+            />
+          </TableCell>
+          <TableCell align="left">{roleChoicesDict[row.role]}</TableCell>
+          <TableCell align="left">
+            {household?.id === row?.household?.id
+              ? relationshipChoicesDict[row.relationship]
+              : relationshipChoicesDict.NON_BENEFICIARY}
+          </TableCell>
+          <TableCell align="left">
+            <UniversalMoment>{row.birthDate}</UniversalMoment>
+          </TableCell>
+          <TableCell align="left">{sexToCapitalize(row.sex)}</TableCell>
+        </ClickableTableRow>
+      )}
       headCells={headCells}
       rowsPerPageOptions={totalCount < 5 ? [totalCount] : [5, 10, 15]}
       rowsPerPage={totalCount > 5 ? rowsPerPage : totalCount}

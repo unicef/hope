@@ -14,5 +14,7 @@ export function useBaseUrl(): {
   const isAllPrograms = programId === 'all';
   const isGlobal = businessArea === 'global';
 
-  return { businessArea, programId, baseUrl, isAllPrograms, isGlobal };
+  return {
+    businessArea, programId, baseUrl, isAllPrograms, isGlobal,
+  };
 }

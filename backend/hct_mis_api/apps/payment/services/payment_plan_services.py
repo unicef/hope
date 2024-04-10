@@ -30,7 +30,6 @@ from hct_mis_api.apps.payment.celery_tasks import (
 from hct_mis_api.apps.payment.models import (
     Approval,
     ApprovalProcess,
-    FinancialServiceProvider,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
@@ -137,13 +136,7 @@ class PaymentPlanService:
         if self.payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY:
             raise GraphQLError("Sending in progress")
 
-        # send to payment gateway if applicable
-        not_sent_pg_delivery_mechanisms = self.payment_plan.delivery_mechanisms.filter(
-            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            financial_service_provider__payment_gateway_id__isnull=False,
-            sent_to_payment_gateway=False,
-        )
-        if not_sent_pg_delivery_mechanisms.exists():
+        if self.payment_plan.can_send_to_payment_gateway:
             send_to_payment_gateway.delay(self.payment_plan.pk, self.user.pk)
         else:
             raise GraphQLError("Already sent to Payment Gateway")
@@ -700,8 +693,10 @@ class PaymentPlanService:
             if not chunks_no:
                 raise GraphQLError("Payments Number is required for split by records")
 
-            if chunks_no > payments_count or chunks_no < 2:
-                raise GraphQLError("Payment Parts number should be between 2 and total number of payments")
+            if chunks_no > payments_count or chunks_no < PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK:
+                raise GraphQLError(
+                    f"Payment Parts number should be between {PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK} and total number of payments"
+                )
             payments_chunks = list(chunks(list(payments.order_by("unicef_id").values_list("id", flat=True)), chunks_no))
 
         elif split_type == PaymentPlanSplit.SplitType.BY_ADMIN_AREA2:

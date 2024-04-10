@@ -1,11 +1,11 @@
-import { Checkbox, FormControlLabel, Grid, MenuItem } from '@material-ui/core';
-import React from 'react';
+import { Checkbox, FormControlLabel, Grid, MenuItem } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
-import { DatePickerFilter } from '../../../components/core/DatePickerFilter';
-import { FiltersSection } from '../../../components/core/FiltersSection';
-import { SelectFilter } from '../../../components/core/SelectFilter';
-import { createHandleApplyFilterChange } from '../../../utils/utils';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { DatePickerFilter } from '@components/core/DatePickerFilter';
+import { FiltersSection } from '@components/core/FiltersSection';
+import { SelectFilter } from '@components/core/SelectFilter';
+import { createHandleApplyFilterChange } from '@utils/utils';
 
 interface ReportingFiltersProps {
   filter;
@@ -16,32 +16,28 @@ interface ReportingFiltersProps {
   setAppliedFilter: (filter) => void;
 }
 
-export const ReportingFilters = ({
+export function ReportingFilters({
   filter,
   choicesData,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: ReportingFiltersProps): React.ReactElement => {
+}: ReportingFiltersProps): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
-  const {
-    handleFilterChange,
-    applyFilterChanges,
-    clearFilter,
-  } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
-
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -55,20 +51,18 @@ export const ReportingFilters = ({
       applyHandler={handleApplyFilter}
       clearHandler={handleClearFilter}
     >
-      <Grid container alignItems='flex-end' spacing={3}>
+      <Grid container alignItems="flex-end" spacing={3}>
         <Grid item xs={3}>
           <SelectFilter
             label={t('Report Type')}
             onChange={(e) => handleFilterChange('type', e.target.value)}
             value={filter.type}
           >
-            {choicesData.reportTypesChoices.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
+            {choicesData.reportTypesChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
@@ -88,17 +82,15 @@ export const ReportingFilters = ({
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
-            label='Status'
+            label="Status"
             onChange={(e) => handleFilterChange('status', e.target.value)}
             value={filter.status}
           >
-            {choicesData.reportStatusChoices.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
+            {choicesData.reportStatusChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid item xs={12}>
@@ -110,13 +102,13 @@ export const ReportingFilters = ({
                   handleFilterChange('onlyMy', checked)
                 }
                 value={filter.onlyMy}
-                color='primary'
+                color="primary"
               />
             }
-            label='See my reports only'
+            label="See my reports only"
           />
         </Grid>
       </Grid>
     </FiltersSection>
   );
-};
+}

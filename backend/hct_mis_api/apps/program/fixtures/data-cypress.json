@@ -21,7 +21,6 @@
       "cash_plus": true,
       "population_goal": 0,
       "administrative_areas_of_implementation": "",
-      "individual_data_needed": false,
       "admin_areas": [],
       "data_collecting_type": 1,
       "programme_code": "ABC2"
@@ -53,7 +52,6 @@
       "cash_plus": true,
       "population_goal": 99,
       "administrative_areas_of_implementation": "other data here ",
-      "individual_data_needed": true,
       "admin_areas": [],
       "data_collecting_type": 1,
       "programme_code": "ABC1"

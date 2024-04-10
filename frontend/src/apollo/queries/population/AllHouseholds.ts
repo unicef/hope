@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const AllHouseholds = gql`
   query AllHouseholds(
@@ -19,7 +19,6 @@ export const AllHouseholds = gql`
     $admin2: ID
     $withdrawn: Boolean
     $program: ID
-
   ) {
     allHouseholds(
       after: $after

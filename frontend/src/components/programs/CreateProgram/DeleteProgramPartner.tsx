@@ -4,17 +4,18 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
-import React, { useState } from 'react';
+} from '@mui/material';
+import { Delete } from '@mui/icons-material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { DialogDescription } from '../../../containers/dialogs/DialogDescription';
-import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
-import { GreyText } from '../../core/GreyText';
-import { LoadingButton } from '../../core/LoadingButton';
-import { ErrorButton } from '../../core/ErrorButton';
+import { DialogDescription } from '@containers/dialogs/DialogDescription';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { GreyText } from '@core/GreyText';
+import { LoadingButton } from '@core/LoadingButton';
+import { ErrorButton } from '@core/ErrorButton';
 
 const WhiteDeleteIcon = styled(Delete)`
   color: #fff;
@@ -25,23 +26,23 @@ interface DeleteProgramPartnerProps {
   handleDeleteProgramPartner;
 }
 
-export const DeleteProgramPartner = ({
+export function DeleteProgramPartner({
   canDeleteProgramPartner,
   handleDeleteProgramPartner,
-}: DeleteProgramPartnerProps): React.ReactElement => {
+}: DeleteProgramPartnerProps): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   return (
     <>
       <ErrorButton
-        data-cy='button-delete'
+        data-cy="button-delete"
         onClick={() => setOpen(true)}
         disabled={!canDeleteProgramPartner}
       >
         <Delete />
       </ErrorButton>
-      <Dialog open={open} onClose={() => setOpen(false)} scroll='paper'>
+      <Dialog open={open} onClose={() => setOpen(false)} scroll="paper">
         <DialogTitleWrapper>
           <DialogTitle>
             {t(
@@ -58,12 +59,12 @@ export const DeleteProgramPartner = ({
           <DialogActions>
             <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <LoadingButton
-              //TODO: fix this
+              // TODO: fix this
               loading={false}
-              type='submit'
-              variant='contained'
+              type="submit"
+              variant="contained"
               onClick={() => handleDeleteProgramPartner()}
-              data-cy='button-delete'
+              data-cy="button-delete"
               endIcon={<WhiteDeleteIcon />}
             >
               {t('Delete')}
@@ -73,4 +74,4 @@ export const DeleteProgramPartner = ({
       </Dialog>
     </>
   );
-};
+}

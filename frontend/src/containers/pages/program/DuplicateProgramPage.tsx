@@ -1,28 +1,28 @@
-import { Box, Step, StepButton, Stepper } from '@material-ui/core';
+import { Box, Step, StepButton, Stepper } from '@mui/material';
 import { Formik } from 'formik';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams, useHistory } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   AllProgramsForChoicesDocument,
   useAllAreasTreeQuery,
   useCopyProgramMutation,
   useProgramQuery,
   useUserPartnerChoicesQuery,
-} from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { DetailsStep } from '../../../components/programs/CreateProgram/DetailsStep';
-import { PartnersStep } from '../../../components/programs/CreateProgram/PartnersStep';
-import { programValidationSchema } from '../../../components/programs/CreateProgram/programValidationSchema';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
+} from '@generated/graphql';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { DetailsStep } from '@components/programs/CreateProgram/DetailsStep';
+import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
+import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { hasPermissionInModule } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { usePermissions } from '@hooks/usePermissions';
 
 export const DuplicateProgramPage = (): ReactElement => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
@@ -38,10 +38,8 @@ export const DuplicateProgramPage = (): ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const {
-    data: userPartnerChoicesData,
-    loading: userPartnerChoicesLoading,
-  } = useUserPartnerChoicesQuery();
+  const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
+    useUserPartnerChoicesQuery();
 
   const handleSubmit = async (values): Promise<void> => {
     try {
@@ -61,9 +59,7 @@ export const DuplicateProgramPage = (): ReactElement => {
         ],
       });
       showMessage('Programme created.');
-      history.push(
-        `/${baseUrl}/details/${response.data.copyProgram.program.id}`,
-      );
+      navigate(`/${baseUrl}/details/${response.data.copyProgram.program.id}`);
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
@@ -178,24 +174,26 @@ export const DuplicateProgramPage = (): ReactElement => {
               }
             />
             <Box p={6}>
-              <Stepper activeStep={step}>
-                <Step>
-                  <StepButton
-                    data-cy='step-button-details'
-                    onClick={() => setStep(0)}
-                  >
-                    {t('Details')}
-                  </StepButton>
-                </Step>
-                <Step>
-                  <StepButton
-                    data-cy='step-button-partners'
-                    onClick={() => setStep(1)}
-                  >
-                    {t('Programme Partners')}
-                  </StepButton>
-                </Step>
-              </Stepper>
+              <Box mb={2}>
+                <Stepper activeStep={step}>
+                  <Step>
+                    <StepButton
+                      data-cy="step-button-details"
+                      onClick={() => setStep(0)}
+                    >
+                      {t('Details')}
+                    </StepButton>
+                  </Step>
+                  <Step>
+                    <StepButton
+                      data-cy="step-button-partners"
+                      onClick={() => setStep(1)}
+                    >
+                      {t('Programme Partners')}
+                    </StepButton>
+                  </Step>
+                </Stepper>
+              </Box>
               {step === 0 && (
                 <DetailsStep values={values} handleNext={handleNext} />
               )}

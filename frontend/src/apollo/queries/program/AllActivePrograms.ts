@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const ALL_ACTIVE_PROGRAMS_QUERY = gql`
   query AllActivePrograms(

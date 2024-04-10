@@ -1,19 +1,20 @@
-import get from 'lodash/get';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
-import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { useDebounce } from '../../hooks/useDebounce';
 import {
   createHandleApplyFilterChange,
   getAutocompleteOptionLabel,
   handleAutocompleteChange,
   handleAutocompleteClose,
   handleOptionSelected,
-} from '../../utils/utils';
+} from '@utils/utils';
+import get from 'lodash/get';
+import * as React from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAllUsersForFiltersLazyQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useDebounce } from '@hooks/useDebounce';
 import { BaseAutocomplete } from './BaseAutocomplete';
 
-export const AssigneeAutocomplete = ({
+export function AssigneeAutocomplete({
   disabled,
   name,
   filter,
@@ -35,8 +36,8 @@ export const AssigneeAutocomplete = ({
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
   dataCy?: string;
-}): React.ReactElement => {
-  const history = useHistory();
+}): React.ReactElement {
+  const navigate = useNavigate();
   const location = useLocation();
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
@@ -56,9 +57,19 @@ export const AssigneeAutocomplete = ({
   const isMounted = useRef(true);
 
   const loadDataCallback = useCallback(() => {
-    if (isMounted.current && businessArea) {
-      loadData({ variables: { businessArea, search: debouncedInputText } });
-    }
+    const asyncLoadData = async () => {
+      if (isMounted.current && businessArea) {
+        try {
+          await loadData({
+            variables: { businessArea, search: debouncedInputText },
+          });
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    };
+
+    void asyncLoadData();
   }, [loadData, businessArea, debouncedInputText]);
 
   useEffect(() => {
@@ -72,7 +83,7 @@ export const AssigneeAutocomplete = ({
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
-    history,
+    navigate,
     location,
     filter,
     setFilter,
@@ -118,4 +129,4 @@ export const AssigneeAutocomplete = ({
       debouncedInputText={debouncedInputText}
     />
   );
-};
+}

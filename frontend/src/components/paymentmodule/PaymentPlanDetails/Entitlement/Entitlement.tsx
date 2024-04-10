@@ -7,14 +7,15 @@ import {
   MenuItem,
   Select,
   Typography,
-} from '@material-ui/core';
-import { GetApp } from '@material-ui/icons';
-import AttachFileIcon from '@material-ui/icons/AttachFile';
-import React, { useState } from 'react';
+} from '@mui/material';
+import { GetApp } from '@mui/icons-material';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   PaymentPlanBackgroundActionStatus,
   PaymentPlanDocument,
@@ -23,16 +24,16 @@ import {
   useAllSteficonRulesQuery,
   useExportXlsxPpListMutation,
   useSetSteficonRuleOnPpListMutation,
-} from '../../../../__generated__/graphql';
-import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../../../core/LabelizedField';
-import { LoadingButton } from '../../../core/LoadingButton';
-import { LoadingComponent } from '../../../core/LoadingComponent';
-import { Title } from '../../../core/Title';
-import { UniversalMoment } from '../../../core/UniversalMoment';
+} from '@generated/graphql';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { LoadingButton } from '@core/LoadingButton';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
-import { useProgramContext } from "../../../../programContext";
+import { useProgramContext } from '../../../../programContext';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -93,10 +94,10 @@ interface EntitlementProps {
   permissions: string[];
 }
 
-export const Entitlement = ({
+export function Entitlement({
   paymentPlan,
   permissions,
-}: EntitlementProps): React.ReactElement => {
+}: EntitlementProps): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
@@ -115,19 +116,15 @@ export const Entitlement = ({
     ],
   };
 
-  const [
-    setSteficonRule,
-    { loading: loadingSetSteficonRule },
-  ] = useSetSteficonRuleOnPpListMutation(options);
+  const [setSteficonRule, { loading: loadingSetSteficonRule }] =
+    useSetSteficonRuleOnPpListMutation(options);
 
   const { data: steficonData, loading } = useAllSteficonRulesQuery({
     variables: { enabled: true, deprecated: false, type: 'PAYMENT_PLAN' },
     fetchPolicy: 'network-only',
   });
-  const [
-    mutateExport,
-    { loading: loadingExport },
-  ] = useExportXlsxPpListMutation();
+  const [mutateExport, { loading: loadingExport }] =
+    useExportXlsxPpListMutation();
 
   if (!steficonData) {
     return null;
@@ -142,7 +139,8 @@ export const Entitlement = ({
   );
 
   const shouldDisableEntitlementSelect =
-    !canApplySteficonRule || paymentPlan.status !== PaymentPlanStatus.Locked ||
+    !canApplySteficonRule ||
+    paymentPlan.status !== PaymentPlanStatus.Locked ||
     !isActiveProgram;
 
   const shouldDisableDownloadTemplate =
@@ -151,7 +149,8 @@ export const Entitlement = ({
   const shouldDisableExportXlsx =
     loadingExport ||
     paymentPlan.status !== PaymentPlanStatus.Locked ||
-    paymentPlan?.backgroundActionStatus === PaymentPlanBackgroundActionStatus.XlsxExporting ||
+    paymentPlan?.backgroundActionStatus ===
+      PaymentPlanBackgroundActionStatus.XlsxExporting ||
     !isActiveProgram;
 
   return (
@@ -159,24 +158,31 @@ export const Entitlement = ({
       <ContainerColumnWithBorder>
         <Box mt={4}>
           <Title>
-            <Typography variant='h6'>{t('Entitlement')}</Typography>
+            <Typography variant="h6">{t('Entitlement')}</Typography>
           </Title>
           <GreyText>{t('Select Entitlement Formula')}</GreyText>
-          <Grid alignItems='center' container>
+          <Grid alignItems="center" container>
             <Grid item xs={11}>
-              <FormControl variant='outlined' margin='dense' fullWidth>
-                <InputLabel>{t('Entitlement Formula')}</InputLabel>
+              <FormControl size="small" variant="outlined" fullWidth>
+                <Box mb={1}>
+                  <InputLabel>{t('Entitlement Formula')}</InputLabel>
+                </Box>
                 <Select
+                  size="small"
                   disabled={shouldDisableEntitlementSelect}
                   MenuProps={{
-                    getContentAnchorEl: null,
+                    anchorOrigin: {
+                      vertical: 'bottom',
+                      horizontal: 'left',
+                    },
+                    transformOrigin: {
+                      vertical: 'top',
+                      horizontal: 'left',
+                    },
                   }}
                   value={steficonRuleValue}
-                  data-cy='input-entitlement-formula'
-                  labelWidth={180}
-                  onChange={(event) =>
-                    setSteficonRuleValue(event.target.value as string)
-                  }
+                  data-cy="input-entitlement-formula"
+                  onChange={(event) => setSteficonRuleValue(event.target.value)}
                 >
                   {steficonData.allSteficonRules.edges.map((each, index) => (
                     <MenuItem
@@ -193,16 +199,17 @@ export const Entitlement = ({
             <Grid item>
               <Box ml={2}>
                 <Button
-                  variant='contained'
-                  color='primary'
+                  variant="contained"
+                  color="primary"
                   disabled={
                     loadingSetSteficonRule ||
                     !steficonRuleValue ||
                     paymentPlan.status !== PaymentPlanStatus.Locked ||
-                    paymentPlan.backgroundActionStatus === PaymentPlanBackgroundActionStatus.RuleEngineRun ||
+                    paymentPlan.backgroundActionStatus ===
+                      PaymentPlanBackgroundActionStatus.RuleEngineRun ||
                     !isActiveProgram
                   }
-                  data-cy='button-apply-steficon'
+                  data-cy="button-apply-steficon"
                   onClick={async () => {
                     try {
                       await setSteficonRule({
@@ -224,27 +231,27 @@ export const Entitlement = ({
               </Box>
             </Grid>
           </Grid>
-          <Box display='flex' alignItems='center'>
+          <Box display="flex" alignItems="center">
             <OrDivider />
             <DividerLabel>Or</DividerLabel>
             <OrDivider />
           </Box>
         </Box>
-        <Box display='flex'>
-          <Box width='50%'>
+        <Box display="flex">
+          <Box width="50%">
             <BoxWithBorderRight
-              display='flex'
-              justifyContent='center'
-              alignItems='center'
-              flexDirection='column'
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              flexDirection="column"
             >
               {paymentPlan.hasPaymentListExportFile ? (
                 <Button
-                  color='primary'
+                  color="primary"
                   startIcon={<DownloadIcon />}
-                  component='a'
+                  component="a"
                   download
-                  data-cy='button-download-template'
+                  data-cy="button-download-template"
                   href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
                   disabled={shouldDisableDownloadTemplate}
                 >
@@ -254,9 +261,9 @@ export const Entitlement = ({
                 <LoadingButton
                   loading={loadingExport}
                   disabled={shouldDisableExportXlsx}
-                  color='primary'
+                  color="primary"
                   startIcon={<GetApp />}
-                  data-cy='button-export-xlsx'
+                  data-cy="button-export-xlsx"
                   onClick={async () => {
                     try {
                       await mutateExport({
@@ -283,12 +290,12 @@ export const Entitlement = ({
               </GreyTextSmall>
             </BoxWithBorderRight>
           </Box>
-          <Box width='50%'>
+          <Box width="50%">
             <Box
-              display='flex'
-              justifyContent='center'
-              alignItems='center'
-              flexDirection='column'
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              flexDirection="column"
             >
               <Box>
                 <ImportXlsxPaymentPlanPaymentList
@@ -297,12 +304,12 @@ export const Entitlement = ({
                 />
               </Box>
               {paymentPlan?.importedFileName ? (
-                <Box alignItems='center' display='flex'>
+                <Box alignItems="center" display="flex">
                   <SpinaczIconContainer>
-                    <AttachFileIcon fontSize='inherit' />
+                    <AttachFileIcon fontSize="inherit" />
                   </SpinaczIconContainer>
                   <Box mr={1}>
-                    <GreyTextSmall data-cy='imported-file-name'>
+                    <GreyTextSmall data-cy="imported-file-name">
                       {paymentPlan?.importedFileName}
                     </GreyTextSmall>
                   </Box>
@@ -328,7 +335,7 @@ export const Entitlement = ({
           <>
             <Divider />
             <LabelizedField label={t('Total Entitled Quantity')}>
-              <BigValue data-cy='total-entitled-quantity-usd'>
+              <BigValue data-cy="total-entitled-quantity-usd">
                 {`${paymentPlan.totalEntitledQuantity} ${paymentPlan.currency} (${paymentPlan.totalEntitledQuantityUsd} USD)`}
               </BigValue>
             </LabelizedField>
@@ -337,4 +344,4 @@ export const Entitlement = ({
       </ContainerColumnWithBorder>
     </Box>
   );
-};
+}

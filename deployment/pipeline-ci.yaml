@@ -1,15 +1,4 @@
-trigger:
-  batch: true
-  branches:
-    include:
-    - develop
-    - staging
-    - master
-    - ephemeral-1
-    - ops/*
-  paths:
-    exclude:
-    -  docs/*
+trigger: none
 pr: none
 resources:
   - repo: self
@@ -32,7 +21,6 @@ variables:
     sentryEnvironment: "production"
   isTraining: $[eq(variables['Build.SourceBranchName'], 'master')]
   isStaging: $[eq(variables['Build.SourceBranchName'], 'staging')]
-  isEphemeral: $[eq(variables['Build.SourceBranchName'], 'global-program-filter')]
   isDev: $[eq(variables['Build.SourceBranchName'], 'develop')]
   tag: $(Build.SourceVersion)
   additionalTag: $(Build.SourceBranchName)
@@ -59,7 +47,7 @@ stages:
         steps:
           - task: NodeTool@0
             inputs:
-              versionSpec: "14.x"
+              versionSpec: "18.19.x"
             displayName: "Install Node.js"
           - task: Cache@2
             inputs:

@@ -1,49 +1,49 @@
-import { Box, Button } from "@material-ui/core";
-import { GetApp } from "@material-ui/icons";
-import React from "react";
-import { useTranslation } from "react-i18next";
-import { useSnackbar } from "../../../../../hooks/useSnackBar";
-import { LoadingButton } from "../../../../core/LoadingButton";
-import { CreateFollowUpPaymentPlan } from "../../../CreateFollowUpPaymentPlan";
-import { useProgramContext } from "../../../../../programContext";
-import { usePaymentPlanAction } from "../../../../../hooks/usePaymentPlanAction";
+import { Box, Button } from '@mui/material';
+import { GetApp } from '@mui/icons-material';
+import * as React from 'react';
+import { useTranslation } from 'react-i18next';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { LoadingButton } from '../../../../core/LoadingButton';
+import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
+import { useProgramContext } from '../../../../../programContext';
+import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction';
 import {
   Action,
   PaymentPlanBackgroundActionStatus,
   PaymentPlanQuery,
-  useExportXlsxPpListPerFspMutation
-} from "../../../../../__generated__/graphql";
-import {SplitIntoPaymentLists} from "../SplitIntoPaymentLists";
+  useExportXlsxPpListPerFspMutation,
+} from '../../../../../__generated__/graphql';
+import { SplitIntoPaymentLists } from '../SplitIntoPaymentLists';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canDownloadXlsx: boolean;
   canExportXlsx: boolean;
   canSendToPaymentGateway: boolean;
   canSplit: boolean;
-  paymentPlan: PaymentPlanQuery["paymentPlan"];
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const AcceptedPaymentPlanHeaderButtons = ({
+export function AcceptedPaymentPlanHeaderButtons({
   canDownloadXlsx,
   canExportXlsx,
   canSendToPaymentGateway,
   canSplit,
-  paymentPlan
-}: AcceptedPaymentPlanHeaderButtonsProps): React.ReactElement => {
+  paymentPlan,
+}: AcceptedPaymentPlanHeaderButtonsProps): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
 
   const [
     mutateExport,
-    { loading: loadingExport }
+    { loading: loadingExport },
   ] = useExportXlsxPpListPerFspMutation();
 
   const {
     mutatePaymentPlanAction: sendToPaymentGateway,
-    loading: LoadingSendToPaymentGateway
+    loading: LoadingSendToPaymentGateway,
   } = usePaymentPlanAction(Action.SendToPaymentGateway, paymentPlan.id, () =>
-    showMessage(t("Sending to Payment Gateway started"))
+    showMessage(t('Sending to Payment Gateway started')),
   );
 
   const shouldDisableExportXlsx =
@@ -81,16 +81,16 @@ export const AcceptedPaymentPlanHeaderButtons = ({
                 try {
                   await mutateExport({
                     variables: {
-                      paymentPlanId: paymentPlan.id
-                    }
+                      paymentPlanId: paymentPlan.id,
+                    },
                   });
-                  showMessage(t("Exporting XLSX started"));
+                  showMessage(t('Exporting XLSX started'));
                 } catch (e) {
                   e.graphQLErrors.map((x) => showMessage(x.message));
                 }
               }}
             >
-              {t("Export Xlsx")}
+              {t('Export Xlsx')}
             </LoadingButton>
           </Box>
         )}
@@ -108,7 +108,7 @@ export const AcceptedPaymentPlanHeaderButtons = ({
                 !canDownloadXlsx
               }
             >
-              {t("Download XLSX")}
+              {t('Download XLSX')}
             </Button>
           </Box>
         )}
@@ -121,10 +121,10 @@ export const AcceptedPaymentPlanHeaderButtons = ({
             data-cy="button-send-to-payment-gateway"
             disabled={!canSendToPaymentGateway || LoadingSendToPaymentGateway}
           >
-            {t("Send to FSP")}
+            {t('Send to FSP')}
           </Button>
         </Box>
       </>
     </Box>
   );
-};
+}

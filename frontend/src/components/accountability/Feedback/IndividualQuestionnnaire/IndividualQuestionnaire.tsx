@@ -1,10 +1,10 @@
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import { Field } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
-import { ContentLink } from '../../../core/ContentLink';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { ContentLink } from '@core/ContentLink';
 
 interface IndividualQuestionnaireProps {
   values;
@@ -51,13 +51,14 @@ export const IndividualQuestionnaire = ({
           size: 3,
         },
       ].map((el) => (
-        <Grid item xs={3}>
+        <Grid key={el.name} item xs={3}>
           <Field
+            key={el.name}
             name={el.name}
             data-cy={`input-${el.name}`}
             label={el.label}
             displayValue={el.value || '-'}
-            color='primary'
+            color="primary"
             component={FormikCheckboxField}
           />
         </Grid>

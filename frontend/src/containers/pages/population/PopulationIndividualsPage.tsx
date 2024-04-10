@@ -1,19 +1,20 @@
-import { Box } from '@material-ui/core';
-import React, { useState } from 'react';
+import { Box } from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import {
   useHouseholdChoiceDataQuery,
   useIndividualChoiceDataQuery,
-} from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { IndividualsFilter } from '../../../components/population/IndividualsFilter';
+} from '@generated/graphql';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { IndividualsFilter } from '@components/population/IndividualsFilter';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { getFilterFromQueryParams } from '../../../utils/utils';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { IndividualsListTable } from '../../tables/population/IndividualsListTable';
 
 const initialFilter = {
@@ -30,15 +31,13 @@ const initialFilter = {
   lastRegistrationDateMax: '',
 };
 
-export const PopulationIndividualsPage = (): React.ReactElement => {
+export function PopulationIndividualsPage(): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
-  const {
-    data: householdChoicesData,
-    loading: householdChoicesLoading,
-  } = useHouseholdChoiceDataQuery();
+  const { data: householdChoicesData, loading: householdChoicesLoading } =
+    useHouseholdChoiceDataQuery();
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -47,10 +46,8 @@ export const PopulationIndividualsPage = (): React.ReactElement => {
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  const {
-    data: individualChoicesData,
-    loading: individualChoicesLoading,
-  } = useIndividualChoiceDataQuery();
+  const { data: individualChoicesData, loading: individualChoicesLoading } =
+    useIndividualChoiceDataQuery();
 
   if (householdChoicesLoading || individualChoicesLoading)
     return <LoadingComponent />;
@@ -75,9 +72,9 @@ export const PopulationIndividualsPage = (): React.ReactElement => {
         setAppliedFilter={setAppliedFilter}
       />
       <Box
-        display='flex'
-        flexDirection='column'
-        data-cy='page-details-container'
+        display="flex"
+        flexDirection="column"
+        data-cy="page-details-container"
       >
         <IndividualsListTable
           filter={appliedFilter}
@@ -91,4 +88,4 @@ export const PopulationIndividualsPage = (): React.ReactElement => {
       </Box>
     </>
   );
-};
+}

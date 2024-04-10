@@ -16,9 +16,7 @@
             "area": "",
             "language": "",
             "consent": true,
-            "created_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
-            "linked_grievance": null,
-            "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
+            "linked_grievance": null
         }
     },
     {
@@ -38,9 +36,7 @@
             "area": "",
             "language": "",
             "consent": false,
-            "created_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
-            "linked_grievance": null,
-            "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
+            "linked_grievance": null
         }
     }
 ]

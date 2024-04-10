@@ -1,0 +1,46 @@
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+.MuiButton-containedPrimary:hover {
+  opacity: 0.9 !important;
+  color: #fff;
+}
+
+*:focus {
+  outline: none !important;
+}
+
+*:hover {
+  outline: none !important;
+}
+
+/* primary */
+a:hover {
+  color: #003c8f;
+}
+
+/* For Chrome, Safari and Opera */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ffffff;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #ffffff #f1f1f1;
+}
