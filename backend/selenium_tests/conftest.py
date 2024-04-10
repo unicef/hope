@@ -14,6 +14,9 @@ from page_object.grievance.feedback import Feedback
 from page_object.grievance.new_feedback import NewFeedback
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
+from page_object.programme_population.households import Households
+from page_object.programme_population.households_details import HouseholdsDetails
+from page_object.programme_population.individuals import Individuals
 from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
@@ -32,6 +35,7 @@ from hct_mis_api.apps.geo.models import Country
 
 
 def pytest_configure() -> None:
+    pytest.SELENIUM_PATH = os.path.dirname(__file__)
     pytest.CSRF = ""
     pytest.SESSION_ID = ""
     pytest.session = Session()
@@ -57,6 +61,10 @@ def driver() -> Chrome:
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument(
+        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+    )
+    chrome_options.add_argument("--enable-logging")
     chrome_options.add_argument("--window-size=1920,1080")
     return webdriver.Chrome(options=chrome_options)
 
@@ -64,6 +72,7 @@ def driver() -> Chrome:
 @pytest.fixture(autouse=True)
 def browser(driver: Chrome) -> Chrome:
     driver.live_server = LiveServer("localhost")
+    # driver.live_server = LiveServer("0.0.0.0:8080")
     yield driver
     driver.close()
     pytest.CSRF = ""
@@ -119,6 +128,21 @@ def pageRegistrationDataImport(request: FixtureRequest, browser: Chrome) -> Regi
 @pytest.fixture
 def pageDetailsRegistrationDataImport(request: FixtureRequest, browser: Chrome) -> RDIDetailsPage:
     yield RDIDetailsPage(browser)
+
+
+@pytest.fixture
+def pageHouseholds(request: FixtureRequest, browser: Chrome) -> Households:
+    yield Households(browser)
+
+
+@pytest.fixture
+def pageHouseholdsDetails(request: FixtureRequest, browser: Chrome) -> HouseholdsDetails:
+    yield HouseholdsDetails(browser)
+
+
+@pytest.fixture
+def pageIndividuals(request: FixtureRequest, browser: Chrome) -> Individuals:
+    yield Individuals(browser)
 
 
 @pytest.fixture
@@ -235,7 +259,6 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
 
 # make a screenshot with a name of the test, date and time
 def screenshot(driver: Chrome, node_id: str) -> None:
-    # sleep(1)
     if not os.path.exists("screenshot"):
         os.makedirs("screenshot")
     file_name = f'{node_id}_{datetime.today().strftime("%Y-%m-%d_%H.%M")}.png'.replace("/", "_").replace("::", "__")

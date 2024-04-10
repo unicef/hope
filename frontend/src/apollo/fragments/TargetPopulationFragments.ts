@@ -29,6 +29,7 @@ export const targetPopulationDetailed = gql`
     id
     name
     status
+    adminUrl
     buildStatus
     totalHouseholdsCount
     totalIndividualsCount

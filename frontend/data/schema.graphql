@@ -135,6 +135,7 @@ type ApprovalProcessNode implements Node {
   approvalNumberRequired: Int!
   authorizationNumberRequired: Int!
   financeReleaseNumberRequired: Int!
+  adminUrl: String
   rejectedOn: String
   actions: FilteredActionsListNode
 }
@@ -380,6 +381,7 @@ type CashPlanAndPaymentPlanEdges {
 }
 
 type CashPlanAndPaymentPlanNode {
+  adminUrl: String
   objType: String
   id: String
   unicefId: String
@@ -439,6 +441,7 @@ type CashPlanNode implements Node {
   totalPersonsCovered: Int!
   totalPersonsCoveredRevised: Int!
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
+  adminUrl: String
   bankReconciliationSuccess: Int
   bankReconciliationError: Int
   totalNumberOfHouseholds: Int
@@ -549,6 +552,7 @@ type CommunicationMessageNode implements Node {
   migratedAt: DateTime
   copiedFrom: CommunicationMessageNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
+  adminUrl: String
 }
 
 type CommunicationMessageNodeConnection {
@@ -567,6 +571,7 @@ type CommunicationMessageRecipientMapNode implements Node {
   id: ID!
   size: Int
   headOfHousehold: IndividualNode!
+  adminUrl: String
 }
 
 type CommunicationMessageRecipientMapNodeConnection {
@@ -1176,6 +1181,7 @@ type FeedbackNode implements Node {
   copiedFrom: FeedbackNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   feedbackMessages(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackMessageNodeConnection!
+  adminUrl: String
 }
 
 type FeedbackNodeConnection {
@@ -1237,6 +1243,7 @@ type FinancialServiceProviderNode implements Node {
   financialserviceproviderxlsxreportSet(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxReportNodeConnection!
   deliveryMechanismsPerPaymentPlan(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
+  adminUrl: String
   fullName: String
   isPaymentGateway: Boolean
 }
@@ -1259,6 +1266,7 @@ type FinancialServiceProviderXlsxReportNode implements Node {
   updatedAt: DateTime!
   financialServiceProvider: FinancialServiceProviderNode!
   status: Int
+  adminUrl: String
   reportUrl: String
 }
 
@@ -1283,6 +1291,7 @@ type FinancialServiceProviderXlsxTemplateNode implements Node {
   columns: [String]
   coreFields: [String!]!
   financialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
+  adminUrl: String
 }
 
 type FinancialServiceProviderXlsxTemplateNodeConnection {
@@ -1374,6 +1383,7 @@ type GetCashplanVerificationSampleSizeObject {
 }
 
 type GetCommunicationMessageSampleSizeNode {
+  adminUrl: String
   numberOfRecipients: Int
   sampleSize: Int
 }
@@ -1472,6 +1482,7 @@ type GrievanceTicketNode implements Node {
   referralTicketDetails: TicketReferralDetailsNode
   supportDocuments(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceDocumentNodeConnection!
   feedback: FeedbackNode
+  adminUrl: String
   household: HouseholdNode
   individual: IndividualNode
   paymentRecord: PaymentRecordAndPaymentNode
@@ -1636,6 +1647,7 @@ type HouseholdNode implements Node {
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   feedbacks(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
+  adminUrl: String
   selection: HouseholdSelectionNode
   sanctionListPossibleMatch: Boolean
   sanctionListConfirmedMatch: Boolean
@@ -2070,6 +2082,7 @@ type ImportedHouseholdNode implements Node {
   programId: UUID
   collectType: ImportedHouseholdCollectType!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
+  adminUrl: String
   hasDuplicates: Boolean
   importId: String
 }
@@ -2210,6 +2223,7 @@ type ImportedIndividualNode implements Node {
   importedhousehold: ImportedHouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
   identities(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualIdentityNodeConnection!
+  adminUrl: String
   role: String
   age: Int
   importId: String
@@ -2412,6 +2426,7 @@ type IndividualNode implements Node {
   negativeFeedbackTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketNegativeFeedbackDetailsNodeConnection!
   referralTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketReferralDetailsNodeConnection!
   feedbacks(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
+  adminUrl: String
   status: String
   role: String
   age: Int
@@ -2734,7 +2749,7 @@ type Mutations {
   updateProgram(programData: UpdateProgramInput, version: BigInt): UpdateProgram
   deleteProgram(programId: String!): DeleteProgram
   copyProgram(programData: CopyProgramInput!): CopyProgram
-  uploadImportDataXlsxFileAsync(businessAreaSlug: String!, file: Upload!, programId: String): UploadImportDataXLSXFileAsync
+  uploadImportDataXlsxFileAsync(businessAreaSlug: String!, file: Upload!): UploadImportDataXLSXFileAsync
   deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
   registrationXlsxImport(registrationDataImportData: RegistrationXlsxImportMutationInput!): RegistrationXlsxImportMutation
   registrationKoboImport(registrationDataImportData: RegistrationKoboImportMutationInput!): RegistrationKoboImportMutation
@@ -2862,6 +2877,7 @@ type PaymentHouseholdSnapshotNode implements Node {
   snapshotData: JSONString!
   householdId: UUID!
   payment: PaymentNode!
+  adminUrl: String
 }
 
 type PaymentNode implements Node {
@@ -2901,6 +2917,7 @@ type PaymentNode implements Node {
   additionalDocumentNumber: String
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   householdSnapshot: PaymentHouseholdSnapshotNode
+  adminUrl: String
   paymentPlanHardConflicted: Boolean
   paymentPlanHardConflictedData: [PaymentConflictDataNode]
   paymentPlanSoftConflicted: Boolean
@@ -3157,6 +3174,7 @@ type PaymentPlanNode implements Node {
   deliveryMechanisms: [DeliveryMechanismNode]
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
+  adminUrl: String
   currencyName: String
   hasPaymentListExportFile: Boolean
   hasFspDeliveryMechanismXlsxTemplate: Boolean
@@ -3204,6 +3222,7 @@ enum PaymentPlanStatus {
 }
 
 type PaymentRecordAndPaymentNode {
+  adminUrl: String
   objType: String
   id: String
   caId: String
@@ -3269,6 +3288,7 @@ type PaymentRecordNode implements Node {
   visionId: String
   registrationCaId: String
   serviceProvider: ServiceProviderNode!
+  adminUrl: String
   verification: PaymentVerificationNode
   unicefId: String
 }
@@ -3351,6 +3371,7 @@ type PaymentVerificationNode implements Node {
   sentToRapidPro: Boolean!
   ticketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketPaymentVerificationDetailsNodeConnection!
   ticketDetail(offset: Int, before: String, after: String, first: Int, last: Int): TicketPaymentVerificationDetailsNodeConnection!
+  adminUrl: String
   isManuallyEditable: Boolean
   payment: GenericPaymentNode
 }
@@ -3396,6 +3417,7 @@ type PaymentVerificationPlanNode implements Node {
   xlsxFileImported: Boolean!
   error: String
   paymentRecordVerifications(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
+  adminUrl: String
   xlsxFileWasDownloaded: Boolean
   hasXlsxFile: Boolean
   paymentPlan: PaymentPlanNode
@@ -3527,6 +3549,7 @@ type ProgramNode implements Node {
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
+  adminUrl: String
   totalEntitledQuantity: Decimal
   totalDeliveredQuantity: Decimal
   totalUndeliveredQuantity: Decimal
@@ -3790,6 +3813,7 @@ type RecipientNode implements Node {
   id: ID!
   size: Int
   headOfHousehold: IndividualNode!
+  adminUrl: String
 }
 
 type RecipientNodeConnection {
@@ -3897,6 +3921,7 @@ type RegistrationDataImportNode implements Node {
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
+  adminUrl: String
   batchDuplicatesCountAndPercentage: CountAndPercentageNode
   batchPossibleDuplicatesCountAndPercentage: CountAndPercentageNode
   batchUniqueCountAndPercentage: CountAndPercentageNode
@@ -3976,6 +4001,7 @@ type ReportNode implements Node {
   numberOfRecords: Int
   program: ProgramNode
   adminArea(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection!
+  adminUrl: String
   fileUrl: String
   adminArea1(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection
   adminArea2(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection
@@ -4350,6 +4376,7 @@ type SurveyNode implements Node {
   sampleSize: Int!
   flowId: String
   successfulRapidProCalls: [JSONString!]!
+  adminUrl: String
   sampleFilePath: String
   hasValidSampleFile: Boolean
   rapidProUrl: String
@@ -4422,6 +4449,7 @@ type TargetPopulationNode implements Node {
   selections: [HouseholdSelectionNode!]!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
+  adminUrl: String
   totalFamilySize: Int
   householdList(offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   totalHouseholdsCountWithValidPhoneNo: Int

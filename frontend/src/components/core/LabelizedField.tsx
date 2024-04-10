@@ -42,8 +42,8 @@ export function LabelizedField({
   const shouldDisplayDash = dashed && fieldValue !== 0 && !fieldValue;
   if (shouldDisplayDash) {
     displayValue = '-';
-  } else if (children === undefined) {
-    displayValue = <Value color="textSecondary">{value}</Value>;
+  } else {
+    displayValue = <Value color="textSecondary">{fieldValue}</Value>;
   }
 
   return (
