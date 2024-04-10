@@ -156,7 +156,10 @@ jobs:
       - name: Push dist
         run: |
           docker buildx create --use
-          docker buildx build \
+
+          # Base part of the command
+          build_command="docker buildx build \
+            --progress=plain \
             --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dev \
             --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dev \
             --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dist \
@@ -167,18 +170,15 @@ jobs:
             -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }} \
             -f ./docker/Dockerfile \
             --target dist \
-            --push \
-            ./
-
-          # Builds from master branch are tagged with the version number
+            --push ./"
+          
           if [ "${{ github.ref }}" = "refs/heads/master" ]; then
             version=$(python3 -c "import sys; version=None; [version:=line.split('=')[1].strip().strip('\"') for line in open('backend/pyproject.toml', 'r') if line.strip().startswith('version =')]; print(version if version else sys.exit(1))")
             tagged_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-$version
-            echo Will tag ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }} as $tagged_image
-            docker tag ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }} $tagged_image
-            docker push $tagged_image
+            build_command="$build_command -t $tagged_image"
           fi
-
+          
+          eval $build_command
 
   unit_tests:
     runs-on: ubuntu-latest
@@ -197,6 +197,13 @@ jobs:
           backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
             -f ./deployment/docker-compose.tst.yml \
             run backend ./dev.sh test
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./backend/coverage.xml
+          flags: unittests
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
 
   e2e_tests:
     runs-on: ubuntu-latest
@@ -215,6 +222,13 @@ jobs:
           dist_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist dev_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
             -f ./deployment/docker-compose.selenium.yml \
             run selenium
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./backend/coverage.xml
+          flags: e2e
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
 
   trivy:
     runs-on: ubuntu-latest
@@ -227,13 +241,15 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Trivy
-        continue-on-error: true
-        run: |
-          docker pull ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist
-          docker run -v /var/run/docker.sock:/var/run/docker.sock -e TRIVY_EXIT_CODE=2 -e TRIVY_SEVERITY=HIGH,CRITICAL aquasec/trivy:latest image ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist
-
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}'
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
   deploy:
     runs-on: ubuntu-latest
     needs: [e2e_tests, unit_tests, isort, black, flake8, mypy, frontend_tests]
@@ -270,7 +286,7 @@ jobs:
 
           IFS=',' read -ra pipelines <<< "$pipelineId"
           for pipeline in "${pipelines[@]}"; do
-            jsonBody='{"variables": {"sha": {"isSecret": false, "value": "${{ github.sha }}"}, "tag": {"isSecret": false, "value": "core-${{ github.sha }}-dist"}}}'
+            jsonBody='{"variables": {"sha": {"isSecret": false, "value": "${{ github.sha }}"}, "tag": {"isSecret": false, "value": "core-${{ github.sha }}"}}}'
             contentLength=$(echo -n $jsonBody | wc -c)
             project=ICTD-HCT-MIS
             organization=unicef

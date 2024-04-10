@@ -7,6 +7,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 import hct_mis_api.apps.targeting.models as target_models
 from hct_mis_api.apps.account.permissions import (
+    AdminUrlNodeMixin,
     BaseNodePermissionMixin,
     BasePermission,
     Permissions,
@@ -123,7 +124,7 @@ class TargetingCriteriaNode(DjangoObjectType):
         model = target_models.TargetingCriteria
 
 
-class TargetPopulationNode(BaseNodePermissionMixin, DjangoObjectType):
+class TargetPopulationNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     """Defines an individual target population record."""
 
     permission_classes: Tuple[Type[BasePermission]] = (

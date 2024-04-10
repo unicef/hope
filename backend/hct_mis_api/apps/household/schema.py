@@ -23,6 +23,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
+    AdminUrlNodeMixin,
     BaseNodePermissionMixin,
     BasePermission,
     DjangoPermissionFilterConnectionField,
@@ -203,7 +204,7 @@ class BankAccountInfoNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
+class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes: Tuple[Type[BasePermission], ...] = (
         hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS),
@@ -352,7 +353,7 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         )
 
 
-class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
+class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS),

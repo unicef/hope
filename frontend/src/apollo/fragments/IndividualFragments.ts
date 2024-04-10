@@ -5,6 +5,7 @@ export const individualMinimal = gql`
     id
     age
     lastRegistrationDate
+    adminUrl
     createdAt
     updatedAt
     fullName
