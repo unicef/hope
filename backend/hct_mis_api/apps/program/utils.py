@@ -407,8 +407,17 @@ def remove_program_permissions_for_exists_partners(
         partner.save()
 
 
-def create_program_partner_access(partners_access_data, program) -> None:
-    for partner_access in partners_access_data:
+def create_program_partner_access(partners_data, program, partner_access) -> None:
+    full_area_access = Area.objects.filter(area_type__country__business_areas__id=program.business_area.id)
+    unicef_partner = Partner.objects.get(name="UNICEF")
+    # UNICEF has full area access to all the programs
+    partners_data.extend([{"partner": unicef_partner.id, "areas": [area.id for area in full_area_access]}])
+
+    if partner_access == Program.ALL_PARTNERS_ACCESS:
+        partners = Partner.objects.filter(allowed_business_areas=program.business_area).exclude(id=unicef_partner.id)
+        partners_data = [{"partner": partner.id, "areas": [area.id for area in full_area_access]} for partner in partners]
+
+    for partner_access in partners_data:
         program_partner, _ = ProgramPartnerThrough.objects.get_or_create(
             program=program,
             partner_id=partner_access["partner"],
@@ -417,9 +426,7 @@ def create_program_partner_access(partners_access_data, program) -> None:
             program_partner.areas.set(Area.objects.filter(id__in=areas))
         else:
             # full area access
-            program_partner.areas.set(
-                Area.objects.filter(area_type__country__business_areas__id=program.business_area.id)
-            )
+            program_partner.areas.set(full_area_access)
 
 
 def remove_program_partner_access(partners_access_data, program) -> None:

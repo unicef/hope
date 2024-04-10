@@ -69,7 +69,7 @@ class UsersFilter(FilterSet):
         business_area_id = BusinessArea.objects.get(slug=value).id
         return qs.filter(
             Q(user_roles__business_area__slug=value)
-            | Q(partner__permissions__has_key=str(business_area_id))
+            | Q(partners__id=business_area_id)
             | Q(partner__name="UNICEF")
         )
 

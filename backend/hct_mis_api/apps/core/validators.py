@@ -357,6 +357,21 @@ class DataCollectingTypeValidator(BaseValidator):
                 raise ValidationError("Avoid using the deprecated DataCollectingType in Program")
 
 
+class PartnersDataValidator(BaseValidator):
+    @classmethod
+    def validate_partners_data(cls, *args: Any, **kwargs: Any) -> Optional[None]:
+        partners_data = kwargs.get("partners_data")
+        partner_access = kwargs.get("partner_access")
+        partner = kwargs.get("partner")
+        partners_ids = [int(partner["id"]) for partner in partners_data]
+
+        if not partner.is_unicef and partner.id not in partners_ids:
+            raise ValidationError("Please assign access to your partner before saving the programme.")
+        if partners_ids and partner_access != Program.SELECTED_PARTNERS_ACCESS:
+            raise ValidationError("You cannot specify partners for the chosen access type")
+
+
+
 def raise_program_status_is(status: str) -> typing.Callable:
     def decorator(func: typing.Callable) -> typing.Callable:
         def wrapper(*args: Any, **kwargs: Any) -> Any:

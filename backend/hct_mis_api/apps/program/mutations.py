@@ -18,7 +18,7 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.core.validators import (
     CommonValidator,
-    DataCollectingTypeValidator,
+    DataCollectingTypeValidator, PartnersDataValidator,
 )
 from hct_mis_api.apps.program.celery_tasks import copy_program_task
 from hct_mis_api.apps.program.inputs import (
@@ -47,6 +47,7 @@ class CreateProgram(
     CommonValidator,
     ProgrammeCodeValidator,
     DataCollectingTypeValidator,
+    PartnersDataValidator,
     PermissionMutation,
     ValidationErrorMutationMixin,
 ):
@@ -66,17 +67,14 @@ class CreateProgram(
         if not (data_collecting_type_code := program_data.pop("data_collecting_type_code", None)):
             raise ValidationError("DataCollectingType is required for creating new Program")
         data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
-        partner_access = program_data.pop("partner_access", [])
+        partner_access = program_data.get("partner_access", [])
         partners_data = program_data.pop("partners", [])
         programme_code = program_data.get("programme_code", "")
         if programme_code:
             programme_code = programme_code.upper()
             program_data["programme_code"] = programme_code
 
-        partners_ids = [int(partner["id"]) for partner in partners_data]
         partner = info.context.user.partner
-        if not partner.is_unicef and partner.id not in partners_ids:
-            raise ValidationError("Please assign access to your partner before saving the programme.")
 
         cls.validate(
             start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
@@ -84,6 +82,9 @@ class CreateProgram(
             data_collecting_type=data_collecting_type,
             business_area=business_area,
             programme_code=programme_code,
+            partners_data=partners_data,
+            partner_access=partner_access,
+            partner=partner,
         )
 
         program = Program(
@@ -97,8 +98,7 @@ class CreateProgram(
             end_date=program.end_date,
             status=ProgramCycle.ACTIVE,
         )
-
-        create_program_partner_access(partners_data, program)
+        create_program_partner_access(partners_data, program, partner_access)
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
         return CreateProgram(program=program)
@@ -108,6 +108,7 @@ class UpdateProgram(
     ProgramValidator,
     ProgrammeCodeValidator,
     DataCollectingTypeValidator,
+    PartnersDataValidator,
     PermissionMutation,
     ValidationErrorMutationMixin,
 ):
@@ -129,7 +130,7 @@ class UpdateProgram(
         partners_data = program_data.pop("partners", [])
         partners_ids = [int(partner["id"]) for partner in partners_data]
         partner = info.context.user.partner
-        partner_access = program_data.pop("partner_access", [])
+        partner_access = program_data.get("partner_access", [])
         programme_code = program_data.get("programme_code", "")
         if programme_code:
             programme_code = programme_code.upper()
@@ -163,6 +164,9 @@ class UpdateProgram(
             data_collecting_type=data_collecting_type,
             business_area=business_area,
             programme_code=programme_code,
+            partners_data=partners_data,
+            partner_access=partner_access,
+            partner=partner,
         )
 
         if program.status == Program.FINISHED:
@@ -213,7 +217,7 @@ class DeleteProgram(ProgramDeletionValidator, PermissionMutation):
         return cls(ok=True)
 
 
-class CopyProgram(CommonValidator, ProgrammeCodeValidator, PermissionMutation, ValidationErrorMutationMixin):
+class CopyProgram(CommonValidator, ProgrammeCodeValidator, PartnersDataValidator, PermissionMutation, ValidationErrorMutationMixin):
     program = graphene.Field(ProgramNode)
 
     class Arguments:
@@ -238,6 +242,9 @@ class CopyProgram(CommonValidator, ProgrammeCodeValidator, PermissionMutation, V
             end_date=datetime.combine(program_data["end_date"], datetime.min.time()),
             programme_code=programme_code,
             business_area=business_area,
+            partners_data=partners_data,
+            partner_access=partner_access,
+            partner=partner,
         )
         program = copy_program_object(program_id, program_data)
 
