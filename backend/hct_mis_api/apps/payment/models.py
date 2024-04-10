@@ -66,6 +66,7 @@ from hct_mis_api.apps.payment.managers import PaymentManager
 from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.utils.models import (
+    AdminUrlMixin,
     ConcurrencyModel,
     SignatureMixin,
     TimeStampedUUIDModel,
@@ -418,7 +419,7 @@ class PaymentPlanSplit(TimeStampedUUIDModel):
         return self.payment_plan.delivery_mechanisms.first().financial_service_provider
 
 
-class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel):
+class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel, AdminUrlMixin):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -1392,7 +1393,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         self.sent_by = sent_by
 
 
-class CashPlan(ConcurrencyModel, GenericPaymentPlan):
+class CashPlan(ConcurrencyModel, AdminUrlMixin, GenericPaymentPlan):
     DISTRIBUTION_COMPLETED = "Distribution Completed"
     DISTRIBUTION_COMPLETED_WITH_ERRORS = "Distribution Completed with Errors"
     TRANSACTION_COMPLETED = "Transaction Completed"
@@ -1495,7 +1496,7 @@ class CashPlan(ConcurrencyModel, GenericPaymentPlan):
         ordering = ["created_at"]
 
 
-class PaymentRecord(ConcurrencyModel, GenericPayment):
+class PaymentRecord(ConcurrencyModel, AdminUrlMixin, GenericPayment):
     ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
     ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
     ENTITLEMENT_CARD_STATUS_CHOICE = Choices(
@@ -1562,7 +1563,7 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
         return self.STATUS_SUCCESS
 
 
-class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel, SignatureMixin):
+class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel, AdminUrlMixin, SignatureMixin):
     parent = models.ForeignKey(
         "payment.PaymentPlan",
         on_delete=models.CASCADE,
@@ -1711,7 +1712,7 @@ class ServiceProvider(TimeStampedUUIDModel):
         return self.full_name or ""
 
 
-class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel):
+class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel, AdminUrlMixin):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -1900,7 +1901,7 @@ def update_verification_status_in_cash_plan_on_delete(
     build_summary(instance.payment_plan_obj)
 
 
-class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
+class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "payment_verification_plan",

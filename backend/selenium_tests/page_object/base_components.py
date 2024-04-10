@@ -33,9 +33,13 @@ class BaseComponents(Common):
     navResourcesConversations = 'a[data-cy="nav-resources-Conversations"]'
     navResourcesToolsAndMaterials = 'a[data-cy="nav-resources-Tools and Materials"]'
     navResourcesReleaseNote = 'a[data-cy="nav-resources-Release Note"]'
+    mainContent = 'div[data-cy="main-content"]'
 
     # Text
     globalProgramFilterText = "All Programmes"
+
+    def getMainContent(self) -> WebElement:
+        return self.wait_for(self.mainContent)
 
     def getBusinessAreaContainer(self) -> WebElement:
         return self.wait_for(self.businessAreaContainer)
