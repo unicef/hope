@@ -1,9 +1,8 @@
-
-import { Typography } from '@mui/material';
-import { FieldArray, Form, Formik } from 'formik';
+import { Box, Divider, Grid, Typography } from '@mui/material';
+import { Field, FieldArray, Form, Formik } from 'formik';
+import { useLocation, useNavigate } from 'react-router-dom';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import * as Yup from 'yup';
 import {
   ProgramStatus,
@@ -18,20 +17,15 @@ import { CreateTargetPopulationHeader } from '@components/targeting/CreateTarget
 import { Exclusions } from '@components/targeting/CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '@components/targeting/PaperContainer';
 import { TargetingCriteria } from '@components/targeting/TargetingCriteria';
-import { TargetingCriteriaDisabled } from '@components/targeting/TargetingCriteria/TargetingCriteriaDisabled';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '@utils/targetingUtils';
 import { getFullNodeFromEdgesById } from '@utils/utils';
-import { useNavigate } from 'react-router-dom';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 
-const Label = styled.p`
-  color: #b1b1b5;
-`;
-
-export function CreateTargetPopulationPage(): React.ReactElement {
+export const CreateTargetPopulationPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const initialValues = {
@@ -42,12 +36,16 @@ export function CreateTargetPopulationPage(): React.ReactElement {
     exclusionReason: '',
     flagExcludeIfActiveAdjudicationTicket: false,
     flagExcludeIfOnSanctionList: false,
+    householdIds: '',
+    individualIds: '',
   };
   const [mutate, { loading }] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const navigate = useNavigate();
+  const location = useLocation();
+  const category = location.state?.category;
 
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
@@ -87,18 +85,31 @@ export function CreateTargetPopulationPage(): React.ReactElement {
 
   const handleSubmit = async (values): Promise<void> => {
     try {
+      let input = {
+        programId: values.program,
+        name: values.name,
+        businessAreaSlug: businessArea,
+      };
+
+      if (category === 'filters') {
+        input = {
+          ...input,
+          ...getTargetingCriteriaVariables(values),
+        };
+      } else if (category === 'ids') {
+        input = {
+          ...input,
+          householdIds: values.householdIds,
+          individualIds: values.individualIds,
+        };
+      }
+
       const res = await mutate({
         variables: {
-          input: {
-            programId: values.program,
-            name: values.name,
-            excludedIds: values.excludedIds,
-            exclusionReason: values.exclusionReason,
-            businessAreaSlug: businessArea,
-            ...getTargetingCriteriaVariables(values),
-          },
+          input,
         },
       });
+
       showMessage(t('Target Population Created'));
       navigate(
         `/${baseUrl}/target-population/${res.data.createTargetPopulation.targetPopulation.id}`,
@@ -124,38 +135,97 @@ export function CreateTargetPopulationPage(): React.ReactElement {
             baseUrl={baseUrl}
             permissions={permissions}
           />
-          {values.program ? (
-            <FieldArray
-              name="criterias"
-              render={(arrayHelpers) => (
-                <TargetingCriteria
-                  helpers={arrayHelpers}
-                  rules={values.criterias}
-                  selectedProgram={getFullNodeFromEdgesById(
-                    allProgramsData?.allPrograms?.edges,
-                    values.program,
-                  )}
-                  screenBeneficiary={
-                    businessAreaData?.businessArea?.screenBeneficiary
-                  }
-                  isEdit
-                />
-              )}
-            />
-          ) : (
-            <TargetingCriteriaDisabled />
-          )}
-          <Exclusions />
           <PaperContainer>
-            <Typography variant="h6">
+            <Box pt={3} pb={3}>
+              <Typography variant="h6">{t('Targeting Criteria')}</Typography>
+            </Box>
+            <Grid container>
+              <Grid item xs={6}>
+                <Field
+                  name="name"
+                  label={t('Target Population Name')}
+                  type="text"
+                  fullWidth
+                  required
+                  component={FormikTextField}
+                  variant="outlined"
+                  data-cy="input-name"
+                />
+              </Grid>
+            </Grid>
+            <Box pt={6} pb={6}>
+              <Divider />
+            </Box>
+            {values.program && category === 'filters' ? (
+              <>
+                <FieldArray
+                  name="criterias"
+                  render={(arrayHelpers) => (
+                    <TargetingCriteria
+                      helpers={arrayHelpers}
+                      rules={values.criterias}
+                      selectedProgram={getFullNodeFromEdgesById(
+                        allProgramsData?.allPrograms?.edges,
+                        values.program,
+                      )}
+                      screenBeneficiary={
+                        businessAreaData?.businessArea?.screenBeneficiary
+                      }
+                      isEdit
+                    />
+                  )}
+                />
+              </>
+            ) : null}
+            {category === 'ids' ? (
+              <>
+                <Grid container spacing={3}>
+                  <Grid item xs={12}>
+                    <Field
+                      data-cy="input-included-household-ids"
+                      name="householdIds"
+                      fullWidth
+                      variant="outlined"
+                      label={t('Household IDs')}
+                      component={FormikTextField}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Box pt={3} pb={3}>
+                      <Divider />
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Field
+                      data-cy="input-included-individual-ids"
+                      name="individualIds"
+                      fullWidth
+                      variant="outlined"
+                      label={t('Individual IDs')}
+                      component={FormikTextField}
+                    />
+                  </Grid>
+                </Grid>
+              </>
+            ) : null}
+          </PaperContainer>
+          {category === ' filters' && <Exclusions />}
+          <Box
+            pt={3}
+            pb={3}
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+          >
+            <Typography style={{ color: '#b1b1b5' }} variant="h6">
               {t('Save to see the list of households')}
             </Typography>
-            <Label>
+            <Typography style={{ color: '#b1b1b5' }} variant="subtitle1">
               {t('List of households will be available after saving')}
-            </Label>
-          </PaperContainer>
+            </Typography>
+          </Box>
         </Form>
       )}
     </Formik>
   );
-}
+};
