@@ -29,6 +29,7 @@ index_settings = {
 
 
 class ImportedIndividualDocument(Document):
+    id = fields.KeywordField()  # The boost parameter on field mappings has been removed
     given_name = fields.TextField(
         analyzer=name_synonym_analyzer, fields={"phonetic": fields.TextField(analyzer=phonetic_analyzer)}
     )
