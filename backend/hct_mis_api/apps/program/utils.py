@@ -6,6 +6,7 @@ from django.db.models import QuerySet
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.models import DataCollectingType
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
     BankAccountInfo,
@@ -18,7 +19,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
 from hct_mis_api.apps.program.validators import validate_data_collecting_type
 from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 
@@ -404,3 +405,27 @@ def remove_program_permissions_for_exists_partners(
     for partner in Partner.objects.exclude(id__in=partner_exclude_ids):
         partner.get_permissions().remove_program_areas(business_area_pk, program_pk)
         partner.save()
+
+
+def create_program_partner_access(partners_access_data, program) -> None:
+    for partner_access in partners_access_data:
+        program_partner, _ = ProgramPartnerThrough.objects.get_or_create(
+            program=program,
+            partner_id=partner_access["partner"],
+        )
+        if areas := partner_access.get("areas"):
+            program_partner.areas.set(Area.objects.filter(id__in=areas))
+        else:
+            # full area access
+            program_partner.areas.set(
+                Area.objects.filter(area_type__country__business_areas__id=program.business_area.id)
+            )
+
+
+def remove_program_partner_access(partners_access_data, program) -> None:
+    partner_ids = [partner_access["partner"] for partner_access in partners_access_data]
+    existing_program_partner_access = ProgramPartnerThrough.objects.filter(
+        program=program,
+    )
+    removed_partner_access = existing_program_partner_access.exclude(partner_id__in=partner_ids)
+    removed_partner_access.delete()

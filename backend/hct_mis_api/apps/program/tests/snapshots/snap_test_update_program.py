@@ -142,6 +142,21 @@ snapshots['TestUpdateProgram::test_update_program_of_other_partner_raise_error 1
     ]
 }
 
+snapshots['TestUpdateProgram::test_update_program_partners 1'] = {
+    'data': {
+        'updateProgram': {
+            'program': {
+                'dataCollectingType': {
+                    'code': 'partial_individuals',
+                    'label': 'Partial'
+                },
+                'name': 'updated name',
+                'status': 'DRAFT'
+            }
+        }
+    }
+}
+
 snapshots['TestUpdateProgram::test_update_program_when_finished 1'] = {
     'data': {
         'updateProgram': None
@@ -214,7 +229,7 @@ snapshots['TestUpdateProgram::test_update_program_with_duplicated_programme_code
                     'line': 3
                 }
             ],
-            'message': "Programme code is already used.",
+            'message': 'Programme code is already used.',
             'path': [
                 'updateProgram'
             ]

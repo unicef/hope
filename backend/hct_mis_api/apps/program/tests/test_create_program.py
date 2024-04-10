@@ -11,6 +11,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -198,6 +199,36 @@ class TestCreateProgram(APITestCase):
 
         program = Program.objects.get(name="Test")
         self.assertEqual(program.programme_code, "ABC2")
+
+    def test_create_program_with_partners(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+        area1 = AreaFactory()
+        area2 = AreaFactory()
+        partner2 = PartnerFactory()
+        self.program_data["programData"]["partnersAccess"] = [
+            {
+                "partner": str(self.partner.id),
+                "areas": [str(area1.id), str(area2.id)],
+            },
+            {
+                "partner": str(partner2.id),
+                "areas": [str(area1.id), str(area2.id)],
+            },
+        ]
+
+        self.graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+        )
+
+        program = Program.objects.get(name="Test")
+        self.assertEqual(program.partners.count(), 2)
+        self.assertEqual(program.program_partner_through.count(), 2)
+        self.assertEqual(program.program_partner_through.first().areas.count(), 2)
+        self.assertEqual(program.program_partner_through.last().areas.count(), 2)
+        self.assertIn(area1, program.program_partner_through.first().areas.all())
+        self.assertIn(area2, program.program_partner_through.first().areas.all())
+        self.assertIn(area1, program.program_partner_through.last().areas.all())
+        self.assertIn(area2, program.program_partner_through.last().areas.all())
 
     def test_programme_code_should_be_unique_among_the_same_business_area(self) -> None:
         ProgramFactory(programme_code="ABC2", business_area=self.business_area)

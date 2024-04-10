@@ -135,7 +135,6 @@ type ApprovalProcessNode implements Node {
   approvalNumberRequired: Int!
   authorizationNumberRequired: Int!
   financeReleaseNumberRequired: Int!
-  adminUrl: String
   rejectedOn: String
   actions: FilteredActionsListNode
 }
@@ -177,6 +176,7 @@ type AreaNode implements Node {
   areaSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  programPartnerThrough: [ProgramPartnerThroughNode!]!
   programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
@@ -339,6 +339,7 @@ type BusinessAreaNode implements Node {
   isAccountabilityApplicable: Boolean
   active: Boolean!
   enableEmailNotification: Boolean!
+  partners: [PartnerNodeForProgram!]!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   dataCollectingTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
   partnerSet: [PartnerNodeForProgram!]!
@@ -441,7 +442,6 @@ type CashPlanNode implements Node {
   totalPersonsCovered: Int!
   totalPersonsCoveredRevised: Int!
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
-  adminUrl: String
   bankReconciliationSuccess: Int
   bankReconciliationError: Int
   totalNumberOfHouseholds: Int
@@ -571,7 +571,6 @@ type CommunicationMessageRecipientMapNode implements Node {
   id: ID!
   size: Int
   headOfHousehold: IndividualNode!
-  adminUrl: String
 }
 
 type CommunicationMessageRecipientMapNodeConnection {
@@ -618,7 +617,8 @@ input CopyProgramInput {
   administrativeAreasOfImplementation: String
   businessAreaSlug: String
   dataCollectingTypeCode: String
-  partners: [PartnerProgramInput]
+  partners: [ProgramPartnerThroughInput]
+  partnerAccess: String
   programmeCode: String
 }
 
@@ -780,7 +780,8 @@ input CreateProgramInput {
   administrativeAreasOfImplementation: String
   businessAreaSlug: String
   dataCollectingTypeCode: String
-  partners: [PartnerProgramInput]
+  partners: [ProgramPartnerThroughInput]
+  partnerAccess: String
   programmeCode: String
 }
 
@@ -1243,7 +1244,6 @@ type FinancialServiceProviderNode implements Node {
   financialserviceproviderxlsxreportSet(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxReportNodeConnection!
   deliveryMechanismsPerPaymentPlan(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
-  adminUrl: String
   fullName: String
   isPaymentGateway: Boolean
 }
@@ -1266,7 +1266,6 @@ type FinancialServiceProviderXlsxReportNode implements Node {
   updatedAt: DateTime!
   financialServiceProvider: FinancialServiceProviderNode!
   status: Int
-  adminUrl: String
   reportUrl: String
 }
 
@@ -1291,7 +1290,6 @@ type FinancialServiceProviderXlsxTemplateNode implements Node {
   columns: [String]
   coreFields: [String!]!
   financialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
-  adminUrl: String
 }
 
 type FinancialServiceProviderXlsxTemplateNodeConnection {
@@ -1383,7 +1381,6 @@ type GetCashplanVerificationSampleSizeObject {
 }
 
 type GetCommunicationMessageSampleSizeNode {
-  adminUrl: String
   numberOfRecipients: Int
   sampleSize: Int
 }
@@ -2082,7 +2079,6 @@ type ImportedHouseholdNode implements Node {
   programId: UUID
   collectType: ImportedHouseholdCollectType!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
-  adminUrl: String
   hasDuplicates: Boolean
   importId: String
 }
@@ -2223,7 +2219,6 @@ type ImportedIndividualNode implements Node {
   importedhousehold: ImportedHouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
   identities(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualIdentityNodeConnection!
-  adminUrl: String
   role: String
   age: Int
   importId: String
@@ -2811,18 +2806,15 @@ type PartnerNodeForProgram {
   rght: Int!
   treeId: Int!
   level: Int!
+  businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   partnerSet: [PartnerNodeForProgram!]!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
   individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  programPartnerThrough: [ProgramPartnerThroughNode!]!
+  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   adminAreas: [AreaGroupNode]
   areaAccess: String
-}
-
-input PartnerProgramInput {
-  id: String!
-  areaAccess: String
-  adminAreas: [String]
 }
 
 type PartnerType {
@@ -2836,10 +2828,13 @@ type PartnerType {
   rght: Int!
   treeId: Int!
   level: Int!
+  businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   partnerSet: [PartnerNodeForProgram!]!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
   individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  programPartnerThrough: [ProgramPartnerThroughNode!]!
+  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
 }
 
 type PaymentConflictDataNode {
@@ -2877,7 +2872,6 @@ type PaymentHouseholdSnapshotNode implements Node {
   snapshotData: JSONString!
   householdId: UUID!
   payment: PaymentNode!
-  adminUrl: String
 }
 
 type PaymentNode implements Node {
@@ -3222,7 +3216,6 @@ enum PaymentPlanStatus {
 }
 
 type PaymentRecordAndPaymentNode {
-  adminUrl: String
   objType: String
   id: String
   caId: String
@@ -3535,6 +3528,8 @@ type ProgramNode implements Node {
   householdCount: Int!
   individualCount: Int!
   programmeCode: String
+  partnerAccess: ProgramPartnerAccess
+  partners: [PartnerNodeForProgram!]!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -3544,6 +3539,7 @@ type ProgramNode implements Node {
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   grievanceTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, totalHouseholdsCountWithValidPhoneNoMax: Int, totalHouseholdsCountWithValidPhoneNoMin: Int, orderBy: String): TargetPopulationNodeConnection!
+  programPartnerThrough: [ProgramPartnerThroughNode!]!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   activityLogs(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
@@ -3555,7 +3551,7 @@ type ProgramNode implements Node {
   totalUndeliveredQuantity: Decimal
   totalNumberOfHouseholds: Int
   totalNumberOfHouseholdsWithTpInProgram: Int
-  partners: [PartnerNodeForProgram]
+  partnersAccess: [ProgramPartnerThroughNode]
 }
 
 type ProgramNodeConnection {
@@ -3568,6 +3564,26 @@ type ProgramNodeConnection {
 type ProgramNodeEdge {
   node: ProgramNode
   cursor: String!
+}
+
+enum ProgramPartnerAccess {
+  ALL_PARTNERS_ACCESS
+  NONE_PARTNERS_ACCESS
+  SELECTED_PARTNERS_ACCESS
+}
+
+input ProgramPartnerThroughInput {
+  partner: String
+  areas: [String]
+}
+
+type ProgramPartnerThroughNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  program: ProgramNode!
+  partner: PartnerNodeForProgram!
+  areas: [AreaNode]
 }
 
 enum ProgramScope {
@@ -3813,7 +3829,6 @@ type RecipientNode implements Node {
   id: ID!
   size: Int
   headOfHousehold: IndividualNode!
-  adminUrl: String
 }
 
 type RecipientNodeConnection {
@@ -4001,7 +4016,6 @@ type ReportNode implements Node {
   numberOfRecords: Int
   program: ProgramNode
   adminArea(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection!
-  adminUrl: String
   fileUrl: String
   adminArea1(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection
   adminArea2(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection
@@ -5033,7 +5047,8 @@ input UpdateProgramInput {
   populationGoal: Int
   administrativeAreasOfImplementation: String
   dataCollectingTypeCode: String
-  partners: [PartnerProgramInput]
+  partners: [ProgramPartnerThroughInput]
+  partnerAccess: String
   programmeCode: String
 }
 
@@ -5094,6 +5109,7 @@ type UserBusinessAreaNode implements Node {
   isAccountabilityApplicable: Boolean
   active: Boolean!
   enableEmailNotification: Boolean!
+  partners: [PartnerNodeForProgram!]!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   dataCollectingTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
   partnerSet: [PartnerNodeForProgram!]!

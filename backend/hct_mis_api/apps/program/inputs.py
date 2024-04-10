@@ -7,6 +7,11 @@ class PartnerProgramInput(graphene.InputObjectType):
     admin_areas = graphene.List(graphene.String)
 
 
+class ProgramPartnerThroughInput(graphene.InputObjectType):
+    partner = graphene.String()
+    areas = graphene.List(graphene.String)
+
+
 class CreateProgramInput(graphene.InputObjectType):
     name = graphene.String()
     start_date = graphene.Date()
@@ -20,7 +25,8 @@ class CreateProgramInput(graphene.InputObjectType):
     administrative_areas_of_implementation = graphene.String()
     business_area_slug = graphene.String()
     data_collecting_type_code = graphene.String()
-    partners = graphene.List(PartnerProgramInput)
+    partners = graphene.List(ProgramPartnerThroughInput)
+    partner_access = graphene.String()
     programme_code = graphene.String()
 
 
@@ -38,7 +44,8 @@ class UpdateProgramInput(graphene.InputObjectType):
     population_goal = graphene.Int()
     administrative_areas_of_implementation = graphene.String()
     data_collecting_type_code = graphene.String()
-    partners = graphene.List(PartnerProgramInput)
+    partners = graphene.List(ProgramPartnerThroughInput)
+    partner_access = graphene.String()
     programme_code = graphene.String()
 
 
@@ -56,5 +63,6 @@ class CopyProgramInput(graphene.InputObjectType):
     administrative_areas_of_implementation = graphene.String()
     business_area_slug = graphene.String()
     data_collecting_type_code = graphene.String()
-    partners = graphene.List(PartnerProgramInput)
+    partners = graphene.List(ProgramPartnerThroughInput)
+    partner_access = graphene.String()
     programme_code = graphene.String()

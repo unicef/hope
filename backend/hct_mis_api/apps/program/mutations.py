@@ -26,10 +26,12 @@ from hct_mis_api.apps.program.inputs import (
     CreateProgramInput,
     UpdateProgramInput,
 )
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
 from hct_mis_api.apps.program.schema import ProgramNode
 from hct_mis_api.apps.program.utils import (
     copy_program_object,
+    create_program_partner_access,
+    remove_program_partner_access,
     remove_program_permissions_for_exists_partners,
     update_partner_permissions_for_program,
 )
@@ -64,6 +66,7 @@ class CreateProgram(
         if not (data_collecting_type_code := program_data.pop("data_collecting_type_code", None)):
             raise ValidationError("DataCollectingType is required for creating new Program")
         data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
+        partner_access = program_data.pop("partner_access", [])
         partners_data = program_data.pop("partners", [])
         programme_code = program_data.get("programme_code", "")
         if programme_code:
@@ -94,8 +97,8 @@ class CreateProgram(
             end_date=program.end_date,
             status=ProgramCycle.ACTIVE,
         )
-        for partner in partners_data:
-            update_partner_permissions_for_program(partner, str(business_area.pk), str(program.pk))
+
+        create_program_partner_access(partners_data, program)
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
         return CreateProgram(program=program)
@@ -126,6 +129,7 @@ class UpdateProgram(
         partners_data = program_data.pop("partners", [])
         partners_ids = [int(partner["id"]) for partner in partners_data]
         partner = info.context.user.partner
+        partner_access = program_data.pop("partner_access", [])
         programme_code = program_data.get("programme_code", "")
         if programme_code:
             programme_code = programme_code.upper()
@@ -179,9 +183,8 @@ class UpdateProgram(
 
         # no need to update partners for Activation or Finish action
         if status_to_set not in [Program.ACTIVE, Program.FINISHED]:
-            for partner in partners_data:
-                update_partner_permissions_for_program(partner, str(business_area.pk), str(program.pk))
-            remove_program_permissions_for_exists_partners(partners_ids, str(business_area.pk), str(program.pk))
+            create_program_partner_access(partners_data, program)
+            remove_program_partner_access(partners_data, program)
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return UpdateProgram(program=program)
@@ -222,6 +225,7 @@ class CopyProgram(CommonValidator, ProgrammeCodeValidator, PermissionMutation, V
     def processed_mutate(cls, root: Any, info: Any, program_data: Dict) -> "CopyProgram":
         program_id = decode_id_string_required(program_data.pop("id"))
         partners_data = program_data.pop("partners", [])
+        partner_access = program_data.pop("partner_access", [])
         business_area = Program.objects.get(id=program_id).business_area
         programme_code = program_data.get("programme_code", "")
         if programme_code:
@@ -237,8 +241,7 @@ class CopyProgram(CommonValidator, ProgrammeCodeValidator, PermissionMutation, V
         )
         program = copy_program_object(program_id, program_data)
 
-        for partner in partners_data:
-            update_partner_permissions_for_program(partner, str(business_area.pk), str(program.pk))
+        create_program_partner_access(partners_data, program)
 
         copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
