@@ -335,7 +335,7 @@ class Household(
     ConcurrencyModel,
     UnicefIdentifiedModel,
     AdminUrlMixin,
-    RdiMergeStatusMixin
+    RdiMergeStatusMixin,
 ):
     class CollectType(models.TextChoices):
         STANDARD = "STANDARD", "Standard"
@@ -790,7 +790,9 @@ class IndividualIdentity(SoftDeletableIsOriginalModel, TimeStampedModel, RdiMerg
         return f"{self.partner} {self.individual} {self.number}"
 
 
-class IndividualRoleInHousehold(SoftDeletableIsOriginalModel, TimeStampedUUIDModel, AbstractSyncable, RdiMergeStatusMixin):
+class IndividualRoleInHousehold(
+    SoftDeletableIsOriginalModel, TimeStampedUUIDModel, AbstractSyncable, RdiMergeStatusMixin
+):
     individual = models.ForeignKey(
         "household.Individual",
         on_delete=models.CASCADE,
@@ -844,7 +846,7 @@ class Individual(
     ConcurrencyModel,
     UnicefIdentifiedModel,
     AdminUrlMixin,
-    RdiMergeStatusMixin
+    RdiMergeStatusMixin,
 ):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
