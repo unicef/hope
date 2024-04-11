@@ -77,16 +77,20 @@ interface TargetingCriteriaProps {
   selectedProgram?;
   isEdit?: boolean;
   screenBeneficiary: boolean;
+  isSocialDctType: boolean;
+  isStandardDctType: boolean;
 }
 
-export function TargetingCriteria({
+export const TargetingCriteria = ({
   rules,
   helpers,
   targetPopulation,
   selectedProgram,
   isEdit,
   screenBeneficiary,
-}: TargetingCriteriaProps): React.ReactElement {
+  isSocialDctType,
+  isStandardDctType,
+}: TargetingCriteriaProps): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const [isOpen, setOpen] = useState(false);
@@ -138,10 +142,7 @@ export function TargetingCriteria({
     }
 
     // Disable household filters for social programs
-    if (
-      selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
-      DataCollectingTypeType.Social
-    ) {
+    if (isSocialDctType) {
       householdFiltersAvailable = false;
     }
   }
@@ -216,23 +217,44 @@ export function TargetingCriteria({
                 <Box mt={3} p={3}>
                   <Grid container spacing={3}>
                     <Grid item xs={6}>
-                      <FormControlLabel
-                        disabled
-                        control={
-                          <Checkbox
-                            color="primary"
-                            name="flagExcludeIfActiveAdjudicationTicket"
-                            data-cy="checkbox-exclude-if-active-adjudication-ticket"
-                            checked={Boolean(
-                              targetPopulation?.targetingCriteria
-                                ?.flagExcludeIfActiveAdjudicationTicket,
-                            )}
-                          />
-                        }
-                        label={t(
-                          'Exclude Households with Active Adjudication Ticket',
-                        )}
-                      />
+                      {isStandardDctType && (
+                        <FormControlLabel
+                          disabled
+                          control={
+                            <Checkbox
+                              color="primary"
+                              name="flagExcludeIfActiveAdjudicationTicket"
+                              data-cy="checkbox-exclude-if-active-adjudication-ticket"
+                              checked={Boolean(
+                                targetPopulation?.targetingCriteria
+                                  ?.flagExcludeIfActiveAdjudicationTicket,
+                              )}
+                            />
+                          }
+                          label={t(
+                            'Exclude Households with Active Adjudication Ticket',
+                          )}
+                        />
+                      )}
+                      {isSocialDctType && (
+                        <FormControlLabel
+                          disabled
+                          control={
+                            <Checkbox
+                              color="primary"
+                              name="flagExcludePeopleIfActiveAdjudicationTicket"
+                              data-cy="checkbox-exclude-people-if-active-adjudication-ticket"
+                              checked={Boolean(
+                                targetPopulation?.targetingCriteria
+                                  ?.flagExcludePeopleIfActiveAdjudicationTicket,
+                              )}
+                            />
+                          }
+                          label={t(
+                            'Exclude People with Active Adjudication Ticket',
+                          )}
+                        />
+                      )}
                     </Grid>
                     <Grid item xs={6}>
                       {screenBeneficiary && (
@@ -260,17 +282,32 @@ export function TargetingCriteria({
               ) : (
                 <Box mt={3} p={3}>
                   <Grid container spacing={3}>
-                    <Grid item xs={6}>
-                      <Field
-                        name="flagExcludeIfActiveAdjudicationTicket"
-                        label={t(
-                          'Exclude Households with Active Adjudication Ticket',
-                        )}
-                        color="primary"
-                        component={FormikCheckboxField}
-                        data-cy="input-active-adjudication-ticket"
-                      />
-                    </Grid>
+                    {isStandardDctType && (
+                      <Grid item xs={6}>
+                        <Field
+                          name="flagExcludeIfActiveAdjudicationTicket"
+                          label={t(
+                            'Exclude Households with Active Adjudication Ticket',
+                          )}
+                          color="primary"
+                          component={FormikCheckboxField}
+                          data-cy="input-active-adjudication-ticket"
+                        />
+                      </Grid>
+                    )}
+                    {isSocialDctType && (
+                      <Grid item xs={6}>
+                        <Field
+                          name="flagExcludePeopleWithActiveAdjudicationTicket"
+                          label={t(
+                            'Exclude People with Active Adjudication Ticket',
+                          )}
+                          color="primary"
+                          component={FormikCheckboxField}
+                          data-cy="input-active-adjudication-ticket"
+                        />
+                      </Grid>
+                    )}
                     {screenBeneficiary && (
                       <Grid item xs={6}>
                         <Field
@@ -297,4 +334,4 @@ export function TargetingCriteria({
     );
   }
   return <TargetingCriteriaDisabled showTooltip />;
-}
+};
