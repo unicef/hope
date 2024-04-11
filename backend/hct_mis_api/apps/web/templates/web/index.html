@@ -21,24 +21,7 @@
     {% endif %}
   </script>
 
-  {% if MATOMO_TRACKER_URL and MATOMO_SITE_ID and MATOMO_SCRIPT_URL %}
-    <!-- Matomo -->
-    <script>
-      var _paq = window._paq = window._paq || [];
-      /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
-      _paq.push(['trackPageView']);
-      _paq.push(['enableLinkTracking']);
-      (function() {
-        _paq.push(['setTrackerUrl', '{{ MATOMO_TRACKER_URL }}']);
-        _paq.push(['setSiteId', '{{ MATOMO_SITE_ID }}']);
-        var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
-        g.async = true;
-        g.src = '{{ MATOMO_SCRIPT_URL }}';
-        s.parentNode.insertBefore(g, s);
-      })();
-    </script>
-    <!-- End Matomo Code -->
-  {% endif %}
+  {% include 'matomo.html' %}
 
   <script type="module" src="{{ assets.file }}"></script>
 </head>
