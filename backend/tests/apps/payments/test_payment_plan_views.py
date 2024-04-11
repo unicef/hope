@@ -13,6 +13,7 @@ from hct_mis_api.apps.account.fixtures import (
 )
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.payment.api.views import PaymentPlanManagerialViewSet
 from hct_mis_api.apps.payment.fixtures import (
     ApprovalFactory,
     ApprovalProcessFactory,
@@ -20,6 +21,8 @@ from hct_mis_api.apps.payment.fixtures import (
 )
 from hct_mis_api.apps.payment.models import Approval, PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+
+pytestmark = pytest.mark.django_db
 
 
 class PaymentPlanTestMixin:
@@ -235,6 +238,19 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         assert self.payment_plan1.status == PaymentPlan.Status.IN_APPROVAL
         assert self.payment_plan2.status == PaymentPlan.Status.IN_APPROVAL
 
+    @pytest.mark.parametrize(
+        "action_name, result",
+        (
+            (PaymentPlan.Action.APPROVE.name, Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.name),
+            (PaymentPlan.Action.AUTHORIZE.name, Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE.name),
+            (PaymentPlan.Action.REVIEW.name, Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW.name),
+            ("Some other action name", None),
+        ),
+    )
+    def test_get_action_permission(self, action_name, result):
+        payment_plan_managerial_viewset = PaymentPlanManagerialViewSet()
+        assert payment_plan_managerial_viewset._get_action_permission(action_name) == result
+
 
 class TestPaymentPlanList(PaymentPlanTestMixin):
     def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:
@@ -313,6 +329,6 @@ class TestPaymentPlanList(PaymentPlanTestMixin):
             "follow_ups": [],
             "program": self.program1.name,
             "program_id": encode_id_base64(self.program1.id, "Program"),
-            "last_modified_date": self.payment_plan1.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-            "last_modified_by": None,
+            "last_approval_process_date": self.payment_plan1.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+            "last_approval_process_by": None,
         }

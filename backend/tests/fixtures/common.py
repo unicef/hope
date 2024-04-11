@@ -1,5 +1,5 @@
 import base64
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 
@@ -7,7 +7,7 @@ from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 
 
 @pytest.fixture()
-def afghanistan(db: Any) -> BusinessAreaFactory:
+def afghanistan() -> BusinessAreaFactory:
     return BusinessAreaFactory(
         **{
             "code": "0060",
