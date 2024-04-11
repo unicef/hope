@@ -23,16 +23,6 @@ class LimitBusinessAreaModelMixin(models.Model):
         abstract = True
 
 
-class RdiMergedModelManager(models.Manager):
-    def get_queryset(self) -> QuerySet:
-        return super().get_queryset().filter(rdi_merge_status=RdiMergeStatusMixin.MERGED)
-
-
-class RdiImportedModelManager(models.Manager):
-    def get_queryset(self) -> QuerySet:
-        return super().get_queryset().filter(rdi_merge_status=RdiMergeStatusMixin.PENDING)
-
-
 class RdiMergeStatusMixin(models.Model):
     PENDING = "PENDING"
     MERGED = "MERGED"
@@ -42,9 +32,6 @@ class RdiMergeStatusMixin(models.Model):
     )
 
     rdi_merge_status = models.CharField(max_length=10, choices=STATUS_CHOICE, null=True)
-
-    objects = RdiMergedModelManager()
-    imported = RdiImportedModelManager()
 
     class Meta:
         abstract = True
