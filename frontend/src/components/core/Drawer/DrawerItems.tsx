@@ -69,10 +69,10 @@ export const DrawerItems = ({
     },
   });
   useEffect(() => {
-    if (programId) {
+    if (!isAllPrograms) {
       getProgram();
     }
-  },[programId]);
+  }, [programId]);
   const permissions = usePermissions();
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
@@ -125,7 +125,7 @@ export const DrawerItems = ({
         programResults?.data?.program?.isSocialWorkerProgram;
       if (item.isSocialWorker === false) {
         isVisible &&= !isSocialWorkerProgram;
-      }else if(item.isSocialWorker === true){
+      } else if (item.isSocialWorker === true) {
         isVisible &&= isSocialWorkerProgram;
       }
       return isVisible;
