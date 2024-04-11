@@ -197,6 +197,13 @@ jobs:
           backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
             -f ./deployment/docker-compose.tst.yml \
             run backend ./dev.sh test
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./backend/coverage.xml
+          flags: unittests
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
 
   e2e_tests:
     runs-on: ubuntu-latest
@@ -215,6 +222,13 @@ jobs:
           dist_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist dev_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
             -f ./deployment/docker-compose.selenium.yml \
             run selenium
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./backend/coverage.xml
+          flags: e2e
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
 
   trivy:
     runs-on: ubuntu-latest
@@ -227,13 +241,15 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Trivy
-        continue-on-error: true
-        run: |
-          docker pull ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist
-          docker run -v /var/run/docker.sock:/var/run/docker.sock -e TRIVY_EXIT_CODE=2 -e TRIVY_SEVERITY=HIGH,CRITICAL aquasec/trivy:latest image ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist
-
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}'
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
   deploy:
     runs-on: ubuntu-latest
     needs: [e2e_tests, unit_tests, isort, black, flake8, mypy, frontend_tests]

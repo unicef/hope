@@ -8,6 +8,7 @@ export const Me = gql`
       email
       firstName
       lastName
+      isSuperuser
       businessAreas {
         edges {
           node {

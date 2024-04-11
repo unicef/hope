@@ -4,6 +4,7 @@ export const householdMinimal = gql`
   fragment householdMinimal on HouseholdNode {
     id
     status
+    adminUrl
     createdAt
     residenceStatus
     maleChildrenCount
