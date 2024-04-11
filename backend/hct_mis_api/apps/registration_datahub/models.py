@@ -295,6 +295,9 @@ class ImportedIndividual(TimeStampedUUIDModel):
         null=True, db_index=True, blank=True
     )  # TODO temporary null=True until we migrate backward all data
     age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True)
+    wallet_name = models.CharField(max_length=64, blank=True, default="")
+    blockchain_name = models.CharField(max_length=64, blank=True, default="")
+    wallet_address = models.CharField(max_length=128, blank=True, default="")
 
     @property
     def age(self) -> int:

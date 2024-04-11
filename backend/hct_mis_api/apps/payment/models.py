@@ -260,6 +260,7 @@ class GenericPayment(TimeStampedUUIDModel):
     DELIVERY_TYPE_TRANSFER = "Transfer"
     DELIVERY_TYPE_TRANSFER_TO_ACCOUNT = "Transfer to Account"
     DELIVERY_TYPE_VOUCHER = "Voucher"
+    DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET = "Transfer to Digital Wallet"
 
     DELIVERY_TYPES_IN_CASH = (
         DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL,
@@ -287,6 +288,7 @@ class GenericPayment(TimeStampedUUIDModel):
         (DELIVERY_TYPE_TRANSFER, _("Transfer")),
         (DELIVERY_TYPE_TRANSFER_TO_ACCOUNT, _("Transfer to Account")),
         (DELIVERY_TYPE_VOUCHER, _("Voucher")),
+        (DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET, _("Transfer to Digital Wallet")),
     )
 
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
@@ -1068,6 +1070,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("additional_document_number", _("Additional Document Number")),
         ("registration_token", _("Registration Token")),
         ("status", _("Status")),
+        ("transaction_status_blockchain", _("Transaction Status on the Blockchain")),
     )
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
@@ -1163,6 +1166,8 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "additional_document_type": (payment, "additional_document_type"),
             "additional_document_number": (payment, "additional_document_number"),
             "status": (payment, "payment_status"),
+            # TODO: add new column
+            "transaction_status_blockchain": (payment, "transaction_status_blockchain"),
         }
         additional_columns = {"registration_token": cls.get_registration_token_doc_number}
         if column_name in additional_columns:
