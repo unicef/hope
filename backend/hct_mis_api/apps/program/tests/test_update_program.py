@@ -14,7 +14,7 @@ from hct_mis_api.apps.core.fixtures import (
     generate_data_collecting_types,
 )
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.geo.fixtures import AreaFactory
+from hct_mis_api.apps.geo.fixtures import AreaFactory, CountryFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
@@ -31,6 +31,13 @@ class TestUpdateProgram(APITestCase):
             label
             code
           }
+          partners {   
+            partnerName       
+            areas {
+              name
+            }
+          }
+          partnerAccess
         }
       }
     }
@@ -44,12 +51,18 @@ class TestUpdateProgram(APITestCase):
 
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.business_area.data_collecting_types.set(DataCollectingType.objects.all().values_list("id", flat=True))
+        cls.unicef_partner = PartnerFactory(name="UNICEF")
 
         cls.program = ProgramFactory.create(
             name="initial name",
             status=Program.DRAFT,
             business_area=cls.business_area,
             data_collecting_type=data_collecting_type,
+            partner_access=Program.NONE_PARTNERS_ACCESS,
+        )
+        unicef_program = ProgramPartnerThrough.objects.create(
+            program=cls.program,
+            partner=cls.unicef_partner,
         )
         cls.program_finished = ProgramFactory.create(
             status=Program.FINISHED,
@@ -59,6 +72,26 @@ class TestUpdateProgram(APITestCase):
         cls.partner = PartnerFactory(name="WFP")
         cls.user = UserFactory.create(partner=cls.partner)
 
+        cls.other_partner = PartnerFactory(name="Other Partner")
+        cls.other_partner.allowed_business_areas.set([cls.business_area])
+        cls.partner_not_allowed_in_BA = PartnerFactory(name="Partner not allowed in BA")
+
+        country_afg = CountryFactory(name="Afghanistan")
+        country_afg.business_areas.set([cls.business_area])
+        area_type_afg = AreaTypeFactory(name="Area Type in Afg", country=country_afg)
+        country_other = CountryFactory(name="Other Country", short_name="Oth",
+            iso_code2="O",
+            iso_code3="OTH",
+            iso_num="111",
+        )
+        cls.area_type_other = AreaTypeFactory(name="Area Type Other", country=country_other)
+
+        cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg)
+        cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg)
+        cls.area_not_in_afg = AreaFactory(name="Area not in AFG", area_type=cls.area_type_other)
+
+        unicef_program.areas.set([cls.area_in_afg_1, cls.area_in_afg_2])
+
     def test_update_program_not_authenticated(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
@@ -67,6 +100,7 @@ class TestUpdateProgram(APITestCase):
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "name": "updated name",
                     "status": Program.ACTIVE,
+                    "partnerAccess": Program.NONE_PARTNERS_ACCESS,
                 },
                 "version": self.program.version,
             },
@@ -98,13 +132,11 @@ class TestUpdateProgram(APITestCase):
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "name": "updated name",
                     "status": Program.ACTIVE,
-                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
                     "dataCollectingTypeCode": "partial_individuals",
                 },
                 "version": self.program.version,
             },
         )
-
         updated_program = Program.objects.get(id=self.program.id)
         if should_be_updated:
             assert updated_program.status == Program.ACTIVE
@@ -113,19 +145,25 @@ class TestUpdateProgram(APITestCase):
             assert updated_program.status == Program.DRAFT
             assert updated_program.name == "initial name"
 
-    def test_update_program_partners(self) -> None:
-        area1 = AreaFactory()
-        area2 = AreaFactory()
-        area_to_de_unselected = AreaFactory()
-        existing_partner = PartnerFactory(name="Other Partner")
+    @parameterized.expand(
+        [
+            ("valid", Program.SELECTED_PARTNERS_ACCESS),
+            ("invalid_all_partner_access", Program.ALL_PARTNERS_ACCESS),
+            ("invalid_none_partner_access", Program.NONE_PARTNERS_ACCESS),
+        ]
+    )
+    def test_update_program_partners(self, _: Any, partner_access: str) -> None:
+        area1 = AreaFactory(name="Area1", area_type=self.area_type_other)
+        area2 = AreaFactory(name="Area2", area_type=self.area_type_other)
+        area_to_be_unselected = AreaFactory(name="AreaToBeUnselected", area_type=self.area_type_other)
         program_partner = ProgramPartnerThrough.objects.create(
             program=self.program,
             partner=self.partner,
         )
-        program_partner.areas.set([area1, area_to_de_unselected])
-        program_partner_to_be_deleted = ProgramPartnerThrough.objects.create(
+        program_partner.areas.set([area1, area_to_be_unselected])
+        ProgramPartnerThrough.objects.create(
             program=self.program,
-            partner=existing_partner,
+            partner=self.other_partner,
         )
         partner_to_be_added = PartnerFactory(name="Partner to be added")
         self.create_user_role_with_permissions(
@@ -142,9 +180,53 @@ class TestUpdateProgram(APITestCase):
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "name": "updated name",
                     "status": Program.DRAFT,
-                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
                     "dataCollectingTypeCode": "partial_individuals",
-                    "partnersAccess": [
+                    "partners": [
+                        {
+                            "partner": str(self.partner.id),
+                            "areas": [str(area1.id), str(area2.id)],
+                        },
+                        {
+                            "partner": str(partner_to_be_added.id),
+                            "areas": [str(area1.id), str(area2.id)],
+                        },
+                    ],
+                    "partnerAccess": partner_access,
+                },
+                "version": self.program.version,
+            },
+        )
+
+    def test_update_program_partners_invalid_access_type_from_object(self) -> None:
+        area1 = AreaFactory(name="Area1", area_type=self.area_type_other)
+        area2 = AreaFactory(name="Area2", area_type=self.area_type_other)
+        area_to_be_unselected = AreaFactory(name="AreaToBeUnselected", area_type=self.area_type_other)
+        program_partner = ProgramPartnerThrough.objects.create(
+            program=self.program,
+            partner=self.partner,
+        )
+        program_partner.areas.set([area1, area_to_be_unselected])
+        ProgramPartnerThrough.objects.create(
+            program=self.program,
+            partner=self.other_partner,
+        )
+        partner_to_be_added = PartnerFactory(name="Partner to be added")
+        self.create_user_role_with_permissions(
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.business_area,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "name": "updated name",
+                    "status": Program.DRAFT,
+                    "dataCollectingTypeCode": "partial_individuals",
+                    "partners": [
                         {
                             "partner": str(self.partner.id),
                             "areas": [str(area1.id), str(area2.id)],
@@ -159,20 +241,28 @@ class TestUpdateProgram(APITestCase):
             },
         )
 
-        updated_program = Program.objects.get(id=self.program.id)
-        self.assertEqual(updated_program.status, Program.DRAFT)
-        self.assertEqual(updated_program.name, "updated name")
-        self.assertEqual(updated_program.partners.count(), 2)
-        self.assertEqual(updated_program.program_partner_through.count(), 2)
-        self.assertEqual(updated_program.program_partner_through.first().areas.count(), 2)
-        self.assertEqual(updated_program.program_partner_through.last().areas.count(), 2)
-        self.assertIn(area1, updated_program.program_partner_through.first().areas.all())
-        self.assertIn(area2, updated_program.program_partner_through.first().areas.all())
-        self.assertIn(area1, updated_program.program_partner_through.last().areas.all())
-        self.assertIn(area2, updated_program.program_partner_through.last().areas.all())
-        self.assertNotIn(area_to_de_unselected, updated_program.program_partner_through.first().areas.all())
-        self.assertNotIn(area_to_de_unselected, updated_program.program_partner_through.last().areas.all())
-        self.assertFalse(ProgramPartnerThrough.objects.filter(id=program_partner_to_be_deleted.id).exists())
+
+    def test_update_program_partners_all_partners_access(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.business_area,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "name": "updated name",
+                    "status": Program.DRAFT,
+                    "dataCollectingTypeCode": "partial_individuals",
+                    "partnerAccess": Program.ALL_PARTNERS_ACCESS,
+                },
+                "version": self.program.version,
+            },
+        )
 
     def test_update_active_program_with_dct(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
@@ -193,7 +283,6 @@ class TestUpdateProgram(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "dataCollectingTypeCode": "partial_individuals",
-                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
                 },
                 "version": self.program.version,
             },
@@ -213,12 +302,12 @@ class TestUpdateProgram(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "dataCollectingTypeCode": "partial_individuals",
-                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
                 },
                 "version": self.program.version,
             },
         )
         self.assertEqual(self.program.data_collecting_type.code, "full_collection")
+
 
     def test_update_program_with_deprecated_dct(self) -> None:
         dct, _ = DataCollectingType.objects.update_or_create(
@@ -235,7 +324,6 @@ class TestUpdateProgram(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "dataCollectingTypeCode": "deprecated",
-                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
                 },
                 "version": self.program.version,
             },
@@ -256,7 +344,6 @@ class TestUpdateProgram(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "dataCollectingTypeCode": "inactive",
-                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
                 },
                 "version": self.program.version,
             },
@@ -277,7 +364,6 @@ class TestUpdateProgram(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "dataCollectingTypeCode": "test_wrong_ba",
-                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
                 },
                 "version": self.program.version,
             },
@@ -293,7 +379,6 @@ class TestUpdateProgram(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(self.program_finished.id, "ProgramNode"),
                     "name": "xyz",
-                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
                 },
                 "version": self.program_finished.version,
             },
@@ -312,7 +397,13 @@ class TestUpdateProgram(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "name": "xyz",
-                    "partners": [{"id": str(another_partner.id), "areaAccess": "BUSINESS_AREA"}],
+                    "partnerAccess": Program.SELECTED_PARTNERS_ACCESS,
+                    "partners": [
+                        {
+                            "partner": str(another_partner.id),
+                            "areas": [],
+                        },
+                    ],
                 },
                 "version": self.program.version,
             },
@@ -321,14 +412,13 @@ class TestUpdateProgram(APITestCase):
     def test_update_program_with_programme_code(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
 
-        self.graphql_request(
+        x = self.graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
             variables={
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "name": "xyz",
-                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
                     "programmeCode": "ab/2",
                 },
                 "version": self.program.version,
@@ -351,7 +441,6 @@ class TestUpdateProgram(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "name": "xyz",
-                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
                     "programmeCode": "",
                 },
                 "version": self.program.version,
@@ -375,7 +464,6 @@ class TestUpdateProgram(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "name": "xyz",
-                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
                     "programmeCode": "abc2",
                 },
                 "version": self.program.version,

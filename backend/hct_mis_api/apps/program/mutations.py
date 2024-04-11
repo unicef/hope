@@ -128,9 +128,8 @@ class UpdateProgram(
         old_program = Program.objects.get(id=program_id)
         business_area = program.business_area
         partners_data = program_data.pop("partners", [])
-        partners_ids = [int(partner["id"]) for partner in partners_data]
         partner = info.context.user.partner
-        partner_access = program_data.get("partner_access", [])
+        partner_access = program_data.get("partner_access", program.partner_access)
         programme_code = program_data.get("programme_code", "")
         if programme_code:
             programme_code = programme_code.upper()
@@ -145,9 +144,11 @@ class UpdateProgram(
                 cls.has_permission(info, Permissions.PROGRAMME_FINISH, business_area)
 
         if status_to_set not in [Program.ACTIVE, Program.FINISHED]:
-            if not partner.is_unicef and partner.id not in partners_ids:
-                raise ValidationError("Please assign access to your partner before saving the programme.")
-
+            cls.validate_partners_data(
+                partners_data=partners_data,
+                partner_access=partner_access,
+                partner=partner,
+            )
         data_collecting_type_code = program_data.pop("data_collecting_type_code", None)
         data_collecting_type = old_program.data_collecting_type
         if data_collecting_type_code and data_collecting_type_code != data_collecting_type.code:
@@ -164,11 +165,8 @@ class UpdateProgram(
             data_collecting_type=data_collecting_type,
             business_area=business_area,
             programme_code=programme_code,
-            partners_data=partners_data,
-            partner_access=partner_access,
-            partner=partner,
+            excluded_validators="validate_partners_data",
         )
-
         if program.status == Program.FINISHED:
             # Only reactivation is possible
             status = program_data.get("status")
@@ -181,15 +179,12 @@ class UpdateProgram(
         for attrib, value in program_data.items():
             if hasattr(program, attrib):
                 setattr(program, attrib, value)
-
         program.full_clean()
-        program.save()
-
         # no need to update partners for Activation or Finish action
         if status_to_set not in [Program.ACTIVE, Program.FINISHED]:
-            create_program_partner_access(partners_data, program)
+            partners_data = create_program_partner_access(partners_data, program, partner_access)
             remove_program_partner_access(partners_data, program)
-
+        program.save()
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return UpdateProgram(program=program)
 
@@ -232,6 +227,7 @@ class CopyProgram(CommonValidator, ProgrammeCodeValidator, PartnersDataValidator
         partner_access = program_data.pop("partner_access", [])
         business_area = Program.objects.get(id=program_id).business_area
         programme_code = program_data.get("programme_code", "")
+        partner = info.context.user.partner
         if programme_code:
             programme_code = programme_code.upper()
             program_data["programme_code"] = programme_code
@@ -248,8 +244,7 @@ class CopyProgram(CommonValidator, ProgrammeCodeValidator, PartnersDataValidator
         )
         program = copy_program_object(program_id, program_data)
 
-        create_program_partner_access(partners_data, program)
-
+        create_program_partner_access(partners_data, program, partner_access)
         copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
 

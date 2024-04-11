@@ -2,7 +2,7 @@ import re
 from typing import Dict, List, Sequence, Union
 
 from django.db import transaction
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.models import DataCollectingType
@@ -407,32 +407,34 @@ def remove_program_permissions_for_exists_partners(
         partner.save()
 
 
-def create_program_partner_access(partners_data, program, partner_access) -> None:
+def create_program_partner_access(partners_data, program, partner_access) -> List[Dict]:
     full_area_access = Area.objects.filter(area_type__country__business_areas__id=program.business_area.id)
+
+    if partner_access == Program.ALL_PARTNERS_ACCESS:
+        partners = Partner.objects.filter(allowed_business_areas=program.business_area)
+        partners_data = [{"partner": partner.id, "areas": [area.id for area in full_area_access]} for partner in partners]
+
     unicef_partner = Partner.objects.get(name="UNICEF")
     # UNICEF has full area access to all the programs
     partners_data.extend([{"partner": unicef_partner.id, "areas": [area.id for area in full_area_access]}])
 
-    if partner_access == Program.ALL_PARTNERS_ACCESS:
-        partners = Partner.objects.filter(allowed_business_areas=program.business_area).exclude(id=unicef_partner.id)
-        partners_data = [{"partner": partner.id, "areas": [area.id for area in full_area_access]} for partner in partners]
-
-    for partner_access in partners_data:
+    for partner_data in partners_data:
         program_partner, _ = ProgramPartnerThrough.objects.get_or_create(
             program=program,
-            partner_id=partner_access["partner"],
+            partner_id=partner_data["partner"],
         )
-        if areas := partner_access.get("areas"):
+        if areas := partner_data.get("areas"):
             program_partner.areas.set(Area.objects.filter(id__in=areas))
         else:
             # full area access
             program_partner.areas.set(full_area_access)
+    return partners_data
 
 
-def remove_program_partner_access(partners_access_data, program) -> None:
-    partner_ids = [partner_access["partner"] for partner_access in partners_access_data]
+def remove_program_partner_access(partners_data, program) -> None:
+    partner_ids = [partner_data["partner"] for partner_data in partners_data]
     existing_program_partner_access = ProgramPartnerThrough.objects.filter(
         program=program,
     )
-    removed_partner_access = existing_program_partner_access.exclude(partner_id__in=partner_ids)
+    removed_partner_access = existing_program_partner_access.exclude(Q(partner_id__in=partner_ids) | Q(partner__name="UNICEF"))
     removed_partner_access.delete()

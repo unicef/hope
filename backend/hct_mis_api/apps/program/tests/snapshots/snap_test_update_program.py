@@ -56,6 +56,20 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_0_with_permissio
                     'label': 'Partial'
                 },
                 'name': 'updated name',
+                'partnerAccess': 'NONE_PARTNERS_ACCESS',
+                'partners': [
+                    {
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'partnerName': 'UNICEF'
+                    }
+                ],
                 'status': 'ACTIVE'
             }
         }
@@ -142,7 +156,7 @@ snapshots['TestUpdateProgram::test_update_program_of_other_partner_raise_error 1
     ]
 }
 
-snapshots['TestUpdateProgram::test_update_program_partners 1'] = {
+snapshots['TestUpdateProgram::test_update_program_partners_0_valid 1'] = {
     'data': {
         'updateProgram': {
             'program': {
@@ -151,10 +165,146 @@ snapshots['TestUpdateProgram::test_update_program_partners 1'] = {
                     'label': 'Partial'
                 },
                 'name': 'updated name',
+                'partnerAccess': 'SELECTED_PARTNERS_ACCESS',
+                'partners': [
+                    {
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'partnerName': 'UNICEF'
+                    },
+                    {
+                        'areas': [
+                            {
+                                'name': 'Area1'
+                            },
+                            {
+                                'name': 'Area2'
+                            }
+                        ],
+                        'partnerName': 'WFP'
+                    },
+                    {
+                        'areas': [
+                            {
+                                'name': 'Area1'
+                            },
+                            {
+                                'name': 'Area2'
+                            }
+                        ],
+                        'partnerName': 'Partner to be added'
+                    }
+                ],
                 'status': 'DRAFT'
             }
         }
     }
+}
+
+snapshots['TestUpdateProgram::test_update_program_partners_1_invalid_all_partner_access 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['You cannot specify partners for the chosen access type']",
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_partners_2_invalid_none_partner_access 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['You cannot specify partners for the chosen access type']",
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_partners_all_partners_access 1'] = {
+    'data': {
+        'updateProgram': {
+            'program': {
+                'dataCollectingType': {
+                    'code': 'partial_individuals',
+                    'label': 'Partial'
+                },
+                'name': 'updated name',
+                'partnerAccess': 'ALL_PARTNERS_ACCESS',
+                'partners': [
+                    {
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'partnerName': 'UNICEF'
+                    },
+                    {
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'partnerName': 'Other Partner'
+                    }
+                ],
+                'status': 'DRAFT'
+            }
+        }
+    }
+}
+
+snapshots['TestUpdateProgram::test_update_program_partners_invalid_access_type_from_object 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['You cannot specify partners for the chosen access type']",
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
 }
 
 snapshots['TestUpdateProgram::test_update_program_when_finished 1'] = {

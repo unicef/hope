@@ -18,6 +18,7 @@ from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
 from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
+from hct_mis_api.apps.program.utils import create_program_partner_access
 from hct_mis_api.apps.targeting.celery_tasks import create_tp_from_list
 from hct_mis_api.apps.targeting.models import TargetingCriteria
 from hct_mis_api.apps.utils.admin import (
