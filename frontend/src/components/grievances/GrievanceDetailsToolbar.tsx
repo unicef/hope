@@ -23,6 +23,7 @@ import { PageHeader } from '@core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from '../../programContext';
 import { getGrievanceEditPath } from './utils/createGrievanceUtils';
+import { AdminButton } from '@core/AdminButton';
 
 const Separator = styled.div`
   width: 1px;
@@ -338,6 +339,7 @@ export function GrievanceDetailsToolbar({
     <PageHeader
       title={`Ticket ID: ${ticket.unicefId}`}
       breadCrumbs={breadCrumbsItems}
+      flags={<AdminButton adminUrl={ticket.adminUrl} />}
     >
       <Box display="flex" alignItems="center">
         {isEditable && canEdit && (

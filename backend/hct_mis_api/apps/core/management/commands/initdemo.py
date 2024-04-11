@@ -63,6 +63,7 @@ class Command(BaseCommand):
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/account/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/documenttype.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/grievance/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/accountability/fixtures/data.json")

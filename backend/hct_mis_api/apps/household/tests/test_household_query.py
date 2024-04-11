@@ -125,7 +125,10 @@ HOUSEHOLD_QUERY = """
 
 
 class TestHouseholdQuery(APITestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
+    fixtures = (
+        f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
+        f"{settings.PROJECT_ROOT}/apps/household/fixtures/documenttype.json",
+    )
 
     @classmethod
     def setUpTestData(cls) -> None:

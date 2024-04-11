@@ -6,7 +6,6 @@ from selenium.webdriver.remote.webelement import WebElement
 
 class RegistrationDataImport(BaseComponents):
     # Locators
-    mainContent = 'div[data-cy="main-content"]'
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
     buttonImport = 'button[data-cy="button-import"]'
@@ -29,7 +28,10 @@ class RegistrationDataImport(BaseComponents):
     excelItem = 'li[data-cy="excel-menu-item"]'
     koboItem = 'li[data-cy="kobo-menu-item"]'
     inputName = 'input[data-cy="input-name"]'
-    inputFile = 'input[data-cy="file-input"]'
+    inputFile = 'input[type="file"]'
+    numberOfHouseholds = 'div[data-cy="number-of-households"]'
+    numberOfIndividuals = 'div[data-cy="number-of-individuals"]'
+    errorsContainer = 'div[data-cy="errors-container"]'
 
     # Texts
     titleText = "Registration Data Import"
@@ -42,9 +44,6 @@ class RegistrationDataImport(BaseComponents):
     inputFileText = "UPLOAD FILE"
 
     # Elements
-
-    def getMainContent(self) -> WebElement:
-        return self.wait_for(self.mainContent)
 
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
@@ -110,6 +109,9 @@ class RegistrationDataImport(BaseComponents):
     def getButtonImportFile(self) -> WebElement:
         return self.wait_for(self.buttonImportRDI)
 
+    def disappearButtonImportFile(self) -> None:
+        self.wait_for_disappear(self.buttonImportRDI)
+
     def getExcelItem(self) -> WebElement:
         return self.wait_for(self.excelItem)
 
@@ -121,3 +123,19 @@ class RegistrationDataImport(BaseComponents):
 
     def getInputFile(self) -> WebElement:
         return self.wait_for(self.inputFile)
+
+    def getNumberOfHouseholds(self) -> WebElement:
+        return self.wait_for(self.numberOfHouseholds)
+
+    def getNumberOfIndividuals(self) -> WebElement:
+        return self.wait_for(self.numberOfIndividuals)
+
+    def getErrorsContainer(self) -> WebElement:
+        return self.wait_for(self.errorsContainer)
+
+    def buttonImportFileIsEnabled(self, timeout: int = 30) -> bool:
+        for _ in range(timeout):
+            if self.getButtonImportFile().is_enabled():  # type: ignore
+                return True
+            sleep(1)
+        return False

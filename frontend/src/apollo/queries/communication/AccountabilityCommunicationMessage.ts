@@ -5,6 +5,7 @@ export const AccountabilityCommunicationMessage = gql`
     accountabilityCommunicationMessage(id: $id) {
       id
       unicefId
+      adminUrl
       createdBy {
         id
         firstName
