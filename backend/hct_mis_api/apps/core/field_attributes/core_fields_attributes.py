@@ -34,6 +34,9 @@ from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.field_attributes.fields_types import (
     _HOUSEHOLD,
     _INDIVIDUAL,
+    TEMPLATE_HOH,
+    TEMPLATE_HOUSEHOLD,
+    TEMPLATE_INDIVIDUAL,
     TEMPLATE_MAPPING_NORMAL,
     TEMPLATE_MAPPING_PEOPLE,
     TYPE_BOOL,
@@ -46,7 +49,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
     TYPE_SELECT_MANY,
     TYPE_SELECT_ONE,
     TYPE_STRING,
-    Scope, TEMPLATE_HOH, TEMPLATE_HOUSEHOLD, TEMPLATE_INDIVIDUAL,
+    Scope,
 )
 from hct_mis_api.apps.core.field_attributes.lookup_functions import (
     get_birth_certificate_issuer,
@@ -1316,7 +1319,9 @@ CORE_FIELDS_ATTRIBUTES = [
         "name": "physical_disability",
         "lookup": "physical_disability",
         "required": False,
-        "label": {"English(EN)": f"If the {TEMPLATE_INDIVIDUAL} has difficulty walking or climbing steps, what is the severity?"},
+        "label": {
+            "English(EN)": f"If the {TEMPLATE_INDIVIDUAL} has difficulty walking or climbing steps, what is the severity?"
+        },
         "hint": "",
         "choices": [
             {"label": {"English(EN)": label}, "value": value} for value, label in SEVERITY_OF_DISABILITY_CHOICES
@@ -1817,12 +1822,15 @@ class FieldFactory(list):
         self._fill_label_template(attr)
         super().append(attr)
 
-    def _fill_label_template(self, field: dict, language: str = "English(EN)") -> str:
-        label_with_template = field["label"][language]
-        maping_dict = TEMPLATE_MAPPING_NORMAL if Scope.XLSX_PEOPLE not in self.scopes else TEMPLATE_MAPPING_PEOPLE
-        for maping in maping_dict.items():
-            label_with_template = label_with_template.replace(maping[0], maping[1])
+    def _fill_label_template(self, field: dict, language: str = "English(EN)") -> Optional[str]:
+        label_with_template = field["label"].get(language)
+        if not label_with_template:
+            return None
+        mapping_dict = TEMPLATE_MAPPING_NORMAL if Scope.XLSX_PEOPLE not in self.scopes else TEMPLATE_MAPPING_PEOPLE
+        for mapping in mapping_dict.items():
+            label_with_template = label_with_template.replace(mapping[0], mapping[1])
         field["label"][language] = label_with_template
+        return label_with_template
 
     @classmethod
     def from_scopes(cls, scopes: list[Scope]) -> "FieldFactory":
@@ -1834,23 +1842,13 @@ class FieldFactory(list):
 
     @classmethod
     def from_scope(cls, scope: Scope) -> "FieldFactory":
-        if scope == Scope.XLSX_PEOPLE:
-            return cls.from_people_scope()
         factory = cls()
         all_fields = copy.deepcopy(factory.all_fields)
         factory.scopes.add(scope)
         factory.extend(filter(lambda field: scope in field["scope"], all_fields))
-        return factory
-
-    @classmethod
-    def from_people_scope(cls) -> "FieldFactory":
-        factory = cls()
-        all_fields = copy.deepcopy(factory.all_fields)
-        people_fields = filter(lambda field: Scope.XLSX_PEOPLE in field["scope"], all_fields)
-        factory.scopes.add(Scope.XLSX_PEOPLE)
-        for field_attr in people_fields:
-            field_attr["xlsx_field"] = "pp_" + field_attr["xlsx_field"].replace("_h_c", "_i_c")
-            factory.append(field_attr)
+        if scope == Scope.XLSX_PEOPLE:
+            for field_attr in factory:
+                field_attr["xlsx_field"] = "pp_" + field_attr["xlsx_field"].replace("_h_c", "_i_c")
         return factory
 
     def and_scope(self, scope: Scope) -> "FieldFactory":
