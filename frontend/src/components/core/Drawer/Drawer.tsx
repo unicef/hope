@@ -13,6 +13,8 @@ import { Logo } from '../Logo';
 import { DrawerItems } from './DrawerItems';
 import { resourcesItems } from './menuItems';
 import styled from 'styled-components';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ProgramStatus, useProgramLazyQuery } from '@generated/graphql';
 
 const matchColorToWindowOrigin = (): string => {
   const url = window.location.href;
@@ -105,6 +107,11 @@ const Text = styled(ListItemText)`
     line-height: 16px;
   }
 `;
+const ProgramNotActiveBar = styled.div`
+  background-color: #ff80ff;
+  text-align: center;
+  color: #444;
+`;
 
 const Icon = styled(ListItemIcon)`
   && {
@@ -127,9 +134,21 @@ export const Drawer = ({
 }: DrawerProps): React.ReactElement => {
   const { t } = useTranslation();
   const [showMismatchedDialog, setShowMismatchedDialog] = useState(false);
+
+  const { programId,isAllPrograms } = useBaseUrl();
+  const [getProgram, programResults] = useProgramLazyQuery({
+    variables: {
+      id: programId,
+    },
+  });
   const backendVersion = useBackendVersion();
   const frontendVersion = useFrontendVersion();
 
+  useEffect(() => {
+    if (!isAllPrograms) {
+      getProgram();
+    }
+  }, [programId]);
   useEffect(() => {
     if (
       !showMismatchedDialog &&
@@ -140,6 +159,14 @@ export const Drawer = ({
       setShowMismatchedDialog(true);
     }
   }, [backendVersion, frontendVersion, showMismatchedDialog]);
+
+  let notActiveBar = null;
+  if (
+    !isAllPrograms &&
+    programResults?.data?.program?.status !== ProgramStatus.Active
+  ) {
+    notActiveBar = <ProgramNotActiveBar>program inactive</ProgramNotActiveBar>;
+  }
 
   return (
     <DrawerComponent
@@ -157,6 +184,7 @@ export const Drawer = ({
           <ChevronLeftIcon />
         </CollapseIconButton>
       </ToolbarHeader>
+      {notActiveBar}
       <Divider />
       <ToolbarScrollBox>
         <List>
