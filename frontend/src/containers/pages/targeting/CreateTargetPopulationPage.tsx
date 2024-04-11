@@ -5,13 +5,11 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
-  ProgramStatus,
-  useAllProgramsForChoicesQuery,
+  DataCollectingTypeType,
   useBusinessAreaDataQuery,
   useCreateTpMutation,
 } from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
-import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { CreateTargetPopulationHeader } from '@components/targeting/CreateTargetPopulation/CreateTargetPopulationHeader';
 import { Exclusions } from '@components/targeting/CreateTargetPopulation/Exclusions';
@@ -22,12 +20,15 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '@utils/targetingUtils';
-import { getFullNodeFromEdgesById } from '@utils/utils';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { useProgramContext } from 'src/programContext';
+import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 
 export const CreateTargetPopulationPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
   const initialValues = {
     name: '',
     criterias: [],
@@ -51,17 +52,24 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
     variables: { businessAreaSlug: businessArea },
   });
 
-  const { data: allProgramsData, loading: loadingPrograms } =
-    useAllProgramsForChoicesQuery({
-      variables: { businessArea, status: [ProgramStatus.Active] },
-      fetchPolicy: 'network-only',
-    });
-
-  if (loadingPrograms) return <LoadingComponent />;
   if (permissions === null) return null;
-  if (!allProgramsData || !businessAreaData) return null;
+  if (!businessAreaData) return null;
   if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
     return <PermissionDenied />;
+
+  console.log(selectedProgram);
+
+  const screenBeneficiary = businessAreaData?.businessArea?.screenBeneficiary;
+  const individualFiltersAvailable =
+    selectedProgram?.dataCollectingType?.individualFiltersAvailable;
+  const householdFiltersAvailable =
+    selectedProgram?.dataCollectingType?.householdFiltersAvailable;
+  const isSocialDctType =
+    selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
+    DataCollectingTypeType.Social;
+  const isStandardDctType =
+    selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
+    DataCollectingTypeType.Standard;
 
   const validationSchema = Yup.object().shape({
     name: Yup.string()
@@ -164,13 +172,10 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
                     <TargetingCriteria
                       helpers={arrayHelpers}
                       rules={values.criterias}
-                      selectedProgram={getFullNodeFromEdgesById(
-                        allProgramsData?.allPrograms?.edges,
-                        values.program,
-                      )}
-                      screenBeneficiary={
-                        businessAreaData?.businessArea?.screenBeneficiary
-                      }
+                      selectedProgram={selectedProgram}
+                      screenBeneficiary={screenBeneficiary}
+                      isStandardDctType={isStandardDctType}
+                      isSocialDctType={isSocialDctType}
                       isEdit
                     />
                   )}
@@ -180,32 +185,81 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
             {category === 'ids' ? (
               <>
                 <Grid container spacing={3}>
+                  {householdFiltersAvailable && (
+                    <Grid item xs={12}>
+                      <Field
+                        data-cy="input-included-household-ids"
+                        name="householdIds"
+                        fullWidth
+                        variant="outlined"
+                        label={t('Household IDs')}
+                        component={FormikTextField}
+                      />
+                    </Grid>
+                  )}
                   <Grid item xs={12}>
-                    <Field
-                      data-cy="input-included-household-ids"
-                      name="householdIds"
-                      fullWidth
-                      variant="outlined"
-                      label={t('Household IDs')}
-                      component={FormikTextField}
-                    />
+                    <AndDivider>
+                      <AndDividerLabel>OR</AndDividerLabel>
+                    </AndDivider>
                   </Grid>
-                  <Grid item xs={12}>
-                    <Box pt={3} pb={3}>
-                      <Divider />
-                    </Box>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Field
-                      data-cy="input-included-individual-ids"
-                      name="individualIds"
-                      fullWidth
-                      variant="outlined"
-                      label={t('Individual IDs')}
-                      component={FormikTextField}
-                    />
-                  </Grid>
+                  {individualFiltersAvailable && (
+                    <Grid item xs={12}>
+                      <Box pb={3}>
+                        <Field
+                          data-cy="input-included-individual-ids"
+                          name="individualIds"
+                          fullWidth
+                          variant="outlined"
+                          label={t('Individual IDs')}
+                          component={FormikTextField}
+                        />
+                      </Box>
+                    </Grid>
+                  )}
                 </Grid>
+                <Box mt={3} p={3}>
+                  <Grid container spacing={3}>
+                    {isStandardDctType && (
+                      <Grid item xs={6}>
+                        <Field
+                          name="flagExcludeIfActiveAdjudicationTicket"
+                          label={t(
+                            'Exclude Households with Active Adjudication Ticket',
+                          )}
+                          color="primary"
+                          component={FormikCheckboxField}
+                          data-cy="input-active-adjudication-ticket"
+                        />
+                      </Grid>
+                    )}
+                    {isSocialDctType && (
+                      <Grid item xs={6}>
+                        <Field
+                          name="flagExcludePeopleWithActiveAdjudicationTicket"
+                          label={t(
+                            'Exclude People with Active Adjudication Ticket',
+                          )}
+                          color="primary"
+                          component={FormikCheckboxField}
+                          data-cy="input-active-adjudication-ticket"
+                        />
+                      </Grid>
+                    )}
+                    {screenBeneficiary && (
+                      <Grid item xs={6}>
+                        <Field
+                          name="flagExcludeIfOnSanctionList"
+                          label={t(
+                            'Exclude Households with an active sanction screen flag',
+                          )}
+                          color="primary"
+                          component={FormikCheckboxField}
+                          data-cy="input-active-sanction-flag"
+                        />
+                      </Grid>
+                    )}
+                  </Grid>
+                </Box>
               </>
             ) : null}
           </PaperContainer>
