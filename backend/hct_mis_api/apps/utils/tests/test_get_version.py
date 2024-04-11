@@ -7,7 +7,7 @@ from hct_mis_api import get_full_version
 
 
 class TestUtils(TestCase):
-    @patch("builtins.open", new_callable=mock_open, read_data='[project]\n version = "2.3.4"')
+    @patch("builtins.open", new_callable=mock_open, read_data=b'[project]\n version = "2.3.4"')
     def test_get_full_version(self, mock_file_open: Any) -> None:
         self.assertEqual(get_full_version(), "2.3.4")
 
@@ -16,7 +16,7 @@ class TestUtils(TestCase):
         with self.assertRaises(FileNotFoundError):
             get_full_version()
 
-    @patch("builtins.open", new_callable=mock_open, read_data='[project]\n wrong_key = "empty_version_XD"')
+    @patch("builtins.open", new_callable=mock_open, read_data=b'[project]\n wrong_key = "empty_version_XD"')
     def test_key_not_found(self, mock_file_open: Any) -> None:
         with self.assertRaises(KeyError):
             get_full_version()
