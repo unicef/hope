@@ -247,7 +247,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             ("Some other action name", None),
         ),
     )
-    def test_get_action_permission(self, action_name, result):
+    def test_get_action_permission(self, action_name: str, result: str) -> None:
         payment_plan_managerial_viewset = PaymentPlanManagerialViewSet()
         assert payment_plan_managerial_viewset._get_action_permission(action_name) == result
 
