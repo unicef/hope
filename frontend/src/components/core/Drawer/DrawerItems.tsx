@@ -1,6 +1,6 @@
 import {
   useBusinessAreaDataQuery,
-  useCashAssistUrlPrefixQuery,
+  useProgramLazyQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -18,7 +18,12 @@ import {
   hasPermissionInModule,
   hasPermissions,
 } from '../../../config/permissions';
-import { MenuItem, menuItems } from './menuItems';
+import {
+  MenuItem,
+  menuItems,
+  SCOPE_ALL_PROGRAMS,
+  SCOPE_PROGRAM,
+} from './menuItems';
 
 const Text = styled(ListItemText)`
   .MuiTypography-body1 {
@@ -57,10 +62,17 @@ export const DrawerItems = ({
   currentLocation,
   open,
 }: DrawerItemsProps): React.ReactElement => {
-  const { data: cashAssistUrlData } = useCashAssistUrlPrefixQuery({
-    fetchPolicy: 'cache-first',
-  });
   const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
+  const [getProgram, programResults] = useProgramLazyQuery({
+    variables: {
+      id: programId,
+    },
+  });
+  useEffect(() => {
+    if (programId) {
+      getProgram();
+    }
+  },[programId]);
   const permissions = usePermissions();
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
@@ -90,11 +102,10 @@ export const DrawerItems = ({
   if (permissions === null || !businessAreaData) return null;
 
   const prepareMenuItems = (items: MenuItem[]): MenuItem[] => {
-    const updatedMenuItems = [...items];
+    let updatedMenuItems = [...items];
     const getIndexByName = (name: string): number =>
       updatedMenuItems.findIndex((item) => item?.name === name);
-    const cashAssistIndex = getIndexByName('Cash Assist');
-    const programDetailsIndex = getIndexByName('Programme Details');
+    const programDetailsIndex = getIndexByName('Program Details');
     const reportingIndex = getIndexByName('Reporting');
 
     // Remove 'Reporting' item when program is selected
@@ -102,27 +113,23 @@ export const DrawerItems = ({
       updatedMenuItems.splice(reportingIndex, 1);
     }
 
-    // Set CashAssist URL
-    updatedMenuItems[cashAssistIndex].href =
-      cashAssistUrlData?.cashAssistUrlPrefix;
-
     // When GlobalProgramFilter applied
     if (!isAllPrograms) {
       updatedMenuItems[programDetailsIndex].href = `/details/${programId}`;
     }
-    // When GlobalProgramFilter not applied show some pages only
-    if (isAllPrograms) {
-      const pagesAvailableForAllPrograms = [
-        'Country Dashboard',
-        'Programme Management',
-        'Reporting',
-        'Grievance',
-        'Activity Log',
-      ];
-      return updatedMenuItems.filter((item) =>
-        pagesAvailableForAllPrograms.includes(item.name),
-      );
-    }
+    updatedMenuItems = updatedMenuItems.filter((item) => {
+      let isVisible = isAllPrograms
+        ? item.scopes.includes(SCOPE_ALL_PROGRAMS)
+        : item.scopes.includes(SCOPE_PROGRAM);
+      const isSocialWorkerProgram =
+        programResults?.data?.program?.isSocialWorkerProgram;
+      if (item.isSocialWorker === false) {
+        isVisible &&= !isSocialWorkerProgram;
+      }else if(item.isSocialWorker === true){
+        isVisible &&= isSocialWorkerProgram;
+      }
+      return isVisible;
+    });
     return updatedMenuItems;
   };
 
