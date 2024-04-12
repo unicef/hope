@@ -1,4 +1,3 @@
-import random
 from datetime import datetime
 
 import pytest
@@ -9,10 +8,8 @@ from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import DataCollectingType, BusinessArea
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from helpers.date_time_format import FormatTime
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
-from selenium.webdriver import Keys
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -30,12 +27,17 @@ def normal_program() -> Program:
 @pytest.fixture
 def active_program() -> Program:
     return get_program_with_dct_type_and_name("Active Program", status=Program.ACTIVE)
+
+
 @pytest.fixture
 def draft_program() -> Program:
     return get_program_with_dct_type_and_name("Draft Program", status=Program.DRAFT)
+
+
 @pytest.fixture
 def finished_program() -> Program:
     return get_program_with_dct_type_and_name("Finished Program", status=Program.FINISHED)
+
 
 def get_program_with_dct_type_and_name(
     name, dct_type=DataCollectingType.Type.STANDARD, status=Program.ACTIVE
@@ -117,9 +119,9 @@ class TestDrawer:
 
     def test_inactive_draft_subheader(
         self,
-            draft_program:Program,
+        draft_program: Program,
         active_program: Program,
-            finished_program:Program,
+        finished_program: Program,
         pageProgrammeManagement: ProgrammeManagement,
         pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
