@@ -39,7 +39,12 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                 <div
                   data-cy="label-Created By"
                 >
-                  Matthew Sosa
+                  <span
+                    class="sc-hLQSwg hXyiIZ"
+                    color="textSecondary"
+                  >
+                    Matthew Sosa
+                  </span>
                 </div>
               </div>
             </div>
@@ -56,12 +61,17 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                 <div
                   data-cy="label-Programme"
                 >
-                  <a
-                    class="sc-beySPh ikyHhp"
-                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/details/UHJvZ3JhbU5vZGU6NWJhMjEzY2UtNmNlOS00NTc4LThhNDgtYjFmMDgyM2Q2MDAy"
+                  <span
+                    class="sc-hLQSwg hXyiIZ"
+                    color="textSecondary"
                   >
-                    Already attention fear well hit instead person.
-                  </a>
+                    <a
+                      class="sc-beySPh ikyHhp"
+                      href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/details/UHJvZ3JhbU5vZGU6NWJhMjEzY2UtNmNlOS00NTc4LThhNDgtYjFmMDgyM2Q2MDAy"
+                    >
+                      Already attention fear well hit instead person.
+                    </a>
+                  </span>
                 </div>
               </div>
             </div>
@@ -78,12 +88,17 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                 <div
                   data-cy="label-Target Population"
                 >
-                  <a
-                    class="sc-beySPh ikyHhp"
-                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MzlmMjQ0YzEtZGRiMC00ZGZmLWE0MzEtN2JiMDFhMTdiMThm"
+                  <span
+                    class="sc-hLQSwg hXyiIZ"
+                    color="textSecondary"
                   >
-                    Report should property early adult.
-                  </a>
+                    <a
+                      class="sc-beySPh ikyHhp"
+                      href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MzlmMjQ0YzEtZGRiMC00ZGZmLWE0MzEtN2JiMDFhMTdiMThm"
+                    >
+                      Report should property early adult.
+                    </a>
+                  </span>
                 </div>
               </div>
             </div>
@@ -100,7 +115,12 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                 <div
                   data-cy="label-Currency"
                 >
-                  PLN
+                  <span
+                    class="sc-hLQSwg hXyiIZ"
+                    color="textSecondary"
+                  >
+                    PLN
+                  </span>
                 </div>
               </div>
             </div>
@@ -117,11 +137,16 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                 <div
                   data-cy="label-Start Date"
                 >
-                  <time
-                    datetime="1603756800000"
+                  <span
+                    class="sc-hLQSwg hXyiIZ"
+                    color="textSecondary"
                   >
-                    27 Oct 2020
-                  </time>
+                    <time
+                      datetime="1603756800000"
+                    >
+                      27 Oct 2020
+                    </time>
+                  </span>
                 </div>
               </div>
             </div>
@@ -138,11 +163,16 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                 <div
                   data-cy="label-End Date"
                 >
-                  <time
-                    datetime="1631059200000"
+                  <span
+                    class="sc-hLQSwg hXyiIZ"
+                    color="textSecondary"
                   >
-                    8 Sep 2021
-                  </time>
+                    <time
+                      datetime="1631059200000"
+                    >
+                      8 Sep 2021
+                    </time>
+                  </span>
                 </div>
               </div>
             </div>
@@ -159,11 +189,16 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                 <div
                   data-cy="label-Dispersion Start Date"
                 >
-                  <time
-                    datetime="1842307200000"
+                  <span
+                    class="sc-hLQSwg hXyiIZ"
+                    color="textSecondary"
                   >
-                    19 May 2028
-                  </time>
+                    <time
+                      datetime="1842307200000"
+                    >
+                      19 May 2028
+                    </time>
+                  </span>
                 </div>
               </div>
             </div>
@@ -180,11 +215,16 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                 <div
                   data-cy="label-Dispersion End Date"
                 >
-                  <time
-                    datetime="1880755200000"
+                  <span
+                    class="sc-hLQSwg hXyiIZ"
+                    color="textSecondary"
                   >
-                    7 Aug 2029
-                  </time>
+                    <time
+                      datetime="1880755200000"
+                    >
+                      7 Aug 2029
+                    </time>
+                  </span>
                 </div>
               </div>
             </div>
@@ -209,11 +249,16 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                   <div
                     data-cy="label-Related Follow-Up Payment Plans"
                   >
-                    <div
-                      class="MuiBox-root css-j7qwjs"
+                    <span
+                      class="sc-hLQSwg hXyiIZ"
+                      color="textSecondary"
                     >
-                      -
-                    </div>
+                      <div
+                        class="MuiBox-root css-j7qwjs"
+                      >
+                        -
+                      </div>
+                    </span>
                   </div>
                 </div>
               </div>

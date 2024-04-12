@@ -23,6 +23,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
+import { AdminButton } from "@core/AdminButton";
 
 const Container = styled.div`
   padding: 20px;
@@ -95,7 +96,12 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
             ? breadCrumbsItems
             : null
         }
-        flags={<IndividualFlags individual={individual} />}
+        flags={
+          <>
+            <IndividualFlags individual={individual} />
+            <AdminButton adminUrl={individual?.adminUrl} />
+          </>
+        }
       >
         <Box mr={2}>
           {individual?.photo ? (
