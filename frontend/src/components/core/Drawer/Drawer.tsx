@@ -167,7 +167,7 @@ export const Drawer = ({
     programResults?.data?.program?.status !== undefined &&
     programResults?.data?.program?.status !== null
   ) {
-    notActiveBar = <ProgramNotActiveBar>program inactive</ProgramNotActiveBar>;
+    notActiveBar = <ProgramNotActiveBar data-cy="program-inactive-subheader">program inactive</ProgramNotActiveBar>;
   }
 
   return (
