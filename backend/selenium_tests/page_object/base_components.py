@@ -137,5 +137,5 @@ class BaseComponents(Common):
         self.getGlobalProgramFilter().click()
         return self.select_listbox_element(name)
 
-    def getdrawerInactiveSubheader(self, timeout=Common.DEFAULT_TIMEOUT) -> WebElement:
+    def getDrawerInactiveSubheader(self, timeout: int = Common.DEFAULT_TIMEOUT) -> WebElement:
         return self.wait_for(self.drawerInactiveSubheader, timeout=timeout)
