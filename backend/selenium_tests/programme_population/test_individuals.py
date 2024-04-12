@@ -26,9 +26,18 @@ class TestSmokeIndividuals:
     def test_smoke_page_individuals(self, create_programs: None, pageIndividuals: Individuals) -> None:
         pageIndividuals.selectGlobalProgramFilter("Test Programm").click()
         pageIndividuals.getNavProgrammePopulation().click()
-        pageIndividuals.getNavHouseholds().click()
+        pageIndividuals.getNavIndividuals().click()
+        assert "Individuals" in pageIndividuals.getTableTitle().text
+        assert "Individual ID" in pageIndividuals.getIndividualId().text
+        assert "Individual" in pageIndividuals.getIndividualName().text
+        assert "Household ID" in pageIndividuals.getHouseholdId().text
+        assert "Relationship to HoH" in pageIndividuals.getRelationship().text
+        assert "Age" in pageIndividuals.getIndividualAge().text
+        assert "Gender" in pageIndividuals.getIndividualSex().text
+        assert "Administrative Level 2" in pageIndividuals.getIndividualLocation().text
+        assert 2 == len(pageIndividuals.getTableRow())
 
     def test_smoke_page_individuals_details(self, create_programs: None, pageIndividuals: Individuals) -> None:
         pageIndividuals.selectGlobalProgramFilter("Test Programm").click()
         pageIndividuals.getNavProgrammePopulation().click()
-        pageIndividuals.getNavHouseholds().click()
+        pageIndividuals.getNavIndividuals().click()
