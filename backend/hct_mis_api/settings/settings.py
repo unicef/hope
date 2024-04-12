@@ -13,7 +13,7 @@ from single_source import get_version
 
 from hct_mis_api.settings.env import env
 
-DEBUG = env("DEBUG")
+DEBUG: bool = env("DEBUG")
 IS_TEST = False
 
 PROJECT_NAME = "hct_mis_api"
@@ -374,9 +374,7 @@ PHONENUMBER_DEFAULT_REGION = "US"
 
 SANCTION_LIST_CC_MAIL = env("SANCTION_LIST_CC_MAIL")
 
-
 GRIEVANCE_POSTGRES_ENABLED = os.getenv("GRIEVANCE_POSTGRES_ENABLED", True)
-
 
 RAPID_PRO_URL = env("RAPID_PRO_URL")
 
@@ -405,9 +403,7 @@ COUNTRIES_OVERRIDE = {
 
 ROOT_TOKEN = env.str("ROOT_ACCESS_TOKEN", uuid4().hex)
 
-
 CORS_ALLOWED_ORIGIN_REGEXES = [r"https://\w+.blob.core.windows.net$"]
-
 
 EXCHANGE_RATE_CACHE_EXPIRY = env.int("EXCHANGE_RATE_CACHE_EXPIRY", default=1 * 60 * 60 * 24)
 
@@ -501,7 +497,6 @@ FLAGS = {
     "NEW_RECORD_MODEL": [{"condition": "boolean", "value": False}],
 }
 
-
 MARKDOWNIFY = {
     "default": {
         "WHITELIST_TAGS": ["a", "abbr", "acronym", "b", "blockquote", "em", "i", "li", "ol", "p", "strong", "ul" "br"]
@@ -528,7 +523,6 @@ SECURE_REFERRER_POLICY = env("SECURE_REFERRER_POLICY")
 SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS")
 
 FLOWER_ADDRESS = env("FLOWER_ADDRESS")
-
 
 ADMIN_SYNC_CONFIG = "admin_sync.conf.DjangoConstance"
 DEFAULT_EMPTY_PARTNER = "Default Empty Partner"
