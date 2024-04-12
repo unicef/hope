@@ -157,7 +157,7 @@ export const DrawerItems = ({
   };
 
   return (
-    <div>
+    <div data-cy="drawer-items">
       {preparedMenuItems?.map((item, index) => {
         if (
           item.permissionModule &&
