@@ -135,7 +135,6 @@ type ApprovalProcessNode implements Node {
   approvalNumberRequired: Int!
   authorizationNumberRequired: Int!
   financeReleaseNumberRequired: Int!
-  adminUrl: String
   rejectedOn: String
   actions: FilteredActionsListNode
 }
@@ -441,7 +440,6 @@ type CashPlanNode implements Node {
   totalPersonsCovered: Int!
   totalPersonsCoveredRevised: Int!
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
-  adminUrl: String
   bankReconciliationSuccess: Int
   bankReconciliationError: Int
   totalNumberOfHouseholds: Int
@@ -571,7 +569,6 @@ type CommunicationMessageRecipientMapNode implements Node {
   id: ID!
   size: Int
   headOfHousehold: IndividualNode!
-  adminUrl: String
 }
 
 type CommunicationMessageRecipientMapNodeConnection {
@@ -976,6 +973,7 @@ enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   TRANSFER
   TRANSFER_TO_ACCOUNT
   VOUCHER
+  TRANSFER_TO_DIGITAL_WALLET
 }
 
 type DiscardPaymentVerificationPlan {
@@ -1243,7 +1241,6 @@ type FinancialServiceProviderNode implements Node {
   financialserviceproviderxlsxreportSet(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxReportNodeConnection!
   deliveryMechanismsPerPaymentPlan(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
-  adminUrl: String
   fullName: String
   isPaymentGateway: Boolean
 }
@@ -1266,7 +1263,6 @@ type FinancialServiceProviderXlsxReportNode implements Node {
   updatedAt: DateTime!
   financialServiceProvider: FinancialServiceProviderNode!
   status: Int
-  adminUrl: String
   reportUrl: String
 }
 
@@ -1291,7 +1287,6 @@ type FinancialServiceProviderXlsxTemplateNode implements Node {
   columns: [String]
   coreFields: [String!]!
   financialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
-  adminUrl: String
 }
 
 type FinancialServiceProviderXlsxTemplateNodeConnection {
@@ -1383,7 +1378,6 @@ type GetCashplanVerificationSampleSizeObject {
 }
 
 type GetCommunicationMessageSampleSizeNode {
-  adminUrl: String
   numberOfRecipients: Int
   sampleSize: Int
 }
@@ -2007,6 +2001,7 @@ enum ImportedHouseholdCurrency {
   ZAR
   ZMW
   ZWL
+  USDC
 }
 
 type ImportedHouseholdNode implements Node {
@@ -2082,7 +2077,6 @@ type ImportedHouseholdNode implements Node {
   programId: UUID
   collectType: ImportedHouseholdCollectType!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
-  adminUrl: String
   hasDuplicates: Boolean
   importId: String
 }
@@ -2220,10 +2214,12 @@ type ImportedIndividualNode implements Node {
   misUnicefId: String
   programId: UUID
   ageAtRegistration: Int
+  walletName: String!
+  blockchainName: String!
+  walletAddress: String!
   importedhousehold: ImportedHouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
   identities(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualIdentityNodeConnection!
-  adminUrl: String
   role: String
   age: Int
   importId: String
@@ -2398,6 +2394,9 @@ type IndividualNode implements Node {
   preferredLanguage: String
   relationshipConfirmed: Boolean!
   ageAtRegistration: Int
+  walletName: String!
+  blockchainName: String!
+  walletAddress: String!
   program: ProgramNode
   copiedFrom: IndividualNode
   originUnicefId: String
@@ -2864,6 +2863,7 @@ enum PaymentDeliveryType {
   TRANSFER
   TRANSFER_TO_ACCOUNT
   VOUCHER
+  TRANSFER_TO_DIGITAL_WALLET
 }
 
 type PaymentDetailsApproveMutation {
@@ -2877,7 +2877,6 @@ type PaymentHouseholdSnapshotNode implements Node {
   snapshotData: JSONString!
   householdId: UUID!
   payment: PaymentNode!
-  adminUrl: String
 }
 
 type PaymentNode implements Node {
@@ -3126,6 +3125,7 @@ enum PaymentPlanCurrency {
   ZAR
   ZMW
   ZWL
+  USDC
 }
 
 type PaymentPlanNode implements Node {
@@ -3222,7 +3222,6 @@ enum PaymentPlanStatus {
 }
 
 type PaymentRecordAndPaymentNode {
-  adminUrl: String
   objType: String
   id: String
   caId: String
@@ -3249,6 +3248,7 @@ enum PaymentRecordDeliveryType {
   TRANSFER
   TRANSFER_TO_ACCOUNT
   VOUCHER
+  TRANSFER_TO_DIGITAL_WALLET
 }
 
 enum PaymentRecordEntitlementCardStatus {
@@ -3813,7 +3813,6 @@ type RecipientNode implements Node {
   id: ID!
   size: Int
   headOfHousehold: IndividualNode!
-  adminUrl: String
 }
 
 type RecipientNodeConnection {
@@ -4001,7 +4000,6 @@ type ReportNode implements Node {
   numberOfRecords: Int
   program: ProgramNode
   adminArea(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection!
-  adminUrl: String
   fileUrl: String
   adminArea1(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection
   adminArea2(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection

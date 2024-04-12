@@ -16,6 +16,7 @@ from graphql import GraphQLError
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
+from hct_mis_api.apps.core.currencies import USDC
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.utils import (
@@ -950,6 +951,13 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
 
         if len(mappings) != payment_plan.delivery_mechanisms.count():
             raise GraphQLError("Please assign FSP to all delivery mechanisms before moving to next step")
+
+        if payment_plan.currency == USDC:
+            for mapping in mappings:
+                if mapping["delivery_mechanism"] != GenericPayment.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET:
+                    raise GraphQLError(
+                        "For currency USDC can be assigned only delivery mechanism Transfer to Digital Wallet"
+                    )
 
         existing_pairs = set()
         for mapping in mappings:
