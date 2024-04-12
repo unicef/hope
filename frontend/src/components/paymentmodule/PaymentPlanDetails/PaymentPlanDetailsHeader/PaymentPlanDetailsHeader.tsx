@@ -1,7 +1,6 @@
 import { Box } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import {
   paymentPlanBackgroundActionStatusToColor,
@@ -18,10 +17,7 @@ import { InReviewPaymentPlanHeaderButtons } from './HeaderButtons/InReviewPaymen
 import { LockedFspPaymentPlanHeaderButtons } from './HeaderButtons/LockedFspPaymentPlanHeaderButtons';
 import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
-
-const StatusWrapper = styled(Box)`
-  width: 150px;
-`;
+import { AdminButton } from '@core/AdminButton';
 
 interface PaymentPlanDetailsHeaderProps {
   baseUrl: string;
@@ -178,19 +174,19 @@ export function PaymentPlanDetailsHeader({
               <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
             </Box>
           </Box>
-          <StatusWrapper ml={2}>
+          <Box ml={2}>
             <StatusBox
               status={paymentPlan.status}
               statusToColor={paymentPlanStatusToColor}
             />
-          </StatusWrapper>
+          </Box>
           {paymentPlan.backgroundActionStatus && (
-            <StatusWrapper>
+            <Box>
               <StatusBox
                 status={paymentPlan.backgroundActionStatus}
                 statusToColor={paymentPlanBackgroundActionStatusToColor}
               />
-            </StatusWrapper>
+            </Box>
           )}
         </Box>
       }
@@ -199,6 +195,7 @@ export function PaymentPlanDetailsHeader({
           ? breadCrumbsItems
           : null
       }
+      flags={<AdminButton adminUrl={paymentPlan.adminUrl} />}
     >
       {buttons}
     </PageHeader>

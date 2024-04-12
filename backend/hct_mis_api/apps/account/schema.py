@@ -32,6 +32,8 @@ from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
+from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.geo.schema import AreaGroupNode
 from hct_mis_api.apps.household.models import Household, Individual
 
 logger = logging.getLogger(__name__)
@@ -139,7 +141,7 @@ class JSONLazyString(graphene.Scalar):
 class PartnerNodeForProgram(DjangoObjectType):
     id = graphene.ID()
     name = graphene.String()
-    admin_areas = graphene.List(graphene.String)
+    admin_areas = graphene.List(AreaGroupNode)
     area_access = graphene.String()
 
     class Meta:
@@ -154,9 +156,13 @@ class PartnerNodeForProgram(DjangoObjectType):
         else:
             return []
 
-    def resolve_admin_areas(self, info: Any, **kwargs: Any) -> List[str]:
+    def resolve_admin_areas(self, info: Any, **kwargs: Any) -> List[Dict]:
         areas_ids = PartnerNodeForProgram._get_areas_ids(self, info.context.headers)
-        return areas_ids
+        return_list = []
+        for level in [1, 2, 3, 4]:
+            ids = Area.objects.filter(area_type__area_level=level, id__in=areas_ids).values_list("id", flat=True)
+            return_list.append({"ids": ids, "level": level, "total_count": len(ids)})
+        return return_list
 
     def resolve_area_access(self, info: Any, **kwargs: Any) -> str:
         areas_ids = PartnerNodeForProgram._get_areas_ids(self, info.context.headers)

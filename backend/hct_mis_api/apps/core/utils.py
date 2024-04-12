@@ -36,6 +36,7 @@ from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
     from django.db.models import Model, QuerySet
+    from django.http import HttpHeaders
 
     from openpyxl.cell import Cell
     from openpyxl.worksheet.worksheet import Worksheet
@@ -76,7 +77,7 @@ def encode_id_base64(id_string: Optional[str], model_name: str) -> Optional[str]
     return encode_id_base64_required(id_string, model_name)
 
 
-def get_program_id_from_headers(info_context_headers: Dict) -> Optional[str]:
+def get_program_id_from_headers(info_context_headers: Union[Dict, "HttpHeaders"]) -> Optional[str]:
     # TODO: need to double check if program_id is str or uuid?
     #  decoded/encoded ??
     # sometimes it get from info.context.headers or kwargs["Program"]: str
@@ -302,6 +303,7 @@ def nested_dict_get(dictionary: Dict, path: str) -> Optional[str]:
 
 
 def get_count_and_percentage(count: int, all_items_count: int = 1) -> Dict[str, Union[int, float]]:
+    all_items_count = all_items_count or 1  # fix division by zero
     percentage = (count / all_items_count) * 100
     return {"count": count, "percentage": percentage}
 

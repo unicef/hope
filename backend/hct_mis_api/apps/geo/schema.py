@@ -8,6 +8,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.geo.filters import AreaFilter
 from hct_mis_api.apps.geo.models import Area, AreaType
+from hct_mis_api.apps.utils.graphql import does_path_exist_in_query
 
 
 class AreaNode(DjangoObjectType):
@@ -31,10 +32,21 @@ class AreaTreeNode(ObjectType):
     name = graphene.String()
     p_code = graphene.String()
     areas = graphene.List(lambda: AreaTreeNode)
+    level = graphene.Int()
 
     @staticmethod
     def resolve_areas(parent: Area, info: Any, **kwargs: Any) -> List[Area]:
         return parent.get_children()
+
+    @staticmethod
+    def resolve_level(parent: Area, info: Any, **kwargs: Any) -> int:
+        return parent.area_type.area_level
+
+
+class AreaGroupNode(ObjectType):
+    ids = graphene.List(graphene.ID)
+    level = graphene.Int()
+    total_count = graphene.Int()
 
 
 class Query(graphene.ObjectType):
@@ -49,4 +61,7 @@ class Query(graphene.ObjectType):
         return Area.objects.all().order_by("area_type__area_level", "name")
 
     def resolve_all_areas_tree(self, info: Any, business_area: str, **kwargs: Any) -> List[Area]:
-        return Area.objects.filter(area_type__country__business_areas__slug=business_area).get_cached_trees()
+        queryset = Area.objects.filter(area_type__country__business_areas__slug=business_area)
+        if does_path_exist_in_query("edges.node.level", info):
+            queryset = queryset.select_related("area_type")
+        return queryset.get_cached_trees()

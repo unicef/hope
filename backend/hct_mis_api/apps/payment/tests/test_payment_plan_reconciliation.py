@@ -946,7 +946,10 @@ class TestPaymentPlanReconciliation(APITestCase):
 
     @freeze_time("2023-12-12")
     def test_follow_up_pp_entitlements_can_be_changed_with_steficon_rule(self) -> None:
-        pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED, unicef_id="unicef_id_12345_2023")
+        pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED)
+        pp.unicef_id = "PP-0060-23-00000002"
+        pp.save()
+
         rule = RuleFactory(name="SomeRule")
 
         self.snapshot_graphql_request(

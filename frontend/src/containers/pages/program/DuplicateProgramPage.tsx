@@ -42,12 +42,18 @@ export const DuplicateProgramPage = (): ReactElement => {
     useUserPartnerChoicesQuery();
 
   const handleSubmit = async (values): Promise<void> => {
+    const budgetValue = parseFloat(values.budget) ?? 0;
+    const budgetToFixed = !Number.isNaN(budgetValue)
+      ? budgetValue.toFixed(2)
+      : 0;
+
     try {
       const response = await mutate({
         variables: {
           programData: {
             id,
             ...values,
+            budget: budgetToFixed,
             businessAreaSlug: businessArea,
           },
         },
@@ -76,7 +82,7 @@ export const DuplicateProgramPage = (): ReactElement => {
     sector,
     dataCollectingType,
     description,
-    budget = '0.00',
+    budget = '',
     administrativeAreasOfImplementation,
     populationGoal = 0,
     cashPlus = false,
@@ -103,6 +109,8 @@ export const DuplicateProgramPage = (): ReactElement => {
       areaAccess: partner.areaAccess,
     })),
   };
+  initialValues.budget =
+    data.program.budget === '0.00' ? '' : data.program.budget;
 
   const stepFields = [
     [

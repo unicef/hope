@@ -22,6 +22,7 @@ export const PROGRAM_QUERY = gql`
       totalNumberOfHouseholdsWithTpInProgram
       administrativeAreasOfImplementation
       version
+      adminUrl
       dataCollectingType {
         id
         code
@@ -35,7 +36,11 @@ export const PROGRAM_QUERY = gql`
         id
         name
         areaAccess
-        adminAreas
+        adminAreas {
+          ids
+          level
+          totalCount
+        }
       }
     }
   }

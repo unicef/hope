@@ -37,16 +37,30 @@ interface ProgramDetailsProps {
   choices: ProgrammeChoiceDataQuery;
 }
 
-export function ProgramDetails({
+export const ProgramDetails = ({
   program,
   choices,
-}: ProgramDetailsProps): React.ReactElement {
+}: ProgramDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
   const { programFrequencyOfPaymentsChoices, programSectorChoices } = choices;
   const programFrequencyOfPaymentsChoicesDict = choicesToDict(
     programFrequencyOfPaymentsChoices,
   );
   const programSectorChoicesDict = choicesToDict(programSectorChoices);
+  const renderAdminAreasCount = (partner): React.ReactElement => (
+    <Grid container spacing={6}>
+      {partner.adminAreas?.map((area) => (
+        <Grid item xs={3} key={area.level}>
+          <LabelizedField
+            dataCy={`admin-area-${area.level}-total-count`}
+            label={t(`Admin Area ${area.level}`)}
+          >
+            {area.totalCount}
+          </LabelizedField>
+        </Grid>
+      ))}
+    </Grid>
+  );
 
   return (
     <ContainerColumnWithBorder data-cy="program-details-container">
@@ -140,19 +154,25 @@ export function ProgramDetails({
           <OverviewContainer>
             <Grid container spacing={6}>
               {program.partners.map((partner) => (
-                <Grid key={partner.id} item xs={3}>
+                <Grid
+                  key={partner.id}
+                  item
+                  xs={partner.areaAccess === 'BUSINESS_AREA' ? 3 : 6}
+                >
                   <StyledBox p={6} flexDirection="column">
                     <Typography data-cy="label-partner-name" variant="h6">
                       {partner.name}
                     </Typography>
-                    <LabelizedField
-                      label={t('Area Access')}
-                      value={
-                        partner.areaAccess === 'BUSINESS_AREA'
-                          ? t('Business Area')
-                          : `Admin Areas: ${partner.adminAreas?.length || 0}`
-                      }
-                    />
+                    {partner.areaAccess === 'BUSINESS_AREA' ? (
+                      <LabelizedField
+                        dataCy="area-access-field"
+                        label={t('Area Access')}
+                      >
+                        {t('Business Area')}
+                      </LabelizedField>
+                    ) : (
+                      renderAdminAreasCount(partner)
+                    )}
                   </StyledBox>
                 </Grid>
               ))}
@@ -162,4 +182,4 @@ export function ProgramDetails({
       )}
     </ContainerColumnWithBorder>
   );
-}
+};

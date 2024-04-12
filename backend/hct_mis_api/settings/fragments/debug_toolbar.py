@@ -1,21 +1,15 @@
 from django.http import HttpRequest
 
-from hct_mis_api.settings.settings import DEBUG, MIDDLEWARE, INSTALLED_APPS
+from hct_mis_api.settings.settings import DEBUG,IS_TEST, MIDDLEWARE, INSTALLED_APPS
 
-if DEBUG:
-    INSTALLED_APPS += [
-        "debug_toolbar",
-    ]
-    MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
+if DEBUG and not IS_TEST:
+    from constance import config
 
-    # DEBUG TOOLBAR
-    def show_ddt(request: HttpRequest) -> None:  # pragma: no-cover
-        from flags.state import flag_enabled
-
-        return flag_enabled("DEVELOP_DEBUG_TOOLBAR", request=request)
+    INSTALLED_APPS += ["debug_toolbar", "graphiql_debug_toolbar"]
+    MIDDLEWARE.append("graphiql_debug_toolbar.middleware.DebugToolbarMiddleware")
 
     DEBUG_TOOLBAR_CONFIG = {
-        "SHOW_TOOLBAR_CALLBACK": show_ddt,
+        "SHOW_TOOLBAR_CALLBACK": lambda request: config.SHOW_TOOLBAR,
         "JQUERY_URL": "",
     }
     DEBUG_TOOLBAR_PANELS = [
