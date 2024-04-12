@@ -44,7 +44,7 @@ from psycopg2._range import NumericRange
 
 from hct_mis_api.apps.account.models import HorizontalChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES, USDC
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     CORE_FIELDS_ATTRIBUTES,
@@ -163,6 +163,10 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
         return self.ca_id if isinstance(self, CashPlan) else self.unicef_id
 
     def get_exchange_rate(self, exchange_rates_client: Optional["ExchangeRateClient"] = None) -> float:
+        if self.currency == USDC:
+            # exchange rate for Digital currency
+            return 1.0
+
         if exchange_rates_client is None:
             exchange_rates_client = ExchangeRates()
 

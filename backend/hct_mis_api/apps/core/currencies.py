@@ -144,6 +144,7 @@ TZS = "TZS"
 UAH = "UAH"
 UGX = "UGX"
 USD = "USD"
+USDC = "USDC"
 UYU = "UYU"
 UYW = "UYW"
 UZS = "UZS"
@@ -325,4 +326,5 @@ CURRENCY_CHOICES = (
     (ZAR, _("South African rand")),
     (ZMW, _("Zambian kwacha")),
     (ZWL, _("Zimbabwean dollar")),
+    (USDC, _("Digital currency")),
 )

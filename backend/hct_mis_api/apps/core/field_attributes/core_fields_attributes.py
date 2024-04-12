@@ -1790,7 +1790,7 @@ CORE_FIELDS_ATTRIBUTES = (
             "scope": [Scope.XLSX, Scope.PAYMENT_CHANNEL, Scope.KOBO_IMPORT],
         },
         {
-            "id": "",
+            "id": " ",
             "type": TYPE_STRING,
             "name": "wallet_name",
             "lookup": "wallet_name",
@@ -1803,7 +1803,7 @@ CORE_FIELDS_ATTRIBUTES = (
             "scope": [Scope.XLSX, Scope.INDIVIDUAL_UPDATE],
         },
         {
-            "id": "",
+            "id": " ",
             "type": TYPE_STRING,
             "name": "blockchain_name",
             "lookup": "blockchain_name",
@@ -1816,7 +1816,7 @@ CORE_FIELDS_ATTRIBUTES = (
             "scope": [Scope.XLSX, Scope.INDIVIDUAL_UPDATE],
         },
         {
-            "id": "",
+            "id": " ",
             "type": TYPE_STRING,
             "name": "wallet_address",
             "lookup": "wallet_address",
