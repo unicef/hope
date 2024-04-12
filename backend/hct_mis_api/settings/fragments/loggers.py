@@ -1,6 +1,6 @@
 import logging
 import sys
-from typing import Dict, Any
+from typing import Any, Dict
 
 from hct_mis_api.settings.env import env
 from hct_mis_api.settings.settings import DEBUG

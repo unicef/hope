@@ -1,5 +1,6 @@
-from hct_mis_api.settings.env import env
+import logging
 
+from hct_mis_api.settings.env import env
 
 SENTRY_DSN = env("SENTRY_DSN")
 SENTRY_URL = env("SENTRY_URL")
@@ -8,6 +9,7 @@ SENTRY_ENABLE_TRACING = env("SENTRY_ENABLE_TRACING")
 
 if SENTRY_DSN:
     import sentry_sdk
+    from sentry_sdk.integrations.celery import CeleryIntegration
     from sentry_sdk.integrations.django import DjangoIntegration
     from sentry_sdk.integrations.logging import LoggingIntegration, ignore_logger
 

@@ -1,4 +1,3 @@
-
 SPECTACULAR_SETTINGS = {
     "TITLE": "HOPE API",
     "DESCRIPTION": "HOPE REST AOI Swagger Documentation",

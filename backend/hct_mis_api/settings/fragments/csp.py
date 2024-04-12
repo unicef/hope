@@ -1,7 +1,7 @@
 from typing import Tuple
 
 from hct_mis_api.settings.env import env
-from hct_mis_api.settings.settings import FRONTEND_HOST, ALLOWED_HOSTS
+from hct_mis_api.settings.settings import ALLOWED_HOSTS, FRONTEND_HOST
 
 CSP_REPORT_URI = env.tuple("CSP_REPORT_URI")
 CSP_REPORT_ONLY = env("CSP_REPORT_ONLY")

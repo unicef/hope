@@ -1,6 +1,4 @@
-from django.http import HttpRequest
-
-from hct_mis_api.settings.settings import DEBUG,IS_TEST, MIDDLEWARE, INSTALLED_APPS
+from hct_mis_api.settings.settings import DEBUG, INSTALLED_APPS, IS_TEST, MIDDLEWARE
 
 if DEBUG and not IS_TEST:
     from constance import config

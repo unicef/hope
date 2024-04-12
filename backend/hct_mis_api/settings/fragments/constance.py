@@ -1,8 +1,8 @@
-from hct_mis_api.settings.env import env
-
-from hct_mis_api.settings.settings import REDIS_INSTANCE
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import gettext_lazy as _
+
+from hct_mis_api.settings.env import env
+from hct_mis_api.settings.settings import REDIS_INSTANCE
 
 CONSTANCE_REDIS_CONNECTION = env("CONSTANCE_REDIS_CONNECTION", default=f"redis://{REDIS_INSTANCE}/0")
 CONSTANCE_REDIS_CACHE_TIMEOUT = 1

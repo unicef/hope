@@ -1,20 +1,15 @@
-import logging
 import os
-import sys
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 from uuid import uuid4
 
-from django.core.validators import MaxValueValidator, MinValueValidator
 from django.http import HttpRequest
 from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
-from sentry_sdk.integrations.celery import CeleryIntegration
 from single_source import get_version
-from smart_admin.utils import match, regex
 
 from hct_mis_api.settings.env import env
 
@@ -293,7 +288,7 @@ OTHER_APPS = [
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
-print (INSTALLED_APPS)
+print(INSTALLED_APPS)
 # LOGIN_REDIRECT_URL = f'/api/{ADMIN_PANEL_URL}/'
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -380,7 +375,6 @@ PHONENUMBER_DEFAULT_REGION = "US"
 SANCTION_LIST_CC_MAIL = env("SANCTION_LIST_CC_MAIL")
 
 
-
 GRIEVANCE_POSTGRES_ENABLED = os.getenv("GRIEVANCE_POSTGRES_ENABLED", True)
 
 
@@ -413,9 +407,6 @@ ROOT_TOKEN = env.str("ROOT_ACCESS_TOKEN", uuid4().hex)
 
 
 CORS_ALLOWED_ORIGIN_REGEXES = [r"https://\w+.blob.core.windows.net$"]
-
-
-
 
 
 EXCHANGE_RATE_CACHE_EXPIRY = env.int("EXCHANGE_RATE_CACHE_EXPIRY", default=1 * 60 * 60 * 24)
@@ -511,7 +502,6 @@ FLAGS = {
 }
 
 
-
 MARKDOWNIFY = {
     "default": {
         "WHITELIST_TAGS": ["a", "abbr", "acronym", "b", "blockquote", "em", "i", "li", "ol", "p", "strong", "ul" "br"]
@@ -540,21 +530,17 @@ SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS")
 FLOWER_ADDRESS = env("FLOWER_ADDRESS")
 
 
-
 ADMIN_SYNC_CONFIG = "admin_sync.conf.DjangoConstance"
 DEFAULT_EMPTY_PARTNER = "Default Empty Partner"
 
-from hct_mis_api.settings.fragments.celery import *  # noqa: F403, F401
-from hct_mis_api.settings.fragments.constance import *  # noqa: F403, F401
-from hct_mis_api.settings.fragments.csp import *  # noqa: F403, F401
-from hct_mis_api.settings.fragments.debug_toolbar import *  # noqa: F403, F401
-from hct_mis_api.settings.fragments.es import *  # noqa: F403, F401
-from hct_mis_api.settings.fragments.loggers import *  # noqa: F403, F401
-from hct_mis_api.settings.fragments.mailjet import *  # noqa: F403, F401
-from hct_mis_api.settings.fragments.sentry import *  # noqa: F403, F401
-from hct_mis_api.settings.fragments.smart_admin import *  # noqa: F403, F401
-from hct_mis_api.settings.fragments.social_auth import *  # noqa: F403, F401
-from hct_mis_api.settings.fragments.storages import *  # noqa: F403, F401
-
-
-
+from hct_mis_api.settings.fragments.celery import *  # noqa: F403, F401, E402
+from hct_mis_api.settings.fragments.constance import *  # noqa: F403, F401, E402
+from hct_mis_api.settings.fragments.csp import *  # noqa: F403, F401, E402
+from hct_mis_api.settings.fragments.debug_toolbar import *  # noqa: F403, F401, E402
+from hct_mis_api.settings.fragments.es import *  # noqa: F403, F401, E402
+from hct_mis_api.settings.fragments.loggers import *  # noqa: F403, F401, E402
+from hct_mis_api.settings.fragments.mailjet import *  # noqa: F403, F401, E402
+from hct_mis_api.settings.fragments.sentry import *  # noqa: F403, F401, E402
+from hct_mis_api.settings.fragments.smart_admin import *  # noqa: F403, F401, E402
+from hct_mis_api.settings.fragments.social_auth import *  # noqa: F403, F401, E402
+from hct_mis_api.settings.fragments.storages import *  # noqa: F403, F401, E402
