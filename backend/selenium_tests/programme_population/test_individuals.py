@@ -23,7 +23,11 @@ def add_households() -> None:
 
 @pytest.mark.usefixtures("login")
 class TestSmokeIndividuals:
-    def test_smoke_page_individuals(self, create_programs: None, pageIndividuals: Individuals) -> None:
+    def test_smoke_page_individuals(self,
+                                    create_programs: None,
+                                    add_households: None,
+                                    pageIndividuals: Individuals
+                                    ) -> None:
         pageIndividuals.selectGlobalProgramFilter("Test Programm").click()
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
@@ -35,9 +39,15 @@ class TestSmokeIndividuals:
         assert "Age" in pageIndividuals.getIndividualAge().text
         assert "Gender" in pageIndividuals.getIndividualSex().text
         assert "Administrative Level 2" in pageIndividuals.getIndividualLocation().text
-        assert 2 == len(pageIndividuals.getTableRow())
+        assert 6 == len(pageIndividuals.getIndividualTableRow())
 
-    def test_smoke_page_individuals_details(self, create_programs: None, pageIndividuals: Individuals) -> None:
+    def test_smoke_page_individuals_details(self,
+                                            create_programs: None,
+                                            add_households: None,
+                                            pageIndividuals: Individuals
+                                            ) -> None:
         pageIndividuals.selectGlobalProgramFilter("Test Programm").click()
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
+        pageIndividuals.getIndividualTableRow()[0].click()
+        pageIndividuals.screenshot("1")

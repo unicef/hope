@@ -29,6 +29,7 @@ class Individuals(BaseComponents):
     individualLocation = 'th[data-cy="individual-location"]'
     tableRow = 'tr[data-cy="table-row"]'
     tablePagination = 'div[data-cy="table-pagination"]'
+    individualTableRow = 'tr[data-cy="individual-table-row"'
 
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
@@ -104,6 +105,10 @@ class Individuals(BaseComponents):
 
     def getTableRow(self) -> WebElement:
         return self.get_elements(self.tableRow)
+
+    def getIndividualTableRow(self) -> WebElement:
+        self.wait_for(self.individualTableRow)
+        return self.get_elements(self.individualTableRow)
 
     def getTablePagination(self) -> WebElement:
         return self.wait_for(self.tablePagination)
