@@ -4,6 +4,8 @@ from django.core.management import call_command
 import pytest
 from page_object.programme_population.individuals import Individuals
 
+from page_object.programme_population.individuals_details import IndividualsDetails
+
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
@@ -44,10 +46,18 @@ class TestSmokeIndividuals:
     def test_smoke_page_individuals_details(self,
                                             create_programs: None,
                                             add_households: None,
-                                            pageIndividuals: Individuals
+                                            pageIndividuals: Individuals,
+                                            pageIndividualsDetails: IndividualsDetails
                                             ) -> None:
         pageIndividuals.selectGlobalProgramFilter("Test Programm").click()
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getIndividualTableRow()[0].click()
+        print(pageIndividualsDetails.getIndividualName().text)
+        print(pageIndividualsDetails.getHouseholdId().text)
+        print(pageIndividualsDetails.getRelationship().text)
+        print(pageIndividualsDetails.getIndividualAge().text)
+        print(pageIndividualsDetails.getIndividualSex().text)
+        print(pageIndividualsDetails.getIndividualLocation().text)
+        print(pageIndividualsDetails.getIndividualName().text)
         pageIndividuals.screenshot("1")

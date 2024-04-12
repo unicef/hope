@@ -3,36 +3,47 @@ from selenium.webdriver.remote.webelement import WebElement
 
 
 class IndividualsDetails(BaseComponents):
-    mainContent = 'div[data-cy="main-content"]'
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    indFiltersSearch = 'div[data-cy="ind-filters-search"]'
-    filterSearchType = 'div[data-cy="filter-search-type"]'
-    indFiltersGender = 'div[data-cy="ind-filters-gender"]'
-    indFiltersAgeFrom = 'div[data-cy="ind-filters-age-from"]'
-    indFiltersAgeTo = 'div[data-cy="ind-filters-age-to"]'
-    indFiltersFlags = 'div[data-cy="ind-filters-flags"]'
-    indFiltersOrderBy = 'div[data-cy="ind-filters-order-by"]'
-    indFiltersStatus = 'div[data-cy="ind-filters-status"]'
-    datePickerFilter = 'div[data-cy="date-picker-filter"]'
-    buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
-    buttonFiltersApply = 'button[data-cy="button-filters-apply"]'
-    pageDetailsContainer = 'div[data-cy="page-details-container"]'
-    tableTitle = 'h6[data-cy="table-title"]'
-    sanctionListPossibleMatch = 'th[data-cy="sanction-list-possible-match"]'
-    tableLabel = 'span[data-cy="table-label"]'
-    individualId = 'th[data-cy="individual-id"]'
-    individualName = 'th[data-cy="individual-name"]'
-    householdId = 'th[data-cy="household-id"]'
-    relationship = 'th[data-cy="relationship"]'
-    individualAge = 'th[data-cy="individual-age"]'
-    individualSex = 'th[data-cy="individual-sex"]'
-    individualLocation = 'th[data-cy="individual-location"]'
-    individualTableRow = 'tr[data-cy="individual-table-row"]'
-    tablePagination = 'div[data-cy="table-pagination"]'
-
-    def getMainContent(self) -> WebElement:
-        return self.wait_for(self.mainContent)
+    labelFullName = 'div[data-cy="label-Full Name"]'
+    labelGivenName = 'div[data-cy="label-Given Name"]'
+    labelMiddleName = 'div[data-cy="label-Middle Name"]'
+    labelFamilyName = 'div[data-cy="label-Family Name"]'
+    labelGender = 'div[data-cy="label-Gender"]'
+    labelAge = 'div[data-cy="label-Age"]'
+    labelDateOfBirth = 'div[data-cy="label-Date of Birth"]'
+    labelEstimatedDateOfBirth = 'div[data-cy="label-Estimated Date of Birth"]'
+    labelMaritalStatus = 'div[data-cy="label-Marital Status"]'
+    labelWorkStatus = 'div[data-cy="label-Work Status"]'
+    labelPregnant = 'div[data-cy="label-Pregnant"]'
+    labelHouseholdId = 'div[data-cy="label-Household ID"]'
+    labelRole = 'div[data-cy="label-Role"]'
+    labelRelationshipToHoh = 'div[data-cy="label-Relationship to HOH"]'
+    labelPreferredLanguage = 'div[data-cy="label-Preferred language"]'
+    labelLinkedHouseholds = 'div[data-cy="label-Linked Households"]'
+    labelObservedDisabilities = 'div[data-cy="label-Observed disabilities"]'
+    labelSeeingDisabilitySeverity = 'div[data-cy="label-Seeing disability severity"]'
+    labelHearingDisabilitySeverity = 'div[data-cy="label-Hearing disability severity"]'
+    labelPhysicalDisabilitySeverity = 'div[data-cy="label-Physical disability severity"]'
+    labelRememberingOrConcentratingDisabilitySeverity = 'div[data-cy="label-Remembering or concentrating disability severity"]'
+    labelSelfCareDisabilitySeverity = 'div[data-cy="label-Self-care disability severity"]'
+    labelCommunicatingDisabilitySeverity = 'div[data-cy="label-Communicating disability severity"]'
+    labelDisability = 'div[data-cy="label-Disability"]'
+    labelBirth_certificate = 'div[data-cy="label-BIRTH_CERTIFICATE"]'
+    labelIssued = 'div[data-cy="label-issued"]'
+    labelDrivers_license = 'div[data-cy="label-DRIVERS_LICENSE"]'
+    labelElectoral_card = 'div[data-cy="label-ELECTORAL_CARD"]'
+    labelNational_passport = 'div[data-cy="label-NATIONAL_PASSPORT"]'
+    labelNational_id = 'div[data-cy="label-NATIONAL_ID"]'
+    labelUnhcrId = 'div[data-cy="label-UNHCR ID"]'
+    labelWfpId = 'div[data-cy="label-WFP ID"]'
+    labelEmail = 'div[data-cy="label-Email"]'
+    labelPhoneNumber = 'div[data-cy="label-Phone Number"]'
+    labelAlternativePhoneNumber = 'div[data-cy="label-Alternative Phone Number"]'
+    labelDateOfLastScreeningAgainstSanctionsList = 'div[data-cy="label-Date of last screening against sanctions list"]'
+    labelLinkedGrievances = 'div[data-cy="label-Linked Grievances"]'
+    labelSchoolEnrolled = 'div[data-cy="label-school enrolled"]'
+    labelSchoolEnrolledBefore = 'div[data-cy="label-school enrolled before"]'
 
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
@@ -40,74 +51,125 @@ class IndividualsDetails(BaseComponents):
     def getPageHeaderTitle(self) -> WebElement:
         return self.wait_for(self.pageHeaderTitle)
 
-    def getIndFiltersSearch(self) -> WebElement:
-        return self.wait_for(self.indFiltersSearch)
+    def getLabelFullName(self) -> WebElement:
+        return self.wait_for(self.labelFullName)
 
-    def getFilterSearchType(self) -> WebElement:
-        return self.wait_for(self.filterSearchType)
+    def getLabelGivenName(self) -> WebElement:
+        return self.wait_for(self.labelGivenName)
 
-    def getIndFiltersGender(self) -> WebElement:
-        return self.wait_for(self.indFiltersGender)
+    def getLabelMiddleName(self) -> WebElement:
+        return self.wait_for(self.labelMiddleName)
 
-    def getIndFiltersAgeFrom(self) -> WebElement:
-        return self.wait_for(self.indFiltersAgeFrom)
+    def getLabelFamilyName(self) -> WebElement:
+        return self.wait_for(self.labelFamilyName)
 
-    def getIndFiltersAgeTo(self) -> WebElement:
-        return self.wait_for(self.indFiltersAgeTo)
+    def getLabelGender(self) -> WebElement:
+        return self.wait_for(self.labelGender)
 
-    def getIndFiltersFlags(self) -> WebElement:
-        return self.wait_for(self.indFiltersFlags)
+    def getLabelAge(self) -> WebElement:
+        return self.wait_for(self.labelAge)
 
-    def getIndFiltersOrderBy(self) -> WebElement:
-        return self.wait_for(self.indFiltersOrderBy)
+    def getLabelDateOfBirth(self) -> WebElement:
+        return self.wait_for(self.labelDateOfBirth)
 
-    def getIndFiltersStatus(self) -> WebElement:
-        return self.wait_for(self.indFiltersStatus)
+    def getLabelEstimatedDateOfBirth(self) -> WebElement:
+        return self.wait_for(self.labelEstimatedDateOfBirth)
 
-    def getDatePickerFilter(self) -> WebElement:
-        return self.wait_for(self.datePickerFilter)
+    def getLabelMaritalStatus(self) -> WebElement:
+        return self.wait_for(self.labelMaritalStatus)
 
-    def getButtonFiltersClear(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersClear)
+    def getLabelWorkStatus(self) -> WebElement:
+        return self.wait_for(self.labelWorkStatus)
 
-    def getButtonFiltersApply(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersApply)
+    def getLabelPregnant(self) -> WebElement:
+        return self.wait_for(self.labelPregnant)
 
-    def getPageDetailsContainer(self) -> WebElement:
-        return self.wait_for(self.pageDetailsContainer)
+    def getLabelHouseholdId(self) -> WebElement:
+        return self.wait_for(self.labelHouseholdId)
 
-    def getTableTitle(self) -> WebElement:
-        return self.wait_for(self.tableTitle)
+    def getLabelRole(self) -> WebElement:
+        return self.wait_for(self.labelRole)
 
-    def getSanctionListPossibleMatch(self) -> WebElement:
-        return self.wait_for(self.sanctionListPossibleMatch)
+    def getLabelRelationshipToHoh(self) -> WebElement:
+        return self.wait_for(self.labelRelationshipToHoh)
 
-    def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
+    def getLabelPreferredLanguage(self) -> WebElement:
+        return self.wait_for(self.labelPreferredLanguage)
 
-    def getIndividualId(self) -> WebElement:
-        return self.wait_for(self.individualId)
+    def getLabelLinkedHouseholds(self) -> WebElement:
+        return self.wait_for(self.labelLinkedHouseholds)
 
-    def getIndividualName(self) -> WebElement:
-        return self.wait_for(self.individualName)
+    def getLabelObservedDisabilities(self) -> WebElement:
+        return self.wait_for(self.labelObservedDisabilities)
 
-    def getHouseholdId(self) -> WebElement:
-        return self.wait_for(self.householdId)
+    def getLabelSeeingDisabilitySeverity(self) -> WebElement:
+        return self.wait_for(self.labelSeeingDisabilitySeverity)
 
-    def getRelationship(self) -> WebElement:
-        return self.wait_for(self.relationship)
+    def getLabelHearingDisabilitySeverity(self) -> WebElement:
+        return self.wait_for(self.labelHearingDisabilitySeverity)
 
-    def getIndividualAge(self) -> WebElement:
-        return self.wait_for(self.individualAge)
+    def getLabelPhysicalDisabilitySeverity(self) -> WebElement:
+        return self.wait_for(self.labelPhysicalDisabilitySeverity)
 
-    def getIndividualSex(self) -> WebElement:
-        return self.wait_for(self.individualSex)
+    def getLabelRememberingOrConcentratingDisabilitySeverity(self) -> WebElement:
+        return self.wait_for(self.labelRememberingOrConcentratingDisabilitySeverity)
 
-    def getIndividualLocation(self) -> WebElement:
-        return self.wait_for(self.individualLocation)
+    def getLabelSelfCareDisabilitySeverity(self) -> WebElement:
+        return self.wait_for(self.labelSelfCareDisabilitySeverity)
 
-    def getIndividualTableRow(self) -> WebElement:
-        return self.wait_for(self.individualTableRow)
+    def getLabelCommunicatingDisabilitySeverity(self) -> WebElement:
+        return self.wait_for(self.labelCommunicatingDisabilitySeverity)
 
-    def getTablePagination(self) -> WebElement:
-        return self.wait_for(self.tablePagination)
+    def getLabelDisability(self) -> WebElement:
+        return self.wait_for(self.labelDisability)
+
+    def getLabelBirth_certificate(self) -> WebElement:
+        return self.wait_for(self.labelBirth_certificate)
+
+    def getLabelIssued(self) -> WebElement:
+        return self.wait_for(self.labelIssued)
+
+    def getLabelDrivers_license(self) -> WebElement:
+        return self.wait_for(self.labelDrivers_license)
+
+    def getLabelElectoral_card(self) -> WebElement:
+        return self.wait_for(self.labelElectoral_card)
+
+    def getLabelNational_passport(self) -> WebElement:
+        return self.wait_for(self.labelNational_passport)
+
+    def getLabelNational_id(self) -> WebElement:
+        return self.wait_for(self.labelNational_id)
+
+    def getLabelUnhcrId(self) -> WebElement:
+        return self.wait_for(self.labelUnhcrId)
+
+    def getLabelIssued(self) -> WebElement:
+        return self.wait_for(self.labelIssued)
+
+    def getLabelWfpId(self) -> WebElement:
+        return self.wait_for(self.labelWfpId)
+
+    def getLabelIssued(self) -> WebElement:
+        return self.wait_for(self.labelIssued)
+
+    def getLabelEmail(self) -> WebElement:
+        return self.wait_for(self.labelEmail)
+
+    def getLabelPhoneNumber(self) -> WebElement:
+        return self.wait_for(self.labelPhoneNumber)
+
+    def getLabelAlternativePhoneNumber(self) -> WebElement:
+        return self.wait_for(self.labelAlternativePhoneNumber)
+
+    def getLabelDateOfLastScreeningAgainstSanctionsList(self) -> WebElement:
+        return self.wait_for(self.labelDateOfLastScreeningAgainstSanctionsList)
+
+    def getLabelLinkedGrievances(self) -> WebElement:
+        return self.wait_for(self.labelLinkedGrievances)
+
+    def getLabelSchoolEnrolled(self) -> WebElement:
+        return self.wait_for(self.labelSchoolEnrolled)
+
+    def getLabelSchoolEnrolledBefore(self) -> WebElement:
+        return self.wait_for(self.labelSchoolEnrolledBefore)
