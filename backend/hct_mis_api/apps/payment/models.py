@@ -164,6 +164,7 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
 
     def get_exchange_rate(self, exchange_rates_client: Optional["ExchangeRateClient"] = None) -> float:
         if self.currency == USDC:
+            # TODO: is it good place for that?
             # exchange rate for Digital currency
             return 1.0
 
@@ -304,7 +305,7 @@ class GenericPayment(TimeStampedUUIDModel):
     status_date = models.DateTimeField()
     household = models.ForeignKey("household.Household", on_delete=models.CASCADE)
     head_of_household = models.ForeignKey("household.Individual", on_delete=models.CASCADE, null=True)
-    delivery_type = models.CharField(choices=DELIVERY_TYPE_CHOICE, max_length=24, null=True)
+    delivery_type = models.CharField(choices=DELIVERY_TYPE_CHOICE, max_length=32, null=True)
     currency = models.CharField(
         max_length=4,
     )
@@ -1254,7 +1255,7 @@ class FinancialServiceProvider(LimitBusinessAreaModelMixin, TimeStampedUUIDModel
     name = models.CharField(max_length=100, unique=True)
     vision_vendor_number = models.CharField(max_length=100, unique=True)
     delivery_mechanisms = HorizontalChoiceArrayField(
-        models.CharField(choices=GenericPayment.DELIVERY_TYPE_CHOICE, max_length=24)
+        models.CharField(choices=GenericPayment.DELIVERY_TYPE_CHOICE, max_length=32)
     )
     distribution_limit = models.DecimalField(
         decimal_places=2,
@@ -1431,7 +1432,7 @@ class CashPlan(ConcurrencyModel, AdminUrlMixin, GenericPaymentPlan):
     comments = models.CharField(max_length=255, null=True)
     delivery_type = models.CharField(
         choices=GenericPayment.DELIVERY_TYPE_CHOICE,
-        max_length=24,
+        max_length=32,
         null=True,
         db_index=True,
     )

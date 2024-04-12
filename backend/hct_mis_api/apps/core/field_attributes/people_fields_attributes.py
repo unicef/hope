@@ -1327,7 +1327,7 @@ PEOPLE_FIELDS_ATTRIBUTES = [
         "scope": [Scope.XLSX_PEOPLE],
     },
     {
-        "id": " ",
+        "id": "8f423979-6721-45d3-9b08-f3ffe22e72e4",
         "type": TYPE_STRING,
         "name": "wallet_name",
         "lookup": "wallet_name",
@@ -1340,7 +1340,7 @@ PEOPLE_FIELDS_ATTRIBUTES = [
         "scope": [Scope.XLSX_PEOPLE],
     },
     {
-        "id": " ",
+        "id": "b4c56b02-8805-4eae-82cd-0e6451d006b9",
         "type": TYPE_STRING,
         "name": "blockchain_name",
         "lookup": "blockchain_name",
@@ -1353,7 +1353,7 @@ PEOPLE_FIELDS_ATTRIBUTES = [
         "scope": [Scope.XLSX_PEOPLE],
     },
     {
-        "id": " ",
+        "id": "ff6284e2-8e3a-47b8-80c1-6c6b20b2d837",
         "type": TYPE_STRING,
         "name": "wallet_address",
         "lookup": "wallet_address",
