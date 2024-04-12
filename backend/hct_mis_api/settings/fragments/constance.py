@@ -197,6 +197,7 @@ Clear Cache,clear-cache/
         "The schedule (in days) which is applied to task clean_old_record_files_task",
         "positive_integers",
     ),
+    "SHOW_TOOLBAR": (False, "Show debug toolbar", bool),
 }
 
 CONSTANCE_DBS = ("default",)
