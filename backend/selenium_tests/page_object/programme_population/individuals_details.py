@@ -25,7 +25,9 @@ class IndividualsDetails(BaseComponents):
     labelSeeingDisabilitySeverity = 'div[data-cy="label-Seeing disability severity"]'
     labelHearingDisabilitySeverity = 'div[data-cy="label-Hearing disability severity"]'
     labelPhysicalDisabilitySeverity = 'div[data-cy="label-Physical disability severity"]'
-    labelRememberingOrConcentratingDisabilitySeverity = 'div[data-cy="label-Remembering or concentrating disability severity"]'
+    labelRememberingOrConcentratingDisabilitySeverity = (
+        'div[data-cy="label-Remembering or concentrating disability severity"]'
+    )
     labelSelfCareDisabilitySeverity = 'div[data-cy="label-Self-care disability severity"]'
     labelCommunicatingDisabilitySeverity = 'div[data-cy="label-Communicating disability severity"]'
     labelDisability = 'div[data-cy="label-Disability"]'

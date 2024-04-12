@@ -3,7 +3,6 @@ from django.core.management import call_command
 
 import pytest
 from page_object.programme_population.individuals import Individuals
-
 from page_object.programme_population.individuals_details import IndividualsDetails
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -26,11 +25,9 @@ def add_households() -> None:
 
 @pytest.mark.usefixtures("login")
 class TestSmokeIndividuals:
-    def test_smoke_page_individuals(self,
-                                    create_programs: None,
-                                    add_households: None,
-                                    pageIndividuals: Individuals
-                                    ) -> None:
+    def test_smoke_page_individuals(
+        self, create_programs: None, add_households: None, pageIndividuals: Individuals
+    ) -> None:
         pageIndividuals.selectGlobalProgramFilter("Test Programm").click()
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
@@ -44,51 +41,45 @@ class TestSmokeIndividuals:
         assert "Administrative Level 2" in pageIndividuals.getIndividualLocation().text
         assert 6 == len(pageIndividuals.getIndividualTableRow())
 
-    def test_smoke_page_individuals_details(self,
-                                            create_programs: None,
-                                            add_households: None,
-                                            pageIndividuals: Individuals,
-                                            pageIndividualsDetails: IndividualsDetails
-                                            ) -> None:
+    def test_smoke_page_individuals_details(
+        self,
+        create_programs: None,
+        add_households: None,
+        pageIndividuals: Individuals,
+        pageIndividualsDetails: IndividualsDetails,
+    ) -> None:
         pageIndividuals.selectGlobalProgramFilter("Test Programm").click()
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getIndividualTableRow()[0].click()
-        print(pageIndividualsDetails.getLabelFullName().text)
-        print(pageIndividualsDetails.getLabelGivenName().text)
-        print(pageIndividualsDetails.getLabelMiddleName().text)
-        print(pageIndividualsDetails.getLabelFamilyName().text)
-        print(pageIndividualsDetails.getLabelGender().text)
-        print(pageIndividualsDetails.getLabelAge().text)
-        print(pageIndividualsDetails.getLabelDateOfBirth().text)
-        print(pageIndividualsDetails.getLabelEstimatedDateOfBirth().text)
-        print(pageIndividualsDetails.getLabelMaritalStatus().text)
-        print(pageIndividualsDetails.getLabelWorkStatus().text)
-        print(pageIndividualsDetails.getLabelPregnant().text)
-        print(pageIndividualsDetails.getLabelHouseholdId().text)
-        print(pageIndividualsDetails.getLabelRole().text)
-        print(pageIndividualsDetails.getLabelRelationshipToHoh().text)
-        print(pageIndividualsDetails.getLabelPreferredLanguage().text)
-        print(pageIndividualsDetails.getLabelLinkedHouseholds().text)
-        print(pageIndividualsDetails.getLabelObservedDisabilities().text)
-        print(pageIndividualsDetails.getLabelSeeingDisabilitySeverity().text)
-        print(pageIndividualsDetails.getLabelHearingDisabilitySeverity().text)
-        print(pageIndividualsDetails.getLabelPhysicalDisabilitySeverity().text)
-        print(pageIndividualsDetails.getLabelRememberingOrConcentratingDisabilitySeverity().text)
-        print(pageIndividualsDetails.getLabelCommunicatingDisabilitySeverity().text)
-        print(pageIndividualsDetails.getLabelDisability().text)
-        print(pageIndividualsDetails.getLabelBirth_certificate().text)
-        print(pageIndividualsDetails.getLabelIssued().text)
-        print(pageIndividualsDetails.getLabelDrivers_license().text)
-        print(pageIndividualsDetails.getLabelElectoral_card().text)
-        print(pageIndividualsDetails.getLabelNational_passport().text)
-        print(pageIndividualsDetails.getLabelNational_id().text)
-        print(pageIndividualsDetails.getLabelUnhcrId().text)
-        print(pageIndividualsDetails.getLabelWfpId().text)
-        print(pageIndividualsDetails.getLabelEmail().text)
-        print(pageIndividualsDetails.getLabelPhoneNumber().text)
-        print(pageIndividualsDetails.getLabelAlternativePhoneNumber().text)
-        print(pageIndividualsDetails.getLabelDateOfLastScreeningAgainstSanctionsList().text)
-        print(pageIndividualsDetails.getLabelLinkedGrievances().text)
-        print(pageIndividualsDetails.getLabelSchoolEnrolled().text)
-        print(pageIndividualsDetails.getLabelSchoolEnrolledBefore().text)
+        assert "Alicja Kowalska" in pageIndividualsDetails.getLabelFullName().text
+        assert "Alicja" in pageIndividualsDetails.getLabelGivenName().text
+        assert "-" in pageIndividualsDetails.getLabelMiddleName().text
+        assert "Kowalska" in pageIndividualsDetails.getLabelFamilyName().text
+        assert "Female" in pageIndividualsDetails.getLabelGender().text
+        assert "82" in pageIndividualsDetails.getLabelAge().text
+        assert "26 Aug 1941" in pageIndividualsDetails.getLabelDateOfBirth().text
+        assert "No" in pageIndividualsDetails.getLabelEstimatedDateOfBirth().text
+        assert "Married" in pageIndividualsDetails.getLabelMaritalStatus().text
+        assert "Not provided" in pageIndividualsDetails.getLabelWorkStatus().text
+        assert "Yes" in pageIndividualsDetails.getLabelPregnant().text
+        assert "-" in pageIndividualsDetails.getLabelHouseholdId().text
+        assert "Alternate collector" in pageIndividualsDetails.getLabelRole().text
+        assert (
+            "Not a Family Member. Can only act as a recipient."
+            in pageIndividualsDetails.getLabelRelationshipToHoh().text
+        )
+        assert "-" in pageIndividualsDetails.getLabelPreferredLanguage().text
+        assert "HH-20-0000.0001 -Alternate collector" in pageIndividualsDetails.getLabelLinkedHouseholds().text
+        assert "-" in pageIndividualsDetails.getLabelObservedDisabilities().text
+        assert "None" in pageIndividualsDetails.getLabelSeeingDisabilitySeverity().text
+        assert "None" in pageIndividualsDetails.getLabelHearingDisabilitySeverity().text
+        assert "None" in pageIndividualsDetails.getLabelPhysicalDisabilitySeverity().text
+        assert "None" in pageIndividualsDetails.getLabelRememberingOrConcentratingDisabilitySeverity().text
+        assert "None" in pageIndividualsDetails.getLabelCommunicatingDisabilitySeverity().text
+        assert "Not Disabled" in pageIndividualsDetails.getLabelDisability().text
+        assert "Poland" in pageIndividualsDetails.getLabelIssued().text
+        assert "fake111test@email.com" in pageIndividualsDetails.getLabelEmail().text
+        assert "0048503123555" in pageIndividualsDetails.getLabelPhoneNumber().text
+        assert "-" in pageIndividualsDetails.getLabelAlternativePhoneNumber().text
+        assert "-" in pageIndividualsDetails.getLabelDateOfLastScreeningAgainstSanctionsList().text

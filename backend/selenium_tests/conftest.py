@@ -17,6 +17,7 @@ from page_object.programme_management.programme_management import ProgrammeManag
 from page_object.programme_population.households import Households
 from page_object.programme_population.households_details import HouseholdsDetails
 from page_object.programme_population.individuals import Individuals
+from page_object.programme_population.individuals_details import IndividualsDetails
 from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
@@ -149,6 +150,11 @@ def pageHouseholdsDetails(request: FixtureRequest, browser: Chrome) -> Household
 @pytest.fixture
 def pageIndividuals(request: FixtureRequest, browser: Chrome) -> Individuals:
     yield Individuals(browser)
+
+
+@pytest.fixture
+def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> IndividualsDetails:
+    yield IndividualsDetails(browser)
 
 
 @pytest.fixture
