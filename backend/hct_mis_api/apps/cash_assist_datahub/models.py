@@ -138,7 +138,7 @@ class PaymentRecord(SessionModel):
     delivery_type = models.CharField(
         choices=InternalPaymentRecord.DELIVERY_TYPE_CHOICE,
         default=InternalPaymentRecord.DELIVERY_TYPE_CASH,
-        max_length=24,
+        max_length=32,
         null=True,
     )
     currency = models.CharField(max_length=4, null=True)
