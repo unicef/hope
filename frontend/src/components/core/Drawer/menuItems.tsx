@@ -88,8 +88,8 @@ export const menuItems: MenuItem[] = [
   },
   {
     name: 'People',
-    href: '/population/individuals',
-    selectedRegexp: /^\/population\/individuals.*$/,
+    href: '/population/people',
+    selectedRegexp: /^\/population\/people.*$/,
     icon: <PeopleIcon />,
     permissionModule: 'POPULATION',
     scopes: [SCOPE_PROGRAM],
