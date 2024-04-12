@@ -87,7 +87,7 @@ export const menuItems: MenuItem[] = [
     ],
   },
   {
-    name: 'Social Workers',
+    name: 'People',
     href: '/population/individuals',
     selectedRegexp: /^\/population\/individuals.*$/,
     icon: <PeopleIcon />,

@@ -135,7 +135,7 @@ export const Drawer = ({
   const { t } = useTranslation();
   const [showMismatchedDialog, setShowMismatchedDialog] = useState(false);
 
-  const { programId,isAllPrograms } = useBaseUrl();
+  const { programId, isAllPrograms } = useBaseUrl();
   const [getProgram, programResults] = useProgramLazyQuery({
     variables: {
       id: programId,
@@ -163,7 +163,9 @@ export const Drawer = ({
   let notActiveBar = null;
   if (
     !isAllPrograms &&
-    programResults?.data?.program?.status !== ProgramStatus.Active
+    programResults?.data?.program?.status !== ProgramStatus.Active &&
+    programResults?.data?.program?.status !== undefined &&
+    programResults?.data?.program?.status !== null
   ) {
     notActiveBar = <ProgramNotActiveBar>program inactive</ProgramNotActiveBar>;
   }
