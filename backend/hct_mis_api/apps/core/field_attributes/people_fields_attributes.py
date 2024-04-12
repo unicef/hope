@@ -1327,7 +1327,7 @@ PEOPLE_FIELDS_ATTRIBUTES = [
         "scope": [Scope.XLSX_PEOPLE],
     },
     {
-        "id": "",
+        "id": " ",
         "type": TYPE_STRING,
         "name": "wallet_name",
         "lookup": "wallet_name",
@@ -1340,7 +1340,7 @@ PEOPLE_FIELDS_ATTRIBUTES = [
         "scope": [Scope.XLSX_PEOPLE],
     },
     {
-        "id": "",
+        "id": " ",
         "type": TYPE_STRING,
         "name": "blockchain_name",
         "lookup": "blockchain_name",
@@ -1353,7 +1353,7 @@ PEOPLE_FIELDS_ATTRIBUTES = [
         "scope": [Scope.XLSX_PEOPLE],
     },
     {
-        "id": "",
+        "id": " ",
         "type": TYPE_STRING,
         "name": "wallet_address",
         "lookup": "wallet_address",
