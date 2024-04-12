@@ -3,24 +3,14 @@ import os
 import sys
 from datetime import datetime
 
+from django.conf import settings
+from django.core.management import call_command
+
 import pytest
 from _pytest.config import Config
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
-from django.conf import settings
-from django.core.management import call_command
-from pytest_django.live_server_helper import LiveServer
-from requests import Session
-from selenium import webdriver
-from selenium.webdriver import Chrome
-from selenium.webdriver.chrome.options import Options
-
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.geo.models import Country
 from page_object.admin_panel.admin_panel import AdminPanel
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from page_object.grievance.feedback import Feedback
@@ -34,6 +24,17 @@ from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
 )
+from pytest_django.live_server_helper import LiveServer
+from requests import Session
+from selenium import webdriver
+from selenium.webdriver import Chrome
+from selenium.webdriver.chrome.options import Options
+
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.geo.models import Country
 
 
 def pytest_configure(config: Config) -> None:
