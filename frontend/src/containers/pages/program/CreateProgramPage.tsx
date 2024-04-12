@@ -3,7 +3,7 @@ import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  AllProgramsForChoicesDocument,
+  AllProgramsForChoicesDocument, ProgramPartnerAccess,
   useAllAreasTreeQuery,
   useCreateProgramMutation,
   useUserPartnerChoicesQuery,
@@ -20,7 +20,6 @@ import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { useNavigate } from 'react-router-dom';
-import { AccessTypes } from '@containers/pages/program/AccessTypes';
 
 export const CreateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -52,7 +51,7 @@ export const CreateProgramPage = (): ReactElement => {
       ? populationGoalValue
       : 0;
     const partnersToSet =
-      values.accessType === AccessTypes.OnlySelectedPartners
+      values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess
         ? values.partners
         : [];
 
@@ -95,7 +94,7 @@ export const CreateProgramPage = (): ReactElement => {
     cashPlus: false,
     frequencyOfPayments: 'REGULAR',
     partners: [],
-    accessType: AccessTypes.NonePartners,
+    partnerAccess: ProgramPartnerAccess.NonePartnersAccess,
   };
 
   const stepFields = [
@@ -113,7 +112,7 @@ export const CreateProgramPage = (): ReactElement => {
       'cashPlus',
       'frequencyOfPayments',
     ],
-    ['partners', 'accessType'],
+    ['partners', 'partnerAccess'],
   ];
 
   if (treeLoading || userPartnerChoicesLoading) return <LoadingComponent />;

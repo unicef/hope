@@ -145,12 +145,20 @@ class ProgramPartnerThroughNode(DjangoObjectType):
 
     partner_name = graphene.String()
     areas = graphene.List(AreaNode)
+    area_access = graphene.String()
 
     def resolve_areas(self, info: Any) -> "List[Area]":
         return self.areas.all()
 
     def resolve_partner_name(self, info: Any) -> str:
         return self.partner.name
+
+    def resolve_area_access(self, info: Any, **kwargs: Any) -> str:
+        areas_count = self.areas.count()
+        if areas_count != 0:
+            return "ADMIN_AREA"
+        else:
+            return "BUSINESS_AREA"
 
 
 # class PartnerNodeForProgram(DjangoObjectType):

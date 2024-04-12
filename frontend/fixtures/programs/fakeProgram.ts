@@ -1,4 +1,4 @@
-import { ProgramNode } from '../../src/__generated__/graphql';
+import { ProgramNode, ProgramPartnerAccess } from '../../src/__generated__/graphql';
 
 export const fakeProgram = {
   id: 'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
@@ -18,9 +18,10 @@ export const fakeProgram = {
   totalNumberOfHouseholds: 2,
   administrativeAreasOfImplementation: 'Crime book.',
   version: 1644233612796091,
+  partnerAccess: ProgramPartnerAccess.SelectedPartnersAccess,
   partners: [
     {
-      adminAreas: [],
+      areas: [],
       areaAccess: 'BUSINESS_AREA',
       id: '1',
     },

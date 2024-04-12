@@ -32,14 +32,14 @@ export const UPDATE_PROGRAM_MUTATION = gql`
           householdFiltersAvailable
           description
         }
+        partnerAccess
         partners {
           id
-          name
+          partnerName
           areaAccess
-          adminAreas {
-            ids
+          areas {
+            id
             level
-            totalCount
           }
         }
       }

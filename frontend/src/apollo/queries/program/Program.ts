@@ -32,14 +32,14 @@ export const PROGRAM_QUERY = gql`
         householdFiltersAvailable
         description
       }
+      partnerAccess
       partners {
         id
-        name
+        partnerName
         areaAccess
-        adminAreas {
-          ids
+        areas {
+          id
           level
-          totalCount
         }
       }
     }

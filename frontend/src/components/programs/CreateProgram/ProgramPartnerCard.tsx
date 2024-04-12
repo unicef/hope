@@ -60,7 +60,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   const [allAreasTree, setAllAreasTree] = React.useState<AreaTreeNode[]>(() =>
     AreaTreeNode.buildTree(
       allAreasTreeData,
-      values.partners[index]?.adminAreas,
+      values.partners[index]?.areas,
     ),
   );
   const description = t(
@@ -79,7 +79,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
     _event.stopPropagation();
     node.toggleCheck();
     setFieldValue(
-      `partners[${index}].adminAreas`,
+      `partners[${index}].areas`,
       AreaTreeNode.getAllSelectedIds(allAreasTree),
     );
     setFieldValue(`partners[${index}].areaAccess`, 'ADMIN_AREA');
@@ -136,7 +136,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   }
 
   // Get selected admin areas
-  const selectedAdminAreas = values.partners[index]?.adminAreas || [];
+  const selectedAdminAreas = values.partners[index]?.areas || [];
 
   // Group allAreasTreeData by level
   const allAreasTreeDataGroupedByLevel = groupAreasByLevel(
@@ -187,7 +187,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
             defaultCollapseIcon={<ExpandMoreIcon />}
             defaultExpandIcon={<ChevronRightIcon />}
             multiSelect
-            selected={(values.partners[index]?.adminAreas || []).map(String)}
+            selected={(values.partners[index]?.areas || []).map(String)}
           >
             {allAreasTree.length > 0 && allAreasTree.map(renderNode)}
           </TreeView>
@@ -254,7 +254,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
           onChange={(event) => {
             setIsAdminAreaExpanded(event.target.value === 'ADMIN_AREA');
             if (event.target.value === 'BUSINESS_AREA') {
-              setFieldValue(`partners[${index}].adminAreas`, []);
+              setFieldValue(`partners[${index}].areas`, []);
               clearChecks();
             }
           }}

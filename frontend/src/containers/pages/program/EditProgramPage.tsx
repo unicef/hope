@@ -4,6 +4,7 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
+  ProgramPartnerAccess,
   useAllAreasTreeQuery,
   useProgramQuery,
   useUpdateProgramMutation,
@@ -22,7 +23,6 @@ import { decodeIdString } from '@utils/utils';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
-import { AccessTypes } from '@containers/pages/program/AccessTypes';
 
 export const EditProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -81,7 +81,7 @@ export const EditProgramPage = (): ReactElement => {
     frequencyOfPayments = 'REGULAR',
     version,
     partners,
-    // accessType = AccessTypes.NonePartners, // TODO fetch from api
+    partnerAccess,
   } = data.program;
 
   const handleSubmit = async (values): Promise<void> => {
@@ -94,7 +94,7 @@ export const EditProgramPage = (): ReactElement => {
       ? populationGoalValue
       : 0;
     const partnersToSet =
-      values.accessType === AccessTypes.OnlySelectedPartners
+      values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess
         ? values.partners
         : [];
 
@@ -133,10 +133,10 @@ export const EditProgramPage = (): ReactElement => {
     frequencyOfPayments,
     partners: partners.map((partner) => ({
       id: partner.id,
-      adminAreas: partner.adminAreas.flatMap((area) => area.ids),
+      areas: partner.areas.map((area) => area.id),
       areaAccess: partner.areaAccess,
     })),
-    accessType: AccessTypes.NonePartners, // TODO fetch from program object
+    partnerAccess: ProgramPartnerAccess.NonePartnersAccess,
   };
   initialValues.budget =
     data.program.budget === '0.00' ? '' : data.program.budget;
@@ -158,7 +158,7 @@ export const EditProgramPage = (): ReactElement => {
       'cashPlus',
       'frequencyOfPayments',
     ],
-    ['partners', 'accessType'],
+    ['partners', 'partnerAccess'],
   ];
 
   const { allAreasTree } = treeData;

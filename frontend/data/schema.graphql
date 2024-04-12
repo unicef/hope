@@ -151,12 +151,6 @@ type ApprovalProcessNodeEdge {
   cursor: String!
 }
 
-type AreaGroupNode {
-  ids: [ID]
-  level: Int
-  totalCount: Int
-}
-
 type AreaNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -339,10 +333,10 @@ type BusinessAreaNode implements Node {
   isAccountabilityApplicable: Boolean
   active: Boolean!
   enableEmailNotification: Boolean!
-  partners: [PartnerNodeForProgram!]!
+  partners: [PartnerType!]!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   dataCollectingTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
-  partnerSet: [PartnerNodeForProgram!]!
+  partnerSet: [PartnerType!]!
   userRoles: [UserRoleNode!]!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individualSet(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -2795,33 +2789,11 @@ type PaginatedPaymentRecordsAndPaymentsNode {
   totalCount: Int
 }
 
-type PartnerNodeForProgram {
-  id: ID
-  allowedBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
-  name: String
-  parent: PartnerNodeForProgram
-  isUn: Boolean!
-  permissions: JSONString!
-  lft: Int!
-  rght: Int!
-  treeId: Int!
-  level: Int!
-  businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
-  partnerSet: [PartnerNodeForProgram!]!
-  userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
-  individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
-  grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
-  programPartnerThrough: [ProgramPartnerThroughNode!]!
-  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
-  adminAreas: [AreaGroupNode]
-  areaAccess: String
-}
-
 type PartnerType {
   id: ID!
   allowedBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   name: String!
-  parent: PartnerNodeForProgram
+  parent: PartnerType
   isUn: Boolean!
   permissions: JSONString!
   lft: Int!
@@ -2829,7 +2801,7 @@ type PartnerType {
   treeId: Int!
   level: Int!
   businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
-  partnerSet: [PartnerNodeForProgram!]!
+  partnerSet: [PartnerType!]!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
   individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
@@ -3529,7 +3501,7 @@ type ProgramNode implements Node {
   individualCount: Int!
   programmeCode: String
   partnerAccess: ProgramPartnerAccess
-  partners: [PartnerNodeForProgram!]!
+  partners: [ProgramPartnerThroughNode]
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -3551,7 +3523,6 @@ type ProgramNode implements Node {
   totalUndeliveredQuantity: Decimal
   totalNumberOfHouseholds: Int
   totalNumberOfHouseholdsWithTpInProgram: Int
-  partnersAccess: [ProgramPartnerThroughNode]
 }
 
 type ProgramNodeConnection {
@@ -3582,8 +3553,10 @@ type ProgramPartnerThroughNode {
   createdAt: DateTime!
   updatedAt: DateTime!
   program: ProgramNode!
-  partner: PartnerNodeForProgram!
+  partner: PartnerType!
   areas: [AreaNode]
+  partnerName: String
+  areaAccess: String
 }
 
 enum ProgramScope {
@@ -5109,10 +5082,10 @@ type UserBusinessAreaNode implements Node {
   isAccountabilityApplicable: Boolean
   active: Boolean!
   enableEmailNotification: Boolean!
-  partners: [PartnerNodeForProgram!]!
+  partners: [PartnerType!]!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   dataCollectingTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
-  partnerSet: [PartnerNodeForProgram!]!
+  partnerSet: [PartnerType!]!
   userRoles: [UserRoleNode!]!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individualSet(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -5158,7 +5131,7 @@ type UserNode implements Node {
   dateJoined: DateTime!
   id: ID!
   status: UserStatus!
-  partner: PartnerNodeForProgram
+  partner: PartnerType
   email: String!
   availableForExport: Boolean!
   customFields: JSONString!

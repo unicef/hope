@@ -47,20 +47,28 @@ export const ProgramDetails = ({
     programFrequencyOfPaymentsChoices,
   );
   const programSectorChoicesDict = choicesToDict(programSectorChoices);
-  const renderAdminAreasCount = (partner): React.ReactElement => (
-    <Grid container spacing={6}>
-      {partner.adminAreas?.map((area) => (
-        <Grid item xs={3} key={area.level}>
-          <LabelizedField
-            dataCy={`admin-area-${area.level}-total-count`}
-            label={t(`Admin Area ${area.level}`)}
-          >
-            {area.totalCount}
-          </LabelizedField>
-        </Grid>
-      ))}
-    </Grid>
-  );
+  const renderAdminAreasCount = (partner: ProgramQuery['program']['partners'][0]): React.ReactElement => {
+    const counts = {};
+    partner.areas?.forEach(({ level }) => {
+      const currentCount = counts[level] || 0;
+      counts[level] = currentCount + 1;
+    });
+
+    return (
+      <Grid container spacing={6}>
+        {Object.keys(counts).map((level) => (
+          <Grid item xs={3} key={level}>
+            <LabelizedField
+              dataCy={`admin-area-${level}-total-count`}
+              label={t(`Admin Area ${level}`)}
+            >
+              {counts[level]}
+            </LabelizedField>
+          </Grid>
+        ))}
+      </Grid>
+    );
+  };
 
   return (
     <ContainerColumnWithBorder data-cy="program-details-container">
@@ -161,7 +169,7 @@ export const ProgramDetails = ({
                 >
                   <StyledBox p={6} flexDirection="column">
                     <Typography data-cy="label-partner-name" variant="h6">
-                      {partner.name}
+                      {partner.partnerName}
                     </Typography>
                     {partner.areaAccess === 'BUSINESS_AREA' ? (
                       <LabelizedField

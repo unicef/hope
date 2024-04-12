@@ -4,7 +4,7 @@ import { Field, FieldArray, FormikErrors } from 'formik';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { AllAreasTreeQuery } from '@generated/graphql';
+import { AllAreasTreeQuery, ProgramPartnerAccess } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { BaseSection } from '@core/BaseSection';
 import { ButtonTooltip } from '@core/ButtonTooltip';
@@ -12,7 +12,6 @@ import { ProgramPartnerCard } from './ProgramPartnerCard';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { DividerLine } from '@core/DividerLine';
 import { useEffect } from 'react';
-import { AccessTypes } from '@containers/pages/program/AccessTypes';
 
 interface PartnersStepProps {
   values;
@@ -64,15 +63,15 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
 
   const accessTypeChoices = [
     {
-      value: AccessTypes.NonePartners,
+      value: ProgramPartnerAccess.NonePartnersAccess,
       label: 'None of the partners should have access',
     },
     {
-      value: AccessTypes.OnlySelectedPartners,
+      value: ProgramPartnerAccess.SelectedPartnersAccess,
       label: 'Only selected partners within the business area',
     },
     {
-      value: AccessTypes.AllPartners,
+      value: ProgramPartnerAccess.AllPartnersAccess,
       label: 'All partners within the business area',
     },
   ];
@@ -83,7 +82,7 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
         <Box display="flex" justifyContent="space-between" mt={2}>
           <Grid item xs={6}>
             <Field
-              name="accessType"
+              name="partnerAccess"
               label={t('Who should have access to the program?')}
               color="primary"
               choices={accessTypeChoices}
@@ -93,7 +92,7 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
             />
           </Grid>
         </Box>
-        {values.accessType === AccessTypes.OnlySelectedPartners && (
+        {values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess && (
           <>
             <DividerLine />
             <FieldArray
