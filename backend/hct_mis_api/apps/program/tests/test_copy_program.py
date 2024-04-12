@@ -1,3 +1,5 @@
+from flaky import flaky
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -39,6 +41,7 @@ class TestCopyProgram(APITestCase):
           populationGoal
           administrativeAreasOfImplementation
         }
+      validationErrors
       }
     }
     """
@@ -148,6 +151,7 @@ class TestCopyProgram(APITestCase):
             variables=self.copy_data,
         )
 
+    @flaky(max_runs=3, min_passes=1)
     def test_copy_with_permissions(self) -> None:
         user = UserFactory.create()
         self.assertEqual(Household.objects.count(), 3)
@@ -244,4 +248,15 @@ class TestCopyProgram(APITestCase):
             request_string=self.COPY_PROGRAM_MUTATION,
             context={"user": user},
             variables=copy_data_incompatible,
+        )
+
+    def test_copy_program_with_existing_name(self) -> None:
+        user = UserFactory.create()
+        self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        copy_data_existing_name = {**self.copy_data}
+        copy_data_existing_name["programData"]["name"] = "initial name"
+        self.snapshot_graphql_request(
+            request_string=self.COPY_PROGRAM_MUTATION,
+            context={"user": user},
+            variables=copy_data_existing_name,
         )

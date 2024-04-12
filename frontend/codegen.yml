@@ -1,5 +1,5 @@
 overwrite: true
-schema: './data/schema.json'
+schema: './data/schema.graphql'
 documents: 'src/apollo/**/*.ts'
 generates:
   src/__generated__/introspection-result.ts:

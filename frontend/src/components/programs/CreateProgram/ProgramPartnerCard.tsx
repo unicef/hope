@@ -14,6 +14,7 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { DividerLine } from '@core/DividerLine';
 import { DeleteProgramPartner } from './DeleteProgramPartner';
 import { AreaTreeNode } from './AreaTreeNode';
+import { LabelizedField } from '@components/core/LabelizedField';
 
 interface ProgramPartnerCardProps {
   values;
@@ -51,10 +52,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   setFieldValue,
 }): React.ReactElement => {
   const { t } = useTranslation();
-  const selectedAreasLength = values.partners[index]?.adminAreas?.length;
-  const initialExpanded = selectedAreasLength > 0;
-  const [isAdminAreaExpanded, setIsAdminAreaExpanded] =
-    useState(initialExpanded);
+  const [isAdminAreaExpanded, setIsAdminAreaExpanded] = useState(false);
 
   const [allAreasTree, setAllAreasTree] = React.useState<AreaTreeNode[]>(() =>
     AreaTreeNode.buildTree(
@@ -81,7 +79,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
     setFieldValue(`partners[${index}].areaAccess`, 'ADMIN_AREA');
     setAllAreasTree([...allAreasTree]);
   };
-  
+
   const renderNode = (node: AreaTreeNode): React.ReactElement => (
     <TreeItem
       key={node.id}
@@ -104,20 +102,70 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
     </TreeItem>
   );
 
+  function groupAreasByLevel(areas, selectedAreas, level = 1) {
+    const grouped = { [level]: 0 };
+
+    areas.forEach((area) => {
+      if (selectedAreas.includes(area.id)) {
+        grouped[level]++;
+      }
+
+      if (area.areas && area.areas.length > 0) {
+        const subGrouped = groupAreasByLevel(
+          area.areas,
+          selectedAreas,
+          level + 1,
+        );
+        Object.keys(subGrouped).forEach((key) => {
+          if (grouped[key]) {
+            grouped[key] += subGrouped[key];
+          } else {
+            grouped[key] = subGrouped[key];
+          }
+        });
+      }
+    });
+
+    return grouped;
+  }
+
+  // Get selected admin areas
+  const selectedAdminAreas = values.partners[index]?.adminAreas || [];
+
+  // Group allAreasTreeData by level
+  const allAreasTreeDataGroupedByLevel = groupAreasByLevel(
+    allAreasTreeData,
+    selectedAdminAreas,
+  );
+
   const adminAreaOptionLabel = (
     <Box display="flex" flexDirection="column">
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Box>
           <BigText>{t('Admin Area')}</BigText>
           <SmallText>
-            {t('The partner has access to selected Admin Areas')}
+            {t(
+              "The partner will have access to the program's selected admin area(s):",
+            )}
           </SmallText>
-          <Box mt={2} mb={2}>
-            <SmallText>
-              Selected Admin Areas:{' '}
-              {AreaTreeNode.getAllSelectedIds(allAreasTree).length || 0}
-            </SmallText>
-          </Box>
+          {!isAdminAreaExpanded &&
+            Object.values(allAreasTreeDataGroupedByLevel).some(
+              (count) => count > 0,
+            ) && (
+              <Grid container>
+                {Object.keys(allAreasTreeDataGroupedByLevel).map((level) => (
+                  <Grid key={level} item xs={4}>
+                    <LabelizedField
+                      dataCy={`Admin-Areas-${level}-field`}
+                      label={`Admin Areas ${level}`}
+                      key={level}
+                    >
+                      {allAreasTreeDataGroupedByLevel[level]}
+                    </LabelizedField>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
         </Box>
         <IconButton
           onClick={() => {

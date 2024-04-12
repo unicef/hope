@@ -100,6 +100,18 @@ DEFAULTS = {
             "cdn.jsdelivr.net",
         ),
     ),
+    "MATOMO_TRACKER_URL": (
+        str,
+        "",
+    ),
+    "MATOMO_SCRIPT_URL": (
+        str,
+        "",
+    ),
+    "MATOMO_SITE_ID": (
+        str,
+        "",
+    ),
 }
 
 env = Env(**DEFAULTS)

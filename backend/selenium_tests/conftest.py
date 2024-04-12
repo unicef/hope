@@ -9,8 +9,18 @@ from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from page_object.admin_panel.admin_panel import AdminPanel
+from page_object.grievance.details_feedback_page import FeedbackDetailsPage
+from page_object.grievance.feedback import Feedback
+from page_object.grievance.new_feedback import NewFeedback
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
+from page_object.programme_population.households import Households
+from page_object.programme_population.households_details import HouseholdsDetails
+from page_object.programme_population.individuals import Individuals
+from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
+from page_object.registration_data_import.registration_data_import import (
+    RegistrationDataImport,
+)
 from pytest_django.live_server_helper import LiveServer
 from requests import Session
 from selenium import webdriver
@@ -25,6 +35,7 @@ from hct_mis_api.apps.geo.models import Country
 
 
 def pytest_configure() -> None:
+    pytest.SELENIUM_PATH = os.path.dirname(__file__)
     pytest.CSRF = ""
     pytest.SESSION_ID = ""
     pytest.session = Session()
@@ -50,6 +61,10 @@ def driver() -> Chrome:
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument(
+        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+    )
+    chrome_options.add_argument("--enable-logging")
     chrome_options.add_argument("--window-size=1920,1080")
     return webdriver.Chrome(options=chrome_options)
 
@@ -57,6 +72,7 @@ def driver() -> Chrome:
 @pytest.fixture(autouse=True)
 def browser(driver: Chrome) -> Chrome:
     driver.live_server = LiveServer("localhost")
+    # driver.live_server = LiveServer("0.0.0.0:8080")
     yield driver
     driver.close()
     pytest.CSRF = ""
@@ -90,9 +106,50 @@ def pageAdminPanel(request: FixtureRequest, browser: Chrome) -> AdminPanel:
 
 
 @pytest.fixture
+def pageFeedback(request: FixtureRequest, browser: Chrome) -> Feedback:
+    yield Feedback(browser)
+
+
+@pytest.fixture
+def pageFeedbackDetails(request: FixtureRequest, browser: Chrome) -> FeedbackDetailsPage:
+    yield FeedbackDetailsPage(browser)
+
+
+@pytest.fixture
+def pageNewFeedback(request: FixtureRequest, browser: Chrome) -> NewFeedback:
+    yield NewFeedback(browser)
+
+
+@pytest.fixture
+def pageRegistrationDataImport(request: FixtureRequest, browser: Chrome) -> RegistrationDataImport:
+    yield RegistrationDataImport(browser)
+
+
+@pytest.fixture
+def pageDetailsRegistrationDataImport(request: FixtureRequest, browser: Chrome) -> RDIDetailsPage:
+    yield RDIDetailsPage(browser)
+
+
+@pytest.fixture
+def pageHouseholds(request: FixtureRequest, browser: Chrome) -> Households:
+    yield Households(browser)
+
+
+@pytest.fixture
+def pageHouseholdsDetails(request: FixtureRequest, browser: Chrome) -> HouseholdsDetails:
+    yield HouseholdsDetails(browser)
+
+
+@pytest.fixture
+def pageIndividuals(request: FixtureRequest, browser: Chrome) -> Individuals:
+    yield Individuals(browser)
+
+
+@pytest.fixture
 def business_area() -> BusinessArea:
     business_area, _ = BusinessArea.objects.get_or_create(
         **{
+            "pk": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
             "code": "0060",
             "name": "Afghanistan",
             "long_name": "THE ISLAMIC REPUBLIC OF AFGHANISTAN",
@@ -131,6 +188,7 @@ def create_super_user(business_area: BusinessArea) -> User:
     country = Country.objects.get(name="Afghanistan")
     business_area.countries.add(country)
     user = UserFactory.create(
+        pk="4196c2c5-c2dd-48d2-887f-3a9d39e78916",
         is_superuser=True,
         is_staff=True,
         username="superuser",
@@ -201,7 +259,6 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
 
 # make a screenshot with a name of the test, date and time
 def screenshot(driver: Chrome, node_id: str) -> None:
-    # sleep(1)
     if not os.path.exists("screenshot"):
         os.makedirs("screenshot")
     file_name = f'{node_id}_{datetime.today().strftime("%Y-%m-%d_%H.%M")}.png'.replace("/", "_").replace("::", "__")

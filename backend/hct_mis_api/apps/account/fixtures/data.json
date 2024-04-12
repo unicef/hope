@@ -22,7 +22,10 @@
     "rght": 2,
     "tree_id": 2,
     "is_un": true,
-    "permissions": {}
+    "permissions": {},
+    "allowed_business_areas": [
+        "c259b1a0-ae3a-494e-b343-f7c8eb060c68"
+    ]
   }
 },
 {
@@ -43,7 +46,10 @@
           "00000000-0000-0000-0000-faceb00c0000": []
         }
       }
-    }
+    },
+    "allowed_business_areas": [
+        "c259b1a0-ae3a-494e-b343-f7c8eb060c68"
+    ]
   }
 },
 {
@@ -56,7 +62,10 @@
     "rght": 2,
     "tree_id": 4,
     "is_un": false,
-    "permissions": {}
+    "permissions": {},
+    "allowed_business_areas": [
+        "c259b1a0-ae3a-494e-b343-f7c8eb060c68"
+    ]
   }
 },
 {

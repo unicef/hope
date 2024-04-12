@@ -30,6 +30,7 @@ import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTabl
 import { PaymentRecordHouseholdTable } from '../../tables/payments/PaymentRecordAndPaymentHouseholdTable';
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
 import { HouseholdIndividualsTable } from '../../tables/population/HouseholdIndividualsTable/HouseholdIndividualsTable';
+import { AdminButton } from '@core/AdminButton';
 
 const Container = styled.div`
   padding: 20px;
@@ -149,6 +150,7 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
                 />
               )}
             </Box>
+            <AdminButton adminUrl={household?.adminUrl} />
           </>
         }
       />

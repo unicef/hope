@@ -207,6 +207,8 @@ TEMPLATES: List[Dict[str, Any]] = [
                 # Social auth context_processors
                 "social_django.context_processors.backends",
                 "social_django.context_processors.login_redirect",
+                # Matomo
+                "hct_mis_api.apps.core.context_processors.matomo",
             ],
             "debug": DEBUG,
         },
@@ -283,7 +285,8 @@ OTHER_APPS = [
     "explorer",
     "import_export",
     "rest_framework",
-    "drf_yasg",
+    "drf_spectacular",
+    "drf_spectacular_sidecar",
     "flags",
     "admin_cursor_paginator",
     "markdownify.apps.MarkdownifyConfig",
@@ -539,7 +542,7 @@ FLOWER_ADDRESS = env("FLOWER_ADDRESS")
 
 
 ADMIN_SYNC_CONFIG = "admin_sync.conf.DjangoConstance"
-
+DEFAULT_EMPTY_PARTNER = "Default Empty Partner"
 
 from hct_mis_api.settings.fragments.celery import *  # noqa: F403, F401
 from hct_mis_api.settings.fragments.constance import *  # noqa: F403, F401
