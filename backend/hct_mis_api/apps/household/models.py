@@ -26,6 +26,7 @@ from sorl.thumbnail import ImageField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.languages import Languages
+from hct_mis_api.apps.core.mixins import RdiMergeStatusMixin
 from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.signals import (
@@ -334,6 +335,7 @@ class Household(
     ConcurrencyModel,
     UnicefIdentifiedModel,
     AdminUrlMixin,
+    RdiMergeStatusMixin,
 ):
     class CollectType(models.TextChoices):
         STANDARD = "STANDARD", "Standard"
@@ -672,7 +674,7 @@ class DocumentType(TimeStampedUUIDModel):
         return f"{self.label}"
 
 
-class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDModel):
+class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDModel, RdiMergeStatusMixin):
     STATUS_PENDING = "PENDING"
     STATUS_VALID = "VALID"
     STATUS_NEED_INVESTIGATION = "NEED_INVESTIGATION"
@@ -758,7 +760,7 @@ class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDMo
         self.save()
 
 
-class IndividualIdentity(SoftDeletableIsOriginalModel, TimeStampedModel):
+class IndividualIdentity(SoftDeletableIsOriginalModel, TimeStampedModel, RdiMergeStatusMixin):
     # notice that this model has `created` and `modified` fields
     individual = models.ForeignKey("Individual", related_name="identities", on_delete=models.CASCADE)
     number = models.CharField(
@@ -788,7 +790,9 @@ class IndividualIdentity(SoftDeletableIsOriginalModel, TimeStampedModel):
         return f"{self.partner} {self.individual} {self.number}"
 
 
-class IndividualRoleInHousehold(SoftDeletableIsOriginalModel, TimeStampedUUIDModel, AbstractSyncable):
+class IndividualRoleInHousehold(
+    SoftDeletableIsOriginalModel, TimeStampedUUIDModel, AbstractSyncable, RdiMergeStatusMixin
+):
     individual = models.ForeignKey(
         "household.Individual",
         on_delete=models.CASCADE,
@@ -842,6 +846,7 @@ class Individual(
     ConcurrencyModel,
     UnicefIdentifiedModel,
     AdminUrlMixin,
+    RdiMergeStatusMixin,
 ):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -1246,7 +1251,7 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
     program = models.ForeignKey("program.Program", null=True, on_delete=models.CASCADE)
 
 
-class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable):
+class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, RdiMergeStatusMixin):
     individual = models.ForeignKey(
         "household.Individual",
         related_name="bank_account_info",
