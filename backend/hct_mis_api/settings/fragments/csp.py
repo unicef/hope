@@ -1,7 +1,7 @@
 from typing import Tuple
 
 from hct_mis_api.settings.env import env
-from hct_mis_api.settings.settings import ALLOWED_HOSTS, FRONTEND_HOST
+from hct_mis_api.settings.settings import ALLOWED_HOSTS, DEBUG, FRONTEND_HOST
 
 CSP_REPORT_URI = env.tuple("CSP_REPORT_URI")
 CSP_REPORT_ONLY = env("CSP_REPORT_ONLY")
@@ -18,7 +18,6 @@ CSP_FONT_SRC: Tuple[str, ...] = env.tuple("CSP_FONT_SRC")
 CSP_MEDIA_SRC: Tuple[str, ...] = env.tuple("CSP_MEDIA_SRC")
 CSP_CONNECT_SRC: Tuple[str, ...] = env.tuple("CSP_CONNECT_SRC")
 
-DEBUG = env.bool("DEBUG", default=False)
 if DEBUG:
     CSP_CONNECT_SRC += (FRONTEND_HOST,)
     CSP_FONT_SRC += (FRONTEND_HOST,)
