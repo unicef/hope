@@ -418,6 +418,10 @@ class PaymentPlanSplit(TimeStampedUUIDModel):
     def financial_service_provider(self) -> "FinancialServiceProvider":
         return self.payment_plan.delivery_mechanisms.first().financial_service_provider
 
+    @property
+    def chosen_configuration(self) -> Optional[str]:
+        return self.payment_plan.delivery_mechanisms.first().chosen_configuration
+
 
 class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel, AdminUrlMixin):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
@@ -1374,6 +1378,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
     delivery_mechanism_order = models.PositiveIntegerField()
 
     sent_to_payment_gateway = models.BooleanField(default=False)
+    chosen_configuration = models.CharField(max_length=50, null=True)
 
     class Meta:
         constraints = [
