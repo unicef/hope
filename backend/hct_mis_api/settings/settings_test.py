@@ -1,7 +1,7 @@
 import logging
 import os
 
-from backend.hct_mis_api.settings import *  # noqa: ignore=F403
+from backend.hct_mis_api.settings.settings import *  # noqa: ignore=F403
 
 # dev overrides
 DEBUG = True
