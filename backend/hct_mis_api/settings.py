@@ -119,6 +119,18 @@ DEFAULTS = {
             "cdn.jsdelivr.net",
         ),
     ),
+    "MATOMO_TRACKER_URL": (
+        str,
+        "",
+    ),
+    "MATOMO_SCRIPT_URL": (
+        str,
+        "",
+    ),
+    "MATOMO_SITE_ID": (
+        str,
+        "",
+    ),
 }
 
 env = Env(**DEFAULTS)
@@ -362,6 +374,8 @@ TEMPLATES: List[Dict[str, Any]] = [
                 # Social auth context_processors
                 "social_django.context_processors.backends",
                 "social_django.context_processors.login_redirect",
+                # Matomo
+                "hct_mis_api.apps.core.context_processors.matomo",
             ],
             "debug": DEBUG,
         },
@@ -1110,6 +1124,10 @@ if DEBUG and not IS_TEST:
         "debug_toolbar.panels.redirects.RedirectsPanel",
         "debug_toolbar.panels.profiling.ProfilingPanel",
     ]
+
+MATOMO_TRACKER_URL = env("MATOMO_TRACKER_URL")
+MATOMO_SCRIPT_URL = env("MATOMO_SCRIPT_URL")
+MATOMO_SITE_ID = env("MATOMO_SITE_ID")
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
