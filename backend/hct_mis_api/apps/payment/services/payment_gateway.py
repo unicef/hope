@@ -363,7 +363,7 @@ class PaymentGatewayService:
                     "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
                     "data_transfer_configuration": fsp.configs,
                     "delivery_mechanisms": [
-                        Payment.DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
+                        Payment.DELIVERY_TYPE_CASH_OVER_THE_COUNTER,
                         Payment.DELIVERY_TYPE_MOBILE_MONEY,
                     ],
                 },
