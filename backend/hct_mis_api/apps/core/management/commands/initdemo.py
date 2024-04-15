@@ -1,3 +1,4 @@
+import logging
 import time
 from argparse import ArgumentParser
 from typing import Any
@@ -6,6 +7,8 @@ from django.conf import settings
 from django.core.management import BaseCommand, call_command
 from django.db import OperationalError, connections
 from django.utils import timezone
+
+import elasticsearch
 
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
@@ -18,6 +21,8 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.registration_datahub.management.commands.fix_unicef_id_imported_individuals_and_households import (
     update_mis_unicef_id_individual_and_household,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -58,6 +63,7 @@ class Command(BaseCommand):
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/account/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/documenttype.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/grievance/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/accountability/fixtures/data.json")
@@ -70,7 +76,11 @@ class Command(BaseCommand):
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/steficon/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/aurora/fixtures/data.json")
 
-        call_command("search_index", "--rebuild", "-f")
+        try:
+            call_command("search_index", "--rebuild", "-f")
+        except elasticsearch.exceptions.RequestError:
+            logger.error("Elasticsearch request error")
+
         update_mis_unicef_id_individual_and_household()
         generate_payment_plan()
         generate_real_cash_plans()

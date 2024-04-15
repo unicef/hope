@@ -13,6 +13,7 @@ from graphene_django import DjangoObjectType
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import (
     POPULATION_DETAILS,
+    AdminUrlNodeMixin,
     BaseNodePermissionMixin,
     BasePermission,
     DjangoPermissionFilterConnectionField,
@@ -92,7 +93,7 @@ class GrievanceDocumentNode(DjangoObjectType):
         interfaces = (relay.Node,)
 
 
-class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
+class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes: Tuple[Type[BasePermission], ...] = (
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR),
@@ -586,6 +587,8 @@ class Query(graphene.ObjectType):
                 .prefetch_related(*to_prefetch)
                 .filter(business_area_id=business_area_id, programs=None)
             )
+        else:
+            queryset = queryset.filter(programs__id=program_id)
 
         return queryset.annotate(
             total=Case(

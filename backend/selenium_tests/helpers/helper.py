@@ -64,6 +64,19 @@ class Common:
         button.click()
         assert url_fragment in self.wait_for_new_url(programme_creation_url).split("/")[-1]
 
+    def upload_file(self, upload_file: str, xpath: str = "//input[@type='file']") -> None:
+        self._wait().until(EC.presence_of_element_located((By.XPATH, xpath))).send_keys(upload_file)
+
+    def select_option_by_name(self, optionName: str) -> None:
+        selectOption = f'li[data-cy="select-option-{optionName}"]'
+        self.wait_for(selectOption).click()
+        try:
+            self.wait_for_disappear(selectOption)
+        except BaseException:
+            sleep(1)
+            self.wait_for(selectOption).click()
+            self.wait_for_disappear(selectOption)
+
     @staticmethod
     def choose_option(list_options: list, name: str) -> bool:
         for option in list_options:
