@@ -74,11 +74,15 @@ export const targetPopulationDetailed = gql`
       firstName
       lastName
     }
+    hasEmptyCriteria
+    hasEmptyIdsCriteria
     targetingCriteria {
       __typename
       id
       flagExcludeIfActiveAdjudicationTicket
       flagExcludeIfOnSanctionList
+      householdIds
+      individualIds
       rules {
         __typename
         id

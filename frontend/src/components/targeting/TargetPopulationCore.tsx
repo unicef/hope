@@ -17,30 +17,60 @@ const Label = styled.p`
   color: #b1b1b5;
 `;
 
+const IdContainer = styled.div`
+  background-color: #e6ecf4;
+  border: 1px solid #2f95fb;
+  border-radius: 5px;
+  padding: 10px;
+  white-space: pre-wrap;
+`;
+
 interface TargetPopulationCoreProps {
   id: string;
   targetPopulation: TargetPopulationQuery['targetPopulation'];
   permissions: string[];
   screenBeneficiary: boolean;
+  isStandardDctType: boolean;
+  isSocialDctType: boolean;
+  category: string;
 }
 
-export function TargetPopulationCore({
+export const TargetPopulationCore = ({
   id,
   targetPopulation,
   permissions,
   screenBeneficiary,
-}: TargetPopulationCoreProps): React.ReactElement {
+  isStandardDctType,
+  isSocialDctType,
+  category,
+}: TargetPopulationCoreProps): React.ReactElement => {
   const { t } = useTranslation();
   if (!targetPopulation) return null;
+  const householdIds = targetPopulation.targetingCriteria?.householdIds;
+  const individualIds = targetPopulation.targetingCriteria?.individualIds;
 
   return (
     <>
       {targetPopulation.targetingCriteria ? (
         <PaperContainer>
+          <Box pt={3} pb={3}>
+            <Typography variant="h6">{t('Targeting Criteria')}</Typography>
+          </Box>
+          <Box mb={2}>
+            {householdIds.length > 0 && (
+              <IdContainer>{householdIds}</IdContainer>
+            )}
+          </Box>
+          {individualIds.length > 0 && (
+            <IdContainer>{individualIds}</IdContainer>
+          )}
           <TargetingCriteria
             rules={targetPopulation.targetingCriteria?.rules || []}
             targetPopulation={targetPopulation}
             screenBeneficiary={screenBeneficiary}
+            isStandardDctType={isStandardDctType}
+            isSocialDctType={isSocialDctType}
+            category={category}
           />
         </PaperContainer>
       ) : null}
@@ -93,4 +123,4 @@ export function TargetPopulationCore({
       )}
     </>
   );
-}
+};

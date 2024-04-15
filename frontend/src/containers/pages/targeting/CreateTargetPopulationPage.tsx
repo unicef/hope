@@ -28,7 +28,8 @@ import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 export const CreateTargetPopulationPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
-  const { selectedProgram } = useProgramContext();
+  const { selectedProgram, isSocialDctType, isStandardDctType } =
+    useProgramContext();
   const initialValues = {
     name: '',
     criterias: [],
@@ -57,19 +58,11 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
   if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
     return <PermissionDenied />;
 
-  console.log(selectedProgram);
-
   const screenBeneficiary = businessAreaData?.businessArea?.screenBeneficiary;
   const individualFiltersAvailable =
     selectedProgram?.dataCollectingType?.individualFiltersAvailable;
   const householdFiltersAvailable =
     selectedProgram?.dataCollectingType?.householdFiltersAvailable;
-  const isSocialDctType =
-    selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
-    DataCollectingTypeType.Social;
-  const isStandardDctType =
-    selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
-    DataCollectingTypeType.Standard;
 
   const validationSchema = Yup.object().shape({
     name: Yup.string()
@@ -93,31 +86,18 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
 
   const handleSubmit = async (values): Promise<void> => {
     try {
-      let input = {
-        programId: values.program,
-        name: values.name,
-        businessAreaSlug: businessArea,
-      };
-
-      if (category === 'filters') {
-        input = {
-          ...input,
-          ...getTargetingCriteriaVariables(values),
-        };
-      } else if (category === 'ids') {
-        input = {
-          ...input,
-          householdIds: values.householdIds,
-          individualIds: values.individualIds,
-        };
-      }
-
       const res = await mutate({
         variables: {
-          input,
+          input: {
+            programId: values.program,
+            name: values.name,
+            excludedIds: values.excludedIds,
+            exclusionReason: values.exclusionReason,
+            businessAreaSlug: businessArea,
+            ...getTargetingCriteriaVariables(values),
+          },
         },
       });
-
       showMessage(t('Target Population Created'));
       navigate(
         `/${baseUrl}/target-population/${res.data.createTargetPopulation.targetPopulation.id}`,
@@ -142,6 +122,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
             values={values}
             baseUrl={baseUrl}
             permissions={permissions}
+            category={category}
           />
           <PaperContainer>
             <Box pt={3} pb={3}>
@@ -176,6 +157,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
                       screenBeneficiary={screenBeneficiary}
                       isStandardDctType={isStandardDctType}
                       isSocialDctType={isSocialDctType}
+                      category={category}
                       isEdit
                     />
                   )}
@@ -228,20 +210,20 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
                           )}
                           color="primary"
                           component={FormikCheckboxField}
-                          data-cy="input-active-adjudication-ticket"
+                          data-cy="input-active-households-adjudication-ticket"
                         />
                       </Grid>
                     )}
                     {isSocialDctType && (
                       <Grid item xs={6}>
                         <Field
-                          name="flagExcludePeopleWithActiveAdjudicationTicket"
+                          name="flagExcludeIfActiveAdjudicationTicket"
                           label={t(
                             'Exclude People with Active Adjudication Ticket',
                           )}
                           color="primary"
                           component={FormikCheckboxField}
-                          data-cy="input-active-adjudication-ticket"
+                          data-cy="input-active-people-adjudication-ticket"
                         />
                       </Grid>
                     )}

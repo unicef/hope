@@ -79,6 +79,7 @@ interface TargetingCriteriaProps {
   screenBeneficiary: boolean;
   isSocialDctType: boolean;
   isStandardDctType: boolean;
+  category: string;
 }
 
 export const TargetingCriteria = ({
@@ -90,6 +91,7 @@ export const TargetingCriteria = ({
   screenBeneficiary,
   isSocialDctType,
   isStandardDctType,
+  category,
 }: TargetingCriteriaProps): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
@@ -154,7 +156,7 @@ export const TargetingCriteria = ({
           <div />
           {isEdit && (
             <>
-              {!!rules.length && (
+              {!!rules.length && category === 'filters' && (
                 <Button
                   variant="outlined"
                   color="primary"
@@ -179,30 +181,32 @@ export const TargetingCriteria = ({
         <ContentWrapper>
           <Box display="flex" flexDirection="column">
             <Box display="flex" flexWrap="wrap">
-              {rules.length ? (
-                rules.map((criteria, index) => (
-                  // eslint-disable-next-line
-                  <Fragment key={criteria.id || index}>
-                    <Criteria
-                      isEdit={isEdit}
-                      canRemove={rules.length > 1}
-                      rules={criteria.filters}
-                      individualsFiltersBlocks={
-                        criteria.individualsFiltersBlocks || []
-                      }
-                      editFunction={() => editCriteria(criteria, index)}
-                      removeFunction={() => helpers.remove(index)}
-                    />
+              {rules.length
+                ? rules.map((criteria, index) => (
+                    // eslint-disable-next-line
+                    <Fragment key={criteria.id || index}>
+                      <Criteria
+                        isEdit={isEdit}
+                        canRemove={rules.length > 1}
+                        rules={criteria.filters}
+                        individualsFiltersBlocks={
+                          criteria.individualsFiltersBlocks || []
+                        }
+                        editFunction={() => editCriteria(criteria, index)}
+                        removeFunction={() => helpers.remove(index)}
+                      />
 
-                    {index === rules.length - 1 ||
-                    (rules.length === 1 && index === 0) ? null : (
-                      <Divider>
-                        <DividerLabel>Or</DividerLabel>
-                      </Divider>
-                    )}
-                  </Fragment>
-                ))
-              ) : (
+                      {index === rules.length - 1 ||
+                      (rules.length === 1 && index === 0) ? null : (
+                        <Divider>
+                          <DividerLabel>Or</DividerLabel>
+                        </Divider>
+                      )}
+                    </Fragment>
+                  ))
+                : null}
+
+              {category === 'filters' && !rules.length && (
                 <AddCriteria
                   onClick={() => setOpen(true)}
                   data-cy="button-target-population-add-criteria"
@@ -242,11 +246,11 @@ export const TargetingCriteria = ({
                           control={
                             <Checkbox
                               color="primary"
-                              name="flagExcludePeopleIfActiveAdjudicationTicket"
+                              name="flagExcludeIfActiveAdjudicationTicket"
                               data-cy="checkbox-exclude-people-if-active-adjudication-ticket"
                               checked={Boolean(
                                 targetPopulation?.targetingCriteria
-                                  ?.flagExcludePeopleIfActiveAdjudicationTicket,
+                                  ?.flagExcludeIfActiveAdjudicationTicket,
                               )}
                             />
                           }
