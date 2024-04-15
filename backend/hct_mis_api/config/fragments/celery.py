@@ -1,0 +1,14 @@
+from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
+from hct_mis_api.config.env import env
+from hct_mis_api.config.settings import REDIS_INSTANCE
+
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default=f"redis://{REDIS_INSTANCE}/0")
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default=f"redis://{REDIS_INSTANCE}/0")
+CELERY_TIMEZONE = "UTC"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 360 * 60
+CELERY_BEAT_SCHEDULE = TASKS_SCHEDULES
+CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER")
