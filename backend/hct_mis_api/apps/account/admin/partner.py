@@ -40,6 +40,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
     list_filter = ("is_un", "parent")
     search_fields = ("name",)
     readonly_fields = ("permissions", "sub_partners")
+    filter_horizontal = ("allowed_business_areas",)
     list_display = (
         "__str__",
         "sub_partners",
