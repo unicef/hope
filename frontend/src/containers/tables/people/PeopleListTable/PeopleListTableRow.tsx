@@ -27,7 +27,7 @@ export function PeopleListTableRow({
     choicesData.relationshipChoices,
   );
 
-  const individualDetailsPath = `/${baseUrl}/population/individuals/${individual.id}`;
+  const individualDetailsPath = `/${baseUrl}/population/people/${individual.id}`;
   const handleClick = (): void => {
     navigate(individualDetailsPath);
   };
@@ -47,9 +47,6 @@ export function PeopleListTableRow({
         <BlackLink to={individualDetailsPath}>{individual.unicefId}</BlackLink>
       </TableCell>
       <AnonTableCell>{individual.fullName}</AnonTableCell>
-      <TableCell align="left">
-        {relationshipChoicesDict[individual.relationship]}
-      </TableCell>
       <TableCell align="right">{individual.age}</TableCell>
       <TableCell align="left">{sexToCapitalize(individual.sex)}</TableCell>
       <TableCell align="left">{individual.household?.admin2?.name}</TableCell>
