@@ -21,7 +21,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { decodeIdString } from '@utils/utils';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { hasPermissionInModule } from '../../../config/permissions';
+import { hasPermissionInModule, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 
 export const EditProgramPage = (): ReactElement => {
@@ -81,7 +81,7 @@ export const EditProgramPage = (): ReactElement => {
     frequencyOfPayments = 'REGULAR',
     version,
     partners,
-    partnerAccess,
+    partnerAccess = ProgramPartnerAccess.AllPartnersAccess,
   } = data.program;
 
   const handleSubmit = async (values): Promise<void> => {
@@ -136,7 +136,7 @@ export const EditProgramPage = (): ReactElement => {
       areas: partner.areas.map((area) => area.id),
       areaAccess: partner.areaAccess,
     })),
-    partnerAccess: ProgramPartnerAccess.NonePartnersAccess,
+    partnerAccess,
   };
   initialValues.budget =
     data.program.budget === '0.00' ? '' : data.program.budget;
@@ -158,11 +158,18 @@ export const EditProgramPage = (): ReactElement => {
       'cashPlus',
       'frequencyOfPayments',
     ],
-    ['partners', 'partnerAccess'],
+    ['partnerAccess'],
   ];
 
   const { allAreasTree } = treeData;
   const { userPartnerChoices } = userPartnerChoicesData;
+
+  const breadCrumbsItems: BreadCrumbsItem[] = [
+    {
+      title: t('Programme'),
+      to: `/${baseUrl}/details/${id}`,
+    },
+  ];
 
   return (
     <Formik
@@ -197,13 +204,6 @@ export const EditProgramPage = (): ReactElement => {
             stepFields[step].forEach((field) => setFieldTouched(field));
           }
         };
-
-        const breadCrumbsItems: BreadCrumbsItem[] = [
-          {
-            title: t('Programme'),
-            to: `/${baseUrl}/details/${id}`,
-          },
-        ];
 
         return (
           <>

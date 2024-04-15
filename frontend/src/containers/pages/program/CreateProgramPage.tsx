@@ -16,7 +16,7 @@ import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
 import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { hasPermissionInModule } from '../../../config/permissions';
+import { hasPermissionInModule, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { useNavigate } from 'react-router-dom';
@@ -94,7 +94,7 @@ export const CreateProgramPage = (): ReactElement => {
     cashPlus: false,
     frequencyOfPayments: 'REGULAR',
     partners: [],
-    partnerAccess: ProgramPartnerAccess.NonePartnersAccess,
+    partnerAccess: ProgramPartnerAccess.AllPartnersAccess,
   };
 
   const stepFields = [
@@ -112,7 +112,7 @@ export const CreateProgramPage = (): ReactElement => {
       'cashPlus',
       'frequencyOfPayments',
     ],
-    ['partners', 'partnerAccess'],
+    ['partnerAccess'],
   ];
 
   if (treeLoading || userPartnerChoicesLoading) return <LoadingComponent />;

@@ -35,7 +35,7 @@ export const PROGRAM_QUERY = gql`
       partnerAccess
       partners {
         id
-        partnerName
+        name
         areaAccess
         areas {
           id

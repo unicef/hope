@@ -47,6 +47,7 @@ export const programValidationSchema = (
       .max(255, t('Too long'))
       .nullable(),
     populationGoal: Yup.number().min(0).max(99999999, t('Number is too big')),
+    partnerAccess: Yup.string().required(),
     partners: Yup.array().of(
       Yup.object().shape({
         id: Yup.string().required(t('Partner ID is required')),

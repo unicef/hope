@@ -1,6 +1,6 @@
 import { Box, Button, Grid } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { Field, FieldArray, FormikErrors } from 'formik';
+import { Field, FieldArray } from 'formik';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -36,13 +36,17 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
   const { baseUrl } = useBaseUrl();
 
   useEffect(() => {
-    if (values.partners.length === 0) {
+    if (values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess && values.partners.length === 0) {
       setFieldValue('partners', [
         {
           id: '',
           areaAccess: 'BUSINESS_AREA',
         },
       ]);
+    }
+
+    if (values.partnerAccess !== ProgramPartnerAccess.SelectedPartnersAccess && values.partners.length > 0) {
+      setFieldValue('partners', []);
     }
   }, [values, setFieldValue]);
 

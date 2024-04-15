@@ -18,7 +18,7 @@ import { programValidationSchema } from '@components/programs/CreateProgram/prog
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { hasPermissionInModule } from '../../../config/permissions';
+import { hasPermissionInModule, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 
 export const DuplicateProgramPage = (): ReactElement => {
@@ -93,7 +93,7 @@ export const DuplicateProgramPage = (): ReactElement => {
     cashPlus = false,
     frequencyOfPayments = 'REGULAR',
     partners,
-    partnerAccess = ProgramPartnerAccess.NonePartnersAccess,
+    partnerAccess = ProgramPartnerAccess.AllPartnersAccess,
   } = data.program;
 
   const initialValues = {
@@ -134,11 +134,18 @@ export const DuplicateProgramPage = (): ReactElement => {
       'cashPlus',
       'frequencyOfPayments',
     ],
-    ['partners', 'partnerAccess'],
+    ['partnerAccess'],
   ];
 
   const { allAreasTree } = treeData;
   const { userPartnerChoices } = userPartnerChoicesData;
+
+  const breadCrumbsItems: BreadCrumbsItem[] = [
+    {
+      title: t('Programme'),
+      to: `/${baseUrl}/details/${id}`,
+    },
+  ];
 
   return (
     <Formik
@@ -173,13 +180,6 @@ export const DuplicateProgramPage = (): ReactElement => {
             stepFields[step].forEach((field) => setFieldTouched(field));
           }
         };
-
-        const breadCrumbsItems: BreadCrumbsItem[] = [
-          {
-            title: t('Programme'),
-            to: `/${baseUrl}/details/${id}`,
-          },
-        ];
 
         return (
           <>
