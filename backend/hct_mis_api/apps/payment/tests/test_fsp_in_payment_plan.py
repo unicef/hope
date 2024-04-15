@@ -5,6 +5,7 @@ from graphql import GraphQLError
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.currencies import USDC
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
@@ -868,6 +869,40 @@ class TestVolumeByDeliveryMechanism(APITestCase):
         self.assertEqual(new_data[1]["volumeUsd"], 0)
         self.assertEqual(new_data[2]["volume"], 500)
         self.assertEqual(new_data[2]["volumeUsd"], 100)
+
+    def test_delivery_mechanism_validation_for_usdc(self) -> None:
+        DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=self.payment_plan,
+            financial_service_provider=self.santander_fsp,
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+            delivery_mechanism_order=1,
+        )
+
+        self.payment_plan.currency = USDC
+        self.payment_plan.save()
+
+        self.payment_plan.refresh_from_db(fields=["currency"])
+        assert self.payment_plan.currency == USDC
+
+        assign_fsps_mutation_response_with_error = self.graphql_request(
+            request_string=ASSIGN_FSPS_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": self.encoded_payment_plan_id,
+                "mappings": [
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_CASH,
+                        "fspId": self.encoded_santander_fsp_id,
+                        "order": 1,
+                    },
+                ],
+            },
+        )
+        assert "errors" in assign_fsps_mutation_response_with_error, assign_fsps_mutation_response_with_error
+        assert (
+            assign_fsps_mutation_response_with_error["errors"][0]["message"]
+            == "For currency USDC can be assigned only delivery mechanism Transfer to Digital Wallet"
+        )
 
 
 class TestValidateFSPPerDeliveryMechanism(APITestCase):

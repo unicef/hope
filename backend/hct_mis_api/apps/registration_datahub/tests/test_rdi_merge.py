@@ -113,6 +113,9 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
                 "email": "fake_email_1@com",
+                "wallet_name": "Wallet Name 1",
+                "blockchain_name": "Blockchain Name 1",
+                "wallet_address": "Wallet Address 1",
             },
             {
                 "full_name": "Robin Ford",
@@ -244,6 +247,13 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         self.assertEqual(Individual.objects.filter(full_name="Baz Bush").first().email, "fake_email_5@com")
         self.assertEqual(Individual.objects.filter(full_name="Benjamin Butler").first().email, "fake_email_1@com")
         self.assertEqual(Individual.objects.filter(full_name="Bob Jackson").first().email, "")
+        self.assertEqual(Individual.objects.filter(full_name="Benjamin Butler").first().wallet_name, "Wallet Name 1")
+        self.assertEqual(
+            Individual.objects.filter(full_name="Benjamin Butler").first().blockchain_name, "Blockchain Name 1"
+        )
+        self.assertEqual(
+            Individual.objects.filter(full_name="Benjamin Butler").first().wallet_address, "Wallet Address 1"
+        )
 
         household_data = model_to_dict(
             households[0],
