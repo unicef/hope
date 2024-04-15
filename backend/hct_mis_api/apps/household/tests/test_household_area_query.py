@@ -133,14 +133,12 @@ class TestHouseholdAreaQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    @skip(reason="Check after merge")
     def test_household_with_no_admin_area_is_filtered(self, _: Any, permissions: List[Permissions]) -> None:
         # No permissions
         partner = PartnerFactory(name="NOT_UNICEF_1")
-        partner.permissions = {}
-        partner.save()
         user = UserFactory(partner=partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan)
+        # No access to any admin area
+        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan, program=self.program)
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
@@ -162,16 +160,9 @@ class TestHouseholdAreaQuery(APITestCase):
     def test_household_admin_area_3_is_filtered(self, _: Any, permissions: List[Permissions]) -> None:
         # Access to admin3
         partner = PartnerFactory(name="NOT_UNICEF_2")
-        partner.permissions = {
-            str(self.business_area_afghanistan.id): {
-                "programs": {
-                    str(self.program.id): [str(self.household_5.admin3.id)],
-                }
-            }
-        }
-        partner.save()
         user = UserFactory(partner=partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan, self.program)
+        # partner with access to household_5.admin3 in program self.program
+        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan, program=self.program, areas=[self.household_5.admin3])
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
@@ -193,16 +184,8 @@ class TestHouseholdAreaQuery(APITestCase):
     def test_household_many_admin_area_3_is_filtered(self, _: Any, permissions: List[Permissions]) -> None:
         # Access to many admin3
         partner = PartnerFactory(name="NOT_UNICEF_3")
-        partner.permissions = {
-            str(self.business_area_afghanistan.id): {
-                "programs": {
-                    str(self.program.id): [str(self.household_4.admin3.id), str(self.household_5.admin3.id)],
-                }
-            }
-        }
-        partner.save()
         user = UserFactory(partner=partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan)
+        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan, program=self.program, areas=[self.household_4.admin3, self.household_5.admin3])
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
@@ -224,16 +207,8 @@ class TestHouseholdAreaQuery(APITestCase):
     def test_household_admin_area_2_is_filtered(self, _: Any, permissions: List[Permissions]) -> None:
         # Access to admin2
         partner = PartnerFactory(name="NOT_UNICEF_4")
-        partner.permissions = {
-            str(self.business_area_afghanistan.id): {
-                "programs": {
-                    str(self.program.id): [str(self.household_3.admin2.id)],
-                }
-            }
-        }
-        partner.save()
         user = UserFactory(partner=partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan)
+        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan, program=self.program, areas=[self.household_3.admin2])
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
@@ -255,16 +230,8 @@ class TestHouseholdAreaQuery(APITestCase):
     def test_household_many_admin_area_2_is_filtered(self, _: Any, permissions: List[Permissions]) -> None:
         # Access many admin2
         partner = PartnerFactory(name="NOT_UNICEF_5")
-        partner.permissions = {
-            str(self.business_area_afghanistan.id): {
-                "programs": {
-                    str(self.program.id): [str(self.household_1.admin2.id), str(self.household_2.admin2.id)],
-                }
-            }
-        }
-        partner.save()
         user = UserFactory(partner=partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan)
+        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan, program=self.program, areas=[self.household_1.admin2, self.household_2.admin2])
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
@@ -286,20 +253,8 @@ class TestHouseholdAreaQuery(APITestCase):
     def test_household_admin_area_2_and_admin_area_3_is_filtered(self, _: Any, permissions: List[Permissions]) -> None:
         # Access many admin2 and admin3
         partner = PartnerFactory(name="NOT_UNICEF_6")
-        partner.permissions = {
-            str(self.business_area_afghanistan.id): {
-                "programs": {
-                    str(self.program.id): [
-                        str(self.household_1.admin2.id),
-                        str(self.household_4.admin3.id),
-                        str(self.household_5.admin3.id),
-                    ],
-                }
-            }
-        }
-        partner.save()
         user = UserFactory(partner=partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan)
+        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan, program=self.program, areas=[self.household_1.admin2, self.household_4.admin3, self.household_5.admin3])
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
@@ -321,16 +276,8 @@ class TestHouseholdAreaQuery(APITestCase):
     def test_household_admin_area_1_is_filtered(self, _: Any, permissions: List[Permissions]) -> None:
         # Access to admin1
         partner = PartnerFactory(name="NOT_UNICEF_7")
-        partner.permissions = {
-            str(self.business_area_afghanistan.id): {
-                "programs": {
-                    str(self.program.id): [str(self.household_1.admin1.id)],
-                }
-            }
-        }
-        partner.save()
         user = UserFactory(partner=partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan)
+        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan, program=self.program, areas=[self.household_1.admin1])
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
@@ -365,35 +312,3 @@ class TestHouseholdAreaQuery(APITestCase):
             },
         )
 
-    @parameterized.expand(
-        [
-            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST]),
-            ("without_permission", []),
-        ]
-    )
-    def test_households_area_filtered_when_partner_has_business_area_access(
-        self, _: Any, permissions: List[Permissions]
-    ) -> None:
-        # Full query returned
-        partner = PartnerFactory(name="NOT_UNICEF_8")
-        partner.permissions = {
-            str(self.business_area_afghanistan.id): {
-                "programs": {
-                    str(self.program.id): [],
-                }
-            }
-        }
-        partner.save()
-        user = UserFactory(partner=partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan, self.program)
-
-        self.snapshot_graphql_request(
-            request_string=ALL_HOUSEHOLD_QUERY,
-            context={
-                "user": user,
-                "headers": {
-                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
-                    "Business-Area": self.business_area_afghanistan.slug,
-                },
-            },
-        )

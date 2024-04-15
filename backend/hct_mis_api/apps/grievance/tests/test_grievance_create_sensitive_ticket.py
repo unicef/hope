@@ -81,7 +81,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
             parent=cash_plan,
             currency="PLN",
         )
-        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
+        cls.update_partner_access_to_program(cls.user, cls.program)
         cls.maxDiff = None
 
     @parameterized.expand(

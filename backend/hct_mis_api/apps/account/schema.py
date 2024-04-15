@@ -139,61 +139,23 @@ class JSONLazyString(graphene.Scalar):
         return json.loads(value)
 
 
-class ProgramPartnerThroughNode(DjangoObjectType):
-    class Meta:
-        model = ProgramPartnerThrough
-
-    partner_name = graphene.String()
+class PartnerNode(DjangoObjectType):
+    name = graphene.String()
     areas = graphene.List(AreaNode)
     area_access = graphene.String()
 
-    def resolve_areas(self, info: Any) -> "List[Area]":
-        return self.areas.all()
+    class Meta:
+        model = Partner
 
-    def resolve_partner_name(self, info: Any) -> str:
-        return self.partner.name
+    def resolve_areas(self, info: Any) -> "List[Area]":
+        return self.program_partner_through.get(program_id=self.partner_program).areas.all()
 
     def resolve_area_access(self, info: Any, **kwargs: Any) -> str:
-        areas_count = self.areas.count()
-        if areas_count != 0:
-            return "ADMIN_AREA"
-        else:
+        if self.program_partner_through.get(program_id=self.partner_program).full_area_access:
             return "BUSINESS_AREA"
+        else:
+            return "ADMIN_AREA"
 
-
-# class PartnerNodeForProgram(DjangoObjectType):
-#     id = graphene.ID()
-#     name = graphene.String()
-#     admin_areas = graphene.List(AreaGroupNode)
-#     area_access = graphene.String()
-#
-#     class Meta:
-#         model = Partner
-#
-#     @staticmethod
-#     def _get_areas_ids(partner: Partner, info_context_headers: Dict) -> List[str]:
-#         if program_id := partner.program.id:
-#             program = partner.program
-#             areas_ids = partner.get_permissions().areas_for(str(program.business_area_id), str(program_id))
-#             return areas_ids if areas_ids else []
-#         else:
-#             return []
-#
-#     def resolve_admin_areas(self, info: Any, **kwargs: Any) -> List[Dict]:
-#         areas_ids = PartnerNodeForProgram._get_areas_ids(self, info.context.headers)
-#         return_list = []
-#         for level in [1, 2, 3, 4]:
-#             ids = Area.objects.filter(area_type__area_level=level, id__in=areas_ids).values_list("id", flat=True)
-#             return_list.append({"ids": ids, "level": level, "total_count": len(ids)})
-#         return return_list
-#
-#     def resolve_area_access(self, info: Any, **kwargs: Any) -> str:
-#         areas_ids = PartnerNodeForProgram._get_areas_ids(self, info.context.headers)
-#         if len(areas_ids) != 0:
-#             return "ADMIN_AREA"
-#         else:
-#             return "BUSINESS_AREA"
-#
 
 class Query(graphene.ObjectType):
     me = graphene.Field(UserNode)

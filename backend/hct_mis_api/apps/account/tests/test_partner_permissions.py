@@ -3,9 +3,11 @@ from django.test import TestCase
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import Role, User, UserRole
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
+from hct_mis_api.apps.geo.fixtures import AreaFactory
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 
 
 class UserPartnerTest(TestCase):
@@ -13,23 +15,26 @@ class UserPartnerTest(TestCase):
     def setUpTestData(cls) -> None:
         cls.role_1 = Role.objects.create(name="Create_program", permissions=["PROGRAMME_CREATE"])
         cls.role_2 = Role.objects.create(name="Finish_program", permissions=["PROGRAMME_FINISH"])
+        cls.area_1 = AreaFactory(name="Area 1")
+        cls.area_2 = AreaFactory(name="Area 2")
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)
-        partner_perms = {
-            str(cls.business_area.pk): {
-                "roles": [str(cls.role_2.pk)],
-                "programs": {str(cls.program.pk): ["admin_id_1"]},
-            }
-        }
-        cls.other_partner = PartnerFactory(name="Partner", permissions=partner_perms)
+        cls.other_partner = PartnerFactory(name="Partner")
+        ba_partner_through = BusinessAreaPartnerThrough.objects.create(business_area=cls.business_area, partner=cls.other_partner)
+        ba_partner_through.roles.set([cls.role_2])
+        program_partner_through = ProgramPartnerThrough.objects.create(program=cls.program, partner=cls.other_partner)
+        program_partner_through.areas.set([cls.area_1])
         cls.other_user = UserFactory(partner=cls.other_partner)
-        cls.is_unicef_partner = PartnerFactory(name="UNICEF")
-        cls.user = UserFactory(partner=cls.is_unicef_partner)
+
+        cls.unicef_partner = PartnerFactory(name="UNICEF")
+        program_unicef_through = ProgramPartnerThrough.objects.create(program=cls.program, partner=cls.unicef_partner)
+        program_unicef_through.areas.set([cls.area_1, cls.area_2])
+        cls.unicef_user = UserFactory(partner=cls.unicef_partner)
 
         UserRole.objects.create(
             business_area=cls.business_area,
-            user=cls.user,
+            user=cls.unicef_user,
             role=cls.role_1,
         )
         UserRole.objects.create(
@@ -38,42 +43,39 @@ class UserPartnerTest(TestCase):
             role=cls.role_1,
         )
 
+        cls.user_without_role = UserFactory(partner=cls.unicef_partner)
+
     def test_partner_is_hope(self) -> None:
-        self.assertTrue(self.is_unicef_partner.is_unicef)
+        self.assertTrue(self.unicef_partner.is_unicef)
         self.assertFalse(self.other_partner.is_unicef)
 
-    def test_get_partner_role_ids_list(self) -> None:
-        empty_list = User.get_partner_role_ids_list(self.other_user)
-        self.assertEqual(list(), empty_list)
+    def test_get_partner_program_ids_for_business_area(self) -> None:
+        resp_1 = self.other_user.partner.get_program_ids_for_business_area(business_area_id=self.business_area.pk)
 
-        resp_1 = User.get_partner_role_ids_list(self.other_user, business_area_slug=self.business_area.slug)
-        resp_2 = User.get_partner_role_ids_list(self.other_user, business_area_id=self.business_area.pk)
+        self.assertListEqual(resp_1, [str(self.program.pk)])
 
-        self.assertListEqual(resp_1, resp_2)
-        self.assertEqual(resp_1, [str(self.role_2.pk)])
+        resp_2 = self.unicef_user.partner.get_program_ids_for_business_area(business_area_id=self.business_area.pk)
+        self.assertListEqual(resp_2, [str(self.program.pk)])
 
-        resp_3 = User.get_partner_role_ids_list(self.user, business_area_slug=self.business_area.slug)
-        self.assertEqual(list(), resp_3)
+    def test_get_partner_roles_for_business_area(self) -> None:
+        empty_qs = self.other_user.partner.get_roles_for_business_area()
+        self.assertQuerysetEqual(empty_qs, Role.objects.none())
 
-    def test_get_partner_programs_areas_dict(self) -> None:
-        empty_dict = User.get_partner_programs_areas_dict(self.other_user)
-        self.assertEqual(dict(), empty_dict)
+        resp_1 = self.other_user.partner.get_roles_for_business_area(business_area_slug=self.business_area.slug)
+        resp_2 = self.other_user.partner.get_roles_for_business_area(business_area_id=self.business_area.pk)
 
-        resp_1 = User.get_partner_programs_areas_dict(self.other_user, business_area_slug=self.business_area.slug)
-        resp_2 = User.get_partner_programs_areas_dict(self.other_user, business_area_id=self.business_area.pk)
+        self.assertQuerysetEqual(resp_1, resp_2)
+        self.assertQuerysetEqual(resp_1, Role.objects.filter(pk=self.role_2.pk))
 
-        self.assertEqual(resp_1, resp_2)
-        self.assertEqual(resp_1, {str(self.program.pk): ["admin_id_1"]})
+        resp_3 = self.unicef_user.partner.get_roles_for_business_area(business_area_slug=self.business_area.slug)
+        self.assertQuerysetEqual(resp_3, Role.objects.none())
 
-        resp_3 = User.get_partner_programs_areas_dict(self.user, business_area_slug=self.business_area.slug)
-        self.assertEqual(dict(), resp_3)
+    def test_get_partner_areas_per_program(self) -> None:
+        other_partner_areas = self.other_user.partner.get_program_areas(self.program.pk)
+        self.assertQuerysetEqual(other_partner_areas, Area.objects.filter(id=self.area_1.pk))
 
-    def test_get_partner_areas_ids_per_program(self) -> None:
-        empty_list = User.get_partner_areas_ids_per_program(self.user, self.business_area.pk, self.business_area.pk)
-        self.assertEqual(list(), empty_list)
-
-        resp_1 = User.get_partner_areas_ids_per_program(self.other_user, self.program.pk, self.business_area.pk)
-        self.assertEqual(resp_1, ["admin_id_1"])
+        unicef_partner_areas = self.unicef_user.partner.get_program_areas(self.program.pk)
+        self.assertQuerysetEqual(unicef_partner_areas, Area.objects.filter(id__in=[self.area_1.pk, self.area_2.pk]))
 
     def test_partner_permissions_in_business_area(self) -> None:
         # two roles without program
@@ -82,7 +84,7 @@ class UserPartnerTest(TestCase):
             self.assertTrue(role in roles_2)
 
         # one role with program
-        role_1 = User.permissions_in_business_area(self.user, business_area_slug=self.business_area.slug)
+        role_1 = User.permissions_in_business_area(self.unicef_user, business_area_slug=self.business_area.slug)
         default_list = [
             "USER_MANAGEMENT_VIEW_LIST",
             "RDI_VIEW_DETAILS",
@@ -117,19 +119,26 @@ class UserPartnerTest(TestCase):
         )
         self.assertEqual(empty_list, list())
 
-        # one role is_unicef user
+        # one role unicef user
         roles_1_for_unicef_user = User.permissions_in_business_area(
-            self.user, business_area_slug=self.business_area.slug, program_id=self.program.pk
+            self.unicef_user, business_area_slug=self.business_area.slug, program_id=self.program.pk
         )
         self.assertEqual(roles_1_for_unicef_user.sort(), default_list)
 
+
+        # user with unicef partner but without role in BA
+        roles_0_for_unicef_user = User.permissions_in_business_area(
+            self.user_without_role, business_area_slug=self.business_area.slug, program_id=self.program.pk
+        )
+        self.assertEqual(roles_0_for_unicef_user, list())
+
     def test_partner_has_permission(self) -> None:
         # check user_roles
-        user_has_one_role = User.has_permission(self.user, "PROGRAMME_CREATE", self.business_area)
+        user_has_one_role = User.has_permission(self.unicef_user, "PROGRAMME_CREATE", self.business_area)
         self.assertTrue(user_has_one_role)
 
         # check user_roles
-        user_without_access = User.has_permission(self.user, "Role_Not_Added", self.business_area)
+        user_without_access = User.has_permission(self.unicef_user, "Role_Not_Added", self.business_area)
         self.assertFalse(user_without_access)
 
         # check partner_roles
@@ -157,9 +166,9 @@ class UserPartnerTest(TestCase):
 
         # check with program_id user partner is_unicef
         unicef_user_without_perms = User.has_permission(
-            self.user, "PROGRAMME_FINISH", self.business_area, self.program.pk
+            self.unicef_user, "PROGRAMME_FINISH", self.business_area, self.program.pk
         )
         self.assertFalse(unicef_user_without_perms)
 
-        unicef_user_with_perms = User.has_permission(self.user, "PROGRAMME_CREATE", self.business_area, self.program.pk)
+        unicef_user_with_perms = User.has_permission(self.unicef_user, "PROGRAMME_CREATE", self.business_area, self.program.pk)
         self.assertTrue(unicef_user_with_perms)

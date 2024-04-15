@@ -32,10 +32,11 @@ class TestUpdateProgram(APITestCase):
             code
           }
           partners {   
-            partnerName       
+            name       
             areas {
               name
             }
+            areaAccess
           }
           partnerAccess
         }
@@ -60,7 +61,7 @@ class TestUpdateProgram(APITestCase):
             data_collecting_type=data_collecting_type,
             partner_access=Program.NONE_PARTNERS_ACCESS,
         )
-        unicef_program = ProgramPartnerThrough.objects.create(
+        unicef_program, _ = ProgramPartnerThrough.objects.get_or_create(
             program=cls.program,
             partner=cls.unicef_partner,
         )
@@ -72,8 +73,10 @@ class TestUpdateProgram(APITestCase):
         cls.partner = PartnerFactory(name="WFP")
         cls.user = UserFactory.create(partner=cls.partner)
 
+        # partner allowed within BA - will be granted access for ALL_PARTNERS_ACCESS type
         cls.other_partner = PartnerFactory(name="Other Partner")
         cls.other_partner.allowed_business_areas.set([cls.business_area])
+
         cls.partner_not_allowed_in_BA = PartnerFactory(name="Partner not allowed in BA")
 
         country_afg = CountryFactory(name="Afghanistan")
@@ -263,6 +266,61 @@ class TestUpdateProgram(APITestCase):
                 "version": self.program.version,
             },
         )
+
+    def test_update_full_area_access_flag(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.business_area,
+        )
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "name": "updated name",
+                    "status": Program.DRAFT,
+                    "dataCollectingTypeCode": "partial_individuals",
+                    "partnerAccess": Program.ALL_PARTNERS_ACCESS,
+                },
+                "version": self.program.version,
+            },
+        )
+
+        for program_partner_through in Program.objects.get(name="updated name").program_partner_through.all():
+            self.assertEqual(program_partner_through.full_area_access, True)
+
+        self.program.refresh_from_db()
+
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "name": "updated name",
+                    "status": Program.DRAFT,
+                    "dataCollectingTypeCode": "partial_individuals",
+                    "partnerAccess": Program.SELECTED_PARTNERS_ACCESS,
+                    "partners": [
+                        {
+                            "partner": str(self.partner.id),
+                            "areas": [],
+                        },
+                        {
+                            "partner": str(self.other_partner.id),
+                            "areas": [self.area_in_afg_1.id],
+                        }
+                    ],
+                },
+                "version": self.program.version,
+            },
+        )
+
+        self.assertEqual(ProgramPartnerThrough.objects.get(partner=self.partner, program__name="updated name").full_area_access, True)
+        self.assertEqual(ProgramPartnerThrough.objects.get(partner=self.other_partner, program__name="updated name").full_area_access, False)
+        self.assertEqual(ProgramPartnerThrough.objects.get(partner=self.unicef_partner, program__name="updated name").full_area_access, True)
 
     def test_update_active_program_with_dct(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)

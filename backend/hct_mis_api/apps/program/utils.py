@@ -412,11 +412,11 @@ def create_program_partner_access(partners_data, program, partner_access) -> Lis
 
     if partner_access == Program.ALL_PARTNERS_ACCESS:
         partners = Partner.objects.filter(allowed_business_areas=program.business_area)
-        partners_data = [{"partner": partner.id, "areas": [area.id for area in full_area_access]} for partner in partners]
+        partners_data = [{"partner": partner.id, "areas": []} for partner in partners]
 
     unicef_partner = Partner.objects.get(name="UNICEF")
     # UNICEF has full area access to all the programs
-    partners_data.extend([{"partner": unicef_partner.id, "areas": [area.id for area in full_area_access]}])
+    partners_data.extend([{"partner": unicef_partner.id, "areas": []}])
 
     for partner_data in partners_data:
         program_partner, _ = ProgramPartnerThrough.objects.get_or_create(
@@ -425,9 +425,13 @@ def create_program_partner_access(partners_data, program, partner_access) -> Lis
         )
         if areas := partner_data.get("areas"):
             program_partner.areas.set(Area.objects.filter(id__in=areas))
+            program_partner.full_area_access = False
+            program_partner.save(update_fields=["full_area_access"])
         else:
             # full area access
             program_partner.areas.set(full_area_access)
+            program_partner.full_area_access = True
+            program_partner.save(update_fields=["full_area_access"])
     return partners_data
 
 

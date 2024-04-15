@@ -47,6 +47,99 @@ snapshots['TestUpdateProgram::test_update_draft_not_empty_program_with_dct 1'] =
     ]
 }
 
+snapshots['TestUpdateProgram::test_update_full_area_access_flag 1'] = {
+    'data': {
+        'updateProgram': {
+            'program': {
+                'dataCollectingType': {
+                    'code': 'partial_individuals',
+                    'label': 'Partial'
+                },
+                'name': 'updated name',
+                'partnerAccess': 'ALL_PARTNERS_ACCESS',
+                'partners': [
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'Other Partner'
+                    }
+                ],
+                'status': 'DRAFT'
+            }
+        }
+    }
+}
+
+snapshots['TestUpdateProgram::test_update_full_area_access_flag 2'] = {
+    'data': {
+        'updateProgram': {
+            'program': {
+                'dataCollectingType': {
+                    'code': 'partial_individuals',
+                    'label': 'Partial'
+                },
+                'name': 'updated name',
+                'partnerAccess': 'SELECTED_PARTNERS_ACCESS',
+                'partners': [
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'WFP'
+                    },
+                    {
+                        'areaAccess': 'ADMIN_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            }
+                        ],
+                        'name': 'Other Partner'
+                    }
+                ],
+                'status': 'DRAFT'
+            }
+        }
+    }
+}
+
 snapshots['TestUpdateProgram::test_update_program_authenticated_0_with_permissions 1'] = {
     'data': {
         'updateProgram': {
@@ -59,6 +152,7 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_0_with_permissio
                 'partnerAccess': 'NONE_PARTNERS_ACCESS',
                 'partners': [
                     {
+                        'areaAccess': 'BUSINESS_AREA',
                         'areas': [
                             {
                                 'name': 'Area in AFG 1'
@@ -67,7 +161,7 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_0_with_permissio
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'partnerName': 'UNICEF'
+                        'name': 'UNICEF'
                     }
                 ],
                 'status': 'ACTIVE'
@@ -168,6 +262,7 @@ snapshots['TestUpdateProgram::test_update_program_partners_0_valid 1'] = {
                 'partnerAccess': 'SELECTED_PARTNERS_ACCESS',
                 'partners': [
                     {
+                        'areaAccess': 'BUSINESS_AREA',
                         'areas': [
                             {
                                 'name': 'Area in AFG 1'
@@ -176,9 +271,10 @@ snapshots['TestUpdateProgram::test_update_program_partners_0_valid 1'] = {
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'partnerName': 'UNICEF'
+                        'name': 'UNICEF'
                     },
                     {
+                        'areaAccess': 'ADMIN_AREA',
                         'areas': [
                             {
                                 'name': 'Area1'
@@ -187,9 +283,10 @@ snapshots['TestUpdateProgram::test_update_program_partners_0_valid 1'] = {
                                 'name': 'Area2'
                             }
                         ],
-                        'partnerName': 'WFP'
+                        'name': 'WFP'
                     },
                     {
+                        'areaAccess': 'ADMIN_AREA',
                         'areas': [
                             {
                                 'name': 'Area1'
@@ -198,7 +295,7 @@ snapshots['TestUpdateProgram::test_update_program_partners_0_valid 1'] = {
                                 'name': 'Area2'
                             }
                         ],
-                        'partnerName': 'Partner to be added'
+                        'name': 'Partner to be added'
                     }
                 ],
                 'status': 'DRAFT'
@@ -259,6 +356,7 @@ snapshots['TestUpdateProgram::test_update_program_partners_all_partners_access 1
                 'partnerAccess': 'ALL_PARTNERS_ACCESS',
                 'partners': [
                     {
+                        'areaAccess': 'BUSINESS_AREA',
                         'areas': [
                             {
                                 'name': 'Area in AFG 1'
@@ -267,9 +365,10 @@ snapshots['TestUpdateProgram::test_update_program_partners_all_partners_access 1
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'partnerName': 'UNICEF'
+                        'name': 'UNICEF'
                     },
                     {
+                        'areaAccess': 'BUSINESS_AREA',
                         'areas': [
                             {
                                 'name': 'Area in AFG 1'
@@ -278,7 +377,7 @@ snapshots['TestUpdateProgram::test_update_program_partners_all_partners_access 1
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'partnerName': 'Other Partner'
+                        'name': 'Other Partner'
                     }
                 ],
                 'status': 'DRAFT'

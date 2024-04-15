@@ -150,21 +150,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObje
                 # admin2 is empty or non-program ticket -> no restrictions for admin area
                 has_partner_area_access = True
             else:
-                partner_permission = partner.get_permissions()
-                partner_areas_list: Optional[List] = partner_permission.areas_for(
-                    str(business_area.id), ticket_program_id
-                )
-                if partner_areas_list is not None:
-                    if partner_areas_list:
-                        has_partner_area_access = str(object_instance.admin2.id) in partner_areas_list
-                    else:
-                        # partner_areas_list is [] -> has access full area access
-                        has_partner_area_access = True
-                else:
-                    # partner_areas_list is None
-                    # don't have access to BA
-                    has_partner_area_access = False
-
+                has_partner_area_access = object_instance.admin2 in partner.get_program_areas(ticket_program_id)
         if (
             user.has_permission(perm, business_area, ticket_program_id) or check_creator or check_assignee
         ) and has_partner_area_access:

@@ -292,26 +292,21 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
         super().check_node_permission(info, object_instance)
         user = info.context.user
         program_id = get_program_id_from_headers(info.context.headers)
-        business_area_slug = info.context.headers.get("Business-Area")
-        business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
 
         if not user.partner.is_unicef:
             if program_id and str(object_instance.program_id) != program_id:
                 raise PermissionDenied("Permission Denied")
-
-            partner_permission = user.partner.get_permissions()
-            areas_from_partner = partner_permission.areas_for(str(business_area_id), str(object_instance.program_id))
-            if areas_from_partner is None:
+            if not user.partner.has_program_access(object_instance.program_id):
                 raise PermissionDenied("Permission Denied")
-
-            if len(areas_from_partner) > 0 and object_instance.household_id and object_instance.household.admin_area_id:
+            if object_instance.household_id and object_instance.household.admin_area_id:
+                areas_from_partner = user.partner.get_program_areas(object_instance.program_id)
                 household = object_instance.household
-                areas_from_household = {
-                    str(household.admin1_id),
-                    str(household.admin2_id),
-                    str(household.admin3_id),
-                }
-                if not areas_from_household.intersection(areas_from_partner):
+                areas_from_household = [
+                    household.admin1_id,
+                    household.admin2_id,
+                    household.admin3_id,
+                ]
+                if not areas_from_partner.filter(id__in=areas_from_household).exists():
                     raise PermissionDenied("Permission Denied")
 
         # if user can't simply view all individuals, we check if they can do it because of grievance
@@ -449,26 +444,16 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
         super().check_node_permission(info, object_instance)
         user = info.context.user
         program_id = get_program_id_from_headers(info.context.headers)
-        business_area_slug = info.context.headers.get("Business-Area")
-        business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
 
         if not user.partner.is_unicef:
-            partner_permission = user.partner.get_permissions()
-
             if program_id and str(object_instance.program_id) != program_id:
                 raise PermissionDenied("Permission Denied")
-
-            areas_from_partner = partner_permission.areas_for(str(business_area_id), str(object_instance.program_id))
-            if areas_from_partner is None:
+            if not user.partner.has_program_access(object_instance.program_id):
                 raise PermissionDenied("Permission Denied")
-
-            if len(areas_from_partner) > 0 and object_instance.admin_area_id:
-                areas_from_household = {
-                    str(object_instance.admin1_id),
-                    str(object_instance.admin2_id),
-                    str(object_instance.admin3_id),
-                }
-                if not areas_from_household.intersection(areas_from_partner):
+            if object_instance.admin_area_id:
+                areas_from_partner = user.partner.get_program_areas(object_instance.program_id)
+                areas_from_household = [object_instance.admin1_id, object_instance.admin2_id, object_instance.admin3_id]
+                if not areas_from_partner.filter(id__in=areas_from_household).exists():
                     raise PermissionDenied("Permission Denied")
 
         # if user doesn't have permission to view all households, we check based on their grievance tickets
@@ -615,33 +600,27 @@ class Query(graphene.ObjectType):
 
         if not user.partner.is_unicef:  # Unicef partner has full access to all AdminAreas
             business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
-            partner_permission = user.partner.get_permissions()
+            programs_for_business_area = []
 
-            if program_id:
-                areas = partner_permission.areas_for(str(business_area_id), str(program_id))
-                if areas is None:
-                    return Individual.objects.none()
-                programs_permissions = [
-                    (program_id, areas),
-                ]
-            else:
-                programs_for_business_area = partner_permission.get_programs_for_business_area(str(business_area_id))
-                if not programs_for_business_area:
-                    return Individual.objects.none()
-                programs_permissions = programs_for_business_area.programs.items()
+            if program_id and user.partner.has_program_access(program_id):
+                programs_for_business_area = [program_id]
+            elif not program_id:
+                programs_for_business_area = user.partner.get_program_ids_for_business_area(business_area_id)
+            if not programs_for_business_area:
+                return Individual.objects.none()
+            programs_permissions = [
+                (program_id, user.partner.get_program_areas(program_id)) for program_id in programs_for_business_area
+            ]
 
             filter_q = Q()
             for program_id, areas_ids in programs_permissions:
-                if areas_ids:
-                    areas_query = Q(
-                        Q(household__admin1__in=areas_ids)
-                        | Q(household__admin2__in=areas_ids)
-                        | Q(household__admin3__in=areas_ids)
-                        | Q(household__admin_area__isnull=True)
-                    )
-                    filter_q |= Q(Q(program_id=program_id) & areas_query)
-                else:
-                    filter_q |= Q(program_id=program_id)
+                areas_query = Q(
+                    Q(household__admin1__in=areas_ids)
+                    | Q(household__admin2__in=areas_ids)
+                    | Q(household__admin3__in=areas_ids)
+                    | Q(household__admin_area__isnull=True)
+                )
+                filter_q |= Q(Q(program_id=program_id) & areas_query)
 
             queryset = queryset.filter(filter_q)
         return queryset
@@ -670,33 +649,27 @@ class Query(graphene.ObjectType):
 
         if not user.partner.is_unicef:  # Unicef partner has full access to all AdminAreas
             business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
-            partner_permission = user.partner.get_permissions()
+            programs_for_business_area = []
 
-            if program_id:
-                areas = partner_permission.areas_for(str(business_area_id), str(program_id))
-                if areas is None:
-                    return Household.objects.none()
-                programs_permissions = [
-                    (program_id, areas),
-                ]
-            else:
-                programs_for_business_area = partner_permission.get_programs_for_business_area(str(business_area_id))
-                if not programs_for_business_area:
-                    return Household.objects.none()
-                programs_permissions = programs_for_business_area.programs.items()
+            if program_id and user.partner.has_program_access(program_id):
+                programs_for_business_area = [program_id]
+            elif not program_id:
+                programs_for_business_area = user.partner.get_program_ids_for_business_area(business_area_id)
+            if not programs_for_business_area:
+                return Household.objects.none()
+            programs_permissions = [
+                (program_id, user.partner.get_program_areas(program_id)) for program_id in programs_for_business_area
+            ]
 
             filter_q = Q()
             for program_id, areas_ids in programs_permissions:
-                if areas_ids:
-                    areas_query = Q(
-                        Q(admin1__in=areas_ids)
-                        | Q(admin2__in=areas_ids)
-                        | Q(admin3__in=areas_ids)
-                        | Q(admin_area__isnull=True)
-                    )
-                    filter_q |= Q(Q(program_id=program_id) & areas_query)
-                else:
-                    filter_q |= Q(program_id=program_id)
+                areas_query = Q(
+                    Q(admin1__in=areas_ids)
+                    | Q(admin2__in=areas_ids)
+                    | Q(admin3__in=areas_ids)
+                    | Q(admin_area__isnull=True)
+                )
+                filter_q |= Q(Q(program_id=program_id) & areas_query)
 
             queryset = queryset.filter(filter_q)
 

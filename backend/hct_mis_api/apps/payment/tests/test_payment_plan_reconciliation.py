@@ -336,7 +336,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
         program = Program.objects.get(id=decode_id_string_required(program_id))
-        self.update_user_partner_perm_for_program(self.user, self.business_area, program)
+        self.update_partner_access_to_program(self.user, program)
 
         create_target_population_response = self.graphql_request(
             request_string=CREATE_TARGET_POPULATION_MUTATION,

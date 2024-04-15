@@ -59,21 +59,10 @@ class TestPaymentNotification(APITestCase):
         # potential recipients
         partner_unicef = PartnerFactory.create(name="UNICEF")
         partner_with_program_access = PartnerFactory.create(name="Partner with program access")
-        partner_with_program_access.permissions = {
-            str(cls.business_area.id): {
-                "programs": {str(cls.program.id): []},
-                "roles": [],
-            }
-        }
-        partner_with_program_access.save()
+        cls.update_partner_access_to_program(partner_with_program_access, cls.program)
+
         partner_without_program_access = PartnerFactory.create(name="Partner without program access")
-        partner_without_program_access.permissions = {
-            str(cls.business_area.id): {
-                "programs": {str(cls.program2.id): []},
-                "roles": [],
-            }
-        }
-        partner_without_program_access.save()
+        cls.update_partner_access_to_program(partner_without_program_access, cls.program2)
         # users with action permissions
         cls.user_with_approval_permission_partner_unicef = UserFactory.create(partner=partner_unicef)
         cls.create_user_role_with_permissions(
@@ -144,23 +133,28 @@ class TestPaymentNotification(APITestCase):
         partner_with_action_permissions_and_program_access = PartnerFactory.create(
             name="Partner with action permissions and program access"
         )
-        partner_with_action_permissions_and_program_access.permissions = {
-            str(cls.business_area.id): {
-                "programs": {str(cls.program.id): []},
-                "roles": [str(role.pk)],
-            }
-        }
-        partner_with_action_permissions_and_program_access.save()
+        cls.update_partner_access_to_program(
+            partner_with_action_permissions_and_program_access,
+            cls.program,
+        )
+        cls.add_partner_role_in_business_area(
+            partner_with_action_permissions_and_program_access,
+            cls.business_area,
+            [role],
+        )
         partner_with_action_permissions_without_program_access = PartnerFactory.create(
             name="Partner with action permissions and without program access"
         )
-        partner_with_action_permissions_without_program_access.permissions = {
-            str(cls.business_area.id): {
-                "programs": {str(cls.program2.id): []},
-                "roles": [str(role.pk)],
-            }
-        }
-        partner_with_action_permissions_without_program_access.save()
+        cls.update_partner_access_to_program(
+            partner_with_action_permissions_without_program_access,
+            cls.program2,
+        )
+        cls.add_partner_role_in_business_area(
+            partner_with_action_permissions_without_program_access,
+            cls.business_area,
+            [role],
+        )
+
         cls.user_with_partner_action_permissions_and_program_access = UserFactory.create(
             partner=partner_with_action_permissions_and_program_access
         )

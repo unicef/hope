@@ -74,8 +74,6 @@ class TestGrievanceAreaQuery(APITestCase):
     @skip(reason="Check after merge")
     def test_admin2_null_is_filtered(self, _: Any, permissions: List[Permissions]) -> None:
         partner = PartnerFactory(name="NOT_UNICEF_1")
-        partner.permissions = {}
-        partner.save()
         user = UserFactory(partner=partner)
         self.create_user_role_with_permissions(user, permissions, self.business_area)
 
@@ -101,8 +99,9 @@ class TestGrievanceAreaQuery(APITestCase):
     )
     def test_one_admin2_is_filtered(self, _: Any, permissions: List[Permissions]) -> None:
         partner = PartnerFactory(name="NOT_UNICEF_2")
-        partner.permissions = {str(self.business_area.id): {"programs": {str(self.program.id): [str(self.doshi.id)]}}}
-        partner.save()
+        self.update_partner_access_to_program(
+            partner, self.program, [self.doshi]
+        )
         user = UserFactory(partner=partner)
         self.create_user_role_with_permissions(user, permissions, self.business_area)
 
@@ -129,12 +128,9 @@ class TestGrievanceAreaQuery(APITestCase):
     @skip("Fail on pipeline")
     def test_many_admin2_is_filtered(self, _: Any, permissions: List[Permissions]) -> None:
         partner = PartnerFactory(name="NOT_UNICEF_3")
-        partner.permissions = {
-            str(self.business_area.id): {
-                "programs": {str(self.program.id): [str(self.doshi.id), str(self.burka.id), str(self.quadis.id)]}
-            }
-        }
-        partner.save()
+        self.update_partner_access_to_program(
+            partner, self.program, [self.doshi, self.burka, self.quadis]
+        )
         user = UserFactory(partner=partner)
         self.create_user_role_with_permissions(user, permissions, self.business_area)
 
@@ -189,8 +185,9 @@ class TestGrievanceAreaQuery(APITestCase):
         self, _: Any, permissions: List[Permissions]
     ) -> None:
         partner = PartnerFactory(name="NOT_UNICEF_5")
-        partner.permissions = {str(self.business_area.id): {"programs": {str(self.program.id): []}}}
-        partner.save()
+        self.update_partner_access_to_program(
+            partner, self.program, [self.doshi, self.burka, self.quadis]
+        )
         user = UserFactory(partner=partner)
         self.create_user_role_with_permissions(user, permissions, self.business_area)
 

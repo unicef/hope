@@ -48,6 +48,7 @@ class ProgramPartnerThrough(TimeStampedUUIDModel):
         related_name="program_partner_through",
     )
     areas = models.ManyToManyField("geo.Area", related_name="program_partner_through", blank=True)
+    full_area_access = models.BooleanField(default=False)
 
     class Meta:
         constraints = [

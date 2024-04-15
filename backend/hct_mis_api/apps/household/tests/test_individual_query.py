@@ -92,8 +92,6 @@ class TestIndividualQuery(APITestCase):
             status=Program.DRAFT,
             data_collecting_type=partial,
         )
-        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
-        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program_draft)
 
         cls.household_one = HouseholdFactory.build(business_area=cls.business_area, program=cls.program)
         cls.household_one.household_collection.save()
@@ -256,15 +254,12 @@ class TestIndividualQuery(APITestCase):
 
         cls.household_one.set_admin_areas(cls.area2)
 
-        cls.partner.permissions = {
-            str(cls.business_area.id): {
-                "programs": {
-                    str(cls.program.id): [str(cls.household_one.admin_area.id)],
-                    str(cls.program_draft.id): [str(cls.household_one.admin_area.id)],
-                }
-            }
-        }
-        cls.partner.save()
+        cls.update_partner_access_to_program(
+            cls.partner, cls.program, [cls.household_one.admin_area]
+        )
+        cls.update_partner_access_to_program(
+            cls.partner, cls.program_draft, [cls.household_one.admin_area]
+        )
 
         # remove after data migration
         migrate_data_to_representations()

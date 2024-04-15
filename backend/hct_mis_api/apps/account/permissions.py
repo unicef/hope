@@ -292,7 +292,7 @@ def compare_program_id_with_url(
     url_elements = str(url.path).rsplit("/", 1)
     if url_elements[0] == f"/{business_area_arg}/programs/all/details":
         program_id = decode_id_string(url_elements[1])
-        return str(program_id) in user.get_partner_programs_areas_dict(business_area_id=business_area.pk)
+        return user.partner.has_program_access(program_id)
     return True
 
 
@@ -302,7 +302,6 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
     business_area_arg = kwargs.get("business_area")
     if business_area_arg is None:
         return False
-
     business_area = (
         business_area_arg
         if isinstance(business_area_arg, BusinessArea)

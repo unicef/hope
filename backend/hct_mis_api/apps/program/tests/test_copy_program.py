@@ -1,9 +1,13 @@
-from flaky import flaky
+from typing import Any
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from flaky import flaky
+from parameterized import parameterized
+
+from hct_mis_api.apps.account.fixtures import UserFactory, PartnerFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
+from hct_mis_api.apps.geo.fixtures import AreaFactory, CountryFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import (
     BankAccountInfoFactory,
     DocumentFactory,
@@ -22,7 +26,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 
 
 class TestCopyProgram(APITestCase):
@@ -40,6 +44,14 @@ class TestCopyProgram(APITestCase):
           cashPlus
           populationGoal
           administrativeAreasOfImplementation
+          partners {   
+            name       
+            areas {
+              name
+            }
+            areaAccess
+          }
+          partnerAccess
         }
       validationErrors
       }
@@ -49,6 +61,8 @@ class TestCopyProgram(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
+        cls.partner = PartnerFactory(name="WFP")
+        cls.user = UserFactory.create(partner=cls.partner)
         data_collecting_type = DataCollectingTypeFactory(
             label="Full", code="full", weight=1, business_areas=[cls.business_area]
         )
@@ -74,6 +88,7 @@ class TestCopyProgram(APITestCase):
                 "populationGoal": 150000,
                 "administrativeAreasOfImplementation": "Lorem Ipsum",
                 "programmeCode": "T3ST",
+                "partnerAccess": Program.NONE_PARTNERS_ACCESS,
             },
         }
         cls.household1, cls.individuals1 = create_household_and_individuals(
@@ -129,6 +144,29 @@ class TestCopyProgram(APITestCase):
         cls.individuals3[1].duplicate = True
         cls.individuals3[1].save()
 
+        # create UNICEF partner - it will always be granted access while creating program
+        PartnerFactory(name="UNICEF")
+
+        # partner allowed within BA - will be granted access for ALL_PARTNERS_ACCESS type
+        partner_allowed_in_BA = PartnerFactory(name="Other Partner")
+        partner_allowed_in_BA.allowed_business_areas.set([cls.business_area])
+
+        PartnerFactory(name="Partner not allowed in BA")
+
+        country_afg = CountryFactory(name="Afghanistan")
+        country_afg.business_areas.set([cls.business_area])
+        area_type_afg = AreaTypeFactory(name="Area Type in Afg", country=country_afg)
+        country_other = CountryFactory(name="Other Country", short_name="Oth",
+                                       iso_code2="O",
+                                       iso_code3="OTH",
+                                       iso_num="111",
+                                       )
+        cls.area_type_other = AreaTypeFactory(name="Area Type Other", country=country_other)
+
+        cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg)
+        cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg)
+        cls.area_not_in_afg = AreaFactory(name="Area not in AFG", area_type=cls.area_type_other)
+
     def test_copy_program_not_authenticated(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.COPY_PROGRAM_MUTATION,
@@ -153,14 +191,13 @@ class TestCopyProgram(APITestCase):
 
     @flaky(max_runs=3, min_passes=1)
     def test_copy_with_permissions(self) -> None:
-        user = UserFactory.create()
         self.assertEqual(Household.objects.count(), 3)
         self.assertEqual(Individual.objects.count(), 4)
-        self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
 
         self.snapshot_graphql_request(
             request_string=self.COPY_PROGRAM_MUTATION,
-            context={"user": user},
+            context={"user": self.user},
             variables=self.copy_data,
         )
         copied_program = Program.objects.exclude(id=self.program.id).order_by("created_at").last()
@@ -238,25 +275,70 @@ class TestCopyProgram(APITestCase):
             .copied_from,
             self.individual_role_in_household1.individual,
         )
+        self.assertEqual(ProgramPartnerThrough.objects.filter(program=copied_program).count(), 1)
 
     def test_copy_program_incompatible_collecting_type(self) -> None:
-        user = UserFactory.create()
-        self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
         copy_data_incompatible = {**self.copy_data}
         copy_data_incompatible["programData"]["dataCollectingTypeCode"] = "partial"
         self.snapshot_graphql_request(
             request_string=self.COPY_PROGRAM_MUTATION,
-            context={"user": user},
+            context={"user": self.user},
             variables=copy_data_incompatible,
         )
 
     def test_copy_program_with_existing_name(self) -> None:
-        user = UserFactory.create()
-        self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
         copy_data_existing_name = {**self.copy_data}
         copy_data_existing_name["programData"]["name"] = "initial name"
         self.snapshot_graphql_request(
             request_string=self.COPY_PROGRAM_MUTATION,
-            context={"user": user},
+            context={"user": self.user},
             variables=copy_data_existing_name,
         )
+
+    @parameterized.expand(
+        [
+            ("valid", Program.SELECTED_PARTNERS_ACCESS),
+            ("invalid_all_partner_access", Program.ALL_PARTNERS_ACCESS),
+            ("invalid_none_partner_access", Program.NONE_PARTNERS_ACCESS),
+        ]
+    )
+    def test_copy_program_with_partners(self, _: Any, partner_access: str) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        area1 = AreaFactory(name="North Brianmouth", area_type=self.area_type_other)
+        area2 = AreaFactory(name="South Catherine", area_type=self.area_type_other)
+        partner2 = PartnerFactory(name="New Partner")
+        self.copy_data["programData"]["partners"] = [
+            {
+                "partner": str(self.partner.id),
+                "areas": [str(area1.id), str(area2.id)],
+            },
+            {
+                "partner": str(partner2.id),
+                "areas": [],
+            },
+        ]
+        self.copy_data["programData"]["partnerAccess"] = partner_access
+        self.snapshot_graphql_request(
+            request_string=self.COPY_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.copy_data,
+        )
+
+    def test_copy_program_with_partners_all_partners_access(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        self.copy_data["programData"]["partnerAccess"] = Program.ALL_PARTNERS_ACCESS
+
+        self.snapshot_graphql_request(
+            request_string=self.COPY_PROGRAM_MUTATION, context={"user": self.user}, variables=self.copy_data
+        )
+
+    def test_copy_program_with_partners_none_partners_access(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        self.copy_data["programData"]["partnerAccess"] = Program.NONE_PARTNERS_ACCESS
+
+        self.snapshot_graphql_request(
+            request_string=self.COPY_PROGRAM_MUTATION, context={"user": self.user}, variables=self.copy_data
+        )
+

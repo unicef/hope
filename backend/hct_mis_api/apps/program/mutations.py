@@ -98,7 +98,9 @@ class CreateProgram(
             end_date=program.end_date,
             status=ProgramCycle.ACTIVE,
         )
-        create_program_partner_access(partners_data, program, partner_access)
+        # create partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
+        if partner_access == Program.SELECTED_PARTNERS_ACCESS:
+            create_program_partner_access(partners_data, program, partner_access)
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
         return CreateProgram(program=program)
@@ -180,8 +182,8 @@ class UpdateProgram(
             if hasattr(program, attrib):
                 setattr(program, attrib, value)
         program.full_clean()
-        # no need to update partners for Activation or Finish action
-        if status_to_set not in [Program.ACTIVE, Program.FINISHED]:
+        # update partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
+        if status_to_set not in [Program.ACTIVE, Program.FINISHED] and partner_access == Program.SELECTED_PARTNERS_ACCESS:
             partners_data = create_program_partner_access(partners_data, program, partner_access)
             remove_program_partner_access(partners_data, program)
         program.save()
@@ -224,7 +226,7 @@ class CopyProgram(CommonValidator, ProgrammeCodeValidator, PartnersDataValidator
     def processed_mutate(cls, root: Any, info: Any, program_data: Dict) -> "CopyProgram":
         program_id = decode_id_string_required(program_data.pop("id"))
         partners_data = program_data.pop("partners", [])
-        partner_access = program_data.pop("partner_access", [])
+        partner_access = program_data.get("partner_access", [])
         business_area = Program.objects.get(id=program_id).business_area
         programme_code = program_data.get("programme_code", "")
         partner = info.context.user.partner
@@ -244,7 +246,9 @@ class CopyProgram(CommonValidator, ProgrammeCodeValidator, PartnersDataValidator
         )
         program = copy_program_object(program_id, program_data)
 
-        create_program_partner_access(partners_data, program, partner_access)
+        # create partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
+        if partner_access == Program.SELECTED_PARTNERS_ACCESS:
+            create_program_partner_access(partners_data, program, partner_access)
         copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
 

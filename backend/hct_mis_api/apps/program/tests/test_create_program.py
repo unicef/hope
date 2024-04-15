@@ -11,7 +11,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.geo.fixtures import AreaFactory
+from hct_mis_api.apps.geo.fixtures import AreaFactory, CountryFactory, AreaTypeFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -39,6 +39,14 @@ class TestCreateProgram(APITestCase):
             active
             individualFiltersAvailable
           }
+          partners {   
+            name       
+            areas {
+              name
+            }
+            areaAccess
+          }
+          partnerAccess
         }
         validationErrors
       }
@@ -73,9 +81,32 @@ class TestCreateProgram(APITestCase):
                 "administrativeAreasOfImplementation": "Lorem Ipsum",
                 "businessAreaSlug": cls.business_area.slug,
                 "dataCollectingTypeCode": cls.data_collecting_type.code,
-                "partners": [{"id": str(cls.partner.id), "areaAccess": "BUSINESS_AREA"}],
+                "partnerAccess": Program.NONE_PARTNERS_ACCESS,
             }
         }
+
+        # create UNICEF partner - it will always be granted access while creating program
+        PartnerFactory(name="UNICEF")
+
+        # partner allowed within BA - will be granted access for ALL_PARTNERS_ACCESS type
+        partner_allowed_in_BA = PartnerFactory(name="Other Partner")
+        partner_allowed_in_BA.allowed_business_areas.set([cls.business_area])
+
+        PartnerFactory(name="Partner not allowed in BA")
+
+        country_afg = CountryFactory(name="Afghanistan")
+        country_afg.business_areas.set([cls.business_area])
+        area_type_afg = AreaTypeFactory(name="Area Type in Afg", country=country_afg)
+        country_other = CountryFactory(name="Other Country", short_name="Oth",
+                                       iso_code2="O",
+                                       iso_code3="OTH",
+                                       iso_num="111",
+                                       )
+        cls.area_type_other = AreaTypeFactory(name="Area Type Other", country=country_other)
+
+        cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg)
+        cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg)
+        cls.area_not_in_afg = AreaFactory(name="Area not in AFG", area_type=cls.area_type_other)
 
     def test_create_program_not_authenticated(self) -> None:
         self.snapshot_graphql_request(request_string=self.CREATE_PROGRAM_MUTATION, variables=self.program_data)
@@ -196,39 +227,54 @@ class TestCreateProgram(APITestCase):
         self.graphql_request(
             request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
         )
-
         program = Program.objects.get(name="Test")
         self.assertEqual(program.programme_code, "ABC2")
 
-    def test_create_program_with_partners(self) -> None:
+    @parameterized.expand(
+        [
+            ("valid", Program.SELECTED_PARTNERS_ACCESS),
+            ("invalid_all_partner_access", Program.ALL_PARTNERS_ACCESS),
+            ("invalid_none_partner_access", Program.NONE_PARTNERS_ACCESS),
+        ]
+    )
+    def test_create_program_with_partners(self, _: Any, partner_access: str) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
-        area1 = AreaFactory()
-        area2 = AreaFactory()
-        partner2 = PartnerFactory()
-        self.program_data["programData"]["partnersAccess"] = [
+        area1 = AreaFactory(name="North Brianmouth", area_type=self.area_type_other)
+        area2 = AreaFactory(name="South Catherine", area_type=self.area_type_other)
+        partner2 = PartnerFactory(name="New Partner")
+        self.program_data["programData"]["partners"] = [
             {
                 "partner": str(self.partner.id),
                 "areas": [str(area1.id), str(area2.id)],
             },
             {
                 "partner": str(partner2.id),
-                "areas": [str(area1.id), str(area2.id)],
+                "areas": [],
             },
         ]
+        self.program_data["programData"]["partnerAccess"] = partner_access
 
-        self.graphql_request(
+        self.snapshot_graphql_request(
             request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
         )
 
-        program = Program.objects.get(name="Test")
-        self.assertEqual(program.partners.count(), 2)
-        self.assertEqual(program.program_partner_through.count(), 2)
-        self.assertEqual(program.program_partner_through.first().areas.count(), 2)
-        self.assertEqual(program.program_partner_through.last().areas.count(), 2)
-        self.assertIn(area1, program.program_partner_through.first().areas.all())
-        self.assertIn(area2, program.program_partner_through.first().areas.all())
-        self.assertIn(area1, program.program_partner_through.last().areas.all())
-        self.assertIn(area2, program.program_partner_through.last().areas.all())
+    def test_create_program_with_partners_all_partners_access(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+        self.program_data["programData"]["partnerAccess"] = Program.ALL_PARTNERS_ACCESS
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+        )
+        for program_partner_through in Program.objects.get(name="Test").program_partner_through.all():
+            self.assertEqual(program_partner_through.full_area_access, True)
+
+    def test_create_program_with_partners_none_partners_access(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+        self.program_data["programData"]["partnerAccess"] = Program.NONE_PARTNERS_ACCESS
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+        )
 
     def test_programme_code_should_be_unique_among_the_same_business_area(self) -> None:
         ProgramFactory(programme_code="ABC2", business_area=self.business_area)

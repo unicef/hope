@@ -30,9 +30,7 @@ from hct_mis_api.apps.account.permissions import (
     hopeOneOfPermissionClass,
     hopePermissionClass,
 )
-from hct_mis_api.apps.account.schema import (
-    ProgramPartnerThroughNode,
-)
+from hct_mis_api.apps.account.schema import PartnerNode
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import DataCollectingType
@@ -43,6 +41,7 @@ from hct_mis_api.apps.core.utils import (
     chart_permission_decorator,
     to_choice_object,
 )
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.payment.filters import (
     CashPlanFilter,
     PaymentVerificationPlanFilter,
@@ -77,7 +76,7 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     total_number_of_households = graphene.Int()
     total_number_of_households_with_tp_in_program = graphene.Int()
     data_collecting_type = graphene.Field(DataCollectingTypeNode, source="data_collecting_type")
-    partners = graphene.List(ProgramPartnerThroughNode)
+    partners = graphene.List(PartnerNode)
 
     class Meta:
         model = Program
@@ -106,7 +105,9 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     #     return partners_list
     @staticmethod
     def resolve_partners(program: Program, info: Any, **kwargs: Any) -> List[ProgramPartnerThrough]:
-        return ProgramPartnerThrough.objects.filter(program=program)
+        return Partner.objects.filter(
+            program_partner_through__program=program,
+        ).annotate(partner_program=Value(program.id)).distinct()
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -208,7 +209,7 @@ class Query(graphene.ObjectType):
             "data_collecting_type__isnull": False,
         }
         if not info.context.user.partner.is_unicef:
-            filters.update({"id__in": info.context.user.partner.program_ids})
+            filters.update({"id__in": info.context.user.partner.programs.values_list("id", flat=True)})
         return (
             Program.objects.filter(**filters)
             .exclude(data_collecting_type__code="unknown")

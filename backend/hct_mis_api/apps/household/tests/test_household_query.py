@@ -7,7 +7,7 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import (
     BusinessAreaFactory,
     PartnerFactory,
-    UserFactory,
+    UserFactory, RoleFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -157,10 +157,6 @@ class TestHouseholdQuery(APITestCase):
             status=Program.DRAFT,
         )
 
-        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program_one)
-        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program_two)
-        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program_draft)
-
         cls.households = []
         country_origin = geo_models.Country.objects.filter(iso_code2="PL").first()
 
@@ -208,16 +204,12 @@ class TestHouseholdQuery(APITestCase):
             individual=household.head_of_household,
         )
 
-        cls.partner.permissions = {
-            str(cls.business_area.id): {
-                "programs": {
-                    str(cls.program_one.id): [str(cls.households[0].admin_area.id)],
-                    str(cls.program_two.id): [str(cls.households[0].admin_area.id)],
-                    str(cls.program_draft.id): [str(cls.households[0].admin_area.id)],
-                }
-            }
-        }
-        cls.partner.save()
+        role = RoleFactory(name="Test Role", permissions=[Permissions.PROGRAMME_CREATE])
+        cls.add_partner_role_in_business_area(
+            cls.partner, cls.business_area, [role],
+        )
+        for program in [cls.program_one, cls.program_two, cls.program_draft]:
+            cls.update_partner_access_to_program(cls.partner, program, [cls.households[0].admin_area])
 
         # remove after data migration
         BusinessAreaFactory(name="Democratic Republic of Congo")

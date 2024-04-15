@@ -31,6 +31,7 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.account.utils import test_conditional
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
@@ -62,9 +63,6 @@ class BusinessAreaPartnerPermission:
 
     def in_program(self, program_id: str) -> Optional[List[str]]:
         return self.programs.get(program_id, None)
-
-    def get_program_ids(self) -> List[str]:
-        return list(self.programs.keys())
 
     def get_all_area_ids(self) -> List[str]:
         all_area_ids = []
@@ -148,12 +146,6 @@ class PartnerPermission:
         # return only BA with roles NOT []
         return [ba_id for ba_id in self._available_business_areas if self._permissions[ba_id].roles]
 
-    def program_ids(self) -> List[str]:
-        ids = []
-        for ba_perms in self._permissions.values():
-            ids.extend(ba_perms.get_program_ids())
-        return ids
-
     def get_programs_for_business_area(self, business_area_id: str) -> "Optional[BusinessAreaPartnerPermission]":
         if business_area_id not in self._available_business_areas:
             return None
@@ -230,28 +222,35 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
     def is_editable(self) -> bool:
         return not self.is_unicef and not self.is_default
 
-    def has_complete_access_in_program(self, program_id: str, business_area_id: str) -> bool:
-        return self.is_unicef or self.get_permissions().areas_for(business_area_id, program_id) == []
-
-    @property
-    def program_ids(self) -> List[str]:
-        return self.get_permissions().program_ids()
+    def has_complete_access_in_program(self, program_id: str) -> bool:
+        return self.is_unicef or (
+            self.program_partner_through.filter(program_id=program_id).first()
+            and self.program_partner_through.filter(program_id=program_id).first().full_area_access
+        )
 
     @property
     def business_area_ids(self) -> List[str]:
         return self.get_permissions().business_area_ids()
 
     def get_program_ids_for_business_area(self, business_area_id: str) -> List[str]:
-        from hct_mis_api.apps.program.models import Program
+        return [str(program_id) for program_id in self.programs.filter(business_area_id=business_area_id).values_list("id", flat=True)]
 
-        if self.is_unicef:
-            return [
-                str(program_id)
-                for program_id in Program.objects.filter(business_area_id=business_area_id).values_list("id", flat=True)
-            ]
-        programs_for_business_area = self.get_permissions().get_programs_for_business_area(business_area_id)
+    def has_program_access(self, program_id: str) -> bool:
+        return self.programs.filter(id=program_id).exists()
 
-        return programs_for_business_area.get_program_ids() if programs_for_business_area else []
+    def get_program_areas(self, program_id: str) -> QuerySet(Area):
+        return Area.objects.filter(program_partner_through__partner=self, program_partner_through__program_id=program_id)
+
+    def get_roles_for_business_area(
+        self, business_area_slug: Optional[str] = None, business_area_id: Optional["UUID"] = None
+    ) -> QuerySet["Role"]:
+        if not business_area_slug and not business_area_id:
+            return Role.objects.none()
+
+        if not business_area_id and business_area_slug:
+            business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
+
+        return Role.objects.filter(business_area_partner_through__partner=self, business_area_partner_through__business_area_id=business_area_id)
 
 
 class User(AbstractUser, NaturalKeyModel, UUIDModel):
@@ -290,32 +289,10 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             self.partner.save()
         super().save(*args, **kwargs)
 
-    def get_partner_role_ids_list(
-        self, business_area_slug: Optional[str] = None, business_area_id: Optional["UUID"] = None
-    ) -> List:
-        if not business_area_slug and not business_area_id:
-            return list()
-
-        if not business_area_id and business_area_slug:
-            business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
-        partner_role_ids = self.partner.get_permissions().roles_for(str(business_area_id))
-        return partner_role_ids
-
-    def get_partner_programs_areas_dict(
-        self, business_area_slug: Optional[str] = None, business_area_id: Optional["UUID"] = None
-    ) -> Dict:
-        if not business_area_slug and not business_area_id:
-            return dict()
-
-        if not business_area_id and business_area_slug:
-            business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
-        partner_programs_dict = self.partner.permissions.get(str(business_area_id), {}).get("programs", {})
-        return partner_programs_dict
-
     def permissions_in_business_area(self, business_area_slug: str, program_id: Optional[UUID] = None) -> List:
         """
         return list of permissions based on User Role BA and User Partner
-        if program_id is in arguments need to check if user.partner.permissions json has program_id
+        if program_id is in arguments need to check if partner has access to this program
         """
         user_roles_query = UserRole.objects.filter(user=self, business_area__slug=business_area_slug).exclude(
             expiry_date__lt=timezone.now()
@@ -327,24 +304,17 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         # Regular user, need to check access to the program
         if not self.partner.is_unicef:
             # Check program access
-            if program_id:
-                has_program_access = str(program_id) in self.get_partner_programs_areas_dict(
-                    business_area_slug=business_area_slug
-                )
-                if not has_program_access:
-                    return []
+            if program_id and not self.partner.has_program_access(program_id):
+                return []
 
             # Prepare partner permissions
-            partner_role_ids_per_ba = self.get_partner_role_ids_list(business_area_slug=business_area_slug)
-            all_partner_roles_permissions_list = list(
-                Role.objects.filter(id__in=partner_role_ids_per_ba).values_list("permissions", flat=True)
-            )
+            partner_roles_in_ba = self.partner.get_roles_for_business_area(business_area_slug=business_area_slug)
+            all_partner_roles_permissions_list = [perm for perm in partner_roles_in_ba.values_list("permissions", flat=True) if perm]
         elif all_user_roles_permissions_list:
             # Default partner permissions for UNICEF partner with access to business area
             all_partner_roles_permissions_list = [DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER]
         else:
             all_partner_roles_permissions_list = []
-
         return list(
             set(
                 [perm for perms in all_partner_roles_permissions_list for perm in perms]
@@ -362,13 +332,6 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         self, permission: str, business_area: BusinessArea, program_id: Optional[UUID] = None, write: bool = False
     ) -> bool:
         return permission in self.permissions_in_business_area(business_area.slug, program_id)
-
-    def get_partner_areas_ids_per_program(self, program_id: UUID, business_area_id: UUID) -> List:
-        partner_areas_ids_per_program = self.get_partner_programs_areas_dict(business_area_id=business_area_id).get(
-            str(program_id), []
-        )
-
-        return partner_areas_ids_per_program
 
     @test_conditional(lru_cache())
     def cached_user_roles(self) -> QuerySet["UserRole"]:

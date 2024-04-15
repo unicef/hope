@@ -1,16 +1,9 @@
 import graphene
 
-
-class PartnerProgramInput(graphene.InputObjectType):
-    id = graphene.String(required=True, description="Partner ID")
-    area_access = graphene.String(description="'ADMIN_AREA' or 'BUSINESS_AREA'")
-    admin_areas = graphene.List(graphene.String)
-
-
 class ProgramPartnerThroughInput(graphene.InputObjectType):
     partner = graphene.String()
     areas = graphene.List(graphene.String)
-
+    area_access = graphene.String(description="'ADMIN_AREA' or 'BUSINESS_AREA'")
 
 class CreateProgramInput(graphene.InputObjectType):
     name = graphene.String()
