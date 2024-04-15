@@ -1,7 +1,13 @@
+from typing import Any
+from unittest.mock import patch
+
 from django.conf import settings
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions import (
+    DeduplicateAndCheckAgainstSanctionsListTask,
+)
 from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
@@ -96,6 +102,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "sex": MALE,
                     "birth_date": "1955-09-04",
                     "program_id": cls.program.id,
+                    "business_area": cls.business_area,
                 },
                 {
                     "registration_data_import": cls.registration_data_import_datahub,
@@ -307,7 +314,6 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
         )
 
 
-@disabled_locally_test
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     databases = {"default", "registration_datahub"}
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
@@ -322,6 +328,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             region_name="SAR",
             deduplication_possible_duplicate_score=11.0,
             has_data_sharing_agreement=True,
+            screen_beneficiary=True,
         )
         cls.program = ProgramFactory(status="ACTIVE")
         cls.registration_data_import = RegistrationDataImportFactory(
@@ -348,6 +355,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": HEAD,
                     "sex": MALE,
                     "birth_date": "1955-09-07",
+                    "business_area": cls.business_area,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -360,6 +368,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": WIFE_HUSBAND,
                     "sex": FEMALE,
                     "birth_date": "1955-09-05",
+                    "business_area": cls.business_area,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -455,3 +464,15 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
 
         self.assertEqual(needs_adjudication.count(), 0)
         self.assertEqual(duplicate.count(), 2)
+
+    @patch(
+        "hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge.CheckAgainstSanctionListPreMergeTask.execute"
+    )
+    def test_deduplicate_and_check_against_sanctions_list_when_screen_beneficiary_on(
+        self,
+        check_sanction_list_mock: Any,
+    ) -> None:
+        DeduplicateAndCheckAgainstSanctionsListTask().execute(
+            should_populate_index=False, individuals_ids=[self.individuals[0].id, self.individuals[1].id]
+        )
+        check_sanction_list_mock.assert_called()

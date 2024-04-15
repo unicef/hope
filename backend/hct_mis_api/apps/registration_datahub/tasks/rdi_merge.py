@@ -448,8 +448,6 @@ class RdiMergeTask:
                         )
 
                     # SANCTION LIST CHECK
-                    print("*********")
-                    print(obj_hct.should_check_against_sanction_list())
                     if obj_hct.should_check_against_sanction_list():
                         logger.info(f"RDI:{registration_data_import_id} Checking against sanction list")
                         CheckAgainstSanctionListPreMergeTask.execute(registration_data_import=obj_hct)
