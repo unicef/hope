@@ -1,9 +1,8 @@
-import { Box } from '@mui/material';
-import { Field } from 'formik';
+import { Box, Button } from '@mui/material';
 import * as React from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { LoadingButton } from '@core/LoadingButton';
 import { PageHeader } from '@core/PageHeader';
@@ -34,26 +33,19 @@ export function CreateTargetPopulationHeader({
 
   return (
     <PageHeader
-      title={
-        <Field
-          name="name"
-          label={t('Enter Target Population Name')}
-          type="text"
-          fullWidth
-          required
-          component={FormikTextField}
-          variant="standard"
-          data-cy="input-name"
-        />
-      }
+      title={t('New Target Population')}
       breadCrumbs={
         hasPermissions(PERMISSIONS.TARGETING_VIEW_LIST, permissions)
           ? breadCrumbsItems
           : null
       }
-      hasInputComponent
     >
       <>
+        <Box m={2}>
+          <Button component={Link} to={`/${baseUrl}/target-population`}>
+            {t('Cancel')}
+          </Button>
+        </Box>
         <Box m={2}>
           <LoadingButton
             variant="contained"

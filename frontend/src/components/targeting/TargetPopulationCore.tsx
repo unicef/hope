@@ -36,11 +36,13 @@ export function TargetPopulationCore({
   return (
     <>
       {targetPopulation.targetingCriteria ? (
-        <TargetingCriteria
-          rules={targetPopulation.targetingCriteria?.rules || []}
-          targetPopulation={targetPopulation}
-          screenBeneficiary={screenBeneficiary}
-        />
+        <PaperContainer>
+          <TargetingCriteria
+            rules={targetPopulation.targetingCriteria?.rules || []}
+            targetPopulation={targetPopulation}
+            screenBeneficiary={screenBeneficiary}
+          />
+        </PaperContainer>
       ) : null}
       {targetPopulation?.excludedIds ? (
         <PaperContainer>
