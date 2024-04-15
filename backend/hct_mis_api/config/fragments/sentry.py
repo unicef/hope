@@ -1,6 +1,6 @@
 import logging
 
-from hct_mis_api.settings.env import env
+from hct_mis_api.config.env import env
 
 SENTRY_DSN = env("SENTRY_DSN")
 SENTRY_URL = env("SENTRY_URL")

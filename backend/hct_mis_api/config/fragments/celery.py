@@ -1,6 +1,6 @@
 from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
-from hct_mis_api.settings.env import env
-from hct_mis_api.settings.settings import REDIS_INSTANCE
+from hct_mis_api.config.env import env
+from hct_mis_api.config.settings import REDIS_INSTANCE
 
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", default=f"redis://{REDIS_INSTANCE}/0")
 CELERY_ACCEPT_CONTENT = ["json"]

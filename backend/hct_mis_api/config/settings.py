@@ -11,7 +11,7 @@ from django.utils.translation import gettext_lazy as _
 
 from single_source import get_version
 
-from hct_mis_api.settings.env import env
+from hct_mis_api.config.env import env
 
 DEBUG: bool = env("DEBUG")
 IS_TEST = False
@@ -526,17 +526,17 @@ FLOWER_ADDRESS = env("FLOWER_ADDRESS")
 ADMIN_SYNC_CONFIG = "admin_sync.conf.DjangoConstance"
 DEFAULT_EMPTY_PARTNER = "Default Empty Partner"
 
-from hct_mis_api.settings.fragments.celery import *  # noqa: F403, F401, E402
-from hct_mis_api.settings.fragments.constance import *  # noqa: F403, F401, E402
-from hct_mis_api.settings.fragments.csp import *  # noqa: F403, F401, E402
-from hct_mis_api.settings.fragments.debug_toolbar import *  # noqa: F403, F401, E402
-from hct_mis_api.settings.fragments.drf import *  # noqa: F403, F401, E402
-from hct_mis_api.settings.fragments.drf_spectacular import *  # noqa: F403, F401, E402
-from hct_mis_api.settings.fragments.es import *  # noqa: F403, F401, E402
-from hct_mis_api.settings.fragments.loggers import *  # noqa: F403, F401, E402
-from hct_mis_api.settings.fragments.mailjet import *  # noqa: F403, F401, E402
-from hct_mis_api.settings.fragments.matomo import *  # noqa: F403, F401, E402
-from hct_mis_api.settings.fragments.sentry import *  # noqa: F403, F401, E402
-from hct_mis_api.settings.fragments.smart_admin import *  # noqa: F403, F401, E402
-from hct_mis_api.settings.fragments.social_auth import *  # noqa: F403, F401, E402
-from hct_mis_api.settings.fragments.storages import *  # noqa: F403, F401, E402
+from hct_mis_api.config.fragments.celery import *  # noqa: F403, F401, E402
+from hct_mis_api.config.fragments.constance import *  # noqa: F403, F401, E402
+from hct_mis_api.config.fragments.csp import *  # noqa: F403, F401, E402
+from hct_mis_api.config.fragments.debug_toolbar import *  # noqa: F403, F401, E402
+from hct_mis_api.config.fragments.drf import *  # noqa: F403, F401, E402
+from hct_mis_api.config.fragments.drf_spectacular import *  # noqa: F403, F401, E402
+from hct_mis_api.config.fragments.es import *  # noqa: F403, F401, E402
+from hct_mis_api.config.fragments.loggers import *  # noqa: F403, F401, E402
+from hct_mis_api.config.fragments.mailjet import *  # noqa: F403, F401, E402
+from hct_mis_api.config.fragments.matomo import *  # noqa: F403, F401, E402
+from hct_mis_api.config.fragments.sentry import *  # noqa: F403, F401, E402
+from hct_mis_api.config.fragments.smart_admin import *  # noqa: F403, F401, E402
+from hct_mis_api.config.fragments.social_auth import *  # noqa: F403, F401, E402
+from hct_mis_api.config.fragments.storages import *  # noqa: F403, F401, E402
