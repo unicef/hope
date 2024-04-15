@@ -530,9 +530,12 @@ from hct_mis_api.settings.fragments.celery import *  # noqa: F403, F401, E402
 from hct_mis_api.settings.fragments.constance import *  # noqa: F403, F401, E402
 from hct_mis_api.settings.fragments.csp import *  # noqa: F403, F401, E402
 from hct_mis_api.settings.fragments.debug_toolbar import *  # noqa: F403, F401, E402
+from hct_mis_api.settings.fragments.drf import *  # noqa: F403, F401, E402
+from hct_mis_api.settings.fragments.drf_spectacular import *  # noqa: F403, F401, E402
 from hct_mis_api.settings.fragments.es import *  # noqa: F403, F401, E402
 from hct_mis_api.settings.fragments.loggers import *  # noqa: F403, F401, E402
 from hct_mis_api.settings.fragments.mailjet import *  # noqa: F403, F401, E402
+from hct_mis_api.settings.fragments.matomo import *  # noqa: F403, F401, E402
 from hct_mis_api.settings.fragments.sentry import *  # noqa: F403, F401, E402
 from hct_mis_api.settings.fragments.smart_admin import *  # noqa: F403, F401, E402
 from hct_mis_api.settings.fragments.social_auth import *  # noqa: F403, F401, E402
