@@ -853,5 +853,10 @@
   "Debit Card Number": "Debit Card Number",
   "Debit Card Issuer": "Debit Card Issuer",
   "Account Holder Name": "Account Holder Name",
-  "Payment Plan Verification": "Payment Plan Verification"
+  "Payment Plan Verification": "Payment Plan Verification",
+  "Use Filters": "Use Filters",
+  "Use IDs": "Use IDs",
+  "Included Target Population Entries (Households or Individuals)": "Included Target Population Entries (Households or Individuals)",
+  "New Target Population": "New Target Population",
+  "Exclude People with Active Adjudication Ticket": "Exclude People with Active Adjudication Ticket"
 }
