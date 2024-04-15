@@ -187,7 +187,7 @@ class FinancialServiceProviderNode(BaseNodePermissionMixin, DjangoObjectType):
     available_configurations = graphene.List(AvailableFSPConfiguration)
 
     def resolve_is_payment_gateway(self, info: Any) -> bool:
-        return self.payment_gateway
+        return self.is_payment_gateway
 
     def resolve_available_configurations(self, info: Any) -> List[Optional[dict]]:
         if not self.is_payment_gateway:

@@ -170,7 +170,6 @@ class FspData(FlexibleArgumentsDataclassMixin):
     name: str
     vision_vendor_number: str
     configs: List[Optional[dict]]  # {id: value, key: value, label: value}
-    payload: dict
 
 
 @dataclasses.dataclass()
