@@ -13,16 +13,32 @@ interface CreateTargetPopulationHeaderProps {
   baseUrl: string;
   permissions: string[];
   loading: boolean;
+  category: string;
 }
 
-export function CreateTargetPopulationHeader({
+export const CreateTargetPopulationHeader = ({
   handleSubmit,
   values,
   baseUrl,
   permissions,
   loading,
-}: CreateTargetPopulationHeaderProps): React.ReactElement {
+  category,
+}: CreateTargetPopulationHeaderProps): React.ReactElement => {
   const { t } = useTranslation();
+
+  const isSubmitDisabled = () => {
+    if (category === 'filters') {
+      return values.criterias?.length === 0 || !values.name || loading;
+    }
+    if (category === 'ids') {
+      return (
+        !(values.individualIds || values.householdIds) ||
+        !values.name ||
+        loading
+      );
+    }
+    return true;
+  };
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -51,7 +67,7 @@ export function CreateTargetPopulationHeader({
             variant="contained"
             color="primary"
             onClick={handleSubmit}
-            disabled={values.criterias?.length === 0 || !values.name || loading}
+            disabled={isSubmitDisabled()}
             loading={loading}
             data-cy="button-target-population-create"
           >
@@ -61,4 +77,4 @@ export function CreateTargetPopulationHeader({
       </>
     </PageHeader>
   );
-}
+};

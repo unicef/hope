@@ -3,9 +3,9 @@ module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
   env: {
-    "browser": true,
-    "es2021": true,
-    "jest/globals": true
+    browser: true,
+    es2021: true,
+    'jest/globals': true,
   },
   extends: [
     'airbnb-typescript',
