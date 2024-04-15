@@ -1,4 +1,4 @@
-from hct_mis_api.settings.env import env
+from hct_mis_api.config.env import env
 
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL_AUTOSYNC = False

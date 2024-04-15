@@ -1,4 +1,4 @@
-from hct_mis_api.settings.env import env
+from hct_mis_api.config.env import env
 
 MATOMO_TRACKER_URL = env("MATOMO_TRACKER_URL")
 MATOMO_SCRIPT_URL = env("MATOMO_SCRIPT_URL")

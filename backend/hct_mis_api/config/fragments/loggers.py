@@ -2,8 +2,8 @@ import logging
 import sys
 from typing import Any, Dict
 
-from hct_mis_api.settings.env import env
-from hct_mis_api.settings.settings import DEBUG
+from hct_mis_api.config.env import env
+from hct_mis_api.config.settings import DEBUG
 
 LOG_LEVEL = env("LOG_LEVEL", default="ERROR") if "test" not in sys.argv else "INFO"
 

@@ -1,4 +1,4 @@
-from hct_mis_api.settings.env import env
+from hct_mis_api.config.env import env
 
 AZURE_ACCOUNT_NAME = env("STORAGE_AZURE_ACCOUNT_NAME", default="")
 AZURE_ACCOUNT_KEY = env("STORAGE_AZURE_ACCOUNT_KEY", default="")

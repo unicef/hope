@@ -1,6 +1,6 @@
 from smart_admin.utils import match, regex
 
-from hct_mis_api.settings.env import env
+from hct_mis_api.config.env import env
 
 SMART_ADMIN_SECTIONS = {
     "HOPE": [
