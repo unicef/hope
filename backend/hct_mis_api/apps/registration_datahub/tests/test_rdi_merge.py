@@ -1,5 +1,6 @@
 from contextlib import contextmanager
-from typing import Callable, Generator
+from typing import Any, Callable, Generator
+from unittest.mock import patch
 
 from django.conf import settings
 from django.db import DEFAULT_DB_ALIAS, connections
@@ -33,7 +34,6 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
-from hct_mis_api.conftest import disabled_locally_test
 
 
 @contextmanager
@@ -57,7 +57,6 @@ def capture_on_commit_callbacks(
             start_count = callback_count
 
 
-@disabled_locally_test
 class TestRdiMergeTask(BaseElasticSearchTestCase):
     databases = {"default", "registration_datahub"}
     fixtures = [
@@ -75,6 +74,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             name=cls.rdi.name, hct_id=cls.rdi.id, business_area_slug=cls.rdi.business_area.slug
         )
         cls.rdi.datahub_id = cls.rdi_hub.id
+        cls.rdi.screen_beneficiary = True
         cls.rdi.save()
 
         area_type_level_1 = AreaTypeFactory(
@@ -343,7 +343,10 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         }
         self.assertEqual(household_data, expected)
 
-    def test_merging_external_collector(self) -> None:
+    @patch(
+        "hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge.CheckAgainstSanctionListPreMergeTask.execute"
+    )
+    def test_merging_external_collector(self, check_sanction_list_mock: Any) -> None:
         imported_household = ImportedHouseholdFactory(
             collect_individual_data=COLLECT_TYPE_FULL,
             registration_data_import=self.rdi_hub,
@@ -373,3 +376,5 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         role.save()
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
+
+        check_sanction_list_mock.assert_called_once_with(registration_data_import=self.rdi)
