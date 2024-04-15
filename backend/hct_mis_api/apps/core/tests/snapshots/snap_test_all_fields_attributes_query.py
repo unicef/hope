@@ -52306,6 +52306,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'DKK'
                     },
                     {
+                        'labelEn': 'Digital currency',
+                        'labels': [
+                            {
+                                'label': 'Digital currency',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'USDC'
+                    },
+                    {
                         'labelEn': 'Djiboutian franc',
                         'labels': [
                             {
