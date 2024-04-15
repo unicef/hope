@@ -75,18 +75,6 @@ exports[`containers/tables/population/PeopleListTable should render loading 1`] 
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
-                  data-cy="relationship"
-                  scope="col"
-                >
-                  <span
-                    class="sc-iBdnpw jMIPuq"
-                    data-cy="table-label"
-                  >
-                    Relationship to HoH
-                  </span>
-                </th>
-                <th
                   class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-1azl6jz-MuiTableCell-root"
                   data-cy="individual-age"
                   scope="col"
@@ -132,8 +120,8 @@ exports[`containers/tables/population/PeopleListTable should render loading 1`] 
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
+                  colspan="6"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -146,8 +134,8 @@ exports[`containers/tables/population/PeopleListTable should render loading 1`] 
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
+                  colspan="6"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -160,8 +148,8 @@ exports[`containers/tables/population/PeopleListTable should render loading 1`] 
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
+                  colspan="6"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -174,8 +162,8 @@ exports[`containers/tables/population/PeopleListTable should render loading 1`] 
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
+                  colspan="6"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -188,8 +176,8 @@ exports[`containers/tables/population/PeopleListTable should render loading 1`] 
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
+                  colspan="6"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -202,8 +190,8 @@ exports[`containers/tables/population/PeopleListTable should render loading 1`] 
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
+                  colspan="6"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -216,8 +204,8 @@ exports[`containers/tables/population/PeopleListTable should render loading 1`] 
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
+                  colspan="6"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -230,8 +218,8 @@ exports[`containers/tables/population/PeopleListTable should render loading 1`] 
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
+                  colspan="6"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -244,8 +232,8 @@ exports[`containers/tables/population/PeopleListTable should render loading 1`] 
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
+                  colspan="6"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -258,8 +246,8 @@ exports[`containers/tables/population/PeopleListTable should render loading 1`] 
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
+                  colspan="6"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
