@@ -169,7 +169,7 @@ class FspData(FlexibleArgumentsDataclassMixin):
     remote_id: str
     name: str
     vision_vendor_number: str
-    configurations: List[Optional[dict]]  # TODO MB "configurations" ? {key: value, label: value}
+    configs: List[Optional[dict]]  # {id: value, key: value, label: value}
     payload: dict
 
 
@@ -361,7 +361,7 @@ class PaymentGatewayService:
                     "vision_vendor_number": fsp.vision_vendor_number,
                     "name": fsp.name,
                     "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                    "data_transfer_configuration": fsp.configurations,
+                    "data_transfer_configuration": fsp.configs,
                     "delivery_mechanisms": [
                         Payment.DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
                         Payment.DELIVERY_TYPE_MOBILE_MONEY,
