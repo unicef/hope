@@ -1,13 +1,11 @@
 import logging
 import os
-import sys
 from datetime import datetime
 
 from django.conf import settings
 from django.core.management import call_command
 
 import pytest
-from _pytest.config import Config
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
@@ -37,10 +35,7 @@ from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Country
 
 
-def pytest_configure(config: Config) -> None:
-    pytest.localhost = True if config.getoption("--localhost") else False
-
-    sys._called_from_pytest = True
+def pytest_configure() -> None:
     from django.conf import settings
 
     settings.DEBUG = True
