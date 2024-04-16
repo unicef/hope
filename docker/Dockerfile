@@ -46,7 +46,7 @@ ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
     PATH=$PATH:$PYPACKAGES/bin \
     XDG_RUNTIME_DIR=/run/user/"${UID}"
 
-WORKDIR /code
+WORKDIR $PDM_PROJECT
 
 COPY --from=waitforit /data/waitforit /usr/local/bin/waitforit
 
@@ -59,10 +59,10 @@ RUN pip install pdm==2.13.3 &&\
     pdm config venv.in_project false &&\
     pdm config install.cache true
 
-WORKDIR $PDM_PROJECT
-COPY backend/pyproject.toml backend/pdm.lock ./
+COPY ./backend ./
 
-RUN pdm sync --prod --no-editable --no-self
+COPY ./docker/entrypoint.sh /bin/
+ENTRYPOINT ["entrypoint.sh"]
 
 # Dev image
 FROM builder AS dev
@@ -74,11 +74,9 @@ RUN apt-get update \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-WORKDIR $PDM_PROJECT
-RUN pdm sync --no-editable --no-self
-
-WORKDIR /code
 COPY ./backend ./
+
+RUN pdm sync --no-editable --no-self
 
 COPY ./docker/entrypoint.sh /bin/
 ENTRYPOINT ["entrypoint.sh"]
