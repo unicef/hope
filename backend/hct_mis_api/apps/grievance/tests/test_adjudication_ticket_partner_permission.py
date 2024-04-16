@@ -248,7 +248,6 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
 
     def test_close_ticket_when_partner_with_permission(self) -> None:
         partner = PartnerFactory()
-        partner.permissions = {str(self.business_area.id): {"programs": {str(self.program.id): [str(self.doshi.id)]}}}
         self.update_partner_access_to_program(
             partner, self.program, [self.doshi]
         )

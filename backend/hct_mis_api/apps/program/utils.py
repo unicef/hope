@@ -390,23 +390,6 @@ def copy_bank_account_info_per_individual(
     return bank_accounts_info_list
 
 
-def update_partner_permissions_for_program(partner_data: Dict, business_area_pk: str, program_pk: str) -> None:
-    admin_areas = [area_id for area_id in partner_data.get("admin_areas", [])]
-    partner = Partner.objects.get(id=partner_data["id"])
-    partner_perms = partner.get_permissions()
-    partner_perms.set_program_areas(business_area_pk, program_pk, admin_areas)
-    partner.set_permissions(partner_perms)
-    partner.save()
-
-
-def remove_program_permissions_for_exists_partners(
-    partner_exclude_ids: Sequence[Union[str, int]], business_area_pk: str, program_pk: str
-) -> None:
-    for partner in Partner.objects.exclude(id__in=partner_exclude_ids):
-        partner.get_permissions().remove_program_areas(business_area_pk, program_pk)
-        partner.save()
-
-
 def create_program_partner_access(partners_data, program, partner_access) -> List[Dict]:
     full_area_access = Area.objects.filter(area_type__country__business_areas__id=program.business_area.id)
 

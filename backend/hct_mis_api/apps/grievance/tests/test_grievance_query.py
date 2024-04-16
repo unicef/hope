@@ -216,7 +216,7 @@ class TestGrievanceQuery(APITestCase):
         cls.add_partner_role_in_business_area(
             cls.partner,
             cls.business_area,
-            role,
+            [role],
         )
         cls.update_partner_access_to_program(
             cls.partner_2,
@@ -226,7 +226,7 @@ class TestGrievanceQuery(APITestCase):
         cls.add_partner_role_in_business_area(
             cls.partner_2,
             cls.business_area,
-            role,
+            [role],
         )
         cls.user = UserFactory.create(partner=cls.partner)
         cls.user2 = UserFactory.create(partner=cls.partner_2)

@@ -595,13 +595,9 @@ class GrievanceStatusChangeMutation(PermissionMutation):
                     raise PermissionDenied("Permission Denied: User does not have set partner")
 
                 if not partner.is_unicef:
-                    partner_permission = partner.get_permissions()
-
                     for selected_individual in grievance_ticket.ticket_details.selected_individuals.all():
-                        areas_ids = partner_permission.areas_for(
-                            str(grievance_ticket.business_area.id), str(selected_individual.program.id)
-                        )
-                        if areas_ids is None or str(selected_individual.household.admin2.id) not in areas_ids:
+                        partner_areas = partner.get_program_areas(selected_individual.program.id)
+                        if not partner_areas.filter(id=selected_individual.household.admin2.id).exists():
                             raise PermissionDenied("Permission Denied: User does not have access to close ticket")
 
             clear_cache(grievance_ticket.ticket_details, grievance_ticket.business_area.slug)

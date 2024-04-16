@@ -63,7 +63,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
-        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
+        cls.update_partner_access_to_program(cls.user, cls.program)
 
         tp = TargetPopulation(
             name="Draft Target Population",
@@ -179,7 +179,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
-        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
+        cls.update_partner_access_to_program(cls.user, cls.program)
 
         tp = TargetPopulation(
             name="Draft Target Population",
@@ -307,7 +307,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
-        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
+        cls.update_partner_access_to_program(cls.user, cls.program)
 
         tp = TargetPopulation(
             name="Draft Target Population",

@@ -1,7 +1,6 @@
 from django.conf import settings
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.models import PartnerPermission
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
@@ -98,19 +97,16 @@ class TestHouseholdPermissionsQuery(APITestCase):
             variables={"id": self.id_to_base64(self.household.id, "HouseholdNode")},
         )
 
-    def test_not_unicef_partner_with_program_and_without_admin_area_has_access_for_program(self) -> None:
-        self._test_not_unicef_partner_with_program_and_without_admin_area_has_access(
+    def test_not_unicef_partner_with_program_and_with_full_admin_area_has_access_for_program(self) -> None:
+        self._test_not_unicef_partner_with_program_and_with_full_admin_area_has_access(
             self.id_to_base64(self.program_one.id, "ProgramNode")
         )
 
-    def test_not_unicef_partner_with_program_and_without_admin_area_has_access_query_all_programs(self) -> None:
-        self._test_not_unicef_partner_with_program_and_without_admin_area_has_access("all")
+    def test_not_unicef_partner_with_program_and_with_full_admin_area_has_access_query_all_programs(self) -> None:
+        self._test_not_unicef_partner_with_program_and_with_full_admin_area_has_access("all")
 
-    def _test_not_unicef_partner_with_program_and_without_admin_area_has_access(self, program: str) -> None:
-        permissions: PartnerPermission = self.not_unicef_partner.get_permissions()
-        permissions.set_program_areas(str(self.business_area.id), str(self.program_one.id), [])
-        self.not_unicef_partner.set_permissions(permissions)
-        self.not_unicef_partner.save()
+    def _test_not_unicef_partner_with_program_and_with_full_admin_area_has_access(self, program: str) -> None:
+        self.update_partner_access_to_program(self.not_unicef_partner, self.program_one, [self.area2, self.area3])
         self.user.partner = self.not_unicef_partner
         self.user.save()
 
@@ -135,10 +131,11 @@ class TestHouseholdPermissionsQuery(APITestCase):
         self._test_not_unicef_partner_with_program_and_with_correct_admin_area_has_access("all")
 
     def _test_not_unicef_partner_with_program_and_with_correct_admin_area_has_access(self, program: str) -> None:
-        permissions: PartnerPermission = self.not_unicef_partner.get_permissions()
-        permissions.set_program_areas(str(self.business_area.id), str(self.program_one.id), [str(self.area2.id)])
-        self.not_unicef_partner.set_permissions(permissions)
-        self.not_unicef_partner.save()
+        self.update_partner_access_to_program(
+            self.not_unicef_partner,
+            self.program_one,
+            [self.area2],
+        )
         self.user.partner = self.not_unicef_partner
         self.user.save()
 
@@ -165,10 +162,11 @@ class TestHouseholdPermissionsQuery(APITestCase):
         self._test_not_unicef_partner_with_program_and_with_wrong_admin_area_doesnt_have_access("all")
 
     def _test_not_unicef_partner_with_program_and_with_wrong_admin_area_doesnt_have_access(self, program: str) -> None:
-        permissions: PartnerPermission = self.not_unicef_partner.get_permissions()
-        permissions.set_program_areas(str(self.business_area.id), str(self.program_one.id), [str(self.area3.id)])
-        self.not_unicef_partner.set_permissions(permissions)
-        self.not_unicef_partner.save()
+        self.update_partner_access_to_program(
+            self.not_unicef_partner,
+            self.program_one,
+            [self.area3],
+        )
         self.user.partner = self.not_unicef_partner
         self.user.save()
 

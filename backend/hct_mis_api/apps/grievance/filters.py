@@ -360,10 +360,9 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
         program_id = get_program_id_from_headers(self.request.headers)
 
         perm = Permissions.GRIEVANCES_CROSS_AREA_FILTER.value
-
         if (
             user.has_permission(perm, business_area, program_id)
-            and user.partner.has_complete_access_in_program(program_id, str(business_area.id))
+            and user.partner.has_complete_access_in_program(program_id)
             and value is True
         ):
             return qs.filter(needs_adjudication_ticket_details__is_cross_area=True)

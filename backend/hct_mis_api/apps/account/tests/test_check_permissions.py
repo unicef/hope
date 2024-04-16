@@ -2,14 +2,14 @@ from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
-from hct_mis_api.apps.account.models import PartnerPermission, Role, User, UserRole
+from hct_mis_api.apps.account.models import Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions, check_permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
 from hct_mis_api.apps.core.utils import encode_id_base64_required
 from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 
 
 class TestCheckPermissions(TestCase):
@@ -76,9 +76,9 @@ class TestCheckPermissions(TestCase):
         self.assertFalse(result)
 
     def test_user_is_not_unicef_and_has_access_to_business_area_and_program(self) -> None:
-        permissions = PartnerPermission()
-        permissions.set_program_areas(self.business_area.pk, self.program.pk, [str(self.area.pk)])
-        partner = PartnerFactory(name="Partner", permissions=permissions.to_dict())
+        partner = PartnerFactory(name="Partner")
+        program_partner_through = ProgramPartnerThrough.objects.create(program=self.program, partner=partner)
+        program_partner_through.areas.set([self.area])
         self.user.partner = partner
         self.user.save()
 
@@ -94,10 +94,11 @@ class TestCheckPermissions(TestCase):
     def test_user_is_not_unicef_and_dont_have_access_to_business_area_but_has_access_to_business_area_via_partner(
         self,
     ) -> None:
-        permissions = PartnerPermission()
-        permissions.set_program_areas(self.business_area.pk, self.program.pk, [str(self.area.pk)])
-        permissions.set_roles(self.business_area.pk, [str(self.role.pk)])
-        partner = PartnerFactory(name="Partner", permissions=permissions.to_dict())
+        partner = PartnerFactory(name="Partner")
+        program_partner_through = ProgramPartnerThrough.objects.create(program=self.program, partner=partner)
+        program_partner_through.areas.set([self.area])
+        ba_partner_through = BusinessAreaPartnerThrough.objects.create(business_area=self.business_area, partner=partner)
+        ba_partner_through.roles.set([self.role])
         self.user.partner = partner
         self.user.save()
 
@@ -109,9 +110,9 @@ class TestCheckPermissions(TestCase):
         self.assertTrue(result)
 
     def test_user_is_not_unicef_and_dont_have_access_to_business_area_at_all(self) -> None:
-        permissions = PartnerPermission()
-        permissions.set_program_areas(self.business_area.pk, self.program.pk, [str(self.area.pk)])
-        partner = PartnerFactory(name="Partner", permissions=permissions.to_dict())
+        partner = PartnerFactory(name="Partner")
+        program_partner_through = ProgramPartnerThrough.objects.create(program=self.program, partner=partner)
+        program_partner_through.areas.set([self.area])
         self.user.partner = partner
         self.user.save()
 

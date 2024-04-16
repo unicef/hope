@@ -52,106 +52,6 @@ USER_STATUS_CHOICES = (
 )
 
 
-@dataclasses.dataclass
-class BusinessAreaPartnerPermission:
-    business_area_id: str
-    roles: List[str] = dataclasses.field(default_factory=list)
-    programs: Dict[str, List[str]] = dataclasses.field(default_factory=dict)
-
-    def to_dict(self) -> Dict:
-        return {"roles": self.roles or [], "programs": self.programs or {}}
-
-    def in_program(self, program_id: str) -> Optional[List[str]]:
-        return self.programs.get(program_id, None)
-
-    def get_all_area_ids(self) -> List[str]:
-        all_area_ids = []
-        for _program_id, area_ids in self.programs.items():
-            all_area_ids.extend(area_ids)
-        return all_area_ids
-
-
-class PartnerPermission:
-    def __init__(self) -> None:
-        self._permissions: Dict[str, BusinessAreaPartnerPermission] = {}
-        self._available_business_areas = []
-
-    @classmethod
-    def from_dict(cls, data: Dict) -> "PartnerPermission":
-        instance = cls()
-        for business_area_id in data:
-            instance._permissions[business_area_id] = BusinessAreaPartnerPermission(
-                business_area_id=business_area_id,
-                roles=data[business_area_id].get("roles", []),
-                programs=data[business_area_id].get("programs", {}),
-            )
-        instance._available_business_areas.extend(instance._permissions.keys())
-        return instance
-
-    @classmethod
-    def from_list(cls, data: List[BusinessAreaPartnerPermission]) -> "PartnerPermission":
-        instance = cls()
-        for permission in data:
-            instance._permissions[permission.business_area_id] = permission
-        instance._available_business_areas.extend(instance._permissions.keys())
-        return instance
-
-    def set_roles(self, business_area_id: str, roles: List[str]) -> None:
-        business_area_id = str(business_area_id)
-        permissions = self._permissions.get(business_area_id, BusinessAreaPartnerPermission(business_area_id))
-        permissions.roles = roles
-        self._permissions[business_area_id] = permissions
-
-    def set_program_areas(self, business_area_id: str, program_id: str, areas_ids: List[str]) -> None:
-        business_area_id = str(business_area_id)
-        program_id = str(program_id)
-        permissions = self._permissions.get(business_area_id, BusinessAreaPartnerPermission(business_area_id))
-        permissions.programs[program_id] = areas_ids
-        self._permissions[business_area_id] = permissions
-
-    def remove_program_areas(self, business_area_id: str, program_id: str) -> None:
-        permissions = self._permissions.get(business_area_id, BusinessAreaPartnerPermission(business_area_id))
-        if program_id in permissions.programs:
-            permissions.programs.pop(program_id)
-
-    def to_dict(self) -> Dict:
-        return {business_area_id: permission.to_dict() for business_area_id, permission in self._permissions.items()}
-
-    def to_list(self) -> List[BusinessAreaPartnerPermission]:
-        return list(self._permissions.values())
-
-    def roles_for(self, business_area_id: str) -> List[str]:
-        if business_area_id not in self._available_business_areas:
-            return []
-        return self._permissions[business_area_id].roles
-
-    def areas_for(self, business_area_id: str, program_id: str) -> Optional[List[str]]:
-        """
-        if return None it means that no access into BA for this partner
-        if return empty list [] it means that partner have access for all Areas
-        """
-        if business_area_id not in self._available_business_areas:
-            return None
-        return self._permissions[business_area_id].in_program(program_id)
-
-    def all_areas_for(self, business_area_id: str) -> Optional[List[str]]:
-        """
-        return list for all Areas or None
-        """
-        if business_area_id not in self._available_business_areas:
-            return None
-        return self._permissions[business_area_id].get_all_area_ids()
-
-    def business_area_ids(self) -> List[str]:
-        # return only BA with roles NOT []
-        return [ba_id for ba_id in self._available_business_areas if self._permissions[ba_id].roles]
-
-    def get_programs_for_business_area(self, business_area_id: str) -> "Optional[BusinessAreaPartnerPermission]":
-        if business_area_id not in self._available_business_areas:
-            return None
-        return self._permissions[business_area_id]
-
-
 class Partner(LimitBusinessAreaModelMixin, MPTTModel):
     name = CICharField(max_length=100, unique=True)
     parent = TreeForeignKey(
@@ -183,12 +83,6 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
     @property
     def is_parent(self) -> bool:
         return self.id in Partner.objects.exclude(parent__isnull=True).values_list("parent", flat=True)
-
-    def get_permissions(self) -> PartnerPermission:
-        return PartnerPermission.from_dict(self.permissions)
-
-    def set_permissions(self, partner_permission: PartnerPermission) -> None:
-        self.permissions = partner_permission.to_dict()
 
     @classmethod
     def get_partners_as_choices(cls) -> List:
@@ -227,10 +121,6 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
             self.program_partner_through.filter(program_id=program_id).first()
             and self.program_partner_through.filter(program_id=program_id).first().full_area_access
         )
-
-    @property
-    def business_area_ids(self) -> List[str]:
-        return self.get_permissions().business_area_ids()
 
     def get_program_ids_for_business_area(self, business_area_id: str) -> List[str]:
         return [str(program_id) for program_id in self.programs.filter(business_area_id=business_area_id).values_list("id", flat=True)]

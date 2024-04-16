@@ -52,7 +52,7 @@ mutation CreateAccountabilityCommunicationMessage (
         cls.business_area = create_afghanistan()
         cls.user = UserFactory(first_name="John", last_name="Wick")
         cls.program = ProgramFactory(status=Program.ACTIVE)
-        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
+        cls.update_partner_access_to_program(cls.user, cls.program)
         cls.target_population = TargetPopulationFactory(
             business_area=cls.business_area,
             status=TargetPopulation.STATUS_PROCESSING,

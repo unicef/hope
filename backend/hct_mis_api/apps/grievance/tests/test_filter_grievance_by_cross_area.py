@@ -15,7 +15,7 @@ from hct_mis_api.apps.grievance.fixtures import (
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 
 FILTER_GRIEVANCE_BY_CROSS_AREA = """
 query AllGrievanceTickets($isCrossArea: Boolean) {
@@ -36,7 +36,7 @@ query AllGrievanceTickets($isCrossArea: Boolean) {
 
 
 @patch("hct_mis_api.apps.core.es_filters.ElasticSearchFilterSet.USE_ALL_FIELDS_AS_POSTGRES_DB", True)
-class TestCrossAreaFilterAvailable(APITestCase):
+class TestCrossAreaFilter(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
@@ -110,17 +110,15 @@ class TestCrossAreaFilterAvailable(APITestCase):
 
         # testing different access requirements
         cls.partner_without_area_restrictions = PartnerFactory(name="Partner without area restrictions")
-        cls.partner_without_area_restrictions.permissions = {
-            str(cls.business_area.id): {"programs": {str(cls.program.id): []}}
-        }
-        cls.partner_without_area_restrictions.save()
+        program_partner_through_without_area_restrictions = ProgramPartnerThrough.objects.create(
+            program=cls.program, partner=cls.partner_without_area_restrictions
+        )
+        program_partner_through_without_area_restrictions.full_area_access = True
+        program_partner_through_without_area_restrictions.save()
         cls.partner_with_area_restrictions = PartnerFactory(name="Partner with area restrictions")
-        cls.partner_with_area_restrictions.permissions = {
-            str(cls.business_area.id): {
-                "programs": {str(cls.program.id): [str(cls.admin_area1.id), str(cls.admin_area2.id)]}
-            }
-        }
-        cls.partner_with_area_restrictions.save()
+        cls.update_partner_access_to_program(
+            cls.partner_with_area_restrictions, cls.program, [cls.admin_area1, cls.admin_area2]
+        )
 
     @pytest.mark.skip(reason="This test has never worked with pytest")
     def test1_cross_area_filter_true_full_area_access_without_permission(self) -> None:
@@ -211,7 +209,7 @@ class TestCrossAreaFilterAvailable(APITestCase):
         )
 
     @pytest.mark.skip(reason="unstable test")
-    def test_cross_area_filter_true_but_area_restrictions(self) -> None:
+    def test_across_area_filter_true_but_area_restrictions(self) -> None:
         user_with_area_restrictions = UserFactory(partner=self.partner_with_area_restrictions)
         self.create_user_role_with_permissions(
             user_with_area_restrictions,

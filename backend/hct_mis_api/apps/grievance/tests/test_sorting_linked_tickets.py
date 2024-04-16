@@ -79,14 +79,12 @@ class TestGrievanceQuery(APITestCase):
         cls.add_partner_role_in_business_area(
             cls.partner, cls.business_area, [role],
         )
-        cls.partner_2.permissions = {
-            str(cls.business_area.pk): {
-                "programs": {str(cls.program.id): [str(cls.admin_area_1.pk), str(cls.admin_area_2.pk)]},
-                "roles": ["e9e8c91a-c711-45b7-be8c-501c14d46330"],
-            }
-        }
-        cls.partner.save()
-        cls.partner_2.save()
+        cls.update_partner_access_to_program(
+            cls.partner_2, cls.program, [cls.admin_area_1, cls.admin_area_2]
+        )
+        cls.add_partner_role_in_business_area(
+            cls.partner_2, cls.business_area, [role],
+        )
 
         household_1, _ = create_household({"size": 1})
         household_2, _ = create_household({"size": 1})

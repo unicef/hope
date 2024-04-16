@@ -48,15 +48,6 @@ class ProgramCycleAdminInline(admin.TabularInline):
 
 class PartnerAreaForm(forms.Form):
     partner = forms.ModelChoiceField(queryset=Partner.objects.all(), required=True)
-    # def __init__(self, *args: Any, **kwargs: Any) -> None:
-    #     self.business_area_id = kwargs.pop("business_area_id")
-    #     super().__init__(*args, **kwargs)
-    #
-    #     self.fields["partner"] = forms.ModelChoiceField(queryset=self.get_partner_queryset())
-    #
-    # def get_partner_queryset(self) -> QuerySet[Partner]:
-    #     return Partner.objects.filter(allowed_business_areas__id=self.business_area_id)
-    # program = forms.ModelChoiceField(queryset=Program.objects.all(), required=True)
     areas = TreeNodeMultipleChoiceField(queryset=Area.objects.all(), widget=CheckboxSelectMultiple(), required=False)
 
 
@@ -143,6 +134,13 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
                             partner=form["partner"],
                             program=program,
                         )
+                        if not areas_ids:
+                            program_partner.full_area_access = True
+                            program_partner.save(update_fields=["full_area_access"])
+                            areas_ids = Area.objects.filter(area_type__country__business_areas__id=program.business_area.id).values_list("id", flat=True)
+                        else:
+                            program_partner.full_area_access = False
+                            program_partner.save(update_fields=["full_area_access"])
                         program_partner.areas.set(areas_ids)
                     elif form and form["DELETE"]:
                         ProgramPartnerThrough.objects.filter(partner=form["partner"], program=program).delete()

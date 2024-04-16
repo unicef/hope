@@ -562,7 +562,7 @@ class Query(graphene.ObjectType):
 
         # Full access to all AdminAreas if is_unicef
         # and ignore filtering for Cross Area tickets
-        if not user.partner.is_unicef and not kwargs.get("is_cross_area", False):
+        if not user.partner.is_unicef and not(kwargs.get("is_cross_area", False) and program_id and user.partner.has_complete_access_in_program(program_id)):
             queryset = filter_grievance_tickets_based_on_partner_areas_2(
                 queryset, user.partner, business_area_id, program_id
             )
@@ -594,9 +594,7 @@ class Query(graphene.ObjectType):
 
         perm = Permissions.GRIEVANCES_CROSS_AREA_FILTER.value
 
-        return user.has_permission(perm, business_area, program_id) and user.partner.has_complete_access_in_program(
-            program_id, str(business_area.id)
-        )
+        return user.has_permission(perm, business_area, program_id) and user.partner.has_complete_access_in_program(program_id)
 
     def resolve_grievance_ticket_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)

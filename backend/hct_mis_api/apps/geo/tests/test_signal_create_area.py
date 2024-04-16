@@ -30,7 +30,7 @@ class PartnerAccessChangeSignal(TestCase):
         cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=cls.area_type_afg)
 
         cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area, partner_access=Program.SELECTED_PARTNERS_ACCESS)
-        cls.program_partner_through = ProgramPartnerThrough.objects.create(program=cls.program, partner=cls.partner)
+        cls.program_partner_through, _ = ProgramPartnerThrough.objects.get_or_create(program=cls.program, partner=cls.partner)
         cls.program_partner_through.areas.set([cls.area_in_afg_1, cls.area_in_afg_2])
         cls.program_partner_through.full_area_access = False
         cls.program_partner_through.save()

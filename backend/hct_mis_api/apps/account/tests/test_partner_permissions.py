@@ -28,7 +28,7 @@ class UserPartnerTest(TestCase):
         cls.other_user = UserFactory(partner=cls.other_partner)
 
         cls.unicef_partner = PartnerFactory(name="UNICEF")
-        program_unicef_through = ProgramPartnerThrough.objects.create(program=cls.program, partner=cls.unicef_partner)
+        program_unicef_through, _ = ProgramPartnerThrough.objects.get_or_create(program=cls.program, partner=cls.unicef_partner)
         program_unicef_through.areas.set([cls.area_1, cls.area_2])
         cls.unicef_user = UserFactory(partner=cls.unicef_partner)
 

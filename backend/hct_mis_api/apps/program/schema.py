@@ -94,15 +94,6 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     def resolve_total_number_of_households_with_tp_in_program(program: Program, info: Any, **kwargs: Any) -> int:
         return program.households_with_tp_in_program.count()
 
-    # @staticmethod
-    # def resolve_partners(program: Program, info: Any, **kwargs: Any) -> List[Partner]:
-    #     # filter Partners by program_id and program.business_area_id
-    #     partners_list = []
-    #     for partner in Partner.objects.all():
-    #         partner.program = program
-    #         if partner.get_permissions().areas_for(str(program.business_area_id), str(program.pk)) is not None:
-    #             partners_list.append(partner)
-    #     return partners_list
     @staticmethod
     def resolve_partners(program: Program, info: Any, **kwargs: Any) -> List[ProgramPartnerThrough]:
         return Partner.objects.filter(

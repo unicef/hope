@@ -163,7 +163,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
             number_of_individuals=6,
         )
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-        self.update_user_partner_perm_for_program(self.user, self.business_area, program)
+        self.update_partner_access_to_program(self.user, program)
         self.snapshot_graphql_request(
             request_string=self.CREATE_REGISTRATION_DATA_IMPORT,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(program.id, "ProgramNode")}},

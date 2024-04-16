@@ -32,8 +32,6 @@ from hct_mis_api.apps.program.utils import (
     copy_program_object,
     create_program_partner_access,
     remove_program_partner_access,
-    remove_program_permissions_for_exists_partners,
-    update_partner_permissions_for_program,
 )
 from hct_mis_api.apps.program.validators import (
     ProgramDeletionValidator,
