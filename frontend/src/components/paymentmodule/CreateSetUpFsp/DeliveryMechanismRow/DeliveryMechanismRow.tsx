@@ -13,6 +13,7 @@ interface DeliveryMechanismRowProps {
   deliveryMechanismsChoices;
   fspsChoices;
   permissions: string[];
+  setFieldValue: (name, value) => void;
 }
 
 export function DeliveryMechanismRow({
@@ -21,9 +22,16 @@ export function DeliveryMechanismRow({
   values,
   deliveryMechanismsChoices,
   fspsChoices,
+  setFieldValue,
 }: DeliveryMechanismRowProps): React.ReactElement {
   const { t } = useTranslation();
   const chosenFsp = values.deliveryMechanisms[index].fsp;
+
+  const handleFspChange = (e): void => {
+    setFieldValue(`deliveryMechanisms[${index}].chosenConfiguration`, '');
+    setFieldValue(`deliveryMechanisms[${index}].fsp`, e.target.value);
+  };
+
   return (
     <Box flexDirection="column">
       <Grid alignItems='flex-end' container>
@@ -52,13 +60,14 @@ export function DeliveryMechanismRow({
         {step === 1 && fspsChoices && (
           <>
             <Grid item xs={3}>
-            <Grid item xs={8}>
+            <Grid item xs={10}>
               <Field
                 name={`deliveryMechanisms[${index}].fsp`}
                 variant="outlined"
                 label={t('FSP')}
                 component={FormikSelectField}
                 choices={fspsChoices}
+                onChange={(e) => handleFspChange(e)}
               />
             </Grid>
           </Grid>

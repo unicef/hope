@@ -179,7 +179,7 @@ export const SetUpFspCore = ({
       onSubmit={(values) => handleSubmit(values)}
       enableReinitialize
     >
-      {({ values, submitForm }) => (
+      {({ values, submitForm, setFieldValue }) => (
         <Form>
           <AutoSubmitFormOnEnter />
           <Box m={5}>
@@ -227,6 +227,7 @@ export const SetUpFspCore = ({
                           step={activeStep}
                           values={values}
                           permissions={permissions}
+                          setFieldValue={setFieldValue}
                         />
                       );
                     })}

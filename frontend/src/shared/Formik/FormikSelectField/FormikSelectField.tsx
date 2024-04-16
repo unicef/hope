@@ -30,6 +30,7 @@ export function FormikSelectField({
   multiple,
   icon = null,
   disableClearable = false,
+  onChange,
   ...otherProps
 }): React.ReactElement {
   const isInvalid =
@@ -46,6 +47,7 @@ export function FormikSelectField({
     return Boolean(v);
   };
 
+
   const isValue = checkValue(otherProps.value || field.value);
 
   const showX = isValue && !disableClearable && !otherProps.disabled;
@@ -56,6 +58,12 @@ export function FormikSelectField({
       <Select
         {...field}
         {...otherProps}
+        onChange={(event) => {
+          field.onChange(event);
+          if (onChange) {
+            onChange(event);
+          }
+        }}
         size="small"
         name={field.name}
         multiple={multiple}
