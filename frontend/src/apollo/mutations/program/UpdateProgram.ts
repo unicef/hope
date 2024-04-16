@@ -35,7 +35,7 @@ export const UPDATE_PROGRAM_MUTATION = gql`
         partnerAccess
         partners {
           id
-          partnerName
+          name
           areaAccess
           areas {
             id

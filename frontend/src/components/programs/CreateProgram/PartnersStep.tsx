@@ -2,6 +2,7 @@ import { Box, Button, Grid } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { Field, FieldArray } from 'formik';
 import * as React from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { AllAreasTreeQuery, ProgramPartnerAccess } from '@generated/graphql';
@@ -11,7 +12,7 @@ import { ButtonTooltip } from '@core/ButtonTooltip';
 import { ProgramPartnerCard } from './ProgramPartnerCard';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { DividerLine } from '@core/DividerLine';
-import { useEffect } from 'react';
+import { partnerAccessChoices } from '@components/programs/constants';
 
 interface PartnersStepProps {
   values;
@@ -65,21 +66,6 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
     }
   }
 
-  const accessTypeChoices = [
-    {
-      value: ProgramPartnerAccess.NonePartnersAccess,
-      label: 'None of the partners should have access',
-    },
-    {
-      value: ProgramPartnerAccess.SelectedPartnersAccess,
-      label: 'Only selected partners within the business area',
-    },
-    {
-      value: ProgramPartnerAccess.AllPartnersAccess,
-      label: 'All partners within the business area',
-    },
-  ];
-
   return (
     <BaseSection title={title}>
       <>
@@ -89,7 +75,7 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
               name="partnerAccess"
               label={t('Who should have access to the program?')}
               color="primary"
-              choices={accessTypeChoices}
+              choices={partnerAccessChoices}
               component={FormikSelectField}
               required
               disableClearable
