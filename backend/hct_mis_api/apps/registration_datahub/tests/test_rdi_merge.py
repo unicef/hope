@@ -18,12 +18,14 @@ from hct_mis_api.apps.household.models import (
     HEAD,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
+    BankAccountInfo,
     Household,
     Individual,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.fixtures import (
+    ImportedBankAccountInfoFactory,
     ImportedHouseholdFactory,
     ImportedIndividualFactory,
     RegistrationDataImportDatahubFactory,
@@ -216,6 +218,10 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             enumerator_rec_id=1234567890,
         )
         self.set_imported_individuals(imported_household)
+
+        ImportedBankAccountInfoFactory(individual=self.individuals[0])
+        ImportedBankAccountInfoFactory(individual=self.individuals[1])
+
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
 
@@ -231,6 +237,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         self.assertEqual(8, individuals.count())
         self.assertEqual(0, imported_individuals.count())  # Removed after successful merge
         self.assertEqual(households.first().flex_fields.get("enumerator_id"), 1234567890)
+        self.assertEqual(BankAccountInfo.objects.count(), 2)
 
         individual_with_valid_phone_data = Individual.objects.filter(given_name="Liz").first()
         individual_with_invalid_phone_data = Individual.objects.filter(given_name="Jenna").first()
