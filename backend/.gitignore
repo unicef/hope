@@ -4,3 +4,4 @@ Makefile
 test_times.txt
 screenshot
 report
+.pdm-python
