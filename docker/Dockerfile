@@ -39,10 +39,9 @@ RUN apt-get update \
   && mkdir -p -m 0700 /run/user/"${UID}" \
   && chown -R hope:hope /code /tmp /data /run/user/"${UID}"
 
-ENV PDM_PROJECT=/opt/pdm
+ENV PDM_PROJECT=/code
 ENV PYPACKAGES=$PDM_PROJECT/__pypackages__/3.11
 ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
-    PDM_PROJECT=/opt/pdm \
     PYTHONPATH=$PYTHONPATH:$PYPACKAGES/lib:/code: \
     PATH=$PATH:$PYPACKAGES/bin \
     XDG_RUNTIME_DIR=/run/user/"${UID}"

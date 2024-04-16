@@ -78,7 +78,7 @@ disable_error_code = [
 django_settings_module = "hct_mis_api.settings"
 
 [tool.pdm]
-distribution = false
+distribution = true
 
 [tool.pdm.dev-dependencies]
 dev = [
