@@ -70,7 +70,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
     def setUpTestData(cls) -> None:
         program = ProgramFactory()
         cls.rdi = RegistrationDataImportFactory(program=program)
-        cls.rdi.business_area.postpone_deduplication = True
+        cls.rdi.business_area.postpone_deduplication = False
         cls.rdi.business_area.save()
         cls.rdi_hub = RegistrationDataImportDatahubFactory(
             name=cls.rdi.name, hct_id=cls.rdi.id, business_area_slug=cls.rdi.business_area.slug

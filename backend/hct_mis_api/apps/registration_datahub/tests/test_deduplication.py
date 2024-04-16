@@ -465,14 +465,17 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         self.assertEqual(needs_adjudication.count(), 0)
         self.assertEqual(duplicate.count(), 2)
 
+    @patch("hct_mis_api.apps.utils.elasticsearch_utils.populate_index")
     @patch(
         "hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge.CheckAgainstSanctionListPreMergeTask.execute"
     )
-    def test_deduplicate_and_check_against_sanctions_list_when_screen_beneficiary_on(
+    def test_deduplicate_and_check_against_sanctions_list_when_screen_beneficiary(
         self,
         check_sanction_list_mock: Any,
+        populate_index_mock: Any,
     ) -> None:
         DeduplicateAndCheckAgainstSanctionsListTask().execute(
-            should_populate_index=False, individuals_ids=[self.individuals[0].id, self.individuals[1].id]
+            should_populate_index=True, individuals_ids=[self.individuals[0].id, self.individuals[1].id]
         )
+        populate_index_mock.assert_called()
         check_sanction_list_mock.assert_called()
