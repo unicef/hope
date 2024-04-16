@@ -47,7 +47,6 @@ export function FormikSelectField({
     return Boolean(v);
   };
 
-
   const isValue = checkValue(otherProps.value || field.value);
 
   const showX = isValue && !disableClearable && !otherProps.disabled;

@@ -41,10 +41,7 @@ export function EditSetUpFspPage(): React.ReactElement {
   return (
     <>
       <EditSetUpFspHeader permissions={permissions} />
-      <SetUpFspCore
-        permissions={permissions}
-        initialValues={initialValues}
-      />
+      <SetUpFspCore permissions={permissions} initialValues={initialValues} />
     </>
   );
 }
