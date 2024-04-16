@@ -1318,6 +1318,15 @@ class FinancialServiceProvider(LimitBusinessAreaModelMixin, TimeStampedUUIDModel
     def is_payment_gateway(self) -> bool:
         return self.communication_channel == self.COMMUNICATION_CHANNEL_API and self.payment_gateway_id is not None
 
+    @property
+    def configurations(self) -> List[Optional[dict]]:
+        if not self.is_payment_gateway:
+            return []
+        return [
+            {"key": config.get("key", None), "label": config.get("label", None), "id": config.get("id", None)}
+            for config in self.data_transfer_configuration
+        ]
+
 
 class FinancialServiceProviderXlsxReport(TimeStampedUUIDModel):
     # TODO: remove? do we using this one?

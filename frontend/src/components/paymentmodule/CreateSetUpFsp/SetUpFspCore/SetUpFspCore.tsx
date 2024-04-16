@@ -25,6 +25,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export interface FormValues {
   deliveryMechanisms: {
+    chosenConfiguration: string;
     deliveryMechanism: string;
     fsp: string;
   }[];
@@ -141,6 +142,7 @@ export const SetUpFspCore = ({
       fspId: el.fsp,
       deliveryMechanism: el.deliveryMechanism,
       order: index + 1,
+      chosenConfiguration: el.chosenConfiguration,
     }));
     try {
       await assignFspToDeliveryMechanism({
@@ -203,6 +205,7 @@ export const SetUpFspCore = ({
                       const mappedFsps = mapping?.fsps.map((el) => ({
                         name: el.name,
                         value: el.id,
+                        configurations: el.configurations,
                       }));
 
                       const deliveryMechanismsChoices =

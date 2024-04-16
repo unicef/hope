@@ -243,11 +243,6 @@ type AssignFspToDeliveryMechanismMutation {
   paymentPlan: PaymentPlanNode
 }
 
-type AvailableFSPConfiguration {
-  key: String
-  label: String
-}
-
 input AvailableFspsForDeliveryMechanismsInput {
   paymentPlanId: ID!
 }
@@ -979,6 +974,7 @@ enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   TRANSFER
   TRANSFER_TO_ACCOUNT
   VOUCHER
+  CASH_OVER_THE_COUNTER
 }
 
 type DiscardPaymentVerificationPlan {
@@ -1249,7 +1245,6 @@ type FinancialServiceProviderNode implements Node {
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   fullName: String
   isPaymentGateway: Boolean
-  availableConfigurations: [AvailableFSPConfiguration]
 }
 
 type FinancialServiceProviderNodeConnection {
@@ -1317,11 +1312,18 @@ scalar FlexFieldsScalar
 type FspChoice {
   id: String
   name: String
+  configurations: [FspConfiguration]
 }
 
 type FspChoices {
   deliveryMechanism: String
   fsps: [FspChoice]
+}
+
+type FspConfiguration {
+  id: String
+  key: String
+  label: String
 }
 
 input FullListArguments {
@@ -2863,6 +2865,7 @@ enum PaymentDeliveryType {
   TRANSFER
   TRANSFER_TO_ACCOUNT
   VOUCHER
+  CASH_OVER_THE_COUNTER
 }
 
 type PaymentDetailsApproveMutation {
@@ -3246,6 +3249,7 @@ enum PaymentRecordDeliveryType {
   TRANSFER
   TRANSFER_TO_ACCOUNT
   VOUCHER
+  CASH_OVER_THE_COUNTER
 }
 
 enum PaymentRecordEntitlementCardStatus {

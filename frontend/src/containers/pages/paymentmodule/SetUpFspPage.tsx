@@ -19,6 +19,7 @@ export function SetUpFspPage(): React.ReactElement {
       {
         deliveryMechanism: '',
         fsp: '',
+        chosenConfiguration: '',
       },
     ],
   };

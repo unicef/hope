@@ -23,9 +23,10 @@ export function DeliveryMechanismRow({
   fspsChoices,
 }: DeliveryMechanismRowProps): React.ReactElement {
   const { t } = useTranslation();
+  const chosenFsp = values.deliveryMechanisms[index].fsp;
   return (
     <Box flexDirection="column">
-      <Grid container>
+      <Grid alignItems='flex-end' container>
         <Grid item xs={3}>
           <Grid item xs={12}>
             <Box display="flex" alignItems="center">
@@ -49,7 +50,8 @@ export function DeliveryMechanismRow({
           </Grid>
         </Grid>
         {step === 1 && fspsChoices && (
-          <Grid item xs={3}>
+          <>
+            <Grid item xs={3}>
             <Grid item xs={8}>
               <Field
                 name={`deliveryMechanisms[${index}].fsp`}
@@ -60,6 +62,31 @@ export function DeliveryMechanismRow({
               />
             </Grid>
           </Grid>
+            {fspsChoices.find(el => el.value == chosenFsp)?.configurations.length > 0 && (
+            <Grid item xs={3}>
+              <Grid item xs={8}>
+                <Field
+                  name={`deliveryMechanisms[${index}].chosenConfiguration`}
+                  variant="outlined"
+                  label={t('Configuration')}
+                  component={FormikSelectField}
+                  choices={
+                    fspsChoices.find(el => el.value == chosenFsp)?.configurations
+                      ? fspsChoices.find(el => el.value == chosenFsp)?.configurations.map(
+                          el => (
+                            {
+                              name: el.label,
+                              value: el.key,
+                            }
+                          ),
+                        )
+                      : []
+                  }
+                />
+              </Grid>
+            </Grid>
+            )}
+          </>
         )}
         {/* {step === 0 && values.deliveryMechanisms[index].deliveryMechanism && (
           <Grid item xs={3}>
