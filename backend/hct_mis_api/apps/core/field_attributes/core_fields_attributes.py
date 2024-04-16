@@ -1687,7 +1687,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "type": TYPE_LIST_OF_IDS,
         "name": "alternate_collector_id",
         "lookup": "alternate_collector_id",
-        "required": True,
+        "required": False,
         "label": {"English(EN)": "List of alternate collectors ids, separated by a semicolon"},
         "choices": [],
         "associated_with": _INDIVIDUAL,
@@ -1807,9 +1807,9 @@ class FieldFactory(list):
         self, fields: Optional[Any] = None, scopes: Optional[Iterable[Scope]] = None, *args: Any, **kwargs: Any
     ) -> None:
         super().__init__(*args, **kwargs)
+        self.scopes: Iterable = scopes or set()
         if fields:
             self.extend(fields)
-        self.scopes: Iterable = scopes or set()
         self.all_fields = copy.deepcopy(CORE_FIELDS_ATTRIBUTES)
 
     def extend(self, __iterable: Iterable[dict]) -> None:
@@ -1836,7 +1836,10 @@ class FieldFactory(list):
     def from_scopes(cls, scopes: list[Scope]) -> "FieldFactory":
         factory = cls()
         all_fields = copy.deepcopy(factory.all_fields)
-        factory.extend(filter(lambda field: any(True for scope in scopes if scope in field["scope"]), all_fields))
+        factory.extend(list(filter(lambda field: any(True for scope in scopes if scope in field["scope"]), all_fields)))
+        if Scope.XLSX_PEOPLE in scopes:
+            for field_attr in factory:
+                field_attr["xlsx_field"] = "pp_" + field_attr["xlsx_field"].replace("_h_c", "_i_c")
         factory.scopes.update(scopes)
         return factory
 
@@ -1845,7 +1848,7 @@ class FieldFactory(list):
         factory = cls()
         all_fields = copy.deepcopy(factory.all_fields)
         factory.scopes.add(scope)
-        factory.extend(filter(lambda field: scope in field["scope"], all_fields))
+        factory.extend(list(filter(lambda field: scope in field["scope"], all_fields)))
         if scope == Scope.XLSX_PEOPLE:
             for field_attr in factory:
                 field_attr["xlsx_field"] = "pp_" + field_attr["xlsx_field"].replace("_h_c", "_i_c")
