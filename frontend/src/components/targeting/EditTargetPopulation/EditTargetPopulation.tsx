@@ -1,5 +1,5 @@
-import { Typography } from '@mui/material';
-import { FieldArray, Form, Formik } from 'formik';
+import { Box, Divider, Grid, Typography } from '@mui/material';
+import { Field, FieldArray, Form, Formik } from 'formik';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -22,6 +22,8 @@ import { PaperContainer } from '../PaperContainer';
 import { TargetingCriteria } from '../TargetingCriteria';
 import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
 import { useNavigate } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -32,10 +34,10 @@ interface EditTargetPopulationProps {
   screenBeneficiary: boolean;
 }
 
-export function EditTargetPopulation({
+export const EditTargetPopulation = ({
   targetPopulation,
   screenBeneficiary,
-}: EditTargetPopulationProps): React.ReactElement {
+}: EditTargetPopulationProps): React.ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const initialValues = {
@@ -50,10 +52,13 @@ export function EditTargetPopulation({
         .flagExcludeIfActiveAdjudicationTicket || false,
     flagExcludeIfOnSanctionList:
       targetPopulation.targetingCriteria.flagExcludeIfOnSanctionList || false,
+    householdIds: targetPopulation.targetingCriteria.householdIds,
+    individualIds: targetPopulation.targetingCriteria.individualIds,
   };
   const [mutate, { loading }] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
+  const { isSocialDctType, isStandardDctType } = useProgramContext();
   const { data: allProgramsData, loading: loadingPrograms } =
     useAllProgramsForChoicesQuery({
       variables: { businessArea, status: [ProgramStatus.Active] },
@@ -131,6 +136,10 @@ export function EditTargetPopulation({
       values.program,
     );
 
+  const category =
+    targetPopulation.targetingCriteria?.rules.length !== 0 ? 'filters' : 'ids';
+  const isTitleEditable = (): boolean => targetPopulation.status !== 'LOCKED';
+
   return (
     <Formik
       initialValues={initialValues}
@@ -147,30 +156,67 @@ export function EditTargetPopulation({
             loading={loading}
             baseUrl={baseUrl}
             targetPopulation={targetPopulation}
+            category={category}
           />
-          <FieldArray
-            name="targetingCriteria"
-            render={(arrayHelpers) => (
-              <TargetingCriteria
-                helpers={arrayHelpers}
-                rules={values.targetingCriteria}
-                selectedProgram={selectedProgram(values)}
-                isEdit
-                screenBeneficiary={screenBeneficiary}
-              />
-            )}
-          />
-          <Exclusions initialOpen={Boolean(values.excludedIds)} />
           <PaperContainer>
-            <Typography variant="h6">
+            <Box pt={3} pb={3}>
+              <Typography variant="h6">{t('Targeting Criteria')}</Typography>
+            </Box>
+            <Grid container>
+              <Grid item xs={6}>
+                <Field
+                  name="name"
+                  label={t('Target Population Name')}
+                  type="text"
+                  fullWidth
+                  required
+                  component={FormikTextField}
+                  variant="outlined"
+                  data-cy="input-name"
+                />
+              </Grid>
+            </Grid>
+            <Box pt={6} pb={6}>
+              <Divider />
+            </Box>
+            {category === 'filters' ? (
+              <FieldArray
+                name="targetingCriteria"
+                render={(arrayHelpers) => (
+                  <TargetingCriteria
+                    helpers={arrayHelpers}
+                    rules={values.targetingCriteria}
+                    selectedProgram={selectedProgram(values)}
+                    isEdit
+                    screenBeneficiary={screenBeneficiary}
+                    isStandardDctType={isStandardDctType}
+                    isSocialDctType={isSocialDctType}
+                    category={category}
+                  />
+                )}
+              />
+            ) : null}
+          </PaperContainer>
+          {category === 'filters' && (
+            <Exclusions initialOpen={Boolean(values.excludedIds)} />
+          )}
+          ,
+          <Box
+            pt={3}
+            pb={3}
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+          >
+            <Typography style={{ color: '#b1b1b5' }} variant="h6">
               {t('Save to see the list of households')}
             </Typography>
-            <Label>
+            <Typography style={{ color: '#b1b1b5' }} variant="subtitle1">
               {t('List of households will be available after saving')}
-            </Label>
-          </PaperContainer>
+            </Typography>
+          </Box>
         </Form>
       )}
     </Formik>
   );
-}
+};
