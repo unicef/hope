@@ -31,7 +31,7 @@ def _create(models: Optional[List[Model]]) -> None:
         try:
             index.create()
         except elasticsearch.exceptions.RequestError:
-            pass
+            logger.exception(f"Failed to create index {index}")
 
 
 def _populate(models: Optional[List[Any]], options: Dict) -> None:
