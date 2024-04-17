@@ -6054,6 +6054,8 @@ export type QueryAllHouseholdsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   businessArea?: InputMaybe<Scalars['String']['input']>;
   countryOrigin?: InputMaybe<Scalars['String']['input']>;
+  documentNumber?: InputMaybe<Scalars['String']['input']>;
+  documentType?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   headOfHousehold_FullName?: InputMaybe<Scalars['String']['input']>;
   headOfHousehold_FullName_Startswith?: InputMaybe<Scalars['String']['input']>;
@@ -6066,7 +6068,6 @@ export type QueryAllHouseholdsArgs = {
   program?: InputMaybe<Scalars['ID']['input']>;
   residenceStatus?: InputMaybe<Scalars['String']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
-  searchType?: InputMaybe<Scalars['String']['input']>;
   size?: InputMaybe<Scalars['String']['input']>;
   size_Gte?: InputMaybe<Scalars['Int']['input']>;
   size_Lte?: InputMaybe<Scalars['Int']['input']>;
@@ -10415,7 +10416,6 @@ export type AllHouseholdsQueryVariables = Exact<{
   headOfHouseholdPhoneNoValid?: InputMaybe<Scalars['Boolean']['input']>;
   adminArea?: InputMaybe<Scalars['ID']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
-  searchType?: InputMaybe<Scalars['String']['input']>;
   residenceStatus?: InputMaybe<Scalars['String']['input']>;
   lastRegistrationDate?: InputMaybe<Scalars['String']['input']>;
   admin2?: InputMaybe<Scalars['ID']['input']>;
@@ -10437,7 +10437,8 @@ export type AllHouseholdsForPopulationTableQueryVariables = Exact<{
   headOfHouseholdFullNameIcontains?: InputMaybe<Scalars['String']['input']>;
   adminArea?: InputMaybe<Scalars['ID']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
-  searchType?: InputMaybe<Scalars['String']['input']>;
+  documentType?: InputMaybe<Scalars['String']['input']>;
+  documentNumber?: InputMaybe<Scalars['String']['input']>;
   residenceStatus?: InputMaybe<Scalars['String']['input']>;
   lastRegistrationDate?: InputMaybe<Scalars['String']['input']>;
   admin2?: InputMaybe<Scalars['ID']['input']>;
@@ -19925,7 +19926,7 @@ export type CashPlanVerificationSamplingChoicesLazyQueryHookResult = ReturnType<
 export type CashPlanVerificationSamplingChoicesSuspenseQueryHookResult = ReturnType<typeof useCashPlanVerificationSamplingChoicesSuspenseQuery>;
 export type CashPlanVerificationSamplingChoicesQueryResult = Apollo.QueryResult<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>;
 export const AllHouseholdsDocument = gql`
-    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $headOfHouseholdPhoneNoValid: Boolean, $adminArea: ID, $search: String, $searchType: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean, $program: ID) {
+    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $headOfHouseholdPhoneNoValid: Boolean, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean, $program: ID) {
   allHouseholds(
     after: $after
     before: $before
@@ -19938,7 +19939,6 @@ export const AllHouseholdsDocument = gql`
     headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid
     adminArea: $adminArea
     search: $search
-    searchType: $searchType
     residenceStatus: $residenceStatus
     lastRegistrationDate: $lastRegistrationDate
     admin2: $admin2
@@ -20024,7 +20024,6 @@ export const AllHouseholdsDocument = gql`
  *      headOfHouseholdPhoneNoValid: // value for 'headOfHouseholdPhoneNoValid'
  *      adminArea: // value for 'adminArea'
  *      search: // value for 'search'
- *      searchType: // value for 'searchType'
  *      residenceStatus: // value for 'residenceStatus'
  *      lastRegistrationDate: // value for 'lastRegistrationDate'
  *      admin2: // value for 'admin2'
@@ -20050,7 +20049,7 @@ export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHousehold
 export type AllHouseholdsSuspenseQueryHookResult = ReturnType<typeof useAllHouseholdsSuspenseQuery>;
 export type AllHouseholdsQueryResult = Apollo.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllHouseholdsForPopulationTableDocument = gql`
-    query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $searchType: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean, $headOfHouseholdPhoneNoValid: Boolean, $program: ID, $isActiveProgram: Boolean) {
+    query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $documentType: String, $documentNumber: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean, $headOfHouseholdPhoneNoValid: Boolean, $program: ID, $isActiveProgram: Boolean) {
   allHouseholds(
     after: $after
     before: $before
@@ -20062,7 +20061,8 @@ export const AllHouseholdsForPopulationTableDocument = gql`
     headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains
     adminArea: $adminArea
     search: $search
-    searchType: $searchType
+    documentType: $documentType
+    documentNumber: $documentNumber
     residenceStatus: $residenceStatus
     lastRegistrationDate: $lastRegistrationDate
     admin2: $admin2
@@ -20140,7 +20140,8 @@ export const AllHouseholdsForPopulationTableDocument = gql`
  *      headOfHouseholdFullNameIcontains: // value for 'headOfHouseholdFullNameIcontains'
  *      adminArea: // value for 'adminArea'
  *      search: // value for 'search'
- *      searchType: // value for 'searchType'
+ *      documentType: // value for 'documentType'
+ *      documentNumber: // value for 'documentNumber'
  *      residenceStatus: // value for 'residenceStatus'
  *      lastRegistrationDate: // value for 'lastRegistrationDate'
  *      admin2: // value for 'admin2'

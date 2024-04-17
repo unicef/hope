@@ -17,9 +17,14 @@ import { HouseholdTable } from '../../tables/population/HouseholdTable';
 export function PopulationHouseholdPage(): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery({
+      fetchPolicy: 'cache-first',
+    });
   const initialFilter = {
     search: '',
-    searchType: 'household_id',
+    documentType: choicesData?.householdSearchTypesChoices[0].value,
+    documentNumber: '',
     residenceStatus: '',
     admin2: '',
     householdSizeMin: '',
@@ -37,11 +42,6 @@ export function PopulationHouseholdPage(): React.ReactElement {
 
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
-
-  const { data: choicesData, loading: choicesLoading } =
-    useHouseholdChoiceDataQuery({
-      fetchPolicy: 'cache-first',
-    });
 
   if (choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;

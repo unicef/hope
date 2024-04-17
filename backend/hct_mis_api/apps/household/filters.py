@@ -85,7 +85,8 @@ class HouseholdFilter(FilterSet):
     business_area = BusinessAreaSlugFilter()
     size = IntegerRangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
-    search_type = CharFilter(method="search_type_filter")
+    document_type = CharFilter(method="document_type_filter")
+    document_number = CharFilter(method="document_number_filter")
     head_of_household__full_name = CharFilter(field_name="head_of_household__full_name", lookup_expr="startswith")
     head_of_household__phone_no_valid = BooleanFilter(method="phone_no_valid_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
@@ -147,26 +148,22 @@ class HouseholdFilter(FilterSet):
     def _search_es(self, qs: QuerySet, value: Any) -> QuerySet:
         business_area = self.data["business_area"]
         search = value.strip()
-        search_type = self.data.get("search_type")
+        split_values_list = search.split(" ")
+        inner_query = Q()
+        for split_value in split_values_list:
+            striped_value = split_value.strip(",")
+            if striped_value.startswith(("HOPE-", "KOBO-")):
+                _value = _prepare_kobo_asset_id_value(search)
+                # if user put somethink like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
+                # will filter by '111222' like 111222 is ID
+                inner_query |= Q(kobo_asset_id__endswith=_value)
 
-        if search_type == "kobo_asset_id":
-            split_values_list = search.split(" ")
-            inner_query = Q()
-            for split_value in split_values_list:
-                striped_value = split_value.strip(",")
-                if striped_value.startswith(("HOPE-", "KOBO-")):
-                    _value = _prepare_kobo_asset_id_value(search)
-                    # if user put somethink like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
-                    # will filter by '111222' like 111222 is ID
-                    inner_query |= Q(kobo_asset_id__endswith=_value)
-            return qs.filter(inner_query).distinct()
-
-        query_dict = get_elasticsearch_query_for_households(search, search_type, business_area)
+        query_dict = get_elasticsearch_query_for_households(search, business_area)
         es_response = (
             HouseholdDocument.search().params(search_type="dfs_query_then_fetch").update_from_dict(query_dict).execute()
         )
         es_ids = [x.meta["id"] for x in es_response]
-        return qs.filter(id__in=es_ids)
+        return qs.filter(Q(id__in=es_ids) | inner_query).distinct()
 
     def search_filter(self, qs: QuerySet[Household], name: str, value: Any) -> QuerySet[Household]:
         try:
@@ -219,8 +216,16 @@ class HouseholdFilter(FilterSet):
             )
         raise SearchException(f"Invalid search key '{search_type}'")
 
-    def search_type_filter(self, qs: QuerySet[Household], name: str, value: str) -> QuerySet[Household]:
+    def document_type_filter(self, qs: QuerySet[Household], name: str, value: str) -> QuerySet[Household]:
         return qs
+
+    def document_number_filter(self, qs: QuerySet[Household], name: str, value: str) -> QuerySet[Household]:
+        document_number = value.strip()
+        document_type = self.data.get("document_type")
+        return qs.filter(
+            head_of_household__documents__type__key=document_type,
+            head_of_household__documents__document_number__icontains=document_number,
+        )
 
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         if value is True:
@@ -409,45 +414,15 @@ def get_elasticsearch_query_for_individuals(search: str, search_type: str, busin
     }
 
 
-def get_elasticsearch_query_for_households(search: str, search_type: str, business_area: "BusinessArea") -> Dict:
-    all_queries: List = []
-
-    if search_type == "household_id":
-        all_queries.append({"match_phrase_prefix": {"unicef_id": {"query": search}}})
-    elif search_type == "individual_id":
-        all_queries.append({"match_phrase_prefix": {"head_of_household.unicef_id": {"query": search}}})
-    elif search_type == "full_name":
-        all_queries.append({"match_phrase_prefix": {"head_of_household.full_name": {"query": search}}})
-    elif search_type == "phone_no":
-        all_queries.append({"match_phrase_prefix": {"head_of_household.phone_no_text": {"query": search}}})
-        all_queries.append({"match_phrase_prefix": {"head_of_household.phone_no_alternative_text": {"query": search}}})
-    elif search_type == "bank_account_number":
-        all_queries.append(
-            {"match_phrase_prefix": {"head_of_household.bank_account_info.bank_account_number": {"query": search}}}
-        )
-    elif search_type == "registration_id":
-        try:
-            int(search)
-        except ValueError:
-            raise SearchException("The search value for a given search type should be a number")
-        all_queries.append({"match_phrase_prefix": {"registration_id": {"query": search}}})
-    elif search_type == "kobo_asset_id":
-        # Handled on postgres side
-        pass
-    elif DocumentType.objects.filter(key=search_type).exists():
-        all_queries.append(
-            {
-                "bool": {
-                    "must": [
-                        {"match": {"head_of_household.documents.number": {"query": search}}},
-                        {"match": {"head_of_household.documents.key": {"query": search_type}}},
-                    ],
-                },
-            }
-        )
-    else:
-        raise SearchException(f"Invalid search key '{search_type}'")
-
+def get_elasticsearch_query_for_households(search: str, business_area: "BusinessArea") -> Dict:
+    all_queries: List = [{"match_phrase_prefix": {"unicef_id": {"query": search}}},
+                         {"match_phrase_prefix": {"head_of_household.unicef_id": {"query": search}}},
+                         {"match_phrase_prefix": {"head_of_household.full_name": {"query": search}}},
+                         {"match_phrase_prefix": {"head_of_household.phone_no_text": {"query": search}}},
+                         {"match_phrase_prefix": {"head_of_household.phone_no_alternative_text": {"query": search}}}, {
+                             "match_phrase_prefix": {
+                                 "head_of_household.bank_account_info.bank_account_number": {"query": search}}},
+                         {"match_phrase_prefix": {"registration_id": {"query": search}}}]
     query: Dict[str, Any] = {
         "size": "100",
         "_source": False,
