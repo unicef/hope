@@ -16,6 +16,7 @@ module.exports = {
     'plugin:import/errors',
     'plugin:import/warnings',
     'plugin:jest/recommended',
+    'plugin:@tanstack/eslint-plugin-query/recommended',
   ],
   parserOptions: {
     sourceType: 'module',
@@ -26,7 +27,14 @@ module.exports = {
       es6: true,
     },
   },
-  plugins: ['@typescript-eslint', 'react', 'import', 'react-hooks', 'jest'],
+  plugins: [
+    '@typescript-eslint',
+    'react',
+    'import',
+    'react-hooks',
+    'jest',
+    '@tanstack/query',
+  ],
   ignorePatterns: ['**/*.test.tsx', '**/*.test.ts', '**/__generated__/*'],
   settings: {
     react: {
@@ -62,6 +70,9 @@ module.exports = {
     'import/prefer-default-export': 'off',
     'react-hooks/exhaustive-deps': 'warn',
     'react-hooks/rules-of-hooks': 'error',
+    '@tanstack/query/exhaustive-deps': 'error',
+    '@tanstack/query/no-rest-destructuring': 'warn',
+    '@tanstack/query/stable-query-client': 'error',
     'react/jsx-filename-extension': [
       1,
       { extensions: ['.js', '.jsx', '.ts', '.tsx'] },

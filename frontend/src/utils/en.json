@@ -859,5 +859,18 @@
   "Included Target Population Entries (Households or Individuals)": "Included Target Population Entries (Households or Individuals)",
   "New Target Population": "New Target Population",
   "Exclude People with Active Adjudication Ticket": "Exclude People with Active Adjudication Ticket",
-  "Edit Target Population": "Edit Target Population"
+  "Edit Target Population": "Edit Target Population",
+  "Managerial Console": "Managerial Console",
+  "Payment Plans pending for Approval": "Payment Plans pending for Approval",
+  "Payment Plans pending for Authorization": "Payment Plans pending for Authorization",
+  "Payment Plans pending for Release": "Payment Plans pending for Release",
+  "Payment Verification Plans Overview": "Payment Verification Plans Overview",
+  "Selected Plans IDs": "Selected Plans IDs",
+  "Payment Plan(s) Approved": "Payment Plan(s) Approved",
+  "Payment Plan(s) Authorized": "Payment Plan(s) Authorized",
+  "Payment Plan(s) Released": "Payment Plan(s) Released",
+  "Action completed successfully": "Action completed successfully",
+  "Sent for Approval by": "Sent for Approval by",
+  "Approved by": "Approved by",
+  "Authorized by": "Authorized by"
 }
