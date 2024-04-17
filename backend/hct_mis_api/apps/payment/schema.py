@@ -180,7 +180,7 @@ class FinancialServiceProviderNode(BaseNodePermissionMixin, DjangoObjectType):
     full_name = graphene.String(source="name")
     is_payment_gateway = graphene.Boolean()
 
-    def resolve_is_payment_gateway(self, info: Any) -> bool:
+    def resolve_is_payment_gateway(self, info: Any) -> graphene.Boolean:
         return self.is_payment_gateway
 
     class Meta:
