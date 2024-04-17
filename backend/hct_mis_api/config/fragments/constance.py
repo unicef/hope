@@ -198,6 +198,11 @@ Clear Cache,clear-cache/
         "positive_integers",
     ),
     "SHOW_TOOLBAR": (False, "Show debug toolbar", bool),
+    "REST_API_TTL": (
+        60 * 60 * 24 * 7,  # 7 days
+        "Time To Live for REST API cache",
+        "positive_integers",
+    ),
 }
 
 CONSTANCE_DBS = ("default",)
