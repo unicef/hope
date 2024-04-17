@@ -42,7 +42,7 @@ def etag_decorator(key_constructor_class: "KeyConstructor", compare_etags: bool 
             )
 
             # If etag from header and calculated are the same,
-            # return 304 status code as request consist of the same data already (cached on client side)
+            # return 304 status code as request consists of the same data already (cached on client side)
             if compare_etags and request.headers.get("ETAG") == etag:
                 return Response(status=status.HTTP_304_NOT_MODIFIED, headers={"ETAG": etag})
             res = function(*args, **kwargs)
