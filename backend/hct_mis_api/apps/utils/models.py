@@ -42,7 +42,12 @@ class RepresentationManager(models.Manager):
 
 class SoftDeletableRepresentationManager(SoftDeletableManager):
     def get_queryset(self) -> "QuerySet":
-        return super().get_queryset().filter(is_original=False)
+        return super().get_queryset().filter(is_original=False, rdi_merge_status="MERGED")
+
+
+class SoftDeletableOnlyImportedManager(SoftDeletableManager):
+    def get_queryset(self) -> "QuerySet":
+        return super().get_queryset().filter(is_original=False, rdi_merge_status="PENDING")
 
 
 # remove after data migration
@@ -109,6 +114,7 @@ class SoftDeletableIsOriginalModel(models.Model):
         abstract = True
 
     objects = SoftDeletableRepresentationManager(_emit_deprecation_warnings=True)
+    imported = SoftDeletableOnlyImportedManager()
     available_objects = SoftDeletableRepresentationManager()
     all_objects = models.Manager()
     original_and_repr_objects = SoftDeletableManager(_emit_deprecation_warnings=True)
@@ -154,6 +160,7 @@ class SoftDeletableModelWithDate(models.Model):
         abstract = True
 
     objects = SoftDeletableRepresentationManager()
+    imported = SoftDeletableOnlyImportedManager()
     all_objects = models.Manager()
     original_and_repr_objects = SoftDeletableManager(_emit_deprecation_warnings=True)
 

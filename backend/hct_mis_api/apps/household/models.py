@@ -329,13 +329,13 @@ class HouseholdCollection(UnicefIdentifiedModel):
 
 
 class Household(
+    RdiMergeStatusMixin,
     SoftDeletableModelWithDate,
     TimeStampedUUIDModel,
     AbstractSyncable,
     ConcurrencyModel,
     UnicefIdentifiedModel,
     AdminUrlMixin,
-    RdiMergeStatusMixin,
 ):
     class CollectType(models.TextChoices):
         STANDARD = "STANDARD", "Standard"
@@ -674,7 +674,7 @@ class DocumentType(TimeStampedUUIDModel):
         return f"{self.label}"
 
 
-class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDModel, RdiMergeStatusMixin):
+class Document(RdiMergeStatusMixin, AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDModel):
     STATUS_PENDING = "PENDING"
     STATUS_VALID = "VALID"
     STATUS_NEED_INVESTIGATION = "NEED_INVESTIGATION"

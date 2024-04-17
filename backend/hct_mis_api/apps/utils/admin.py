@@ -35,7 +35,7 @@ class SoftDeletableAdminMixin(admin.ModelAdmin):
         return qs
 
     def get_list_filter(self, request: HttpRequest) -> Tuple:
-        return tuple(list(super().get_list_filter(request)) + ["is_removed"])
+        return tuple(list(super().get_list_filter(request)) + ["is_removed", "rdi_merge_status"])
 
 
 class IsOriginalAdminMixin(admin.ModelAdmin):

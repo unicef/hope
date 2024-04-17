@@ -263,7 +263,7 @@ class BusinessAreaSlugFilter(InputFilter):
 
 
 @admin.register(IndividualRoleInHousehold)
-class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
+class IndividualRoleInHouseholdAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdminBase):
     list_display = ("individual", "household", "role")
     list_filter = (DepotManager, QueryStringFilter, "role", BusinessAreaSlugFilter)
     raw_id_fields = ("individual", "household", "copied_from")
@@ -280,7 +280,7 @@ class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase)
 
 
 @admin.register(IndividualIdentity)
-class IndividualIdentityAdmin(HOPEModelAdminBase):
+class IndividualIdentityAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     list_display = ("partner", "individual", "number")
     list_filter = (("individual__unicef_id", ValueFilter.factory(label="Individual's UNICEF Id")),)
     raw_id_fields = ("individual", "partner", "copied_from")

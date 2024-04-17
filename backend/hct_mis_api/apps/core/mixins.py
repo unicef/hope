@@ -30,7 +30,6 @@ class RdiMergeStatusMixin(models.Model):
         (PENDING, _("Pending")),
         (MERGED, _("Merged")),
     )
-
     rdi_merge_status = models.CharField(max_length=10, choices=STATUS_CHOICE, null=True)
 
     class Meta:
