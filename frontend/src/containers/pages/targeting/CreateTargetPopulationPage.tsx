@@ -63,23 +63,27 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
   const householdFiltersAvailable =
     selectedProgram?.dataCollectingType?.householdFiltersAvailable;
 
+  const idValidation = Yup.string().test(
+    'testName',
+    'ID is not in the correct format',
+    (ids) => {
+      if (!ids?.length) {
+        return true;
+      }
+      const idsArr = ids.split(',');
+      return idsArr.every((el) =>
+        /^\s*(IND|HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el),
+      );
+    },
+  );
+
   const validationSchema = Yup.object().shape({
     name: Yup.string()
       .min(3, t('Targeting name should have at least 3 characters.'))
       .max(255, t('Targeting name should have at most 255 characters.')),
-    excludedIds: Yup.string().test(
-      'testName',
-      'ID is not in the correct format',
-      (ids) => {
-        if (!ids?.length) {
-          return true;
-        }
-        const idsArr = ids.split(',');
-        return idsArr.every((el) =>
-          /^\s*(IND|HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el),
-        );
-      },
-    ),
+    excludedIds: idValidation,
+    householdIds: idValidation,
+    individualIds: idValidation,
     exclusionReason: Yup.string().max(500, t('Too long')),
   });
 
@@ -151,7 +155,6 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
                   <TargetingCriteria
                     helpers={arrayHelpers}
                     rules={values.criterias}
-                    selectedProgram={selectedProgram}
                     screenBeneficiary={screenBeneficiary}
                     isStandardDctType={isStandardDctType}
                     isSocialDctType={isSocialDctType}
@@ -176,11 +179,13 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
                       />
                     </Grid>
                   )}
-                  <Grid item xs={12}>
-                    <AndDivider>
-                      <AndDividerLabel>OR</AndDividerLabel>
-                    </AndDivider>
-                  </Grid>
+                  {householdFiltersAvailable && individualFiltersAvailable && (
+                    <Grid item xs={12}>
+                      <AndDivider>
+                        <AndDividerLabel>OR</AndDividerLabel>
+                      </AndDivider>
+                    </Grid>
+                  )}
                   {individualFiltersAvailable && (
                     <Grid item xs={12}>
                       <Box pb={3}>
