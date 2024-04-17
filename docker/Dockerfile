@@ -22,6 +22,7 @@ RUN apt-get update \
     libpq-dev \
     python3-psycopg2 \
     python3-gdal \
+    python3-dev \
     gdal-bin \
     libcairo2 \
     libcairo2-dev \
@@ -42,24 +43,27 @@ RUN apt-get update \
 ENV PDM_PROJECT=/code
 ENV PYPACKAGES=$PDM_PROJECT/__pypackages__/3.11
 ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
-    PYTHONPATH=$PYTHONPATH:$PYPACKAGES/lib:/code: \
+    PYTHONPATH=$PYTHONPATH:$PYPACKAGES/lib:/code \
     PATH=$PATH:$PYPACKAGES/bin \
     XDG_RUNTIME_DIR=/run/user/"${UID}"
 
 WORKDIR $PDM_PROJECT
+
+RUN pip install pdm==2.14.0 &&\
+    pip install --upgrade pip setuptools &&\
+    pdm config cache_dir /var/cache/pdm &&\
+    pdm config python.use_venv false &&\
+    pdm config venv.in_project false &&\
+    pdm config install.cache true &&\
+    pdm config check_update false
 
 COPY --from=waitforit /data/waitforit /usr/local/bin/waitforit
 
 # Dist builder image
 FROM base as builder
 
-RUN pip install pdm==2.13.3 &&\
-    pdm config cache_dir /var/cache/pdm &&\
-    pdm config python.use_venv false &&\
-    pdm config venv.in_project false &&\
-    pdm config install.cache true
-
 COPY ./backend ./
+RUN pdm sync --prod --no-editable --no-self
 
 COPY ./docker/entrypoint.sh /bin/
 ENTRYPOINT ["entrypoint.sh"]
@@ -75,7 +79,6 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 COPY ./backend ./
-
 RUN pdm sync --no-editable --no-self
 
 COPY ./docker/entrypoint.sh /bin/
@@ -85,9 +88,9 @@ ENTRYPOINT ["entrypoint.sh"]
 FROM base AS be-dist
 
 COPY --chown=hope:hope ./backend ./
-COPY --chown=hope:hope --from=builder $PDM_PROJECT $PDM_PROJECT
-COPY --chown=hope:hope --from=certs /data/psql-cert.crt /code/psql-cert.crt
+RUN pdm sync --prod --no-editable --no-self
 
+COPY --chown=hope:hope --from=certs /data/psql-cert.crt /code/psql-cert.crt
 USER hope
 
 COPY ./docker/entrypoint.sh /bin/
