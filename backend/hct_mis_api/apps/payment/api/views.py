@@ -84,7 +84,7 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
 
     @etag_decorator(PaymentPlanKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=PaymentPlanKeyConstructor())
-    def list(self, request, *args, **kwargs):
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
     @action(

@@ -1,5 +1,5 @@
 import functools
-from typing import Any, Callable
+from typing import Callable
 
 from django.core.cache import cache
 
@@ -10,7 +10,7 @@ from rest_framework_extensions.key_constructor.constructors import KeyConstructo
 
 class ModelVersionKeyBitMixin:
     @staticmethod
-    def get_value_for_key(key):
+    def get_value_for_key(key: str) -> str:
         value = cache.get(key, None)
         if not value:
             value = 1
