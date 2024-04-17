@@ -638,14 +638,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(URGENCY_CHOICES)
 
     def resolve_grievance_ticket_search_types_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
-        search_types_choices = [
-            ("ticket_id", "Ticket ID"),
-            ("ticket_hh_id", "Household ID"),
-            ("full_name", "Full Name"),
-            ("phone_number", "Phone Number"),
-            ("registration_id", "Registration ID (Aurora)"),
-            ("bank_account_number", "Bank Account Number"),
-        ]
+        search_types_choices = []
         search_types_choices.extend(DocumentType.objects.all().order_by("label").values_list("key", "label"))
         return [{"name": name, "value": value} for value, name in search_types_choices]
 
