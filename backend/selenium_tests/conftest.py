@@ -36,73 +36,74 @@ from hct_mis_api.apps.geo.models import Country
 
 
 def pytest_configure() -> None:
-    from django.conf import settings
+    if not request.node.get_closest_marker("local"):
+        from django.conf import settings
 
-    settings.DEBUG = True
-    settings.ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", os.getenv("DOMAIN", "")]
-    settings.CELERY_TASK_ALWAYS_EAGER = True
+        settings.DEBUG = True
+        settings.ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", os.getenv("DOMAIN", "")]
+        settings.CELERY_TASK_ALWAYS_EAGER = True
 
-    settings.ELASTICSEARCH_INDEX_PREFIX = "test_"
-    settings.EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+        settings.ELASTICSEARCH_INDEX_PREFIX = "test_"
+        settings.EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-    settings.EXCHANGE_RATE_CACHE_EXPIRY = 0
-    settings.USE_DUMMY_EXCHANGE_RATES = True
+        settings.EXCHANGE_RATE_CACHE_EXPIRY = 0
+        settings.USE_DUMMY_EXCHANGE_RATES = True
 
-    settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
-    settings.CSRF_COOKIE_SECURE = False
-    settings.CSRF_COOKIE_HTTPONLY = False
-    settings.SESSION_COOKIE_SECURE = False
-    settings.SESSION_COOKIE_HTTPONLY = True
-    settings.SECURE_HSTS_SECONDS = False
-    settings.SECURE_CONTENT_TYPE_NOSNIFF = True
-    settings.SECURE_REFERRER_POLICY = "same-origin"
+        settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
+        settings.CSRF_COOKIE_SECURE = False
+        settings.CSRF_COOKIE_HTTPONLY = False
+        settings.SESSION_COOKIE_SECURE = False
+        settings.SESSION_COOKIE_HTTPONLY = True
+        settings.SECURE_HSTS_SECONDS = False
+        settings.SECURE_CONTENT_TYPE_NOSNIFF = True
+        settings.SECURE_REFERRER_POLICY = "same-origin"
 
-    settings.CACHE_ENABLED = False
-    settings.CACHES = {
-        "default": {
-            "BACKEND": "hct_mis_api.apps.core.memcache.LocMemCache",
-            "TIMEOUT": 1800,
+        settings.CACHE_ENABLED = False
+        settings.CACHES = {
+            "default": {
+                "BACKEND": "hct_mis_api.apps.core.memcache.LocMemCache",
+                "TIMEOUT": 1800,
+            }
         }
-    }
 
-    settings.LOGGING["loggers"].update(
-        {
-            "": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
-            "registration_datahub.tasks.deduplicate": {
-                "handlers": ["default"],
-                "level": "INFO",
-                "propagate": True,
-            },
-            "sanction_list.tasks.check_against_sanction_list_pre_merge": {
-                "handlers": ["default"],
-                "level": "INFO",
-                "propagate": True,
-            },
-            "graphql": {"handlers": ["default"], "level": "CRITICAL", "propagate": True},
-            "elasticsearch": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
-            "elasticsearch-dsl-django": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
-            "hct_mis_api.apps.registration_datahub.tasks.deduplicate": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
-            "hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
-        }
-    )
+        settings.LOGGING["loggers"].update(
+            {
+                "": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
+                "registration_datahub.tasks.deduplicate": {
+                    "handlers": ["default"],
+                    "level": "INFO",
+                    "propagate": True,
+                },
+                "sanction_list.tasks.check_against_sanction_list_pre_merge": {
+                    "handlers": ["default"],
+                    "level": "INFO",
+                    "propagate": True,
+                },
+                "graphql": {"handlers": ["default"], "level": "CRITICAL", "propagate": True},
+                "elasticsearch": {
+                    "handlers": ["default"],
+                    "level": "CRITICAL",
+                    "propagate": True,
+                },
+                "elasticsearch-dsl-django": {
+                    "handlers": ["default"],
+                    "level": "CRITICAL",
+                    "propagate": True,
+                },
+                "hct_mis_api.apps.registration_datahub.tasks.deduplicate": {
+                    "handlers": ["default"],
+                    "level": "CRITICAL",
+                    "propagate": True,
+                },
+                "hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields": {
+                    "handlers": ["default"],
+                    "level": "CRITICAL",
+                    "propagate": True,
+                },
+            }
+        )
 
-    logging.disable(logging.CRITICAL)
+        logging.disable(logging.CRITICAL)
     pytest.SELENIUM_PATH = os.path.dirname(__file__)
     pytest.CSRF = ""
     pytest.SESSION_ID = ""
@@ -125,9 +126,10 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
 
 
 @pytest.fixture
-def driver() -> Chrome:
+def driver(request: FixtureRequest) -> Chrome:
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
+    if not request.node.get_closest_marker("local"):
+        chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument(
         "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
@@ -138,9 +140,13 @@ def driver() -> Chrome:
 
 
 @pytest.fixture(autouse=True)
-def browser(driver: Chrome) -> Chrome:
-    driver.live_server = LiveServer("localhost")
-    # driver.live_server = LiveServer("0.0.0.0:8080")
+def browser(driver: Chrome, request: FixtureRequest) -> Chrome:
+    if request.node.get_closest_marker("mapping"):
+        driver.live_server = LiveServer("0.0.0.0:8080")
+    elif request.node.get_closest_marker("local"):
+        driver.live_server.url = "http://localhost:8080"
+    else:
+        driver.live_server = LiveServer("localhost")
     yield driver
     driver.close()
     pytest.CSRF = ""

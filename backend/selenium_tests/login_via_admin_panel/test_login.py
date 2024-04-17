@@ -6,6 +6,8 @@ from selenium.webdriver.common.by import By
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import User
 
+from helpers.video import RecorderMethod
+
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
@@ -21,11 +23,15 @@ def create_normal_user() -> User:
 
 class TestAdminPanel:
     def test_login_superuser(self, browser: Chrome, pageAdminPanel: AdminPanel) -> None:
+        input("enter")
+        rec = RecorderMethod()
+        rec.recorder_start('1920x1080', 'test_login_superuser')
         browser.get(f"{browser.live_server.url}/api/unicorn/")
         pageAdminPanel.getLogin().send_keys("superuser")
         pageAdminPanel.getPassword().send_keys("testtest2")
         pageAdminPanel.getLoginButton().click()
         assert "Permissions" in pageAdminPanel.getPermissionText().text
+        rec.recorder_stop()
 
     def test_login_normal_user(self, browser: Chrome, pageAdminPanel: AdminPanel) -> None:
         create_normal_user()
