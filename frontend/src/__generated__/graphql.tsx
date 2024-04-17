@@ -2414,6 +2414,8 @@ export type HouseholdNodeIndividualsArgs = {
   age?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   businessArea?: InputMaybe<Scalars['String']['input']>;
+  documentNumber?: InputMaybe<Scalars['String']['input']>;
+  documentType?: InputMaybe<Scalars['String']['input']>;
   excludedId?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   flags?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
@@ -2430,7 +2432,6 @@ export type HouseholdNodeIndividualsArgs = {
   program?: InputMaybe<Scalars['ID']['input']>;
   programs?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   search?: InputMaybe<Scalars['String']['input']>;
-  searchType?: InputMaybe<Scalars['String']['input']>;
   sex?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   withdrawn?: InputMaybe<Scalars['Boolean']['input']>;
@@ -6109,6 +6110,8 @@ export type QueryAllIndividualsArgs = {
   age?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   businessArea?: InputMaybe<Scalars['String']['input']>;
+  documentNumber?: InputMaybe<Scalars['String']['input']>;
+  documentType?: InputMaybe<Scalars['String']['input']>;
   excludedId?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   flags?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
@@ -6125,7 +6128,6 @@ export type QueryAllIndividualsArgs = {
   program?: InputMaybe<Scalars['ID']['input']>;
   programs?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   search?: InputMaybe<Scalars['String']['input']>;
-  searchType?: InputMaybe<Scalars['String']['input']>;
   sex?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   withdrawn?: InputMaybe<Scalars['Boolean']['input']>;
@@ -10461,7 +10463,8 @@ export type AllIndividualsQueryVariables = Exact<{
   age?: InputMaybe<Scalars['String']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
-  searchType?: InputMaybe<Scalars['String']['input']>;
+  documentType?: InputMaybe<Scalars['String']['input']>;
+  documentNumber?: InputMaybe<Scalars['String']['input']>;
   programs?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
   lastRegistrationDate?: InputMaybe<Scalars['String']['input']>;
@@ -10487,7 +10490,8 @@ export type AllIndividualsForPopulationTableQueryVariables = Exact<{
   age?: InputMaybe<Scalars['String']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
-  searchType?: InputMaybe<Scalars['String']['input']>;
+  documentType?: InputMaybe<Scalars['String']['input']>;
+  documentNumber?: InputMaybe<Scalars['String']['input']>;
   programs?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
   lastRegistrationDate?: InputMaybe<Scalars['String']['input']>;
@@ -20169,7 +20173,7 @@ export type AllHouseholdsForPopulationTableLazyQueryHookResult = ReturnType<type
 export type AllHouseholdsForPopulationTableSuspenseQueryHookResult = ReturnType<typeof useAllHouseholdsForPopulationTableSuspenseQuery>;
 export type AllHouseholdsForPopulationTableQueryResult = Apollo.QueryResult<AllHouseholdsForPopulationTableQuery, AllHouseholdsForPopulationTableQueryVariables>;
 export const AllIndividualsDocument = gql`
-    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $searchType: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String]) {
+    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $documentType: String, $documentNumber: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String]) {
   allIndividuals(
     before: $before
     after: $after
@@ -20180,7 +20184,8 @@ export const AllIndividualsDocument = gql`
     age: $age
     orderBy: $orderBy
     search: $search
-    searchType: $searchType
+    documentType: $documentType
+    documentNumber: $documentNumber
     programs: $programs
     status: $status
     lastRegistrationDate: $lastRegistrationDate
@@ -20289,7 +20294,8 @@ export const AllIndividualsDocument = gql`
  *      age: // value for 'age'
  *      orderBy: // value for 'orderBy'
  *      search: // value for 'search'
- *      searchType: // value for 'searchType'
+ *      documentType: // value for 'documentType'
+ *      documentNumber: // value for 'documentNumber'
  *      programs: // value for 'programs'
  *      status: // value for 'status'
  *      lastRegistrationDate: // value for 'lastRegistrationDate'
@@ -20320,7 +20326,7 @@ export type AllIndividualsLazyQueryHookResult = ReturnType<typeof useAllIndividu
 export type AllIndividualsSuspenseQueryHookResult = ReturnType<typeof useAllIndividualsSuspenseQuery>;
 export type AllIndividualsQueryResult = Apollo.QueryResult<AllIndividualsQuery, AllIndividualsQueryVariables>;
 export const AllIndividualsForPopulationTableDocument = gql`
-    query AllIndividualsForPopulationTable($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $searchType: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String], $program: ID, $isActiveProgram: Boolean) {
+    query AllIndividualsForPopulationTable($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $documentType: String, $documentNumber: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String], $program: ID, $isActiveProgram: Boolean) {
   allIndividuals(
     before: $before
     after: $after
@@ -20331,7 +20337,8 @@ export const AllIndividualsForPopulationTableDocument = gql`
     age: $age
     orderBy: $orderBy
     search: $search
-    searchType: $searchType
+    documentType: $documentType
+    documentNumber: $documentNumber
     programs: $programs
     status: $status
     lastRegistrationDate: $lastRegistrationDate
@@ -20404,7 +20411,8 @@ export const AllIndividualsForPopulationTableDocument = gql`
  *      age: // value for 'age'
  *      orderBy: // value for 'orderBy'
  *      search: // value for 'search'
- *      searchType: // value for 'searchType'
+ *      documentType: // value for 'documentType'
+ *      documentNumber: // value for 'documentNumber'
  *      programs: // value for 'programs'
  *      status: // value for 'status'
  *      lastRegistrationDate: // value for 'lastRegistrationDate'
