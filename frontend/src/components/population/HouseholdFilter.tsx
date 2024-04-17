@@ -65,20 +65,20 @@ export function HouseholdFilters({
       isOnPaper={isOnPaper}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid container item xs={6}>
-          <Grid item xs={12}>
-            <SearchTextField
-              label={t('Search')}
-              value={filter.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-              data-cy="hh-filters-search"
-            />
-          </Grid>
+        <Grid item xs={3}>
+          <SearchTextField
+            label={t('Search')}
+            value={filter.search}
+            onChange={(e) => handleFilterChange('search', e.target.value)}
+            data-cy="hh-filters-search"
+          />
         </Grid>
-        <Grid container item xs={6} spacing={0}>
-          <Grid item xs={4}>
+        <Grid container item xs={6} spacing={3}>
+          <Grid item xs={6}>
             <SelectFilter
-              onChange={(e) => handleFilterChange('documentType', e.target.value)}
+              onChange={(e) =>
+                handleFilterChange('documentType', e.target.value)
+              }
               label={t('Document Type')}
               value={filter.documentType}
               borderRadius="0px 4px 4px 0px"
@@ -95,11 +95,13 @@ export function HouseholdFilters({
               )}
             </SelectFilter>
           </Grid>
-          <Grid item xs={8}>
+          <Grid item xs={6}>
             <SearchTextField
               label={t('Document number')}
               value={filter.documentNumber}
-              onChange={(e) => handleFilterChange('documentNumber', e.target.value)}
+              onChange={(e) =>
+                handleFilterChange('documentNumber', e.target.value)
+              }
               data-cy="hh-filters-document-number"
             />
           </Grid>
