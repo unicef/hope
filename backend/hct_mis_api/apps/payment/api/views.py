@@ -3,6 +3,7 @@ from typing import Any, Optional
 from django.db import transaction
 from django.db.models import QuerySet
 
+from constance import config
 from django_filters import rest_framework as filters
 from rest_framework import mixins, status
 from rest_framework.decorators import action
@@ -12,7 +13,9 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+from rest_framework_extensions.cache.decorators import cache_response
 
+from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.api.permissions import (
     PaymentViewListManagerialPermission,
     PMViewListPermission,
@@ -23,6 +26,7 @@ from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.api.mixins import BusinessAreaMixin, BusinessAreaProgramMixin
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.payment.api.caches import PaymentPlanKeyConstructor
 from hct_mis_api.apps.payment.api.filters import PaymentPlanFilter
 from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanBulkActionSerializer,
@@ -77,6 +81,11 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
             ],
             program__in=program_ids,
         )
+
+    @etag_decorator(PaymentPlanKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=PaymentPlanKeyConstructor())
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     @action(
         detail=False,
