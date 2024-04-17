@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import Any, Dict, List
 
 from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
@@ -41,9 +41,6 @@ from hct_mis_api.apps.household.models import (
     Individual,
 )
 from hct_mis_api.apps.program.models import Program
-
-if TYPE_CHECKING:
-    from hct_mis_api.apps.core.models import BusinessArea
 
 logger = logging.getLogger(__name__)
 
@@ -146,7 +143,6 @@ class HouseholdFilter(FilterSet):
         return qs
 
     def _search_es(self, qs: QuerySet, value: Any) -> QuerySet:
-        business_area = self.data["business_area"]
         search = value.strip()
         split_values_list = search.split(" ")
         inner_query = Q()
@@ -154,16 +150,44 @@ class HouseholdFilter(FilterSet):
             striped_value = split_value.strip(",")
             if striped_value.startswith(("HOPE-", "KOBO-")):
                 _value = _prepare_kobo_asset_id_value(search)
-                # if user put somethink like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
+                # if user put something like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
                 # will filter by '111222' like 111222 is ID
                 inner_query |= Q(kobo_asset_id__endswith=_value)
 
-        query_dict = get_elasticsearch_query_for_households(search, business_area)
+        query_dict = self._get_elasticsearch_query_for_households(search)
         es_response = (
             HouseholdDocument.search().params(search_type="dfs_query_then_fetch").update_from_dict(query_dict).execute()
         )
         es_ids = [x.meta["id"] for x in es_response]
         return qs.filter(Q(id__in=es_ids) | inner_query).distinct()
+
+    def _get_elasticsearch_query_for_households(self, search: str) -> Dict:
+        business_area = self.data["business_area"]
+        query: Dict[str, Any] = {
+            "size": "100",
+            "_source": False,
+            "query": {
+                "bool": {
+                    "minimum_should_match": 1,
+                    "should": [
+                        {"match_phrase_prefix": {"unicef_id": {"query": search}}},
+                        {"match_phrase_prefix": {"head_of_household.unicef_id": {"query": search}}},
+                        {"match_phrase_prefix": {"head_of_household.full_name": {"query": search}}},
+                        {"match_phrase_prefix": {"head_of_household.phone_no_text": {"query": search}}},
+                        {"match_phrase_prefix": {"head_of_household.phone_no_alternative_text": {"query": search}}},
+                        {
+                            "match_phrase_prefix": {
+                                "head_of_household.bank_account_info.bank_account_number": {"query": search}
+                            }
+                        },
+                        {"match_phrase_prefix": {"registration_id": {"query": search}}},
+                    ],
+                }
+            },
+        }
+        if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH_USE_BUSINESS_AREA:
+            query["query"]["bool"]["filter"] = [{"term": {"business_area": business_area}}]
+        return query
 
     def search_filter(self, qs: QuerySet[Household], name: str, value: Any) -> QuerySet[Household]:
         try:
@@ -174,6 +198,7 @@ class HouseholdFilter(FilterSet):
             return qs.none()
 
     def _search_db(self, qs: QuerySet[Household], value: str) -> QuerySet[Household]:
+        # TODO: to remove
         search = value.strip()
         search_type = self.data.get("search_type")
 
@@ -296,7 +321,7 @@ class IndividualFilter(FilterSet):
     def _search_es(self, qs: QuerySet[Individual], value: str) -> QuerySet[Individual]:
         business_area = self.data["business_area"]
         search = value.strip()
-        query_dict = get_elasticsearch_query_for_individuals(search, business_area)
+        query_dict = self._get_elasticsearch_query_for_individuals(search)
         es_response = (
             get_individual_doc(business_area)
             .search()
@@ -308,6 +333,28 @@ class IndividualFilter(FilterSet):
         es_ids = [x.meta["id"] for x in es_response]
         return qs.filter(Q(id__in=es_ids)).distinct()
 
+    def _get_elasticsearch_query_for_individuals(self, search: str) -> Dict:
+        business_area = self.data["business_area"]
+        return {
+            "size": "100",
+            "_source": False,
+            "query": {
+                "bool": {
+                    "filter": {"term": {"business_area": business_area}},
+                    "minimum_should_match": 1,
+                    "should": [
+                        {"match_phrase_prefix": {"unicef_id": {"query": search}}},
+                        {"match_phrase_prefix": {"household.unicef_id": {"query": search}}},
+                        {"match_phrase_prefix": {"full_name": {"query": search}}},
+                        {"match_phrase_prefix": {"phone_no_text": {"query": search}}},
+                        {"match_phrase_prefix": {"phone_no_alternative_text": {"query": search}}},
+                        {"match_phrase_prefix": {"registration_id": {"query": search}}},
+                        {"match_phrase_prefix": {"bank_account_info.bank_account_number": {"query": search}}},
+                    ],
+                }
+            },
+        }
+
     def search_filter(self, qs: QuerySet[Individual], name: str, value: Any) -> QuerySet[Individual]:
         try:
             if config.USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH:
@@ -317,6 +364,7 @@ class IndividualFilter(FilterSet):
             return qs.none()
 
     def _search_db(self, qs: QuerySet[Individual], value: str) -> QuerySet[Individual]:
+        # TODO: to remove
         search_type = self.data.get("search_type")
         search = value.strip()
         if search_type == "individual_id":
@@ -368,56 +416,6 @@ class IndividualFilter(FilterSet):
             return qs.filter(program__status=Program.FINISHED)
         else:
             return qs
-
-
-def get_elasticsearch_query_for_individuals(search: str, business_area: "BusinessArea") -> Dict:
-    return {
-        "size": "100",
-        "_source": False,
-        "query": {
-            "bool": {
-                "filter": {"term": {"business_area": business_area}},
-                "minimum_should_match": 1,
-                "should": [
-                    {"match_phrase_prefix": {"unicef_id": {"query": search}}},
-                    {"match_phrase_prefix": {"household.unicef_id": {"query": search}}},
-                    {"match_phrase_prefix": {"full_name": {"query": search}}},
-                    {"match_phrase_prefix": {"phone_no_text": {"query": search}}},
-                    {"match_phrase_prefix": {"phone_no_alternative_text": {"query": search}}},
-                    {"match_phrase_prefix": {"registration_id": {"query": search}}},
-                    {"match_phrase_prefix": {"bank_account_info.bank_account_number": {"query": search}}},
-                ],
-            }
-        },
-    }
-
-
-def get_elasticsearch_query_for_households(search: str, business_area: "BusinessArea") -> Dict:
-    query: Dict[str, Any] = {
-        "size": "100",
-        "_source": False,
-        "query": {
-            "bool": {
-                "minimum_should_match": 1,
-                "should": [
-                    {"match_phrase_prefix": {"unicef_id": {"query": search}}},
-                    {"match_phrase_prefix": {"head_of_household.unicef_id": {"query": search}}},
-                    {"match_phrase_prefix": {"head_of_household.full_name": {"query": search}}},
-                    {"match_phrase_prefix": {"head_of_household.phone_no_text": {"query": search}}},
-                    {"match_phrase_prefix": {"head_of_household.phone_no_alternative_text": {"query": search}}},
-                    {
-                        "match_phrase_prefix": {
-                            "head_of_household.bank_account_info.bank_account_number": {"query": search}
-                        }
-                    },
-                    {"match_phrase_prefix": {"registration_id": {"query": search}}},
-                ],
-            }
-        },
-    }
-    if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH_USE_BUSINESS_AREA:
-        query["query"]["bool"]["filter"] = ({"term": {"business_area": business_area}},)
-    return query
 
 
 class MergedHouseholdFilter(FilterSet):
