@@ -6018,6 +6018,8 @@ export type QueryAllGrievanceTicketArgs = {
   category?: InputMaybe<Scalars['String']['input']>;
   createdAtRange?: InputMaybe<Scalars['String']['input']>;
   createdBy?: InputMaybe<Scalars['ID']['input']>;
+  documentNumber?: InputMaybe<Scalars['String']['input']>;
+  documentType?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   fsp?: InputMaybe<Scalars['String']['input']>;
   grievanceStatus?: InputMaybe<Scalars['String']['input']>;
@@ -6039,7 +6041,6 @@ export type QueryAllGrievanceTicketArgs = {
   scoreMax?: InputMaybe<Scalars['String']['input']>;
   scoreMin?: InputMaybe<Scalars['String']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
-  searchType?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   totalDays?: InputMaybe<Scalars['Int']['input']>;
   urgency?: InputMaybe<Scalars['String']['input']>;
@@ -10069,7 +10070,8 @@ export type AllGrievanceTicketQueryVariables = Exact<{
   issueType?: InputMaybe<Scalars['String']['input']>;
   businessArea: Scalars['String']['input'];
   search?: InputMaybe<Scalars['String']['input']>;
-  searchType?: InputMaybe<Scalars['String']['input']>;
+  documentType?: InputMaybe<Scalars['String']['input']>;
+  documentNumber?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
   fsp?: InputMaybe<Scalars['String']['input']>;
   createdAtRange?: InputMaybe<Scalars['String']['input']>;
@@ -17308,7 +17310,7 @@ export type AllGrievanceDashboardChartsLazyQueryHookResult = ReturnType<typeof u
 export type AllGrievanceDashboardChartsSuspenseQueryHookResult = ReturnType<typeof useAllGrievanceDashboardChartsSuspenseQuery>;
 export type AllGrievanceDashboardChartsQueryResult = Apollo.QueryResult<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
-    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $searchType: String, $status: [String], $fsp: String, $createdAtRange: String, $admin2: ID, $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $createdBy: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String, $grievanceType: String, $grievanceStatus: String, $priority: String, $urgency: String, $preferredLanguage: String, $program: String, $isActiveProgram: Boolean, $isCrossArea: Boolean) {
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $documentType: String, $documentNumber: String, $status: [String], $fsp: String, $createdAtRange: String, $admin2: ID, $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $createdBy: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String, $grievanceType: String, $grievanceStatus: String, $priority: String, $urgency: String, $preferredLanguage: String, $program: String, $isActiveProgram: Boolean, $isCrossArea: Boolean) {
   allGrievanceTicket(
     before: $before
     after: $after
@@ -17319,7 +17321,8 @@ export const AllGrievanceTicketDocument = gql`
     issueType: $issueType
     businessArea: $businessArea
     search: $search
-    searchType: $searchType
+    documentType: $documentType
+    documentNumber: $documentNumber
     status: $status
     fsp: $fsp
     createdAtRange: $createdAtRange
@@ -17408,7 +17411,8 @@ export const AllGrievanceTicketDocument = gql`
  *      issueType: // value for 'issueType'
  *      businessArea: // value for 'businessArea'
  *      search: // value for 'search'
- *      searchType: // value for 'searchType'
+ *      documentType: // value for 'documentType'
+ *      documentNumber: // value for 'documentNumber'
  *      status: // value for 'status'
  *      fsp: // value for 'fsp'
  *      createdAtRange: // value for 'createdAtRange'
