@@ -8,7 +8,7 @@ from hct_mis_api.apps.payment.models import PaymentPlan
 
 
 @receiver(post_save, sender=PaymentPlan)
-def increment_payment_plan_per_business_area_version(
+def increment_payment_plan_per_program_version(
     sender: Any, instance: PaymentPlan, created: bool, **kwargs: dict
 ) -> None:
     if instance.status in [
