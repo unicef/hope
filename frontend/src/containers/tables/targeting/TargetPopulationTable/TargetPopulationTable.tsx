@@ -43,7 +43,7 @@ export const TargetPopulationTable = ({
   const { businessArea, programId } = useBaseUrl();
   const initialVariables: AllTargetPopulationsQueryVariables = {
     name: filter.name,
-    totalHouseholdsCountMin: filter.totalHouseholdsCountMin || 0,
+    totalHouseholdsCountMin: filter.totalHouseholdsCountMin || null,
     totalHouseholdsCountMax: filter.totalHouseholdsCountMax || null,
     status: filter.status,
     businessArea,
