@@ -242,7 +242,8 @@ class IndividualFilter(FilterSet):
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
     programs = ModelMultipleChoiceFilter(field_name="household__programs", queryset=Program.objects.all())
     search = CharFilter(method="search_filter")
-    search_type = CharFilter(method="search_type_filter")
+    document_type = CharFilter(method="document_type_filter")
+    document_number = CharFilter(method="document_number_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     admin2 = GlobalIDMultipleChoiceFilter(field_name="household__admin_area")
     status = MultipleChoiceFilter(choices=INDIVIDUAL_STATUS_CHOICES, method="status_filter")
@@ -294,9 +295,8 @@ class IndividualFilter(FilterSet):
 
     def _search_es(self, qs: QuerySet[Individual], value: str) -> QuerySet[Individual]:
         business_area = self.data["business_area"]
-        search_type = self.data.get("search_type")
         search = value.strip()
-        query_dict = get_elasticsearch_query_for_individuals(search, search_type, business_area)
+        query_dict = get_elasticsearch_query_for_individuals(search, business_area)
         es_response = (
             get_individual_doc(business_area)
             .search()
@@ -339,8 +339,13 @@ class IndividualFilter(FilterSet):
             return qs.filter(documents__type__key=search_type, documents__document_number__icontains=search)
         raise SearchException(f"Invalid search key '{search_type}'")
 
-    def search_type_filter(self, qs: QuerySet[Individual], name: str, value: str) -> QuerySet[Individual]:
+    def document_type_filter(self, qs: QuerySet[Individual], name: str, value: str) -> QuerySet[Individual]:
         return qs
+
+    def document_number_filter(self, qs: QuerySet[Household], name: str, value: str) -> QuerySet[Household]:
+        document_number = value.strip()
+        document_type = self.data.get("document_type")
+        return qs.filter(documents__type__key=document_type, documents__document_number__icontains=document_number)
 
     def status_filter(self, qs: QuerySet, name: str, value: List[str]) -> QuerySet:
         q_obj = Q()
@@ -365,42 +370,7 @@ class IndividualFilter(FilterSet):
             return qs
 
 
-def get_elasticsearch_query_for_individuals(search: str, search_type: str, business_area: "BusinessArea") -> Dict:
-    all_queries: List = []
-
-    if search_type == "individual_id":
-        all_queries.append({"match_phrase_prefix": {"unicef_id": {"query": search}}})
-    elif search_type == "household_id":
-        all_queries.append({"match_phrase_prefix": {"household.unicef_id": {"query": search}}})
-    elif search_type == "full_name":
-        all_queries.append({"match_phrase_prefix": {"full_name": {"query": search}}})
-    elif search_type == "phone_no":
-        all_queries.append({"match_phrase_prefix": {"phone_no_text": {"query": search}}})
-        all_queries.append(
-            {"match_phrase_prefix": {"phone_no_alternative_text": {"query": search}}},
-        )
-    elif search_type == "registration_id":
-        try:
-            int(search)
-        except ValueError:
-            raise SearchException("The search value for a given search type should be a number")
-        all_queries.append({"match_phrase_prefix": {"registration_id": {"query": search}}})
-    elif search_type == "bank_account_number":
-        all_queries.append({"match_phrase_prefix": {"bank_account_info.bank_account_number": {"query": search}}})
-    elif DocumentType.objects.filter(key=search_type).exists():
-        all_queries.append(
-            {
-                "bool": {
-                    "must": [
-                        {"match": {"documents.number": {"query": search}}},
-                        {"match": {"documents.key": {"query": search_type}}},
-                    ],
-                },
-            }
-        )
-    else:
-        raise SearchException(f"Invalid search key '{search_type}'")
-
+def get_elasticsearch_query_for_individuals(search: str, business_area: "BusinessArea") -> Dict:
     return {
         "size": "100",
         "_source": False,
@@ -408,28 +378,40 @@ def get_elasticsearch_query_for_individuals(search: str, search_type: str, busin
             "bool": {
                 "filter": {"term": {"business_area": business_area}},
                 "minimum_should_match": 1,
-                "should": all_queries,
+                "should": [
+                    {"match_phrase_prefix": {"unicef_id": {"query": search}}},
+                    {"match_phrase_prefix": {"household.unicef_id": {"query": search}}},
+                    {"match_phrase_prefix": {"full_name": {"query": search}}},
+                    {"match_phrase_prefix": {"phone_no_text": {"query": search}}},
+                    {"match_phrase_prefix": {"phone_no_alternative_text": {"query": search}}},
+                    {"match_phrase_prefix": {"registration_id": {"query": search}}},
+                    {"match_phrase_prefix": {"bank_account_info.bank_account_number": {"query": search}}},
+                ],
             }
         },
     }
 
 
 def get_elasticsearch_query_for_households(search: str, business_area: "BusinessArea") -> Dict:
-    all_queries: List = [{"match_phrase_prefix": {"unicef_id": {"query": search}}},
-                         {"match_phrase_prefix": {"head_of_household.unicef_id": {"query": search}}},
-                         {"match_phrase_prefix": {"head_of_household.full_name": {"query": search}}},
-                         {"match_phrase_prefix": {"head_of_household.phone_no_text": {"query": search}}},
-                         {"match_phrase_prefix": {"head_of_household.phone_no_alternative_text": {"query": search}}}, {
-                             "match_phrase_prefix": {
-                                 "head_of_household.bank_account_info.bank_account_number": {"query": search}}},
-                         {"match_phrase_prefix": {"registration_id": {"query": search}}}]
     query: Dict[str, Any] = {
         "size": "100",
         "_source": False,
         "query": {
             "bool": {
                 "minimum_should_match": 1,
-                "should": all_queries,
+                "should": [
+                    {"match_phrase_prefix": {"unicef_id": {"query": search}}},
+                    {"match_phrase_prefix": {"head_of_household.unicef_id": {"query": search}}},
+                    {"match_phrase_prefix": {"head_of_household.full_name": {"query": search}}},
+                    {"match_phrase_prefix": {"head_of_household.phone_no_text": {"query": search}}},
+                    {"match_phrase_prefix": {"head_of_household.phone_no_alternative_text": {"query": search}}},
+                    {
+                        "match_phrase_prefix": {
+                            "head_of_household.bank_account_info.bank_account_number": {"query": search}
+                        }
+                    },
+                    {"match_phrase_prefix": {"registration_id": {"query": search}}},
+                ],
             }
         },
     }

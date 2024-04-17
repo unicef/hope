@@ -59,10 +59,13 @@ export function LookUpReassignRoleModal({
   const { id } = useParams();
   const { showMessage } = useSnackbar();
   const [mutate] = useReassignRoleGrievanceMutation();
+  const { data: individualChoicesData, loading: individualChoicesLoading } =
+    useIndividualChoiceDataQuery();
 
   const initialFilterIND = {
     search: '',
-    searchType: 'individual_id',
+    documentType: individualChoicesData?.individualSearchTypesChoices[0].value,
+    documentNumber: '',
     admin2: '',
     sex: '',
     ageMin: '',
@@ -85,8 +88,6 @@ export function LookUpReassignRoleModal({
   );
 
   const { businessArea } = useBaseUrl();
-  const { data: individualChoicesData, loading: individualChoicesLoading } =
-    useIndividualChoiceDataQuery();
 
   if (individualChoicesLoading) return <LoadingComponent />;
 
