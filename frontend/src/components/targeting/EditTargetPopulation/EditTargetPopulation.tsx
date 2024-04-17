@@ -1,33 +1,26 @@
-import { Box, Divider, Grid, Typography } from '@mui/material';
-import { Field, FieldArray, Form, Formik } from 'formik';
-import * as React from 'react';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import * as Yup from 'yup';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import {
-  ProgramStatus,
   TargetPopulationQuery,
   TargetPopulationStatus,
-  useAllProgramsForChoicesQuery,
   useUpdateTpMutation,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { Box, Divider, Grid, Typography } from '@mui/material';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { getTargetingCriteriaVariables } from '@utils/targetingUtils';
-import { getFullNodeFromEdgesById } from '@utils/utils';
-import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
-import { LoadingComponent } from '@core/LoadingComponent';
+import { Field, FieldArray, Form, Formik } from 'formik';
+import * as React from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
+import * as Yup from 'yup';
+import { AndDivider, AndDividerLabel } from '../AndDivider';
 import { Exclusions } from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
 import { TargetingCriteria } from '../TargetingCriteria';
 import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
-import { useNavigate } from 'react-router-dom';
-import { useProgramContext } from 'src/programContext';
-import { FormikTextField } from '@shared/Formik/FormikTextField';
-
-const Label = styled.p`
-  color: #b1b1b5;
-`;
 
 interface EditTargetPopulationProps {
   targetPopulation: TargetPopulationQuery['targetPopulation'];
@@ -57,48 +50,50 @@ export const EditTargetPopulation = ({
   };
   const [mutate, { loading }] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
-  const { baseUrl, businessArea } = useBaseUrl();
-  const { isSocialDctType, isStandardDctType } = useProgramContext();
-  const { data: allProgramsData, loading: loadingPrograms } =
-    useAllProgramsForChoicesQuery({
-      variables: { businessArea, status: [ProgramStatus.Active] },
-      fetchPolicy: 'cache-and-network',
-    });
+  const { baseUrl } = useBaseUrl();
+  const { selectedProgram, isSocialDctType, isStandardDctType } =
+    useProgramContext();
 
-  if (loadingPrograms) {
-    return <LoadingComponent />;
-  }
-  if (!allProgramsData) {
-    return null;
-  }
+  const category =
+    targetPopulation.targetingCriteria?.rules.length !== 0 ? 'filters' : 'ids';
+
+  const individualFiltersAvailable =
+    selectedProgram?.dataCollectingType?.individualFiltersAvailable;
+  const householdFiltersAvailable =
+    selectedProgram?.dataCollectingType?.householdFiltersAvailable;
 
   const handleValidate = (values): { targetingCriteria?: string } => {
     const { targetingCriteria } = values;
     const errors: { targetingCriteria?: string } = {};
-    if (!targetingCriteria.length) {
+    if (!targetingCriteria.length && category === 'filters') {
       errors.targetingCriteria = t(
         'You need to select at least one targeting criteria',
       );
     }
     return errors;
   };
+
+  const idValidation = Yup.string().test(
+    'testName',
+    'ID is not in the correct format',
+    (ids) => {
+      if (!ids?.length) {
+        return true;
+      }
+      const idsArr = ids.split(',');
+      return idsArr.every((el) =>
+        /^\s*(IND|HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el),
+      );
+    },
+  );
+
   const validationSchema = Yup.object().shape({
     name: Yup.string()
       .min(3, 'Targeting name should have at least 3 characters.')
       .max(255, 'Targeting name should have at most 255 characters.'),
-    excludedIds: Yup.string().test(
-      'testName',
-      'ID is not in the correct format',
-      (ids) => {
-        if (!ids?.length) {
-          return true;
-        }
-        const idsArr = ids.split(',');
-        return idsArr.every((el) =>
-          /^\s*(IND|HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el),
-        );
-      },
-    ),
+    excludedIds: idValidation,
+    householdIds: idValidation,
+    individualIds: idValidation,
     exclusionReason: Yup.string().max(500, t('Too long')),
   });
 
@@ -119,6 +114,8 @@ export const EditTargetPopulation = ({
                 values.flagExcludeIfActiveAdjudicationTicket,
               flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
               criterias: values.targetingCriteria,
+              householdIds: values.householdIds,
+              individualIds: values.individualIds,
             }),
           },
         },
@@ -129,16 +126,6 @@ export const EditTargetPopulation = ({
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
-
-  const selectedProgram = (values): void =>
-    getFullNodeFromEdgesById(
-      allProgramsData?.allPrograms?.edges,
-      values.program,
-    );
-
-  const category =
-    targetPopulation.targetingCriteria?.rules.length !== 0 ? 'filters' : 'ids';
-  const isTitleEditable = (): boolean => targetPopulation.status !== 'LOCKED';
 
   return (
     <Formik
@@ -173,6 +160,7 @@ export const EditTargetPopulation = ({
                   component={FormikTextField}
                   variant="outlined"
                   data-cy="input-name"
+                  disabled={targetPopulation.status === 'LOCKED'}
                 />
               </Grid>
             </Grid>
@@ -186,7 +174,6 @@ export const EditTargetPopulation = ({
                   <TargetingCriteria
                     helpers={arrayHelpers}
                     rules={values.targetingCriteria}
-                    selectedProgram={selectedProgram(values)}
                     isEdit
                     screenBeneficiary={screenBeneficiary}
                     isStandardDctType={isStandardDctType}
@@ -195,6 +182,88 @@ export const EditTargetPopulation = ({
                   />
                 )}
               />
+            ) : null}
+            {category === 'ids' ? (
+              <>
+                <Grid container spacing={3}>
+                  {householdFiltersAvailable && (
+                    <Grid item xs={12}>
+                      <Field
+                        data-cy="input-included-household-ids"
+                        name="householdIds"
+                        fullWidth
+                        variant="outlined"
+                        label={t('Household IDs')}
+                        component={FormikTextField}
+                      />
+                    </Grid>
+                  )}
+                  {householdFiltersAvailable && individualFiltersAvailable && (
+                    <Grid item xs={12}>
+                      <AndDivider>
+                        <AndDividerLabel>OR</AndDividerLabel>
+                      </AndDivider>
+                    </Grid>
+                  )}
+                  {individualFiltersAvailable && (
+                    <Grid item xs={12}>
+                      <Box pb={3}>
+                        <Field
+                          data-cy="input-included-individual-ids"
+                          name="individualIds"
+                          fullWidth
+                          variant="outlined"
+                          label={t('Individual IDs')}
+                          component={FormikTextField}
+                        />
+                      </Box>
+                    </Grid>
+                  )}
+                </Grid>
+                <Box mt={3} p={3}>
+                  <Grid container spacing={3}>
+                    {isStandardDctType && (
+                      <Grid item xs={6}>
+                        <Field
+                          name="flagExcludeIfActiveAdjudicationTicket"
+                          label={t(
+                            'Exclude Households with Active Adjudication Ticket',
+                          )}
+                          color="primary"
+                          component={FormikCheckboxField}
+                          data-cy="input-active-households-adjudication-ticket"
+                        />
+                      </Grid>
+                    )}
+                    {isSocialDctType && (
+                      <Grid item xs={6}>
+                        <Field
+                          name="flagExcludeIfActiveAdjudicationTicket"
+                          label={t(
+                            'Exclude People with Active Adjudication Ticket',
+                          )}
+                          color="primary"
+                          component={FormikCheckboxField}
+                          data-cy="input-active-people-adjudication-ticket"
+                        />
+                      </Grid>
+                    )}
+                    {screenBeneficiary && (
+                      <Grid item xs={6}>
+                        <Field
+                          name="flagExcludeIfOnSanctionList"
+                          label={t(
+                            'Exclude Households with an active sanction screen flag',
+                          )}
+                          color="primary"
+                          component={FormikCheckboxField}
+                          data-cy="input-active-sanction-flag"
+                        />
+                      </Grid>
+                    )}
+                  </Grid>
+                </Box>
+              </>
             ) : null}
           </PaperContainer>
           {category === 'filters' && (

@@ -13,11 +13,12 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { Criteria } from './Criteria';
-import { TargetingCriteriaDisabled } from './TargetingCriteriaDisabled';
 import {
   ContentWrapper,
-  VulnerabilityScoreComponent,
-} from './VulnerabilityScoreComponent';
+  TargetingCriteriaDisabled,
+} from './TargetingCriteriaDisabled';
+import { VulnerabilityScoreComponent } from './VulnerabilityScoreComponent';
+import { useProgramContext } from 'src/programContext';
 
 const Title = styled.div`
   padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
@@ -74,7 +75,6 @@ interface TargetingCriteriaProps {
   rules?;
   helpers?;
   targetPopulation?: TargetPopulationQuery['targetPopulation'];
-  selectedProgram?;
   isEdit?: boolean;
   screenBeneficiary: boolean;
   isSocialDctType: boolean;
@@ -86,7 +86,6 @@ export const TargetingCriteria = ({
   rules,
   helpers,
   targetPopulation,
-  selectedProgram,
   isEdit,
   screenBeneficiary,
   isSocialDctType,
@@ -95,6 +94,7 @@ export const TargetingCriteria = ({
 }: TargetingCriteriaProps): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
+  const { selectedProgram } = useProgramContext();
   const [isOpen, setOpen] = useState(false);
   const [criteriaIndex, setIndex] = useState(null);
   const [criteriaObject, setCriteria] = useState({});
@@ -127,26 +127,22 @@ export const TargetingCriteria = ({
     return closeModal();
   };
 
-  let individualFiltersAvailable = true;
-  let householdFiltersAvailable = true;
+  let individualFiltersAvailable =
+    selectedProgram?.dataCollectingType?.individualFiltersAvailable;
+  let householdFiltersAvailable =
+    selectedProgram?.dataCollectingType?.householdFiltersAvailable;
 
-  if (selectedProgram) {
-    const { dataCollectingType } = selectedProgram;
-    individualFiltersAvailable = dataCollectingType?.individualFiltersAvailable;
-    householdFiltersAvailable = dataCollectingType?.householdFiltersAvailable;
+  // Allow use filters on non-migrated programs
+  if (individualFiltersAvailable === undefined) {
+    individualFiltersAvailable = true;
+  }
+  if (householdFiltersAvailable === undefined) {
+    householdFiltersAvailable = true;
+  }
 
-    // Allow use filters on non-migrated programs
-    if (individualFiltersAvailable === undefined) {
-      individualFiltersAvailable = true;
-    }
-    if (householdFiltersAvailable === undefined) {
-      householdFiltersAvailable = true;
-    }
-
-    // Disable household filters for social programs
-    if (isSocialDctType) {
-      householdFiltersAvailable = false;
-    }
+  // Disable household filters for social programs
+  if (isSocialDctType) {
+    householdFiltersAvailable = false;
   }
 
   if (householdFiltersAvailable || individualFiltersAvailable) {
