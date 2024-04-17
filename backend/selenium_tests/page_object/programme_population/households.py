@@ -116,6 +116,9 @@ class Households(BaseComponents):
     def getHouseholdTableRows(self) -> WebElement:
         return self.wait_for(self.householdTableRow)
 
+    def getHouseholdsRows(self) -> list[WebElement]:
+        self.getHouseholdTableRows()
+        return self.get_elements(self.householdTableRow)
+
     def getHouseholdsRowByNumber(self, number: int) -> WebElement:
-        self.wait_for(self.getHouseholdTableRows)
-        return self.get_elements(self.getHouseholdTableRows)[number]
+        return self.getHouseholdsRows()[number]

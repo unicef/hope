@@ -46,7 +46,6 @@ import { FormikSliderField } from '@shared/Formik/FormikSliderField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { CommunicationSteps, CommunicationTabsValues } from '@utils/constants';
 import { getPercentage } from '@utils/utils';
-import { AdminButton } from '@core/AdminButton';
 import * as React from 'react';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];

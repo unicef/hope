@@ -18,6 +18,7 @@ from page_object.programme_management.programme_management import ProgrammeManag
 from page_object.programme_population.households import Households
 from page_object.programme_population.households_details import HouseholdsDetails
 from page_object.programme_population.individuals import Individuals
+from page_object.programme_population.individuals_details import IndividualsDetails
 from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
@@ -33,6 +34,10 @@ from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Country
+
+
+def pytest_addoption(parser) -> None:  # type: ignore
+    parser.addoption("--mapping", action="store_true", default=False, help="Enable mapping mode")
 
 
 def pytest_configure() -> None:
@@ -126,10 +131,9 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
 
 
 @pytest.fixture
-def driver(request: FixtureRequest) -> Chrome:
+def driver() -> Chrome:
     chrome_options = Options()
-    if not request.node.get_closest_marker("local"):
-        chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument(
         "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
@@ -217,6 +221,11 @@ def pageHouseholdsDetails(request: FixtureRequest, browser: Chrome) -> Household
 @pytest.fixture
 def pageIndividuals(request: FixtureRequest, browser: Chrome) -> Individuals:
     yield Individuals(browser)
+
+
+@pytest.fixture
+def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> IndividualsDetails:
+    yield IndividualsDetails(browser)
 
 
 @pytest.fixture
