@@ -90,40 +90,34 @@ export const DrawerItems = ({
   if (permissions === null || !businessAreaData) return null;
 
   const prepareMenuItems = (items: MenuItem[]): MenuItem[] => {
-    const updatedMenuItems = [...items];
-    const getIndexByName = (name: string): number =>
-      updatedMenuItems.findIndex((item) => item?.name === name);
-    const cashAssistIndex = getIndexByName('Cash Assist');
-    const programDetailsIndex = getIndexByName('Programme Details');
-    const reportingIndex = getIndexByName('Reporting');
+    const pagesAvailableForAllPrograms = [
+      'Country Dashboard',
+      'Programme Management',
+      'Reporting',
+      'Grievance',
+      'Activity Log',
+      'Managerial Console',
+    ];
 
-    // Remove 'Reporting' item when program is selected
-    if (reportingIndex !== -1 && !isAllPrograms) {
-      updatedMenuItems.splice(reportingIndex, 1);
-    }
+    const updatedMenuItems = items.map((item) => {
+      if (item.name === 'Cash Assist') {
+        return { ...item, href: cashAssistUrlData?.cashAssistUrlPrefix };
+      }
+      if (!isAllPrograms && item.name === 'Programme Details') {
+        return { ...item, href: `/details/${programId}` };
+      }
+      return item;
+    });
 
-    // Set CashAssist URL
-    updatedMenuItems[cashAssistIndex].href =
-      cashAssistUrlData?.cashAssistUrlPrefix;
-
-    // When GlobalProgramFilter applied
     if (!isAllPrograms) {
-      updatedMenuItems[programDetailsIndex].href = `/details/${programId}`;
-    }
-    // When GlobalProgramFilter not applied show some pages only
-    if (isAllPrograms) {
-      const pagesAvailableForAllPrograms = [
-        'Country Dashboard',
-        'Programme Management',
-        'Reporting',
-        'Grievance',
-        'Activity Log',
-      ];
-      return updatedMenuItems.filter((item) =>
-        pagesAvailableForAllPrograms.includes(item.name),
+      return updatedMenuItems.filter(
+        (item) => !['Reporting', 'Managerial Console'].includes(item.name),
       );
     }
-    return updatedMenuItems;
+
+    return updatedMenuItems.filter((item) =>
+      pagesAvailableForAllPrograms.includes(item.name),
+    );
   };
 
   const preparedMenuItems = prepareMenuItems(menuItems);

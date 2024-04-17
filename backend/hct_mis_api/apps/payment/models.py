@@ -1,4 +1,5 @@
 import logging
+from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
@@ -80,6 +81,12 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class ModifiedData:
+    modified_date: datetime
+    modified_by: Optional["User"] = None
 
 
 class ChoiceArrayFieldDM(ArrayField):
@@ -1016,6 +1023,31 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
     def get_program(self) -> "Program":
         # TODO will update after add feature with 'program_cycle' and migrate all data
         return self.program_cycle.program if self.program_cycle else self.program
+
+    def _get_last_approval_process_data(self) -> ModifiedData:
+        approval_process = hasattr(self, "approval_process") and self.approval_process.first()
+        if approval_process:
+            if self.status == PaymentPlan.Status.IN_APPROVAL:
+                return ModifiedData(approval_process.sent_for_approval_date, approval_process.sent_for_approval_by)
+            if self.status == PaymentPlan.Status.IN_AUTHORIZATION:
+                if approval := approval_process.approvals.filter(type=Approval.APPROVAL).order_by("created_at").last():
+                    return ModifiedData(approval.created_at, approval.created_by)
+            if self.status == PaymentPlan.Status.IN_REVIEW:
+                if (
+                    approval := approval_process.approvals.filter(type=Approval.AUTHORIZATION)
+                    .order_by("created_at")
+                    .last()
+                ):
+                    return ModifiedData(approval.created_at, approval.created_by)
+        return ModifiedData(self.updated_at)
+
+    @property
+    def last_approval_process_date(self) -> Optional[datetime]:
+        return self._get_last_approval_process_data().modified_date
+
+    @property
+    def last_approval_process_by(self) -> Optional[str]:
+        return self._get_last_approval_process_data().modified_by
 
     @property
     def can_send_to_payment_gateway(self) -> bool:
