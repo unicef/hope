@@ -5,7 +5,6 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
-  DataCollectingTypeType,
   useBusinessAreaDataQuery,
   useCreateTpMutation,
 } from '@generated/graphql';
@@ -146,23 +145,21 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
               <Divider />
             </Box>
             {values.program && category === 'filters' ? (
-              <>
-                <FieldArray
-                  name="criterias"
-                  render={(arrayHelpers) => (
-                    <TargetingCriteria
-                      helpers={arrayHelpers}
-                      rules={values.criterias}
-                      selectedProgram={selectedProgram}
-                      screenBeneficiary={screenBeneficiary}
-                      isStandardDctType={isStandardDctType}
-                      isSocialDctType={isSocialDctType}
-                      category={category}
-                      isEdit
-                    />
-                  )}
-                />
-              </>
+              <FieldArray
+                name="criterias"
+                render={(arrayHelpers) => (
+                  <TargetingCriteria
+                    helpers={arrayHelpers}
+                    rules={values.criterias}
+                    selectedProgram={selectedProgram}
+                    screenBeneficiary={screenBeneficiary}
+                    isStandardDctType={isStandardDctType}
+                    isSocialDctType={isSocialDctType}
+                    category={category}
+                    isEdit
+                  />
+                )}
+              />
             ) : null}
             {category === 'ids' ? (
               <>
@@ -245,7 +242,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
               </>
             ) : null}
           </PaperContainer>
-          {category === ' filters' && <Exclusions />}
+          {category === 'filters' && <Exclusions />}
           <Box
             pt={3}
             pb={3}
