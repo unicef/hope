@@ -873,10 +873,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-blmEgr gQJBaW"
+                  class="sc-ifyrAs fSIDzb"
                 >
                   <div
-                    class="sc-ifyrAs mxgjl"
+                    class="sc-dJGMql iKMXMO"
                     data-cy="status-container"
                     status="PENDING"
                   >
@@ -893,10 +893,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-blmEgr gQJBaW"
+                  class="sc-ifyrAs fSIDzb"
                 >
                   <div
-                    class="sc-ifyrAs dOeJdZ"
+                    class="sc-dJGMql fQdggy"
                     data-cy="status-container"
                     status="ACTIVE"
                   >
@@ -953,10 +953,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-blmEgr gQJBaW"
+                  class="sc-ifyrAs fSIDzb"
                 >
                   <div
-                    class="sc-ifyrAs mxgjl"
+                    class="sc-dJGMql iKMXMO"
                     data-cy="status-container"
                     status="PENDING"
                   >
@@ -973,10 +973,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-blmEgr gQJBaW"
+                  class="sc-ifyrAs fSIDzb"
                 >
                   <div
-                    class="sc-ifyrAs dOeJdZ"
+                    class="sc-dJGMql fQdggy"
                     data-cy="status-container"
                     status="ACTIVE"
                   >
@@ -1033,10 +1033,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-blmEgr gQJBaW"
+                  class="sc-ifyrAs fSIDzb"
                 >
                   <div
-                    class="sc-ifyrAs mxgjl"
+                    class="sc-dJGMql iKMXMO"
                     data-cy="status-container"
                     status="PENDING"
                   >
@@ -1053,10 +1053,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-blmEgr gQJBaW"
+                  class="sc-ifyrAs fSIDzb"
                 >
                   <div
-                    class="sc-ifyrAs dOeJdZ"
+                    class="sc-dJGMql fQdggy"
                     data-cy="status-container"
                     status="ACTIVE"
                   >
@@ -1113,10 +1113,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-blmEgr gQJBaW"
+                  class="sc-ifyrAs fSIDzb"
                 >
                   <div
-                    class="sc-ifyrAs mxgjl"
+                    class="sc-dJGMql iKMXMO"
                     data-cy="status-container"
                     status="PENDING"
                   >
@@ -1133,10 +1133,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-blmEgr gQJBaW"
+                  class="sc-ifyrAs fSIDzb"
                 >
                   <div
-                    class="sc-ifyrAs dOeJdZ"
+                    class="sc-dJGMql fQdggy"
                     data-cy="status-container"
                     status="ACTIVE"
                   >
@@ -1193,10 +1193,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-blmEgr gQJBaW"
+                  class="sc-ifyrAs fSIDzb"
                 >
                   <div
-                    class="sc-ifyrAs mxgjl"
+                    class="sc-dJGMql iKMXMO"
                     data-cy="status-container"
                     status="PENDING"
                   >
@@ -1213,10 +1213,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-blmEgr gQJBaW"
+                  class="sc-ifyrAs fSIDzb"
                 >
                   <div
-                    class="sc-ifyrAs dOeJdZ"
+                    class="sc-dJGMql fQdggy"
                     data-cy="status-container"
                     status="ACTIVE"
                   >
