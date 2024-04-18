@@ -7,19 +7,16 @@ export const api = {
 
   async get(url: string, params: Record<string, any> = {}) {
     const query = new URLSearchParams(params).toString();
-    const cached = this.cache.get(url);
-
-    const headers = { ...this.headers };
-    if (cached && cached.etag) {
-      headers['If-None-Match'] = cached.etag;
-    }
 
     const response = await fetch(`${this.baseURL}${url}?${query}`, {
-      headers,
+      headers: this.headers,
     });
 
-    if (response.status === 304 && cached) {
-      return cached.data;
+    if (response.status === 304) {
+      const cached = this.cache.get(url);
+      if (cached) {
+        return cached.data;
+      }
     }
 
     if (!response.ok) {
@@ -29,7 +26,9 @@ export const api = {
     const etag = response.headers.get('ETag');
     const data = await response.json();
 
-    this.cache.set(url, { etag, data });
+    if (etag) {
+      this.cache.set(url, { etag, data });
+    }
 
     return data;
   },
