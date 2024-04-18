@@ -24,7 +24,7 @@ def etag_decorator(key_constructor_class: "KeyConstructor", compare_etags: bool 
     It expects for the first argument to be a view instance and for the second to be a request like:
         def view_function(self, request, *args, **kwargs)
     It calculates etag based on the KeyConstructor (key_constructor_class) and adds it to the response.
-    If compare_etags is True it compares calculated etag with ETAG header from the request.
+    If compare_etags is True it compares calculated etag with If-None_match header from the request.
     If they are the same, it returns 304 status code without any data.
     """
 
@@ -43,7 +43,7 @@ def etag_decorator(key_constructor_class: "KeyConstructor", compare_etags: bool 
 
             # If etag from header and calculated are the same,
             # return 304 status code as request consists of the same data already (cached on client side)
-            if compare_etags and request.headers.get("ETAG") == etag:
+            if compare_etags and request.headers.get("If-None-Match") == etag:
                 return Response(status=status.HTTP_304_NOT_MODIFIED, headers={"ETAG": etag})
             res = function(*args, **kwargs)
             res.headers["ETAG"] = etag

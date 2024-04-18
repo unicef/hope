@@ -23,7 +23,7 @@ class TestEtagDecorator:
         return Response()
 
     def test_etag_decorator_etag_exists(self) -> None:
-        response = self.dummy_view(self.DummyRequest({"ETAG": "etag"}), (1, 2, 3), {})
+        response = self.dummy_view(self.DummyRequest({"If-None-Match": "etag"}), (1, 2, 3), {})
         assert response.status_code == status.HTTP_304_NOT_MODIFIED
         assert response.headers["ETAG"] == "etag"
 
@@ -33,6 +33,6 @@ class TestEtagDecorator:
         assert response.headers["ETAG"] == "etag"
 
     def test_etag_decorator_old_etag(self) -> None:
-        response = self.dummy_view(self.DummyRequest({"ETAG": "old"}), (1, 2, 3), {})
+        response = self.dummy_view(self.DummyRequest({"If-None-Match": "old"}), (1, 2, 3), {})
         assert response.status_code == status.HTTP_200_OK
         assert response.headers["ETAG"] == "etag"
