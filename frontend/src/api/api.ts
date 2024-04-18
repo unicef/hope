@@ -3,17 +3,35 @@ export const api = {
   headers: {
     Accept: 'application/json',
   },
+  cache: new Map(),
+
   async get(url: string, params: Record<string, any> = {}) {
     const query = new URLSearchParams(params).toString();
+    const cached = this.cache.get(url);
+
+    const headers = { ...this.headers };
+    if (cached && cached.etag) {
+      headers['If-None-Match'] = cached.etag;
+    }
+
     const response = await fetch(`${this.baseURL}${url}?${query}`, {
-      headers: this.headers,
+      headers,
     });
+
+    if (response.status === 304 && cached) {
+      return cached.data;
+    }
 
     if (!response.ok) {
       throw new Error(`Error fetching data from ${url}`);
     }
 
-    return response.json();
+    const etag = response.headers.get('ETag');
+    const data = await response.json();
+
+    this.cache.set(url, { etag, data });
+
+    return data;
   },
 
   async post(url: string, data: Record<string, any> = {}) {
