@@ -542,6 +542,11 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         }
         self.assertEqual(household_obj_data, expected_hh)
 
+        self.assertEqual(individual.household.detail_id, "aPkhoRMrkkDwgsvWuwi39s")
+        self.assertEqual(individual.household.kobo_asset_id, "aPkhoRMrkkDwgsvWuwi39s")
+        self.assertEqual(individual.household.kobo_submission_uuid, "c09130af-6c9c-4dba-8c7f-1b2ff1970d19")
+        self.assertEqual(individual.household.kobo_submission_time, "2020-06-03T13:05:10+00:00")
+
     @mock.patch(
         "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,

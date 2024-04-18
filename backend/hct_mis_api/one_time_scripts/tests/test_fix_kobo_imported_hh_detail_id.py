@@ -1,3 +1,5 @@
+from django.core.management import call_command
+
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.registration_datahub.fixtures import ImportedHouseholdFactory
@@ -14,6 +16,7 @@ class TestFixKoboHhDetailId(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
+        call_command("loadcountries")
         ImportedHouseholdFactory(
             kobo_submission_uuid="6bb78c41-da41-47e2-9b4e-27dfbd7e7777",
             kobo_asset_id="aD3dSDiFoASn7CAtBS3h33",
