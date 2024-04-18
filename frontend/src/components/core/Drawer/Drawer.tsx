@@ -161,13 +161,15 @@ export const Drawer = ({
   }, [backendVersion, frontendVersion, showMismatchedDialog]);
 
   let notActiveBar = null;
-  if (
-    !isAllPrograms &&
-    programResults?.data?.program?.status !== ProgramStatus.Active &&
-    programResults?.data?.program?.status !== undefined &&
-    programResults?.data?.program?.status !== null
-  ) {
-    notActiveBar = <ProgramNotActiveBar data-cy="program-inactive-subheader">program inactive</ProgramNotActiveBar>;
+  const programStatus = programResults?.data?.program?.status;
+  const isActive = programStatus === ProgramStatus.Active;
+  const isDefined = programStatus !== undefined && programStatus !== null;
+  if (!isAllPrograms && isActive && isDefined) {
+    notActiveBar = (
+      <ProgramNotActiveBar data-cy="program-inactive-subheader">
+        program inactive
+      </ProgramNotActiveBar>
+    );
   }
 
   return (

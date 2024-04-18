@@ -14,7 +14,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './PeopleListTableHeadCells';
 import { PeopleListTableRow } from './PeopleListTableRow';
 
-interface IndividualsListTableProps {
+interface PeopleListTableProps {
   filter;
   businessArea: string;
   canViewDetails: boolean;
@@ -26,7 +26,7 @@ export function PeopleListTable({
   filter,
   canViewDetails,
   choicesData,
-}: IndividualsListTableProps): React.ReactElement {
+}: PeopleListTableProps): React.ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const initialVariables: AllIndividualsForPopulationTableQueryVariables = {
