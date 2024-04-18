@@ -113,6 +113,10 @@ def payment_plan_setup(cls: Any) -> None:
         name="Santander",
         distribution_limit=None,
         delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_CASH],
+        data_transfer_configuration=[
+            {"key": "config_1", "label": "Config 1", "id": "1"},
+            {"key": "config_11", "label": "Config 11", "id": "11"},
+        ],
     )
     cls.encoded_santander_fsp_id = encode_id_base64(cls.santander_fsp.id, "FinancialServiceProvider")
 
@@ -120,6 +124,7 @@ def payment_plan_setup(cls: Any) -> None:
         name="Bank of America",
         delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER, GenericPayment.DELIVERY_TYPE_CASH],
         distribution_limit=1000,
+        data_transfer_configuration=[{"key": "config_2", "label": "Config 2", "id": "2"}],
     )
     cls.encoded_bank_of_america_fsp_id = encode_id_base64(cls.bank_of_america_fsp.id, "FinancialServiceProvider")
 
@@ -131,6 +136,7 @@ def payment_plan_setup(cls: Any) -> None:
             GenericPayment.DELIVERY_TYPE_TRANSFER,
             GenericPayment.DELIVERY_TYPE_CASH,
         ],
+        data_transfer_configuration=[{"key": "config_3", "label": "Config 3", "id": "3"}],
     )
     cls.encoded_bank_of_europe_fsp_id = encode_id_base64(cls.bank_of_europe_fsp.id, "FinancialServiceProvider")
     FspXlsxTemplatePerDeliveryMechanismFactory(
@@ -164,6 +170,7 @@ mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeli
                 fsp {
                     id
                 }
+                chosenConfiguration
             }
         }
     }
@@ -194,6 +201,7 @@ query PaymentPlan($id: ID!) {
             fsp {
                 id
             }
+            chosenConfiguration
         }
     }
 }
@@ -206,6 +214,11 @@ query AvailableFspsForDeliveryMechanisms($input: AvailableFspsForDeliveryMechani
         fsps {
             id
             name
+            configurations {
+                id
+                key
+                label
+            }
         }
     }
 }
@@ -409,11 +422,13 @@ class TestFSPAssignment(APITestCase):
                         "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
                         "fspId": self.encoded_santander_fsp_id,
                         "order": 1,
+                        "chosenConfiguration": "config_1",
                     },
                     {
                         "deliveryMechanism": GenericPayment.DELIVERY_TYPE_VOUCHER,
                         "fspId": self.encoded_bank_of_america_fsp_id,
                         "order": 2,
+                        "chosenConfiguration": "config_2",
                     },
                 ],
             },
@@ -422,6 +437,8 @@ class TestFSPAssignment(APITestCase):
         complete_payment_plan_data = complete_mutation_response["data"]["assignFspToDeliveryMechanism"]["paymentPlan"]
         assert complete_payment_plan_data["deliveryMechanisms"][0]["fsp"]["id"] == self.encoded_santander_fsp_id
         assert complete_payment_plan_data["deliveryMechanisms"][1]["fsp"]["id"] == self.encoded_bank_of_america_fsp_id
+        assert complete_payment_plan_data["deliveryMechanisms"][0]["chosenConfiguration"] == "config_1"
+        assert complete_payment_plan_data["deliveryMechanisms"][1]["chosenConfiguration"] == "config_2"
 
         new_payment_plan_response = self.graphql_request(
             request_string=CURRENT_PAYMENT_PLAN_QUERY,
@@ -457,11 +474,13 @@ class TestFSPAssignment(APITestCase):
                         "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
                         "fspId": self.encoded_santander_fsp_id,
                         "order": 1,
+                        "chosenConfiguration": "config_1",
                     },
                     {
                         "deliveryMechanism": GenericPayment.DELIVERY_TYPE_VOUCHER,
                         "fspId": self.encoded_bank_of_america_fsp_id,
                         "order": 2,
+                        "chosenConfiguration": "config_2",
                     },
                 ],
             },
@@ -470,6 +489,8 @@ class TestFSPAssignment(APITestCase):
         complete_payment_plan_data = complete_mutation_response["data"]["assignFspToDeliveryMechanism"]["paymentPlan"]
         assert complete_payment_plan_data["deliveryMechanisms"][0]["fsp"]["id"] == self.encoded_santander_fsp_id
         assert complete_payment_plan_data["deliveryMechanisms"][1]["fsp"]["id"] == self.encoded_bank_of_america_fsp_id
+        assert complete_payment_plan_data["deliveryMechanisms"][0]["chosenConfiguration"] == "config_1"
+        assert complete_payment_plan_data["deliveryMechanisms"][1]["chosenConfiguration"] == "config_2"
 
         payment_plan_response = self.graphql_request(
             request_string=CURRENT_PAYMENT_PLAN_QUERY,
@@ -529,11 +550,13 @@ class TestFSPAssignment(APITestCase):
                         "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
                         "fspId": self.encoded_santander_fsp_id,
                         "order": 1,
+                        "chosenConfiguration": "config_1",
                     },
                     {
                         "deliveryMechanism": GenericPayment.DELIVERY_TYPE_VOUCHER,
                         "fspId": self.encoded_bank_of_america_fsp_id,
                         "order": 2,
+                        "chosenConfiguration": "config_2",
                     },
                 ],
             },
@@ -549,6 +572,8 @@ class TestFSPAssignment(APITestCase):
         assert len(current_data["deliveryMechanisms"]) == 2
         assert current_data["deliveryMechanisms"][0]["fsp"] is not None
         assert current_data["deliveryMechanisms"][1]["fsp"] is not None
+        assert current_data["deliveryMechanisms"][0]["chosenConfiguration"] == "config_1"
+        assert current_data["deliveryMechanisms"][1]["chosenConfiguration"] == "config_2"
 
         new_choose_dms_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
@@ -574,6 +599,8 @@ class TestFSPAssignment(APITestCase):
         assert len(new_data["deliveryMechanisms"]) == 2
         assert new_data["deliveryMechanisms"][0]["fsp"] is None
         assert new_data["deliveryMechanisms"][1]["fsp"] is None
+        assert new_data["deliveryMechanisms"][1]["chosenConfiguration"] is None
+        assert new_data["deliveryMechanisms"][0]["chosenConfiguration"] is None
 
     def test_choosing_different_fsps_for_the_same_delivery_mechanism(self) -> None:
         choose_dms_response = self.graphql_request(

@@ -31,6 +31,7 @@ export function EditFollowUpSetUpFspPage(): React.ReactElement {
     paymentPlanData.paymentPlan.deliveryMechanisms.map((el) => ({
       deliveryMechanism: el.name,
       fsp: el.fsp?.id || '',
+      chosenConfiguration: el.chosenConfiguration || '',
     }));
 
   const initialValues = {
