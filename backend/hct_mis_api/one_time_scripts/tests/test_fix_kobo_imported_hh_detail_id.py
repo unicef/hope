@@ -14,6 +14,7 @@ from hct_mis_api.one_time_scripts.fix_kobo_imported_hh_detail_id import (
 
 class TestFixKoboHhDetailId(APITestCase):
     databases = {"default", "registration_datahub"}
+
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
