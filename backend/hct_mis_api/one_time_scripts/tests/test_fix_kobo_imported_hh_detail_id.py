@@ -1,11 +1,12 @@
-from hct_mis_api.one_time_scripts.fix_kobo_imported_hh_detail_id import fix_kobo_imported_hh_detail_id
-
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.registration_datahub.fixtures import ImportedHouseholdFactory
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     KoboImportedSubmission,
+)
+from hct_mis_api.one_time_scripts.fix_kobo_imported_hh_detail_id import (
+    fix_kobo_imported_hh_detail_id,
 )
 
 
