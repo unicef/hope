@@ -4,6 +4,7 @@ import {
 } from '@api/paymentModuleApi';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
 import { ApprovalSection } from '@components/managerialConsole/ApprovalSection';
 import { AuthorizationSection } from '@components/managerialConsole/AuthorizationSection';
 import { ReleaseSection } from '@components/managerialConsole/ReleaseSection';
@@ -14,7 +15,7 @@ import { Box } from '@mui/material';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { hasPermissions } from 'src/config/permissions';
+import { PERMISSIONS, hasPermissions } from 'src/config/permissions';
 
 export const ManagerialConsolePage: React.FC = () => {
   const { t } = useTranslation();
@@ -124,6 +125,9 @@ export const ManagerialConsolePage: React.FC = () => {
     'PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW',
     permissions,
   );
+
+  if (!hasPermissions(PERMISSIONS.PAYMENT_VIEW_LIST_MANAGERIAL, permissions))
+    return <PermissionDenied />;
 
   return (
     <>
