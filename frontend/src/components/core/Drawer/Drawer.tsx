@@ -164,7 +164,7 @@ export const Drawer = ({
   const programStatus = programResults?.data?.program?.status;
   const isActive = programStatus === ProgramStatus.Active;
   const isDefined = programStatus !== undefined && programStatus !== null;
-  if (!isAllPrograms && isActive && isDefined) {
+  if (!isAllPrograms && !isActive && isDefined) {
     notActiveBar = (
       <ProgramNotActiveBar data-cy="program-inactive-subheader">
         program inactive
