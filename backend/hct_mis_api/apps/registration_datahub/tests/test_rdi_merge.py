@@ -214,6 +214,10 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             admin4_title=self.area4.name,
             zip_code="00-123",
             enumerator_rec_id=1234567890,
+            detail_id="123456123",
+            kobo_asset_id="Test_asset_id",
+            kobo_submission_uuid="123-6c9c-4dba-8c7f-123",
+            kobo_submission_time="2222-22-22T00:00:00+00:00",
         )
         self.set_imported_individuals(imported_household)
         with capture_on_commit_callbacks(execute=True):
@@ -224,13 +228,18 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
 
         imported_households = ImportedHousehold.objects.all()
         imported_individuals = ImportedIndividual.objects.all()
+        household = households.first()
 
         self.assertEqual(1, households.count())
         self.assertEqual(0, imported_households.count())  # Removed after successful merge
-        self.assertEqual(households[0].collect_individual_data, COLLECT_TYPE_FULL)
+        self.assertEqual(household.collect_individual_data, COLLECT_TYPE_FULL)
         self.assertEqual(8, individuals.count())
         self.assertEqual(0, imported_individuals.count())  # Removed after successful merge
-        self.assertEqual(households.first().flex_fields.get("enumerator_id"), 1234567890)
+        self.assertEqual(household.flex_fields.get("enumerator_id"), 1234567890)
+        self.assertEqual(household.detail_id, "123456123")
+        self.assertEqual(household.kobo_asset_id, "Test_asset_id")
+        self.assertEqual(household.kobo_submission_uuid, "123-6c9c-4dba-8c7f-123")
+        self.assertEqual(household.kobo_submission_time, "2222-22-22T00:00:00+00:00")
 
         individual_with_valid_phone_data = Individual.objects.filter(given_name="Liz").first()
         individual_with_invalid_phone_data = Individual.objects.filter(given_name="Jenna").first()
@@ -246,7 +255,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         self.assertEqual(Individual.objects.filter(full_name="Bob Jackson").first().email, "")
 
         household_data = model_to_dict(
-            households[0],
+            household,
             (
                 "female_age_group_0_5_count",
                 "female_age_group_6_11_count",
