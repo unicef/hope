@@ -45,7 +45,6 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
     ImportedIndividualIdentity,
 )
-from hct_mis_api.conftest import disabled_locally_test
 
 
 def create_document_image() -> File:
@@ -70,7 +69,6 @@ class CellMock:
         self.coordinate = coordinate
 
 
-@disabled_locally_test
 class TestRdiCreateTask(BaseElasticSearchTestCase):
     databases = {
         "default",
@@ -428,7 +426,6 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(list(documents), expected)
 
 
-@disabled_locally_test
 class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
     databases = {
         "default",
@@ -544,8 +541,8 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
 
         self.assertEqual(individual.household.detail_id, "aPkhoRMrkkDwgsvWuwi39s")
         self.assertEqual(individual.household.kobo_asset_id, "aPkhoRMrkkDwgsvWuwi39s")
-        self.assertEqual(individual.household.kobo_submission_uuid, "c09130af-6c9c-4dba-8c7f-1b2ff1970d19")
-        self.assertEqual(individual.household.kobo_submission_time, "2020-06-03T13:05:10+00:00")
+        self.assertEqual(str(individual.household.kobo_submission_uuid), "c09130af-6c9c-4dba-8c7f-1b2ff1970d19")
+        self.assertEqual(individual.household.kobo_submission_time.isoformat(), "2020-06-03T13:05:10+00:00")
 
     @mock.patch(
         "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
@@ -931,3 +928,55 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
             "w+",
         ) as json_file:
             json_file.write(json.dumps(result))
+
+    def test_handle_household_dict(self) -> None:
+        bank_accounts_to_create, households_to_create = [], []
+        collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = dict(), dict(), dict()
+        household = {
+            "_id": 1111,
+            "uuid": "qweqweqweqwe",
+            "start": "2024-03",
+            "end": "2024-03",
+            "org_name_enumerator_h_c": "org_name_enumerator_string",
+            "name_enumerator_h_c": "name_enumerator_string",
+            "enumertor_phone_num_h_f": "321123123321",
+            "consent_h_c": "1",
+            "country_h_c": "NGA",
+            "admin1_h_c": "NG037",
+            "admin2_h_c": "NG037011",
+            "village_h_c": "VillageName",
+            "nearest_school_h_f": "next",
+            "hh_geopoint_h_c": "46.123 6.312 0 0",
+            "size_h_c": "5",
+            "children_under_18_h_f": "2",
+            "children_6_to_11_h_f": "1",
+            "hohh_is_caregiver_h_f": "0",
+            "alternate_collector": "1",
+            "_xform_id_string": "kobo_asset_id_string_OR_detail_id",
+            "_uuid": "123123-411d-85f1-123123",
+            "_submission_time": "2022-02-22T12:22:22",
+        }
+        submission_meta_data = {
+            "kobo_submission_uuid": "123123-411d-85f1-123123",
+            "kobo_asset_id": "kobo_asset_id_string_OR_detail_id",
+            "kobo_submission_time": "2022-02-22T12:22:22",
+        }
+
+        task = self.RdiKoboCreateTask()
+        task.handle_household(
+            bank_accounts_to_create,
+            collectors_to_create,
+            head_of_households_mapping,
+            household,
+            households_to_create,
+            individuals_ids_hash_dict,
+            self.registration_data_import,
+            submission_meta_data,
+        )
+        hh = households_to_create[0]
+
+        self.assertEqual(len(households_to_create), 1)
+        self.assertEqual(hh.detail_id, "kobo_asset_id_string_OR_detail_id")
+        self.assertEqual(hh.kobo_asset_id, "kobo_asset_id_string_OR_detail_id")
+        self.assertEqual(hh.kobo_submission_time.isoformat(), "2022-02-22T12:22:22")
+        self.assertEqual(hh.kobo_submission_uuid, "123123-411d-85f1-123123")
