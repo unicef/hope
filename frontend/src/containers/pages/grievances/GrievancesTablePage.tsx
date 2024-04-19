@@ -30,7 +30,7 @@ export function GrievancesTablePage(): React.ReactElement {
 
   const initialFilter = {
     search: '',
-    documentType: choicesData?.grievanceTicketSearchTypesChoices[0].value,
+    documentType: choicesData?.documentTypeChoices?.[0]?.value,
     documentNumber: '',
     status: '',
     fsp: '',

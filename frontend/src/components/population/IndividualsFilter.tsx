@@ -98,7 +98,7 @@ export function IndividualsFilter({
               fullWidth
               disableClearable
             >
-              {choicesData?.individualSearchTypesChoices.map(
+              {choicesData?.documentTypeChoices.map(
                 ({ name, value }) => (
                   <MenuItem key={value} value={value}>
                     {name}
