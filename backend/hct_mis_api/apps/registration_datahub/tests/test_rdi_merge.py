@@ -31,6 +31,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
+    KoboImportedSubmission,
 )
 from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 from hct_mis_api.conftest import disabled_locally_test
@@ -240,6 +241,15 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         self.assertEqual(household.kobo_asset_id, "Test_asset_id")
         self.assertEqual(household.kobo_submission_uuid, "123-6c9c-4dba-8c7f-123")
         self.assertEqual(household.kobo_submission_time, "2222-22-22T00:00:00+00:00")
+
+        # check KoboImportedSubmission
+        kobo_import_submission_qs = KoboImportedSubmission.objects.all()
+        kobo_import_submission = kobo_import_submission_qs.first()
+        self.assertEqual(kobo_import_submission_qs.count(), 1)
+        self.assertEqual(kobo_import_submission.kobo_submission_uuid, "123-6c9c-4dba-8c7f-123")
+        self.assertEqual(kobo_import_submission.kobo_asset_id, "Test_asset_id")
+        self.assertEqual(kobo_import_submission.kobo_submission_time, "2222-22-22T00:00:00+00:00")
+        self.assertEqual(kobo_import_submission.imported_household, None)
 
         individual_with_valid_phone_data = Individual.objects.filter(given_name="Liz").first()
         individual_with_invalid_phone_data = Individual.objects.filter(given_name="Jenna").first()
