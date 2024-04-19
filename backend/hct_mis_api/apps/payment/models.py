@@ -50,7 +50,11 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     CORE_FIELDS_ATTRIBUTES,
     FieldFactory,
 )
-from hct_mis_api.apps.core.field_attributes.fields_types import _HOUSEHOLD, _INDIVIDUAL
+from hct_mis_api.apps.core.field_attributes.fields_types import (
+    _HOUSEHOLD,
+    _INDIVIDUAL,
+    Scope,
+)
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.utils import nested_getattr
@@ -1096,7 +1100,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     )
 
     @classmethod
-    def get_column_from_core_field(cls, payment: "Payment", core_field_name: str) -> Any:
+    def get_column_from_core_field(
+        cls, payment: "Payment", core_field_name: str, is_social_worker_program: bool
+    ) -> Any:
         def parse_admin_area(obj: "Area") -> str:
             if not obj:
                 return ""
@@ -1104,7 +1110,10 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
         collector = payment.collector
         household = payment.household
-        core_fields_attributes = FieldFactory(CORE_FIELDS_ATTRIBUTES).to_dict_by("name")
+        if is_social_worker_program:
+            core_fields_attributes = FieldFactory.from_scope(Scope.XLSX_PEOPLE).to_dict_by("name")
+        else:
+            core_fields_attributes = FieldFactory.not_from_scope(Scope.XLSX_PEOPLE).to_dict_by("name")
         attr = core_fields_attributes[core_field_name]
         lookup = attr["lookup"]
         lookup = lookup.replace("__", ".")
@@ -1764,7 +1773,9 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
     payment_plan_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     payment_plan_object_id = UUIDField()
-    payment_plan_obj: "Union[PaymentPlan, CashPlan]" = GenericForeignKey("payment_plan_content_type", "payment_plan_object_id")  # type: ignore
+    payment_plan_obj: "Union[PaymentPlan, CashPlan]" = GenericForeignKey(
+        "payment_plan_content_type", "payment_plan_object_id"
+    )  # type: ignore
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
     verification_channel = models.CharField(max_length=50, choices=VERIFICATION_CHANNEL_CHOICES)
     sample_size = models.PositiveIntegerField(null=True)
