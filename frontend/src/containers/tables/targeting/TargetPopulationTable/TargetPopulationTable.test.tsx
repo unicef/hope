@@ -10,8 +10,8 @@ describe('containers/tables/targeting/TargetPopulation/TargetPopulationTable', (
   const initialFilter = {
     name: '',
     status: '',
-    totalHouseholdsCountMin: '',
-    totalHouseholdsCountMax: '',
+    totalHouseholdsCountMin: null,
+    totalHouseholdsCountMax: null,
     createdAtRangeMin: '',
     createdAtRangeMax: '',
   };
