@@ -23,7 +23,7 @@ export function PopulationHouseholdPage(): React.ReactElement {
     });
   const initialFilter = {
     search: '',
-    documentType: choicesData?.householdSearchTypesChoices[0].value,
+    documentType: choicesData?.documentTypeChoices?.[0]?.value,
     documentNumber: '',
     residenceStatus: '',
     admin2: '',

@@ -591,9 +591,6 @@ class Query(graphene.ObjectType):
     all_households_flex_fields_attributes = graphene.List(FieldAttributeNode)
     all_individuals_flex_fields_attributes = graphene.List(FieldAttributeNode)
 
-    individual_search_types_choices = graphene.List(ChoiceObject)
-    household_search_types_choices = graphene.List(ChoiceObject)
-
     def resolve_all_individuals(self, info: Any, **kwargs: Any) -> QuerySet[Individual]:
         user = info.context.user
         program_id = get_program_id_from_headers(info.context.headers)
@@ -898,13 +895,3 @@ class Query(graphene.ObjectType):
             {"label": "total", "data": sum_of_totals},
         ]
         return {"labels": INDIVIDUALS_CHART_LABELS, "datasets": datasets}
-
-    def resolve_individual_search_types_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, str]]:
-        search_types_choices = []
-        search_types_choices.extend(DocumentType.objects.all().order_by("label").values_list("key", "label"))
-        return [{"name": name, "value": value} for value, name in search_types_choices]
-
-    def resolve_household_search_types_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, str]]:
-        search_types_choices = []
-        search_types_choices.extend(DocumentType.objects.all().order_by("label").values_list("key", "label"))
-        return [{"name": name, "value": value} for value, name in search_types_choices]

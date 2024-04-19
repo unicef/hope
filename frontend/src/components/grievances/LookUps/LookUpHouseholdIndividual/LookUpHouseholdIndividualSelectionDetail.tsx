@@ -57,7 +57,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
   const initialFilterHH = {
     program: isAllPrograms ? '' : programId,
     search: '',
-    documentType: householdChoicesData?.householdSearchTypesChoices[0].value,
+    documentType: householdChoicesData?.documentTypeChoices?.[0]?.value,
     documentNumber: '',
     residenceStatus: '',
     admin2: '',
@@ -70,7 +70,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
   const initialFilterIND = {
     program: isAllPrograms ? '' : programId,
     search: '',
-    documentType: individualChoicesData?.individualSearchTypesChoices[0].value,
+    documentType: individualChoicesData?.documentTypeChoices?.[0]?.value,
     documentNumber: '',
     admin2: '',
     sex: '',

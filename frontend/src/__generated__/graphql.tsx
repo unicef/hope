@@ -5691,19 +5691,16 @@ export type Query = {
   grievanceTicketIssueTypeChoices?: Maybe<Array<Maybe<IssueTypesObject>>>;
   grievanceTicketManualCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   grievanceTicketPriorityChoices?: Maybe<Array<Maybe<ChoiceObjectInt>>>;
-  grievanceTicketSearchTypesChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   grievanceTicketStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   grievanceTicketSystemCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   grievanceTicketUrgencyChoices?: Maybe<Array<Maybe<ChoiceObjectInt>>>;
   hasAvailableUsersToExport?: Maybe<Scalars['Boolean']['output']>;
   household?: Maybe<HouseholdNode>;
-  householdSearchTypesChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   identityTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   importData?: Maybe<ImportDataNode>;
   importedHousehold?: Maybe<ImportedHouseholdNode>;
   importedIndividual?: Maybe<ImportedIndividualNode>;
   individual?: Maybe<IndividualNode>;
-  individualSearchTypesChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   koboImportData?: Maybe<KoboImportDataNode>;
   koboProject?: Maybe<KoboAssetObject>;
   logEntryActionChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
@@ -10144,7 +10141,7 @@ export type GrievanceTicketUnicefIdQuery = { __typename?: 'Query', grievanceTick
 export type GrievancesChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GrievancesChoiceDataQuery = { __typename?: 'Query', grievanceTicketStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, grievanceTicketCategoryChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, grievanceTicketManualCategoryChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, grievanceTicketSystemCategoryChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, grievanceTicketPriorityChoices?: Array<{ __typename?: 'ChoiceObjectInt', name?: string | null, value?: number | null } | null> | null, grievanceTicketUrgencyChoices?: Array<{ __typename?: 'ChoiceObjectInt', name?: string | null, value?: number | null } | null> | null, grievanceTicketIssueTypeChoices?: Array<{ __typename?: 'IssueTypesObject', category?: string | null, label?: string | null, subCategories?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null } | null> | null, grievanceTicketSearchTypesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
+export type GrievancesChoiceDataQuery = { __typename?: 'Query', grievanceTicketStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, grievanceTicketCategoryChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, grievanceTicketManualCategoryChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, grievanceTicketSystemCategoryChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, grievanceTicketPriorityChoices?: Array<{ __typename?: 'ChoiceObjectInt', name?: string | null, value?: number | null } | null> | null, grievanceTicketUrgencyChoices?: Array<{ __typename?: 'ChoiceObjectInt', name?: string | null, value?: number | null } | null> | null, grievanceTicketIssueTypeChoices?: Array<{ __typename?: 'IssueTypesObject', category?: string | null, label?: string | null, subCategories?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null } | null> | null, documentTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type PartnerForGrievanceChoicesQueryVariables = Exact<{
   householdId?: InputMaybe<Scalars['ID']['input']>;
@@ -10521,7 +10518,7 @@ export type HouseholdQuery = { __typename?: 'Query', household?: { __typename?: 
 export type HouseholdChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HouseholdChoiceDataQuery = { __typename?: 'Query', residenceStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, relationshipChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, roleChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, maritalStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, workStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, deduplicationBatchStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, deduplicationGoldenRecordStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, observedDisabilityChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, severityOfDisabilityChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, householdSearchTypesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
+export type HouseholdChoiceDataQuery = { __typename?: 'Query', residenceStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, relationshipChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, roleChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, maritalStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, workStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, deduplicationBatchStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, deduplicationGoldenRecordStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, observedDisabilityChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, severityOfDisabilityChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, documentTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type HouseholdFlexFieldsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -10540,7 +10537,7 @@ export type IndividualQuery = { __typename?: 'Query', individual?: { __typename?
 export type IndividualChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type IndividualChoiceDataQuery = { __typename?: 'Query', flagChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, individualSearchTypesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
+export type IndividualChoiceDataQuery = { __typename?: 'Query', flagChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, documentTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type IndividualFlexFieldsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -17747,7 +17744,7 @@ export const GrievancesChoiceDataDocument = gql`
       value
     }
   }
-  grievanceTicketSearchTypesChoices {
+  documentTypeChoices {
     name
     value
   }
@@ -20526,7 +20523,7 @@ export const HouseholdChoiceDataDocument = gql`
     name
     value
   }
-  householdSearchTypesChoices {
+  documentTypeChoices {
     name
     value
   }
@@ -20651,7 +20648,7 @@ export const IndividualChoiceDataDocument = gql`
     name
     value
   }
-  individualSearchTypesChoices {
+  documentTypeChoices {
     name
     value
   }
@@ -27021,19 +27018,16 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   grievanceTicketIssueTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['IssueTypesObject']>>>, ParentType, ContextType>;
   grievanceTicketManualCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   grievanceTicketPriorityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObjectInt']>>>, ParentType, ContextType>;
-  grievanceTicketSearchTypesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   grievanceTicketStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   grievanceTicketSystemCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   grievanceTicketUrgencyChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObjectInt']>>>, ParentType, ContextType>;
   hasAvailableUsersToExport?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<QueryHasAvailableUsersToExportArgs, 'businessAreaSlug'>>;
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType, RequireFields<QueryHouseholdArgs, 'id'>>;
-  householdSearchTypesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   identityTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType, RequireFields<QueryImportDataArgs, 'id'>>;
   importedHousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType, RequireFields<QueryImportedHouseholdArgs, 'id'>>;
   importedIndividual?: Resolver<Maybe<ResolversTypes['ImportedIndividualNode']>, ParentType, ContextType, RequireFields<QueryImportedIndividualArgs, 'id'>>;
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType, RequireFields<QueryIndividualArgs, 'id'>>;
-  individualSearchTypesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   koboImportData?: Resolver<Maybe<ResolversTypes['KoboImportDataNode']>, ParentType, ContextType, RequireFields<QueryKoboImportDataArgs, 'id'>>;
   koboProject?: Resolver<Maybe<ResolversTypes['KoboAssetObject']>, ParentType, ContextType, RequireFields<QueryKoboProjectArgs, 'businessAreaSlug' | 'uid'>>;
   logEntryActionChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;

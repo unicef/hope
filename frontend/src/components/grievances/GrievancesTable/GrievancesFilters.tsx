@@ -142,7 +142,7 @@ export const GrievancesFilters = ({
               fullWidth
               disableClearable
             >
-              {choicesData?.grievanceTicketSearchTypesChoices?.map(
+              {choicesData?.documentTypeChoices?.map(
                 ({ name, value }) => (
                   <MenuItem key={value} value={value}>
                     {name}

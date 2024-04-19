@@ -30,7 +30,7 @@ export function LookUpLinkedTicketsTable({
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
     search: filter.search.trim(),
-    documentType: choicesData?.grievanceTicketSearchTypesChoices[0].value,
+    documentType: choicesData?.documentTypeChoices?.[0]?.value,
     documentNumber: filter.documentNumber.trim(),
     status: [filter.status],
     fsp: filter.fsp,

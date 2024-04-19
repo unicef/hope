@@ -86,7 +86,7 @@ export function HouseholdFilters({
               fullWidth
               disableClearable
             >
-              {choicesData?.householdSearchTypesChoices.map(
+              {choicesData?.documentTypeChoices.map(
                 ({ name, value }) => (
                   <MenuItem key={value} value={value}>
                     {name}

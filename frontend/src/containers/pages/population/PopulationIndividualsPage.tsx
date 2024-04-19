@@ -30,7 +30,7 @@ export function PopulationIndividualsPage(): React.ReactElement {
 
   const initialFilter = {
     search: '',
-    documentType: individualChoicesData?.individualSearchTypesChoices[0].value,
+    documentType: individualChoicesData?.documentTypeChoices?.[0]?.value,
     documentNumber: '',
     admin2: '',
     sex: '',
