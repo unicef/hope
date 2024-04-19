@@ -46,7 +46,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         self.index_id: Optional[int] = None
         self.households_to_update = []
         print(FieldFactory.from_scopes([Scope.XLSX_PEOPLE]).apply_business_area().to_dict_by("xlsx_field"))
-        print('*'*300)
+        print("*" * 300)
         self.COMBINED_FIELDS: Dict = {
             **FieldFactory.from_scopes([Scope.XLSX_PEOPLE]).apply_business_area().to_dict_by("xlsx_field"),
             **serialize_flex_attributes()["individuals"],
