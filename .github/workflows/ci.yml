@@ -231,6 +231,7 @@ jobs:
           verbose: true
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: report
           path: ./backend/report/

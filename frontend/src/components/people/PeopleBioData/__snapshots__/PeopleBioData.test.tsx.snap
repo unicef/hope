@@ -3,7 +3,7 @@
 exports[`components/population/IndividualBioData should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-hABBmJ iliAxK css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fmKFGs khJLEe css-1ps6pg7-MuiPaper-root"
   >
     <div
       class="sc-dmyCSP ljiJAm"
@@ -301,7 +301,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
       >
         <div
-          class="sc-fmKFGs jLgjYX"
+          class="sc-fHejqy hpSvKY"
         />
       </div>
       <div
@@ -479,7 +479,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
       >
         <div
-          class="sc-fmKFGs jLgjYX"
+          class="sc-fHejqy hpSvKY"
         />
       </div>
       <div
@@ -534,7 +534,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
       >
         <div
-          class="sc-fmKFGs jLgjYX"
+          class="sc-fHejqy hpSvKY"
         />
       </div>
       <div
@@ -602,7 +602,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
       >
         <div
-          class="sc-fmKFGs jLgjYX"
+          class="sc-fHejqy hpSvKY"
         />
       </div>
       <div

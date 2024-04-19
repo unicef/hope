@@ -1,4 +1,4 @@
-import { Assessment } from '@mui/icons-material';
+import { Assessment, ManageAccounts } from '@mui/icons-material';
 import Assignment from '@mui/icons-material/Assignment';
 import DashboardIcon from '@mui/icons-material/DashboardRounded';
 import AttachMoney from '@mui/icons-material/AttachMoney';
@@ -116,6 +116,14 @@ export const menuItems: MenuItem[] = [
       PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
       PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
     ],
+  },
+  {
+    name: 'Managerial Console',
+    href: '/managerial-console',
+    selectedRegexp: /^\/managerial-console.*$/,
+    icon: <ManageAccounts />,
+    scopes: [SCOPE_PROGRAM],
+    permissions: [PERMISSIONS.PAYMENT_VIEW_LIST_MANAGERIAL],
   },
   {
     name: 'Program Details',

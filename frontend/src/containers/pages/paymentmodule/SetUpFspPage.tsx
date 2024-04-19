@@ -19,6 +19,7 @@ export function SetUpFspPage(): React.ReactElement {
       {
         deliveryMechanism: '',
         fsp: '',
+        chosenConfiguration: '',
       },
     ],
   };
@@ -26,10 +27,7 @@ export function SetUpFspPage(): React.ReactElement {
   return (
     <>
       <CreateSetUpFspHeader baseUrl={baseUrl} permissions={permissions} />
-      <SetUpFspCore
-        permissions={permissions}
-        initialValues={initialValues}
-      />
+      <SetUpFspCore permissions={permissions} initialValues={initialValues} />
     </>
   );
 }

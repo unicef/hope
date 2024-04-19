@@ -9,7 +9,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
       class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="sc-iVheDh eyZRKJ MuiBox-root css-u331zs"
+        class="sc-iCKXBC iyaLVj MuiBox-root css-u331zs"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
@@ -411,7 +411,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root MuiTableRow-hover sc-cyZbeP bLfLbk css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root MuiTableRow-hover sc-lnsjTu hatGNx css-n2dwpd-MuiTableRow-root"
                 role="checkbox"
               >
                 <td
@@ -461,7 +461,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
                 />
               </tr>
               <tr
-                class="MuiTableRow-root MuiTableRow-hover sc-cyZbeP bLfLbk css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root MuiTableRow-hover sc-lnsjTu hatGNx css-n2dwpd-MuiTableRow-root"
                 role="checkbox"
               >
                 <td
@@ -636,7 +636,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
       class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="sc-iVheDh eyZRKJ MuiBox-root css-u331zs"
+        class="sc-iCKXBC iyaLVj MuiBox-root css-u331zs"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
@@ -1038,7 +1038,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root MuiTableRow-hover sc-cyZbeP bLfLbk css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root MuiTableRow-hover sc-lnsjTu hatGNx css-n2dwpd-MuiTableRow-root"
                 role="checkbox"
               >
                 <td
@@ -1088,7 +1088,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 />
               </tr>
               <tr
-                class="MuiTableRow-root MuiTableRow-hover sc-cyZbeP bLfLbk css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root MuiTableRow-hover sc-lnsjTu hatGNx css-n2dwpd-MuiTableRow-root"
                 role="checkbox"
               >
                 <td
