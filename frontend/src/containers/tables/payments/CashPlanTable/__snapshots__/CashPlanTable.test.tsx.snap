@@ -702,7 +702,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-dJGMql eNEZkO css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-hIPBNq kGXfmv css-n2dwpd-MuiTableRow-root"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
@@ -753,7 +753,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-dJGMql eNEZkO css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-hIPBNq kGXfmv css-n2dwpd-MuiTableRow-root"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
@@ -804,7 +804,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-dJGMql eNEZkO css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-hIPBNq kGXfmv css-n2dwpd-MuiTableRow-root"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
@@ -855,7 +855,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-dJGMql eNEZkO css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-hIPBNq kGXfmv css-n2dwpd-MuiTableRow-root"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
@@ -906,7 +906,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-dJGMql eNEZkO css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-hIPBNq kGXfmv css-n2dwpd-MuiTableRow-root"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >

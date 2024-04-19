@@ -64,7 +64,7 @@ class PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer(ReadOnlyMo
         return {
             "user": self.context["user_email"],
             "business_area": obj.payment_plan.business_area.code,
-            "config_key": obj.payment_plan.business_area.code,
+            "config_key": obj.chosen_configuration,
         }
 
     def get_payload(self, obj: Any) -> Dict:
@@ -169,8 +169,7 @@ class FspData(FlexibleArgumentsDataclassMixin):
     remote_id: str
     name: str
     vision_vendor_number: str
-    configuration: dict
-    payload: dict
+    configs: List[Optional[dict]]  # {id: value, key: value, label: value}
 
 
 @dataclasses.dataclass()
@@ -361,8 +360,11 @@ class PaymentGatewayService:
                     "vision_vendor_number": fsp.vision_vendor_number,
                     "name": fsp.name,
                     "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                    "data_transfer_configuration": fsp.configuration,
-                    "delivery_mechanisms": [Payment.DELIVERY_TYPE_TRANSFER_TO_ACCOUNT],
+                    "data_transfer_configuration": fsp.configs,
+                    "delivery_mechanisms": [
+                        Payment.DELIVERY_TYPE_CASH_OVER_THE_COUNTER,
+                        Payment.DELIVERY_TYPE_MOBILE_MONEY,
+                    ],
                 },
             )
 

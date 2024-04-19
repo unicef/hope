@@ -6,7 +6,7 @@ exports[`components/paymentmodule/CreateSetUpFsp/DeliveryMechanismRow should ren
     class="MuiBox-root css-cgq59l"
   >
     <div
-      class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
+      class="MuiGrid-root MuiGrid-container css-19sicoy-MuiGrid-root"
     >
       <div
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
