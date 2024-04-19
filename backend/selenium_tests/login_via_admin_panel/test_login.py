@@ -1,12 +1,11 @@
 import pytest
+from helpers.video import RecorderMethod
 from page_object.admin_panel.admin_panel import AdminPanel
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import User
-
-from helpers.video import RecorderMethod
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -25,7 +24,7 @@ class TestAdminPanel:
     def test_login_superuser(self, browser: Chrome, pageAdminPanel: AdminPanel) -> None:
         input("enter")
         rec = RecorderMethod()
-        rec.recorder_start('1920x1080', 'test_login_superuser')
+        rec.recorder_start("1920x1080", "test_login_superuser")
         browser.get(f"{browser.live_server.url}/api/unicorn/")
         pageAdminPanel.getLogin().send_keys("superuser")
         pageAdminPanel.getPassword().send_keys("testtest2")
