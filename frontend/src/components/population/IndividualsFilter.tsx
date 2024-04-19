@@ -94,7 +94,7 @@ export function IndividualsFilter({
               label={t('Document Type')}
               value={filter.documentType}
               borderRadius="0px 4px 4px 0px"
-              data-cy="filter-document-type"
+              data-cy="filters-document-type"
               fullWidth
               disableClearable
             >
@@ -114,7 +114,7 @@ export function IndividualsFilter({
               onChange={(e) =>
                 handleFilterChange('documentNumber', e.target.value)
               }
-              data-cy="hh-filters-document-number"
+              data-cy="filters-document-number"
             />
           </Grid>
         </Grid>
