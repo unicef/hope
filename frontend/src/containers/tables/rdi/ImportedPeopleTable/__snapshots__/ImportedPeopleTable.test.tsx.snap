@@ -822,7 +822,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-blmEgr hvEZiA css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-ifyrAs ctljOF css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
