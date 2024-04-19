@@ -3557,6 +3557,7 @@ type ProgramNode implements Node {
   totalNumberOfHouseholds: Int
   totalNumberOfHouseholdsWithTpInProgram: Int
   partners: [PartnerNodeForProgram]
+  isSocialWorkerProgram: Boolean
 }
 
 type ProgramNodeConnection {
