@@ -1813,10 +1813,11 @@ class FieldFactory(list):
         self.all_fields = copy.deepcopy(CORE_FIELDS_ATTRIBUTES)
 
     def extend(self, __iterable: Iterable[dict]) -> None:
-        for item in __iterable:
+        items = list(__iterable)
+        for item in items:
             if item not in self:
                 self._fill_label_template(item)
-        super().extend(__iterable)
+        super().extend(items)
 
     def append(self, attr: dict) -> None:
         self._fill_label_template(attr)
@@ -1836,7 +1837,7 @@ class FieldFactory(list):
     def from_scopes(cls, scopes: list[Scope]) -> "FieldFactory":
         factory = cls()
         all_fields = copy.deepcopy(factory.all_fields)
-        factory.extend(list(filter(lambda field: any(True for scope in scopes if scope in field["scope"]), all_fields)))
+        factory.extend(filter(lambda field: any(True for scope in scopes if scope in field["scope"]), all_fields))
         if Scope.XLSX_PEOPLE in scopes:
             for field_attr in factory:
                 field_attr["xlsx_field"] = "pp_" + field_attr["xlsx_field"].replace("_h_c", "_i_c")
@@ -1848,7 +1849,7 @@ class FieldFactory(list):
         factory = cls()
         all_fields = copy.deepcopy(factory.all_fields)
         factory.scopes.add(scope)
-        factory.extend(list(filter(lambda field: scope in field["scope"], all_fields)))
+        factory.extend(filter(lambda field: scope in field["scope"], all_fields))
         if scope == Scope.XLSX_PEOPLE:
             for field_attr in factory:
                 field_attr["xlsx_field"] = "pp_" + field_attr["xlsx_field"].replace("_h_c", "_i_c")
