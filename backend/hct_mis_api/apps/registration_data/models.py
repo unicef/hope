@@ -26,6 +26,44 @@ from hct_mis_api.apps.utils.validators import (
 )
 
 
+class ImportData(TimeStampedUUIDModel):
+    XLSX = "XLSX"
+    JSON = "JSON"
+    FLEX_REGISTRATION = "FLEX"
+    DATA_TYPE_CHOICES = (
+        (XLSX, _("XLSX File")),
+        (JSON, _("JSON File")),
+        (FLEX_REGISTRATION, _("Flex Registration")),
+    )
+    STATUS_PENDING = "PENDING"
+    STATUS_RUNNING = "RUNNING"
+    STATUS_FINISHED = "FINISHED"
+    STATUS_ERROR = "ERROR"
+    STATUS_VALIDATION_ERROR = "VALIDATION_ERROR"
+
+    STATUS_CHOICES = (
+        (STATUS_PENDING, _("Pending")),
+        (STATUS_RUNNING, _("Running")),
+        (STATUS_FINISHED, _("Finished")),
+        (STATUS_ERROR, _("Error")),
+        (STATUS_VALIDATION_ERROR, _("Validation Error")),
+    )
+    status = models.CharField(max_length=20, default=STATUS_FINISHED, choices=STATUS_CHOICES)
+    business_area_slug = models.CharField(max_length=200, blank=True)
+    file = models.FileField(null=True)
+    data_type = models.CharField(max_length=4, choices=DATA_TYPE_CHOICES, default=XLSX)
+    number_of_households = models.PositiveIntegerField(null=True)
+    number_of_individuals = models.PositiveIntegerField(null=True)
+    error = models.TextField(blank=True)
+    validation_errors = models.TextField(blank=True)
+    created_by_id = models.UUIDField(null=True)
+
+
+class KoboImportData(ImportData):
+    kobo_asset_id = models.CharField(max_length=100)
+    only_active_submissions = models.BooleanField(default=True)
+
+
 class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -78,6 +116,18 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         (API, "Flex API"),
         (EDOPOMOGA, "eDopomoga"),
     )
+
+    LOADING = "LOADING"
+    NOT_STARTED = "NOT_STARTED"
+    STARTED = "STARTED"
+    DONE = "DONE"
+    IMPORT_DONE_CHOICES = (
+        (LOADING, _("Loading")),
+        (NOT_STARTED, _("Not Started")),
+        (STARTED, _("Started")),
+        (DONE, _("Done")),
+    )
+
     name = CICharField(
         max_length=255,
         unique=True,
@@ -131,6 +181,13 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     )
     erased = models.BooleanField(default=False, help_text="Abort RDI")
     refuse_reason = models.CharField(max_length=100, blank=True, null=True)
+    import_data = models.OneToOneField(
+        ImportData,
+        related_name="registration_data_import",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+    import_done = models.CharField(max_length=15, choices=IMPORT_DONE_CHOICES, default=NOT_STARTED)
 
     def __str__(self) -> str:
         return self.name
@@ -166,3 +223,21 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
 
     def can_be_merged(self) -> bool:
         return self.status in (self.IN_REVIEW, self.MERGE_ERROR)
+
+
+class KoboImportedSubmission(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True, null=True, blank=True)
+    kobo_submission_uuid = models.UUIDField()
+    kobo_asset_id = models.CharField(max_length=150)
+    kobo_submission_time = models.DateTimeField()
+    # we use on_delete=models.SET_NULL because we want to be able to delete
+    # Household without loosing track of importing
+    imported_household = models.ForeignKey("household.Household", blank=True, null=True, on_delete=models.SET_NULL)
+    amended = models.BooleanField(default=False, blank=True)
+
+    registration_data_import = models.ForeignKey(
+        RegistrationDataImport,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+    )
