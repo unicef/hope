@@ -12,16 +12,22 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismPerPaymentPlanFactory,
+    FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanSplitFactory,
     RealProgramFactory,
 )
-from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+from hct_mis_api.apps.payment.models import (
+    FinancialServiceProvider,
+    Payment,
+    PaymentPlan,
+    PaymentPlanSplit,
+)
 
 
 class TestPaymentPlanModel(TestCase):
-    databases = "__all__"
-
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
@@ -120,8 +126,6 @@ class TestPaymentPlanModel(TestCase):
 
 
 class TestPaymentModel(TestCase):
-    databases = "__all__"
-
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
@@ -267,3 +271,61 @@ class TestPaymentModel(TestCase):
         self.assertEqual(p3_data["payment_plan_soft_conflicted"], True)
         self.assertEqual(p2_data["payment_plan_hard_conflicted_data"], [])
         self.assertIsNotNone(p3_data["payment_plan_hard_conflicted_data"])
+
+
+class TestPaymentPlanSplitModel(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        create_afghanistan()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+
+    def test_properties(self) -> None:
+        pp = PaymentPlanFactory()
+        dm = DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=pp,
+            chosen_configuration="key1",
+        )
+        p1 = PaymentFactory(parent=pp, currency="PLN")
+        p2 = PaymentFactory(parent=pp, currency="PLN")
+        pp_split1 = PaymentPlanSplitFactory(
+            payment_plan=pp,
+            split_type=PaymentPlanSplit.SplitType.BY_RECORDS,
+            chunks_no=2,
+            order=0,
+        )
+        pp_split1.payments.set([p1, p2])
+        self.assertEqual(pp_split1.financial_service_provider, dm.financial_service_provider)
+        self.assertEqual(pp_split1.chosen_configuration, dm.chosen_configuration)
+
+
+class TestFinancialServiceProviderModel(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        create_afghanistan()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+
+    def test_properties(self) -> None:
+        fsp1 = FinancialServiceProviderFactory(
+            data_transfer_configuration=[
+                {"key": "key1", "label": "label1", "id": 1, "random_key": "random"},
+                {"key": "key2", "label": "label2", "id": 2, "random_key": "random"},
+            ],
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            payment_gateway_id=123,
+        )
+        fsp2 = FinancialServiceProviderFactory(
+            data_transfer_configuration=[
+                {"key": "key1", "label": "label1", "id": 1, "random_key": "random"},
+                {"key": "key2", "label": "label2", "id": 2, "random_key": "random"},
+            ],
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+        )
+
+        self.assertEqual(
+            fsp1.configurations,
+            [
+                {"key": "key1", "label": "label1", "id": 1},
+                {"key": "key2", "label": "label2", "id": 2},
+            ],
+        )
+        self.assertEqual(fsp2.configurations, [])

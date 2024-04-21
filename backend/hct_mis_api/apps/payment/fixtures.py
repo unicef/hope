@@ -47,6 +47,7 @@ from hct_mis_api.apps.payment.models import (
     GenericPayment,
     Payment,
     PaymentPlan,
+    PaymentPlanSplit,
     PaymentRecord,
     PaymentVerification,
     PaymentVerificationPlan,
@@ -581,6 +582,17 @@ class PaymentPlanFactory(DjangoModelFactory):
     male_adults_count = factory.fuzzy.FuzzyInteger(2, 4)
     total_households_count = factory.fuzzy.FuzzyInteger(2, 4)
     total_individuals_count = factory.fuzzy.FuzzyInteger(8, 16)
+
+
+class PaymentPlanSplitFactory(DjangoModelFactory):
+    class Meta:
+        model = PaymentPlanSplit
+
+    payment_plan = factory.SubFactory(PaymentPlanFactory)
+    split_type = factory.fuzzy.FuzzyChoice(
+        PaymentPlanSplit.SplitType.choices,
+        getter=lambda c: c[0],
+    )
 
 
 class PaymentFactory(DjangoModelFactory):
