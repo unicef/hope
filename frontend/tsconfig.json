@@ -23,6 +23,7 @@
     "maxNodeModuleJsDepth": 10,
     "baseUrl": ".",
     "paths": {
+      "@api/*": ["src/api/*"],
       "@components/*": ["src/components/*"],
       "@core/*": ["src/components/core/*"],
       "@containers/*": ["src/containers/*"],

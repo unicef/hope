@@ -29,8 +29,9 @@ import { isPermissionDeniedError, renderSomethingOrDash } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { PaymentRecordHouseholdTable } from '../../tables/payments/PaymentRecordAndPaymentHouseholdTable';
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
-import { HouseholdIndividualsTable } from '../../tables/population/HouseholdIndividualsTable/HouseholdIndividualsTable';
 import { AdminButton } from '@core/AdminButton';
+import { CollectorsTable } from '@containers/tables/population/CollectorsTable';
+import { HouseholdMembersTable } from '@containers/tables/population/HouseholdMembersTable';
 
 const Container = styled.div`
   padding: 20px;
@@ -164,10 +165,16 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
       <HouseholdCompositionTable household={household as HouseholdNode} />
       <Container>
         {household?.individuals?.edges?.length ? (
-          <HouseholdIndividualsTable
-            choicesData={choicesData}
-            household={household as HouseholdNode}
-          />
+          <>
+            <HouseholdMembersTable
+              choicesData={choicesData}
+              household={household as HouseholdNode}
+            />
+            <CollectorsTable
+              choicesData={choicesData}
+              household={household as HouseholdNode}
+            />
+          </>
         ) : null}
         {hasPermissions(
           PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
