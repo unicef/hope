@@ -189,8 +189,6 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     programme_code = models.CharField(max_length=4, null=True, blank=True)
 
     partner_access = models.CharField(
-        null=True,
-        blank=True,
         max_length=50,
         choices=PARTNER_ACCESS_CHOICE,
         default=SELECTED_PARTNERS_ACCESS,

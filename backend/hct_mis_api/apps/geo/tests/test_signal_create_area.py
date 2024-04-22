@@ -40,7 +40,7 @@ class PartnerAccessChangeSignal(TestCase):
         cls.program_partner_through.areas.set([cls.area_in_afg_1, cls.area_in_afg_2])
         cls.program_partner_through.full_area_access = False
         cls.program_partner_through.save()
-        cls.program_unicef_through = ProgramPartnerThrough.objects.create(
+        cls.program_unicef_through, _ = ProgramPartnerThrough.objects.get_or_create(
             program=cls.program, partner=cls.unicef_partner
         )
         cls.program_unicef_through.areas.set([cls.area_in_afg_1, cls.area_in_afg_2])

@@ -56,7 +56,7 @@ class TestAllProgramsQuery(APITestCase):
             partner=cls.partner,
         )
 
-        program_with_all_partners_access = ProgramFactory.create(
+        ProgramFactory.create(
             name="Program with all partners access",
             status=Program.ACTIVE,
             business_area=cls.business_area,
@@ -64,7 +64,7 @@ class TestAllProgramsQuery(APITestCase):
             partner_access=Program.ALL_PARTNERS_ACCESS,
         )
 
-        program_with_none_partner_access = ProgramFactory.create(
+        ProgramFactory.create(
             name="Program with none partner access",
             status=Program.ACTIVE,
             business_area=cls.business_area,

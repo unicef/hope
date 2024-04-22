@@ -156,9 +156,6 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         self.create_new_feedback()
 
     def test_getting_all_feedbacks(self) -> None:
-        print(self.user.partner)
-        print(self.user.partner.program_partner_through.all())
-        print(self.user.partner.program_partner_through.first().program)
         self.create_new_feedback()
         response = self.graphql_request(
             request_string=self.ALL_FEEDBACKS_QUERY,
@@ -166,7 +163,6 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
                 "user": self.user,
                 "headers": {
                     "Business-Area": self.business_area.slug,
-                    "Program": encode_id_base64(self.program.id, "ProgramNode"),
                 },
             },
             variables={},
@@ -425,7 +421,6 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
                 "user": self.user,
                 "headers": {
                     "Business-Area": self.business_area.slug,
-                    "Program": encode_id_base64(self.program.id, "ProgramNode"),
                 },
             },
             variables={"orderBy": "-issue_type"},
@@ -442,7 +437,6 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
                 "user": self.user,
                 "headers": {
                     "Business-Area": self.business_area.slug,
-                    "Program": encode_id_base64(self.program.id, "ProgramNode"),
                 },
             },
             variables={"orderBy": "issue_type"},
@@ -466,7 +460,6 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
                 "user": self.user,
                 "headers": {
                     "Business-Area": self.business_area.slug,
-                    "Program": encode_id_base64(self.program.id, "ProgramNode"),
                 },
             },
             variables={"orderBy": "linked_grievance"},
@@ -484,7 +477,6 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
                 "user": self.user,
                 "headers": {
                     "Business-Area": self.business_area.slug,
-                    "Program": encode_id_base64(self.program.id, "ProgramNode"),
                 },
             },
             variables={"orderBy": "-linked_grievance"},
