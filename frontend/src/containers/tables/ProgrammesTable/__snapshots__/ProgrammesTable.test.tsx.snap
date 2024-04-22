@@ -587,7 +587,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root MuiTableRow-hover sc-hIPBNq kGXfmv css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root MuiTableRow-hover sc-dmXWDj gOBKoz css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row-Notice hair fall college enough perhaps."
                 role="checkbox"
               >
@@ -605,10 +605,10 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
                 >
                   <div
-                    class="sc-ifyrAs fSIDzb"
+                    class="sc-dJGMql eSUODg"
                   >
                     <div
-                      class="sc-dJGMql fQdggy"
+                      class="sc-hIPBNq dKNoXr"
                       data-cy="status-container"
                       status="ACTIVE"
                     >

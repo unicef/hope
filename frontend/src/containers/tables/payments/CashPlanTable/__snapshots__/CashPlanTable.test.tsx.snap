@@ -95,7 +95,7 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
                   role="button"
                   tabindex="0"
                 >
-                  Num. of Households
+                  Num. of Payments
                   <svg
                     aria-hidden="true"
                     class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
@@ -506,7 +506,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                   role="button"
                   tabindex="0"
                 >
-                  Num. of Households
+                  Num. of Payments
                   <svg
                     aria-hidden="true"
                     class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
@@ -702,7 +702,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-dJGMql eNEZkO css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-hIPBNq kGXfmv css-n2dwpd-MuiTableRow-root"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
@@ -753,7 +753,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-dJGMql eNEZkO css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-hIPBNq kGXfmv css-n2dwpd-MuiTableRow-root"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
@@ -804,7 +804,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-dJGMql eNEZkO css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-hIPBNq kGXfmv css-n2dwpd-MuiTableRow-root"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
@@ -855,7 +855,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-dJGMql eNEZkO css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-hIPBNq kGXfmv css-n2dwpd-MuiTableRow-root"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
@@ -906,7 +906,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-dJGMql eNEZkO css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-hIPBNq kGXfmv css-n2dwpd-MuiTableRow-root"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >

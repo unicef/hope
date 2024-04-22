@@ -1,0 +1,1 @@
+export { CollectorsTable } from './CollectorsTable';

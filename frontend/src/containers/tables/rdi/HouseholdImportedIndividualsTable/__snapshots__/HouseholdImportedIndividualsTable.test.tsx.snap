@@ -131,7 +131,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi hVkfLD css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-hABBmJ epuKTt css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
@@ -178,7 +178,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi hVkfLD css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-hABBmJ epuKTt css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
@@ -225,7 +225,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi hVkfLD css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-hABBmJ epuKTt css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
@@ -469,7 +469,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi hVkfLD css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-hABBmJ epuKTt css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
@@ -521,7 +521,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi hVkfLD css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-hABBmJ epuKTt css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
@@ -573,7 +573,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi hVkfLD css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-hABBmJ epuKTt css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
