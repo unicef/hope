@@ -1674,7 +1674,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "type": TYPE_LIST_OF_IDS,
         "name": "primary_collector_id",
         "lookup": "primary_collector_id",
-        "required": True,
+        "required": False,
         "label": {"English(EN)": "List of primary collectors ids, separated by a semicolon"},
         "choices": [],
         "associated_with": _INDIVIDUAL,

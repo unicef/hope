@@ -185,115 +185,115 @@ class TestXLSXValidatorsMethods(APITestCase):
                     {
                         "header": "assistance_type_h_f",
                         "message": "Sheet: 'Households', Unexpected value: Option 1 for type select "
-                        "many of field assistance_type_h_f",
+                                   "many of field assistance_type_h_f",
                         "row_number": 3,
                     },
                     {
                         "header": "assistance_type_h_f",
                         "message": "Sheet: 'Households', Unexpected value: Option 1, Option 2, Option "
-                        "3 for type select many of field assistance_type_h_f",
+                                   "3 for type select many of field assistance_type_h_f",
                         "row_number": 4,
                     },
                     {
                         "header": "assistance_type_h_f",
                         "message": "Sheet: 'Households', Unexpected value: Option 13 for type select "
-                        "many of field assistance_type_h_f",
+                                   "many of field assistance_type_h_f",
                         "row_number": 5,
                     },
                     {
                         "header": "assistance_type_h_f",
                         "message": "Sheet: 'Households', Unexpected value: Option 3 for type select "
-                        "many of field assistance_type_h_f",
+                                   "many of field assistance_type_h_f",
                         "row_number": 6,
                     },
                     {
                         "header": "assistance_type_h_f",
                         "message": "Sheet: 'Households', Unexpected value: Option 1, Option 3 for type "
-                        "select many of field assistance_type_h_f",
+                                   "select many of field assistance_type_h_f",
                         "row_number": 7,
                     },
                     {
                         "header": "assistance_type_h_f",
                         "message": "Sheet: 'Households', Unexpected value: Option 2, Option 3 for type "
-                        "select many of field assistance_type_h_f",
+                                   "select many of field assistance_type_h_f",
                         "row_number": 8,
                     },
                     {
                         "header": "assistance_type_h_f",
                         "message": "Sheet: 'Households', Unexpected value: Option 2 for type select "
-                        "many of field assistance_type_h_f",
+                                   "many of field assistance_type_h_f",
                         "row_number": 9,
                     },
                     {
                         "header": "assistance_type_h_f",
                         "message": "Sheet: 'Households', Unexpected value: Option 1, Option 2, Option "
-                        "4 for type select many of field assistance_type_h_f",
+                                   "4 for type select many of field assistance_type_h_f",
                         "row_number": 10,
                     },
                     {
                         "header": "assistance_type_h_f",
                         "message": "Sheet: 'Households', Unexpected value: Option 4 for type select "
-                        "many of field assistance_type_h_f",
+                                   "many of field assistance_type_h_f",
                         "row_number": 11,
                     },
                     {
                         "header": "assistance_type_h_f",
                         "message": "Sheet: 'Households', Unexpected value: Option 5 for type select "
-                        "many of field assistance_type_h_f",
+                                   "many of field assistance_type_h_f",
                         "row_number": 12,
                     },
                     {
                         "header": "assistance_type_h_f",
                         "message": "Sheet: 'Households', Unexpected value: Option 1, Option 4 for type "
-                        "select many of field assistance_type_h_f",
+                                   "select many of field assistance_type_h_f",
                         "row_number": 13,
                     },
                     {
                         "header": "assistance_type_h_f",
                         "message": "Sheet: 'Households', Unexpected value: Option 2, Option 4 for type "
-                        "select many of field assistance_type_h_f",
+                                   "select many of field assistance_type_h_f",
                         "row_number": 14,
                     },
                     {
                         "header": "assistance_type_h_f",
                         "message": "Sheet: 'Households', Unexpected value: Option 3 for type select "
-                        "many of field assistance_type_h_f",
+                                   "many of field assistance_type_h_f",
                         "row_number": 15,
                     },
                     {
                         "header": "assistance_type_h_f",
                         "message": "Sheet: 'Households', Unexpected value: Option 1, Option 2, Option "
-                        "5 for type select many of field assistance_type_h_f",
+                                   "5 for type select many of field assistance_type_h_f",
                         "row_number": 16,
                     },
                     {
                         "header": "assistance_type_h_f",
                         "message": "Sheet: 'Households', Unexpected value: Option 6 for type select "
-                        "many of field assistance_type_h_f",
+                                   "many of field assistance_type_h_f",
                         "row_number": 17,
                     },
                     {
                         "header": "assistance_type_h_f",
                         "message": "Sheet: 'Households', Unexpected value: Option 7 for type select "
-                        "many of field assistance_type_h_f",
+                                   "many of field assistance_type_h_f",
                         "row_number": 18,
                     },
                     {
                         "header": "assistance_type_h_f",
                         "message": "Sheet: 'Households', Unexpected value: Option 1, Option 5 for type "
-                        "select many of field assistance_type_h_f",
+                                   "select many of field assistance_type_h_f",
                         "row_number": 19,
                     },
                     {
                         "header": "assistance_type_h_f",
                         "message": "Sheet: 'Households', Unexpected value: Option 2, Option 5 for type "
-                        "select many of field assistance_type_h_f",
+                                   "select many of field assistance_type_h_f",
                         "row_number": 20,
                     },
                     {
                         "header": "assistance_type_h_f",
                         "message": "Sheet: 'Households', Unexpected value: Option 4 for type select "
-                        "many of field assistance_type_h_f",
+                                   "many of field assistance_type_h_f",
                         "row_number": 21,
                     },
                 ],
@@ -466,24 +466,24 @@ class TestXLSXValidatorsMethods(APITestCase):
 
     def test_required_validator(self) -> None:
         with mock.patch(
-            "hct_mis_api.apps.registration_datahub.validators.UploadXLSXInstanceValidator.get_all_fields",
-            lambda *args: {"test": {"required": True}},
+                "hct_mis_api.apps.registration_datahub.validators.UploadXLSXInstanceValidator.get_all_fields",
+                lambda *args: {"test": {"required": True}},
         ):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
             result = upload_xlsx_instance_validator.required_validator(value="tak", header="test")
             self.assertTrue(result)
 
         with mock.patch(
-            "hct_mis_api.apps.registration_datahub.validators.UploadXLSXInstanceValidator.get_all_fields",
-            lambda *args: {"test": {"required": True}},
+                "hct_mis_api.apps.registration_datahub.validators.UploadXLSXInstanceValidator.get_all_fields",
+                lambda *args: {"test": {"required": True}},
         ):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
             result = upload_xlsx_instance_validator.required_validator(value="", header="test")
             self.assertFalse(result)
 
         with mock.patch(
-            "hct_mis_api.apps.registration_datahub.validators.UploadXLSXInstanceValidator.get_all_fields",
-            lambda *args: {"test": {"required": False}},
+                "hct_mis_api.apps.registration_datahub.validators.UploadXLSXInstanceValidator.get_all_fields",
+                lambda *args: {"test": {"required": False}},
         ):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
             result = upload_xlsx_instance_validator.required_validator(value="", header="test")
@@ -605,10 +605,15 @@ class TestXLSXValidatorsMethods(APITestCase):
                 "message": "Sheet: 'People', Unexpected value: None for type integer of field pp_index_id",
             },
         ]
-
+        print('xD *'*100)
         with open(file_path, "rb") as file:
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator(is_social_worker_program=True)
             result = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
+        import logging
+        logging.error('xD *'*100)
+        print('exp', expected_result)
+        print('res', result)
+        print('xD *'*100)
         self.assertEqual(result, expected_result)
 
     def test_validate_people_sheet_valid(self) -> None:
