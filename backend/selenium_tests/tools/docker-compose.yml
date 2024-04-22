@@ -1,0 +1,10 @@
+services:
+  chromium:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - $HOME/.Xauthority:/root/.Xauthority:rw
+    environment:
+      - DISPLAY=$DISPLAY
