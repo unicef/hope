@@ -25,6 +25,7 @@ export const TargetPopulationHouseholds = gql`
           unicefId
           headOfHousehold {
             id
+            unicefId
             givenName
             familyName
             fullName

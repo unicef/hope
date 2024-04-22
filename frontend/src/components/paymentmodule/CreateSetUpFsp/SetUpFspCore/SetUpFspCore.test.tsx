@@ -22,6 +22,7 @@ describe('components/paymentmodule/CreateSetUpFsp/SetUpFspCore', () => {
               {
                 deliveryMechanism: '',
                 fsp: '',
+                chosenConfiguration: '',
               },
             ],
           }}

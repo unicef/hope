@@ -25,6 +25,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export interface FormValues {
   deliveryMechanisms: {
+    chosenConfiguration: string;
     deliveryMechanism: string;
     fsp: string;
   }[];
@@ -141,6 +142,7 @@ export const SetUpFspCore = ({
       fspId: el.fsp,
       deliveryMechanism: el.deliveryMechanism,
       order: index + 1,
+      chosenConfiguration: el.chosenConfiguration,
     }));
     try {
       await assignFspToDeliveryMechanism({
@@ -177,7 +179,7 @@ export const SetUpFspCore = ({
       onSubmit={(values) => handleSubmit(values)}
       enableReinitialize
     >
-      {({ values, submitForm }) => (
+      {({ values, submitForm, setFieldValue }) => (
         <Form>
           <AutoSubmitFormOnEnter />
           <Box m={5}>
@@ -203,6 +205,7 @@ export const SetUpFspCore = ({
                       const mappedFsps = mapping?.fsps.map((el) => ({
                         name: el.name,
                         value: el.id,
+                        configurations: el.configurations,
                       }));
 
                       const deliveryMechanismsChoices =
@@ -224,6 +227,7 @@ export const SetUpFspCore = ({
                           step={activeStep}
                           values={values}
                           permissions={permissions}
+                          setFieldValue={setFieldValue}
                         />
                       );
                     })}

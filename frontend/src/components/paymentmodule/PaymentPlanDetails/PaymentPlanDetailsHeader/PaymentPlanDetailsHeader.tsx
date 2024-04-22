@@ -1,7 +1,6 @@
 import { Box } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import {
   paymentPlanBackgroundActionStatusToColor,
@@ -19,10 +18,6 @@ import { LockedFspPaymentPlanHeaderButtons } from './HeaderButtons/LockedFspPaym
 import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
 import { AdminButton } from '@core/AdminButton';
-
-const StatusWrapper = styled(Box)`
-  width: 150px;
-`;
 
 interface PaymentPlanDetailsHeaderProps {
   baseUrl: string;
@@ -42,8 +37,6 @@ export function PaymentPlanDetailsHeader({
       to: `/${baseUrl}/payment-module/`,
     },
   ];
-
-
 
   const canRemove = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
   const canEdit = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
@@ -181,19 +174,19 @@ export function PaymentPlanDetailsHeader({
               <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
             </Box>
           </Box>
-          <StatusWrapper ml={2}>
+          <Box ml={2}>
             <StatusBox
               status={paymentPlan.status}
               statusToColor={paymentPlanStatusToColor}
             />
-          </StatusWrapper>
+          </Box>
           {paymentPlan.backgroundActionStatus && (
-            <StatusWrapper>
+            <Box>
               <StatusBox
                 status={paymentPlan.backgroundActionStatus}
                 statusToColor={paymentPlanBackgroundActionStatusToColor}
               />
-            </StatusWrapper>
+            </Box>
           )}
         </Box>
       }
