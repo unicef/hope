@@ -1,5 +1,4 @@
 import logging
-import traceback
 from functools import partial
 from typing import Any, Callable, Dict, Optional
 
@@ -45,8 +44,6 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         super().__init__()
         self.index_id: Optional[int] = None
         self.households_to_update = []
-        print(FieldFactory.from_scopes([Scope.XLSX_PEOPLE]).apply_business_area().to_dict_by("xlsx_field"))
-        print("*" * 300)
         self.COMBINED_FIELDS: Dict = {
             **FieldFactory.from_scopes([Scope.XLSX_PEOPLE]).apply_business_area().to_dict_by("xlsx_field"),
             **serialize_flex_attributes()["individuals"],
@@ -156,7 +153,6 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                     if value is not None:
                         obj_to_create.flex_fields[header] = value
             except Exception as e:
-                traceback.print_exc()
                 raise Exception(
                     f"Error processing cell {header_cell} with `{cell}`: {e.__class__.__name__}({e})"
                 ) from e
