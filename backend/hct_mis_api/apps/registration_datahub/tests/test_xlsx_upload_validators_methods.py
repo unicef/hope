@@ -605,16 +605,9 @@ class TestXLSXValidatorsMethods(APITestCase):
                 "message": "Sheet: 'People', Unexpected value: None for type integer of field pp_index_id",
             },
         ]
-        print("xD *" * 100)
         with open(file_path, "rb") as file:
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator(is_social_worker_program=True)
             result = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
-        import logging
-
-        logging.error("xD *" * 100)
-        print("exp", expected_result)
-        print("res", result)
-        print("xD *" * 100)
         self.assertEqual(result, expected_result)
 
     def test_validate_people_sheet_valid(self) -> None:
