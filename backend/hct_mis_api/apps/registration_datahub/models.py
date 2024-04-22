@@ -508,9 +508,9 @@ class ImportedIndividualIdentity(models.Model):
 
 class KoboImportedSubmission(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True, null=True, blank=True)
-    kobo_submission_uuid = models.UUIDField()
-    kobo_asset_id = models.CharField(max_length=150)
-    kobo_submission_time = models.DateTimeField()
+    kobo_submission_uuid = models.UUIDField()  # ImportedHousehold.kobo_submission_uuid
+    kobo_asset_id = models.CharField(max_length=150)  # ImportedHousehold.detail_id
+    kobo_submission_time = models.DateTimeField()  # ImportedHousehold.kobo_submission_time
     # we use on_delete=models.SET_NULL because we want to be able to delete
     # ImportedHousehold without loosing track of importing
     imported_household = models.ForeignKey(ImportedHousehold, blank=True, null=True, on_delete=models.SET_NULL)

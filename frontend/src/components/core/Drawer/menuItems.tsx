@@ -1,4 +1,4 @@
-import { Assessment } from '@mui/icons-material';
+import { Assessment, ManageAccounts } from '@mui/icons-material';
 import Assignment from '@mui/icons-material/Assignment';
 import DashboardIcon from '@mui/icons-material/DashboardRounded';
 import AttachMoney from '@mui/icons-material/AttachMoney';
@@ -34,7 +34,13 @@ export type MenuItem = {
   secondaryActions?: MenuItem[];
   flag?: string;
   external?: boolean;
+  scopes: string[];
+  isSocialWorker?: boolean
 };
+export const SCOPE_PROGRAM = 'SCOPE_PROGRAM';
+export const SCOPE_ALL_PROGRAMS = 'SCOPE_ALL_PROGRAMS';
+
+
 export const menuItems: MenuItem[] = [
   {
     name: 'Country Dashboard',
@@ -42,21 +48,35 @@ export const menuItems: MenuItem[] = [
     selectedRegexp: /^\/$/,
     icon: <DashboardIcon />,
     permissions: [PERMISSIONS.DASHBOARD_VIEW_COUNTRY],
+    scopes: [SCOPE_ALL_PROGRAMS],
   },
   {
     name: 'Registration Data Import',
     href: '/registration-data-import',
     selectedRegexp: /^\/registration-data-import.*$/,
     icon: <AutorenewIcon />,
+    isSocialWorker: false,
     permissions: [PERMISSIONS.RDI_VIEW_DETAILS, PERMISSIONS.RDI_VIEW_LIST],
+    scopes: [SCOPE_PROGRAM],
   },
   {
-    name: 'Programme Population',
+    name: 'Registration Data Import',
+    href: '/registration-data-import-for-people',
+    selectedRegexp: /^\/registration-data-import.*$/,
+    icon: <AutorenewIcon />,
+    isSocialWorker: true,
+    permissions: [PERMISSIONS.RDI_VIEW_DETAILS, PERMISSIONS.RDI_VIEW_LIST],
+    scopes: [SCOPE_PROGRAM],
+  },
+  {
+    name: 'Program Population',
     href: '/population/household',
     selectedRegexp: /^\/population.*$/,
     icon: <PeopleIcon />,
     collapsable: true,
     permissionModule: 'POPULATION',
+    scopes: [SCOPE_PROGRAM],
+    isSocialWorker: false,
     secondaryActions: [
       {
         name: 'Households',
@@ -64,6 +84,7 @@ export const menuItems: MenuItem[] = [
         selectedRegexp: /^\/population\/household.*$/,
         icon: <PeopleAltRoundedIcon />,
         permissionModule: 'HOUSEHOLDS',
+        scopes: [SCOPE_PROGRAM],
       },
       {
         name: 'Individuals',
@@ -71,14 +92,25 @@ export const menuItems: MenuItem[] = [
         selectedRegexp: /^\/population\/individuals.*$/,
         icon: <FaceIcon />,
         permissionModule: 'INDIVIDUALS',
+        scopes: [SCOPE_PROGRAM],
       },
     ],
   },
   {
-    name: 'Programme Management',
+    name: 'People',
+    href: '/population/people',
+    selectedRegexp: /^\/population\/people.*$/,
+    icon: <PeopleIcon />,
+    permissionModule: 'POPULATION',
+    scopes: [SCOPE_PROGRAM],
+    isSocialWorker: true,
+  },
+  {
+    name: 'Programs',
     href: '/list',
     selectedRegexp: /^\/programs.*$/,
     icon: <Assignment />,
+    scopes: [SCOPE_ALL_PROGRAMS],
     permissions: [
       PERMISSIONS.PROGRAMME_MANAGEMENT_VIEW,
       PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
@@ -86,10 +118,19 @@ export const menuItems: MenuItem[] = [
     ],
   },
   {
-    name: 'Programme Details',
+    name: 'Managerial Console',
+    href: '/managerial-console',
+    selectedRegexp: /^\/managerial-console.*$/,
+    icon: <ManageAccounts />,
+    scopes: [SCOPE_PROGRAM],
+    permissions: [PERMISSIONS.PAYMENT_VIEW_LIST_MANAGERIAL],
+  },
+  {
+    name: 'Program Details',
     href: '/programs',
     selectedRegexp: /^\/programs.*$/,
     icon: <Assignment />,
+    scopes: [SCOPE_PROGRAM],
     permissions: [
       PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
       PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
@@ -100,22 +141,18 @@ export const menuItems: MenuItem[] = [
     href: '/target-population',
     selectedRegexp: /^\/target-population.*$/,
     icon: <ListAltRoundedIcon />,
+    scopes: [SCOPE_PROGRAM],
     permissions: [
       PERMISSIONS.TARGETING_VIEW_LIST,
       PERMISSIONS.TARGETING_VIEW_DETAILS,
     ],
   },
   {
-    name: 'Cash Assist',
-    selectedRegexp: /^\/unique.*$/,
-    icon: <PaymentIcon />,
-    external: true,
-  },
-  {
     name: 'Payment Module',
     href: '/payment-module',
     selectedRegexp: /^\/payment-module.*$/,
     icon: <PaymentIcon />,
+    scopes: [SCOPE_PROGRAM],
     permissions: [PERMISSIONS.PM_VIEW_LIST, PERMISSIONS.PM_VIEW_DETAILS],
     flag: 'isPaymentPlanApplicable',
   },
@@ -124,6 +161,7 @@ export const menuItems: MenuItem[] = [
     href: '/payment-verification',
     selectedRegexp: /^\/payment-verification.*$/,
     icon: <AttachMoney />,
+    scopes: [SCOPE_PROGRAM],
     permissions: [
       PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST,
       PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS,
@@ -137,6 +175,7 @@ export const menuItems: MenuItem[] = [
     icon: <Feedback />,
     collapsable: true,
     permissionModule: 'GRIEVANCES',
+    scopes: [SCOPE_PROGRAM, SCOPE_ALL_PROGRAMS],
     secondaryActions: [
       {
         name: 'Grievance Tickets',
@@ -144,6 +183,7 @@ export const menuItems: MenuItem[] = [
         selectedRegexp: /^\/grievance\/tickets.*$/,
         icon: <ListIcon />,
         permissionModule: 'GRIEVANCES',
+        scopes: [SCOPE_PROGRAM, SCOPE_ALL_PROGRAMS],
       },
       {
         name: 'Grievance Dashboard',
@@ -151,6 +191,7 @@ export const menuItems: MenuItem[] = [
         selectedRegexp: /^\/grievance\/dashboard.*$/,
         icon: <Assessment />,
         permissionModule: 'GRIEVANCES',
+        scopes: [SCOPE_PROGRAM, SCOPE_ALL_PROGRAMS],
       },
       {
         name: 'Feedback',
@@ -158,6 +199,7 @@ export const menuItems: MenuItem[] = [
         selectedRegexp: /^\/grievance\/feedback.*$/,
         icon: <RateReviewIcon />,
         permissionModule: 'GRIEVANCES',
+        scopes: [SCOPE_PROGRAM, SCOPE_ALL_PROGRAMS],
       },
     ],
   },
@@ -169,6 +211,7 @@ export const menuItems: MenuItem[] = [
     collapsable: true,
     permissionModule: 'ACCOUNTABILITY',
     flag: 'isAccountabilityApplicable',
+    scopes: [SCOPE_PROGRAM],
     secondaryActions: [
       {
         name: 'Communication',
@@ -176,6 +219,7 @@ export const menuItems: MenuItem[] = [
         selectedRegexp: /^\/accountability\/communication.*$/,
         icon: <MessageIcon />,
         permissionModule: 'COMMUNICATION_MESSAGE',
+        scopes: [SCOPE_PROGRAM],
       },
       {
         name: 'Surveys',
@@ -183,6 +227,7 @@ export const menuItems: MenuItem[] = [
         selectedRegexp: /^\/accountability\/surveys.*$/,
         icon: <BallotIcon />,
         permissionModule: 'SURVEY',
+        scopes: [SCOPE_PROGRAM],
       },
     ],
   },
@@ -192,6 +237,7 @@ export const menuItems: MenuItem[] = [
     selectedRegexp: /^\/reporting.*$/,
     icon: <TrendingUpRoundedIcon />,
     permissions: [PERMISSIONS.REPORTING_EXPORT],
+    scopes: [SCOPE_ALL_PROGRAMS],
   },
   {
     name: 'Programme Users',
@@ -199,6 +245,7 @@ export const menuItems: MenuItem[] = [
     selectedRegexp: /^\/users-list.*$/,
     icon: <SupervisedUserCircle />,
     permissions: [PERMISSIONS.USER_MANAGEMENT_VIEW_LIST],
+    scopes: [SCOPE_PROGRAM],
   },
   {
     name: 'Activity Log',
@@ -206,6 +253,15 @@ export const menuItems: MenuItem[] = [
     selectedRegexp: /^\/activity-log.*$/,
     icon: <TrackChangesIcon />,
     permissions: [PERMISSIONS.ACTIVITY_LOG_VIEW],
+    scopes: [SCOPE_ALL_PROGRAMS],
+  },
+  {
+    name: 'Program Log',
+    href: '/activity-log',
+    selectedRegexp: /^\/activity-log.*$/,
+    icon: <TrackChangesIcon />,
+    permissions: [PERMISSIONS.ACTIVITY_LOG_VIEW],
+    scopes: [SCOPE_PROGRAM],
   },
 ];
 

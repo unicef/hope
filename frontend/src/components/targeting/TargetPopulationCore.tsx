@@ -7,11 +7,14 @@ import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityL
 import {
   TargetPopulationBuildStatus,
   TargetPopulationQuery,
+  useTargetPopulationHouseholdsQuery,
 } from '@generated/graphql';
 import { PaperContainer } from './PaperContainer';
 import { Results } from './Results';
 import { TargetingCriteria } from './TargetingCriteria';
 import { TargetingHouseholds } from './TargetingHouseholds';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { TargetPopulationPeopleTable } from '@containers/tables/targeting/TargetPopulationPeopleTable';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -31,7 +34,44 @@ export function TargetPopulationCore({
   screenBeneficiary,
 }: TargetPopulationCoreProps): React.ReactElement {
   const { t } = useTranslation();
+  const { businessArea } = useBaseUrl();
   if (!targetPopulation) return null;
+
+  const recordsTable = targetPopulation.program.isSocialWorkerProgram ? (
+    <TargetPopulationPeopleTable
+      id={id}
+      query={useTargetPopulationHouseholdsQuery}
+      queryObjectName="targetPopulationHouseholds"
+      canViewDetails={hasPermissions(
+        PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+        permissions,
+      )}
+      variables={{ businessArea }}
+    />
+  ) : (
+    <TargetingHouseholds
+      id={id}
+      canViewDetails={hasPermissions(
+        PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+        permissions,
+      )}
+    />
+  );
+
+  const recordInfo =
+    targetPopulation.buildStatus === TargetPopulationBuildStatus.Ok ? (
+      recordsTable
+    ) : (
+      <PaperContainer>
+        <Typography data-cy="target-population-building" variant="h6">
+          {t('Target Population is building')}
+        </Typography>
+        <Label>
+          Target population is processing, the list of households will be
+          available when the process is finished
+        </Label>
+      </PaperContainer>
+    );
 
   return (
     <>
@@ -66,26 +106,7 @@ export function TargetPopulationCore({
         </PaperContainer>
       ) : null}
       <Results targetPopulation={targetPopulation} />
-
-      {targetPopulation.buildStatus === TargetPopulationBuildStatus.Ok ? (
-        <TargetingHouseholds
-          id={id}
-          canViewDetails={hasPermissions(
-            PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
-            permissions,
-          )}
-        />
-      ) : (
-        <PaperContainer>
-          <Typography data-cy="target-population-building" variant="h6">
-            {t('Target Population is building')}
-          </Typography>
-          <Label>
-            Target population is processing, the list of households will be
-            available when the process is finished
-          </Label>
-        </PaperContainer>
-      )}
+      {recordInfo}
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={targetPopulation.id} />
       )}

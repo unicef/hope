@@ -975,6 +975,7 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
                     delivery_mechanism=mapping["delivery_mechanism"],
                     delivery_mechanism_order=mapping["order"],
                 ),
+                "chosen_configuration": mapping.get("chosen_configuration", None),
             }
             for mapping in mappings
         ]
