@@ -90,6 +90,7 @@ class ChooseDeliveryMechanismsForPaymentPlanInput(graphene.InputObjectType):
 class FSPToDeliveryMechanismMappingInput(graphene.InputObjectType):
     fsp_id = graphene.ID(required=True)
     delivery_mechanism = graphene.String(required=True)
+    chosen_configuration = graphene.String(required=False)
     order = graphene.Int(required=True)
 
 

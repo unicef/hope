@@ -609,6 +609,7 @@ class PaymentPlanService:
                             payment.save()
                 if update_dms:
                     delivery_mechanism_per_payment_plan.financial_service_provider = fsp
+                    delivery_mechanism_per_payment_plan.chosen_configuration = mapping.get("chosen_configuration", None)
                     delivery_mechanism_per_payment_plan.save()
 
             if set(processed_payments) != set(self.payment_plan.eligible_payments):

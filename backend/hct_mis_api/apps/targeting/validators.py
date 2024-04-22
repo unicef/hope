@@ -143,8 +143,8 @@ class TargetingCriteriaInputValidator:
             logger.error("Target criteria can has only filters or ids, not possible to has both")
             raise ValidationError("Target criteria can has only filters or ids, not possible to has both")
 
-        if household_ids and (
-            not program_dct.household_filters_available or program_dct.type == DataCollectingType.Type.SOCIAL
+        if household_ids and not (
+            program_dct.household_filters_available or program_dct.type == DataCollectingType.Type.SOCIAL
         ):
             logger.error("Target criteria can has only individual ids")
             raise ValidationError("Target criteria can has only individual ids")

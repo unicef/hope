@@ -66,7 +66,7 @@ class TestProgrammeManagement:
         assert "Regular" in pageProgrammeDetails.getLabelFreqOfPayment().text
         assert "-" in pageProgrammeDetails.getLabelAdministrativeAreas().text
         assert "No" in pageProgrammeDetails.getLabelCashPlus().text
-        assert "0" in pageProgrammeDetails.getLabelTotalNumberOfHouseholds().text
+        assert "0" in pageProgrammeDetails.getLabelProgramSize().text
 
     @pytest.mark.parametrize(
         "test_data",
@@ -125,7 +125,7 @@ class TestProgrammeManagement:
         assert "One-off" in pageProgrammeDetails.getLabelFreqOfPayment().text
         assert test_data["administrativeAreas"] in pageProgrammeDetails.getLabelAdministrativeAreas().text
         assert "Yes" in pageProgrammeDetails.getLabelCashPlus().text
-        assert "0" in pageProgrammeDetails.getLabelTotalNumberOfHouseholds().text
+        assert "0" in pageProgrammeDetails.getLabelProgramSize().text
 
     @pytest.mark.parametrize(
         "test_data",
@@ -171,7 +171,7 @@ class TestProgrammeManagement:
         assert "One-off" in pageProgrammeDetails.getLabelFreqOfPayment().text
         assert "-" in pageProgrammeDetails.getLabelAdministrativeAreas().text
         assert "No" in pageProgrammeDetails.getLabelCashPlus().text
-        assert "0" in pageProgrammeDetails.getLabelTotalNumberOfHouseholds().text
+        assert "0" in pageProgrammeDetails.getLabelProgramSize().text
 
     @pytest.mark.parametrize(
         "test_data",
@@ -217,7 +217,7 @@ class TestProgrammeManagement:
         assert "Regular" in pageProgrammeDetails.getLabelFreqOfPayment().text
         assert "-" in pageProgrammeDetails.getLabelAdministrativeAreas().text
         assert "Yes" in pageProgrammeDetails.getLabelCashPlus().text
-        assert "0" in pageProgrammeDetails.getLabelTotalNumberOfHouseholds().text
+        assert "0" in pageProgrammeDetails.getLabelProgramSize().text
 
     @pytest.mark.parametrize(
         "test_data",
@@ -262,7 +262,7 @@ class TestProgrammeManagement:
         assert "Regular" in pageProgrammeDetails.getLabelFreqOfPayment().text
         assert "-" in pageProgrammeDetails.getLabelAdministrativeAreas().text
         assert "Yes" in pageProgrammeDetails.getLabelCashPlus().text
-        assert "0" in pageProgrammeDetails.getLabelTotalNumberOfHouseholds().text
+        assert "0" in pageProgrammeDetails.getLabelProgramSize().text
         # Check Programme Management Page
         pageProgrammeManagement.getNavProgrammeManagement().click()
         pageProgrammeManagement.fillFiltersSearch(test_data["program_name"])
@@ -497,7 +497,7 @@ class TestComeBackScenarios:
         assert "Regular" in pageProgrammeDetails.getLabelFreqOfPayment().text
         assert "-" in pageProgrammeDetails.getLabelAdministrativeAreas().text
         assert "Yes" in pageProgrammeDetails.getLabelCashPlus().text
-        assert "0" in pageProgrammeDetails.getLabelTotalNumberOfHouseholds().text
+        assert "0" in pageProgrammeDetails.getLabelProgramSize().text
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
 
 
