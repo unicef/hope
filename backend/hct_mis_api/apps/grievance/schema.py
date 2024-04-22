@@ -122,8 +122,8 @@ class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObje
         super().check_node_permission(info, object_instance)
         business_area = object_instance.business_area
         user = info.context.user
-        # TODO: grievances should be cross program ??? remove program_id
-        program_id = get_program_id_from_headers(info.context.headers)
+        # when selected All programs in GPF program_id is None
+        program_id: Optional[str] = get_program_id_from_headers(info.context.headers)
 
         if object_instance.category == GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE:
             perm = Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE.value
@@ -143,8 +143,6 @@ class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObje
         partner = user.partner
         has_partner_area_access = partner.is_unicef
         ticket_program_id = str(object_instance.programs.first().id) if object_instance.programs.first() else None
-        if program_id and ticket_program_id != program_id:
-            log_and_raise("Ticket does not belong to the selected program")
         if not partner.is_unicef:
             if not object_instance.admin2 or not ticket_program_id:
                 # admin2 is empty or non-program ticket -> no restrictions for admin area
@@ -573,6 +571,8 @@ class Query(graphene.ObjectType):
                 .prefetch_related(*to_prefetch)
                 .filter(business_area_id=business_area_id, programs=None)
             )
+        else:
+            queryset = queryset.filter(programs__id=program_id)
 
         return queryset.annotate(
             total=Case(

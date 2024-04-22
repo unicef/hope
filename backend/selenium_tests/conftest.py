@@ -1,3 +1,4 @@
+import logging
 import os
 from datetime import datetime
 
@@ -17,6 +18,7 @@ from page_object.programme_management.programme_management import ProgrammeManag
 from page_object.programme_population.households import Households
 from page_object.programme_population.households_details import HouseholdsDetails
 from page_object.programme_population.individuals import Individuals
+from page_object.programme_population.individuals_details import IndividualsDetails
 from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
@@ -34,7 +36,78 @@ from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, Busin
 from hct_mis_api.apps.geo.models import Country
 
 
+def pytest_addoption(parser) -> None:  # type: ignore
+    parser.addoption("--mapping", action="store_true", default=False, help="Enable mapping mode")
+
+
 def pytest_configure() -> None:
+    from django.conf import settings
+
+    settings.DEBUG = True
+    settings.ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", os.getenv("DOMAIN", "")]
+    settings.CELERY_TASK_ALWAYS_EAGER = True
+
+    settings.ELASTICSEARCH_INDEX_PREFIX = "test_"
+    settings.EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+    settings.EXCHANGE_RATE_CACHE_EXPIRY = 0
+    settings.USE_DUMMY_EXCHANGE_RATES = True
+
+    settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
+    settings.CSRF_COOKIE_SECURE = False
+    settings.CSRF_COOKIE_HTTPONLY = False
+    settings.SESSION_COOKIE_SECURE = False
+    settings.SESSION_COOKIE_HTTPONLY = True
+    settings.SECURE_HSTS_SECONDS = False
+    settings.SECURE_CONTENT_TYPE_NOSNIFF = True
+    settings.SECURE_REFERRER_POLICY = "same-origin"
+
+    settings.CACHE_ENABLED = False
+    settings.CACHES = {
+        "default": {
+            "BACKEND": "hct_mis_api.apps.core.memcache.LocMemCache",
+            "TIMEOUT": 1800,
+        }
+    }
+
+    settings.LOGGING["loggers"].update(
+        {
+            "": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
+            "registration_datahub.tasks.deduplicate": {
+                "handlers": ["default"],
+                "level": "INFO",
+                "propagate": True,
+            },
+            "sanction_list.tasks.check_against_sanction_list_pre_merge": {
+                "handlers": ["default"],
+                "level": "INFO",
+                "propagate": True,
+            },
+            "graphql": {"handlers": ["default"], "level": "CRITICAL", "propagate": True},
+            "elasticsearch": {
+                "handlers": ["default"],
+                "level": "CRITICAL",
+                "propagate": True,
+            },
+            "elasticsearch-dsl-django": {
+                "handlers": ["default"],
+                "level": "CRITICAL",
+                "propagate": True,
+            },
+            "hct_mis_api.apps.registration_datahub.tasks.deduplicate": {
+                "handlers": ["default"],
+                "level": "CRITICAL",
+                "propagate": True,
+            },
+            "hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields": {
+                "handlers": ["default"],
+                "level": "CRITICAL",
+                "propagate": True,
+            },
+        }
+    )
+
+    logging.disable(logging.CRITICAL)
     pytest.SELENIUM_PATH = os.path.dirname(__file__)
     pytest.CSRF = ""
     pytest.SESSION_ID = ""
@@ -70,9 +143,11 @@ def driver() -> Chrome:
 
 
 @pytest.fixture(autouse=True)
-def browser(driver: Chrome) -> Chrome:
-    driver.live_server = LiveServer("localhost")
-    # driver.live_server = LiveServer("0.0.0.0:8080")
+def browser(request: FixtureRequest, driver: Chrome) -> Chrome:
+    if request.config.getoption("--mapping"):
+        driver.live_server = LiveServer("0.0.0.0:8080")
+    else:
+        driver.live_server = LiveServer("localhost")
     yield driver
     driver.close()
     pytest.CSRF = ""
@@ -143,6 +218,11 @@ def pageHouseholdsDetails(request: FixtureRequest, browser: Chrome) -> Household
 @pytest.fixture
 def pageIndividuals(request: FixtureRequest, browser: Chrome) -> Individuals:
     yield Individuals(browser)
+
+
+@pytest.fixture
+def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> IndividualsDetails:
+    yield IndividualsDetails(browser)
 
 
 @pytest.fixture

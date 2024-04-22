@@ -9,6 +9,11 @@ export const AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY = gql`
       fsps {
         id
         name
+        configurations {
+            id
+            key
+            label
+        }
       }
     }
   }

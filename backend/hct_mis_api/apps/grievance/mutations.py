@@ -1037,7 +1037,9 @@ class DeleteHouseholdApproveMutation(PermissionMutation):
         reason_hh_id = reason_hh_id.strip() if reason_hh_id else None
         if reason_hh_id:
             # validate reason HH id
-            reason_hh_obj = get_object_or_404(Household, unicef_id=reason_hh_id)
+            reason_hh_obj = get_object_or_404(
+                Household, unicef_id=reason_hh_id, program=ticket_details.household.program
+            )
             if reason_hh_obj.withdrawn:
                 raise ValidationError(f"The provided household {reason_hh_obj.unicef_id} has to be active.")
             if reason_hh_obj == ticket_details.household:
