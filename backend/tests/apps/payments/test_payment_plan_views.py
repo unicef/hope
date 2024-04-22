@@ -1,5 +1,7 @@
+import json
 from typing import Any, Callable
 
+from django.core.cache import cache
 from django.utils import timezone
 
 import pytest
@@ -117,6 +119,9 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         assert self.payment_plan1.unicef_id in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
         assert self.payment_plan2.unicef_id in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
         assert self.payment_plan3.unicef_id not in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
+
+        # test caching
+        assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
 
     def test_list_payment_plans_approval_process_data(
         self,
