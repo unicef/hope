@@ -156,6 +156,9 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         self.create_new_feedback()
 
     def test_getting_all_feedbacks(self) -> None:
+        print(self.user.partner)
+        print(self.user.partner.program_partner_through.all())
+        print(self.user.partner.program_partner_through.first().program)
         self.create_new_feedback()
         response = self.graphql_request(
             request_string=self.ALL_FEEDBACKS_QUERY,

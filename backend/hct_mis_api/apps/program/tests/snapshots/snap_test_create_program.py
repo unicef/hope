@@ -188,21 +188,10 @@ snapshots['TestCreateProgram::test_create_program_with_partners_0_valid 1'] = {
                 'description': 'my description of program',
                 'endDate': '2021-12-20',
                 'frequencyOfPayments': 'REGULAR',
+                'isSocialWorkerProgram': False,
                 'name': 'Test',
                 'partnerAccess': 'SELECTED_PARTNERS_ACCESS',
                 'partners': [
-                    {
-                        'areaAccess': 'ADMIN_AREA',
-                        'areas': [
-                            {
-                                'name': 'North Brianmouth'
-                            },
-                            {
-                                'name': 'South Catherine'
-                            }
-                        ],
-                        'name': 'WFP'
-                    },
                     {
                         'areaAccess': 'BUSINESS_AREA',
                         'areas': [
@@ -214,6 +203,18 @@ snapshots['TestCreateProgram::test_create_program_with_partners_0_valid 1'] = {
                             }
                         ],
                         'name': 'UNICEF'
+                    },
+                    {
+                        'areaAccess': 'ADMIN_AREA',
+                        'areas': [
+                            {
+                                'name': 'North Brianmouth'
+                            },
+                            {
+                                'name': 'South Catherine'
+                            }
+                        ],
+                        'name': 'WFP'
                     },
                     {
                         'areaAccess': 'BUSINESS_AREA',
@@ -295,6 +296,7 @@ snapshots['TestCreateProgram::test_create_program_with_partners_all_partners_acc
                 'description': 'my description of program',
                 'endDate': '2021-12-20',
                 'frequencyOfPayments': 'REGULAR',
+                'isSocialWorkerProgram': False,
                 'name': 'Test',
                 'partnerAccess': 'ALL_PARTNERS_ACCESS',
                 'partners': [
@@ -350,6 +352,7 @@ snapshots['TestCreateProgram::test_create_program_with_partners_none_partners_ac
                 'description': 'my description of program',
                 'endDate': '2021-12-20',
                 'frequencyOfPayments': 'REGULAR',
+                'isSocialWorkerProgram': False,
                 'name': 'Test',
                 'partnerAccess': 'NONE_PARTNERS_ACCESS',
                 'partners': [

@@ -48,45 +48,25 @@ class PartnerForGrievanceTest(APITestCase):
 
         # partner with access to Test Program - should be returned if Program is passed or if neither program nor household/individual is passed
         # (because it has access to ANY program in this BA)
-        partner_perms = {
-            str(cls.business_area.pk): {
-                "roles": [],
-                "programs": {str(cls.program.pk): []},
-            }
-        }
-        PartnerFactory(name="Partner with access to Test Program", permissions=partner_perms)
+        partner_with_access_to_test_program = PartnerFactory(name="Partner with access to Test Program")
+        cls.update_partner_access_to_program(partner_with_access_to_test_program, cls.program)
 
         # partner with access to Test Program for Household - should be returned if Program is not passed and household/individual is passed or if neither program nor household/individual is passed
         # (because it has access to ANY program in this BA)
-        partner_perms_program_for_hh = {
-            str(cls.business_area.pk): {
-                "roles": [],
-                "programs": {str(cls.program_for_household.pk): []},
-            }
-        }
-        PartnerFactory(
-            name="Partner with access to Test Program for Household", permissions=partner_perms_program_for_hh
+        partner_with_access_to_test_program_for_hh = PartnerFactory(
+            name="Partner with access to Test Program for Household"
         )
+        cls.update_partner_access_to_program(partner_with_access_to_test_program_for_hh, cls.program_for_household)
 
         # partner with access to Test Program Any - should be returned if  neither program nor household/individual is passed
         # (because it has access to ANY program in this BA)
-        partner_perms_any_program = {
-            str(cls.business_area.pk): {
-                "roles": [],
-                "programs": {str(cls.program_any.pk): []},
-            }
-        }
-        PartnerFactory(name="Partner with with access to Test Program Any", permissions=partner_perms_any_program)
+        partner_with_access_to_test_program_any = PartnerFactory(name="Partner with with access to Test Program Any")
+        cls.update_partner_access_to_program(partner_with_access_to_test_program_any, cls.program_any)
 
         # partner without access to any program in this BA (but with role, which should not matter) - should not be returned in any case
         role = Role.objects.create(name="Partner role")
-        partner_no_program_access = {
-            str(cls.business_area.pk): {
-                "roles": [str(role.pk)],
-                "programs": {},
-            }
-        }
-        PartnerFactory(name="Partner Without Program Access", permissions=partner_no_program_access)
+        partner_without_program_access = PartnerFactory(name="Partner Without Program Access")
+        cls.add_partner_role_in_business_area(partner_without_program_access, cls.business_area, [role])
 
     def test_partner_choices_with_program(self) -> None:
         self.snapshot_graphql_request(

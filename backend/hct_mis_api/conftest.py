@@ -28,6 +28,7 @@ def pytest_configure(config: Config) -> None:
 
     settings.ELASTICSEARCH_INDEX_PREFIX = "test_"
     settings.EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    settings.CATCH_ALL_EMAIL = ""
 
     settings.EXCHANGE_RATE_CACHE_EXPIRY = 0
     settings.USE_DUMMY_EXCHANGE_RATES = True

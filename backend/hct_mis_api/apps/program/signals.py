@@ -4,6 +4,7 @@ from django.db import transaction
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import Signal, receiver
 
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 from hct_mis_api.apps.program.utils import (
@@ -38,6 +39,11 @@ def track_old_partner_access(sender: Any, instance: Program, **kwargs: Any) -> N
 
 @receiver(post_save, sender=Program)
 def handle_partner_access_change(sender: Any, instance: Program, created: bool, **kwargs: Any) -> None:
+    if created:
+        # grant access to UNICEF partner
+        unicef_partner = Partner.objects.get(name="UNICEF")
+        create_program_partner_access([{"partner": unicef_partner.id, "areas": []}], instance)
+
     old_partner_access = instance.old_partner_access
     new_partner_access = instance.partner_access
 
@@ -46,7 +52,6 @@ def handle_partner_access_change(sender: Any, instance: Program, created: bool, 
             create_program_partner_access([], instance, new_partner_access)
         elif new_partner_access == Program.NONE_PARTNERS_ACCESS:
             remove_program_partner_access([], instance)
-            create_program_partner_access([], instance, new_partner_access)
 
 
 @receiver(pre_save, sender=ProgramPartnerThrough)

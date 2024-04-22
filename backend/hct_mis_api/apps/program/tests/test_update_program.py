@@ -68,6 +68,7 @@ class TestUpdateProgram(APITestCase):
         cls.program_finished = ProgramFactory.create(
             status=Program.FINISHED,
             business_area=cls.business_area,
+            partner_access=Program.NONE_PARTNERS_ACCESS,
         )
 
         cls.partner = PartnerFactory(name="WFP")

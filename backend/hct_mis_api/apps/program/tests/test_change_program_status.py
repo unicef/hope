@@ -83,6 +83,7 @@ class TestChangeProgramStatus(APITestCase):
             status=initial_status,
             business_area=self.business_area,
             data_collecting_type=data_collecting_type,
+            partner_access=Program.SELECTED_PARTNERS_ACCESS,
         )
 
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
@@ -94,7 +95,7 @@ class TestChangeProgramStatus(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(program.id, "ProgramNode"),
                     "status": target_status,
-                    "partners": [{"id": str(self.user.partner.id), "areaAccess": "BUSINESS_AREA"}],
+                    "partners": [{"partner": str(self.user.partner.id), "areaAccess": "BUSINESS_AREA"}],
                 }
             },
         )

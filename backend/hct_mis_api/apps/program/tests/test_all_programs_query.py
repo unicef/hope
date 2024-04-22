@@ -37,10 +37,12 @@ class TestAllProgramsQuery(APITestCase):
         cls.business_area.data_collecting_types.set(DataCollectingType.objects.all().values_list("id", flat=True))
 
         cls.partner = PartnerFactory(name="WFP")
+        cls.partner.allowed_business_areas.add(cls.business_area)
         cls.user = UserFactory.create(partner=cls.partner)
 
         cls.unicef_partner = PartnerFactory(name="UNICEF")
         other_partner = PartnerFactory(name="Other Partner")
+        other_partner.allowed_business_areas.add(cls.business_area)
 
         program_with_partner_access = ProgramFactory.create(
             name="Program with partner access",
@@ -53,10 +55,6 @@ class TestAllProgramsQuery(APITestCase):
             program=program_with_partner_access,
             partner=cls.partner,
         )
-        ProgramPartnerThrough.objects.create(
-            program=program_with_partner_access,
-            partner=cls.unicef_partner,
-        )
 
         program_with_all_partners_access = ProgramFactory.create(
             name="Program with all partners access",
@@ -64,18 +62,6 @@ class TestAllProgramsQuery(APITestCase):
             business_area=cls.business_area,
             data_collecting_type=data_collecting_type,
             partner_access=Program.ALL_PARTNERS_ACCESS,
-        )
-        ProgramPartnerThrough.objects.create(
-            program=program_with_all_partners_access,
-            partner=cls.partner,
-        )
-        ProgramPartnerThrough.objects.create(
-            program=program_with_all_partners_access,
-            partner=cls.unicef_partner,
-        )
-        ProgramPartnerThrough.objects.create(
-            program=program_with_all_partners_access,
-            partner=other_partner,
         )
 
         program_with_none_partner_access = ProgramFactory.create(
@@ -85,10 +71,6 @@ class TestAllProgramsQuery(APITestCase):
             data_collecting_type=data_collecting_type,
             partner_access=Program.NONE_PARTNERS_ACCESS,
         )
-        ProgramPartnerThrough.objects.create(
-            program=program_with_none_partner_access,
-            partner=cls.unicef_partner,
-        )
 
         program_without_partner_access = ProgramFactory.create(
             name="Program without partner access",
@@ -96,10 +78,6 @@ class TestAllProgramsQuery(APITestCase):
             business_area=cls.business_area,
             data_collecting_type=data_collecting_type,
             partner_access=Program.SELECTED_PARTNERS_ACCESS,
-        )
-        ProgramPartnerThrough.objects.create(
-            program=program_without_partner_access,
-            partner=cls.unicef_partner,
         )
         ProgramPartnerThrough.objects.create(
             program=program_without_partner_access,
