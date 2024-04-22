@@ -72,6 +72,8 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
             business_area=self.selected_business_area,
             program=program,
         )
+        obj.hct_id = self.rdi.id
+        obj.save(update_fields=["hct_id"])
 
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
