@@ -20,8 +20,11 @@ from adminfilters.filters import ChoicesFieldComboFilter, NumberFilter, ValueFil
 from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 
-from hct_mis_api.apps.registration_datahub.models import (
+from hct_mis_api.apps.registration_data.models import (
     ImportData,
+    RegistrationDataImportDatahub,
+)
+from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
     ImportedDocument,
     ImportedDocumentType,
@@ -30,7 +33,6 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividualIdentity,
     ImportedIndividualRoleInHousehold,
     KoboImportedSubmission,
-    RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.utils import (
     post_process_dedupe_results as _post_process_dedupe_results,

@@ -13,7 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='importedhousehold',
             name='collect_type',
-            field=models.CharField(choices=[('STANDARD', 'Standard'), ('SINGLE', 'Single')], default='STANDARD',
-                                   max_length=8),
+            field=models.CharField(choices=[('STANDARD', 'Standard'), ('SINGLE', 'Single')], default='STANDARD', max_length=8),
         ),
     ]

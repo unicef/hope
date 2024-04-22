@@ -25,6 +25,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     YES,
 )
+from hct_mis_api.apps.registration_data.models import RegistrationDataImportDatahub
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
     ImportedDocument,
@@ -32,7 +33,6 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
-    RegistrationDataImportDatahub,
 )
 from hct_mis_api.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,

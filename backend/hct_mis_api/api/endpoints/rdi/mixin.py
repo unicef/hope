@@ -13,12 +13,12 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
+from hct_mis_api.apps.registration_data.models import RegistrationDataImportDatahub
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
-    RegistrationDataImportDatahub,
 )
 
 logger = logging.getLogger(__name__)

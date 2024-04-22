@@ -2,7 +2,7 @@ import json
 import logging
 import re
 from datetime import date
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import Any, Dict, Optional
 
 from django.contrib.gis.db.models import PointField
 from django.core.validators import (
@@ -50,9 +50,6 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.phone import recalculate_phone_numbers_validity
-
-if TYPE_CHECKING:
-    from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 
@@ -131,7 +128,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     fchild_hoh = models.BooleanField(null=True)
     child_hoh = models.BooleanField(null=True)
     registration_data_import = models.ForeignKey(
-        "RegistrationDataImportDatahub",
+        "registration_data.RegistrationDataImportDatahub",
         related_name="households",
         on_delete=models.CASCADE,
     )
@@ -244,7 +241,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
     )
     registration_data_import = models.ForeignKey(
-        "RegistrationDataImportDatahub",
+        "registration_data.RegistrationDataImportDatahub",
         related_name="individuals",
         on_delete=models.CASCADE,
     )
@@ -363,86 +360,6 @@ class ImportedIndividualRoleInHousehold(TimeStampedUUIDModel):
         unique_together = ("role", "household")
 
 
-class RegistrationDataImportDatahub(TimeStampedUUIDModel):
-    LOADING = "LOADING"
-    NOT_STARTED = "NOT_STARTED"
-    STARTED = "STARTED"
-    DONE = "DONE"
-    IMPORT_DONE_CHOICES = (
-        (LOADING, _("Loading")),
-        (NOT_STARTED, _("Not Started")),
-        (STARTED, _("Started")),
-        (DONE, _("Done")),
-    )
-
-    name = models.CharField(max_length=255, blank=True)
-    import_date = models.DateTimeField(auto_now_add=True)
-    hct_id = models.UUIDField(null=True, db_index=True)
-    import_data = models.OneToOneField(
-        "ImportData",
-        related_name="registration_data_import",
-        on_delete=models.CASCADE,
-        null=True,
-    )
-    import_done = models.CharField(max_length=15, choices=IMPORT_DONE_CHOICES, default=NOT_STARTED)
-    business_area_slug = models.CharField(max_length=250, blank=True)
-
-    class Meta:
-        ordering = ("name",)
-        permissions = (["api_upload", "Can upload"],)
-
-    def __str__(self) -> str:
-        return self.name
-
-    @property
-    def business_area(self) -> str:
-        return self.business_area_slug
-
-    @property
-    def linked_rdi(self) -> "RegistrationDataImport":
-        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-
-        return RegistrationDataImport.objects.get(datahub_id=self.id)
-
-
-class ImportData(TimeStampedUUIDModel):
-    XLSX = "XLSX"
-    JSON = "JSON"
-    FLEX_REGISTRATION = "FLEX"
-    DATA_TYPE_CHOICES = (
-        (XLSX, _("XLSX File")),
-        (JSON, _("JSON File")),
-        (FLEX_REGISTRATION, _("Flex Registration")),
-    )
-    STATUS_PENDING = "PENDING"
-    STATUS_RUNNING = "RUNNING"
-    STATUS_FINISHED = "FINISHED"
-    STATUS_ERROR = "ERROR"
-    STATUS_VALIDATION_ERROR = "VALIDATION_ERROR"
-
-    STATUS_CHOICES = (
-        (STATUS_PENDING, _("Pending")),
-        (STATUS_RUNNING, _("Running")),
-        (STATUS_FINISHED, _("Finished")),
-        (STATUS_ERROR, _("Error")),
-        (STATUS_VALIDATION_ERROR, _("Validation Error")),
-    )
-    status = models.CharField(max_length=20, default=STATUS_FINISHED, choices=STATUS_CHOICES)
-    business_area_slug = models.CharField(max_length=200, blank=True)
-    file = models.FileField(null=True)
-    data_type = models.CharField(max_length=4, choices=DATA_TYPE_CHOICES, default=XLSX)
-    number_of_households = models.PositiveIntegerField(null=True)
-    number_of_individuals = models.PositiveIntegerField(null=True)
-    error = models.TextField(blank=True)
-    validation_errors = models.TextField(blank=True)
-    created_by_id = models.UUIDField(null=True)
-
-
-class KoboImportData(ImportData):
-    kobo_asset_id = models.CharField(max_length=100)
-    only_active_submissions = models.BooleanField(default=True)
-
-
 class DocumentValidator(TimeStampedUUIDModel):
     type = models.ForeignKey(
         "ImportedDocumentType",
@@ -514,7 +431,7 @@ class KoboImportedSubmission(models.Model):
     amended = models.BooleanField(default=False, blank=True)
 
     registration_data_import = models.ForeignKey(
-        RegistrationDataImportDatahub,
+        "registration_data.RegistrationDataImportDatahub",
         null=True,
         blank=True,
         on_delete=models.CASCADE,
@@ -535,7 +452,7 @@ class Record(models.Model):
     timestamp = models.DateTimeField(db_index=True)
     storage = models.BinaryField(null=True, blank=True)
     registration_data_import = models.ForeignKey(
-        "registration_datahub.RegistrationDataImportDatahub",
+        "registration_data.RegistrationDataImportDatahub",
         related_name="records",
         on_delete=models.SET_NULL,
         null=True,

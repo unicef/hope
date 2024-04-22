@@ -7,8 +7,10 @@ from django.db.models import QuerySet
 from celery import Task
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
+from hct_mis_api.apps.registration_data.models import (
+    RegistrationDataImport,
+    RegistrationDataImportDatahub,
+)
 from hct_mis_api.apps.utils.celery_utils import (
     get_all_celery_tasks,
     get_task_in_queue_or_running,

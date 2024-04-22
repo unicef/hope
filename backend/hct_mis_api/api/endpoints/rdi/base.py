@@ -18,11 +18,11 @@ from hct_mis_api.api.endpoints.rdi.upload import HouseholdSerializer
 from hct_mis_api.api.models import Grant
 from hct_mis_api.api.utils import humanize_errors
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedHousehold,
+from hct_mis_api.apps.registration_data.models import (
+    RegistrationDataImport,
     RegistrationDataImportDatahub,
 )
+from hct_mis_api.apps.registration_datahub.models import ImportedHousehold
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.core.models import BusinessArea

@@ -108,7 +108,7 @@ def registration_xlsx_import_task(
         return True
     except Exception as e:
         logger.warning(e)
-        from hct_mis_api.apps.registration_datahub.models import (
+        from hct_mis_api.apps.registration_data.models import (
             RegistrationDataImportDatahub,
         )
 
@@ -288,7 +288,7 @@ def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
 @log_start_and_end
 @sentry_tags
 def pull_kobo_submissions_task(self: Any, import_data_id: "UUID") -> Dict:
-    from hct_mis_api.apps.registration_datahub.models import KoboImportData
+    from hct_mis_api.apps.registration_data.models import KoboImportData
 
     kobo_import_data = KoboImportData.objects.get(id=import_data_id)
     set_sentry_business_area_tag(kobo_import_data.business_area_slug)
@@ -310,7 +310,7 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID") -> Dict:
 @sentry_tags
 def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> Dict:
     from hct_mis_api.apps.program.models import Program
-    from hct_mis_api.apps.registration_datahub.models import ImportData
+    from hct_mis_api.apps.registration_data.models import ImportData
     from hct_mis_api.apps.registration_datahub.tasks.validatate_xlsx_import import (
         ValidateXlsxImport,
     )

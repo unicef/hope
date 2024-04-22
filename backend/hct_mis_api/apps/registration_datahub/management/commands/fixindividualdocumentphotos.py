@@ -13,8 +13,8 @@ from hct_mis_api.apps.core.kobo.common import (
 )
 from hct_mis_api.apps.core.utils import rename_dict_keys
 from hct_mis_api.apps.household.models import Document
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import ImportData, ImportedDocument
+from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
+from hct_mis_api.apps.registration_datahub.models import ImportedDocument
 from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
     RdiKoboCreateTask,
 )

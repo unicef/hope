@@ -30,7 +30,10 @@ from hct_mis_api.apps.household.models import (
     Individual,
 )
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_data.models import (
+    RegistrationDataImport,
+    RegistrationDataImportDatahub,
+)
 from hct_mis_api.apps.registration_datahub.documents import (
     ImportedIndividualDocument,
     get_imported_individual_doc,
@@ -38,7 +41,6 @@ from hct_mis_api.apps.registration_datahub.documents import (
 from hct_mis_api.apps.registration_datahub.models import (
     SIMILAR_IN_BATCH,
     ImportedIndividual,
-    RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 from hct_mis_api.apps.utils.elasticsearch_utils import (

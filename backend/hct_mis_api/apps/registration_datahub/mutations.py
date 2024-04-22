@@ -22,7 +22,12 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.core.validators import BaseValidator, raise_program_status_is
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_data.models import (
+    ImportData,
+    KoboImportData,
+    RegistrationDataImport,
+    RegistrationDataImportDatahub,
+)
 from hct_mis_api.apps.registration_data.schema import RegistrationDataImportNode
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
@@ -38,11 +43,8 @@ from hct_mis_api.apps.registration_datahub.inputs import (
     RegistrationXlsxImportMutationInput,
 )
 from hct_mis_api.apps.registration_datahub.models import (
-    ImportData,
     ImportedHousehold,
     ImportedIndividual,
-    KoboImportData,
-    RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.schema import (
     ImportDataNode,

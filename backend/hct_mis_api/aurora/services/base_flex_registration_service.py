@@ -11,13 +11,15 @@ from django.db.transaction import atomic
 from django.forms import modelform_factory
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_data.models import (
+    ImportData,
+    RegistrationDataImport,
+    RegistrationDataImportDatahub,
+)
 from hct_mis_api.apps.registration_datahub.celery_tasks import rdi_deduplication_task
 from hct_mis_api.apps.registration_datahub.models import (
-    ImportData,
     ImportedHousehold,
     ImportedIndividual,
-    RegistrationDataImportDatahub,
 )
 from hct_mis_api.aurora.celery_tasks import process_flex_records_task
 from hct_mis_api.aurora.models import Record, Registration

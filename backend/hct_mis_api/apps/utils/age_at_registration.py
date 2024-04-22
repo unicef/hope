@@ -3,8 +3,10 @@ from typing import Optional, Union
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
 
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
+from hct_mis_api.apps.registration_data.models import (
+    RegistrationDataImport,
+    RegistrationDataImportDatahub,
+)
 
 
 def calculate_age_at_registration(
