@@ -112,7 +112,7 @@ class TestAllProgramsQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_all_programs_query(self, _: Any, permissions: List[Permissions]):
+    def test_all_programs_query(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.ALL_PROGRAMS_QUERY,
@@ -125,7 +125,7 @@ class TestAllProgramsQuery(APITestCase):
             variables={"businessArea": self.business_area.slug, "orderBy": "name"},
         )
 
-    def test_all_programs_query_unicef_partner(self):
+    def test_all_programs_query_unicef_partner(self) -> None:
         user = UserFactory.create(partner=self.unicef_partner)
         # granting any role in the business area to the user; permission to view programs is inherited from the unicef partner
         self.create_user_role_with_permissions(user, [Permissions.RDI_MERGE_IMPORT], self.business_area)

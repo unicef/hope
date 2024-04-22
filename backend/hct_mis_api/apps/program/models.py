@@ -193,7 +193,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         blank=True,
         max_length=50,
         choices=PARTNER_ACCESS_CHOICE,
-        default=ALL_PARTNERS_ACCESS,
+        default=SELECTED_PARTNERS_ACCESS,
     )
     partners = models.ManyToManyField(to="account.Partner", through=ProgramPartnerThrough, related_name="programs")
 

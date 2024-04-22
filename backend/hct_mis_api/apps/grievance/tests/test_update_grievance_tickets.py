@@ -8,7 +8,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from factory import Factory
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -90,7 +90,7 @@ class TestUpdateGrievanceTickets(APITestCase):
     def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.generate_document_types_for_all_countries()
-        partner = Partner.objects.get(name="Partner")
+        partner = PartnerFactory(name="Partner")
         cls.user = UserFactory(id="a5c44eeb-482e-49c2-b5ab-d769f83db116", partner=partner)
         cls.user_two = UserFactory(id="a34716d8-aaf1-4c70-bdd8-0d58be94981a")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")

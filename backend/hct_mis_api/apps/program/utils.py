@@ -391,7 +391,7 @@ def copy_bank_account_info_per_individual(
     return bank_accounts_info_list
 
 
-def create_program_partner_access(partners_data, program, partner_access) -> List[Dict]:
+def create_program_partner_access(partners_data: List, program: Program, partner_access: str) -> List[Dict]:
     if partner_access == Program.ALL_PARTNERS_ACCESS:
         partners = Partner.objects.filter(allowed_business_areas=program.business_area).exclude(
             name=settings.DEFAULT_EMPTY_PARTNER
@@ -418,7 +418,7 @@ def create_program_partner_access(partners_data, program, partner_access) -> Lis
     return partners_data
 
 
-def remove_program_partner_access(partners_data, program) -> None:
+def remove_program_partner_access(partners_data: List, program: Program) -> None:
     partner_ids = [partner_data["partner"] for partner_data in partners_data]
     existing_program_partner_access = ProgramPartnerThrough.objects.filter(
         program=program,

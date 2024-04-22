@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.db import transaction
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import Signal, receiver
@@ -23,7 +25,7 @@ pre_save_full_area_access_flag_change = Signal(providing_args=["old_full_area_ac
 
 
 @receiver(pre_save, sender=Program)
-def track_old_partner_access(sender, instance, **kwargs):
+def track_old_partner_access(sender: Any, instance: Program, **kwargs: Any) -> None:
     try:
         old_instance = Program.objects.get(pk=instance.pk)
         old_partner_access = old_instance.partner_access
@@ -35,7 +37,7 @@ def track_old_partner_access(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=Program)
-def handle_partner_access_change(sender, instance, created, **kwargs):
+def handle_partner_access_change(sender: Any, instance: Program, created: bool, **kwargs: Any) -> None:
     old_partner_access = instance.old_partner_access
     new_partner_access = instance.partner_access
 
@@ -48,7 +50,7 @@ def handle_partner_access_change(sender, instance, created, **kwargs):
 
 
 @receiver(pre_save, sender=ProgramPartnerThrough)
-def track_old_full_area_access_flag(sender, instance, **kwargs):
+def track_old_full_area_access_flag(sender: Any, instance: ProgramPartnerThrough, **kwargs: Any) -> None:
     try:
         old_instance = ProgramPartnerThrough.objects.get(pk=instance.pk)
         old_full_area_access_flag = old_instance.full_area_access
@@ -62,7 +64,7 @@ def track_old_full_area_access_flag(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=ProgramPartnerThrough)
-def handle_partner_full_area_access_flag(sender, instance, **kwargs):
+def handle_partner_full_area_access_flag(sender: Any, instance: ProgramPartnerThrough, **kwargs: Any) -> None:
     # Apply signal if full_area_access=True for ProgramPartnerThrough created OR full_area_access field updated
     if new_full_area_access_flag := instance.full_area_access:
         old_full_area_access_flag = instance.old_full_area_access_flag

@@ -57,7 +57,7 @@ from hct_mis_api.apps.payment.schema import (
 )
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.filters import ProgramFilter
-from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 
 
@@ -95,7 +95,7 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
         return program.households_with_tp_in_program.count()
 
     @staticmethod
-    def resolve_partners(program: Program, info: Any, **kwargs: Any) -> List[ProgramPartnerThrough]:
+    def resolve_partners(program: Program, info: Any, **kwargs: Any) -> QuerySet[Partner]:
         return (
             Partner.objects.filter(
                 program_partner_through__program=program,

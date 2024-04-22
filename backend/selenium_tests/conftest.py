@@ -311,7 +311,9 @@ def create_super_user(business_area: BusinessArea) -> User:
         )
         data_collecting_type.limit_to.add(business_area)
         data_collecting_type.save()
-    ba_partner_through = BusinessAreaPartnerThrough.objects.get_or_create(business_area=business_area, partner=partner)
+    ba_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
+        business_area=business_area, partner=partner
+    )
     ba_partner_through.roles.set([role])
     return user
 

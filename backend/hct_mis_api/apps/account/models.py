@@ -133,7 +133,7 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
     def has_area_access(self, area_id: Union[str, UUID], program_id: Union[str, UUID]) -> bool:
         return self.is_unicef or self.get_program_areas(program_id).filter(id=area_id).exists()
 
-    def get_program_areas(self, program_id: Union[str, UUID]) -> QuerySet(Area):
+    def get_program_areas(self, program_id: Union[str, UUID]) -> QuerySet[Area]:
         return Area.objects.filter(
             program_partner_through__partner=self, program_partner_through__program_id=program_id
         )

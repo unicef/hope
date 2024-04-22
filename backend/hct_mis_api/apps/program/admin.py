@@ -125,8 +125,8 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
         elif request.method == "POST":
             partner_area_form_set = PartnerAreaFormSet(request.POST or None, prefix="program_areas")
             if partner_area_form_set.is_valid():
-                for form in partner_area_form_set:
-                    form = form.cleaned_data
+                for partner_area_form in partner_area_form_set:
+                    form = partner_area_form.cleaned_data
                     if form and not form["DELETE"]:
                         areas_ids = list(map(lambda area: str(area.id), form["areas"]))
                         program_partner, _ = ProgramPartnerThrough.objects.update_or_create(

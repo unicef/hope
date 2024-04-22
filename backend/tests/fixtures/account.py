@@ -48,6 +48,6 @@ def create_user_role_with_permissions(update_user_partner_perm_for_program: Any)
     return _create_user_role_with_permissions
 
 
-@pytest.fixture(autouse=True, scope="session")
-def partner_unicef():
+@pytest.fixture(autouse=True)
+def partner_unicef() -> PartnerFactory:
     return PartnerFactory(name="UNICEF")

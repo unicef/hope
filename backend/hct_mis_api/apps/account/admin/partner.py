@@ -27,7 +27,7 @@ def can_add_business_area_to_partner(request: Any, *args: Any, **kwargs: Any) ->
     return request.user.can_add_business_area_to_partner()
 
 
-def business_area_role_form_custom_query(queryset: "QuerySet") -> "BusinessAreaRoleForm":
+def business_area_role_form_custom_query(queryset: "QuerySet") -> Any:
     class BusinessAreaRoleForm(forms.Form):
         business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all(), required=True)
         roles = forms.ModelMultipleChoiceField(queryset=Role.objects.all(), required=True)
