@@ -52,7 +52,7 @@ services:
     command: |
       sh -c "
         waitforit -host=db -port=5432 -timeout=30 &&
-        pytest -svvv -m "not mapping" selenium_tests --html=./report/report.html
+        pytest -svvv selenium_tests --html=./report/report.html
       "
     ports:
       - "8080:8080"
