@@ -8,7 +8,7 @@ import styled from 'styled-components';
 import * as Yup from 'yup';
 import {
   ImportDataStatus,
-  useCreateRegistrationXlsxImportMutation,
+  useCreateRegistrationXlsxImportMutation, useProgramQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -17,6 +17,7 @@ import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
 import { DropzoneField } from './DropzoneField';
 import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
 import { useSaveXlsxImportDataAndCheckStatus } from './useSaveXlsxImportDataAndCheckStatus';
+import { useProgramContext } from '../../../../programContext';
 
 const CircularProgressContainer = styled.div`
   display: flex;
@@ -42,11 +43,12 @@ export function CreateImportFromXlsxForm({
     loading: saveXlsxLoading,
     xlsxImportData,
   } = useSaveXlsxImportDataAndCheckStatus();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea,programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [createImport] = useCreateRegistrationXlsxImportMutation();
+  const {data:programData} = useProgramQuery({ variables: { id: programId } });
 
   const onSubmit = async (values): Promise<void> => {
     setSubmitDisabled(true);
@@ -61,9 +63,15 @@ export function CreateImportFromXlsxForm({
           },
         },
       });
-      navigate(
-        `/${baseUrl}/registration-data-import/${data.data.registrationXlsxImport.registrationDataImport.id}`,
-      );
+      if (programData.program.isSocialWorkerProgram) {
+        navigate(
+          `/${baseUrl}/registration-data-import-for-people/${data.data.registrationXlsxImport.registrationDataImport.id}`,
+        );
+      } else {
+        navigate(
+          `/${baseUrl}/registration-data-import/${data.data.registrationXlsxImport.registrationDataImport.id}`,
+        );
+      }
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
       setSubmitDisabled(false);
