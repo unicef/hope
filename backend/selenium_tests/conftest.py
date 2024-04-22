@@ -32,7 +32,11 @@ from selenium.webdriver.chrome.options import Options
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, BusinessAreaPartnerThrough
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    BusinessAreaPartnerThrough,
+    DataCollectingType,
+)
 from hct_mis_api.apps.geo.models import Country
 
 
@@ -276,7 +280,7 @@ def create_super_user(business_area: BusinessArea) -> User:
         email="test@example.com",
         partner=partner,
     )
-    user_role = UserRole.objects.create(
+    UserRole.objects.create(
         user=user,
         role=Role.objects.get(name="Role"),
         business_area=BusinessArea.objects.get(name="Afghanistan"),
@@ -307,10 +311,8 @@ def create_super_user(business_area: BusinessArea) -> User:
         )
         data_collecting_type.limit_to.add(business_area)
         data_collecting_type.save()
-    ba_partner_through = BusinessAreaPartnerThrough.objects.get_or_create(
-        business_area=business_area, partner=partner
-    )
-    ba_partner_through.roles.set(role)
+    ba_partner_through = BusinessAreaPartnerThrough.objects.get_or_create(business_area=business_area, partner=partner)
+    ba_partner_through.roles.set([role])
     return user
 
 

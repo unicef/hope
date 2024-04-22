@@ -4,7 +4,10 @@ from django.dispatch import Signal, receiver
 
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
-from hct_mis_api.apps.program.utils import create_program_partner_access, remove_program_partner_access
+from hct_mis_api.apps.program.utils import (
+    create_program_partner_access,
+    remove_program_partner_access,
+)
 
 program_copied = Signal()
 
@@ -15,8 +18,8 @@ def adjust_program_size(program: Program) -> None:
     transaction.on_commit(lambda: adjust_program_size_task.delay(program.id))
 
 
-pre_save_partner_access_change = Signal(providing_args=['old_partner_access'])
-pre_save_full_area_access_flag_change = Signal(providing_args=['old_full_area_access_flag'])
+pre_save_partner_access_change = Signal(providing_args=["old_partner_access"])
+pre_save_full_area_access_flag_change = Signal(providing_args=["old_full_area_access_flag"])
 
 
 @receiver(pre_save, sender=Program)
@@ -53,7 +56,9 @@ def track_old_full_area_access_flag(sender, instance, **kwargs):
         old_full_area_access_flag = None
 
     instance.old_full_area_access_flag = old_full_area_access_flag
-    pre_save_full_area_access_flag_change.send(sender=sender, instance=instance, old_full_area_access_flag=old_full_area_access_flag)
+    pre_save_full_area_access_flag_change.send(
+        sender=sender, instance=instance, old_full_area_access_flag=old_full_area_access_flag
+    )
 
 
 @receiver(post_save, sender=ProgramPartnerThrough)
@@ -62,6 +67,7 @@ def handle_partner_full_area_access_flag(sender, instance, **kwargs):
     if new_full_area_access_flag := instance.full_area_access:
         old_full_area_access_flag = instance.old_full_area_access_flag
         if old_full_area_access_flag != new_full_area_access_flag:
-            full_area_access_areas = Area.objects.filter(area_type__country__business_areas__id=instance.program.business_area.id)
+            full_area_access_areas = Area.objects.filter(
+                area_type__country__business_areas__id=instance.program.business_area.id
+            )
             instance.areas.set(full_area_access_areas)
-

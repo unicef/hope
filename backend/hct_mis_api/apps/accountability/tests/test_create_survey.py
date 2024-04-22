@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import django
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.celery_tasks import send_survey_to_users
 from hct_mis_api.apps.accountability.models import Survey

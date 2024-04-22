@@ -365,11 +365,14 @@ class PartnersDataValidator(BaseValidator):
         partner = kwargs.get("partner")
         partners_ids = [int(partner["partner"]) for partner in partners_data]
 
-        if partner_access == Program.SELECTED_PARTNERS_ACCESS and not partner.is_unicef and partner.id not in partners_ids:
+        if (
+            partner_access == Program.SELECTED_PARTNERS_ACCESS
+            and not partner.is_unicef
+            and partner.id not in partners_ids
+        ):
             raise ValidationError("Please assign access to your partner before saving the programme.")
         if partners_ids and partner_access != Program.SELECTED_PARTNERS_ACCESS:
             raise ValidationError("You cannot specify partners for the chosen access type")
-
 
 
 def raise_program_status_is(status: str) -> typing.Callable:

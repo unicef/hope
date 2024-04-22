@@ -9,14 +9,13 @@ from django.utils import timezone
 import pytest
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory, RoleFactory
-from hct_mis_api.apps.account.models import User, Role
+from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
@@ -364,7 +363,9 @@ class TestGrievanceQuery(APITestCase):
             cls.program,
             full_area_access=True,
         )
-        cls.user_with_full_area_access = UserFactory(partner=partner_with_full_area_access, username="user_with_full_area_access")
+        cls.user_with_full_area_access = UserFactory(
+            partner=partner_with_full_area_access, username="user_with_full_area_access"
+        )
 
         # user with access to admin area 1
         partner_with_admin_area1_access = PartnerFactory(name="Partner With Admin Area 1 Access")
@@ -373,7 +374,9 @@ class TestGrievanceQuery(APITestCase):
             cls.program,
             [cls.admin_area_1],
         )
-        cls.user_with_admin_area_1_access = UserFactory(partner=partner_with_admin_area1_access, username="user_with_admin_area_1_access")
+        cls.user_with_admin_area_1_access = UserFactory(
+            partner=partner_with_admin_area1_access, username="user_with_admin_area_1_access"
+        )
 
         # user with access to admin area 2
         partner_with_admin_area2_access = PartnerFactory(name="Partner With Admin Area 2 Access")
@@ -382,7 +385,9 @@ class TestGrievanceQuery(APITestCase):
             cls.program,
             [cls.admin_area_2],
         )
-        cls.user_with_admin_area_2_access = UserFactory(partner=partner_with_admin_area2_access, username="user_with_admin_area_2_access")
+        cls.user_with_admin_area_2_access = UserFactory(
+            partner=partner_with_admin_area2_access, username="user_with_admin_area_2_access"
+        )
 
     @parameterized.expand(
         [

@@ -97,7 +97,9 @@ class TestCheckPermissions(TestCase):
         partner = PartnerFactory(name="Partner")
         program_partner_through = ProgramPartnerThrough.objects.create(program=self.program, partner=partner)
         program_partner_through.areas.set([self.area])
-        ba_partner_through = BusinessAreaPartnerThrough.objects.create(business_area=self.business_area, partner=partner)
+        ba_partner_through = BusinessAreaPartnerThrough.objects.create(
+            business_area=self.business_area, partner=partner
+        )
         ba_partner_through.roles.set([self.role])
         self.user.partner = partner
         self.user.save()

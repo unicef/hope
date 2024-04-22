@@ -254,12 +254,8 @@ class TestIndividualQuery(APITestCase):
 
         cls.household_one.set_admin_areas(cls.area2)
 
-        cls.update_partner_access_to_program(
-            cls.partner, cls.program, [cls.household_one.admin_area]
-        )
-        cls.update_partner_access_to_program(
-            cls.partner, cls.program_draft, [cls.household_one.admin_area]
-        )
+        cls.update_partner_access_to_program(cls.partner, cls.program, [cls.household_one.admin_area])
+        cls.update_partner_access_to_program(cls.partner, cls.program_draft, [cls.household_one.admin_area])
 
         # remove after data migration
         migrate_data_to_representations()

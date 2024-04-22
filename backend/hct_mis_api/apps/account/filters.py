@@ -7,7 +7,6 @@ from django.db.models.functions import Lower
 from django_filters import BooleanFilter, CharFilter, FilterSet, MultipleChoiceFilter
 
 from hct_mis_api.apps.account.models import USER_STATUS_CHOICES, Partner, Role
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
 
 if TYPE_CHECKING:

@@ -3,11 +3,11 @@ from typing import Any
 from flaky import flaky
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory, PartnerFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
-from hct_mis_api.apps.geo.fixtures import AreaFactory, CountryFactory, AreaTypeFactory
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.household.fixtures import (
     BankAccountInfoFactory,
     DocumentFactory,
@@ -44,8 +44,8 @@ class TestCopyProgram(APITestCase):
           cashPlus
           populationGoal
           administrativeAreasOfImplementation
-          partners {   
-            name       
+          partners {
+            name
             areas {
               name
             }
@@ -156,11 +156,13 @@ class TestCopyProgram(APITestCase):
         country_afg = CountryFactory(name="Afghanistan")
         country_afg.business_areas.set([cls.business_area])
         area_type_afg = AreaTypeFactory(name="Area Type in Afg", country=country_afg)
-        country_other = CountryFactory(name="Other Country", short_name="Oth",
-                                       iso_code2="O",
-                                       iso_code3="OTH",
-                                       iso_num="111",
-                                       )
+        country_other = CountryFactory(
+            name="Other Country",
+            short_name="Oth",
+            iso_code2="O",
+            iso_code3="OTH",
+            iso_num="111",
+        )
         cls.area_type_other = AreaTypeFactory(name="Area Type Other", country=country_other)
 
         cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg)
@@ -341,4 +343,3 @@ class TestCopyProgram(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.COPY_PROGRAM_MUTATION, context={"user": self.user}, variables=self.copy_data
         )
-

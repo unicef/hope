@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 
-from hct_mis_api.apps.account.fixtures import UserFactory, PartnerFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.core.base_test_case import APITestCase

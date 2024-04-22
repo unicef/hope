@@ -30,11 +30,8 @@ class TestCrossAreaFilterAvailable(APITestCase):
         program_partner_through_without_area_restrictions.full_area_access = True
         program_partner_through_without_area_restrictions.save()
 
-
         cls.partner_with_area_restrictions = PartnerFactory(name="Partner with area restrictions")
-        cls.update_partner_access_to_program(
-            cls.partner_with_area_restrictions, cls.program, [cls.area]
-        )
+        cls.update_partner_access_to_program(cls.partner_with_area_restrictions, cls.program, [cls.area])
 
         cls.partner_unicef = PartnerFactory(name="UNICEF")
 

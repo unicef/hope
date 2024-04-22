@@ -1,9 +1,9 @@
 import re
-from typing import Dict, List, Sequence, Union
+from typing import Dict, List
 
 from django.conf import settings
 from django.db import transaction
-from django.db.models import QuerySet, Q
+from django.db.models import Q, QuerySet
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.models import DataCollectingType
@@ -393,7 +393,9 @@ def copy_bank_account_info_per_individual(
 
 def create_program_partner_access(partners_data, program, partner_access) -> List[Dict]:
     if partner_access == Program.ALL_PARTNERS_ACCESS:
-        partners = Partner.objects.filter(allowed_business_areas=program.business_area).exclude(name=settings.DEFAULT_EMPTY_PARTNER)
+        partners = Partner.objects.filter(allowed_business_areas=program.business_area).exclude(
+            name=settings.DEFAULT_EMPTY_PARTNER
+        )
         partners_data = [{"partner": partner.id, "areas": []} for partner in partners]
 
     unicef_partner = Partner.objects.get(name="UNICEF")
@@ -421,5 +423,7 @@ def remove_program_partner_access(partners_data, program) -> None:
     existing_program_partner_access = ProgramPartnerThrough.objects.filter(
         program=program,
     )
-    removed_partner_access = existing_program_partner_access.exclude(Q(partner_id__in=partner_ids) | Q(partner__name="UNICEF"))
+    removed_partner_access = existing_program_partner_access.exclude(
+        Q(partner_id__in=partner_ids) | Q(partner__name="UNICEF")
+    )
     removed_partner_access.delete()

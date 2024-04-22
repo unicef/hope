@@ -5,7 +5,7 @@ import shutil
 import time
 from functools import reduce
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional, List
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
@@ -19,15 +19,16 @@ from graphene.test import Client
 from snapshottest.django import TestCase as SnapshotTestTestCase
 
 from hct_mis_api.apps.account.models import Role, UserRole
+from hct_mis_api.apps.core.models import BusinessAreaPartnerThrough
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_CHOICE, DocumentType
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.program.models import ProgramPartnerThrough
-from hct_mis_api.apps.core.models import BusinessAreaPartnerThrough
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.account.models import User
+    from hct_mis_api.apps.account.models import Partner, User
     from hct_mis_api.apps.core.models import BusinessArea
+    from hct_mis_api.apps.geo.models import Area
     from hct_mis_api.apps.program.models import Program
 
 
@@ -111,7 +112,12 @@ class APITestCase(SnapshotTestTestCase):
                 context.FILES[name] = file
 
     @staticmethod
-    def update_partner_access_to_program(partner: "Partner", program: "Program", areas: Optional[List["Area"]] = None, full_area_access: Optional[bool] = False) -> None:
+    def update_partner_access_to_program(
+        partner: "Partner",
+        program: "Program",
+        areas: Optional[List["Area"]] = None,
+        full_area_access: Optional[bool] = False,
+    ) -> None:
         program_partner_through, _ = ProgramPartnerThrough.objects.get_or_create(
             program=program,
             partner=partner,
@@ -123,7 +129,9 @@ class APITestCase(SnapshotTestTestCase):
             program_partner_through.save(update_fields=["full_area_access"])
 
     @staticmethod
-    def add_partner_role_in_business_area(partner: "Partner", business_area: "BusinessArea", roles: List["Role"]) -> None:
+    def add_partner_role_in_business_area(
+        partner: "Partner", business_area: "BusinessArea", roles: List["Role"]
+    ) -> None:
         business_area_partner_through = BusinessAreaPartnerThrough.objects.create(
             business_area=business_area,
             partner=partner,

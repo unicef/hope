@@ -7,7 +7,8 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import (
     BusinessAreaFactory,
     PartnerFactory,
-    UserFactory, RoleFactory,
+    RoleFactory,
+    UserFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -206,7 +207,9 @@ class TestHouseholdQuery(APITestCase):
 
         role = RoleFactory(name="Test Role", permissions=[Permissions.PROGRAMME_CREATE])
         cls.add_partner_role_in_business_area(
-            cls.partner, cls.business_area, [role],
+            cls.partner,
+            cls.business_area,
+            [role],
         )
         for program in [cls.program_one, cls.program_two, cls.program_draft]:
             cls.update_partner_access_to_program(cls.partner, program, [cls.households[0].admin_area])

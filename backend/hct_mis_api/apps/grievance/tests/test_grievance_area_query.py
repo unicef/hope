@@ -99,9 +99,7 @@ class TestGrievanceAreaQuery(APITestCase):
     )
     def test_one_admin2_is_filtered(self, _: Any, permissions: List[Permissions]) -> None:
         partner = PartnerFactory(name="NOT_UNICEF_2")
-        self.update_partner_access_to_program(
-            partner, self.program, [self.doshi]
-        )
+        self.update_partner_access_to_program(partner, self.program, [self.doshi])
         user = UserFactory(partner=partner)
         self.create_user_role_with_permissions(user, permissions, self.business_area)
 
@@ -128,9 +126,7 @@ class TestGrievanceAreaQuery(APITestCase):
     @skip("Fail on pipeline")
     def test_many_admin2_is_filtered(self, _: Any, permissions: List[Permissions]) -> None:
         partner = PartnerFactory(name="NOT_UNICEF_3")
-        self.update_partner_access_to_program(
-            partner, self.program, [self.doshi, self.burka, self.quadis]
-        )
+        self.update_partner_access_to_program(partner, self.program, [self.doshi, self.burka, self.quadis])
         user = UserFactory(partner=partner)
         self.create_user_role_with_permissions(user, permissions, self.business_area)
 
@@ -185,9 +181,7 @@ class TestGrievanceAreaQuery(APITestCase):
         self, _: Any, permissions: List[Permissions]
     ) -> None:
         partner = PartnerFactory(name="NOT_UNICEF_5")
-        self.update_partner_access_to_program(
-            partner, self.program, [self.doshi, self.burka, self.quadis]
-        )
+        self.update_partner_access_to_program(partner, self.program, [self.doshi, self.burka, self.quadis])
         user = UserFactory(partner=partner)
         self.create_user_role_with_permissions(user, permissions, self.business_area)
 

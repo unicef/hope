@@ -596,7 +596,9 @@ class GrievanceStatusChangeMutation(PermissionMutation):
 
                 if not partner.is_unicef:
                     for selected_individual in grievance_ticket.ticket_details.selected_individuals.all():
-                        if not partner.has_area_access(area_id=selected_individual.household.admin2.id, program_id=selected_individual.program.id):
+                        if not partner.has_area_access(
+                            area_id=selected_individual.household.admin2.id, program_id=selected_individual.program.id
+                        ):
                             raise PermissionDenied("Permission Denied: User does not have access to close ticket")
 
             clear_cache(grievance_ticket.ticket_details, grievance_ticket.business_area.slug)
@@ -1197,7 +1199,9 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
 
             # Validate partner's permission
             if not partner.is_unicef:
-                if not partner.has_area_access(area_id=selected_individual.household.admin2.id, program_id=selected_individual.program.id):
+                if not partner.has_area_access(
+                    area_id=selected_individual.household.admin2.id, program_id=selected_individual.program.id
+                ):
                     raise PermissionDenied("Permission Denied: User does not have access to select individual")
 
             if selected_individual not in (
@@ -1215,7 +1219,9 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
             # Validate partner's permission
             if not partner.is_unicef:
                 for selected_individual in selected_individuals:
-                    if not partner.has_area_access(area_id=selected_individual.household.admin2.id, program_id=selected_individual.program.id):
+                    if not partner.has_area_access(
+                        area_id=selected_individual.household.admin2.id, program_id=selected_individual.program.id
+                    ):
                         raise PermissionDenied("Permission Denied: User does not have access to select individual")
 
             ticket_details.selected_individuals.remove(*ticket_details.selected_individuals.all())

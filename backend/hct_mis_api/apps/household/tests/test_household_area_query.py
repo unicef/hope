@@ -1,5 +1,4 @@
 from typing import Any, List
-from unittest import skip
 
 from parameterized import parameterized
 
@@ -162,7 +161,9 @@ class TestHouseholdAreaQuery(APITestCase):
         partner = PartnerFactory(name="NOT_UNICEF_2")
         user = UserFactory(partner=partner)
         # partner with access to household_5.admin3 in program self.program
-        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan, program=self.program, areas=[self.household_5.admin3])
+        self.create_user_role_with_permissions(
+            user, permissions, self.business_area_afghanistan, program=self.program, areas=[self.household_5.admin3]
+        )
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
@@ -185,7 +186,13 @@ class TestHouseholdAreaQuery(APITestCase):
         # Access to many admin3
         partner = PartnerFactory(name="NOT_UNICEF_3")
         user = UserFactory(partner=partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan, program=self.program, areas=[self.household_4.admin3, self.household_5.admin3])
+        self.create_user_role_with_permissions(
+            user,
+            permissions,
+            self.business_area_afghanistan,
+            program=self.program,
+            areas=[self.household_4.admin3, self.household_5.admin3],
+        )
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
@@ -208,7 +215,9 @@ class TestHouseholdAreaQuery(APITestCase):
         # Access to admin2
         partner = PartnerFactory(name="NOT_UNICEF_4")
         user = UserFactory(partner=partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan, program=self.program, areas=[self.household_3.admin2])
+        self.create_user_role_with_permissions(
+            user, permissions, self.business_area_afghanistan, program=self.program, areas=[self.household_3.admin2]
+        )
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
@@ -231,7 +240,13 @@ class TestHouseholdAreaQuery(APITestCase):
         # Access many admin2
         partner = PartnerFactory(name="NOT_UNICEF_5")
         user = UserFactory(partner=partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan, program=self.program, areas=[self.household_1.admin2, self.household_2.admin2])
+        self.create_user_role_with_permissions(
+            user,
+            permissions,
+            self.business_area_afghanistan,
+            program=self.program,
+            areas=[self.household_1.admin2, self.household_2.admin2],
+        )
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
@@ -254,7 +269,13 @@ class TestHouseholdAreaQuery(APITestCase):
         # Access many admin2 and admin3
         partner = PartnerFactory(name="NOT_UNICEF_6")
         user = UserFactory(partner=partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan, program=self.program, areas=[self.household_1.admin2, self.household_4.admin3, self.household_5.admin3])
+        self.create_user_role_with_permissions(
+            user,
+            permissions,
+            self.business_area_afghanistan,
+            program=self.program,
+            areas=[self.household_1.admin2, self.household_4.admin3, self.household_5.admin3],
+        )
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
@@ -277,7 +298,9 @@ class TestHouseholdAreaQuery(APITestCase):
         # Access to admin1
         partner = PartnerFactory(name="NOT_UNICEF_7")
         user = UserFactory(partner=partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan, program=self.program, areas=[self.household_1.admin1])
+        self.create_user_role_with_permissions(
+            user, permissions, self.business_area_afghanistan, program=self.program, areas=[self.household_1.admin1]
+        )
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
@@ -311,4 +334,3 @@ class TestHouseholdAreaQuery(APITestCase):
                 },
             },
         )
-

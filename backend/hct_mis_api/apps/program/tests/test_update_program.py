@@ -14,7 +14,7 @@ from hct_mis_api.apps.core.fixtures import (
     generate_data_collecting_types,
 )
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.geo.fixtures import AreaFactory, CountryFactory, AreaTypeFactory
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
@@ -31,8 +31,8 @@ class TestUpdateProgram(APITestCase):
             label
             code
           }
-          partners {   
-            name       
+          partners {
+            name
             areas {
               name
             }
@@ -82,7 +82,9 @@ class TestUpdateProgram(APITestCase):
         country_afg = CountryFactory(name="Afghanistan")
         country_afg.business_areas.set([cls.business_area])
         area_type_afg = AreaTypeFactory(name="Area Type in Afg", country=country_afg)
-        country_other = CountryFactory(name="Other Country", short_name="Oth",
+        country_other = CountryFactory(
+            name="Other Country",
+            short_name="Oth",
             iso_code2="O",
             iso_code3="OTH",
             iso_num="111",
@@ -244,7 +246,6 @@ class TestUpdateProgram(APITestCase):
             },
         )
 
-
     def test_update_program_partners_all_partners_access(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
@@ -311,16 +312,28 @@ class TestUpdateProgram(APITestCase):
                         {
                             "partner": str(self.other_partner.id),
                             "areas": [self.area_in_afg_1.id],
-                        }
+                        },
                     ],
                 },
                 "version": self.program.version,
             },
         )
 
-        self.assertEqual(ProgramPartnerThrough.objects.get(partner=self.partner, program__name="updated name").full_area_access, True)
-        self.assertEqual(ProgramPartnerThrough.objects.get(partner=self.other_partner, program__name="updated name").full_area_access, False)
-        self.assertEqual(ProgramPartnerThrough.objects.get(partner=self.unicef_partner, program__name="updated name").full_area_access, True)
+        self.assertEqual(
+            ProgramPartnerThrough.objects.get(partner=self.partner, program__name="updated name").full_area_access, True
+        )
+        self.assertEqual(
+            ProgramPartnerThrough.objects.get(
+                partner=self.other_partner, program__name="updated name"
+            ).full_area_access,
+            False,
+        )
+        self.assertEqual(
+            ProgramPartnerThrough.objects.get(
+                partner=self.unicef_partner, program__name="updated name"
+            ).full_area_access,
+            True,
+        )
 
     def test_update_active_program_with_dct(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
@@ -365,7 +378,6 @@ class TestUpdateProgram(APITestCase):
             },
         )
         self.assertEqual(self.program.data_collecting_type.code, "full_collection")
-
 
     def test_update_program_with_deprecated_dct(self) -> None:
         dct, _ = DataCollectingType.objects.update_or_create(
@@ -470,7 +482,7 @@ class TestUpdateProgram(APITestCase):
     def test_update_program_with_programme_code(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
 
-        x = self.graphql_request(
+        self.graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
             variables={

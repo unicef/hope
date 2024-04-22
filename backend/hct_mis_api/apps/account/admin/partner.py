@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Any, Optional, Sequence, Type, Union
+from typing import TYPE_CHECKING, Any, Optional, Sequence, Type, Union
 
 from django import forms
 from django.contrib import admin, messages
@@ -18,6 +18,9 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.admin import HopeModelAdminMixin
 from mptt.forms import TreeNodeMultipleChoiceField
+
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet
 
 
 def can_add_business_area_to_partner(request: Any, *args: Any, **kwargs: Any) -> bool:
@@ -138,7 +141,9 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
                         ba_partner_through_to_be_deleted.append(
                             BusinessAreaPartnerThrough.objects.filter(
                                 partner=partner, business_area=form["business_area"]
-                            ).first().id
+                            )
+                            .first()
+                            .id
                         )
 
             if incompatible_roles:

@@ -18,7 +18,8 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.core.validators import (
     CommonValidator,
-    DataCollectingTypeValidator, PartnersDataValidator,
+    DataCollectingTypeValidator,
+    PartnersDataValidator,
 )
 from hct_mis_api.apps.program.celery_tasks import copy_program_task
 from hct_mis_api.apps.program.inputs import (
@@ -26,7 +27,7 @@ from hct_mis_api.apps.program.inputs import (
     CreateProgramInput,
     UpdateProgramInput,
 )
-from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.program.schema import ProgramNode
 from hct_mis_api.apps.program.utils import (
     copy_program_object,
@@ -181,7 +182,10 @@ class UpdateProgram(
                 setattr(program, attrib, value)
         program.full_clean()
         # update partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
-        if status_to_set not in [Program.ACTIVE, Program.FINISHED] and partner_access == Program.SELECTED_PARTNERS_ACCESS:
+        if (
+            status_to_set not in [Program.ACTIVE, Program.FINISHED]
+            and partner_access == Program.SELECTED_PARTNERS_ACCESS
+        ):
             partners_data = create_program_partner_access(partners_data, program, partner_access)
             remove_program_partner_access(partners_data, program)
         program.save()
@@ -205,14 +209,15 @@ class DeleteProgram(ProgramDeletionValidator, PermissionMutation):
         cls.has_permission(info, Permissions.PROGRAMME_REMOVE, program.business_area)
 
         cls.validate(program=program)
-        remove_program_permissions_for_exists_partners([], str(program.business_area.pk), str(program.pk))
 
         program.delete()
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return cls(ok=True)
 
 
-class CopyProgram(CommonValidator, ProgrammeCodeValidator, PartnersDataValidator, PermissionMutation, ValidationErrorMutationMixin):
+class CopyProgram(
+    CommonValidator, ProgrammeCodeValidator, PartnersDataValidator, PermissionMutation, ValidationErrorMutationMixin
+):
     program = graphene.Field(ProgramNode)
 
     class Arguments:

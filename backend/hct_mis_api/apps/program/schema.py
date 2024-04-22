@@ -41,7 +41,6 @@ from hct_mis_api.apps.core.utils import (
     chart_permission_decorator,
     to_choice_object,
 )
-from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.payment.filters import (
     CashPlanFilter,
     PaymentVerificationPlanFilter,
@@ -97,9 +96,13 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_partners(program: Program, info: Any, **kwargs: Any) -> List[ProgramPartnerThrough]:
-        return Partner.objects.filter(
-            program_partner_through__program=program,
-        ).annotate(partner_program=Value(program.id)).distinct()
+        return (
+            Partner.objects.filter(
+                program_partner_through__program=program,
+            )
+            .annotate(partner_program=Value(program.id))
+            .distinct()
+        )
 
     @staticmethod
     def resolve_is_social_worker_program(program: Program, info: Any, **kwargs: Any) -> bool:

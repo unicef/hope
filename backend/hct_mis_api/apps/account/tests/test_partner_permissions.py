@@ -21,14 +21,18 @@ class UserPartnerTest(TestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)
         cls.other_partner = PartnerFactory(name="Partner")
-        ba_partner_through = BusinessAreaPartnerThrough.objects.create(business_area=cls.business_area, partner=cls.other_partner)
+        ba_partner_through = BusinessAreaPartnerThrough.objects.create(
+            business_area=cls.business_area, partner=cls.other_partner
+        )
         ba_partner_through.roles.set([cls.role_2])
         program_partner_through = ProgramPartnerThrough.objects.create(program=cls.program, partner=cls.other_partner)
         program_partner_through.areas.set([cls.area_1])
         cls.other_user = UserFactory(partner=cls.other_partner)
 
         cls.unicef_partner = PartnerFactory(name="UNICEF")
-        program_unicef_through, _ = ProgramPartnerThrough.objects.get_or_create(program=cls.program, partner=cls.unicef_partner)
+        program_unicef_through, _ = ProgramPartnerThrough.objects.get_or_create(
+            program=cls.program, partner=cls.unicef_partner
+        )
         program_unicef_through.areas.set([cls.area_1, cls.area_2])
         cls.unicef_user = UserFactory(partner=cls.unicef_partner)
 
@@ -125,7 +129,6 @@ class UserPartnerTest(TestCase):
         )
         self.assertEqual(roles_1_for_unicef_user.sort(), default_list)
 
-
         # user with unicef partner but without role in BA
         roles_0_for_unicef_user = User.permissions_in_business_area(
             self.user_without_role, business_area_slug=self.business_area.slug, program_id=self.program.pk
@@ -170,5 +173,7 @@ class UserPartnerTest(TestCase):
         )
         self.assertFalse(unicef_user_without_perms)
 
-        unicef_user_with_perms = User.has_permission(self.unicef_user, "PROGRAMME_CREATE", self.business_area, self.program.pk)
+        unicef_user_with_perms = User.has_permission(
+            self.unicef_user, "PROGRAMME_CREATE", self.business_area, self.program.pk
+        )
         self.assertTrue(unicef_user_with_perms)

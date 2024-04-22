@@ -11,7 +11,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.geo.fixtures import AreaFactory, CountryFactory, AreaTypeFactory
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -40,8 +40,8 @@ class TestCreateProgram(APITestCase):
             active
             individualFiltersAvailable
           }
-          partners {   
-            name       
+          partners {
+            name
             areas {
               name
             }
@@ -98,11 +98,13 @@ class TestCreateProgram(APITestCase):
         country_afg = CountryFactory(name="Afghanistan")
         country_afg.business_areas.set([cls.business_area])
         area_type_afg = AreaTypeFactory(name="Area Type in Afg", country=country_afg)
-        country_other = CountryFactory(name="Other Country", short_name="Oth",
-                                       iso_code2="O",
-                                       iso_code3="OTH",
-                                       iso_num="111",
-                                       )
+        country_other = CountryFactory(
+            name="Other Country",
+            short_name="Oth",
+            iso_code2="O",
+            iso_code3="OTH",
+            iso_num="111",
+        )
         cls.area_type_other = AreaTypeFactory(name="Area Type Other", country=country_other)
 
         cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg)

@@ -33,9 +33,8 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.geo.schema import AreaGroupNode, AreaNode
+from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.program.models import ProgramPartnerThrough
 
 logger = logging.getLogger(__name__)
 

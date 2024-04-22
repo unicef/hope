@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from constance import config
 
-from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
+from hct_mis_api.apps.account.models import Partner, User, UserRole
 from hct_mis_api.apps.account.permissions import (
     DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER,
     Permissions,

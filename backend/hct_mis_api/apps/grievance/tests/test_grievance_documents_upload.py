@@ -6,7 +6,7 @@ from django.test import override_settings
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory, PartnerFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import UploadDocumentsBase
 from hct_mis_api.apps.core.fixtures import create_afghanistan

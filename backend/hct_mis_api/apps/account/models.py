@@ -1,6 +1,6 @@
 import logging
 from functools import lru_cache
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 from uuid import UUID
 
 from django import forms
@@ -122,7 +122,10 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
         )
 
     def get_program_ids_for_business_area(self, business_area_id: str) -> List[str]:
-        return [str(program_id) for program_id in self.programs.filter(business_area_id=business_area_id).values_list("id", flat=True)]
+        return [
+            str(program_id)
+            for program_id in self.programs.filter(business_area_id=business_area_id).values_list("id", flat=True)
+        ]
 
     def has_program_access(self, program_id: Union[str, UUID]) -> bool:
         return self.is_unicef or self.programs.filter(id=program_id).exists()
@@ -131,7 +134,9 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
         return self.is_unicef or self.get_program_areas(program_id).filter(id=area_id).exists()
 
     def get_program_areas(self, program_id: Union[str, UUID]) -> QuerySet(Area):
-        return Area.objects.filter(program_partner_through__partner=self, program_partner_through__program_id=program_id)
+        return Area.objects.filter(
+            program_partner_through__partner=self, program_partner_through__program_id=program_id
+        )
 
     def get_roles_for_business_area(
         self, business_area_slug: Optional[str] = None, business_area_id: Optional["UUID"] = None
@@ -142,7 +147,10 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
         if not business_area_id and business_area_slug:
             business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
 
-        return Role.objects.filter(business_area_partner_through__partner=self, business_area_partner_through__business_area_id=business_area_id)
+        return Role.objects.filter(
+            business_area_partner_through__partner=self,
+            business_area_partner_through__business_area_id=business_area_id,
+        )
 
     def add_roles_in_business_area(self, business_area_id: str, roles: List["Role"]) -> None:
         business_area_partner_through = BusinessAreaPartnerThrough.objects.get_or_create(
@@ -208,7 +216,9 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
 
             # Prepare partner permissions
             partner_roles_in_ba = self.partner.get_roles_for_business_area(business_area_slug=business_area_slug)
-            all_partner_roles_permissions_list = [perm for perm in partner_roles_in_ba.values_list("permissions", flat=True) if perm]
+            all_partner_roles_permissions_list = [
+                perm for perm in partner_roles_in_ba.values_list("permissions", flat=True) if perm
+            ]
         elif all_user_roles_permissions_list:
             # Default partner permissions for UNICEF partner with access to business area
             all_partner_roles_permissions_list = [DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER]

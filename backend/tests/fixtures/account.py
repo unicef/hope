@@ -2,6 +2,7 @@ from typing import Any, Callable, Iterable, Optional
 
 import pytest
 
+from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.account.models import Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.models import Program
@@ -45,3 +46,8 @@ def create_user_role_with_permissions(update_user_partner_perm_for_program: Any)
         return user_role
 
     return _create_user_role_with_permissions
+
+
+@pytest.fixture(autouse=True, scope="session")
+def partner_unicef():
+    return PartnerFactory(name="UNICEF")
