@@ -31,6 +31,7 @@ class TestCreateProgram(APITestCase):
           cashPlus
           populationGoal
           administrativeAreasOfImplementation
+          isSocialWorkerProgram
           dataCollectingType {
             code
             label
