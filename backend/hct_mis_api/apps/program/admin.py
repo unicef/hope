@@ -109,7 +109,7 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
         program: Program = context["original"]
         PartnerAreaFormSet = formset_factory(PartnerAreaForm, extra=0, can_delete=True)
 
-        is_editable = program.partner_access != Program.SELECTED_PARTNERS_ACCESS
+        is_editable = program.partner_access == Program.SELECTED_PARTNERS_ACCESS
 
         if request.method == "GET" or not is_editable:
             partner_area_data = []
@@ -137,11 +137,10 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
                         if not areas_ids:
                             program_partner.full_area_access = True
                             program_partner.save(update_fields=["full_area_access"])
-                            areas_ids = Area.objects.filter(area_type__country__business_areas__id=program.business_area.id).values_list("id", flat=True)
                         else:
                             program_partner.full_area_access = False
                             program_partner.save(update_fields=["full_area_access"])
-                        program_partner.areas.set(areas_ids)
+                            program_partner.areas.set(areas_ids)
                     elif form and form["DELETE"]:
                         ProgramPartnerThrough.objects.filter(partner=form["partner"], program=program).delete()
                 return HttpResponseRedirect(reverse("admin:program_program_partners", args=[pk]))

@@ -16,6 +16,7 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
@@ -195,7 +196,8 @@ class TestGrievanceQuery(APITestCase):
         call_command("loadcountries")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
-        country = CountryFactory(name="Afghanistan", business_area=cls.business_area)
+        country = CountryFactory(name="Afghanistan")
+        country.business_areas.set([cls.business_area])
         area_type = AreaTypeFactory(
             name="Admin type one",
             area_level=2,
@@ -360,7 +362,7 @@ class TestGrievanceQuery(APITestCase):
         cls.update_partner_access_to_program(
             partner_with_full_area_access,
             cls.program,
-            [cls.admin_area_1, cls.admin_area_2],
+            full_area_access=True,
         )
         cls.user_with_full_area_access = UserFactory(partner=partner_with_full_area_access, username="user_with_full_area_access")
 

@@ -191,18 +191,6 @@ snapshots['TestCreateProgram::test_create_program_with_partners_0_valid 1'] = {
                 'partnerAccess': 'SELECTED_PARTNERS_ACCESS',
                 'partners': [
                     {
-                        'areaAccess': 'BUSINESS_AREA',
-                        'areas': [
-                            {
-                                'name': 'Area in AFG 1'
-                            },
-                            {
-                                'name': 'Area in AFG 2'
-                            }
-                        ],
-                        'name': 'UNICEF'
-                    },
-                    {
                         'areaAccess': 'ADMIN_AREA',
                         'areas': [
                             {
@@ -213,6 +201,18 @@ snapshots['TestCreateProgram::test_create_program_with_partners_0_valid 1'] = {
                             }
                         ],
                         'name': 'WFP'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF'
                     },
                     {
                         'areaAccess': 'BUSINESS_AREA',

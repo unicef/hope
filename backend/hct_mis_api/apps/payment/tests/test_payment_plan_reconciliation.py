@@ -21,7 +21,7 @@ from openpyxl import load_workbook
 from parameterized import parameterized
 from pytz import utc
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import UserFactory, PartnerFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -262,7 +262,8 @@ class TestPaymentPlanReconciliation(APITestCase):
             is_payment_plan_applicable=True,
         )
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.user = UserFactory.create()
+        partner = PartnerFactory(name="Partner")
+        cls.user = UserFactory.create(partner=partner)
         cls.all_necessary_permissions = [
             Permissions.PM_CREATE,
             Permissions.PM_VIEW_DETAILS,
@@ -336,7 +337,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
         program = Program.objects.get(id=decode_id_string_required(program_id))
-        self.update_partner_access_to_program(self.user, program)
+        self.update_partner_access_to_program(self.user.partner, program)
 
         create_target_population_response = self.graphql_request(
             request_string=CREATE_TARGET_POPULATION_MUTATION,

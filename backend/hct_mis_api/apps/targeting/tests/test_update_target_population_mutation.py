@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import UserFactory, PartnerFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -161,12 +161,13 @@ class TestUpdateTargetPopulationMutation(APITestCase):
     def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.user = UserFactory.create()
+        partner = PartnerFactory(name="Partner")
+        cls.user = UserFactory.create(partner=partner)
         create_household({"size": 2, "residence_status": "HOST", "business_area": cls.business_area})
         create_household({"size": 3, "residence_status": "HOST", "business_area": cls.business_area})
         create_household({"size": 3, "residence_status": "HOST", "business_area": cls.business_area})
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
-        cls.update_partner_access_to_program(cls.user, cls.program)
+        cls.update_partner_access_to_program(partner, cls.program)
         cls.draft_target_population = TargetPopulation(
             name="draft_target_population",
             targeting_criteria=cls.get_targeting_criteria_for_rule(

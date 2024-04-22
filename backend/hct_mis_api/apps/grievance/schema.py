@@ -150,7 +150,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObje
                 # admin2 is empty or non-program ticket -> no restrictions for admin area
                 has_partner_area_access = True
             else:
-                has_partner_area_access = object_instance.admin2 in partner.get_program_areas(ticket_program_id)
+                has_partner_area_access = partner.has_area_access(area_id=object_instance.admin2.id, program_id=ticket_program_id)
         if (
             user.has_permission(perm, business_area, ticket_program_id) or check_creator or check_assignee
         ) and has_partner_area_access:
@@ -562,7 +562,7 @@ class Query(graphene.ObjectType):
 
         # Full access to all AdminAreas if is_unicef
         # and ignore filtering for Cross Area tickets
-        if not user.partner.is_unicef and not(kwargs.get("is_cross_area", False) and program_id and user.partner.has_complete_access_in_program(program_id)):
+        if not user.partner.is_unicef and not(kwargs.get("is_cross_area", False) and program_id and user.partner.has_full_area_access_in_program(program_id)):
             queryset = filter_grievance_tickets_based_on_partner_areas_2(
                 queryset, user.partner, business_area_id, program_id
             )
@@ -594,7 +594,7 @@ class Query(graphene.ObjectType):
 
         perm = Permissions.GRIEVANCES_CROSS_AREA_FILTER.value
 
-        return user.has_permission(perm, business_area, program_id) and user.partner.has_complete_access_in_program(program_id)
+        return user.has_permission(perm, business_area, program_id) and user.partner.has_full_area_access_in_program(program_id)
 
     def resolve_grievance_ticket_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)

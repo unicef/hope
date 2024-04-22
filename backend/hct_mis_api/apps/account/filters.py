@@ -66,11 +66,9 @@ class UsersFilter(FilterSet):
         return qs.filter(q_obj)
 
     def business_area_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[User]":
-        business_area_id = BusinessArea.objects.get(slug=value).id
         return qs.filter(
             Q(user_roles__business_area__slug=value)
-            | Q(partners__id=business_area_id)
-            | Q(partner__name="UNICEF")
+            | Q(partner__business_area_partner_through__business_area__slug=value)
         )
 
     def partners_filter(self, qs: "QuerySet", name: str, values: List["UUID"]) -> "QuerySet[User]":

@@ -4,7 +4,7 @@ from django.core.management import call_command
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import UserFactory, PartnerFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -45,7 +45,8 @@ class TestGrievanceUpdateNegativeFeedbackTicketQuery(APITestCase):
     def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
         call_command("loadcountries")
-        cls.user = UserFactory.create()
+        partner = PartnerFactory(name="Partner")
+        cls.user = UserFactory.create(partner=partner)
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -63,7 +64,7 @@ class TestGrievanceUpdateNegativeFeedbackTicketQuery(APITestCase):
         cls.ticket.ticket.status = GrievanceTicket.STATUS_NEW
         cls.ticket.ticket.save()
         cls.program = ProgramFactory(business_area=BusinessArea.objects.first(), status=Program.ACTIVE)
-        cls.update_partner_access_to_program(cls.user, cls.program)
+        cls.update_partner_access_to_program(partner, cls.program)
 
     @parameterized.expand(
         [

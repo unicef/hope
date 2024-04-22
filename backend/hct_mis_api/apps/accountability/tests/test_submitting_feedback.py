@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import UserFactory, PartnerFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -92,7 +92,8 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
     def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.user = UserFactory.create()
+        partner = PartnerFactory(name="Partner")
+        cls.user = UserFactory.create(partner=partner)
         cls.create_user_role_with_permissions(
             cls.user,
             [
@@ -115,7 +116,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
             },
             individuals_data=[{}],
         )
-        cls.update_partner_access_to_program(cls.user, cls.program)
+        cls.update_partner_access_to_program(partner, cls.program)
 
         country = geo_models.Country.objects.create(name="Afghanistan")
         cls.area_type = AreaTypeFactory(

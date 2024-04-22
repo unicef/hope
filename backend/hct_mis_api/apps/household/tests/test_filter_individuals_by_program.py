@@ -32,8 +32,8 @@ class TestFilterIndividualsByProgram(APITestCase):
         cls.business_area = create_afghanistan()
         cls.program1 = ProgramFactory(name="Test program ONE", business_area=cls.business_area, status="ACTIVE")
         cls.program2 = ProgramFactory(name="Test program TWO", business_area=cls.business_area, status="ACTIVE")
-        cls.update_partner_access_to_program(cls.user, cls.program1)
-        cls.update_partner_access_to_program(cls.user, cls.program2)
+        cls.update_partner_access_to_program(cls.partner, cls.program1)
+        cls.update_partner_access_to_program(cls.partner, cls.program2)
 
         household_one = HouseholdFactory.build(business_area=cls.business_area, program=cls.program1)
         household_two = HouseholdFactory.build(business_area=cls.business_area, program=cls.program2)

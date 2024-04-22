@@ -90,7 +90,8 @@ class TestUpdateGrievanceTickets(APITestCase):
     def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.generate_document_types_for_all_countries()
-        cls.user = UserFactory(id="a5c44eeb-482e-49c2-b5ab-d769f83db116")
+        partner = Partner.objects.get(name="Partner")
+        cls.user = UserFactory(id="a5c44eeb-482e-49c2-b5ab-d769f83db116", partner=partner)
         cls.user_two = UserFactory(id="a34716d8-aaf1-4c70-bdd8-0d58be94981a")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
@@ -106,7 +107,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         cls.program = ProgramFactory(
             name="Test program ONE", business_area=BusinessArea.objects.first(), status=Program.ACTIVE
         )
-        cls.update_partner_access_to_program(cls.user, cls.program)
+        cls.update_partner_access_to_program(partner, cls.program)
 
         household_one = HouseholdFactory.build(
             id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=2, village="Example", program=cls.program

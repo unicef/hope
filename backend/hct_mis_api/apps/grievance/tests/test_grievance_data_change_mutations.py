@@ -7,7 +7,7 @@ from django.core.management import call_command
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import UserFactory, PartnerFactory
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
@@ -81,7 +81,8 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
 
-        cls.user = UserFactory.create()
+        partner = PartnerFactory(name="Partner")
+        cls.user = UserFactory.create(partner=partner)
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
         country = geo_models.Country.objects.get(name="Afghanistan")
@@ -106,7 +107,7 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
             status=Program.ACTIVE,
             business_area=BusinessArea.objects.first(),
         )
-        cls.update_partner_access_to_program(cls.user, cls.program)
+        cls.update_partner_access_to_program(partner, cls.program)
 
         household_one = HouseholdFactory.build(
             id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=3, country=country, program=cls.program

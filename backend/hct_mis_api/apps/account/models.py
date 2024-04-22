@@ -1,7 +1,6 @@
-import dataclasses
 import logging
 from functools import lru_cache
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 from django import forms
@@ -30,7 +29,7 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.account.utils import test_conditional
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
@@ -116,7 +115,7 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
     def is_editable(self) -> bool:
         return not self.is_unicef and not self.is_default
 
-    def has_complete_access_in_program(self, program_id: str) -> bool:
+    def has_full_area_access_in_program(self, program_id: Union[str, UUID]) -> bool:
         return self.is_unicef or (
             self.program_partner_through.filter(program_id=program_id).first()
             and self.program_partner_through.filter(program_id=program_id).first().full_area_access
@@ -125,10 +124,13 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
     def get_program_ids_for_business_area(self, business_area_id: str) -> List[str]:
         return [str(program_id) for program_id in self.programs.filter(business_area_id=business_area_id).values_list("id", flat=True)]
 
-    def has_program_access(self, program_id: str) -> bool:
-        return self.programs.filter(id=program_id).exists()
+    def has_program_access(self, program_id: Union[str, UUID]) -> bool:
+        return self.is_unicef or self.programs.filter(id=program_id).exists()
 
-    def get_program_areas(self, program_id: str) -> QuerySet(Area):
+    def has_area_access(self, area_id: Union[str, UUID], program_id: Union[str, UUID]) -> bool:
+        return self.is_unicef or self.get_program_areas(program_id).filter(id=area_id).exists()
+
+    def get_program_areas(self, program_id: Union[str, UUID]) -> QuerySet(Area):
         return Area.objects.filter(program_partner_through__partner=self, program_partner_through__program_id=program_id)
 
     def get_roles_for_business_area(
@@ -141,6 +143,13 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
             business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
 
         return Role.objects.filter(business_area_partner_through__partner=self, business_area_partner_through__business_area_id=business_area_id)
+
+    def add_roles_in_business_area(self, business_area_id: str, roles: List["Role"]) -> None:
+        business_area_partner_through = BusinessAreaPartnerThrough.objects.get_or_create(
+            partner=self,
+            business_area_id=business_area_id,
+        )
+        business_area_partner_through.roles.add(roles)
 
 
 class User(AbstractUser, NaturalKeyModel, UUIDModel):

@@ -2,7 +2,7 @@ from typing import Any, Dict, List
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import UserFactory, PartnerFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -42,7 +42,8 @@ class TestApproveTargetPopulationMutation(APITestCase):
     def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.user = UserFactory.create()
+        partner = PartnerFactory(name="Partner")
+        cls.user = UserFactory.create(partner=partner)
         cls.households = []
         (household, individuals) = create_household(
             {
@@ -63,7 +64,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
-        cls.update_partner_access_to_program(cls.user, cls.program)
+        cls.update_partner_access_to_program(partner, cls.program)
 
         tp = TargetPopulation(
             name="Draft Target Population",
@@ -164,7 +165,8 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.user = UserFactory.create()
+        partner = PartnerFactory(name="Partner")
+        cls.user = UserFactory.create(partner=partner)
         cls.households = []
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -179,7 +181,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
-        cls.update_partner_access_to_program(cls.user, cls.program)
+        cls.update_partner_access_to_program(partner, cls.program)
 
         tp = TargetPopulation(
             name="Draft Target Population",
@@ -292,7 +294,8 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.user = UserFactory.create()
+        partner = PartnerFactory(name="Partner")
+        cls.user = UserFactory.create(partner=partner)
         cls.households = []
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -307,7 +310,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
-        cls.update_partner_access_to_program(cls.user, cls.program)
+        cls.update_partner_access_to_program(partner, cls.program)
 
         tp = TargetPopulation(
             name="Draft Target Population",

@@ -7,7 +7,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 
 
-class PartnerAccessChangeSignal(TestCase):
+class TestPartnerAccessChangeSignal(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()

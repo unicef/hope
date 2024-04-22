@@ -4,7 +4,7 @@ from django.core.management import call_command
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import UserFactory, PartnerFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -59,7 +59,8 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
     def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
-        cls.user = UserFactory.create()
+        partner = PartnerFactory(name="Partner")
+        cls.user = UserFactory.create(partner=partner)
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
         country = geo_models.Country.objects.get(name="Afghanistan")
@@ -71,7 +72,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
         cls.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
 
         cls.program = ProgramFactory(id="e6537f1e-27b5-4179-a443-d42498fb0478", status=Program.ACTIVE)
-        cls.update_partner_access_to_program(cls.user, cls.program)
+        cls.update_partner_access_to_program(partner, cls.program)
         CashPlanFactory(
             id="0272dd2d-c41e-435d-9587-6ba280678c54",
             ca_id="B4M-21-CSH-00004",

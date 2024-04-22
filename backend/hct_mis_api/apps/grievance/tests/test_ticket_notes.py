@@ -4,7 +4,7 @@ from django.core.management import call_command
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import UserFactory, PartnerFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -64,11 +64,12 @@ class TestTicketNotes(APITestCase):
         )
         AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
 
-        cls.user = UserFactory.create(first_name="John", last_name="Doe")
+        partner = PartnerFactory(name="Partner")
+        cls.user = UserFactory.create(first_name="John", last_name="Doe", partner=partner)
         cls.ticket_1 = GrievanceTicketFactory(id="5d64ef51-5ed5-4891-b1a3-44a24acb7720")
         cls.ticket_2 = GrievanceTicketFactory(id="1dd2dc43-d418-45bd-b9f7-7545dd4c13a5")
         cls.program = ProgramFactory(business_area=BusinessArea.objects.first(), status=Program.ACTIVE)
-        cls.update_partner_access_to_program(cls.user, cls.program)
+        cls.update_partner_access_to_program(partner, cls.program)
 
     def test_ticket_notes_query_all(self) -> None:
         TicketNoteFactory(

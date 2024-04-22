@@ -111,13 +111,16 @@ class APITestCase(SnapshotTestTestCase):
                 context.FILES[name] = file
 
     @staticmethod
-    def update_partner_access_to_program(partner: "Partner", program: "Program", areas: Optional[List["Area"]] = None) -> None:
+    def update_partner_access_to_program(partner: "Partner", program: "Program", areas: Optional[List["Area"]] = None, full_area_access: Optional[bool] = False) -> None:
         program_partner_through, _ = ProgramPartnerThrough.objects.get_or_create(
             program=program,
             partner=partner,
         )
         if areas:
             program_partner_through.areas.set(areas)
+        if full_area_access:
+            program_partner_through.full_area_access = True
+            program_partner_through.save(update_fields=["full_area_access"])
 
     @staticmethod
     def add_partner_role_in_business_area(partner: "Partner", business_area: "BusinessArea", roles: List["Role"]) -> None:

@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import UserFactory, PartnerFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.models import Survey
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -50,9 +50,10 @@ mutation CreateAccountabilityCommunicationMessage (
     @classmethod
     def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
-        cls.user = UserFactory(first_name="John", last_name="Wick")
+        partner = PartnerFactory(name="Partner")
+        cls.user = UserFactory(first_name="John", last_name="Wick", partner=partner)
         cls.program = ProgramFactory(status=Program.ACTIVE)
-        cls.update_partner_access_to_program(cls.user, cls.program)
+        cls.update_partner_access_to_program(partner, cls.program)
         cls.target_population = TargetPopulationFactory(
             business_area=cls.business_area,
             status=TargetPopulation.STATUS_PROCESSING,

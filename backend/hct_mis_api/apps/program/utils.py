@@ -1,6 +1,7 @@
 import re
 from typing import Dict, List, Sequence, Union
 
+from django.conf import settings
 from django.db import transaction
 from django.db.models import QuerySet, Q
 
@@ -391,10 +392,8 @@ def copy_bank_account_info_per_individual(
 
 
 def create_program_partner_access(partners_data, program, partner_access) -> List[Dict]:
-    full_area_access = Area.objects.filter(area_type__country__business_areas__id=program.business_area.id)
-
     if partner_access == Program.ALL_PARTNERS_ACCESS:
-        partners = Partner.objects.filter(allowed_business_areas=program.business_area)
+        partners = Partner.objects.filter(allowed_business_areas=program.business_area).exclude(name=settings.DEFAULT_EMPTY_PARTNER)
         partners_data = [{"partner": partner.id, "areas": []} for partner in partners]
 
     unicef_partner = Partner.objects.get(name="UNICEF")
@@ -412,7 +411,6 @@ def create_program_partner_access(partners_data, program, partner_access) -> Lis
             program_partner.save(update_fields=["full_area_access"])
         else:
             # full area access
-            program_partner.areas.set(full_area_access)
             program_partner.full_area_access = True
             program_partner.save(update_fields=["full_area_access"])
     return partners_data
