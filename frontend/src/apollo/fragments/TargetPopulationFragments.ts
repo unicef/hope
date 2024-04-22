@@ -66,6 +66,7 @@ export const targetPopulationDetailed = gql`
       status
       startDate
       endDate
+      isSocialWorkerProgram
     }
     createdBy {
       __typename

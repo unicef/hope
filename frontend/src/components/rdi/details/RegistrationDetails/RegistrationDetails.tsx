@@ -38,10 +38,12 @@ const Error = styled.p`
 `;
 interface RegistrationDetailsProps {
   registration: RegistrationDetailedFragment;
+  isSocialWorkerProgram?: boolean;
 }
 
 export function RegistrationDetails({
   registration,
+  isSocialWorkerProgram,
 }: RegistrationDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const withinBatchOptions = [
@@ -83,6 +85,53 @@ export function RegistrationDetails({
     }
     return '-';
   };
+
+  let numbersComponent = null;
+  if (isSocialWorkerProgram) {
+    numbersComponent = (
+      <Grid item xs={4}>
+        <Grid container>
+          <Grid item xs={6}>
+            <BigValueContainer>
+              <LabelizedField
+                label={t('Total Number of People')}
+                dataCy="individuals"
+              >
+                <BigValue>{registration?.numberOfIndividuals}</BigValue>
+              </LabelizedField>
+            </BigValueContainer>
+          </Grid>
+        </Grid>
+      </Grid>
+    );
+  } else {
+    numbersComponent = (
+      <Grid item xs={4}>
+        <Grid container>
+          <Grid item xs={6}>
+            <BigValueContainer>
+              <LabelizedField
+                label={t('Total Number of Households')}
+                dataCy="households"
+              >
+                <BigValue>{registration?.numberOfHouseholds}</BigValue>
+              </LabelizedField>
+            </BigValueContainer>
+          </Grid>
+          <Grid item xs={6}>
+            <BigValueContainer>
+              <LabelizedField
+                label={t('Total Number of Individuals')}
+                dataCy="individuals"
+              >
+                <BigValue>{registration?.numberOfIndividuals}</BigValue>
+              </LabelizedField>
+            </BigValueContainer>
+          </Grid>
+        </Grid>
+      </Grid>
+    );
+  }
   return (
     <ContainerColumnWithBorder>
       <Title>
@@ -138,30 +187,7 @@ export function RegistrationDetails({
               ) : null}
             </Grid>
           </Grid>
-          <Grid item xs={4}>
-            <Grid container>
-              <Grid item xs={6}>
-                <BigValueContainer>
-                  <LabelizedField
-                    label={t('Total Number of Households')}
-                    dataCy="households"
-                  >
-                    <BigValue>{registration?.numberOfHouseholds}</BigValue>
-                  </LabelizedField>
-                </BigValueContainer>
-              </Grid>
-              <Grid item xs={6}>
-                <BigValueContainer>
-                  <LabelizedField
-                    label={t('Total Number of Individuals')}
-                    dataCy="individuals"
-                  >
-                    <BigValue>{registration?.numberOfIndividuals}</BigValue>
-                  </LabelizedField>
-                </BigValueContainer>
-              </Grid>
-            </Grid>
-          </Grid>
+          {numbersComponent}
           {registration.status === 'DEDUPLICATION_FAILED' ? null : (
             <Grid item xs={4}>
               <Grid container direction="column">

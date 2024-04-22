@@ -4,6 +4,11 @@ import { RegistrationDataImportDetailsPage } from '../pages/rdi/RegistrationData
 import { RegistrationDataImportPage } from '../pages/rdi/RegistrationDataImportPage';
 import { RegistrationHouseholdDetailsPage } from '../pages/rdi/RegistrationHouseholdDetailsPage';
 import { RegistrationIndividualDetailsPage } from '../pages/rdi/RegistrationIndividualDetailsPage';
+import {RegistrationPeopleDetailsPage} from "@containers/pages/rdi/people/RegistrationPeopleDetailsPage";
+import {
+  RegistrationDataImportForPeopleDetailsPage
+} from "@containers/pages/rdi/people/RegistrationDataImportForPeopleDetailsPage";
+import {RegistrationDataForPeopleImportPage} from "@containers/pages/rdi/people/RegistrationDataForPeopleImportPage";
 
 export const RegistrationRoutes = (): React.ReactElement => {
   const registrationRoutes = [
@@ -14,6 +19,18 @@ export const RegistrationRoutes = (): React.ReactElement => {
     {
       path: 'registration-data-import/individual/:id',
       element: <RegistrationIndividualDetailsPage />,
+    },
+    {
+      path: 'registration-data-import-for-people/people/:id',
+      element: <RegistrationPeopleDetailsPage />,
+    },
+    {
+      path: 'registration-data-import-for-people/:id',
+      element: <RegistrationDataImportForPeopleDetailsPage />,
+    },
+    {
+      path: 'registration-data-import-for-people',
+      element: <RegistrationDataForPeopleImportPage />,
     },
     {
       path: 'registration-data-import/:id',
