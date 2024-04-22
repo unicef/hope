@@ -199,7 +199,15 @@ class CompleteRDIView(HOPEAPIBusinessAreaView, UpdateAPIView):
 
         sibling = self.selected_rdi.linked_rdi
         sibling.status = RegistrationDataImport.IN_REVIEW
-        sibling.save()
+        sibling.number_of_households = self.selected_rdi.households.count()
+        sibling.number_of_individuals = self.selected_rdi.individuals.count()
+        sibling.save(
+            update_fields=(
+                "status",
+                "number_of_households",
+                "number_of_individuals",
+            )
+        )
 
         return Response(
             [
