@@ -76,7 +76,7 @@ class TestSmokeHouseholds:
         assert "Full_TEST" in pageHouseholdsDetails.getLabelDataCollectingType().text
         assert "USD 0.00" in pageHouseholdsDetails.getLabelCashReceived().text
         assert "USD 0.00" in pageHouseholdsDetails.getLabelTotalCashReceived().text
-        assert "Individuals in Household" in pageHouseholdsDetails.getTableTitle().text
+        assert "Household Members" in pageHouseholdsDetails.getTableTitle().text
         assert "Individual ID" in pageHouseholdsDetails.getTableLabel().text
         assert "ACTIVE" in pageHouseholdsDetails.getStatusContainer().text
         assert "No results" in pageHouseholdsDetails.getTableRow().text
