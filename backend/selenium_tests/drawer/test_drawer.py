@@ -67,7 +67,6 @@ class TestDrawer:
         expected_menu_items = [
             "Registration Data Import",
             "People",
-            "Managerial Console",
             "Program Details",
             "Targeting",
             "Payment Module",
@@ -90,7 +89,6 @@ class TestDrawer:
         expected_menu_items = [
             "Registration Data Import",
             "Program Population",
-            "Managerial Console",
             "Program Details",
             "Targeting",
             "Payment Module",
@@ -111,6 +109,7 @@ class TestDrawer:
         expected_menu_items = [
             "Country Dashboard",
             "Programs",
+            "Managerial Console",
             "Grievance",
             "Reporting",
             "Activity Log",
