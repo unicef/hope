@@ -22,7 +22,7 @@ export function CreateSetUpFspHeader({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module/${
+      to: `/${baseUrl}/payment-module-people/${
         isFollowUp ? 'followup-payment-plans' : 'payment-plans'
       }/${id}`,
     },

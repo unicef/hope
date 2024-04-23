@@ -37,7 +37,7 @@ export function OpenPaymentPlanHeaderButtons({
             color="primary"
             startIcon={<EditRounded />}
             component={Link}
-            to={`/${baseUrl}/payment-module/${
+            to={`/${baseUrl}/payment-module-people/${
               isFollowUp ? 'followup-payment-plans' : 'payment-plans'
             }/${id}/edit`}
             disabled={!isActiveProgram}

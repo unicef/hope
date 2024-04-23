@@ -31,7 +31,7 @@ export function RelatedFollowUpPaymentPlans({
     followUpLinks = truncatedFollowUps.map((followUp) => (
       <BlackLink
         key={followUp?.node?.id}
-        to={`/${baseUrl}/payment-module/followup-payment-plans/${followUp?.node?.id}`}
+        to={`/${baseUrl}/payment-module-people/followup-payment-plans/${followUp?.node?.id}`}
       >
         {followUp?.node?.unicefId}
         <br />

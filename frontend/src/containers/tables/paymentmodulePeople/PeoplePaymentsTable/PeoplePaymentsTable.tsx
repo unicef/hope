@@ -13,10 +13,10 @@ import {
   useAllPaymentsForTableQuery,
 } from '@generated/graphql';
 import { UniversalTable } from '../../UniversalTable';
-import { headCells } from './PeoplePaymentsTableHeadCells';
 import { PeoplePaymentsTableRow } from './PeoplePaymentsTableRow';
 import { WarningTooltipTable } from './WarningTooltipTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { headCells } from './PeoplePaymentsTableHeadCells';
 
 const StyledBox = styled(Box)`
   background-color: #fff;

@@ -115,7 +115,7 @@ export const CreatePeoplePaymentPlanPage = (): React.ReactElement => {
       });
       showMessage(t('Payment Plan Created'));
       navigate(
-        `/${baseUrl}/payment-module/payment-plans/${res.data.createPaymentPlan.paymentPlan.id}`,
+        `/${baseUrl}/payment-module-people/payment-plans/${res.data.createPaymentPlan.paymentPlan.id}`,
       );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
