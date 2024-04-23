@@ -1,0 +1,1 @@
+export { PeoplePaymentPlanDetailsResults } from './PeoplePaymentPlanDetailsResults';

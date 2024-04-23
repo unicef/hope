@@ -1,0 +1,127 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSection should render 1`] = `
+<div>
+  <div
+    class="MuiBox-root css-j7qwjs"
+  >
+    <div
+      class="sc-hLQSwg IDXfo"
+    >
+      <h6
+        class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+      >
+        Volume by Delivery Mechanism
+      </h6>
+       
+    </div>
+    <div
+      class="sc-eDLKkx eHrULA"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-container css-1bzpx2o-MuiGrid-root"
+      >
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+        >
+          <div
+            class="sc-dmyCSP cjNvSp"
+            color="#D8E1EE"
+          >
+            <div>
+              <span
+                class="sc-beySPh gbuZtJ"
+                color="textSecondary"
+              >
+                Cash (Miranda Ltd)
+              </span>
+              <div
+                data-cy="label-Cash (Miranda Ltd)"
+              >
+                <span
+                  class="sc-guDLey cyWTlF"
+                  color="textSecondary"
+                >
+                  0 PLN (0 USD)
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+        >
+          <div
+            class="sc-dmyCSP UzTpF"
+            color=" #d8d8d8"
+          >
+            <div>
+              <span
+                class="sc-beySPh gbuZtJ"
+                color="textSecondary"
+              >
+                In Kind (Frazier-Watson)
+              </span>
+              <div
+                data-cy="label-In Kind (Frazier-Watson)"
+              >
+                <span
+                  class="sc-guDLey cyWTlF"
+                  color="textSecondary"
+                >
+                  0 PLN (0 USD)
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+        >
+          <div
+            class="sc-dmyCSP bOKfMH"
+            color="#003C8F"
+          >
+            <div>
+              <span
+                class="sc-beySPh gbuZtJ"
+                color="textSecondary"
+              >
+                Transfer (Bray Group)
+              </span>
+              <div
+                data-cy="label-Transfer (Bray Group)"
+              >
+                <span
+                  class="sc-guDLey cyWTlF"
+                  color="textSecondary"
+                >
+                  0 PLN (0 USD)
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-container css-1e2bu2o-MuiGrid-root"
+      >
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+        >
+          <div
+            class="sc-jTQCzO LEIUV"
+          >
+            <canvas
+              height="0"
+              role="img"
+              style="display: block; box-sizing: border-box; height: 0px; width: 0px;"
+              width="0"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
