@@ -866,5 +866,6 @@
   "Action completed successfully": "Action completed successfully",
   "Sent for Approval by": "Sent for Approval by",
   "Approved by": "Approved by",
-  "Authorized by": "Authorized by"
+  "Authorized by": "Authorized by",
+  "This individual is also included in other Payment Plans. Click this icon to view details.": "This individual is also included in other Payment Plans. Click this icon to view details."
 }

@@ -9,7 +9,7 @@
 <table class="table">
   <tbody>
     <tr>
-        <td colspan="4" class="header">PAYMENT PLAN DETAILS</td>
+      <td colspan="4" class="header">PAYMENT PLAN DETAILS</td>
     </tr>
     <tr>
       <td>Start Date</td>
@@ -45,14 +45,14 @@
       <td colspan="4" class="header">SUMMARY</td>
     </tr>
     <tr>
-      <td>Total number of households covered</td>
-      <td>{{ payment_plan.total_households_count }}</td>
+      <td>Total number of people covered</td>
+      <td>{{ payment_plan.total_people_count }}</td>
       <td>Total entitlement</td>
       <td>{{ payment_plan.total_entitled_quantity|default_if_none:"0" }}</td>
     </tr>
     <tr>
-      <td>Total number of individuals covered</td>
-      <td>{{ payment_plan.total_individuals_count }}</td>
+      <td></td>
+      <td></td>
       <td>Currency</td>
       <td>{{ payment_plan.currency }}</td>
     </tr>
@@ -71,7 +71,7 @@
       <td colspan="6" class="header">RECONCILIATION SUMMARY</td>
     </tr>
     <tr>
-      <td>Total Households redeemed</td>
+      <td>Total People redeemed</td>
       <td>{{reconciliation.reconciled|default_if_none:"0"}}</td>
       <td>Total amount redeemed ({{ payment_plan.currency }})</td>
       <td>{{reconciliation.reconciled_local|default_if_none:"0"}}</td>
@@ -79,7 +79,7 @@
       <td>{{reconciliation.reconciled_usd|default_if_none:"0"}}</td>
     </tr>
     <tr>
-      <td>Total pending Households</td>
+      <td>Total pending People</td>
       <td>{{reconciliation.pending|default_if_none:"0"}}</td>
       <td>Total amount unredeemed ({{ payment_plan.currency }})</td>
       <td>{{reconciliation.pending_local|default_if_none:"0"}}</td>
@@ -96,9 +96,9 @@
 <table>
   <tbody>
     <tr>
-        <td colspan="2" class="header">approval</td>
-        <td colspan="2" class="header">authorization</td>
-        <td colspan="2" class="header">release</td>
+      <td colspan="2" class="header">approval</td>
+      <td colspan="2" class="header">authorization</td>
+      <td colspan="2" class="header">release</td>
     </tr>
     <tr>
       <td>Name of Approver</td>
@@ -167,7 +167,7 @@
 
 <p></p>
 <p></p>
-    <p>Link to Payment Plan: <a href="{{ payment_plan_link }}">{{ payment_plan_link }}</a></p>
+<p>Link to Payment Plan: <a href="{{ payment_plan_link }}">{{ payment_plan_link }}</a></p>
 <p></p>
 <p>Generated on {% now "N j, Y" %}</p>
 

@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/AuthorizePaymentPlan should render 1`] = `
+<div>
+  <div
+    class="MuiBox-root css-hpgf8j"
+  >
+    <button
+      class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium css-dl1jos-MuiButtonBase-root-MuiButton-root"
+      data-cy="button-authorize"
+      disabled=""
+      tabindex="-1"
+      type="button"
+    >
+      Authorize
+    </button>
+  </div>
+</div>
+`;

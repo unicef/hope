@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/paymentmodule/CreateSetUpFsp/SetUpFspCore should render 1`] = `<div />`;

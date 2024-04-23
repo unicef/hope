@@ -1,0 +1,234 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/PaymentPlanDetailsResults should render 1`] = `
+<div>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-dmyCSP kWtMci css-1ps6pg7-MuiPaper-root"
+  >
+    <div
+      class="sc-eDLKkx kbjSlf"
+    >
+      <h6
+        class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+      >
+        Results
+      </h6>
+    </div>
+    <div
+      class="sc-jTQCzO kXsWaY"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
+      >
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+        >
+          <div
+            class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-1efphpz-MuiGrid-root"
+          >
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+            >
+              <div
+                class="sc-hLQSwg lpoPA-D"
+                color="#5F02CF"
+              >
+                <div>
+                  <span
+                    class="sc-beySPh gbuZtJ"
+                    color="textSecondary"
+                  >
+                    Female Children
+                  </span>
+                  <div
+                    data-cy="label-Female Children"
+                  >
+                    <span
+                      class="sc-guDLey cyWTlF"
+                      color="textSecondary"
+                    >
+                      0
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+            >
+              <div
+                class="sc-hLQSwg gOSGSG"
+                color="#DFCCF5"
+              >
+                <div>
+                  <span
+                    class="sc-beySPh gbuZtJ"
+                    color="textSecondary"
+                  >
+                    Female Adults
+                  </span>
+                  <div
+                    data-cy="label-Female Adults"
+                  >
+                    <span
+                      class="sc-guDLey cyWTlF"
+                      color="textSecondary"
+                    >
+                      1
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+            >
+              <div
+                class="sc-hLQSwg epYyAz"
+                color="#1D6A64"
+              >
+                <div>
+                  <span
+                    class="sc-beySPh gbuZtJ"
+                    color="textSecondary"
+                  >
+                    Male Children
+                  </span>
+                  <div
+                    data-cy="label-Male Children"
+                  >
+                    <span
+                      class="sc-guDLey cyWTlF"
+                      color="textSecondary"
+                    >
+                      0
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+            >
+              <div
+                class="sc-hLQSwg eHLZxv"
+                color="#B1E3E0"
+              >
+                <div>
+                  <span
+                    class="sc-beySPh gbuZtJ"
+                    color="textSecondary"
+                  >
+                    Male Adults
+                  </span>
+                  <div
+                    data-cy="label-Male Adults"
+                  >
+                    <span
+                      class="sc-guDLey cyWTlF"
+                      color="textSecondary"
+                    >
+                      2
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+        >
+          <div
+            class="MuiGrid-root MuiGrid-container css-1e2bu2o-MuiGrid-root"
+          >
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+            >
+              <div
+                class="sc-fsYfdN kEIWSo"
+                data-cy="chart-container"
+              >
+                <canvas
+                  height="0"
+                  role="img"
+                  style="display: block; box-sizing: border-box; height: 0px; width: 0px;"
+                  width="0"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+        >
+          <div
+            class="MuiGrid-root MuiGrid-container css-16g5rpk-MuiGrid-root"
+          >
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+            >
+              <div
+                class="sc-gLLuof chJFWu"
+              >
+                <div>
+                  <span
+                    class="sc-beySPh gbuZtJ"
+                    color="textSecondary"
+                  >
+                    Total Number of Households
+                  </span>
+                  <div
+                    data-cy="label-Total Number of Households"
+                  >
+                    <span
+                      class="sc-guDLey cyWTlF"
+                      color="textSecondary"
+                    >
+                      <div
+                        class="sc-iBdnpw laLuMi"
+                      >
+                        1
+                      </div>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+            >
+              <div
+                class="sc-gLLuof chJFWu"
+              >
+                <div>
+                  <span
+                    class="sc-beySPh gbuZtJ"
+                    color="textSecondary"
+                  >
+                    Targeted Individuals
+                  </span>
+                  <div
+                    data-cy="label-Targeted Individuals"
+                  >
+                    <span
+                      class="sc-guDLey cyWTlF"
+                      color="textSecondary"
+                    >
+                      <div
+                        class="sc-iBdnpw laLuMi"
+                      >
+                        3
+                      </div>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

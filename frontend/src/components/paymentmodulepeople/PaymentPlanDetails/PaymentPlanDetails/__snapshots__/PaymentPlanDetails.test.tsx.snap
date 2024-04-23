@@ -1,0 +1,272 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should render 1`] = `
+<div>
+  <div
+    class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-13i4rnv-MuiGrid-root"
+  >
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-dmyCSP kCVGgv css-1ps6pg7-MuiPaper-root"
+    >
+      <div
+        class="sc-gLLuof bNTvKV"
+      >
+        <h6
+          class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+        >
+          Details
+        </h6>
+      </div>
+      <div
+        class="sc-jTQCzO GcLEc"
+      >
+        <div
+          class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
+        >
+          <div
+            class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-6 MuiGrid-grid-xs-9 css-1fpp2xl-MuiGrid-root"
+          >
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            >
+              <div>
+                <span
+                  class="sc-hLQSwg hqLXmS"
+                  color="textSecondary"
+                >
+                  Created By
+                </span>
+                <div
+                  data-cy="label-Created By"
+                >
+                  <span
+                    class="sc-eDLKkx gpSOvu"
+                    color="textSecondary"
+                  >
+                    Matthew Sosa
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            >
+              <div>
+                <span
+                  class="sc-hLQSwg hqLXmS"
+                  color="textSecondary"
+                >
+                  Programme
+                </span>
+                <div
+                  data-cy="label-Programme"
+                >
+                  <span
+                    class="sc-eDLKkx gpSOvu"
+                    color="textSecondary"
+                  >
+                    <a
+                      class="sc-beySPh ikyHhp"
+                      href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/details/UHJvZ3JhbU5vZGU6NWJhMjEzY2UtNmNlOS00NTc4LThhNDgtYjFmMDgyM2Q2MDAy"
+                    >
+                      Already attention fear well hit instead person.
+                    </a>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            >
+              <div>
+                <span
+                  class="sc-hLQSwg hqLXmS"
+                  color="textSecondary"
+                >
+                  Target Population
+                </span>
+                <div
+                  data-cy="label-Target Population"
+                >
+                  <span
+                    class="sc-eDLKkx gpSOvu"
+                    color="textSecondary"
+                  >
+                    <a
+                      class="sc-beySPh ikyHhp"
+                      href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MzlmMjQ0YzEtZGRiMC00ZGZmLWE0MzEtN2JiMDFhMTdiMThm"
+                    >
+                      Report should property early adult.
+                    </a>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            >
+              <div>
+                <span
+                  class="sc-hLQSwg hqLXmS"
+                  color="textSecondary"
+                >
+                  Currency
+                </span>
+                <div
+                  data-cy="label-Currency"
+                >
+                  <span
+                    class="sc-eDLKkx gpSOvu"
+                    color="textSecondary"
+                  >
+                    PLN
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            >
+              <div>
+                <span
+                  class="sc-hLQSwg hqLXmS"
+                  color="textSecondary"
+                >
+                  Start Date
+                </span>
+                <div
+                  data-cy="label-Start Date"
+                >
+                  <span
+                    class="sc-eDLKkx gpSOvu"
+                    color="textSecondary"
+                  >
+                    <time
+                      datetime="1603756800000"
+                    >
+                      27 Oct 2020
+                    </time>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            >
+              <div>
+                <span
+                  class="sc-hLQSwg hqLXmS"
+                  color="textSecondary"
+                >
+                  End Date
+                </span>
+                <div
+                  data-cy="label-End Date"
+                >
+                  <span
+                    class="sc-eDLKkx gpSOvu"
+                    color="textSecondary"
+                  >
+                    <time
+                      datetime="1631059200000"
+                    >
+                      8 Sep 2021
+                    </time>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            >
+              <div>
+                <span
+                  class="sc-hLQSwg hqLXmS"
+                  color="textSecondary"
+                >
+                  Dispersion Start Date
+                </span>
+                <div
+                  data-cy="label-Dispersion Start Date"
+                >
+                  <span
+                    class="sc-eDLKkx gpSOvu"
+                    color="textSecondary"
+                  >
+                    <time
+                      datetime="1842307200000"
+                    >
+                      19 May 2028
+                    </time>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            >
+              <div>
+                <span
+                  class="sc-hLQSwg hqLXmS"
+                  color="textSecondary"
+                >
+                  Dispersion End Date
+                </span>
+                <div
+                  data-cy="label-Dispersion End Date"
+                >
+                  <span
+                    class="sc-eDLKkx gpSOvu"
+                    color="textSecondary"
+                  >
+                    <time
+                      datetime="1880755200000"
+                    >
+                      7 Aug 2029
+                    </time>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-6 MuiGrid-direction-xs-column MuiGrid-grid-xs-3 css-1ua2l6q-MuiGrid-root"
+          >
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
+            >
+              <div
+                class="sc-iBdnpw ffEAip"
+                color="#84A1CA"
+              >
+                <div>
+                  <span
+                    class="sc-hLQSwg hqLXmS"
+                    color="textSecondary"
+                  >
+                    Related Follow-Up Payment Plans
+                  </span>
+                  <div
+                    data-cy="label-Related Follow-Up Payment Plans"
+                  >
+                    <span
+                      class="sc-eDLKkx gpSOvu"
+                      color="textSecondary"
+                    >
+                      <div
+                        class="MuiBox-root css-j7qwjs"
+                      >
+                        -
+                      </div>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
