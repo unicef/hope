@@ -1,6 +1,6 @@
 import {
   useBusinessAreaDataQuery,
-  useCashAssistUrlPrefixQuery,
+  useProgramLazyQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -18,7 +18,12 @@ import {
   hasPermissionInModule,
   hasPermissions,
 } from '../../../config/permissions';
-import { MenuItem, menuItems } from './menuItems';
+import {
+  MenuItem,
+  menuItems,
+  SCOPE_ALL_PROGRAMS,
+  SCOPE_PROGRAM,
+} from './menuItems';
 
 const Text = styled(ListItemText)`
   .MuiTypography-body1 {
@@ -57,10 +62,17 @@ export const DrawerItems = ({
   currentLocation,
   open,
 }: DrawerItemsProps): React.ReactElement => {
-  const { data: cashAssistUrlData } = useCashAssistUrlPrefixQuery({
-    fetchPolicy: 'cache-first',
-  });
   const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
+  const [getProgram, programResults] = useProgramLazyQuery({
+    variables: {
+      id: programId,
+    },
+  });
+  useEffect(() => {
+    if (!isAllPrograms) {
+      getProgram();
+    }
+  }, [programId]);
   const permissions = usePermissions();
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
@@ -90,34 +102,35 @@ export const DrawerItems = ({
   if (permissions === null || !businessAreaData) return null;
 
   const prepareMenuItems = (items: MenuItem[]): MenuItem[] => {
-    const pagesAvailableForAllPrograms = [
-      'Country Dashboard',
-      'Programme Management',
-      'Reporting',
-      'Grievance',
-      'Activity Log',
-      'Managerial Console',
-    ];
+    let updatedMenuItems = [...items];
+    const getIndexByName = (name: string): number =>
+      updatedMenuItems.findIndex((item) => item?.name === name);
+    const programDetailsIndex = getIndexByName('Program Details');
+    const reportingIndex = getIndexByName('Reporting');
 
-    const updatedMenuItems = items.map((item) => {
-      if (item.name === 'Cash Assist') {
-        return { ...item, href: cashAssistUrlData?.cashAssistUrlPrefix };
-      }
-      if (!isAllPrograms && item.name === 'Programme Details') {
-        return { ...item, href: `/details/${programId}` };
-      }
-      return item;
-    });
-
-    if (!isAllPrograms) {
-      return updatedMenuItems.filter(
-        (item) => !['Reporting', 'Managerial Console'].includes(item.name),
-      );
+    // Remove 'Reporting' item when program is selected
+    if (reportingIndex !== -1 && !isAllPrograms) {
+      updatedMenuItems.splice(reportingIndex, 1);
     }
 
-    return updatedMenuItems.filter((item) =>
-      pagesAvailableForAllPrograms.includes(item.name),
-    );
+    // When GlobalProgramFilter applied
+    if (!isAllPrograms) {
+      updatedMenuItems[programDetailsIndex].href = `/details/${programId}`;
+    }
+    updatedMenuItems = updatedMenuItems.filter((item) => {
+      let isVisible = isAllPrograms
+        ? item.scopes.includes(SCOPE_ALL_PROGRAMS)
+        : item.scopes.includes(SCOPE_PROGRAM);
+      const isSocialWorkerProgram =
+        programResults?.data?.program?.isSocialWorkerProgram;
+      if (item.isSocialWorker === false) {
+        isVisible &&= !isSocialWorkerProgram;
+      } else if (item.isSocialWorker === true) {
+        isVisible &&= isSocialWorkerProgram;
+      }
+      return isVisible;
+    });
+    return updatedMenuItems;
   };
 
   const preparedMenuItems = prepareMenuItems(menuItems);
@@ -144,7 +157,7 @@ export const DrawerItems = ({
   };
 
   return (
-    <div>
+    <div data-cy="drawer-items">
       {preparedMenuItems?.map((item, index) => {
         if (
           item.permissionModule &&
