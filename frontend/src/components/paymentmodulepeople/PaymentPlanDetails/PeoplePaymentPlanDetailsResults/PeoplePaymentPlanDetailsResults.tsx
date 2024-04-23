@@ -59,6 +59,7 @@ export const PeoplePaymentPlanDetailsResults = ({
     maleChildrenCount,
     femaleAdultsCount,
     maleAdultsCount,
+    totalIndividualsCount,
   } = paymentPlan;
 
   return (
