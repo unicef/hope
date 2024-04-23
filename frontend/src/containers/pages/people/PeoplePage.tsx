@@ -31,7 +31,7 @@ const initialFilter = {
   lastRegistrationDateMax: '',
 };
 
-export function PeoplePage(): React.ReactElement {
+export const PeoplePage = (): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const { businessArea } = useBaseUrl();
@@ -79,7 +79,6 @@ export function PeoplePage(): React.ReactElement {
         <PeopleListTable
           filter={appliedFilter}
           businessArea={businessArea}
-          choicesData={householdChoicesData}
           canViewDetails={hasPermissions(
             PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
             permissions,
@@ -88,4 +87,4 @@ export function PeoplePage(): React.ReactElement {
       </Box>
     </>
   );
-}
+};

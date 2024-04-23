@@ -15,7 +15,6 @@ import {
   IndividualDisability,
   IndividualNode,
 } from '@generated/graphql';
-import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
@@ -136,7 +135,7 @@ export function PeopleBioData({
   let peopleFromHouseholdData = null;
   if (individual?.household) {
     const household = individual.household;
-    console.log('household',household)
+    console.log('household', household);
     peopleFromHouseholdData = (
       <>
         <Grid item xs={3}>

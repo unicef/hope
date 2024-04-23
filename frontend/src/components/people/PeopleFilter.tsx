@@ -99,7 +99,7 @@ export function PeopleFilter({
             >
               {choicesData?.individualSearchTypesChoices
                 .filter(
-                  (item) => !searchNotAvailableForPeople.includes(item.value)
+                  (item) => !searchNotAvailableForPeople.includes(item.value),
                 )
                 .map(({ name, value }) => (
                   <MenuItem key={value} value={value}>
