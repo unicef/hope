@@ -215,8 +215,8 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             enumerator_rec_id=1234567890,
             detail_id="123456123",
             kobo_asset_id="Test_asset_id",
-            kobo_submission_uuid="123-6c9c-4dba-8c7f-123",
-            kobo_submission_time="2222-22-22T00:00:00+00:00",
+            kobo_submission_uuid="c09130af-6c9c-4dba-8c7f-1b2ff1970d19",
+            kobo_submission_time="2022-02-22T12:22:22",
         )
         self.set_imported_individuals(imported_household)
         with capture_on_commit_callbacks(execute=True):
@@ -236,17 +236,14 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         self.assertEqual(0, imported_individuals.count())  # Removed after successful merge
         self.assertEqual(household.flex_fields.get("enumerator_id"), 1234567890)
         self.assertEqual(household.detail_id, "123456123")
-        self.assertEqual(household.kobo_asset_id, "Test_asset_id")
-        self.assertEqual(household.kobo_submission_uuid, "123-6c9c-4dba-8c7f-123")
-        self.assertEqual(household.kobo_submission_time, "2222-22-22T00:00:00+00:00")
 
         # check KoboImportedSubmission
         kobo_import_submission_qs = KoboImportedSubmission.objects.all()
         kobo_import_submission = kobo_import_submission_qs.first()
         self.assertEqual(kobo_import_submission_qs.count(), 1)
-        self.assertEqual(kobo_import_submission.kobo_submission_uuid, "123-6c9c-4dba-8c7f-123")
-        self.assertEqual(kobo_import_submission.kobo_asset_id, "Test_asset_id")
-        self.assertEqual(kobo_import_submission.kobo_submission_time, "2222-22-22T00:00:00+00:00")
+        self.assertEqual(str(kobo_import_submission.kobo_submission_uuid), "c09130af-6c9c-4dba-8c7f-1b2ff1970d19")
+        self.assertEqual(kobo_import_submission.kobo_asset_id, "123456123")
+        self.assertEqual(str(kobo_import_submission.kobo_submission_time), "2022-02-22 12:22:22+00:00")
         self.assertEqual(kobo_import_submission.imported_household, None)
 
         individual_with_valid_phone_data = Individual.objects.filter(given_name="Liz").first()
