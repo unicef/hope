@@ -155,7 +155,7 @@ export const SetUpFspCore = ({
       });
       showMessage(t('FSPs have been assigned to the delivery mechanisms'));
       navigate(
-        `/${baseUrl}/payment-module/${
+        `/${baseUrl}/payment-module-people/${
           isFollowUp ? 'followup-payment-plans' : 'payment-plans'
         }/${id}`,
       );

@@ -120,7 +120,7 @@ export const EditPeoplePaymentPlanPage = (): React.ReactElement => {
       });
       showMessage(t('Payment Plan Edited'));
       navigate(
-        `/${baseUrl}/payment-module/payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
+        `/${baseUrl}/payment-module-people/payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
       );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));

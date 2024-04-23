@@ -37,7 +37,7 @@ export function EditPaymentPlanHeader({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module/${
+      to: `/${baseUrl}/payment-module-people/${
         isFollowUp ? 'followup-payment-plans' : 'payment-plans'
       }/${id}`,
     },
@@ -75,7 +75,7 @@ export function EditPaymentPlanHeader({
         <Box mr={3}>
           <Button
             component={Link}
-            to={`/${baseUrl}/payment-module/payment-plans/${id}`}
+            to={`/${baseUrl}/payment-module-people/payment-plans/${id}`}
           >
             {t('Cancel')}
           </Button>

@@ -107,7 +107,7 @@ export const PeoplePaymentsTableRow = ({
   };
 
   const individual = payment?.household?.individuals?.edges?.[0]?.node;
-  const individualDetailsPath = `/${baseUrl}/population/individuals/${individual.id}`;
+  const individualDetailsPath = `/${baseUrl}/population/individuals/${individual?.id}`;
 
   return (
     <ClickableTableRow hover role="checkbox" key={payment.id}>
@@ -133,19 +133,19 @@ export const PeoplePaymentsTableRow = ({
       <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={individualDetailsPath}>
-            {individual.unicefId}
+            {individual?.unicefId}
           </BlackLink>
         ) : (
-          individual.unicefId
+          individual?.unicefId
         )}
       </TableCell>
       <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={individualDetailsPath}>
-            {individual.fullName}
+            {individual?.fullName}
           </BlackLink>
         ) : (
-          individual.fullName
+          individual?.fullName
         )}
       </TableCell>
       <TableCell align="left">

@@ -23,7 +23,7 @@ export const PeoplePaymentPlanTableRow = ({
 }: PeoplePaymentPlanTableRowProps): React.ReactElement => {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
-  const paymentPlanPath = `/${baseUrl}/payment-module/${
+  const paymentPlanPath = `/${baseUrl}/payment-module-people/${
     plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'
   }/${plan.id}`;
   const handleClick = (): void => {

@@ -15,15 +15,14 @@ import { ExcludeSection } from '@components/paymentmodule/PaymentPlanDetails/Exc
 import { FspSection } from '@components/paymentmodule/PaymentPlanDetails/FspSection';
 import { PaymentPlanDetails } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails';
 import { PaymentPlanDetailsHeader } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader';
-import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
 import { PeoplePaymentPlanDetailsResults } from '@components/paymentmodulepeople/PaymentPlanDetails/PeoplePaymentPlanDetailsResults';
+import { PeoplePaymentsTable } from '@containers/tables/paymentmodulePeople/PeoplePaymentsTable';
 
 export const PeoplePaymentPlanDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
@@ -92,7 +91,7 @@ export const PeoplePaymentPlanDetailsPage = (): React.ReactElement => {
           )}
           <ExcludeSection paymentPlan={paymentPlan} />
           <PeoplePaymentPlanDetailsResults paymentPlan={paymentPlan} />
-          <PaymentsTable
+          <PeoplePaymentsTable
             businessArea={businessArea}
             paymentPlan={paymentPlan}
             permissions={permissions}

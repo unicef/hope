@@ -28,7 +28,7 @@ export function SetUpFspButtonActions({
         {step === 0 && (
           <Button
             component={Link}
-            to={`/${baseUrl}/payment-module/${
+            to={`/${baseUrl}/payment-module-people/${
               isFollowUp ? 'followup-payment-plans' : 'payment-plans'
             }/${paymentPlanId}`}
           >

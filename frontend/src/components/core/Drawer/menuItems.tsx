@@ -35,11 +35,10 @@ export type MenuItem = {
   flag?: string;
   external?: boolean;
   scopes: string[];
-  isSocialWorker?: boolean
+  isSocialWorker?: boolean;
 };
 export const SCOPE_PROGRAM = 'SCOPE_PROGRAM';
 export const SCOPE_ALL_PROGRAMS = 'SCOPE_ALL_PROGRAMS';
-
 
 export const menuItems: MenuItem[] = [
   {
@@ -154,6 +153,17 @@ export const menuItems: MenuItem[] = [
     icon: <PaymentIcon />,
     scopes: [SCOPE_PROGRAM],
     permissions: [PERMISSIONS.PM_VIEW_LIST, PERMISSIONS.PM_VIEW_DETAILS],
+    isSocialWorker: false,
+    flag: 'isPaymentPlanApplicable',
+  },
+  {
+    name: 'Payment Module',
+    href: '/payment-module-people',
+    selectedRegexp: /^\/payment-module-people.*$/,
+    icon: <PaymentIcon />,
+    scopes: [SCOPE_PROGRAM],
+    permissions: [PERMISSIONS.PM_VIEW_LIST, PERMISSIONS.PM_VIEW_DETAILS],
+    isSocialWorker: true,
     flag: 'isPaymentPlanApplicable',
   },
   {

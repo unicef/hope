@@ -14,6 +14,7 @@ import { ProgramRoutes } from './ProgramRoutes';
 import { RegistrationRoutes } from './RegistrationRoutes';
 import { TargetingRoutes } from './TargetingRoutes';
 import { AccountabilityRoutes } from './AccountabilityRoutes';
+import { PaymentModulePeopleRoutes } from './PaymentModulePeopleRoutes';
 
 export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
   const routes = useRoutes([
@@ -52,6 +53,7 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
       <ProgramRoutes />
       <TargetingRoutes />
       <PaymentModuleRoutes />
+      <PaymentModulePeopleRoutes />
       <PaymentVerificationRoutes />
       <GrievanceRoutes />
     </>

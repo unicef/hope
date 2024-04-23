@@ -12,13 +12,13 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
-    label: 'Payment Id',
+    label: 'Payment ID',
     id: 'unicef_id',
     numeric: false,
   },
   {
     disablePadding: false,
-    label: 'Individual Id',
+    label: 'Individual ID',
     id: 'individual__unicef_id',
     numeric: false,
     disableSort: true,
@@ -29,12 +29,6 @@ export const headCells: HeadCell<
     id: 'individual__full_name',
     numeric: false,
     disableSort: true,
-  },
-  {
-    disablePadding: false,
-    label: 'Household Size',
-    id: 'household__size',
-    numeric: false,
   },
   {
     disablePadding: false,
