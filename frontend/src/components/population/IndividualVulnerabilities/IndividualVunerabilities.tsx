@@ -17,7 +17,7 @@ const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}
     ${({ theme }) => theme.spacing(11)};
   margin-top: ${({ theme }) => theme.spacing(6)};
-  margin-bottom: ${({ theme }) => theme.spacing(6)};
+  margin-bottom: ${({ theme }) => theme.spacing(4)};
 `;
 interface IndividualVulnerabilitesProps {
   individual: IndividualNode;

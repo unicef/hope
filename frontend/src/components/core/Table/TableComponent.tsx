@@ -27,6 +27,7 @@ const Root = styled('div')`
 const Paper = styled(MuiPaper)`
   width: 100%;
   margin-bottom: 8px;
+  overflow: clip;
 `;
 
 const Table = styled(MuiTable)`
