@@ -8,6 +8,7 @@ from django.test import TestCase
 
 from dateutil.relativedelta import relativedelta
 
+from hct_mis_api.apps.core.currencies import USDC
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
@@ -123,6 +124,10 @@ class TestPaymentPlanModel(TestCase):
         # create not conflicted payment
         PaymentFactory(parent=pp1, conflicted=False, currency="PLN")
         self.assertEqual(pp1.can_be_locked, True)
+
+    def test_get_exchange_rate_for_usdc_currency(self) -> None:
+        pp = PaymentPlanFactory(currency=USDC)
+        self.assertEqual(pp.get_exchange_rate(), 1.0)
 
 
 class TestPaymentModel(TestCase):
