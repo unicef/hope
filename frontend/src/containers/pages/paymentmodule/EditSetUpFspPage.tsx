@@ -31,6 +31,7 @@ export function EditSetUpFspPage(): React.ReactElement {
     paymentPlanData.paymentPlan.deliveryMechanisms.map((el) => ({
       deliveryMechanism: el.name,
       fsp: el.fsp?.id || '',
+      chosenConfiguration: el.chosenConfiguration || '',
     }));
 
   const initialValues = {
@@ -40,10 +41,7 @@ export function EditSetUpFspPage(): React.ReactElement {
   return (
     <>
       <EditSetUpFspHeader permissions={permissions} />
-      <SetUpFspCore
-        permissions={permissions}
-        initialValues={initialValues}
-      />
+      <SetUpFspCore permissions={permissions} initialValues={initialValues} />
     </>
   );
 }
