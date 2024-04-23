@@ -920,6 +920,13 @@ class TestVolumeByDeliveryMechanism(APITestCase):
             delivery_mechanism_order=1,
         )
 
+        DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=self.payment_plan,
+            financial_service_provider=self.bank_of_america_fsp,
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+            delivery_mechanism_order=2,
+        )
+
         self.payment_plan.currency = USDC
         self.payment_plan.save()
 
@@ -936,6 +943,11 @@ class TestVolumeByDeliveryMechanism(APITestCase):
                         "deliveryMechanism": GenericPayment.DELIVERY_TYPE_CASH,
                         "fspId": self.encoded_santander_fsp_id,
                         "order": 1,
+                    },
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_CASH,
+                        "fspId": self.encoded_bank_of_america_fsp_id,
+                        "order": 2,
                     },
                 ],
             },
