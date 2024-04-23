@@ -27,15 +27,8 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.registration_data.models import (
-    ImportedBankAccountInfo,
-    ImportedHousehold,
-    ImportedIndividual,
-    ImportedIndividualRoleInHousehold,
-    KoboImportedSubmission,
-    RegistrationDataImport,
-    RegistrationDataImportDatahub,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport, RegistrationDataImportDatahub, \
+    KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
 from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.signals import rdi_merged
@@ -147,7 +140,7 @@ class RdiMergeTask:
 
     def merge_admin_areas(
         self,
-        imported_household: ImportedHousehold,
+        imported_household: Household,
         household: Household,
     ) -> None:
         admins = {
@@ -170,7 +163,7 @@ class RdiMergeTask:
             household.set_admin_areas(save=False)
 
     def _prepare_households(
-        self, imported_households: List[ImportedHousehold], obj_hct: RegistrationDataImport
+        self, imported_households: List[Household], obj_hct: RegistrationDataImport
     ) -> Dict[int, Household]:
         households_dict = {}
         countries = {}
@@ -241,7 +234,7 @@ class RdiMergeTask:
 
     def _prepare_individuals(
         self,
-        imported_individuals: List[ImportedIndividual],
+        imported_individuals: List[Individual],
         households_dict: Dict[int, Household],
         obj_hct: RegistrationDataImport,
     ) -> Tuple[Dict, List, List]:
@@ -333,14 +326,14 @@ class RdiMergeTask:
         try:
             obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id)
             obj_hub = RegistrationDataImportDatahub.objects.get(hct_id=registration_data_import_id)
-            imported_households = ImportedHousehold.objects.filter(registration_data_import=obj_hub)
-            imported_individuals = ImportedIndividual.objects.filter(registration_data_import=obj_hub).order_by(
+            imported_households = Household.objects.filter(registration_data_import=obj_hub)
+            imported_individuals = Individual.objects.filter(registration_data_import=obj_hub).order_by(
                 "first_registration_date"
             )
-            imported_roles = ImportedIndividualRoleInHousehold.objects.filter(
+            imported_roles = IndividualRoleInHousehold.objects.filter(
                 household__in=imported_households, individual__in=imported_individuals
             )
-            imported_bank_account_infos = ImportedBankAccountInfo.objects.filter(individual__in=imported_individuals)
+            imported_bank_account_infos = BankAccountInfo.objects.filter(individual__in=imported_individuals)
             household_ids = []
             try:
                 with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):

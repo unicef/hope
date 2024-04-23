@@ -32,7 +32,6 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import (
     SIMILAR_IN_BATCH,
-    ImportedIndividual,
     RegistrationDataImport,
     RegistrationDataImportDatahub,
 )
@@ -198,7 +197,7 @@ class DeduplicateTask:
         )
 
     def deduplicate_imported_individuals(self, registration_data_import_datahub: RegistrationDataImportDatahub) -> None:
-        imported_individuals = ImportedIndividual.objects.filter(
+        imported_individuals = Individual.objects.filter(
             registration_data_import_id=registration_data_import_datahub.id
         )
 
@@ -290,7 +289,7 @@ class DeduplicateTask:
                 self._set_error_message_and_status(registration_data_import, message)
                 break
 
-        ImportedIndividual.objects.bulk_update(
+        Individual.objects.bulk_update(
             to_bulk_update_results,
             [
                 "deduplication_batch_results",
@@ -301,7 +300,7 @@ class DeduplicateTask:
             batch_size=1000,
         )
         if registration_data_import.status == RegistrationDataImport.DEDUPLICATION_FAILED:
-            ImportedIndividual.objects.filter(
+            Individual.objects.filter(
                 registration_data_import_id=registration_data_import_datahub.id,
                 deduplication_batch_status=UNIQUE_IN_BATCH,
                 deduplication_golden_record_status=UNIQUE,
@@ -310,35 +309,35 @@ class DeduplicateTask:
                 deduplication_golden_record_status=NOT_PROCESSED,
             )
         else:
-            ImportedIndividual.objects.filter(registration_data_import_id=registration_data_import_datahub.id).exclude(
+            Individual.objects.filter(registration_data_import_id=registration_data_import_datahub.id).exclude(
                 id__in=duplicates_in_batch.union(possible_duplicates_in_batch)
             ).update(deduplication_batch_status=UNIQUE_IN_BATCH)
-            ImportedIndividual.objects.filter(registration_data_import_id=registration_data_import_datahub.id).exclude(
+            Individual.objects.filter(registration_data_import_id=registration_data_import_datahub.id).exclude(
                 id__in=duplicates_in_population.union(possible_duplicates_in_population)
             ).update(deduplication_golden_record_status=UNIQUE)
             old_rdi = RegistrationDataImport.objects.get(id=registration_data_import.id)
             registration_data_import.status = RegistrationDataImport.IN_REVIEW
-            registration_data_import.batch_duplicates = ImportedIndividual.objects.filter(
+            registration_data_import.batch_duplicates = Individual.objects.filter(
                 registration_data_import_id=registration_data_import_datahub.id,
                 deduplication_batch_status=DUPLICATE_IN_BATCH,
             ).count()
-            registration_data_import.batch_possible_duplicates = ImportedIndividual.objects.filter(
+            registration_data_import.batch_possible_duplicates = Individual.objects.filter(
                 registration_data_import_id=registration_data_import_datahub.id,
                 deduplication_batch_status=SIMILAR_IN_BATCH,
             ).count()
-            registration_data_import.batch_unique = ImportedIndividual.objects.filter(
+            registration_data_import.batch_unique = Individual.objects.filter(
                 registration_data_import_id=registration_data_import_datahub.id,
                 deduplication_batch_status=UNIQUE_IN_BATCH,
             ).count()
-            registration_data_import.golden_record_duplicates = ImportedIndividual.objects.filter(
+            registration_data_import.golden_record_duplicates = Individual.objects.filter(
                 registration_data_import_id=registration_data_import_datahub.id,
                 deduplication_golden_record_status=DUPLICATE,
             ).count()
-            registration_data_import.golden_record_possible_duplicates = ImportedIndividual.objects.filter(
+            registration_data_import.golden_record_possible_duplicates = Individual.objects.filter(
                 registration_data_import_id=registration_data_import_datahub.id,
                 deduplication_golden_record_status=NEEDS_ADJUDICATION,
             ).count()
-            registration_data_import.golden_record_unique = ImportedIndividual.objects.filter(
+            registration_data_import.golden_record_unique = Individual.objects.filter(
                 registration_data_import_id=registration_data_import_datahub.id,
                 deduplication_golden_record_status=UNIQUE,
             ).count()
@@ -360,7 +359,7 @@ class DeduplicateTask:
 
     def _prepare_fields(
         self,
-        individual: Union[Individual, ImportedIndividual],
+        individual: Union[Individual, Individual],
         fields_names: Tuple[str, ...],
         dict_fields: Dict[str, Any],
     ) -> Dict[str, Any]:
@@ -509,7 +508,7 @@ class DeduplicateTask:
         query_dict: Dict,
         duplicate_score: float,
         document: Union[Type[IndividualDocument], Type[ImportedIndividualDocument]],
-        individual: Union[Individual, ImportedIndividual],
+        individual: Union[Individual, Individual],
     ) -> DeduplicationResult:
         duplicates = []
         possible_duplicates = []
@@ -559,7 +558,7 @@ class DeduplicateTask:
         )
 
     def _deduplicate_single_imported_individual(
-        self, individual: ImportedIndividual, rdi_id: str
+        self, individual: Individual, rdi_id: str
     ) -> DeduplicationResult:
         fields_names: Tuple[str, ...] = (
             "given_name",
@@ -593,7 +592,7 @@ class DeduplicateTask:
             individual,
         )
 
-    def _deduplicate_single_individual(self, individual: Union[Individual, ImportedIndividual]) -> DeduplicationResult:
+    def _deduplicate_single_individual(self, individual: Union[Individual, Individual]) -> DeduplicationResult:
         fields_names = (
             "given_name",
             "full_name",

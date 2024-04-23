@@ -14,15 +14,13 @@ from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import SheetImageLoader, serialize_flex_attributes
 from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
-from hct_mis_api.apps.registration_data.models import (
-    ImportData,
-    ImportedDocumentType,
-    ImportedHousehold,
-    ImportedIndividual,
-    ImportedIndividualRoleInHousehold,
-    RegistrationDataImport,
-    RegistrationDataImportDatahub,
+from hct_mis_api.apps.household.models import (
+    DocumentType,
+    Household,
+    Individual,
+    IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport, RegistrationDataImportDatahub
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
     RdiXlsxCreateTask,
@@ -53,7 +51,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         self,
         value: Any,
         header: str,
-        individual: ImportedIndividual,
+        individual: Individual,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -64,7 +62,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             if not index_id:
                 continue
             role = ROLE_PRIMARY if header == "pp_primary_collector_id" else ROLE_ALTERNATE
-            self.collectors[int(index_id)].append(ImportedIndividualRoleInHousehold(individual=individual, role=role))
+            self.collectors[int(index_id)].append(IndividualRoleInHousehold(individual=individual, role=role))
 
     def _create_collectors(self) -> None:
         collectors_to_create = []
@@ -72,7 +70,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             for collector in collectors_list:
                 collector.household_id = self.households.get(int(index_id)).pk
                 collectors_to_create.append(collector)
-        ImportedIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
+        IndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
 
     def _create_hh_ind(
         self, obj_to_create: Any, row: Any, first_row: Any, complex_fields: Dict, complex_types: Dict, sheet_title: str
@@ -202,7 +200,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             },
         }
         document_complex_types: Dict[str, Callable] = {}
-        for document_type in ImportedDocumentType.objects.all():
+        for document_type in DocumentType.objects.all():
             document_complex_types[f"pp_{document_type.key}_i_c"] = self._handle_document_fields
             document_complex_types[f"pp_{document_type.key}_no_i_c"] = self._handle_document_fields
             document_complex_types[f"pp_{document_type.key}_photo_i_c"] = self._handle_document_photo_fields
@@ -218,12 +216,12 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         program_id = RegistrationDataImport.objects.get(id=registration_data_import.hct_id).program.id
 
         hh_obj = partial(
-            ImportedHousehold,
+            Household,
             registration_data_import=registration_data_import,
             program_id=program_id,
-            collect_type=ImportedHousehold.CollectType.SINGLE.value,
+            collect_type=Household.CollectType.SINGLE.value,
         )
-        ind_obj = partial(ImportedIndividual, registration_data_import=registration_data_import, program_id=program_id)
+        ind_obj = partial(Individual, registration_data_import=registration_data_import, program_id=program_id)
 
         first_row = sheet[1]
 
@@ -241,8 +239,8 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 obj_to_create = hh_obj() if sheet_title == "households" else ind_obj()
                 self._create_hh_ind(obj_to_create, row, first_row, complex_fields, complex_types, sheet_title)
 
-        ImportedIndividual.objects.bulk_create(self.individuals)
-        ImportedHousehold.objects.bulk_update(
+        Individual.objects.bulk_create(self.individuals)
+        Household.objects.bulk_update(
             self.households_to_update,
             ["head_of_household"],
             1000,

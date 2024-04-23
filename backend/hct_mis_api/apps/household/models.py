@@ -486,7 +486,7 @@ class Household(
     flex_fields = JSONField(default=dict, blank=True)
     first_registration_date = models.DateTimeField()
     last_registration_date = models.DateTimeField()
-    head_of_household = models.OneToOneField("Individual", related_name="heading_household", on_delete=models.CASCADE)
+    head_of_household = models.OneToOneField("Individual", related_name="heading_household", on_delete=models.CASCADE, null=True)
     fchild_hoh = models.BooleanField(null=True)
     child_hoh = models.BooleanField(null=True)
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
@@ -556,7 +556,8 @@ class Household(
             HouseholdSelection.objects.filter(
                 household=self, target_population__status=TargetPopulation.STATUS_LOCKED
             ).delete()
-        cache.delete_pattern(f"count_{self.business_area.slug}_HouseholdNodeConnection_*")
+        if self.rdi_merge_status == "MERGED":
+            cache.delete_pattern(f"count_{self.business_area.slug}_HouseholdNodeConnection_*")
         super().save(*args, **kwargs)
 
     def delete(self, *args: Any, **kwargs: Any) -> Tuple[int, Dict[str, int]]:

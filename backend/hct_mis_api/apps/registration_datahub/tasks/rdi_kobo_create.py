@@ -24,18 +24,20 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
+from hct_mis_api.apps.household.models import (
+    BankAccountInfo,
+    Document,
+    DocumentType,
+    Household,
+    Individual,
+    IndividualIdentity,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.registration_data.models import (
     ImportData,
-    ImportedBankAccountInfo,
-    ImportedDocument,
-    ImportedDocumentType,
-    ImportedHousehold,
-    ImportedIndividual,
-    ImportedIndividualIdentity,
-    ImportedIndividualRoleInHousehold,
     KoboImportedSubmission,
     RegistrationDataImport,
-    RegistrationDataImportDatahub,
+    RegistrationDataImportDatahub
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
@@ -61,7 +63,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     def __init__(
         self,
     ) -> None:
-        document_keys = ImportedDocumentType.objects.values_list("key", flat=True)
+        document_keys = DocumentType.objects.values_list("key", flat=True)
         self.DOCS_AND_IDENTITIES_FIELDS = [
             f"{key}_{suffix}" for key in document_keys for suffix in ["no_i_c", "photo_i_c", "issuer_i_c"]
         ]
@@ -95,7 +97,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         return float(value)
 
     def _cast_and_assign(
-        self, value: Union[str, list], field: str, obj: Union[ImportedIndividual, ImportedHousehold]
+        self, value: Union[str, list], field: str, obj: Union[Individual, Household]
     ) -> None:
         complex_fields = {
             "IMAGE": self._handle_image_field,
@@ -132,7 +134,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         identities = []
         for documents_dict in documents_and_identities:
             for document_name, data in documents_dict.items():
-                if not ImportedIndividual.objects.filter(id=data["individual"].id).exists():
+                if not Individual.objects.filter(id=data["individual"].id).exists():
                     continue
 
                 is_identity = document_name in identity_fields
@@ -142,7 +144,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 if is_identity:
                     partner = "WFP" if document_name == "scope_id" else "UNHCR"
                     identities.append(
-                        ImportedIndividualIdentity(
+                        IndividualIdentity(
                             partner=partner,
                             individual=data["individual"],
                             document_number=data["number"],
@@ -150,10 +152,10 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         )
                     )
                     continue
-                document_type = ImportedDocumentType.objects.get(key=document_name)
+                document_type = DocumentType.objects.get(key=document_name)
                 file = self._handle_image_field(data.get("photo", ""), False)
                 documents.append(
-                    ImportedDocument(
+                    Document(
                         document_number=data["number"],
                         country=country,
                         photo=file,
@@ -161,8 +163,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         type=document_type,
                     )
                 )
-        ImportedDocument.objects.bulk_create(documents)
-        ImportedIndividualIdentity.objects.bulk_create(identities)
+        Document.objects.bulk_create(documents)
+        IndividualIdentity.objects.bulk_create(identities)
 
     @staticmethod
     def _handle_collectors(collectors_dict: Dict, individuals_dict: Dict) -> None:
@@ -171,7 +173,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             for collector in collectors_list:
                 collector.individual_id = individuals_dict.get(hash_key)
                 collectors_to_bulk_create.append(collector)
-        ImportedIndividualRoleInHousehold.objects.bulk_create(collectors_to_bulk_create)
+        IndividualRoleInHousehold.objects.bulk_create(collectors_to_bulk_create)
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
@@ -249,28 +251,28 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
     def bulk_creates(
         self,
-        bank_accounts_to_create: list[ImportedBankAccountInfo],
+        bank_accounts_to_create: list[BankAccountInfo],
         head_of_households_mapping: dict,
-        households_to_create: list[ImportedHousehold],
+        households_to_create: list[Household],
     ) -> None:
-        ImportedHousehold.objects.bulk_create(households_to_create)
+        Household.objects.bulk_create(households_to_create)
         households_to_update = []
         for household, individual in head_of_households_mapping.items():
             household.head_of_household = individual
             households_to_update.append(household)
-        ImportedHousehold.objects.bulk_update(
+        Household.objects.bulk_update(
             households_to_update,
             ["head_of_household"],
         )
-        ImportedBankAccountInfo.objects.bulk_create(bank_accounts_to_create)
+        BankAccountInfo.objects.bulk_create(bank_accounts_to_create)
 
     def handle_household(
         self,
-        bank_accounts_to_create: list[ImportedBankAccountInfo],
+        bank_accounts_to_create: list[BankAccountInfo],
         collectors_to_create: dict,
         head_of_households_mapping: dict,
         household: dict,
-        households_to_create: list[ImportedHousehold],
+        households_to_create: list[Household],
         individuals_ids_hash_dict: dict,
         registration_data_import: RegistrationDataImportDatahub,
         submission_meta_data: dict,
@@ -279,7 +281,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         documents_and_identities_to_create = []
         # fix for support new field 'detail_id' in ImportedHousehold
         submission_meta_data["detail_id"] = submission_meta_data.get("kobo_asset_id", "")
-        household_obj = ImportedHousehold(**submission_meta_data)
+        household_obj = Household(**submission_meta_data)
         self.attachments = household.get("_attachments", [])
         registration_date = None
         current_individuals = []
@@ -288,7 +290,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 for individual in hh_value:
                     current_individual_docs_and_identities = defaultdict(dict)
                     current_individual_bank_account = {}
-                    individual_obj = ImportedIndividual()
+                    individual_obj = Individual()
                     only_collector_flag = False
                     role = None
                     for i_field, i_value in individual.items():
@@ -343,9 +345,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     current_individuals.append(individual_obj)
                     documents_and_identities_to_create.append(current_individual_docs_and_identities)
                     if current_individual_bank_account:
-                        bank_accounts_to_create.append(ImportedBankAccountInfo(**current_individual_bank_account))
+                        bank_accounts_to_create.append(BankAccountInfo(**current_individual_bank_account))
                     if role in (ROLE_PRIMARY, ROLE_ALTERNATE):
-                        role_obj = ImportedIndividualRoleInHousehold(
+                        role_obj = IndividualRoleInHousehold(
                             individual_id=individual_obj.pk,
                             household_id=household_obj.pk,
                             role=role,
@@ -374,7 +376,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             ind.first_registration_date = registration_date
             ind.last_registration_date = registration_date
             ind.detail_id = household_obj.detail_id
-        ImportedIndividual.objects.bulk_create(individuals_to_create_list)
+        Individual.objects.bulk_create(individuals_to_create_list)
         self._handle_documents_and_identities(documents_and_identities_to_create)
 
     def _handle_exception(self, assigned_to: str, field_name: str, e: BaseException) -> None:

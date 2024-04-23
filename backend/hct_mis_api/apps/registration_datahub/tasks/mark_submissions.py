@@ -5,11 +5,8 @@ from django.db import transaction
 from django.db.models import QuerySet
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.registration_data.models import (
-    ImportedHousehold,
-    KoboImportedSubmission,
-    RegistrationDataImport,
-)
+from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.registration_data.models import KoboImportedSubmission, RegistrationDataImport
 
 
 class MarkSubmissions:
@@ -37,7 +34,7 @@ class MarkSubmissions:
         return KoboImportedSubmission.objects.exclude(kobo_submission_uuid__in=list(submission_ids))
 
     def _get_submissions_ids(self, datahub_ids: QuerySet) -> List:
-        return ImportedHousehold.objects.filter(
+        return Household.objects.filter(
             kobo_submission_uuid__isnull=False,
             registration_data_import__id__in=list(datahub_ids),
         ).values_list("kobo_submission_uuid", flat=True)
