@@ -32,10 +32,6 @@ export const AllPaymentsForTable = gql`
           id
           unicefId
           status
-          individual {
-            id
-            unicefId
-          }
           household {
             id
             unicefId
@@ -43,6 +39,15 @@ export const AllPaymentsForTable = gql`
             admin2 {
               id
               name
+            }
+            individuals {
+              edges {
+                node {
+                  id
+                  unicefId
+                  fullName
+                }
+              }
             }
           }
           entitlementQuantity
@@ -72,6 +77,7 @@ export const AllPaymentsForTable = gql`
           }
           collector {
             id
+            unicefId
             fullName
           }
           financialServiceProvider {

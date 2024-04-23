@@ -11,7 +11,7 @@ import { PeoplePaymentsTable } from './PeoplePaymentsTable';
 const paymentPlan = fakeApolloAllPaymentPlansForTable[0].result.data
   .allPaymentPlans.edges[0].node as PaymentPlanQuery['paymentPlan'];
 
-describe('containers/tables/paymentmodule/PaymentsTable', () => {
+describe('containers/tables/paymentmodule/PeoplePaymentsTable', () => {
   it('should render with data', async () => {
     const { container } = render(
       <MockedProvider addTypename={false} mocks={fakeApolloAllPaymentsForTable}>
