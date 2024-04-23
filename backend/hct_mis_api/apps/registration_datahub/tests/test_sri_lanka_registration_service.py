@@ -12,7 +12,7 @@ from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_NATIONAL_ID
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.re.models import (
+from hct_mis_api.apps.registration_data.models import (
     ImportedBankAccountInfo,
     ImportedDocument,
     ImportedDocumentType,

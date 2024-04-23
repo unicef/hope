@@ -270,24 +270,6 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         return self.status in (self.IN_REVIEW, self.MERGE_ERROR)
 
 
-class KoboImportedSubmission(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True, db_index=True, null=True, blank=True)
-    kobo_submission_uuid = models.UUIDField()
-    kobo_asset_id = models.CharField(max_length=150)
-    kobo_submission_time = models.DateTimeField()
-    # we use on_delete=models.SET_NULL because we want to be able to delete
-    # Household without loosing track of importing
-    imported_household = models.ForeignKey("household.Household", blank=True, null=True, on_delete=models.SET_NULL)
-    amended = models.BooleanField(default=False, blank=True)
-
-    registration_data_import = models.ForeignKey(
-        RegistrationDataImport,
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE,
-    )
-
-
 class RegistrationDataImportDatahub(TimeStampedUUIDModel):
     LOADING = "LOADING"
     NOT_STARTED = "NOT_STARTED"
@@ -741,3 +723,21 @@ class ImportedBankAccountInfo(TimeStampedUUIDModel):
         if self.debit_card_number:
             self.debit_card_number = str(self.debit_card_number).replace(" ", "")
         super().save(*args, **kwargs)
+
+
+class KoboImportedSubmission(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True, null=True, blank=True)
+    kobo_submission_uuid = models.UUIDField()
+    kobo_asset_id = models.CharField(max_length=150)
+    kobo_submission_time = models.DateTimeField()
+    # we use on_delete=models.SET_NULL because we want to be able to delete
+    # Household without loosing track of importing
+    imported_household = models.ForeignKey(ImportedHousehold, blank=True, null=True, on_delete=models.SET_NULL)
+    amended = models.BooleanField(default=False, blank=True)
+
+    registration_data_import = models.ForeignKey(
+        RegistrationDataImportDatahub,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+    )
