@@ -10,12 +10,12 @@ import {
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import { IndividualsFilter } from '@components/population/IndividualsFilter';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { PeopleListTable } from '@containers/tables/people/PeopleListTable';
+import { PeopleFilter } from '@components/people/PeopleFilter';
 
 const initialFilter = {
   search: '',
@@ -63,7 +63,7 @@ export function PeoplePage(): React.ReactElement {
   return (
     <>
       <PageHeader title={t('People')} />
-      <IndividualsFilter
+      <PeopleFilter
         filter={filter}
         choicesData={individualChoicesData}
         setFilter={setFilter}

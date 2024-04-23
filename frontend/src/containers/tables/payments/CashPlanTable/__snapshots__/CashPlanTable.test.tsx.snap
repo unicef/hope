@@ -6,7 +6,7 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
     class="sc-iBdnpw dcYiFg"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN bNxSeJ css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN dTdCVM css-1ps6pg7-MuiPaper-root"
     >
       <div
         class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
@@ -417,7 +417,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
     class="sc-iBdnpw dcYiFg"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN bNxSeJ css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN dTdCVM css-1ps6pg7-MuiPaper-root"
     >
       <div
         class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"

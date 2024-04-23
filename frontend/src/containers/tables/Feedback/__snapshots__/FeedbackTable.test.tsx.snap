@@ -9,7 +9,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render loading 1`] = `
       class="sc-fsYfdN iJWUfq"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-qZrbh lhqvQi css-1ps6pg7-MuiPaper-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-qZrbh jpxerT css-1ps6pg7-MuiPaper-root"
       >
         <div
           class="MuiTableContainer-root sc-csKJxZ css-rorn0c-MuiTableContainer-root"

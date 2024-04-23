@@ -129,10 +129,30 @@ export const individualDetailed = gql`
     enrolledInNutritionProgramme
     administrationOfRutf
     household {
+      registrationDataImport {
+        name
+        dataSource
+        importDate
+        importedBy {
+          firstName
+          lastName
+          email
+          username
+        }
+      }
       status
       id
+      residenceStatus
       address
+      village
+      zipCode
+      geopoint
+      country
       countryOrigin
+      deliveredQuantities {
+        totalDeliveredQuantity
+        currency
+      }
       adminArea {
         id
         name
