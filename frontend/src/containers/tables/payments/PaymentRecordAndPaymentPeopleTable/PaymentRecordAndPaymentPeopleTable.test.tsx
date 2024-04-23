@@ -1,20 +1,19 @@
 import { MockedProvider } from '@apollo/react-testing';
 import { act } from '@testing-library/react';
-import * as React from 'react';
 import wait from 'waait';
 import { fakeApolloAllPaymentRecordsHousehold } from '../../../../../fixtures/payments/fakeApolloAllPaymentRecordsHousehold';
 import { fakeHousehold } from '../../../../../fixtures/population/fakeHousehold';
 import { render } from '../../../../testUtils/testUtils';
-import { PaymentRecordHouseholdTable } from '.';
+import { PaymentRecordAndPaymentPeopleTable } from '.';
 
-describe('containers/tables/payments/PaymentRecordHouseholdTable', () => {
+describe('containers/tables/payments/PaymentRecordAndPaymentPeopleTable', () => {
   it('should render with data', async () => {
     const { container } = render(
       <MockedProvider
         addTypename={false}
         mocks={fakeApolloAllPaymentRecordsHousehold}
       >
-        <PaymentRecordHouseholdTable
+        <PaymentRecordAndPaymentPeopleTable
           household={fakeHousehold}
           openInNewTab={false}
           businessArea="afghanistan"
@@ -33,7 +32,7 @@ describe('containers/tables/payments/PaymentRecordHouseholdTable', () => {
         addTypename={false}
         mocks={fakeApolloAllPaymentRecordsHousehold}
       >
-        <PaymentRecordHouseholdTable
+        <PaymentRecordAndPaymentPeopleTable
           household={fakeHousehold}
           openInNewTab={false}
           businessArea="afghanistan"
