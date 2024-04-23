@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-import pytest
+from django.core.cache import cache
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
 from hct_mis_api.apps.account.models import UserRole
@@ -120,8 +120,8 @@ class TestCrossAreaFilter(APITestCase):
             cls.partner_with_area_restrictions, cls.program, [cls.admin_area1, cls.admin_area2]
         )
 
-    @pytest.mark.skip(reason="This test has never worked with pytest")
     def test1_cross_area_filter_true_full_area_access_without_permission(self) -> None:
+        cache.clear()
         user_without_permission = UserFactory(partner=self.partner_without_area_restrictions)
         self.create_user_role_with_permissions(
             user_without_permission,
@@ -208,8 +208,8 @@ class TestCrossAreaFilter(APITestCase):
             variables={"isCrossArea": None},
         )
 
-    @pytest.mark.skip(reason="unstable test")
-    def test_across_area_filter_true_but_area_restrictions(self) -> None:
+    def test_cross_area_filter_true_but_area_restrictions(self) -> None:
+        cache.clear()
         user_with_area_restrictions = UserFactory(partner=self.partner_with_area_restrictions)
         self.create_user_role_with_permissions(
             user_with_area_restrictions,
