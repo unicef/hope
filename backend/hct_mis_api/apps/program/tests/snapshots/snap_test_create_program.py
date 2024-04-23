@@ -24,6 +24,7 @@ snapshots['TestCreateProgram::test_create_program_authenticated_0_with_permissio
                 'description': 'my description of program',
                 'endDate': '2021-12-20',
                 'frequencyOfPayments': 'REGULAR',
+                'isSocialWorkerProgram': False,
                 'name': 'Test',
                 'populationGoal': 150000,
                 'sector': 'EDUCATION',
