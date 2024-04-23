@@ -11,9 +11,7 @@ from rest_framework.response import Response
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedIndividualRoleInHousehold,
-)
+from hct_mis_api.apps.registration_data.models import ImportedIndividualRoleInHousehold
 
 
 class DelegateSerializer(serializers.Serializer):

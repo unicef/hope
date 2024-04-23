@@ -24,14 +24,12 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
 )
 from hct_mis_api.apps.registration_data.models import (
-    RegistrationDataImport,
-    RegistrationDataImportDatahub,
-)
-from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
+    RegistrationDataImport,
+    RegistrationDataImportDatahub,
 )
 
 PEOPLE_TYPE_CHOICES = (

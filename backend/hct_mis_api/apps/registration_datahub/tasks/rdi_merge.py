@@ -27,17 +27,17 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
-from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
-from hct_mis_api.apps.registration_datahub.models import (
+from hct_mis_api.apps.registration_data.models import (
     ImportedBankAccountInfo,
     ImportedHousehold,
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
     KoboImportedSubmission,
+    RegistrationDataImport,
     RegistrationDataImportDatahub,
 )
+from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
+from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.signals import rdi_merged
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (

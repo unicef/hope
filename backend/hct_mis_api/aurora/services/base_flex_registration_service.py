@@ -13,14 +13,12 @@ from django.forms import modelform_factory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_data.models import (
     ImportData,
+    ImportedHousehold,
+    ImportedIndividual,
     RegistrationDataImport,
     RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.celery_tasks import rdi_deduplication_task
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedHousehold,
-    ImportedIndividual,
-)
 from hct_mis_api.aurora.celery_tasks import process_flex_records_task
 from hct_mis_api.aurora.models import Record, Registration
 from hct_mis_api.aurora.rdi import AuroraProcessor

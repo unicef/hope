@@ -29,7 +29,14 @@ from hct_mis_api.apps.household.models import (
     SON_DAUGHTER,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_data.models import (
+    ImportedBankAccountInfo,
+    ImportedDocument,
+    ImportedDocumentType,
+    ImportedHousehold,
+    ImportedIndividual,
+    RegistrationDataImport,
+)
 from hct_mis_api.apps.registration_datahub.celery_tasks import remove_old_rdi_links_task
 from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedBankAccountInfoFactory,
@@ -38,13 +45,6 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedHouseholdFactory,
     ImportedIndividualFactory,
     RegistrationDataImportDatahubFactory,
-)
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedBankAccountInfo,
-    ImportedDocument,
-    ImportedDocumentType,
-    ImportedHousehold,
-    ImportedIndividual,
 )
 from hct_mis_api.aurora.celery_tasks import (
     automate_rdi_creation_task,

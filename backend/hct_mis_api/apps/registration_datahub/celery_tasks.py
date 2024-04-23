@@ -10,12 +10,14 @@ from django.utils import timezone
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Document
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_data.models import (
+    ImportedHousehold,
+    RegistrationDataImport,
+)
 from hct_mis_api.apps.registration_datahub.exceptions import (
     AlreadyRunningException,
     WrongStatusException,
 )
-from hct_mis_api.apps.registration_datahub.models import ImportedHousehold
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
 )
@@ -142,7 +144,7 @@ def registration_kobo_import_task(
         )
     except Exception as e:
         logger.warning(e)
-        from hct_mis_api.apps.registration_datahub.models import (
+        from hct_mis_api.apps.registration_data.models import (
             RegistrationDataImportDatahub,
         )
 
@@ -160,7 +162,7 @@ def registration_kobo_import_task(
 def registration_kobo_import_hourly_task(self: Any) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
-        from hct_mis_api.apps.registration_datahub.models import (
+        from hct_mis_api.apps.registration_data.models import (
             RegistrationDataImportDatahub,
         )
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
@@ -193,7 +195,7 @@ def registration_kobo_import_hourly_task(self: Any) -> None:
 def registration_xlsx_import_hourly_task(self: Any) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
-        from hct_mis_api.apps.registration_datahub.models import (
+        from hct_mis_api.apps.registration_data.models import (
             RegistrationDataImportDatahub,
         )
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
@@ -264,7 +266,7 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
 @sentry_tags
 def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
     try:
-        from hct_mis_api.apps.registration_datahub.models import (
+        from hct_mis_api.apps.registration_data.models import (
             RegistrationDataImportDatahub,
         )
         from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (

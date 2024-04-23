@@ -3,7 +3,7 @@ from typing import Any
 from django.core.management import BaseCommand
 
 from hct_mis_api.apps.household.models import BankAccountInfo
-from hct_mis_api.apps.registration_datahub.models import ImportedBankAccountInfo
+from hct_mis_api.apps.registration_data.models import ImportedBankAccountInfo
 
 
 class Command(BaseCommand):

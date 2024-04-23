@@ -4,7 +4,7 @@ from django.core.management import BaseCommand
 from django.db.models import Q
 
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
+from hct_mis_api.apps.registration_data.models import ImportedIndividual
 
 
 def update_mis_unicef_id_individual_and_household() -> None:

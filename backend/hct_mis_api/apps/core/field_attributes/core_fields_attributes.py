@@ -89,8 +89,10 @@ from hct_mis_api.apps.household.models import (
     SEX_CHOICE,
     WORK_STATUS_CHOICE,
 )
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import COLLECT_TYPES
+from hct_mis_api.apps.registration_data.models import (
+    COLLECT_TYPES,
+    RegistrationDataImport,
+)
 
 logger = logging.getLogger(__name__)
 

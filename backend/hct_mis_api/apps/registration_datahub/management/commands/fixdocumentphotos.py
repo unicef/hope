@@ -4,7 +4,7 @@ from django.core.management import BaseCommand
 from django.db.models import F
 
 from hct_mis_api.apps.household.models import Document
-from hct_mis_api.apps.registration_datahub.models import ImportedDocument
+from hct_mis_api.apps.registration_data.models import ImportedDocument
 
 
 def fix_document_photos() -> None:

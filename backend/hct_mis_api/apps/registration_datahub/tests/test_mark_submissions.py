@@ -10,13 +10,10 @@ from django.utils import timezone
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import ImportData, KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedHouseholdFactory,
     RegistrationDataImportDatahubFactory,
-)
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportData,
-    KoboImportedSubmission,
 )
 from hct_mis_api.apps.registration_datahub.tasks.mark_submissions import MarkSubmissions
 

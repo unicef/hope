@@ -1,7 +1,7 @@
 from django.core.paginator import Paginator
 
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.registration_datahub.models import ImportedHousehold
+from hct_mis_api.apps.registration_data.models import ImportedHousehold
 
 
 def migrate_household_admin_area() -> None:

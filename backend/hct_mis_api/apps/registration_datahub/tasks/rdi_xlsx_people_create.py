@@ -16,14 +16,12 @@ from hct_mis_api.apps.core.utils import SheetImageLoader, serialize_flex_attribu
 from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
 from hct_mis_api.apps.registration_data.models import (
     ImportData,
-    RegistrationDataImport,
-    RegistrationDataImportDatahub,
-)
-from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
+    RegistrationDataImport,
+    RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (

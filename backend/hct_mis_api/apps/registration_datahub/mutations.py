@@ -24,6 +24,8 @@ from hct_mis_api.apps.core.validators import BaseValidator, raise_program_status
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import (
     ImportData,
+    ImportedHousehold,
+    ImportedIndividual,
     KoboImportData,
     RegistrationDataImport,
     RegistrationDataImportDatahub,
@@ -41,10 +43,6 @@ from hct_mis_api.apps.registration_datahub.documents import get_imported_individ
 from hct_mis_api.apps.registration_datahub.inputs import (
     RegistrationKoboImportMutationInput,
     RegistrationXlsxImportMutationInput,
-)
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedHousehold,
-    ImportedIndividual,
 )
 from hct_mis_api.apps.registration_datahub.schema import (
     ImportDataNode,

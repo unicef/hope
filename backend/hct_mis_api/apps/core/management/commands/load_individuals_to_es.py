@@ -13,12 +13,12 @@ from hct_mis_api.apps.household.documents import (
     IndividualDocumentUkraine,
 )
 from hct_mis_api.apps.household.models import Individual
+from hct_mis_api.apps.registration_data.models import ImportedIndividual
 from hct_mis_api.apps.registration_datahub.documents import (
     ImportedIndividualDocumentAfghanistan,
     ImportedIndividualDocumentOthers,
     ImportedIndividualDocumentUkraine,
 )
-from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 
 BATCH_SIZE = 1000
 

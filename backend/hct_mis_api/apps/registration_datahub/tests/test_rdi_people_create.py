@@ -12,13 +12,13 @@ from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_datahub.fixtures import (
-    RegistrationDataImportDatahubFactory,
-)
-from hct_mis_api.apps.registration_datahub.models import (
+from hct_mis_api.apps.registration_data.models import (
     ImportData,
     ImportedHousehold,
     ImportedIndividual,
+)
+from hct_mis_api.apps.registration_datahub.fixtures import (
+    RegistrationDataImportDatahubFactory,
 )
 from hct_mis_api.conftest import disabled_locally_test
 

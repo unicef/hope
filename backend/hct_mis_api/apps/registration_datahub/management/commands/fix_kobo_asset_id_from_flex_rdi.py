@@ -3,7 +3,7 @@ from typing import Any
 from django.core.management import BaseCommand
 from django.db.models import OuterRef, Subquery
 
-from hct_mis_api.apps.registration_datahub.models import (
+from hct_mis_api.apps.registration_data.models import (
     ImportedHousehold,
     ImportedIndividual,
 )

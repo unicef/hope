@@ -5,7 +5,7 @@ from django.core.management import BaseCommand
 from django.db import transaction
 
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
+from hct_mis_api.apps.registration_data.models import ImportedIndividual
 
 
 def update_birth_date() -> None:

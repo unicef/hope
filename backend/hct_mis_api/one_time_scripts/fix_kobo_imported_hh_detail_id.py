@@ -2,7 +2,7 @@ import logging
 
 from django.core.paginator import Paginator
 
-from hct_mis_api.apps.registration_datahub.models import (
+from hct_mis_api.apps.registration_data.models import (
     ImportedHousehold,
     KoboImportedSubmission,
 )

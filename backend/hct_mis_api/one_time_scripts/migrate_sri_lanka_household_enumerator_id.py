@@ -2,7 +2,7 @@ from django.db import transaction
 from django.db.models import Q
 
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.registration_datahub.models import ImportedHousehold
+from hct_mis_api.apps.registration_data.models import ImportedHousehold
 
 
 @transaction.atomic()
