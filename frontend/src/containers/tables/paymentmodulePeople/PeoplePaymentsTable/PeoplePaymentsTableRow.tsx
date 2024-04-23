@@ -66,8 +66,6 @@ export const PeoplePaymentsTableRow = ({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const paymentDetailsPath = `/${baseUrl}/payment-module/payments/${payment.id}`;
-  const individualDetailsPath = `/${baseUrl}/population/individuals/${payment.individual.id}`;
-  const collectorDetailsPath = `/${baseUrl}/population/individuals/${payment.collector.id}`;
 
   const handleDialogWarningOpen = (
     e: React.SyntheticEvent<HTMLDivElement>,
@@ -108,6 +106,9 @@ export const PeoplePaymentsTableRow = ({
     return <OrangeError />;
   };
 
+  const individual = payment?.household?.individuals?.edges?.[0]?.node;
+  const individualDetailsPath = `/${baseUrl}/population/individuals/${individual.id}`;
+
   return (
     <ClickableTableRow hover role="checkbox" key={payment.id}>
       <TableCell align="left">
@@ -132,24 +133,25 @@ export const PeoplePaymentsTableRow = ({
       <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={individualDetailsPath}>
-            {payment.individual.unicefId}
+            {individual.unicefId}
           </BlackLink>
         ) : (
-          payment.individual.unicefId
+          individual.unicefId
+        )}
+      </TableCell>
+      <TableCell align="left">
+        {canViewDetails ? (
+          <BlackLink to={individualDetailsPath}>
+            {individual.fullName}
+          </BlackLink>
+        ) : (
+          individual.fullName
         )}
       </TableCell>
       <TableCell align="left">
         {renderSomethingOrDash(payment.household.admin2?.name)}
       </TableCell>
-      <TableCell align="left">
-        {canViewDetails ? (
-          <BlackLink to={collectorDetailsPath}>
-            {payment.collector.fullName}
-          </BlackLink>
-        ) : (
-          payment.collector.fullName
-        )}
-      </TableCell>
+
       <TableCell align="left">
         {payment.financialServiceProvider
           ? payment.financialServiceProvider.name

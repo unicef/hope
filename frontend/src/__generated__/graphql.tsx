@@ -10274,7 +10274,7 @@ export type AllPaymentsForTableQueryVariables = Exact<{
 }>;
 
 
-export type AllPaymentsForTableQuery = { __typename?: 'Query', allPayments?: { __typename?: 'PaymentNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'PaymentNodeEdge', cursor: string, node?: { __typename?: 'PaymentNode', id: string, unicefId?: string | null, status: PaymentStatus, entitlementQuantity?: number | null, entitlementQuantityUsd?: number | null, currency: string, deliveredQuantity?: number | null, deliveredQuantityUsd?: number | null, paymentPlanHardConflicted?: boolean | null, paymentPlanSoftConflicted?: boolean | null, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, size?: number | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null }, paymentPlanHardConflictedData?: Array<{ __typename?: 'PaymentConflictDataNode', paymentPlanUnicefId?: string | null, paymentPlanId?: string | null, paymentPlanStartDate?: string | null, paymentPlanEndDate?: string | null, paymentPlanStatus?: string | null, paymentId?: string | null, paymentUnicefId?: string | null } | null> | null, paymentPlanSoftConflictedData?: Array<{ __typename?: 'PaymentConflictDataNode', paymentPlanUnicefId?: string | null, paymentPlanId?: string | null, paymentPlanStartDate?: string | null, paymentPlanEndDate?: string | null, paymentPlanStatus?: string | null, paymentId?: string | null, paymentUnicefId?: string | null } | null> | null, collector: { __typename?: 'IndividualNode', id: string, fullName: string }, financialServiceProvider?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null } | null> } | null };
+export type AllPaymentsForTableQuery = { __typename?: 'Query', allPayments?: { __typename?: 'PaymentNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'PaymentNodeEdge', cursor: string, node?: { __typename?: 'PaymentNode', id: string, unicefId?: string | null, status: PaymentStatus, entitlementQuantity?: number | null, entitlementQuantityUsd?: number | null, currency: string, deliveredQuantity?: number | null, deliveredQuantityUsd?: number | null, paymentPlanHardConflicted?: boolean | null, paymentPlanSoftConflicted?: boolean | null, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, size?: number | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null, individuals?: { __typename?: 'IndividualNodeConnection', edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string } | null } | null> } | null }, paymentPlanHardConflictedData?: Array<{ __typename?: 'PaymentConflictDataNode', paymentPlanUnicefId?: string | null, paymentPlanId?: string | null, paymentPlanStartDate?: string | null, paymentPlanEndDate?: string | null, paymentPlanStatus?: string | null, paymentId?: string | null, paymentUnicefId?: string | null } | null> | null, paymentPlanSoftConflictedData?: Array<{ __typename?: 'PaymentConflictDataNode', paymentPlanUnicefId?: string | null, paymentPlanId?: string | null, paymentPlanStartDate?: string | null, paymentPlanEndDate?: string | null, paymentPlanStatus?: string | null, paymentId?: string | null, paymentUnicefId?: string | null } | null> | null, collector: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, financialServiceProvider?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null } | null> } | null };
 
 export type CashPlanQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -18904,6 +18904,15 @@ export const AllPaymentsForTableDocument = gql`
             id
             name
           }
+          individuals {
+            edges {
+              node {
+                id
+                unicefId
+                fullName
+              }
+            }
+          }
         }
         entitlementQuantity
         entitlementQuantityUsd
@@ -18932,6 +18941,7 @@ export const AllPaymentsForTableDocument = gql`
         }
         collector {
           id
+          unicefId
           fullName
         }
         financialServiceProvider {

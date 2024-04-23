@@ -21,6 +21,14 @@ export const headCells: HeadCell<
     label: 'Individual Id',
     id: 'individual__unicef_id',
     numeric: false,
+    disableSort: true,
+  },
+  {
+    disablePadding: false,
+    label: 'Individual Name',
+    id: 'individual__full_name',
+    numeric: false,
+    disableSort: true,
   },
   {
     disablePadding: false,
@@ -32,12 +40,6 @@ export const headCells: HeadCell<
     disablePadding: false,
     label: 'Administrative Level 2',
     id: 'household__admin2__name',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
-    label: 'Collector',
-    id: 'collector_id',
     numeric: false,
   },
   {

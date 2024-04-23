@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] = `
+exports[`containers/tables/payments/PeoplePaymentPlansTable should render loading 1`] = `
 <div>
   <div
     class="sc-iBdnpw dcYiFg"
@@ -119,7 +119,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                   role="button"
                   tabindex="0"
                 >
-                  Num. of Households
+                  Num. of People
                   <svg
                     aria-hidden="true"
                     class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
@@ -478,7 +478,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
 </div>
 `;
 
-exports[`containers/tables/payments/PaymentPlansTable should render with data 1`] = `
+exports[`containers/tables/payments/PeoplePaymentPlansTable should render with data 1`] = `
 <div>
   <div
     class="sc-iBdnpw dcYiFg"
@@ -597,7 +597,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                   role="button"
                   tabindex="0"
                 >
-                  Num. of Households
+                  Num. of People
                   <svg
                     aria-hidden="true"
                     class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
