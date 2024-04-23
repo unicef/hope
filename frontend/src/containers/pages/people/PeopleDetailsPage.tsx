@@ -262,7 +262,8 @@ export function PeopleDetailsPage(): React.ReactElement {
                 </Grid>
                 <Grid item xs={3}>
                   <LabelizedField label={t('Device ID')}>
-                    {household?.deviceid}
+                    {/* //TODO: Figure it out. deviceId removed from the model? */}
+                    {/* {household?.deviceid} */} -
                   </LabelizedField>
                 </Grid>
               </Grid>

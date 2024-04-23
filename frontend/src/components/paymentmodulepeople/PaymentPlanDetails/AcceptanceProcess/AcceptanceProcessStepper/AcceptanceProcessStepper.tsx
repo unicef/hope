@@ -1,15 +1,10 @@
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
-import CancelIcon from '@mui/icons-material/Cancel';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { PaymentPlanQuery } from '@generated/graphql';
-
-const StyledCancelIcon = styled(CancelIcon)`
-  color: #e90202;
-`;
 
 interface AcceptanceProcessStepperProps {
   acceptanceProcess: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'][0]['node'];
@@ -64,12 +59,7 @@ export function AcceptanceProcessStepper({
     <Stepper activeStep={getActiveStep()}>
       {steps.map((step) => (
         <Step completed={step.isCompleted} key={step.name}>
-          <StepLabel
-            error={step.hasError}
-            StepIconComponent={step.hasError ? StyledCancelIcon : null}
-          >
-            {step.name}
-          </StepLabel>
+          <StepLabel error={step.hasError}>{step.name}</StepLabel>
         </Step>
       ))}
     </Stepper>

@@ -72,6 +72,10 @@ export const individualMinimal = gql`
           }
         }
       }
+      totalCashReceivedUsd
+      lastRegistrationDate
+      start
+      firstRegistrationDate
     }
   }
 `;
