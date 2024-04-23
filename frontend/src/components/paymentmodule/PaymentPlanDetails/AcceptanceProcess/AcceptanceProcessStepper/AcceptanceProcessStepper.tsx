@@ -6,6 +6,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { PaymentPlanQuery } from '@generated/graphql';
+import { StepIconProps } from '@mui/material';
 
 const StyledCancelIcon = styled(CancelIcon)`
   color: #e90202;
@@ -14,6 +15,11 @@ const StyledCancelIcon = styled(CancelIcon)`
 interface AcceptanceProcessStepperProps {
   acceptanceProcess: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'][0]['node'];
 }
+
+const StepIconWrapper: React.FC<StepIconProps> = (props) => {
+  const { error } = props;
+  return error ? <StyledCancelIcon /> : null;
+};
 
 export function AcceptanceProcessStepper({
   acceptanceProcess,
@@ -66,7 +72,7 @@ export function AcceptanceProcessStepper({
         <Step completed={step.isCompleted} key={step.name}>
           <StepLabel
             error={step.hasError}
-            StepIconComponent={step.hasError ? StyledCancelIcon : null}
+            StepIconComponent={step.hasError ? StepIconWrapper : undefined}
           >
             {step.name}
           </StepLabel>
