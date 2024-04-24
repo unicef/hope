@@ -273,6 +273,21 @@ class TestHouseholdQuery(APITestCase):
             variables={"id": self.id_to_base64(self.households[0].id, "HouseholdNode")},
         )
 
+    def test_household_query_single_different_program_in_header(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=HOUSEHOLD_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_one.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"id": self.id_to_base64(self.households[0].id, "HouseholdNode")},
+        )
+
     def test_household_query_draft(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area

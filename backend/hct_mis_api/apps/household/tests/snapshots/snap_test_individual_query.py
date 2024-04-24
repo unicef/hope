@@ -48,6 +48,26 @@ snapshots['TestIndividualQuery::test_individual_query_single_1_without_permissio
     ]
 }
 
+snapshots['TestIndividualQuery::test_individual_query_single_different_program_in_header 1'] = {
+    'data': {
+        'individual': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'individual'
+            ]
+        }
+    ]
+}
+
 snapshots['TestIndividualQuery::test_query_individuals_by_admin2_0_with_permission 1'] = {
     'data': {
         'allIndividuals': {

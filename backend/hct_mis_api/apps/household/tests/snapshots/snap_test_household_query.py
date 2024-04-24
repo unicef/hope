@@ -216,6 +216,26 @@ snapshots['TestHouseholdQuery::test_household_query_single_1_without_permission 
     ]
 }
 
+snapshots['TestHouseholdQuery::test_household_query_single_different_program_in_header 1'] = {
+    'data': {
+        'household': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'household'
+            ]
+        }
+    ]
+}
+
 snapshots['TestHouseholdQuery::test_query_households_by_national_id_no_filter_0_with_permission 1'] = {
     'data': {
         'allHouseholds': {
