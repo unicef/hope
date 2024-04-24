@@ -151,6 +151,12 @@ type ApprovalProcessNodeEdge {
   cursor: String!
 }
 
+type AreaGroupNode {
+  ids: [ID]
+  level: Int
+  totalCount: Int
+}
+
 type AreaNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -3579,7 +3585,6 @@ input ProgramPartnerThroughInput {
   areas: [String]
   areaAccess: String
 }
-
 enum ProgramScope {
   FOR_PARTNERS
   UNICEF
@@ -4462,6 +4467,7 @@ type TargetPopulationNode implements Node {
   householdList(offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   totalHouseholdsCountWithValidPhoneNo: Int
   hasEmptyCriteria: Boolean
+  hasEmptyIdsCriteria: Boolean
 }
 
 type TargetPopulationNodeConnection {
@@ -4496,6 +4502,8 @@ type TargetingCriteriaNode {
   updatedAt: DateTime!
   flagExcludeIfActiveAdjudicationTicket: Boolean!
   flagExcludeIfOnSanctionList: Boolean!
+  householdIds: String!
+  individualIds: String!
   targetPopulation: TargetPopulationNode
   rules: [TargetingCriteriaRuleNode]
 }
@@ -4504,6 +4512,8 @@ input TargetingCriteriaObjectType {
   rules: [TargetingCriteriaRuleObjectType]
   flagExcludeIfActiveAdjudicationTicket: Boolean
   flagExcludeIfOnSanctionList: Boolean
+  householdIds: String
+  individualIds: String
 }
 
 enum TargetingCriteriaRuleFilterComparisonMethod {
