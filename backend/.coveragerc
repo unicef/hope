@@ -7,6 +7,8 @@ omit =
         */tests/**
         */migrations/*,
         */apps.py,
+        */admin/*.py
+        */admin.py
         hct_mis_api/one_time_scripts/*,
         hct_mis_api/libs/*,
         hct_mis_api/settings/*,
@@ -29,6 +31,7 @@ exclude_lines =
     # Don't complain if non-runnable code isn't run:
     #if 0:
     if __name__ == .__main__.:
+    if TYPE_CHECKING
 
 fail_under = 20
 
