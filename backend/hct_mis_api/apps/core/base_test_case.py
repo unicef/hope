@@ -25,7 +25,7 @@ from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_CHOICE, Docume
 from hct_mis_api.apps.program.models import ProgramPartnerThrough
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no_cover
     from hct_mis_api.apps.account.models import Partner, User
     from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.geo.models import Area

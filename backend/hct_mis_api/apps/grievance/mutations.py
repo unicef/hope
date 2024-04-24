@@ -591,8 +591,6 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
             if isinstance(grievance_ticket.ticket_details, TicketNeedsAdjudicationDetails):
                 partner = user.partner
-                if partner is None:
-                    raise PermissionDenied("Permission Denied: User does not have set partner")
 
                 if not partner.is_unicef:
                     for selected_individual in grievance_ticket.ticket_details.selected_individuals.all():
@@ -1185,9 +1183,6 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
 
         user = info.context.user
         partner = user.partner
-
-        if partner is None:
-            raise PermissionDenied("Permission Denied: User does not have set partner")
 
         if selected_individual_id and selected_individual_ids:
             log_and_raise("Only one option for selected individuals is available")
