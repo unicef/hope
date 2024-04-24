@@ -147,9 +147,11 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
         context["program_area_formset"] = partner_area_form_set
         context["business_area"] = program.business_area
         context["areas"] = Area.objects.filter(area_type__country__business_areas__id=program.business_area.id)
-        context["partners"] = Partner.objects.filter(
-            Q(allowed_business_areas=program.business_area) | Q(name="UNICEF")
-        ).order_by("name")
+        context["partners"] = (
+            Partner.objects.filter(Q(allowed_business_areas=program.business_area))
+            .exclude(name="UNICEF")
+            .order_by("name")
+        )
         context["program"] = program
         context["unicef_partner_id"] = Partner.objects.get(name="UNICEF").id
 

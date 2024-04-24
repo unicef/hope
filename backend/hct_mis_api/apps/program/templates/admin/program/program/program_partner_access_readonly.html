@@ -48,12 +48,15 @@
                                 <td class="field-partner">
                                     {{ form.partner.errors.as_ul }}
                                     <select name="program_areas-{{  forloop.counter0 }}-partner" id="id_program_areas-{{ forloop.counter0 }}-partner" disabled>
-                                        <option value > --------- {{ form.partner.value }} </option>
+                                    {% if form.partner.value == unicef_partner_id %}
+                                        <option value={{ unicef_partner_id }} selected> UNICEF </option>
+                                    {% else %}
+                                        <option value > --------- </option>
                                         {%  for partner in partners %}
-                                           <option value={{ partner.id }} {% if partner.id == form.partner.value %} selected {% endif %}> {{ partner.name }}</option>
+                                            <option value={{ partner.id }} {% if partner.id == form.partner.value %} selected{% endif %}> {{ partner.name }}</option>
                                         {% endfor %}
+                                    {% endif %}
                                     </select>
-                                </td>
                                 <td class="field-areas">
                                     {{ form.areas.errors.as_ul }}
                                     <div class="field-areas-container">
