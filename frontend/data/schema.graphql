@@ -941,6 +941,7 @@ type DeliveryMechanismNode implements Node {
   deliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism
   deliveryMechanismOrder: Int!
   sentToPaymentGateway: Boolean!
+  chosenConfiguration: String
   name: String
   order: Int
   fsp: FinancialServiceProviderNode
@@ -970,6 +971,7 @@ enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   TRANSFER
   TRANSFER_TO_ACCOUNT
   VOUCHER
+  CASH_OVER_THE_COUNTER
 }
 
 type DiscardPaymentVerificationPlan {
@@ -1123,6 +1125,7 @@ type ExportXlsxPaymentVerificationPlanFile {
 input FSPToDeliveryMechanismMappingInput {
   fspId: ID!
   deliveryMechanism: String!
+  chosenConfiguration: String
   order: Int!
 }
 
@@ -1306,11 +1309,18 @@ scalar FlexFieldsScalar
 type FspChoice {
   id: String
   name: String
+  configurations: [FspConfiguration]
 }
 
 type FspChoices {
   deliveryMechanism: String
   fsps: [FspChoice]
+}
+
+type FspConfiguration {
+  id: String
+  key: String
+  label: String
 }
 
 input FullListArguments {
@@ -2850,6 +2860,7 @@ enum PaymentDeliveryType {
   TRANSFER
   TRANSFER_TO_ACCOUNT
   VOUCHER
+  CASH_OVER_THE_COUNTER
 }
 
 type PaymentDetailsApproveMutation {
@@ -3233,6 +3244,7 @@ enum PaymentRecordDeliveryType {
   TRANSFER
   TRANSFER_TO_ACCOUNT
   VOUCHER
+  CASH_OVER_THE_COUNTER
 }
 
 enum PaymentRecordEntitlementCardStatus {
@@ -3519,7 +3531,7 @@ type ProgramNode implements Node {
   householdCount: Int!
   individualCount: Int!
   programmeCode: String
-  partnerAccess: ProgramPartnerAccess
+  partnerAccess: ProgramPartnerAccess!
   partners: [PartnerNode]
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
@@ -3541,6 +3553,7 @@ type ProgramNode implements Node {
   totalUndeliveredQuantity: Decimal
   totalNumberOfHouseholds: Int
   totalNumberOfHouseholdsWithTpInProgram: Int
+  isSocialWorkerProgram: Boolean
 }
 
 type ProgramNodeConnection {

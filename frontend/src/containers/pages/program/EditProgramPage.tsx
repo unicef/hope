@@ -21,7 +21,10 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { decodeIdString } from '@utils/utils';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { hasPermissionInModule, PERMISSIONS } from '../../../config/permissions';
+import {
+  hasPermissionInModule,
+  PERMISSIONS,
+} from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 
 export const EditProgramPage = (): ReactElement => {
@@ -95,7 +98,11 @@ export const EditProgramPage = (): ReactElement => {
       : 0;
     const partnersToSet =
       values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess
-        ? values.partners
+        ? values.partners.map(({ id, areas, areaAccess }) => ({
+            partner: id,
+            areas: areaAccess === 'ADMIN_AREA' ? areas : [],
+            areaAccess,
+          }))
         : [];
 
     try {
@@ -133,7 +140,7 @@ export const EditProgramPage = (): ReactElement => {
     frequencyOfPayments,
     partners: partners.map((partner) => ({
       id: partner.id,
-      areas: partner.areas.map((area) => area.id),
+      areas: partner.areas.map((area) => decodeIdString(area.id)),
       areaAccess: partner.areaAccess,
     })),
     partnerAccess,

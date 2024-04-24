@@ -3,7 +3,8 @@ import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  AllProgramsForChoicesDocument, ProgramPartnerAccess,
+  AllProgramsForChoicesDocument,
+  ProgramPartnerAccess,
   useAllAreasTreeQuery,
   useCreateProgramMutation,
   useUserPartnerChoicesQuery,
@@ -16,10 +17,14 @@ import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
 import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { hasPermissionInModule, PERMISSIONS } from '../../../config/permissions';
+import {
+  hasPermissionInModule,
+  PERMISSIONS,
+} from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { useNavigate } from 'react-router-dom';
+import { decodeIdString } from '@utils/utils';
 
 export const CreateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -52,7 +57,11 @@ export const CreateProgramPage = (): ReactElement => {
       : 0;
     const partnersToSet =
       values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess
-        ? values.partners
+        ? values.partners.map(({ id, areas, areaAccess }) => ({
+            partner: id,
+            areas,
+            areaAccess,
+          }))
         : [];
 
     try {

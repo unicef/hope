@@ -4,7 +4,8 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  AllProgramsForChoicesDocument, ProgramPartnerAccess,
+  AllProgramsForChoicesDocument,
+  ProgramPartnerAccess,
   useAllAreasTreeQuery,
   useCopyProgramMutation,
   useProgramQuery,
@@ -18,8 +19,12 @@ import { programValidationSchema } from '@components/programs/CreateProgram/prog
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { hasPermissionInModule, PERMISSIONS } from '../../../config/permissions';
+import {
+  hasPermissionInModule,
+  PERMISSIONS,
+} from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
+import { decodeIdString } from '@utils/utils';
 
 export const DuplicateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -48,7 +53,11 @@ export const DuplicateProgramPage = (): ReactElement => {
       : 0;
     const partnersToSet =
       values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess
-        ? values.partners
+        ? values.partners.map(({ id, areas, areaAccess }) => ({
+            partner: id,
+            areas: areaAccess === 'ADMIN_AREA' ? areas : [],
+            areaAccess,
+          }))
         : [];
 
     try {
@@ -111,7 +120,7 @@ export const DuplicateProgramPage = (): ReactElement => {
     frequencyOfPayments,
     partners: partners.map((partner) => ({
       id: partner.id,
-      areas: partner.areas,
+      areas: partner.areas.map((area) => decodeIdString(area.id)),
       areaAccess: partner.areaAccess,
     })),
     partnerAccess,
