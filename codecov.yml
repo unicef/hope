@@ -9,3 +9,6 @@ coverage:
     patch:
       default:
         target: 95%
+
+ignore:
+  - "backend/hct_mist_api/config/*"
