@@ -107,7 +107,7 @@ disabled_locally_test = pytest.mark.skip(
 @pytest.fixture(scope="session")
 def django_elasticsearch_setup(request: pytest.FixtureRequest) -> None:
     xdist_suffix = getattr(request.config, "workerinput", {}).get("workerid")
-    if xdist_suffix:
+    if xdist_suffix:  # pragma: no cover
         # Put a suffix like _gw0, _gw1 etc on xdist processes
         _set_suffix_to_test_elasticsearch(suffix=xdist_suffix)
 
