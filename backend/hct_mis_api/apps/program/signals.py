@@ -27,11 +27,7 @@ pre_save_full_area_access_flag_change = Signal(providing_args=["old_full_area_ac
 
 @receiver(pre_save, sender=Program)
 def track_old_partner_access(sender: Any, instance: Program, **kwargs: Any) -> None:
-    try:
-        old_instance = Program.objects.get(pk=instance.pk)
-        old_partner_access = old_instance.partner_access
-    except Program.DoesNotExist:
-        old_partner_access = None
+    old_partner_access = getattr(Program.objects.filter(pk=instance.pk).first(), "partner_access", None)
 
     instance.old_partner_access = old_partner_access
     pre_save_partner_access_change.send(sender=sender, instance=instance, old_partner_access=old_partner_access)
@@ -56,11 +52,9 @@ def handle_partner_access_change(sender: Any, instance: Program, created: bool, 
 
 @receiver(pre_save, sender=ProgramPartnerThrough)
 def track_old_full_area_access_flag(sender: Any, instance: ProgramPartnerThrough, **kwargs: Any) -> None:
-    try:
-        old_instance = ProgramPartnerThrough.objects.get(pk=instance.pk)
-        old_full_area_access_flag = old_instance.full_area_access
-    except ProgramPartnerThrough.DoesNotExist:
-        old_full_area_access_flag = None
+    old_full_area_access_flag = getattr(
+        ProgramPartnerThrough.objects.filter(pk=instance.pk).first(), "full_area_access", None
+    )
 
     instance.old_full_area_access_flag = old_full_area_access_flag
     pre_save_full_area_access_flag_change.send(

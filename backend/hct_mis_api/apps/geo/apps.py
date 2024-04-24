@@ -5,4 +5,4 @@ class Config(AppConfig):
     name = "hct_mis_api.apps.geo"
 
     def ready(self) -> None:
-        from hct_mis_api.apps.geo import signals as area_signals  # noqa: F401
+        import hct_mis_api.apps.geo.signals  # noqa: F401

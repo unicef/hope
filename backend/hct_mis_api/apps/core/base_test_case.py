@@ -132,11 +132,11 @@ class APITestCase(SnapshotTestTestCase):
     def add_partner_role_in_business_area(
         partner: "Partner", business_area: "BusinessArea", roles: List["Role"]
     ) -> None:
-        business_area_partner_through = BusinessAreaPartnerThrough.objects.create(
+        business_area_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
             business_area=business_area,
             partner=partner,
         )
-        business_area_partner_through.roles.set(roles)
+        business_area_partner_through.roles.add(*roles)
 
     @classmethod
     def create_partner_role_with_permissions(
@@ -148,13 +148,13 @@ class APITestCase(SnapshotTestTestCase):
         areas: Optional[List["Area"]] = None,
         name: Optional[str] = "Partner Role with Permissions",
     ) -> None:
-        business_area_partner_through = BusinessAreaPartnerThrough.objects.create(
+        business_area_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
             business_area=business_area,
             partner=partner,
         )
         permission_list = [perm.value for perm in permissions]
         role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})
-        business_area_partner_through.roles.set([role])
+        business_area_partner_through.roles.add(role)
         if program:
             cls.update_partner_access_to_program(partner, program, areas)
 

@@ -9,3 +9,7 @@ coverage:
     patch:
       default:
         target: 95%
+
+ignore:
+  - "**/admin/*.py"
+  - "**/admin.py"

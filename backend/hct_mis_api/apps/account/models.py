@@ -153,11 +153,11 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
         )
 
     def add_roles_in_business_area(self, business_area_id: str, roles: List["Role"]) -> None:
-        business_area_partner_through = BusinessAreaPartnerThrough.objects.get_or_create(
+        business_area_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
             partner=self,
             business_area_id=business_area_id,
         )
-        business_area_partner_through.roles.add(roles)
+        business_area_partner_through.roles.add(*roles)
 
 
 class User(AbstractUser, NaturalKeyModel, UUIDModel):
