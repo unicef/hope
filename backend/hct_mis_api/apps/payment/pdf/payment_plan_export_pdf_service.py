@@ -24,6 +24,7 @@ class PaymentPlanPDFExportSevice:
         self.payment_plan = payment_plan
         self.download_link: str = ""
         self.payment_plan_link: str = ""
+        self.is_social_worker_program = payment_plan.program.is_social_worker_program
 
     @staticmethod
     def get_link(api_url: Optional[str] = None) -> str:
@@ -58,7 +59,10 @@ class PaymentPlanPDFExportSevice:
 
     def generate_pdf_summary(self) -> Any:
         self.generate_web_links()
-        template_name = "payment/payment_plan_summary_pdf_template.html"
+        if self.is_social_worker_program:
+            template_name = "payment/people_payment_plan_summary_pdf_template.html"
+        else:
+            template_name = "payment/payment_plan_summary_pdf_template.html"
         filename = f"PaymentPlanSummary-{self.payment_plan.unicef_id}.pdf"
         delivery_mechanism_per_payment_plan = self.payment_plan.delivery_mechanisms.select_related(
             "financial_service_provider"
