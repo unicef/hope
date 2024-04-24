@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type
 from django.db.models import Model
 
 from django_elasticsearch_dsl.registries import registry
-from elasticsearch_dsl import Search, connections
+from elasticsearch_dsl import connections
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +28,7 @@ def _create(models: Optional[List[Model]]) -> None:
     import elasticsearch
 
     for index in registry.get_indices(models):
+        logger.info(f"Creating index {index._name}")
         try:
             index.create()
         except elasticsearch.exceptions.RequestError:  # pragma: no cover
@@ -71,9 +72,7 @@ def delete_all_indexes() -> None:
 
 def remove_elasticsearch_documents_by_matching_ids(id_list: List[str], document: "Type[Document]") -> None:
     query_dict = {"query": {"terms": {"_id": [str(_id) for _id in id_list]}}}
-    search = Search(index=document.Index.name)
-    search.update_from_dict(query_dict)
-    search.delete()
+    document.search().params(search_type="dfs_query_then_fetch").update_from_dict(query_dict).delete()
 
 
 class HealthStatus(enum.Enum):
