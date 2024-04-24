@@ -582,7 +582,11 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
     class Meta:
         verbose_name = "Payment Plan"
         ordering = ["created_at"]
-        constraints = [models.UniqueConstraint(fields=["name", "program"], name="name_unique_per_program")]
+        constraints = [
+            UniqueConstraint(
+                fields=["name", "program", "is_removed"], condition=Q(is_removed=False), name="name_unique_per_program"
+            )
+        ]
 
     def __str__(self) -> str:
         return self.unicef_id or ""
