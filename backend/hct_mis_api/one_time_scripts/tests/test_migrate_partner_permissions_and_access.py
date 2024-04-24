@@ -32,7 +32,13 @@ class TestMigratePartnerPermissionsAndAccess(TestCase):
         country_afg = CountryFactory(name="Afghanistan")
         country_afg.business_areas.set([cls.afghanistan])
         area_type_afg = AreaTypeFactory(name="Area Type in Afg", country=country_afg)
-        country_ukr = CountryFactory(name="Ukraine")
+        country_ukr = CountryFactory(
+            name="Ukraine",
+            short_name="Ukraine",
+            iso_code2="UA",
+            iso_code3="UKR",
+            iso_num="0804",
+        )
         country_ukr.business_areas.set([cls.ukraine])
         area_type_ukr = AreaTypeFactory(name="Area Type in Ukr", country=country_ukr)
 
