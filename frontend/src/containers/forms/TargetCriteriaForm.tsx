@@ -30,32 +30,7 @@ import { DialogFooter } from '../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../dialogs/DialogTitleWrapper';
 import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
 import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
-import { useProgramContext } from '../../programContext';
-
-const AndDividerLabel = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 500;
-  color: #253b46;
-  text-transform: uppercase;
-  padding: 5px;
-  border: 1px solid #b1b1b5;
-  border-radius: 50%;
-  background-color: #fff;
-`;
-const AndDivider = styled.div`
-  border-top: 1px solid #b1b1b5;
-  margin: ${({ theme }) => theme.spacing(10)} 0;
-  position: relative;
-`;
+import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
 
 const ButtonBox = styled.div`
   width: 300px;
@@ -123,13 +98,11 @@ export const TargetCriteriaForm = ({
   householdFiltersAvailable,
 }: TargetCriteriaFormPropTypes): React.ReactElement => {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
-  const {
-    selectedProgram: { id },
-  } = useProgramContext();
+  const { businessArea, programId } = useBaseUrl();
+
   const { data, loading } = useCachedImportedIndividualFieldsQuery(
     businessArea,
-    id,
+    programId,
   );
 
   const filtersArrayWrapperRef = useRef(null);
@@ -153,6 +126,9 @@ export const TargetCriteriaForm = ({
     };
     setHouseholdData(filteredHouseholdData);
   }, [data, loading]);
+
+  if (!data) return null;
+
   const validate = ({
     filters,
     individualsFiltersBlocks,
