@@ -151,12 +151,6 @@ type ApprovalProcessNodeEdge {
   cursor: String!
 }
 
-type AreaGroupNode {
-  ids: [ID]
-  level: Int
-  totalCount: Int
-}
-
 type AreaNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -3585,6 +3579,7 @@ input ProgramPartnerThroughInput {
   areas: [String]
   areaAccess: String
 }
+
 enum ProgramScope {
   FOR_PARTNERS
   UNICEF
