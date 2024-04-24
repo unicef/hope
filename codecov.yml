@@ -11,4 +11,4 @@ coverage:
         target: 95%
 
 ignore:
-  - "backend/hct_mist_api/config/*"
+  - "**/settings.py"
