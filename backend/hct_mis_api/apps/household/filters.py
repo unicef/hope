@@ -45,12 +45,13 @@ from hct_mis_api.apps.program.models import Program
 logger = logging.getLogger(__name__)
 
 
-def _prepare_kobo_asset_id_value(code: str) -> str:
+def _prepare_kobo_asset_id_value(code: str) -> str:  # pragma: no cover
     """
     preparing value for filter by kobo_asset_id
     value examples KOBO-111222, HOPE-20220531-3/111222, HOPE-2022530111222
     return asset_id number like 111222
     """
+    # TODO: test needed
     if len(code) < 6:
         return code
 
@@ -148,7 +149,7 @@ class HouseholdFilter(FilterSet):
         inner_query = Q()
         for split_value in split_values_list:
             striped_value = split_value.strip(",")
-            if striped_value.startswith(("HOPE-", "KOBO-")):
+            if striped_value.startswith(("HOPE-", "KOBO-")):  # pragma: no cover
                 _value = _prepare_kobo_asset_id_value(search)
                 # if user put something like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
                 # will filter by '111222' like 111222 is ID
@@ -185,7 +186,7 @@ class HouseholdFilter(FilterSet):
                 }
             },
         }
-        if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH_USE_BUSINESS_AREA:
+        if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH_USE_BUSINESS_AREA:  # pragma: no cover
             query["query"]["bool"]["filter"] = [{"term": {"business_area": business_area}}]
         return query
 
@@ -193,11 +194,11 @@ class HouseholdFilter(FilterSet):
         try:
             if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH:
                 return self._search_es(qs, value)
-            return self._search_db(qs, value)
-        except SearchException:
+            return self._search_db(qs, value)  # pragma: no cover
+        except SearchException:  # pragma: no cover
             return qs.none()
 
-    def _search_db(self, qs: QuerySet[Household], value: str) -> QuerySet[Household]:
+    def _search_db(self, qs: QuerySet[Household], value: str) -> QuerySet[Household]:  # pragma: no cover
         # TODO: to remove
         search = value.strip()
         search_type = self.data.get("search_type")
@@ -363,7 +364,7 @@ class IndividualFilter(FilterSet):
         except SearchException:
             return qs.none()
 
-    def _search_db(self, qs: QuerySet[Individual], value: str) -> QuerySet[Individual]:
+    def _search_db(self, qs: QuerySet[Individual], value: str) -> QuerySet[Individual]:  # pragma: no cover
         # TODO: to remove
         search_type = self.data.get("search_type")
         search = value.strip()

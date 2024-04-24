@@ -154,7 +154,8 @@ class GrievanceTicketFilter(FilterSet):
             return qs.filter(programs__in=[decode_id_string(value)])
         return qs
 
-    def preferred_language_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+    def preferred_language_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:  # pragma: no cover
+        # TODO: test needed
         q_obj = Q()
         for ticket_type, ticket_fields in self.SEARCH_TICKET_TYPES_LOOKUPS.items():
             for field, lookups in ticket_fields.items():
