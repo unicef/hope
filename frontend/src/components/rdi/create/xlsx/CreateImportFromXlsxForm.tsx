@@ -13,6 +13,7 @@ import {
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
 import { DropzoneField } from './DropzoneField';
 import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
@@ -58,6 +59,7 @@ export function CreateImportFromXlsxForm({
             name: values.name,
             screenBeneficiary: values.screenBeneficiary,
             businessAreaSlug: businessArea,
+            allowDeliveryMechanismsValidationErrors: values.allowDeliveryMechanismsValidationErrors,
           },
         },
       });
@@ -75,6 +77,7 @@ export function CreateImportFromXlsxForm({
       name: '',
       screenBeneficiary: false,
       file: null,
+      allowDeliveryMechanismsValidationErrors: false,
     },
     validationSchema,
     onSubmit,
@@ -99,7 +102,7 @@ export function CreateImportFromXlsxForm({
     setSubmitForm(formik.submitForm);
   }, [formik.submitForm]);
   useEffect(() => {
-    if (xlsxImportData?.status === ImportDataStatus.Finished) {
+    if (xlsxImportData?.status === ImportDataStatus.Finished || formik.values.allowDeliveryMechanismsValidationErrors && ImportDataStatus.DeliveryMechanismsValidationError) {
       setSubmitDisabled(false);
     }
   }, [xlsxImportData]);
@@ -115,6 +118,16 @@ export function CreateImportFromXlsxForm({
           required
           variant="outlined"
           component={FormikTextField}
+        />
+      </Box>
+      <Box mt={2}>
+        <Field
+          name="allowDeliveryMechanismsValidationErrors"
+          fullWidth
+          label={t('Allow Delivery Mechanisms Validation Errors')}
+          required
+          variant="outlined"
+          component={FormikCheckboxField}
         />
       </Box>
       <ScreenBeneficiaryField />

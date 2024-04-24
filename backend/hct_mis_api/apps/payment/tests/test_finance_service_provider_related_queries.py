@@ -2,6 +2,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxReportFactory,
@@ -10,7 +11,6 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxReport,
-    GenericPayment,
 )
 
 QUERY_FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATE = """
@@ -158,7 +158,7 @@ class TestFSPRelatedSchema(APITestCase):
         cls.fsp_1 = FinancialServiceProviderFactory(
             name="FSP_1",
             vision_vendor_number="149-69-3686",
-            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH],
+            delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH],
             distribution_limit=10_000,
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
         )
@@ -166,7 +166,7 @@ class TestFSPRelatedSchema(APITestCase):
         cls.fsp_2 = FinancialServiceProviderFactory(
             name="FSP_2",
             vision_vendor_number="666-69-3686",
-            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER],
+            delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER],
             distribution_limit=20_000,
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
         )

@@ -63,7 +63,9 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.managers import PaymentManager
+from hct_mis_api.apps.payment.models_mixins import DeliveryDataMixin
 from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.utils.models import (
@@ -256,49 +258,6 @@ class GenericPayment(TimeStampedUUIDModel):
         (ENTITLEMENT_CARD_STATUS_INACTIVE, _("Inactive")),
     )
 
-    DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL = "Cardless cash withdrawal"
-    DELIVERY_TYPE_CASH = "Cash"
-    DELIVERY_TYPE_CASH_BY_FSP = "Cash by FSP"
-    DELIVERY_TYPE_CHEQUE = "Cheque"
-    DELIVERY_TYPE_DEPOSIT_TO_CARD = "Deposit to Card"
-    DELIVERY_TYPE_MOBILE_MONEY = "Mobile Money"
-    DELIVERY_TYPE_PRE_PAID_CARD = "Pre-paid card"
-    DELIVERY_TYPE_REFERRAL = "Referral"
-    DELIVERY_TYPE_TRANSFER = "Transfer"
-    DELIVERY_TYPE_TRANSFER_TO_ACCOUNT = "Transfer to Account"
-    DELIVERY_TYPE_VOUCHER = "Voucher"
-    DELIVERY_TYPE_CASH_OVER_THE_COUNTER = "Cash over the counter"
-
-    DELIVERY_TYPES_IN_CASH = (
-        DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL,
-        DELIVERY_TYPE_CASH,
-        DELIVERY_TYPE_CASH_BY_FSP,
-        DELIVERY_TYPE_CHEQUE,
-        DELIVERY_TYPE_DEPOSIT_TO_CARD,
-        DELIVERY_TYPE_MOBILE_MONEY,
-        DELIVERY_TYPE_PRE_PAID_CARD,
-        DELIVERY_TYPE_REFERRAL,
-        DELIVERY_TYPE_TRANSFER,
-        DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
-        DELIVERY_TYPE_CASH_OVER_THE_COUNTER,
-    )
-    DELIVERY_TYPES_IN_VOUCHER = (DELIVERY_TYPE_VOUCHER,)
-
-    DELIVERY_TYPE_CHOICE = (
-        (DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL, _("Cardless cash withdrawal")),
-        (DELIVERY_TYPE_CASH, _("Cash")),
-        (DELIVERY_TYPE_CASH_BY_FSP, _("Cash by FSP")),
-        (DELIVERY_TYPE_CHEQUE, _("Cheque")),
-        (DELIVERY_TYPE_DEPOSIT_TO_CARD, _("Deposit to Card")),
-        (DELIVERY_TYPE_MOBILE_MONEY, _("Mobile Money")),
-        (DELIVERY_TYPE_PRE_PAID_CARD, _("Pre-paid card")),
-        (DELIVERY_TYPE_REFERRAL, _("Referral")),
-        (DELIVERY_TYPE_TRANSFER, _("Transfer")),
-        (DELIVERY_TYPE_TRANSFER_TO_ACCOUNT, _("Transfer to Account")),
-        (DELIVERY_TYPE_VOUCHER, _("Voucher")),
-        (DELIVERY_TYPE_CASH_OVER_THE_COUNTER, _("Cash over the counter")),
-    )
-
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     status = models.CharField(
         max_length=255,
@@ -308,7 +267,7 @@ class GenericPayment(TimeStampedUUIDModel):
     status_date = models.DateTimeField()
     household = models.ForeignKey("household.Household", on_delete=models.CASCADE)
     head_of_household = models.ForeignKey("household.Individual", on_delete=models.CASCADE, null=True)
-    delivery_type = models.CharField(choices=DELIVERY_TYPE_CHOICE, max_length=24, null=True)
+    delivery_type = models.CharField(choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES, max_length=24, null=True)
     currency = models.CharField(
         max_length=4,
     )
@@ -1248,7 +1207,7 @@ class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
         "FinancialServiceProvider", on_delete=models.CASCADE, related_name="fsp_xlsx_template_per_delivery_mechanisms"
     )
     delivery_mechanism = models.CharField(
-        max_length=255, verbose_name=_("Delivery Mechanism"), choices=GenericPayment.DELIVERY_TYPE_CHOICE
+        max_length=255, verbose_name=_("Delivery Mechanism"), choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES
     )
     xlsx_template = models.ForeignKey(
         "FinancialServiceProviderXlsxTemplate",
@@ -1284,7 +1243,7 @@ class FinancialServiceProvider(LimitBusinessAreaModelMixin, TimeStampedUUIDModel
     name = models.CharField(max_length=100, unique=True)
     vision_vendor_number = models.CharField(max_length=100, unique=True)
     delivery_mechanisms = HorizontalChoiceArrayField(
-        models.CharField(choices=GenericPayment.DELIVERY_TYPE_CHOICE, max_length=24)
+        models.CharField(choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES, max_length=24)
     )
     distribution_limit = models.DecimalField(
         decimal_places=2,
@@ -1417,7 +1376,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
     )
     status = FSMField(default=Status.NOT_SENT, protected=False, db_index=True)
     delivery_mechanism = models.CharField(
-        max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, db_index=True, null=True
+        max_length=255, choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES, db_index=True, null=True
     )
     delivery_mechanism_order = models.PositiveIntegerField()
 
@@ -1470,7 +1429,7 @@ class CashPlan(ConcurrencyModel, AdminUrlMixin, GenericPaymentPlan):
     coverage_unit = models.CharField(max_length=255)
     comments = models.CharField(max_length=255, null=True)
     delivery_type = models.CharField(
-        choices=GenericPayment.DELIVERY_TYPE_CHOICE,
+        choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
         max_length=24,
         null=True,
         db_index=True,
@@ -2157,3 +2116,35 @@ class PaymentHouseholdSnapshot(TimeStampedUUIDModel):
     snapshot_data = JSONField(default=dict)
     household_id = models.UUIDField()
     payment = models.OneToOneField(Payment, on_delete=models.CASCADE, related_name="household_snapshot")
+
+
+class DeliveryMechanismData(DeliveryDataMixin, SignatureMixin, TimeStampedUUIDModel):
+    individual = models.ForeignKey(
+        "household.Individual", on_delete=models.CASCADE, related_name="delivery_mechanisms_data"
+    )
+    delivery_mechanism = models.CharField(
+        max_length=255, verbose_name=_("Delivery Mechanism"), choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES
+    )
+    data = JSONField(default=dict, blank=True)
+
+    is_valid = models.BooleanField(default=False)
+    validation_errors = JSONField(default=dict)
+    possible_duplicate_of = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        related_name="possible_duplicates",
+        null=True,
+        blank=True,
+    )
+    unique_key = models.CharField(max_length=256, blank=True, null=True, unique=True, editable=False)
+
+    def __str__(self) -> str:
+        return f"[{self.id}] {self.individual} - {self.delivery_mechanism}"
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["individual", "delivery_mechanism"],
+                name="unique_individual_delivery_mechanism",
+            ),
+        ]

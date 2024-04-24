@@ -61,6 +61,7 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE, Household
 from hct_mis_api.apps.household.schema import HouseholdNode
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.filters import (
     FinancialServiceProviderFilter,
     FinancialServiceProviderXlsxReportFilter,
@@ -434,6 +435,7 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
 
     @classmethod
     def get_collector_field(cls, payment: "Payment", field_name: str) -> Union[None, str, Dict]:
+        # TODO MB get from DeliveryMechanismData ???? SNAPSHOT???
         """return primary_collector or alternate_collector field value or None"""
         if household_snapshot := getattr(payment, "household_snapshot", None):
             household_snapshot_data = household_snapshot.snapshot_data
@@ -1174,7 +1176,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(PaymentRecord.ENTITLEMENT_CARD_STATUS_CHOICE)
 
     def resolve_payment_record_delivery_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
-        return to_choice_object(PaymentRecord.DELIVERY_TYPE_CHOICE)
+        return to_choice_object(DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES)
 
     def resolve_cash_plan_verification_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(PaymentVerificationPlan.STATUS_CHOICES)
@@ -1191,7 +1193,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(PaymentVerification.STATUS_CHOICES)
 
     def resolve_all_delivery_mechanisms(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
-        return to_choice_object(GenericPayment.DELIVERY_TYPE_CHOICE)
+        return to_choice_object(DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES)
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
@@ -1375,10 +1377,12 @@ class Query(graphene.ObjectType):
             .order_by("business_area")
             .annotate(
                 total_delivered_cash=Sum(
-                    "delivered_quantity_usd", filter=Q(delivery_type__in=GenericPayment.DELIVERY_TYPES_IN_CASH)
+                    "delivered_quantity_usd",
+                    filter=Q(delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_CASH),
                 ),
                 total_delivered_voucher=Sum(
-                    "delivered_quantity_usd", filter=Q(delivery_type__in=GenericPayment.DELIVERY_TYPES_IN_VOUCHER)
+                    "delivered_quantity_usd",
+                    filter=Q(delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_VOUCHER),
                 ),
                 business_area_name=F("business_area__name"),
             )

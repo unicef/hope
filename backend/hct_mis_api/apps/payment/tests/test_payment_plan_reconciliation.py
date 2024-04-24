@@ -40,6 +40,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp,
     payment_plan_apply_engine_rule,
 )
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
@@ -51,7 +52,6 @@ from hct_mis_api.apps.payment.fixtures import (
 )
 from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
-    GenericPayment,
     Payment,
     PaymentPlan,
     PaymentVerification,
@@ -417,14 +417,17 @@ class TestPaymentPlanReconciliation(APITestCase):
 
         santander_fsp = FinancialServiceProviderFactory(
             name="Santander",
-            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH, GenericPayment.DELIVERY_TYPE_TRANSFER],
+            delivery_mechanisms=[
+                DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+                DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+            ],
             distribution_limit=None,
         )
         FspXlsxTemplatePerDeliveryMechanismFactory(
-            financial_service_provider=santander_fsp, delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH
+            financial_service_provider=santander_fsp, delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH
         )
         FspXlsxTemplatePerDeliveryMechanismFactory(
-            financial_service_provider=santander_fsp, delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER
+            financial_service_provider=santander_fsp, delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER
         )
         encoded_santander_fsp_id = encode_id_base64(santander_fsp.id, "FinancialServiceProvider")
 
@@ -489,7 +492,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                 input=dict(
                     paymentPlanId=encoded_payment_plan_id,
                     deliveryMechanisms=[
-                        GenericPayment.DELIVERY_TYPE_CASH,
+                        DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
                     ],
                 )
             ),
@@ -519,7 +522,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                 "paymentPlanId": encoded_payment_plan_id,
                 "mappings": [
                     {
-                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_CASH,
+                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
                         "fspId": encoded_santander_fsp_id,
                         "order": 1,
                     }
@@ -547,7 +550,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         payment_plan.refresh_from_db()
         assert (
             payment_plan.delivery_mechanisms.filter(
-                financial_service_provider=santander_fsp, delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH
+                financial_service_provider=santander_fsp, delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH
             ).count()
             == 1
         )

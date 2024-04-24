@@ -16,6 +16,7 @@ from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
@@ -28,8 +29,6 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
     FspXlsxTemplatePerDeliveryMechanism,
-    GenericPayment,
-    Payment,
     PaymentPlan,
     PaymentPlanSplit,
     ServiceProvider,
@@ -77,17 +76,17 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         cls.payment_plan = PaymentPlanFactory(program=program, business_area=cls.business_area)
         fsp_1 = FinancialServiceProviderFactory(
             name="Test FSP 1",
-            delivery_mechanisms=[Payment.DELIVERY_TYPE_CASH],
+            delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH],
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
             vision_vendor_number=123456789,
         )
         FspXlsxTemplatePerDeliveryMechanismFactory(
-            financial_service_provider=fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
+            financial_service_provider=fsp_1, delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH
         )
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=cls.payment_plan,
             financial_service_provider=fsp_1,
-            delivery_mechanism=Payment.DELIVERY_TYPE_CASH,
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
             delivery_mechanism_order=1,
         )
         program.households.set(Household.objects.all().values_list("id", flat=True))
@@ -186,29 +185,30 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
 
     def test_export_payment_plan_payment_list_per_fsp(self) -> None:
         financial_service_provider1 = FinancialServiceProviderFactory(
-            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH]
+            delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH]
         )
         FspXlsxTemplatePerDeliveryMechanismFactory(
-            financial_service_provider=financial_service_provider1, delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH
+            financial_service_provider=financial_service_provider1,
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
         )
         financial_service_provider2 = FinancialServiceProviderFactory(
-            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER]
+            delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER]
         )
         FspXlsxTemplatePerDeliveryMechanismFactory(
             financial_service_provider=financial_service_provider2,
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
         )
 
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
             financial_service_provider=financial_service_provider1,
             delivery_mechanism_order=2,
         )
 
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
             financial_service_provider=financial_service_provider2,
             delivery_mechanism_order=3,
         )
@@ -255,14 +255,15 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         min_no_of_payments_in_chunk_mock.__get__ = mock.Mock(return_value=2)
 
         financial_service_provider1 = FinancialServiceProviderFactory(
-            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH]
+            delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH]
         )
         FspXlsxTemplatePerDeliveryMechanismFactory(
-            financial_service_provider=financial_service_provider1, delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH
+            financial_service_provider=financial_service_provider1,
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
         )
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
             financial_service_provider=financial_service_provider1,
             delivery_mechanism_order=2,
         )

@@ -27,6 +27,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     prepare_follow_up_payment_plan_task,
     prepare_payment_plan_task,
 )
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
@@ -35,7 +36,6 @@ from hct_mis_api.apps.payment.fixtures import (
 )
 from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
-    GenericPayment,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
@@ -655,7 +655,7 @@ class TestPaymentPlanServices(APITestCase):
         pg_fsp = FinancialServiceProviderFactory(
             name="Western Union",
             delivery_mechanisms=[
-                GenericPayment.DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
+                DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
             ],
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             payment_gateway_id="123",
@@ -663,7 +663,7 @@ class TestPaymentPlanServices(APITestCase):
         dm = DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=pp,
             financial_service_provider=pg_fsp,
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
             sent_to_payment_gateway=True,
         )
 

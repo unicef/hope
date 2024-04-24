@@ -1475,6 +1475,7 @@ export type DeliveryMechanismNodeEdge = {
 };
 
 export enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
+  AtmCard = 'ATM_CARD',
   CardlessCashWithdrawal = 'CARDLESS_CASH_WITHDRAWAL',
   Cash = 'CASH',
   CashByFsp = 'CASH_BY_FSP',
@@ -2656,6 +2657,7 @@ export type ImportDataNode = Node & {
   createdAt: Scalars['DateTime']['output'];
   createdById?: Maybe<Scalars['UUID']['output']>;
   dataType: ImportDataDataType;
+  deliveryMechanismsValidationErrors: Scalars['String']['output'];
   error: Scalars['String']['output'];
   file?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -2670,6 +2672,7 @@ export type ImportDataNode = Node & {
 };
 
 export enum ImportDataStatus {
+  DeliveryMechanismsValidationError = 'DELIVERY_MECHANISMS_VALIDATION_ERROR',
   Error = 'ERROR',
   Finished = 'FINISHED',
   Pending = 'PENDING',
@@ -3737,6 +3740,7 @@ export type KoboImportDataNode = Node & {
   createdAt: Scalars['DateTime']['output'];
   createdById?: Maybe<Scalars['UUID']['output']>;
   dataType: ImportDataDataType;
+  deliveryMechanismsValidationErrors: Scalars['String']['output'];
   error: Scalars['String']['output'];
   file?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -4587,6 +4591,7 @@ export type PaymentConflictDataNode = {
 };
 
 export enum PaymentDeliveryType {
+  AtmCard = 'ATM_CARD',
   CardlessCashWithdrawal = 'CARDLESS_CASH_WITHDRAWAL',
   Cash = 'CASH',
   CashByFsp = 'CASH_BY_FSP',
@@ -5026,6 +5031,7 @@ export type PaymentRecordAndPaymentNode = {
 };
 
 export enum PaymentRecordDeliveryType {
+  AtmCard = 'ATM_CARD',
   CardlessCashWithdrawal = 'CARDLESS_CASH_WITHDRAWAL',
   Cash = 'CASH',
   CashByFsp = 'CASH_BY_FSP',
@@ -7093,6 +7099,7 @@ export type RegistrationKoboImportMutationInput = {
   importDataId?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   pullPictures?: InputMaybe<Scalars['Boolean']['input']>;
+  raiseTicketsOnDeliveryMechanismsValidationError?: InputMaybe<Scalars['Boolean']['input']>;
   screenBeneficiary?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
@@ -7103,6 +7110,7 @@ export type RegistrationXlsxImportMutation = {
 };
 
 export type RegistrationXlsxImportMutationInput = {
+  allowDeliveryMechanismsValidationErrors?: InputMaybe<Scalars['Boolean']['input']>;
   businessAreaSlug?: InputMaybe<Scalars['String']['input']>;
   importDataId?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -25704,6 +25712,7 @@ export type ImportDataNodeResolvers<ContextType = any, ParentType extends Resolv
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdById?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;
   dataType?: Resolver<ResolversTypes['ImportDataDataType'], ParentType, ContextType>;
+  deliveryMechanismsValidationErrors?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   error?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   file?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -26189,6 +26198,7 @@ export type KoboImportDataNodeResolvers<ContextType = any, ParentType extends Re
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdById?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;
   dataType?: Resolver<ResolversTypes['ImportDataDataType'], ParentType, ContextType>;
+  deliveryMechanismsValidationErrors?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   error?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   file?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;

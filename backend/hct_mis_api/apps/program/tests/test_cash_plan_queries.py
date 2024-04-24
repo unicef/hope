@@ -10,8 +10,8 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import CashPlanFactory
-from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 QUERY_SINGLE_CASH_PLAN = """
@@ -101,7 +101,7 @@ class TestCashPlanQueries(APITestCase):
                 "total_delivered_quantity": 53477453.27,
                 "total_entitled_quantity": 56657648.82,
                 "total_undelivered_quantity": 55497021.04,
-                "delivery_type": PaymentRecord.DELIVERY_TYPE_DEPOSIT_TO_CARD,
+                "delivery_type": DeliveryMechanismChoices.DELIVERY_TYPE_DEPOSIT_TO_CARD,
                 "assistance_through": "Cairo Amman Bank",
             },
             {
@@ -130,7 +130,7 @@ class TestCashPlanQueries(APITestCase):
                 "total_delivered_quantity": 41935107.03,
                 "total_entitled_quantity": 38204833.92,
                 "total_undelivered_quantity": 63098825.46,
-                "delivery_type": PaymentRecord.DELIVERY_TYPE_DEPOSIT_TO_CARD,
+                "delivery_type": DeliveryMechanismChoices.DELIVERY_TYPE_DEPOSIT_TO_CARD,
                 "assistance_through": "Cairo Amman Bank",
             },
         ]

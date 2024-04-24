@@ -665,3 +665,17 @@ def send_payment_notification_emails(
         PaymentNotification(payment_plan, action, action_user, action_date_formatted).send_email_notification()
     except Exception as e:
         logger.exception(e)
+
+"""
+Existing Models:
+FinancialServiceProviderXlsxTemplate:
+- hardcoded columns 
+
+- get_column_value_from_payment (custom columns)
+- get_column_value_from_core_fields
+- get_column_from_payment_channel
+
+payment channel creation on import/merge KOBO / AURORA / FLEX?
+
+XLSX required fields / chosen in template????
+"""

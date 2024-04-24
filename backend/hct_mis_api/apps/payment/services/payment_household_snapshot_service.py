@@ -42,7 +42,7 @@ def handle_type_mapping(value: Any) -> Any:
 
 def create_payment_plan_snapshot_data(payment_plan: PaymentPlan) -> None:
     payments_ids = list(
-        Payment.objects.filter(parent=payment_plan, household_snapshot__isnull=True)
+        payment_plan.eligible_payments.filter(household_snapshot__isnull=True)
         .values_list("id", flat=True)
         .order_by("id")
     )
@@ -154,3 +154,6 @@ def get_needs_adjudication_tickets_count(individual: Individual) -> int:
         .count()
     )
     return golden_records_count + possible_duplicates_count
+
+
+# TODO MB DELIVERY_MECHANISM_DATA

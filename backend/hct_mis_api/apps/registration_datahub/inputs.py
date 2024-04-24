@@ -6,6 +6,9 @@ class RegistrationXlsxImportMutationInput(graphene.InputObjectType):
     name = graphene.String()
     business_area_slug = graphene.String()
     screen_beneficiary = graphene.Boolean()
+    # True - create/merge RDI with delivery mechanism validation errors, create Grievance needs adjudication tickets
+    # False - fail RDI create/merge on delivery mechanism validation errors
+    allow_delivery_mechanisms_validation_errors = graphene.Boolean()
 
 
 class RegistrationKoboImportMutationInput(graphene.InputObjectType):
@@ -14,3 +17,4 @@ class RegistrationKoboImportMutationInput(graphene.InputObjectType):
     pull_pictures = graphene.Boolean()
     business_area_slug = graphene.String()
     screen_beneficiary = graphene.Boolean()
+    allow_delivery_mechanisms_validation_errors = graphene.Boolean()

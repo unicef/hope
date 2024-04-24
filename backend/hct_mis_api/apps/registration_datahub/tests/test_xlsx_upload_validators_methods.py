@@ -157,7 +157,7 @@ class TestXLSXValidatorsMethods(APITestCase):
         )
         upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
         upload_xlsx_instance_validator.rows_validator(wb["Households"])
-        result = upload_xlsx_instance_validator.rows_validator(wb["Individuals"])
+        upload_xlsx_instance_validator.rows_validator(wb["Individuals"])
         expected = [
             {
                 "row_number": 0,
@@ -165,7 +165,7 @@ class TestXLSXValidatorsMethods(APITestCase):
                 "message": "Sheet: Individuals, There are multiple head of households for household with id: 3",
             }
         ]
-        self.assertEqual(expected, result)
+        self.assertEqual(expected, upload_xlsx_instance_validator.errors)
 
     def test_rows_validator(self) -> None:
         wb = openpyxl.load_workbook(
@@ -430,8 +430,8 @@ class TestXLSXValidatorsMethods(APITestCase):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
             for sheet, expected_values in file:
                 upload_xlsx_instance_validator.image_loader = SheetImageLoader(sheet)
-                result = upload_xlsx_instance_validator.rows_validator(sheet, self.business_area.slug)
-                self.assertEqual(result, expected_values)
+                upload_xlsx_instance_validator.rows_validator(sheet, self.business_area.slug)
+                self.assertEqual(upload_xlsx_instance_validator.errors, expected_values)
 
     def test_validate_file_extension(self) -> None:
         file_path, expected_values = (
@@ -440,9 +440,9 @@ class TestXLSXValidatorsMethods(APITestCase):
         )
         with open(file_path, "rb") as file:
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
-            result = upload_xlsx_instance_validator.validate_file_extension(file)
-            self.assertEqual(result[0]["row_number"], expected_values[0]["row_number"])
-            self.assertEqual(result[0]["message"], expected_values[0]["message"])
+            upload_xlsx_instance_validator.validate_file_extension(file)
+            self.assertEqual(upload_xlsx_instance_validator.errors[0]["row_number"], expected_values[0]["row_number"])
+            self.assertEqual(upload_xlsx_instance_validator.errors[0]["message"], expected_values[0]["message"])
 
     def test_validate_file_content_as_xlsx(self) -> None:
         file_path, expected_values = (
@@ -451,7 +451,7 @@ class TestXLSXValidatorsMethods(APITestCase):
         )
         with open(file_path, "rb") as file:
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
-            result = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
+            result, _ = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
             self.assertEqual(result[0]["row_number"], expected_values[0]["row_number"])
             self.assertEqual(result[0]["message"], expected_values[0]["message"])
 
@@ -460,7 +460,8 @@ class TestXLSXValidatorsMethods(APITestCase):
         with open(invalid_cols_file_path, "rb") as file:
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
             wb = openpyxl.load_workbook(file, data_only=True)
-            errors = upload_xlsx_instance_validator.validate_file_with_template(wb)
+            upload_xlsx_instance_validator.validate_file_with_template(wb)
+            errors = upload_xlsx_instance_validator.errors
             errors.sort(key=operator.itemgetter("row_number", "header"))
             self.assertEqual(errors, [])
 
@@ -510,8 +511,8 @@ class TestXLSXValidatorsMethods(APITestCase):
             },
         ]
 
-        result = upload_xlsx_instance_validator.validate_collectors_size(wb)
-        self.assertEqual(result, expected_result)
+        upload_xlsx_instance_validator.validate_collectors_size(wb)
+        self.assertEqual(upload_xlsx_instance_validator.errors, expected_result)
 
     def test_validate_collector_unique(self) -> None:
         file_path = f"{self.FILES_DIR_PATH}/test_collectors.xlsx"
@@ -531,7 +532,7 @@ class TestXLSXValidatorsMethods(APITestCase):
 
         with open(file_path, "rb") as file:
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
-            result = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
+            result, _ = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
         self.assertEqual(result, expected_result)
 
     def test_validate_incorrect_admin_area(self) -> None:
@@ -572,7 +573,7 @@ class TestXLSXValidatorsMethods(APITestCase):
 
         with open(file_path, "rb") as file:
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
-            result = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
+            result, _ = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
         self.assertEqual(result, expected_result)
 
     def test_validate_people_sheet_invalid(self) -> None:
@@ -608,7 +609,7 @@ class TestXLSXValidatorsMethods(APITestCase):
 
         with open(file_path, "rb") as file:
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator(is_social_worker_program=True)
-            result = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
+            result, _ = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
         self.assertEqual(result, expected_result)
 
     def test_validate_people_sheet_valid(self) -> None:
@@ -616,5 +617,5 @@ class TestXLSXValidatorsMethods(APITestCase):
 
         with open(file_path, "rb") as file:
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator(is_social_worker_program=True)
-            result = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
+            result, _ = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
         self.assertEqual(result, [])

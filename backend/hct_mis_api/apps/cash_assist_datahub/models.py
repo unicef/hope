@@ -4,7 +4,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from hct_mis_api.apps.payment.models import PaymentRecord as InternalPaymentRecord
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.utils.models import AbstractSession
 
 
@@ -136,8 +136,8 @@ class PaymentRecord(SessionModel):
     entitlement_card_status = models.CharField(max_length=20, null=True)
     entitlement_card_issue_date = models.DateField(null=True)
     delivery_type = models.CharField(
-        choices=InternalPaymentRecord.DELIVERY_TYPE_CHOICE,
-        default=InternalPaymentRecord.DELIVERY_TYPE_CASH,
+        choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
+        default=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
         max_length=24,
         null=True,
     )

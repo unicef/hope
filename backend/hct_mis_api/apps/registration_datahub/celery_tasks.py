@@ -62,7 +62,11 @@ def locked_cache(key: Union[int, str], timeout: int = 60 * 60 * 24) -> Any:
 @log_start_and_end
 @sentry_tags
 def registration_xlsx_import_task(
-    self: Any, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: "UUID"
+    self: Any,
+    registration_data_import_id: str,
+    import_data_id: str,
+    business_area_id: str,
+    program_id: "UUID",
 ) -> bool:
     try:
         from hct_mis_api.apps.program.models import Program

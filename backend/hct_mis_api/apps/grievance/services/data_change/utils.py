@@ -41,6 +41,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.models import DeliveryMechanismData
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -213,6 +214,23 @@ def handle_update_payment_channel(payment_channel: Dict) -> Optional[BankAccount
         return bank_account_info
 
     return None
+
+
+def handle_add_delivery_mechanism_data(
+    delivery_mechanism_data: Dict, individual: Individual
+) -> Optional[DeliveryMechanismData]:
+    return DeliveryMechanismData(
+        individual=individual,
+        data=delivery_mechanism_data.get("data"),
+    )
+
+
+def handle_update_delivery_mechanism_data(delivery_mechanism_data: Dict) -> Optional[DeliveryMechanismData]:
+    delivery_mechanism_data_id = decode_id_string(delivery_mechanism_data.get("id"))
+    dmd = get_object_or_404(DeliveryMechanismData, id=delivery_mechanism_data_id)
+    dmd.data = delivery_mechanism_data.get("data")
+    return dmd
+
 
 
 def handle_add_identity(identity: Dict, individual: Individual) -> IndividualIdentity:
@@ -388,6 +406,31 @@ def prepare_edit_payment_channel(payment_channels: List[Dict]) -> List[Dict]:
         if type_ := pc.get("type"):
             if handler := handlers.get(type_):
                 items.append(handler(pc))
+    return items
+
+
+def prepare_edit_delivery_mechanism_data(delivery_mechanism_data: List[Dict]) -> List[Dict]:
+    items = []
+    for dmd in delivery_mechanism_data:
+        encoded_id = dmd.get("id")
+        field_name = dmd.get("field_name")
+        delivery_mechanism_data = get_object_or_404(DeliveryMechanismData, id=decode_id_string(encoded_id))
+        data = {
+            "approve_status": False,
+            "value": {
+                "id": encoded_id,
+                "individual": encode_id_base64(delivery_mechanism_data.individual.id, "Individual"),
+                "field_name": field_name,
+                "value": dmd.get("value"),
+            },
+            "previous_value": {
+                "id": encoded_id,
+                "individual": encode_id_base64(delivery_mechanism_data.individual.id, "Individual"),
+                "field_name": field_name,
+                "value": delivery_mechanism_data.delivery_data.get(field_name),
+            },
+        }
+        items.append(data)
     return items
 
 

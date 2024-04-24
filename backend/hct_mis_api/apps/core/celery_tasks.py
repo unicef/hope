@@ -212,6 +212,7 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
                         country=country,
                     )
 
+                    # TODO MB ????
                     bank_account_info = BankAccountInfo(bank_account_number=iban, individual=individual)
 
                     documents.append(passport)

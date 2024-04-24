@@ -164,6 +164,7 @@ def get_has_phone_number_query(_: Any, args: Any) -> Q:
 
 
 def get_has_bank_account_number_query(_: Any, args: Any) -> Q:
+    # TODO MB ?????
     has_bank_account_number = args[0] in [True, "True"]
     if has_bank_account_number:  # Individual can have related object bank_account, but empty number
         return Q(bank_account_info__isnull=False) & ~Q(bank_account_info__bank_account_number="")

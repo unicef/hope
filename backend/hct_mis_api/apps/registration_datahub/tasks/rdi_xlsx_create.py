@@ -29,10 +29,12 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
+from hct_mis_api.apps.payment.models import DeliveryMechanismData
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedBankAccountInfo,
+    ImportedDeliveryMechanismData,
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
@@ -68,6 +70,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self.individuals = []
         self.collectors = defaultdict(list)
         self.bank_accounts = defaultdict(dict)
+        self.delivery_mechanisms_data = defaultdict(dict)
 
     def _handle_collect_individual_data(
         self,
@@ -104,6 +107,28 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         self.bank_accounts[f"individual_{row_num}"]["individual"] = individual
         self.bank_accounts[f"individual_{row_num}"][name] = value
+
+    def _handle_delivery_mechanism_fields(
+        self,
+        value: Any,
+        header: str,
+        row_num: int,
+        individual: ImportedIndividual,
+        field: Dict[str, Any],
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
+        if value is None:
+            return
+
+        name = header.replace("_i_c", "").replace("pp_", "")
+
+        self.delivery_mechanisms_data[f"individual_{row_num}"]["individual"] = individual
+        for delivery_mechanism in field.get("delivery_mechanisms", []):
+            if delivery_mechanism not in self.delivery_mechanisms_data[f"individual_{row_num}"]:
+                self.delivery_mechanisms_data[f"individual_{row_num}"][delivery_mechanism] = {name: value}
+            else:
+                self.delivery_mechanisms_data[f"individual_{row_num}"][delivery_mechanism].update({name: value})
 
     def _handle_document_fields(
         self,
@@ -363,6 +388,20 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         ImportedBankAccountInfo.objects.bulk_create(bank_accounts_infos_to_create)
 
+    def _create_delivery_mechanisms_data(self) -> None:
+        imported_delivery_mechanism_data = []
+        for _, data in self.delivery_mechanisms_data.items():
+            individual = data.pop("individual")
+            for delivery_type, values in data.items():
+                imported_delivery_mechanism_data.append(
+                    ImportedDeliveryMechanismData(
+                        individual=individual,
+                        delivery_mechanism=delivery_type,
+                        data=values,
+                    )
+                )
+        ImportedDeliveryMechanismData.objects.bulk_create(imported_delivery_mechanism_data)
+
     def _create_documents(self) -> None:
         docs_to_create = []
         for document_data in self.documents.values():
@@ -418,6 +457,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         return obj_to_create
 
     def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
+        delivery_mechanism_xlsx_fields = DeliveryMechanismData.get_scope_delivery_mechanisms_fields(by="xlsx_field")
         complex_fields: Dict[str, Dict[str, Callable]] = {
             "individuals": {
                 "photo_i_c": self._handle_image_field,
@@ -426,11 +466,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "pregnant_i_c": self._handle_bool_field,
                 "fchild_hoh_i_c": self._handle_bool_field,
                 "child_hoh_i_c": self._handle_bool_field,
-                "bank_name_i_c": self._handle_bank_account_fields,
-                "bank_account_number_i_c": self._handle_bank_account_fields,
-                "debit_card_number_i_c": self._handle_bank_account_fields,
-                "account_holder_name_i_c": self._handle_bank_account_fields,
-                "bank_branch_name_i_c": self._handle_bank_account_fields,
+                "bank_name_i_c": self._handle_bank_account_fields,  # TODO MB ?
+                "bank_account_number_i_c": self._handle_bank_account_fields,  # TODO MB ?
+                "debit_card_number_i_c": self._handle_bank_account_fields,  # TODO MB ?
+                "account_holder_name_i_c": self._handle_bank_account_fields,  # TODO MB ?
+                "bank_branch_name_i_c": self._handle_bank_account_fields,  # TODO MB ?
                 "first_registration_date_i_c": self._handle_datetime,
                 "unhcr_id_no_i_c": self._handle_identity_fields,
                 "unhcr_id_photo_i_c": self._handle_identity_photo,
@@ -438,7 +478,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "scope_id_no_i_c": self._handle_identity_fields,
                 "scope_id_photo_i_c": self._handle_identity_photo,
                 "scope_id_issuer_i_c": self._handle_identity_issuing_country_fields,
-            },
+            }.update({field: self._handle_delivery_mechanism_fields for field in delivery_mechanism_xlsx_fields}),
             "households": {
                 "consent_sign_h_c": self._handle_image_field,
                 "hh_geopoint_h_c": self._handle_geopoint_field,
@@ -533,6 +573,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                 individual=obj_to_create if sheet_title == "individuals" else None,
                                 household=obj_to_create if sheet_title == "households" else None,
                                 is_field_required=current_field.get("required", False),
+                                field=current_field,
                             )
                             if value is not None:
                                 setattr(
@@ -610,6 +651,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             self._create_identities()
             self._create_collectors()
             self._create_bank_accounts_infos()
+            self._create_delivery_mechanisms_data()
 
     @transaction.atomic(using="registration_datahub")
     def execute(

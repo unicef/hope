@@ -35,6 +35,7 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.models import (
     Approval,
     ApprovalProcess,
@@ -147,7 +148,7 @@ class CashPlanFactory(DjangoModelFactory):
         ext_word_list=None,
     )
     delivery_type = factory.fuzzy.FuzzyChoice(
-        PaymentRecord.DELIVERY_TYPE_CHOICE,
+        DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
         getter=lambda c: c[0],
     )
     assistance_measurement = factory.Faker("currency_name")
@@ -207,7 +208,7 @@ class FinancialServiceProviderFactory(DjangoModelFactory):
     delivery_mechanisms = factory.List(
         [
             factory.fuzzy.FuzzyChoice(
-                GenericPayment.DELIVERY_TYPE_CHOICE,
+                DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
                 getter=lambda c: c[0],
             )
         ]
@@ -225,7 +226,7 @@ class FspXlsxTemplatePerDeliveryMechanismFactory(DjangoModelFactory):
 
     financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
     delivery_mechanism = factory.fuzzy.FuzzyChoice(
-        GenericPayment.DELIVERY_TYPE_CHOICE,
+        DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
         getter=lambda c: c[0],
     )
     xlsx_template = factory.SubFactory(FinancialServiceProviderXlsxTemplateFactory)
@@ -278,7 +279,7 @@ class PaymentRecordFactory(DjangoModelFactory):
         tzinfo=utc,
     )
     delivery_type = factory.fuzzy.FuzzyChoice(
-        PaymentRecord.DELIVERY_TYPE_CHOICE,
+        DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
         getter=lambda c: c[0],
     )
     currency = factory.Faker("currency_code")
@@ -447,7 +448,7 @@ class RealCashPlanFactory(DjangoModelFactory):
         ext_word_list=None,
     )
     delivery_type = factory.fuzzy.FuzzyChoice(
-        PaymentRecord.DELIVERY_TYPE_CHOICE,
+        DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
         getter=lambda c: c[0],
     )
     assistance_measurement = factory.Faker("currency_name")
@@ -515,7 +516,7 @@ class RealPaymentRecordFactory(DjangoModelFactory):
         tzinfo=utc,
     )
     delivery_type = factory.fuzzy.FuzzyChoice(
-        PaymentRecord.DELIVERY_TYPE_CHOICE,
+        DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
         getter=lambda c: c[0],
     )
     currency = factory.Faker("currency_code")
@@ -619,7 +620,7 @@ class PaymentFactory(DjangoModelFactory):
         ).individual
     )
     delivery_type = factory.fuzzy.FuzzyChoice(
-        GenericPayment.DELIVERY_TYPE_CHOICE,
+        DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
         getter=lambda c: c[0],
     )
     currency = factory.Faker("currency_code")
@@ -678,7 +679,7 @@ class DeliveryMechanismPerPaymentPlanFactory(DjangoModelFactory):
         tzinfo=utc,
     )
     delivery_mechanism = factory.fuzzy.FuzzyChoice(
-        GenericPayment.DELIVERY_TYPE_CHOICE,
+        DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
         getter=lambda c: c[0],
     )
     delivery_mechanism_order = factory.fuzzy.FuzzyInteger(1, 4)
@@ -853,11 +854,13 @@ def generate_reconciled_payment_plan() -> None:
     payment_plan.save()
 
     fsp_1 = FinancialServiceProviderFactory(
-        delivery_mechanisms=[Payment.DELIVERY_TYPE_CASH],
+        delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH],
     )
     FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=fsp_1)
     DeliveryMechanismPerPaymentPlanFactory(
-        payment_plan=payment_plan, financial_service_provider=fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
+        payment_plan=payment_plan,
+        financial_service_provider=fsp_1,
+        delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
     )
 
     create_payment_verification_plan_with_status(
@@ -1023,17 +1026,19 @@ def generate_payment_plan() -> None:
     fsp_1 = FinancialServiceProvider.objects.update_or_create(
         pk=fsp_1_pk,
         name="Test FSP 1",
-        delivery_mechanisms=[Payment.DELIVERY_TYPE_CASH],
+        delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH],
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
         vision_vendor_number=123456789,
     )[0]
 
     FspXlsxTemplatePerDeliveryMechanismFactory(
-        financial_service_provider=fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
+        financial_service_provider=fsp_1, delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH
     )
 
     DeliveryMechanismPerPaymentPlanFactory(
-        payment_plan=payment_plan, financial_service_provider=fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
+        payment_plan=payment_plan,
+        financial_service_provider=fsp_1,
+        delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
     )
     # create primary collector role
     IndividualRoleInHouseholdFactory(household=household_1, individual=individual_1, role=ROLE_PRIMARY)
@@ -1047,7 +1052,7 @@ def generate_payment_plan() -> None:
         currency="USD",
         household=household_1,
         collector=individual_1,
-        delivery_type=Payment.DELIVERY_TYPE_CASH,
+        delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
         financial_service_provider=fsp_1,
         status_date=now,
         status=Payment.STATUS_PENDING,
@@ -1061,7 +1066,7 @@ def generate_payment_plan() -> None:
         currency="USD",
         household=household_2,
         collector=individual_2,
-        delivery_type=Payment.DELIVERY_TYPE_CASH,
+        delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
         financial_service_provider=fsp_1,
         status_date=now,
         status=Payment.STATUS_PENDING,

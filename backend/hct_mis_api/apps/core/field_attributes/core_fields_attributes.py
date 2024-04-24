@@ -32,6 +32,7 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.field_attributes.fields_types import (
+    _DELIVERY_MECHANISM_DATA,
     _HOUSEHOLD,
     _INDIVIDUAL,
     TYPE_BOOL,
@@ -68,6 +69,7 @@ from hct_mis_api.apps.core.field_attributes.lookup_functions import (
 )
 from hct_mis_api.apps.core.field_attributes.payment_channel_fields_attributes import (
     PAYMENT_CHANNEL_FIELDS_ATTRIBUTES,
+    DeliveryMechanismChoices
 )
 from hct_mis_api.apps.core.field_attributes.people_fields_attributes import (
     PEOPLE_FIELDS_ATTRIBUTES,
@@ -361,7 +363,10 @@ CORE_FIELDS_ATTRIBUTES = (
             "choices": [],
             "associated_with": _INDIVIDUAL,
             "xlsx_field": "full_name_i_c",
-            "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+            "required_for_payment": True,
+            "unique_for_payment": True,
+            "delivery_mechanisms": [DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD],
+            "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE, Scope.DELIVERY_MECHANISM], # TODO MB *test* remove delivery mechanism
         },
         {
             "id": "b1f90314-b8b8-4bcb-9265-9d48d1fce5a4",
@@ -1763,32 +1768,6 @@ CORE_FIELDS_ATTRIBUTES = (
             "xlsx_field": "age_at_registration",
             "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
         },
-        {
-            "id": "22085a8d-205d-42a9-b5b3-951b51f11915",
-            "type": TYPE_STRING,
-            "name": "account_holder_name",
-            "lookup": "account_holder_name",
-            "label": {"English(EN)": "Account holder name"},
-            "hint": "",
-            "required": False,
-            "choices": [],
-            "associated_with": _INDIVIDUAL,
-            "xlsx_field": "account_holder_name_i_c",
-            "scope": [Scope.XLSX, Scope.PAYMENT_CHANNEL, Scope.KOBO_IMPORT],
-        },
-        {
-            "id": "e9d964b9-aa85-4a0f-b1eb-4755bdad7592",
-            "type": TYPE_STRING,
-            "name": "bank_branch_name",
-            "lookup": "bank_branch_name",
-            "label": {"English(EN)": "Bank branch name"},
-            "hint": "",
-            "required": False,
-            "choices": [],
-            "associated_with": _INDIVIDUAL,
-            "xlsx_field": "bank_branch_name_i_c",
-            "scope": [Scope.XLSX, Scope.PAYMENT_CHANNEL, Scope.KOBO_IMPORT],
-        },
     ]
     + PEOPLE_FIELDS_ATTRIBUTES
     + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
@@ -1843,6 +1822,9 @@ class FieldFactory(list):
 
     def associated_with_household(self) -> "FieldFactory":
         return self._associated_with(_HOUSEHOLD)
+
+    def associated_with_delivery_mechanism(self) -> "FieldFactory":
+        return self._associated_with(_DELIVERY_MECHANISM_DATA)
 
     def _associated_with(self, associated_with: str) -> "FieldFactory":
         factory = FieldFactory(scopes=self.scopes)

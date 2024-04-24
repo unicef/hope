@@ -16,6 +16,7 @@ from hct_mis_api.apps.cash_assist_datahub.models import (
     TargetPopulation,
 )
 from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.models import PaymentRecord as HopePaymentRecord
 from hct_mis_api.apps.targeting.models import TargetPopulation as HopeTargetPopulation
 
@@ -128,7 +129,7 @@ def populate_ca_datahub(targeting_id: str) -> None:
                 entitlement_card_number="ASH12345678",
                 entitlement_card_status=HopePaymentRecord.ENTITLEMENT_CARD_STATUS_ACTIVE,
                 entitlement_card_issue_date=timezone.now() - timedelta(days=10),
-                delivery_type=HopePaymentRecord.DELIVERY_TYPE_TRANSFER,
+                delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
                 currency="USD",
                 entitlement_quantity=10,
                 delivered_quantity=10,

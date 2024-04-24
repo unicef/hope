@@ -43,6 +43,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
+from hct_mis_api.apps.payment.models import DeliveryMechanismData
 from hct_mis_api.apps.registration_datahub.models import KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 from hct_mis_api.apps.registration_datahub.utils import find_attachment_in_kobo
@@ -114,6 +115,9 @@ class ImportDataInstanceValidator:
     def __init__(self, is_social_worker_program: bool = False) -> None:
         self.is_social_worker_program = is_social_worker_program
         self.all_fields = self.get_all_fields()
+        self.delivery_mechanisms_xlsx_fields = [
+            _field["xlsx_field"] for _field in DeliveryMechanismData.get_all_delivery_mechanisms_fields()
+        ]
 
     def get_combined_attributes(self) -> Dict:
         scope_list = (
@@ -271,6 +275,55 @@ class ImportDataInstanceValidator:
             logger.exception(e)
             raise
 
+    def delivery_mechanisms_validator(self, xlsx_delivery_mechanisms_dict: Dict) -> List[Dict[str, Any]]:
+        delivery_mechanisms_to_required_fields_mapping = (
+            DeliveryMechanismData.get_delivery_mechanisms_to_xlsx_fields_mapping(by="xlsx_field", required=True)
+        )
+        xlsx_fields_map = DeliveryMechanismData.get_all_delivery_mechanisms_fields(by="xlsx_field")
+
+        try:
+            all_rows_delivery_mechanisms_errors = []
+
+            for row, data in xlsx_delivery_mechanisms_dict.items():
+                delivery_mechanisms_errors = []
+                delivery_mechanisms_fields_values_dict = defaultdict(dict)
+
+                for delivery_mechanism_xlsx_field_name, value in data.items():
+                    for dm, fields in delivery_mechanisms_to_required_fields_mapping.items():
+                        if delivery_mechanism_xlsx_field_name in fields:
+                            delivery_mechanisms_fields_values_dict[dm][delivery_mechanism_xlsx_field_name] = value
+
+                # drop delivery mechanism data validation for delivery mechanisms that contains only Scope.GLOBAL fields
+                for dm, fields in delivery_mechanisms_fields_values_dict.items():
+                    # if all fields are Scope.GLOBAL, drop delivery mechanism data
+                    if all(Scope.GLOBAL in xlsx_fields_map[field]["scope"] for field in fields.keys()):
+                        delivery_mechanisms_fields_values_dict.pop(dm)
+
+                for dm, fields in delivery_mechanisms_to_required_fields_mapping.items():
+                    if dm not in delivery_mechanisms_fields_values_dict:
+                        continue
+
+                    # sort fields by scope.DELIVERY_MECHANISM first, then by scope.GLOBAL
+                    global_fields = [field for field in fields if Scope.GLOBAL in field["scope"]]
+                    delivery_mechanisms_fields = [
+                        field for field in fields if Scope.DELIVERY_MECHANISM in field["scope"]
+                    ]
+
+                    for field in delivery_mechanisms_fields + global_fields:
+                        if not delivery_mechanisms_fields_values_dict[dm].get(field, None):
+                            delivery_mechanisms_errors.append(
+                                {
+                                    "row_number": row,
+                                    "header": field,
+                                    "message": f"Field {field} is required for delivery mechanism {dm}",
+                                }
+                            )
+
+            return all_rows_delivery_mechanisms_errors
+        except Exception as e:
+            logger.exception(e)
+            raise
+
 
 class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
     def __init__(self, is_social_worker_program: bool = False) -> None:
@@ -279,6 +332,9 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         self.head_of_household_count = defaultdict(int)
         self.combined_fields = self.get_combined_fields()
         self.household_ids = []
+
+        self.errors = []
+        self.delivery_mechanisms_errors = []
 
     def get_combined_fields(self) -> Dict:
         core_fields = (
@@ -489,7 +545,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def rows_validator(self, sheet: Worksheet, business_area_slug: Optional[str] = None) -> List:
+    def rows_validator(self, sheet: Worksheet, business_area_slug: Optional[str] = None) -> None:
         try:
             first_row = sheet[1]
             combined_fields = {
@@ -576,6 +632,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 "other_id_no_i_c": {},
             }
 
+            delivery_mechanisms_data = defaultdict(dict)
+
             def has_value(cell: Cell) -> bool:
                 if cell.value is None:
                     return False
@@ -660,6 +718,9 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     if header.value in identities_numbers:
                         identities_numbers[header.value]["numbers"].append(str(value) if value else None)
 
+                    if header.value in self.delivery_mechanisms_xlsx_fields:
+                        delivery_mechanisms_data[row][header.value] = value
+
                 if current_household_id and current_household_id not in self.household_ids:
                     message = f"Sheet: Individuals, There is no household with provided id: {current_household_id}"
                     invalid_rows.append({"row_number": row_number, "header": "relationship_i_c", "message": message})
@@ -688,11 +749,17 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
             invalid_doc_rows = []
             invalid_ident_rows = []
+            invalid_delivery_mechanisms = []
             if sheet.title == "Individuals":
                 invalid_doc_rows = self.documents_validator(documents_numbers)
                 invalid_ident_rows = self.identity_validator(identities_numbers)
 
-            return [*invalid_rows, *invalid_doc_rows, *invalid_ident_rows]
+            if sheet.title in ["Individuals", "People"]:
+                invalid_delivery_mechanisms = self.delivery_mechanisms_validator(delivery_mechanisms_data)
+
+            self.errors.extend([*invalid_rows, *invalid_doc_rows, *invalid_ident_rows])
+            self.delivery_mechanisms_errors.extend(invalid_delivery_mechanisms)
+
         except Exception as e:
             logger.exception(e)
             raise
@@ -719,17 +786,16 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     invalid_rows.append({"row_number": row_number, "header": header_name, "message": message})
         return invalid_rows
 
-    def validate_file_with_template(self, wb: Workbook) -> List:
+    def validate_file_with_template(self, wb: Workbook) -> None:
         try:
-            errors = []
             combined_fields = self.combined_fields
 
             for name, fields in combined_fields.items():
                 if name.capitalize() not in wb.sheetnames:
-                    errors.append(
+                    self.errors.append(
                         {"row_number": 0, "header": "File", "message": f"Worksheet {name.capitalize()} does not exist."}
                     )
-                    return errors
+                    return
 
                 sheet = wb[name.capitalize()]
                 first_row = sheet[1]
@@ -743,65 +809,73 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 columns_difference = required_fields.difference(column_names)
 
                 if columns_difference:
-                    errors.extend(
+                    self.errors.extend(
                         [
                             {"row_number": 1, "header": col, "message": f"Missing column name {col}"}
                             for col in columns_difference
                         ]
                     )
+                    return
 
-            return errors
         except Exception as e:
             logger.exception(e)
             raise
 
-    def validate_file_extension(self, xlsx_file: Any) -> List:
+    def validate_file_extension(self, xlsx_file: Any) -> None:
         try:
             file_suffix = Path(xlsx_file.name).suffix
             if file_suffix != ".xlsx":
-                return [
-                    {
-                        "row_number": 1,
-                        "header": f"{xlsx_file.name}",
-                        "message": "Only .xlsx files are accepted for import",
-                    }
-                ]
-            return []
+                self.errors.append(
+                    [
+                        {
+                            "row_number": 1,
+                            "header": f"{xlsx_file.name}",
+                            "message": "Only .xlsx files are accepted for import",
+                        }
+                    ]
+                )
+                return
         except Exception as e:
             logger.exception(e)
             raise
 
-    def validate_everything(self, xlsx_file: Any, business_area_slug: str) -> List[Dict[str, Any]]:
+    def validate_everything(
+        self, xlsx_file: Any, business_area_slug: str
+    ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         try:
-            errors = self.validate_file_extension(xlsx_file)
-            if errors:
-                return errors
+            self.validate_file_extension(xlsx_file)
+            if self.errors:
+                return self.errors, self.delivery_mechanisms_errors
             try:
                 wb = openpyxl.load_workbook(xlsx_file, data_only=True)
             except BadZipfile:
-                return [{"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file"}]
-            errors = self.validate_file_with_template(wb)
-            if errors:
-                # return error if WS do not exist in the import file
-                return errors
-            errors.extend(self.validate_index_id(wb))
-            errors.extend(self.validate_collectors_size(wb))
-            errors.extend(self.validate_collectors(wb))
-            if self.is_social_worker_program:
-                errors.extend(self.validate_people_collectors(wb))
+                return [
+                    {"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file"}
+                ], self.delivery_mechanisms_errors
 
-            if not self.is_social_worker_program:
+            self.validate_file_with_template(wb)
+            if self.errors:
+                # return error if WS do not exist in the import file
+                return self.errors, self.delivery_mechanisms_errors
+
+            self.validate_index_id(wb)
+            self.validate_collectors_size(wb)
+
+            if self.is_social_worker_program:
+                self.validate_people_collectors(wb)
+                people_sheet = wb["People"]
+                self.image_loader = SheetImageLoader(people_sheet)
+                self.rows_validator(people_sheet)
+            else:
+                self.validate_collectors(wb)
                 individuals_sheet = wb["Individuals"]
                 household_sheet = wb["Households"]
                 self.image_loader = SheetImageLoader(household_sheet)
-                errors.extend(self.rows_validator(household_sheet, business_area_slug))
+                self.rows_validator(household_sheet, business_area_slug)
                 self.image_loader = SheetImageLoader(individuals_sheet)
-                errors.extend(self.rows_validator(individuals_sheet))
-            else:
-                people_sheet = wb["People"]
-                self.image_loader = SheetImageLoader(people_sheet)
-                errors.extend(self.rows_validator(people_sheet))
-            return errors
+                self.rows_validator(individuals_sheet)
+
+            return self.errors, self.delivery_mechanisms_errors
         except Exception as e:
             logger.exception(e)
             raise
@@ -852,10 +926,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_collectors(self, wb: Workbook) -> List[Dict[str, Any]]:
+    def validate_collectors(self, wb: Workbook) -> None:
         try:
-            errors = []
-
             individuals_sheet = wb["Individuals"]
             households_sheet = wb["Households"]
             first_row = individuals_sheet[1]
@@ -874,19 +946,18 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 elif cell.value == "alternate_collector_id":
                     alternate_collectors_data = {c.row: c for c in individuals_sheet[cell.column_letter][2:] if c.value}
 
-            errors.extend(
+            self.errors.extend(
                 self.collector_column_validator("primary_collector_id", primary_collectors_data, household_ids)
             )
-            errors.extend(
+            self.errors.extend(
                 self.collector_column_validator(
                     "alternate_collector_id",
                     alternate_collectors_data,
                     household_ids,
                 )
             )
-            errors.extend(self.validate_collectors_unique(primary_collectors_data, alternate_collectors_data))
+            self.errors.extend(self.validate_collectors_unique(primary_collectors_data, alternate_collectors_data))
 
-            return errors
         except Exception as e:
             logger.exception(e)
             raise
@@ -915,9 +986,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_index_id(self, wb: Workbook) -> List[Dict[str, Any]]:
+    def validate_index_id(self, wb: Workbook) -> None:
         try:
-            errors = []
             if self.is_social_worker_program:
                 people_sheet = wb["People"]
                 header_row = people_sheet[1]
@@ -931,22 +1001,22 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 )[0]
                 duplicates = list(set([i for i in index_ids if index_ids.count(i) > 1 and i is not None]))
                 if duplicates:
-                    errors.append(
+                    self.errors.append(
                         {
                             "row_number": 1,
                             "header": "People",
                             "message": f"There are duplicates with id(s): {duplicates}. Number have to be unique in the field pp_index_id.",
                         }
                     )
+                    return
 
-            return errors
         except Exception as e:
             logger.exception(e)
             raise
 
-    def validate_people_collectors(self, wb: Workbook) -> List[Dict[str, Any]]:
+    def validate_people_collectors(self, wb: Workbook) -> None:
         try:
-            errors, index_ids, primary_collector_ids, alternate_collector_ids, relationship_column = [], [], [], [], []
+            index_ids, primary_collector_ids, alternate_collector_ids, relationship_column = [], [], [], []
             people_sheet = wb["People"]
             first_row = people_sheet[1]
 
@@ -983,7 +1053,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 index_ids, relationship_column, primary_collector_ids, alternate_collector_ids
             ):
                 if relationship not in [HEAD, NON_BENEFICIARY] and index_id is not None:
-                    errors.append(
+                    self.errors.append(
                         {
                             "row_number": 1,
                             "header": "People",
@@ -997,7 +1067,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     and int(index_id) not in pr_ids
                     and int(index_id) not in alt_ids
                 ):
-                    errors.append(
+                    self.errors.append(
                         {
                             "row_number": 1,
                             "header": "People",
@@ -1005,7 +1075,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         }
                     )
                 if relationship == NON_BENEFICIARY and (pr_col is None and alt_col is None):
-                    errors.append(
+                    self.errors.append(
                         {
                             "row_number": 1,
                             "header": "People",
@@ -1015,15 +1085,12 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         }
                     )
 
-            return errors
         except Exception as e:
             logger.exception(e)
             raise
 
-    def validate_collectors_size(self, wb: Workbook) -> List[Dict[str, Any]]:
+    def validate_collectors_size(self, wb: Workbook) -> None:
         try:
-            errors = []
-
             if not self.is_social_worker_program:
                 individuals_sheet = wb["Individuals"]
                 households_sheet = wb["Households"]
@@ -1032,7 +1099,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 individuals_count = self._count_individuals(individuals_sheet)
 
                 if household_count == 0:
-                    errors.append(
+                    self.errors.append(
                         {
                             "row_number": 1,
                             "header": "Households",
@@ -1041,7 +1108,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     )
 
                 if individuals_count == 0:
-                    errors.append(
+                    self.errors.append(
                         {
                             "row_number": 1,
                             "header": "Individuals",
@@ -1052,7 +1119,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 people_sheet = wb["People"]
                 people_count = self._count_individuals(people_sheet)
                 if people_count == 0:
-                    errors.append(
+                    self.errors.append(
                         {
                             "row_number": 1,
                             "header": "People",
@@ -1060,7 +1127,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         }
                     )
 
-            return errors
         except Exception as e:
             logger.exception(e)
             raise
