@@ -30,8 +30,8 @@ def _create(models: Optional[List[Model]]) -> None:
     for index in registry.get_indices(models):
         try:
             index.create()
-        except elasticsearch.exceptions.RequestError:
-            logger.exception(f"Failed to create index {index}")
+        except elasticsearch.exceptions.RequestError:  # pragma: no cover
+            logger.exception(f"Failed to create index {index._name}")
 
 
 def _populate(models: Optional[List[Any]], options: Dict) -> None:
