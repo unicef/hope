@@ -1,4 +1,4 @@
-from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -43,8 +43,12 @@ class TestUserFilter(APITestCase):
 
         # user with partner with role in BA
         partner = PartnerFactory(name="Test Partner")
-        role = RoleFactory(name="Partner Role", permissions=[Permissions.GRIEVANCES_CREATE])
-        cls.add_partner_role_in_business_area(partner, business_area, [role])
+        cls.create_partner_role_with_permissions(
+            partner=partner,
+            permissions=[Permissions.GRIEVANCES_CREATE],
+            business_area=business_area,
+            name="Partner Role",
+        )
         UserFactory(partner=partner, username="user_with_partner_in_ba")
 
         # user without access to BA
