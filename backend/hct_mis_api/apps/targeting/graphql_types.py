@@ -139,6 +139,7 @@ class TargetPopulationNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObj
     households = DjangoFilterConnectionField(HouseholdNode, filterset_class=HouseholdFilter)
     total_households_count_with_valid_phone_no = graphene.Int()
     has_empty_criteria = graphene.Boolean()
+    has_empty_ids_criteria = graphene.Boolean()
 
     def resolve_total_households_count_with_valid_phone_no(self, info: Any) -> int:
         return self.households.exclude(
@@ -173,3 +174,5 @@ class TargetingCriteriaObjectType(graphene.InputObjectType):
     rules = graphene.List(TargetingCriteriaRuleObjectType)
     flag_exclude_if_active_adjudication_ticket = graphene.Boolean()
     flag_exclude_if_on_sanction_list = graphene.Boolean()
+    household_ids = graphene.String()
+    individual_ids = graphene.String()
