@@ -4,6 +4,7 @@ from datetime import datetime
 
 from django.conf import settings
 from django.core.management import call_command
+from pytest_html_reporter import attach
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -344,5 +345,6 @@ def screenshot(driver: Chrome, node_id: str) -> None:
     if not os.path.exists("screenshot"):
         os.makedirs("screenshot")
     file_name = f'{node_id}_{datetime.today().strftime("%Y-%m-%d_%H.%M")}.png'.replace("/", "_").replace("::", "__")
-    file_path = os.path.join("screenshot", file_name)
+    file_path = os.path.join("pytest_screenshots", file_name)
     driver.get_screenshot_as_file(file_path)
+    attach(data=driver.get_screenshot_as_png())
