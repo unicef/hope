@@ -138,11 +138,13 @@ export const EditProgramPage = (): ReactElement => {
     populationGoal,
     cashPlus,
     frequencyOfPayments,
-    partners: partners.map((partner) => ({
-      id: partner.id,
-      areas: partner.areas.map((area) => decodeIdString(area.id)),
-      areaAccess: partner.areaAccess,
-    })),
+    partners: partners
+      .filter((partner) => partner.name !== 'UNICEF')
+      .map((partner) => ({
+        id: partner.id,
+        areas: partner.areas.map((area) => decodeIdString(area.id)),
+        areaAccess: partner.areaAccess,
+      })),
     partnerAccess,
   };
   initialValues.budget =

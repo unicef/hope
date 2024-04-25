@@ -77,9 +77,13 @@ export const ProgramDetails = ({
     );
   };
 
+  const partners = program.partners.filter(
+    (partner) => partner.name !== 'UNICEF',
+  );
+
   const showPartners =
     program.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess &&
-    program.partners.length > 0;
+    partners.length > 0;
   return (
     <ContainerColumnWithBorder data-cy="program-details-container">
       <Title>
@@ -177,7 +181,7 @@ export const ProgramDetails = ({
           </Title>
           <OverviewContainer>
             <Grid container spacing={6}>
-              {program.partners.map((partner) => (
+              {partners.map((partner) => (
                 <Grid
                   key={partner.id}
                   item

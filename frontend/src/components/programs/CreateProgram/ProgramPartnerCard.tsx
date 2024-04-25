@@ -58,10 +58,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   const [isAdminAreaExpanded, setIsAdminAreaExpanded] = useState(false);
 
   const [allAreasTree, setAllAreasTree] = React.useState<AreaTreeNode[]>(() =>
-    AreaTreeNode.buildTree(
-      allAreasTreeData,
-      values.partners[index]?.areas,
-    ),
+    AreaTreeNode.buildTree(allAreasTreeData, values.partners[index]?.areas),
   );
   const description = t(
     'Provide info about Programme Partner and set Area Access',
@@ -144,6 +141,9 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
     selectedAdminAreas,
   );
 
+  const hasAdminAreaAccess =
+    values.partners[index]?.areaAccess === 'ADMIN_AREA';
+
   const adminAreaOptionLabel = (
     <Box display="flex" flexDirection="column">
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -155,6 +155,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
             )}
           </SmallText>
           {!isAdminAreaExpanded &&
+            hasAdminAreaAccess &&
             Object.values(allAreasTreeDataGroupedByLevel).some(
               (count) => count > 0,
             ) && (

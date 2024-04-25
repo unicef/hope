@@ -59,7 +59,7 @@ export const CreateProgramPage = (): ReactElement => {
       values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess
         ? values.partners.map(({ id, areas, areaAccess }) => ({
             partner: id,
-            areas,
+            areas: areaAccess === 'ADMIN_AREA' ? areas : [],
             areaAccess,
           }))
         : [];
