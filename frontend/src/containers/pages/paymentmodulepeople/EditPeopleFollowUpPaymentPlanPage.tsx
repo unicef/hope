@@ -122,7 +122,7 @@ export const EditPeopleFollowUpPaymentPlanPage = (): React.ReactElement => {
       });
       showMessage(t('Follow-up Payment Plan Edited'));
       navigate(
-        `/${baseUrl}/payment-module-people/followup-payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
+        `/${baseUrl}/payment-module/followup-payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
       );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
