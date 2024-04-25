@@ -89,15 +89,17 @@ class CommunicationMessageFactory(DjangoModelFactory):
         lambda o: {"excludedAdminAreas": []} if o.sampling_type == Message.SamplingChoices.FULL_LIST else None
     )
     random_sampling_arguments = factory.LazyAttribute(
-        lambda o: {
-            "age": {"max": 80, "min": 30},
-            "sex": choice(["MALE", "FEMALE"]),
-            "margin_of_error": 20.0,
-            "confidence_interval": 0.9,
-            "excluded_admin_areas": [],
-        }
-        if o.sampling_type == Message.SamplingChoices.RANDOM
-        else None
+        lambda o: (
+            {
+                "age": {"max": 80, "min": 30},
+                "sex": choice(["MALE", "FEMALE"]),
+                "margin_of_error": 20.0,
+                "confidence_interval": 0.9,
+                "excluded_admin_areas": [],
+            }
+            if o.sampling_type == Message.SamplingChoices.RANDOM
+            else None
+        )
     )
     created_at = factory.Faker("date_time_this_decade", before_now=False, after_now=True, tzinfo=utc)
 
