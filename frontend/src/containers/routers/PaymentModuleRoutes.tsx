@@ -11,54 +11,143 @@ import { PaymentModulePage } from '../pages/paymentmodule/PaymentModulePage';
 import { PaymentPlanDetailsPage } from '../pages/paymentmodule/PaymentPlanDetailsPage';
 import { SetUpFspPage } from '../pages/paymentmodule/SetUpFspPage';
 import { SetUpFollowUpFspPage } from '../pages/paymentmodule/SetUpFollowUpFspPage';
+import { useProgramContext } from '../../programContext';
+import { CreatePeoplePaymentPlanPage } from '@containers/pages/paymentmodulepeople/CreatePeoplePaymentPlanPage';
+import { PeoplePaymentModulePage } from '@containers/pages/paymentmodulepeople/PeoplePaymentModulePage';
+import { EditPeopleFollowUpPaymentPlanPage } from '@containers/pages/paymentmodulepeople/EditPeopleFollowUpPaymentPlanPage';
+import { EditPeopleFollowUpSetUpFspPage } from '@containers/pages/paymentmodulepeople/EditPeopleFollowUpSetUpFspPage';
+import { SetUpPeopleFollowUpFspPage } from '@containers/pages/paymentmodulepeople/SetUpPeopleFollowUpFspPage';
+import { EditPeopleSetUpFspPage } from '@containers/pages/paymentmodulepeople/EditPeopleSetUpFspPage';
+import { EditPeoplePaymentPlanPage } from '@containers/pages/paymentmodulepeople/EditPeoplePaymentPlanPage';
+import { PeoplePaymentDetailsPage } from '@containers/pages/paymentmodulepeople/PeoplePaymentDetailsPage';
+import { SetUpPeopleFspPage } from '@containers/pages/paymentmodulepeople/SetUpPeopleFspPage';
+import { PeoplePaymentPlanDetailsPage } from '@containers/pages/paymentmodulepeople/PeoplePaymentPlanDetailsPage';
+import { PeopleFollowUpPaymentPlanDetailsPage } from '@containers/pages/paymentmodulepeople/PeopleFollowUpPaymentPlanDetailsPage';
 
 export const PaymentModuleRoutes = (): React.ReactElement => {
-  const paymentModuleRoutes = [
-    {
-      path: 'payment-module/new-plan',
-      element: <CreatePaymentPlanPage />,
-    },
+  const { isSocialDctType } = useProgramContext();
+  let children = [];
+
+  if (isSocialDctType) {
+    children = [
+      {
+        path: '',
+        element: <PeoplePaymentModulePage />,
+      },
+      {
+        path: 'new-plan',
+        element: <CreatePeoplePaymentPlanPage />,
+      },
+      {
+        path: 'followup-payment-plans/:id',
+        children: [
+          {
+            path: '',
+            element: <PeopleFollowUpPaymentPlanDetailsPage />,
+          },
+          {
+            path: 'edit',
+            element: <EditPeopleFollowUpPaymentPlanPage />,
+          },
+          {
+            path: 'setup-fsp/edit',
+            element: <EditPeopleFollowUpSetUpFspPage />,
+          },
+          {
+            path: 'setup-fsp/create',
+            element: <SetUpPeopleFollowUpFspPage />,
+          },
+        ],
+      },
+      {
+        path: 'payment-plans/:id',
+        children: [
+          {
+            path: '',
+            element: <PeoplePaymentPlanDetailsPage />,
+          },
+          {
+            path: 'edit',
+            element: <EditPeoplePaymentPlanPage />,
+          },
+          {
+            path: 'setup-fsp/edit',
+            element: <EditPeopleSetUpFspPage />,
+          },
+          {
+            path: 'setup-fsp/create',
+            element: <SetUpPeopleFspPage />,
+          },
+        ],
+      },
+      {
+        path: 'payments/:id',
+        element: <PeoplePaymentDetailsPage />,
+      },
+    ];
+  } else {
+    children = [
+      {
+        path: '',
+        element: <PaymentModulePage />,
+      },
+      {
+        path: 'new-plan',
+        element: <CreatePaymentPlanPage />,
+      },
+      {
+        path: 'followup-payment-plans/:id',
+        children: [
+          {
+            path: '',
+            element: <FollowUpPaymentPlanDetailsPage />,
+          },
+          {
+            path: 'edit',
+            element: <EditFollowUpPaymentPlanPage />,
+          },
+          {
+            path: 'setup-fsp/edit',
+            element: <EditFollowUpSetUpFspPage />,
+          },
+          {
+            path: 'setup-fsp/create',
+            element: <SetUpFollowUpFspPage />,
+          },
+        ],
+      },
+      {
+        path: 'payment-plans/:id',
+        children: [
+          {
+            path: '',
+            element: <PaymentPlanDetailsPage />,
+          },
+          {
+            path: 'edit',
+            element: <EditPaymentPlanPage />,
+          },
+          {
+            path: 'setup-fsp/edit',
+            element: <EditSetUpFspPage />,
+          },
+          {
+            path: 'setup-fsp/create',
+            element: <SetUpFspPage />,
+          },
+        ],
+      },
+      {
+        path: 'payments/:id',
+        element: <PaymentDetailsPage />,
+      },
+    ];
+  }
+
+  return useRoutes([
     {
       path: 'payment-module',
-      element: <PaymentModulePage />,
+      children,
     },
-    {
-      path: 'payment-module/followup-payment-plans/:id/edit',
-      element: <EditFollowUpPaymentPlanPage />,
-    },
-    {
-      path: 'payment-module/followup-payment-plans/:id/setup-fsp/edit',
-      element: <EditFollowUpSetUpFspPage />,
-    },
-    {
-      path: 'payment-module/followup-payment-plans/:id/setup-fsp/create',
-      element: <SetUpFollowUpFspPage />,
-    },
-    {
-      path: 'payment-module/payment-plans/:id/setup-fsp/edit',
-      element: <EditSetUpFspPage />,
-    },
-    {
-      path: 'payment-module/payment-plans/:id/edit',
-      element: <EditPaymentPlanPage />,
-    },
-    {
-      path: 'payment-module/payments/:id',
-      element: <PaymentDetailsPage />,
-    },
-    {
-      path: 'payment-module/payment-plans/:id/setup-fsp/create',
-      element: <SetUpFspPage />,
-    },
-    {
-      path: 'payment-module/payment-plans/:id',
-      element: <PaymentPlanDetailsPage />,
-    },
-    {
-      path: 'payment-module/followup-payment-plans/:id',
-      element: <FollowUpPaymentPlanDetailsPage />,
-    },
-  ];
-
-  return useRoutes(paymentModuleRoutes);
+  ]);
 };

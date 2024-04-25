@@ -29,10 +29,9 @@ const Container = styled.div`
   }
 `;
 
-export function RegistrationPeopleDetailsPage(): React.ReactElement {
+export function PeopleRegistrationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
-  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const { data: flexFieldsData, loading: flexFieldsDataLoading } =
     useAllIndividualsFlexFieldsAttributesQuery();
@@ -55,26 +54,17 @@ export function RegistrationPeopleDetailsPage(): React.ReactElement {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)
       ? [
-        {
-          title: t('Registration Data import'),
-          to: `/${baseUrl}/registration-data-import/`,
-        },
-      ]
+          {
+            title: t('Registration Data import'),
+            to: '../..',
+          },
+        ]
       : []),
     {
       title: importedIndividual.registrationDataImport.name,
-      to: `/${baseUrl}/registration-data-import/${btoa(
-        `RegistrationDataImportNode:${importedIndividual.registrationDataImport.hctId}`,
-      )}`,
+      to: '..',
     },
   ];
-
-  if (importedIndividual?.household?.id) {
-    breadCrumbsItems.push({
-      title: `${t('HOUSEHOLD ID')}: ${importedIndividual?.household.importId}`,
-      to: `/${baseUrl}/registration-data-import/household/${importedIndividual?.household?.id}`,
-    });
-  }
 
   return (
     <div>
