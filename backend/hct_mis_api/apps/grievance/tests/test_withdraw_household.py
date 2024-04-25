@@ -57,7 +57,7 @@ class TestWithdrawHousehold(APITestCase):
             self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
         )
 
-        household = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07")
+        household = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07", program=self.program_one)
         household.household_collection.save()
         household.registration_data_import.imported_by.save()
         household.registration_data_import.program = self.program_one

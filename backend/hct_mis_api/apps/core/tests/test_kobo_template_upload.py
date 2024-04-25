@@ -114,10 +114,7 @@ class TestKoboTemplateUpload(APITestCase):
                 "Field: national_passport_no_i_c - Field is missing",
                 "Field: account_holder_name_i_c - Field is missing",
                 "Field: bank_branch_name_i_c - Field is missing",
-                # TODO: fix this? (rebase issue?)
-                # "Field: bank_name_i_c - Field is missing",
-                # "Field: bank_account_number_i_c - Field is missing",
-                # "Field: preferred_language_i_c - Field is missing",
+                "Field: program_registration_id_h_c - Field is missing",
             ]
         }
         self.assertEqual(form.errors, expected_errors)
