@@ -95,9 +95,11 @@ def log_create(
         user=user,
         business_area=business_area,
         object_repr=str(instance),
-        changes=create_diff(old_object, new_object, mapping)
-        if action not in (LogEntry.DELETE, LogEntry.SOFT_DELETE)
-        else None,
+        changes=(
+            create_diff(old_object, new_object, mapping)
+            if action not in (LogEntry.DELETE, LogEntry.SOFT_DELETE)
+            else None
+        ),
     )
     # if only one program
     if programs and isinstance(programs, (UUID, str)):
