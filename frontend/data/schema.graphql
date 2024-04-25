@@ -1620,7 +1620,7 @@ type HouseholdNode implements Node {
   koboAssetId: String!
   rowId: Int
   detailId: String
-  registrationId: Int
+  registrationId: String
   totalCashReceivedUsd: Decimal
   totalCashReceived: Decimal
   familyId: String
@@ -2080,6 +2080,7 @@ type ImportedHouseholdNode implements Node {
   koboAssetId: String!
   rowId: Int
   detailId: String
+  programRegistrationId: String
   enumeratorRecId: Int
   misUnicefId: String
   programId: UUID
@@ -2394,7 +2395,7 @@ type IndividualNode implements Node {
   koboAssetId: String!
   rowId: Int
   detailId: String
-  registrationId: Int
+  registrationId: String
   disabilityCertificatePicture: String
   preferredLanguage: String
   relationshipConfirmed: Boolean!
