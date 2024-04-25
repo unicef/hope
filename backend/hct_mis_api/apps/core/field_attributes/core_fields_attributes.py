@@ -1799,6 +1799,19 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "index_id",
         "scope": [Scope.XLSX_PEOPLE],
     },
+    {
+        "id": "8ef6fd85-032f-42cf-8f1f-3398f88316af",
+        "type": TYPE_STRING,
+        "name": "registration_id",
+        "lookup": "registration_id",
+        "label": {"English(EN)": "Program registration id"},
+        "hint": "",
+        "required": False,
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "program_registration_id_h_c",
+        "scope": [Scope.KOBO_IMPORT],
+    },
 ] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
 
 

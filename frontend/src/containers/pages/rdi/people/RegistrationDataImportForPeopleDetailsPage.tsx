@@ -21,9 +21,7 @@ import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
-import { ImportedHouseholdTable } from '../../../tables/rdi/ImportedHouseholdsTable';
-import { ImportedIndividualsTable } from '../../../tables/rdi/ImportedIndividualsTable';
-import {ImportedPeopleTable} from "@containers/tables/rdi/ImportedPeopleTable";
+import { ImportedPeopleTable } from '@containers/tables/rdi/ImportedPeopleTable';
 
 const Container = styled.div`
   && {
@@ -114,7 +112,10 @@ export const RegistrationDataImportForPeopleDetailsPage =
     }): React.ReactElement {
       return (
         <Container>
-          <RegistrationDetails registration={data.registrationDataImport} isSocialWorkerProgram={programData.program.isSocialWorkerProgram}/>
+          <RegistrationDetails
+            registration={data.registrationDataImport}
+            isSocialWorkerProgram={programData.program.isSocialWorkerProgram}
+          />
           {isErased ? null : (
             <TableWrapper>
               <ContainerColumnWithBorder>

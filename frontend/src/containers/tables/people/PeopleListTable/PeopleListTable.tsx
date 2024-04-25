@@ -61,7 +61,6 @@ export function PeopleListTable({
             key={row.id}
             individual={row}
             canViewDetails={canViewDetails}
-            choicesData={choicesData}
           />
         )}
       />
