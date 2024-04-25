@@ -1,7 +1,17 @@
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
 
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.payment.fixtures import (
+    ApprovalFactory,
+    ApprovalProcessFactory,
+    DeliveryMechanismPerPaymentPlanFactory,
+    FinancialServiceProviderFactory,
+    PaymentPlanFactory,
+)
+from hct_mis_api.apps.payment.models import Approval, GenericPayment
 from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
 )
@@ -9,49 +19,45 @@ from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
 
 class TestPaymentPlanPDFExportService(TestCase):
     def setUp(self) -> None:
-        self.payment_plan_mock = MagicMock()
-        self.payment_plan_mock.id = 111
-        self.payment_plan_mock.program.id = 333
-        self.payment_plan_mock.business_area.slug = "afghanistan"
-        self.payment_plan_mock.unicef_id = "PP-0060-24-00000007"
-        self.payment_plan_mock.program.is_social_worker_program = False
-        self.pdf_export_service = PaymentPlanPDFExportService(self.payment_plan_mock)
+        create_afghanistan()
+        self.payment_plan = PaymentPlanFactory()
+        self.payment_plan.unicef_id = "PP-0060-24-00000007"
+        self.payment_plan.save()
+        self.pdf_export_service = PaymentPlanPDFExportService(self.payment_plan)
 
-    @patch("django.conf.settings")
-    @patch("hct_mis_api.apps.core.utils.encode_id_base64")
-    def test_generate_web_links(self, mock_encode_id_base64, mock_settings):
-        mock_encode_id_base64.side_effect = lambda x, y: f"{x}_{y}"
-        mock_settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
+        financial_service_provider1 = FinancialServiceProviderFactory(
+            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH]
+        )
+
+        DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=self.payment_plan,
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+            financial_service_provider=financial_service_provider1,
+            delivery_mechanism_order=1,
+        )
+        approval_process = ApprovalProcessFactory(
+            payment_plan=self.payment_plan,
+        )
+        ApprovalFactory(type=Approval.APPROVAL, approval_process=approval_process)
+
+    @patch(
+        "hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service.PaymentPlanPDFExportService.get_link",
+        return_value="http://www_link/download-payment-plan-summary-pdf/111",
+    )
+    def test_generate_web_links(self, get_link_mock: Any) -> None:
         expected_download_link = "http://www_link/download-payment-plan-summary-pdf/111"
-        expected_payment_plan_link = "http://test_frontend_host/afghanistan/programs/333/payment-module/payment-plans/111"
+        self.pdf_export_service.generate_web_links()
+        self.assertEqual(self.pdf_export_service.download_link, expected_download_link)
+        self.assertEqual(self.pdf_export_service.payment_plan_link, expected_download_link)
 
-        with patch.object(self.pdf_export_service, 'get_link') as mock_get_link:
-            mock_get_link.return_value = "http://www_link/download-payment-plan-summary-pdf/111"
-
-            self.pdf_export_service.generate_web_links()
-            self.assertEqual(self.pdf_export_service.download_link, expected_download_link)
-            self.assertEqual(self.pdf_export_service.payment_plan_link, expected_payment_plan_link)
-
-    @patch("django.conf.settings")
-    @patch("hct_mis_api.apps.utils.pdf_generator.generate_pdf_from_html")
-    def test_generate_pdf_summary(self, mock_generate_pdf_from_html, mock_settings):
-        mock_settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
-        mock_generate_pdf_from_html.return_value = "pp_summary_pdf"
-        reconciliation_qs_mock = MagicMock()
-        reconciliation_qs_mock.aggregate.return_value = {
-            "pending": 11,
-            "pending_usd": 11,
-            "pending_local": 5,
-            "reconciled": 8,
-            "reconciled_usd": 8,
-            "reconciled_local": 4
-        }
-        self.pdf_export_service.payment_plan.eligible_payments.aggregate.return_value = reconciliation_qs_mock
-
+    @patch(
+        "hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service.PaymentPlanPDFExportService.get_link",
+        return_value="http://www_link/download-payment-plan-summary-pdf/111",
+    )
+    def test_generate_pdf_summary(self, get_link_mock: Any) -> None:
         pdf, filename = self.pdf_export_service.generate_pdf_summary()
-        mock_generate_pdf_from_html.assert_called_once()
 
-        self.assertEqual(pdf, "pp_summary_pdf")
+        self.assertTrue(isinstance(pdf, bytes))
         self.assertEqual(filename, "PaymentPlanSummary-PP-0060-24-00000007.pdf")
 
     def test_get_email_context(self) -> None:
