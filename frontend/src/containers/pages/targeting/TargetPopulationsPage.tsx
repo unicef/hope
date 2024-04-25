@@ -15,6 +15,7 @@ import { getFilterFromQueryParams } from '@utils/utils';
 import { TargetingInfoDialog } from '../../dialogs/targetPopulation/TargetingInfoDialog';
 import { TargetPopulationTable } from '../../tables/targeting/TargetPopulationTable';
 import { useProgramContext } from '../../../programContext';
+import { CreateTPMenu } from '@components/targeting/CreateTPMenu';
 
 const initialFilter = {
   name: '',
@@ -25,7 +26,7 @@ const initialFilter = {
   createdAtRangeMax: '',
 };
 
-export function TargetPopulationsPage(): React.ReactElement {
+export const TargetPopulationsPage = (): React.ReactElement => {
   const location = useLocation();
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
@@ -60,21 +61,7 @@ export function TargetPopulationsPage(): React.ReactElement {
             <Info />
           </IconButton>
           <TargetingInfoDialog open={isInfoOpen} setOpen={setToggleInfo} />
-          {canCreate && (
-            <ButtonTooltip
-              variant="contained"
-              color="primary"
-              title={t(
-                'Program has to be active to create a new Target Population',
-              )}
-              component={Link}
-              to={`/${baseUrl}/target-population/create`}
-              data-cy="button-target-population-create-new"
-              disabled={!isActiveProgram}
-            >
-              Create new
-            </ButtonTooltip>
-          )}
+          {canCreate && <CreateTPMenu />}
         </>
       </PageHeader>
       <TargetPopulationFilters
@@ -93,4 +80,4 @@ export function TargetPopulationsPage(): React.ReactElement {
       />
     </>
   );
-}
+};

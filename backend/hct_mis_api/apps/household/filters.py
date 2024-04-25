@@ -196,7 +196,7 @@ class HouseholdFilter(FilterSet):
                 int(search)
             except ValueError:
                 raise SearchException("The search value for a given search type should be a number")
-            return qs.filter(registration_id__icontains=search)
+            return qs.filter(registration_id__istartswith=search)
         if search_type == "kobo_asset_id":
             inner_query = Q()
             split_values_list = search.split(" ")

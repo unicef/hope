@@ -15,9 +15,11 @@ import {
 } from '@generated/graphql';
 import { TargetPopulationPageHeader } from '../headers/TargetPopulationPageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useProgramContext } from 'src/programContext';
 
-export function TargetPopulationDetailsPage(): React.ReactElement {
+export const TargetPopulationDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
+  const { isStandardDctType, isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
   const { data, loading, error, startPolling, stopPolling } =
     useTargetPopulationQuery({
@@ -53,6 +55,9 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
 
   const { targetPopulation } = data;
 
+  const category =
+    targetPopulation.targetingCriteria?.rules.length !== 0 ? 'filters' : 'ids';
+
   const canDuplicate =
     hasPermissions(PERMISSIONS.TARGETING_DUPLICATE, permissions) &&
     Boolean(targetPopulation.targetingCriteria);
@@ -72,9 +77,12 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
       <TargetPopulationCore
         id={targetPopulation.id}
         targetPopulation={targetPopulation}
+        isStandardDctType={isStandardDctType}
+        isSocialDctType={isSocialDctType}
+        category={category}
         permissions={permissions}
         screenBeneficiary={businessAreaData?.businessArea?.screenBeneficiary}
       />
     </>
   );
-}
+};

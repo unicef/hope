@@ -39,6 +39,8 @@ class TestTargetPopulationQuery(APITestCase):
           targetPopulation(id:$id){
             name
             status
+            hasEmptyCriteria
+            hasEmptyIdsCriteria
             totalHouseholdsCount
             totalIndividualsCount
             targetingCriteria{
@@ -195,7 +197,7 @@ class TestTargetPopulationQuery(APITestCase):
             ),
         ]
     )
-    def test_simple_target_query_2(self, _: Any, permissions: List[Permissions]) -> None:
+    def test_simple_target_query_next(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
