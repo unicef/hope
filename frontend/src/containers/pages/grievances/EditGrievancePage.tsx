@@ -373,13 +373,13 @@ export const EditGrievancePage = (): React.ReactElement => {
                                 >
                                   {ticket.household.unicefId}
                                 </BlackLink>
-                                ) : (
+                              ) : (
                                 <div>
                                   {ticket.household?.id
                                     ? ticket.household.unicefId
                                     : '-'}
                                 </div>
-                                )}
+                              )}
                             </span>
                           </LabelizedField>
                         </Grid>
@@ -394,13 +394,13 @@ export const EditGrievancePage = (): React.ReactElement => {
                                 >
                                   {ticket.individual.unicefId}
                                 </BlackLink>
-                                ) : (
+                              ) : (
                                 <div>
                                   {ticket.individual?.id
                                     ? ticket.individual.unicefId
                                     : '-'}
                                 </div>
-                                )}
+                              )}
                             </span>
                           </LabelizedField>
                         </Grid>
@@ -553,13 +553,54 @@ export const EditGrievancePage = (): React.ReactElement => {
                       PERMISSIONS.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER,
                       permissions,
                     ) && (
-                      <BoxPadding>
-                        <DataChangeComponent
-                          values={values}
-                          setFieldValue={setFieldValue}
-                        />
-                        {dataChangeErrors(errors, touched)}
-                      </BoxPadding>
+                      <>
+                        <BoxPadding>
+                          <DataChangeComponent
+                            values={values}
+                            setFieldValue={setFieldValue}
+                          />
+                          {dataChangeErrors(errors, touched)}
+                        </BoxPadding>
+                        <BoxPadding>
+                          <Title>
+                            <Typography variant="h6">
+                              {t('Delivery Mechanisms')}
+                            </Typography>
+                          </Title>
+                          <Grid container spacing={3}>
+                            <Grid item xs={3}>
+                              <Field
+                                name="paymentChannelField1"
+                                fullWidth
+                                variant="outlined"
+                                label="Payment Channel Field 1"
+                                required
+                                component={FormikTextField}
+                              />
+                            </Grid>
+                            <Grid item xs={3}>
+                              <Field
+                                name="paymentChannelField2"
+                                fullWidth
+                                variant="outlined"
+                                label="Payment Channel Field 2"
+                                required
+                                component={FormikTextField}
+                              />
+                            </Grid>
+                            <Grid item xs={3}>
+                              <Field
+                                name="paymentChannelField3"
+                                fullWidth
+                                variant="outlined"
+                                label="Payment Channel Field 3"
+                                required
+                                component={FormikTextField}
+                              />
+                            </Grid>
+                          </Grid>
+                        </BoxPadding>
+                      </>
                     )}
                   </ContainerColumnWithBorder>
                 </NewTicket>
