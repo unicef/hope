@@ -57,8 +57,8 @@ export const ProgramDetails = ({
   ): React.ReactElement => {
     const counts = {};
     partner.areas?.forEach(({ level }) => {
-      const currentCount = counts[level] || 0;
-      counts[level] = currentCount + 1;
+      const currentCount = counts[level + 1] || 0;
+      counts[level + 1] = currentCount + 1;
     });
 
     return (
