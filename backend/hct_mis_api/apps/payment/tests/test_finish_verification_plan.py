@@ -57,11 +57,14 @@ class TestFinishVerificationPlan(TestCase):
             generic_fk_obj=cash_plan,
         )
         for i in range(payment_record_amount):
-            registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
+            registration_data_import = RegistrationDataImportFactory(
+                imported_by=user, business_area=business_area, program=cls.program
+            )
             household, _ = create_household(
                 {
                     "registration_data_import": registration_data_import,
                     "admin_area": afghanistan_areas_qs.order_by("?").first(),
+                    "program": cls.program,
                 },
                 {
                     "registration_data_import": registration_data_import,

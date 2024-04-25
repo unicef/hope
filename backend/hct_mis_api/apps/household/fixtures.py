@@ -273,6 +273,7 @@ def create_household(
 
     household.head_of_household = individuals[0]
     household.household_collection.save()
+    household.program.save()
     # household.registration_data_import.imported_by.partner.save()
     household.registration_data_import.imported_by.save()
     household.registration_data_import.program.save()
@@ -317,6 +318,7 @@ def create_household_for_fixtures(
     )
 
     household.household_collection.save()
+    household.program.save()
     household.head_of_household = individuals[0]
     household.registration_data_import.imported_by.save()
     household.registration_data_import.program.save()
@@ -362,6 +364,7 @@ def create_household_and_individuals(
     if household_data.get("size") is None:
         household_data["size"] = len(individuals_data)
     household: Household = HouseholdFactory.build(**household_data)
+    household.program.save()
     household.household_collection.save()
     household.registration_data_import.imported_by.save()
     household.registration_data_import.program.save()
