@@ -21,7 +21,7 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.payment.models import PaymentPlan, PaymentVerificationPlan
 from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
-    PaymentPlanPDFExportSevice,
+    PaymentPlanPDFExportService,
 )
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
@@ -565,7 +565,7 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: st
                 payment_plan.export_pdf_file_summary.delete()
                 payment_plan.export_pdf_file_summary = None
 
-            service = PaymentPlanPDFExportSevice(payment_plan)
+            service = PaymentPlanPDFExportService(payment_plan)
             pdf, filename = service.generate_pdf_summary()
 
             file_pdf_obj = FileTemp(
