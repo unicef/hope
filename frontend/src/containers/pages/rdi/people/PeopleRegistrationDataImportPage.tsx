@@ -21,7 +21,7 @@ const initialFilter = {
   importDateRangeMax: '',
 };
 
-export function RegistrationDataForPeopleImportPage(): React.ReactElement {
+export function PeopleRegistrationDataImportPage(): React.ReactElement {
   const location = useLocation();
   const permissions = usePermissions();
   const { t } = useTranslation();

@@ -8,7 +8,6 @@ import { StatusBox } from '@components/core/StatusBox';
 import { registrationDataImportStatusToColor } from '@utils/utils';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface PaymentRecordTableRowProps {
   registrationDataImport: RegistrationDataImportNode;
@@ -24,8 +23,7 @@ export function RegistrationDataImportTableRow({
   radioChangeHandler,
 }: PaymentRecordTableRowProps): React.ReactElement {
   const navigate = useNavigate();
-  const { baseUrl } = useBaseUrl();
-  const importDetailsPath = `/${baseUrl}/registration-data-import/${registrationDataImport.id}`;
+  const importDetailsPath = `${registrationDataImport.id}`;
   const handleClick = (): void => {
     if (radioChangeHandler !== undefined) {
       radioChangeHandler(registrationDataImport.id);
