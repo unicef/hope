@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class PaymentPlanPDFExportSevice:
+class PaymentPlanPDFExportService:
     text_template = "payment/pdf_file_generated_email.txt"
     html_template = "payment/pdf_file_generated_email.html"
 
