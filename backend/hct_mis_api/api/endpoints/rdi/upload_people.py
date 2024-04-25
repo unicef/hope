@@ -58,6 +58,7 @@ class PeopleSerializer(serializers.ModelSerializer):
             "updated_at",
             "mis_unicef_id",
         ]
+        ref_name = "PeopleUploadSerializer"
 
 
 class PeopleUploadMixin:

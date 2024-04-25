@@ -78,6 +78,7 @@ export const PERMISSIONS = {
   PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP:
     'PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP',
   PM_EXPORT_PDF_SUMMARY: 'PM_EXPORT_PDF_SUMMARY',
+  PAYMENT_VIEW_LIST_MANAGERIAL: 'PAYMENT_VIEW_LIST_MANAGERIAL',
 
   // Grievances
   GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE:
@@ -236,8 +237,8 @@ export function hasCreatorOrOwnerPermissions(
 ): boolean {
   // use where we have to check 3 different permissions, for ex. grievances
   return (
-    allowedPermissions.includes(generalPermission)
-    || (isCreator && allowedPermissions.includes(creatorPermission))
-    || (isOwner && allowedPermissions.includes(ownerPermission))
+    allowedPermissions.includes(generalPermission) ||
+    (isCreator && allowedPermissions.includes(creatorPermission)) ||
+    (isOwner && allowedPermissions.includes(ownerPermission))
   );
 }

@@ -1,10 +1,10 @@
 version: '3.7'
 
 volumes:
-  backend-data:
-  backend-web-app:
-  db:
-  data_es:
+  backend-data-selenium:
+  backend-web-app-selenium:
+  db-selenium:
+  data_es-selenium:
 
 services:
   selenium:
@@ -33,9 +33,10 @@ services:
     volumes:
       - ./backend/report/screenshot/:/code/screenshot/
       - ./backend/report/:/code/report/
-      - backend-data:/data
+      - backend-data-selenium:/data
+      - ./backend/selenium_tests:/code/selenium_tests
       - type: volume
-        source: backend-web-app
+        source: backend-web-app-selenium
         target: /code/hct_mis_api/apps/web/static
         volume:
           nocopy: false
@@ -63,7 +64,7 @@ services:
       dockerfile: docker/Dockerfile
       target: dist
     volumes:
-      - backend-web-app:/tmp
+      - backend-web-app-selenium:/tmp
     command: |
       sh -c "
         cp -r ./hct_mis_api/apps/web/static/* /tmp/
@@ -80,7 +81,7 @@ services:
   db:
     image: kartoza/postgis:14-3
     volumes:
-      - db:/var/lib/postgresql/data
+      - db-selenium:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d
     environment:
       - POSTGRES_MULTIPLE_DATABASES=unicef_hct_mis_cashassist,rdi_datahub,mis_datahub,erp_datahub,ca_datahub
@@ -111,6 +112,6 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - data_es:/usr/share/elasticsearch/data
+      - data_es-selenium:/usr/share/elasticsearch/data
     ports:
       - 9200:9200

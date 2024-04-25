@@ -77,16 +77,6 @@ snapshots['TestCrossAreaFilterAvailable::test_cross_area_filter_true_but_area_re
                         'language': 'Polish',
                         'status': 1
                     }
-                },
-                {
-                    'node': {
-                        'admin': 'Admin Area 2',
-                        'category': 8,
-                        'consent': True,
-                        'description': 'Same Area Grievance',
-                        'language': 'Polish',
-                        'status': 1
-                    }
                 }
             ]
         }

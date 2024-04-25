@@ -17,6 +17,7 @@ import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { AllGrievanceTicketQuery } from '@generated/graphql';
 import { useProgramContext } from '../../../../programContext';
+import { Bold } from '@components/core/Bold';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -31,10 +32,6 @@ const StyledTable = styled(Table)`
 `;
 const StyledDialog = styled(Dialog)`
   max-height: 800px;
-`;
-
-const Bold = styled.span`
-  font-weight: bold;
 `;
 
 interface BulkBaseModalProps {

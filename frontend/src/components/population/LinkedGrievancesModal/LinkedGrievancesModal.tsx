@@ -30,6 +30,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { StatusBox } from '@core/StatusBox';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { getGrievanceDetailsPath } from '../../grievances/utils/createGrievanceUtils';
+import { Bold } from '@components/core/Bold';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -43,10 +44,6 @@ const StyledTable = styled(Table)`
 `;
 const StyledDialog = styled(Dialog)`
   max-height: 800px;
-`;
-
-const Bold = styled.span`
-  font-weight: bold;
 `;
 
 interface LinkedGrievancesModalProps {
@@ -111,12 +108,12 @@ export function LinkedGrievancesModal({
   const renderGrievances = (): Array<React.ReactElement> =>
     allGrievances.length
       ? allGrievances.map((el) => {
-        const grievanceDetailsPath = getGrievanceDetailsPath(
-          el.node.id,
-          el.node.category,
-          baseUrl,
-        );
-        return (
+          const grievanceDetailsPath = getGrievanceDetailsPath(
+            el.node.id,
+            el.node.category,
+            baseUrl,
+          );
+          return (
             <span key={el.node.id}>
               <ContentLink href={grievanceDetailsPath}>
                 {`${el.node.unicefId} - ${
@@ -125,8 +122,8 @@ export function LinkedGrievancesModal({
               </ContentLink>{' '}
               <br />
             </span>
-        );
-      })
+          );
+        })
       : [<span key="empty">-</span>];
 
   const renderLink = (): React.ReactElement => {

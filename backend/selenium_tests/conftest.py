@@ -18,6 +18,7 @@ from page_object.programme_management.programme_management import ProgrammeManag
 from page_object.programme_population.households import Households
 from page_object.programme_population.households_details import HouseholdsDetails
 from page_object.programme_population.individuals import Individuals
+from page_object.programme_population.individuals_details import IndividualsDetails
 from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
@@ -33,6 +34,10 @@ from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Country
+
+
+def pytest_addoption(parser) -> None:  # type: ignore
+    parser.addoption("--mapping", action="store_true", default=False, help="Enable mapping mode")
 
 
 def pytest_configure() -> None:
@@ -138,9 +143,11 @@ def driver() -> Chrome:
 
 
 @pytest.fixture(autouse=True)
-def browser(driver: Chrome) -> Chrome:
-    driver.live_server = LiveServer("localhost")
-    # driver.live_server = LiveServer("0.0.0.0:8080")
+def browser(request: FixtureRequest, driver: Chrome) -> Chrome:
+    if request.config.getoption("--mapping"):
+        driver.live_server = LiveServer("0.0.0.0:8080")
+    else:
+        driver.live_server = LiveServer("localhost")
     yield driver
     driver.close()
     pytest.CSRF = ""
@@ -211,6 +218,11 @@ def pageHouseholdsDetails(request: FixtureRequest, browser: Chrome) -> Household
 @pytest.fixture
 def pageIndividuals(request: FixtureRequest, browser: Chrome) -> Individuals:
     yield Individuals(browser)
+
+
+@pytest.fixture
+def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> IndividualsDetails:
+    yield IndividualsDetails(browser)
 
 
 @pytest.fixture

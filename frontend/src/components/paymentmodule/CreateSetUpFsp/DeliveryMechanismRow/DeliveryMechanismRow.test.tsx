@@ -12,6 +12,7 @@ describe('components/paymentmodule/CreateSetUpFsp/DeliveryMechanismRow', () => {
         {
           deliveryMechanism: '',
           fsp: '',
+          chosenConfiguration: '',
         },
       ],
     };
@@ -35,6 +36,7 @@ describe('components/paymentmodule/CreateSetUpFsp/DeliveryMechanismRow', () => {
         deliveryMechanismsChoices={deliveryMechanismsChoices}
         fspsChoices={mappedFsps}
         permissions={[PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP]}
+        setFieldValue={() => {}}
       />,
     );
 
