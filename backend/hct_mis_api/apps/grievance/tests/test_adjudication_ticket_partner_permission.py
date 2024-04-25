@@ -217,8 +217,6 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
 
         self.ticket_details.selected_individuals.add(self.individuals_1[0])  # doshi guy
 
-        print(self.ticket_details.selected_individuals)
-
         self.create_user_role_with_permissions(
             self.user,
             [
