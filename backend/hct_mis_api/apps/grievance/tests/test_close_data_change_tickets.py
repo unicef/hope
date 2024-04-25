@@ -102,7 +102,9 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
         cls.update_partner_access_to_program(partner, cls.program)
         cls.update_partner_access_to_program(partner, program_one)
 
-        household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07", admin_area=cls.admin_area_1)
+        household_one = HouseholdFactory.build(
+            id="07a901ed-d2a5-422a-b962-3570da1d5d07", admin_area=cls.admin_area_1, program=cls.program
+        )
         household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.program = program_one
@@ -110,7 +112,9 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
         household_one.program = program_one
         household_one.programs.add(program_one)
 
-        household_two = HouseholdFactory.build(id="603dfd3f-baca-42d1-aac6-3e1c537ddbef", admin_area=cls.admin_area_1)
+        household_two = HouseholdFactory.build(
+            id="603dfd3f-baca-42d1-aac6-3e1c537ddbef", admin_area=cls.admin_area_1, program=cls.program
+        )
         household_two.household_collection.save()
         household_two.registration_data_import.imported_by.save()
         household_two.registration_data_import.program = program_one

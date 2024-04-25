@@ -13,7 +13,8 @@ def create_afghanistan(
     is_payment_plan_applicable: bool = False,
 ) -> BusinessArea:
     return BusinessArea.objects.get_or_create(
-        **{
+        code="0060",
+        defaults={
             "code": "0060",
             "name": "Afghanistan",
             "long_name": "THE ISLAMIC REPUBLIC OF AFGHANISTAN",
