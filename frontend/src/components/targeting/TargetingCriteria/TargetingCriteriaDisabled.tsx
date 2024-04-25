@@ -1,26 +1,14 @@
 import * as React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { Typography, Paper, Tooltip } from '@mui/material';
+import { Tooltip, Box } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 
-const PaperContainer = styled(Paper)`
-  padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
-  margin: ${({ theme }) => theme.spacing(5)};
-  border-bottom: 1px solid rgba(224, 224, 224, 1);
-`;
 
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(4)};
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
 
-const ContentWrapper = styled.div`
+export const ContentWrapper = styled(Box)`
   display: flex;
   flex-wrap: wrap;
-  padding: ${({ theme }) => theme.spacing(4)} 0;
 `;
 
 const IconWrapper = styled.div`
@@ -50,11 +38,7 @@ export function TargetingCriteriaDisabled({
 }): React.ReactElement {
   const { t } = useTranslation();
   return (
-    <div>
-      <PaperContainer>
-        <Title>
-          <Typography variant="h6">{t('Targeting Criteria')}</Typography>
-        </Title>
+    <>
         {showTooltip ? (
           <ContentWrapper>
             <Tooltip title="Make sure program has checked household filter flag or individual filter flag">
@@ -84,7 +68,6 @@ export function TargetingCriteriaDisabled({
             </AddCriteria>
           </ContentWrapper>
         )}
-      </PaperContainer>
-    </div>
+    </>
   );
 }

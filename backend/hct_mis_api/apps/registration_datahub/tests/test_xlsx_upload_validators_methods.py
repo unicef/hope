@@ -605,7 +605,6 @@ class TestXLSXValidatorsMethods(APITestCase):
                 "message": "Sheet: 'People', Unexpected value: None for type integer of field pp_index_id",
             },
         ]
-
         with open(file_path, "rb") as file:
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator(is_social_worker_program=True)
             result = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
