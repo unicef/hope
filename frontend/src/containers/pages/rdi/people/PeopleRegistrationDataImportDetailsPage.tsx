@@ -57,7 +57,7 @@ const TabPanel = ({
   );
 };
 
-export const RegistrationDataImportForPeopleDetailsPage =
+export const PeopleRegistrationDataImportDetailsPage =
   (): React.ReactElement => {
     const { t } = useTranslation();
     const { id } = useParams();
