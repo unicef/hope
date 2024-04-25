@@ -305,7 +305,9 @@ class TestIndividualQuery(APITestCase):
         )
 
     def test_individual_query_single_different_program_in_header(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], self.business_area, self.program)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], self.business_area, self.program
+        )
 
         self.snapshot_graphql_request(
             request_string=self.INDIVIDUAL_QUERY,

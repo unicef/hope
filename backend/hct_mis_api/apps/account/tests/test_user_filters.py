@@ -2,6 +2,7 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestUserFilter(APITestCase):
@@ -32,6 +33,7 @@ class TestUserFilter(APITestCase):
 
         # user with UNICEF partner
         partner_unicef = PartnerFactory(name="UNICEF")
+        program = ProgramFactory(name="Program")
         cls.user_with_unicef_partner = UserFactory(partner=partner_unicef, username="unicef_user")
         cls.create_user_role_with_permissions(
             cls.user_with_unicef_partner, [Permissions.USER_MANAGEMENT_VIEW_LIST], business_area
@@ -48,6 +50,7 @@ class TestUserFilter(APITestCase):
             permissions=[Permissions.GRIEVANCES_CREATE],
             business_area=business_area,
             name="Partner Role",
+            program=program,
         )
         UserFactory(partner=partner, username="user_with_partner_in_ba")
 

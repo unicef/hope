@@ -203,6 +203,50 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
             },
         )
 
+    def test_select_individual_when_partner_with_permission_with_selected_individual_and_selected_individuals(
+        self,
+    ) -> None:
+        partner = PartnerFactory(name="NOT_UNICEF")
+        self.update_partner_access_to_program(partner, self.program, [self.doshi])
+
+        self.user.partner = partner
+        self.user.save()
+
+        self.individuals_1[0].program = self.program
+        self.individuals_1[0].save()
+
+        self.ticket_details.selected_individuals.add(self.individuals_1[0])  # doshi guy
+
+        print(self.ticket_details.selected_individuals)
+
+        self.create_user_role_with_permissions(
+            self.user,
+            [
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+            ],
+            self.business_area,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=APPROVE_NEEDS_ADJUDICATION_MUTATION,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={
+                "grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"),
+                "selectedIndividualIds": [
+                    encode_id_base64(self.individuals_1[0].id, "IndividualNode")  # guy from doshi admin2
+                ],
+                "selectedIndividualId": encode_id_base64(self.individuals_1[0].id, "IndividualNode"),
+            },
+        )
+
     def test_select_individual_when_partner_with_permission_and_no_selected_program(self) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
         self.update_partner_access_to_program(partner, self.program, [self.doshi])

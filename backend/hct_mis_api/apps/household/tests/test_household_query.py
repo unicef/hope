@@ -274,7 +274,9 @@ class TestHouseholdQuery(APITestCase):
         )
 
     def test_household_query_single_different_program_in_header(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS], self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=HOUSEHOLD_QUERY,

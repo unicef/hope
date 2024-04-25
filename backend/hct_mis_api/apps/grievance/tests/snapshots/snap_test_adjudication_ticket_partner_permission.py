@@ -124,3 +124,23 @@ snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_
         }
     }
 }
+
+snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_partner_with_permission_with_selected_individual_and_selected_individuals 1'] = {
+    'data': {
+        'approveNeedsAdjudication': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 7
+                }
+            ],
+            'message': 'Only one option for selected individuals is available',
+            'path': [
+                'approveNeedsAdjudication'
+            ]
+        }
+    ]
+}
