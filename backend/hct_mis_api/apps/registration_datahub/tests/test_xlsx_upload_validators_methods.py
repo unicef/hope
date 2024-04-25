@@ -592,7 +592,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             {
                 "row_number": 1,
                 "header": "People",
-                "message": "Individual with index_id 1 have to has an external collector.",
+                "message": "Individual with index_id 1 has to have an external collector.",
             },
             {
                 "row_number": 1,
