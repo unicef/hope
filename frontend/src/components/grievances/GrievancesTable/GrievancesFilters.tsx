@@ -120,27 +120,29 @@ export const GrievancesFilters = ({
       applyHandler={handleApplyFilter}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid container alignItems="flex-end" item xs={5} spacing={0}>
-          <Grid item xs={5}>
-            <SearchTextField
-              value={filter.search}
-              label="Search"
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-              data-cy="filters-search"
-              borderRadius="4px 0px 0px 4px"
-            />
-          </Grid>
-          <Grid container item xs={7}>
+        <Grid item xs={3}>
+          <SearchTextField
+            value={filter.search}
+            label="Search"
+            onChange={(e) => handleFilterChange('search', e.target.value)}
+            data-cy="filters-search"
+            borderRadius="4px 0px 0px 4px"
+          />
+        </Grid>
+        <Grid container item xs={6} spacing={3}>
+          <Grid item xs={6}>
             <SelectFilter
-              onChange={(e) => handleFilterChange('searchType', e.target.value)}
-              label="Search Type"
-              value={filter.searchType}
+              onChange={(e) =>
+                handleFilterChange('documentType', e.target.value)
+              }
+              label="Document Type"
+              value={filter.documentType}
               borderRadius="0px 4px 4px 0px"
-              data-cy="filters-search-type"
+              data-cy="filters-document-type"
               fullWidth
               disableClearable
             >
-              {choicesData?.grievanceTicketSearchTypesChoices?.map(
+              {choicesData?.documentTypeChoices?.map(
                 ({ name, value }) => (
                   <MenuItem key={value} value={value}>
                     {name}
@@ -148,6 +150,17 @@ export const GrievancesFilters = ({
                 ),
               )}
             </SelectFilter>
+          </Grid>
+          <Grid item xs={6}>
+            <SearchTextField
+              value={filter.documentNumber}
+              label="Document Number"
+              onChange={(e) =>
+                handleFilterChange('documentNumber', e.target.value)
+              }
+              data-cy="filters-document-number"
+              borderRadius="4px 0px 0px 4px"
+            />
           </Grid>
         </Grid>
         {isAllPrograms && (
@@ -163,7 +176,7 @@ export const GrievancesFilters = ({
             />
           </Grid>
         )}
-        <Grid container item xs={2}>
+        <Grid container item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}

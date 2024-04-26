@@ -2,6 +2,7 @@ from typing import Any, List
 
 from django.conf import settings
 
+from constance.test import override_config
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import (
@@ -10,7 +11,7 @@ from hct_mis_api.apps.account.fixtures import (
     UserFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import (
     create_afghanistan,
     generate_data_collecting_types,
@@ -27,8 +28,8 @@ from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
 )
 
 ALL_HOUSEHOLD_QUERY = """
-      query AllHouseholds($search: String, $searchType: String, $program: ID) {
-        allHouseholds(search: $search, searchType: $searchType, orderBy: "size", program: $program, businessArea: "afghanistan") {
+      query AllHouseholds($search: String, $documentType: String, $documentNumber: String, $program: ID) {
+        allHouseholds(search: $search, documentType: $documentType, documentNumber: $documentNumber, orderBy: "size", program: $program, businessArea: "afghanistan") {
           edges {
             node {
               size
@@ -124,7 +125,9 @@ HOUSEHOLD_QUERY = """
     """
 
 
-class TestHouseholdQuery(APITestCase):
+@override_config(USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH=True)
+class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
+    databases = "__all__"
     fixtures = (
         f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
         f"{settings.PROJECT_ROOT}/apps/household/fixtures/documenttype.json",
@@ -318,7 +321,7 @@ class TestHouseholdQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": f"{household.unicef_id}", "searchType": "household_id"},
+            variables={"search": f"{household.unicef_id}"},
         )
 
     @parameterized.expand(
@@ -341,7 +344,7 @@ class TestHouseholdQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": f"{household.head_of_household.unicef_id}", "searchType": "individual_id"},
+            variables={"search": f"{household.head_of_household.unicef_id}"},
         )
 
     @parameterized.expand(
@@ -364,7 +367,7 @@ class TestHouseholdQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": f"{household.head_of_household.full_name}", "searchType": "individual_id"},
+            variables={"search": f"{household.head_of_household.full_name}"},
         )
 
     @parameterized.expand(
@@ -385,7 +388,7 @@ class TestHouseholdQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": "+18663567905", "searchType": "phone_no"},
+            variables={"search": "+18663567905"},
         )
 
     @parameterized.expand(
@@ -406,31 +409,7 @@ class TestHouseholdQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": "123-456-789", "searchType": "national_id"},
-        )
-
-    @parameterized.expand(
-        [
-            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], "123"),
-            ("with_permission_wrong_type_in_search", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], "123/123"),
-            ("without_permission", [], "123"),
-        ]
-    )
-    def test_query_households_by_registration_id_filter(
-        self, _: Any, permissions: List[Permissions], search: str
-    ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        self.snapshot_graphql_request(
-            request_string=ALL_HOUSEHOLD_QUERY,
-            context={
-                "user": self.user,
-                "headers": {
-                    "Program": self.id_to_base64(self.program_two.id, "ProgramNode"),
-                    "Business-Area": self.business_area.slug,
-                },
-            },
-            variables={"search": search, "searchType": "registration_id"},
+            variables={"documentNumber": "123-456-789", "documentType": "national_id"},
         )
 
     @parameterized.expand(
@@ -474,5 +453,5 @@ class TestHouseholdQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": "qwerty12345", "searchType": "kobo_asset_id"},
+            variables={"search": "qwerty12345"},
         )

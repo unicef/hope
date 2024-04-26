@@ -41,7 +41,7 @@ export const GrievancesChoiceData = gql`
       }
     }
 
-    grievanceTicketSearchTypesChoices {
+    documentTypeChoices {
       name
       value
     }

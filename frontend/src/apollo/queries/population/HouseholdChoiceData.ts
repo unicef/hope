@@ -38,7 +38,7 @@ export const HouseholdChoiceData = gql`
       name
       value
     }
-    householdSearchTypesChoices {
+    documentTypeChoices {
       name
       value
     }
