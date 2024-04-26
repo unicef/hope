@@ -157,6 +157,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     detail_id = models.CharField(
         max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
     )
+    program_registration_id = models.CharField(max_length=50, blank=True, null=True)
     enumerator_rec_id = models.PositiveIntegerField(blank=True, null=True)
     flex_registrations_record = models.ForeignKey(
         "registration_datahub.Record",

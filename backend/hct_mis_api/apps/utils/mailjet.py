@@ -21,7 +21,8 @@ class MailjetClient:
         variables: Optional[Dict[str, Any]] = None,
     ) -> None:
         self.mailjet_template_id = mailjet_template_id
-        self.subject = subject
+        subject_prefix = settings.EMAIL_SUBJECT_PREFIX
+        self.subject = f"[{subject_prefix}] {subject}" if subject_prefix else subject
         self.recipients = recipients
         self.ccs = ccs or []
         self.variables = variables
