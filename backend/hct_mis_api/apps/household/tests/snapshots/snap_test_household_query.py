@@ -301,6 +301,13 @@ snapshots['TestHouseholdQuery::test_query_households_by_search_full_name_filter_
     'data': {
         'allHouseholds': {
             'edges': [
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 2',
+                        'countryOrigin': 'Poland',
+                        'size': 2
+                    }
+                }
             ]
         }
     }
