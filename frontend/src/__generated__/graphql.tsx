@@ -2415,6 +2415,8 @@ export type HouseholdNodeIndividualsArgs = {
   age?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   businessArea?: InputMaybe<Scalars['String']['input']>;
+  documentNumber?: InputMaybe<Scalars['String']['input']>;
+  documentType?: InputMaybe<Scalars['String']['input']>;
   excludedId?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   flags?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
@@ -2431,7 +2433,6 @@ export type HouseholdNodeIndividualsArgs = {
   program?: InputMaybe<Scalars['ID']['input']>;
   programs?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   search?: InputMaybe<Scalars['String']['input']>;
-  searchType?: InputMaybe<Scalars['String']['input']>;
   sex?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   withdrawn?: InputMaybe<Scalars['Boolean']['input']>;
@@ -5704,19 +5705,16 @@ export type Query = {
   grievanceTicketIssueTypeChoices?: Maybe<Array<Maybe<IssueTypesObject>>>;
   grievanceTicketManualCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   grievanceTicketPriorityChoices?: Maybe<Array<Maybe<ChoiceObjectInt>>>;
-  grievanceTicketSearchTypesChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   grievanceTicketStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   grievanceTicketSystemCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   grievanceTicketUrgencyChoices?: Maybe<Array<Maybe<ChoiceObjectInt>>>;
   hasAvailableUsersToExport?: Maybe<Scalars['Boolean']['output']>;
   household?: Maybe<HouseholdNode>;
-  householdSearchTypesChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   identityTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   importData?: Maybe<ImportDataNode>;
   importedHousehold?: Maybe<ImportedHouseholdNode>;
   importedIndividual?: Maybe<ImportedIndividualNode>;
   individual?: Maybe<IndividualNode>;
-  individualSearchTypesChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   koboImportData?: Maybe<KoboImportDataNode>;
   koboProject?: Maybe<KoboAssetObject>;
   logEntryActionChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
@@ -6031,6 +6029,8 @@ export type QueryAllGrievanceTicketArgs = {
   category?: InputMaybe<Scalars['String']['input']>;
   createdAtRange?: InputMaybe<Scalars['String']['input']>;
   createdBy?: InputMaybe<Scalars['ID']['input']>;
+  documentNumber?: InputMaybe<Scalars['String']['input']>;
+  documentType?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   fsp?: InputMaybe<Scalars['String']['input']>;
   grievanceStatus?: InputMaybe<Scalars['String']['input']>;
@@ -6052,7 +6052,6 @@ export type QueryAllGrievanceTicketArgs = {
   scoreMax?: InputMaybe<Scalars['String']['input']>;
   scoreMin?: InputMaybe<Scalars['String']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
-  searchType?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   totalDays?: InputMaybe<Scalars['Int']['input']>;
   urgency?: InputMaybe<Scalars['String']['input']>;
@@ -6068,6 +6067,8 @@ export type QueryAllHouseholdsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   businessArea?: InputMaybe<Scalars['String']['input']>;
   countryOrigin?: InputMaybe<Scalars['String']['input']>;
+  documentNumber?: InputMaybe<Scalars['String']['input']>;
+  documentType?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   headOfHousehold_FullName?: InputMaybe<Scalars['String']['input']>;
   headOfHousehold_FullName_Startswith?: InputMaybe<Scalars['String']['input']>;
@@ -6080,7 +6081,6 @@ export type QueryAllHouseholdsArgs = {
   program?: InputMaybe<Scalars['ID']['input']>;
   residenceStatus?: InputMaybe<Scalars['String']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
-  searchType?: InputMaybe<Scalars['String']['input']>;
   size?: InputMaybe<Scalars['String']['input']>;
   size_Gte?: InputMaybe<Scalars['Int']['input']>;
   size_Lte?: InputMaybe<Scalars['Int']['input']>;
@@ -6122,6 +6122,8 @@ export type QueryAllIndividualsArgs = {
   age?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   businessArea?: InputMaybe<Scalars['String']['input']>;
+  documentNumber?: InputMaybe<Scalars['String']['input']>;
+  documentType?: InputMaybe<Scalars['String']['input']>;
   excludedId?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   flags?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
@@ -6138,7 +6140,6 @@ export type QueryAllIndividualsArgs = {
   program?: InputMaybe<Scalars['ID']['input']>;
   programs?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   search?: InputMaybe<Scalars['String']['input']>;
-  searchType?: InputMaybe<Scalars['String']['input']>;
   sex?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   withdrawn?: InputMaybe<Scalars['Boolean']['input']>;
@@ -10080,7 +10081,8 @@ export type AllGrievanceTicketQueryVariables = Exact<{
   issueType?: InputMaybe<Scalars['String']['input']>;
   businessArea: Scalars['String']['input'];
   search?: InputMaybe<Scalars['String']['input']>;
-  searchType?: InputMaybe<Scalars['String']['input']>;
+  documentType?: InputMaybe<Scalars['String']['input']>;
+  documentNumber?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
   fsp?: InputMaybe<Scalars['String']['input']>;
   createdAtRange?: InputMaybe<Scalars['String']['input']>;
@@ -10153,7 +10155,7 @@ export type GrievanceTicketUnicefIdQuery = { __typename?: 'Query', grievanceTick
 export type GrievancesChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GrievancesChoiceDataQuery = { __typename?: 'Query', grievanceTicketStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, grievanceTicketCategoryChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, grievanceTicketManualCategoryChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, grievanceTicketSystemCategoryChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, grievanceTicketPriorityChoices?: Array<{ __typename?: 'ChoiceObjectInt', name?: string | null, value?: number | null } | null> | null, grievanceTicketUrgencyChoices?: Array<{ __typename?: 'ChoiceObjectInt', name?: string | null, value?: number | null } | null> | null, grievanceTicketIssueTypeChoices?: Array<{ __typename?: 'IssueTypesObject', category?: string | null, label?: string | null, subCategories?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null } | null> | null, grievanceTicketSearchTypesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
+export type GrievancesChoiceDataQuery = { __typename?: 'Query', grievanceTicketStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, grievanceTicketCategoryChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, grievanceTicketManualCategoryChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, grievanceTicketSystemCategoryChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, grievanceTicketPriorityChoices?: Array<{ __typename?: 'ChoiceObjectInt', name?: string | null, value?: number | null } | null> | null, grievanceTicketUrgencyChoices?: Array<{ __typename?: 'ChoiceObjectInt', name?: string | null, value?: number | null } | null> | null, grievanceTicketIssueTypeChoices?: Array<{ __typename?: 'IssueTypesObject', category?: string | null, label?: string | null, subCategories?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null } | null> | null, documentTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type PartnerForGrievanceChoicesQueryVariables = Exact<{
   householdId?: InputMaybe<Scalars['ID']['input']>;
@@ -10429,7 +10431,6 @@ export type AllHouseholdsQueryVariables = Exact<{
   headOfHouseholdPhoneNoValid?: InputMaybe<Scalars['Boolean']['input']>;
   adminArea?: InputMaybe<Scalars['ID']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
-  searchType?: InputMaybe<Scalars['String']['input']>;
   residenceStatus?: InputMaybe<Scalars['String']['input']>;
   lastRegistrationDate?: InputMaybe<Scalars['String']['input']>;
   admin2?: InputMaybe<Scalars['ID']['input']>;
@@ -10451,7 +10452,8 @@ export type AllHouseholdsForPopulationTableQueryVariables = Exact<{
   headOfHouseholdFullNameIcontains?: InputMaybe<Scalars['String']['input']>;
   adminArea?: InputMaybe<Scalars['ID']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
-  searchType?: InputMaybe<Scalars['String']['input']>;
+  documentType?: InputMaybe<Scalars['String']['input']>;
+  documentNumber?: InputMaybe<Scalars['String']['input']>;
   residenceStatus?: InputMaybe<Scalars['String']['input']>;
   lastRegistrationDate?: InputMaybe<Scalars['String']['input']>;
   admin2?: InputMaybe<Scalars['ID']['input']>;
@@ -10474,7 +10476,8 @@ export type AllIndividualsQueryVariables = Exact<{
   age?: InputMaybe<Scalars['String']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
-  searchType?: InputMaybe<Scalars['String']['input']>;
+  documentType?: InputMaybe<Scalars['String']['input']>;
+  documentNumber?: InputMaybe<Scalars['String']['input']>;
   programs?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
   lastRegistrationDate?: InputMaybe<Scalars['String']['input']>;
@@ -10500,7 +10503,8 @@ export type AllIndividualsForPopulationTableQueryVariables = Exact<{
   age?: InputMaybe<Scalars['String']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
-  searchType?: InputMaybe<Scalars['String']['input']>;
+  documentType?: InputMaybe<Scalars['String']['input']>;
+  documentNumber?: InputMaybe<Scalars['String']['input']>;
   programs?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
   lastRegistrationDate?: InputMaybe<Scalars['String']['input']>;
@@ -10528,7 +10532,7 @@ export type HouseholdQuery = { __typename?: 'Query', household?: { __typename?: 
 export type HouseholdChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HouseholdChoiceDataQuery = { __typename?: 'Query', residenceStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, relationshipChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, roleChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, maritalStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, workStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, deduplicationBatchStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, deduplicationGoldenRecordStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, observedDisabilityChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, severityOfDisabilityChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, householdSearchTypesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
+export type HouseholdChoiceDataQuery = { __typename?: 'Query', residenceStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, relationshipChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, roleChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, maritalStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, workStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, deduplicationBatchStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, deduplicationGoldenRecordStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, observedDisabilityChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, severityOfDisabilityChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, documentTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type HouseholdFlexFieldsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -10547,7 +10551,7 @@ export type IndividualQuery = { __typename?: 'Query', individual?: { __typename?
 export type IndividualChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type IndividualChoiceDataQuery = { __typename?: 'Query', flagChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, individualSearchTypesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
+export type IndividualChoiceDataQuery = { __typename?: 'Query', flagChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, documentTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type IndividualFlexFieldsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -17318,7 +17322,7 @@ export type AllGrievanceDashboardChartsLazyQueryHookResult = ReturnType<typeof u
 export type AllGrievanceDashboardChartsSuspenseQueryHookResult = ReturnType<typeof useAllGrievanceDashboardChartsSuspenseQuery>;
 export type AllGrievanceDashboardChartsQueryResult = Apollo.QueryResult<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
-    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $searchType: String, $status: [String], $fsp: String, $createdAtRange: String, $admin2: ID, $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $createdBy: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String, $grievanceType: String, $grievanceStatus: String, $priority: String, $urgency: String, $preferredLanguage: String, $program: String, $isActiveProgram: Boolean, $isCrossArea: Boolean) {
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $documentType: String, $documentNumber: String, $status: [String], $fsp: String, $createdAtRange: String, $admin2: ID, $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $createdBy: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String, $grievanceType: String, $grievanceStatus: String, $priority: String, $urgency: String, $preferredLanguage: String, $program: String, $isActiveProgram: Boolean, $isCrossArea: Boolean) {
   allGrievanceTicket(
     before: $before
     after: $after
@@ -17329,7 +17333,8 @@ export const AllGrievanceTicketDocument = gql`
     issueType: $issueType
     businessArea: $businessArea
     search: $search
-    searchType: $searchType
+    documentType: $documentType
+    documentNumber: $documentNumber
     status: $status
     fsp: $fsp
     createdAtRange: $createdAtRange
@@ -17418,7 +17423,8 @@ export const AllGrievanceTicketDocument = gql`
  *      issueType: // value for 'issueType'
  *      businessArea: // value for 'businessArea'
  *      search: // value for 'search'
- *      searchType: // value for 'searchType'
+ *      documentType: // value for 'documentType'
+ *      documentNumber: // value for 'documentNumber'
  *      status: // value for 'status'
  *      fsp: // value for 'fsp'
  *      createdAtRange: // value for 'createdAtRange'
@@ -17753,7 +17759,7 @@ export const GrievancesChoiceDataDocument = gql`
       value
     }
   }
-  grievanceTicketSearchTypesChoices {
+  documentTypeChoices {
     name
     value
   }
@@ -19940,7 +19946,7 @@ export type CashPlanVerificationSamplingChoicesLazyQueryHookResult = ReturnType<
 export type CashPlanVerificationSamplingChoicesSuspenseQueryHookResult = ReturnType<typeof useCashPlanVerificationSamplingChoicesSuspenseQuery>;
 export type CashPlanVerificationSamplingChoicesQueryResult = Apollo.QueryResult<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>;
 export const AllHouseholdsDocument = gql`
-    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $headOfHouseholdPhoneNoValid: Boolean, $adminArea: ID, $search: String, $searchType: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean, $program: ID) {
+    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $headOfHouseholdPhoneNoValid: Boolean, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean, $program: ID) {
   allHouseholds(
     after: $after
     before: $before
@@ -19953,7 +19959,6 @@ export const AllHouseholdsDocument = gql`
     headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid
     adminArea: $adminArea
     search: $search
-    searchType: $searchType
     residenceStatus: $residenceStatus
     lastRegistrationDate: $lastRegistrationDate
     admin2: $admin2
@@ -20039,7 +20044,6 @@ export const AllHouseholdsDocument = gql`
  *      headOfHouseholdPhoneNoValid: // value for 'headOfHouseholdPhoneNoValid'
  *      adminArea: // value for 'adminArea'
  *      search: // value for 'search'
- *      searchType: // value for 'searchType'
  *      residenceStatus: // value for 'residenceStatus'
  *      lastRegistrationDate: // value for 'lastRegistrationDate'
  *      admin2: // value for 'admin2'
@@ -20065,7 +20069,7 @@ export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHousehold
 export type AllHouseholdsSuspenseQueryHookResult = ReturnType<typeof useAllHouseholdsSuspenseQuery>;
 export type AllHouseholdsQueryResult = Apollo.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllHouseholdsForPopulationTableDocument = gql`
-    query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $searchType: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean, $headOfHouseholdPhoneNoValid: Boolean, $program: ID, $isActiveProgram: Boolean) {
+    query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $documentType: String, $documentNumber: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean, $headOfHouseholdPhoneNoValid: Boolean, $program: ID, $isActiveProgram: Boolean) {
   allHouseholds(
     after: $after
     before: $before
@@ -20077,7 +20081,8 @@ export const AllHouseholdsForPopulationTableDocument = gql`
     headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains
     adminArea: $adminArea
     search: $search
-    searchType: $searchType
+    documentType: $documentType
+    documentNumber: $documentNumber
     residenceStatus: $residenceStatus
     lastRegistrationDate: $lastRegistrationDate
     admin2: $admin2
@@ -20155,7 +20160,8 @@ export const AllHouseholdsForPopulationTableDocument = gql`
  *      headOfHouseholdFullNameIcontains: // value for 'headOfHouseholdFullNameIcontains'
  *      adminArea: // value for 'adminArea'
  *      search: // value for 'search'
- *      searchType: // value for 'searchType'
+ *      documentType: // value for 'documentType'
+ *      documentNumber: // value for 'documentNumber'
  *      residenceStatus: // value for 'residenceStatus'
  *      lastRegistrationDate: // value for 'lastRegistrationDate'
  *      admin2: // value for 'admin2'
@@ -20183,7 +20189,7 @@ export type AllHouseholdsForPopulationTableLazyQueryHookResult = ReturnType<type
 export type AllHouseholdsForPopulationTableSuspenseQueryHookResult = ReturnType<typeof useAllHouseholdsForPopulationTableSuspenseQuery>;
 export type AllHouseholdsForPopulationTableQueryResult = Apollo.QueryResult<AllHouseholdsForPopulationTableQuery, AllHouseholdsForPopulationTableQueryVariables>;
 export const AllIndividualsDocument = gql`
-    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $searchType: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String]) {
+    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $documentType: String, $documentNumber: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String]) {
   allIndividuals(
     before: $before
     after: $after
@@ -20194,7 +20200,8 @@ export const AllIndividualsDocument = gql`
     age: $age
     orderBy: $orderBy
     search: $search
-    searchType: $searchType
+    documentType: $documentType
+    documentNumber: $documentNumber
     programs: $programs
     status: $status
     lastRegistrationDate: $lastRegistrationDate
@@ -20303,7 +20310,8 @@ export const AllIndividualsDocument = gql`
  *      age: // value for 'age'
  *      orderBy: // value for 'orderBy'
  *      search: // value for 'search'
- *      searchType: // value for 'searchType'
+ *      documentType: // value for 'documentType'
+ *      documentNumber: // value for 'documentNumber'
  *      programs: // value for 'programs'
  *      status: // value for 'status'
  *      lastRegistrationDate: // value for 'lastRegistrationDate'
@@ -20334,7 +20342,7 @@ export type AllIndividualsLazyQueryHookResult = ReturnType<typeof useAllIndividu
 export type AllIndividualsSuspenseQueryHookResult = ReturnType<typeof useAllIndividualsSuspenseQuery>;
 export type AllIndividualsQueryResult = Apollo.QueryResult<AllIndividualsQuery, AllIndividualsQueryVariables>;
 export const AllIndividualsForPopulationTableDocument = gql`
-    query AllIndividualsForPopulationTable($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $searchType: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String], $program: ID, $isActiveProgram: Boolean) {
+    query AllIndividualsForPopulationTable($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $documentType: String, $documentNumber: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String], $program: ID, $isActiveProgram: Boolean) {
   allIndividuals(
     before: $before
     after: $after
@@ -20345,7 +20353,8 @@ export const AllIndividualsForPopulationTableDocument = gql`
     age: $age
     orderBy: $orderBy
     search: $search
-    searchType: $searchType
+    documentType: $documentType
+    documentNumber: $documentNumber
     programs: $programs
     status: $status
     lastRegistrationDate: $lastRegistrationDate
@@ -20418,7 +20427,8 @@ export const AllIndividualsForPopulationTableDocument = gql`
  *      age: // value for 'age'
  *      orderBy: // value for 'orderBy'
  *      search: // value for 'search'
- *      searchType: // value for 'searchType'
+ *      documentType: // value for 'documentType'
+ *      documentNumber: // value for 'documentNumber'
  *      programs: // value for 'programs'
  *      status: // value for 'status'
  *      lastRegistrationDate: // value for 'lastRegistrationDate'
@@ -20528,7 +20538,7 @@ export const HouseholdChoiceDataDocument = gql`
     name
     value
   }
-  householdSearchTypesChoices {
+  documentTypeChoices {
     name
     value
   }
@@ -20653,7 +20663,7 @@ export const IndividualChoiceDataDocument = gql`
     name
     value
   }
-  individualSearchTypesChoices {
+  documentTypeChoices {
     name
     value
   }
@@ -27032,19 +27042,16 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   grievanceTicketIssueTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['IssueTypesObject']>>>, ParentType, ContextType>;
   grievanceTicketManualCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   grievanceTicketPriorityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObjectInt']>>>, ParentType, ContextType>;
-  grievanceTicketSearchTypesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   grievanceTicketStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   grievanceTicketSystemCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   grievanceTicketUrgencyChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObjectInt']>>>, ParentType, ContextType>;
   hasAvailableUsersToExport?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<QueryHasAvailableUsersToExportArgs, 'businessAreaSlug'>>;
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType, RequireFields<QueryHouseholdArgs, 'id'>>;
-  householdSearchTypesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   identityTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType, RequireFields<QueryImportDataArgs, 'id'>>;
   importedHousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType, RequireFields<QueryImportedHouseholdArgs, 'id'>>;
   importedIndividual?: Resolver<Maybe<ResolversTypes['ImportedIndividualNode']>, ParentType, ContextType, RequireFields<QueryImportedIndividualArgs, 'id'>>;
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType, RequireFields<QueryIndividualArgs, 'id'>>;
-  individualSearchTypesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   koboImportData?: Resolver<Maybe<ResolversTypes['KoboImportDataNode']>, ParentType, ContextType, RequireFields<QueryKoboImportDataArgs, 'id'>>;
   koboProject?: Resolver<Maybe<ResolversTypes['KoboAssetObject']>, ParentType, ContextType, RequireFields<QueryKoboProjectArgs, 'businessAreaSlug' | 'uid'>>;
   logEntryActionChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;

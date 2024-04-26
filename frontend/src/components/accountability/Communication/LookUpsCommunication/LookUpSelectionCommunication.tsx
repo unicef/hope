@@ -72,9 +72,13 @@ export function LookUpSelectionCommunication({
     getFilterFromQueryParams(location, initialFilterTP),
   );
 
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery();
+
   const initialFilterHH = {
     search: '',
-    searchType: 'household_id',
+    documentType: choicesData?.documentTypeChoices?.[0]?.value,
+    documentNumber: '',
     residenceStatus: '',
     admin2: '',
     householdSizeMin: '',
@@ -91,9 +95,6 @@ export function LookUpSelectionCommunication({
   );
 
   const { t } = useTranslation();
-
-  const { data: choicesData, loading: choicesLoading } =
-    useHouseholdChoiceDataQuery();
 
   const handleChange = (type: number, value: string[] | string): void => {
     setValues({

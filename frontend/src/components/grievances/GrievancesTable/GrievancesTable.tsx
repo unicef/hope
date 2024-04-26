@@ -55,7 +55,8 @@ export function GrievancesTable({
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
     search: filter.search.trim(),
-    searchType: filter.searchType,
+    documentType: filter.documentType,
+    documentNumber: filter.documentNumber.trim(),
     status: [filter.status],
     fsp: filter.fsp,
     createdAtRange: JSON.stringify({

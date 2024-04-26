@@ -47113,6 +47113,23 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Individual',
                 'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Registration Data Import',
+                'labels': [
+                    {
+                        'label': 'Registration Data Import',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'registration_data_import',
+                'required': False,
+                'type': 'SELECT_MANY'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
                     {
                         'labelEn': 'Aunt / Uncle',
                         'labels': [
