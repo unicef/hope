@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.payment.fixtures import (
     ApprovalFactory,
     ApprovalProcessFactory,
@@ -15,12 +16,15 @@ from hct_mis_api.apps.payment.models import Approval, GenericPayment
 from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestPaymentPlanPDFExportService(TestCase):
     def setUp(self) -> None:
         create_afghanistan()
-        self.payment_plan = PaymentPlanFactory()
+        self.payment_plan = PaymentPlanFactory(
+            program=ProgramFactory(data_collecting_type__type=DataCollectingType.Type.STANDARD)
+        )
         self.payment_plan.unicef_id = "PP-0060-24-00000007"
         self.payment_plan.save()
         self.pdf_export_service = PaymentPlanPDFExportService(self.payment_plan)
@@ -55,10 +59,21 @@ class TestPaymentPlanPDFExportService(TestCase):
         return_value="http://www_link/download-payment-plan-summary-pdf/111",
     )
     def test_generate_pdf_summary(self, get_link_mock: Any) -> None:
-        pdf, filename = self.pdf_export_service.generate_pdf_summary()
+        pdf1, filename1 = self.pdf_export_service.generate_pdf_summary()
 
-        self.assertTrue(isinstance(pdf, bytes))
-        self.assertEqual(filename, "PaymentPlanSummary-PP-0060-24-00000007.pdf")
+        self.assertEqual(self.payment_plan.program.data_collecting_type.type, DataCollectingType.Type.STANDARD)
+
+        self.assertTrue(isinstance(pdf1, bytes))
+        self.assertEqual(filename1, "PaymentPlanSummary-PP-0060-24-00000007.pdf")
+
+        self.payment_plan.program.data_collecting_type.type = DataCollectingType.Type.SOCIAL
+        self.payment_plan.program.data_collecting_type.save()
+        self.payment_plan.program.data_collecting_type.refresh_from_db(fields=["type"])
+
+        self.assertEqual(self.payment_plan.program.data_collecting_type.type, DataCollectingType.Type.SOCIAL)
+        pdf2, filename2 = self.pdf_export_service.generate_pdf_summary()
+        self.assertTrue(isinstance(pdf2, bytes))
+        self.assertEqual(filename2, "PaymentPlanSummary-PP-0060-24-00000007.pdf")
 
     def test_get_email_context(self) -> None:
         user_mock = MagicMock()
@@ -69,7 +84,8 @@ class TestPaymentPlanPDFExportService(TestCase):
             "first_name": "First",
             "last_name": "Last",
             "email": "first.last@email_tivix.com",
-            "message": "Payment Plan Summary PDF file(s) have been generated, and below you will find the link to download the file(s).",
+            "message": "Payment Plan Summary PDF file(s) have been generated, "
+            "and below you will find the link to download the file(s).",
             "link": "",
             "title": "Payment Plan Payment List files generated",
         }
