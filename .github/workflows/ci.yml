@@ -222,13 +222,6 @@ jobs:
           dist_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist dev_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
             -f ./deployment/docker-compose.selenium.yml \
             run selenium
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./backend/coverage.xml
-          flags: e2e
-          token: ${{ secrets.CODECOV_TOKEN }}
-          verbose: true
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         continue-on-error: true
@@ -236,6 +229,14 @@ jobs:
           name: report
           path: ./backend/report/
           retention-days: 5
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        continue-on-error: true
+        with:
+          files: ./backend/coverage.xml
+          flags: e2e
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
 
 
   trivy:

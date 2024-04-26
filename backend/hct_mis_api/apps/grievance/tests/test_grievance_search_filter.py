@@ -1,5 +1,3 @@
-from unittest.mock import patch
-
 from django.conf import settings
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
@@ -20,14 +18,13 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 
-@patch("hct_mis_api.apps.core.es_filters.ElasticSearchFilterSet.USE_ALL_FIELDS_AS_POSTGRES_DB", True)
 class TestGrievanceQuerySearchFilter(APITestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     FILTER_BY_SEARCH = """
-    query AllGrievanceTicket($search: String, $searchType: String)
+    query AllGrievanceTicket($search: String, $documentType: String, $documentNumber: String)
     {
-      allGrievanceTicket(businessArea: "afghanistan", search: $search, searchType: $searchType) {
+      allGrievanceTicket(businessArea: "afghanistan", search: $search, documentType: $documentType, documentNumber: $documentNumber) {
         totalCount
         edges {
           cursor
@@ -146,7 +143,6 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             },
             variables={
                 "search": f"{self.grievance_ticket_1.unicef_id}",
-                "searchType": "ticket_id",
             },
         )
 
@@ -168,7 +164,6 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             },
             variables={
                 "search": f"{self.grievance_ticket_2.household_unicef_id}",
-                "searchType": "ticket_hh_id",
             },
         )
 
@@ -190,7 +185,6 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             },
             variables={
                 "search": f"{self.individual_1.full_name}",
-                "searchType": "full_name",
             },
         )
 
@@ -211,29 +205,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
                 },
             },
             variables={
-                "search": "test123",
-                "searchType": "national_id",
-            },
-        )
-
-    def test_grievance_list_filtered_by_invalid_search_type(self) -> None:
-        self.create_user_role_with_permissions(
-            self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
-            self.business_area,
-        )
-
-        self.snapshot_graphql_request(
-            request_string=self.FILTER_BY_SEARCH,
-            context={
-                "user": self.user,
-                "headers": {
-                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
-                    "Business-Area": self.business_area.slug,
-                },
-            },
-            variables={
-                "search": "test123",
-                "searchType": "invalid",
+                "documentNumber": "test123",
+                "documentType": "national_id",
             },
         )
