@@ -15,10 +15,8 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 ALL_HOUSEHOLD_QUERY = """
-  query AllHouseholds($search: String, $searchType: String, $program: ID) {
+  query AllHouseholds($program: ID) {
     allHouseholds(
-        search: $search,
-        searchType: $searchType,
         orderBy: "size",
         program: $program,
         businessArea: "afghanistan"

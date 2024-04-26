@@ -1,5 +1,3 @@
-from unittest.mock import patch
-
 from django.core.cache import cache
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
@@ -35,7 +33,6 @@ query AllGrievanceTickets($isCrossArea: Boolean) {
 """
 
 
-@patch("hct_mis_api.apps.core.es_filters.ElasticSearchFilterSet.USE_ALL_FIELDS_AS_POSTGRES_DB", True)
 class TestCrossAreaFilter(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:

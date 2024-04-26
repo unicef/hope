@@ -367,16 +367,6 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_bank_account_nu
                         'phoneNo': '(007)682-4596',
                         'phoneNoValid': False
                     }
-                },
-                {
-                    'node': {
-                        'birthDate': '1965-06-26',
-                        'familyName': 'Bond',
-                        'fullName': 'James Bond',
-                        'givenName': 'James',
-                        'phoneNo': '(007)682-4596',
-                        'phoneNoValid': False
-                    }
                 }
             ]
         }

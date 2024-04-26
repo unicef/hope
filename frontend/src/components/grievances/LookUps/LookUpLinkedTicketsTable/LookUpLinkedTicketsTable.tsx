@@ -25,10 +25,13 @@ export function LookUpLinkedTicketsTable({
   setFieldValue,
   initialValues,
 }: LookUpLinkedTicketsTableProps): React.ReactElement {
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery();
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
     search: filter.search.trim(),
-    searchType: 'ticket_id',
+    documentType: choicesData?.documentTypeChoices?.[0]?.value,
+    documentNumber: filter.documentNumber.trim(),
     status: [filter.status],
     fsp: filter.fsp,
     createdAtRange: JSON.stringify({
@@ -38,8 +41,6 @@ export function LookUpLinkedTicketsTable({
     admin2: filter?.admin2?.node?.id,
   };
   const [selected, setSelected] = useState(initialValues.selectedLinkedTickets);
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
   if (choicesLoading) {
     return null;
   }

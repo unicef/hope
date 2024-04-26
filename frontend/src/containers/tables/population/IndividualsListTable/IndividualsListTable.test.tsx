@@ -10,7 +10,8 @@ import { fakeApolloAllIndividualsForPopulationTable } from '../../../../../fixtu
 describe('containers/tables/population/IndividualsListTable', () => {
   const initialFilter = {
     search: '',
-    searchType: 'individual_id',
+    documentType: 'individual_id',
+    documentNumber: '',
     admin2: '',
     sex: '',
     ageMin: '',

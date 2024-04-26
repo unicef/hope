@@ -13,6 +13,7 @@ omit =
         hct_mis_api/libs/*,
         hct_mis_api/settings/*,
         hct_mis_api/settings.py,
+        hct_mis_api/config/settings.py
         hct_mis_api/apps/core/management/commands/*
 
 [report]

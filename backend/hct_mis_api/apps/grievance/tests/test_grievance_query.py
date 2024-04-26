@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import Any, List
-from unittest.mock import patch
 
 from django.core.cache import cache
 from django.core.management import call_command
@@ -25,7 +24,6 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 
-@patch("hct_mis_api.apps.core.es_filters.ElasticSearchFilterSet.USE_ALL_FIELDS_AS_POSTGRES_DB", True)
 class TestGrievanceQuery(APITestCase):
     ALL_GRIEVANCE_QUERY = """
     query AllGrievanceTickets {

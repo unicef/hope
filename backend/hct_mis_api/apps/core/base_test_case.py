@@ -14,6 +14,7 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.test import RequestFactory, TestCase
 
 import factory
+import pytest
 from elasticsearch_dsl import connections
 from graphene.test import Client
 from snapshottest.django import TestCase as SnapshotTestTestCase
@@ -191,6 +192,11 @@ class BaseElasticSearchTestCase(TestCase):
     @classmethod
     def rebuild_search_index(cls) -> None:
         rebuild_search_index()
+
+    @pytest.fixture(autouse=True)
+    def _setup_elasticsearch(self, django_elasticsearch_setup: None) -> None:
+        # Setup elasticsearch to work in parallel
+        pass
 
 
 class UploadDocumentsBase(APITestCase):
