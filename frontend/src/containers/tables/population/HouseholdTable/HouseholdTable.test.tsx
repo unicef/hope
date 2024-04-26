@@ -10,7 +10,8 @@ import { HouseholdTable } from '.';
 describe('containers/tables/population/HouseholdTable', () => {
   const initialFilter = {
     search: '',
-    searchType: 'household_id',
+    documentType: '',
+    documentNumber: '',
     residenceStatus: '',
     admin2: '',
     householdSizeMin: '',

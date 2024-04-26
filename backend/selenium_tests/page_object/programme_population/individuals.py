@@ -6,7 +6,7 @@ class Individuals(BaseComponents):
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
     indFiltersSearch = 'div[data-cy="ind-filters-search"]'
-    filterSearchType = 'div[data-cy="filter-search-type"]'
+    filterDocumentType = 'div[data-cy="filters-document-type"]'
     indFiltersGender = 'div[data-cy="ind-filters-gender"]'
     indFiltersAgeFrom = 'div[data-cy="ind-filters-age-from"]'
     indFiltersAgeTo = 'div[data-cy="ind-filters-age-to"]'
@@ -40,8 +40,8 @@ class Individuals(BaseComponents):
     def getIndFiltersSearch(self) -> WebElement:
         return self.wait_for(self.indFiltersSearch)
 
-    def getFilterSearchType(self) -> WebElement:
-        return self.wait_for(self.filterSearchType)
+    def getFilterDocumentType(self) -> WebElement:
+        return self.wait_for(self.filterDocumentType)
 
     def getIndFiltersGender(self) -> WebElement:
         return self.wait_for(self.indFiltersGender)
