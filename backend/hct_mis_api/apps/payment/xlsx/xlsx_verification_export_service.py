@@ -72,9 +72,9 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         return wb
 
     def _add_version(self) -> None:
-        self.ws_meta[
-            XlsxVerificationExportService.VERSION_CELL_NAME_COORDINATES
-        ] = XlsxVerificationExportService.VERSION_CELL_NAME
+        self.ws_meta[XlsxVerificationExportService.VERSION_CELL_NAME_COORDINATES] = (
+            XlsxVerificationExportService.VERSION_CELL_NAME
+        )
         self.ws_meta[XlsxVerificationExportService.VERSION_CELL_COORDINATES] = XlsxVerificationExportService.VERSION
 
     def _to_received_column(self, payment_record_verification: PaymentVerification) -> Optional[str]:
