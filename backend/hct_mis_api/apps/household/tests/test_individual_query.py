@@ -69,6 +69,9 @@ class TestIndividualQuery(APITestCase):
         cls.partner = PartnerFactory(name="Test123")
         cls.user = UserFactory(partner=cls.partner)
 
+        cls.partner_no_access = PartnerFactory(name="Partner No Access")
+        cls.user_with_no_access = UserFactory(partner=cls.partner_no_access)
+
         cls.business_area = create_afghanistan()
         BusinessAreaFactory(name="Democratic Republic of Congo")
         BusinessAreaFactory(name="Sudan")
@@ -90,6 +93,12 @@ class TestIndividualQuery(APITestCase):
             name="Test program DRAFT",
             business_area=cls.business_area,
             status=Program.DRAFT,
+            data_collecting_type=partial,
+        )
+        cls.program_other = ProgramFactory(
+            name="Test program OTHER",
+            business_area=cls.business_area,
+            status=Program.ACTIVE,
             data_collecting_type=partial,
         )
 
@@ -163,12 +172,31 @@ class TestIndividualQuery(APITestCase):
             IndividualFactory(household=cls.household_one, program=cls.program, **individual)
             for index, individual in enumerate(cls.individuals_to_create)
         ]
-        cls.household_one.head_of_household = cls.individuals[0]
         cls.individuals_from_hh_one = [ind for ind in cls.individuals if ind.household == cls.household_one]
         # cls.individuals_from_hh_two = [ind for ind in cls.individuals if ind.household == household_two]
         cls.household_one.head_of_household = cls.individuals_from_hh_one[0]
         # household_two.head_of_household = cls.individuals_from_hh_two[1]
         cls.household_one.save()
+
+        # individual in program that cls.user does not have access to
+        cls.household_2 = HouseholdFactory.build(business_area=cls.business_area, program=cls.program)
+        cls.household_2.household_collection.save()
+        cls.household_2.registration_data_import.imported_by.save()
+        cls.household_2.registration_data_import.program = cls.program
+        cls.household_2.registration_data_import.save()
+        cls.individual_to_create_2_data = {
+            "full_name": "Tester Test",
+            "given_name": "Tester",
+            "family_name": "Test",
+            "phone_no": "(953)681-4591",
+            "birth_date": "1943-07-30",
+            "id": "8ff39244-2884-459b-ad14-8d63a6fe4a4a",
+        }
+        cls.individual_2 = IndividualFactory(
+            household=cls.household_2, program=cls.program_other, **cls.individual_to_create_2_data
+        )
+        cls.household_2.head_of_household = cls.individual_2
+        cls.household_2.save()
 
         cls.bank_account_info = BankAccountInfoFactory(
             individual=cls.individuals[5], bank_name="ING", bank_account_number=11110000222255558888999925
@@ -268,7 +296,6 @@ class TestIndividualQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    @skip(reason="Remove 2nd program after merging to develop")
     def test_individual_query_all(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
@@ -646,4 +673,33 @@ class TestIndividualQuery(APITestCase):
                 },
             },
             variables={"admin2": [encode_id_base64(self.area2.id, "AreaNode")]},
+        )
+
+    def test_individual_query_all_for_all_programs(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    def test_individual_query_all_for_all_programs_user_with_no_program_access(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user_with_no_access, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area
+        )
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={
+                "user": self.user_with_no_access,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
         )

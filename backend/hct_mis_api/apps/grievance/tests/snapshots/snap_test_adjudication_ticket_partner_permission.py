@@ -125,6 +125,39 @@ snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_
     }
 }
 
+snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_partner_with_permission_with_selectedIndividualId 1'] = {
+    'data': {
+        'approveNeedsAdjudication': {
+            '__typename': 'NeedsAdjudicationApproveMutation',
+            'grievanceTicket': {
+                '__typename': 'GrievanceTicketNode',
+                'description': 'GrievanceTicket',
+                'status': 5
+            }
+        }
+    }
+}
+
+snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_partner_with_permission_with_selectedIndividualId_incorrect 1'] = {
+    'data': {
+        'approveNeedsAdjudication': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 7
+                }
+            ],
+            'message': 'The selected individual is not valid, must be one of those attached to the ticket',
+            'path': [
+                'approveNeedsAdjudication'
+            ]
+        }
+    ]
+}
+
 snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_partner_with_permission_with_selected_individual_and_selected_individuals 1'] = {
     'data': {
         'approveNeedsAdjudication': None

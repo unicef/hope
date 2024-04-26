@@ -137,6 +137,9 @@ class TestHouseholdQuery(APITestCase):
         cls.user = UserFactory.create(partner=cls.partner)
         cls.business_area = create_afghanistan()
 
+        cls.partner_no_access = PartnerFactory(name="Partner No Access")
+        cls.user_with_no_access = UserFactory(partner=cls.partner_no_access)
+
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
         generate_data_collecting_types()
         partial = DataCollectingType.objects.get(code="partial_individuals")
@@ -156,6 +159,11 @@ class TestHouseholdQuery(APITestCase):
             name="Test program DRAFT",
             business_area=cls.business_area,
             status=Program.DRAFT,
+        )
+        cls.program_other = ProgramFactory(
+            name="Test program OTHER",
+            business_area=cls.business_area,
+            status=Program.ACTIVE,
         )
 
         cls.households = []
@@ -202,6 +210,16 @@ class TestHouseholdQuery(APITestCase):
         household.head_of_household.phone_no = "+18663567905"
         household.head_of_household.save()
         household.head_of_household.refresh_from_db()
+
+        # household in program that cls.user does not have access to
+        create_household(
+            {
+                "size": 5,
+                "address": "Lorem Ipsumm 5",
+                "country_origin": country_origin,
+                "program": cls.program_other,
+            },
+        )
 
         DocumentFactory(
             document_number="123-456-789",
@@ -487,4 +505,34 @@ class TestHouseholdQuery(APITestCase):
                 },
             },
             variables={"search": "qwerty12345", "searchType": "kobo_asset_id"},
+        )
+
+    def test_household_query_all_for_all_programs(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area
+        )
+
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    def test_household_query_all_for_all_programs_user_with_no_program_access(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user_with_no_access, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area
+        )
+
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={
+                "user": self.user_with_no_access,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
         )
