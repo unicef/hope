@@ -5,12 +5,11 @@ import { useLocation } from 'react-router-dom';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { RegistrationDataImportCreateDialog } from '@components/rdi/create/RegistrationDataImportCreateDialog';
-import { RegistrationFilters } from '@components/rdi/RegistrationFilters';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { RegistrationDataImportForPeopleTable } from '@containers/tables/rdi/RegistrationDataImportForPeopleTable';
-import {RegistrationPeopleFilters} from "@components/rdi/RegistrationPeopleFilters";
+import { RegistrationPeopleFilters } from '@components/rdi/RegistrationPeopleFilters';
 
 const initialFilter = {
   search: '',

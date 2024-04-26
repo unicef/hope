@@ -107,6 +107,8 @@ ENV = env("ENV")
 # prefix all non-production emails
 if ENV != "prod":
     EMAIL_SUBJECT_PREFIX = f"{ENV}"
+else:
+    EMAIL_SUBJECT_PREFIX = ""
 
 RO_CONN = dict(**env.db("DATABASE_URL")).copy()
 RO_CONN.update(

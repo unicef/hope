@@ -165,20 +165,24 @@ class TestHouseholdQuery(APITestCase):
         country_origin = geo_models.Country.objects.filter(iso_code2="PL").first()
 
         for index, family_size in enumerate(family_sizes_list):
-            (household, individuals) = create_household(
-                {"size": family_size, "address": f"Lorem Ipsum {family_size}", "country_origin": country_origin},
-            )
             if index % 2:
-                household.programs.add(cls.program_one)
-                household.program_id = cls.program_one.pk
-                household.save()
+                program = cls.program_one
             else:
-                household.programs.add(cls.program_two)
-                household.program_id = cls.program_two.pk
-                household.save()
-                # added for testing migrate_data_to_representations script
-                if family_size == 14:
-                    household.programs.add(cls.program_one)
+                program = cls.program_two
+
+            (household, individuals) = create_household(
+                {
+                    "size": family_size,
+                    "address": f"Lorem Ipsum {family_size}",
+                    "country_origin": country_origin,
+                    "program": program,
+                },
+            )
+            household.programs.add(program)
+            household.save()
+            # added for testing migrate_data_to_representations script
+            if family_size == 14:
+                household.programs.add(cls.program_one)
 
             area_type_level_1 = AreaTypeFactory(
                 name="State1",
