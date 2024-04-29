@@ -60,7 +60,17 @@ const CriteriaSetBox = styled.div`
   margin: ${({ theme }) => theme.spacing(2)} 0;
 `;
 
-const CriteriaField = ({ field }): React.ReactElement => {
+const CriteriaField = ({ field, choicesDict }): React.ReactElement => {
+  const extractChoiceLabel = (field, argument) => {
+    console.log('choicesDict', choicesDict, field, argument);
+    let choices = choicesDict?.[field.fieldName];
+    if (!choices) {
+      choices = field.fieldAttribute.choices;
+    }
+    return choices?.length
+      ? choices.find((each) => each.value === argument)?.labelEn
+      : argument;
+  };
   const { t } = useTranslation();
   let fieldElement;
   switch (field.comparisonMethod) {
@@ -89,13 +99,7 @@ const CriteriaField = ({ field }): React.ReactElement => {
           {field.fieldAttribute.type === 'BOOL' ? (
             <span>{field.arguments[0] === 'True' ? t('Yes') : t('No')}</span>
           ) : (
-            <span>
-              {field.fieldAttribute.choices?.length
-                ? field.fieldAttribute.choices.find(
-                    (each) => each.value === field.arguments[0],
-                  )?.labelEn
-                : field.arguments[0]}
-            </span>
+            <span>{extractChoiceLabel(field, field.arguments[0])}</span>
           )}
         </p>
       );
@@ -119,35 +123,17 @@ const CriteriaField = ({ field }): React.ReactElement => {
       );
       break;
     case 'CONTAINS':
-      fieldElement =
-        field.arguments.length > 1 ? (
-          <p>
-            {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-            {field.arguments.map((argument, index) => (
-              <>
-                <span>
-                  {field.fieldAttribute.choices?.length
-                    ? field.fieldAttribute.choices.find(
-                        (each) => each.value === argument,
-                      )?.labelEn
-                    : field.arguments[0]}
-                </span>
-                {index !== field.arguments.length - 1 && ', '}
-              </>
-            ))}
-          </p>
-        ) : (
-          <p>
-            {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-            <span>
-              {field.fieldAttribute.choices?.length
-                ? field.fieldAttribute.choices.find(
-                    (each) => each.value === field.arguments[0],
-                  )?.labelEn
-                : field.arguments[0]}
-            </span>
-          </p>
-        );
+      fieldElement = (
+        <p>
+          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+          {field.arguments.map((argument, index) => (
+            <>
+              <span>{extractChoiceLabel(field, argument)}</span>
+              {index !== field.arguments.length - 1 && ', '}
+            </>
+          ))}
+        </p>
+      );
       break;
     default:
       fieldElement = (
@@ -168,6 +154,7 @@ interface CriteriaProps {
   isEdit: boolean;
   canRemove: boolean;
   alternative?: boolean;
+  choicesDict;
 }
 
 export function Criteria({
@@ -176,6 +163,7 @@ export function Criteria({
   editFunction = () => null,
   isEdit,
   canRemove,
+  choicesDict,
   alternative = null,
   individualsFiltersBlocks,
 }: CriteriaProps): React.ReactElement {
@@ -183,14 +171,14 @@ export function Criteria({
     <CriteriaElement alternative={alternative} data-cy="criteria-container">
       {rules.map((each, index) => (
         // eslint-disable-next-line
-        <CriteriaField key={index} field={each} />
+        <CriteriaField choicesDict={choicesDict} key={index} field={each} />
       ))}
       {individualsFiltersBlocks.map((item) => (
         // eslint-disable-next-line
         <CriteriaSetBox>
           {item.individualBlockFilters.map((filter) => (
             // eslint-disable-next-line
-            <CriteriaField field={filter} />
+            <CriteriaField choicesDict={choicesDict} field={filter} />
           ))}
         </CriteriaSetBox>
       ))}

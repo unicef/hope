@@ -1809,7 +1809,7 @@ class FieldFactory(list):
         super().__init__(*args, **kwargs)
         self.scopes: Iterable = scopes or set()
         if fields:
-            self.extend(fields)
+            self.extend(copy.deepcopy(fields))
         self.all_fields = copy.deepcopy(CORE_FIELDS_ATTRIBUTES)
 
     def extend(self, __iterable: Iterable[dict]) -> None:
@@ -1837,11 +1837,22 @@ class FieldFactory(list):
     def from_scopes(cls, scopes: list[Scope]) -> "FieldFactory":
         factory = cls()
         all_fields = copy.deepcopy(factory.all_fields)
+        factory.scopes.update(scopes)
         factory.extend(filter(lambda field: any(True for scope in scopes if scope in field["scope"]), all_fields))
         if Scope.XLSX_PEOPLE in scopes:
             for field_attr in factory:
                 field_attr["xlsx_field"] = "pp_" + field_attr["xlsx_field"].replace("_h_c", "_i_c")
+        return factory
+
+    @classmethod
+    def from_only_scopes(cls, scopes: list[Scope]) -> "FieldFactory":
+        factory = cls()
+        all_fields = copy.deepcopy(factory.all_fields)
         factory.scopes.update(scopes)
+        factory.extend(filter(lambda field: all(True for scope in scopes if scope in field["scope"]), all_fields))
+        if Scope.XLSX_PEOPLE in scopes:
+            for field_attr in factory:
+                field_attr["xlsx_field"] = "pp_" + field_attr["xlsx_field"].replace("_h_c", "_i_c")
         return factory
 
     @classmethod
