@@ -1,7 +1,6 @@
-import { Grid, Paper, Typography } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import {
   choicesToDict,
@@ -19,12 +18,10 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { BlackLink } from '@core/BlackLink';
 import { Title } from '@core/Title';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-
-const Overview = styled(Paper)`
-  margin: 20px;
-  padding: ${({ theme }) => theme.spacing(8)}
-    ${({ theme }) => theme.spacing(11)};
-`;
+import { Overview } from '@components/payments/Overview';
+import { HouseholdDetails } from '@components/payments/HouseholdDetails';
+import { useProgramContext } from '../../programContext';
+import { IndividualDetails } from '@components/payments/IndividualDetails';
 
 interface VerificationPaymentRecordDetailsProps {
   paymentRecord: PaymentRecordQuery['paymentRecord'];
@@ -39,6 +36,7 @@ export function VerificationPaymentRecordDetails({
 }: VerificationPaymentRecordDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
   const deliveryTypeDict = choicesToDict(
     choicesData.paymentRecordDeliveryTypeChoices,
   );
@@ -106,49 +104,13 @@ export function VerificationPaymentRecordDetails({
           </Grid>
         </Grid>
       </ContainerColumnWithBorder>
-      <Overview>
-        <Title>
-          <Typography variant="h6">{t('Household')}</Typography>
-        </Title>
-        <Grid container spacing={3}>
-          <Grid item xs={3}>
-            <LabelizedField
-              label={t('HOUSEHOLD ID')}
-              value={paymentRecord.household.unicefId}
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <LabelizedField
-              label={t('HEAD OF HOUSEHOLD')}
-              value={paymentRecord.fullName}
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <LabelizedField
-              label={t('TOTAL PERSON COVERED')}
-              value={paymentRecord.totalPersonsCovered}
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <LabelizedField
-              label={t('PHONE NUMBER')}
-              value={getPhoneNoLabel(
-                paymentRecord.household.headOfHousehold.phoneNo,
-                paymentRecord.household.headOfHousehold.phoneNoValid,
-              )}
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <LabelizedField
-              label={t('ALT. PHONE NUMBER')}
-              value={getPhoneNoLabel(
-                paymentRecord.household.headOfHousehold.phoneNoAlternative,
-                paymentRecord.household.headOfHousehold.phoneNoAlternativeValid,
-              )}
-            />
-          </Grid>
-        </Grid>
-      </Overview>
+      {isSocialDctType ? (
+        <IndividualDetails
+          individual={paymentRecord.household.headOfHousehold}
+        />
+      ) : (
+        <HouseholdDetails household={paymentRecord.household} />
+      )}
       <Overview>
         <Title>
           <Typography variant="h6">{t('Entitlement Details')}</Typography>

@@ -5,23 +5,23 @@ import {
   PaymentVerificationNode,
   useAllPaymentVerificationsQuery,
 } from '@generated/graphql';
-import { UniversalTable } from '../../UniversalTable';
-import { headCells } from './VerificationsHeadCells';
-import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';
+import { UniversalTable } from '../../../UniversalTable';
+import { headCells } from './PeopleVerificationRecordsHeadCells';
+import { PeopleVerificationRecordsTableRow } from '@containers/tables/payments/VerificationRecordsTable/People/PeopleVerificationRecordsTableRow';
 
-interface VerificationsTableProps {
+interface PeopleVerificationRecordsTableProps {
   paymentPlanId?: string;
   filter;
   canViewRecordDetails: boolean;
   businessArea: string;
 }
 
-export function VerificationsTable({
+export function PeopleVerificationRecordsTable({
   paymentPlanId,
   filter,
   canViewRecordDetails,
   businessArea,
-}: VerificationsTableProps): ReactElement {
+}: PeopleVerificationRecordsTableProps): ReactElement {
   const { t } = useTranslation();
 
   const initialVariables: AllPaymentVerificationsQueryVariables = {
@@ -41,11 +41,10 @@ export function VerificationsTable({
       queriedObjectName="allPaymentVerifications"
       initialVariables={initialVariables}
       renderRow={(paymentVerification) => (
-        <VerificationRecordsTableRow
+        <PeopleVerificationRecordsTableRow
           key={paymentVerification.id}
           paymentVerification={paymentVerification}
           canViewRecordDetails={canViewRecordDetails}
-          showStatusColumn={false}
         />
       )}
     />

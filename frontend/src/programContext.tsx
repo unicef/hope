@@ -1,4 +1,9 @@
-import { createContext, ReactElement, useContext, useState } from 'react';
+import React, {
+  createContext,
+  ReactElement,
+  useContext,
+  useState,
+} from 'react';
 import { DataCollectingTypeType, ProgramStatus } from './__generated__/graphql';
 
 export interface ProgramInterface {
@@ -17,6 +22,14 @@ export interface ProgramInterface {
 }
 
 export type ProgramContextType = ProgramInterface | null;
+
+type ProgramContent = {
+  selectedProgram: ProgramContextType;
+  setSelectedProgram: (program: ProgramContextType) => void;
+  isActiveProgram: boolean;
+  isSocialDctType: boolean;
+  isStandardDctType: boolean;
+};
 
 export const ProgramContext = createContext(null);
 
@@ -54,5 +67,5 @@ export function ProgramProvider({
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const useProgramContext = () => useContext(ProgramContext);
+export const useProgramContext = (): ProgramContent =>
+  useContext(ProgramContext);
