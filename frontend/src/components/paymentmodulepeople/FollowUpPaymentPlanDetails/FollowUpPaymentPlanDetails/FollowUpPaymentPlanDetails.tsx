@@ -46,7 +46,7 @@ export function FollowUpPaymentPlanDetails({
             <Grid item xs={3}>
               <LabelizedField label={t('Main Payment Plan')}>
                 <BlackLink
-                  to={`/${baseUrl}/payment-module-people/payment-plans/${sourcePaymentPlanId}`}
+                  to={`/${baseUrl}/payment-module/payment-plans/${sourcePaymentPlanId}`}
                 >
                   {sourcePaymentPlanUnicefId}
                 </BlackLink>

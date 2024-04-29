@@ -52,7 +52,7 @@ export function FspSection({
               color="primary"
               variant="contained"
               component={Link}
-              to={`/${baseUrl}/payment-module-people/${
+              to={`/${baseUrl}/payment-module/${
                 isFollowUp ? 'followup-payment-plans' : 'payment-plans'
               }/${id}/setup-fsp/edit`}
               disabled={!isActiveProgram}
@@ -98,7 +98,7 @@ export function FspSection({
             disabled={shouldDisableSetUpFsp()}
             data-cy="button-set-up-fsp"
             component={Link}
-            to={`/${baseUrl}/payment-module-people/${
+            to={`/${baseUrl}/payment-module/${
               isFollowUp ? 'followup-payment-plans' : 'payment-plans'
             }/${id}/setup-fsp/create`}
           >

@@ -271,6 +271,32 @@ class TestPaymentNotification(APITestCase):
             3,
         )
 
+    @mock.patch("hct_mis_api.apps.payment.notifications.MailjetClient.send_email")
+    @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
+    @override_settings(EMAIL_SUBJECT_PREFIX="test")
+    def test_send_email_notification_subject_test_env(self, mock_send: Any) -> None:
+        payment_notification = PaymentNotification(
+            self.payment_plan,
+            PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+            self.user_action_user,
+            f"{timezone.now():%-d %B %Y}",
+        )
+        for mailjet_client in payment_notification.emails:
+            self.assertEqual(mailjet_client.subject, "[test] Payment pending for Approval")
+
+    @mock.patch("hct_mis_api.apps.payment.notifications.MailjetClient.send_email")
+    @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
+    @override_settings(EMAIL_SUBJECT_PREFIX="")
+    def test_send_email_notification_subject_prod_env(self, mock_send: Any) -> None:
+        payment_notification = PaymentNotification(
+            self.payment_plan,
+            PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+            self.user_action_user,
+            f"{timezone.now():%-d %B %Y}",
+        )
+        for mailjet_client in payment_notification.emails:
+            self.assertEqual(mailjet_client.subject, "Payment pending for Approval")
+
     @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
     @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
     @override_config(ENABLE_MAILJET=True)
