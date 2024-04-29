@@ -96,7 +96,7 @@ export function CreateFollowUpPaymentPlan({
       setDialogOpen(false);
       showMessage(t('Payment Plan Created'));
       navigate(
-        `/${baseUrl}/payment-module-people/followup-payment-plans/${res.data.createFollowUpPaymentPlan.paymentPlan.id}`,
+        `/${baseUrl}/payment-module/followup-payment-plans/${res.data.createFollowUpPaymentPlan.paymentPlan.id}`,
       );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));

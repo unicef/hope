@@ -27,7 +27,7 @@ export function RegistrationDataImportForPeopleTableRow({
   const { baseUrl } = useBaseUrl();
   const importDetailsForPeoplePath = `/${baseUrl}/registration-data-import-for-people/${registrationDataImport.id}`;
   const handleClick = (): void => {
-        navigate(importDetailsForPeoplePath);
+    navigate(importDetailsForPeoplePath);
   };
   const renderImportedBy = (): string => {
     if (registrationDataImport?.importedBy) {

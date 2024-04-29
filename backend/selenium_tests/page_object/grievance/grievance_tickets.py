@@ -6,7 +6,7 @@ class Grievance(BaseComponents):
     # Locators
     titlePage = 'h5[data-cy="page-header-title"]'
     searchFilter = 'div[data-cy="filters-search"]'
-    ticketTypeFilter = 'div[data-cy="filters-search-type"]'
+    documentTypeFilter = 'div[data-cy="filters-document-type"]'
     ticketId = 'li[data-value="ticket_id"]'
     householdId = 'li[data-value="ticket_hh_id"]'
     familyName = 'li[data-value="full_name"]'
@@ -67,7 +67,7 @@ class Grievance(BaseComponents):
         return self.wait_for(self.searchFilter)
 
     def getTicketTypeFilter(self) -> WebElement:
-        return self.wait_for(self.ticketTypeFilter)
+        return self.wait_for(self.documentTypeFilter)
 
     def getCreationDateFromFilter(self) -> WebElement:
         return self.wait_for(self.creationDateFromFilter)

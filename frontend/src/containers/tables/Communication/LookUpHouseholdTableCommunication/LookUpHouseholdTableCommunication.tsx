@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import styled from 'styled-components';
 import {
+  AllHouseholdsForPopulationTableQueryVariables,
   AllHouseholdsQuery,
   AllHouseholdsQueryVariables,
   HouseholdChoiceDataQuery,
@@ -57,14 +58,15 @@ export function LookUpHouseholdTableCommunication({
     }
     return undefined;
   };
-  const initialVariables: AllHouseholdsQueryVariables = {
+  const initialVariables: AllHouseholdsForPopulationTableQueryVariables = {
     businessArea,
     familySize: JSON.stringify({
       min: filter.householdSizeMin,
       max: filter.householdSizeMax,
     }),
     search: filter.search.trim(),
-    searchType: filter.searchType,
+    documentType: filter.documentType,
+    documentNumber: filter.search.trim(),
     admin2: filter.admin2,
     residenceStatus: filter.residenceStatus,
     withdrawn: matchWithdrawnValue(),

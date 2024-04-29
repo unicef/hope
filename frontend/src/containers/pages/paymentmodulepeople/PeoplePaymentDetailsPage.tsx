@@ -44,13 +44,13 @@ export const PeoplePaymentDetailsPage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module-people/`,
+      to: `/${baseUrl}/payment-module/`,
     },
     {
       title: ` ${paymentPlanIsFollowUp ? 'Follow-up ' : ''} Payment Plan ${
         payment.parent.unicefId
       }`,
-      to: `/${baseUrl}/payment-module-people/${
+      to: `/${baseUrl}/payment-module/${
         paymentPlanIsFollowUp ? 'followup-payment-plans' : 'payment-plans'
       }/${data.payment.parent.id}/`,
     },
