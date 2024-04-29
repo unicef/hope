@@ -29,6 +29,8 @@ import {
 import { UniversalActivityLogTablePaymentVerification } from '../../tables/UniversalActivityLogTablePaymentVerification';
 import { VerificationsTable } from '../../tables/payments/VerificationRecordsTable';
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
+import { useProgramContext } from '../../../programContext';
+import { PeopleVerificationsTable } from '@containers/tables/payments/VerificationRecordsTable/People/PeopleVerificationsTable';
 
 const Container = styled.div`
   display: flex;
@@ -76,6 +78,7 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
   });
   const { data: choicesData, loading: choicesLoading } =
     useCashPlanVerificationSamplingChoicesQuery();
+  const { isSocialDctType } = useProgramContext();
 
   if (loading || choicesLoading) return <LoadingComponent />;
 
@@ -166,6 +169,33 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
     </PageHeader>
   );
 
+  const renderVerificationsTable = () => {
+    if (isSocialDctType) {
+      return (
+        <PeopleVerificationsTable
+          paymentPlanId={paymentPlan.id}
+          filter={appliedFilter}
+          businessArea={businessArea}
+          canViewRecordDetails={hasPermissions(
+            PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
+            permissions,
+          )}
+        />
+      );
+    }
+    return (
+      <VerificationsTable
+        paymentPlanId={paymentPlan.id}
+        filter={appliedFilter}
+        businessArea={businessArea}
+        canViewRecordDetails={hasPermissions(
+          PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
+          permissions,
+        )}
+      />
+    );
+  };
+
   return (
     <>
       {toolbar}
@@ -195,17 +225,7 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
             setAppliedFilter={setAppliedFilter}
             verifications={paymentPlan.verificationPlans}
           />
-          <TableWrapper>
-            <VerificationsTable
-              paymentPlanId={paymentPlan.id}
-              filter={appliedFilter}
-              businessArea={businessArea}
-              canViewRecordDetails={hasPermissions(
-                PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
-                permissions,
-              )}
-            />
-          </TableWrapper>
+          <TableWrapper>{renderVerificationsTable()}</TableWrapper>
         </>
       ) : null}
       {canSeeActivationMessage() ? (
