@@ -64,7 +64,6 @@ export function PeopleFilter({
   const handleClearFilter = (): void => {
     clearFilter();
   };
-  const searchNotAvailableForPeople = ['household_id'];
 
   // Show admin area filter only for social programs
   const showAdminAreaFilter =
@@ -78,35 +77,43 @@ export function PeopleFilter({
       isOnPaper={isOnPaper}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid container alignItems="flex-end" item xs={6} spacing={0}>
-          <Grid item xs={8}>
-            <SearchTextField
-              label={t('Search')}
-              value={filter.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-              data-cy="ind-filters-search"
-            />
-          </Grid>
-          <Grid item xs={4}>
+        <Grid item xs={3}>
+          <SearchTextField
+            label={t('Search')}
+            value={filter.search}
+            onChange={(e) => handleFilterChange('search', e.target.value)}
+            data-cy="ind-filters-search"
+          />
+        </Grid>
+        <Grid container item xs={6} spacing={3}>
+          <Grid item xs={6}>
             <SelectFilter
-              onChange={(e) => handleFilterChange('searchType', e.target.value)}
-              label={t('Search Type')}
-              value={filter.searchType}
+              onChange={(e) =>
+                handleFilterChange('documentType', e.target.value)
+              }
+              label={t('Document Type')}
+              value={filter.documentType}
               borderRadius="0px 4px 4px 0px"
-              data-cy="filter-search-type"
+              data-cy="filters-document-type"
               fullWidth
               disableClearable
             >
-              {choicesData?.individualSearchTypesChoices
-                .filter(
-                  (item) => !searchNotAvailableForPeople.includes(item.value),
-                )
-                .map(({ name, value }) => (
-                  <MenuItem key={value} value={value}>
-                    {name}
-                  </MenuItem>
-                ))}
+              {choicesData?.documentTypeChoices.map(({ name, value }) => (
+                <MenuItem key={value} value={value}>
+                  {name}
+                </MenuItem>
+              ))}
             </SelectFilter>
+          </Grid>
+          <Grid item xs={6}>
+            <SearchTextField
+              label={t('Document number')}
+              value={filter.documentNumber}
+              onChange={(e) =>
+                handleFilterChange('documentNumber', e.target.value)
+              }
+              data-cy="filters-document-number"
+            />
           </Grid>
         </Grid>
         {isAllPrograms && (

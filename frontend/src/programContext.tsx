@@ -17,7 +17,6 @@ export interface ProgramInterface {
     label: string;
     code: string;
     type: string;
-    children;
   };
 }
 
