@@ -149,9 +149,7 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
-        # input("enter")
         pageProgrammeManagement.getInputProgrammeName().send_keys("New Programme")
-        # input("enter")
         pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
         pageProgrammeManagement.getInputEndDate().click()

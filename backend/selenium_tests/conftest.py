@@ -4,7 +4,6 @@ from datetime import datetime
 
 from django.conf import settings
 from django.core.management import call_command
-from pytest_html_reporter import attach
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -25,6 +24,7 @@ from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
 )
 from pytest_django.live_server_helper import LiveServer
+from pytest_html_reporter import attach
 from requests import Session
 from selenium import webdriver
 from selenium.webdriver import Chrome
@@ -133,7 +133,7 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
 @pytest.fixture
 def driver() -> Chrome:
     chrome_options = Options()
-    if not os.environ.get('STREAM'):
+    if not os.environ.get("STREAM"):
         chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument(
