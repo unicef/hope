@@ -5,7 +5,6 @@ import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityL
 import {
   choicesToDict,
   formatCurrencyWithSymbol,
-  getPhoneNoLabel,
   paymentRecordStatusToColor,
   paymentStatusDisplayMap,
   verificationRecordsStatusToColor,

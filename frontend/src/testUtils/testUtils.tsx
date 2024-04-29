@@ -73,7 +73,7 @@ export const fakeContextProgram = {
       children: null,
     },
   },
-  setSelectedProgram: (program) => {},
+  setSelectedProgram: () => {},
   isActiveProgram: true,
   isSocialDctType: false,
   isStandardDctType: true,
