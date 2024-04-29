@@ -86,28 +86,3 @@ class Targeting(BaseComponents):
 
     def getTargetPopulationsRows(self) -> WebElement:
         return self.wait_for(self.rows)
-
-    def checkElementsOnPage(self) -> None:
-        self.getTitlePage().should("be.visible").contains(self.textTitlePage)
-        # self.getButtonFiltersExpand().click()
-        self.getSearchFilter().should("be.visible")
-        self.getStatusFilter().should("be.visible")
-        self.getMinNumberOfHouseholdsFilter().should("be.visible")
-        self.getMaxNumberOfHouseholdsFilter().should("be.visible")
-        self.getButtonCreateNew().should("be.visible").contains(self.textCreateNew)
-        self.getTabTitle().should("be.visible").contains(self.textTabTitle)
-        self.getTabColumnName().should("be.visible").contains(self.textTabName)
-        self.getTabColumnStatus().should("be.visible").contains(self.textTabStatus)
-        self.getTabColumnNOHouseholds()
-        self.getTabColumnDateCreated()
-        self.getTabColumnLastEdited()
-        self.getTabColumnCreatedBy()
-
-    def selectStatus(self, status: str) -> None:
-        self.getStatusFilter().click()
-        self.getStatusOption().contains(status).click()
-        self.pressEscapeFromElement(self.getStatusOption().contains(status))
-        self.getApply().click()
-
-    def chooseTargetPopulationRow(self, row: int) -> WebElement:
-        return self.getTargetPopulationsRows().eq(row)

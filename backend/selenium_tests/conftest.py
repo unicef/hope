@@ -9,6 +9,8 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
+
+from page_object.targeting.targeting import Targeting
 from page_object.admin_panel.admin_panel import AdminPanel
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from page_object.grievance.feedback import Feedback
@@ -223,6 +225,11 @@ def pageIndividuals(request: FixtureRequest, browser: Chrome) -> Individuals:
 @pytest.fixture
 def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> IndividualsDetails:
     yield IndividualsDetails(browser)
+
+
+@pytest.fixture
+def pageTargeting(request: FixtureRequest, browser: Chrome) -> Targeting:
+    yield Targeting(browser)
 
 
 @pytest.fixture
