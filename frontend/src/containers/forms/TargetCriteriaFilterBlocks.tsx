@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import { chooseFieldType, clearField } from '@utils/targetingUtils';
 import { ImportedIndividualFieldsQuery } from '@generated/graphql';
 import { TargetCriteriaBlockFilter } from './TargetCriteriaBlockFilter';
+import { choicesToDict } from '@utils/utils';
 
 const Divider = styled.div`
   border-top: 1px solid #e2e2e2;
@@ -71,11 +72,13 @@ export function TargetCriteriaFilterBlocks({
   blockIndex,
   data,
   values,
+  choicesToDict,
   onDelete,
 }: {
   blockIndex: number;
   data: ImportedIndividualFieldsQuery;
   values;
+  choicesToDict;
   onDelete: () => void;
 }): React.ReactElement {
   const { t } = useTranslation();
@@ -104,6 +107,7 @@ export function TargetCriteriaFilterBlocks({
                         index={index}
                         data={data}
                         each={each}
+                        choicesDict={choicesToDict}
                         onChange={(e, object) => {
                           if (object) {
                             return chooseFieldType(object, arrayHelpers, index);

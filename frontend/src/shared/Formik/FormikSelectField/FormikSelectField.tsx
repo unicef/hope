@@ -70,6 +70,19 @@ export function FormikSelectField({
         id={`textField-${field.name}`}
         error={isInvalid}
         renderValue={(selected) => {
+          if (Array.isArray(selected)) {
+            return selected
+              .map((s) => {
+                const selectedItem = otherProps.choices.find(
+                  (choice) =>
+                    choice.value === s || choice.name === s || choice.label === s,
+                );
+                return selectedItem
+                  ? selectedItem.labelEn || selectedItem.name || selectedItem.label
+                  : s;
+              })
+              .join(', ');
+          }
           const selectedItem = otherProps.choices.find(
             (choice) => choice.value === selected || choice.name === selected,
           );
