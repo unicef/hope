@@ -180,8 +180,8 @@ class FieldAttributeNode(graphene.ObjectType):
         if callable(choices) and not isinstance(choices, models.Manager):
             choices = choices()
         if isinstance(
-                choices,
-                Iterable,
+            choices,
+            Iterable,
         ):
             return sorted(choices, key=lambda elem: elem["label"]["English(EN)"])
         return choices.all()
@@ -264,17 +264,15 @@ class LanguageObjectConnection(ObjectConnection):
 
 
 def get_fields_attr_generators(
-        flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None, program_id: Optional[str] = None
+    flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None, program_id: Optional[str] = None
 ) -> Generator:
-    is_social_worker_program = Program.objects.get(id=program_id).is_social_worker_program
     if flex_field is not False:
         yield from FlexibleAttribute.objects.order_by("created_at")
     if flex_field is not True:
-        if is_social_worker_program:
+        if program_id and Program.objects.get(id=program_id).is_social_worker_program:
             yield from FieldFactory.from_only_scopes([Scope.XLSX_PEOPLE, Scope.TARGETING]).filtered_by_types(
-                FILTERABLE_TYPES).apply_business_area(
-                business_area_slug=business_area_slug, program_id=program_id
-            )
+                FILTERABLE_TYPES
+            ).apply_business_area(business_area_slug=business_area_slug, program_id=program_id)
         else:
             yield from FieldFactory.from_scope(Scope.TARGETING).filtered_by_types(FILTERABLE_TYPES).apply_business_area(
                 business_area_slug=business_area_slug, program_id=program_id
@@ -358,11 +356,11 @@ class Query(graphene.ObjectType):
         return config.CASH_ASSIST_URL_PREFIX
 
     def resolve_all_fields_attributes(
-            parent,
-            info: Any,
-            flex_field: Optional[bool] = None,
-            business_area_slug: Optional[str] = None,
-            program_id: Optional[str] = None,
+        parent,
+        info: Any,
+        flex_field: Optional[bool] = None,
+        business_area_slug: Optional[str] = None,
+        program_id: Optional[str] = None,
     ) -> List[Any]:
         def is_a_killer_filter(field: Any) -> bool:
             if isinstance(field, FlexibleAttribute):

@@ -27,7 +27,6 @@ if TYPE_CHECKING:
 
     from graphene.types.structures import List as GrapheneList
 
-    from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.targeting.models import TargetingIndividualBlockRuleFilter
 
 
@@ -69,7 +68,9 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
                 parent.field_name, parent.targeting_criteria_rule.targeting_criteria.target_population
             )
             parent.targeting_criteria_rule
-            return filter_choices(field_attribute, parent.arguments)  # type: ignore # can't convert graphene list to list
+            return filter_choices(
+                field_attribute, parent.arguments  # type: ignore # can't convert graphene list to list
+            )
 
     class Meta:
         model = target_models.TargetingCriteriaRuleFilter
