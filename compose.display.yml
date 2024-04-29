@@ -9,9 +9,7 @@ volumes:
 services:
   selenium:
     stdin_open: true
-    tty: true
     image: unicef/hct-mis-backend-dev
-    shm_size: 2gb
     environment:
       - REDIS_INSTANCE=redis:6379
       - PYTHONUNBUFFERED=1
@@ -28,6 +26,11 @@ services:
       - DATABASE_URL_HUB_REGISTRATION=postgis://postgres:postgres@db:5432/rdi_datahub
       - USE_DUMMY_EXCHANGE_RATES=yes
       - CELERY_TASK_ALWAYS_EAGER=true
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - DISPLAY=host.docker.internal:0
+      - STREAM=true
     build:
       context: ./
       dockerfile: docker/Dockerfile
@@ -36,6 +39,8 @@ services:
       - ./backend/report/screenshot/:/code/screenshot/
       - ./backend/report/:/code/report/
       - backend-data:/data
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - $HOME/.Xauthority:/root/.Xauthority:rw
       - backend-data-selenium:/data
       - ./backend/selenium_tests:/code/selenium_tests
       - type: volume
@@ -59,6 +64,8 @@ services:
         condition: service_started
       init_fe:
         condition: service_completed_successfully
+      selenium-hub:
+        condition: service_started
 
   init_fe:
     image: unicef/hct-mis-backend-dist
@@ -118,3 +125,10 @@ services:
       - data_es-selenium:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
+
+  selenium-hub:
+    image: selenium/hub:latest
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
