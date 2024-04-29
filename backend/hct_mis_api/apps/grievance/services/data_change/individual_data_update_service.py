@@ -123,9 +123,9 @@ class IndividualDataUpdateService(DataChangeService):
         individual_data_with_approve_status["identities_to_remove"] = identities_to_remove_with_approve_status
         individual_data_with_approve_status["identities_to_edit"] = prepare_edit_identities(identities_to_edit)
         individual_data_with_approve_status["payment_channels"] = payment_channels_with_approve_status
-        individual_data_with_approve_status["payment_channels_to_remove"] = (
-            payment_channels_to_remove_with_approve_status
-        )
+        individual_data_with_approve_status[
+            "payment_channels_to_remove"
+        ] = payment_channels_to_remove_with_approve_status
         individual_data_with_approve_status["payment_channels_to_edit"] = prepare_edit_payment_channel(
             payment_channels_to_edit
         )
@@ -215,9 +215,9 @@ class IndividualDataUpdateService(DataChangeService):
             identities_to_remove_with_approve_status
         )
         individual_data_with_approve_status["payment_channels"] = payment_channels_with_approve_status
-        individual_data_with_approve_status["payment_channels_to_remove"] = (
-            payment_channels_to_remove_with_approve_status
-        )
+        individual_data_with_approve_status[
+            "payment_channels_to_remove"
+        ] = payment_channels_to_remove_with_approve_status
         individual_data_with_approve_status["payment_channels_to_edit"] = prepare_edit_payment_channel(
             payment_channels_to_edit
         )
