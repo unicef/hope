@@ -1,21 +1,9 @@
 import functools
 from typing import Callable
 
-from django.core.cache import cache
-
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework_extensions.key_constructor.constructors import KeyConstructor
-
-
-class ModelVersionKeyBitMixin:
-    @staticmethod
-    def get_value_for_key(key: str) -> str:
-        value = cache.get(key, None)
-        if not value:
-            value = 1
-            cache.set(key, value, timeout=None)
-        return str(value)
 
 
 def etag_decorator(key_constructor_class: "KeyConstructor", compare_etags: bool = True) -> Callable:

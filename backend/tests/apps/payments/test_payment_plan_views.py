@@ -2,6 +2,8 @@ import json
 from typing import Any, Callable
 
 from django.core.cache import cache
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 import pytest
@@ -90,7 +92,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         response = self.client.get(self.url)
         assert response.status_code == expected_status
 
-    def test_list_payment_plans(
+    def test_list_payment_plans11(
         self,
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
@@ -98,6 +100,19 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         update_user_partner_perm_for_program: Callable,
         id_to_base64: Callable,
     ) -> None:
+        def _test_list():
+            """
+            Helper function to test list payment plans now and again to test caching
+            """
+            response = self.client.get(self.url)
+            assert response.status_code == status.HTTP_200_OK
+            response_json = response.json()["results"]
+            assert len(response_json) == 2
+            assert self.payment_plan1.unicef_id in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
+            assert self.payment_plan2.unicef_id in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
+            assert self.payment_plan3.unicef_id not in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
+            return response
+
         self.set_up(api_client, afghanistan, id_to_base64)
         create_user_role_with_permissions(
             self.user,
@@ -112,16 +127,21 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         assert response_json[0]["unicef_id"] == self.payment_plan1.unicef_id
 
         update_user_partner_perm_for_program(self.user, self.afghanistan, self.program2)
-        response = self.client.get(self.url)
-        assert response.status_code == status.HTTP_200_OK
-        response_json = response.json()["results"]
-        assert len(response_json) == 2
-        assert self.payment_plan1.unicef_id in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
-        assert self.payment_plan2.unicef_id in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
-        assert self.payment_plan3.unicef_id not in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
 
-        # test caching
-        assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
+        with CaptureQueriesContext(connection) as ctx:
+            response = _test_list()
+
+            etag = response.headers["etag"]
+            assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
+            assert len(ctx.captured_queries) == 21
+
+        # Test that reoccurring request use cached data
+        with CaptureQueriesContext(connection) as ctx:
+            response = _test_list()
+            etag_second_call = response.headers["etag"]
+            assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
+            assert etag_second_call == etag
+            assert len(ctx.captured_queries) == 8
 
     def test_list_payment_plans_approval_process_data(
         self,
