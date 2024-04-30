@@ -1,5 +1,7 @@
 import functools
-from typing import Callable
+from typing import Any, Callable
+
+from django.core.cache import cache
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -40,3 +42,14 @@ def etag_decorator(key_constructor_class: "KeyConstructor", compare_etags: bool 
         return wrapper
 
     return inner
+
+
+def get_or_create_cache_key(key: str, default: Any) -> Any:
+    """
+    Get value from cache by key or create it with default value.
+    """
+    value = cache.get(key)
+    if value is None:
+        cache.set(key, default, timeout=None)
+        return default
+    return value
