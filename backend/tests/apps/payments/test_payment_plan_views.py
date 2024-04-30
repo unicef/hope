@@ -100,7 +100,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         update_user_partner_perm_for_program: Callable,
         id_to_base64: Callable,
     ) -> None:
-        def _test_list():
+        def _test_list() -> Any:
             """
             Helper function to test list payment plans now and again to test caching
             """
