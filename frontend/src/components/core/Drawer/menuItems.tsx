@@ -122,7 +122,7 @@ export const menuItems: MenuItem[] = [
     href: '/managerial-console',
     selectedRegexp: /^\/managerial-console.*$/,
     icon: <ManageAccounts />,
-    scopes: [SCOPE_PROGRAM],
+    scopes: [SCOPE_ALL_PROGRAMS],
     permissions: [PERMISSIONS.PAYMENT_VIEW_LIST_MANAGERIAL],
   },
   {

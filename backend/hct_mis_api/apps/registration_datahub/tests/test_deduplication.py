@@ -182,7 +182,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             household_data={
                 "registration_data_import": registration_data_import_second,
                 "business_area": cls.business_area,
-                "program": cls.program,
+                "program": registration_data_import_second.program,
             },
             individuals_data=[
                 {
@@ -334,7 +334,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             household_data={
                 "registration_data_import": cls.registration_data_import,
                 "business_area": cls.business_area,
-                "program": cls.program,
+                "program": cls.registration_data_import.program,
             },
             individuals_data=[
                 {
@@ -391,7 +391,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             household_data={
                 "registration_data_import": registration_data_import_second,
                 "business_area": cls.business_area,
-                "program": cls.program,
+                "program": registration_data_import_second.program,
             },
             individuals_data=[
                 {

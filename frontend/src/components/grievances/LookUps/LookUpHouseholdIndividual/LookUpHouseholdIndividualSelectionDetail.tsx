@@ -50,10 +50,15 @@ export function LookUpHouseholdIndividualSelectionDetail({
   const location = useLocation();
   const { businessArea, isAllPrograms, programId } = useBaseUrl();
   const [selectedTab, setSelectedTab] = useState(0);
+  const { data: householdChoicesData, loading: householdChoicesLoading } =
+    useHouseholdChoiceDataQuery();
+  const { data: individualChoicesData, loading: individualChoicesLoading } =
+    useIndividualChoiceDataQuery();
   const initialFilterHH = {
-    search: '',
     program: isAllPrograms ? '' : programId,
-    searchType: 'household_id',
+    search: '',
+    documentType: householdChoicesData?.documentTypeChoices?.[0]?.value,
+    documentNumber: '',
     residenceStatus: '',
     admin2: '',
     householdSizeMin: '',
@@ -63,9 +68,10 @@ export function LookUpHouseholdIndividualSelectionDetail({
     programState: 'active',
   };
   const initialFilterIND = {
-    search: '',
     program: isAllPrograms ? '' : programId,
-    searchType: 'individual_id',
+    search: '',
+    documentType: individualChoicesData?.documentTypeChoices?.[0]?.value,
+    documentNumber: '',
     admin2: '',
     sex: '',
     ageMin: '',
@@ -75,9 +81,6 @@ export function LookUpHouseholdIndividualSelectionDetail({
     status: '',
     programState: 'active',
   };
-
-  const { data: householdChoicesData, loading: householdChoicesLoading } =
-    useHouseholdChoiceDataQuery();
 
   const [filterIND, setFilterIND] = useState(
     getFilterFromQueryParams(location, initialFilterIND),
@@ -92,9 +95,6 @@ export function LookUpHouseholdIndividualSelectionDetail({
   const [appliedFilterHH, setAppliedFilterHH] = useState(
     getFilterFromQueryParams(location, initialFilterHH),
   );
-
-  const { data: individualChoicesData, loading: individualChoicesLoading } =
-    useIndividualChoiceDataQuery();
 
   const { data: programsData, loading: programsLoading } =
     useAllProgramsForChoicesQuery({
