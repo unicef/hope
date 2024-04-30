@@ -1,11 +1,9 @@
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
-import CancelIcon from '@mui/icons-material/Cancel';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanQuery } from '@generated/graphql';
-import { StepIconProps } from '@mui/material';
 
 interface AcceptanceProcessStepperProps {
   acceptanceProcess: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'][0]['node'];

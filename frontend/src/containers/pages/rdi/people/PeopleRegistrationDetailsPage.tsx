@@ -18,7 +18,6 @@ import {
   useHouseholdChoiceDataQuery,
   useImportedIndividualQuery,
 } from '@generated/graphql';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Container = styled.div`
   padding: 20px;

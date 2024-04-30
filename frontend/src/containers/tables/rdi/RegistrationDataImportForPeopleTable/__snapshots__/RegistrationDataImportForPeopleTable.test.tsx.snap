@@ -773,7 +773,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                 >
                   <a
                     class="sc-hIPBNq ejGWsQ"
-                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import-for-people/UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6NGQxMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAw"
+                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6NGQxMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAw"
                   >
                     Test Import
                   </a>

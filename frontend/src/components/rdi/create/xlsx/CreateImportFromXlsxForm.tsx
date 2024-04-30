@@ -9,7 +9,6 @@ import * as Yup from 'yup';
 import {
   ImportDataStatus,
   useCreateRegistrationXlsxImportMutation,
-  useProgramQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -43,14 +42,11 @@ export function CreateImportFromXlsxForm({
     loading: saveXlsxLoading,
     xlsxImportData,
   } = useSaveXlsxImportDataAndCheckStatus();
-  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [createImport] = useCreateRegistrationXlsxImportMutation();
-  const { data: programData } = useProgramQuery({
-    variables: { id: programId },
-  });
 
   const onSubmit = async (values): Promise<void> => {
     setSubmitDisabled(true);

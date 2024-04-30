@@ -1,11 +1,10 @@
 import { styled } from '@mui/system';
-import { Menu, MenuItem, Button, Tooltip, ListItemText } from '@mui/material';
+import { Menu, MenuItem, Button, ListItemText } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SurveyCategory } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';

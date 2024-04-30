@@ -6,10 +6,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymen
     class="MuiBox-root css-0"
   >
     <button
-      class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium Mui-disabled MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium css-11ph28e-MuiButtonBase-root-MuiButton-root"
+      class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium css-11ph28e-MuiButtonBase-root-MuiButton-root"
       data-cy="button-import"
-      disabled=""
-      tabindex="-1"
+      tabindex="0"
       type="button"
     >
       <span
@@ -28,6 +27,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymen
         </svg>
       </span>
       Upload File
+      <span
+        class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
+      />
     </button>
   </div>
 </div>
