@@ -10,11 +10,13 @@ class Targeting(BaseComponents):
     programFilter = 'div[data-cy="filters-program"]'
     minNumberOfHouseholds = 'div[data-cy="filters-total-households-count-min"]'
     maxNumberOfHouseholds = 'div[data-cy="filters-total-households-count-max"]'
-    buttonCreateNew = 'a[data-cy="button-target-population-create-new"]'
+    buttonCreateNew = 'button[data-cy="button-new-tp"]'
     tabTitle = 'h6[data-cy="table-title"]'
     tabColumnLabel = 'span[data-cy="table-label"]'
     statusOptions = 'li[role="option"]'
     rows = 'tr[role="checkbox"]'
+    createUserFilters = 'div[data-cy="menu-item-filters-text"]'
+    createUseIDs = 'div[data-cy="menu-item-ids-text"]'
 
     # Texts
 
@@ -57,23 +59,8 @@ class Targeting(BaseComponents):
     def getTabTitle(self) -> WebElement:
         return self.wait_for(self.tabTitle)
 
-    def getTabColumnName(self) -> WebElement:
-        return self.wait_for(self.tabColumnLabel).eq(0)
-
-    def getTabColumnStatus(self) -> WebElement:
-        return self.wait_for(self.tabColumnLabel).eq(1)
-
-    def getTabColumnNOHouseholds(self) -> WebElement:
-        return self.wait_for(self.tabColumnLabel).eq(2)
-
-    def getTabColumnDateCreated(self) -> WebElement:
-        return self.wait_for(self.tabColumnLabel).eq(3)
-
-    def getTabColumnLastEdited(self) -> WebElement:
-        return self.wait_for(self.tabColumnLabel).eq(4)
-
-    def getTabColumnCreatedBy(self) -> WebElement:
-        return self.wait_for(self.tabColumnLabel).eq(5)
+    def getTabColumnLabel(self) -> list[WebElement]:
+        return self.get_elements(self.tabColumnLabel)
 
     def getStatusOption(self) -> WebElement:
         return self.wait_for(self.statusOptions)
@@ -84,5 +71,11 @@ class Targeting(BaseComponents):
     def getClear(self) -> WebElement:
         return self.wait_for(self.buttonClear)
 
-    def getTargetPopulationsRows(self) -> WebElement:
-        return self.wait_for(self.rows)
+    def getTargetPopulationsRows(self) -> list[WebElement]:
+        return self.get_elements(self.rows)
+
+    def getCreateUserFilters(self) -> WebElement:
+        return self.wait_for(self.createUserFilters)
+
+    def getCreateUseIDs(self) -> WebElement:
+        return self.wait_for(self.createUseIDs)
