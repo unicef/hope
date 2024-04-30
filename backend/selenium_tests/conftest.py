@@ -11,6 +11,7 @@ from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 
 from page_object.targeting.targeting import Targeting
+from page_object.targeting.create_new import CreateNew
 from page_object.admin_panel.admin_panel import AdminPanel
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from page_object.grievance.feedback import Feedback
@@ -230,6 +231,11 @@ def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> Individu
 @pytest.fixture
 def pageTargeting(request: FixtureRequest, browser: Chrome) -> Targeting:
     yield Targeting(browser)
+
+
+@pytest.fixture
+def pageCreateTargeting(request: FixtureRequest, browser: Chrome) -> CreateNew:
+    yield CreateNew(browser)
 
 
 @pytest.fixture

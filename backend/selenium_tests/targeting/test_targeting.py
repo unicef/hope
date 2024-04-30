@@ -1,5 +1,6 @@
 import pytest
 from page_object.targeting.targeting import Targeting
+from page_object.targeting.create_new import CreateNew
 
 from django.conf import settings
 from django.core.management import call_command
@@ -40,5 +41,33 @@ class TestSmokeTargeting:
         assert expected_column_names == [name.text for name in pageTargeting.getTabColumnLabel()]
         assert 2 == len(pageTargeting.getTargetPopulationsRows())
         pageTargeting.getButtonCreateNew().click()
-        assert "Use Filters" in pageTargeting.getCreateUserFilters().text
+        assert "Use Filters" in pageTargeting.getCreateUseFilters().text
         assert "Use IDs" in pageTargeting.getCreateUseIDs().text
+
+    def test_smoke_targeting_create_use_filters(self,
+                                                create_programs: None,
+                                                add_targeting: None,
+                                                pageTargeting: Targeting,
+                                                pageCreateTargeting: CreateNew):
+        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.getNavTargeting().click()
+        pageTargeting.getButtonCreateNew().click()
+        pageTargeting.getCreateUseFilters().click()
+        pageTargeting.screenshot("UseFilters")
+
+    def test_smoke_targeting_create_use_ids(self,
+                                            create_programs: None,
+                                            add_targeting: None,
+                                            pageTargeting: Targeting,
+                                            pageCreateTargeting: CreateNew):
+        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.getNavTargeting().click()
+        pageTargeting.getButtonCreateNew().click()
+        pageTargeting.getCreateUseIDs().click()
+        pageTargeting.screenshot("UseIDs")
+
+    def test_smoke_targeting_details_page(self, create_programs: None, add_targeting: None, pageTargeting: Targeting):
+        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.getNavTargeting().click()
+        pageTargeting.getTargetPopulationsRows()[0].click()
+        pageTargeting.screenshot("Details")

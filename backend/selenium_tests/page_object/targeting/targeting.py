@@ -74,7 +74,7 @@ class Targeting(BaseComponents):
     def getTargetPopulationsRows(self) -> list[WebElement]:
         return self.get_elements(self.rows)
 
-    def getCreateUserFilters(self) -> WebElement:
+    def getCreateUseFilters(self) -> WebElement:
         return self.wait_for(self.createUserFilters)
 
     def getCreateUseIDs(self) -> WebElement:
