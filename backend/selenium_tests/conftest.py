@@ -24,6 +24,7 @@ from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
 )
 from pytest_django.live_server_helper import LiveServer
+from pytest_html_reporter import attach
 from requests import Session
 from selenium import webdriver
 from selenium.webdriver import Chrome
@@ -132,7 +133,8 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
 @pytest.fixture
 def driver() -> Chrome:
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
+    if not os.environ.get("STREAM"):
+        chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument(
         "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
@@ -143,9 +145,11 @@ def driver() -> Chrome:
 
 
 @pytest.fixture(autouse=True)
-def browser(request: FixtureRequest, driver: Chrome) -> Chrome:
-    if request.config.getoption("--mapping"):
+def browser(driver: Chrome, request: FixtureRequest) -> Chrome:
+    if request.node.get_closest_marker("mapping"):
         driver.live_server = LiveServer("0.0.0.0:8080")
+    elif request.node.get_closest_marker("local"):
+        driver.live_server.url = "http://localhost:8080"
     else:
         driver.live_server = LiveServer("localhost")
     yield driver
@@ -344,3 +348,4 @@ def screenshot(driver: Chrome, node_id: str) -> None:
     file_name = f'{node_id}_{datetime.today().strftime("%Y-%m-%d_%H.%M")}.png'.replace("/", "_").replace("::", "__")
     file_path = os.path.join("screenshot", file_name)
     driver.get_screenshot_as_file(file_path)
+    attach(data=driver.get_screenshot_as_png())
