@@ -1,5 +1,5 @@
 import { TargetCriteriaForm } from '@containers/forms/TargetCriteriaForm';
-import { TargetPopulationQuery } from '@generated/graphql';
+import {DataCollectingTypeType, TargetPopulationQuery} from '@generated/graphql';
 import { AddCircleOutline } from '@mui/icons-material';
 import { Box, Button, Checkbox, FormControlLabel, Grid } from '@mui/material';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
