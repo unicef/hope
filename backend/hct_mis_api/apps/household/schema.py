@@ -383,6 +383,7 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
         filterset_class=IndividualFilter,
     )
     residence_status = graphene.String()
+    registration_id = graphene.String()
 
     @staticmethod
     def resolve_sanction_list_possible_match(parent: Household, info: Any) -> bool:
@@ -443,6 +444,12 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
     @staticmethod
     def resolve_active_individuals_count(parent: Household, info: Any) -> int:
         return parent.active_individuals.count()
+
+    @staticmethod
+    def resolve_registration_id(parent: Household, info: Any) -> Optional[str]:
+        if not parent.registration_id:
+            return None
+        return parent.registration_id.split("#")[0]
 
     @classmethod
     def check_node_permission(cls, info: Any, object_instance: Household) -> None:
@@ -590,9 +597,6 @@ class Query(graphene.ObjectType):
 
     all_households_flex_fields_attributes = graphene.List(FieldAttributeNode)
     all_individuals_flex_fields_attributes = graphene.List(FieldAttributeNode)
-
-    individual_search_types_choices = graphene.List(ChoiceObject)
-    household_search_types_choices = graphene.List(ChoiceObject)
 
     def resolve_all_individuals(self, info: Any, **kwargs: Any) -> QuerySet[Individual]:
         user = info.context.user
@@ -898,28 +902,3 @@ class Query(graphene.ObjectType):
             {"label": "total", "data": sum_of_totals},
         ]
         return {"labels": INDIVIDUALS_CHART_LABELS, "datasets": datasets}
-
-    def resolve_individual_search_types_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, str]]:
-        search_types_choices = [
-            ("individual_id", "Individual ID"),
-            ("household_id", "Household ID"),
-            ("full_name", "Full Name"),
-            ("phone_no", "Phone Number"),
-            ("registration_id", "Registration ID (Aurora)"),
-            ("bank_account_number", "Bank Account Number"),
-        ]
-        search_types_choices.extend(DocumentType.objects.all().order_by("label").values_list("key", "label"))
-        return [{"name": name, "value": value} for value, name in search_types_choices]
-
-    def resolve_household_search_types_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, str]]:
-        search_types_choices = [
-            ("household_id", "Household ID"),
-            ("individual_id", "Individual ID"),
-            ("full_name", "Full Name"),
-            ("phone_no", "Phone Number"),
-            ("registration_id", "Registration ID (Aurora)"),
-            ("kobo_asset_id", "KoBo Asset ID"),
-            ("bank_account_number", "Bank Account Number"),
-        ]
-        search_types_choices.extend(DocumentType.objects.all().order_by("label").values_list("key", "label"))
-        return [{"name": name, "value": value} for value, name in search_types_choices]

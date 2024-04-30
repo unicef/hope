@@ -69,6 +69,10 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends \
     chromium-driver \
     chromium \
+    ffmpeg \
+    xorg \
+    x11-apps \
+    dbus \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 

@@ -142,6 +142,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
         cls.individual_no_role_second = IndividualFactory(
             household=cls.household,
             registration_data_import=rdi,
+            program=rdi.program,
         )
         cls.household.head_of_household = cls.household1_individual_primary_and_head
         cls.household.save()
