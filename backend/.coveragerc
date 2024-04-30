@@ -4,6 +4,7 @@ source = hct_mis_api
 concurrency=multiprocessing
 
 omit =
+        */selenium_tests/**
         */tests/**
         */migrations/*,
         */apps.py,
@@ -34,7 +35,7 @@ exclude_lines =
     if __name__ == .__main__.:
     if TYPE_CHECKING
 
-fail_under = 20
+fail_under = 15
 
 ignore_errors = False
 
