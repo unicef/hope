@@ -523,7 +523,12 @@ Jameschester, SC 24934
           <div
             data-cy="label-Data Collecting Type"
           >
-            -
+            <span
+              class="sc-guDLey cyWTlF"
+              color="textSecondary"
+            >
+              data collecting type
+            </span>
           </div>
         </div>
       </div>

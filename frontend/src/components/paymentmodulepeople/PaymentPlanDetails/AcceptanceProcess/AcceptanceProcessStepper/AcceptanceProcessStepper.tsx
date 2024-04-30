@@ -3,7 +3,6 @@ import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { PaymentPlanQuery } from '@generated/graphql';
 
 interface AcceptanceProcessStepperProps {
