@@ -92,7 +92,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         response = self.client.get(self.url)
         assert response.status_code == expected_status
 
-    def test_list_payment_plans11(
+    def test_list_payment_plans(
         self,
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
