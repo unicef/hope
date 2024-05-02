@@ -9,9 +9,6 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
-
-from page_object.targeting.targeting import Targeting
-from page_object.targeting.create_new import CreateNew
 from page_object.admin_panel.admin_panel import AdminPanel
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from page_object.grievance.feedback import Feedback
@@ -26,6 +23,8 @@ from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
 )
+from page_object.targeting.create_new import CreateNew
+from page_object.targeting.targeting import Targeting
 from pytest_django.live_server_helper import LiveServer
 from requests import Session
 from selenium import webdriver
