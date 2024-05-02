@@ -6,10 +6,12 @@ from django.urls import reverse
 
 from rest_framework import status
 
+from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.household.fixtures import HouseholdFactory
-from hct_mis_api.apps.steficon.admin import RuleAdmin
+from hct_mis_api.apps.steficon.admin import RuleAdmin, RuleCommitAdmin
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
 from hct_mis_api.apps.steficon.models import Rule
+from hct_mis_api.config import settings
 
 CODE = """
 class SteficonConfig:
@@ -139,7 +141,7 @@ class TestBasicRule(TestCase):
         is_valid = rule.execute({}, only_release=False)
         self.assertTrue(is_valid)
 
-    def test_stable(self) -> None:
+    def test_admin_stable(self) -> None:
         rule = RuleFactory(name="Rule1")
         rule_commit = RuleCommitFactory(rule=rule)
 
@@ -147,8 +149,9 @@ class TestBasicRule(TestCase):
             RuleAdmin(Mock(), Mock()).stable(rule),
             f'<a href="/api/unicorn/steficon/rulecommit/{rule_commit.id}/change/">{rule_commit.version}</a>',
         )
+        self.assertIsNone(RuleAdmin(Mock(), Mock()).stable(RuleFactory(name="Rule2")))
 
-    def test_diff(self) -> None:
+    def test_admin_diff(self) -> None:
         self.client.login(username="test", password="test")
 
         rule = RuleFactory(name="Rule1", version=2)
@@ -190,3 +193,67 @@ class TestBasicRule(TestCase):
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_admin_revert(self) -> None:
+        self.client.login(username="test", password="test")
+
+        rule = RuleFactory(name="Rule1", version=2)
+        rule_commit_1 = RuleCommitFactory(
+            version=1,
+            rule=rule,
+            definition="result.value=100",
+            before={},
+            after={
+                "name": rule.name,
+                "enabled": True,
+                "language": "python",
+                "definition": "result.value=100",
+                "deprecated": False,
+            },
+        )
+        RuleCommitFactory(
+            version=2,
+            rule=rule,
+            definition="result.value=200",
+            enabled=False,
+            before={
+                "name": rule.name,
+                "enabled": True,
+                "language": "python",
+                "definition": "result.value=100",
+                "deprecated": False,
+            },
+            after={
+                "name": rule.name,
+                "enabled": False,
+                "language": "python",
+                "definition": "result.value=200",
+                "deprecated": False,
+            },
+        )
+
+        url = f"{reverse('admin:steficon_rule_revert', args=(rule.id, rule_commit_1.id))}"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(response, reverse("admin:steficon_rule_change", args=[rule.id]))
+
+        response = self.client.post(url, data={"_restore": True})
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(response, reverse("admin:steficon_rule_change", args=[rule.id]))
+
+    def test_root_user_can_edit_version_and_rule(self) -> None:
+        self.assertEqual(
+            RuleCommitAdmin(Mock(), Mock()).get_readonly_fields(
+                Mock(user=self.user, headers={"x-root-token": settings.ROOT_TOKEN})
+            ),
+            ["updated_by"],
+        )
+
+    def test_regular_user_cannot_edit_version_and_rule(self) -> None:
+        self.assertEqual(
+            RuleCommitAdmin(Mock(), Mock()).get_readonly_fields(Mock(user=UserFactory(is_superuser=False))),
+            ["updated_by", "version", "rule"],
+        )
