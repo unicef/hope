@@ -3,6 +3,7 @@ from django.core.management import call_command
 
 import pytest
 from page_object.targeting.create_new import CreateNew
+from page_object.targeting.t_details_page import DetailsTargeting
 from page_object.targeting.targeting import Targeting
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -56,9 +57,44 @@ class TestSmokeTargeting:
         pageTargeting.screenshot("UseIDs")
 
     def test_smoke_targeting_details_page(
-        self, create_programs: None, add_targeting: None, pageTargeting: Targeting
+        self,
+        create_programs: None,
+        add_targeting: None,
+        pageTargeting: Targeting,
+        pageDetailsTargeting: DetailsTargeting,
     ) -> None:
         pageTargeting.selectGlobalProgramFilter("Test Programm").click()
         pageTargeting.getNavTargeting().click()
-        pageTargeting.getTargetPopulationsRows()[0].click()
-        pageTargeting.screenshot("Details")
+        pageTargeting.chooseTargetPopulations(0).click()
+        assert "Copy TP" in pageDetailsTargeting.getPageHeaderTitle().text
+        pageDetailsTargeting.getButtonTargetPopulationDuplicate()
+        pageDetailsTargeting.getButtonDelete()
+        assert "EDIT" in pageDetailsTargeting.getButtonEdit().text
+        assert "REBUILD" in pageDetailsTargeting.getButtonRebuild().text
+        assert "LOCK" in pageDetailsTargeting.getButtonTargetPopulationLock().text
+        assert "Details" in pageDetailsTargeting.getDetailsTitle().text
+        assert "OPEN" in pageDetailsTargeting.getLabelStatus().text
+        assert "OPEN" in pageDetailsTargeting.getTargetPopulationStatus().text
+        assert "CREATED BY" in pageDetailsTargeting.getLabelizedFieldContainerCreatedBy().text
+        pageDetailsTargeting.getLabelCreatedBy()
+        assert "PROGRAMME POPULATION CLOSE DATE" in pageDetailsTargeting.getLabelizedFieldContainerCloseDate().text
+        assert "PROGRAMME" in pageDetailsTargeting.getLabelizedFieldContainerProgramName().text
+        assert "Test Programm" in pageDetailsTargeting.getLabelProgramme().text
+        assert "SEND BY" in pageDetailsTargeting.getLabelizedFieldContainerSendBy().text
+        assert "-" in pageDetailsTargeting.getLabelSendBy().text
+        assert "-" in pageDetailsTargeting.getLabelSendDate().text
+        assert "-" in pageDetailsTargeting.getCriteriaContainer().text
+        assert "0" in pageDetailsTargeting.getLabelFemaleChildren().text
+        assert "0" in pageDetailsTargeting.getLabelMaleChildren().text
+        assert "0" in pageDetailsTargeting.getLabelMaleAdults().text
+        assert "2" in pageDetailsTargeting.getLabelTotalNumberOfHouseholds().text
+        assert "8" in pageDetailsTargeting.getLabelTargetedIndividuals().text
+        assert "Households" in pageDetailsTargeting.getTableTitle().text
+        expected_menu_items = [
+            "ID",
+            "Head of Household",
+            "Household Size",
+            "Administrative Level 2",
+            "Score",
+        ]
+        assert expected_menu_items == [i.text for i in pageDetailsTargeting.getTableLabel()]

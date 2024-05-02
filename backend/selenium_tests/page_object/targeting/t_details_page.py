@@ -2,7 +2,7 @@ from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
 
-class TDetailsPage(BaseComponents):
+class DetailsTargeting(BaseComponents):
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
     buttonTargetPopulationDuplicate = 'button[data-cy="button-target-population-duplicate"]'
@@ -124,7 +124,7 @@ class TDetailsPage(BaseComponents):
         return self.wait_for(self.tableTitle)
 
     def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
+        return self.get_elements(self.tableLabel)
 
     def getTablePagination(self) -> WebElement:
         return self.wait_for(self.tablePagination)

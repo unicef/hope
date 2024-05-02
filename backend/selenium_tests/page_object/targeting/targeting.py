@@ -1,3 +1,5 @@
+from time import sleep
+
 from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -73,6 +75,14 @@ class Targeting(BaseComponents):
 
     def getTargetPopulationsRows(self) -> list[WebElement]:
         return self.get_elements(self.rows)
+
+    def chooseTargetPopulations(self, number: int) -> WebElement:
+        try:
+            self.wait_for(self.rows)
+            return self.get_elements(self.rows)[number]
+        except IndexError:
+            sleep(1)
+            return self.get_elements(self.rows)[number]
 
     def getCreateUseFilters(self) -> WebElement:
         return self.wait_for(self.createUserFilters)

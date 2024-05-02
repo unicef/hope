@@ -24,6 +24,7 @@ from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
 )
 from page_object.targeting.create_new import CreateNew
+from page_object.targeting.t_details_page import DetailsTargeting
 from page_object.targeting.targeting import Targeting
 from pytest_django.live_server_helper import LiveServer
 from requests import Session
@@ -230,6 +231,11 @@ def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> Individu
 @pytest.fixture
 def pageTargeting(request: FixtureRequest, browser: Chrome) -> Targeting:
     yield Targeting(browser)
+
+
+@pytest.fixture
+def pageDetailsTargeting(request: FixtureRequest, browser: Chrome) -> DetailsTargeting:
+    yield DetailsTargeting(browser)
 
 
 @pytest.fixture
