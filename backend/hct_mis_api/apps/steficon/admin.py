@@ -319,6 +319,14 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
         except (RuleCommit.DoesNotExist, AttributeError):
             return None
 
+    def delete_view(
+        self, request: HttpRequest, object_id: str, extra_context: Optional[Any] = None
+    ) -> Union[HttpResponse, HttpResponse]:
+        return super().delete_view(request, object_id, extra_context)
+
+    def render_delete_form(self, request: HttpRequest, context: Dict) -> Form:
+        return super().render_delete_form(request, context)
+
     def _get_csv_config(self, form: Form) -> Dict:
         return dict(
             quoting=int(form.cleaned_data["quoting"]),
@@ -407,6 +415,13 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
         context = self.get_common_context(request, pk, title="Changelog", state_opts=RuleCommit._meta)
         return TemplateResponse(request, "admin/steficon/rule/changelog.html", context)
 
+    # urls=[r"^aaa/(?P<pk>.*)/(?P<state>.*)/$", r"^bbb/(?P<pk>.*)/$"],
+    # @button(visible=lambda btn: "/change/" in btn.request.path)
+
+    @view(pattern=r"<int:pk>/rule_do_revert/<int:state>/")
+    def do_revert(self, request: HttpRequest, pk: UUID, state: bool) -> None:
+        pass
+
     @view(pattern=r"<int:pk>/revert/<int:state>/")
     def revert(self, request: HttpRequest, pk: UUID, state: bool) -> Union[TemplateResponse, HttpResponseRedirect]:
         try:
@@ -462,6 +477,11 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
+
+    def change_view(
+        self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: Optional[Any] = None
+    ) -> HttpResponse:
+        return super().change_view(request, object_id, form_url, extra_context)
 
     def _changeform_view(
         self, request: HttpRequest, object_id: Optional[str], form_url: str = "", extra_context: Optional[Any] = None

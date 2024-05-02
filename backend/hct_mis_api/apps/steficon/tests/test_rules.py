@@ -2,14 +2,10 @@ from unittest.mock import Mock
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from django.urls import reverse
-
-from rest_framework import status
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.household.fixtures import HouseholdFactory
-from hct_mis_api.apps.steficon.admin import RuleAdmin, RuleCommitAdmin
-from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
+from hct_mis_api.apps.steficon.admin import RuleCommitAdmin
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.config import settings
 
