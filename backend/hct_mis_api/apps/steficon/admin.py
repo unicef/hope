@@ -319,11 +319,6 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
         except (RuleCommit.DoesNotExist, AttributeError):
             return None
 
-    def delete_view(
-        self, request: HttpRequest, object_id: str, extra_context: Optional[Any] = None
-    ) -> Union[HttpResponse, HttpResponse]:
-        return super().delete_view(request, object_id, extra_context)
-
     def _get_csv_config(self, form: Form) -> Dict:
         return dict(
             quoting=int(form.cleaned_data["quoting"]),
