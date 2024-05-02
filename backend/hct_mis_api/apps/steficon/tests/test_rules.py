@@ -1,6 +1,14 @@
+from unittest.mock import Mock
+
+from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.urls import reverse
+
+from rest_framework import status
 
 from hct_mis_api.apps.household.fixtures import HouseholdFactory
+from hct_mis_api.apps.steficon.admin import RuleAdmin
+from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
 from hct_mis_api.apps.steficon.models import Rule
 
 CODE = """
@@ -27,6 +35,7 @@ s = s.upper()
 class TestBasicRule(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        cls.user = get_user_model().objects.create_superuser(username="test", password="test")
         cls.household = HouseholdFactory.build()
 
     def test_rule(self) -> None:
@@ -129,3 +138,55 @@ class TestBasicRule(TestCase):
         rule = Rule.objects.create(name="Rule2", definition="age1=datetime.date.today()", enabled=True)
         is_valid = rule.execute({}, only_release=False)
         self.assertTrue(is_valid)
+
+    def test_stable(self) -> None:
+        rule = RuleFactory(name="Rule1")
+        rule_commit = RuleCommitFactory(rule=rule)
+
+        self.assertEqual(
+            RuleAdmin(Mock(), Mock()).stable(rule),
+            f'<a href="/api/unicorn/steficon/rulecommit/{rule_commit.id}/change/">{rule_commit.version}</a>',
+        )
+
+    def test_diff(self) -> None:
+        self.client.login(username="test", password="test")
+
+        rule = RuleFactory(name="Rule1", version=2)
+        RuleCommitFactory(
+            version=1,
+            rule=rule,
+            definition="result.value=100",
+            before={},
+            after={
+                "name": rule.name,
+                "enabled": True,
+                "language": "python",
+                "definition": "result.value=100",
+                "deprecated": False,
+            },
+        )
+        rule_commit_2 = RuleCommitFactory(
+            version=2,
+            rule=rule,
+            definition="result.value=200",
+            enabled=False,
+            before={
+                "name": rule.name,
+                "enabled": True,
+                "language": "python",
+                "definition": "result.value=100",
+                "deprecated": False,
+            },
+            after={
+                "name": rule.name,
+                "enabled": False,
+                "language": "python",
+                "definition": "result.value=200",
+                "deprecated": False,
+            },
+        )
+
+        url = f"{reverse('admin:steficon_rule_diff', args=(rule.id,))}?state_pk={rule_commit_2.id}"
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
