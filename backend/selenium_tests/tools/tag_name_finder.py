@@ -1,20 +1,6 @@
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
 
-default_url = "http://localhost:8080"
-url = input(f"Url of page (default is {default_url}):")
-if not url:
-    url = default_url
-
-driver = Chrome()
-
-driver.get(url)
-label = input("Choose the label (default it data-cy):")
-if not label:
-    label = "data-cy"
-input("Open the page and press Enter")
-ids = driver.find_elements(By.XPATH, f"//*[@{label}]")
-
 
 def printing(what: str) -> None:
     for ii in ids:
@@ -29,6 +15,23 @@ def printing(what: str) -> None:
             print(f"def {method_name}(self) -> WebElement: \n\treturn self.wait_for(self.{var_name})\n")
 
 
-printing("Labels")
-print("\n")
-printing("Methods")
+default_url = "http://localhost:8080"
+url = input(f"Url of page (default is {default_url}):")
+if not url:
+    url = default_url
+
+driver = Chrome()
+
+driver.get(url)
+label = input("Choose the label (default it data-cy):")
+if not label:
+    label = "data-cy"
+
+exit_loop = ""
+while exit_loop != "exit":
+    exit_loop = input("Open the page and press Enter or write exit")
+    ids = driver.find_elements(By.XPATH, f"//*[@{label}]")
+
+    printing("Labels")
+    print("\n")
+    printing("Methods")
