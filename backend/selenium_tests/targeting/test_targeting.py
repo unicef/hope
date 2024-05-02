@@ -45,7 +45,13 @@ class TestSmokeTargeting:
         pageTargeting.getNavTargeting().click()
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getCreateUseFilters().click()
-        pageTargeting.screenshot("UseFilters")
+        assert "New Target Population" in pageCreateTargeting.getPageHeaderTitle().text
+        assert "SAVE" in pageCreateTargeting.getButtonTargetPopulationCreate().text
+        pageCreateTargeting.getInputName()
+        pageCreateTargeting.getDivTargetPopulationAddCriteria().click()
+        pageCreateTargeting.getButtonHouseholdRule().click()
+        pageCreateTargeting.getButtonIndividualRule().click()
+        pageCreateTargeting.getAutocompleteTargetCriteriaOption().click()
 
     def test_smoke_targeting_create_use_ids(
         self, create_programs: None, add_targeting: None, pageTargeting: Targeting, pageCreateTargeting: CreateNew
@@ -54,7 +60,13 @@ class TestSmokeTargeting:
         pageTargeting.getNavTargeting().click()
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getCreateUseIDs().click()
-        pageTargeting.screenshot("UseIDs")
+        assert "New Target Population" in pageCreateTargeting.getPageHeaderTitle().text
+        assert "SAVE" in pageCreateTargeting.getButtonTargetPopulationCreate().text
+        pageCreateTargeting.getInputName()
+        pageCreateTargeting.getInputIncludedHouseholdIds()
+        pageCreateTargeting.getInputHouseholdids()
+        pageCreateTargeting.getInputIncludedIndividualIds()
+        pageCreateTargeting.getInputIndividualids()
 
     def test_smoke_targeting_details_page(
         self,
