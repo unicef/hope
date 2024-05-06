@@ -47,10 +47,13 @@ export function RequestedIndividualDataChangeTable({
     payment_channels_to_edit: paymentChannelsToEdit,
     previous_payment_channels: previousPaymentChannels,
     flex_fields: flexFields,
+    delivery_mechanism_data: deliveryMechanismData,
+    delivery_mechanism_data_to_edit: deliveryMechanismDataToEdit,
+    delivery_mechanism_data_to_remove: deliveryMechanismDataToRemove,
     ...restIndividualData
   } = individualData;
-  const entries = Object.entries(restIndividualData);
-  const entriesFlexFields = Object.entries(flexFields);
+  const entries = restIndividualData && Object.entries(restIndividualData);
+  const entriesFlexFields = flexFields && Object.entries(flexFields);
   const fieldsDict = useArrayToDict(
     data?.allAddIndividualsFieldsAttributes,
     'name',

@@ -37,6 +37,8 @@ export function EntriesTable({
   entriesFlexFields,
   setFieldValue,
 }: EntriesTableProps): React.ReactElement {
+  console.log('entries', entries);
+  console.log('entriesFlexFields', entriesFlexFields);
   const { t } = useTranslation();
   const { selectedFlexFields } = values;
   const selectedBioData = values.selected;

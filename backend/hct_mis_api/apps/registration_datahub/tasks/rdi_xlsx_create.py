@@ -1,3 +1,4 @@
+import json
 import logging
 from collections import defaultdict
 from datetime import datetime
@@ -8,6 +9,7 @@ from typing import Any, Callable, Dict, Optional, Union
 from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.files.storage import default_storage
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import transaction
 from django.utils import timezone
 
@@ -397,7 +399,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                     ImportedDeliveryMechanismData(
                         individual=individual,
                         delivery_mechanism=delivery_type,
-                        data=values,
+                        data=json.dumps(values, cls=DjangoJSONEncoder),
                     )
                 )
         ImportedDeliveryMechanismData.objects.bulk_create(imported_delivery_mechanism_data)
@@ -478,7 +480,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "scope_id_no_i_c": self._handle_identity_fields,
                 "scope_id_photo_i_c": self._handle_identity_photo,
                 "scope_id_issuer_i_c": self._handle_identity_issuing_country_fields,
-            }.update({field: self._handle_delivery_mechanism_fields for field in delivery_mechanism_xlsx_fields}),
+            },
             "households": {
                 "consent_sign_h_c": self._handle_image_field,
                 "hh_geopoint_h_c": self._handle_geopoint_field,
@@ -489,6 +491,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "collect_individual_data": self._handle_collect_individual_data,
             },
         }
+        complex_fields["individuals"].update(
+            {field["xlsx_field"]: self._handle_delivery_mechanism_fields for field in delivery_mechanism_xlsx_fields}
+        )
         document_complex_types: Dict[str, Callable] = {}
         for document_type in ImportedDocumentType.objects.all():
             document_complex_types[f"{document_type.key}_i_c"] = self._handle_document_fields

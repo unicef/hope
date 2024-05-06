@@ -2118,7 +2118,7 @@ class PaymentHouseholdSnapshot(TimeStampedUUIDModel):
     payment = models.OneToOneField(Payment, on_delete=models.CASCADE, related_name="household_snapshot")
 
 
-class DeliveryMechanismData(DeliveryDataMixin, SignatureMixin, TimeStampedUUIDModel):
+class DeliveryMechanismData(DeliveryDataMixin, TimeStampedUUIDModel, SignatureMixin):
     individual = models.ForeignKey(
         "household.Individual", on_delete=models.CASCADE, related_name="delivery_mechanisms_data"
     )
@@ -2137,6 +2137,13 @@ class DeliveryMechanismData(DeliveryDataMixin, SignatureMixin, TimeStampedUUIDMo
         blank=True,
     )
     unique_key = models.CharField(max_length=256, blank=True, null=True, unique=True, editable=False)
+
+    signature_fields = (
+        "data",
+        "delivery_mechanism",
+    )
+
+    objects = models.Manager()
 
     def __str__(self) -> str:
         return f"[{self.id}] {self.individual} - {self.delivery_mechanism}"

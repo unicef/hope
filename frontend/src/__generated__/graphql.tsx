@@ -3643,6 +3643,9 @@ export type IndividualUpdateDataObjectType = {
   administrationOfRutf?: InputMaybe<Scalars['Boolean']['input']>;
   birthDate?: InputMaybe<Scalars['Date']['input']>;
   commsDisability?: InputMaybe<Scalars['String']['input']>;
+  deliveryMechanismData?: InputMaybe<Scalars['Arg']['input']>;
+  deliveryMechanismDataToEdit?: InputMaybe<Scalars['Arg']['input']>;
+  deliveryMechanismDataToRemove?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   disability?: InputMaybe<Scalars['String']['input']>;
   documents?: InputMaybe<Array<InputMaybe<IndividualDocumentObjectType>>>;
   documentsToEdit?: InputMaybe<Array<InputMaybe<EditIndividualDocumentObjectType>>>;
@@ -3977,6 +3980,9 @@ export type MutationsApproveHouseholdDataChangeArgs = {
 
 
 export type MutationsApproveIndividualDataChangeArgs = {
+  approvedDeliveryMechanismDataToCreate?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  approvedDeliveryMechanismDataToEdit?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  approvedDeliveryMechanismDataToRemove?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
   approvedDocumentsToCreate?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
   approvedDocumentsToEdit?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
   approvedDocumentsToRemove?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
@@ -6978,6 +6984,7 @@ export type RegistrationDataImportDatahubNodeEdge = {
 export type RegistrationDataImportNode = Node & {
   __typename?: 'RegistrationDataImportNode';
   adminUrl?: Maybe<Scalars['String']['output']>;
+  allowDeliveryMechanismsValidationErrors: Scalars['Boolean']['output'];
   batchDuplicates: Scalars['Int']['output'];
   batchDuplicatesCountAndPercentage?: Maybe<CountAndPercentageNode>;
   batchPossibleDuplicates: Scalars['Int']['output'];
@@ -7095,11 +7102,11 @@ export type RegistrationKoboImportMutation = {
 };
 
 export type RegistrationKoboImportMutationInput = {
+  allowDeliveryMechanismsValidationErrors?: InputMaybe<Scalars['Boolean']['input']>;
   businessAreaSlug?: InputMaybe<Scalars['String']['input']>;
   importDataId?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   pullPictures?: InputMaybe<Scalars['Boolean']['input']>;
-  raiseTicketsOnDeliveryMechanismsValidationError?: InputMaybe<Scalars['Boolean']['input']>;
   screenBeneficiary?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
@@ -9287,6 +9294,9 @@ export type ApproveIndividualDataChangeMutationVariables = Exact<{
   approvedPaymentChannelsToCreate?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>> | InputMaybe<Scalars['Int']['input']>>;
   approvedPaymentChannelsToEdit?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>> | InputMaybe<Scalars['Int']['input']>>;
   approvedPaymentChannelsToRemove?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>> | InputMaybe<Scalars['Int']['input']>>;
+  approvedDeliveryMechanismDataToCreate?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>> | InputMaybe<Scalars['Int']['input']>>;
+  approvedDeliveryMechanismDataToEdit?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>> | InputMaybe<Scalars['Int']['input']>>;
+  approvedDeliveryMechanismDataToRemove?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>> | InputMaybe<Scalars['Int']['input']>>;
 }>;
 
 
@@ -12649,7 +12659,7 @@ export type ApproveHouseholdDataChangeMutationHookResult = ReturnType<typeof use
 export type ApproveHouseholdDataChangeMutationResult = Apollo.MutationResult<ApproveHouseholdDataChangeMutation>;
 export type ApproveHouseholdDataChangeMutationOptions = Apollo.BaseMutationOptions<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>;
 export const ApproveIndividualDataChangeDocument = gql`
-    mutation ApproveIndividualDataChange($grievanceTicketId: ID!, $individualApproveData: JSONString, $flexFieldsApproveData: JSONString, $approvedDocumentsToCreate: [Int], $approvedDocumentsToRemove: [Int], $approvedDocumentsToEdit: [Int], $approvedIdentitiesToCreate: [Int], $approvedIdentitiesToEdit: [Int], $approvedIdentitiesToRemove: [Int], $approvedPaymentChannelsToCreate: [Int], $approvedPaymentChannelsToEdit: [Int], $approvedPaymentChannelsToRemove: [Int]) {
+    mutation ApproveIndividualDataChange($grievanceTicketId: ID!, $individualApproveData: JSONString, $flexFieldsApproveData: JSONString, $approvedDocumentsToCreate: [Int], $approvedDocumentsToRemove: [Int], $approvedDocumentsToEdit: [Int], $approvedIdentitiesToCreate: [Int], $approvedIdentitiesToEdit: [Int], $approvedIdentitiesToRemove: [Int], $approvedPaymentChannelsToCreate: [Int], $approvedPaymentChannelsToEdit: [Int], $approvedPaymentChannelsToRemove: [Int], $approvedDeliveryMechanismDataToCreate: [Int], $approvedDeliveryMechanismDataToEdit: [Int], $approvedDeliveryMechanismDataToRemove: [Int]) {
   approveIndividualDataChange(
     grievanceTicketId: $grievanceTicketId
     individualApproveData: $individualApproveData
@@ -12663,6 +12673,9 @@ export const ApproveIndividualDataChangeDocument = gql`
     approvedPaymentChannelsToCreate: $approvedPaymentChannelsToCreate
     approvedPaymentChannelsToEdit: $approvedPaymentChannelsToEdit
     approvedPaymentChannelsToRemove: $approvedPaymentChannelsToRemove
+    approvedDeliveryMechanismDataToCreate: $approvedDeliveryMechanismDataToCreate
+    approvedDeliveryMechanismDataToEdit: $approvedDeliveryMechanismDataToEdit
+    approvedDeliveryMechanismDataToRemove: $approvedDeliveryMechanismDataToRemove
   ) {
     grievanceTicket {
       id
@@ -12705,6 +12718,9 @@ export type ApproveIndividualDataChangeMutationFn = Apollo.MutationFunction<Appr
  *      approvedPaymentChannelsToCreate: // value for 'approvedPaymentChannelsToCreate'
  *      approvedPaymentChannelsToEdit: // value for 'approvedPaymentChannelsToEdit'
  *      approvedPaymentChannelsToRemove: // value for 'approvedPaymentChannelsToRemove'
+ *      approvedDeliveryMechanismDataToCreate: // value for 'approvedDeliveryMechanismDataToCreate'
+ *      approvedDeliveryMechanismDataToEdit: // value for 'approvedDeliveryMechanismDataToEdit'
+ *      approvedDeliveryMechanismDataToRemove: // value for 'approvedDeliveryMechanismDataToRemove'
  *   },
  * });
  */
@@ -27191,6 +27207,7 @@ export type RegistrationDataImportDatahubNodeEdgeResolvers<ContextType = any, Pa
 
 export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportNode'] = ResolversParentTypes['RegistrationDataImportNode']> = {
   adminUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  allowDeliveryMechanismsValidationErrors?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   batchDuplicates?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   batchDuplicatesCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>;
   batchPossibleDuplicates?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;

@@ -120,6 +120,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
       ? decodeIdString(linkedFeedbackId)
       : null,
     documentation: [],
+    individualDataUpdateFields: [{ fieldName: null, fieldValue: null },],
   };
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },

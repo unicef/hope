@@ -69,7 +69,7 @@ from hct_mis_api.apps.core.field_attributes.lookup_functions import (
 )
 from hct_mis_api.apps.core.field_attributes.payment_channel_fields_attributes import (
     PAYMENT_CHANNEL_FIELDS_ATTRIBUTES,
-    DeliveryMechanismChoices
+    DeliveryMechanismChoices,
 )
 from hct_mis_api.apps.core.field_attributes.people_fields_attributes import (
     PEOPLE_FIELDS_ATTRIBUTES,
@@ -366,7 +366,7 @@ CORE_FIELDS_ATTRIBUTES = (
             "required_for_payment": True,
             "unique_for_payment": True,
             "delivery_mechanisms": [DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD],
-            "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE, Scope.DELIVERY_MECHANISM], # TODO MB *test* remove delivery mechanism
+            "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
         },
         {
             "id": "b1f90314-b8b8-4bcb-9265-9d48d1fce5a4",
@@ -497,6 +497,10 @@ CORE_FIELDS_ATTRIBUTES = (
             "associated_with": _INDIVIDUAL,
             "xlsx_field": "who_answers_phone_i_c",
             "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+            # TODO MB remove *testing*
+            "delivery_mechanisms": [DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD],
+            "required_for_payment": True,
+            "unique_for_payment": True,
         },
         {
             "id": "f7609980-95c4-4b18-82dc-132a04ce7d65",
@@ -1818,18 +1822,15 @@ class FieldFactory(list):
         return factory
 
     def associated_with_individual(self) -> "FieldFactory":
-        return self._associated_with(_INDIVIDUAL)
+        return self._associated_with([_INDIVIDUAL, _DELIVERY_MECHANISM_DATA])
 
     def associated_with_household(self) -> "FieldFactory":
-        return self._associated_with(_HOUSEHOLD)
+        return self._associated_with([_HOUSEHOLD])
 
-    def associated_with_delivery_mechanism(self) -> "FieldFactory":
-        return self._associated_with(_DELIVERY_MECHANISM_DATA)
-
-    def _associated_with(self, associated_with: str) -> "FieldFactory":
+    def _associated_with(self, associated_with: List[str]) -> "FieldFactory":
         factory = FieldFactory(scopes=self.scopes)
         for item in self:
-            if item.get("associated_with") == associated_with:
+            if item.get("associated_with") in associated_with:
                 factory.append(item)
         return factory
 

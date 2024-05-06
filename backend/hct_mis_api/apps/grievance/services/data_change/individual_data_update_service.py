@@ -1,5 +1,6 @@
+import dataclasses
 from datetime import date, datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from django.contrib.auth.models import AbstractUser
 from django.db import transaction
@@ -64,6 +65,21 @@ from hct_mis_api.apps.household.services.household_recalculate_data import (
 )
 from hct_mis_api.apps.payment.models import DeliveryMechanismData
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
+
+
+@dataclasses.dataclass
+class DeliveryMechanismDataPayloadField:
+    name: str
+    value: Optional[str] = None
+    previous_value: Optional[str] = None
+
+
+@dataclasses.dataclass
+class DeliveryMechanismDataPayload:
+    id: str
+    label: str
+    approve_status: bool
+    data_fields: List[DeliveryMechanismDataPayloadField]
 
 
 class IndividualDataUpdateService(DataChangeService):
@@ -253,15 +269,15 @@ class IndividualDataUpdateService(DataChangeService):
         individual_data_with_approve_status["payment_channels_to_edit"] = prepare_edit_payment_channel(
             payment_channels_to_edit
         )
+        individual_data_with_approve_status["previous_payment_channels"] = prepare_previous_payment_channels(
+            payment_channels_to_remove_with_approve_status
+        )
         individual_data_with_approve_status["delivery_mechanism_data"] = delivery_mechanism_data_with_approve_status
         individual_data_with_approve_status[
             "delivery_mechanism_data_to_remove"
         ] = delivery_mechanism_data_to_remove_with_approve_status
-        individual_data_with_approve_status["delivery_mechanism_data_to_edit"] = prepare_edit_payment_channel(
+        individual_data_with_approve_status["delivery_mechanism_data_to_edit"] = prepare_edit_delivery_mechanism_data(
             delivery_mechanism_data_to_edit
-        )
-        individual_data_with_approve_status["previous_payment_channels"] = prepare_previous_payment_channels(
-            payment_channels_to_remove_with_approve_status
         )
         individual_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
         ticket_details.individual_data = individual_data_with_approve_status
@@ -314,18 +330,14 @@ class IndividualDataUpdateService(DataChangeService):
             if is_approved(identity)
         ]
         delivery_mechanism_data = [
-            identity["value"]
-            for identity in individual_data.pop("delivery_mechanism_data", [])
-            if is_approved(identity)
+            dmd for dmd in individual_data.pop("delivery_mechanism_data", []) if is_approved(dmd)
         ]
         delivery_mechanism_data_to_remove_encoded = individual_data.pop("delivery_mechanism_data_to_remove", [])
         delivery_mechanism_data_to_remove = [
             decode_id_string(data["value"]) for data in delivery_mechanism_data_to_remove_encoded if is_approved(data)
-        ]
+        ]  # TODO MB
         delivery_mechanism_data_to_edit = [
-            identity["value"]
-            for identity in individual_data.pop("delivery_mechanism_data_to_edit", [])
-            if is_approved(identity)
+            dmd for dmd in individual_data.pop("delivery_mechanism_data_to_edit", []) if is_approved(dmd)
         ]
         only_approved_data = {
             field: convert_to_empty_string_if_null(value_and_approve_status.get("value"))
@@ -426,7 +438,9 @@ class IndividualDataUpdateService(DataChangeService):
             for delivery_mechanism_data in delivery_mechanism_data_to_create:
                 _validate_delivery_mechanism_data(delivery_mechanism_data)
 
-        DeliveryMechanismData.objects.filter(id__in=delivery_mechanism_data_to_remove).delete()
+        if delivery_mechanism_data_to_remove:
+            DeliveryMechanismData.objects.filter(id__in=delivery_mechanism_data_to_remove).delete()
+
         if new_individual.household:
             recalculate_data(new_individual.household)
         else:

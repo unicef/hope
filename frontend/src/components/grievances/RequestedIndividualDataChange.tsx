@@ -152,6 +152,9 @@ export function RequestedIndividualDataChange({
   const selectedPaymentChannels = [];
   const selectedPaymentChannelsToRemove = [];
   const selectedPaymentChannelsToEdit = [];
+  const selectedDeliveryMechanismData = [];
+  const selectedDeliveryMechanismDataToRemove = [];
+  const selectedDeliveryMechanismDataToEdit = [];
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < paymentChannels?.length; i++) {
     if (paymentChannels[i]?.approve_status) {
@@ -278,6 +281,9 @@ export function RequestedIndividualDataChange({
         selectedPaymentChannels,
         selectedPaymentChannelsToEdit,
         selectedPaymentChannelsToRemove,
+        selectedDeliveryMechanismData,
+        selectedDeliveryMechanismDataToEdit,
+        selectedDeliveryMechanismDataToRemove,
       }}
       onSubmit={async (values) => {
         const individualApproveData = values.selected.reduce((prev, curr) => {
@@ -296,6 +302,11 @@ export function RequestedIndividualDataChange({
           values.selectedPaymentChannelsToRemove;
         const approvedPaymentChannelsToEdit =
           values.selectedPaymentChannelsToEdit;
+        const approvedDeliveryMechanismDataToCreate = values.selectedDeliveryMechanismData;
+        const approvedDeliveryMechanismDataToRemove =
+          values.selectedDeliveryMechanismDataToRemove;
+        const approvedDeliveryMechanismDataToEdit =
+          values.selectedDeliveryMechanismDataToEdit;
         const flexFieldsApproveData = values.selectedFlexFields.reduce(
           (prev, curr) => {
             // eslint-disable-next-line no-param-reassign
@@ -318,6 +329,9 @@ export function RequestedIndividualDataChange({
               approvedPaymentChannelsToCreate,
               approvedPaymentChannelsToRemove,
               approvedPaymentChannelsToEdit,
+              approvedDeliveryMechanismDataToCreate,
+              approvedDeliveryMechanismDataToRemove,
+              approvedDeliveryMechanismDataToEdit,
               flexFieldsApproveData: JSON.stringify(flexFieldsApproveData),
             },
           });

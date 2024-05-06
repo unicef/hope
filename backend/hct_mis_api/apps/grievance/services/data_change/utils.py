@@ -221,16 +221,17 @@ def handle_add_delivery_mechanism_data(
 ) -> Optional[DeliveryMechanismData]:
     return DeliveryMechanismData(
         individual=individual,
-        data=delivery_mechanism_data.get("data"),
+        delivery_mechanism=delivery_mechanism_data.get("delivery_mechanism"),
+        data=delivery_mechanism_data.get("data"),  # TODO MB handle core fields?
     )
 
 
 def handle_update_delivery_mechanism_data(delivery_mechanism_data: Dict) -> Optional[DeliveryMechanismData]:
     delivery_mechanism_data_id = decode_id_string(delivery_mechanism_data.get("id"))
     dmd = get_object_or_404(DeliveryMechanismData, id=delivery_mechanism_data_id)
-    dmd.data = delivery_mechanism_data.get("data")
+    for field in delivery_mechanism_data.get("fields", []):
+        dmd.data[field] = field.get("value", None)  # TODO MB handle core fields?
     return dmd
-
 
 
 def handle_add_identity(identity: Dict, individual: Individual) -> IndividualIdentity:
@@ -413,22 +414,20 @@ def prepare_edit_delivery_mechanism_data(delivery_mechanism_data: List[Dict]) ->
     items = []
     for dmd in delivery_mechanism_data:
         encoded_id = dmd.get("id")
-        field_name = dmd.get("field_name")
+        data_fields = dmd.get("data_fields", [])
         delivery_mechanism_data = get_object_or_404(DeliveryMechanismData, id=decode_id_string(encoded_id))
         data = {
+            "id": encoded_id,
+            "label": dmd.get("label"),
             "approve_status": False,
-            "value": {
-                "id": encoded_id,
-                "individual": encode_id_base64(delivery_mechanism_data.individual.id, "Individual"),
-                "field_name": field_name,
-                "value": dmd.get("value"),
-            },
-            "previous_value": {
-                "id": encoded_id,
-                "individual": encode_id_base64(delivery_mechanism_data.individual.id, "Individual"),
-                "field_name": field_name,
-                "value": delivery_mechanism_data.delivery_data.get(field_name),
-            },
+            "data_fields": [
+                {
+                    "name": field.get("name"),
+                    "value": field.get("value"),
+                    "previous_value": delivery_mechanism_data.delivery_data.get(field, None),
+                }
+                for field in data_fields
+            ],
         }
         items.append(data)
     return items

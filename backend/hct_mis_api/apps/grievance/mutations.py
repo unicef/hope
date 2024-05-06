@@ -806,6 +806,9 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
         approved_payment_channels_to_create = graphene.List(graphene.Int)
         approved_payment_channels_to_edit = graphene.List(graphene.Int)
         approved_payment_channels_to_remove = graphene.List(graphene.Int)
+        approved_delivery_mechanism_data_to_create = graphene.List(graphene.Int)
+        approved_delivery_mechanism_data_to_edit = graphene.List(graphene.Int)
+        approved_delivery_mechanism_data_to_remove = graphene.List(graphene.Int)
         flex_fields_approve_data = graphene.JSONString()
         version = BigInt(required=False)
 
@@ -827,6 +830,9 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
         approved_payment_channels_to_create: List,
         approved_payment_channels_to_edit: List,
         approved_payment_channels_to_remove: List,
+        approved_delivery_mechanism_data_to_create: List,
+        approved_delivery_mechanism_data_to_edit: List,
+        approved_delivery_mechanism_data_to_remove: List,
         flex_fields_approve_data: Dict,
         **kwargs: Any,
     ) -> "IndividualDataChangeApproveMutation":
@@ -860,12 +866,16 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
             "payment_channels": approved_payment_channels_to_create,
             "payment_channels_to_remove": approved_payment_channels_to_remove,
             "payment_channels_to_edit": approved_payment_channels_to_edit,
+            "delivery_mechanism_data": approved_delivery_mechanism_data_to_create,
+            "delivery_mechanism_data_to_remove": approved_delivery_mechanism_data_to_remove,
+            "delivery_mechanism_data_to_edit": approved_delivery_mechanism_data_to_edit,
         }
 
         for field_name, item in individual_data.items():
             field_to_approve = individual_approve_data.get(field_name)
             if field_name in documents_mapping:
                 for index, document_data in enumerate(individual_data[field_name]):
+                    # TODO MB
                     approved_documents_indexes = documents_mapping.get(field_name, [])
                     document_data["approve_status"] = index in approved_documents_indexes
             elif field_name == "flex_fields":

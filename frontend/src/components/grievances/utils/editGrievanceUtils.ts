@@ -92,6 +92,7 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
     payment_channels: paymentChannels,
     payment_channels_to_remove: paymentChannelsToRemove,
     payment_channels_to_edit: paymentChannelsToEdit,
+    // TODO MB add dmd
     ...rest
   } = individualData;
 

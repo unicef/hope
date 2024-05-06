@@ -115,9 +115,9 @@ class ImportDataInstanceValidator:
     def __init__(self, is_social_worker_program: bool = False) -> None:
         self.is_social_worker_program = is_social_worker_program
         self.all_fields = self.get_all_fields()
-        self.delivery_mechanisms_xlsx_fields = [
-            _field["xlsx_field"] for _field in DeliveryMechanismData.get_all_delivery_mechanisms_fields()
-        ]
+        self.delivery_mechanisms_xlsx_fields = list(
+            set([_field["xlsx_field"] for _field in DeliveryMechanismData.get_all_delivery_mechanisms_fields()])
+        )
 
     def get_combined_attributes(self) -> Dict:
         scope_list = (
@@ -279,12 +279,11 @@ class ImportDataInstanceValidator:
         delivery_mechanisms_to_required_fields_mapping = (
             DeliveryMechanismData.get_delivery_mechanisms_to_xlsx_fields_mapping(by="xlsx_field", required=True)
         )
-        xlsx_fields_map = DeliveryMechanismData.get_all_delivery_mechanisms_fields(by="xlsx_field")
+        global_scope_xlsx_fields = list(FieldFactory.from_scope(Scope.GLOBAL).to_dict_by("xlsx_field").keys())
 
         try:
             all_rows_delivery_mechanisms_errors = []
-
-            for row, data in xlsx_delivery_mechanisms_dict.items():
+            for row_number, data in xlsx_delivery_mechanisms_dict.items():
                 delivery_mechanisms_errors = []
                 delivery_mechanisms_fields_values_dict = defaultdict(dict)
 
@@ -293,31 +292,29 @@ class ImportDataInstanceValidator:
                         if delivery_mechanism_xlsx_field_name in fields:
                             delivery_mechanisms_fields_values_dict[dm][delivery_mechanism_xlsx_field_name] = value
 
+                dm_to_drop = []
                 # drop delivery mechanism data validation for delivery mechanisms that contains only Scope.GLOBAL fields
                 for dm, fields in delivery_mechanisms_fields_values_dict.items():
                     # if all fields are Scope.GLOBAL, drop delivery mechanism data
-                    if all(Scope.GLOBAL in xlsx_fields_map[field]["scope"] for field in fields.keys()):
-                        delivery_mechanisms_fields_values_dict.pop(dm)
+                    if all(field in global_scope_xlsx_fields for field in fields.keys()):
+                        dm_to_drop.append(dm)
+                for dm in dm_to_drop:
+                    delivery_mechanisms_fields_values_dict.pop(dm)
 
                 for dm, fields in delivery_mechanisms_to_required_fields_mapping.items():
                     if dm not in delivery_mechanisms_fields_values_dict:
                         continue
 
-                    # sort fields by scope.DELIVERY_MECHANISM first, then by scope.GLOBAL
-                    global_fields = [field for field in fields if Scope.GLOBAL in field["scope"]]
-                    delivery_mechanisms_fields = [
-                        field for field in fields if Scope.DELIVERY_MECHANISM in field["scope"]
-                    ]
-
-                    for field in delivery_mechanisms_fields + global_fields:
+                    for field in fields:
                         if not delivery_mechanisms_fields_values_dict[dm].get(field, None):
                             delivery_mechanisms_errors.append(
                                 {
-                                    "row_number": row,
+                                    "row_number": row_number,
                                     "header": field,
                                     "message": f"Field {field} is required for delivery mechanism {dm}",
                                 }
                             )
+                all_rows_delivery_mechanisms_errors.extend(delivery_mechanisms_errors)
 
             return all_rows_delivery_mechanisms_errors
         except Exception as e:
@@ -338,9 +335,9 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
     def get_combined_fields(self) -> Dict:
         core_fields = (
-            FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID])
+            FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.DELIVERY_MECHANISM])
             if not self.is_social_worker_program
-            else FieldFactory.from_scopes([Scope.XLSX_PEOPLE])
+            else FieldFactory.from_scopes([Scope.XLSX_PEOPLE, Scope.DELIVERY_MECHANISM])
         )
         # TODO: update flex field for People
         flex_fields = serialize_flex_attributes()
@@ -719,7 +716,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         identities_numbers[header.value]["numbers"].append(str(value) if value else None)
 
                     if header.value in self.delivery_mechanisms_xlsx_fields:
-                        delivery_mechanisms_data[row][header.value] = value
+                        delivery_mechanisms_data[row_number][header.value] = value
 
                 if current_household_id and current_household_id not in self.household_ids:
                     message = f"Sheet: Individuals, There is no household with provided id: {current_household_id}"

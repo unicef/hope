@@ -351,9 +351,11 @@ class RdiMergeTask:
     def _create_grievance_ticket_for_delivery_mechanisms_errors(
         self, delivery_mechanism_data: DeliveryMechanismData, obj_hct: RegistrationDataImport, description: str
     ):
-        comments = f"This is system generated ticket for RDI {obj_hct}"
+        # TODO MB move to utils and reuse when ticket close validation fails
+        comments = f"This is a system generated ticket for RDI {obj_hct}"
         grievance_ticket = GrievanceTicket(
-            catergory=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
             admin2=delivery_mechanism_data.individual.household.admin2,
             business_area=obj_hct.business_area,
             registration_data_import=obj_hct,
@@ -361,15 +363,20 @@ class RdiMergeTask:
             comments=comments,
         )
         individual_data_with_approve_status = {
-            field: {
-                "value": None,
-                "approve_status": False,
-                "previous_value": delivery_mechanism_data.delivery_data.get(field),
-            }
-            for field, value in delivery_mechanism_data.validation_errors.items()
+            "id": str(delivery_mechanism_data.id),
+            "label": delivery_mechanism_data.delivery_mechanism,
+            "approve_status": False,
+            "data_fields": [
+                {
+                    "name": field,
+                    "value": None,
+                    "previous_value": delivery_mechanism_data.delivery_data.get(field),
+                }
+                for field, value in delivery_mechanism_data.validation_errors.items()
+            ],
         }
         individual_data_update_ticket = TicketIndividualDataUpdateDetails(
-            individual_data={"delivery_mechanism_data": individual_data_with_approve_status},
+            individual_data={"delivery_mechanism_data": [individual_data_with_approve_status]},
             individual=delivery_mechanism_data.individual,
             ticket=grievance_ticket,
         )
@@ -412,7 +419,6 @@ class RdiMergeTask:
                     )
                     grievance_tickets_to_create.append(grievance_ticket)
                     individual_data_update_tickets_to_create.append(individual_data_update_ticket)
-
             delivery_mechanism_data.save()
 
         if grievance_tickets_to_create:
@@ -549,7 +555,7 @@ class RdiMergeTask:
                             registration_data_import=obj_hct,
                         )
                         logger.info(
-                            "RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)} needs adjudication"
+                            f"RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)} needs adjudication"
                         )
 
                     # SANCTION LIST CHECK

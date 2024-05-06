@@ -102,7 +102,10 @@ export function CreateImportFromXlsxForm({
     setSubmitForm(formik.submitForm);
   }, [formik.submitForm]);
   useEffect(() => {
-    if (xlsxImportData?.status === ImportDataStatus.Finished || formik.values.allowDeliveryMechanismsValidationErrors && ImportDataStatus.DeliveryMechanismsValidationError) {
+    if (
+      xlsxImportData?.status === ImportDataStatus.Finished
+      || xlsxImportData?.status === ImportDataStatus.DeliveryMechanismsValidationError && formik.values.allowDeliveryMechanismsValidationErrors
+    ) {
       setSubmitDisabled(false);
     }
   }, [xlsxImportData]);
@@ -125,9 +128,9 @@ export function CreateImportFromXlsxForm({
           name="allowDeliveryMechanismsValidationErrors"
           fullWidth
           label={t('Allow Delivery Mechanisms Validation Errors')}
-          required
           variant="outlined"
           component={FormikCheckboxField}
+          // TODO onlick set Import button as enabled if requirements met
         />
       </Box>
       <ScreenBeneficiaryField />

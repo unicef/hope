@@ -1,9 +1,9 @@
 import hashlib
+import json
 from collections import defaultdict
 from functools import cached_property
 from typing import Any, Dict, List
 
-from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
@@ -23,7 +23,7 @@ class DeliveryDataMixin:
         associated_objects = {
             _INDIVIDUAL: self.individual,
             _HOUSEHOLD: self.individual.household,
-            _DELIVERY_MECHANISM_DATA: self.data,
+            _DELIVERY_MECHANISM_DATA: json.loads(self.data),
         }
         return associated_objects.get(associated_with)
 
@@ -32,7 +32,10 @@ class DeliveryDataMixin:
         delivery_data = {}
         for field in self.delivery_mechanism_fields:
             associated_object = self.get_associated_object(field["associated_with"])
-            delivery_data[field["name"]] = getattr(associated_object, field["name"], None)
+            if isinstance(associated_object, dict):
+                delivery_data[field["name"]] = associated_object.get(field["name"], None)
+            else:
+                delivery_data[field["name"]] = getattr(associated_object, field["name"], None)
 
         return delivery_data
 
@@ -40,33 +43,28 @@ class DeliveryDataMixin:
         self.validation_errors = {}
         for required_field in self.required_fields:
             associated_object = self.get_associated_object(required_field["associated_with"])
-            value = getattr(associated_object, required_field["name"], None)
-            if value is None:
-                self.validation_errors[required_field["name"]] = self.VALIDATION_ERROR_MISSING_DATA
+            if isinstance(associated_object, dict):
+                value = associated_object.get(required_field["name"], None)
+            else:
+                value = getattr(associated_object, required_field["name"], None)
+            if value in [None, ""]:
+                self.validation_errors[required_field["name"]] = str(self.VALIDATION_ERROR_MISSING_DATA)
                 self.is_valid = False
         if not self.validation_errors:
             self.is_valid = True
-
-    def _normalize(self, name: str, value: Any) -> Any:
-        if "." in name:
-            return value
-        field = self.__class__._meta.get_field(name)
-        if isinstance(field, models.DecimalField) and value is not None:
-            return f"{{:.{field.decimal_places}f}}".format(value)
-        return value
 
     def update_unique_field(self) -> None:
         if self.is_valid and hasattr(self, "unique_fields") and isinstance(self.unique_fields, (list, tuple)):
             sha256 = hashlib.sha256()
             sha256.update(self.individual.program.name.encode("utf-8"))
 
-            for field_name in self.unique_fields:
-                value = getattr(self.data, field_name, None)
-                value = self._normalize(field_name, value)
+            for field in self.unique_fields:
+                field_name = field["name"]
+                value = self.delivery_data.get(field_name, None)
                 sha256.update(str(value).encode("utf-8"))
 
             unique_key = sha256.hexdigest()
-            possible_duplicates = self.model.objects.filter(
+            possible_duplicates = self.__class__.objects.filter(
                 unique_key__isnull=False,
                 unique_key=unique_key,
                 individual__program=self.individual.program,
@@ -77,15 +75,12 @@ class DeliveryDataMixin:
             if possible_duplicates.exists():
                 self.unique_key = None
                 self.is_valid = False
-                self.validation_errors[str(self.unique_fields)] = f"{self.VALIDATION_ERROR_DATA_NOT_UNIQUE}"
+                self.validation_errors[str([field["name"] for field in self.unique_fields])] = str(
+                    self.VALIDATION_ERROR_DATA_NOT_UNIQUE
+                )
                 self.possible_duplicate_of = possible_duplicates.first()
             else:
                 self.unique_key = unique_key
-
-    signature_fields = (
-        "data",
-        "delivery_mechanism",
-    )
 
     @cached_property
     def delivery_mechanism_fields(self) -> List[dict]:
@@ -117,7 +112,9 @@ class DeliveryDataMixin:
             if _field.get("delivery_mechanisms", [])
         ]
         delivery_mechanisms_fields = [
-            _field for _field in FieldFactory.from_scope(Scope.DELIVERY_MECHANISM).to_dict_by(by).values()
+            _field
+            for _field in FieldFactory.from_scope(Scope.DELIVERY_MECHANISM).to_dict_by(by).values()
+            if _field.get(by) not in global_fields
         ]
 
         return global_fields + delivery_mechanisms_fields
