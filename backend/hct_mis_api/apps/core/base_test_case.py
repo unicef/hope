@@ -5,7 +5,7 @@ import shutil
 import time
 from functools import reduce
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
@@ -20,13 +20,16 @@ from graphene.test import Client
 from snapshottest.django import TestCase as SnapshotTestTestCase
 
 from hct_mis_api.apps.account.models import Role, UserRole
+from hct_mis_api.apps.core.models import BusinessAreaPartnerThrough
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_CHOICE, DocumentType
+from hct_mis_api.apps.program.models import ProgramPartnerThrough
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
-if TYPE_CHECKING:
-    from hct_mis_api.apps.account.models import User
+if TYPE_CHECKING:  # pragma: no_cover
+    from hct_mis_api.apps.account.models import Partner, User
     from hct_mis_api.apps.core.models import BusinessArea
+    from hct_mis_api.apps.geo.models import Area
     from hct_mis_api.apps.program.models import Program
 
 
@@ -110,20 +113,51 @@ class APITestCase(SnapshotTestTestCase):
                 context.FILES[name] = file
 
     @staticmethod
-    def update_user_partner_perm_for_program(user: "User", business_area: "BusinessArea", program: "Program") -> None:
-        partner_permissions = user.partner.permissions or {}
-        if str(business_area.pk) in partner_permissions:
-            # only add new program_id
-            if str(program.pk) not in partner_permissions[str(business_area.pk)]["programs"]:
-                partner_permissions[str(business_area.pk)]["programs"].update({str(program.pk): []})
-            else:
-                pass
-                # TODO: add maybe update program's areas
-        else:
-            partner_permissions.update({str(business_area.pk): {"programs": {str(program.pk): []}}})
+    def update_partner_access_to_program(
+        partner: "Partner",
+        program: "Program",
+        areas: Optional[List["Area"]] = None,
+        full_area_access: Optional[bool] = False,
+    ) -> None:
+        program_partner_through, _ = ProgramPartnerThrough.objects.get_or_create(
+            program=program,
+            partner=partner,
+        )
+        if areas:
+            program_partner_through.areas.set(areas)
+        if full_area_access:
+            program_partner_through.full_area_access = True
+            program_partner_through.save(update_fields=["full_area_access"])
 
-        user.partner.permissions = partner_permissions
-        user.partner.save()
+    @staticmethod
+    def add_partner_role_in_business_area(
+        partner: "Partner", business_area: "BusinessArea", roles: List["Role"]
+    ) -> None:
+        business_area_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
+            business_area=business_area,
+            partner=partner,
+        )
+        business_area_partner_through.roles.add(*roles)
+
+    @classmethod
+    def create_partner_role_with_permissions(
+        cls,
+        partner: "Partner",
+        permissions: Iterable,
+        business_area: "BusinessArea",
+        program: Optional["Program"] = None,
+        areas: Optional[List["Area"]] = None,
+        name: Optional[str] = "Partner Role with Permissions",
+    ) -> None:
+        business_area_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
+            business_area=business_area,
+            partner=partner,
+        )
+        permission_list = [perm.value for perm in permissions]
+        role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})
+        business_area_partner_through.roles.add(role)
+        if program:
+            cls.update_partner_access_to_program(partner, program, areas)
 
     @classmethod
     def create_user_role_with_permissions(
@@ -132,6 +166,7 @@ class APITestCase(SnapshotTestTestCase):
         permissions: Iterable,
         business_area: "BusinessArea",
         program: Optional["Program"] = None,
+        areas: Optional[List["Area"]] = None,
         name: Optional[str] = "Role with Permissions",
     ) -> UserRole:
         permission_list = [perm.value for perm in permissions]
@@ -140,7 +175,7 @@ class APITestCase(SnapshotTestTestCase):
 
         # update Partner permissions for the program
         if program:
-            cls.update_user_partner_perm_for_program(user, business_area, program)
+            cls.update_partner_access_to_program(user.partner, program, areas)
         return user_role
 
 
