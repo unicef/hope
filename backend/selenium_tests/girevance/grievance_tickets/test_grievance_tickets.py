@@ -52,9 +52,11 @@ class TestSmokeGrievanceTickets:
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getSelectAll().click()
         assert "NEW TICKET" in pageGrievanceTickets.getButtonNewTicket().text
+        assert "ASSIGN" in pageGrievanceTickets.getButtonAssign().text
+        assert "SET PRIORITY" in pageGrievanceTickets.getButtonSetPriority().text
+        assert "SET URGENCY" in pageGrievanceTickets.getButtonSetUrgency().text
+        assert "ADD NOTE" in pageGrievanceTickets.getButtonAddNote().text
         assert 6 == len(pageGrievanceTickets.getTicketListRow())
-        print(pageGrievanceTickets.getTicketListRow()[0].text)
-        print([i.text for i in pageGrievanceTickets.getTableLabel()])
         expected_labels = [
             "Ticket ID",
             "Status",
@@ -72,4 +74,20 @@ class TestSmokeGrievanceTickets:
         ]
         assert expected_labels == [i.text for i in pageGrievanceTickets.getTableLabel()]
 
-        pageGrievanceTickets.screenshot("grievance")
+    def test_check_grievance_tickets_system_generated_page(
+        self,
+        create_programs: None,
+        add_households: None,
+        add_grievance: None,
+        pageGrievanceTickets: GrievanceTickets,
+    ) -> None:
+        """
+        Go to Grievance page
+        Check if all elements on page exist
+        """
+        # Go to Grievance Tickets
+        pageGrievanceTickets.getNavGrievance().click()
+        assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
+        print(pageGrievanceTickets.getTicketListRow()[0].text)
+        pageGrievanceTickets.getTabSystemGenerated().click()
+        pageGrievanceTickets.screenshot("system")

@@ -48,6 +48,10 @@ class GrievanceTickets(BaseComponents):
     filtersCreatedBy = 'div[data-cy="filters-created-by-input"]'
     selectAll = 'aria-label="select all"'
     tableLabel = 'span[data-cy="table-label"]'
+    buttonAssign = 'button[data-cy="button-Assign"]'
+    buttonSetPriority = 'button[data-cy="button-Set priority"]'
+    buttonSetUrgency = 'button[data-cy="button-Set Urgency"]'
+    buttonAddNote = 'button[data-cy="button-add note"]'
 
     dateTitleFilterPopup = 'div[class="MuiPaper-root MuiPopover-paper MuiPaper-elevation8 MuiPaper-rounded"]'
     daysFilterPopup = (
@@ -194,3 +198,15 @@ class GrievanceTickets(BaseComponents):
 
     def getSelectAll(self) -> WebElement:
         return self.driver.find_element(By.XPATH, f"//*[@{self.selectAll}]")
+
+    def getButtonAssign(self) -> WebElement:
+            return self.wait_for(self.buttonAssign)
+
+    def getButtonSetPriority(self) -> WebElement:
+        return self.wait_for(self.buttonSetPriority)
+
+    def getButtonSetUrgency(self) -> WebElement:
+        return self.wait_for(self.buttonSetUrgency)
+
+    def getButtonAddNote(self) -> WebElement:
+        return self.wait_for(self.buttonAddNote)
