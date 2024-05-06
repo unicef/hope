@@ -128,7 +128,7 @@ class GrievanceTickets(BaseComponents):
         return self.wait_for(self.buttonClear)
 
     def getButtonNewTicket(self) -> WebElement:
-        return self.wait_for(self.buttonNewTicket)
+        return self.get(self.buttonNewTicket)
 
     def getTicketID(self) -> WebElement:
         return self.wait_for(self.ticketId)
@@ -182,6 +182,7 @@ class GrievanceTickets(BaseComponents):
         return self.wait_for(self.tabUserGenerated)
 
     def getTicketListRow(self) -> WebElement:
+        self.wait_for(self.ticketListRow)
         return self.get_elements(self.ticketListRow)
 
     def getTableLabel(self) -> WebElement:
