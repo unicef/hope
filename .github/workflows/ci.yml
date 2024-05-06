@@ -218,12 +218,12 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: E2E tests
-        continue-on-error: true
         run: |
           dist_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist dev_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
             -f ./deployment/docker-compose.selenium.yml \
             run selenium
       - name: Upload Artifact
+        if: always()
         uses: actions/upload-artifact@v4
         continue-on-error: true
         with:
@@ -231,6 +231,7 @@ jobs:
           path: ./backend/report/
           retention-days: 5
       - name: Upload coverage to Codecov
+        if: always()
         uses: codecov/codecov-action@v4
         continue-on-error: true
         with:
