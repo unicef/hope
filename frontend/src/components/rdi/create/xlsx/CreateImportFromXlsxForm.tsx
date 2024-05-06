@@ -59,7 +59,8 @@ export function CreateImportFromXlsxForm({
             name: values.name,
             screenBeneficiary: values.screenBeneficiary,
             businessAreaSlug: businessArea,
-            allowDeliveryMechanismsValidationErrors: values.allowDeliveryMechanismsValidationErrors,
+            allowDeliveryMechanismsValidationErrors:
+              values.allowDeliveryMechanismsValidationErrors,
           },
         },
       });
@@ -103,12 +104,16 @@ export function CreateImportFromXlsxForm({
   }, [formik.submitForm]);
   useEffect(() => {
     if (
-      xlsxImportData?.status === ImportDataStatus.Finished
-      || xlsxImportData?.status === ImportDataStatus.DeliveryMechanismsValidationError && formik.values.allowDeliveryMechanismsValidationErrors
+      xlsxImportData?.status === ImportDataStatus.Finished ||
+      (xlsxImportData?.status ===
+        ImportDataStatus.DeliveryMechanismsValidationError &&
+        formik.values.allowDeliveryMechanismsValidationErrors)
     ) {
       setSubmitDisabled(false);
+    } else {
+      setSubmitDisabled(true);
     }
-  }, [xlsxImportData]);
+  }, [xlsxImportData, formik.values.allowDeliveryMechanismsValidationErrors]);
 
   return (
     <FormikProvider value={formik}>
@@ -124,14 +129,18 @@ export function CreateImportFromXlsxForm({
         />
       </Box>
       <Box mt={2}>
-        <Field
-          name="allowDeliveryMechanismsValidationErrors"
-          fullWidth
-          label={t('Allow Delivery Mechanisms Validation Errors')}
-          variant="outlined"
-          component={FormikCheckboxField}
-          // TODO onlick set Import button as enabled if requirements met
-        />
+        {xlsxImportData?.status ===
+          ImportDataStatus.DeliveryMechanismsValidationError && (
+          <Box mt={2}>
+            <Field
+              name="allowDeliveryMechanismsValidationErrors"
+              fullWidth
+              label={t('Allow Delivery Mechanisms Validation Errors')}
+              variant="outlined"
+              component={FormikCheckboxField}
+            />
+          </Box>
+        )}
       </Box>
       <ScreenBeneficiaryField />
       {saveXlsxLoading ? (
