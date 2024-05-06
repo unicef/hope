@@ -29,9 +29,11 @@ export const LookUpLinkedTicketsModal = ({
   const { businessArea } = useBaseUrl();
   const { t } = useTranslation();
   const location = useLocation();
-
+  const { data: choicesData, loading: choicesLoading } = useGrievancesChoiceDataQuery();
   const initialFilter = {
     search: '',
+    documentType: choicesData?.documentTypeChoices?.[0]?.value,
+    documentNumber: '',
     status: '',
     fsp: '',
     createdAtRangeMin: null,
@@ -46,8 +48,6 @@ export const LookUpLinkedTicketsModal = ({
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
   if (!choicesData) return null;
   if (choicesLoading) {
     return <LoadingComponent />;
