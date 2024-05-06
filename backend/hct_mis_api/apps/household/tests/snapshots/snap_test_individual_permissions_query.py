@@ -31,6 +31,30 @@ snapshots['TestIndividualPermissionsQuery::test_not_unicef_partner_with_program_
     }
 }
 
+snapshots['TestIndividualPermissionsQuery::test_not_unicef_partner_with_program_and_with_full_admin_area_has_access_for_program 1'] = {
+    'data': {
+        'individual': {
+            'household': {
+                'admin2': {
+                    'pCode': 'TEST0101'
+                }
+            }
+        }
+    }
+}
+
+snapshots['TestIndividualPermissionsQuery::test_not_unicef_partner_with_program_and_with_full_admin_area_has_access_query_all_programs 1'] = {
+    'data': {
+        'individual': {
+            'household': {
+                'admin2': {
+                    'pCode': 'TEST0101'
+                }
+            }
+        }
+    }
+}
+
 snapshots['TestIndividualPermissionsQuery::test_not_unicef_partner_with_program_and_with_wrong_admin_area_doesnt_have_access_for_program 1'] = {
     'data': {
         'individual': None
@@ -69,30 +93,6 @@ snapshots['TestIndividualPermissionsQuery::test_not_unicef_partner_with_program_
             ]
         }
     ]
-}
-
-snapshots['TestIndividualPermissionsQuery::test_not_unicef_partner_with_program_and_without_admin_area_has_access_for_program 1'] = {
-    'data': {
-        'individual': {
-            'household': {
-                'admin2': {
-                    'pCode': 'TEST0101'
-                }
-            }
-        }
-    }
-}
-
-snapshots['TestIndividualPermissionsQuery::test_not_unicef_partner_with_program_and_without_admin_area_has_access_query_all_programs 1'] = {
-    'data': {
-        'individual': {
-            'household': {
-                'admin2': {
-                    'pCode': 'TEST0101'
-                }
-            }
-        }
-    }
 }
 
 snapshots['TestIndividualPermissionsQuery::test_not_unicef_partner_without_program_doesnt_have_access_for_program 1'] = {
