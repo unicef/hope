@@ -1,8 +1,9 @@
 from page_object.base_components import BaseComponents
+from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
 
-class Grievance(BaseComponents):
+class GrievanceTickets(BaseComponents):
     # Locators
     titlePage = 'h5[data-cy="page-header-title"]'
     searchFilter = 'div[data-cy="filters-search"]'
@@ -45,6 +46,7 @@ class Grievance(BaseComponents):
     ticketListRow = 'tr[role="checkbox"]'
     statusOptions = 'li[role="option"]'
     filtersCreatedBy = 'div[data-cy="filters-created-by-input"]'
+    selectAll = 'aria-label="select all"'
 
     dateTitleFilterPopup = 'div[class="MuiPaper-root MuiPopover-paper MuiPaper-elevation8 MuiPaper-rounded"]'
     daysFilterPopup = (
@@ -186,150 +188,5 @@ class Grievance(BaseComponents):
     def getOptions(self) -> WebElement:
         return self.wait_for(self.statusOptions)
 
-    def checkElementsOnUserGeneratedPage(self) -> None:
-        self.getGrievanceTitle().contains(self.textTitle)
-        self.getTabTitle().contains(self.textTabTitle)
-        self.getTabUserGenerated().should("be.visible")
-        self.getTabSystemGenerated().should("be.visible")
-        self.checkAllSearchFieldsVisible()
-        self.getButtonNewTicket().should("be.visible")
-        self.checkAllColumnsVisibility()
-
-    def chooseCategoryFilter(self, category: str) -> None:
-        self.getCategoryFilter().click()
-        self.getOptions().contains(category).click()
-        self.getButtonApply().click()
-
-    def chooseStatusFilter(self, status: str) -> None:
-        self.getStatusFilter().click()
-        self.getOptions().contains(status).click()
-        self.getButtonApply().click()
-
-    def choosePriorityFilter(self, prio: str) -> None:
-        self.getPriorityFilter().click()
-        self.getOptions().contains(prio).click()
-        self.getButtonApply().click()
-
-    def chooseUrgencyFilter(self, urgency: str) -> None:
-        self.getUrgencyFilter().click()
-        self.getOptions().contains(urgency).click()
-        self.getButtonApply().click()
-
-    def chooseRDIFilter(self, rdi: str) -> None:
-        self.getRegistrationDataImportFilter().click()
-        self.getOptions().contains(rdi).click()
-        self.getButtonApply().click()
-
-    def chooseAdminFilter(self, name: str) -> None:
-        self.getAdminLevelFilter().click()
-        self.getOptions().contains(name).click()
-        self.getButtonApply().click()
-
-    def chooseAssigneeFilter(self, mail: str) -> None:
-        self.getAssigneeFilter().click()
-        self.getOptions().contains(mail).click()
-        self.getButtonApply().click()
-
-    def checkElementsOnSystemGeneratedPage(self) -> None:
-        self.getTabSystemGenerated().click()
-        self.getGrievanceTitle().contains(self.textTitle)
-        self.getTabTitle().contains(self.textTabTitle)
-        self.checkAllSearchFieldsVisible()
-        self.getSimilarityScoreFromFilter().should("be.visible")
-        self.getSimilarityScoreToFilter().should("be.visible")
-        self.checkAllColumnsVisibility()
-        self.getTicketListRow().eq(0).should("be.visible")
-
-    def checkElementsOfTicketTypeFilter(self) -> None:
-        self.getTicketTypeFilter().click()
-        self.getTicketID().should("be.visible")
-        self.getHouseholdID().should("be.visible")
-        self.pressEscapeFromElement(self.getFamilyName().should("be.visible"))
-
-    def checkAllSearchFieldsVisible(self) -> None:
-        self.getSearchFilter().should("be.visible")
-        self.getTicketTypeFilter().should("be.visible")
-        self.getCreationDateFromFilter().should("be.visible")
-        self.getCreationDateToFilter().should("be.visible")
-        self.getStatusFilter().should("be.visible")
-        self.getFspFilter().should("be.visible")
-        self.getCategoryFilter().should("be.visible")
-        self.getAssigneeFilter().should("be.visible")
-        self.getAdminLevelFilter().should("be.visible")
-        self.getRegistrationDataImportFilter().should("be.visible")
-        self.getPreferredLanguageFilter().should("be.visible")
-        self.getPriorityFilter().should("be.visible")
-        self.getUrgencyFilter().should("be.visible")
-        self.getActiveTicketsFilter().should("be.visible")
-        self.checkElementsOfTicketTypeFilter()
-        self.getButtonApply().should("be.visible")
-        self.getButtonClear().should("be.visible")
-
-    def checkAllColumnsVisibility(self) -> None:
-        self.getTabTicketID().should("be.visible")
-        self.getTabStatus().should("be.visible")
-        self.getTabAssignedTo().should("be.visible")
-        self.getTabCategory().scrollIntoView().should("be.visible")
-        self.getTabIssueType().scrollIntoView().should("be.visible")
-        self.getTabHouseholdID().scrollIntoView().should("be.visible")
-        self.getTabPriority().scrollIntoView().should("be.visible")
-        self.getTabUrgency().scrollIntoView().should("be.visible")
-        self.getTabLinkedTickets().scrollIntoView().should("be.visible")
-        self.getTabCreationData().scrollIntoView().should("be.visible")
-        self.getTabLastModifiedDate().scrollIntoView().should("be.visible")
-        self.getTabTotalDays().scrollIntoView().should("be.visible")
-
-    def useSearchFilter(self, text: str) -> None:
-        self.getSearchFilter().type(text)
-        self.getButtonApply().click()
-
-    def chooseTicketTypeHouseholdID(self) -> None:
-        self.getTicketTypeFilter().click()
-        self.getHouseholdID().click()
-        self.pressEscapeFromElement(self.getHouseholdID())
-        self.getButtonApply().click()
-
-    def chooseTicketTypeTicketID(self) -> None:
-        self.getTicketTypeFilter().click()
-        self.getTicketID().click()
-        self.pressEscapeFromElement(self.getTicketID())
-        self.getButtonApply().click()
-
-    def chooseTicketTypeLastName(self) -> None:
-        self.getTicketTypeFilter().click()
-        self.getFamilyName().click()
-        self.pressEscapeFromElement(self.getFamilyName())
-        self.getButtonApply().click()
-
-    def checkTicketTypeFilterText(self, text: str) -> WebElement:
-        return self.getTicketTypeFilter().find("div").eq(0).scrollIntoView().contains(text)
-
-    def changeCreationDateFrom(self, date: str) -> WebElement:
-        # Date format (String): YYYY-MM-DD
-        return self.getCreationDateFromFilter().type(date)
-
-    def openCreationDateFromFilter(self) -> WebElement:
-        return self.getCreationDateFromFilter().find("button").click()
-
-    def chooseDayFilterPopup(self, day: str) -> WebElement:
-        return self.getDaysFilterPopup().contains("p", day).click()
-
-    def checkDateFilterFrom(self, date: str) -> WebElement:
-        # Date format (String): YYYY-MM-DD
-        return self.getCreationDateFromFilter().find("input").should("have.value", date)
-
-    def changeCreationDateTo(self, date: str) -> WebElement:
-        # Date format (String): YYYY-MM-DD
-        return self.getCreationDateToFilter().type(date)
-
-    def openCreationDateToFilter(self) -> WebElement:
-        return self.getCreationDateToFilter().find("button").click()
-
-    def checkDateFilterTo(self, date: str) -> WebElement:
-        # Date format (String): YYYY-MM-DD
-        return self.getCreationDateToFilter().find("input").should("have.value", date)
-
-    def checkDateTitleFilter(self, date: str) -> WebElement:
-        # Date format (String): Www, Mmm D
-        # Example: Sat, Jan 1
-        return self.getDateTitleFilterPopup().contains(date).type("{esc}")
+    def getSelectAll(self) -> WebElement:
+        return self.driver.find_element(By.XPATH, f'//*[@{self.selectAll}]')

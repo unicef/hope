@@ -9,6 +9,8 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
+
+from page_object.grievance.grievance_tickets import GrievanceTickets
 from page_object.admin_panel.admin_panel import AdminPanel
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from page_object.grievance.feedback import Feedback
@@ -187,6 +189,11 @@ def pageAdminPanel(request: FixtureRequest, browser: Chrome) -> AdminPanel:
 @pytest.fixture
 def pageFeedback(request: FixtureRequest, browser: Chrome) -> Feedback:
     yield Feedback(browser)
+
+
+@pytest.fixture
+def pageGrievanceTickets(request: FixtureRequest, browser: Chrome) -> GrievanceTickets:
+    yield GrievanceTickets(browser)
 
 
 @pytest.fixture
