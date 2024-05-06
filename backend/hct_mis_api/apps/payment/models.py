@@ -1365,6 +1365,7 @@ class FinancialServiceProvider(LimitBusinessAreaModelMixin, TimeStampedUUIDModel
 
     @property
     def configurations(self) -> List[Optional[dict]]:
+        return []  # temporary disabled
         if not self.is_payment_gateway:
             return []
         return [
