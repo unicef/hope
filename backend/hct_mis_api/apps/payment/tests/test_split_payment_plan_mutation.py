@@ -47,6 +47,7 @@ class TestSplitPaymentPlan(APITestCase):
 
     @patch("hct_mis_api.apps.payment.models.PaymentPlanSplit.MAX_CHUNKS")
     def test_split_payment_plan_mutation(self, max_chunks_mock: Any) -> None:
+        max_chunks_mock.__get__ = mock.Mock(return_value=10)
         pp = PaymentPlanFactory(business_area=self.business_area, status=PaymentPlan.Status.ACCEPTED)
 
         fsp_1 = FinancialServiceProviderFactory(
@@ -106,6 +107,8 @@ class TestSplitPaymentPlan(APITestCase):
         # check correct PaymentPlan status
         delivery_mech_for_pp.sent_to_payment_gateway = False
         delivery_mech_for_pp.save()
+        pp.status = PaymentPlan.Status.OPEN
+        pp.save()
         self.snapshot_graphql_request(
             request_string=SPLIT_PAYMENT_MUTATION,
             context={"user": self.user},
@@ -115,13 +118,15 @@ class TestSplitPaymentPlan(APITestCase):
                 "splitType": "BY_RECORDS",
             },
         )
+        pp.status = PaymentPlan.Status.ACCEPTED
+        pp.save()
 
         self.snapshot_graphql_request(
             request_string=SPLIT_PAYMENT_MUTATION,
             context={"user": self.user},
             variables={
                 "paymentPlanId": self.id_to_base64(pp.id, "PaymentPlanNode"),
-                "paymentsNo": 2,
+                "paymentsNo": 0,
                 "splitType": "BY_RECORDS",
             },
         )
@@ -140,13 +145,13 @@ class TestSplitPaymentPlan(APITestCase):
         )
 
         # successful
-        max_chunks_mock.__get__ = mock.Mock(return_value=99)
+        max_chunks_mock.__get__ = mock.Mock(return_value=10)
         self.snapshot_graphql_request(
             request_string=SPLIT_PAYMENT_MUTATION,
             context={"user": self.user},
             variables={
                 "paymentPlanId": self.id_to_base64(pp.id, "PaymentPlanNode"),
-                "paymentsNo": 2,
+                "paymentsNo": 10,
                 "splitType": "BY_RECORDS",
             },
         )
