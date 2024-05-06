@@ -1,8 +1,6 @@
 import logging
 from typing import Any, Dict, Tuple
 
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
 from django.db import transaction
 from django.db.models import QuerySet
 from django.template.loader import render_to_string
@@ -16,6 +14,7 @@ from hct_mis_api.apps.household.models import (
     Individual,
     XlsxUpdateFile,
 )
+from hct_mis_api.apps.utils.mailjet import MailjetClient
 
 logger = logging.getLogger(__name__)
 
@@ -148,7 +147,7 @@ class IndividualsIBANXlsxUpdate:
         if self.business_area.enable_email_notification:
             email = self._prepare_email(context=self._get_email_context(message=str(self.validation_errors)))
             try:
-                email.send()
+                email.send_email()
             except Exception as e:
                 logger.exception(e)
 
@@ -158,7 +157,7 @@ class IndividualsIBANXlsxUpdate:
                 context=self._get_email_context(message="All of the Individuals IBAN number we're updated successfully")
             )
             try:
-                email.send()
+                email.send_email()
             except Exception as e:
                 logger.exception(e)
 
@@ -174,12 +173,12 @@ class IndividualsIBANXlsxUpdate:
         }
         email = cls._prepare_email(context=context)
         try:
-            email.send()
+            email.send_email()
         except Exception as e:
             logger.exception(e)
 
     @staticmethod
-    def _prepare_email(context: Dict) -> EmailMultiAlternatives:
+    def _prepare_email(context: Dict) -> MailjetClient:
         text_body = render_to_string(
             "admin/household/individual/individuals_iban_xlsx_update_email.txt", context=context
         )
@@ -187,12 +186,11 @@ class IndividualsIBANXlsxUpdate:
             "admin/household/individual/individuals_iban_xlsx_update_email.txt", context=context
         )
 
-        email = EmailMultiAlternatives(
+        email = MailjetClient(
             subject=f"Individual IBANs xlsx [{context['upload_file_id']}] update result",
-            from_email=settings.EMAIL_HOST_USER,
-            to=[context["email"]],
-            body=text_body,
+            recipients=[context["email"]],
+            html_body=html_body,
+            text_body=text_body,
         )
-        email.attach_alternative(html_body, "text/html")
 
         return email

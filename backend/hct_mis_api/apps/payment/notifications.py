@@ -112,13 +112,12 @@ class PaymentNotification:
         return email
 
     def send_email_notification(self) -> None:
-        if not config.SEND_PAYMENT_PLANS_NOTIFICATION or not self.enable_email_notification:
-            return
-        try:
-            for email in self.emails:
-                email.send_email()
-        except Exception as e:
-            logger.exception(e)
+        if config.SEND_PAYMENT_PLANS_NOTIFICATION and self.enable_email_notification:
+            try:
+                for email in self.emails:
+                    email.send_email()
+            except Exception as e:
+                logger.exception(e)
 
     def _prepare_body_variables(self, user_recipient: User) -> Dict[str, Any]:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"

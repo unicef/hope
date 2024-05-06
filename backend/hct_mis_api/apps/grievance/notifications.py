@@ -3,7 +3,6 @@ from enum import auto
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
 
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils import timezone
 
@@ -12,6 +11,7 @@ from constance import config
 from hct_mis_api.apps.account.models import User, UserRole
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.utils.mailjet import MailjetClient
 
 logger = logging.getLogger(__name__)
 
@@ -56,28 +56,25 @@ class GrievanceNotification:
         func: Callable = GrievanceNotification.ACTION_PREPARE_USER_RECIPIENTS_DICT[self.action]
         return func(self)
 
-    def _prepare_emails(self) -> List[EmailMultiAlternatives]:
+    def _prepare_emails(self) -> List[MailjetClient]:
         return [self._prepare_email(user) for user in self.user_recipients]
 
-    def _prepare_email(self, user_recipient: "User") -> EmailMultiAlternatives:
+    def _prepare_email(self, user_recipient: "User") -> MailjetClient:
         prepare_bodies_method = GrievanceNotification.ACTION_PREPARE_BODIES_DICT[self.action]
         text_body, html_body, subject = prepare_bodies_method(self, user_recipient)
-        email = EmailMultiAlternatives(
+        email = MailjetClient(
             subject=subject,
-            from_email=settings.EMAIL_HOST_USER,
-            to=[user_recipient.email],
-            body=text_body,
+            recipients=[user_recipient.email],
+            html_body=html_body,
+            text_body=text_body,
         )
-        email.attach_alternative(html_body, "text/html")
         return email
 
     def send_email_notification(self) -> None:
-        if self.enable_email_notification:
-            if not config.SEND_GRIEVANCES_NOTIFICATION:
-                return
+        if config.SEND_GRIEVANCES_NOTIFICATION and self.enable_email_notification:
             try:
                 for email in self.emails:
-                    email.send()
+                    email.send_email()
             except Exception as e:
                 logger.exception(e)
 

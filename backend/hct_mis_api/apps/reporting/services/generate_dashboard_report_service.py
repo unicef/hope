@@ -960,7 +960,7 @@ class GenerateDashboardReportService:
             self.report.status = DashboardReport.FAILED
         self.report.save()
 
-        if self.report.file:
+        if self.report.file and self.business_area.enable_email_notification:
             self._send_email()
 
     def _send_email(self) -> None:
@@ -976,8 +976,11 @@ class GenerateDashboardReportService:
         html_body = render_to_string("dashboard_report.html", context=context)
         subject = "HOPE report generated"
 
-        if self.business_area.enable_email_notification:
-            self.report.created_by.email_user(subject, text_body, settings.EMAIL_HOST_USER, html_message=html_body)
+        self.report.created_by.email_user(
+            subject=subject,
+            html_body=html_body,
+            text_body=text_body,
+        )
 
     @staticmethod
     def _adjust_column_width_from_col(ws: "Worksheet", min_col: int, max_col: int, min_row: int) -> None:
