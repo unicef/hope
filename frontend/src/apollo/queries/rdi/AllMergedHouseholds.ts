@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const ALL_MERGED_HOUSEHOLDS_QUERY = gql`
   query AllMergedHouseholds(

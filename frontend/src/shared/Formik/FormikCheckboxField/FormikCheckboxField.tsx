@@ -1,14 +1,15 @@
-import React, { useEffect } from 'react';
+import * as React from 'react';
+import { useEffect } from 'react';
 import {
   FormControlLabel,
   Checkbox,
   FormHelperText,
   Grid,
-} from '@material-ui/core';
+} from '@mui/material';
 import get from 'lodash/get';
-import { LabelizedField } from '../../../components/core/LabelizedField';
+import { LabelizedField } from '@components/core/LabelizedField';
 
-export const Check = ({
+export function Check({
   field,
   form,
   label,
@@ -16,7 +17,7 @@ export const Check = ({
   displayValue = '',
   container = true,
   ...otherProps
-}): React.ReactElement => {
+}): React.ReactElement {
   const handleChange = (): void => {
     form.setFieldValue(field.name, !field.value);
   };
@@ -45,7 +46,7 @@ export const Check = ({
         control={
           <Checkbox
             {...otherProps}
-            color='primary'
+            color="primary"
             checked={checked}
             onChange={handleChange}
             data-cy={`input-${field.name}`}
@@ -63,4 +64,4 @@ export const Check = ({
       )}
     </Grid>
   );
-};
+}

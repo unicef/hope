@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const CREATE_PAYMENT_VERIFICATION_MUTATION = gql`
   mutation CreatePaymentVerificationPlan(

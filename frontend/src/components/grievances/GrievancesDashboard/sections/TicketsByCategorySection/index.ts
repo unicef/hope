@@ -1,1 +1,1 @@
-import { TicketsByCategorySection } from './TicketsByCategorySection';
+export { TicketsByCategorySection } from './TicketsByCategorySection';

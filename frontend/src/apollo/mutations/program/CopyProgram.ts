@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const COPY_PROGRAM_MUTATION = gql`
   mutation CopyProgram($programData: CopyProgramInput!) {
@@ -6,6 +6,7 @@ export const COPY_PROGRAM_MUTATION = gql`
       program {
         id
       }
+      validationErrors
     }
   }
 `;

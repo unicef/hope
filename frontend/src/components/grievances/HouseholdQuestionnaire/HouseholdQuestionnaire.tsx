@@ -1,31 +1,27 @@
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import { Field } from 'formik';
-import React, { useEffect } from 'react';
+import * as React from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
-import { ContentLink } from '../../core/ContentLink';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import {
-  AllHouseholdsQuery,
-  useHouseholdLazyQuery,
-} from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../core/LoadingComponent';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { ContentLink } from '@core/ContentLink';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { AllHouseholdsQuery, useHouseholdLazyQuery } from '@generated/graphql';
+import { LoadingComponent } from '@core/LoadingComponent';
 
 interface HouseholdQuestionnaireProps {
   values;
 }
 
-export const HouseholdQuestionnaire = ({
+export function HouseholdQuestionnaire({
   values,
-}: HouseholdQuestionnaireProps): React.ReactElement => {
+}: HouseholdQuestionnaireProps): React.ReactElement {
   const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
     values.selectedHousehold;
-  const [
-    getHousehold,
-    { data: fullHousehold, loading: fullHouseholdLoading },
-  ] = useHouseholdLazyQuery({ variables: { id: household?.id } });
+  const [getHousehold, { data: fullHousehold, loading: fullHouseholdLoading }] =
+    useHouseholdLazyQuery({ variables: { id: household?.id } });
 
   useEffect(() => {
     if (values.selectedHousehold) {
@@ -127,17 +123,17 @@ export const HouseholdQuestionnaire = ({
           size: 3,
         },
       ].map((el) => (
-        <Grid item xs={3}>
+        <Grid key={el.name} item xs={3}>
           <Field
             name={el.name}
             data-cy={`input-${el.name}`}
             label={el.label}
             displayValue={el.value || '-'}
-            color='primary'
+            color="primary"
             component={FormikCheckboxField}
           />
         </Grid>
       ))}
     </Grid>
   );
-};
+}

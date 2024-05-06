@@ -7,12 +7,12 @@
 3. Run
 
 
-Frontend running on Local Machine (use node 16)
+Frontend running on Local Machine (use node 20)
 
 ```bash
 cd frontend
 yarn
-yarn start
+yarn dev
 # in another terminal
 cd ..
 docker-compose build
@@ -41,11 +41,11 @@ docker-compose -f docker-compose.yml -f docker-compose.frontend.yml run --rm bac
 ./manage.py initdemo --skip-drop
 ```
 
-Access the frontend in your browser at [`localhost:8082/login`](http://localhost:8082/login)
+Access the frontend in your browser at [`localhost:3000/login`](http://localhost:3000/login)
 
-Backend can be accessed at `/api/` i.e. [`localhost:8082/api/unicorn/`](http://localhost:8082/api/unicorn/)
+Backend can be accessed at `/api/` i.e. [`localhost:8080/api/unicorn/`](http://localhost:8080/api/unicorn/)
 
-When running locally, you don't neet to provide AD credentials - you can go straight to [`localhost:8082/api/unicorn/`](http://localhost:8082/api/unicorn/) and log in with `root:root1234`. When you have the necessary cookies in your browser, you can also access the FE dashboard.
+When running locally, you don't neet to provide AD credentials - you can go straight to [`localhost:8080/api/unicorn/`](http://localhost:8080/api/unicorn/) and log in with `root:root1234`. When you have the necessary cookies in your browser, you can also access the FE dashboard.
 
 # Cypress Testing Service
 Go to cypress_testing_service catalog
@@ -119,6 +119,13 @@ More information can be found here:
 {% embed url="https://docs.djangoproject.com/en/3.0/topics/testing/overview/" caption="" %}
 
 [https://github.com/syrusakbary/snapshottest](https://github.com/syrusakbary/snapshottest)
+
+#### **Frontend:**
+for the frontend we are using jest
+You can run frontend tests with the following commands:
+```cd frontend
+yarn test
+```
 
 ## Development / Build / Deployment Process
 

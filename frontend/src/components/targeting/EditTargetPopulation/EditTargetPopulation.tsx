@@ -1,7 +1,6 @@
-import { useHistory } from 'react-router-dom';
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import { FieldArray, Form, Formik } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
@@ -11,17 +10,18 @@ import {
   TargetPopulationStatus,
   useAllProgramsForChoicesQuery,
   useUpdateTpMutation,
-} from '../../../__generated__/graphql';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
-import { getFullNodeFromEdgesById } from '../../../utils/utils';
-import { AutoSubmitFormOnEnter } from '../../core/AutoSubmitFormOnEnter';
-import { LoadingComponent } from '../../core/LoadingComponent';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { getTargetingCriteriaVariables } from '@utils/targetingUtils';
+import { getFullNodeFromEdgesById } from '@utils/utils';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '@core/LoadingComponent';
 import { Exclusions } from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
 import { TargetingCriteria } from '../TargetingCriteria';
 import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
+import { useNavigate } from 'react-router-dom';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -32,11 +32,11 @@ interface EditTargetPopulationProps {
   screenBeneficiary: boolean;
 }
 
-export const EditTargetPopulation = ({
+export function EditTargetPopulation({
   targetPopulation,
   screenBeneficiary,
-}: EditTargetPopulationProps): React.ReactElement => {
-  const history = useHistory();
+}: EditTargetPopulationProps): React.ReactElement {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const initialValues = {
     id: targetPopulation.id,
@@ -54,13 +54,11 @@ export const EditTargetPopulation = ({
   const [mutate, { loading }] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
-  const {
-    data: allProgramsData,
-    loading: loadingPrograms,
-  } = useAllProgramsForChoicesQuery({
-    variables: { businessArea, status: [ProgramStatus.Active] },
-    fetchPolicy: 'cache-and-network',
-  });
+  const { data: allProgramsData, loading: loadingPrograms } =
+    useAllProgramsForChoicesQuery({
+      variables: { businessArea, status: [ProgramStatus.Active] },
+      fetchPolicy: 'cache-and-network',
+    });
 
   if (loadingPrograms) {
     return <LoadingComponent />;
@@ -121,7 +119,7 @@ export const EditTargetPopulation = ({
         },
       });
       showMessage(t('Target Population Updated'));
-      history.push(`/${baseUrl}/target-population/${values.id}`);
+      navigate(`/${baseUrl}/target-population/${values.id}`);
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
@@ -140,41 +138,39 @@ export const EditTargetPopulation = ({
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ values, submitForm }) => {
-        return (
-          <Form>
-            <AutoSubmitFormOnEnter />
-            <EditTargetPopulationHeader
-              handleSubmit={submitForm}
-              values={values}
-              loading={loading}
-              baseUrl={baseUrl}
-              targetPopulation={targetPopulation}
-            />
-            <FieldArray
-              name='targetingCriteria'
-              render={(arrayHelpers) => (
-                <TargetingCriteria
-                  helpers={arrayHelpers}
-                  rules={values.targetingCriteria}
-                  selectedProgram={selectedProgram(values)}
-                  isEdit
-                  screenBeneficiary={screenBeneficiary}
-                />
-              )}
-            />
-            <Exclusions initialOpen={Boolean(values.excludedIds)} />
-            <PaperContainer>
-              <Typography variant='h6'>
-                {t('Save to see the list of households')}
-              </Typography>
-              <Label>
-                {t('List of households will be available after saving')}
-              </Label>
-            </PaperContainer>
-          </Form>
-        );
-      }}
+      {({ values, submitForm }) => (
+        <Form>
+          <AutoSubmitFormOnEnter />
+          <EditTargetPopulationHeader
+            handleSubmit={submitForm}
+            values={values}
+            loading={loading}
+            baseUrl={baseUrl}
+            targetPopulation={targetPopulation}
+          />
+          <FieldArray
+            name="targetingCriteria"
+            render={(arrayHelpers) => (
+              <TargetingCriteria
+                helpers={arrayHelpers}
+                rules={values.targetingCriteria}
+                selectedProgram={selectedProgram(values)}
+                isEdit
+                screenBeneficiary={screenBeneficiary}
+              />
+            )}
+          />
+          <Exclusions initialOpen={Boolean(values.excludedIds)} />
+          <PaperContainer>
+            <Typography variant="h6">
+              {t('Save to see the list of households')}
+            </Typography>
+            <Label>
+              {t('List of households will be available after saving')}
+            </Label>
+          </PaperContainer>
+        </Form>
+      )}
     </Formik>
   );
-};
+}

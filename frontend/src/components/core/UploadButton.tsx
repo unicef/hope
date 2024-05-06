@@ -1,11 +1,12 @@
-import React, { useRef } from 'react';
-import Button from '@material-ui/core/Button';
+import * as React from 'react';
+import { useRef } from 'react';
+import Button from '@mui/material/Button';
 
-export const UploadButton = ({
+export function UploadButton({
   children,
   handleChange,
   ...otherProps
-}): React.ReactElement => {
+}): React.ReactElement {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const onClickHandler = () => {
@@ -21,11 +22,11 @@ export const UploadButton = ({
       </Button>
       <input
         ref={inputRef}
-        accept='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        type='file'
+        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        type="file"
         style={{ display: 'none' }}
         onChange={onChangeHandler}
       />
     </>
   );
-};
+}

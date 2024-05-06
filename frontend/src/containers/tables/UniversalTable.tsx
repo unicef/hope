@@ -1,12 +1,9 @@
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import useDeepCompareEffect from 'use-deep-compare-effect';
-import { PermissionDenied } from '../../components/core/PermissionDenied';
-import { HeadCell } from '../../components/core/Table/EnhancedTableHead';
-import {
-  Order,
-  TableComponent,
-} from '../../components/core/Table/TableComponent';
-import { columnToOrderBy, isPermissionDeniedError } from '../../utils/utils';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import { Order, TableComponent } from '@components/core/Table/TableComponent';
+import { columnToOrderBy, isPermissionDeniedError } from '@utils/utils';
 
 interface UniversalTableProps<T, K> {
   rowsPerPageOptions?: number[];
@@ -112,7 +109,7 @@ export function UniversalTable<T, K>({
       rowsPerPageOptions={rowsPerPageOptions}
       rowsPerPage={rowsPerPage}
       page={page}
-      itemsCount={data?.[queriedObjectName]?.totalCount}
+      itemsCount={data?.[queriedObjectName]?.totalCount ?? 0}
       handleChangePage={(_event, newPage) => {
         if (!edges.length) return;
         const variables = {
@@ -156,7 +153,7 @@ export function UniversalTable<T, K>({
         }
         refetch(variables);
       }}
-      handleRequestSort={(event, property) => {
+      handleRequestSort={(_event, property) => {
         let direction: Order = 'asc';
         if (property === orderBy) {
           direction = orderDirection === 'asc' ? 'desc' : 'asc';

@@ -1,20 +1,21 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { useSurveysChoiceDataQuery } from '../../../../__generated__/graphql';
-import { CreateSurveyMenu } from '../../../../components/accountability/Surveys/CreateSurveyMenu';
-import { SurveysFilters } from '../../../../components/accountability/Surveys/SurveysTable/SurveysFilters';
-import { PageHeader } from '../../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../../components/core/PermissionDenied';
+import { useSurveysChoiceDataQuery } from '@generated/graphql';
+import { CreateSurveyMenu } from '@components/accountability/Surveys/CreateSurveyMenu';
+import { SurveysFilters } from '@components/accountability/Surveys/SurveysTable/SurveysFilters';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
 import {
   hasPermissionInModule,
   PERMISSIONS,
 } from '../../../../config/permissions';
-import { usePermissions } from '../../../../hooks/usePermissions';
-import { getFilterFromQueryParams } from '../../../../utils/utils';
+import { usePermissions } from '@hooks/usePermissions';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { SurveysTable } from '../../../tables/Surveys/SurveysTable/SurveysTable';
 
-export const SurveysPage = (): React.ReactElement => {
+export function SurveysPage(): React.ReactElement {
   const permissions = usePermissions();
   const { t } = useTranslation();
   const { data: choicesData } = useSurveysChoiceDataQuery({
@@ -69,4 +70,4 @@ export const SurveysPage = (): React.ReactElement => {
       />
     </>
   );
-};
+}

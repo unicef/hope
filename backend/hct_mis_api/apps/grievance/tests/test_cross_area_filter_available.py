@@ -40,6 +40,7 @@ class TestCrossAreaFilterAvailable(APITestCase):
 
     def test_cross_area_filter_available_for_unicef_partner(self) -> None:
         user = UserFactory(partner=self.partner_unicef)
+        self.create_user_role_with_permissions(user, [Permissions.GRIEVANCES_CROSS_AREA_FILTER], self.business_area)
 
         self.snapshot_graphql_request(
             request_string=CROSS_AREA_FILTER_AVAILABLE_QUERY,

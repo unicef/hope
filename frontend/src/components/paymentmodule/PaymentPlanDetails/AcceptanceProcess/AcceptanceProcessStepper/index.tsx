@@ -1,1 +1,1 @@
-import { AcceptanceProcessStepper } from './AcceptanceProcessStepper';
+export { AcceptanceProcessStepper } from './AcceptanceProcessStepper';

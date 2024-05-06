@@ -1,14 +1,14 @@
-import React from 'react';
+import * as React from 'react';
 import { Doughnut } from 'react-chartjs-2';
-import { AllChartsQuery } from '../../../__generated__/graphql';
+import { AllChartsQuery } from '@generated/graphql';
 
 interface IndividualsReachedByAgeAndGenderGroupsChartProps {
   data: AllChartsQuery['chartIndividualsReachedByAgeAndGender'];
 }
 
-export const IndividualsReachedByAgeAndGenderGroupsChart = ({
+export function IndividualsReachedByAgeAndGenderGroupsChart({
   data,
-}: IndividualsReachedByAgeAndGenderGroupsChartProps): React.ReactElement => {
+}: IndividualsReachedByAgeAndGenderGroupsChartProps): React.ReactElement {
   if (!data) return null;
 
   const chartData = {
@@ -27,7 +27,7 @@ export const IndividualsReachedByAgeAndGenderGroupsChart = ({
           '#B1E3E0',
           '#D2E0E0',
         ],
-        data: [...data.datasets[0]?.data],
+        data: [...(data.datasets[0]?.data || [])],
       },
     ],
   };
@@ -45,4 +45,4 @@ export const IndividualsReachedByAgeAndGenderGroupsChart = ({
   };
 
   return <Doughnut data={chartData} options={options} />;
-};
+}

@@ -1,13 +1,13 @@
-import { TextField, Box } from '@material-ui/core';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import React from 'react';
+import Autocomplete from '@mui/lab/Autocomplete';
+import { Box, TextField } from '@mui/material';
+import * as React from 'react';
 
-export const FormikAutocomplete = ({
+export function FormikAutocomplete({
   field,
   form,
   choices,
   label,
-}): React.ReactElement => {
+}): React.ReactElement {
   const realSelectedValue = choices.find((item) => item.value === field.value);
 
   const handleChange = (e, option): void => {
@@ -21,15 +21,15 @@ export const FormikAutocomplete = ({
   return (
     <Box mt={2}>
       <Autocomplete
-        id='combo-box-demo'
+        id="combo-box-demo"
         options={choices}
         onChange={handleChange}
         value={realSelectedValue}
         getOptionLabel={(choice) => choice.labelEn}
         renderInput={(params) => (
-          <TextField {...params} label={label} variant='outlined' />
+          <TextField {...params} label={label} variant="outlined" />
         )}
       />
     </Box>
   );
-};
+}

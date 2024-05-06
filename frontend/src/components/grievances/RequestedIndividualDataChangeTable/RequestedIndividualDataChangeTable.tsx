@@ -1,10 +1,10 @@
-import React, { ReactElement } from 'react';
-import { useArrayToDict } from '../../../hooks/useArrayToDict';
+import { ReactElement } from 'react';
+import { useArrayToDict } from '@hooks/useArrayToDict';
 import {
   GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
-} from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../core/LoadingComponent';
+} from '@generated/graphql';
+import { LoadingComponent } from '@core/LoadingComponent';
 import { DocumentsTable } from './DocumentsTable';
 import { DocumentsToEditTable } from './DocumentsToEditTable';
 import { DocumentsToRemoveTable } from './DocumentsToRemoveTable';
@@ -115,7 +115,7 @@ export function RequestedIndividualDataChangeTable({
               index={index}
               document={document}
             />
-          ))
+        ))
         : null}
       {identities?.length ? (
         <IdentitiesTable
@@ -131,20 +131,18 @@ export function RequestedIndividualDataChangeTable({
         />
       ) : null}
       {identitiesToEdit?.length
-        ? identitiesToEdit.map((identity, index) => {
-            return (
-              <IdentitiesToEditTable
-                key={identity.previous_value.number}
-                values={values}
-                isEdit={isEdit}
-                ticket={ticket}
-                setFieldValue={setFieldValue}
-                countriesDict={countriesDict}
-                index={index}
-                identity={identity}
-              />
-            );
-          })
+        ? identitiesToEdit.map((identity, index) => (
+            <IdentitiesToEditTable
+              key={identity.previous_value.number}
+              values={values}
+              isEdit={isEdit}
+              ticket={ticket}
+              setFieldValue={setFieldValue}
+              countriesDict={countriesDict}
+              index={index}
+              identity={identity}
+            />
+        ))
         : null}
       {paymentChannels?.length ? (
         <PaymentChannelsTable
@@ -156,19 +154,17 @@ export function RequestedIndividualDataChangeTable({
         />
       ) : null}
       {paymentChannelsToEdit?.length
-        ? paymentChannelsToEdit.map((paymentChannel, index) => {
-            return (
-              <PaymentChannelsToEditTable
-                key={paymentChannel.previous_value.bankAccountNumber}
-                values={values}
-                isEdit={isEdit}
-                ticket={ticket}
-                setFieldValue={setFieldValue}
-                index={index}
-                paymentChannel={paymentChannel}
-              />
-            );
-          })
+        ? paymentChannelsToEdit.map((paymentChannel, index) => (
+            <PaymentChannelsToEditTable
+              key={paymentChannel.previous_value.bankAccountNumber}
+              values={values}
+              isEdit={isEdit}
+              ticket={ticket}
+              setFieldValue={setFieldValue}
+              index={index}
+              paymentChannel={paymentChannel}
+            />
+        ))
         : null}
       {documentsToRemove?.length ? (
         <DocumentsToRemoveTable

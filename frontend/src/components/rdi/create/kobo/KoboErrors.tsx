@@ -1,11 +1,9 @@
-import React, {useState} from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
-import {
-  IconButton,
-  Collapse
-} from '@material-ui/core';
-import { ExpandLessRounded, ExpandMoreRounded } from '@material-ui/icons';
-import { KoboErrorNode } from '../../../../__generated__/graphql';
+import { IconButton, Collapse } from '@mui/material';
+import { ExpandLessRounded, ExpandMoreRounded } from '@mui/icons-material';
+import { KoboErrorNode } from '@generated/graphql';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -33,15 +31,19 @@ export function ErrorsKobo({
         <IconButton
           onClick={() => setExpanded(!expanded)}
           aria-expanded={expanded}
-          aria-label='show more'
+          aria-label="show more"
         >
           {expanded ? <ExpandLessRounded /> : <ExpandMoreRounded />}
         </IconButton>
       </ErrorsContainer>
-      <Collapse in={expanded} timeout='auto' unmountOnExit>
+      <Collapse in={expanded} timeout="auto" unmountOnExit>
         {errors.map((item) => (
-          <Error>
-            <strong>Field: {item.header}</strong> {item.message}
+          <Error key={item.message}>
+            <strong>
+              Field:
+              {item.header}
+            </strong>{' '}
+            {item.message}
           </Error>
         ))}
       </Collapse>

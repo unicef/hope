@@ -97,7 +97,7 @@ class TestDeliveryDate(APITestCase):
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     @patch(
         "hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service.timezone.now",
-        return_value=datetime(2023, 10, 23),
+        return_value=datetime(2023, 10, 23).replace(tzinfo=utc),
     )
     def test_uploading_delivery_date_with_xlsx(self, mock_time_zone: Any, mock_exchange_rate: Any) -> None:
         self.payment_1.delivery_date = None
@@ -187,10 +187,12 @@ class TestDeliveryDate(APITestCase):
 
         payment_1 = PaymentFactory(parent=pp)
         payment_1.unicef_id = "RCPT-0060-24-0.000.665"
+        payment_1.entitlement_quantity = 212  # the same value like in file
         payment_1.save()
 
         payment_2 = PaymentFactory(parent=pp)
         payment_2.unicef_id = "RCPT-0060-24-0.000.666"
+        payment_2.entitlement_quantity = 212  # the same value like in file
         payment_2.save()
 
         file_with_reference_id = file_reference_id()

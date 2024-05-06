@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const UPDATE_PAYMENT_PLAN = gql`
   mutation UpdatePP($input: UpdatePaymentPlanInput!) {

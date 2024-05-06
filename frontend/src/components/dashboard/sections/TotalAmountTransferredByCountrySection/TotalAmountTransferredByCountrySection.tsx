@@ -1,17 +1,17 @@
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { GlobalAreaChartsQuery } from '../../../../__generated__/graphql';
+import { GlobalAreaChartsQuery } from '@generated/graphql';
 import { TotalAmountTransferredByCountryChart } from '../../charts/TotalAmountTransferredByCountryChart';
 import { CardTextLightLarge } from '../../DashboardCard';
 import { DashboardPaper } from '../../DashboardPaper';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface TotalAmountTransferredByCountrySectionProps {
   data: GlobalAreaChartsQuery['chartTotalTransferredCashByCountry'];
 }
-export const TotalAmountTransferredByCountrySection = ({
+export function TotalAmountTransferredByCountrySection({
   data,
-}: TotalAmountTransferredByCountrySectionProps): React.ReactElement => {
+}: TotalAmountTransferredByCountrySectionProps): React.ReactElement {
   const { businessArea } = useBaseUrl();
   const { t } = useTranslation();
   if (businessArea !== 'global') {
@@ -26,4 +26,4 @@ export const TotalAmountTransferredByCountrySection = ({
       <TotalAmountTransferredByCountryChart data={data} />
     </DashboardPaper>
   );
-};
+}

@@ -3,26 +3,26 @@
 exports[`components/rdi/details/individual/RegistrationIndividualBioData should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root sc-dnqmqq fafuoy MuiPaper-elevation1 MuiPaper-rounded"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-qZrbh jScPhr css-1ps6pg7-MuiPaper-root"
   >
     <div
-      class="sc-bxivhb jsIVNl"
+      class="sc-hLQSwg iuGfmc"
     >
       <h6
-        class="MuiTypography-root MuiTypography-h6"
+        class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
       >
         Bio Data
       </h6>
     </div>
     <div
-      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6"
+      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6 css-zow5z4-MuiGrid-root"
     >
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Full Name
@@ -30,16 +30,21 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Full Name"
           >
-            Alicja Kowalska
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Alicja Kowalska
+            </span>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Given Name
@@ -47,16 +52,21 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Given Name"
           >
-            Alicja
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Alicja
+            </span>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Middle Name
@@ -69,11 +79,11 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Family Name
@@ -81,16 +91,21 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Family Name"
           >
-            Kowalska
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Kowalska
+            </span>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Gender
@@ -98,16 +113,21 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Gender"
           >
-            Female
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Female
+            </span>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Age
@@ -115,16 +135,21 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Age"
           >
-            80
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              80
+            </span>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Date of Birth
@@ -132,20 +157,25 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Date of Birth"
           >
-            <time
-              datetime="-894672000000"
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
             >
-              26 Aug 1941
-            </time>
+              <time
+                datetime="-894672000000"
+              >
+                26 Aug 1941
+              </time>
+            </span>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Estimated Date of Birth
@@ -153,16 +183,21 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Estimated Date of Birth"
           >
-            No
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              No
+            </span>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Marital Status
@@ -170,16 +205,21 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Marital Status"
           >
-            Married
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Married
+            </span>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Work Status
@@ -187,16 +227,21 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Work Status"
           >
-            Not provided
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Not provided
+            </span>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Pregnant
@@ -204,16 +249,21 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Pregnant"
           >
-            Yes
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Yes
+            </span>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Household ID
@@ -221,16 +271,21 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Household ID"
           >
-            -
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              -
+            </span>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Role
@@ -238,16 +293,21 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Role"
           >
-            Alternate collector
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Alternate collector
+            </span>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Relationship to HOH
@@ -255,16 +315,21 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Relationship to HOH"
           >
-            Not a Family Member. Can only act as a recipient.
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Not a Family Member. Can only act as a recipient.
+            </span>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Preferred language
@@ -277,18 +342,18 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
       >
         <div
-          class="sc-iwsKbI AgGOt"
+          class="sc-jsEeTM gZYCVp"
         />
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Observed disabilities
@@ -301,11 +366,11 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Seeing disability severity
@@ -313,16 +378,21 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Seeing disability severity"
           >
-            None
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              None
+            </span>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Hearing disability severity
@@ -330,16 +400,21 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Hearing disability severity"
           >
-            None
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              None
+            </span>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Physical disability severity
@@ -347,16 +422,21 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Physical disability severity"
           >
-            None
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              None
+            </span>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Remembering or concentrating disability severity
@@ -364,16 +444,21 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Remembering or concentrating disability severity"
           >
-            None
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              None
+            </span>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Self-care disability severity
@@ -381,16 +466,21 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Self-care disability severity"
           >
-            None
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              None
+            </span>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Communicating disability severity
@@ -398,16 +488,21 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Communicating disability severity"
           >
-            None
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              None
+            </span>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Disability
@@ -415,29 +510,34 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Disability"
           >
-            Not Disabled
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              Not Disabled
+            </span>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
       >
         <div
-          class="sc-iwsKbI AgGOt"
+          class="sc-jsEeTM gZYCVp"
         />
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div
-          class="MuiBox-root MuiBox-root-1"
+          class="MuiBox-root css-cgq59l"
         >
           <div
-            class="MuiBox-root MuiBox-root-2"
+            class="MuiBox-root css-1itv5e3"
           >
             <div>
               <span
-                class="sc-bwzfXH eoWrid"
+                class="sc-guDLey RwNuC"
                 color="textSecondary"
               >
                 National ID
@@ -445,13 +545,18 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
               <div
                 data-cy="label-National ID"
               >
-                WSH221365
+                <span
+                  class="sc-dmyCSP bGPBYf"
+                  color="textSecondary"
+                >
+                  WSH221365
+                </span>
               </div>
             </div>
           </div>
           <div>
             <span
-              class="sc-bwzfXH eoWrid"
+              class="sc-guDLey RwNuC"
               color="textSecondary"
             >
               issued
@@ -459,24 +564,29 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             <div
               data-cy="label-issued"
             >
-              Poland
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                Poland
+              </span>
             </div>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
       >
         <div
-          class="sc-iwsKbI AgGOt"
+          class="sc-jsEeTM gZYCVp"
         />
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Email
@@ -489,11 +599,11 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Phone Number
@@ -501,16 +611,21 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Phone Number"
           >
-            +48503123555
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              +48503123555
+            </span>
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Alternate Phone Number
@@ -518,7 +633,12 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Alternate Phone Number"
           >
-            -
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              -
+            </span>
           </div>
         </div>
       </div>

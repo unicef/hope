@@ -123,3 +123,5 @@ venv.bak/
 *.devcontainer
 **/.vscode/settings.json
 /HCT-MIS.code-workspace
+
+cov.json

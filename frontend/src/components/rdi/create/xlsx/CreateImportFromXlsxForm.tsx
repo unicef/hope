@@ -1,22 +1,23 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { CircularProgress } from '@material-ui/core';
+import { Box, CircularProgress } from '@mui/material';
 import { Field, FormikProvider, useFormik } from 'formik';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import {
   ImportDataStatus,
-  useCreateRegistrationXlsxImportMutation,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
+  useCreateRegistrationXlsxImportMutation, useProgramQuery,
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
 import { DropzoneField } from './DropzoneField';
 import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
 import { useSaveXlsxImportDataAndCheckStatus } from './useSaveXlsxImportDataAndCheckStatus';
+import { useProgramContext } from '../../../../programContext';
 
 const CircularProgressContainer = styled.div`
   display: flex;
@@ -42,11 +43,12 @@ export function CreateImportFromXlsxForm({
     loading: saveXlsxLoading,
     xlsxImportData,
   } = useSaveXlsxImportDataAndCheckStatus();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea,programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const [createImport] = useCreateRegistrationXlsxImportMutation();
+  const {data:programData} = useProgramQuery({ variables: { id: programId } });
 
   const onSubmit = async (values): Promise<void> => {
     setSubmitDisabled(true);
@@ -61,9 +63,15 @@ export function CreateImportFromXlsxForm({
           },
         },
       });
-      history.push(
-        `/${baseUrl}/registration-data-import/${data.data.registrationXlsxImport.registrationDataImport.id}`,
-      );
+      if (programData.program.isSocialWorkerProgram) {
+        navigate(
+          `/${baseUrl}/registration-data-import-for-people/${data.data.registrationXlsxImport.registrationDataImport.id}`,
+        );
+      } else {
+        navigate(
+          `/${baseUrl}/registration-data-import/${data.data.registrationXlsxImport.registrationDataImport.id}`,
+        );
+      }
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
       setSubmitDisabled(false);
@@ -105,29 +113,29 @@ export function CreateImportFromXlsxForm({
   }, [xlsxImportData]);
 
   return (
-    <div>
-      <FormikProvider value={formik}>
-        <DropzoneField loading={saveXlsxLoading} />
+    <FormikProvider value={formik}>
+      <DropzoneField loading={saveXlsxLoading} />
+      <Box mt={2}>
         <Field
-          name='name'
+          name="name"
           fullWidth
           label={t('Title')}
           required
-          variant='outlined'
+          variant="outlined"
           component={FormikTextField}
         />
-        <ScreenBeneficiaryField />
-        {saveXlsxLoading ? (
-          <CircularProgressContainer>
-            <CircularProgress />
-          </CircularProgressContainer>
-        ) : (
-          <XlsxImportDataRepresentation
-            xlsxImportData={xlsxImportData}
-            loading={saveXlsxLoading}
-          />
-        )}
-      </FormikProvider>
-    </div>
+      </Box>
+      <ScreenBeneficiaryField />
+      {saveXlsxLoading ? (
+        <CircularProgressContainer>
+          <CircularProgress />
+        </CircularProgressContainer>
+      ) : (
+        <XlsxImportDataRepresentation
+          xlsxImportData={xlsxImportData}
+          loading={saveXlsxLoading}
+        />
+      )}
+    </FormikProvider>
   );
 }

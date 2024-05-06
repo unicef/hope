@@ -1,45 +1,60 @@
-import { ApolloProvider } from '@apollo/react-hooks';
-import MomentUtils from '@date-io/moment';
-import { ThemeProvider } from '@material-ui/core';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import {
+  ApolloProvider,
+  ApolloClient,
+  NormalizedCacheObject,
+} from '@apollo/client';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { CssBaseline } from '@mui/material';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
+import { ReactNode, useEffect, useState } from 'react';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
-import ApolloClient from 'apollo-client';
-import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import { getClient } from './apollo/client';
-import { ConfirmationDialogProvider } from './components/core/ConfirmationDialog';
+import { ConfirmationDialogProvider } from '@core/ConfirmationDialog';
 import { theme } from './theme';
 import { ProgramProvider } from './programContext';
-import { SnackbarProvider } from './hooks/useSnackBar';
+import { SnackbarProvider } from '@hooks/useSnackBar';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
 
-export const Providers: React.FC = ({ children }) => {
+interface ProvidersProps {
+  children: ReactNode[];
+}
+
+const queryClient = new QueryClient();
+
+export const Providers: React.FC<ProvidersProps> = ({ children }) => {
   const [apolloClient, setApolloClient] = useState<
-    ApolloClient<NormalizedCacheObject>
+    ApolloClient<NormalizedCacheObject> | undefined
   >();
+
   useEffect(() => {
     getClient().then((client) => {
       setApolloClient(client);
     });
   }, []);
+
   if (!apolloClient) {
     return null;
   }
+
   return (
-    <ApolloProvider client={apolloClient}>
-      <ThemeProvider theme={theme}>
-        <StyledThemeProvider theme={theme}>
-          <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils}>
+    <QueryClientProvider client={queryClient}>
+      <ApolloProvider client={apolloClient}>
+        <MuiThemeProvider theme={theme}>
+          <StyledThemeProvider theme={theme}>
             <ConfirmationDialogProvider>
-              <CssBaseline />
-              <ProgramProvider>
-                <SnackbarProvider>{children}</SnackbarProvider>
-              </ProgramProvider>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <CssBaseline />
+                <ProgramProvider>
+                  <SnackbarProvider>{children}</SnackbarProvider>
+                </ProgramProvider>
+              </LocalizationProvider>
             </ConfirmationDialogProvider>
-          </MuiPickersUtilsProvider>
-        </StyledThemeProvider>
-      </ThemeProvider>
-    </ApolloProvider>
+          </StyledThemeProvider>
+        </MuiThemeProvider>
+      </ApolloProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 };

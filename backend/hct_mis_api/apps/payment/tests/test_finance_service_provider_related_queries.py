@@ -150,7 +150,7 @@ edges {
 class TestFSPRelatedSchema(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        create_afghanistan()
+        cls.business_area = create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
@@ -162,6 +162,7 @@ class TestFSPRelatedSchema(APITestCase):
             distribution_limit=10_000,
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
         )
+        cls.fsp_1.allowed_business_areas.add(cls.business_area)
         cls.fsp_2 = FinancialServiceProviderFactory(
             name="FSP_2",
             vision_vendor_number="666-69-3686",
@@ -169,6 +170,7 @@ class TestFSPRelatedSchema(APITestCase):
             distribution_limit=20_000,
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
         )
+        cls.fsp_2.allowed_business_areas.add(cls.business_area)
 
         # Generate FinancialServiceProvidersXlsxTemplates
         cls.fsp_xlsx_template_1 = FinancialServiceProviderXlsxTemplateFactory(
@@ -194,7 +196,7 @@ class TestFSPRelatedSchema(APITestCase):
     def test_query_all_financial_service_providers(self) -> None:
         self.snapshot_graphql_request(
             request_string=QUERY_ALL_FINANCIAL_SERVICE_PROVIDERS,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables={"orderBy": "name"},
         )
 
@@ -206,7 +208,7 @@ class TestFSPRelatedSchema(APITestCase):
     def test_query_single_financial_service_provider(self) -> None:
         self.snapshot_graphql_request(
             request_string=QUERY_FINANCIAL_SERVICE_PROVIDER,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables={"id": self.id_to_base64(self.fsp_1.id, "FinancialServiceProviderNode")},
         )
 

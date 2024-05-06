@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const PAYMENT_RECORD_QUERY = gql`
   query PaymentRecord($id: ID!) {
@@ -22,6 +22,7 @@ export const PAYMENT_RECORD_QUERY = gql`
         statusDate
         receivedAmount
         isManuallyEditable
+        adminUrl
       }
       currency
       entitlementQuantity

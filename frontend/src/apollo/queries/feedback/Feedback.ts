@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const Feedback = gql`
   query Feedback($id: ID!) {
@@ -6,6 +6,7 @@ export const Feedback = gql`
       id
       unicefId
       issueType
+      adminUrl
       householdLookup {
         id
         unicefId

@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const CHOOSE_DELIVERY_MECHANISMS_FOR_PAYMENT_PLAN = gql`
   mutation ChooseDeliveryMechForPaymentPlan(

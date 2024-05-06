@@ -1,9 +1,13 @@
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
-import { Tooltip, TooltipProps } from '@material-ui/core';
-import WarningIcon from '@material-ui/icons/Warning';
+import { Tooltip, TooltipProps } from '@mui/material';
+import WarningIcon from '@mui/icons-material/Warning';
 
-const StyledWarning = styled(WarningIcon)`
+interface StyledWarningProps {
+  confirmed: boolean;
+}
+
+const StyledWarning = styled(WarningIcon)<StyledWarningProps>`
   color: ${({ theme, confirmed }) =>
     confirmed ? 'deeppink' : theme.hctPalette.orange};
 `;
@@ -14,14 +18,14 @@ interface WarningTooltipProps {
   handleClick?: TooltipProps['onClick'];
 }
 
-export const WarningTooltip = ({
+export function WarningTooltip({
   confirmed = false,
   message = '',
   handleClick,
-}: WarningTooltipProps): React.ReactElement => {
+}: WarningTooltipProps): React.ReactElement {
   return (
     <Tooltip onClick={handleClick} title={message}>
-      <StyledWarning confirmed={confirmed ? 1 : 0} />
+      <StyledWarning confirmed={confirmed} />
     </Tooltip>
   );
-};
+}

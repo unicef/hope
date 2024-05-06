@@ -25,19 +25,19 @@ export const fakeApolloAllSteficonRules = [
           edges: [
             {
               node: {
-                id: "U3RlZmljb25SdWxlTm9kZTo1",
-                name: "Test Formula for Payment Plan 033"
+                id: 'U3RlZmljb25SdWxlTm9kZTo1',
+                name: 'Test Formula for Payment Plan 033',
               },
             },
             {
               node: {
-                id: "U3RlZmljb25SdWxlTm9kZTo3",
-                name: "Test Formula for Payment Plan 044"
+                id: 'U3RlZmljb25SdWxlTm9kZTo3',
+                name: 'Test Formula for Payment Plan 044',
               },
             },
           ],
         },
       },
     },
-  }
+  },
 ];

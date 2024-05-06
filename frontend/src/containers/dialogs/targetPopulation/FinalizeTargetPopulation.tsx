@@ -1,20 +1,22 @@
-import { Button, DialogContent, DialogTitle } from '@material-ui/core';
-import React from 'react';
+import { Button, DialogContent, DialogTitle } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
-import { LoadingButton } from '../../../components/core/LoadingButton';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { useFinalizeTpMutation } from '../../../__generated__/graphql';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { useFinalizeTpMutation } from '@generated/graphql';
 import { Dialog } from '../Dialog';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useNavigate } from 'react-router-dom';
 
 export interface FinalizeTargetPopulationPropTypes {
   open: boolean;
-  setOpen: Function;
+  setOpen: (open: boolean) => void;
+  totalHouseholds: number;
+  targetPopulationId: string;
 }
 
 export const FinalizeTargetPopulation = ({
@@ -22,8 +24,8 @@ export const FinalizeTargetPopulation = ({
   setOpen,
   totalHouseholds,
   targetPopulationId,
-}): React.ReactElement => {
-  const history = useHistory();
+}: FinalizeTargetPopulationPropTypes): React.ReactElement => {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
@@ -36,15 +38,15 @@ export const FinalizeTargetPopulation = ({
     }).then(() => {
       setOpen(false);
       showMessage(t('Target Population Finalized'));
-      history.push(`/${baseUrl}/target-population/${id}`);
+      navigate(`/${baseUrl}/target-population/${id}`);
     });
   };
   return (
     <Dialog
       open={open}
       onClose={() => setOpen(false)}
-      scroll='paper'
-      aria-labelledby='form-dialog-title'
+      scroll="paper"
+      aria-labelledby="form-dialog-title"
     >
       <DialogTitleWrapper>
         <DialogTitle>{t('Send to Cash Assist')}</DialogTitle>
@@ -62,11 +64,11 @@ export const FinalizeTargetPopulation = ({
           <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
           <LoadingButton
             onClick={() => onSubmit(targetPopulationId)}
-            color='primary'
-            variant='contained'
+            color="primary"
+            variant="contained"
             loading={loading}
             disabled={loading || !totalHouseholds}
-            data-cy='button-target-population-send-to-cash-assist'
+            data-cy="button-target-population-send-to-cash-assist"
           >
             {t('Send to cash assist')}
           </LoadingButton>

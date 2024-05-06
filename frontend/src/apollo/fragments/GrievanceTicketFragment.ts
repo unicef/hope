@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const grievanceTicketDetailed = gql`
   fragment grievanceTicketDetailed on GrievanceTicketNode {
@@ -37,6 +37,7 @@ export const grievanceTicketDetailed = gql`
       lastName
       email
     }
+    adminUrl
     individual {
       ...individualDetailed
       householdsAndRoles {

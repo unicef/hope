@@ -1,22 +1,22 @@
-import { Avatar, Box, Grid, Paper, Typography } from '@material-ui/core';
+import { Avatar, Box, Grid, Paper, Typography } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
-import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
-import { renderUserName } from '../../../../utils/utils';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { renderUserName } from '@utils/utils';
 import {
   FeedbackDocument,
   FeedbackQuery,
   useCreateFeedbackMsgMutation,
   useMeQuery,
-} from '../../../../__generated__/graphql';
-import { LoadingButton } from '../../../core/LoadingButton';
-import { OverviewContainerColumn } from '../../../core/OverviewContainerColumn';
-import { Title } from '../../../core/Title';
-import { UniversalMoment } from '../../../core/UniversalMoment';
+} from '@generated/graphql';
+import { LoadingButton } from '@core/LoadingButton';
+import { OverviewContainerColumn } from '@core/OverviewContainerColumn';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 
 const Name = styled.span`
   font-size: 16px;
@@ -40,10 +40,10 @@ interface MessagesProps {
   canAddMessage: boolean;
 }
 
-export const Messages = ({
+export function Messages({
   messages,
   canAddMessage,
-}: MessagesProps): React.ReactElement => {
+}: MessagesProps): React.ReactElement {
   const { t } = useTranslation();
   const { data: meData, loading: meLoading } = useMeQuery({
     fetchPolicy: 'cache-and-network',
@@ -64,11 +64,11 @@ export const Messages = ({
   ): React.ReactElement => (
     <Grid container key={noteId}>
       <Grid item xs={2}>
-        <Avatar alt={`${name} picture`} src='/static/images/avatar/1.jpg' />
+        <Avatar alt={`${name} picture`} src="/static/images/avatar/1.jpg" />
       </Grid>
       <Grid item xs={10}>
         <Grid item xs={12}>
-          <Box display='flex' justifyContent='space-between'>
+          <Box display="flex" justifyContent="space-between">
             <Name>{name}</Name>
             <Date>
               <UniversalMoment withTime>{date}</UniversalMoment>
@@ -124,7 +124,7 @@ export const Messages = ({
           {({ submitForm }) => (
             <StyledBox>
               <Title>
-                <Typography variant='h6'>{t('Notes')}</Typography>
+                <Typography variant="h6">{t('Notes')}</Typography>
               </Title>
               <OverviewContainerColumn>
                 {mappedMessages}
@@ -135,7 +135,7 @@ export const Messages = ({
                     </Grid>
                     <Grid item xs={10}>
                       <Grid item xs={12}>
-                        <Box display='flex' justifyContent='space-between'>
+                        <Box display="flex" justifyContent="space-between">
                           <Name>{renderUserName(meData.me)}</Name>
                         </Box>
                       </Grid>
@@ -143,22 +143,22 @@ export const Messages = ({
                         <DescMargin>
                           <Form>
                             <Field
-                              name='newNote'
+                              name="newNote"
                               multiline
                               fullWidth
-                              variant='filled'
-                              label='Add a message ...'
+                              variant="filled"
+                              label="Add a message ..."
                               component={FormikTextField}
                             />
                             <Box
                               mt={2}
-                              display='flex'
-                              justifyContent='flex-end'
+                              display="flex"
+                              justifyContent="flex-end"
                             >
                               <LoadingButton
                                 loading={loading}
-                                color='primary'
-                                variant='contained'
+                                color="primary"
+                                variant="contained"
                                 onClick={submitForm}
                               >
                                 {t('Send New Message')}
@@ -177,4 +177,4 @@ export const Messages = ({
       </Box>
     </Grid>
   );
-};
+}

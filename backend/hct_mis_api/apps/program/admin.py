@@ -1,6 +1,7 @@
 from typing import Optional
 
 from django.contrib import admin, messages
+from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -55,6 +56,9 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
 
     inlines = (ProgramCycleAdminInline,)
     ordering = ("name",)
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet[Program]:
+        return super().get_queryset(request).select_related("data_collecting_type", "business_area")
 
     @button(
         permission="targeting.add_targetpopulation",

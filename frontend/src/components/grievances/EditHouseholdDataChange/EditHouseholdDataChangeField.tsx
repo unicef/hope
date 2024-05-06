@@ -1,31 +1,31 @@
-import { Grid } from '@material-ui/core';
-import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+import { Grid } from '@mui/material';
+import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useLocation } from 'react-router-dom';
-import { FormikDateField } from '../../../shared/Formik/FormikDateField';
-import { FormikDecimalField } from '../../../shared/Formik/FormikDecimalField';
-import { FormikFileField } from '../../../shared/Formik/FormikFileField';
-import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
+import { FormikDateField } from '@shared/Formik/FormikDateField';
+import { FormikDecimalField } from '@shared/Formik/FormikDecimalField';
+import { FormikFileField } from '@shared/Formik/FormikFileField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
   AllEditHouseholdFieldsQuery,
   useAllAdminAreasLazyQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { FormikBoolFieldGrievances } from '../FormikBoolFieldGrievances';
 import { GrievanceFlexFieldPhotoModalEditable } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalEditable';
-import { FormikAutocomplete } from '../../../shared/Formik/FormikAutocomplete';
-import { FormikAsyncAutocomplete } from '../../../shared/Formik/FormikAsyncAutocomplete';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { FormikAutocomplete } from '@shared/Formik/FormikAutocomplete';
+import { FormikAsyncAutocomplete } from '@shared/Formik/FormikAsyncAutocomplete';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
-export interface EditHouseholdDataChangeField {
+export interface EditHouseholdDataChangeFieldProps {
   field: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];
   name: string;
 }
 export const EditHouseholdDataChangeField = ({
   name,
   field,
-}: EditHouseholdDataChangeField): React.ReactElement => {
+}: EditHouseholdDataChangeFieldProps): React.ReactElement => {
   const { businessArea } = useBaseUrl();
   const location = useLocation();
   const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
@@ -91,7 +91,7 @@ export const EditHouseholdDataChangeField = ({
     case 'DATE':
       fieldProps = {
         component: FormikDateField,
-        decoratorEnd: <CalendarTodayRoundedIcon color='disabled' />,
+        decoratorEnd: <CalendarTodayRoundedIcon color="disabled" />,
       };
       break;
     case 'BOOL':
@@ -113,18 +113,16 @@ export const EditHouseholdDataChangeField = ({
       fieldProps = {};
   }
   return (
-    <>
-      <Grid item xs={4}>
-        <Field
-          name={name}
-          fullWidth
-          variant='outlined'
-          label={field.labelEn}
-          required={field.required}
-          disabled={isEditTicket}
-          {...fieldProps}
-        />
-      </Grid>
-    </>
+    <Grid item xs={4}>
+      <Field
+        name={name}
+        fullWidth
+        variant="outlined"
+        label={field.labelEn}
+        required={field.required}
+        disabled={isEditTicket}
+        {...fieldProps}
+      />
+    </Grid>
   );
 };

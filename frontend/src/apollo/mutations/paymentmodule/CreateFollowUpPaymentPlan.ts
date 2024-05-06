@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const CREATE_FOLLOW_UP_PAYMENT_PLAN = gql`
   mutation CreateFollowUpPP(

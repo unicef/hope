@@ -1,15 +1,16 @@
-import { Button } from '@material-ui/core';
-import React, { useState } from 'react';
+import { Button } from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { UsersListFilters } from '../../../components/core/UsersListFilters';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { UsersListFilters } from '@components/core/UsersListFilters';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { getFilterFromQueryParams } from '../../../utils/utils';
+import { usePermissions } from '@hooks/usePermissions';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { UsersTable } from '../../tables/UsersTable';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const initialFilter = {
   search: '',
@@ -18,7 +19,7 @@ const initialFilter = {
   status: '',
 };
 
-export const UsersPage = (): React.ReactElement => {
+export function UsersPage(): React.ReactElement {
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const { t } = useTranslation();
@@ -40,12 +41,12 @@ export const UsersPage = (): React.ReactElement => {
       <PageHeader title={t('Programme Users')}>
         <>
           <Button
-            variant='contained'
-            color='primary'
+            variant="contained"
+            color="primary"
             onClick={() => null}
-            component='a'
+            component="a"
             href={`/api/download-exported-users/${businessArea}`}
-            data-cy='button-target-population-create-new'
+            data-cy="button-target-population-create-new"
           >
             Export
           </Button>
@@ -61,4 +62,4 @@ export const UsersPage = (): React.ReactElement => {
       <UsersTable filter={appliedFilter} />
     </>
   );
-};
+}

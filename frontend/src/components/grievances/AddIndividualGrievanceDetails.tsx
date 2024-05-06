@@ -1,20 +1,20 @@
-import { Box, Button, Grid, Typography } from '@material-ui/core';
-import React from 'react';
+import { Box, Button, Grid, Typography } from '@mui/material';
+import * as React from 'react';
 import capitalize from 'lodash/capitalize';
 import { useTranslation } from 'react-i18next';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { getFlexFieldTextValue, renderBoolean } from '../../utils/utils';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
+import { getFlexFieldTextValue, renderBoolean } from '@utils/utils';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
   useApproveAddIndividualDataChangeMutation,
-} from '../../__generated__/graphql';
-import { useConfirmation } from '../core/ConfirmationDialog';
-import { LabelizedField } from '../core/LabelizedField';
-import { LoadingComponent } from '../core/LoadingComponent';
-import { Title } from '../core/Title';
+} from '@generated/graphql';
+import { useConfirmation } from '@core/ConfirmationDialog';
+import { LabelizedField } from '@core/LabelizedField';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { Title } from '@core/Title';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 
 export function AddIndividualGrievanceDetails({
@@ -74,7 +74,7 @@ export function AddIndividualGrievanceDetails({
         <Grid key={key} item xs={6}>
           <LabelizedField
             label={key === 'sex' ? t('GENDER') : key.replace(/_/g, ' ')}
-            value={textValue}
+            value={<span>{textValue as React.ReactNode}</span>}
           />
         </Grid>
       );
@@ -82,28 +82,24 @@ export function AddIndividualGrievanceDetails({
 
   const flexFieldLabels =
     Object.entries(flexFields || {}).map(
-      ([key, value]: [string, string | string[]]) => {
-        return (
-          <Grid key={key} item xs={6}>
-            <LabelizedField
-              label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
-              value={getFlexFieldTextValue(key, value, fieldsDict[key])}
-            />
-          </Grid>
-        );
-      },
-    ) || [];
-  const documentLabels =
-    documents?.map((item) => {
-      return (
-        <Grid key={item?.country + item?.key} item xs={6}>
+      ([key, value]: [string, string | string[]]) => (
+        <Grid key={key} item xs={6}>
           <LabelizedField
-            label={item?.key?.replace(/_/g, ' ')}
-            value={item.number}
+            label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
+            value={getFlexFieldTextValue(key, value, fieldsDict[key])}
           />
         </Grid>
-      );
-    }) || [];
+      ),
+    ) || [];
+  const documentLabels =
+    documents?.map((item) => (
+      <Grid key={item?.country + item?.key} item xs={6}>
+        <LabelizedField
+          label={item?.key?.replace(/_/g, ' ')}
+          value={item.number}
+        />
+      </Grid>
+    )) || [];
   const identityLabels =
     identities?.map((item) => {
       const partner = item.partner || item.agency; // For backward compatibility
@@ -132,11 +128,11 @@ export function AddIndividualGrievanceDetails({
   return (
     <ApproveBox>
       <Title>
-        <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>{t('Individual Data')}</Typography>
+        <Box display="flex" justifyContent="space-between">
+          <Typography variant="h6">{t('Individual Data')}</Typography>
           {canApproveDataChange && (
             <Button
-              data-cy='button-approve'
+              data-cy="button-approve"
               onClick={() =>
                 confirm({
                   title: t('Warning'),
@@ -146,8 +142,8 @@ export function AddIndividualGrievanceDetails({
                     await mutate({
                       variables: {
                         grievanceTicketId: ticket.id,
-                        approveStatus: !ticket.addIndividualTicketDetails
-                          .approveStatus,
+                        approveStatus:
+                          !ticket.addIndividualTicketDetails.approveStatus,
                       },
                       refetchQueries: () => [
                         {
@@ -172,7 +168,7 @@ export function AddIndividualGrievanceDetails({
                   ? 'outlined'
                   : 'contained'
               }
-              color='primary'
+              color="primary"
               disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
             >
               {ticket.addIndividualTicketDetails.approveStatus

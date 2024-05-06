@@ -10,7 +10,10 @@ from hct_mis_api.apps.account.admin.forms import (
 )
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User, UserRole
-from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.account.permissions import (
+    DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER,
+    Permissions,
+)
 from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
 from hct_mis_api.apps.core.models import BusinessArea
 
@@ -102,28 +105,17 @@ class UserRolesTest(TestCase):
             user=user_not_unicef_partner,
         )
 
-        self.assertEqual(
+        self.assertIn(
+            Permissions.RDI_VIEW_LIST.value,
             user_not_unicef_partner.permissions_in_business_area(self.business_area_afg.slug),
-            [Permissions.RDI_VIEW_LIST.value],
         )
-        self.assertEqual(
+        self.assertNotIn(
+            Permissions.REPORTING_EXPORT.value,
+            user_not_unicef_partner.permissions_in_business_area(self.business_area_afg.slug),
+        )
+        self.assertIn(
+            Permissions.REPORTING_EXPORT.value,
             user_not_unicef_partner.permissions_in_business_area(self.business_area_ukr.slug),
-            [Permissions.REPORTING_EXPORT.value],
-        )
-        self.assertTrue(
-            user_not_unicef_partner.cached_has_user_roles_for_business_area_and_permission(
-                self.business_area_afg, Permissions.RDI_VIEW_LIST.value
-            )
-        )
-        self.assertFalse(
-            user_not_unicef_partner.cached_has_user_roles_for_business_area_and_permission(
-                self.business_area_afg, Permissions.REPORTING_EXPORT.value
-            )
-        )
-        self.assertTrue(
-            user_not_unicef_partner.cached_has_user_roles_for_business_area_and_permission(
-                self.business_area_ukr, Permissions.REPORTING_EXPORT.value
-            )
         )
 
         user_role_1.expiry_date = "2024-02-02"
@@ -136,13 +128,27 @@ class UserRolesTest(TestCase):
             user_not_unicef_partner.permissions_in_business_area(self.business_area_afg.slug),
             [],
         )
-        self.assertFalse(
-            user_not_unicef_partner.cached_has_user_roles_for_business_area_and_permission(
-                self.business_area_afg, Permissions.RDI_VIEW_LIST.value
-            )
+        self.assertNotIn(
+            Permissions.RDI_VIEW_LIST.value,
+            user_not_unicef_partner.permissions_in_business_area(self.business_area_afg.slug),
         )
-        self.assertFalse(
-            user_not_unicef_partner.cached_has_user_roles_for_business_area_and_permission(
-                self.business_area_afg, Permissions.REPORTING_EXPORT.value
-            )
+        self.assertNotIn(
+            Permissions.REPORTING_EXPORT.value,
+            user_not_unicef_partner.permissions_in_business_area(self.business_area_afg.slug),
+        )
+
+    def test_unicef_partner_has_permission_from_user_and_default_permission(self) -> None:
+        partner = PartnerFactory(name="UNICEF")
+        user = UserFactory(partner=partner)
+        role = Role.objects.create(name="111", permissions=[Permissions.GRIEVANCES_CREATE.value])
+        UserRole.objects.create(role=role, business_area=self.business_area_afg, user=user)
+
+        self.assertIn(
+            Permissions.GRIEVANCES_CREATE.value, user.permissions_in_business_area(self.business_area_afg.slug)
+        )
+        for permission in DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER:
+            self.assertIn(permission.value, user.permissions_in_business_area(self.business_area_afg.slug))
+
+        self.assertNotIn(
+            Permissions.GRIEVANCES_UPDATE.value, user.permissions_in_business_area(self.business_area_afg.slug)
         )

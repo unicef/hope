@@ -1,13 +1,11 @@
-import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Slider from '@material-ui/core/Slider';
-import { Typography } from '@material-ui/core';
+import * as React from 'react';
+import { styled } from '@mui/system';
+import Grid from '@mui/material/Grid';
+import Slider from '@mui/material/Slider';
+import { Typography, Box } from '@mui/material';
 
-const useStyles = makeStyles({
-  root: {
-    width: 400,
-  },
+const StyledBox = styled(Box)({
+  width: 400,
 });
 
 export const FormikSliderField = ({
@@ -19,16 +17,14 @@ export const FormikSliderField = ({
   dataCy,
   ...otherProps
 }): React.ReactElement => {
-  const classes = useStyles();
-
-  const handleSliderChange = (event, newValue): void => {
+  const handleSliderChange = (_, newValue): void => {
     form.setFieldValue(field.name, newValue);
   };
 
   return (
-    <div className={classes.root}>
-      <Typography variant='caption'>{otherProps.label}</Typography>
-      <Grid container spacing={2} alignItems='center'>
+    <StyledBox>
+      <Typography variant="caption">{otherProps.label}</Typography>
+      <Grid container spacing={2} alignItems="center">
         <Grid item xs>
           <Slider
             {...otherProps}
@@ -37,7 +33,7 @@ export const FormikSliderField = ({
             max={max}
             value={typeof field.value === 'number' ? field.value : 0}
             onChange={handleSliderChange}
-            aria-labelledby='input-slider'
+            aria-labelledby="input-slider"
           />
         </Grid>
         <Grid item>
@@ -47,6 +43,6 @@ export const FormikSliderField = ({
           </p>
         </Grid>
       </Grid>
-    </div>
+    </StyledBox>
   );
 };

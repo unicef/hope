@@ -29,6 +29,7 @@ from hct_mis_api.apps.grievance.constants import (
 )
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
 from hct_mis_api.apps.utils.models import (
+    AdminUrlMixin,
     ConcurrencyModel,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
@@ -89,7 +90,7 @@ class GenericPaymentTicket(TimeStampedUUIDModel):
         abstract = True
 
 
-class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel):
+class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "user_modified",

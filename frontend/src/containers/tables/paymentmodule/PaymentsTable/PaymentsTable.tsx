@@ -1,42 +1,43 @@
-import { Box, Paper, Typography } from '@material-ui/core';
-import React, { useState } from 'react';
+import { Box, Paper, Typography } from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
-import { ImportXlsxPaymentPlanPaymentListPerFsp } from '../../../../components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymentListPerFsp';
+import { TableWrapper } from '@components/core/TableWrapper';
+import { ImportXlsxPaymentPlanPaymentListPerFsp } from '@components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymentListPerFsp';
 import {
   AllPaymentsForTableQuery,
   AllPaymentsForTableQueryVariables,
   PaymentPlanQuery,
   PaymentPlanStatus,
   useAllPaymentsForTableQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentsTableHeadCells';
 import { PaymentsTableRow } from './PaymentsTableRow';
 import { WarningTooltipTable } from './WarningTooltipTable';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const StyledBox = styled(Box)`
   background-color: #fff;
 `;
 interface PaymentsTableProps {
   businessArea: string;
-  baseUrl: string;
   paymentPlan: PaymentPlanQuery['paymentPlan'];
   permissions: string[];
   canViewDetails?: boolean;
 }
 
-export const PaymentsTable = ({
+export function PaymentsTable({
   businessArea,
-  baseUrl,
   paymentPlan,
   permissions,
   canViewDetails = false,
-}: PaymentsTableProps): React.ReactElement => {
+}: PaymentsTableProps): React.ReactElement {
+  const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const [dialogPayment, setDialogPayment] = useState<
-    AllPaymentsForTableQuery['allPayments']['edges'][number]['node'] | null
+  AllPaymentsForTableQuery['allPayments']['edges'][number]['node'] | null
   >();
   const initialVariables: AllPaymentsForTableQueryVariables = {
     businessArea,
@@ -47,8 +48,8 @@ export const PaymentsTable = ({
     <>
       <TableWrapper>
         <Paper>
-          <StyledBox p={6} display='flex' justifyContent='space-between'>
-            <Typography data-cy='table-title' variant='h6'>
+          <StyledBox p={6} display="flex" justifyContent="space-between">
+            <Typography data-cy="table-title" variant="h6">
               {t('Payee List')}
             </Typography>
             {(paymentPlan.status === PaymentPlanStatus.Accepted ||
@@ -60,17 +61,17 @@ export const PaymentsTable = ({
             )}
           </StyledBox>
           <UniversalTable<
-            AllPaymentsForTableQuery['allPayments']['edges'][number]['node'],
-            AllPaymentsForTableQueryVariables
+          AllPaymentsForTableQuery['allPayments']['edges'][number]['node'],
+          AllPaymentsForTableQueryVariables
           >
             isOnPaper={false}
             headCells={headCells}
             query={useAllPaymentsForTableQuery}
             rowsPerPageOptions={[10, 25, 50]}
-            queriedObjectName='allPayments'
+            queriedObjectName="allPayments"
             initialVariables={initialVariables}
-            defaultOrderBy='createdAt'
-            defaultOrderDirection='desc'
+            defaultOrderBy="createdAt"
+            defaultOrderDirection="desc"
             renderRow={(row) => (
               <PaymentsTableRow
                 key={row.id}
@@ -93,4 +94,4 @@ export const PaymentsTable = ({
       />
     </>
   );
-};
+}

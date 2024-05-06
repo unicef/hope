@@ -7,14 +7,14 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@material-ui/core';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import React from 'react';
+} from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
-import { GrievanceTicketQuery } from '../../../__generated__/graphql';
-import { TableTitle } from '../../core/TableTitle';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
+import { GrievanceTicketQuery } from '@generated/graphql';
+import { TableTitle } from '@core/TableTitle';
 import { handleSelected } from '../utils/helpers';
 
 const GreenIcon = styled.div`
@@ -37,14 +37,14 @@ export interface PaymentChannelsToEditTableProps {
   paymentChannel;
 }
 
-export const PaymentChannelsToEditTable = ({
+export function PaymentChannelsToEditTable({
   values,
   isEdit,
   ticket,
   setFieldValue,
   index,
   paymentChannel,
-}: PaymentChannelsToEditTableProps): React.ReactElement => {
+}: PaymentChannelsToEditTableProps): React.ReactElement {
   const { t } = useTranslation();
   const { selectedPaymentChannelsToEdit } = values;
   const handleSelectPaymentChannelToEdit = (paymentChannelIndex): void => {
@@ -65,8 +65,8 @@ export const PaymentChannelsToEditTable = ({
   return (
     <>
       <TableTitle>
-        <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>
+        <Box display="flex" justifyContent="space-between">
+          <Typography variant="h6">
             {t('Payment channel to be edited')}
           </Typography>
         </Box>
@@ -74,11 +74,11 @@ export const PaymentChannelsToEditTable = ({
       <StyledTable>
         <TableHead>
           <TableRow>
-            <TableCell align='left'>
+            <TableCell align="left">
               {isEdit ? (
                 <Checkbox
-                  color='primary'
-                  data-cy='checkbox-edit-payment-channel'
+                  color="primary"
+                  data-cy="checkbox-edit-payment-channel"
                   onChange={(): void => {
                     handleSelectPaymentChannelToEdit(index);
                   }}
@@ -90,25 +90,25 @@ export const PaymentChannelsToEditTable = ({
                 />
               ) : (
                 selectedPaymentChannelsToEdit.includes(index) && (
-                  <GreenIcon data-cy='green-check'>
+                  <GreenIcon data-cy="green-check">
                     <CheckCircleIcon />
                   </GreenIcon>
                 )
               )}
             </TableCell>
-            <TableCell align='left'>{t('Field')}</TableCell>
-            <TableCell align='left'>{t('Current Value')}</TableCell>
-            <TableCell align='left'>{t('New Value')}</TableCell>
+            <TableCell align="left">{t('Field')}</TableCell>
+            <TableCell align="left">{t('Current Value')}</TableCell>
+            <TableCell align="left">{t('New Value')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           <TableRow>
             <TableCell />
-            <TableCell align='left'>{t('Bank Name')}</TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">{t('Bank Name')}</TableCell>
+            <TableCell align="left">
               {paymentChannel.previous_value.bank_name}
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {renderNewOrNotUpdated(
                 paymentChannel.previous_value?.bank_name,
                 paymentChannel.value?.bank_name,
@@ -117,11 +117,11 @@ export const PaymentChannelsToEditTable = ({
           </TableRow>
           <TableRow>
             <TableCell />
-            <TableCell align='left'>{t('Bank Account Number')}</TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">{t('Bank Account Number')}</TableCell>
+            <TableCell align="left">
               {paymentChannel.previous_value.bank_account_number}
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {renderNewOrNotUpdated(
                 paymentChannel.previous_value?.bank_account_number,
                 paymentChannel.value?.bank_account_number,
@@ -130,11 +130,11 @@ export const PaymentChannelsToEditTable = ({
           </TableRow>
           <TableRow>
             <TableCell />
-            <TableCell align='left'>{t('Bank Account Holder Name')}</TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">{t('Bank Account Holder Name')}</TableCell>
+            <TableCell align="left">
               {paymentChannel.previous_value.account_holder_name}
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {renderNewOrNotUpdated(
                 paymentChannel.previous_value?.account_holder_name,
                 paymentChannel.value?.account_holder_name,
@@ -143,11 +143,11 @@ export const PaymentChannelsToEditTable = ({
           </TableRow>
           <TableRow>
             <TableCell />
-            <TableCell align='left'>{t('Bank Branch Name')}</TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">{t('Bank Branch Name')}</TableCell>
+            <TableCell align="left">
               {paymentChannel.previous_value.bank_branch_name}
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {renderNewOrNotUpdated(
                 paymentChannel.previous_value?.bank_branch_name,
                 paymentChannel.value?.bank_branch_name,
@@ -158,4 +158,4 @@ export const PaymentChannelsToEditTable = ({
       </StyledTable>
     </>
   );
-};
+}

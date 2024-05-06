@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllIndividualsForPopulationTableQueryVariables,
@@ -6,11 +6,11 @@ import {
   HouseholdChoiceDataQuery,
   IndividualNode,
   useAllIndividualsForPopulationTableQuery,
-} from '../../../../__generated__/graphql';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
-import { dateToIsoString } from '../../../../utils/utils';
+} from '@generated/graphql';
+import { TableWrapper } from '@components/core/TableWrapper';
+import { dateToIsoString } from '@utils/utils';
 import { UniversalTable } from '../../UniversalTable';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './IndividualsListTableHeadCells';
 import { IndividualsListTableRow } from './IndividualsListTableRow';
 
@@ -21,12 +21,12 @@ interface IndividualsListTableProps {
   choicesData: HouseholdChoiceDataQuery;
 }
 
-export const IndividualsListTable = ({
+export function IndividualsListTable({
   businessArea,
   filter,
   canViewDetails,
   choicesData,
-}: IndividualsListTableProps): React.ReactElement => {
+}: IndividualsListTableProps): React.ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const initialVariables: AllIndividualsForPopulationTableQueryVariables = {
@@ -52,7 +52,7 @@ export const IndividualsListTable = ({
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllIndividualsForPopulationTableQuery}
-        queriedObjectName='allIndividuals'
+        queriedObjectName="allIndividuals"
         initialVariables={initialVariables}
         allowSort={false}
         filterOrderBy={filter.orderBy}
@@ -67,4 +67,4 @@ export const IndividualsListTable = ({
       />
     </TableWrapper>
   );
-};
+}

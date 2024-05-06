@@ -1,8 +1,8 @@
-import { AllProgramsQuery } from '../../../__generated__/graphql';
-import { HeadCell } from '../../../components/core/Table/EnhancedTableHead';
+import { AllProgramsQuery } from '@generated/graphql';
+import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 
 export const headCells: HeadCell<
-  AllProgramsQuery['allPrograms']['edges'][number]['node']
+AllProgramsQuery['allPrograms']['edges'][number]['node']
 >[] = [
   {
     disablePadding: false,
@@ -31,7 +31,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Num. of Households',
-    //disabled because number_of_households is not a field in the program model
+    // disabled because number_of_households is not a field in the program model
     id: 'number_of_households',
     numeric: true,
     disableSort: true,

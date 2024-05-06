@@ -1,5 +1,5 @@
-import { HeadCell } from '../../../core/Table/EnhancedTableHead';
-import { PaymentRecordAndPaymentNode } from '../../../../__generated__/graphql';
+import { HeadCell } from '@core/Table/EnhancedTableHead';
+import { PaymentRecordAndPaymentNode } from '@generated/graphql';
 
 export const headCells: HeadCell<PaymentRecordAndPaymentNode>[] = [
   {
@@ -17,20 +17,21 @@ export const headCells: HeadCell<PaymentRecordAndPaymentNode>[] = [
   {
     disablePadding: false,
     label: 'Programme Name',
-    id: 'payment_record__parent__program__name',
+    id: 'parent__program__name',
     numeric: false,
     disableSort: true,
   },
   {
     disablePadding: false,
     label: 'Delivered',
-    id: 'payment_record__delivered_quantity',
+    id: 'delivered_quantity',
     numeric: true,
   },
   {
     disablePadding: false,
     label: 'Received',
-    id: 'receivedAmount',
+    id: 'payment_verification__received_amount',
+    disableSort: true,
     numeric: true,
   },
 ];

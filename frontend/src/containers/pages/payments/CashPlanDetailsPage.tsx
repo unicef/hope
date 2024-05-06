@@ -1,26 +1,26 @@
-import { Button } from '@material-ui/core';
-import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
-import React from 'react';
+import { Button } from '@mui/material';
+import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { CashPlanDetails } from '../../../components/core/CashPlanDetails/CashPlanDetails';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { TableWrapper } from '../../../components/core/TableWrapper';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { CashPlanDetails } from '@components/core/CashPlanDetails/CashPlanDetails';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TableWrapper } from '@components/core/TableWrapper';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { isPermissionDeniedError } from '../../../utils/utils';
+import { usePermissions } from '@hooks/usePermissions';
+import { isPermissionDeniedError } from '@utils/utils';
 import {
   CashPlanNode,
   useBusinessAreaDataQuery,
   useCashAssistUrlPrefixQuery,
   useCashPlanQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { PaymentRecordTable } from '../../tables/payments/PaymentRecordTable';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Container = styled.div`
   && {
@@ -30,25 +30,21 @@ const Container = styled.div`
   }
 `;
 
-export const CashPlanDetailsPage = (): React.ReactElement => {
+export function CashPlanDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
   const { baseUrl, isAllPrograms, businessArea } = useBaseUrl();
-  const {
-    data: businessAreaData,
-    loading: businessAreaDataLoading,
-  } = useBusinessAreaDataQuery({
-    variables: { businessAreaSlug: businessArea },
-  });
+  const { data: businessAreaData, loading: businessAreaDataLoading } =
+    useBusinessAreaDataQuery({
+      variables: { businessAreaSlug: businessArea },
+    });
   const { data, loading, error } = useCashPlanQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const {
-    data: caData,
-    loading: caPrefixLoading,
-  } = useCashAssistUrlPrefixQuery({ fetchPolicy: 'cache-first' });
+  const { data: caData, loading: caPrefixLoading } =
+    useCashAssistUrlPrefixQuery({ fetchPolicy: 'cache-first' });
   if (loading || caPrefixLoading || businessAreaDataLoading)
     return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
@@ -85,11 +81,11 @@ export const CashPlanDetailsPage = (): React.ReactElement => {
       >
         {!businessAreaData.businessArea.isPaymentPlanApplicable && (
           <Button
-            variant='contained'
-            color='primary'
-            component='a'
+            variant="contained"
+            color="primary"
+            component="a"
             disabled={!data.cashPlan.caHashId}
-            target='_blank'
+            target="_blank"
             href={`${caData.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_cashplan&id=${data.cashPlan.caHashId}`}
             startIcon={<OpenInNewRoundedIcon />}
           >
@@ -105,4 +101,4 @@ export const CashPlanDetailsPage = (): React.ReactElement => {
       </Container>
     </div>
   );
-};
+}

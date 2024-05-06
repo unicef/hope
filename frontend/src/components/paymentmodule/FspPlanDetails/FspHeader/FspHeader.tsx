@@ -1,11 +1,11 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
-import EditIcon from '@material-ui/icons/EditRounded';
-import React from 'react';
+import EditIcon from '@mui/icons-material/EditRounded';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
-import { PageHeader } from '../../../core/PageHeader';
+import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import { PageHeader } from '@core/PageHeader';
 
 interface FspHeaderProps {
   baseUrl: string;
@@ -34,11 +34,11 @@ export function FspHeader({
           : null
       }
     >
-      <Box display='flex' mt={2} mb={2}>
+      <Box display="flex" mt={2} mb={2}>
         <Box mr={3}>
           <Button
-            color='primary'
-            variant='outlined'
+            color="primary"
+            variant="outlined"
             component={Link}
             to={`/${baseUrl}/fsp/`}
             startIcon={<EditIcon />}

@@ -47,6 +47,7 @@ from hct_mis_api.apps.payment.models import (
     GenericPayment,
     Payment,
     PaymentPlan,
+    PaymentPlanSplit,
     PaymentRecord,
     PaymentVerification,
     PaymentVerificationPlan,
@@ -389,7 +390,6 @@ class RealProgramFactory(DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
-    individual_data_needed = factory.fuzzy.FuzzyChoice((True, False))
     programme_code = factory.LazyAttribute(
         lambda o: "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
     )
@@ -582,6 +582,17 @@ class PaymentPlanFactory(DjangoModelFactory):
     male_adults_count = factory.fuzzy.FuzzyInteger(2, 4)
     total_households_count = factory.fuzzy.FuzzyInteger(2, 4)
     total_individuals_count = factory.fuzzy.FuzzyInteger(8, 16)
+
+
+class PaymentPlanSplitFactory(DjangoModelFactory):
+    class Meta:
+        model = PaymentPlanSplit
+
+    payment_plan = factory.SubFactory(PaymentPlanFactory)
+    split_type = factory.fuzzy.FuzzyChoice(
+        PaymentPlanSplit.SplitType.choices,
+        getter=lambda c: c[0],
+    )
 
 
 class PaymentFactory(DjangoModelFactory):
@@ -1057,3 +1068,9 @@ def generate_payment_plan() -> None:
     )
 
     payment_plan.update_population_count_fields()
+
+
+def update_fsps() -> None:
+    afghanistan = BusinessArea.objects.get(slug="afghanistan")
+    for fsp in FinancialServiceProvider.objects.all():
+        fsp.allowed_business_areas.add(afghanistan)

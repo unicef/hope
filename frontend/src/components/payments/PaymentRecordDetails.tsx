@@ -1,31 +1,28 @@
-import { Grid, Paper, Typography } from '@material-ui/core';
-import React from 'react';
+import { Grid, Paper, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
+import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import {
   formatCurrencyWithSymbol,
   getPhoneNoLabel,
   paymentRecordStatusToColor,
   paymentStatusDisplayMap,
   verificationRecordsStatusToColor,
-} from '../../utils/utils';
-import {
-  PaymentRecordNode,
-  PaymentVerificationNode,
-} from '../../__generated__/graphql';
-import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../core/LabelizedField';
-import { StatusBox } from '../core/StatusBox';
-import { Title } from '../core/Title';
-import { UniversalMoment } from '../core/UniversalMoment';
-import { BlackLink } from '../core/BlackLink';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+} from '@utils/utils';
+import { PaymentRecordNode, PaymentVerificationNode } from '@generated/graphql';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { StatusBox } from '@core/StatusBox';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { BlackLink } from '@core/BlackLink';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Overview = styled(Paper)`
   margin: 20px;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
+  padding: ${({ theme }) => theme.spacing(8)}
+    ${({ theme }) => theme.spacing(11)};
 `;
 
 interface PaymentRecordDetailsProps {
@@ -33,10 +30,10 @@ interface PaymentRecordDetailsProps {
   canViewActivityLog: boolean;
 }
 
-export const PaymentRecordDetails = ({
+export function PaymentRecordDetails({
   paymentRecord,
   canViewActivityLog,
-}: PaymentRecordDetailsProps): React.ReactElement => {
+}: PaymentRecordDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   let paymentVerification: PaymentVerificationNode = null;
@@ -47,7 +44,7 @@ export const PaymentRecordDetails = ({
     <>
       <ContainerColumnWithBorder>
         <Title>
-          <Typography variant='h6'>{t('Payment Record Details')}</Typography>
+          <Typography variant="h6">{t('Payment Record Details')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
@@ -85,7 +82,7 @@ export const PaymentRecordDetails = ({
       {paymentVerification != null ? (
         <ContainerColumnWithBorder>
           <Title>
-            <Typography variant='h6'>{t('Verification Details')}</Typography>
+            <Typography variant="h6">{t('Verification Details')}</Typography>
           </Title>
           <Grid container spacing={3}>
             <Grid item xs={3}>
@@ -110,7 +107,7 @@ export const PaymentRecordDetails = ({
       ) : null}
       <Overview>
         <Title>
-          <Typography variant='h6'>{t('Household')}</Typography>
+          <Typography variant="h6">{t('Household')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
@@ -153,7 +150,7 @@ export const PaymentRecordDetails = ({
       </Overview>
       <Overview>
         <Title>
-          <Typography variant='h6'>{t('Entitlement Details')}</Typography>
+          <Typography variant="h6">{t('Entitlement Details')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
@@ -223,4 +220,4 @@ export const PaymentRecordDetails = ({
       ) : null}
     </>
   );
-};
+}

@@ -1,22 +1,24 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { render, RenderOptions } from '@testing-library/react';
-import { TestProviders } from './testProviders';
-import { MockLink } from '@apollo/react-testing';
 import { Formik } from 'formik';
 import noop from 'lodash/noop';
-import { ProgramStatus } from "../__generated__/graphql";
+import { TestProviders } from './testProviders';
+import { ProgramStatus } from '@generated/graphql';
+import { MockLink } from '@apollo/client/testing';
 
 const customRender = (
   ui: ReactElement,
   options?: Omit<RenderOptions, 'queries'>,
 ) =>
   render(
-    <BrowserRouter>
-      <Formik initialValues={{}} onSubmit={noop}>
-        {ui}
-      </Formik>
-    </BrowserRouter>,
+    <>
+      <BrowserRouter>
+        <Formik initialValues={{}} onSubmit={noop}>
+          {ui}
+        </Formik>
+      </BrowserRouter>
+    </>,
     {
       wrapper: TestProviders,
       ...options,
@@ -51,13 +53,13 @@ export class ApolloLoadingLink extends MockLink {
     super([]);
   }
 
-  request(operation) {
+  request() {
     return null;
   }
 }
 
 export const fakeContextProgram = {
-    id: 1,
-    name: "someName",
-    status: ProgramStatus.Active
-}
+  id: 1,
+  name: 'someName',
+  status: ProgramStatus.Active,
+};

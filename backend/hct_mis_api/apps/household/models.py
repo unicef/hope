@@ -36,6 +36,7 @@ from hct_mis_api.apps.household.signals import (
 )
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
+    AdminUrlMixin,
     ConcurrencyModel,
     RepresentationManager,
     SoftDeletableIsOriginalModel,
@@ -332,6 +333,7 @@ class Household(
     AbstractSyncable,
     ConcurrencyModel,
     UnicefIdentifiedModel,
+    AdminUrlMixin,
 ):
     class CollectType(models.TextChoices):
         STANDARD = "STANDARD", "Standard"
@@ -839,6 +841,7 @@ class Individual(
     AbstractSyncable,
     ConcurrencyModel,
     UnicefIdentifiedModel,
+    AdminUrlMixin,
 ):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -1240,6 +1243,7 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
     rdi = models.ForeignKey("registration_data.RegistrationDataImport", on_delete=models.CASCADE, null=True)
     xlsx_match_columns = ArrayField(models.CharField(max_length=32), null=True)
     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.PROTECT)
+    program = models.ForeignKey("program.Program", null=True, on_delete=models.CASCADE)
 
 
 class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable):

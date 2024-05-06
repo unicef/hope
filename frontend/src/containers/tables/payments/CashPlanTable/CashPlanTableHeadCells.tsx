@@ -1,5 +1,5 @@
-import { HeadCell } from '../../../../components/core/Table/EnhancedTableHead';
-import { CashPlanAndPaymentPlanNode } from '../../../../__generated__/graphql';
+import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import { CashPlanAndPaymentPlanNode } from '@generated/graphql';
 
 export const headCells: HeadCell<CashPlanAndPaymentPlanNode>[] = [
   {
@@ -16,7 +16,7 @@ export const headCells: HeadCell<CashPlanAndPaymentPlanNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Num. of Households',
+    label: 'Num. of Payments',
     id: 'total_number_of_households',
     numeric: true,
   },

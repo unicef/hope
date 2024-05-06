@@ -7,11 +7,11 @@ import {
   MenuList,
   Paper,
   Popper,
-} from '@material-ui/core';
-import React from 'react';
+} from '@mui/material';
+import * as React from 'react';
 import styled from 'styled-components';
-import { MeQuery } from '../__generated__/graphql';
-import { clearCache } from '../utils/utils';
+import { MeQuery } from '@generated/graphql';
+import { clearCache } from '@utils/utils';
 import { getClient } from '../apollo/client';
 
 const UserProfileButton = styled(Button)`
@@ -20,7 +20,7 @@ const UserProfileButton = styled(Button)`
   }
 `;
 const MenuButtonText = styled.span`
-  margin-left: ${({ theme }) => theme.spacing(2)}px;
+  margin-left: ${({ theme }) => theme.spacing(2)};
 `;
 interface UserProfileMenuProps {
   meData: MeQuery;
@@ -44,7 +44,18 @@ export function UserProfileMenu({
     setOpen((previousOpen) => !previousOpen);
   };
 
-  const handleClose = (event: React.MouseEvent<EventTarget>): void => {
+  const handleClearCache = async (): Promise<void> => {
+    const client = await getClient();
+    await clearCache(client);
+  };
+
+  const handleClose = (
+    event:
+      | React.MouseEvent<HTMLAnchorElement, MouseEvent>
+      | React.TouchEvent<HTMLAnchorElement>
+      | MouseEvent
+      | TouchEvent,
+  ): void => {
     if (
       anchorRef.current &&
       anchorRef.current.contains(event.target as HTMLElement)
@@ -55,21 +66,24 @@ export function UserProfileMenu({
     setOpen(false);
   };
 
-  const handleClearCache = async (): Promise<void> => {
-    const client = await getClient();
-    await clearCache(client);
+  const handleLogout = (
+    event:
+      | React.MouseEvent<HTMLAnchorElement, MouseEvent>
+      | React.TouchEvent<HTMLAnchorElement>
+      | MouseEvent
+      | TouchEvent,
+  ): void => {
+    window.location.assign('/api/logout');
+    localStorage.removeItem('AUTHENTICATED');
+    handleClose(event);
+    handleClearCache();
   };
 
   const handleClearCacheAndReloadWindow = async (): Promise<void> => {
     await handleClearCache();
     window.location.reload();
   };
-  const handleLogout = (event: React.MouseEvent<EventTarget>): void => {
-    window.location.assign('/api/logout');
-    localStorage.removeItem('AUTHENTICATED');
-    handleClose(event);
-    handleClearCache();
-  };
+
   function handleListKeyDown(event: React.KeyboardEvent): void {
     if (event.key === 'Tab') {
       event.preventDefault();
@@ -85,9 +99,9 @@ export function UserProfileMenu({
       <UserProfileButton
         ref={anchorRef}
         onClick={handleToggle}
-        data-cy='menu-user-profile'
+        data-cy="menu-user-profile"
       >
-        <Avatar alt={meData.me.email} src='/static/images/avatar/1.jpg' />
+        <Avatar alt={meData.me.email} src="/static/images/avatar/1.jpg" />
         <MenuButtonText> {meData.me.email}</MenuButtonText>
       </UserProfileButton>
       <Popper
@@ -109,16 +123,20 @@ export function UserProfileMenu({
               <ClickAwayListener onClickAway={handleClose}>
                 <MenuList
                   autoFocusItem={open}
-                  id='menu-list-grow'
+                  id="menu-list-grow"
                   onKeyDown={handleListKeyDown}
                 >
                   <MenuItem
                     onClick={handleClearCacheAndReloadWindow}
-                    data-cy='menu-item-clear-cache'
+                    data-cy="menu-item-clear-cache"
                   >
                     Clear Cache
                   </MenuItem>
-                  <MenuItem onClick={handleLogout} data-cy='menu-item-logout'>
+                  <MenuItem
+                    href="/api/logout"
+                    onClick={handleLogout}
+                    data-cy="menu-item-logout"
+                  >
                     Logout
                   </MenuItem>
                 </MenuList>

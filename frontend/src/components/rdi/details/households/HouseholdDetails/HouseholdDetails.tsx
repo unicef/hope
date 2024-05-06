@@ -1,17 +1,18 @@
-import { Grid, Typography } from '@material-ui/core';
-import React from 'react';
+import { Grid, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ContainerColumnWithBorder } from '../../../../core/ContainerColumnWithBorder';
-import { ContentLink } from '../../../../core/ContentLink';
-import { LabelizedField } from '../../../../core/LabelizedField';
-import { choicesToDict } from '../../../../../utils/utils';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { ContentLink } from '@core/ContentLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { choicesToDict } from '@utils/utils';
 import {
   HouseholdChoiceDataQuery,
   ImportedHouseholdDetailedFragment,
-} from '../../../../../__generated__/graphql';
-import { Title } from '../../../../core/Title';
+} from '@generated/graphql';
+import { Title } from '@core/Title';
 import { useProgramContext } from '../../../../../programContext';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Overview = styled.div`
   display: flex;
@@ -22,13 +23,12 @@ const Overview = styled.div`
 interface HouseholdDetailsProps {
   household: ImportedHouseholdDetailedFragment;
   choicesData: HouseholdChoiceDataQuery;
-  baseUrl: string;
 }
 export function HouseholdDetails({
   household,
   choicesData,
-  baseUrl,
 }: HouseholdDetailsProps): React.ReactElement {
+  const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const residenceChoicesDict = choicesToDict(
@@ -37,7 +37,7 @@ export function HouseholdDetails({
   return (
     <ContainerColumnWithBorder>
       <Title>
-        <Typography variant='h6'>{t('Details')}</Typography>
+        <Typography variant="h6">{t('Details')}</Typography>
       </Title>
       <Overview>
         <Grid container spacing={6}>

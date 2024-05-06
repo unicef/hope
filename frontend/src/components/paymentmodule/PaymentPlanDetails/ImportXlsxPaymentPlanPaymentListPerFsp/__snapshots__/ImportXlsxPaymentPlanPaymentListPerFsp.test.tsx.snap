@@ -5,34 +5,31 @@ exports[`components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymen
 exports[`components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymentListPerFsp should render 1`] = `
 <div>
   <div
-    class="MuiBox-root MuiBox-root-1"
+    class="MuiBox-root css-0"
   >
     <button
-      class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary Mui-disabled Mui-disabled"
+      class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium Mui-disabled MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium css-11ph28e-MuiButtonBase-root-MuiButton-root"
       data-cy="button-import"
       disabled=""
       tabindex="-1"
       type="button"
     >
       <span
-        class="MuiButton-label"
+        class="MuiButton-startIcon MuiButton-iconSizeMedium css-1d6wzja-MuiButton-startIcon"
       >
-        <span
-          class="MuiButton-startIcon MuiButton-iconSizeMedium"
+        <svg
+          aria-hidden="true"
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium sc-iBdnpw jZUapm css-i4bv87-MuiSvgIcon-root"
+          data-testid="PublishIcon"
+          focusable="false"
+          viewBox="0 0 24 24"
         >
-          <svg
-            aria-hidden="true"
-            class="MuiSvgIcon-root sc-gzVnrw jxpDBy"
-            focusable="false"
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M5 4v2h14V4H5zm0 10h4v6h6v-6h4l-7-7-7 7z"
-            />
-          </svg>
-        </span>
-        Upload Reconciliation Info
+          <path
+            d="M5 4v2h14V4zm0 10h4v6h6v-6h4l-7-7z"
+          />
+        </svg>
       </span>
+      Upload Reconciliation Info
     </button>
   </div>
 </div>

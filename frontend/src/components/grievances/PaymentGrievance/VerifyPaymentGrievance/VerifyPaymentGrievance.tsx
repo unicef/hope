@@ -1,27 +1,22 @@
-import {
-  Box,
-  Button,
-  DialogContent,
-  DialogTitle,
-  Grid,
-} from '@material-ui/core';
+import { Box, Button, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dialog } from '../../../../containers/dialogs/Dialog';
-import { DialogActions } from '../../../../containers/dialogs/DialogActions';
-import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { FormikRadioGroup } from '../../../../shared/Formik/FormikRadioGroup';
-import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useUpdateGrievanceMutation,
-} from '../../../../__generated__/graphql';
-import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
+} from '@generated/graphql';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 
 export interface VerifyPaymentGrievanceProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -78,8 +73,8 @@ export function VerifyPaymentGrievance({
           {verifyManualDialogOpen && <AutoSubmitFormOnEnter />}
           <Box p={2}>
             <Button
-              color='primary'
-              variant='contained'
+              color="primary"
+              variant="contained"
               onClick={() => setVerifyManualDialogOpen(true)}
             >
               {t('Verify')}
@@ -88,9 +83,9 @@ export function VerifyPaymentGrievance({
           <Dialog
             open={verifyManualDialogOpen}
             onClose={() => setVerifyManualDialogOpen(false)}
-            scroll='paper'
-            aria-labelledby='form-dialog-title'
-            maxWidth='md'
+            scroll="paper"
+            aria-labelledby="form-dialog-title"
+            maxWidth="md"
           >
             <DialogTitleWrapper>
               <DialogTitle>{t('Verify Payment')}</DialogTitle>
@@ -100,8 +95,8 @@ export function VerifyPaymentGrievance({
                 <Grid container>
                   <Grid item xs={12}>
                     <Field
-                      name='newStatus'
-                      label='Status'
+                      name="newStatus"
+                      label="Status"
                       style={{ flexDirection: 'row' }}
                       choices={[
                         { value: 'RECEIVED', name: t('Received') },
@@ -113,10 +108,10 @@ export function VerifyPaymentGrievance({
                   <Grid item xs={6}>
                     {values.newStatus === 'RECEIVED' && (
                       <Field
-                        name='newReceivedAmount'
-                        type='number'
+                        name="newReceivedAmount"
+                        type="number"
                         label={t('Amount Received')}
-                        color='primary'
+                        color="primary"
                         component={FormikTextField}
                       />
                     )}
@@ -130,11 +125,11 @@ export function VerifyPaymentGrievance({
                   {t('CANCEL')}
                 </Button>
                 <Button
-                  type='submit'
-                  color='primary'
-                  variant='contained'
+                  type="submit"
+                  color="primary"
+                  variant="contained"
                   onClick={() => submit(values)}
-                  data-cy='button-submit'
+                  data-cy="button-submit"
                 >
                   {t('Verify')}
                 </Button>

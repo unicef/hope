@@ -1,23 +1,24 @@
-import React, { MouseEventHandler, useState } from 'react';
-import TableRow, { TableRowProps } from '@material-ui/core/TableRow';
+import { MouseEventHandler, useState } from 'react';
+import TableRow, { TableRowProps } from '@mui/material/TableRow';
 import styled from 'styled-components';
 
 const StyledTableRow = styled(TableRow)`
   cursor: pointer;
+  && {
+    white-space: nowrap;
+    overflow: auto;
+  }
 `;
 function getSelectedText(): string {
   let text = '';
   if (window.getSelection !== undefined) {
     text = window.getSelection().toString();
   } else if (
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     document.selection !== undefined &&
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     document.selection.type === 'Text'
   ) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     text = document.selection.createRange().text;
   }

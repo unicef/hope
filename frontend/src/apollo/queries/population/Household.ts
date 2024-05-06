@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const HOUSEHOLD_QUERY = gql`
   query Household($id: ID!) {

@@ -1,7 +1,7 @@
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 import { getClient } from '../../../apollo/client';
-import { clearCache } from '../../../utils/utils';
+import { clearCache } from '@utils/utils';
 import MaintenanceGraphic from './maintenance_graphic_painter.png';
 import HopeLogo from './maintenance_hope_logo.png';
 
@@ -74,15 +74,15 @@ export const MaintenancePage: React.FC = () => {
   return (
     <Container>
       <LogoContainer>
-        <img src={HopeLogo} alt='Hope Logo' width='186' height='101' />
+        <img src={HopeLogo} alt="Hope Logo" width="186" height="101" />
       </LogoContainer>
 
       <SquareLogo>
         <img
           src={MaintenanceGraphic}
-          alt='Brush with paint'
-          width='354'
-          height='293'
+          alt="Brush with paint"
+          width="354"
+          height="293"
         />
       </SquareLogo>
 
@@ -97,10 +97,10 @@ export const MaintenancePage: React.FC = () => {
       <Button onClick={goBackAndClearCache}>
         REFRESH PAGE
         <Icon
-          src='./refresh_icon.png'
-          alt='Refresh Icon'
-          width='20'
-          height='20'
+          src="./refresh_icon.png"
+          alt="Refresh Icon"
+          width="20"
+          height="20"
         />
       </Button>
     </Container>

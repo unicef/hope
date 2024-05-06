@@ -4,13 +4,13 @@ import {
   TableCell,
   TableHead,
   TableRow,
-} from '@material-ui/core';
+} from '@mui/material';
 import camelCase from 'lodash/camelCase';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
-import { GrievanceTicketQuery } from '../../../__generated__/graphql';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
+import { GrievanceTicketQuery } from '@generated/graphql';
 import { handleSelected } from '../utils/helpers';
 import { individualDataRow } from './individualDataRow';
 
@@ -28,7 +28,7 @@ export interface EntriesTableProps {
   setFieldValue;
 }
 
-export const EntriesTable = ({
+export function EntriesTable({
   values,
   isEdit,
   fieldsDict,
@@ -36,7 +36,7 @@ export const EntriesTable = ({
   entries,
   entriesFlexFields,
   setFieldValue,
-}: EntriesTableProps): React.ReactElement => {
+}: EntriesTableProps): React.ReactElement {
   const { t } = useTranslation();
   const { selectedFlexFields } = values;
   const selectedBioData = values.selected;
@@ -60,24 +60,24 @@ export const EntriesTable = ({
     <StyledTable>
       <TableHead>
         <TableRow>
-          <TableCell align='left' />
-          <TableCell data-cy='table-cell-type-of-data' align='left'>
+          <TableCell align="left" />
+          <TableCell data-cy="table-cell-type-of-data" align="left">
             {t('Type of Data')}
           </TableCell>
-          <TableCell data-cy='table-cell-previous-current-value' align='left'>
+          <TableCell data-cy="table-cell-previous-current-value" align="left">
             {ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
               ? t('Previous')
               : t('Current')}{' '}
             {t('Value')}
           </TableCell>
-          <TableCell data-cy='table-cell-new-value' align='left'>
+          <TableCell data-cy="table-cell-new-value" align="left">
             {t('New Value')}
           </TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
-        {entries.map((row, index) => {
-          return individualDataRow(
+        {entries.map((row, index) =>
+          individualDataRow(
             row,
             isSelected,
             index,
@@ -85,10 +85,10 @@ export const EntriesTable = ({
             fieldsDict,
             isEdit,
             handleSelectBioData,
-          );
-        })}
-        {entriesFlexFields.map((row, index) => {
-          return individualDataRow(
+          ),
+        )}
+        {entriesFlexFields.map((row, index) =>
+          individualDataRow(
             row,
             isSelectedFlexfields,
             index,
@@ -96,9 +96,9 @@ export const EntriesTable = ({
             fieldsDict,
             isEdit,
             handleFlexFields,
-          );
-        })}
+          ),
+        )}
       </TableBody>
     </StyledTable>
   );
-};
+}

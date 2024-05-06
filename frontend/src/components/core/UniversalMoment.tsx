@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import Moment from 'react-moment';
 import { DATE_FORMAT, DATE_FORMAT_LONG } from '../../config';
 

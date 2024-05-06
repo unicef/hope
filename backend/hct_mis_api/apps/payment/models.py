@@ -1,4 +1,5 @@
 import logging
+from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
@@ -55,6 +56,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
     _INDIVIDUAL,
     Scope,
 )
+from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.household.models import (
@@ -69,6 +71,7 @@ from hct_mis_api.apps.payment.managers import PaymentManager
 from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.utils.models import (
+    AdminUrlMixin,
     ConcurrencyModel,
     SignatureMixin,
     TimeStampedUUIDModel,
@@ -82,6 +85,12 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class ModifiedData:
+    modified_date: datetime
+    modified_by: Optional["User"] = None
 
 
 class ChoiceArrayFieldDM(ArrayField):
@@ -262,6 +271,7 @@ class GenericPayment(TimeStampedUUIDModel):
     DELIVERY_TYPE_TRANSFER = "Transfer"
     DELIVERY_TYPE_TRANSFER_TO_ACCOUNT = "Transfer to Account"
     DELIVERY_TYPE_VOUCHER = "Voucher"
+    DELIVERY_TYPE_CASH_OVER_THE_COUNTER = "Cash over the counter"
 
     DELIVERY_TYPES_IN_CASH = (
         DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL,
@@ -274,6 +284,7 @@ class GenericPayment(TimeStampedUUIDModel):
         DELIVERY_TYPE_REFERRAL,
         DELIVERY_TYPE_TRANSFER,
         DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
+        DELIVERY_TYPE_CASH_OVER_THE_COUNTER,
     )
     DELIVERY_TYPES_IN_VOUCHER = (DELIVERY_TYPE_VOUCHER,)
 
@@ -289,6 +300,7 @@ class GenericPayment(TimeStampedUUIDModel):
         (DELIVERY_TYPE_TRANSFER, _("Transfer")),
         (DELIVERY_TYPE_TRANSFER_TO_ACCOUNT, _("Transfer to Account")),
         (DELIVERY_TYPE_VOUCHER, _("Voucher")),
+        (DELIVERY_TYPE_CASH_OVER_THE_COUNTER, _("Cash over the counter")),
     )
 
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
@@ -394,6 +406,7 @@ class PaymentPlanSplitPayments(TimeStampedUUIDModel):
 
 class PaymentPlanSplit(TimeStampedUUIDModel):
     MAX_CHUNKS = 50
+    MIN_NO_OF_PAYMENTS_IN_CHUNK = 10
 
     class SplitType(models.TextChoices):
         BY_RECORDS = "BY_RECORDS", "By Records"
@@ -419,8 +432,12 @@ class PaymentPlanSplit(TimeStampedUUIDModel):
     def financial_service_provider(self) -> "FinancialServiceProvider":
         return self.payment_plan.delivery_mechanisms.first().financial_service_provider
 
+    @property
+    def chosen_configuration(self) -> Optional[str]:
+        return self.payment_plan.delivery_mechanisms.first().chosen_configuration
 
-class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel):
+
+class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel, AdminUrlMixin):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -1018,6 +1035,53 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         # TODO will update after add feature with 'program_cycle' and migrate all data
         return self.program_cycle.program if self.program_cycle else self.program
 
+    def _get_last_approval_process_data(self) -> ModifiedData:
+        approval_process = hasattr(self, "approval_process") and self.approval_process.first()
+        if approval_process:
+            if self.status == PaymentPlan.Status.IN_APPROVAL:
+                return ModifiedData(approval_process.sent_for_approval_date, approval_process.sent_for_approval_by)
+            if self.status == PaymentPlan.Status.IN_AUTHORIZATION:
+                if approval := approval_process.approvals.filter(type=Approval.APPROVAL).order_by("created_at").last():
+                    return ModifiedData(approval.created_at, approval.created_by)
+            if self.status == PaymentPlan.Status.IN_REVIEW:
+                if (
+                    approval := approval_process.approvals.filter(type=Approval.AUTHORIZATION)
+                    .order_by("created_at")
+                    .last()
+                ):
+                    return ModifiedData(approval.created_at, approval.created_by)
+        return ModifiedData(self.updated_at)
+
+    @property
+    def last_approval_process_date(self) -> Optional[datetime]:
+        return self._get_last_approval_process_data().modified_date
+
+    @property
+    def last_approval_process_by(self) -> Optional[str]:
+        return self._get_last_approval_process_data().modified_by
+
+    @property
+    def can_send_to_payment_gateway(self) -> bool:
+        status_accepted = self.status == PaymentPlan.Status.ACCEPTED
+        if self.splits.exists():
+            has_payment_gateway_fsp = self.delivery_mechanisms.filter(
+                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+                financial_service_provider__payment_gateway_id__isnull=False,
+            ).exists()
+            has_not_sent_to_payment_gateway_splits = self.splits.filter(
+                sent_to_payment_gateway=False,
+            ).exists()
+            return status_accepted and has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
+        else:
+            return (
+                status_accepted
+                and self.delivery_mechanisms.filter(
+                    sent_to_payment_gateway=False,
+                    financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+                    financial_service_provider__payment_gateway_id__isnull=False,
+                ).exists()
+            )
+
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     COLUMNS_CHOICES = (
@@ -1208,7 +1272,7 @@ class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
         return f"{self.financial_service_provider.name} - {self.xlsx_template} - {self.delivery_mechanism}"
 
 
-class FinancialServiceProvider(TimeStampedUUIDModel):
+class FinancialServiceProvider(LimitBusinessAreaModelMixin, TimeStampedUUIDModel):
     COMMUNICATION_CHANNEL_API = "API"
     COMMUNICATION_CHANNEL_SFTP = "SFTP"
     COMMUNICATION_CHANNEL_XLSX = "XLSX"
@@ -1295,6 +1359,16 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
     def is_payment_gateway(self) -> bool:
         return self.communication_channel == self.COMMUNICATION_CHANNEL_API and self.payment_gateway_id is not None
 
+    @property
+    def configurations(self) -> List[Optional[dict]]:
+        return []  # temporary disabled
+        if not self.is_payment_gateway:
+            return []
+        return [
+            {"key": config.get("key", None), "label": config.get("label", None), "id": config.get("id", None)}
+            for config in self.data_transfer_configuration
+        ]
+
 
 class FinancialServiceProviderXlsxReport(TimeStampedUUIDModel):
     # TODO: remove? do we using this one?
@@ -1358,6 +1432,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
     delivery_mechanism_order = models.PositiveIntegerField()
 
     sent_to_payment_gateway = models.BooleanField(default=False)
+    chosen_configuration = models.CharField(max_length=50, null=True)
 
     class Meta:
         constraints = [
@@ -1377,7 +1452,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         self.sent_by = sent_by
 
 
-class CashPlan(ConcurrencyModel, GenericPaymentPlan):
+class CashPlan(ConcurrencyModel, AdminUrlMixin, GenericPaymentPlan):
     DISTRIBUTION_COMPLETED = "Distribution Completed"
     DISTRIBUTION_COMPLETED_WITH_ERRORS = "Distribution Completed with Errors"
     TRANSACTION_COMPLETED = "Transaction Completed"
@@ -1470,12 +1545,17 @@ class CashPlan(ConcurrencyModel, GenericPaymentPlan):
         # TODO: maybe 'ca_id' rename to 'unicef_id'?
         return self.ca_id
 
+    @property
+    def verification_status(self) -> Optional[str]:
+        summary = self.payment_verification_summary.first()
+        return getattr(summary, "status", None)
+
     class Meta:
         verbose_name = "Cash Plan"
         ordering = ["created_at"]
 
 
-class PaymentRecord(ConcurrencyModel, GenericPayment):
+class PaymentRecord(ConcurrencyModel, AdminUrlMixin, GenericPayment):
     ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
     ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
     ENTITLEMENT_CARD_STATUS_CHOICE = Choices(
@@ -1542,7 +1622,7 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
         return self.STATUS_SUCCESS
 
 
-class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel, SignatureMixin):
+class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel, AdminUrlMixin, SignatureMixin):
     parent = models.ForeignKey(
         "payment.PaymentPlan",
         on_delete=models.CASCADE,
@@ -1691,7 +1771,7 @@ class ServiceProvider(TimeStampedUUIDModel):
         return self.full_name or ""
 
 
-class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel):
+class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel, AdminUrlMixin):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -1882,7 +1962,7 @@ def update_verification_status_in_cash_plan_on_delete(
     build_summary(instance.payment_plan_obj)
 
 
-class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
+class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "payment_verification_plan",

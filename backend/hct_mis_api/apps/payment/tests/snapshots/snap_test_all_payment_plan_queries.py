@@ -318,7 +318,7 @@ snapshots['TestPaymentPlanQueries::test_filter_payment_plans_with_source_id 1'] 
                         'sourcePaymentPlan': {
                             'unicefId': 'PP-01'
                         },
-                        'unicefId': 'PP-0060-20-00000005'
+                        'unicefId': 'PP-0060-20-00000003'
                     }
                 },
                 {
@@ -334,7 +334,7 @@ snapshots['TestPaymentPlanQueries::test_filter_payment_plans_with_source_id 1'] 
                         'sourcePaymentPlan': {
                             'unicefId': 'PP-01'
                         },
-                        'unicefId': 'PP-0060-20-00000006'
+                        'unicefId': 'PP-0060-20-00000004'
                     }
                 }
             ]

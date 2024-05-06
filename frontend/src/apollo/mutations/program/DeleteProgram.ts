@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const DELETE_PROGRAM_MUTATION = gql`
   mutation DeleteProgram($programId: String!) {

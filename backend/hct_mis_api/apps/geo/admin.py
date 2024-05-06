@@ -200,38 +200,35 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBa
                 csv_file = form.cleaned_data["file"]
                 data_set = csv_file.read().decode("utf-8-sig").splitlines()
                 reader = csv.DictReader(data_set)
-                country = None
-                for row in reader:
-                    try:
+                try:
+                    country = None
+
+                    for row in reader:
                         d = len(row) // 2
                         area_types = [*row][:d]
                         admin_area = [*row][d:]
-                        country = Country.objects.get(short_name=row["Country"])
-                        for idx, x in enumerate(area_types):
-                            if idx > 0:
-                                art, created = AreaType.objects.get_or_create(name=x, country=country, area_level=idx)
-                                area, created = Area.objects.get_or_create(
-                                    name=row[x], p_code=row[admin_area[idx]], area_type=art
+                        country = country or Country.objects.get(short_name=row["Country"])
+                        for area_level, area_type_name in enumerate(area_types[1:], 1):
+                            area_type, _ = AreaType.objects.get_or_create(
+                                name=area_type_name, country=country, area_level=area_level
+                            )
+                            area, _ = Area.objects.get_or_create(
+                                name=row[area_type_name], p_code=row[admin_area[area_level]], area_type=area_type
+                            )
+                            ids = area_level - 1
+                            if ids > 0:
+                                area_type.parent = AreaType.objects.get(
+                                    country=country, area_level=ids, name=area_types[ids]
                                 )
-                                ids = idx - 1
-                                if ids > 0:
-                                    art.parent = AreaType.objects.get(
-                                        country=country, area_level=ids, name=area_types[ids]
-                                    )
-                                    art.save()
-                                    area.parent = Area.objects.get(
-                                        p_code=row[admin_area[ids]], name=row[area_types[ids]]
-                                    )
-                                    area.save()
-                    except Exception:
-                        self.message_user(request, "Unable to load areas, please check the format", messages.ERROR)
-
-                        raise
-
-                self.message_user(request, f"Updated all areas for {country}")
-                return redirect("admin:geo_area_changelist")
+                                area_type.save()
+                                area.parent = Area.objects.get(p_code=row[admin_area[ids]], name=row[area_types[ids]])
+                                area.save()
+                    self.message_user(request, f"Updated all areas for {country}")
+                    return redirect("admin:geo_area_changelist")
+                except Exception as e:
+                    logger.error(e)
+                    self.message_user(request, "Unable to load areas, please check the format", messages.ERROR)
         else:
             form = ImportCSVForm()
-            context["form"] = form
         context["form"] = form
         return TemplateResponse(request, "admin/geo/import_area_csv.html", context)

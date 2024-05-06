@@ -1,15 +1,15 @@
-import React from 'react';
-import { Grid, Typography } from '@material-ui/core';
+import * as React from 'react';
+import { Grid, Typography } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
+import { PaymentPlanQuery } from '@generated/graphql';
 import { PaperContainer } from '../../../targeting/PaperContainer';
-import { LabelizedField } from '../../../core/LabelizedField';
-import { FieldBorder } from '../../../core/FieldBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { FieldBorder } from '@core/FieldBorder';
 
 const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(2)}px;
+  padding-bottom: ${({ theme }) => theme.spacing(2)};
 `;
 
 const ContentWrapper = styled.div`
@@ -30,9 +30,9 @@ interface ReconciliationSummaryProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const ReconciliationSummary = ({
+export function ReconciliationSummary({
   paymentPlan,
-}: ReconciliationSummaryProps): React.ReactElement => {
+}: ReconciliationSummaryProps): React.ReactElement {
   const { t } = useTranslation();
 
   const {
@@ -79,75 +79,75 @@ export const ReconciliationSummary = ({
     0,
   );
   return (
-    <>
-      <PaperContainer>
-        <Title>
-          <Typography variant='h6'>{t('Reconciliation Summary')}</Typography>
-        </Title>
-        <ContentWrapper>
-          <Grid container>
+    <PaperContainer>
+      <Title>
+        <Typography variant="h6">{t('Reconciliation Summary')}</Typography>
+      </Title>
+      <ContentWrapper>
+        <Grid container>
+          <Grid item xs={12}>
             <Grid item xs={12}>
-              <Grid item xs={12}>
-                <Grid container spacing={0} justifyContent='flex-start'>
-                  {datasets.map(({ color, label, value }) => (
-                    <Grid item xs={2} key={label}>
-                      <FieldBorder color={color}>
-                        <LabelizedField label={label} value={value} />
-                      </FieldBorder>
-                    </Grid>
-                  ))}
-                  <Grid item xs={2}>
-                    <ChartContainer data-cy='chart-container'>
-                      <Pie
-                        width={100}
-                        height={100}
-                        options={{
+              <Grid container spacing={0} justifyContent="flex-start">
+                {datasets.map(({ color, label, value }) => (
+                  <Grid item xs={2} key={label}>
+                    <FieldBorder color={color}>
+                      <LabelizedField label={label} value={value} />
+                    </FieldBorder>
+                  </Grid>
+                ))}
+                <Grid item xs={2}>
+                  <ChartContainer data-cy="chart-container">
+                    <Pie
+                      width={100}
+                      height={100}
+                      options={{
+                        plugins: {
                           legend: {
                             display: false,
                           },
-                        }}
-                        data={{
-                          labels: datasets.map(({ label }) => label),
-                          datasets: [
-                            {
-                              data: datasets.map(({ value }) => value),
-                              backgroundColor: datasets.map(
-                                ({ color }) => color,
-                              ),
-                            },
-                          ],
-                        }}
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                      }}
+                      data={{
+                        labels: datasets.map(({ label }) => label),
+                        datasets: [
+                          {
+                            data: datasets.map(({ value }) => value),
+                            backgroundColor: datasets.map(({ color }) => color),
+                          },
+                        ],
+                      }}
+                    />
+                  </ChartContainer>
+                </Grid>
+              </Grid>
+            </Grid>
+            <ReconciliationWrapUp>
+              <Grid item xs={12}>
+                <Grid container spacing={0} justifyContent="flex-start">
+                  <Grid item xs={2}>
+                    <FieldBorder color="#4E606A">
+                      <LabelizedField
+                        label={t('Number of payments')}
+                        value={numberOfPayments}
                       />
-                    </ChartContainer>
+                    </FieldBorder>
+                  </Grid>
+                  <Grid item xs={2}>
+                    <FieldBorder color="#4E606A">
+                      <LabelizedField
+                        label={t('Reconciled')}
+                        value={`${reconciled} (${reconciledInPercent}%)`}
+                      />
+                    </FieldBorder>
                   </Grid>
                 </Grid>
               </Grid>
-              <ReconciliationWrapUp>
-                <Grid item xs={12}>
-                  <Grid container spacing={0} justifyContent='flex-start'>
-                    <Grid item xs={2}>
-                      <FieldBorder color='#4E606A'>
-                        <LabelizedField
-                          label={t('Number of payments')}
-                          value={numberOfPayments}
-                        />
-                      </FieldBorder>
-                    </Grid>
-                    <Grid item xs={2}>
-                      <FieldBorder color='#4E606A'>
-                        <LabelizedField
-                          label={t('Reconciled')}
-                          value={`${reconciled} (${reconciledInPercent}%)`}
-                        />
-                      </FieldBorder>
-                    </Grid>
-                  </Grid>
-                </Grid>
-              </ReconciliationWrapUp>
-            </Grid>
+            </ReconciliationWrapUp>
           </Grid>
-        </ContentWrapper>
-      </PaperContainer>
-    </>
+        </Grid>
+      </ContentWrapper>
+    </PaperContainer>
   );
-};
+}

@@ -1,4 +1,4 @@
-import { gql } from "apollo-boost";
+import { gql } from '@apollo/client';
 
 export const PAYMENT_PLAN_QUERY = gql`
   query PaymentPlan($id: ID!) {
@@ -28,6 +28,7 @@ export const PAYMENT_PLAN_QUERY = gql`
         id
         name
       }
+      adminUrl
       currency
       currencyName
       startDate
@@ -142,6 +143,7 @@ export const PAYMENT_PLAN_QUERY = gql`
         name
         order
         sentToPaymentGateway
+        chosenConfiguration
         fsp {
           id
           name
@@ -174,6 +176,7 @@ export const PAYMENT_PLAN_QUERY = gql`
           node {
             id
             unicefId
+            adminUrl
             status
             sampleSize
             receivedCount

@@ -85,15 +85,12 @@ class TestSendTpToDatahub(TestCase):
         cls.unhcr, _ = Partner.objects.get_or_create(name="UNHCR", defaults={"is_un": True})
 
         cls.program_individual_data_needed_true = ProgramFactory(
-            individual_data_needed=True,
             business_area=business_area_with_data_sharing,
         )
         cls.program_individual_data_needed_false = ProgramFactory(
-            individual_data_needed=False,
             business_area=business_area_with_data_sharing,
         )
         cls.program_third = ProgramFactory(
-            individual_data_needed=False,
             business_area=business_area_with_data_sharing,
         )
         rdi = RegistrationDataImportFactory()
@@ -232,7 +229,7 @@ class TestSendTpToDatahub(TestCase):
         dh_roles = dh_models.IndividualRoleInHousehold.objects.all()
 
         self.assertEqual(dh_household.count(), 1)
-        self.assertEqual(dh_individuals.count(), 4)
+        self.assertEqual(dh_individuals.count(), 2)
         self.assertEqual(dh_documents.count(), 1)
         self.assertEqual(dh_roles.count(), 2)
 
@@ -268,11 +265,9 @@ class TestSendTpToDatahub(TestCase):
         business_area_with_data_sharing = BusinessArea.objects.first()
 
         program_individual_data_needed_true = ProgramFactory(
-            individual_data_needed=True,
             business_area=business_area_with_data_sharing,
         )
         program_individual_data_needed_false = ProgramFactory(
-            individual_data_needed=False,
             business_area=business_area_with_data_sharing,
         )
         (household, individuals) = create_household(
@@ -307,7 +302,7 @@ class TestSendTpToDatahub(TestCase):
         dh_individuals_count = dh_models.Individual.objects.filter(household_mis_id=household.id).count()
         dh_households_count = dh_models.Household.objects.filter(mis_id=household.id).count()
         self.assertEqual(dh_households_count, 1)
-        self.assertEqual(dh_individuals_count, 3)
+        self.assertEqual(dh_individuals_count, 1)
 
     @parameterized.expand(
         [
@@ -328,7 +323,6 @@ class TestSendTpToDatahub(TestCase):
         business_area = BusinessArea.objects.first()
 
         program = ProgramFactory(
-            individual_data_needed=True,
             business_area=business_area,
         )
 
@@ -353,7 +347,6 @@ class TestSendTpToDatahub(TestCase):
         business_area = BusinessArea.objects.first()
 
         program = ProgramFactory(
-            individual_data_needed=True,
             business_area=business_area,
         )
 
@@ -378,7 +371,6 @@ class TestSendTpToDatahub(TestCase):
         business_area = BusinessArea.objects.first()
 
         program = ProgramFactory(
-            individual_data_needed=True,
             business_area=business_area,
         )
 

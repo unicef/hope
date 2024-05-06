@@ -1,12 +1,13 @@
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ProgramQuery, ProgramStatus } from '../../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { ProgramQuery, ProgramStatus } from '@generated/graphql';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { PageHeader } from '@components/core/PageHeader';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ActiveProgramDetailsPageHeaderButtons } from './ActiveProgramDetailsPageHeaderButtons';
 import { DraftProgramDetailsPageHeaderButtons } from './DraftProgramDetailsPageHeaderButtons';
 import { FinishedProgramDetailsPageHeaderButtons } from './FinishedProgramDetailsPageHeaderButtons';
+import { AdminButton } from '@core/AdminButton';
 
 export interface ProgramDetailsPageHeaderPropTypes {
   program: ProgramQuery['program'];
@@ -18,7 +19,7 @@ export interface ProgramDetailsPageHeaderPropTypes {
   isPaymentPlanApplicable: boolean;
 }
 
-export const ProgramDetailsPageHeader = ({
+export function ProgramDetailsPageHeader({
   program,
   canActivate,
   canEdit,
@@ -26,7 +27,7 @@ export const ProgramDetailsPageHeader = ({
   canFinish,
   canDuplicate,
   isPaymentPlanApplicable,
-}: ProgramDetailsPageHeaderPropTypes): React.ReactElement => {
+}: ProgramDetailsPageHeaderPropTypes): React.ReactElement {
   let buttons;
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
@@ -72,8 +73,12 @@ export const ProgramDetailsPageHeader = ({
   }
 
   return (
-    <PageHeader title={program.name} breadCrumbs={breadCrumbsItems}>
+    <PageHeader
+        title={program.name}
+        breadCrumbs={breadCrumbsItems}
+        flags={<AdminButton adminUrl={program.adminUrl} />}
+    >
       {buttons}
     </PageHeader>
   );
-};
+}

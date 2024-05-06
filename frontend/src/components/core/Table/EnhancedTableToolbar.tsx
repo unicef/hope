@@ -1,49 +1,31 @@
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import React from 'react';
-import {
-  createStyles,
-  lighten,
-  makeStyles,
-  Theme,
-} from '@material-ui/core/styles';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import * as React from 'react';
+import { styled } from '@mui/material/styles';
 
 interface EnhancedTableToolbarProps {
   title: string;
 }
 
-const useToolbarStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      paddingLeft: theme.spacing(6),
-      paddingRight: theme.spacing(1),
-    },
-    highlight:
-      theme.palette.type === 'light'
-        ? {
-            color: theme.palette.secondary.main,
-            backgroundColor: lighten(theme.palette.secondary.light, 0.85),
-          }
-        : {
-            color: theme.palette.text.primary,
-            backgroundColor: theme.palette.secondary.dark,
-          },
-    title: {
-      flex: '1 1 100%',
-    },
-  }),
-);
+const StyledToolbar = styled(Toolbar)(({ theme }) => ({
+  paddingLeft: theme.spacing(6),
+  paddingRight: theme.spacing(1),
+  color: theme.palette.text.primary,
+  backgroundColor: 'white',
+}));
+
+const StyledTypography = styled(Typography)({
+  flex: '1 1 100%',
+});
 
 export function EnhancedTableToolbar({
   title,
 }: EnhancedTableToolbarProps): React.ReactElement {
-  const classes = useToolbarStyles({});
-
   return (
-    <Toolbar className={classes.root}>
-      <Typography data-cy='table-title' className={classes.title} variant='h6'>
+    <StyledToolbar>
+      <StyledTypography data-cy="table-title" variant="h6">
         {title}
-      </Typography>
-    </Toolbar>
+      </StyledTypography>
+    </StyledToolbar>
   );
 }

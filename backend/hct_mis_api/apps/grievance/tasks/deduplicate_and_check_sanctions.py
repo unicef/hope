@@ -50,5 +50,7 @@ class DeduplicateAndCheckAgainstSanctionsListTask:
 
         create_needs_adjudication_tickets(needs_adjudication, "possible_duplicates", business_area)
 
-        CheckAgainstSanctionListPreMergeTask.execute()
+        if not business_area.screen_beneficiary:
+            CheckAgainstSanctionListPreMergeTask.execute()
+
         HardDocumentDeduplication().deduplicate(Document.objects.filter(individual_id__in=individuals_ids))

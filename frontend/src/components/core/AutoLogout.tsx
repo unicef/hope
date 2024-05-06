@@ -1,11 +1,10 @@
-import React, { useRef } from 'react';
-import IdleTimer from 'react-idle-timer';
+import * as React from 'react';
+import { useCallback, useEffect } from 'react';
+import { useIdleTimer } from 'react-idle-timer';
 import { AUTO_LOGOUT_MILLIS } from '../../config';
 
-export const AutoLogout = (): React.ReactElement => {
-  const idleTimer = useRef(null);
-
-  const onIdle = (): void => {
+export function AutoLogout(): React.ReactElement {
+  const handleOnIdle = (): void => {
     if (!localStorage.getItem('AUTHENTICATED')) {
       return;
     }
@@ -13,17 +12,26 @@ export const AutoLogout = (): React.ReactElement => {
     localStorage.removeItem('AUTHENTICATED');
   };
 
-  const onAction = (): void => {
-    idleTimer.current.reset();
-  };
+  //eslint-disable-next-line
+  const { reset } = useIdleTimer({
+    timeout: AUTO_LOGOUT_MILLIS,
+    onIdle: handleOnIdle,
+    debounce: 500,
+  });
 
-  return (
-    <IdleTimer
-      ref={idleTimer}
-      onAction={onAction}
-      onIdle={onIdle}
-      debounce={500}
-      timeout={AUTO_LOGOUT_MILLIS}
-    />
-  );
-};
+  const handleOnAction = useCallback((): void => {
+    reset();
+  }, [reset]);
+
+  useEffect(() => {
+    window.addEventListener('click', handleOnAction);
+    window.addEventListener('mousemove', handleOnAction);
+
+    return () => {
+      window.removeEventListener('click', handleOnAction);
+      window.removeEventListener('mousemove', handleOnAction);
+    };
+  }, [handleOnAction]);
+
+  return <></>;
+}

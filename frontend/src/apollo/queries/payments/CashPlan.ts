@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const CashPlan = gql`
   query CashPlan($id: ID!) {
@@ -34,6 +34,7 @@ export const CashPlan = gql`
           node {
             id
             unicefId
+            adminUrl
             status
             sampleSize
             receivedCount

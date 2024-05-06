@@ -1,11 +1,11 @@
-import React from 'react';
+import * as React from 'react';
 import { useParams } from 'react-router-dom';
-import { PhotoModal } from '../../../core/PhotoModal/PhotoModal';
-import { useImportedIndividualFlexFieldsQuery } from '../../../../__generated__/graphql';
+import { PhotoModal } from '@core/PhotoModal/PhotoModal';
+import { useImportedIndividualFlexFieldsQuery } from '@generated/graphql';
 
-export const ImportedIndividualFlexFieldPhotoModal = ({
+export function ImportedIndividualFlexFieldPhotoModal({
   field,
-}): React.ReactElement => {
+}): React.ReactElement {
   const { id } = useParams();
   const { data } = useImportedIndividualFlexFieldsQuery({
     variables: { id },
@@ -20,4 +20,4 @@ export const ImportedIndividualFlexFieldPhotoModal = ({
   const picUrl = flexFields[field.name];
 
   return <PhotoModal src={picUrl} />;
-};
+}

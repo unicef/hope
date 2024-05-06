@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const LanguageAutocomplete = gql`
   query LanguageAutocomplete($first: Int, $code: String) {

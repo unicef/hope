@@ -1,7 +1,7 @@
 import { MockedProvider } from "@apollo/react-testing";
 import { act } from "react-dom/test-utils";
 import wait from "waait";
-import React from "react";
+import * as React from "react";
 import { fakeApolloPaymentPlan } from "../../../../../../fixtures/paymentmodule/fakeApolloPaymentPlan";
 import { fakeExportXlsxPpListPerFspMutation } from "../../../../../../fixtures/paymentmodule/fakeExportXlsxPpListPerFspMutation";
 import { render } from "../../../../../testUtils/testUtils";

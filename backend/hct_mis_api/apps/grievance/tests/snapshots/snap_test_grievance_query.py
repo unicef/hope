@@ -630,42 +630,30 @@ snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_detail
 
 snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_detail_partner_unicef_for_program 5'] = {
     'data': {
-        'grievanceTicket': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': 'Ticket does not belong to the selected program',
-            'path': [
-                'grievanceTicket'
-            ]
+        'grievanceTicket': {
+            'admin': None,
+            'category': 7,
+            'consent': True,
+            'createdAt': '2020-08-24T00:00:00+00:00',
+            'description': 'Ticket without program, without admin area',
+            'language': 'Polish, English',
+            'status': 3
         }
-    ]
+    }
 }
 
 snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_detail_partner_unicef_for_program 6'] = {
     'data': {
-        'grievanceTicket': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': 'Ticket does not belong to the selected program',
-            'path': [
-                'grievanceTicket'
-            ]
+        'grievanceTicket': {
+            'admin': 'City Test',
+            'category': 7,
+            'consent': True,
+            'createdAt': '2020-08-25T00:00:00+00:00',
+            'description': 'Ticket without program, in admin area 1',
+            'language': 'Polish, English',
+            'status': 3
         }
-    ]
+    }
 }
 
 snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_detail_partner_with_admin_area_1_access_for_all_programs 1'] = {
@@ -834,42 +822,30 @@ snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_detail
 
 snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_detail_partner_with_admin_area_1_access_for_program 5'] = {
     'data': {
-        'grievanceTicket': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': 'Ticket does not belong to the selected program',
-            'path': [
-                'grievanceTicket'
-            ]
+        'grievanceTicket': {
+            'admin': None,
+            'category': 7,
+            'consent': True,
+            'createdAt': '2020-08-24T00:00:00+00:00',
+            'description': 'Ticket without program, without admin area',
+            'language': 'Polish, English',
+            'status': 3
         }
-    ]
+    }
 }
 
 snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_detail_partner_with_admin_area_1_access_for_program 6'] = {
     'data': {
-        'grievanceTicket': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': 'Ticket does not belong to the selected program',
-            'path': [
-                'grievanceTicket'
-            ]
+        'grievanceTicket': {
+            'admin': 'City Test',
+            'category': 7,
+            'consent': True,
+            'createdAt': '2020-08-25T00:00:00+00:00',
+            'description': 'Ticket without program, in admin area 1',
+            'language': 'Polish, English',
+            'status': 3
         }
-    ]
+    }
 }
 
 snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_detail_partner_with_admin_area_2_access_for_all_programs 1'] = {
@@ -1026,42 +1002,30 @@ snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_detail
 
 snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_detail_partner_with_admin_area_2_access_for_program 5'] = {
     'data': {
-        'grievanceTicket': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': 'Ticket does not belong to the selected program',
-            'path': [
-                'grievanceTicket'
-            ]
+        'grievanceTicket': {
+            'admin': None,
+            'category': 7,
+            'consent': True,
+            'createdAt': '2020-08-24T00:00:00+00:00',
+            'description': 'Ticket without program, without admin area',
+            'language': 'Polish, English',
+            'status': 3
         }
-    ]
+    }
 }
 
 snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_detail_partner_with_admin_area_2_access_for_program 6'] = {
     'data': {
-        'grievanceTicket': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': 'Ticket does not belong to the selected program',
-            'path': [
-                'grievanceTicket'
-            ]
+        'grievanceTicket': {
+            'admin': 'City Test',
+            'category': 7,
+            'consent': True,
+            'createdAt': '2020-08-25T00:00:00+00:00',
+            'description': 'Ticket without program, in admin area 1',
+            'language': 'Polish, English',
+            'status': 3
         }
-    ]
+    }
 }
 
 snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_detail_partner_with_full_area_access_for_all_programs 1'] = {
@@ -1206,42 +1170,30 @@ snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_detail
 
 snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_detail_partner_with_full_area_access_for_program 5'] = {
     'data': {
-        'grievanceTicket': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': 'Ticket does not belong to the selected program',
-            'path': [
-                'grievanceTicket'
-            ]
+        'grievanceTicket': {
+            'admin': None,
+            'category': 7,
+            'consent': True,
+            'createdAt': '2020-08-24T00:00:00+00:00',
+            'description': 'Ticket without program, without admin area',
+            'language': 'Polish, English',
+            'status': 3
         }
-    ]
+    }
 }
 
 snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_detail_partner_with_full_area_access_for_program 6'] = {
     'data': {
-        'grievanceTicket': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': 'Ticket does not belong to the selected program',
-            'path': [
-                'grievanceTicket'
-            ]
+        'grievanceTicket': {
+            'admin': 'City Test',
+            'category': 7,
+            'consent': True,
+            'createdAt': '2020-08-25T00:00:00+00:00',
+            'description': 'Ticket without program, in admin area 1',
+            'language': 'Polish, English',
+            'status': 3
         }
-    ]
+    }
 }
 
 snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_detail_partner_without_program_for_all_programs 1'] = {

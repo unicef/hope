@@ -1,6 +1,6 @@
-import { Box, Paper } from '@material-ui/core';
-import BlockRoundedIcon from '@material-ui/icons/BlockRounded';
-import React from 'react';
+import { Box, Paper } from '@mui/material';
+import BlockRoundedIcon from '@mui/icons-material/BlockRounded';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 

@@ -1,11 +1,11 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllPaymentPlansForTableQueryVariables,
   PaymentPlanNode,
   useAllPaymentPlansForTableQuery,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { PaymentPlanTableRow } from './PaymentPlanTableRow';
 import { headCells } from './PaymentPlansHeadCells';
@@ -15,10 +15,10 @@ interface PaymentPlansTableProps {
   canViewDetails: boolean;
 }
 
-export const PaymentPlansTable = ({
+export function PaymentPlansTable({
   filter,
   canViewDetails,
-}: PaymentPlansTableProps): ReactElement => {
+}: PaymentPlansTableProps): ReactElement {
   const { t } = useTranslation();
   const { programId, businessArea } = useBaseUrl();
   const initialVariables: AllPaymentPlansForTableQueryVariables = {
@@ -35,11 +35,11 @@ export const PaymentPlansTable = ({
 
   return (
     <UniversalTable<PaymentPlanNode, AllPaymentPlansForTableQueryVariables>
-      defaultOrderBy='-createdAt'
+      defaultOrderBy="-createdAt"
       title={t('Payment Plans')}
       headCells={headCells}
       query={useAllPaymentPlansForTableQuery}
-      queriedObjectName='allPaymentPlans'
+      queriedObjectName="allPaymentPlans"
       initialVariables={initialVariables}
       renderRow={(row) => (
         <PaymentPlanTableRow
@@ -50,4 +50,4 @@ export const PaymentPlansTable = ({
       )}
     />
   );
-};
+}

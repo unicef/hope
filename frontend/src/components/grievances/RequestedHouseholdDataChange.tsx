@@ -1,16 +1,16 @@
-import { Box, Button, Typography } from '@material-ui/core';
+import { Box, Button, Typography } from '@mui/material';
 import { Formik } from 'formik';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   GrievanceTicketQuery,
   useApproveHouseholdDataChangeMutation,
-} from '../../__generated__/graphql';
-import { useSnackbar } from '../../hooks/useSnackBar';
+} from '@generated/graphql';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { useProgramContext } from '../../programContext';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { useConfirmation } from '../core/ConfirmationDialog';
-import { Title } from '../core/Title';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
+import { useConfirmation } from '@core/ConfirmationDialog';
+import { Title } from '@core/Title';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { RequestedHouseholdDataChangeTable } from './RequestedHouseholdDataChangeTable/RequestedHouseholdDataChangeTable';
 
@@ -67,9 +67,9 @@ export function RequestedHouseholdDataChange({
       return (
         <Button
           onClick={submitForm}
-          variant='contained'
-          color='primary'
-          data-cy='button-approve'
+          variant="contained"
+          color="primary"
+          data-cy="button-approve"
           disabled={
             ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
             !isActiveProgram
@@ -89,9 +89,9 @@ export function RequestedHouseholdDataChange({
             submitForm();
           })
         }
-        variant='contained'
-        color='primary'
-        data-cy='button-approve'
+        variant="contained"
+        color="primary"
+        data-cy="button-approve"
         title={t(
           'Program has to be active to create a Linked Ticket to Feedback',
         )}
@@ -108,14 +108,16 @@ export function RequestedHouseholdDataChange({
     <Formik
       initialValues={{
         selected: entries
-          .filter((row: [string, { approve_status: boolean }]) => {
-            return row[1].approve_status;
-          })
+          .filter(
+            (row: [string, { approve_status: boolean }]) =>
+              row[1].approve_status,
+          )
           .map((row) => row[0]),
         selectedFlexFields: flexFieldsEntries
-          .filter((row: [string, { approve_status: boolean }]) => {
-            return row[1].approve_status;
-          })
+          .filter(
+            (row: [string, { approve_status: boolean }]) =>
+              row[1].approve_status,
+          )
           .map((row) => row[0]),
       }}
       onSubmit={async (values) => {
@@ -151,14 +153,14 @@ export function RequestedHouseholdDataChange({
       {({ submitForm, setFieldValue, values }) => (
         <ApproveBox>
           <Title>
-            <Box display='flex' justifyContent='space-between'>
-              <Typography variant='h6'>Requested Data Change</Typography>
+            <Box display="flex" justifyContent="space-between">
+              <Typography variant="h6">Requested Data Change</Typography>
               {shouldShowEditButton(values) ? (
                 <Button
                   onClick={() => setEdit(true)}
-                  variant='outlined'
-                  color='primary'
-                  data-cy='button-edit'
+                  variant="outlined"
+                  color="primary"
+                  data-cy="button-edit"
                   disabled={ticket.status === GRIEVANCE_TICKET_STATES.CLOSED}
                 >
                   {t('EDIT')}

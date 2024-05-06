@@ -1,96 +1,101 @@
-import React from 'react';
+import * as React from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
   formatCurrencyWithSymbol,
   formatThousands,
   getPercentage,
-} from '../../../utils/utils';
-import { AllChartsQuery } from '../../../__generated__/graphql';
+} from '@utils/utils';
+import { AllChartsQuery } from '@generated/graphql';
 
 interface TotalTransferredByMonthProps {
   data: AllChartsQuery['chartTotalTransferredByMonth'];
 }
-export const TotalTransferredByMonth = ({
+
+export function TotalTransferredByMonth({
   data,
-}: TotalTransferredByMonthProps): React.ReactElement => {
+}: TotalTransferredByMonthProps): React.ReactElement {
   if (!data) return null;
 
-  const chartdata = {
+  const chartdata: any = {
     labels: data.labels,
     datasets: [
       {
         barPercentage: 0.3,
         label: data.datasets[0]?.label,
         backgroundColor: '#C3D1D8',
-        data: [...data.datasets[0]?.data],
+        data: [...(data.datasets[0]?.data || [])],
         stack: 3,
       },
       {
         barPercentage: 0.3,
         label: data.datasets[1]?.label,
         backgroundColor: '#FFAA1D',
-        data: [...data.datasets[1]?.data],
+        data: [...(data.datasets[1]?.data || [])],
         stack: 3,
       },
       {
         barPercentage: 0.3,
         label: data.datasets[2]?.label,
         backgroundColor: '#03867B',
-        data: [...data.datasets[2]?.data],
+        data: [...(data.datasets[2]?.data || [])],
         stack: 3,
       },
     ],
   };
 
-  const options = {
-    legend: {
-      labels: {
-        padding: 40,
+  const options: any = {
+    plugins: {
+      legend: {
+        labels: {
+          padding: 40,
+        },
       },
-    },
-    tooltips: {
-      mode: 'point',
-      callbacks: {
-        label: (tooltipItem, tooltipData) => {
-          if (!tooltipItem.datasetIndex) {
-            // no percentage for previous tranfers value
+      tooltip: {
+        mode: 'point',
+        callbacks: {
+          label: (context) => {
+            const tooltipItem = context.raw;
+            const tooltipData = context.chart.data;
+            if (!context.datasetIndex) {
+              // no percentage for previous transfers value
+              return ` ${
+                tooltipData.datasets[context.datasetIndex].label
+              }: ${formatCurrencyWithSymbol(tooltipItem.y)}`;
+            }
             return ` ${
-              tooltipData.datasets[tooltipItem.datasetIndex].label
-            }: ${formatCurrencyWithSymbol(tooltipItem.yLabel)}`;
-          }
-          return ` ${
-            tooltipData.datasets[tooltipItem.datasetIndex].label
-          }: ${formatCurrencyWithSymbol(tooltipItem.yLabel)} (${getPercentage(
-            tooltipItem.yLabel,
-            tooltipData.datasets[1].data[tooltipItem.index] +
-              tooltipData.datasets[2].data[tooltipItem.index],
-          )})`;
+              tooltipData.datasets[context.datasetIndex].label
+            }: ${formatCurrencyWithSymbol(tooltipItem.y)} (${getPercentage(
+              tooltipItem.y,
+              tooltipData.datasets[1].data[context.dataIndex] +
+                tooltipData.datasets[2].data[context.dataIndex],
+            )})`;
+          },
         },
       },
     },
     scales: {
-      xAxes: [
-        {
-          gridLines: {
-            display: false,
-          },
+      x: {
+        grid: {
+          display: false,
         },
-      ],
-      yAxes: [
-        {
-          scaleLabel: {
-            display: true,
-            labelString: 'USD',
-          },
-          position: 'right',
-          ticks: {
-            beginAtZero: true,
-            callback: formatThousands,
-          },
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'USD',
         },
-      ],
+        position: 'right',
+        beginAtZero: true,
+        ticks: {
+          callback: formatThousands,
+        },
+      },
     },
   };
 
-  return <Bar data={chartdata} options={options} />;
-};
+  return (
+    <div style={{ height: '400px' }}>
+      <Bar data={chartdata} options={options} />
+    </div>
+  );
+}

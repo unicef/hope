@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllHouseholdsForPopulationTableQueryVariables,
@@ -6,10 +6,10 @@ import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
   useAllHouseholdsForPopulationTableQuery,
-} from '../../../../__generated__/graphql';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
+} from '@generated/graphql';
+import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalTable } from '../../UniversalTable';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './HouseholdTableHeadCells';
 import { HouseholdTableRow } from './HouseholdTableRow';
 
@@ -20,12 +20,12 @@ interface HouseholdTableProps {
   canViewDetails: boolean;
 }
 
-export const HouseholdTable = ({
+export function HouseholdTable({
   businessArea,
   filter,
   choicesData,
   canViewDetails,
-}: HouseholdTableProps): React.ReactElement => {
+}: HouseholdTableProps): React.ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const matchWithdrawnValue = (): boolean | undefined => {
@@ -59,7 +59,7 @@ export const HouseholdTable = ({
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllHouseholdsForPopulationTableQuery}
-        queriedObjectName='allHouseholds'
+        queriedObjectName="allHouseholds"
         initialVariables={initialVariables}
         allowSort={false}
         filterOrderBy={filter.orderBy}
@@ -74,4 +74,4 @@ export const HouseholdTable = ({
       />
     </TableWrapper>
   );
-};
+}

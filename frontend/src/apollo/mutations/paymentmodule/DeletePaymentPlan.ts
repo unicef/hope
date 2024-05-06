@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const DELETE_PAYMENT_PLAN = gql`
   mutation DeletePP($paymentPlanId: ID!) {

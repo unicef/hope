@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 from django.core.exceptions import PermissionDenied
 from django.db.models import Model
 
+import graphene
 from graphene import Mutation
 from graphene.relay import ClientIDMutation
 from graphene.types.argument import to_arguments
@@ -64,6 +65,7 @@ class Permissions(Enum):
     TARGETING_UNLOCK = auto()
     TARGETING_SEND = auto()
 
+    PAYMENT_VIEW_LIST_MANAGERIAL = auto()
     # Payment Verification
     PAYMENT_VERIFICATION_VIEW_LIST = auto()
     PAYMENT_VERIFICATION_VIEW_DETAILS = auto()
@@ -298,6 +300,7 @@ def compare_program_id_with_url(
 def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: Any) -> bool:
     if not user.is_authenticated:
         return False
+
     business_area_arg = kwargs.get("business_area")
     if business_area_arg is None:
         return False
@@ -312,9 +315,7 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
     program_id = get_program_id_from_headers(kwargs)
     # is_unicef has access to all Programs
     if user.partner.is_unicef:
-        return any(perm in DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER for perm in permissions) or any(
-            user.has_permission(permission.name, business_area, program_id) for permission in permissions
-        )
+        return any(user.has_permission(permission.name, business_area) for permission in permissions)
     else:
         if not compare_program_id_with_url(user, business_area, business_area_arg, kwargs.get("Referer")):
             return False
@@ -343,6 +344,15 @@ def hopeOneOfPermissionClass(*permissions: Permissions) -> Type[BasePermission]:
             return check_permissions(user, permissions, **kwargs)
 
     return XDPerm
+
+
+class AdminUrlNodeMixin:
+    admin_url = graphene.String()
+
+    def resolve_admin_url(self, info: Any, **kwargs: Any) -> Optional[graphene.String]:
+        if info.context.user.is_superuser:
+            return self.admin_url
+        return None
 
 
 class BaseNodePermissionMixin:

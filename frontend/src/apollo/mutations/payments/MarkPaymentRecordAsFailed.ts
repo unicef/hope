@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const MARK_PAYMENT_RECORD_AS_FAILED = gql`
   mutation markPRAsFailed($paymentRecordId: ID!) {

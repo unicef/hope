@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
-import { UniversalTable } from '../../../../containers/tables/UniversalTable';
-import { choicesToDict, dateToIsoString } from '../../../../utils/utils';
+import * as React from 'react';
+import { useState } from 'react';
+import { UniversalTable } from '@containers/tables/UniversalTable';
+import { choicesToDict, dateToIsoString } from '@utils/utils';
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
   useAllGrievanceTicketQuery,
   useGrievancesChoiceDataQuery,
-} from '../../../../__generated__/graphql';
-import { TableWrapper } from '../../../core/TableWrapper';
+} from '@generated/graphql';
+import { TableWrapper } from '@core/TableWrapper';
 import { headCells } from './LookUpLinkedTicketsHeadCells';
 import { LookUpLinkedTicketsTableRow } from './LookUpLinkedTicketsTableRow';
 
@@ -18,12 +19,12 @@ interface LookUpLinkedTicketsTableProps {
   initialValues;
 }
 
-export const LookUpLinkedTicketsTable = ({
+export function LookUpLinkedTicketsTable({
   businessArea,
   filter,
   setFieldValue,
   initialValues,
-}: LookUpLinkedTicketsTableProps): React.ReactElement => {
+}: LookUpLinkedTicketsTableProps): React.ReactElement {
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
     search: filter.search.trim(),
@@ -37,10 +38,8 @@ export const LookUpLinkedTicketsTable = ({
     admin2: filter?.admin2?.node?.id,
   };
   const [selected, setSelected] = useState(initialValues.selectedLinkedTickets);
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useGrievancesChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery();
   if (choicesLoading) {
     return null;
   }
@@ -54,8 +53,8 @@ export const LookUpLinkedTicketsTable = ({
 
   const handleCheckboxClick = (
     _event:
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>
-      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    | React.MouseEvent<HTMLButtonElement, MouseEvent>
+    | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
     name: string,
   ): void => {
     const selectedIndex = selected.indexOf(name);
@@ -86,13 +85,13 @@ export const LookUpLinkedTicketsTable = ({
   return (
     <TableWrapper>
       <UniversalTable<
-        AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
-        AllGrievanceTicketQueryVariables
+      AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
+      AllGrievanceTicketQueryVariables
       >
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllGrievanceTicketQuery}
-        queriedObjectName='allGrievanceTicket'
+        queriedObjectName="allGrievanceTicket"
         initialVariables={initialVariables}
         onSelectAllClick={handleSelectAllCheckboxesClick}
         numSelected={numSelected}
@@ -109,4 +108,4 @@ export const LookUpLinkedTicketsTable = ({
       />
     </TableWrapper>
   );
-};
+}

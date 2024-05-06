@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const ACCOUNTABILITY_SAMPLE_SIZE_QUERY = gql`
   query AccountabilitySampleSize($input: AccountabilitySampleSizeInput!) {

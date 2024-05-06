@@ -1,27 +1,27 @@
-import { Checkbox } from '@material-ui/core';
-import TableCell from '@material-ui/core/TableCell';
-import { useHistory } from 'react-router-dom';
-import React from 'react';
+import { Checkbox } from '@mui/material';
+import TableCell from '@mui/material/TableCell';
+import { useNavigate } from 'react-router-dom';
+import * as React from 'react';
 import {
   AllGrievanceTicketDocument,
   AllGrievanceTicketQuery,
   useBulkUpdateGrievanceAssigneeMutation,
-} from '../../../__generated__/graphql';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   grievanceTicketBadgeColors,
   grievanceTicketStatusToColor,
   renderUserName,
-} from '../../../utils/utils';
-import { BlackLink } from '../../core/BlackLink';
-import { StatusBox } from '../../core/StatusBox';
-import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../core/UniversalMoment';
+} from '@utils/utils';
+import { BlackLink } from '@core/BlackLink';
+import { StatusBox } from '@core/StatusBox';
+import { ClickableTableRow } from '@core/Table/ClickableTableRow';
+import { UniversalMoment } from '@core/UniversalMoment';
 import { LinkedTicketsModal } from '../LinkedTicketsModal/LinkedTicketsModal';
-import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
 import { AssignedToDropdown } from './AssignedToDropdown';
+import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
 
 interface GrievancesTableRowProps {
   ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
@@ -40,7 +40,7 @@ interface GrievancesTableRowProps {
   initialVariables;
 }
 
-export const GrievancesTableRow = ({
+export function GrievancesTableRow({
   ticket,
   statusChoices,
   categoryChoices,
@@ -53,9 +53,9 @@ export const GrievancesTableRow = ({
   optionsData,
   setInputValue,
   initialVariables,
-}: GrievancesTableRowProps): React.ReactElement => {
+}: GrievancesTableRowProps): React.ReactElement {
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { showMessage } = useSnackbar();
   const detailsPath = getGrievanceDetailsPath(
     ticket.id,
@@ -64,9 +64,9 @@ export const GrievancesTableRow = ({
   );
   const issueType = ticket.issueType
     ? issueTypeChoicesData
-        .find((el) => el.category === ticket.category.toString())
-        .subCategories.find((el) => el.value === ticket.issueType.toString())
-        .name
+      .find((el) => el.category === ticket.category.toString())
+      .subCategories.find((el) => el.value === ticket.issueType.toString())
+      .name
     : '-';
 
   const [mutate] = useBulkUpdateGrievanceAssigneeMutation();
@@ -95,7 +95,7 @@ export const GrievancesTableRow = ({
 
   const handleRowClick = (): void => {
     if (canViewDetails) {
-      history.push(detailsPath);
+      navigate(detailsPath);
     }
     return null;
   };
@@ -124,12 +124,12 @@ export const GrievancesTableRow = ({
     <ClickableTableRow
       onClick={handleRowClick}
       hover
-      role='checkbox'
+      role="checkbox"
       key={ticket.id}
     >
-      <TableCell align='left' padding='checkbox'>
+      <TableCell align="left" padding="checkbox">
         <Checkbox
-          color='primary'
+          color="primary"
           onClick={(event) => {
             event.stopPropagation();
             checkboxClickHandler(ticket);
@@ -139,20 +139,20 @@ export const GrievancesTableRow = ({
           inputProps={{ 'aria-labelledby': ticket.unicefId }}
         />
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={detailsPath}>{ticket.unicefId}</BlackLink>
         ) : (
           ticket.unicefId
         )}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <StatusBox
           status={statusChoices[ticket.status]}
           statusToColor={grievanceTicketStatusToColor}
         />
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {ticket.status === GRIEVANCE_TICKET_STATES.CLOSED ? (
           renderUserName(ticket.assignedTo)
         ) : (
@@ -166,10 +166,10 @@ export const GrievancesTableRow = ({
           />
         )}
       </TableCell>
-      <TableCell align='left'>{categoryChoices[ticket.category]}</TableCell>
-      <TableCell align='left'>{issueType}</TableCell>
-      <TableCell align='left'>{ticket.household?.unicefId || '-'}</TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">{categoryChoices[ticket.category]}</TableCell>
+      <TableCell align="left">{issueType}</TableCell>
+      <TableCell align="left">{ticket.household?.unicefId || '-'}</TableCell>
+      <TableCell align="left">
         <StatusBox
           status={
             priorityChoicesData[
@@ -181,7 +181,7 @@ export const GrievancesTableRow = ({
           statusToColor={grievanceTicketBadgeColors}
         />
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <StatusBox
           status={
             urgencyChoicesData[
@@ -193,7 +193,7 @@ export const GrievancesTableRow = ({
           statusToColor={grievanceTicketBadgeColors}
         />
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <LinkedTicketsModal
           ticket={ticket}
           categoryChoices={categoryChoices}
@@ -203,14 +203,14 @@ export const GrievancesTableRow = ({
           baseUrl={baseUrl}
         />
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <UniversalMoment>{ticket.createdAt}</UniversalMoment>
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <UniversalMoment>{ticket.userModified}</UniversalMoment>
       </TableCell>
-      <TableCell align='left'>{ticket.totalDays}</TableCell>
-      {isAllPrograms && <TableCell align='left'>{mappedPrograms}</TableCell>}
+      <TableCell align="left">{ticket.totalDays}</TableCell>
+      {isAllPrograms && <TableCell align="left">{mappedPrograms}</TableCell>}
     </ClickableTableRow>
   );
-};
+}

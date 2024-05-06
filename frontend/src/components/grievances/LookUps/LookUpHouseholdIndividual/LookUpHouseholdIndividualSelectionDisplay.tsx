@@ -1,6 +1,6 @@
-import { Box, Grid } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
-import React from 'react';
+import { Box, Grid } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import * as React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { StyledBox, BlueText, DarkGrey } from '../LookUpStyles';
@@ -12,6 +12,15 @@ const Flex = styled.div`
     display: flex;
   }
 `;
+interface LookUpHouseholdIndividualSelectionDisplayProps {
+  onValueChange;
+  disableUnselectIndividual: boolean;
+  disableUnselectHousehold: boolean;
+  selectedHousehold;
+  setSelectedHousehold: (value) => void;
+  selectedIndividual;
+  setSelectedIndividual: (value) => void;
+}
 
 export const LookUpHouseholdIndividualSelectionDisplay = ({
   onValueChange,
@@ -21,15 +30,7 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
   setSelectedHousehold,
   selectedIndividual,
   setSelectedIndividual,
-}: {
-  onValueChange;
-  disableUnselectIndividual: boolean;
-  disableUnselectHousehold: boolean;
-  selectedHousehold;
-  setSelectedHousehold: Function;
-  selectedIndividual;
-  setSelectedIndividual: Function;
-}): React.ReactElement => {
+}: LookUpHouseholdIndividualSelectionDisplayProps): React.ReactElement => {
   const { t } = useTranslation();
   const handleRemove = (type): void => {
     if (type === Types.household) {
@@ -47,9 +48,9 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
     <Grid container spacing={5}>
       <Grid item xs={4}>
         <StyledBox disabled={disableUnselectHousehold}>
-          <Grid container alignItems='center' justifyContent='space-between'>
+          <Grid container alignItems="center" justifyContent="space-between">
             <Grid item>
-              <Box display='flex'>
+              <Box display="flex">
                 {t('Household ID')}:
                 <BlueText>
                   &ensp;
@@ -62,8 +63,8 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
                 <DarkGrey>
                   <Flex>
                     <DeleteIcon
-                      color='inherit'
-                      fontSize='small'
+                      color="inherit"
+                      fontSize="small"
                       onClick={() => handleRemove(Types.household)}
                     />
                   </Flex>
@@ -75,9 +76,9 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
       </Grid>
       <Grid item xs={4}>
         <StyledBox disabled={disableUnselectIndividual}>
-          <Grid container alignItems='center' justifyContent='space-between'>
+          <Grid container alignItems="center" justifyContent="space-between">
             <Grid item>
-              <Box display='flex'>
+              <Box display="flex">
                 {t('Individual ID')}:
                 <BlueText>
                   &ensp;
@@ -90,8 +91,8 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
                 <DarkGrey>
                   <Flex>
                     <DeleteIcon
-                      color='inherit'
-                      fontSize='small'
+                      color="inherit"
+                      fontSize="small"
                       onClick={() => handleRemove(Types.individual)}
                     />
                   </Flex>

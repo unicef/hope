@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const ALL_PAYMENT_VERIFICATION_LOG_ENTRIES_QUERY = gql`
   query AllPaymentVerificationLogEntries(

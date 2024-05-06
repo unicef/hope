@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { render } from '../../../../testUtils/testUtils';
 import { fakeDeliveryMechanisms } from '../../../../../fixtures/paymentmodule/fakeDeliveryMechanisms';
 import { fakeFspsData } from '../../../../../fixtures/paymentmodule/fakeFspsData';
@@ -12,6 +12,7 @@ describe('components/paymentmodule/CreateSetUpFsp/DeliveryMechanismRow', () => {
         {
           deliveryMechanism: '',
           fsp: '',
+          chosenConfiguration: '',
         },
       ],
     };
@@ -20,12 +21,11 @@ describe('components/paymentmodule/CreateSetUpFsp/DeliveryMechanismRow', () => {
       name: el.name,
       value: el.id,
     }));
-    const deliveryMechanismsChoices = fakeDeliveryMechanisms.allDeliveryMechanisms.map(
-      (el) => ({
+    const deliveryMechanismsChoices =
+      fakeDeliveryMechanisms.allDeliveryMechanisms.map((el) => ({
         name: el.name,
         value: el.value,
-      }),
-    );
+      }));
 
     const { container } = render(
       <DeliveryMechanismRow
@@ -36,6 +36,7 @@ describe('components/paymentmodule/CreateSetUpFsp/DeliveryMechanismRow', () => {
         deliveryMechanismsChoices={deliveryMechanismsChoices}
         fspsChoices={mappedFsps}
         permissions={[PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP]}
+        setFieldValue={() => {}}
       />,
     );
 

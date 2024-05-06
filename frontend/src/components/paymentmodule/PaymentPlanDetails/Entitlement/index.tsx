@@ -1,1 +1,1 @@
-import { Entitlement } from './Entitlement';
+export { Entitlement } from './Entitlement';

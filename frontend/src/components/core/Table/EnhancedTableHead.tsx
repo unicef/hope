@@ -1,11 +1,10 @@
-import React from 'react';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import TableCell from '@material-ui/core/TableCell';
+import * as React from 'react';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
 import styled from 'styled-components';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
-import { Checkbox } from '@material-ui/core';
+import TableSortLabel from '@mui/material/TableSortLabel';
+import { Checkbox } from '@mui/material';
 
 type Order = 'asc' | 'desc';
 
@@ -19,21 +18,17 @@ export interface HeadCell<T> {
   disableSort?: boolean;
 }
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    visuallyHidden: {
-      border: 0,
-      clip: 'rect(0 0 0 0)',
-      height: 1,
-      margin: -1,
-      overflow: 'hidden',
-      padding: 0,
-      position: 'absolute',
-      top: 20,
-      width: 1,
-    },
-  }),
-);
+const VisuallyHidden = styled.span`
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  top: 20px;
+  width: 1px;
+`;
 
 const TableSortLabelStyled = styled(TableSortLabel)`
   & {
@@ -74,19 +69,17 @@ export function EnhancedTableHead<T>(
     numSelected = 0,
     data = [],
   } = props;
-  const createSortHandler = (property: keyof T | string) => (
-    event: React.MouseEvent<unknown>,
-  ) => {
-    onRequestSort(event, property);
-  };
-  const classes = useStyles();
+  const createSortHandler =
+    (property: keyof T | string) => (event: React.MouseEvent<unknown>) => {
+      onRequestSort(event, property);
+    };
   return (
     <TableHead>
       <TableRow>
         {onSelectAllClick && data.length ? (
-          <TableCell padding='checkbox'>
+          <TableCell padding="checkbox">
             <Checkbox
-              color='primary'
+              color="primary"
               indeterminate={numSelected > 0 && numSelected < rowCount}
               checked={rowCount > 0 && numSelected === rowCount}
               onChange={(event) => onSelectAllClick(event, data)}
@@ -104,22 +97,22 @@ export function EnhancedTableHead<T>(
           >
             {allowSort && !headCell.disableSort ? (
               <TableSortLabelStyled
-                data-cy='table-label'
+                data-cy="table-label"
                 active={orderBy === headCell.id}
                 direction={orderBy === headCell.id ? order : 'asc'}
                 onClick={createSortHandler(headCell.id)}
               >
                 {headCell.label}
                 {orderBy === headCell.id && (
-                  <span className={classes.visuallyHidden}>
+                  <VisuallyHidden>
                     {order === 'desc'
                       ? 'sorted descending'
                       : 'sorted ascending'}
-                  </span>
+                  </VisuallyHidden>
                 )}
               </TableSortLabelStyled>
             ) : (
-              <StyledLabel data-cy='table-label'>{headCell.label}</StyledLabel>
+              <StyledLabel data-cy="table-label">{headCell.label}</StyledLabel>
             )}
           </TableCell>
         ))}

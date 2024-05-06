@@ -1,8 +1,7 @@
 
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import { FieldArray, Form, Formik } from 'formik';
-import React from 'react';
-import { useHistory } from 'react-router-dom';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
@@ -11,27 +10,28 @@ import {
   useAllProgramsForChoicesQuery,
   useBusinessAreaDataQuery,
   useCreateTpMutation,
-} from '../../../__generated__/graphql';
-import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { CreateTargetPopulationHeader } from '../../../components/targeting/CreateTargetPopulation/CreateTargetPopulationHeader';
-import { Exclusions } from '../../../components/targeting/CreateTargetPopulation/Exclusions';
-import { PaperContainer } from '../../../components/targeting/PaperContainer';
-import { TargetingCriteria } from '../../../components/targeting/TargetingCriteria';
-import { TargetingCriteriaDisabled } from '../../../components/targeting/TargetingCriteria/TargetingCriteriaDisabled';
+} from '@generated/graphql';
+import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { CreateTargetPopulationHeader } from '@components/targeting/CreateTargetPopulation/CreateTargetPopulationHeader';
+import { Exclusions } from '@components/targeting/CreateTargetPopulation/Exclusions';
+import { PaperContainer } from '@components/targeting/PaperContainer';
+import { TargetingCriteria } from '@components/targeting/TargetingCriteria';
+import { TargetingCriteriaDisabled } from '@components/targeting/TargetingCriteria/TargetingCriteriaDisabled';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
-import { getFullNodeFromEdgesById } from '../../../utils/utils';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { getTargetingCriteriaVariables } from '@utils/targetingUtils';
+import { getFullNodeFromEdgesById } from '@utils/utils';
+import { useNavigate } from 'react-router-dom';
 
 const Label = styled.p`
   color: #b1b1b5;
 `;
 
-export const CreateTargetPopulationPage = (): React.ReactElement => {
+export function CreateTargetPopulationPage(): React.ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const initialValues = {
@@ -47,19 +47,17 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
   });
 
-  const {
-    data: allProgramsData,
-    loading: loadingPrograms,
-  } = useAllProgramsForChoicesQuery({
-    variables: { businessArea, status: [ProgramStatus.Active] },
-    fetchPolicy: 'network-only',
-  });
+  const { data: allProgramsData, loading: loadingPrograms } =
+    useAllProgramsForChoicesQuery({
+      variables: { businessArea, status: [ProgramStatus.Active] },
+      fetchPolicy: 'network-only',
+    });
 
   if (loadingPrograms) return <LoadingComponent />;
   if (permissions === null) return null;
@@ -102,7 +100,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
         },
       });
       showMessage(t('Target Population Created'));
-      history.push(
+      navigate(
         `/${baseUrl}/target-population/${res.data.createTargetPopulation.targetPopulation.id}`,
       );
     } catch (e) {
@@ -128,7 +126,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
           />
           {values.program ? (
             <FieldArray
-              name='criterias'
+              name="criterias"
               render={(arrayHelpers) => (
                 <TargetingCriteria
                   helpers={arrayHelpers}
@@ -149,7 +147,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
           )}
           <Exclusions />
           <PaperContainer>
-            <Typography variant='h6'>
+            <Typography variant="h6">
               {t('Save to see the list of households')}
             </Typography>
             <Label>
@@ -160,4 +158,4 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
       )}
     </Formik>
   );
-};
+}

@@ -1,12 +1,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Box } from '@material-ui/core';
-import React, { useCallback } from 'react';
+import { Box } from '@mui/material';
+import { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { LoadingComponent } from './LoadingComponent';
 
-const DropzoneContainer = styled.div`
+interface DropzoneContainerProps {
+  disabled: boolean;
+}
+
+const DropzoneContainer = styled.div<DropzoneContainerProps>`
   width: 500px;
   height: 100px;
   background-color: rgba(2, 62, 144, 0.1);
@@ -18,13 +22,13 @@ const DropzoneContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: ${({ theme }) => theme.spacing(5)}px;
-  padding: ${({ theme }) => theme.spacing(5)}px;
+  margin-top: ${({ theme }) => theme.spacing(5)};
+  padding: ${({ theme }) => theme.spacing(5)};
   cursor: pointer;
   ${({ disabled }) => (disabled ? 'filter: grayscale(100%);' : '')}
 `;
 
-export function DropzoneField({
+export const DropzoneField = ({
   onChange,
   loading,
   dontShowFilename,
@@ -32,27 +36,36 @@ export function DropzoneField({
   onChange: (acceptedFiles: File[]) => void;
   loading: boolean;
   dontShowFilename: boolean;
-}): React.ReactElement {
+}): React.ReactElement => {
   const { t } = useTranslation();
   const onDrop = useCallback((acceptedFiles: File[]) => {
     onChange(acceptedFiles);
   }, []);
+
   const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
     disabled: loading,
-    accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    accept: {
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': [
+        '.xlsx',
+      ],
+    },
     onDrop,
   });
   const acceptedFilename =
     acceptedFiles.length > 0 ? acceptedFiles[0].name : null;
   return (
-    <Box display='flex' justifyContent='center' p={5}>
+    <Box display="flex" justifyContent="center" p={5}>
       <DropzoneContainer {...getRootProps()} disabled={loading}>
         <LoadingComponent isLoading={loading} absolute />
-        <input {...getInputProps()} data-cy='file-input' />
+        <input
+          {...getInputProps()}
+          accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          data-cy="file-input"
+        />{' '}
         {dontShowFilename || !acceptedFilename
           ? t('UPLOAD FILE')
           : acceptedFilename}
       </DropzoneContainer>
     </Box>
   );
-}
+};

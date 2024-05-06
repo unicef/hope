@@ -1,11 +1,11 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllPaymentRecordsAndPaymentsQueryVariables,
   HouseholdNode,
   PaymentRecordAndPaymentNode,
   useAllPaymentRecordsAndPaymentsQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentRecordAndPaymentHouseholdTableHeadCells';
 import { PaymentRecordAndPaymentHouseholdTableRow } from './PaymentRecordAndPaymentHouseholdTableRow';
@@ -29,13 +29,13 @@ export function PaymentRecordHouseholdTable({
   };
   return (
     <UniversalTable<
-      PaymentRecordAndPaymentNode,
-      AllPaymentRecordsAndPaymentsQueryVariables
+    PaymentRecordAndPaymentNode,
+    AllPaymentRecordsAndPaymentsQueryVariables
     >
       title={t('Payment Records')}
       headCells={headCells}
       query={useAllPaymentRecordsAndPaymentsQuery}
-      queriedObjectName='allPaymentRecordsAndPayments'
+      queriedObjectName="allPaymentRecordsAndPayments"
       initialVariables={initialVariables}
       renderRow={(row) => (
         <PaymentRecordAndPaymentHouseholdTableRow

@@ -93,7 +93,7 @@ class TestPaymentVerificationMutations(APITestCase):
         cls.cash_plan = cash_plan
         cls.verification = cash_plan.payment_verification_plan.first()
         VerificationPlanStatusChangeServices(payment_verification_plan).activate()
-        info = ResolveInfo(None, None, None, None, None, None, None, None, None, None)  # type: ignore
+        info = ResolveInfo(None, None, None, None, None, None, None, None, None, None)
         request = RequestFactory().get("/api/graphql")
         request.user = cls.user
         info.context = request
@@ -201,7 +201,7 @@ class TestPaymentVerificationMutations(APITestCase):
             UpdatePaymentVerificationReceivedAndReceivedAmount,
         )
 
-        info = ResolveInfo(None, None, None, None, None, None, None, None, None, None)  # type: ignore
+        info = ResolveInfo(None, None, None, None, None, None, None, None, None, None)
         request = RequestFactory().get("/api/graphql")
         request.user = UserFactory()
         info.context = request

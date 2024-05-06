@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const EXPORT_SURVEY_SAMPLE_MUTATION = gql`
   mutation ExportSurveySample($surveyId: ID!) {

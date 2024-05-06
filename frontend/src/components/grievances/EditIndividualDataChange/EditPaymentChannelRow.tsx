@@ -1,17 +1,22 @@
-import { Box, Grid, IconButton } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
-import Close from '@material-ui/icons/Close';
+import { Box, Grid, IconButton } from '@mui/material';
+import { Delete } from '@mui/icons-material';
+import Close from '@mui/icons-material/Close';
 import { useLocation } from 'react-router-dom';
-import Edit from '@material-ui/icons/Edit';
-import React, { useState } from 'react';
+import Edit from '@mui/icons-material/Edit';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { AllIndividualsQuery } from '../../../__generated__/graphql';
-import { LabelizedField } from '../../core/LabelizedField';
+import { AllIndividualsQuery } from '@generated/graphql';
+import { LabelizedField } from '@core/LabelizedField';
 import { PaymentChannelField } from '../PaymentChannelField';
 import { removeItemById } from '../utils/helpers';
 
-const DisabledDiv = styled.div`
+interface DisabledDivProps {
+  disabled: boolean;
+}
+
+const DisabledDiv = styled.div<DisabledDivProps>`
   filter: opacity(${({ disabled }) => (disabled ? 0.5 : 1)});
 `;
 
@@ -48,12 +53,12 @@ export function EditPaymentChannelRow({
             arrayHelpers,
           )
         }
-        baseName='individualDataUpdatePaymentChannelsToEdit'
+        baseName="individualDataUpdatePaymentChannelsToEdit"
         isEdited={isEdited}
         paymentChannel={paymentChannel}
         values={values}
       />
-      <Box display='flex' alignItems='center'>
+      <Box display="flex" alignItems="center">
         <IconButton
           onClick={() => {
             arrayHelpers.remove({
@@ -104,7 +109,7 @@ export function EditPaymentChannelRow({
       </Grid>
       <Grid item xs={1}>
         {!removed ? (
-          <Box display='flex' align-items='center'>
+          <Box display="flex" align-items="center">
             <IconButton
               onClick={() => {
                 setFieldValue(
@@ -134,7 +139,7 @@ export function EditPaymentChannelRow({
             </IconButton>
           </Box>
         ) : (
-          <Box display='flex' alignItems='center' height={48} color='red'>
+          <Box display="flex" alignItems="center" height={48} color="red">
             {t('REMOVED')}
           </Box>
         )}

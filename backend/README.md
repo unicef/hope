@@ -3,10 +3,10 @@
 ## VSCode setup
 
 ```sh
-python3.9 -m venv venv
+python3.11 -m venv venv
 docker compose build
 docker compose run --rm backend poetry export -f requirements.txt --output venv/requirements.txt
-python3.9 -m pip install -r venv/requirements.txt --require-hashes
+python3.11 -m pip install -r venv/requirements.txt --require-hashes
 ```
 
 CMD + Shift + P => `Python: Select interpreter`

@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const Survey = gql`
   query Survey($id: ID!) {
@@ -7,6 +7,7 @@ export const Survey = gql`
       unicefId
       category
       title
+      adminUrl
       createdBy {
         id
         firstName

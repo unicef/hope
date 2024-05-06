@@ -30,6 +30,7 @@ from graphql_relay import to_global_id
 from graphql_relay.connection.arrayconnection import connection_from_list_slice
 
 from hct_mis_api.apps.account.permissions import (
+    AdminUrlNodeMixin,
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
     Permissions,
@@ -179,15 +180,18 @@ class FinancialServiceProviderNode(BaseNodePermissionMixin, DjangoObjectType):
     full_name = graphene.String(source="name")
     is_payment_gateway = graphene.Boolean()
 
-    def resolve_is_payment_gateway(self, info: Any) -> bool:
-        return (
-            self.payment_gateway_id and self.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
-        )
+    def resolve_is_payment_gateway(self, info: Any) -> graphene.Boolean:
+        return self.is_payment_gateway
 
     class Meta:
         model = FinancialServiceProvider
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    @classmethod
+    def get_queryset(cls, queryset: QuerySet, info: Any) -> QuerySet:
+        business_area_slug = info.context.headers.get("Business-Area")
+        return queryset.all().allowed_to(business_area_slug)
 
 
 class ServiceProviderNode(DjangoObjectType):
@@ -324,7 +328,7 @@ class PaymentHouseholdSnapshotNode(BaseNodePermissionMixin, DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
+class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PM_VIEW_DETAILS),)
     payment_plan_hard_conflicted = graphene.Boolean()
     payment_plan_hard_conflicted_data = graphene.List(PaymentConflictDataNode)
@@ -451,6 +455,7 @@ class DeliveryMechanismNode(DjangoObjectType):
     name = graphene.String()
     order = graphene.Int()
     fsp = graphene.Field(FinancialServiceProviderNode)
+    chosen_configuration = graphene.String()
 
     def resolve_name(self, info: Any) -> graphene.String:
         return self.delivery_mechanism
@@ -499,14 +504,22 @@ class VolumeByDeliveryMechanismNode(graphene.ObjectType):
         connection_class = ExtendedConnection
 
 
+class FspConfiguration(graphene.ObjectType):
+    id = graphene.String()
+    key = graphene.String()
+    label = graphene.String()
+
+
+class FspChoice(graphene.ObjectType):
+    id = graphene.String()
+    name = graphene.String()
+    configurations = graphene.List(FspConfiguration)
+
+    def resolve_id(self, info: Any) -> Optional[str]:
+        return encode_id_base64(self["id"], "FinancialServiceProvider")  # type: ignore
+
+
 class FspChoices(graphene.ObjectType):
-    class FspChoice(graphene.ObjectType):
-        id = graphene.String()
-        name = graphene.String()
-
-        def resolve_id(self, info: Any) -> Optional[str]:
-            return encode_id_base64(self["id"], "FinancialServiceProvider")  # type: ignore
-
     delivery_mechanism = graphene.String()
     fsps = graphene.List(FspChoice)
 
@@ -522,7 +535,7 @@ class ReconciliationSummaryNode(graphene.ObjectType):
     reconciled = graphene.Int()
 
 
-class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
+class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PM_VIEW_DETAILS),)
     dispersion_start_date = graphene.Date()
     dispersion_end_date = graphene.Date()
@@ -656,24 +669,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.unsuccessful_payments_for_follow_up().count()
 
     def resolve_can_send_to_payment_gateway(self, info: Any) -> bool:
-        if self.status != PaymentPlan.Status.ACCEPTED:
-            return False
-
-        if self.splits.exists():
-            has_payment_gateway_fsp = self.delivery_mechanisms.filter(
-                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                financial_service_provider__payment_gateway_id__isnull=False,
-            ).exists()
-            has_not_sent_to_payment_gateway_splits = self.splits.filter(
-                sent_to_payment_gateway=False,
-            ).exists()
-            return has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
-        else:
-            return self.delivery_mechanisms.filter(
-                sent_to_payment_gateway=False,
-                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                financial_service_provider__payment_gateway_id__isnull=False,
-            ).exists()
+        return self.can_send_to_payment_gateway  # type: ignore
 
     def resolve_can_split(self, info: Any) -> bool:
         if self.status != PaymentPlan.Status.ACCEPTED:
@@ -687,7 +683,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return True
 
 
-class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
+class PaymentVerificationNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS),)
     is_manually_editable = graphene.Boolean()
     payment = graphene.Field(GenericPaymentNode)
@@ -701,7 +697,7 @@ class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.get_payment
 
 
-class PaymentVerificationPlanNode(DjangoObjectType):
+class PaymentVerificationPlanNode(AdminUrlNodeMixin, DjangoObjectType):
     excluded_admin_areas_filter = graphene.List(graphene.String)
     age_filter = graphene.Field(AgeFilterObject)
     xlsx_file_was_downloaded = graphene.Boolean()
@@ -720,7 +716,7 @@ class PaymentVerificationPlanNode(DjangoObjectType):
         return self.has_xlsx_payment_verification_plan_file
 
 
-class PaymentRecordNode(BaseNodePermissionMixin, DjangoObjectType):
+class PaymentRecordNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS),)
     verification = graphene.Field(PaymentVerificationNode)
     unicef_id = graphene.String(source="ca_id")
@@ -740,7 +736,7 @@ class PaymentVerificationLogEntryNode(LogEntryNode):
         connection_class = ExtendedConnection
 
 
-class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
+class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, graphene.ObjectType):
     """
     for CashPlan and PaymentPlan models
     """
@@ -1096,7 +1092,7 @@ class Query(graphene.ObjectType):
                 [
                     # This basically checks if FSP can accept ANY additional volume,
                     # more strict validation is performed in AssignFspToDeliveryMechanismMutation
-                    {"id": fsp.id, "name": fsp.name}
+                    {"id": fsp.id, "name": fsp.name, "configurations": fsp.configurations}
                     for fsp in fsps
                     if fsp.can_accept_any_volume()
                 ]

@@ -5,7 +5,11 @@ from django.test import TestCase
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.core.admin import AcceptanceProcessThresholdFormset
+from hct_mis_api.apps.core.admin import (
+    AcceptanceProcessThresholdFormset,
+    DataCollectingTypeForm,
+)
+from hct_mis_api.apps.core.models import DataCollectingType
 
 
 class TestAcceptanceProcessThreshold(TestCase):
@@ -29,3 +33,35 @@ class TestAcceptanceProcessThreshold(TestCase):
                 AcceptanceProcessThresholdFormset.validate_ranges(ranges)
         else:
             AcceptanceProcessThresholdFormset.validate_ranges(ranges)
+
+
+class TestDataCollectingTypeForm(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.form_data = {
+            "label": "dct",
+            "code": "dct",
+            "description": "",
+            "compatible_types": "",
+            "limit_to": "",
+            "active": True,
+            "deprecated": False,
+            "individual_filters_available": False,
+            "household_filters_available": True,
+            "recalculate_composition": False,
+            "weight": 0,
+        }
+
+    def test_type_cannot_be_blank(self) -> None:
+        form = DataCollectingTypeForm(self.form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors["type"][0], "This field is required.")
+
+    def test_household_filters_cannot_be_marked_when_type_is_social(self) -> None:
+        form = DataCollectingTypeForm({**self.form_data, "type": DataCollectingType.Type.SOCIAL})
+
+        self.assertFalse(form.is_valid())
+        self.assertEqual(
+            form.errors["type"][0], "Household filters cannot be applied for data collecting type with social type"
+        )

@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { TableWrapper } from '../../../components/core/TableWrapper';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TableWrapper } from '@components/core/TableWrapper';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { getFilterFromQueryParams } from '../../../utils/utils';
+import { usePermissions } from '@hooks/usePermissions';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { PaymentPlansTable } from '../../tables/paymentmodule/PaymentPlansTable';
 import { PaymentPlansFilters } from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { ButtonTooltip } from '../../../components/core/ButtonTooltip';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../programContext';
 
 const initialFilter = {
@@ -23,7 +24,7 @@ const initialFilter = {
   isFollowUp: '',
 };
 
-export const PaymentModulePage = (): React.ReactElement => {
+export function PaymentModulePage(): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
@@ -47,11 +48,11 @@ export const PaymentModulePage = (): React.ReactElement => {
       <PageHeader title={t('Payment Module')}>
         {hasPermissions(PERMISSIONS.PM_CREATE, permissions) && (
           <ButtonTooltip
-            variant='contained'
-            color='primary'
+            variant="contained"
+            color="primary"
             component={Link}
             to={`/${baseUrl}/payment-module/new-plan`}
-            data-cy='button-new-payment-plan'
+            data-cy="button-new-payment-plan"
             title={t('Program has to be active to create new Payment Program')}
             disabled={!isActiveProgram}
           >
@@ -77,4 +78,4 @@ export const PaymentModulePage = (): React.ReactElement => {
       </TableWrapper>
     </>
   );
-};
+}

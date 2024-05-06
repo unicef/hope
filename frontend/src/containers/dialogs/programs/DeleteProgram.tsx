@@ -1,20 +1,21 @@
-import { Button, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/CloseRounded';
-import React, { useState } from 'react';
+import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
+import CloseIcon from '@mui/icons-material/CloseRounded';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
 import {
   AllProgramsForChoicesDocument,
   ProgramQuery,
   useDeleteProgramMutation,
-} from '../../../__generated__/graphql';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
+import { useNavigate } from 'react-router-dom';
 
 const RemoveButton = styled(Button)`
   && {
@@ -32,7 +33,7 @@ const RemoveModalButton = styled(Button)`
 `;
 const MidDialog = styled(Dialog)`
   .MuiDialog-paperWidthSm {
-    min-width: ${({ theme }) => theme.spacing(120)}px;
+    min-width: ${({ theme }) => theme.spacing(120)};
   }
 `;
 
@@ -40,10 +41,10 @@ interface DeleteProgramProps {
   program: ProgramQuery['program'];
 }
 
-export const DeleteProgram = ({
+export function DeleteProgram({
   program,
-}: DeleteProgramProps): React.ReactElement => {
-  const history = useHistory();
+}: DeleteProgramProps): React.ReactElement {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -65,7 +66,7 @@ export const DeleteProgram = ({
         ],
       });
       showMessage(t('Programme removed'));
-      history.push(`/${businessArea}/programs/all/list`);
+      navigate(`/${businessArea}/programs/all/list`);
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
@@ -76,15 +77,15 @@ export const DeleteProgram = ({
       <RemoveButton
         startIcon={<CloseIcon />}
         onClick={() => setOpen(true)}
-        data-cy='button-remove-program'
+        data-cy="button-remove-program"
       >
         {t('REMOVE')}
       </RemoveButton>
       <MidDialog
         open={open}
         onClose={() => setOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Remove Programme')}</DialogTitle>
@@ -96,15 +97,15 @@ export const DeleteProgram = ({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button data-cy='button-cancel' onClick={() => setOpen(false)}>
+            <Button data-cy="button-cancel" onClick={() => setOpen(false)}>
               {t('CANCEL')}
             </Button>
             <RemoveModalButton
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
               onClick={deleteProgram}
-              data-cy='button-remove-program'
+              data-cy="button-remove-program"
             >
               {t('REMOVE')}
             </RemoveModalButton>
@@ -113,4 +114,4 @@ export const DeleteProgram = ({
       </MidDialog>
     </span>
   );
-};
+}

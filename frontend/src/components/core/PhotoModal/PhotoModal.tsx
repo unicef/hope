@@ -1,11 +1,12 @@
-import { Box, Button, DialogContent, IconButton } from '@material-ui/core';
+import { Box, Button, DialogContent, IconButton } from '@mui/material';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
-import CloseIcon from '@material-ui/icons/Close';
-import React, { useState } from 'react';
+import CloseIcon from '@mui/icons-material/Close';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Dialog } from '../../../containers/dialogs/Dialog';
+import { Dialog } from '@containers/dialogs/Dialog';
 import { PhotoModalFooter } from './PhotoModalFooter';
 import { PhotoModalHeader } from './PhotoModalHeader';
 
@@ -27,7 +28,12 @@ export const StyledImage = styled.img`
   transition: 0.4s ease-in-out;
 `;
 
-export const MiniImage = styled.div`
+interface MiniImageProps {
+  src?: string;
+  alt?: string;
+}
+
+export const MiniImage = styled.div<MiniImageProps>`
   height: 45px;
   width: 45px;
   cursor: pointer;
@@ -37,21 +43,23 @@ export const MiniImage = styled.div`
   background-size: cover;
 `;
 
-export const PhotoModal = ({
+export function PhotoModal({
   src,
   linkText,
   variant = 'picture',
   title = 'Photo',
   closeHandler,
   showRotate = true,
+  alt = 'photo',
 }: {
   src: string;
+  alt?: string;
   linkText?: string;
   variant?: 'picture' | 'button' | 'link' | 'pictureClose';
   title?: string;
   closeHandler?;
   showRotate?: boolean;
-}): React.ReactElement => {
+}): React.ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [turnAngle, setTurnAngle] = useState(90);
   const { t } = useTranslation();
@@ -62,8 +70,8 @@ export const PhotoModal = ({
       case 'picture':
         element = (
           <MiniImage
-            data-cy='mini-image'
-            alt='photo'
+            data-cy="mini-image"
+            alt={alt}
             src={src}
             onClick={() => setDialogOpen(true)}
           />
@@ -72,9 +80,9 @@ export const PhotoModal = ({
       case 'button':
         element = (
           <Button
-            data-cy='button-show-photo'
-            color='primary'
-            variant='outlined'
+            data-cy="button-show-photo"
+            color="primary"
+            variant="outlined"
             onClick={() => {
               setDialogOpen(true);
             }}
@@ -86,10 +94,11 @@ export const PhotoModal = ({
       case 'link':
         element = (
           <StyledLink
-            data-cy='link-show-photo'
+            data-cy="link-show-photo"
             onClick={() => {
               setDialogOpen(true);
             }}
+            to={null}
           >
             {linkText}
           </StyledLink>
@@ -97,14 +106,14 @@ export const PhotoModal = ({
         break;
       case 'pictureClose':
         element = (
-          <Box display='flex' alignItems='center'>
+          <Box display="flex" alignItems="center">
             <MiniImage
-              data-cy='mini-image-close'
-              alt='photo'
+              data-cy="mini-image-close"
+              alt={alt}
               src={src}
               onClick={() => setDialogOpen(true)}
             />
-            <IconButton data-cy='close-icon' onClick={() => closeHandler()}>
+            <IconButton data-cy="close-icon" onClick={() => closeHandler()}>
               <CloseIcon />
             </IconButton>
           </Box>
@@ -113,8 +122,8 @@ export const PhotoModal = ({
       default:
         element = (
           <MiniImage
-            data-cy='mini-image'
-            alt='photo'
+            data-cy="mini-image"
+            alt="photo"
             src={src}
             onClick={() => setDialogOpen(true)}
           />
@@ -129,7 +138,7 @@ export const PhotoModal = ({
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        aria-labelledby='form-dialog-title'
+        aria-labelledby="form-dialog-title"
       >
         <PhotoModalHeader
           title={title}
@@ -141,7 +150,7 @@ export const PhotoModal = ({
           <Box p={3}>
             <TransformWrapper>
               <TransformComponent>
-                <StyledImage id='modalImg' alt='photo' src={src} />
+                <StyledImage id="modalImg" alt="photo" src={src} />
               </TransformComponent>
             </TransformWrapper>
           </Box>
@@ -153,4 +162,4 @@ export const PhotoModal = ({
       </Dialog>
     </>
   );
-};
+}

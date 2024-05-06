@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -7,14 +7,14 @@ import {
   useBusinessAreaDataQuery,
   useProgrammeChoiceDataQuery,
   useProgramQuery,
-} from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { ProgramDetails } from '../../../components/programs/ProgramDetails/ProgramDetails';
+} from '@generated/graphql';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { ProgramDetails } from '@components/programs/ProgramDetails/ProgramDetails';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { isPermissionDeniedError } from '../../../utils/utils';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { isPermissionDeniedError } from '@utils/utils';
 import { CashPlanTable } from '../../tables/payments/CashPlanTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ProgramDetailsPageHeader } from '../headers/ProgramDetailsPageHeader';
@@ -36,7 +36,7 @@ const TableWrapper = styled.div`
 `;
 
 const NoCashPlansContainer = styled.div`
-  margin-top: ${({ theme }) => theme.spacing(30)}px;
+  margin-top: 120px;
 `;
 const NoCashPlansTitle = styled.div`
   color: rgba(0, 0, 0, 0.38);
@@ -51,7 +51,7 @@ const NoCashPlansSubTitle = styled.div`
   text-align: center;
 `;
 
-export const ProgramDetailsPage = (): React.ReactElement => {
+export function ProgramDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { data, loading, error } = useProgramQuery({
@@ -59,16 +59,12 @@ export const ProgramDetailsPage = (): React.ReactElement => {
     fetchPolicy: 'network-only',
   });
   const { businessArea } = useBaseUrl();
-  const {
-    data: businessAreaData,
-    loading: businessAreaDataLoading,
-  } = useBusinessAreaDataQuery({
-    variables: { businessAreaSlug: businessArea },
-  });
-  const {
-    data: choices,
-    loading: choicesLoading,
-  } = useProgrammeChoiceDataQuery();
+  const { data: businessAreaData, loading: businessAreaDataLoading } =
+    useBusinessAreaDataQuery({
+      variables: { businessAreaSlug: businessArea },
+    });
+  const { data: choices, loading: choicesLoading } =
+    useProgrammeChoiceDataQuery();
   const permissions = usePermissions();
 
   if (loading || choicesLoading || businessAreaDataLoading)
@@ -123,4 +119,4 @@ export const ProgramDetailsPage = (): React.ReactElement => {
       </Container>
     </div>
   );
-};
+}

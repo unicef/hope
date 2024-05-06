@@ -1,18 +1,19 @@
+import * as React from 'react';
 import get from 'lodash/get';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
-import { useLanguageAutocompleteLazyQuery } from '../../__generated__/graphql';
-import { useDebounce } from '../../hooks/useDebounce';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useLanguageAutocompleteLazyQuery } from '@generated/graphql';
+import { useDebounce } from '@hooks/useDebounce';
 import {
   createHandleApplyFilterChange,
   getAutocompleteOptionLabel,
   handleAutocompleteChange,
   handleOptionSelected,
-} from '../../utils/utils';
+} from '@utils/utils';
 import { BaseAutocomplete } from './BaseAutocomplete';
 
-export const LanguageAutocomplete = ({
+export function LanguageAutocomplete({
   disabled,
   name,
   filter,
@@ -32,10 +33,10 @@ export const LanguageAutocomplete = ({
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
   dataCy?: string;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
@@ -51,9 +52,17 @@ export const LanguageAutocomplete = ({
   const isMounted = useRef(true);
 
   const loadDataCallback = useCallback(() => {
-    if (isMounted.current) {
-      loadData({ variables: { code: debouncedInputText } });
-    }
+    const asyncLoadData = async () => {
+      if (isMounted.current) {
+        try {
+          await loadData({ variables: { code: debouncedInputText } });
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    };
+
+    void asyncLoadData();
   }, [loadData, debouncedInputText]);
 
   useEffect(() => {
@@ -67,7 +76,7 @@ export const LanguageAutocomplete = ({
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
-    history,
+    navigate,
     location,
     filter,
     setFilter,
@@ -115,4 +124,4 @@ export const LanguageAutocomplete = ({
       debouncedInputText={debouncedInputText}
     />
   );
-};
+}

@@ -42,6 +42,7 @@ class Command(BaseCommand):
             f"{settings.PROJECT_ROOT}/apps/registration_datahub/fixtures/data-cypress.json",
             database="registration_datahub",
         )
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/documenttype.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data-cypress.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/targeting/fixtures/data-cypress.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/steficon/fixtures/data-cypress.json")

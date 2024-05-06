@@ -1,7 +1,7 @@
-import { Box } from '@material-ui/core';
-import React from 'react';
+import { Box } from '@mui/material';
+import * as React from 'react';
 import { Doughnut } from 'react-chartjs-2';
-import { AllGrievanceDashboardChartsQuery } from '../../../../__generated__/graphql';
+import { AllGrievanceDashboardChartsQuery } from '@generated/graphql';
 
 interface TicketsByStatusChartProps {
   data: AllGrievanceDashboardChartsQuery['ticketsByCategory'];
@@ -24,7 +24,7 @@ export const TicketsByStatusChart = ({
           '#6D4C41',
           '#4F616B',
         ],
-        data: [...data.datasets[0]?.data],
+        data: [...(data.datasets[0]?.data || [])],
       },
     ],
   };
@@ -42,7 +42,7 @@ export const TicketsByStatusChart = ({
   };
 
   return (
-    <Box mt={6} height='300px'>
+    <Box mt={6} height="300px">
       <Doughnut data={chartData} options={options} />
     </Box>
   );

@@ -1,8 +1,8 @@
-import { Grid, Paper, Typography } from '@material-ui/core';
-import React from 'react';
+import { Grid, Paper, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
+import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import {
   choicesToDict,
   formatCurrencyWithSymbol,
@@ -10,18 +10,18 @@ import {
   paymentStatusDisplayMap,
   paymentStatusToColor,
   verificationRecordsStatusToColor,
-} from '../../utils/utils';
-import { PaymentQuery } from '../../__generated__/graphql';
-import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../core/LabelizedField';
-import { StatusBox } from '../core/StatusBox';
-import { UniversalMoment } from '../core/UniversalMoment';
-import { Title } from '../core/Title';
+} from '@utils/utils';
+import { PaymentQuery } from '@generated/graphql';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { StatusBox } from '@core/StatusBox';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { Title } from '@core/Title';
 
 const Overview = styled(Paper)`
   margin: 20px;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
+  padding: ${({ theme }) => theme.spacing(8)}
+    ${({ theme }) => theme.spacing(11)};
 `;
 
 interface VerificationPaymentDetailsProps {
@@ -44,7 +44,7 @@ export function VerificationPaymentDetails({
     <>
       <ContainerColumnWithBorder>
         <Title>
-          <Typography variant='h6'>{t('Payment Details')}</Typography>
+          <Typography variant="h6">{t('Payment Details')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
@@ -72,7 +72,7 @@ export function VerificationPaymentDetails({
       </ContainerColumnWithBorder>
       <ContainerColumnWithBorder>
         <Title>
-          <Typography variant='h6'>{t('Verification Details')}</Typography>
+          <Typography variant="h6">{t('Verification Details')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
@@ -96,7 +96,7 @@ export function VerificationPaymentDetails({
       </ContainerColumnWithBorder>
       <Overview>
         <Title>
-          <Typography variant='h6'>{t('Household')}</Typography>
+          <Typography variant="h6">{t('Household')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
@@ -139,7 +139,7 @@ export function VerificationPaymentDetails({
       </Overview>
       <Overview>
         <Title>
-          <Typography variant='h6'>{t('Entitlement Details')}</Typography>
+          <Typography variant="h6">{t('Entitlement Details')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>

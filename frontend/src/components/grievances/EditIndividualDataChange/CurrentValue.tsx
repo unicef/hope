@@ -1,9 +1,9 @@
-import { Grid } from '@material-ui/core';
-import React from 'react';
+import { Grid } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
-import { LabelizedField } from '../../core/LabelizedField';
+import { AllAddIndividualFieldsQuery } from '@generated/graphql';
+import { LabelizedField } from '@core/LabelizedField';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 import { GrievanceFlexFieldPhotoModalNewIndividual } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalNewIndividual';
 
@@ -63,7 +63,7 @@ export function CurrentValue({
   }
   return (
     <Grid item xs={3}>
-      <LabelizedField label='Current Value' value={displayValue} />
+      <LabelizedField label="Current Value" value={displayValue} />
     </Grid>
   );
 }

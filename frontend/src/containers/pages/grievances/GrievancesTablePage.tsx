@@ -1,28 +1,28 @@
-import { Tab, Tabs } from '@material-ui/core';
-import React, { useState } from 'react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { useGrievancesChoiceDataQuery } from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { GrievancesFilters } from '../../../components/grievances/GrievancesTable/GrievancesFilters';
-import { GrievancesTable } from '../../../components/grievances/GrievancesTable/GrievancesTable';
+import { useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useGrievancesChoiceDataQuery } from '@generated/graphql';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { GrievancesFilters } from '@components/grievances/GrievancesTable/GrievancesFilters';
+import { GrievancesTable } from '@components/grievances/GrievancesTable/GrievancesTable';
 import { hasPermissionInModule } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import {
   GRIEVANCE_TICKETS_TYPES,
   GrievanceStatuses,
   GrievanceTypes,
-} from '../../../utils/constants';
-import { getFilterFromQueryParams } from '../../../utils/utils';
+} from '@utils/constants';
+import { getFilterFromQueryParams } from '@utils/utils';
+import { Tabs, Tab } from '@core/Tabs';
 
-export const GrievancesTablePage = (): React.ReactElement => {
+export function GrievancesTablePage(): React.ReactElement {
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const { id, cashPlanId } = useParams();
   const location = useLocation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;
 
   const initialFilter = {
@@ -63,10 +63,8 @@ export const GrievancesTablePage = (): React.ReactElement => {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useGrievancesChoiceDataQuery({ fetchPolicy: 'cache-and-network' });
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery({ fetchPolicy: 'cache-and-network' });
 
   const grievanceTicketsTypes = ['USER-GENERATED', 'SYSTEM-GENERATED'];
   const userGeneratedPath = `/${baseUrl}/grievance/tickets/user-generated`;
@@ -78,7 +76,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
   const tabs = (
     <Tabs
       value={selectedTab}
-      onChange={(_event: React.ChangeEvent<{}>, newValue: number) => {
+      onChange={(_event, newValue: number) => {
         setSelectedTab(newValue);
         setFilter({
           ...filter,
@@ -86,13 +84,13 @@ export const GrievancesTablePage = (): React.ReactElement => {
           category: '',
           program: '',
         });
-        history.push(newValue === 0 ? userGeneratedPath : systemGeneratedPath);
+        navigate(newValue === 0 ? userGeneratedPath : systemGeneratedPath);
       }}
-      indicatorColor='primary'
-      textColor='primary'
-      variant='scrollable'
-      scrollButtons='auto'
-      aria-label='tabs'
+      indicatorColor="primary"
+      textColor="primary"
+      variant="scrollable"
+      scrollButtons="auto"
+      aria-label="tabs"
     >
       {mappedTabs}
     </Tabs>
@@ -106,7 +104,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
 
   return (
     <>
-      <PageHeader tabs={tabs} title='Grievance Tickets' />
+      <PageHeader tabs={tabs} title="Grievance Tickets" />
       <GrievancesFilters
         choicesData={choicesData}
         filter={filter}
@@ -119,4 +117,4 @@ export const GrievancesTablePage = (): React.ReactElement => {
       <GrievancesTable filter={appliedFilter} selectedTab={selectedTab} />
     </>
   );
-};
+}

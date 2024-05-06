@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.program.models import Program
 
 
@@ -40,3 +40,20 @@ class ProgramForm(forms.Form):
 
     def get_program_queryset(self) -> QuerySet[Program]:
         return Program.objects.filter(Q(business_area_id=self.business_area_id) & Q(status=Program.ACTIVE))
+
+
+class DataCollectingTypeForm(forms.ModelForm):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.fields["type"].required = True
+
+    class Meta:
+        model = DataCollectingType
+        fields = "__all__"
+
+    def clean(self) -> None:
+        household_filters_available = self.cleaned_data["household_filters_available"]
+
+        if self.cleaned_data.get("type") == DataCollectingType.Type.SOCIAL and household_filters_available is True:
+            msg = "Household filters cannot be applied for data collecting type with social type"
+            self.add_error("type", forms.ValidationError(msg))

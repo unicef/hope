@@ -1,26 +1,20 @@
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogTitle,
-} from '@material-ui/core';
-import { Publish } from '@material-ui/icons';
+import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
+import { Publish } from '@mui/icons-material';
 import get from 'lodash/get';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
-import { ImportErrors } from '../../containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
-import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
-import { useSnackbar } from '../../hooks/useSnackBar';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { ImportErrors } from '@containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
+import { usePaymentRefetchQueries } from '@hooks/usePaymentRefetchQueries';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   useImportXlsxPaymentVerificationPlanFileMutation,
   ImportXlsxPaymentVerificationPlanFileMutation,
   XlsxErrorNode,
-} from '../../__generated__/graphql';
-import { DropzoneField } from '../core/DropzoneField';
-import { LoadingButton } from '../core/LoadingButton';
+} from '@generated/graphql';
+import { DropzoneField } from '@core/DropzoneField';
+import { LoadingButton } from '@core/LoadingButton';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -36,10 +30,10 @@ export interface ImportXlsxProps {
   cashOrPaymentPlanId: string;
 }
 
-export function ImportXlsx({
+export const ImportXlsx = ({
   paymentVerificationPlanId,
   cashOrPaymentPlanId,
-}: ImportXlsxProps): ReactElement {
+}: ImportXlsxProps): ReactElement => {
   const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
@@ -47,15 +41,11 @@ export function ImportXlsx({
 
   const { t } = useTranslation();
 
-  const [
-    mutate,
-    { data: uploadData, loading: fileLoading, error },
-  ] = useImportXlsxPaymentVerificationPlanFileMutation();
+  const [mutate, { data: uploadData, loading: fileLoading, error }] =
+    useImportXlsxPaymentVerificationPlanFileMutation();
 
-  const xlsxErrors: ImportXlsxPaymentVerificationPlanFileMutation['importXlsxPaymentVerificationPlanFile']['errors'] = get(
-    uploadData,
-    'importXlsxPaymentVerificationPlanFile.errors',
-  );
+  const xlsxErrors: ImportXlsxPaymentVerificationPlanFileMutation['importXlsxPaymentVerificationPlanFile']['errors'] =
+    get(uploadData, 'importXlsxPaymentVerificationPlanFile.errors');
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
@@ -84,12 +74,12 @@ export function ImportXlsx({
 
   return (
     <>
-      <Box key='import'>
+      <Box key="import">
         <StyledButton
           startIcon={<Publish />}
-          color='primary'
-          variant='outlined'
-          data-cy='button-import'
+          color="primary"
+          variant="outlined"
+          data-cy="button-import"
           onClick={() => setOpenImport(true)}
         >
           {t('Import XLSX')}
@@ -98,8 +88,8 @@ export function ImportXlsx({
       <Dialog
         open={open}
         onClose={() => setOpenImport(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Select File to Import')}</DialogTitle>
@@ -128,11 +118,13 @@ export function ImportXlsx({
               <Error>
                 <p>Errors</p>
                 {error
-                  ? error.graphQLErrors.map((x) => <p>{x.message}</p>)
+                  ? error.graphQLErrors.map((x) => (
+                      <p key={x.message}>{x.message}</p>
+                  ))
                   : null}
                 <ImportErrors errors={xlsxErrors as XlsxErrorNode[]} />
               </Error>
-            ) : null}
+              ) : null}
           </>
           <DialogActions>
             <Button
@@ -146,11 +138,11 @@ export function ImportXlsx({
             <LoadingButton
               loading={fileLoading}
               disabled={!fileToImport}
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
               onClick={() => handleImport()}
-              data-cy='button-import-entitlement'
+              data-cy="button-import-entitlement"
             >
               {t('IMPORT')}
             </LoadingButton>
@@ -159,4 +151,4 @@ export function ImportXlsx({
       </Dialog>
     </>
   );
-}
+};

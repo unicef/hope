@@ -1,13 +1,13 @@
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ImportedIndividualFieldsQuery } from '../../__generated__/graphql';
-import { FieldChooser } from '../../components/targeting/FieldChooser';
-import { SubField } from '../../components/targeting/SubField';
+import { ImportedIndividualFieldsQuery } from '@generated/graphql';
+import { FieldChooser } from '@components/targeting/FieldChooser';
+import { SubField } from '@components/targeting/SubField';
 
 const Divider = styled.div`
   border-top: 1px solid #b1b1b5;
-  margin: ${({ theme }) => theme.spacing(10)}px 0;
+  margin: ${({ theme }) => theme.spacing(10)} 0;
   position: relative;
 `;
 const DividerLabel = styled.div`
@@ -59,7 +59,7 @@ export function TargetingCriteriaFilter({
         baseName={`filters[${index}]`}
       />
       {each.fieldName && (
-        <div data-cy='autocomplete-target-criteria-values'>
+        <div data-cy="autocomplete-target-criteria-values">
           <SubField field={each} index={index} baseName={`filters[${index}]`} />
         </div>
       )}

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
-import { IconButton, Collapse } from '@material-ui/core';
-import { ExpandLessRounded, ExpandMoreRounded } from '@material-ui/icons';
-import { XlsxErrorNode } from '../../../../../__generated__/graphql';
+import { IconButton, Collapse } from '@mui/material';
+import { ExpandLessRounded, ExpandMoreRounded } from '@mui/icons-material';
+import { XlsxErrorNode } from '@generated/graphql';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -25,20 +26,20 @@ export function ImportErrors({
   }
   return (
     <>
-      <ErrorsContainer data-cy='errors-container'>
+      <ErrorsContainer data-cy="errors-container">
         <IconButton
           onClick={() => setExpanded(!expanded)}
           aria-expanded={expanded}
-          aria-label='show more'
+          aria-label="show more"
         >
           {expanded ? <ExpandLessRounded /> : <ExpandMoreRounded />}
         </IconButton>
       </ErrorsContainer>
-      <Collapse in={expanded} timeout='auto' unmountOnExit>
+      <Collapse in={expanded} timeout="auto" unmountOnExit>
         {errors.map((item) => (
-          <Error>
+          <Error key={item.coordinates}>
             <strong>
-              {item.sheet} - {item.coordinates}
+              {item.sheet} -{item.coordinates}
             </strong>{' '}
             {item.message}
           </Error>

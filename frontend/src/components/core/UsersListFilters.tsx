@@ -1,9 +1,9 @@
-import { Grid, MenuItem } from '@material-ui/core';
-import React from 'react';
+import { Grid, MenuItem } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
-import { useUserChoiceDataQuery } from '../../__generated__/graphql';
-import { createHandleApplyFilterChange } from '../../utils/utils';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useUserChoiceDataQuery } from '@generated/graphql';
+import { createHandleApplyFilterChange } from '@utils/utils';
 import { FiltersSection } from './FiltersSection';
 import { SearchTextField } from './SearchTextField';
 import { SelectFilter } from './SelectFilter';
@@ -16,31 +16,27 @@ interface UsersListFiltersProps {
   setAppliedFilter: (filter) => void;
 }
 
-export const UsersListFilters = ({
+export function UsersListFilters({
   filter,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: UsersListFiltersProps): React.ReactElement => {
+}: UsersListFiltersProps): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
-  const {
-    handleFilterChange,
-    applyFilterChanges,
-    clearFilter,
-  } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
-
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -73,13 +69,11 @@ export const UsersListFilters = ({
             label={t('Partner')}
             value={filter.partner}
           >
-            {choices.userPartnerChoices.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
+            {choices.userPartnerChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
@@ -88,13 +82,12 @@ export const UsersListFilters = ({
             label={t('Role')}
             value={filter.roles}
           >
-            {choices.userRolesChoices.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name} ({item.subsystem === "CA" ? "Cash Assist" : item.subsystem})
-                </MenuItem>
-              );
-            })}
+            {choices.userRolesChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name} (
+                {item.subsystem === 'CA' ? 'Cash Assist' : item.subsystem})
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
@@ -103,16 +96,14 @@ export const UsersListFilters = ({
             label={t('Status')}
             value={filter.status}
           >
-            {choices.userStatusChoices.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
+            {choices.userStatusChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
       </Grid>
     </FiltersSection>
   );
-};
+}
