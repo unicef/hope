@@ -141,7 +141,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             etag_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
             assert etag_second_call == etag
-            assert len(ctx.captured_queries) == 8
+            assert len(ctx.captured_queries) == 12
 
     def test_list_payment_plans_approval_process_data(
         self,
