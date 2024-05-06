@@ -29,13 +29,12 @@ class MailjetClient:
         self.text_body = text_body
         subject_prefix = settings.EMAIL_SUBJECT_PREFIX
         self.subject = f"[{subject_prefix}] {subject}" if subject_prefix else subject
-        self.recipients = recipients
+        self.recipients = settings.CATCH_ALL_EMAIL if settings.CATCH_ALL_EMAIL else recipients
         self.ccs = ccs or []
         self.variables = variables
         self.from_email = from_email or settings.EMAIL_HOST_USER
         self.from_email_display = from_email_display or settings.DEFAULT_FROM_EMAIL
         self.email_body = self._get_email_body()
-        self._validate_email_data()
 
     def _validate_email_data(self) -> None:
         if self.mailjet_template_id and (self.html_body or self.text_body):
@@ -48,8 +47,9 @@ class MailjetClient:
     def send_email(self) -> bool:
         if not config.ENABLE_MAILJET:
             return False
-        if settings.CATCH_ALL_EMAIL:
-            self.recipients = settings.CATCH_ALL_EMAIL
+
+        self._validate_email_data()
+
         if not self.email_body:
             return False
 
@@ -103,10 +103,14 @@ class MailjetClient:
         return {}
 
     def attach_file(self, attachment: str, filename: str, mimetype: str) -> None:
-        self.email_body["Attachments"] = [
+        new_attachment = [
             {
                 "ContentType": mimetype,
                 "Filename": filename,
                 "Base64Content": attachment,
             }
         ]
+        if "Attachments" in self.email_body:
+            self.email_body["Attachments"].extend(new_attachment)
+        else:
+            self.email_body["Attachments"] = new_attachment
