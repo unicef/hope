@@ -4,10 +4,9 @@ from django.conf import settings
 from django.core.management import call_command
 
 import pytest
+from page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from page_object.grievance.grievance_tickets import GrievanceTickets
 from pytest_django import DjangoDbBlocker
-
-from page_object.grievance.details_grievance_page import GrievanceDetailsPage
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -39,11 +38,11 @@ def create_programs(django_db_setup: Generator[None, None, None], django_db_bloc
 @pytest.mark.usefixtures("login")
 class TestSmokeGrievanceTickets:
     def test_check_grievance_tickets_user_generated_page(
-            self,
-            create_programs: None,
-            add_households: None,
-            add_grievance: None,
-            pageGrievanceTickets: GrievanceTickets,
+        self,
+        create_programs: None,
+        add_households: None,
+        add_grievance: None,
+        pageGrievanceTickets: GrievanceTickets,
     ) -> None:
         """
         Go to Grievance tickets user generated page
@@ -77,11 +76,11 @@ class TestSmokeGrievanceTickets:
         assert expected_labels == [i.text for i in pageGrievanceTickets.getTableLabel()]
 
     def test_check_grievance_tickets_system_generated_page(
-            self,
-            create_programs: None,
-            add_households: None,
-            add_grievance: None,
-            pageGrievanceTickets: GrievanceTickets,
+        self,
+        create_programs: None,
+        add_households: None,
+        add_grievance: None,
+        pageGrievanceTickets: GrievanceTickets,
     ) -> None:
         """
         Go to Grievance tickets system generated page
@@ -104,12 +103,12 @@ class TestSmokeGrievanceTickets:
             assert "NEW TICKET" in pageGrievanceTickets.getButtonNewTicket().text
 
     def test_check_grievance_tickets_details_page(
-            self,
-            create_programs: None,
-            add_households: None,
-            add_grievance: None,
-            pageGrievanceTickets: GrievanceTickets,
-            pageGrievanceDetailsPage: GrievanceDetailsPage,
+        self,
+        create_programs: None,
+        add_households: None,
+        add_grievance: None,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
     ) -> None:
         """
         Go to Grievance tickets details page
@@ -150,8 +149,8 @@ class TestGrievanceTicketsHappyPath:
 
     @pytest.mark.skip(reason="ToDo")
     def test_grievance_tickets_create_new_ticket(
-            self,
-            pageGrievanceTickets: GrievanceTickets,
+        self,
+        pageGrievanceTickets: GrievanceTickets,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text

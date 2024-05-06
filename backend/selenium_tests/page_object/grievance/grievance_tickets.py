@@ -201,7 +201,7 @@ class GrievanceTickets(BaseComponents):
         return self.driver.find_element(By.XPATH, f"//*[@{self.selectAll}]")
 
     def getButtonAssign(self) -> WebElement:
-            return self.wait_for(self.buttonAssign)
+        return self.wait_for(self.buttonAssign)
 
     def getButtonSetPriority(self) -> WebElement:
         return self.wait_for(self.buttonSetPriority)
