@@ -34,13 +34,11 @@ export const individualDataRow = (
     approveStatus: boolean;
   };
   const field = fieldsDict[row[0]];
-  console.log('row', row);
-  console.log('fieldsDict', fieldsDict);
-  const individualValue = field.isFlexField
+  const individualValue = field?.isFlexField
     ? ticket.individualDataUpdateTicketDetails?.individual?.flexFields[row[0]]
     : ticket.individualDataUpdateTicketDetails?.individual[
-      camelCase(fieldName)
-    ];
+        camelCase(fieldName)
+      ];
   const currentValue =
     ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
       ? valueDetails.previousValue
