@@ -23,6 +23,31 @@ from hct_mis_api.apps.utils.models import (
 from mptt.fields import TreeForeignKey
 
 
+class BusinessAreaPartnerThrough(TimeStampedUUIDModel):
+    business_area = models.ForeignKey(
+        "BusinessArea",
+        on_delete=models.CASCADE,
+        related_name="business_area_partner_through",
+    )
+    partner = models.ForeignKey(
+        "account.Partner",
+        on_delete=models.CASCADE,
+        related_name="business_area_partner_through",
+    )
+    roles = models.ManyToManyField(
+        "account.Role",
+        related_name="business_area_partner_through",
+    )
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["business_area", "partner"],
+                name="unique_business_area_partner",
+            )
+        ]
+
+
 class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     """
     BusinessArea (EPRP called Workspace, also synonym was
@@ -106,6 +131,10 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     is_accountability_applicable = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
     enable_email_notification = models.BooleanField(default=True, verbose_name="Automatic Email notifications enabled")
+
+    partners = models.ManyToManyField(
+        to="account.Partner", through=BusinessAreaPartnerThrough, related_name="business_areas"
+    )
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         unique_slugify(self, self.name, slug_field_name="slug")

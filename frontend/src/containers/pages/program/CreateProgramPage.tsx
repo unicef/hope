@@ -4,6 +4,7 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllProgramsForChoicesDocument,
+  ProgramPartnerAccess,
   useAllAreasTreeQuery,
   useCreateProgramMutation,
   useUserPartnerChoicesQuery,
@@ -16,10 +17,14 @@ import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
 import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { hasPermissionInModule } from '../../../config/permissions';
+import {
+  hasPermissionInModule,
+  PERMISSIONS,
+} from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { useNavigate } from 'react-router-dom';
+import { decodeIdString } from '@utils/utils';
 
 export const CreateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -50,6 +55,14 @@ export const CreateProgramPage = (): ReactElement => {
     const populationGoalParsed = !Number.isNaN(populationGoalValue)
       ? populationGoalValue
       : 0;
+    const partnersToSet =
+      values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess
+        ? values.partners.map(({ id, areas, areaAccess }) => ({
+            partner: id,
+            areas: areaAccess === 'ADMIN_AREA' ? areas : [],
+            areaAccess,
+          }))
+        : [];
 
     try {
       const response = await mutate({
@@ -59,6 +72,7 @@ export const CreateProgramPage = (): ReactElement => {
             budget: budgetToFixed,
             populationGoal: populationGoalParsed,
             businessAreaSlug: businessArea,
+            partners: partnersToSet,
           },
         },
         refetchQueries: () => [
@@ -89,6 +103,7 @@ export const CreateProgramPage = (): ReactElement => {
     cashPlus: false,
     frequencyOfPayments: 'REGULAR',
     partners: [],
+    partnerAccess: ProgramPartnerAccess.AllPartnersAccess,
   };
 
   const stepFields = [
@@ -106,7 +121,7 @@ export const CreateProgramPage = (): ReactElement => {
       'cashPlus',
       'frequencyOfPayments',
     ],
-    ['partners'],
+    ['partnerAccess'],
   ];
 
   if (treeLoading || userPartnerChoicesLoading) return <LoadingComponent />;
@@ -133,7 +148,13 @@ export const CreateProgramPage = (): ReactElement => {
       }}
       validationSchema={programValidationSchema(t)}
     >
-      {({ submitForm, values, validateForm, setFieldTouched }) => {
+      {({
+        submitForm,
+        values,
+        validateForm,
+        setFieldTouched,
+        setFieldValue,
+      }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
           .map((partner) => ({
@@ -198,6 +219,7 @@ export const CreateProgramPage = (): ReactElement => {
                   step={step}
                   setStep={setStep}
                   submitForm={submitForm}
+                  setFieldValue={setFieldValue}
                 />
               )}
             </Box>
