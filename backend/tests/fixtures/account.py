@@ -1,38 +1,43 @@
-from typing import Any, Callable, Iterable, Optional
+from typing import Any, Callable, Iterable, List, Optional
 
 import pytest
 
-from hct_mis_api.apps.account.models import Role, User, UserRole
+from hct_mis_api.apps.account.fixtures import PartnerFactory
+from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 
 
 @pytest.fixture()
-def update_user_partner_perm_for_program() -> Callable:
-    def _update_user_partner_perm_for_program(user: User, business_area: BusinessArea, program: Program) -> None:
-        partner_permissions = user.partner.permissions or {}
-        if str(business_area.pk) in partner_permissions:
-            # only add new program_id
-            if str(program.pk) not in partner_permissions[str(business_area.pk)]["programs"]:
-                partner_permissions[str(business_area.pk)]["programs"].update({str(program.pk): []})
-            else:
-                pass
-        else:
-            partner_permissions.update({str(business_area.pk): {"programs": {str(program.pk): []}}})
+def update_partner_access_to_program() -> Callable:
+    def _update_partner_access_to_program(
+        partner: Partner,
+        program: Program,
+        areas: Optional[List[Area]] = None,
+        full_area_access: Optional[bool] = False,
+    ) -> None:
+        program_partner_through, _ = ProgramPartnerThrough.objects.get_or_create(
+            program=program,
+            partner=partner,
+        )
+        if areas:
+            program_partner_through.areas.set(areas)
+        if full_area_access:
+            program_partner_through.full_area_access = True
+            program_partner_through.save(update_fields=["full_area_access"])
 
-        user.partner.permissions = partner_permissions
-        user.partner.save()
-
-    return _update_user_partner_perm_for_program
+    return _update_partner_access_to_program
 
 
 @pytest.fixture()
-def create_user_role_with_permissions(update_user_partner_perm_for_program: Any) -> Callable:
+def create_user_role_with_permissions(update_partner_access_to_program: Any) -> Callable:
     def _create_user_role_with_permissions(
         user: User,
         permissions: Iterable,
         business_area: BusinessArea,
         program: Optional[Program] = None,
+        areas: Optional[List[Area]] = None,
         name: Optional[str] = "Role with Permissions",
     ) -> UserRole:
         permission_list = [perm.value for perm in permissions]
@@ -41,7 +46,12 @@ def create_user_role_with_permissions(update_user_partner_perm_for_program: Any)
 
         # update Partner permissions for the program
         if program:
-            update_user_partner_perm_for_program(user, business_area, program)
+            update_partner_access_to_program(user.partner, program, areas)
         return user_role
 
     return _create_user_role_with_permissions
+
+
+@pytest.fixture(autouse=True)
+def partner_unicef() -> PartnerFactory:
+    return PartnerFactory(name="UNICEF")

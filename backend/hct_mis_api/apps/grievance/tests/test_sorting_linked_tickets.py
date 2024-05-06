@@ -4,7 +4,7 @@ from django.core.management import call_command
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -70,20 +70,19 @@ class TestGrievanceQuery(APITestCase):
         cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type, p_code="sadasdasfd222")
 
         # update partner perms
-        cls.partner.permissions = {
-            str(cls.business_area.pk): {
-                "programs": {str(cls.program.id): [str(cls.admin_area_1.pk), str(cls.admin_area_2.pk)]},
-                "roles": ["e9e8c91a-c711-45b7-be8c-501c14d46330"],
-            }
-        }
-        cls.partner_2.permissions = {
-            str(cls.business_area.pk): {
-                "programs": {str(cls.program.id): [str(cls.admin_area_1.pk), str(cls.admin_area_2.pk)]},
-                "roles": ["e9e8c91a-c711-45b7-be8c-501c14d46330"],
-            }
-        }
-        cls.partner.save()
-        cls.partner_2.save()
+        role = RoleFactory(name="Test Role", permissions=[Permissions.PROGRAMME_CREATE])
+        cls.update_partner_access_to_program(cls.partner, cls.program, [cls.admin_area_1, cls.admin_area_2])
+        cls.add_partner_role_in_business_area(
+            cls.partner,
+            cls.business_area,
+            [role],
+        )
+        cls.update_partner_access_to_program(cls.partner_2, cls.program, [cls.admin_area_1, cls.admin_area_2])
+        cls.add_partner_role_in_business_area(
+            cls.partner_2,
+            cls.business_area,
+            [role],
+        )
 
         household_1, _ = create_household({"size": 1})
         household_2, _ = create_household({"size": 1})
