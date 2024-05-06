@@ -47,6 +47,7 @@ class GrievanceTickets(BaseComponents):
     statusOptions = 'li[role="option"]'
     filtersCreatedBy = 'div[data-cy="filters-created-by-input"]'
     selectAll = 'aria-label="select all"'
+    tableLabel = 'span[data-cy="table-label"]'
 
     dateTitleFilterPopup = 'div[class="MuiPaper-root MuiPopover-paper MuiPaper-elevation8 MuiPaper-rounded"]'
     daysFilterPopup = (
@@ -177,7 +178,10 @@ class GrievanceTickets(BaseComponents):
         return self.wait_for(self.tabUserGenerated)
 
     def getTicketListRow(self) -> WebElement:
-        return self.wait_for(self.ticketListRow)
+        return self.get_elements(self.ticketListRow)
+
+    def getTableLabel(self) -> WebElement:
+        return self.get_elements(self.tableLabel)
 
     def getDateTitleFilterPopup(self) -> WebElement:
         return self.wait_for(self.dateTitleFilterPopup)
@@ -189,4 +193,4 @@ class GrievanceTickets(BaseComponents):
         return self.wait_for(self.statusOptions)
 
     def getSelectAll(self) -> WebElement:
-        return self.driver.find_element(By.XPATH, f'//*[@{self.selectAll}]')
+        return self.driver.find_element(By.XPATH, f"//*[@{self.selectAll}]")

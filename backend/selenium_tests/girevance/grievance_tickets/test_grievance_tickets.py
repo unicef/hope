@@ -4,9 +4,8 @@ from django.conf import settings
 from django.core.management import call_command
 
 import pytest
-from pytest_django import DjangoDbBlocker
-
 from page_object.grievance.grievance_tickets import GrievanceTickets
+from pytest_django import DjangoDbBlocker
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -38,11 +37,11 @@ def create_programs(django_db_setup: Generator[None, None, None], django_db_bloc
 @pytest.mark.usefixtures("login")
 class TestSmokeGrievanceTickets:
     def test_check_grievance_tickets_user_generated_page(
-            self,
-            create_programs: None,
-            add_households: None,
-            add_grievance: None,
-            pageGrievanceTickets: GrievanceTickets,
+        self,
+        create_programs: None,
+        add_households: None,
+        add_grievance: None,
+        pageGrievanceTickets: GrievanceTickets,
     ) -> None:
         """
         Go to Grievance page
@@ -53,5 +52,24 @@ class TestSmokeGrievanceTickets:
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getSelectAll().click()
         assert "NEW TICKET" in pageGrievanceTickets.getButtonNewTicket().text
+        print(len(pageGrievanceTickets.getTicketListRow()))
+        print(pageGrievanceTickets.getTicketListRow()[0].text)
+        print([i.text for i in pageGrievanceTickets.getTableLabel()])
+        expected_menu_items = [
+            "Ticket ID",
+            "Status",
+            "Assigned to",
+            "Category",
+            "Issue Type",
+            "Household ID",
+            "Priority",
+            "Urgency",
+            "Linked Tickets",
+            "Creation Date\nsorted descending",
+            "Last Modified Date",
+            "Total Days",
+            "Programmes",
+        ]
+        assert expected_menu_items == [i.text for i in pageGrievanceTickets.getTableLabel()]
 
         pageGrievanceTickets.screenshot("grievance")
