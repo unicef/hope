@@ -34,7 +34,7 @@ class MailjetClient:
         self.variables = variables
         self.from_email = from_email or settings.EMAIL_HOST_USER
         self.from_email_display = from_email_display or settings.DEFAULT_FROM_EMAIL
-        self.email_body = self._get_email_body()
+        self.attachments = []
 
     def _validate_email_data(self) -> None:
         if self.mailjet_template_id and (self.html_body or self.text_body):
@@ -50,8 +50,8 @@ class MailjetClient:
 
         self._validate_email_data()
 
-        if not self.email_body:
-            return False
+        email_body = self._get_email_body()
+        attachments = {"Attachments": self.attachments} if self.attachments else {}
 
         data = {
             "Messages": [
@@ -70,7 +70,8 @@ class MailjetClient:
                         }
                         for cc in self.ccs
                     ],
-                    **self.email_body,
+                    **email_body,
+                    **attachments,
                 }
             ]
         }
@@ -93,14 +94,13 @@ class MailjetClient:
                 "TemplateLanguage": True,
                 "Variables": self.variables,
             }
-        elif self.html_body or self.text_body:
+        else:  # Body content provided through html_body and/or text_body
             content = {}
             if self.html_body:
                 content["HTMLPart"] = self.html_body
             if self.text_body:
                 content["TextPart"] = self.text_body
             return content
-        return {}
 
     def attach_file(self, attachment: str, filename: str, mimetype: str) -> None:
         new_attachment = [
@@ -110,7 +110,4 @@ class MailjetClient:
                 "Base64Content": attachment,
             }
         ]
-        if "Attachments" in self.email_body:
-            self.email_body["Attachments"].extend(new_attachment)
-        else:
-            self.email_body["Attachments"] = new_attachment
+        self.attachments.extend(new_attachment)

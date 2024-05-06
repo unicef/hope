@@ -53,5 +53,5 @@ def create_user_role_with_permissions(update_partner_access_to_program: Any) -> 
 
 
 @pytest.fixture(autouse=True)
-def partner_unicef() -> PartnerFactory:
+def partner_unicef(db: Any) -> PartnerFactory:
     return PartnerFactory(name="UNICEF")
