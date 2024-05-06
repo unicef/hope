@@ -52,10 +52,10 @@ class TestSmokeGrievanceTickets:
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getSelectAll().click()
         assert "NEW TICKET" in pageGrievanceTickets.getButtonNewTicket().text
-        print(len(pageGrievanceTickets.getTicketListRow()))
+        assert 6 == len(pageGrievanceTickets.getTicketListRow())
         print(pageGrievanceTickets.getTicketListRow()[0].text)
         print([i.text for i in pageGrievanceTickets.getTableLabel()])
-        expected_menu_items = [
+        expected_labels = [
             "Ticket ID",
             "Status",
             "Assigned to",
@@ -70,6 +70,6 @@ class TestSmokeGrievanceTickets:
             "Total Days",
             "Programmes",
         ]
-        assert expected_menu_items == [i.text for i in pageGrievanceTickets.getTableLabel()]
+        assert expected_labels == [i.text for i in pageGrievanceTickets.getTableLabel()]
 
         pageGrievanceTickets.screenshot("grievance")
