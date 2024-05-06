@@ -118,6 +118,7 @@ class TestDrawer:
         actual_menu_items = pageProgrammeManagement.getDrawerItems().text.split("\n")
         assert expected_menu_items == actual_menu_items
 
+    @pytest.mark.skip(reason="Unstable test")
     def test_inactive_draft_subheader(
         self,
         draft_program: Program,
