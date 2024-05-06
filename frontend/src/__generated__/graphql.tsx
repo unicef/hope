@@ -1440,6 +1440,18 @@ export type DeliveredQuantityNode = {
   totalDeliveredQuantity?: Maybe<Scalars['Decimal']['output']>;
 };
 
+export type DeliveryMechanismDataObjectType = {
+  approveStatus: Scalars['Boolean']['input'];
+  dataFields: Array<InputMaybe<DeliveryMechanismDataPayloadFieldObjectType>>;
+  label: Scalars['String']['input'];
+};
+
+export type DeliveryMechanismDataPayloadFieldObjectType = {
+  name: Scalars['String']['input'];
+  previousValue?: InputMaybe<Scalars['String']['input']>;
+  value: Scalars['String']['input'];
+};
+
 export type DeliveryMechanismNode = Node & {
   __typename?: 'DeliveryMechanismNode';
   chosenConfiguration?: Maybe<Scalars['String']['output']>;
@@ -1603,6 +1615,13 @@ export type EditBankTransferObjectType = {
   bankName: Scalars['String']['input'];
   id: Scalars['ID']['input'];
   type: Scalars['String']['input'];
+};
+
+export type EditDeliveryMechanismDataObjectType = {
+  approveStatus: Scalars['Boolean']['input'];
+  dataFields: Array<InputMaybe<DeliveryMechanismDataPayloadFieldObjectType>>;
+  id: Scalars['ID']['input'];
+  label: Scalars['String']['input'];
 };
 
 export type EditIndividualDocumentObjectType = {
@@ -3643,8 +3662,8 @@ export type IndividualUpdateDataObjectType = {
   administrationOfRutf?: InputMaybe<Scalars['Boolean']['input']>;
   birthDate?: InputMaybe<Scalars['Date']['input']>;
   commsDisability?: InputMaybe<Scalars['String']['input']>;
-  deliveryMechanismData?: InputMaybe<Scalars['Arg']['input']>;
-  deliveryMechanismDataToEdit?: InputMaybe<Scalars['Arg']['input']>;
+  deliveryMechanismData?: InputMaybe<Array<InputMaybe<DeliveryMechanismDataObjectType>>>;
+  deliveryMechanismDataToEdit?: InputMaybe<Array<InputMaybe<EditDeliveryMechanismDataObjectType>>>;
   deliveryMechanismDataToRemove?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   disability?: InputMaybe<Scalars['String']['input']>;
   documents?: InputMaybe<Array<InputMaybe<IndividualDocumentObjectType>>>;
@@ -23486,6 +23505,8 @@ export type ResolversTypes = {
   DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput;
   DeleteTargetPopulationMutationPayload: ResolverTypeWrapper<DeleteTargetPopulationMutationPayload>;
   DeliveredQuantityNode: ResolverTypeWrapper<DeliveredQuantityNode>;
+  DeliveryMechanismDataObjectType: DeliveryMechanismDataObjectType;
+  DeliveryMechanismDataPayloadFieldObjectType: DeliveryMechanismDataPayloadFieldObjectType;
   DeliveryMechanismNode: ResolverTypeWrapper<DeliveryMechanismNode>;
   DeliveryMechanismNodeConnection: ResolverTypeWrapper<DeliveryMechanismNodeConnection>;
   DeliveryMechanismNodeEdge: ResolverTypeWrapper<DeliveryMechanismNodeEdge>;
@@ -23499,6 +23520,7 @@ export type ResolversTypes = {
   DocumentStatus: DocumentStatus;
   DocumentTypeNode: ResolverTypeWrapper<DocumentTypeNode>;
   EditBankTransferObjectType: EditBankTransferObjectType;
+  EditDeliveryMechanismDataObjectType: EditDeliveryMechanismDataObjectType;
   EditIndividualDocumentObjectType: EditIndividualDocumentObjectType;
   EditIndividualIdentityObjectType: EditIndividualIdentityObjectType;
   EditPaymentVerificationInput: EditPaymentVerificationInput;
@@ -24001,6 +24023,8 @@ export type ResolversParentTypes = {
   DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput;
   DeleteTargetPopulationMutationPayload: DeleteTargetPopulationMutationPayload;
   DeliveredQuantityNode: DeliveredQuantityNode;
+  DeliveryMechanismDataObjectType: DeliveryMechanismDataObjectType;
+  DeliveryMechanismDataPayloadFieldObjectType: DeliveryMechanismDataPayloadFieldObjectType;
   DeliveryMechanismNode: DeliveryMechanismNode;
   DeliveryMechanismNodeConnection: DeliveryMechanismNodeConnection;
   DeliveryMechanismNodeEdge: DeliveryMechanismNodeEdge;
@@ -24012,6 +24036,7 @@ export type ResolversParentTypes = {
   DocumentNodeEdge: DocumentNodeEdge;
   DocumentTypeNode: DocumentTypeNode;
   EditBankTransferObjectType: EditBankTransferObjectType;
+  EditDeliveryMechanismDataObjectType: EditDeliveryMechanismDataObjectType;
   EditIndividualDocumentObjectType: EditIndividualDocumentObjectType;
   EditIndividualIdentityObjectType: EditIndividualIdentityObjectType;
   EditPaymentVerificationInput: EditPaymentVerificationInput;

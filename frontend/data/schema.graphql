@@ -931,6 +931,18 @@ type DeliveredQuantityNode {
   currency: String
 }
 
+input DeliveryMechanismDataObjectType {
+  label: String!
+  approveStatus: Boolean!
+  dataFields: [DeliveryMechanismDataPayloadFieldObjectType]!
+}
+
+input DeliveryMechanismDataPayloadFieldObjectType {
+  name: String!
+  value: String!
+  previousValue: String
+}
+
 type DeliveryMechanismNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -1066,6 +1078,13 @@ input EditBankTransferObjectType {
   bankAccountNumber: String!
   bankBranchName: String
   accountHolderName: String!
+}
+
+input EditDeliveryMechanismDataObjectType {
+  id: ID!
+  label: String!
+  approveStatus: Boolean!
+  dataFields: [DeliveryMechanismDataPayloadFieldObjectType]!
 }
 
 input EditIndividualDocumentObjectType {
@@ -2539,8 +2558,8 @@ input IndividualUpdateDataObjectType {
   preferredLanguage: String
   flexFields: Arg
   paymentDeliveryPhoneNo: String
-  deliveryMechanismData: Arg
-  deliveryMechanismDataToEdit: Arg
+  deliveryMechanismData: [DeliveryMechanismDataObjectType]
+  deliveryMechanismDataToEdit: [EditDeliveryMechanismDataObjectType]
   deliveryMechanismDataToRemove: [ID]
 }
 
