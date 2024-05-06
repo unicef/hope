@@ -11,7 +11,6 @@ export function useInterval(callback, delay): void {
   useEffect((): (() => void) => {
     function tick(): void {
       if (savedCallback.current !== undefined) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
         // @ts-ignore
         savedCallback.current();
       }
@@ -23,10 +22,13 @@ export function useInterval(callback, delay): void {
   }, [delay]);
 }
 
-export function useLazyInterval(callback, delay): [(args?) => void, () => void] {
+export function useLazyInterval(
+  callback,
+  delay,
+): [(args?) => void, () => void] {
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout>();
   const startInterval = (args): void => {
-    setIntervalId(setInterval(()=>callback(args), delay));
+    setIntervalId(setInterval(() => callback(args), delay));
   };
   const cancelInterval = (): void => {
     clearInterval(intervalId);

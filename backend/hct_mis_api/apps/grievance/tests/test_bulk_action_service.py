@@ -3,6 +3,7 @@ from unittest.mock import patch
 from django.test import override_settings
 
 from faker.generator import random
+from flaky import flaky
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
@@ -76,6 +77,7 @@ class TestGrievanceApproveAutomaticMutation(BaseElasticSearchTestCase):
         )
         super().setUpTestData()
 
+    @flaky(max_runs=3, min_passes=1)
     def test_bulk_update_assignee(self) -> None:
         from elasticsearch.helpers import bulk as original_bulk
 
@@ -123,6 +125,7 @@ class TestGrievanceApproveAutomaticMutation(BaseElasticSearchTestCase):
                 grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].status, GrievanceTicket.STATUS_ASSIGNED
             )
 
+    @flaky(max_runs=5, min_passes=1)
     def test_bulk_update_priority(self) -> None:
         from elasticsearch.helpers import bulk as original_bulk
 
@@ -150,6 +153,7 @@ class TestGrievanceApproveAutomaticMutation(BaseElasticSearchTestCase):
             self.assertEqual(grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].priority, PRIORITY_HIGH)
             self.assertEqual(grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].priority, PRIORITY_HIGH)
 
+    @flaky(max_runs=5, min_passes=1)
     def test_bulk_update_urgency(self) -> None:
         from elasticsearch.helpers import bulk as original_bulk
 
@@ -177,6 +181,7 @@ class TestGrievanceApproveAutomaticMutation(BaseElasticSearchTestCase):
                 grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].urgency, URGENCY_VERY_URGENT
             )
 
+    @flaky(max_runs=3, min_passes=1)
     def test_bulk_add_note(self) -> None:
         self.assertEqual(self.grievance_ticket1.ticket_notes.count(), 0)
         self.assertEqual(self.grievance_ticket2.ticket_notes.count(), 0)

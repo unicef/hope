@@ -102,9 +102,7 @@ def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: Pr
             rule_filter = TargetingCriteriaRuleFilter(targeting_criteria_rule=rule, **filter_input)
             rule_filter.save()
         for block_input in rule_input.get("individuals_filters_blocks", []):
-            block = TargetingIndividualRuleFilterBlock(
-                targeting_criteria_rule=rule, target_only_hoh=not program.individual_data_needed
-            )
+            block = TargetingIndividualRuleFilterBlock(targeting_criteria_rule=rule)
             block.save()
             for individual_block_filters_input in block_input.get("individual_block_filters"):
                 individual_block_filters = TargetingIndividualBlockRuleFilter(

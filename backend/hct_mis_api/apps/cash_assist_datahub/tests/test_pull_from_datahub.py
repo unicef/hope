@@ -77,7 +77,6 @@ class TestPullDataFromDatahub(TestCase):
         program.cash_plus = True
         program.population_goal = 1000
         program.administrative_areas_of_implementation = "Test something"
-        program.individual_data_needed = True
         program.save()
         (household, individuals) = create_household(household_args={"size": 1})
         cls.household = household

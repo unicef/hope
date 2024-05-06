@@ -1,19 +1,20 @@
-import { MenuItem, Select } from '@material-ui/core';
-import React, { useCallback, useEffect, useRef } from 'react';
-import { useHistory } from 'react-router-dom';
+import * as React from 'react';
+import { MenuItem, Select } from '@mui/material';
+import { useCallback, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   AllProgramsForChoicesQuery,
   useAllProgramsForChoicesQuery,
-} from '../__generated__/graphql';
-import { LoadingComponent } from '../components/core/LoadingComponent';
-import { useBaseUrl } from '../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from '../programContext';
-import { isProgramNodeUuidFormat } from '../utils/utils';
+import { isProgramNodeUuidFormat } from '@utils/utils';
 
 const CountrySelect = styled(Select)`
   && {
-    width: ${({ theme }) => theme.spacing(58)}px;
+    width: ${({ theme }) => theme.spacing(58)};
     background-color: rgba(104, 119, 127, 0.5);
     color: #e3e6e7;
     border-bottom-width: 0;
@@ -48,10 +49,10 @@ const CountrySelect = styled(Select)`
   }
 `;
 
-export const GlobalProgramSelect = (): React.ReactElement => {
+export function GlobalProgramSelect(): React.ReactElement {
   const { businessArea, programId } = useBaseUrl();
   const { selectedProgram, setSelectedProgram } = useProgramContext();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { data, loading } = useAllProgramsForChoicesQuery({
     variables: { businessArea, first: 100 },
     fetchPolicy: 'network-only',
@@ -67,9 +68,8 @@ export const GlobalProgramSelect = (): React.ReactElement => {
   }, []);
 
   const isOneOfAvailableProgramsId = useCallback(
-    (id: string): boolean => {
-      return data?.allPrograms.edges.some((each) => each.node.id === id);
-    },
+    (id: string): boolean =>
+      data?.allPrograms.edges.some((each) => each.node.id === id),
     [data],
   );
 
@@ -85,19 +85,13 @@ export const GlobalProgramSelect = (): React.ReactElement => {
       const program = getCurrentProgram();
       if (!selectedProgram || selectedProgram?.id !== programId) {
         if (program && isMounted.current) {
-          const {
-            id,
-            name,
-            status,
-            individualDataNeeded,
-            dataCollectingType,
-          } = program;
+          const { id, name, status, dataCollectingType } =
+            program;
 
           setSelectedProgram({
             id,
             name,
             status,
-            individualDataNeeded,
             dataCollectingType: {
               id: dataCollectingType?.id,
               code: dataCollectingType?.code,
@@ -125,15 +119,15 @@ export const GlobalProgramSelect = (): React.ReactElement => {
         !isOneOfAvailableProgramsId(programId)) &&
       programId !== 'all'
     ) {
-      history.push(`/access-denied/${businessArea}`);
+      navigate(`/access-denied/${businessArea}`);
     }
-  }, [programId, history, businessArea, isOneOfAvailableProgramsId, loading]);
+  }, [programId, navigate, businessArea, isOneOfAvailableProgramsId, loading]);
 
   const onChange = (e): void => {
     if (e.target.value === 'all') {
-      history.push(`/${businessArea}/programs/all/list`);
+      navigate(`/${businessArea}/programs/all/list`);
     } else {
-      history.push(
+      navigate(
         `/${businessArea}/programs/${e.target.value}/details/${e.target.value}`,
       );
     }
@@ -149,16 +143,17 @@ export const GlobalProgramSelect = (): React.ReactElement => {
 
   return (
     <CountrySelect
-      data-cy='global-program-filter'
-      variant='filled'
+      data-cy="global-program-filter"
+      variant="filled"
       value={programId}
       onChange={onChange}
     >
-      <MenuItem key='all' value='all'>
+      <MenuItem key="all" value="all">
         All Programmes
       </MenuItem>
       {data.allPrograms.edges
-        .sort((objA, objB) => objA.node.name.localeCompare(objB.node.name))
+        // TODO fix sorting
+        // .sort((objA, objB) => objA.node.name.localeCompare(objB.node.name))
         .map((each) => (
           <MenuItem key={each.node.id} value={each.node.id}>
             {each.node.name}
@@ -166,4 +161,4 @@ export const GlobalProgramSelect = (): React.ReactElement => {
         ))}
     </CountrySelect>
   );
-};
+}

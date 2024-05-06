@@ -5,38 +5,39 @@ import {
   Grid,
   Paper,
   Typography,
-} from '@material-ui/core';
-import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+} from '@mui/material';
+import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
 import get from 'lodash/get';
 import moment from 'moment';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import { useHistory } from 'react-router-dom';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { DialogFooter } from '../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
-import { FormikAdminAreaAutocompleteMultiple } from '../../shared/Formik/FormikAdminAreaAutocomplete/FormikAdminAreaAutocompleteMultiple';
-import { FormikDateField } from '../../shared/Formik/FormikDateField';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { REPORT_TYPES } from '../../utils/constants';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
+import { FormikAdminAreaAutocompleteMultiple } from '@shared/Formik/FormikAdminAreaAutocomplete/FormikAdminAreaAutocompleteMultiple';
+import { FormikDateField } from '@shared/Formik/FormikDateField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { REPORT_TYPES } from '@utils/constants';
 import {
   useAllProgramsQuery,
   useCreateReportMutation,
   useReportChoiceDataQuery,
-} from '../../__generated__/graphql';
-import { AutoSubmitFormOnEnter } from '../core/AutoSubmitFormOnEnter';
-import { FieldLabel } from '../core/FieldLabel';
-import { LoadingButton } from '../core/LoadingButton';
-import { LoadingComponent } from '../core/LoadingComponent';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { FieldLabel } from '@core/FieldLabel';
+import { LoadingButton } from '@core/LoadingButton';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useNavigate } from 'react-router-dom';
 
 export const NewReportForm = (): React.ReactElement => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -45,31 +46,26 @@ export const NewReportForm = (): React.ReactElement => {
     reportType: Yup.string().required(t('Report type is required')),
     dateFrom: Yup.date().required(t('Date From is required')),
     dateTo: Yup.date()
-      .when(
-        'dateFrom',
-        (dateFrom, schema) =>
-          dateFrom &&
-          schema.min(
-            dateFrom,
-            `${t('End date have to be greater than')}
-            ${moment(dateFrom).format('YYYY-MM-DD')}`,
-          ),
-        '',
-      )
-      .required(t('Date To is required')),
+      .required(t('Date To is required'))
+      .when('dateFrom', (dateFrom: any, schema: Yup.DateSchema) =>
+        dateFrom
+          ? schema.min(
+              new Date(dateFrom),
+              `${t('End date have to be greater than')} ${moment(
+                dateFrom,
+              ).format('YYYY-MM-DD')}`,
+            )
+          : schema,
+      ),
   });
 
-  const {
-    data: allProgramsData,
-    loading: loadingPrograms,
-  } = useAllProgramsQuery({
-    variables: { businessArea, status: ['ACTIVE'] },
-    fetchPolicy: 'cache-and-network',
-  });
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useReportChoiceDataQuery();
+  const { data: allProgramsData, loading: loadingPrograms } =
+    useAllProgramsQuery({
+      variables: { businessArea, status: ['ACTIVE'] },
+      fetchPolicy: 'cache-and-network',
+    });
+  const { data: choicesData, loading: choicesLoading } =
+    useReportChoiceDataQuery();
   const [mutate, { loading }] = useCreateReportMutation();
 
   if (loadingPrograms || choicesLoading) return <LoadingComponent />;
@@ -144,9 +140,7 @@ export const NewReportForm = (): React.ReactElement => {
     });
     if (!response.errors && response.data.createReport) {
       showMessage('Report created.');
-      history.push(
-        `/${baseUrl}/reporting/${response.data.createReport.report.id}`,
-      );
+      navigate(`/${baseUrl}/reporting/${response.data.createReport.report.id}`);
     } else {
       showMessage('Report create action failed.');
     }
@@ -156,9 +150,9 @@ export const NewReportForm = (): React.ReactElement => {
     const adminArea2Field = (
       <Grid item xs={12}>
         <Field
-          name='adminArea2'
+          name="adminArea2"
           label={t('Administrative Level 2')}
-          variant='outlined'
+          variant="outlined"
           component={FormikAdminAreaAutocompleteMultiple}
           parentId={values.adminArea1?.node?.id}
         />
@@ -167,10 +161,10 @@ export const NewReportForm = (): React.ReactElement => {
     const programField = (
       <Grid item xs={12}>
         <Field
-          name='program'
+          name="program"
           label={t('Programme')}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           choices={mappedPrograms}
           component={FormikSelectField}
         />
@@ -221,11 +215,22 @@ export const NewReportForm = (): React.ReactElement => {
     return label;
   };
 
+  const ForwardedPaper = React.forwardRef<HTMLDivElement>((props, ref) => (
+    <Paper
+      {...{
+        ...props,
+        ref,
+      }}
+      data-cy="dialog-setup-new-report"
+    />
+  ));
+  ForwardedPaper.displayName = 'ForwardedPaper';
+
   return (
     <>
       <Button
-        color='primary'
-        variant='contained'
+        color="primary"
+        variant="contained"
         onClick={() => setDialogOpen(true)}
       >
         {t('NEW REPORT')}
@@ -233,17 +238,9 @@ export const NewReportForm = (): React.ReactElement => {
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        scroll='paper'
-        PaperComponent={React.forwardRef((props, ref) => (
-          <Paper
-            {...{
-              ...props,
-              ref,
-            }}
-            data-cy='dialog-setup-new-report'
-          />
-        ))}
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        PaperComponent={ForwardedPaper}
+        aria-labelledby="form-dialog-title"
       >
         <Formik
           initialValues={initialValue}
@@ -254,8 +251,8 @@ export const NewReportForm = (): React.ReactElement => {
             <>
               {dialogOpen && <AutoSubmitFormOnEnter />}
               <DialogTitleWrapper>
-                <DialogTitle disableTypography>
-                  <Typography variant='h6'>
+                <DialogTitle>
+                  <Typography variant="h6">
                     {t('Generate New Report')}
                   </Typography>
                 </DialogTitle>
@@ -265,10 +262,10 @@ export const NewReportForm = (): React.ReactElement => {
                   <Grid container spacing={3}>
                     <Grid item xs={12}>
                       <Field
-                        name='reportType'
+                        name="reportType"
                         label={t('Report Type')}
                         fullWidth
-                        variant='outlined'
+                        variant="outlined"
                         required
                         choices={choicesData.reportTypesChoices}
                         component={FormikSelectField}
@@ -282,19 +279,19 @@ export const NewReportForm = (): React.ReactElement => {
                       <Grid container spacing={3}>
                         <Grid item xs={6}>
                           <Field
-                            name='dateFrom'
+                            name="dateFrom"
                             label={t('From Date')}
                             component={FormikDateField}
                             required
                             fullWidth
                             decoratorEnd={
-                              <CalendarTodayRoundedIcon color='disabled' />
+                              <CalendarTodayRoundedIcon color="disabled" />
                             }
                           />
                         </Grid>
                         <Grid item xs={6}>
                           <Field
-                            name='dateTo'
+                            name="dateTo"
                             label={t('To Date')}
                             component={FormikDateField}
                             required
@@ -302,7 +299,7 @@ export const NewReportForm = (): React.ReactElement => {
                             initialFocusedDate={values.dateFrom}
                             fullWidth
                             decoratorEnd={
-                              <CalendarTodayRoundedIcon color='disabled' />
+                              <CalendarTodayRoundedIcon color="disabled" />
                             }
                             minDate={values.dateFrom}
                           />
@@ -315,9 +312,9 @@ export const NewReportForm = (): React.ReactElement => {
                       <>
                         <Grid item xs={12}>
                           <Field
-                            name='adminArea1'
+                            name="adminArea1"
                             label={t('Administrative Level 1')}
-                            variant='outlined'
+                            variant="outlined"
                             level={1}
                             component={FormikAdminAreaAutocomplete}
                             onClear={() => setFieldValue('adminArea2', [])}
@@ -328,19 +325,19 @@ export const NewReportForm = (): React.ReactElement => {
                         </Grid>
                         <Grid item xs={12}>
                           <Field
-                            name='adminArea2'
+                            name="adminArea2"
                             label={t('Administrative Level 2')}
-                            variant='outlined'
+                            variant="outlined"
                             component={FormikAdminAreaAutocompleteMultiple}
                             parentId={values.adminArea1?.node?.id}
                           />
                         </Grid>
                         <Grid item xs={12}>
                           <Field
-                            name='program'
+                            name="program"
                             label={t('Programme')}
                             fullWidth
-                            variant='outlined'
+                            variant="outlined"
                             choices={mappedPrograms}
                             component={FormikSelectField}
                           />
@@ -357,11 +354,11 @@ export const NewReportForm = (): React.ReactElement => {
                   </Button>
                   <LoadingButton
                     loading={loading}
-                    type='submit'
-                    color='primary'
-                    variant='contained'
+                    type="submit"
+                    color="primary"
+                    variant="contained"
                     onClick={submitForm}
-                    data-cy='button-submit'
+                    data-cy="button-submit"
                   >
                     {t('GENERATE')}
                   </LoadingButton>

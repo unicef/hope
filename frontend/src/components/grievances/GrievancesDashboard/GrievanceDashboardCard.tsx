@@ -1,7 +1,7 @@
-import { Grid } from '@material-ui/core';
-import React from 'react';
+import { Grid } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { LabelizedField } from '../../core/LabelizedField';
+import { LabelizedField } from '@core/LabelizedField';
 import { DashboardCard, CardTitle, CardAmountSmaller } from './DashboardCard';
 
 interface GrievanceDashboardCardProps {
@@ -12,25 +12,25 @@ interface GrievanceDashboardCardProps {
   dataCy?: string;
 }
 
-export const GrievanceDashboardCard = ({
+export function GrievanceDashboardCard({
   topLabel,
   topNumber,
   systemGenerated,
   userGenerated,
   dataCy,
-}: GrievanceDashboardCardProps): React.ReactElement => {
+}: GrievanceDashboardCardProps): React.ReactElement {
   const { t } = useTranslation();
   return (
-    <DashboardCard color='#FFF'>
+    <DashboardCard color="#FFF">
       <CardTitle>{topLabel}</CardTitle>
-      <Grid container alignItems='center'>
+      <Grid container alignItems="center">
         <Grid item>
           <CardAmountSmaller data-cy={`${dataCy}-top-number`}>
             {topNumber}
           </CardAmountSmaller>
         </Grid>
       </Grid>
-      <Grid container alignItems='center'>
+      <Grid container alignItems="center">
         <Grid xs={6} item>
           <LabelizedField
             data-cy={`${dataCy}-system-generated`}
@@ -50,4 +50,4 @@ export const GrievanceDashboardCard = ({
       </Grid>
     </DashboardCard>
   );
-};
+}

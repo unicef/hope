@@ -1,14 +1,14 @@
-import { Paper } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Collapse from '@material-ui/core/Collapse';
-import TablePagination from '@material-ui/core/TablePagination';
-import Typography from '@material-ui/core/Typography';
-import ExpandLess from '@material-ui/icons/ExpandLessRounded';
-import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
-import React, { ReactElement, useState } from 'react';
+import { Paper } from '@mui/material';
+import Button from '@mui/material/Button';
+import Collapse from '@mui/material/Collapse';
+import TablePagination from '@mui/material/TablePagination';
+import Typography from '@mui/material/Typography';
+import ExpandLessIcon from '@mui/icons-material/ExpandLessRounded';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { PaymentVerificationLogEntryNode } from '../../../__generated__/graphql';
+import { PaymentVerificationLogEntryNode } from '@generated/graphql';
 import { headCells } from './headCells';
 import { LogRow } from './LogRow';
 import { ButtonPlaceHolder, Row } from './TableStyledComponents';
@@ -18,7 +18,11 @@ const Table = styled.div`
   flex-direction: column;
 `;
 
-const HeadingCell = styled.div`
+interface HeadingCellProps {
+  weight?: number;
+}
+
+const HeadingCell = styled.div<HeadingCellProps>`
   display: flex;
   flex: ${({ weight }) => weight || 1};
   padding: 16px;
@@ -33,12 +37,12 @@ const HeadingCell = styled.div`
 
 const PaperContainer = styled(Paper)`
   width: 100%;
-  padding: ${({ theme }) => theme.spacing(5)}px 0;
-  margin-bottom: ${({ theme }) => theme.spacing(5)}px;
+  padding: ${({ theme }) => theme.spacing(5)} 0;
+  margin-bottom: ${({ theme }) => theme.spacing(5)};
 `;
 
 const Toolbar = styled.div`
-  margin: 0 ${({ theme }) => theme.spacing(6)}px;
+  margin: 0 ${({ theme }) => theme.spacing(6)};
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -52,25 +56,25 @@ interface ActivityLogTablePaymentVerificationProps {
   onChangePage: (event: unknown, newPage: number) => void;
   onChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
-export const ActivityLogTablePaymentVerification = ({
+export function ActivityLogTablePaymentVerification({
   logEntries,
   totalCount,
   rowsPerPage,
   page,
   onChangePage,
   onChangeRowsPerPage,
-}: ActivityLogTablePaymentVerificationProps): ReactElement => {
+}: ActivityLogTablePaymentVerificationProps): ReactElement {
   const [expanded, setExpanded] = useState(false);
   const { t } = useTranslation();
 
   return (
     <PaperContainer>
       <Toolbar>
-        <Typography variant='h6'>{t('Activity Log')}</Typography>
+        <Typography variant="h6">{t('Activity Log')}</Typography>
         <Button
-          variant='outlined'
-          color='primary'
-          endIcon={expanded ? <ExpandLess /> : <ExpandMore />}
+          variant="outlined"
+          color="primary"
+          endIcon={expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           onClick={() => setExpanded(!expanded)}
         >
           {expanded ? 'HIDE' : 'SHOW'}
@@ -79,13 +83,11 @@ export const ActivityLogTablePaymentVerification = ({
       <Collapse in={expanded}>
         <Table>
           <Row>
-            {headCells.map((item) => {
-              return (
-                <HeadingCell key={item.id} style={{ flex: item.weight || 1 }}>
-                  {item.label}
-                </HeadingCell>
-              );
-            })}
+            {headCells.map((item) => (
+              <HeadingCell key={item.id} style={{ flex: item.weight || 1 }}>
+                {item.label}
+              </HeadingCell>
+            ))}
             <ButtonPlaceHolder />
           </Row>
           {logEntries.map((value) => (
@@ -94,7 +96,7 @@ export const ActivityLogTablePaymentVerification = ({
         </Table>
         <TablePagination
           rowsPerPageOptions={[5, 10, 15]}
-          component='div'
+          component="div"
           count={totalCount}
           rowsPerPage={rowsPerPage}
           page={page}
@@ -104,4 +106,4 @@ export const ActivityLogTablePaymentVerification = ({
       </Collapse>
     </PaperContainer>
   );
-};
+}

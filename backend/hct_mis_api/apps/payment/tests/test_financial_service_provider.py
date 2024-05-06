@@ -46,7 +46,7 @@ class TestAllFinancialServiceProviders(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        create_afghanistan()
+        cls.business_area = create_afghanistan()
         cls.user = UserFactory.create()
         permissions = [
             Permissions.PM_LOCK_AND_UNLOCK_FSP,
@@ -62,6 +62,7 @@ class TestAllFinancialServiceProviders(APITestCase):
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
         )
         for fsp in fsps:
+            fsp.allowed_business_areas.add(cls.business_area)
             FspXlsxTemplatePerDeliveryMechanismFactory(
                 financial_service_provider=fsp,
                 xlsx_template=fsp_xlsx_template,
@@ -70,11 +71,11 @@ class TestAllFinancialServiceProviders(APITestCase):
     def test_fetch_count_financial_service_providers(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_COUNT_ALL_FSP_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
         )
 
     def test_fetch_all_financial_service_providers(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_LIST_ALL_FSP_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
         )

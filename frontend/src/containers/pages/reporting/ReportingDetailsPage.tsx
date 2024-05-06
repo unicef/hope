@@ -1,34 +1,35 @@
-import { Button, Grid, Typography } from '@material-ui/core';
-import { GetApp } from '@material-ui/icons';
-import CheckIcon from '@material-ui/icons/Check';
-import EmailIcon from '@material-ui/icons/Email';
-import React, { useEffect } from 'react';
+import { Button, Grid, Typography } from '@mui/material';
+import { GetApp } from '@mui/icons-material';
+import CheckIcon from '@mui/icons-material/Check';
+import EmailIcon from '@mui/icons-material/Email';
+import * as React from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { ALL_REPORTS_QUERY } from '../../../apollo/queries/reporting/AllReports';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
-import { LabelizedField } from '../../../components/core/LabelizedField';
-import { LoadingButton } from '../../../components/core/LoadingButton';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { OverviewContainer } from '../../../components/core/OverviewContainer';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { StatusBox } from '../../../components/core/StatusBox';
-import { Title } from '../../../components/core/Title';
-import { UniversalMoment } from '../../../components/core/UniversalMoment';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
+import { LabelizedField } from '@components/core/LabelizedField';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { OverviewContainer } from '@components/core/OverviewContainer';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { StatusBox } from '@components/core/StatusBox';
+import { Title } from '@components/core/Title';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { REPORTING_STATES } from '../../../utils/constants';
-import { choicesToDict, reportStatusToColor } from '../../../utils/utils';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { REPORTING_STATES } from '@utils/constants';
+import { choicesToDict, reportStatusToColor } from '@utils/utils';
 import {
   useReportChoiceDataQuery,
   useReportQuery,
   useRestartCreateReportMutation,
-} from '../../../__generated__/graphql';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const IconContainer = styled.div`
   color: #d1d1d1;
@@ -48,25 +49,21 @@ const IconsContainer = styled.div`
   align-items: center;
   font-size: 50px;
 `;
-export const ReportingDetailsPage = (): React.ReactElement => {
+export function ReportingDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
 
-  const [
-    mutate,
-    { loading: restartReportLoading },
-  ] = useRestartCreateReportMutation();
+  const [mutate, { loading: restartReportLoading }] =
+    useRestartCreateReportMutation();
 
   const { data, loading, startPolling, stopPolling } = useReportQuery({
     variables: { id },
   });
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useReportChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useReportChoiceDataQuery();
 
   useEffect(() => {
     if (data?.report?.status === REPORTING_STATES.PROCESSING) {
@@ -211,8 +208,8 @@ export const ReportingDetailsPage = (): React.ReactElement => {
         <>
           {report.fileUrl && (
             <Button
-              color='primary'
-              variant='contained'
+              color="primary"
+              variant="contained"
               startIcon={<GetApp />}
               href={report.fileUrl}
             >
@@ -228,8 +225,8 @@ export const ReportingDetailsPage = (): React.ReactElement => {
               </span>
               &emsp;
               <LoadingButton
-                color='primary'
-                variant='contained'
+                color="primary"
+                variant="contained"
                 loading={restartReportLoading}
                 onClick={() => {
                   reGenerateReport();
@@ -243,7 +240,7 @@ export const ReportingDetailsPage = (): React.ReactElement => {
       </PageHeader>
       <ContainerColumnWithBorder>
         <Title>
-          <Typography variant='h6'>{t('Details')}</Typography>
+          <Typography variant="h6">{t('Details')}</Typography>
         </Title>
         <OverviewContainer>
           <Grid container spacing={6}>
@@ -259,10 +256,10 @@ export const ReportingDetailsPage = (): React.ReactElement => {
         <>
           <IconsContainer>
             <IconContainer>
-              <EmailIcon fontSize='inherit' />
+              <EmailIcon fontSize="inherit" />
             </IconContainer>
             <IconContainer>
-              <CheckIcon fontSize='inherit' />
+              <CheckIcon fontSize="inherit" />
             </IconContainer>
           </IconsContainer>
           <GreyText>
@@ -274,4 +271,4 @@ export const ReportingDetailsPage = (): React.ReactElement => {
       )}
     </>
   );
-};
+}

@@ -4,31 +4,32 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
+} from '@mui/material';
 import { Formik } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
-import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
-import { LoadingButton } from '../../../components/core/LoadingButton';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { useDeleteTargetPopulationMutation } from '../../../__generated__/graphql';
+import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { useDeleteTargetPopulationMutation } from '@generated/graphql';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useNavigate } from 'react-router-dom';
 
-export interface DeleteTargetPopulation {
+export interface DeleteTargetPopulationProps {
   open: boolean;
-  setOpen: Function;
+  setOpen: (open: boolean) => void;
+  targetPopulationId: string;
 }
 
 export const DeleteTargetPopulation = ({
   open,
   setOpen,
   targetPopulationId,
-}): React.ReactElement => {
-  const history = useHistory();
+}: DeleteTargetPopulationProps): React.ReactElement => {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [mutate, { loading }] = useDeleteTargetPopulationMutation();
   const { showMessage } = useSnackbar();
@@ -40,8 +41,8 @@ export const DeleteTargetPopulation = ({
     <Dialog
       open={open}
       onClose={() => setOpen(false)}
-      scroll='paper'
-      aria-labelledby='form-dialog-title'
+      scroll="paper"
+      aria-labelledby="form-dialog-title"
     >
       <Formik
         validationSchema={null}
@@ -52,7 +53,7 @@ export const DeleteTargetPopulation = ({
           });
           setOpen(false);
           showMessage('Target Population Deleted');
-          history.push(`/${baseUrl}/target-population/`);
+          navigate(`/${baseUrl}/target-population/`);
         }}
       >
         {({ submitForm }) => (
@@ -71,11 +72,11 @@ export const DeleteTargetPopulation = ({
                 <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
                 <LoadingButton
                   loading={loading}
-                  type='submit'
-                  color='primary'
-                  variant='contained'
+                  type="submit"
+                  color="primary"
+                  variant="contained"
                   onClick={submitForm}
-                  data-cy='button-delete'
+                  data-cy="button-delete"
                 >
                   {t('Delete')}
                 </LoadingButton>

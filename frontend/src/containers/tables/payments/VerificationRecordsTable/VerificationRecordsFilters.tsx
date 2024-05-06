@@ -1,12 +1,12 @@
-import { Grid, MenuItem } from '@material-ui/core';
-import React from 'react';
+import { Grid, MenuItem } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
-import { usePaymentVerificationChoicesQuery } from '../../../../__generated__/graphql';
-import { FiltersSection } from '../../../../components/core/FiltersSection';
-import { SearchTextField } from '../../../../components/core/SearchTextField';
-import { SelectFilter } from '../../../../components/core/SelectFilter';
-import { createHandleApplyFilterChange } from '../../../../utils/utils';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { usePaymentVerificationChoicesQuery } from '@generated/graphql';
+import { FiltersSection } from '@components/core/FiltersSection';
+import { SearchTextField } from '@components/core/SearchTextField';
+import { SelectFilter } from '@components/core/SelectFilter';
+import { createHandleApplyFilterChange } from '@utils/utils';
 
 interface VerificationRecordsFiltersProps {
   filter;
@@ -16,32 +16,28 @@ interface VerificationRecordsFiltersProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export const VerificationRecordsFilters = ({
+export function VerificationRecordsFilters({
   filter,
   verifications,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: VerificationRecordsFiltersProps): React.ReactElement => {
+}: VerificationRecordsFiltersProps): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
-  const {
-    handleFilterChange,
-    applyFilterChanges,
-    clearFilter,
-  } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
-
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -54,13 +50,11 @@ export const VerificationRecordsFilters = ({
     return null;
   }
 
-  const verificationPlanOptions = verifications.edges.map((item) => {
-    return (
-      <MenuItem key={item.node.unicefId} value={item.node.id}>
-        {item.node.unicefId}
-      </MenuItem>
-    );
-  });
+  const verificationPlanOptions = verifications.edges.map((item) => (
+    <MenuItem key={item.node.unicefId} value={item.node.id}>
+      {item.node.unicefId}
+    </MenuItem>
+  ));
 
   return (
     <FiltersSection
@@ -73,7 +67,7 @@ export const VerificationRecordsFilters = ({
             value={filter.search}
             label={t('Search')}
             onChange={(e) => handleFilterChange('search', e.target.value)}
-            data-cy='filters-search'
+            data-cy="filters-search"
             fullWidth
           />
         </Grid>
@@ -84,13 +78,11 @@ export const VerificationRecordsFilters = ({
             value={filter.status}
             fullWidth
           >
-            {choicesData.paymentVerificationStatusChoices.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
+            {choicesData.paymentVerificationStatusChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
@@ -102,13 +94,11 @@ export const VerificationRecordsFilters = ({
             value={filter.verificationChannel}
           >
             {choicesData.cashPlanVerificationVerificationChannelChoices.map(
-              (item) => {
-                return (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.name}
-                  </MenuItem>
-                );
-              },
+              (item) => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              ),
             )}
           </SelectFilter>
         </Grid>
@@ -126,4 +116,4 @@ export const VerificationRecordsFilters = ({
       </Grid>
     </FiltersSection>
   );
-};
+}

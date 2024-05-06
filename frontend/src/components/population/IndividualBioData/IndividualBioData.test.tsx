@@ -1,5 +1,5 @@
 import { act } from '@testing-library/react';
-import React from 'react';
+import * as React from 'react';
 import wait from 'waait';
 import { MockedProvider } from '@apollo/react-testing';
 import { render } from '../../../testUtils/testUtils';
@@ -16,7 +16,7 @@ describe('components/population/IndividualBioData', () => {
       <MockedProvider addTypename={false} mocks={fakeApolloAllGrievances}>
         <IndividualBioData
           baseUrl={fakeBaseUrl}
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           individual={fakeIndividual}
           choicesData={fakeHouseholdChoices}
           grievancesChoices={fakeGrievancesChoices}

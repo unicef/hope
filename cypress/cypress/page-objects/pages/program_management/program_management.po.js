@@ -27,7 +27,6 @@ export default class ProgramManagement extends BaseComponent {
   tableRowX = 'tr[data-cy="table-row-';
   inputFrequencyOfPayment = 'div[data-cy="input-frequency-of-payment"]';
   inputCashPlus = 'span[data-cy="input-cashPlus"]';
-  inputIndividualDataNeeded = 'div[data-cy="input-individual-data-needed"]';
   selectDataCollectingTypeCode =
     'input[data-cy="select-dataCollectingTypeCode"]';
   // Texts
@@ -57,7 +56,6 @@ export default class ProgramManagement extends BaseComponent {
   getStatusContainer = () => cy.get(this.statusContainer);
   getInputFrequencyOfPayment = () => cy.get(this.inputFrequencyOfPayment);
   getInputCashPlus = () => cy.get(this.inputCashPlus).find("input");
-  getInputIndividualDataNeeded = () => cy.get(this.inputIndividualDataNeeded);
   getTableRowByName = (name) => cy.get(this.tableRowX + name + '"]');
   getInputDataCollectingType = () =>
     cy.get(this.inputDataCollectingType).first();

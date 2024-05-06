@@ -8,20 +8,20 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@material-ui/core';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import React from 'react';
+} from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { GRIEVANCE_TICKET_STATES } from '../../../../utils/constants';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useApprovePaymentDetailsMutation,
-} from '../../../../__generated__/graphql';
-import { useConfirmation } from '../../../core/ConfirmationDialog';
-import { Title } from '../../../core/Title';
+} from '@generated/graphql';
+import { useConfirmation } from '@core/ConfirmationDialog';
+import { Title } from '@core/Title';
 import { VerifyPaymentGrievance } from '../VerifyPaymentGrievance/VerifyPaymentGrievance';
 
 const StyledBox = styled(Paper)`
@@ -37,13 +37,13 @@ const GreenIcon = styled.div`
   color: #28cb15;
 `;
 
-export const PaymentGrievanceDetails = ({
+export function PaymentGrievanceDetails({
   ticket,
   canApprovePaymentVerification,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApprovePaymentVerification: boolean;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [mutate] = useApprovePaymentDetailsMutation();
@@ -66,8 +66,8 @@ export const PaymentGrievanceDetails = ({
   return (
     <StyledBox>
       <Title>
-        <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>{t('Payment Details')}</Typography>
+        <Box display="flex" justifyContent="space-between">
+          <Typography variant="h6">{t('Payment Details')}</Typography>
           {ticket.status === GRIEVANCE_TICKET_STATES.IN_PROGRESS ? (
             <VerifyPaymentGrievance ticket={ticket} />
           ) : null}
@@ -104,22 +104,22 @@ export const PaymentGrievanceDetails = ({
                 })
               }
               variant={approveStatus ? 'outlined' : 'contained'}
-              color='primary'
+              color="primary"
               disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
             >
               {approveStatus ? t('Disapprove') : t('Approve')}
             </Button>
-          ) : null}
+            ) : null}
         </Box>
       </Title>
       <StyledTable>
         <TableHead>
           <TableRow>
-            <TableCell align='right' />
-            <TableCell align='right'>{t('Entitlement Value')} ($)</TableCell>
-            <TableCell align='right'>{t('Delivered Value')} ($)</TableCell>
-            <TableCell align='right'>{t('Received Value')} ($)</TableCell>
-            <TableCell align='right'>{t('New Verified Value')} ($)</TableCell>
+            <TableCell align="right" />
+            <TableCell align="right">{t('Entitlement Value')} ($)</TableCell>
+            <TableCell align="right">{t('Delivered Value')} ($)</TableCell>
+            <TableCell align="right">{t('Received Value')} ($)</TableCell>
+            <TableCell align="right">{t('New Verified Value')} ($)</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -131,15 +131,15 @@ export const PaymentGrievanceDetails = ({
                 </GreenIcon>
               ) : null}
             </TableCell>
-            <TableCell align='right'>{entitlementQuantity}</TableCell>
-            <TableCell align='right'>{deliveredQuantity}</TableCell>
-            <TableCell align='right'>
+            <TableCell align="right">{entitlementQuantity}</TableCell>
+            <TableCell align="right">{deliveredQuantity}</TableCell>
+            <TableCell align="right">
               {oldReceivedAmount == null ? receivedAmount : oldReceivedAmount}
             </TableCell>
-            <TableCell align='right'>{newReceivedAmount ?? 0}</TableCell>
+            <TableCell align="right">{newReceivedAmount ?? 0}</TableCell>
           </TableRow>
         </TableBody>
       </StyledTable>
     </StyledBox>
   );
-};
+}

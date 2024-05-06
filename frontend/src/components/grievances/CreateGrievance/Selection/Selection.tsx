@@ -1,18 +1,18 @@
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import { Field } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { GrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
-import { useArrayToDict } from '../../../../hooks/useArrayToDict';
-import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
+import { GrievancesChoiceDataQuery } from '@generated/graphql';
+import { useArrayToDict } from '@hooks/useArrayToDict';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import {
   GRIEVANCE_CATEGORIES_NAMES,
   GRIEVANCE_CATEGORY_DESCRIPTIONS,
   GRIEVANCE_ISSUE_TYPES_NAMES,
   GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS,
-} from '../../../../utils/constants';
-import { DividerLine } from '../../../core/DividerLine';
-import { LabelizedField } from '../../../core/LabelizedField';
+} from '@utils/constants';
+import { DividerLine } from '@core/DividerLine';
+import { LabelizedField } from '@core/LabelizedField';
 
 export interface SelectionProps {
   handleChange: (e: React.ChangeEvent) => void;
@@ -23,14 +23,14 @@ export interface SelectionProps {
   redirectedFromRelatedTicket: boolean;
 }
 
-export const Selection = ({
+export function Selection({
   handleChange,
   choicesData,
   setFieldValue,
   showIssueType,
   values,
   redirectedFromRelatedTicket,
-}: SelectionProps): React.ReactElement => {
+}: SelectionProps): React.ReactElement {
   const { t } = useTranslation();
   const issueTypeDict = useArrayToDict(
     choicesData?.grievanceTicketIssueTypeChoices,
@@ -56,13 +56,13 @@ export const Selection = ({
     <Grid container spacing={3}>
       <Grid item xs={6}>
         <Field
-          name='category'
-          label='Category*'
+          name="category"
+          label="Category*"
           onChange={(e) => {
             setFieldValue('issueType', null);
             handleChange(e);
           }}
-          variant='outlined'
+          variant="outlined"
           choices={choicesData.grievanceTicketManualCategoryChoices}
           component={FormikSelectField}
           disabled={redirectedFromRelatedTicket}
@@ -71,9 +71,9 @@ export const Selection = ({
       {showIssueType(values) && (
         <Grid item xs={6}>
           <Field
-            name='issueType'
-            label='Issue Type*'
-            variant='outlined'
+            name="issueType"
+            label="Issue Type*"
+            variant="outlined"
             choices={
               redirectedFromRelatedTicket
                 ? dataChangeIssueTypes
@@ -102,4 +102,4 @@ export const Selection = ({
       )}
     </Grid>
   );
-};
+}

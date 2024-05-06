@@ -1,9 +1,9 @@
-import { Box } from '@material-ui/core';
-import React from 'react';
+import { Box } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { IndividualNode, IndividualQuery } from '../../__generated__/graphql';
-import { FlagTooltip } from '../core/FlagTooltip';
-import { WarningTooltip } from '../core/WarningTooltip';
+import { IndividualNode, IndividualQuery } from '@generated/graphql';
+import { FlagTooltip } from '@core/FlagTooltip';
+import { WarningTooltip } from '@core/WarningTooltip';
 
 interface IndividualFlagsProps {
   individual: IndividualQuery['individual'] | IndividualNode;

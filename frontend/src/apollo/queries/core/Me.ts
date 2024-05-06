@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const Me = gql`
   query Me {
@@ -8,6 +8,7 @@ export const Me = gql`
       email
       firstName
       lastName
+      isSuperuser
       businessAreas {
         edges {
           node {

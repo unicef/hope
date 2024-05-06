@@ -1,1 +1,1 @@
-import { TicketsByStatusSection } from './TicketsByStatusSection';
+export { TicketsByStatusSection } from './TicketsByStatusSection';

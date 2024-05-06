@@ -1,29 +1,36 @@
-import React from 'react';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import Chip from '@material-ui/core/Chip';
+import * as React from 'react';
+import { useTheme } from '@mui/material/styles';
+import Input from '@mui/material/Input';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import Chip from '@mui/material/Chip';
+import styled from 'styled-components';
 
-const useStyles = makeStyles((theme) => ({
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 300,
-    maxWidth: 500,
-  },
-  chips: {
-    display: 'flex',
-    flexWrap: 'wrap',
-  },
-  chip: {
-    margin: 2,
-  },
-  noLabel: {
-    marginTop: theme.spacing(3),
-  },
-}));
+const StyledFormControl = styled(FormControl)`
+  margin: ${(props) => props.theme.spacing(1)};
+  min-width: 500px;
+  max-width: 500px;
+`;
+
+const StyledInput = styled(Input)`
+  width: 500px !important;
+`;
+
+const StyledChips = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  max-height: 150px;
+  overflow-y: auto;
+`;
+
+const StyledChip = styled(Chip)`
+  margin: 2px;
+`;
+const StyledNoLabel = styled.div`
+  margin-top: ${(props) => props.theme.spacing(3)};
+`;
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -46,14 +53,13 @@ function getStyles(value, comparedValue, theme): { fontWeight: number } {
   };
 }
 
-export const FormikMultiSelectField = ({
+export function FormikMultiSelectField({
   field,
   form,
   label,
   choices,
   ...otherProps
-}): React.ReactElement => {
-  const classes = useStyles();
+}): React.ReactElement {
   const theme = useTheme();
 
   const handleChange = (event): void => {
@@ -63,26 +69,30 @@ export const FormikMultiSelectField = ({
     return null;
   }
   return (
-    <FormControl className={classes.formControl}>
-      <InputLabel id='mutiple-chip-label'>{label}</InputLabel>
+    <StyledFormControl>
+      {label ? (
+        <InputLabel id="mutiple-chip-label">{label}</InputLabel>
+      ) : (
+        <StyledNoLabel />
+      )}
       <Select
-        labelId='mutiple-chip-label'
-        id='mutiple-chip'
+        labelId="mutiple-chip-label"
+        id="mutiple-chip"
         multiple
+        fullWidth
         data-cy={`select-${field.name}`}
         value={field.value}
         onChange={handleChange}
-        input={<Input id='select-multiple-chip' />}
+        input={<StyledInput id="select-multiple-chip" />}
         renderValue={(selected: string[]) => (
-          <div className={classes.chips}>
+          <StyledChips>
             {selected.map((value) => (
-              <Chip
+              <StyledChip
                 key={value}
                 label={choices.find((el) => el.value === value)?.name || ''}
-                className={classes.chip}
               />
             ))}
-          </div>
+          </StyledChips>
         )}
         MenuProps={MenuProps}
         {...otherProps}
@@ -97,6 +107,6 @@ export const FormikMultiSelectField = ({
           </MenuItem>
         ))}
       </Select>
-    </FormControl>
+    </StyledFormControl>
   );
-};
+}

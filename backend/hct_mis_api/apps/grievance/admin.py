@@ -65,6 +65,7 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase, IsOriginalAdm
         ("status", ChoicesFieldComboFilter),
         ("category", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
+        ("programs", AutoCompleteFilter),
         ("registration_data_import", AutoCompleteFilter),
         ("created_by", AutoCompleteFilter),
         ("assigned_to", AutoCompleteFilter),
@@ -85,12 +86,16 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase, IsOriginalAdm
     inlines = [GrievanceTicketCopiedToInline]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet["GrievanceTicket"]:
-        qs = self.model.default_for_migrations_fix.get_queryset().select_related(
-            "registration_data_import",
-            "business_area",
-            "assigned_to",
-            "created_by",
-            "admin2",
+        qs = (
+            self.model.default_for_migrations_fix.get_queryset()
+            .select_related(
+                "registration_data_import",
+                "business_area",
+                "assigned_to",
+                "created_by",
+                "admin2",
+            )
+            .prefetch_related("programs")
         )
         ordering = self.get_ordering(request)
         if ordering:
@@ -148,7 +153,6 @@ class TicketNeedsAdjudicationDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase
         "possible_duplicates",
         "selected_individuals",
     )
-    # filter_horizontal = ("possible_duplicates", "selected_individuals")
 
 
 @admin.register(TicketPaymentVerificationDetails)

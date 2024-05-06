@@ -1,11 +1,8 @@
-import { Box, Button } from '@material-ui/core';
-import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
-import React from 'react';
-import {
-  ProgramQuery,
-  useCashAssistUrlPrefixQuery,
-} from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { Box, Button } from '@mui/material';
+import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
+import * as React from 'react';
+import { ProgramQuery, useCashAssistUrlPrefixQuery } from '@generated/graphql';
+import { LoadingComponent } from '@components/core/LoadingComponent';
 import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
 import { ReactivateProgram } from '../../dialogs/programs/ReactivateProgram';
 
@@ -16,19 +13,19 @@ export interface FinishedProgramDetailsPageHeaderPropTypes {
   isPaymentPlanApplicable: boolean;
 }
 
-export const FinishedProgramDetailsPageHeaderButtons = ({
+export function FinishedProgramDetailsPageHeaderButtons({
   program,
   canActivate,
   canDuplicate,
   isPaymentPlanApplicable,
-}: FinishedProgramDetailsPageHeaderPropTypes): React.ReactElement => {
+}: FinishedProgramDetailsPageHeaderPropTypes): React.ReactElement {
   const { data, loading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
   if (loading) return <LoadingComponent />;
   if (!data) return null;
   return (
-    <Box display='flex' alignItems='center'>
+    <Box display="flex" alignItems="center">
       {canActivate && (
         <Box m={2}>
           <ReactivateProgram program={program} />
@@ -37,9 +34,9 @@ export const FinishedProgramDetailsPageHeaderButtons = ({
       {!isPaymentPlanApplicable && (
         <Box m={2}>
           <Button
-            variant='contained'
-            color='primary'
-            component='a'
+            variant="contained"
+            color="primary"
+            component="a"
             disabled={!program.caHashId}
             href={`${data.cashAssistUrlPrefix}/&pagetype=entityrecord&etn=progres_program&id=/${program.caHashId}`}
             startIcon={<OpenInNewRoundedIcon />}
@@ -55,4 +52,4 @@ export const FinishedProgramDetailsPageHeaderButtons = ({
       )}
     </Box>
   );
-};
+}

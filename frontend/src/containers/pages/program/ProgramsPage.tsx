@@ -1,14 +1,15 @@
-import { Button } from '@material-ui/core';
-import React, { useState } from 'react';
+import { Button } from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
-import { useProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { useProgrammeChoiceDataQuery } from '@generated/graphql';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { getFilterFromQueryParams } from '../../../utils/utils';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { ProgrammesTable } from '../../tables/ProgrammesTable';
 import { ProgrammesFilters } from '../../tables/ProgrammesTable/ProgrammesFilter';
 
@@ -22,10 +23,10 @@ const initialFilter = {
   numberOfHouseholdsMax: '',
   budgetMin: '',
   budgetMax: '',
-  dataCollectingType: ''
+  dataCollectingType: '',
 };
 
-export const ProgramsPage = (): React.ReactElement => {
+export function ProgramsPage(): React.ReactElement {
   const location = useLocation();
 
   const [filter, setFilter] = useState(
@@ -55,11 +56,11 @@ export const ProgramsPage = (): React.ReactElement => {
   const toolbar = (
     <PageHeader title={t('Programme Management')}>
       <Button
-        variant='contained'
-        color='primary'
+        variant="contained"
+        color="primary"
         component={Link}
         to={`/${baseUrl}/create`}
-        data-cy='button-new-program'
+        data-cy="button-new-program"
       >
         {t('Create Programme')}
       </Button>
@@ -84,4 +85,4 @@ export const ProgramsPage = (): React.ReactElement => {
       />
     </div>
   );
-};
+}

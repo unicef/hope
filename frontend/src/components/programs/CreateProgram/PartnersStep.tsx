@@ -1,13 +1,13 @@
-import { Box, Button } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
+import { Box, Button } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import { FieldArray } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { AllAreasTreeQuery } from '../../../__generated__/graphql';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { BaseSection } from '../../core/BaseSection';
-import { ButtonTooltip } from '../../core/ButtonTooltip';
+import { AllAreasTreeQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { BaseSection } from '@core/BaseSection';
+import { ButtonTooltip } from '@core/ButtonTooltip';
 import { ProgramPartnerCard } from './ProgramPartnerCard';
 
 interface PartnersStepProps {
@@ -50,7 +50,7 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
   return (
     <BaseSection title={title} description={description}>
       <FieldArray
-        name='partners'
+        name="partners"
         render={(arrayHelpers) => {
           const {
             form: { setFieldValue },
@@ -69,11 +69,11 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
                   setFieldValue={setFieldValue}
                 />
               ))}
-              <Box display='flex' justifyContent='space-between'>
-                <Box display='flex'>
+              <Box display="flex" justifyContent="space-between">
+                <Box display="flex">
                   <Box mr={2}>
                     <Button
-                      data-cy='button-cancel'
+                      data-cy="button-cancel"
                       component={Link}
                       to={`/${baseUrl}/list`}
                     >
@@ -82,32 +82,32 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
                   </Box>
                   <ButtonTooltip
                     disabled={addPartnerDisabled}
-                    data-cy='button-add-partner'
+                    data-cy="button-add-partner"
                     title={tooltipText}
                     onClick={() =>
                       arrayHelpers.push({ id: '', areaAccess: 'BUSINESS_AREA' })
                     }
-                    variant='outlined'
-                    color='primary'
+                    variant="outlined"
+                    color="primary"
                     endIcon={<AddIcon />}
                   >
                     {t('Add Partner')}
                   </ButtonTooltip>
                 </Box>
-                <Box display='flex'>
+                <Box display="flex">
                   <Box mr={2}>
                     <Button
-                      data-cy='button-back'
-                      variant='outlined'
+                      data-cy="button-back"
+                      variant="outlined"
                       onClick={() => setStep(step - 1)}
                     >
                       {t('Back')}
                     </Button>
                   </Box>
                   <Button
-                    data-cy='button-save'
-                    variant='contained'
-                    color='primary'
+                    data-cy="button-save"
+                    variant="contained"
+                    color="primary"
                     onClick={submitForm}
                   >
                     {t('Save')}

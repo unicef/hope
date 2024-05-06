@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/react-hooks';
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 import { useEffect, useState } from 'react';
 
 const GET_BACKEND_VERSION = gql`

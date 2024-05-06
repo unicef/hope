@@ -1,13 +1,13 @@
-import { MenuItem, Select } from '@material-ui/core';
-import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { MenuItem, Select } from '@mui/material';
+import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useCachedMe } from '../hooks/useCachedMe';
-import { useBaseUrl } from '../hooks/useBaseUrl';
+import { useCachedMe } from '@hooks/useCachedMe';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const CountrySelect = styled(Select)`
   && {
-    width: ${({ theme }) => theme.spacing(58)}px;
+    width: ${({ theme }) => theme.spacing(58)};
     background-color: rgba(104, 119, 127, 0.5);
     color: #e3e6e7;
     border-bottom-width: 0;
@@ -45,15 +45,15 @@ const CountrySelect = styled(Select)`
 export function BusinessAreaSelect(): React.ReactElement {
   const { data } = useCachedMe();
   const { businessArea } = useBaseUrl();
-  const history = useHistory();
+  const navigate = useNavigate();
   const onChange = (e): void => {
-    history.push(`/${e.target.value}/programs/all/list`);
+    navigate(`/${e.target.value}/programs/all/list`);
   };
   if (!data) {
     return null;
   }
   return (
-    <CountrySelect variant='filled' value={businessArea} onChange={onChange}>
+    <CountrySelect variant="filled" value={businessArea} onChange={onChange}>
       {data.me.businessAreas.edges.map((each) => (
         <MenuItem key={each.node.slug} value={each.node.slug}>
           {each.node.name}

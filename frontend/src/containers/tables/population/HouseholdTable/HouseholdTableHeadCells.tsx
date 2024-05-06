@@ -1,5 +1,5 @@
-import { HeadCell } from '../../../../components/core/Table/EnhancedTableHead';
-import { HouseholdNode } from '../../../../__generated__/graphql';
+import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import { HouseholdNode } from '@generated/graphql';
 
 export const headCells: HeadCell<HouseholdNode>[] = [
   {

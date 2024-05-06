@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const INDIVIDUAL_PHOTOS_QUERY = gql`
   query IndividualPhotos($id: ID!) {

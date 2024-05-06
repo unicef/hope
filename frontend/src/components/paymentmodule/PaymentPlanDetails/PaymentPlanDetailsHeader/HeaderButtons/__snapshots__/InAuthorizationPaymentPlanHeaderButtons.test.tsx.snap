@@ -3,41 +3,33 @@
 exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InAuthorizationPaymentPlanHeaderButtons should render with buttons 1`] = `
 <div>
   <div
-    class="MuiBox-root MuiBox-root-1"
+    class="MuiBox-root css-70qvj9"
   >
     <div
-      class="MuiBox-root MuiBox-root-2"
+      class="MuiBox-root css-hpgf8j"
     >
       <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-text makeStyles-error-3"
+        class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium css-xfwdk1-MuiButtonBase-root-MuiButton-root"
         tabindex="0"
         type="button"
       >
+        Reject
         <span
-          class="MuiButton-label"
-        >
-          Reject
-        </span>
-        <span
-          class="MuiTouchRipple-root"
+          class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
         />
       </button>
     </div>
     <div
-      class="MuiBox-root MuiBox-root-4"
+      class="MuiBox-root css-hpgf8j"
     >
       <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary Mui-disabled Mui-disabled"
+        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium css-dl1jos-MuiButtonBase-root-MuiButton-root"
         data-cy="button-authorize"
         disabled=""
         tabindex="-1"
         type="button"
       >
-        <span
-          class="MuiButton-label"
-        >
-          Authorize
-        </span>
+        Authorize
       </button>
     </div>
   </div>

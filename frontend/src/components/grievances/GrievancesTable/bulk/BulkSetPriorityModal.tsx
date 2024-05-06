@@ -1,14 +1,14 @@
-import { MenuItem, Select } from '@material-ui/core';
-import React from 'react';
+import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import AlarmAddIcon from '@material-ui/icons/AlarmAdd';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import AlarmAddIcon from '@mui/icons-material/AlarmAdd';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   AllGrievanceTicketQuery,
   useBulkUpdateGrievancePriorityMutation,
   useGrievancesChoiceDataQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { BulkBaseModal } from './BulkBaseModal';
 
 export const StyledLink = styled.div`
@@ -55,20 +55,18 @@ export const BulkSetPriorityModal = ({
   };
 
   return (
-    <>
-      <BulkBaseModal
-        selectedTickets={selectedTickets}
-        title={t('Set priority')}
-        buttonTitle={t('Set priority')}
-        onSave={onSave}
-        icon={<AlarmAddIcon />}
-      >
+    <BulkBaseModal
+      selectedTickets={selectedTickets}
+      title={t('Set priority')}
+      buttonTitle={t('Set priority')}
+      onSave={onSave}
+      icon={<AlarmAddIcon />}
+    >
+      <FormControl variant="outlined" style={{ width: '100%' }}>
+        <InputLabel>{t('Priority')}</InputLabel>
         <Select
           value={value}
           onChange={(e) => setValue(e.target.value as number)}
-          style={{ width: '100%' }}
-          variant='outlined'
-          margin='dense'
           label={t('Priority')}
         >
           {priorityChoices.map((choice) => (
@@ -77,7 +75,7 @@ export const BulkSetPriorityModal = ({
             </MenuItem>
           ))}
         </Select>
-      </BulkBaseModal>
-    </>
+      </FormControl>
+    </BulkBaseModal>
   );
 };

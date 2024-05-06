@@ -42,6 +42,7 @@ def copy_program_object(copy_from_program_id: str, program_data: dict) -> Progra
     for field_name, value in program_data.items():
         setattr(program, field_name, value)
 
+    program.full_clean()
     program.save()
     program.admin_areas.set(admin_areas)
     program.refresh_from_db()

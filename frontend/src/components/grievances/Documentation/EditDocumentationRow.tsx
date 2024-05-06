@@ -1,15 +1,20 @@
-import { Box, Button, Grid, IconButton } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
-import Edit from '@material-ui/icons/Edit';
-import React, { useState } from 'react';
+import { Box, Button, Grid, IconButton } from '@mui/material';
+import { Delete } from '@mui/icons-material';
+import Edit from '@mui/icons-material/Edit';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { GrievanceTicketQuery } from '../../../__generated__/graphql';
-import { LabelizedField } from '../../core/LabelizedField';
-import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
+import { GrievanceTicketQuery } from '@generated/graphql';
+import { LabelizedField } from '@core/LabelizedField';
+import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 import { DocumentationField } from './DocumentationField';
 
-const DisabledDiv = styled.div`
+interface DisabledDivProps {
+  disabled: boolean;
+}
+
+const DisabledDiv = styled.div<DisabledDivProps>`
   filter: opacity(${({ disabled }) => (disabled ? 0.5 : 1)});
 `;
 
@@ -39,7 +44,7 @@ export function EditDocumentationRow({
         index={index}
         key={`${index}-documentation-file`}
         onDelete={() => arrayHelpers.remove(index)}
-        baseName='documentationToUpdate'
+        baseName="documentationToUpdate"
         setFieldValue={setFieldValue}
         isEdited={isEdited}
       />
@@ -76,7 +81,7 @@ export function EditDocumentationRow({
       )}
       <Grid item xs={1}>
         {!removed ? (
-          <Box ml={2} display='flex' align-items='center'>
+          <Box ml={2} display="flex" align-items="center">
             <IconButton
               onClick={() => {
                 arrayHelpers.replace(index, {
@@ -102,7 +107,7 @@ export function EditDocumentationRow({
             </IconButton>
           </Box>
         ) : (
-          <Box display='flex' alignItems='center' height={48} color='red'>
+          <Box display="flex" alignItems="center" height={48} color="red">
             {t('REMOVED')}
           </Box>
         )}

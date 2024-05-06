@@ -49,7 +49,6 @@ export const fakeApolloAllPrograms = [
                 sector: 'EDUCATION',
                 totalNumberOfHouseholds: 12,
                 totalNumberOfHouseholdsWithTpInProgram: 12,
-                individualDataNeeded: true,
                 __typename: 'ProgramNode',
               },
               __typename: 'ProgramNodeEdge',

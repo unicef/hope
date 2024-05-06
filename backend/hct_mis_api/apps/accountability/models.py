@@ -11,13 +11,14 @@ from django.utils.translation import gettext_lazy as _
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.grievance.models import OriginalAndRepresentationsManager
 from hct_mis_api.apps.utils.models import (
+    AdminUrlMixin,
     RepresentationManager,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
 
 
-class Message(TimeStampedUUIDModel, UnicefIdentifiedModel):
+class Message(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "title",
@@ -94,7 +95,7 @@ class Message(TimeStampedUUIDModel, UnicefIdentifiedModel):
         return f"{self.title} ({self.number_of_recipients} recipients)"
 
 
-class Feedback(TimeStampedUUIDModel, UnicefIdentifiedModel):
+class Feedback(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "description",
@@ -205,7 +206,7 @@ class SampleFileExpiredException(Exception):
     pass
 
 
-class Survey(UnicefIdentifiedModel, TimeStampedUUIDModel):
+class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
     SAMPLE_FILE_EXPIRATION_IN_DAYS = 30
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [

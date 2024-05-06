@@ -1,6 +1,5 @@
-import React from 'react';
-import { Switch, useRouteMatch } from 'react-router-dom';
-import { SentryRoute } from '../../components/core/SentryRoute';
+import * as React from 'react';
+import { useRoutes } from 'react-router-dom';
 import { CreateFeedbackPage } from '../pages/accountability/feedback/CreateFeedbackPage';
 import { EditFeedbackPage } from '../pages/accountability/feedback/EditFeedbackPage';
 import { FeedbackDetailsPage } from '../pages/accountability/feedback/FeedbackDetailsPage';
@@ -12,74 +11,64 @@ import { GrievancesDetailsPage } from '../pages/grievances/GrievancesDetailsPage
 import { GrievancesTablePage } from '../pages/grievances/GrievancesTablePage';
 
 export const GrievanceRoutes = (): React.ReactElement => {
-  const { path } = useRouteMatch();
-
   const grievanceRoutes = [
     {
-      path: `${path}/grievance/new-ticket`,
-      component: <CreateGrievancePage />,
+      path: 'grievance/new-ticket',
+      element: <CreateGrievancePage />,
     },
     {
-      path: `${path}/grievance/edit-ticket/user-generated/:id`,
-      component: <EditGrievancePage key='user' />,
+      path: 'grievance/edit-ticket/user-generated/:id',
+      element: <EditGrievancePage />,
     },
     {
-      path: `${path}/grievance/edit-ticket/system-generated/:id`,
-      component: <EditGrievancePage key='system' />,
+      path: 'grievance/edit-ticket/system-generated/:id',
+      element: <EditGrievancePage />,
     },
     {
-      path: `${path}/grievance/tickets/user-generated/:id`,
-      component: <GrievancesDetailsPage key='user' />,
+      path: 'grievance/tickets/user-generated/:id',
+      element: <GrievancesDetailsPage />,
     },
     {
-      path: `${path}/grievance/tickets/system-generated/:id`,
-      component: <GrievancesDetailsPage key='system' />,
+      path: 'grievance/tickets/system-generated/:id',
+      element: <GrievancesDetailsPage />,
     },
     {
-      path: `${path}/grievance/rdi/:id`,
-      component: <GrievancesTablePage key='rdi' />,
+      path: 'grievance/rdi/:id',
+      element: <GrievancesTablePage />,
     },
     {
-      path: `${path}/grievance/payment-verification/:cashPlanId`,
-      component: <GrievancesTablePage key='verificationId' />,
+      path: 'grievance/payment-verification/:cashPlanId',
+      element: <GrievancesTablePage />,
     },
     {
-      path: `${path}/grievance/tickets/user-generated`,
-      component: <GrievancesTablePage key='user' />,
+      path: 'grievance/tickets/user-generated',
+      element: <GrievancesTablePage />,
     },
     {
-      path: `${path}/grievance/tickets/system-generated`,
-      component: <GrievancesTablePage key='system' />,
+      path: 'grievance/tickets/system-generated',
+      element: <GrievancesTablePage />,
     },
     {
-      path: `${path}/grievance/dashboard`,
-      component: <GrievancesDashboardPage key='all' />,
+      path: 'grievance/dashboard',
+      element: <GrievancesDashboardPage />,
     },
     {
-      path: `${path}/grievance/feedback/create`,
-      component: <CreateFeedbackPage />,
+      path: 'grievance/feedback/create',
+      element: <CreateFeedbackPage />,
     },
     {
-      path: `${path}/grievance/feedback/edit-ticket/:id`,
-      component: <EditFeedbackPage />,
+      path: 'grievance/feedback/edit-ticket/:id',
+      element: <EditFeedbackPage />,
     },
     {
-      path: `${path}/grievance/feedback/:id`,
-      component: <FeedbackDetailsPage />,
+      path: 'grievance/feedback/:id',
+      element: <FeedbackDetailsPage />,
     },
     {
-      path: `${path}/grievance/feedback`,
-      component: <FeedbackPage />,
+      path: 'grievance/feedback',
+      element: <FeedbackPage />,
     },
   ];
 
-  return (
-    <Switch>
-      {grievanceRoutes.map((route) => (
-        <SentryRoute key={route.path} path={route.path}>
-          {route.component}
-        </SentryRoute>
-      ))}
-    </Switch>
-  );
+  return useRoutes(grievanceRoutes);
 };

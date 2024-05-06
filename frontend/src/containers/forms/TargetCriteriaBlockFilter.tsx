@@ -1,7 +1,7 @@
-import React from 'react';
-import { SubField } from '../../components/targeting/SubField';
-import { ImportedIndividualFieldsQuery } from '../../__generated__/graphql';
-import { FieldChooser } from '../../components/targeting/FieldChooser';
+import * as React from 'react';
+import { SubField } from '@components/targeting/SubField';
+import { ImportedIndividualFieldsQuery } from '@generated/graphql';
+import { FieldChooser } from '@components/targeting/FieldChooser';
 
 export function TargetCriteriaBlockFilter({
   blockIndex,
@@ -30,7 +30,7 @@ export function TargetCriteriaBlockFilter({
         baseName={`individualsFiltersBlocks[${blockIndex}].individualBlockFilters[${index}]`}
       />
       {each.fieldName && (
-        <div data-cy='autocomplete-target-criteria-values'>
+        <div data-cy="autocomplete-target-criteria-values">
           <SubField
             field={each}
             index={index}

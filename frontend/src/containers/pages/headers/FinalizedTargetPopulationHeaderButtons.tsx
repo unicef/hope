@@ -1,14 +1,15 @@
-import { Box, Button } from '@material-ui/core';
-import { FileCopy } from '@material-ui/icons';
-import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
-import React, { useState } from 'react';
+import { Box, Button } from '@mui/material';
+import { FileCopy } from '@mui/icons-material';
+import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
+import * as React from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import {
   BusinessAreaDataQuery,
   TargetPopulationQuery,
   useCashAssistUrlPrefixQuery,
-} from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
+} from '@generated/graphql';
+import { LoadingComponent } from '@components/core/LoadingComponent';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 
 const IconContainer = styled.span`
@@ -28,11 +29,11 @@ export interface FinalizedTargetPopulationHeaderButtonsPropTypes {
   businessAreaData: BusinessAreaDataQuery;
 }
 
-export const FinalizedTargetPopulationHeaderButtons = ({
+export function FinalizedTargetPopulationHeaderButtons({
   targetPopulation,
   canDuplicate,
   businessAreaData,
-}: FinalizedTargetPopulationHeaderButtonsPropTypes): React.ReactElement => {
+}: FinalizedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const { data, loading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
@@ -41,7 +42,7 @@ export const FinalizedTargetPopulationHeaderButtons = ({
   if (loading) return <LoadingComponent />;
   if (!data) return null;
   return (
-    <Box display='flex' alignItems='center'>
+    <Box display="flex" alignItems="center">
       {canDuplicate && (
         <IconContainer>
           <Button onClick={() => setOpenDuplicate(true)}>
@@ -52,11 +53,11 @@ export const FinalizedTargetPopulationHeaderButtons = ({
       <Box m={2}>
         {!businessAreaData.businessArea.isPaymentPlanApplicable && (
           <Button
-            variant='contained'
-            color='primary'
-            component='a'
+            variant="contained"
+            color="primary"
+            component="a"
             disabled={!targetPopulation.caHashId}
-            target='_blank'
+            target="_blank"
             href={`${data.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_targetpopulation&id=${targetPopulation.caHashId}`}
             startIcon={<OpenInNewRoundedIcon />}
           >
@@ -71,4 +72,4 @@ export const FinalizedTargetPopulationHeaderButtons = ({
       />
     </Box>
   );
-};
+}

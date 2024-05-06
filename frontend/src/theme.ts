@@ -1,11 +1,11 @@
-import { red } from '@material-ui/core/colors';
-import { createTheme } from '@material-ui/core/styles';
+import { red } from '@mui/material/colors';
+import { createTheme } from '@mui/material/styles';
 import { css } from 'styled-components';
 import { DARK_GRAY, NAVY_BLUE } from './config/colors';
 
 // A custom theme for this app
 const muiTheme = createTheme({
-  spacing: 4,
+  spacing: (factor) => factor * 4,
   palette: {
     primary: {
       main: NAVY_BLUE,
@@ -31,6 +31,7 @@ const muiTheme = createTheme({
 export const FONT = 'Roboto';
 export const theme = {
   ...muiTheme,
+  spacing: muiTheme.spacing,
   drawer: {
     width: 270,
   },
@@ -76,4 +77,5 @@ export const theme = {
     `,
   },
 };
+
 export type MiśTheme = typeof theme;

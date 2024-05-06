@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const Payment = gql`
   query Payment($id: ID!) {
@@ -26,6 +26,7 @@ export const Payment = gql`
         statusDate
         receivedAmount
         isManuallyEditable
+        adminUrl
       }
       currency
       entitlementQuantity
@@ -86,6 +87,7 @@ export const Payment = gql`
       additionalDocumentNumber
       reasonForUnsuccessfulPayment
       snapshotCollectorFullName
+      adminUrl
     }
   }
 `;

@@ -18,7 +18,8 @@
       "type": "TARGETING",
       "flags": {
         "individual_data_needed": false
-      }
+      },
+      "allowed_business_areas": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
     }
   },
   {
@@ -64,7 +65,8 @@
       "type": "TARGETING",
       "flags": {
         "individual_data_needed": false
-      }
+      },
+      "allowed_business_areas": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
     }
   },
   {
@@ -110,7 +112,8 @@
       "type": "PAYMENT_PLAN",
       "flags": {
         "individual_data_needed": false
-      }
+      },
+      "allowed_business_areas": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
     }
   },
   {
@@ -156,7 +159,8 @@
       "type": "PAYMENT_PLAN",
       "flags": {
         "individual_data_needed": false
-      }
+      },
+      "allowed_business_areas": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
     }
   },
   {

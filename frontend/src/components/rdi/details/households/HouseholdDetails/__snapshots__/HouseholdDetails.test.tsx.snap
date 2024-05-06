@@ -3,29 +3,29 @@
 exports[`components/rdi/details/households/HouseholdDetails should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root sc-bdVaJa fUBeDk MuiPaper-elevation1 MuiPaper-rounded"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-beySPh fvkwGO css-1ps6pg7-MuiPaper-root"
   >
     <div
-      class="sc-ifAKCX jDHyWJ"
+      class="sc-eDLKkx bKQhaX"
     >
       <h6
-        class="MuiTypography-root MuiTypography-h6"
+        class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
       >
         Details
       </h6>
     </div>
     <div
-      class="sc-EHOje dYoyHb"
+      class="sc-jTQCzO iuuSmf"
     >
       <div
-        class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6"
+        class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6 css-zow5z4-MuiGrid-root"
       >
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
         >
           <div>
             <span
-              class="sc-htpNat hcDmtB"
+              class="sc-dmyCSP edirvw"
               color="textSecondary"
             >
               Household Size
@@ -33,16 +33,21 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-Household Size"
             >
-              4
+              <span
+                class="sc-hLQSwg hXyiIZ"
+                color="textSecondary"
+              >
+                4
+              </span>
             </div>
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
         >
           <div>
             <span
-              class="sc-htpNat hcDmtB"
+              class="sc-dmyCSP edirvw"
               color="textSecondary"
             >
               Country
@@ -50,16 +55,21 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-Country"
             >
-              Isle of Man
+              <span
+                class="sc-hLQSwg hXyiIZ"
+                color="textSecondary"
+              >
+                Isle of Man
+              </span>
             </div>
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
         >
           <div>
             <span
-              class="sc-htpNat hcDmtB"
+              class="sc-dmyCSP edirvw"
               color="textSecondary"
             >
               Residence Status
@@ -67,16 +77,21 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-Residence Status"
             >
-              Displaced  |  Refugee / Asylum Seeker
+              <span
+                class="sc-hLQSwg hXyiIZ"
+                color="textSecondary"
+              >
+                Displaced  |  Refugee / Asylum Seeker
+              </span>
             </div>
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
         >
           <div>
             <span
-              class="sc-htpNat hcDmtB"
+              class="sc-dmyCSP edirvw"
               color="textSecondary"
             >
               Country of Origin
@@ -84,16 +99,21 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-Country of Origin"
             >
-              San Marino
+              <span
+                class="sc-hLQSwg hXyiIZ"
+                color="textSecondary"
+              >
+                San Marino
+              </span>
             </div>
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
         >
           <div>
             <span
-              class="sc-htpNat hcDmtB"
+              class="sc-dmyCSP edirvw"
               color="textSecondary"
             >
               Head of Household
@@ -101,21 +121,26 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-Head of Household"
             >
-              <a
-                class="sc-bwzfXH kVuoVk"
-                href="/undefined/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpmM2U0ODBiZC05MDYyLTRkMjktODljYy1kMWM3MGRhZDRmMjk="
+              <span
+                class="sc-hLQSwg hXyiIZ"
+                color="textSecondary"
               >
-                Agata Kowalska
-              </a>
+                <a
+                  class="sc-guDLey ibjlhn"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpmM2U0ODBiZC05MDYyLTRkMjktODljYy1kMWM3MGRhZDRmMjk="
+                >
+                  Agata Kowalska
+                </a>
+              </span>
             </div>
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
         >
           <div>
             <span
-              class="sc-htpNat hcDmtB"
+              class="sc-dmyCSP edirvw"
               color="textSecondary"
             >
               FEMALE CHILD HEADED HOUSEHOLD
@@ -123,16 +148,21 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-FEMALE CHILD HEADED HOUSEHOLD"
             >
-              No
+              <span
+                class="sc-hLQSwg hXyiIZ"
+                color="textSecondary"
+              >
+                No
+              </span>
             </div>
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
         >
           <div>
             <span
-              class="sc-htpNat hcDmtB"
+              class="sc-dmyCSP edirvw"
               color="textSecondary"
             >
               CHILD HEADED HOUSEHOLD
@@ -140,16 +170,21 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-CHILD HEADED HOUSEHOLD"
             >
-              No
+              <span
+                class="sc-hLQSwg hXyiIZ"
+                color="textSecondary"
+              >
+                No
+              </span>
             </div>
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
         >
           <div>
             <span
-              class="sc-htpNat hcDmtB"
+              class="sc-dmyCSP edirvw"
               color="textSecondary"
             >
               ADMINISTRATIVE LEVEL 1
@@ -157,16 +192,21 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-ADMINISTRATIVE LEVEL 1"
             >
-              Nangarhar
+              <span
+                class="sc-hLQSwg hXyiIZ"
+                color="textSecondary"
+              >
+                Nangarhar
+              </span>
             </div>
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
         >
           <div>
             <span
-              class="sc-htpNat hcDmtB"
+              class="sc-dmyCSP edirvw"
               color="textSecondary"
             >
               ADMINISTRATIVE LEVEL 2
@@ -174,16 +214,21 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-ADMINISTRATIVE LEVEL 2"
             >
-              Achin
+              <span
+                class="sc-hLQSwg hXyiIZ"
+                color="textSecondary"
+              >
+                Achin
+              </span>
             </div>
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
         >
           <div>
             <span
-              class="sc-htpNat hcDmtB"
+              class="sc-dmyCSP edirvw"
               color="textSecondary"
             >
               Data Collecting Type

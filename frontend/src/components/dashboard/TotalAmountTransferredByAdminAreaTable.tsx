@@ -1,9 +1,9 @@
-import { Table, TableBody, TableCell, TableRow } from '@material-ui/core';
-import React from 'react';
+import { Table, TableBody, TableCell, TableRow } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { formatCurrency, formatNumber } from '../../utils/utils';
-import { CountryChartsQuery } from '../../__generated__/graphql';
-import { EnhancedTableHead } from '../core/Table/EnhancedTableHead';
+import { formatCurrency, formatNumber } from '@utils/utils';
+import { CountryChartsQuery } from '@generated/graphql';
+import { EnhancedTableHead } from '@core/Table/EnhancedTableHead';
 
 interface TotalAmountTransferredByAdminAreaTableProps {
   data: CountryChartsQuery['tableTotalCashTransferredByAdministrativeArea']['data'];
@@ -13,12 +13,12 @@ interface TotalAmountTransferredByAdminAreaTableProps {
 }
 type Order = 'asc' | 'desc';
 
-export const TotalAmountTransferredByAdminAreaTable = ({
+export function TotalAmountTransferredByAdminAreaTable({
   data,
   handleSort,
   order,
   orderBy,
-}: TotalAmountTransferredByAdminAreaTableProps): React.ReactElement => {
+}: TotalAmountTransferredByAdminAreaTableProps): React.ReactElement {
   const { t } = useTranslation();
 
   const headCells = [
@@ -43,21 +43,16 @@ export const TotalAmountTransferredByAdminAreaTable = ({
   ];
   if (!data) return null;
 
-  const renderRows = (): Array<React.ReactElement> => {
-    return data.map((el) => {
-      return (
-        <TableRow key={el.id}>
-          <TableCell align='left'>{el.admin2}</TableCell>
-          <TableCell align='right'>
-            {formatCurrency(el.totalCashTransferred, true)}
-          </TableCell>
-          <TableCell align='right'>
-            {formatNumber(el.totalHouseholds)}
-          </TableCell>
-        </TableRow>
-      );
-    });
-  };
+  const renderRows = (): Array<React.ReactElement> =>
+    data.map((el) => (
+      <TableRow key={el.id}>
+        <TableCell align="left">{el.admin2}</TableCell>
+        <TableCell align="right">
+          {formatCurrency(el.totalCashTransferred, true)}
+        </TableCell>
+        <TableCell align="right">{formatNumber(el.totalHouseholds)}</TableCell>
+      </TableRow>
+    ));
 
   return (
     <Table>
@@ -71,4 +66,4 @@ export const TotalAmountTransferredByAdminAreaTable = ({
       <TableBody>{renderRows()}</TableBody>
     </Table>
   );
-};
+}

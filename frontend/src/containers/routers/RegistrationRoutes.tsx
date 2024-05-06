@@ -1,40 +1,46 @@
-import React from 'react';
-import { Switch, useRouteMatch } from 'react-router-dom';
-import { SentryRoute } from '../../components/core/SentryRoute';
+import * as React from 'react';
+import { useRoutes } from 'react-router-dom';
 import { RegistrationDataImportDetailsPage } from '../pages/rdi/RegistrationDataImportDetailsPage';
 import { RegistrationDataImportPage } from '../pages/rdi/RegistrationDataImportPage';
 import { RegistrationHouseholdDetailsPage } from '../pages/rdi/RegistrationHouseholdDetailsPage';
 import { RegistrationIndividualDetailsPage } from '../pages/rdi/RegistrationIndividualDetailsPage';
+import {RegistrationPeopleDetailsPage} from "@containers/pages/rdi/people/RegistrationPeopleDetailsPage";
+import {
+  RegistrationDataImportForPeopleDetailsPage
+} from "@containers/pages/rdi/people/RegistrationDataImportForPeopleDetailsPage";
+import {RegistrationDataForPeopleImportPage} from "@containers/pages/rdi/people/RegistrationDataForPeopleImportPage";
 
 export const RegistrationRoutes = (): React.ReactElement => {
-  const { path } = useRouteMatch();
-
   const registrationRoutes = [
     {
-      path: `${path}/registration-data-import/household/:id`,
-      component: <RegistrationHouseholdDetailsPage />,
+      path: 'registration-data-import/household/:id',
+      element: <RegistrationHouseholdDetailsPage />,
     },
     {
-      path: `${path}/registration-data-import/individual/:id`,
-      component: <RegistrationIndividualDetailsPage />,
+      path: 'registration-data-import/individual/:id',
+      element: <RegistrationIndividualDetailsPage />,
     },
     {
-      path: `${path}/registration-data-import/:id`,
-      component: <RegistrationDataImportDetailsPage />,
+      path: 'registration-data-import-for-people/people/:id',
+      element: <RegistrationPeopleDetailsPage />,
     },
     {
-      path: `${path}/registration-data-import`,
-      component: <RegistrationDataImportPage />,
+      path: 'registration-data-import-for-people/:id',
+      element: <RegistrationDataImportForPeopleDetailsPage />,
+    },
+    {
+      path: 'registration-data-import-for-people',
+      element: <RegistrationDataForPeopleImportPage />,
+    },
+    {
+      path: 'registration-data-import/:id',
+      element: <RegistrationDataImportDetailsPage />,
+    },
+    {
+      path: 'registration-data-import',
+      element: <RegistrationDataImportPage />,
     },
   ];
 
-  return (
-    <Switch>
-      {registrationRoutes.map((route) => (
-        <SentryRoute key={route.path} path={route.path}>
-          {route.component}
-        </SentryRoute>
-      ))}
-    </Switch>
-  );
+  return useRoutes(registrationRoutes);
 };

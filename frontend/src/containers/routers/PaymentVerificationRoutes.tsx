@@ -1,6 +1,5 @@
-import React from 'react';
-import { Switch, useRouteMatch } from 'react-router-dom';
-import { SentryRoute } from '../../components/core/SentryRoute';
+import * as React from 'react';
+import { useRoutes } from 'react-router-dom';
 import { CashPlanDetailsPage } from '../pages/payments/CashPlanDetailsPage';
 import { CashPlanVerificationDetailsPage } from '../pages/payments/CashPlanVerificationDetailsPage';
 import { CashPlanVerificationRedirectPage } from '../pages/payments/CashplanVerificationRedirectPage';
@@ -10,47 +9,36 @@ import { VerificationPaymentDetailsPage } from '../pages/payments/VerificationPa
 import { VerificationPaymentRecordDetailsPage } from '../pages/payments/VerificationPaymentRecordDetailsPage';
 
 export const PaymentVerificationRoutes = (): React.ReactElement => {
-  const { path } = useRouteMatch();
-
   const paymentVerificationRoutes = [
     {
-      path: `${path}/cashplans/:id`,
-      component: <CashPlanDetailsPage />,
+      path: 'cashplans/:id',
+      element: <CashPlanDetailsPage />,
     },
     {
-      path: `${path}/verification/payment-record/:id`,
-      component: <VerificationPaymentRecordDetailsPage />,
+      path: 'verification/payment-record/:id',
+      element: <VerificationPaymentRecordDetailsPage />,
     },
     {
-      path: `${path}/verification/payment/:id`,
-      component: <VerificationPaymentDetailsPage />,
+      path: 'verification/payment/:id',
+      element: <VerificationPaymentDetailsPage />,
     },
     {
-      path: `${path}/payment-verification`,
-      component: <PaymentVerificationPage />,
-      exact: true,
+      path: 'payment-verification',
+      element: <PaymentVerificationPage />,
     },
     {
-      path: `${path}/payment-verification/cash-plan/:id`,
-      component: <CashPlanVerificationDetailsPage />,
+      path: 'payment-verification/cash-plan/:id',
+      element: <CashPlanVerificationDetailsPage />,
     },
     {
-      path: `${path}/payment-verification/payment-plan/:id`,
-      component: <PaymentPlanVerificationDetailsPage />,
+      path: 'payment-verification/payment-plan/:id',
+      element: <PaymentPlanVerificationDetailsPage />,
     },
     {
-      path: `${path}/csh-payment-verification/:id`,
-      component: <CashPlanVerificationRedirectPage />,
+      path: 'csh-payment-verification/:id',
+      element: <CashPlanVerificationRedirectPage />,
     },
   ];
 
-  return (
-    <Switch>
-      {paymentVerificationRoutes.map((route) => (
-        <SentryRoute key={route.path} path={route.path} exact={route.exact}>
-          {route.component}
-        </SentryRoute>
-      ))}
-    </Switch>
-  );
+  return useRoutes(paymentVerificationRoutes);
 };

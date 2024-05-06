@@ -1,1 +1,1 @@
-import { LinkedGrievancesModal } from './LinkedGrievancesModal';
+export { LinkedGrievancesModal } from './LinkedGrievancesModal';

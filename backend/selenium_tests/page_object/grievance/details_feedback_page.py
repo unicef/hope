@@ -11,6 +11,7 @@ class FeedbackDetailsPage(BaseComponents):
     labelIssueType = 'div[data-cy="label-Issue Type"]'
     labelHouseholdID = 'div[data-cy="label-Household ID"]'
     labelIndividualID = 'div[data-cy="label-Individual ID"]'
+    labelProgramme = 'div[data-cy="label-Programme"]'
     labelCreatedBy = 'div[data-cy="label-Created By"]'
     labelDateCreated = 'div[data-cy="label-Date Created"]'
     labelLastModifiedDate = 'div[data-cy="label-Last Modified Date"]'
@@ -49,6 +50,9 @@ class FeedbackDetailsPage(BaseComponents):
 
     def getIndividualID(self) -> WebElement:
         return self.wait_for(self.labelIndividualID)
+
+    def getProgramme(self) -> WebElement:
+        return self.wait_for(self.labelProgramme)
 
     def getCreatedBy(self) -> WebElement:
         return self.wait_for(self.labelCreatedBy)

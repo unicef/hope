@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const IMPORT_DATA_QUERY = gql`
   query XlsxImportData($id: ID!) {

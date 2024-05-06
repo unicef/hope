@@ -1,15 +1,15 @@
-import { Box } from '@material-ui/core';
-import React from 'react';
+import { Box } from '@mui/material';
+import * as React from 'react';
 import { Doughnut } from 'react-chartjs-2';
-import { formatNumber, getPercentage } from '../../../utils/utils';
-import { AllChartsQuery } from '../../../__generated__/graphql';
+import { formatNumber, getPercentage } from '@utils/utils';
+import { AllChartsQuery } from '@generated/graphql';
 
 interface PaymentsChartProps {
   data: AllChartsQuery['chartPayment'];
 }
-export const PaymentsChart = ({
+export function PaymentsChart({
   data,
-}: PaymentsChartProps): React.ReactElement => {
+}: PaymentsChartProps): React.ReactElement {
   if (!data) return null;
 
   const chartData = {
@@ -17,7 +17,7 @@ export const PaymentsChart = ({
     datasets: [
       {
         backgroundColor: ['#3363A5', '#FFAA1D'],
-        data: [...data.datasets[0]?.data],
+        data: [...(data.datasets[0]?.data || [])],
       },
     ],
   };
@@ -37,21 +37,20 @@ export const PaymentsChart = ({
     tooltips: {
       mode: 'point',
       callbacks: {
-        label: (tooltipItem, tooltipData) => {
-          return ` ${tooltipData.labels[tooltipItem.index]}: ${formatNumber(
+        label: (tooltipItem, tooltipData) =>
+          ` ${tooltipData.labels[tooltipItem.index]}: ${formatNumber(
             tooltipData.datasets[0].data[tooltipItem.index],
           )} (${getPercentage(
             tooltipData.datasets[0].data[tooltipItem.index],
             tooltipData.datasets[0].data.reduce((acc, curr) => acc + curr, 0),
-          )})`;
-        },
+          )})`,
       },
     },
   };
 
   return (
-    <Box mt={6} height='300px'>
+    <Box mt={6} height="300px">
       <Doughnut data={chartData} options={options} />
     </Box>
   );
-};
+}

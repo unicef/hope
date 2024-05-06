@@ -34,10 +34,8 @@ export const fakeApolloAllPaymentPlansForTable = [
             {
               cursor: 'YXJyYXljb25uZWN0aW9uOjA=',
               node: {
-                id:
-                  'UGF5bWVudFBsYW5Ob2RlOmJmOTBkOWQzLTkyY2QtNGMyMC1iODc3LTU1OTFiNzUwZjlkZQ==',
+                id: 'UGF5bWVudFBsYW5Ob2RlOmJmOTBkOWQzLTkyY2QtNGMyMC1iODc3LTU1OTFiNzUwZjlkZQ==',
                 unicefId: 'PP-0060-22-11223344',
-                name: "pp1",
                 isFollowUp: false,
                 followUps: {
                   totalCount: 0,
@@ -46,22 +44,19 @@ export const fakeApolloAllPaymentPlansForTable = [
                 },
                 status: 'FINISHED',
                 createdBy: {
-                  id:
-                    'VXNlck5vZGU6NDE5NmMyYzUtYzJkZC00OGQyLTg4N2YtM2E5ZDM5ZTc4OTE2',
+                  id: 'VXNlck5vZGU6NDE5NmMyYzUtYzJkZC00OGQyLTg4N2YtM2E5ZDM5ZTc4OTE2',
                   firstName: 'Root',
                   lastName: 'Rootkowski',
                   email: 'root@root.com',
                   __typename: 'UserNode',
                 },
                 program: {
-                  id:
-                    'UHJvZ3JhbU5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMDAw',
+                  id: 'UHJvZ3JhbU5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMDAw',
                   name: 'Test Program',
                   __typename: 'ProgramNode',
                 },
                 targetPopulation: {
-                  id:
-                    'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMTIz',
+                  id: 'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMTIz',
                   name: 'Test Target Population',
                   __typename: 'TargetPopulationNode',
                 },
@@ -87,10 +82,8 @@ export const fakeApolloAllPaymentPlansForTable = [
             {
               cursor: 'YXJyYXljb25uZWN0aW9uOjE=',
               node: {
-                id:
-                  'UGF5bWVudFBsYW5Ob2RlOjAwMDAwMDAwLWZlZWQtYmVlZi0wMDAwLTAwMDAwYmFkZjAwZA==',
+                id: 'UGF5bWVudFBsYW5Ob2RlOjAwMDAwMDAwLWZlZWQtYmVlZi0wMDAwLTAwMDAwYmFkZjAwZA==',
                 unicefId: 'PP-0060-23-00000013',
-                name: "pp2",
                 isFollowUp: false,
                 followUps: {
                   totalCount: 0,
@@ -99,22 +92,19 @@ export const fakeApolloAllPaymentPlansForTable = [
                 },
                 status: 'OPEN',
                 createdBy: {
-                  id:
-                    'VXNlck5vZGU6NDE5NmMyYzUtYzJkZC00OGQyLTg4N2YtM2E5ZDM5ZTc4OTE2',
+                  id: 'VXNlck5vZGU6NDE5NmMyYzUtYzJkZC00OGQyLTg4N2YtM2E5ZDM5ZTc4OTE2',
                   firstName: 'Root',
                   lastName: 'Rootkowski',
                   email: 'root@root.com',
                   __typename: 'UserNode',
                 },
                 program: {
-                  id:
-                    'UHJvZ3JhbU5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMDAw',
+                  id: 'UHJvZ3JhbU5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMDAw',
                   name: 'Test Program',
                   __typename: 'ProgramNode',
                 },
                 targetPopulation: {
-                  id:
-                    'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMTIz',
+                  id: 'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMTIz',
                   name: 'Test Target Population',
                   __typename: 'TargetPopulationNode',
                 },

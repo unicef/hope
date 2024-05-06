@@ -60,6 +60,7 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
         obj: RegistrationDataImportDatahub = serializer.save(
             business_area_slug=self.selected_business_area.slug, import_done=RegistrationDataImportDatahub.LOADING
         )
+        serializer.validated_data.pop("import_done", None)
         self.rdi: RegistrationDataImport = RegistrationDataImport.objects.create(
             **serializer.validated_data,
             status=RegistrationDataImport.LOADING,
@@ -71,6 +72,8 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
             business_area=self.selected_business_area,
             program=program,
         )
+        obj.hct_id = self.rdi.id
+        obj.save(update_fields=["hct_id"])
 
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
@@ -196,7 +199,15 @@ class CompleteRDIView(HOPEAPIBusinessAreaView, UpdateAPIView):
 
         sibling = self.selected_rdi.linked_rdi
         sibling.status = RegistrationDataImport.IN_REVIEW
-        sibling.save()
+        sibling.number_of_households = self.selected_rdi.households.count()
+        sibling.number_of_individuals = self.selected_rdi.individuals.count()
+        sibling.save(
+            update_fields=(
+                "status",
+                "number_of_households",
+                "number_of_individuals",
+            )
+        )
 
         return Response(
             [

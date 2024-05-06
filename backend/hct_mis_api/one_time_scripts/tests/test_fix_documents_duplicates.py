@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -10,6 +11,8 @@ from hct_mis_api.one_time_scripts.fix_documents_duplicates import (
 
 
 class TestFixDocumentsDuplicates(TestCase):
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/household/fixtures/documenttype.json",)
+
     def test_fix_documents_duplicates(self) -> None:
         create_afghanistan()
         document_numbers = [

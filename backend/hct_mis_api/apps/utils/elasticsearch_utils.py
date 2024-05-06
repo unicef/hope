@@ -25,8 +25,13 @@ def populate_index(queryset: "QuerySet", doc: Any, parallel: bool = False) -> No
 
 
 def _create(models: Optional[List[Model]]) -> None:
+    import elasticsearch
+
     for index in registry.get_indices(models):
-        index.create()
+        try:
+            index.create()
+        except elasticsearch.exceptions.RequestError:
+            pass
 
 
 def _populate(models: Optional[List[Any]], options: Dict) -> None:

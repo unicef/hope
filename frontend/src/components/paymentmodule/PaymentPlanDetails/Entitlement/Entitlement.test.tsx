@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { MockedProvider } from '@apollo/react-testing';
 import { act } from 'react-dom/test-utils';
 import wait from 'waait';
@@ -6,12 +6,16 @@ import { fakeApolloAllSteficonRules } from '../../../../../fixtures/steficon/fak
 import { fakeApolloPaymentPlan } from '../../../../../fixtures/paymentmodule/fakeApolloPaymentPlan';
 import { render } from '../../../../testUtils/testUtils';
 import { Entitlement } from './Entitlement';
+import {PERMISSIONS} from "../../../../config/permissions";
 
 describe('components/paymentmodule/PaymentPlanDetails/Entitlement', () => {
   it('should render', async () => {
     const { container } = render(
       <MockedProvider addTypename={false} mocks={fakeApolloAllSteficonRules}>
-        <Entitlement paymentPlan={fakeApolloPaymentPlan} />
+        <Entitlement
+          paymentPlan={fakeApolloPaymentPlan}
+          permissions={[PERMISSIONS.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS]}
+        />
       </MockedProvider>,
     );
     await act(() => wait(0)); // wait for response

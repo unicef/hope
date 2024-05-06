@@ -1,1 +1,1 @@
-import { SetUpFspButtonActions } from './SetUpFspButtonActions';
+export { SetUpFspButtonActions } from './SetUpFspButtonActions';

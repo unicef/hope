@@ -2,7 +2,7 @@ import {
   Action,
   PaymentPlanDocument,
   useActionPpMutation,
-} from '../__generated__/graphql';
+} from '@generated/graphql';
 import { useSnackbar } from './useSnackBar';
 
 interface PaymentPlanAction {

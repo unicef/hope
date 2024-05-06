@@ -1,1 +1,1 @@
-import {Selection} from './Selection'
+export { Selection } from './Selection';

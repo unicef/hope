@@ -48,7 +48,7 @@ from hct_mis_api.apps.core.celery_tasks import (
     create_target_population_task,
     upload_new_kobo_template_and_update_flex_fields_task,
 )
-from hct_mis_api.apps.core.forms import ProgramForm
+from hct_mis_api.apps.core.forms import DataCollectingTypeForm, ProgramForm
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     CountryCodeMap,
@@ -718,6 +718,8 @@ class MigrationStatusAdmin(admin.ModelAdmin):
 
 @admin.register(DataCollectingType)
 class DataCollectingTypeAdmin(AdminFiltersMixin, admin.ModelAdmin):
+    form = DataCollectingTypeForm
+
     list_display = (
         "label",
         "code",

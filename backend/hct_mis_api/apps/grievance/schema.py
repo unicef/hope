@@ -13,6 +13,7 @@ from graphene_django import DjangoObjectType
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import (
     POPULATION_DETAILS,
+    AdminUrlNodeMixin,
     BaseNodePermissionMixin,
     BasePermission,
     DjangoPermissionFilterConnectionField,
@@ -92,7 +93,7 @@ class GrievanceDocumentNode(DjangoObjectType):
         interfaces = (relay.Node,)
 
 
-class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
+class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes: Tuple[Type[BasePermission], ...] = (
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR),
@@ -121,8 +122,8 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         super().check_node_permission(info, object_instance)
         business_area = object_instance.business_area
         user = info.context.user
-        # TODO: grievances should be cross program ??? remove program_id
-        program_id = get_program_id_from_headers(info.context.headers)
+        # when selected All programs in GPF program_id is None
+        program_id: Optional[str] = get_program_id_from_headers(info.context.headers)
 
         if object_instance.category == GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE:
             perm = Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE.value
@@ -142,8 +143,6 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         partner = user.partner
         has_partner_area_access = partner.is_unicef
         ticket_program_id = str(object_instance.programs.first().id) if object_instance.programs.first() else None
-        if program_id and ticket_program_id != program_id:
-            log_and_raise("Ticket does not belong to the selected program")
         if not partner.is_unicef:
             if not object_instance.admin2 or not ticket_program_id:
                 # admin2 is empty or non-program ticket -> no restrictions for admin area
@@ -586,6 +585,8 @@ class Query(graphene.ObjectType):
                 .prefetch_related(*to_prefetch)
                 .filter(business_area_id=business_area_id, programs=None)
             )
+        else:
+            queryset = queryset.filter(programs__id=program_id)
 
         return queryset.annotate(
             total=Case(
@@ -600,6 +601,8 @@ class Query(graphene.ObjectType):
 
     def resolve_cross_area_filter_available(self, info: Any, **kwargs: Any) -> bool:
         user = info.context.user
+        if not user.is_authenticated:
+            return False
         business_area = BusinessArea.objects.get(slug=info.context.headers.get("Business-Area"))
         program_id = get_program_id_from_headers(info.context.headers)
 

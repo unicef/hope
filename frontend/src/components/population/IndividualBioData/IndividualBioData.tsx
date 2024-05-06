@@ -1,5 +1,5 @@
-import { Box, Grid, Paper, Typography } from '@material-ui/core';
-import React from 'react';
+import { Box, Grid, Paper, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -8,23 +8,23 @@ import {
   getPhoneNoLabel,
   renderBoolean,
   sexToCapitalize,
-} from '../../../utils/utils';
+} from '@utils/utils';
 import {
   GrievancesChoiceDataQuery,
   HouseholdChoiceDataQuery,
   IndividualDisability,
   IndividualNode,
-} from '../../../__generated__/graphql';
-import { ContentLink } from '../../core/ContentLink';
-import { LabelizedField } from '../../core/LabelizedField';
-import { Title } from '../../core/Title';
-import { UniversalMoment } from '../../core/UniversalMoment';
+} from '@generated/graphql';
+import { ContentLink } from '@core/ContentLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 import { DocumentPopulationPhotoModal } from '../DocumentPopulationPhotoModal';
 import { LinkedGrievancesModal } from '../LinkedGrievancesModal/LinkedGrievancesModal';
 
 const Overview = styled(Paper)`
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
+  padding: ${({ theme }) => theme.spacing(8)}
+    ${({ theme }) => theme.spacing(11)};
 `;
 
 const BorderBox = styled.div`
@@ -38,13 +38,13 @@ interface IndividualBioDataProps {
   choicesData: HouseholdChoiceDataQuery;
   grievancesChoices: GrievancesChoiceDataQuery;
 }
-export const IndividualBioData = ({
+export function IndividualBioData({
   individual,
   baseUrl,
   businessArea,
   choicesData,
   grievancesChoices,
-}: IndividualBioDataProps): React.ReactElement => {
+}: IndividualBioDataProps): React.ReactElement {
   const { t } = useTranslation();
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
@@ -64,7 +64,7 @@ export const IndividualBioData = ({
   const mappedIndividualDocuments = individual?.documents?.edges?.map(
     (edge) => (
       <Grid item xs={3} key={edge.node.id}>
-        <Box flexDirection='column'>
+        <Box flexDirection="column">
           <Box mb={1}>
             <LabelizedField label={edge.node.type.label}>
               {edge.node.photo ? (
@@ -78,7 +78,7 @@ export const IndividualBioData = ({
               )}
             </LabelizedField>
           </Box>
-          <LabelizedField label='issued'>{edge.node.country}</LabelizedField>
+          <LabelizedField label="issued">{edge.node.country}</LabelizedField>
         </Box>
       </Grid>
     ),
@@ -86,13 +86,13 @@ export const IndividualBioData = ({
 
   const mappedIdentities = individual?.identities?.edges?.map((item) => (
     <Grid item xs={3} key={item.node.id}>
-      <Box flexDirection='column'>
+      <Box flexDirection="column">
         <Box mb={1}>
           <LabelizedField label={`${item.node.partner} ID`}>
             {item.node.number}
           </LabelizedField>
         </Box>
-        <LabelizedField label='issued'>{item.node.country}</LabelizedField>
+        <LabelizedField label="issued">{item.node.country}</LabelizedField>
       </Box>
     </Grid>
   ));
@@ -103,7 +103,7 @@ export const IndividualBioData = ({
         {individual?.householdsAndRoles?.length
           ? individual?.householdsAndRoles?.map((item) => (
               <Box key={item.id}>
-                {item.household.unicefId} - {roleChoicesDict[item.role]}
+                {item.household.unicefId} -{roleChoicesDict[item.role]}
               </Box>
             ))
           : '-'}
@@ -147,7 +147,7 @@ export const IndividualBioData = ({
   return (
     <Overview>
       <Title>
-        <Typography variant='h6'>{t('Bio Data')}</Typography>
+        <Typography variant="h6">{t('Bio Data')}</Typography>
       </Title>
       <Grid container spacing={6}>
         <Grid item xs={3}>
@@ -338,4 +338,4 @@ export const IndividualBioData = ({
       </Grid>
     </Overview>
   );
-};
+}

@@ -1,5 +1,5 @@
-import { Grid, Paper, Typography } from '@material-ui/core';
-import React from 'react';
+import { Grid, Paper, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -7,29 +7,29 @@ import {
   PaymentQuery,
   PaymentStatus,
   PaymentVerificationStatus,
-} from '../../../__generated__/graphql';
-import { UniversalActivityLogTable } from '../../../containers/tables/UniversalActivityLogTable';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+} from '@generated/graphql';
+import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
+import { useBusinessArea } from '@hooks/useBusinessArea';
 import {
   formatCurrencyWithSymbol,
   getPhoneNoLabel,
   paymentStatusDisplayMap,
   paymentStatusToColor,
   verificationRecordsStatusToColor,
-} from '../../../utils/utils';
-import { BlackLink } from '../../core/BlackLink';
-import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
-import { DividerLine } from '../../core/DividerLine';
-import { LabelizedField } from '../../core/LabelizedField';
-import { StatusBox } from '../../core/StatusBox';
-import { Title } from '../../core/Title';
-import { UniversalMoment } from '../../core/UniversalMoment';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+} from '@utils/utils';
+import { BlackLink } from '@core/BlackLink';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { DividerLine } from '@core/DividerLine';
+import { LabelizedField } from '@core/LabelizedField';
+import { StatusBox } from '@core/StatusBox';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Overview = styled(Paper)`
   margin: 20px;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
+  padding: ${({ theme }) => theme.spacing(8)}
+    ${({ theme }) => theme.spacing(11)};
 `;
 
 interface PaymentDetailsProps {
@@ -38,11 +38,11 @@ interface PaymentDetailsProps {
   canViewHouseholdDetails: boolean;
 }
 
-export const PaymentDetails = ({
+export function PaymentDetails({
   payment,
   canViewActivityLog,
   canViewHouseholdDetails,
-}: PaymentDetailsProps): React.ReactElement => {
+}: PaymentDetailsProps): React.ReactElement {
   const businessArea = useBusinessArea();
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
@@ -65,7 +65,7 @@ export const PaymentDetails = ({
     <>
       <ContainerColumnWithBorder>
         <Title>
-          <Typography variant='h6'>{t('Details')}</Typography>
+          <Typography variant="h6">{t('Details')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
@@ -124,7 +124,7 @@ export const PaymentDetails = ({
       {paymentVerification != null ? (
         <ContainerColumnWithBorder>
           <Title>
-            <Typography variant='h6'>{t('Verification Details')}</Typography>
+            <Typography variant="h6">{t('Verification Details')}</Typography>
           </Title>
           <Grid container spacing={3}>
             <Grid item xs={3}>
@@ -150,7 +150,7 @@ export const PaymentDetails = ({
       ) : null}
       <Overview>
         <Title>
-          <Typography variant='h6'>{t('Household')}</Typography>
+          <Typography variant="h6">{t('Household')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
@@ -208,7 +208,7 @@ export const PaymentDetails = ({
       </Overview>
       <Overview>
         <Title>
-          <Typography variant='h6'>{t('Entitlement Details')}</Typography>
+          <Typography variant="h6">{t('Entitlement Details')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
@@ -264,7 +264,7 @@ export const PaymentDetails = ({
       </Overview>
       <Overview>
         <Title>
-          <Typography variant='h6'>{t('Reconciliation Details')}</Typography>
+          <Typography variant="h6">{t('Reconciliation Details')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
@@ -309,4 +309,4 @@ export const PaymentDetails = ({
       )}
     </>
   );
-};
+}

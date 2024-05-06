@@ -1,3 +1,5 @@
+from time import sleep
+
 from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -14,14 +16,18 @@ class NewFeedback(BaseComponents):
     buttonNext = 'button[data-cy="button-submit"]'
     option = 'li[role="option"]'
     householdTableRow = 'tr[data-cy="household-table-row"]'
-    individualTableRow = 'tr[data-cy="individual-table-row"'
-    lookUpTabs = 'button[role="tab"]'
+    individualTableRow = 'tr[data-cy="individual-table-row"]'
+    lookUpTabsHouseHold = 'button[role="tab"]'
+    lookUpTabsIndividual = 'button[role="tab"]'
     receivedConsent = 'span[data-cy="input-consent"]'
     description = 'textarea[data-cy="input-description"]'
     comments = 'textarea[data-cy="input-comments"]'
-    adminAreaAutocomplete = 'div[data-cy="input-admin2"]'
+    adminAreaAutocomplete = 'div[data-cy="admin-area-autocomplete"]'
     inputLanguage = 'textarea[data-cy="input-language"]'
     inputArea = 'input[data-cy="input-area"]'
+    programmeSelect = 'div[data-cy="select-program"]'
+    hhRadioButton = 'span[data-cy="input-radio-household"]'
+    individualRadioButton = 'span[data-cy="input-radio-individual"]'
 
     # Texts
     textTitle = "New Feedback"
@@ -49,20 +55,42 @@ class NewFeedback(BaseComponents):
     def getButtonNext(self) -> WebElement:
         return self.wait_for(self.buttonNext)
 
-    def getOption(self) -> WebElement:
-        return self.wait_for(self.option)
+    def getOptions(self) -> list[WebElement]:
+        return self.get_elements(self.option)
 
-    def getHouseholdTab(self) -> WebElement:
-        return self.wait_for(self.lookUpTabs).contains(self.textLookUpHousehold)
+    def getHouseholdTab(self) -> None:
+        try:
+            household_tab = self.get_elements(self.lookUpTabsHouseHold)[0]
+        except IndexError:
+            sleep(1)
+            household_tab = self.get_elements(self.lookUpTabsHouseHold)[0]
+        assert self.textLookUpHousehold in household_tab.text
+        return household_tab
 
-    def getLookUpIndividual(self) -> WebElement:
-        return self.wait_for(self.lookUpTabs).contains(self.textLookUpIndividual)
+    def getIndividualTab(self) -> WebElement:
+        try:
+            individual_tab = self.get_elements(self.lookUpTabsIndividual, attempts=5)[1]
+        except IndexError:
+            sleep(1)
+            individual_tab = self.get_elements(self.lookUpTabsIndividual, attempts=5)[1]
+        assert self.textLookUpIndividual in individual_tab.text
+        return individual_tab
 
     def getHouseholdTableRows(self, number: int) -> WebElement:
-        return self.wait_for(self.householdTableRow).eq(number)
+        self.get_elements(self.hhRadioButton)
+        try:
+            return self.get_elements(self.householdTableRow, attempts=5)[number]
+        except IndexError:
+            sleep(1)
+            return self.get_elements(self.householdTableRow, attempts=5)[number]
 
     def getIndividualTableRow(self, number: int) -> WebElement:
-        return self.wait_for(self.individualTableRow).eq(number)
+        self.get_elements(self.individualRadioButton)
+        try:
+            return self.get_elements(self.individualTableRow, attempts=5)[number]
+        except IndexError:
+            sleep(1)
+            return self.get_elements(self.individualTableRow, attempts=5)[number]
 
     def getReceivedConsent(self) -> WebElement:
         return self.wait_for(self.receivedConsent)
@@ -82,20 +110,31 @@ class NewFeedback(BaseComponents):
     def getAdminAreaAutocomplete(self) -> WebElement:
         return self.wait_for(self.adminAreaAutocomplete)
 
+    def selectArea(self, name: str) -> WebElement:
+        self.getAdminAreaAutocomplete().click()
+        return self.select_listbox_element(name)
+
     def getIssueType(self) -> WebElement:
         return self.wait_for(self.issueType)
 
     def getInputIssueType(self) -> WebElement:
         return self.wait_for(self.inputIssueType)
 
+    def getProgrammeSelect(self) -> WebElement:
+        return self.wait_for(self.programmeSelect)
+
+    def selectProgramme(self, name: str) -> WebElement:
+        self.getProgrammeSelect().click()
+        return self.select_listbox_element(name)
+
     def checkElementsOnPage(self) -> None:
-        self.getTitlePage().contains(self.textTitle)
-        self.getLabelCategory().contains(self.textCategory)
-        self.getSelectIssueType().should("be.visible")
-        self.getButtonCancel().should("be.visible")
-        self.getButtonBack().should("be.visible")
-        self.getButtonNext().should("be.visible")
+        assert self.textTitle in self.getTitlePage().text
+        assert self.textCategory in self.getLabelCategory().text
+        self.getSelectIssueType()
+        self.getButtonCancel()
+        self.getButtonBack()
+        self.getButtonNext()
 
     def chooseOptionByName(self, name: str) -> None:
         self.getSelectIssueType().click()
-        self.getOption().contains(name).click()
+        self.select_listbox_element(name).click()

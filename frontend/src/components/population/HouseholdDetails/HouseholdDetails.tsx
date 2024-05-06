@@ -1,17 +1,17 @@
-import { Box, Grid, Paper, Typography } from '@material-ui/core';
-import React from 'react';
+import { Box, Grid, Paper, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   GrievancesChoiceDataQuery,
   HouseholdChoiceDataQuery,
   HouseholdNode,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { useProgramContext } from '../../../programContext';
-import { choicesToDict, formatCurrencyWithSymbol } from '../../../utils/utils';
-import { ContentLink } from '../../core/ContentLink';
-import { LabelizedField } from '../../core/LabelizedField';
-import { Title } from '../../core/Title';
+import { choicesToDict, formatCurrencyWithSymbol } from '@utils/utils';
+import { ContentLink } from '@core/ContentLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { Title } from '@core/Title';
 import {
   BigValue,
   BigValueContainer,
@@ -23,8 +23,8 @@ const Container = styled.div`
   flex: 1;
   width: 100%;
   background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
+  padding: ${({ theme }) => theme.spacing(8)}
+    ${({ theme }) => theme.spacing(11)};
   flex-direction: column;
   align-items: center;
   border-color: #b1b1b5;
@@ -43,7 +43,7 @@ const Overview = styled.div`
 `;
 const OverviewPaper = styled(Paper)`
   margin: 20px 20px 0 20px;
-  padding: 20px ${({ theme }) => theme.spacing(11)}px;
+  padding: 20px ${({ theme }) => theme.spacing(11)};
 `;
 
 interface HouseholdDetailsProps {
@@ -53,13 +53,13 @@ interface HouseholdDetailsProps {
   businessArea: string;
   grievancesChoices: GrievancesChoiceDataQuery;
 }
-export const HouseholdDetails = ({
+export function HouseholdDetails({
   household,
   choicesData,
   baseUrl,
   businessArea,
   grievancesChoices,
-}: HouseholdDetailsProps): React.ReactElement => {
+}: HouseholdDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const residenceChoicesDict = choicesToDict(
     choicesData.residenceStatusChoices,
@@ -69,7 +69,7 @@ export const HouseholdDetails = ({
     <>
       <Container>
         <Title>
-          <Typography variant='h6'>{t('Details')}</Typography>
+          <Typography variant="h6">{t('Details')}</Typography>
         </Title>
         <Overview>
           <Grid container spacing={3}>
@@ -195,7 +195,7 @@ export const HouseholdDetails = ({
       </Container>
       <OverviewPaper>
         <Title>
-          <Typography variant='h6'>{t('Benefits')}</Typography>
+          <Typography variant="h6">{t('Benefits')}</Typography>
         </Title>
         <Grid container>
           <Grid item xs={3}>
@@ -204,7 +204,7 @@ export const HouseholdDetails = ({
                 <Box mb={2}>
                   <Grid container>
                     <Grid item xs={6}>
-                      <Box display='flex' flexDirection='column'>
+                      <Box display="flex" flexDirection="column">
                         {household?.deliveredQuantities?.map((item) => (
                           <Box
                             key={`${item.currency}-${item.totalDeliveredQuantity}`}
@@ -245,4 +245,4 @@ export const HouseholdDetails = ({
       </OverviewPaper>
     </>
   );
-};
+}

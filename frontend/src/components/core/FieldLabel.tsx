@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 
 const Label = styled.span`
@@ -7,14 +7,8 @@ const Label = styled.span`
 `;
 
 interface FieldLabelProps {
-  children: string
+  children: string;
 }
-export const FieldLabel = ({
-  children }: FieldLabelProps
-): React.ReactElement => {
-  return (
-    <Label>
-      {children}
-    </Label>
-  )
-};
+export function FieldLabel({ children }: FieldLabelProps): React.ReactElement {
+  return <Label>{children}</Label>;
+}

@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Any
 
-from drf_yasg.utils import swagger_auto_schema
+from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.mixins import CreateModelMixin
@@ -39,7 +39,7 @@ class ProgramViewSet(CreateModelMixin, HOPEAPIBusinessAreaViewSet):
     def perform_create(self, serializer: "BaseSerializer") -> None:
         serializer.save(business_area=self.selected_business_area)
 
-    @swagger_auto_schema(request_body=ProgramSerializer)
+    @extend_schema(request=ProgramSerializer)
     def create(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
         self.selected_business_area  # TODO does it work? It should be called
         serializer = ProgramSerializer(data=request.data)

@@ -1,36 +1,34 @@
-import { Box, Button } from '@material-ui/core';
-import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
-import React from 'react';
+import { Box, Button } from '@mui/material';
+import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { PaymentRecordDetails } from '../../../components/payments/PaymentRecordDetails';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { PaymentRecordDetails } from '@components/payments/PaymentRecordDetails';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { usePermissions } from '@hooks/usePermissions';
 import {
   PaymentRecordNode,
   PaymentRecordStatus,
   useBusinessAreaDataQuery,
   useCashAssistUrlPrefixQuery,
   usePaymentRecordQuery,
-} from '../../../__generated__/graphql';
-import { ForceFailedButton } from '../../../components/payments/ForceFailedButton';
-import { RevertForceFailedButton } from '../../../components/payments/RevertForceFailedButton';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { ForceFailedButton } from '@components/payments/ForceFailedButton';
+import { RevertForceFailedButton } from '@components/payments/RevertForceFailedButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
-export const PaymentRecordDetailsPage = (): React.ReactElement => {
+export function PaymentRecordDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { businessArea } = useBaseUrl();
-  const {
-    data: businessAreaData,
-    loading: businessAreaDataLoading,
-  } = useBusinessAreaDataQuery({
-    variables: { businessAreaSlug: businessArea },
-  });
+  const { data: businessAreaData, loading: businessAreaDataLoading } =
+    useBusinessAreaDataQuery({
+      variables: { businessAreaSlug: businessArea },
+    });
   const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
@@ -97,11 +95,11 @@ export const PaymentRecordDetailsPage = (): React.ReactElement => {
       buttons.push(
         <Button
           key={`${paymentRecord.id}-cashAssist`}
-          variant='contained'
-          color='primary'
-          component='a'
+          variant="contained"
+          color="primary"
+          component="a"
           disabled={!paymentRecord.caHashId || !caData?.cashAssistUrlPrefix}
-          target='_blank'
+          target="_blank"
           href={`${caData?.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_payment&id=${paymentRecord.caHashId}`}
           startIcon={<OpenInNewRoundedIcon />}
         >
@@ -120,7 +118,7 @@ export const PaymentRecordDetailsPage = (): React.ReactElement => {
       >
         <>{renderButtons()}</>
       </PageHeader>
-      <Box display='flex' flexDirection='column'>
+      <Box display="flex" flexDirection="column">
         <PaymentRecordDetails
           paymentRecord={paymentRecord}
           canViewActivityLog={hasPermissions(
@@ -131,4 +129,4 @@ export const PaymentRecordDetailsPage = (): React.ReactElement => {
       </Box>
     </>
   );
-};
+}

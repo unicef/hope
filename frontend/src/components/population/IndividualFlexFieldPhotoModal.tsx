@@ -1,12 +1,10 @@
-import { Box } from '@material-ui/core';
-import React from 'react';
+import { Box } from '@mui/material';
+import * as React from 'react';
 import { useParams } from 'react-router-dom';
-import { useIndividualFlexFieldsQuery } from '../../__generated__/graphql';
-import { PhotoModal } from '../core/PhotoModal/PhotoModal';
+import { useIndividualFlexFieldsQuery } from '@generated/graphql';
+import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 
-export const IndividualFlexFieldPhotoModal = ({
-  field,
-}): React.ReactElement => {
+export function IndividualFlexFieldPhotoModal({ field }): React.ReactElement {
   const { id } = useParams();
   const { data } = useIndividualFlexFieldsQuery({
     variables: { id },
@@ -23,8 +21,8 @@ export const IndividualFlexFieldPhotoModal = ({
   return picUrl ? (
     <PhotoModal src={picUrl} />
   ) : (
-    <Box style={{ height: '100%' }} display='flex' alignItems='center'>
+    <Box style={{ height: '100%' }} display="flex" alignItems="center">
       -
     </Box>
   );
-};
+}

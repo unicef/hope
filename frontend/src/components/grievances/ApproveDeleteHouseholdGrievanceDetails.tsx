@@ -6,60 +6,62 @@ import {
   Grid,
   IconButton,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import styled from 'styled-components';
-import Edit from '@material-ui/icons/Edit';
+import Edit from '@mui/icons-material/Edit';
 import { Field, Formik } from 'formik';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { DialogContainer } from '../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useApproveDeleteHouseholdDataChangeMutation,
-} from '../../__generated__/graphql';
-
-export interface ApproveDeleteHouseholdGrievanceDetails {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
-  type: 'edit' | 'button';
-}
+} from '@generated/graphql';
 
 const EditIcon = styled(Edit)`
   color: ${({ theme }) => theme.hctPalette.darkerBlue};
 `;
+export interface ApproveDeleteHouseholdGrievanceDetailsProps {
+  ticket: GrievanceTicketQuery['grievanceTicket'];
+  type: 'edit' | 'button';
+}
 
 export const ApproveDeleteHouseholdGrievanceDetails = ({
   ticket,
   type,
-}: ApproveDeleteHouseholdGrievanceDetails): React.ReactElement => {
+}: ApproveDeleteHouseholdGrievanceDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [mutate] = useApproveDeleteHouseholdDataChangeMutation();
   const { showMessage } = useSnackbar();
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
-  const {
-    approveStatus,
-    reasonHousehold,
-  } = ticket.deleteHouseholdTicketDetails;
+  const { approveStatus, reasonHousehold } =
+    ticket.deleteHouseholdTicketDetails;
 
   const validationSchema = Yup.object().shape({
-    reasonHhId: Yup.string().when('withdrawReason', (withdrawReasonValue) => {
-      if (withdrawReasonValue === 'duplicate' && !approveStatus) {
-        return Yup.string()
-          .required('Household Unicef Id is required')
-          .max(15, 'Too long');
-      }
-      return Yup.string();
-    }),
+    reasonHhId: Yup.string().when(
+      'withdrawReason',
+      (withdrawReasonValue: any) => {
+        const value = String(withdrawReasonValue);
+        if (value === 'duplicate' && !approveStatus) {
+          return Yup.string()
+            .required('Household Unicef Id is required')
+            .max(15, 'Too long');
+        }
+        return Yup.string();
+      },
+    ),
   });
 
   const matchDialogTitle = (): string => {
@@ -124,17 +126,17 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
           <Box p={2}>
             {type === 'edit' ? (
               <IconButton
-                data-cy='edit-button'
+                data-cy="edit-button"
                 onClick={() => setDialogOpen(true)}
               >
                 <EditIcon />
               </IconButton>
             ) : (
               <Button
-                data-cy='button-approve'
+                data-cy="button-approve"
                 onClick={() => setDialogOpen(true)}
                 variant={approveStatus ? 'outlined' : 'contained'}
-                color='primary'
+                color="primary"
                 disabled={!isForApproval}
               >
                 {approveStatus ? t('Disapprove') : t('Approve')}
@@ -144,36 +146,35 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
           <Dialog
             open={dialogOpen}
             onClose={() => setDialogOpen(false)}
-            scroll='paper'
-            aria-labelledby='form-dialog-title'
-            maxWidth='md'
+            scroll="paper"
+            aria-labelledby="form-dialog-title"
+            maxWidth="md"
           >
             <DialogTitleWrapper>
               <DialogTitle>{matchDialogTitle()}</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>
-                <Box display='flex' flexDirection='column'>
+                <Box display="flex" flexDirection="column">
                   <Box mt={2}>
-                    <Typography variant='body2'>
+                    <Typography variant="body2">
                       {showWithdraw()
                         ? t(
-                            'Please provide the reason of withdrawal of this household.',
-                          )
+                          'Please provide the reason of withdrawal of this household.',
+                        )
                         : t(
-                            'You did not approve the following household to be withdrawn. Are you sure you want to continue?',
-                          )}
+                          'You did not approve the following household to be withdrawn. Are you sure you want to continue?',
+                        )}
                     </Typography>
                   </Box>
                   {showWithdraw() && (
                     <Box>
                       <Field
-                        name='withdrawReason'
+                        name="withdrawReason"
                         choices={[
                           {
                             value: 'duplicate',
-                            name:
-                              'This household is a duplicate of another household',
+                            name: 'This household is a duplicate of another household',
                           },
                         ]}
                         component={FormikRadioGroup}
@@ -183,9 +184,9 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
                         <Grid container>
                           <Grid item xs={6}>
                             <Field
-                              name='reasonHhId'
+                              name="reasonHhId"
                               fullWidth
-                              variant='outlined'
+                              variant="outlined"
                               label={t('Household Unicef Id')}
                               component={FormikTextField}
                               required
@@ -194,7 +195,7 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
                         </Grid>
                       )}
                       <Field
-                        name='withdrawReason'
+                        name="withdrawReason"
                         choices={[{ value: 'other', name: 'Other' }]}
                         component={FormikRadioGroup}
                         noMargin
@@ -215,11 +216,11 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
                   {t('CANCEL')}
                 </Button>
                 <Button
-                  type='submit'
-                  color='primary'
-                  variant='contained'
+                  type="submit"
+                  color="primary"
+                  variant="contained"
                   onClick={submitForm}
-                  data-cy='button-submit'
+                  data-cy="button-submit"
                 >
                   {t('Confirm')}
                 </Button>

@@ -36,8 +36,9 @@ class DataChangeValidator:
 
 def validate_file(file: Any) -> None:
     if file.content_type in settings.GRIEVANCE_UPLOAD_CONTENT_TYPES:
+        file_size_MB = round(file.size / (1024 * 1024), 2)
         if file.size > settings.GRIEVANCE_ONE_UPLOAD_MAX_MEMORY_SIZE:
-            raise GraphQLError(_(f"File {file.name} of size {file.size} is above max size limit"))
+            raise GraphQLError(_(f"File {file.name} of size {file_size_MB}MB is above max size limit"))
     else:
         raise GraphQLError(_("File type not supported"))
 

@@ -4,12 +4,12 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
+from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files.base import ContentFile
 
 import pytz
 
-from hct_mis_api import settings
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan

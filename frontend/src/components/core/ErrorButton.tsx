@@ -1,21 +1,11 @@
-import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
+import * as React from 'react';
+import { styled } from '@mui/system';
+import Button from '@mui/material/Button';
 
-const useStyles = makeStyles({
-  error: {
-    color: '#C21313',
-  },
-});
+const ErrorStyledButton = styled(Button)`
+  color: #c21313;
+`;
 
-export const ErrorButton = ({
-  children,
-  ...otherProps
-}): React.ReactElement => {
-  const classes = useStyles(otherProps);
-  return (
-    <Button {...otherProps} className={classes.error}>
-      {children}
-    </Button>
-  );
-};
+export function ErrorButton({ children, ...otherProps }): React.ReactElement {
+  return <ErrorStyledButton {...otherProps}>{children}</ErrorStyledButton>;
+}

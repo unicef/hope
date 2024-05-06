@@ -1,42 +1,38 @@
-import { Grid } from '@material-ui/core';
-import React from 'react';
+import { Grid } from '@mui/material';
+import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import {
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
   useMeQuery,
-} from '../../../../__generated__/graphql';
-import { LoadingComponent } from '../../../../components/core/LoadingComponent';
-import { PermissionDenied } from '../../../../components/core/PermissionDenied';
-import { GrievanceDetailsToolbar } from '../../../../components/grievances/GrievanceDetailsToolbar';
-import { GrievancesApproveSection } from '../../../../components/grievances/GrievancesApproveSection/GrievancesApproveSection';
-import { GrievancesDetails } from '../../../../components/grievances/GrievancesDetails/GrievancesDetails';
-import { GrievancesSidebar } from '../../../../components/grievances/GrievancesSidebar/GrievancesSidebar';
-import { Notes } from '../../../../components/grievances/Notes/Notes';
+} from '@generated/graphql';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { GrievanceDetailsToolbar } from '@components/grievances/GrievanceDetailsToolbar';
+import { GrievancesApproveSection } from '@components/grievances/GrievancesApproveSection/GrievancesApproveSection';
+import { GrievancesDetails } from '@components/grievances/GrievancesDetails/GrievancesDetails';
+import { GrievancesSidebar } from '@components/grievances/GrievancesSidebar/GrievancesSidebar';
+import { Notes } from '@components/grievances/Notes/Notes';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../../hooks/usePermissions';
-import { isPermissionDeniedError } from '../../../../utils/utils';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { isPermissionDeniedError } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { grievancePermissions } from './grievancePermissions';
 
-export const GrievancesDetailsPage = (): React.ReactElement => {
+export function GrievancesDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const permissions = usePermissions();
-  const {
-    data: currentUserData,
-    loading: currentUserDataLoading,
-  } = useMeQuery();
+  const { data: currentUserData, loading: currentUserDataLoading } =
+    useMeQuery();
   const { data, loading, error } = useGrievanceTicketQuery({
     variables: { id },
     fetchPolicy: 'network-only',
   });
 
   const { baseUrl } = useBaseUrl();
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useGrievancesChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery();
 
   if (choicesLoading || loading || currentUserDataLoading)
     return <LoadingComponent />;
@@ -106,4 +102,4 @@ export const GrievancesDetailsPage = (): React.ReactElement => {
       )}
     </>
   );
-};
+}

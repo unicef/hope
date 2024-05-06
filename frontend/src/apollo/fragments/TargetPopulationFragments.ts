@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const targetPopulationMinimal = gql`
   fragment targetPopulationMinimal on TargetPopulationNode {
@@ -29,6 +29,7 @@ export const targetPopulationDetailed = gql`
     id
     name
     status
+    adminUrl
     buildStatus
     totalHouseholdsCount
     totalIndividualsCount
@@ -65,6 +66,7 @@ export const targetPopulationDetailed = gql`
       status
       startDate
       endDate
+      isSocialWorkerProgram
     }
     createdBy {
       __typename

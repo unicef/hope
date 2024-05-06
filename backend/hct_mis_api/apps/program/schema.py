@@ -22,6 +22,7 @@ from graphene_django import DjangoObjectType
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
+    AdminUrlNodeMixin,
     BaseNodePermissionMixin,
     BasePermission,
     DjangoPermissionFilterConnectionField,
@@ -60,7 +61,7 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 
 
-class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
+class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(
             Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
@@ -73,9 +74,9 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
     total_undelivered_quantity = graphene.Decimal()
     total_number_of_households = graphene.Int()
     total_number_of_households_with_tp_in_program = graphene.Int()
-    individual_data_needed = graphene.Boolean()
     data_collecting_type = graphene.Field(DataCollectingTypeNode, source="data_collecting_type")
     partners = graphene.List(PartnerNodeForProgram)
+    is_social_worker_program = graphene.Boolean()
 
     class Meta:
         model = Program
@@ -102,6 +103,10 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
             if partner.get_permissions().areas_for(str(program.business_area_id), str(program.pk)) is not None:
                 partners_list.append(partner)
         return partners_list
+
+    @staticmethod
+    def resolve_is_social_worker_program(program: Program, info: Any, **kwargs: Any) -> bool:
+        return program.is_social_worker_program
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):

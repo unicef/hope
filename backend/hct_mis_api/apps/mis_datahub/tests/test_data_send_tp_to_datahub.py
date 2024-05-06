@@ -82,7 +82,6 @@ class TestDataSendTpToDatahub(TestCase):
         )
 
         cls.program = ProgramFactory(
-            individual_data_needed=True,
             business_area=business_area_with_data_sharing,
             ca_hash_id=uuid.uuid4(),
             ca_id="TEST",
@@ -139,7 +138,6 @@ class TestDataSendTpToDatahub(TestCase):
             "ca_id": self.program.ca_id,
             "description": self.program.description,
             "end_date": timezone.make_aware(datetime.combine(self.program.end_date, datetime.min.time())),
-            "individual_data_needed": True,
             "mis_id": self.program.id,
             "name": self.program.name,
             "scope": self.program.scope,

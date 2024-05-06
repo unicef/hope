@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const TargetPopulationHouseholds = gql`
   query TargetPopulationHouseholds(
@@ -25,6 +25,7 @@ export const TargetPopulationHouseholds = gql`
           unicefId
           headOfHousehold {
             id
+            unicefId
             givenName
             familyName
             fullName

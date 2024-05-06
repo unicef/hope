@@ -1,17 +1,17 @@
-import React from 'react';
+import * as React from 'react';
 import {
   ImportedIndividualNode,
   useImportedIndividualPhotosQuery,
-} from '../../__generated__/graphql';
-import { PhotoModal } from '../core/PhotoModal/PhotoModal';
+} from '@generated/graphql';
+import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 
 interface ImportedIndividualPhotoModalProps {
   individual: ImportedIndividualNode;
 }
 
-export const ImportedIndividualPhotoModal = ({
+export function ImportedIndividualPhotoModal({
   individual,
-}: ImportedIndividualPhotoModalProps): React.ReactElement => {
+}: ImportedIndividualPhotoModalProps): React.ReactElement {
   const { data } = useImportedIndividualPhotosQuery({
     variables: { id: individual?.id },
     fetchPolicy: 'network-only',
@@ -20,8 +20,8 @@ export const ImportedIndividualPhotoModal = ({
   return (
     <PhotoModal
       src={data?.importedIndividual?.photo}
-      variant='button'
+      variant="button"
       title="Individuals's Photo"
     />
   );
-};
+}

@@ -79,13 +79,13 @@ class GetProgramId(abc.ABC):
 def activity_log_assign_program() -> None:
     log_qs = LogEntry.objects.all().exclude(programs__isnull=False)
 
-    print(f"Found {log_qs.count()} Logs for assign to program")
+    logger.info(f"Found {log_qs.count()} Logs for assign to program")
 
     paginator = Paginator(log_qs, 1000)
     number_of_pages = paginator.num_pages
 
     for page in paginator.page_range:
-        print(f"Loading page {page} of {number_of_pages}")
+        logger.info(f"Loading page {page} of {number_of_pages}")
 
         for log in paginator.page(page).object_list:
             program_id = GetProgramId(log.content_object).get_id
@@ -95,4 +95,4 @@ def activity_log_assign_program() -> None:
             elif program_id:
                 log.programs.add(program_id)
 
-    print("Finished Updating Activity Logs")
+    logger.info("Finished Updating Activity Logs")

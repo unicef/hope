@@ -4,18 +4,19 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
-} from '@material-ui/core';
-import React, { useState } from 'react';
+} from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import MessageIcon from '@material-ui/icons/Message';
+import MessageIcon from '@mui/icons-material/Message';
 import styled from 'styled-components';
-import { Dialog } from '../../../../containers/dialogs/Dialog';
-import { DialogActions } from '../../../../containers/dialogs/DialogActions';
-import { UniversalMoment } from '../../../core/UniversalMoment';
-import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
-import { DividerLine } from '../../../core/DividerLine';
-import { renderUserName } from '../../../../utils/utils';
-import { UserNode } from '../../../../__generated__/graphql';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DividerLine } from '@core/DividerLine';
+import { renderUserName } from '@utils/utils';
+import { UserNode } from '@generated/graphql';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -44,34 +45,34 @@ export interface MessageDialogProps {
   author: Pick<UserNode, 'id' | 'email' | 'firstName' | 'lastName'>;
   date: string;
 }
-export const MessageDialog = ({
+export function MessageDialog({
   comment,
   author,
   date,
-}: MessageDialogProps): React.ReactElement => {
+}: MessageDialogProps): React.ReactElement {
   const { t } = useTranslation();
   const [MessageDialogOpen, setMessageDialogOpen] = useState(false);
   return (
     <>
-      <IconButton size='small' onClick={() => setMessageDialogOpen(true)}>
+      <IconButton size="medium" onClick={() => setMessageDialogOpen(true)}>
         <MessageIconContainer>
-          <MessageIcon fontSize='inherit' />
+          <MessageIcon fontSize="inherit" />
         </MessageIconContainer>
       </IconButton>
       <Dialog
         open={MessageDialogOpen}
         onClose={() => setMessageDialogOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
-        maxWidth='md'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
+        maxWidth="md"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Comment')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
-            <Box display='flex' flexDirection='column'>
-              <Box mt={2} display='flex'>
+            <Box display="flex" flexDirection="column">
+              <Box mt={2} display="flex">
                 {renderUserName(author)}{' '}
                 <GreyText>
                   <Box ml={1}>
@@ -87,8 +88,8 @@ export const MessageDialog = ({
         <DialogFooter>
           <DialogActions>
             <Button
-              color='primary'
-              variant='contained'
+              color="primary"
+              variant="contained"
               onClick={() => setMessageDialogOpen(false)}
             >
               {t('Close')}
@@ -98,4 +99,4 @@ export const MessageDialog = ({
       </Dialog>
     </>
   );
-};
+}

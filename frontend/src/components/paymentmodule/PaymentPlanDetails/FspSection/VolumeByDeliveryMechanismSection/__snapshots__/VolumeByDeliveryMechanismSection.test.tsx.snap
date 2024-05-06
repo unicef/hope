@@ -3,34 +3,34 @@
 exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSection should render 1`] = `
 <div>
   <div
-    class="MuiBox-root MuiBox-root-1"
+    class="MuiBox-root css-j7qwjs"
   >
     <div
-      class="sc-bxivhb lealwS"
+      class="sc-hLQSwg IDXfo"
     >
       <h6
-        class="MuiTypography-root MuiTypography-h6"
+        class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
       >
         Volume by Delivery Mechanism
       </h6>
        
     </div>
     <div
-      class="sc-ifAKCX WOpjk"
+      class="sc-eDLKkx eHrULA"
     >
       <div
-        class="MuiGrid-root MuiGrid-container"
+        class="MuiGrid-root MuiGrid-container css-1bzpx2o-MuiGrid-root"
       >
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
         >
           <div
-            class="sc-htpNat eLbkxR"
+            class="sc-dmyCSP cjNvSp"
             color="#D8E1EE"
           >
             <div>
               <span
-                class="sc-bdVaJa kwsjSG"
+                class="sc-beySPh gbuZtJ"
                 color="textSecondary"
               >
                 Cash (Miranda Ltd)
@@ -39,7 +39,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
                 data-cy="label-Cash (Miranda Ltd)"
               >
                 <span
-                  class="sc-bwzfXH kOktSP"
+                  class="sc-guDLey cyWTlF"
                   color="textSecondary"
                 >
                   0 PLN (0 USD)
@@ -49,15 +49,15 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
         >
           <div
-            class="sc-htpNat kToeqy"
+            class="sc-dmyCSP UzTpF"
             color=" #d8d8d8"
           >
             <div>
               <span
-                class="sc-bdVaJa kwsjSG"
+                class="sc-beySPh gbuZtJ"
                 color="textSecondary"
               >
                 In Kind (Frazier-Watson)
@@ -66,7 +66,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
                 data-cy="label-In Kind (Frazier-Watson)"
               >
                 <span
-                  class="sc-bwzfXH kOktSP"
+                  class="sc-guDLey cyWTlF"
                   color="textSecondary"
                 >
                   0 PLN (0 USD)
@@ -76,15 +76,15 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
         >
           <div
-            class="sc-htpNat klzvan"
+            class="sc-dmyCSP bOKfMH"
             color="#003C8F"
           >
             <div>
               <span
-                class="sc-bdVaJa kwsjSG"
+                class="sc-beySPh gbuZtJ"
                 color="textSecondary"
               >
                 Transfer (Bray Group)
@@ -93,7 +93,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
                 data-cy="label-Transfer (Bray Group)"
               >
                 <span
-                  class="sc-bwzfXH kOktSP"
+                  class="sc-guDLey cyWTlF"
                   color="textSecondary"
                 >
                   0 PLN (0 USD)
@@ -104,18 +104,18 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-container MuiGrid-align-items-xs-center"
+        class="MuiGrid-root MuiGrid-container css-1e2bu2o-MuiGrid-root"
       >
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
         >
           <div
-            class="sc-EHOje johpGE"
+            class="sc-jTQCzO LEIUV"
           >
             <canvas
-              class="chartjs-render-monitor"
               height="0"
-              style="display: block;"
+              role="img"
+              style="display: block; box-sizing: border-box; height: 0px; width: 0px;"
               width="0"
             />
           </div>

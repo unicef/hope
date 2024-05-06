@@ -1,31 +1,31 @@
-import { Button } from '@material-ui/core';
-import React, { useState } from 'react';
+import { Button } from '@mui/material';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useHistory, useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   PaymentVerificationPlanStatus,
   useCashPlanVerificationSamplingChoicesQuery,
   usePaymentPlanQuery,
-} from '../../../__generated__/graphql';
-import { BlackLink } from '../../../components/core/BlackLink';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { TableWrapper } from '../../../components/core/TableWrapper';
-import { CashPlanDetailsSection } from '../../../components/payments/CashPlanDetailsSection';
-import { CreateVerificationPlan } from '../../../components/payments/CreateVerificationPlan';
-import { VerificationPlanDetails } from '../../../components/payments/VerificationPlanDetails';
-import { VerificationPlansSummary } from '../../../components/payments/VerificationPlansSummary';
+} from '@generated/graphql';
+import { BlackLink } from '@components/core/BlackLink';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TableWrapper } from '@components/core/TableWrapper';
+import { CashPlanDetailsSection } from '@components/payments/CashPlanDetailsSection';
+import { CreateVerificationPlan } from '@components/payments/CreateVerificationPlan';
+import { VerificationPlanDetails } from '@components/payments/VerificationPlanDetails';
+import { VerificationPlansSummary } from '@components/payments/VerificationPlansSummary';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import {
   decodeIdString,
   getFilterFromQueryParams,
   isPermissionDeniedError,
-} from '../../../utils/utils';
+} from '@utils/utils';
 import { UniversalActivityLogTablePaymentVerification } from '../../tables/UniversalActivityLogTablePaymentVerification';
 import { VerificationsTable } from '../../tables/payments/VerificationRecordsTable';
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
@@ -35,8 +35,7 @@ const Container = styled.div`
   flex: 1;
   width: 100%;
   background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
+  padding: 32px 44px;
   flex-direction: column;
   border-color: #b1b1b5;
   border-bottom-width: 1px;
@@ -58,9 +57,9 @@ const initialFilter = {
   paymentVerificationPlan: '',
 };
 
-export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
+export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const permissions = usePermissions();
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const location = useLocation();
@@ -75,10 +74,8 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useCashPlanVerificationSamplingChoicesQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useCashPlanVerificationSamplingChoicesQuery();
 
   if (loading || choicesLoading) return <LoadingComponent />;
 
@@ -110,13 +107,10 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
 
     return showTable && statesArray.length > 0;
   };
-  const canSeeCreationMessage = (): boolean => {
-    return statesArray.length === 0;
-  };
+  const canSeeCreationMessage = (): boolean => statesArray.length === 0;
 
-  const canSeeActivationMessage = (): boolean => {
-    return !canSeeVerificationRecords() && !canSeeCreationMessage();
-  };
+  const canSeeActivationMessage = (): boolean =>
+    !canSeeVerificationRecords() && !canSeeCreationMessage();
 
   const isFinished =
     paymentPlan?.paymentVerificationSummary?.status === 'FINISHED';
@@ -125,17 +119,17 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
 
   const toolbar = (
     <PageHeader
-      handleBack={() => history.push(`/${baseUrl}/payment-verification`)}
+      handleBack={() => navigate(`/${baseUrl}/payment-verification`)}
       title={
         <BlackLink
-          data-cy='plan-link'
+          data-cy="plan-link"
           to={`/${baseUrl}/payment-module/${
             isFollowUp ? 'followup-payment-plans' : 'payment-plans'
           }/${paymentPlan.id}`}
           fullWidth
         >
           {t('Payment Plan')}{' '}
-          <span data-cy='plan-id'>{paymentPlan.unicefId}</span>
+          <span data-cy="plan-id">{paymentPlan.unicefId}</span>
         </BlackLink>
       }
       breadCrumbs={
@@ -158,8 +152,8 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
         {isFinished &&
           (isAllPrograms ? (
             <Button
-              variant='contained'
-              color='primary'
+              variant="contained"
+              color="primary"
               component={Link}
               to={`/${baseUrl}/grievance/payment-verification/${decodeIdString(
                 paymentPlan.id,
@@ -229,9 +223,9 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
         hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTablePaymentVerification
             objectId={paymentPlan.id}
-            objectType='PaymentPlan'
+            objectType="PaymentPlan"
           />
         )}
     </>
   );
-};
+}

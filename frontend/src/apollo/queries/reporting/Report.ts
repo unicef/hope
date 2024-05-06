@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const REPORT_QUERY = gql`
   query Report($id: ID!) {

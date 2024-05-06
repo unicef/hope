@@ -17,7 +17,6 @@ export const fakeProgram = {
   sector: 'CHILD_PROTECTION',
   totalNumberOfHouseholds: 2,
   administrativeAreasOfImplementation: 'Crime book.',
-  individualDataNeeded: false,
   version: 1644233612796091,
   partners: [
     {

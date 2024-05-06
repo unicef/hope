@@ -1,23 +1,23 @@
-import { Box, Grid, Typography } from '@material-ui/core';
-import React from 'react';
+import { Box, Grid, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../../../core/LabelizedField';
-import { OverviewContainer } from '../../../core/OverviewContainer';
-import { StatusBox } from '../../../core/StatusBox';
-import { UniversalMoment } from '../../../core/UniversalMoment';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { StatusBox } from '@core/StatusBox';
+import { UniversalMoment } from '@core/UniversalMoment';
 import { MiśTheme } from '../../../../theme';
-import { registrationDataImportStatusToColor } from '../../../../utils/utils';
+import { registrationDataImportStatusToColor } from '@utils/utils';
 import {
   RegistrationDetailedFragment,
   RegistrationDataImportStatus,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { DedupeBox } from '../DedupeBox';
-import { Title } from '../../../core/Title';
+import { Title } from '@core/Title';
 
 export const BigValueContainer = styled.div`
-  padding: ${({ theme }) => theme.spacing(6)}px;
+  padding: ${({ theme }) => theme.spacing(6)};
   border-color: #b1b1b5;
   border-left-width: 1px;
   border-left-style: solid;
@@ -29,18 +29,21 @@ export const BigValue = styled.div`
   color: #253b46;
   font-size: 36px;
   line-height: 32px;
-  margin-top: ${({ theme }) => theme.spacing(2)}px;
+  margin-top: ${({ theme }) => theme.spacing(2)};
 `;
 
 const Error = styled.p`
   color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};
+  font-size: 12px;
 `;
 interface RegistrationDetailsProps {
   registration: RegistrationDetailedFragment;
+  isSocialWorkerProgram?: boolean;
 }
 
 export function RegistrationDetails({
   registration,
+  isSocialWorkerProgram,
 }: RegistrationDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const withinBatchOptions = [
@@ -82,17 +85,64 @@ export function RegistrationDetails({
     }
     return '-';
   };
+
+  let numbersComponent = null;
+  if (isSocialWorkerProgram) {
+    numbersComponent = (
+      <Grid item xs={4}>
+        <Grid container>
+          <Grid item xs={6}>
+            <BigValueContainer>
+              <LabelizedField
+                label={t('Total Number of People')}
+                dataCy="individuals"
+              >
+                <BigValue>{registration?.numberOfIndividuals}</BigValue>
+              </LabelizedField>
+            </BigValueContainer>
+          </Grid>
+        </Grid>
+      </Grid>
+    );
+  } else {
+    numbersComponent = (
+      <Grid item xs={4}>
+        <Grid container>
+          <Grid item xs={6}>
+            <BigValueContainer>
+              <LabelizedField
+                label={t('Total Number of Households')}
+                dataCy="households"
+              >
+                <BigValue>{registration?.numberOfHouseholds}</BigValue>
+              </LabelizedField>
+            </BigValueContainer>
+          </Grid>
+          <Grid item xs={6}>
+            <BigValueContainer>
+              <LabelizedField
+                label={t('Total Number of Individuals')}
+                dataCy="individuals"
+              >
+                <BigValue>{registration?.numberOfIndividuals}</BigValue>
+              </LabelizedField>
+            </BigValueContainer>
+          </Grid>
+        </Grid>
+      </Grid>
+    );
+  }
   return (
     <ContainerColumnWithBorder>
       <Title>
-        <Typography variant='h6'>{t('Import Details')}</Typography>
+        <Typography variant="h6">{t('Import Details')}</Typography>
       </Title>
       <OverviewContainer>
-        <Grid alignItems='center' container>
+        <Grid alignItems="center" container>
           <Grid item xs={4}>
             <Grid container spacing={3}>
               <Grid item xs={6}>
-                <Box display='flex' flexDirection='column'>
+                <Box display="flex" flexDirection="column">
                   <LabelizedField label={t('status')}>
                     <StatusBox
                       status={registration?.status}
@@ -137,35 +187,12 @@ export function RegistrationDetails({
               ) : null}
             </Grid>
           </Grid>
-          <Grid item xs={4}>
-            <Grid container>
-              <Grid item xs={6}>
-                <BigValueContainer>
-                  <LabelizedField
-                    label={t('Total Number of Households')}
-                    dataCy='households'
-                  >
-                    <BigValue>{registration?.numberOfHouseholds}</BigValue>
-                  </LabelizedField>
-                </BigValueContainer>
-              </Grid>
-              <Grid item xs={6}>
-                <BigValueContainer>
-                  <LabelizedField
-                    label={t('Total Number of Individuals')}
-                    dataCy='individuals'
-                  >
-                    <BigValue>{registration?.numberOfIndividuals}</BigValue>
-                  </LabelizedField>
-                </BigValueContainer>
-              </Grid>
-            </Grid>
-          </Grid>
+          {numbersComponent}
           {registration.status === 'DEDUPLICATION_FAILED' ? null : (
             <Grid item xs={4}>
-              <Grid container direction='column'>
-                <DedupeBox label='Within Batch' options={withinBatchOptions} />
-                <DedupeBox label='In Population' options={populationOptions} />
+              <Grid container direction="column">
+                <DedupeBox label="Within Batch" options={withinBatchOptions} />
+                <DedupeBox label="In Population" options={populationOptions} />
               </Grid>
             </Grid>
           )}

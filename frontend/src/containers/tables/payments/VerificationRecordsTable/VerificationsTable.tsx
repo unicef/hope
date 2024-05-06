@@ -1,10 +1,10 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllPaymentVerificationsQueryVariables,
   PaymentVerificationNode,
   useAllPaymentVerificationsQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './VerificationsHeadCells';
 import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';
@@ -37,13 +37,13 @@ export function VerificationsTable({
 
   return (
     <UniversalTable<
-      PaymentVerificationNode,
-      AllPaymentVerificationsQueryVariables
+    PaymentVerificationNode,
+    AllPaymentVerificationsQueryVariables
     >
       title={t('Verification Records')}
       headCells={headCells}
       query={useAllPaymentVerificationsQuery}
-      queriedObjectName='allPaymentVerifications'
+      queriedObjectName="allPaymentVerifications"
       initialVariables={initialVariables}
       renderRow={(paymentVerification) => (
         <VerificationRecordsTableRow

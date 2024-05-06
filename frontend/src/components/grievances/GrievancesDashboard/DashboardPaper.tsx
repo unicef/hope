@@ -1,5 +1,5 @@
-import { Box, Paper } from '@material-ui/core';
-import React from 'react';
+import { Box, Paper } from '@mui/material';
+import * as React from 'react';
 import styled from 'styled-components';
 
 interface DashboardPaperProps {
@@ -23,14 +23,14 @@ const StyledPaper = styled(
     color: ${(props) => props.color || 'inherit'}
   }
 `;
-export const DashboardPaper = ({
+export function DashboardPaper({
   title,
   children,
   noMarginTop,
   extraPaddingLeft,
   extraPaddingTitle = true,
   color,
-}: DashboardPaperProps): React.ReactElement => {
+}: DashboardPaperProps): React.ReactElement {
   return (
     <StyledPaper
       noMarginTop={noMarginTop}
@@ -41,4 +41,4 @@ export const DashboardPaper = ({
       {children}
     </StyledPaper>
   );
-};
+}

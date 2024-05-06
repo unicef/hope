@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const registrationMinimal = gql`
   fragment registrationMinimal on RegistrationDataImportNode {
@@ -26,6 +26,7 @@ export const registrationMinimal = gql`
     }
     refuseReason
     totalHouseholdsCountWithValidPhoneNo
+    adminUrl
   }
 `;
 

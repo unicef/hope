@@ -5,28 +5,29 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
+} from '@mui/material';
 import { Field, Formik } from 'formik';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import {
   GrievanceTicketDocument,
   useIndividualChoiceDataQuery,
   useReassignRoleGrievanceMutation,
-} from '../../../../__generated__/graphql';
-import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
-import { getFilterFromQueryParams } from '../../../../utils/utils';
-import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
-import { LoadingComponent } from '../../../core/LoadingComponent';
+} from '@generated/graphql';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { getFilterFromQueryParams } from '@utils/utils';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '@core/LoadingComponent';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
-export const LookUpReassignRoleModal = ({
+export function LookUpReassignRoleModal({
   onValueChange,
   initialValues,
   lookUpDialogOpen,
@@ -52,7 +53,7 @@ export const LookUpReassignRoleModal = ({
   shouldUseMultiple;
   individual;
   household?;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const { id } = useParams();
@@ -84,10 +85,8 @@ export const LookUpReassignRoleModal = ({
   );
 
   const { businessArea } = useBaseUrl();
-  const {
-    data: individualChoicesData,
-    loading: individualChoicesLoading,
-  } = useIndividualChoiceDataQuery();
+  const { data: individualChoicesData, loading: individualChoicesLoading } =
+    useIndividualChoiceDataQuery();
 
   if (individualChoicesLoading) return <LoadingComponent />;
 
@@ -143,12 +142,12 @@ export const LookUpReassignRoleModal = ({
     >
       {({ submitForm, setFieldValue, values }) => (
         <Dialog
-          maxWidth='lg'
+          maxWidth="lg"
           fullWidth
           open={lookUpDialogOpen}
           onClose={() => setLookUpDialogOpen(false)}
-          scroll='paper'
-          aria-labelledby='form-dialog-title'
+          scroll="paper"
+          aria-labelledby="form-dialog-title"
         >
           {lookUpDialogOpen && <AutoSubmitFormOnEnter />}
           <DialogTitleWrapper>
@@ -180,22 +179,22 @@ export const LookUpReassignRoleModal = ({
           </DialogContent>
           <DialogFooter>
             <DialogActions>
-              <Box display='flex'>
+              <Box display="flex">
                 <Box mr={1}>
                   <Field
-                    name='identityVerified'
-                    label='Identity Verified*'
+                    name="identityVerified"
+                    label="Identity Verified*"
                     component={FormikCheckboxField}
                   />
                 </Box>
                 <Button onClick={() => handleCancel()}>{t('CANCEL')}</Button>
                 <Button
-                  type='submit'
-                  color='primary'
-                  variant='contained'
+                  type="submit"
+                  color="primary"
+                  variant="contained"
                   onClick={submitForm}
                   disabled={values.identityVerified === false}
-                  data-cy='button-submit'
+                  data-cy="button-submit"
                 >
                   {t('SAVE')}
                 </Button>
@@ -206,4 +205,4 @@ export const LookUpReassignRoleModal = ({
       )}
     </Formik>
   );
-};
+}

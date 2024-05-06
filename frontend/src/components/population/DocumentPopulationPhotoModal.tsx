@@ -1,9 +1,6 @@
-import React from 'react';
-import {
-  IndividualNode,
-  useIndividualPhotosQuery,
-} from '../../__generated__/graphql';
-import { PhotoModal } from '../core/PhotoModal/PhotoModal';
+import * as React from 'react';
+import { IndividualNode, useIndividualPhotosQuery } from '@generated/graphql';
+import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 
 interface DocumentPopulationPhotoModalProps {
   individual: IndividualNode;
@@ -11,11 +8,11 @@ interface DocumentPopulationPhotoModalProps {
   documentId: string;
 }
 
-export const DocumentPopulationPhotoModal = ({
+export function DocumentPopulationPhotoModal({
   individual,
   documentNumber,
   documentId,
-}: DocumentPopulationPhotoModalProps): React.ReactElement => {
+}: DocumentPopulationPhotoModalProps): React.ReactElement {
   const { data } = useIndividualPhotosQuery({
     variables: { id: individual?.id },
     fetchPolicy: 'network-only',
@@ -28,8 +25,8 @@ export const DocumentPopulationPhotoModal = ({
     <PhotoModal
       src={documentWithPhoto?.node?.photo}
       linkText={documentNumber}
-      variant='link'
+      variant="link"
       title="Document's Photo"
     />
   );
-};
+}

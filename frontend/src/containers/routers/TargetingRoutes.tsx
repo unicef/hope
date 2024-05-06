@@ -1,41 +1,29 @@
-import React from 'react';
-import { Switch, useRouteMatch } from 'react-router-dom';
-import { SentryRoute } from '../../components/core/SentryRoute';
+import * as React from 'react';
+import { useRoutes } from 'react-router-dom';
 import { CreateTargetPopulationPage } from '../pages/targeting/CreateTargetPopulationPage';
 import { EditTargetPopulationPage } from '../pages/targeting/EditTargetPopulationPage';
 import { TargetPopulationDetailsPage } from '../pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from '../pages/targeting/TargetPopulationsPage';
 
 export const TargetingRoutes = (): React.ReactElement => {
-  const { path } = useRouteMatch();
-
   const targetingRoutes = [
     {
-      path: `${path}/target-population`,
-      component: <TargetPopulationsPage />,
-      exact: true,
+      path: 'target-population',
+      element: <TargetPopulationsPage />,
     },
     {
-      path: `${path}/target-population/create`,
-      component: <CreateTargetPopulationPage />,
+      path: 'target-population/create',
+      element: <CreateTargetPopulationPage />,
     },
     {
-      path: `${path}/target-population/edit-tp/:id`,
-      component: <EditTargetPopulationPage />,
+      path: 'target-population/edit-tp/:id',
+      element: <EditTargetPopulationPage />,
     },
     {
-      path: `${path}/target-population/:id`,
-      component: <TargetPopulationDetailsPage />,
+      path: 'target-population/:id',
+      element: <TargetPopulationDetailsPage />,
     },
   ];
 
-  return (
-    <Switch>
-      {targetingRoutes.map((route) => (
-        <SentryRoute key={route.path} path={route.path} exact={route.exact}>
-          {route.component}
-        </SentryRoute>
-      ))}
-    </Switch>
-  );
+  return useRoutes(targetingRoutes);
 };

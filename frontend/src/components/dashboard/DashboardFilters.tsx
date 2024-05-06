@@ -1,11 +1,11 @@
-import { Grid } from '@material-ui/core';
-import React from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
-import { createHandleApplyFilterChange } from '../../utils/utils';
-import { FiltersSection } from '../core/FiltersSection';
-import { ProgramAutocomplete } from '../../shared/autocompletes/ProgramAutocomplete';
+import { Grid } from '@mui/material';
+import * as React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
+import { createHandleApplyFilterChange } from '@utils/utils';
+import { FiltersSection } from '@core/FiltersSection';
+import { ProgramAutocomplete } from '@shared/autocompletes/ProgramAutocomplete';
 
 interface DashboardFiltersProps {
   filter;
@@ -22,13 +22,13 @@ export const DashboardFilters = ({
   appliedFilter,
   setAppliedFilter,
 }: DashboardFiltersProps): React.ReactElement => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
 
   const { applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
     initialFilter,
-    history,
+    navigate,
     location,
     filter,
     setFilter,
@@ -48,12 +48,12 @@ export const DashboardFilters = ({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid container alignItems='flex-end' spacing={3}>
+      <Grid container alignItems="flex-end" spacing={3}>
         {isAllPrograms && (
           <Grid item xs={5}>
             <ProgramAutocomplete
               filter={filter}
-              name='program'
+              name="program"
               value={filter.program}
               setFilter={setFilter}
               initialFilter={initialFilter}
@@ -64,14 +64,14 @@ export const DashboardFilters = ({
         )}
         <Grid item xs={3}>
           <AdminAreaAutocomplete
-            name='administrativeArea'
+            name="administrativeArea"
             value={filter.administrativeArea}
             filter={filter}
             setFilter={setFilter}
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
-            dataCy='filter-administrative-area'
+            dataCy="filter-administrative-area"
           />
         </Grid>
       </Grid>

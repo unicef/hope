@@ -6,6 +6,7 @@ import graphene
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
+    AdminUrlNodeMixin,
     BaseNodePermissionMixin,
     Permissions,
     hopeOneOfPermissionClass,
@@ -50,7 +51,7 @@ class CommunicationMessageRecipientMapNode(BaseNodePermissionMixin, DjangoObject
         )
 
 
-class CommunicationMessageNode(BaseNodePermissionMixin, DjangoObjectType):
+class CommunicationMessageNode(BaseNodePermissionMixin, DjangoObjectType, AdminUrlNodeMixin):
     permission_classes = (
         hopeOneOfPermissionClass(
             Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
@@ -74,7 +75,7 @@ class FeedbackMessageNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class FeedbackNode(BaseNodePermissionMixin, DjangoObjectType):
+class FeedbackNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes = (
         hopeOneOfPermissionClass(
             Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
@@ -100,7 +101,7 @@ class GetCommunicationMessageSampleSizeNode(BaseNodePermissionMixin, graphene.Ob
     sample_size = graphene.Int()
 
 
-class SurveyNode(BaseNodePermissionMixin, DjangoObjectType):
+class SurveyNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes = (
         hopeOneOfPermissionClass(
             Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST,

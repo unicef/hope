@@ -1,12 +1,13 @@
-import { Box } from '@material-ui/core';
-import React, { useState } from 'react';
+import { Box } from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { FormikFileField } from '../../../shared/Formik/FormikFileField';
+import { FormikFileField } from '@shared/Formik/FormikFileField';
 import {
   AllAddIndividualFieldsQuery,
   useGrievanceTicketFlexFieldsQuery,
-} from '../../../__generated__/graphql';
-import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
+} from '@generated/graphql';
+import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 
 export interface GrievanceFlexFieldPhotoModalEditableProps {
   flexField: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
@@ -16,13 +17,13 @@ export interface GrievanceFlexFieldPhotoModalEditableProps {
   form;
 }
 
-export const GrievanceFlexFieldPhotoModalEditable = ({
+export function GrievanceFlexFieldPhotoModalEditable({
   isCurrent,
   isIndividual,
   field,
   form,
   flexField,
-}: GrievanceFlexFieldPhotoModalEditableProps): React.ReactElement => {
+}: GrievanceFlexFieldPhotoModalEditableProps): React.ReactElement {
   const [isEdited, setEdit] = useState(false);
   const { id } = useParams();
   const { data } = useGrievanceTicketFlexFieldsQuery({
@@ -36,27 +37,27 @@ export const GrievanceFlexFieldPhotoModalEditable = ({
 
   const flexFields = isIndividual
     ? data.grievanceTicket?.individualDataUpdateTicketDetails?.individualData
-        ?.flex_fields
+      ?.flex_fields
     : data.grievanceTicket?.householdDataUpdateTicketDetails?.householdData
-        ?.flex_fields;
+      ?.flex_fields;
 
   const picUrl: string = isCurrent
     ? flexFields[flexField.name]?.previous_value
     : flexFields[flexField.name]?.value;
 
   return (
-    <Box style={{ height: '100%' }} display='flex' alignItems='center'>
+    <Box style={{ height: '100%' }} display="flex" alignItems="center">
       {isEdited || !picUrl ? (
-        <Box style={{ height: '100%' }} display='flex' alignItems='center'>
+        <Box style={{ height: '100%' }} display="flex" alignItems="center">
           <FormikFileField field={field} form={form} />
         </Box>
       ) : (
         <PhotoModal
           src={picUrl}
-          variant='pictureClose'
+          variant="pictureClose"
           closeHandler={() => setEdit(true)}
         />
       )}
     </Box>
   );
-};
+}

@@ -1,14 +1,14 @@
-import React from 'react';
-import RotateRightIcon from '@material-ui/icons/RotateRight';
-import { IconButton } from '@material-ui/core';
+import * as React from 'react';
+import RotateRightIcon from '@mui/icons-material/RotateRight';
+import { IconButton } from '@mui/material';
 
-export const RotateImg = ({
+export function RotateImg({
   turnAngle,
   setTurnAngle,
 }: {
   turnAngle: number;
   setTurnAngle: React.Dispatch<React.SetStateAction<number>>;
-}): React.ReactElement => {
+}): React.ReactElement {
   const handleRotateImg = (): void => {
     document
       .getElementById('modalImg')
@@ -17,8 +17,8 @@ export const RotateImg = ({
   };
 
   return (
-    <IconButton data-cy='button-rotate-image' onClick={() => handleRotateImg()}>
+    <IconButton data-cy="button-rotate-image" onClick={() => handleRotateImg()}>
       <RotateRightIcon />
     </IconButton>
   );
-};
+}

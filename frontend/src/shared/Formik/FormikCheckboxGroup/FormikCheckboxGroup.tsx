@@ -1,26 +1,26 @@
-import { Box, Checkbox, FormControlLabel } from '@material-ui/core';
+import { Box, Checkbox, FormControlLabel } from '@mui/material';
 import { Field } from 'formik';
-import React from 'react';
-import { FieldLabel } from '../../../components/core/FieldLabel';
+import * as React from 'react';
+import { FieldLabel } from '@components/core/FieldLabel';
 
-export const FormikCheckboxGroup = ({
+export function FormikCheckboxGroup({
   field,
   ...otherProps
-}): React.ReactElement => {
+}): React.ReactElement {
   return (
     <>
       <FieldLabel>{otherProps.label}</FieldLabel>
-      <Box display='flex' flexDirection='column'>
+      <Box display="flex" flexDirection="column">
         {otherProps.choices.map((each) => (
           <Field
-            type='checkbox'
+            type="checkbox"
             name={field.name}
             value={each.value}
             key={each.name}
             as={FormControlLabel}
             control={
               <Checkbox
-                color='primary'
+                color="primary"
                 checked={otherProps.values[field.name]?.includes(each.value)}
               />
             }
@@ -30,4 +30,4 @@ export const FormikCheckboxGroup = ({
       </Box>
     </>
   );
-};
+}

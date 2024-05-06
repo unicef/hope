@@ -1,8 +1,8 @@
-import { Box } from '@material-ui/core';
-import React from 'react';
+import { Box } from '@mui/material';
+import * as React from 'react';
 import styled from 'styled-components';
-import { UniversalMoment } from '../../../core/UniversalMoment';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { PaymentPlanQuery } from '@generated/graphql';
 import { MessageDialog } from './MessageDialog';
 
 const GreyText = styled.div`
@@ -27,19 +27,19 @@ const GreyBox = styled(Box)`
 interface GreyInfoCardProps {
   topMessage: string;
   topDate: string;
-  approvals: PaymentPlanQuery["paymentPlan"]["approvalProcess"]["edges"][number]["node"]["actions"]["approval"];
+  approvals: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'][number]['node']['actions']['approval'];
 }
 
-export const GreyInfoCard = ({
+export function GreyInfoCard({
   topMessage,
   topDate,
   approvals,
-}: GreyInfoCardProps): React.ReactElement => {
+}: GreyInfoCardProps): React.ReactElement {
   const mappedApprovals = approvals.map((action) => {
     const { info, createdAt, comment, createdBy } = action;
     return (
       info && (
-        <Box alignItems='center' display='flex' key={createdAt}>
+        <Box alignItems="center" display="flex" key={createdAt}>
           {info}
           <Box ml={1}>
             <GreyText>
@@ -63,16 +63,17 @@ export const GreyInfoCard = ({
   });
 
   return (
-    <Box display='flex' flexDirection='column'>
+    <Box display="flex" flexDirection="column">
       <Box p={3}>
         <GreyTitle>
-          {topMessage} on <UniversalMoment>{topDate}</UniversalMoment>
+          {topMessage} on
+          <UniversalMoment>{topDate}</UniversalMoment>
         </GreyTitle>
       </Box>
       <GreyBox
-        display='flex'
-        flexDirection='column'
-        alignItems='center'
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
         ml={3}
         mr={3}
         p={3}
@@ -81,4 +82,4 @@ export const GreyInfoCard = ({
       </GreyBox>
     </Box>
   );
-};
+}

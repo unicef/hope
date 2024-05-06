@@ -1,24 +1,25 @@
-import { Button, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
-import React, { useState } from 'react';
+import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
 import {
   AllProgramsQuery,
   ProgramQuery,
   ProgramStatus,
   useUpdateProgramMutation,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
 import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
-import { LoadingButton } from '../../../components/core/LoadingButton';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { programCompare } from '../../../utils/utils';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { programCompare } from '@utils/utils';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useProgramContext } from '../../../programContext';
+import { useNavigate } from 'react-router-dom';
 
 interface FinishProgramProps {
   program: ProgramQuery['program'];
@@ -27,7 +28,7 @@ interface FinishProgramProps {
 export function FinishProgram({
   program,
 }: FinishProgramProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -72,7 +73,7 @@ export function FinishProgram({
       });
 
       showMessage(t('Programme finished.'));
-      history.push(
+      navigate(
         `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
       );
       setOpen(false);
@@ -83,17 +84,17 @@ export function FinishProgram({
   return (
     <span>
       <Button
-        color='primary'
+        color="primary"
         onClick={() => setOpen(true)}
-        data-cy='button-finish-program'
+        data-cy="button-finish-program"
       >
         {t('Finish Programme')}
       </Button>
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Finish Programme')}</DialogTitle>
@@ -108,11 +109,11 @@ export function FinishProgram({
             <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <LoadingButton
               loading={loading}
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
               onClick={finishProgram}
-              data-cy='button-finish-program'
+              data-cy="button-finish-program"
             >
               {t('FINISH')}
             </LoadingButton>

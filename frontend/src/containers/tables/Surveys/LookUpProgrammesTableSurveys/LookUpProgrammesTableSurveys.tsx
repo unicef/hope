@@ -1,12 +1,12 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import styled from 'styled-components';
 import {
   AllActiveProgramsQueryVariables,
   AllProgramsQuery,
   ProgrammeChoiceDataQuery,
   useAllActiveProgramsQuery,
-} from '../../../../__generated__/graphql';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
+} from '@generated/graphql';
+import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpProgrammesHeadCellsSurveys';
 import { LookUpProgrammesTableRowSurveys } from './LookUpProgrammesTableRowSurveys';
@@ -27,14 +27,14 @@ interface LookUpProgrammesTableSurveysProps {
   setFieldValue;
 }
 
-export const LookUpProgrammesTableSurveys = ({
+export function LookUpProgrammesTableSurveys({
   businessArea,
   filter,
   choicesData,
   selectedProgram,
   handleChange,
   setFieldValue,
-}: LookUpProgrammesTableSurveysProps): ReactElement => {
+}: LookUpProgrammesTableSurveysProps): ReactElement {
   const initialVariables: AllActiveProgramsQueryVariables = {
     businessArea,
     search: filter.search,
@@ -47,7 +47,7 @@ export const LookUpProgrammesTableSurveys = ({
       max: filter.numberOfHouseholdsMax,
     }),
     budget: JSON.stringify(filter.budget),
-    dataCollectingType: filter.dataCollectingType
+    dataCollectingType: filter.dataCollectingType,
   };
 
   const handleRadioChange = (id: string): void => {
@@ -59,12 +59,12 @@ export const LookUpProgrammesTableSurveys = ({
     <NoTableStyling>
       <TableWrapper>
         <UniversalTable<
-          AllProgramsQuery['allPrograms']['edges'][number]['node'],
-          AllActiveProgramsQueryVariables
+        AllProgramsQuery['allPrograms']['edges'][number]['node'],
+        AllActiveProgramsQueryVariables
         >
           headCells={headCells}
           query={useAllActiveProgramsQuery}
-          queriedObjectName='allActivePrograms'
+          queriedObjectName="allActivePrograms"
           initialVariables={initialVariables}
           renderRow={(row) => (
             <LookUpProgrammesTableRowSurveys
@@ -79,4 +79,4 @@ export const LookUpProgrammesTableSurveys = ({
       </TableWrapper>
     </NoTableStyling>
   );
-};
+}

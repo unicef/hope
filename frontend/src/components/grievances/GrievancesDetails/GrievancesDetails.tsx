@@ -1,30 +1,27 @@
-import { Box, Grid, GridSize, Typography } from '@material-ui/core';
-import React from 'react';
+import { Box, Grid, GridSize, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   GrievanceTicketQuery,
   GrievancesChoiceDataQuery,
-} from '../../../__generated__/graphql';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
-} from '../../../utils/constants';
+} from '@generated/graphql';
+import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   choicesToDict,
   grievanceTicketBadgeColors,
   grievanceTicketStatusToColor,
   renderUserName,
-} from '../../../utils/utils';
-import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
-import { ContentLink } from '../../core/ContentLink';
-import { LabelizedField } from '../../core/LabelizedField';
-import { OverviewContainer } from '../../core/OverviewContainer';
-import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
-import { StatusBox } from '../../core/StatusBox';
-import { Title } from '../../core/Title';
-import { UniversalMoment } from '../../core/UniversalMoment';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { BlackLink } from '../../core/BlackLink';
+} from '@utils/utils';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { ContentLink } from '@core/ContentLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { PhotoModal } from '@core/PhotoModal/PhotoModal';
+import { StatusBox } from '@core/StatusBox';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { BlackLink } from '@core/BlackLink';
 
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -34,13 +31,13 @@ interface GrievancesDetailsProps {
   canViewIndividualDetails: boolean;
 }
 
-export const GrievancesDetails = ({
+export function GrievancesDetails({
   ticket,
   choicesData,
   baseUrl,
   canViewHouseholdDetails,
   canViewIndividualDetails,
-}: GrievancesDetailsProps): React.ReactElement => {
+}: GrievancesDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
   const statusChoices: {
@@ -56,10 +53,10 @@ export const GrievancesDetails = ({
 
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices
-        .filter((el) => el.category === ticket.category.toString())[0]
-        .subCategories.filter(
-          (el) => el.value === ticket.issueType.toString(),
-        )[0].name
+      .filter((el) => el.category === ticket.category.toString())[0]
+      .subCategories.filter(
+        (el) => el.value === ticket.issueType.toString(),
+      )[0].name
     : '-';
 
   const showIssueType =
@@ -72,31 +69,29 @@ export const GrievancesDetails = ({
   const showPartner =
     ticket.issueType === +GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT;
 
-  const mappedDocumentation = (): React.ReactElement => {
-    return (
-      <Box display='flex' flexDirection='column'>
-        {ticket.documentation?.length
-          ? ticket.documentation.map((doc) => {
-              if (doc.contentType.includes('image')) {
-                return (
-                  <PhotoModal
-                    key={doc.id}
-                    src={doc.filePath}
-                    variant='link'
-                    linkText={doc.name}
-                  />
-                );
-              }
-              return (
-                <ContentLink key={doc.id} download href={doc.filePath}>
-                  {doc.name}
-                </ContentLink>
-              );
-            })
-          : '-'}
-      </Box>
-    );
-  };
+  const mappedDocumentation = (): React.ReactElement => (
+    <Box display="flex" flexDirection="column">
+      {ticket.documentation?.length
+        ? ticket.documentation.map((doc) => {
+          if (doc.contentType.includes('image')) {
+            return (
+                <PhotoModal
+                  key={doc.id}
+                  src={doc.filePath}
+                  variant="link"
+                  linkText={doc.name}
+                />
+            );
+          }
+          return (
+              <ContentLink key={doc.id} download href={doc.filePath}>
+                {doc.name}
+              </ContentLink>
+          );
+        })
+        : '-'}
+    </Box>
+  );
 
   const renderUrl = (
     obj,
@@ -172,7 +167,7 @@ export const GrievancesDetails = ({
       return <>-</>;
     }
     return (
-      <Box display='flex' flexDirection='column'>
+      <Box display="flex" flexDirection="column">
         {ticket.programs.map((program) => (
           <ContentLink
             key={program.id}
@@ -189,7 +184,7 @@ export const GrievancesDetails = ({
     <Grid item xs={12}>
       <ContainerColumnWithBorder>
         <Title>
-          <Typography variant='h6'>{t('Details')}</Typography>
+          <Typography variant="h6">{t('Details')}</Typography>
         </Title>
         <OverviewContainer>
           <Grid container spacing={6}>
@@ -263,11 +258,11 @@ export const GrievancesDetails = ({
                       >
                         {ticket.household.unicefId}
                       </BlackLink>
-                    ) : (
+                      ) : (
                       <div>
                         {ticket.household?.id ? ticket.household.unicefId : '-'}
                       </div>
-                    )}
+                      )}
                   </span>
                 ),
                 size: 3,
@@ -284,13 +279,13 @@ export const GrievancesDetails = ({
                       >
                         {ticket.individual.unicefId}
                       </BlackLink>
-                    ) : (
+                      ) : (
                       <div>
                         {ticket.individual?.id
                           ? ticket.individual.unicefId
                           : '-'}
                       </div>
-                    )}
+                      )}
                   </span>
                 ),
                 size: 3,
@@ -377,4 +372,4 @@ export const GrievancesDetails = ({
       </ContainerColumnWithBorder>
     </Grid>
   );
-};
+}

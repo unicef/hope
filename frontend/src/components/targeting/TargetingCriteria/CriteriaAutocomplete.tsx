@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import { TextField, Paper } from '@material-ui/core';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+import Autocomplete from '@mui/lab/Autocomplete';
 import styled from 'styled-components';
 import get from 'lodash/get';
+import { Paper, TextField } from '@mui/material';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: 100%;
@@ -27,6 +28,7 @@ export function CriteriaAutocomplete({
     get(otherProps.form.errors, field.name) &&
     get(otherProps.form.touched, field.name);
   return (
+    // @ts-ignore
     <StyledAutocomplete<Option>
       {...field}
       {...otherProps}
@@ -49,8 +51,8 @@ export function CriteriaAutocomplete({
         <TextField
           {...params}
           {...otherProps}
-          variant='outlined'
-          margin='dense'
+          size="small"
+          variant="outlined"
           fullWidth
           helperText={isInvalid && get(otherProps.form.errors, field.name)}
           error={isInvalid}
@@ -65,16 +67,20 @@ export function CriteriaAutocomplete({
           }}
         />
       )}
-      data-cy='autocomplete-target-criteria'
-      PaperComponent={React.forwardRef((props, ref) => (
-        <Paper
-          {...{
-            ...props,
-            ref,
-          }}
-          data-cy='autocomplete-target-criteria-options'
-        />
-      ))}
+      data-cy="autocomplete-target-criteria"
+      component={React.forwardRef(
+        function CriteriaAutocompletePaperComponent(props, ref) {
+          return (
+            <Paper
+              {...{
+                ...props,
+                ref,
+              }}
+              data-cy="autocomplete-target-criteria-options"
+            />
+          );
+        },
+      )}
     />
   );
 }

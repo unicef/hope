@@ -1,11 +1,11 @@
-import { Box, Grid } from '@material-ui/core';
+import { Box, Grid } from '@mui/material';
 import { FieldArray } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   AllAddIndividualFieldsQuery,
   IndividualQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { EditDocumentRow } from './EditDocumentRow';
 
 export interface ExistingDocumentFieldArrayProps {
@@ -26,26 +26,22 @@ export function ExistingDocumentFieldArray({
   return individual?.documents?.edges?.length > 0 ? (
     <Grid container spacing={3}>
       <FieldArray
-        name='individualDataUpdateDocumentsToEdit'
-        render={(arrayHelpers) => {
-          return (
-            <>
-              {individual.documents.edges.map((item) => {
-                return (
-                  <EditDocumentRow
-                    key={item.node.id}
-                    setFieldValue={setFieldValue}
-                    values={values}
-                    document={item}
-                    id={item.node.id}
-                    arrayHelpers={arrayHelpers}
-                    addIndividualFieldsData={addIndividualFieldsData}
-                  />
-                );
-              })}
-            </>
-          );
-        }}
+        name="individualDataUpdateDocumentsToEdit"
+        render={(arrayHelpers) => (
+          <>
+            {individual.documents.edges.map((item) => (
+              <EditDocumentRow
+                key={item.node.id}
+                setFieldValue={setFieldValue}
+                values={values}
+                document={item}
+                id={item.node.id}
+                arrayHelpers={arrayHelpers}
+                addIndividualFieldsData={addIndividualFieldsData}
+              />
+            ))}
+          </>
+        )}
       />
     </Grid>
   ) : (

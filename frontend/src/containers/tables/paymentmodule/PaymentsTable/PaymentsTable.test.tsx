@@ -1,11 +1,11 @@
 import { MockedProvider } from '@apollo/react-testing';
 import { act } from '@testing-library/react';
-import React from 'react';
+import * as React from 'react';
 import wait from 'waait';
 import { fakeApolloAllPaymentsForTable } from '../../../../../fixtures/payments/fakeApolloAllPaymentsForTable';
 import { fakeApolloAllPaymentPlansForTable } from '../../../../../fixtures/payments/fakeApolloAllPaymentPlansForTable';
-import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
+import { render } from '../../../../testUtils/testUtils';
+import { PaymentPlanQuery } from '@generated/graphql';
 import { PERMISSIONS } from '../../../../config/permissions';
 import { PaymentsTable } from './PaymentsTable';
 
@@ -18,7 +18,7 @@ describe('containers/tables/paymentmodule/PaymentsTable', () => {
       <MockedProvider addTypename={false} mocks={fakeApolloAllPaymentsForTable}>
         <PaymentsTable
           canViewDetails={false}
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           paymentPlan={paymentPlan}
           permissions={[PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION]}
         />
@@ -32,13 +32,12 @@ describe('containers/tables/paymentmodule/PaymentsTable', () => {
   it('should render loading', async () => {
     const { container } = render(
       <MockedProvider
-        link={new ApolloLoadingLink()}
         addTypename={false}
         mocks={fakeApolloAllPaymentsForTable}
       >
         <PaymentsTable
           canViewDetails={false}
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           paymentPlan={paymentPlan}
           permissions={[PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION]}
         />

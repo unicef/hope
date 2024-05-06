@@ -1,28 +1,29 @@
-import { Button, DialogContent, DialogTitle } from '@material-ui/core';
-import React from 'react';
+import { Button, DialogContent, DialogTitle } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
-import { LoadingButton } from '../../../components/core/LoadingButton';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { useLockTpMutation } from '../../../__generated__/graphql';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { useLockTpMutation } from '@generated/graphql';
 import { Dialog } from '../Dialog';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useNavigate } from 'react-router-dom';
 
-export interface ApproveCandidateListPropTypes {
+export interface LockTargetPopulationDialogProps {
   open: boolean;
-  setOpen: Function;
+  setOpen: (open: boolean) => void;
+  targetPopulationId: string;
 }
 
-export function LockTargetPopulationDialog({
+export const LockTargetPopulationDialog = ({
   open,
   setOpen,
   targetPopulationId,
-}): React.ReactElement {
-  const history = useHistory();
+}: LockTargetPopulationDialogProps): React.ReactElement => {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
 
@@ -32,8 +33,8 @@ export function LockTargetPopulationDialog({
     <Dialog
       open={open}
       onClose={() => setOpen(false)}
-      scroll='paper'
-      aria-labelledby='form-dialog-title'
+      scroll="paper"
+      aria-labelledby="form-dialog-title"
     >
       <>
         <DialogTitleWrapper>
@@ -55,8 +56,8 @@ export function LockTargetPopulationDialog({
           <DialogActions>
             <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <LoadingButton
-              color='primary'
-              variant='contained'
+              color="primary"
+              variant="contained"
               loading={loading}
               onClick={() => {
                 mutate({
@@ -64,12 +65,12 @@ export function LockTargetPopulationDialog({
                 }).then(() => {
                   setOpen(false);
                   showMessage(t('Target Population Locked'));
-                  history.push(
+                  navigate(
                     `/${baseUrl}/target-population/${targetPopulationId}`,
                   );
                 });
               }}
-              data-cy='button-target-population-modal-lock'
+              data-cy="button-target-population-modal-lock"
             >
               {t('Lock')}
             </LoadingButton>
@@ -78,4 +79,4 @@ export function LockTargetPopulationDialog({
       </>
     </Dialog>
   );
-}
+};

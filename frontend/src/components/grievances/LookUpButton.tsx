@@ -1,6 +1,6 @@
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
-import SearchIcon from '@material-ui/icons/Search';
+import SearchIcon from '@mui/icons-material/Search';
 
 const LookUp = styled.div`
   display: flex;
@@ -49,7 +49,7 @@ export function LookUpButton({
       <span>{title}</span>
     </LookUpPlaceholder>
   ) : (
-    <LookUp data-cy='look-up-button' onClick={handleClick}>
+    <LookUp data-cy="look-up-button" onClick={handleClick}>
       <MarginRightSpan>
         <SearchIcon />
       </MarginRightSpan>

@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const KOBO_IMPORT_DATA_QUERY = gql`
   query KoboImportData($id: ID!) {

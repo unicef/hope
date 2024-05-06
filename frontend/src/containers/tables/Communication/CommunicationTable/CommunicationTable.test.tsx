@@ -1,11 +1,11 @@
 import { MockedProvider } from '@apollo/react-testing';
 import { act } from '@testing-library/react';
-import React from 'react';
+import * as React from 'react';
 import wait from 'waait';
 import { fakeApolloAllCommunicationMessages } from '../../../../../fixtures/communication/fakeApolloAllCommunicationMessages';
 import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
 import { CommunicationTable } from './CommunicationTable';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 describe('containers/tables//Communication/CommunicationTable', () => {
   it('should render with data', async () => {
@@ -36,7 +36,6 @@ describe('containers/tables//Communication/CommunicationTable', () => {
     const { programId } = useBaseUrl();
     const { container } = render(
       <MockedProvider
-        link={new ApolloLoadingLink()}
         addTypename={false}
         mocks={fakeApolloAllCommunicationMessages}
       >

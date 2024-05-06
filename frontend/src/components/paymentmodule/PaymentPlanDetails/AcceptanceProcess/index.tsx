@@ -1,1 +1,1 @@
-import { AcceptanceProcess } from './AcceptanceProcess';
+export { AcceptanceProcess } from './AcceptanceProcess';

@@ -1,5 +1,5 @@
-import { Box, Grid, Paper, Typography } from '@material-ui/core';
-import React from 'react';
+import { Box, Grid, Paper, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -8,20 +8,21 @@ import {
   getPhoneNoLabel,
   renderBoolean,
   sexToCapitalize,
-} from '../../../../../utils/utils';
+} from '@utils/utils';
 import {
   HouseholdChoiceDataQuery,
   ImportedIndividualDetailedFragment,
-} from '../../../../../__generated__/graphql';
-import { ContentLink } from '../../../../core/ContentLink';
-import { LabelizedField } from '../../../../core/LabelizedField';
-import { Title } from '../../../../core/Title';
-import { UniversalMoment } from '../../../../core/UniversalMoment';
+} from '@generated/graphql';
+import { ContentLink } from '@core/ContentLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 import { DocumentRegistrationPhotoModal } from '../DocumentRegistrationPhotoModal';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Overview = styled(Paper)`
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
+  padding: ${({ theme }) => theme.spacing(8)}
+    ${({ theme }) => theme.spacing(11)};
 `;
 
 const BorderBox = styled.div`
@@ -30,15 +31,14 @@ const BorderBox = styled.div`
 
 interface RegistrationIndividualBioDataProps {
   individual: ImportedIndividualDetailedFragment;
-  baseUrl: string;
   choicesData: HouseholdChoiceDataQuery;
 }
 
 export function RegistrationIndividualBioData({
   individual,
   choicesData,
-  baseUrl,
 }: RegistrationIndividualBioDataProps): React.ReactElement {
+  const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
@@ -56,7 +56,7 @@ export function RegistrationIndividualBioData({
   const roleChoicesDict = choicesToDict(choicesData.roleChoices);
   const mappedIndividualDocuments = individual.documents?.edges?.map((edge) => (
     <Grid key={edge.node.id} item xs={3}>
-      <Box flexDirection='column'>
+      <Box flexDirection="column">
         <Box mb={1}>
           <LabelizedField label={edge.node.type.label}>
             {edge.node.photo ? (
@@ -77,7 +77,7 @@ export function RegistrationIndividualBioData({
 
   const mappedIdentities = individual.identities?.edges?.map((item) => (
     <Grid key={item.node.id} item xs={3}>
-      <Box flexDirection='column'>
+      <Box flexDirection="column">
         <Box mb={1}>
           <LabelizedField label={`${item.node.partner} ID`}>
             {item.node.documentNumber}
@@ -91,7 +91,7 @@ export function RegistrationIndividualBioData({
   return (
     <Overview>
       <Title>
-        <Typography variant='h6'>{t('Bio Data')}</Typography>
+        <Typography variant="h6">{t('Bio Data')}</Typography>
       </Title>
       <Grid container spacing={6}>
         <Grid item xs={3}>

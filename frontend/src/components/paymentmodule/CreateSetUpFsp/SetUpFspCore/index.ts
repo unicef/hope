@@ -1,1 +1,1 @@
-import { SetUpFspCore } from './SetUpFspCore';
+export { SetUpFspCore } from './SetUpFspCore';

@@ -34,26 +34,39 @@ def get_households_from_text(program: Program, text: Any, target_field: Any, sep
 
 
 class UpdateByXlsxStage1Form(forms.Form):
-    business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all())
-    registration_data_import = forms.ModelChoiceField(queryset=RegistrationDataImport.objects.all())
-    file = forms.FileField()
+    business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all(), required=True)
+    program = forms.ModelChoiceField(queryset=Program.objects.filter(status=Program.ACTIVE), required=True)
+    registration_data_import = forms.ModelChoiceField(queryset=RegistrationDataImport.objects.all(), required=True)
+    file = forms.FileField(required=True, help_text="Select XLSX file")
+
+    def clean_program(self) -> Optional[Program]:
+        program = self.cleaned_data.get("program")
+        ba = self.cleaned_data.get("business_area")
+        if program.business_area != ba:
+            raise ValidationError("Program should belong to selected business area")
+        return program
 
     def clean_registration_data_import(self) -> Optional[RegistrationDataImport]:
-        data = self.cleaned_data.get("registration_data_import")
+        data: Optional[RegistrationDataImport] = self.cleaned_data.get("registration_data_import")
+        program: Program = self.cleaned_data["program"]
 
         if not data:
             return None
 
         registration_data_import = self._retrieve_rdi_by_name()
 
-        self._check_rdi_has_correct_business_area(registration_data_import)
+        self._check_rdi_has_correct_business_area(registration_data_import, program)
 
         return registration_data_import
 
-    def _check_rdi_has_correct_business_area(self, registration_data_import: RegistrationDataImport) -> None:
+    def _check_rdi_has_correct_business_area(
+        self, registration_data_import: RegistrationDataImport, program: Program
+    ) -> None:
         business_area = self.cleaned_data.get("business_area")
         if registration_data_import.business_area != business_area:
             raise ValidationError("Rdi should belong to selected business area")
+        if getattr(registration_data_import, "program", None) != program:
+            raise ValidationError("Rdi should belong to selected Program")
 
     def _retrieve_rdi_by_name(self) -> RegistrationDataImport:
         data = self.cleaned_data.get("registration_data_import")

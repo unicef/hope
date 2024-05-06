@@ -351,7 +351,9 @@ class TestHouseholdAreaQuery(APITestCase):
     def test_households_area_filtered_when_partner_is_unicef(self, _: Any) -> None:
         partner = PartnerFactory(name="UNICEF")
         user = UserFactory(partner=partner)
-
+        self.create_user_role_with_permissions(
+            user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area_afghanistan
+        )
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
             context={

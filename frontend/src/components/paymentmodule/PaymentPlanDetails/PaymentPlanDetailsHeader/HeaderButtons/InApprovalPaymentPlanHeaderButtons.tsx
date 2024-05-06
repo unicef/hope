@@ -1,6 +1,6 @@
-import { Box } from '@material-ui/core';
-import React from 'react';
-import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
+import { Box } from '@mui/material';
+import * as React from 'react';
+import { PaymentPlanQuery } from '@generated/graphql';
 import { ApprovePaymentPlan } from '../ApprovePaymentPlan';
 import { RejectPaymentPlan } from '../RejectPaymentPlan';
 
@@ -10,15 +10,15 @@ export interface InApprovalPaymentPlanHeaderButtonsProps {
   canApprove: boolean;
 }
 
-export const InApprovalPaymentPlanHeaderButtons = ({
+export function InApprovalPaymentPlanHeaderButtons({
   paymentPlan,
   canReject,
   canApprove,
-}: InApprovalPaymentPlanHeaderButtonsProps): React.ReactElement => {
+}: InApprovalPaymentPlanHeaderButtonsProps): React.ReactElement {
   return (
-    <Box display='flex' alignItems='center'>
+    <Box display="flex" alignItems="center">
       {canReject && <RejectPaymentPlan paymentPlanId={paymentPlan.id} />}
       {canApprove && <ApprovePaymentPlan paymentPlan={paymentPlan} />}
     </Box>
   );
-};
+}
