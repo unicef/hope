@@ -31,6 +31,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
     RegistrationDataImportDatahub,
 )
+from hct_mis_api.apps.utils.phone import calculate_phone_numbers_validity
 
 PEOPLE_TYPE_CHOICES = (
     (BLANK, "None"),
@@ -53,6 +54,9 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     collect_individual_data = serializers.ChoiceField(choices=COLLECT_TYPES)
     residence_status = serializers.ChoiceField(choices=RESIDENCE_STATUS_CHOICE)
     village = serializers.CharField(allow_blank=True, required=False)
+
+    phone_no = serializers.CharField(allow_null=True, allow_blank=True, required=False)
+    phone_no_alternative = serializers.CharField(allow_null=True, allow_blank=True, required=False)
 
     class Meta:
         model = ImportedIndividual
@@ -118,6 +122,9 @@ class PeopleUploadMixin:
             relationship=relationship,
             **individual_data,
         )
+        if ind.phone_no or ind.phone_no_alternative:
+            ind = self._validate_phone_number(ind)
+            ind.save(update_fields=("phone_no_valid", "phone_no_alternative_valid"))
 
         if person_type is not NON_BENEFICIARY:
             hh.head_of_household = ind
@@ -127,6 +134,9 @@ class PeopleUploadMixin:
         for doc in documents:
             self._create_document(ind, doc)
         return ind
+
+    def _validate_phone_number(self, individual: ImportedIndividual) -> ImportedIndividual:
+        return calculate_phone_numbers_validity(individual)
 
     def _create_document(self, member: ImportedIndividual, doc: Dict) -> None:
         ImportedDocument.objects.create(
