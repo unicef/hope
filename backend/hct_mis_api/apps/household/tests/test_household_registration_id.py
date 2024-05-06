@@ -43,7 +43,6 @@ class TestHouseholdRegistrationId(APITestCase):
             status=Program.ACTIVE,
             data_collecting_type=DataCollectingType.objects.get(code="partial_individuals"),
         )
-        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
 
         cls.household, _ = create_household(
             {
