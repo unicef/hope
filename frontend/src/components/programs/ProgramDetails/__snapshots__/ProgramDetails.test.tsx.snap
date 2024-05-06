@@ -248,6 +248,28 @@ exports[`components/ProgramDetails should render 1`] = `
             </div>
           </div>
         </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              Partner Access
+            </span>
+            <div
+              data-cy="label-Partner Access"
+            >
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                Only selected partners within the business area
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
       <div
         class="sc-qZrbh iVQrUc"

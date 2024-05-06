@@ -19,6 +19,7 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.core.validators import (
     CommonValidator,
     DataCollectingTypeValidator,
+    PartnersDataValidator,
 )
 from hct_mis_api.apps.program.celery_tasks import copy_program_task
 from hct_mis_api.apps.program.inputs import (
@@ -30,8 +31,8 @@ from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.program.schema import ProgramNode
 from hct_mis_api.apps.program.utils import (
     copy_program_object,
-    remove_program_permissions_for_exists_partners,
-    update_partner_permissions_for_program,
+    create_program_partner_access,
+    remove_program_partner_access,
 )
 from hct_mis_api.apps.program.validators import (
     ProgramDeletionValidator,
@@ -45,6 +46,7 @@ class CreateProgram(
     CommonValidator,
     ProgrammeCodeValidator,
     DataCollectingTypeValidator,
+    PartnersDataValidator,
     PermissionMutation,
     ValidationErrorMutationMixin,
 ):
@@ -64,16 +66,14 @@ class CreateProgram(
         if not (data_collecting_type_code := program_data.pop("data_collecting_type_code", None)):
             raise ValidationError("DataCollectingType is required for creating new Program")
         data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
+        partner_access = program_data.get("partner_access", [])
         partners_data = program_data.pop("partners", [])
         programme_code = program_data.get("programme_code", "")
         if programme_code:
             programme_code = programme_code.upper()
             program_data["programme_code"] = programme_code
 
-        partners_ids = [int(partner["id"]) for partner in partners_data]
         partner = info.context.user.partner
-        if not partner.is_unicef and partner.id not in partners_ids:
-            raise ValidationError("Please assign access to your partner before saving the programme.")
 
         cls.validate(
             start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
@@ -81,6 +81,9 @@ class CreateProgram(
             data_collecting_type=data_collecting_type,
             business_area=business_area,
             programme_code=programme_code,
+            partners_data=partners_data,
+            partner_access=partner_access,
+            partner=partner,
         )
 
         program = Program(
@@ -94,8 +97,9 @@ class CreateProgram(
             end_date=program.end_date,
             status=ProgramCycle.ACTIVE,
         )
-        for partner in partners_data:
-            update_partner_permissions_for_program(partner, str(business_area.pk), str(program.pk))
+        # create partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
+        if partner_access == Program.SELECTED_PARTNERS_ACCESS:
+            create_program_partner_access(partners_data, program, partner_access)
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
         return CreateProgram(program=program)
@@ -105,6 +109,7 @@ class UpdateProgram(
     ProgramValidator,
     ProgrammeCodeValidator,
     DataCollectingTypeValidator,
+    PartnersDataValidator,
     PermissionMutation,
     ValidationErrorMutationMixin,
 ):
@@ -124,8 +129,8 @@ class UpdateProgram(
         old_program = Program.objects.get(id=program_id)
         business_area = program.business_area
         partners_data = program_data.pop("partners", [])
-        partners_ids = [int(partner["id"]) for partner in partners_data]
         partner = info.context.user.partner
+        partner_access = program_data.get("partner_access", program.partner_access)
         programme_code = program_data.get("programme_code", "")
         if programme_code:
             programme_code = programme_code.upper()
@@ -140,9 +145,11 @@ class UpdateProgram(
                 cls.has_permission(info, Permissions.PROGRAMME_FINISH, business_area)
 
         if status_to_set not in [Program.ACTIVE, Program.FINISHED]:
-            if not partner.is_unicef and partner.id not in partners_ids:
-                raise ValidationError("Please assign access to your partner before saving the programme.")
-
+            cls.validate_partners_data(
+                partners_data=partners_data,
+                partner_access=partner_access,
+                partner=partner,
+            )
         data_collecting_type_code = program_data.pop("data_collecting_type_code", None)
         data_collecting_type = old_program.data_collecting_type
         if data_collecting_type_code and data_collecting_type_code != data_collecting_type.code:
@@ -159,8 +166,8 @@ class UpdateProgram(
             data_collecting_type=data_collecting_type,
             business_area=business_area,
             programme_code=programme_code,
+            excluded_validators="validate_partners_data",
         )
-
         if program.status == Program.FINISHED:
             # Only reactivation is possible
             status = program_data.get("status")
@@ -173,16 +180,15 @@ class UpdateProgram(
         for attrib, value in program_data.items():
             if hasattr(program, attrib):
                 setattr(program, attrib, value)
-
         program.full_clean()
+        # update partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
+        if (
+            status_to_set not in [Program.ACTIVE, Program.FINISHED]
+            and partner_access == Program.SELECTED_PARTNERS_ACCESS
+        ):
+            partners_data = create_program_partner_access(partners_data, program, partner_access)
+            remove_program_partner_access(partners_data, program)
         program.save()
-
-        # no need to update partners for Activation or Finish action
-        if status_to_set not in [Program.ACTIVE, Program.FINISHED]:
-            for partner in partners_data:
-                update_partner_permissions_for_program(partner, str(business_area.pk), str(program.pk))
-            remove_program_permissions_for_exists_partners(partners_ids, str(business_area.pk), str(program.pk))
-
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return UpdateProgram(program=program)
 
@@ -203,14 +209,15 @@ class DeleteProgram(ProgramDeletionValidator, PermissionMutation):
         cls.has_permission(info, Permissions.PROGRAMME_REMOVE, program.business_area)
 
         cls.validate(program=program)
-        remove_program_permissions_for_exists_partners([], str(program.business_area.pk), str(program.pk))
 
         program.delete()
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return cls(ok=True)
 
 
-class CopyProgram(CommonValidator, ProgrammeCodeValidator, PermissionMutation, ValidationErrorMutationMixin):
+class CopyProgram(
+    CommonValidator, ProgrammeCodeValidator, PartnersDataValidator, PermissionMutation, ValidationErrorMutationMixin
+):
     program = graphene.Field(ProgramNode)
 
     class Arguments:
@@ -222,8 +229,10 @@ class CopyProgram(CommonValidator, ProgrammeCodeValidator, PermissionMutation, V
     def processed_mutate(cls, root: Any, info: Any, program_data: Dict) -> "CopyProgram":
         program_id = decode_id_string_required(program_data.pop("id"))
         partners_data = program_data.pop("partners", [])
+        partner_access = program_data.get("partner_access", [])
         business_area = Program.objects.get(id=program_id).business_area
         programme_code = program_data.get("programme_code", "")
+        partner = info.context.user.partner
         if programme_code:
             programme_code = programme_code.upper()
             program_data["programme_code"] = programme_code
@@ -234,12 +243,15 @@ class CopyProgram(CommonValidator, ProgrammeCodeValidator, PermissionMutation, V
             end_date=datetime.combine(program_data["end_date"], datetime.min.time()),
             programme_code=programme_code,
             business_area=business_area,
+            partners_data=partners_data,
+            partner_access=partner_access,
+            partner=partner,
         )
         program = copy_program_object(program_id, program_data)
 
-        for partner in partners_data:
-            update_partner_permissions_for_program(partner, str(business_area.pk), str(program.pk))
-
+        # create partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
+        if partner_access == Program.SELECTED_PARTNERS_ACCESS:
+            create_program_partner_access(partners_data, program, partner_access)
         copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
 

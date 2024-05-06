@@ -117,7 +117,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         self.dv_received = DataValidation(type="list", formula1='"YES,NO"', allow_blank=False)
         self.dv_received.add(f"B2:B{len(self.ws_export_list['B'])}")
         self.ws_export_list.add_data_validation(self.dv_received)
-        self.ws_export_list["B2" :f"B{len(self.ws_export_list['B'])}"]
+        self.ws_export_list["B2":f"B{len(self.ws_export_list['B'])}"]
 
     def generate_workbook(self) -> openpyxl.Workbook:
         self._create_workbook()

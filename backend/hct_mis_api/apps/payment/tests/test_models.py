@@ -326,11 +326,5 @@ class TestFinancialServiceProviderModel(TestCase):
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
         )
 
-        self.assertEqual(
-            fsp1.configurations,
-            [
-                {"key": "key1", "label": "label1", "id": 1},
-                {"key": "key2", "label": "label2", "id": 2},
-            ],
-        )
+        self.assertEqual(fsp1.configurations, [])
         self.assertEqual(fsp2.configurations, [])

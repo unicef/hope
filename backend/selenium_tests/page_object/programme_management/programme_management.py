@@ -30,6 +30,7 @@ class ProgrammeManagement(BaseComponents):
     buttonBack = 'button[data-cy="button-back"]'
     buttonCancel = 'a[data-cy="button-cancel"]'
     buttonSave = 'button[data-cy="button-save"]'
+    selectPartnerAccess = 'div[data-cy="select-partnerAccess"]'
     buttonAddPartner = 'button[data-cy="button-add-partner"]'
     inputPartner = 'div[data-cy="select-partners[0].id"]'
     buttonDelete = 'button[data-cy="button-delete"]'
@@ -66,6 +67,12 @@ class ProgrammeManagement(BaseComponents):
         locator = f'tr[data-cy="table-row-{programName}"]'
         self.wait_for(locator)
         return self.get_elements(locator)[0].text.split("\n")
+
+    def getAccessToProgram(self) -> WebElement:
+        return self.wait_for(self.selectPartnerAccess)
+
+    def selectWhoAccessToProgram(self, name: str) -> None:
+        self.select_option_by_name(name)
 
     def getButtonAddPartner(self) -> WebElement:
         return self.wait_for(self.buttonAddPartner)
