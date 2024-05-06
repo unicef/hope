@@ -376,7 +376,7 @@ class RdiMergeTask:
             ],
         }
         individual_data_update_ticket = TicketIndividualDataUpdateDetails(
-            individual_data={"delivery_mechanism_data": [individual_data_with_approve_status]},
+            individual_data={"delivery_mechanism_data_to_edit": [individual_data_with_approve_status]},
             individual=delivery_mechanism_data.individual,
             ticket=grievance_ticket,
         )
