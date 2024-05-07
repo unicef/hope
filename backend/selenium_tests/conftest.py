@@ -34,6 +34,9 @@ from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Country
+from page_object.targeting.targeting import Targeting
+from page_object.targeting.targeting_create import TargetingCreate
+from page_object.targeting.targeting_details import TargetingDetails
 
 
 def pytest_addoption(parser) -> None:  # type: ignore
@@ -41,6 +44,9 @@ def pytest_addoption(parser) -> None:  # type: ignore
 
 
 def pytest_configure() -> None:
+    #delete all old screenshots
+    for file in os.listdir("report/screenshot"):
+        os.remove(os.path.join("report/screenshot", file))
     from django.conf import settings
 
     settings.DEBUG = True
@@ -224,6 +230,17 @@ def pageIndividuals(request: FixtureRequest, browser: Chrome) -> Individuals:
 def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> IndividualsDetails:
     yield IndividualsDetails(browser)
 
+@pytest.fixture
+def pageTargeting(request: FixtureRequest, browser: Chrome) -> Targeting:
+    yield Targeting(browser)
+
+@pytest.fixture
+def pageTargetingDetails(request: FixtureRequest, browser: Chrome) -> TargetingDetails:
+    yield TargetingDetails(browser)
+
+@pytest.fixture
+def pageTargetingCreate(request: FixtureRequest, browser: Chrome) -> TargetingCreate:
+    yield TargetingCreate(browser)
 
 @pytest.fixture
 def business_area() -> BusinessArea:
