@@ -8,6 +8,7 @@ from django.conf import settings
 from django.test import override_settings
 
 import pytest
+from constance.test import override_config
 from openpyxl import Workbook
 
 from hct_mis_api.apps.utils.mailjet import MailjetClient
@@ -16,6 +17,7 @@ from hct_mis_api.apps.utils.mailjet import MailjetClient
 class TestMailjet:
     @patch("hct_mis_api.apps.utils.mailjet.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
+    @override_config(ENABLE_MAILJET=True)
     def test_mailjet_body_with_template(self, mocked_requests_post: Any) -> None:
         mailjet = MailjetClient(
             mailjet_template_id=1,
@@ -63,6 +65,7 @@ class TestMailjet:
     @override_settings(
         EMAIL_SUBJECT_PREFIX="test", CATCH_ALL_EMAIL=["catchallemail@email.com", "catchallemail2@email.com"]
     )
+    @override_config(ENABLE_MAILJET=True)
     def test_mailjet_body_with_template_with_catch_all(self, mocked_requests_post: Any) -> None:
         mailjet = MailjetClient(
             mailjet_template_id=1,
@@ -108,6 +111,7 @@ class TestMailjet:
 
     @patch("hct_mis_api.apps.utils.mailjet.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
+    @override_config(ENABLE_MAILJET=True)
     def test_mailjet_body_with_html_and_text_body(self, mocked_requests_post: Any) -> None:
         mailjet = MailjetClient(
             html_body="<h1>HTML Body</h1>",
@@ -152,6 +156,7 @@ class TestMailjet:
 
     @patch("hct_mis_api.apps.utils.mailjet.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
+    @override_config(ENABLE_MAILJET=True)
     def test_mailjet_body_with_template_and_attachment(self, mocked_requests_post: Any) -> None:
         mailjet = MailjetClient(
             mailjet_template_id=1,
@@ -231,6 +236,7 @@ class TestMailjet:
         )
 
     @patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @override_config(ENABLE_MAILJET=True)
     def test_mailjet_incorrect_body_with_template_and_html_body(self, mocked_requests_post: Any) -> None:
         mailjet = MailjetClient(
             html_body="<h1>HTML Body</h1>",
@@ -243,9 +249,10 @@ class TestMailjet:
         with pytest.raises(ValueError) as exc:
             mailjet.send_email()
             mocked_requests_post.assert_not_called()
-            assert str(exc.value) == "You cannot use both template and custom email body"
+        assert str(exc.value) == "You cannot use both template and custom email body"
 
     @patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @override_config(ENABLE_MAILJET=True)
     def test_mailjet_incorrect_body_with_template_and_text_body(self, mocked_requests_post: Any) -> None:
         mailjet = MailjetClient(
             text_body="Text Body",
@@ -258,9 +265,10 @@ class TestMailjet:
         with pytest.raises(ValueError) as exc:
             mailjet.send_email()
             mocked_requests_post.assert_not_called()
-            assert str(exc.value) == "You cannot use both template and custom email body"
+        assert str(exc.value) == "You cannot use both template and custom email body"
 
     @patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @override_config(ENABLE_MAILJET=True)
     def test_mailjet_incorrect_body_with_template_and_without_variables(self, mocked_requests_post: Any) -> None:
         mailjet = MailjetClient(
             mailjet_template_id=1,
@@ -274,6 +282,7 @@ class TestMailjet:
         assert str(exc.value) == "You need to provide body variables for template email"
 
     @patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @override_config(ENABLE_MAILJET=True)
     def test_mailjet_incorrect_body_without_template_and_without_html_and_text_body(
         self, mocked_requests_post: Any
     ) -> None:
