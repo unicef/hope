@@ -194,7 +194,7 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
             IndividualFactory(
                 household=household_one if index % 2 else household_two,
                 program=household_one.program if index % 2 else household_two.program,
-                **individual
+                **individual,
             )
             for index, individual in enumerate(cls.individuals_to_create)
         ]
