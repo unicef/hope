@@ -6,6 +6,7 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.test import TestCase, override_settings
 
+from constance.test import override_config
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -31,6 +32,7 @@ class TestGenerateDashboardReportService(TestCase):
         ]
     )
     @patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @override_config(ENABLE_MAILJET=True)
     def test_generate_report_successfully(self, report_type: str, mocked_requests_post: Any) -> None:
         create_afghanistan()
         report = DashboardReportFactory(status=DashboardReport.IN_PROGRESS, report_type=[report_type])
@@ -43,6 +45,7 @@ class TestGenerateDashboardReportService(TestCase):
         mocked_requests_post.assert_called_once()
 
     @patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @override_config(ENABLE_MAILJET=True)
     def test_generate_report_successfully_ba_notification_disabled(self, mocked_requests_post: Any) -> None:
         afg = create_afghanistan()
         afg.enable_email_notification = False
@@ -60,6 +63,7 @@ class TestGenerateDashboardReportService(TestCase):
 
     @patch("hct_mis_api.apps.utils.mailjet.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
+    @override_config(ENABLE_MAILJET=True)
     def test_email_body_for_generate_report(self, mocked_requests_post: Any) -> None:
         create_afghanistan()
         user = UserFactory(email="testemail@email.com")

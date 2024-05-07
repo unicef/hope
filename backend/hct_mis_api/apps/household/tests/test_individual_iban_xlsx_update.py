@@ -9,6 +9,8 @@ from django.core.files import File
 from django.template.loader import render_to_string
 from django.test import TestCase, override_settings
 
+from constance.test import override_config
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
@@ -132,6 +134,7 @@ class TestIndividualXlsxUpdate(TestCase):
 
     @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
+    @override_config(ENABLE_MAILJET=True)
     def test_update_individuals_iban_from_xlsx_task_invalid_file_error(self, mocked_requests_post: Any) -> None:
         update_individuals_iban_from_xlsx_task.run(
             xlsx_update_file_id=self.xlsx_invalid_file.id,
@@ -156,6 +159,7 @@ class TestIndividualXlsxUpdate(TestCase):
 
     @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
+    @override_config(ENABLE_MAILJET=True)
     def test_update_individuals_iban_from_xlsx_task_invalid_file_bad_columns_fail(
         self, mocked_requests_post: Any
     ) -> None:
@@ -180,6 +184,7 @@ class TestIndividualXlsxUpdate(TestCase):
 
     @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
+    @override_config(ENABLE_MAILJET=True)
     def test_update_individuals_iban_from_xlsx_task_invalid_no_match_fail(self, mocked_requests_post: Any) -> None:
         update_individuals_iban_from_xlsx_task.run(
             xlsx_update_file_id=self.xlsx_invalid_file_no_match.id,
@@ -201,6 +206,7 @@ class TestIndividualXlsxUpdate(TestCase):
 
     @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
+    @override_config(ENABLE_MAILJET=True)
     def test_update_individuals_iban_from_xlsx_task_valid_match(self, mocked_requests_post: Any) -> None:
         # creating BankAccountInfo for only one individual, second one should be populated on demand
         BankAccountInfoFactory(individual=self.individuals[0])
@@ -234,6 +240,7 @@ class TestIndividualXlsxUpdate(TestCase):
 
     @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
+    @override_config(ENABLE_MAILJET=True)
     def test_update_individuals_iban_from_xlsx_task_invalid_empty_cell(self, mocked_requests_post: Any) -> None:
         update_individuals_iban_from_xlsx_task.run(
             xlsx_update_file_id=self.xlsx_invalid_file_empty_cell.id,
