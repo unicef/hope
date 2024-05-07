@@ -155,4 +155,5 @@ class TestGrievanceTicketsHappyPath:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getButtonNewTicket().click()
+
         pageGrievanceTickets.screenshot("HappyPath")
