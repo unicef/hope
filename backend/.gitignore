@@ -4,3 +4,6 @@ Makefile
 test_times.txt
 screenshot
 report
+archive
+output.json
+pytest_html_report.html
