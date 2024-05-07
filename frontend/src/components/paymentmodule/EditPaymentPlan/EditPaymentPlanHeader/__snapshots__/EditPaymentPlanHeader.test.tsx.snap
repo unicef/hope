@@ -66,9 +66,8 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
                       class="sc-eDLKkx deAQag"
                     >
                       <div
-                        class="sc-jTQCzO jzWNTC"
+                        class="sc-jTQCzO jzWNTC status-box-container"
                         data-cy="status-container"
-                        status="LOCKED"
                       >
                         LOCKED
                       </div>
