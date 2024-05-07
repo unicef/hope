@@ -22,7 +22,7 @@ class TestMailjet:
     def test_mailjet_body_with_template(self, mocked_requests_post: Any) -> None:
         mailjet = MailjetClient(
             mailjet_template_id=1,
-            subject="Subject for email with template",
+            subject="Subject for email with Template",
             recipients=["test@email.com", "test2@email.com"],
             ccs=["testcc@email.com"],
             variables={"key": "value"},
@@ -34,7 +34,7 @@ class TestMailjet:
                 "Messages": [
                     {
                         "From": {"Email": settings.EMAIL_HOST_USER, "Name": settings.DEFAULT_FROM_EMAIL},
-                        "Subject": "[test] Subject for email with template",
+                        "Subject": "[test] Subject for email with Template",
                         "To": [
                             {
                                 "Email": "test@email.com",
@@ -70,7 +70,7 @@ class TestMailjet:
     def test_mailjet_body_with_template_with_catch_all(self, mocked_requests_post: Any) -> None:
         mailjet = MailjetClient(
             mailjet_template_id=1,
-            subject="Subject for email with template for catch all",
+            subject="Subject for email with Template for Catch All",
             recipients=["test@email.com", "test2@email.com"],
             ccs=["testcc@email.com"],
             variables={"key": "value"},
@@ -82,7 +82,7 @@ class TestMailjet:
                 "Messages": [
                     {
                         "From": {"Email": settings.EMAIL_HOST_USER, "Name": settings.DEFAULT_FROM_EMAIL},
-                        "Subject": "[test] Subject for email with template for catch all",
+                        "Subject": "[test] Subject for email with Template for Catch All",
                         "To": [
                             {
                                 "Email": "catchallemail@email.com",
@@ -158,10 +158,53 @@ class TestMailjet:
     @patch("hct_mis_api.apps.utils.mailjet.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
+    def test_mailjet_body_with_text_body(self, mocked_requests_post: Any) -> None:
+        mailjet = MailjetClient(
+            text_body="Text Body",
+            subject="Subject for email with Text body",
+            recipients=["test@email.com", "test2@email.com"],
+            ccs=["testcc@email.com"],
+        )
+        mailjet.send_email()
+        mocked_requests_post.assert_called_once()
+        expected_data = json.dumps(
+            {
+                "Messages": [
+                    {
+                        "From": {"Email": settings.EMAIL_HOST_USER, "Name": settings.DEFAULT_FROM_EMAIL},
+                        "Subject": "[test] Subject for email with Text body",
+                        "To": [
+                            {
+                                "Email": "test@email.com",
+                            },
+                            {
+                                "Email": "test2@email.com",
+                            },
+                        ],
+                        "Cc": [
+                            {
+                                "Email": "testcc@email.com",
+                            }
+                        ],
+                        "TextPart": "Text Body",
+                    }
+                ]
+            }
+        )
+
+        mocked_requests_post.assert_called_with(
+            "https://api.mailjet.com/v3.1/send",
+            auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY),
+            data=expected_data,
+        )
+
+    @patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @override_settings(EMAIL_SUBJECT_PREFIX="test")
+    @override_config(ENABLE_MAILJET=True)
     def test_mailjet_body_with_template_and_attachment(self, mocked_requests_post: Any) -> None:
         mailjet = MailjetClient(
             mailjet_template_id=1,
-            subject="Subject for email with HTML and Text body",
+            subject="Subject for email with Template and Attachments",
             recipients=["test@email.com", "test2@email.com"],
             ccs=["testcc@email.com"],
             variables={"key": "value"},
@@ -196,7 +239,7 @@ class TestMailjet:
                 "Messages": [
                     {
                         "From": {"Email": settings.EMAIL_HOST_USER, "Name": settings.DEFAULT_FROM_EMAIL},
-                        "Subject": "[test] Subject for email with HTML and Text body",
+                        "Subject": "[test] Subject for email with Template and Attachments",
                         "To": [
                             {
                                 "Email": "test@email.com",
