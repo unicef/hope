@@ -1,0 +1,29 @@
+import json
+
+from django.conf import settings
+from django.test import TestCase
+
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
+from hct_mis_api.apps.registration_datahub.fixtures import ImportedHouseholdFactory
+from hct_mis_api.apps.registration_datahub.utils import calculate_hash_for_kobo_submission
+
+
+class TestRdiUtils(TestCase):
+
+    def test_calculate_hash_for_kobo_submission(self):
+        test_data1 = json.load(
+            open(
+                f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/test_calculate_hash_for_kobo_submission1.json"))
+        test_data2 = json.load(
+            open(
+                f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/test_calculate_hash_for_kobo_submission2.json"))
+        test_data3 = json.load(
+            open(
+                f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/test_calculate_hash_for_kobo_submission3.json"))
+        hash1 = calculate_hash_for_kobo_submission(test_data1)
+        hash2 = calculate_hash_for_kobo_submission(test_data2)
+        hash3 = calculate_hash_for_kobo_submission(test_data3)
+        self.assertEqual(hash1, hash2)
+        self.assertNotEqual(hash1, hash3)

@@ -45,7 +45,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.registration_datahub.models import KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
-from hct_mis_api.apps.registration_datahub.utils import find_attachment_in_kobo
+from hct_mis_api.apps.registration_datahub.utils import find_attachment_in_kobo, calculate_hash_for_kobo_submission
 
 logger = logging.getLogger(__name__)
 
@@ -1374,15 +1374,17 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 item.append(submission["kobo_submission_time"].isoformat())
                 all_saved_submissions_dict[str(submission["kobo_submission_uuid"])] = item
             household: Dict[str, Any]
+            household_hash_list: List[str] = []
             for household in reduced_submissions:
                 household_uuid = str(household.get("_uuid"))
-
+                household_hash = calculate_hash_for_kobo_submission(household)
                 submission_exists = household.get("_submission_time") in all_saved_submissions_dict.get(
                     household_uuid, []
                 )
-                if submission_exists:
+                submission_duplicate = household_hash in household_hash_list
+                if submission_exists or submission_duplicate:
                     continue
-
+                household_hash_list.append(household_hash)
                 head_of_hh_counter = 0
                 primary_collector_counter = 0
                 alternate_collector_counter = 0
