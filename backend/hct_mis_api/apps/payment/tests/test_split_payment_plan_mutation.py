@@ -155,3 +155,13 @@ class TestSplitPaymentPlan(APITestCase):
                 "splitType": "BY_RECORDS",
             },
         )
+
+        self.snapshot_graphql_request(
+            request_string=SPLIT_PAYMENT_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": self.id_to_base64(pp.id, "PaymentPlanNode"),
+                "paymentsNo": 10,
+                "splitType": "BY_COLLECTOR",
+            },
+        )
