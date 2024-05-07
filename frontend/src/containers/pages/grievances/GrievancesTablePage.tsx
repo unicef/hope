@@ -23,11 +23,15 @@ export function GrievancesTablePage(): React.ReactElement {
   const { id, cashPlanId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery({ fetchPolicy: 'cache-and-network' });
+
   const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;
 
   const initialFilter = {
     search: '',
-    searchType: 'ticket_id',
+    documentType: choicesData?.documentTypeChoices?.[0]?.value,
+    documentNumber: '',
     status: '',
     fsp: '',
     createdAtRangeMin: '',
@@ -63,8 +67,6 @@ export function GrievancesTablePage(): React.ReactElement {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery({ fetchPolicy: 'cache-and-network' });
 
   const grievanceTicketsTypes = ['USER-GENERATED', 'SYSTEM-GENERATED'];
   const userGeneratedPath = `/${baseUrl}/grievance/tickets/user-generated`;

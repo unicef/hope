@@ -6,6 +6,7 @@ import { ReportingDetailsPage } from '../pages/reporting/ReportingDetailsPage';
 import { ReportingPage } from '../pages/reporting/ReportingPage';
 import { GrievanceRoutes } from './GrievanceRoutes';
 import { ProgramRoutes } from './ProgramRoutes';
+import { ManagerialConsolePage } from '@containers/pages/managerialConsole/ManagerialConsolePage';
 
 export const AllProgramsRoutesSwitch = (): React.ReactElement => {
   const allProgramsRoutes = [
@@ -25,6 +26,7 @@ export const AllProgramsRoutesSwitch = (): React.ReactElement => {
       path: 'activity-log',
       element: <ActivityLogPage />,
     },
+    { path: 'managerial-console', element: <ManagerialConsolePage /> },
   ];
 
   const routes = useRoutes(allProgramsRoutes);

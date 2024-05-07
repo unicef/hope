@@ -2,7 +2,7 @@ import { Box, Checkbox, Collapse, Grid, IconButton } from '@mui/material';
 import { ArrowDropDown, ArrowRight } from '@mui/icons-material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { TreeItem, TreeView } from '@mui/x-tree-view';
+import { TreeItem, SimpleTreeView } from '@mui/x-tree-view';
 import { Field } from 'formik';
 import * as React from 'react';
 import { useState } from 'react';
@@ -15,6 +15,7 @@ import { DividerLine } from '@core/DividerLine';
 import { DeleteProgramPartner } from './DeleteProgramPartner';
 import { AreaTreeNode } from './AreaTreeNode';
 import { LabelizedField } from '@components/core/LabelizedField';
+import { GreyText } from '@core/GreyText';
 
 interface ProgramPartnerCardProps {
   values;
@@ -24,6 +25,7 @@ interface ProgramPartnerCardProps {
   allAreasTreeData: AllAreasTreeQuery['allAreasTree'];
   partnerChoices: UserPartnerChoicesQuery['userPartnerChoices'];
   setFieldValue;
+  canDeleteProgramPartner: boolean;
 }
 
 const BiggestText = styled(Box)`
@@ -50,15 +52,16 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   allAreasTreeData,
   partnerChoices,
   setFieldValue,
+  canDeleteProgramPartner,
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [isAdminAreaExpanded, setIsAdminAreaExpanded] = useState(false);
 
   const [allAreasTree, setAllAreasTree] = React.useState<AreaTreeNode[]>(() =>
-    AreaTreeNode.buildTree(
-      allAreasTreeData,
-      values.partners[index]?.adminAreas,
-    ),
+    AreaTreeNode.buildTree(allAreasTreeData, values.partners[index]?.areas),
+  );
+  const description = t(
+    'Provide info about Programme Partner and set Area Access',
   );
   const businessAreaOptionLabel = (
     <Box display="flex" flexDirection="column">
@@ -73,7 +76,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
     _event.stopPropagation();
     node.toggleCheck();
     setFieldValue(
-      `partners[${index}].adminAreas`,
+      `partners[${index}].areas`,
       AreaTreeNode.getAllSelectedIds(allAreasTree),
     );
     setFieldValue(`partners[${index}].areaAccess`, 'ADMIN_AREA');
@@ -83,7 +86,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   const renderNode = (node: AreaTreeNode): React.ReactElement => (
     <TreeItem
       key={node.id}
-      nodeId={node.id}
+      itemId={node.id}
       label={
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Checkbox
@@ -130,13 +133,16 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   }
 
   // Get selected admin areas
-  const selectedAdminAreas = values.partners[index]?.adminAreas || [];
+  const selectedAdminAreas = values.partners[index]?.areas || [];
 
   // Group allAreasTreeData by level
   const allAreasTreeDataGroupedByLevel = groupAreasByLevel(
     allAreasTreeData,
     selectedAdminAreas,
   );
+
+  const hasAdminAreaAccess =
+    values.partners[index]?.areaAccess === 'ADMIN_AREA';
 
   const adminAreaOptionLabel = (
     <Box display="flex" flexDirection="column">
@@ -149,6 +155,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
             )}
           </SmallText>
           {!isAdminAreaExpanded &&
+            hasAdminAreaAccess &&
             Object.values(allAreasTreeDataGroupedByLevel).some(
               (count) => count > 0,
             ) && (
@@ -177,14 +184,16 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
       </Box>
       <Collapse in={isAdminAreaExpanded}>
         <Box style={{ maxHeight: '30vh', overflow: 'auto', width: '50%' }}>
-          <TreeView
-            defaultCollapseIcon={<ExpandMoreIcon />}
-            defaultExpandIcon={<ChevronRightIcon />}
+          <SimpleTreeView
+            slots={{
+              expandIcon: ChevronRightIcon,
+              collapseIcon: ExpandMoreIcon,
+            }}
             multiSelect
-            selected={(values.partners[index]?.adminAreas || []).map(String)}
+            selectedItems={(values.partners[index]?.areas || []).map(String)}
           >
             {allAreasTree.length > 0 && allAreasTree.map(renderNode)}
-          </TreeView>
+          </SimpleTreeView>
         </Box>
       </Collapse>
     </Box>
@@ -212,13 +221,17 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
             color="primary"
             choices={partnerChoices}
             component={FormikSelectField}
+            required
           />
         </Grid>
         <DeleteProgramPartner
           // TODO: add permission
-          canDeleteProgramPartner
+          canDeleteProgramPartner={canDeleteProgramPartner}
           handleDeleteProgramPartner={handleDeleteProgramPartner}
         />
+      </Box>
+      <Box mt={2}>
+        <GreyText>{description}</GreyText>
       </Box>
       <Box mt={2}>
         <BiggestText>{t('Area Access')}</BiggestText>
@@ -244,7 +257,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
           onChange={(event) => {
             setIsAdminAreaExpanded(event.target.value === 'ADMIN_AREA');
             if (event.target.value === 'BUSINESS_AREA') {
-              setFieldValue(`partners[${index}].adminAreas`, []);
+              setFieldValue(`partners[${index}].areas`, []);
               clearChecks();
             }
           }}

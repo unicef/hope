@@ -765,7 +765,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root MuiTableRow-hover sc-hIPBNq kGXfmv css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root MuiTableRow-hover sc-dmXWDj gOBKoz css-n2dwpd-MuiTableRow-root"
                 role="checkbox"
               >
                 <td
@@ -782,10 +782,10 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
                 >
                   <div
-                    class="sc-ifyrAs fSIDzb"
+                    class="sc-dJGMql eSUODg"
                   >
                     <div
-                      class="sc-dJGMql fQdggy"
+                      class="sc-hIPBNq dKNoXr"
                       data-cy="status-container"
                       status="READY_FOR_CASH_ASSIST"
                     >
@@ -825,7 +825,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root MuiTableRow-hover sc-hIPBNq kGXfmv css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root MuiTableRow-hover sc-dmXWDj gOBKoz css-n2dwpd-MuiTableRow-root"
                 role="checkbox"
               >
                 <td
@@ -842,10 +842,10 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
                 >
                   <div
-                    class="sc-ifyrAs fSIDzb"
+                    class="sc-dJGMql eSUODg"
                   >
                     <div
-                      class="sc-dJGMql fQdggy"
+                      class="sc-hIPBNq dKNoXr"
                       data-cy="status-container"
                       status="READY_FOR_CASH_ASSIST"
                     >
@@ -885,7 +885,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root MuiTableRow-hover sc-hIPBNq kGXfmv css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root MuiTableRow-hover sc-dmXWDj gOBKoz css-n2dwpd-MuiTableRow-root"
                 role="checkbox"
               >
                 <td
@@ -902,10 +902,10 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
                 >
                   <div
-                    class="sc-ifyrAs fSIDzb"
+                    class="sc-dJGMql eSUODg"
                   >
                     <div
-                      class="sc-dJGMql fQdggy"
+                      class="sc-hIPBNq dKNoXr"
                       data-cy="status-container"
                       status="READY_FOR_CASH_ASSIST"
                     >
@@ -945,7 +945,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root MuiTableRow-hover sc-hIPBNq kGXfmv css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root MuiTableRow-hover sc-dmXWDj gOBKoz css-n2dwpd-MuiTableRow-root"
                 role="checkbox"
               >
                 <td
@@ -962,10 +962,10 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
                 >
                   <div
-                    class="sc-ifyrAs fSIDzb"
+                    class="sc-dJGMql eSUODg"
                   >
                     <div
-                      class="sc-dJGMql fQdggy"
+                      class="sc-hIPBNq dKNoXr"
                       data-cy="status-container"
                       status="ASSIGNED"
                     >

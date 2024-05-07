@@ -28,6 +28,7 @@ import { LoadingComponent } from '@core/LoadingComponent';
 import { StatusBox } from '@core/StatusBox';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
+import { Bold } from '@components/core/Bold';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -41,10 +42,6 @@ const StyledTable = styled(Table)`
 `;
 const StyledDialog = styled(Dialog)`
   max-height: 800px;
-`;
-
-const Bold = styled.span`
-  font-weight: bold;
 `;
 
 interface LinkedTicketsModalProps {

@@ -167,6 +167,73 @@ snapshots['TestHouseholdQuery::test_household_query_all_5_all_max_with_permissio
     }
 }
 
+snapshots['TestHouseholdQuery::test_household_query_all_for_all_programs 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 1',
+                        'countryOrigin': 'Poland',
+                        'size': 1
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 2',
+                        'countryOrigin': 'Poland',
+                        'size': 2
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 3',
+                        'countryOrigin': 'Poland',
+                        'size': 3
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 4',
+                        'countryOrigin': 'Poland',
+                        'size': 4
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 5',
+                        'countryOrigin': 'Poland',
+                        'size': 5
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 11',
+                        'countryOrigin': 'Poland',
+                        'size': 11
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 14',
+                        'countryOrigin': 'Poland',
+                        'size': 14
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestHouseholdQuery::test_household_query_all_for_all_programs_user_with_no_program_access 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+            ]
+        }
+    }
+}
+
 snapshots['TestHouseholdQuery::test_household_query_draft 1'] = {
     'data': {
         'allHouseholds': {
@@ -197,6 +264,26 @@ snapshots['TestHouseholdQuery::test_household_query_single_0_with_permission 1']
 }
 
 snapshots['TestHouseholdQuery::test_household_query_single_1_without_permission 1'] = {
+    'data': {
+        'household': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'household'
+            ]
+        }
+    ]
+}
+
+snapshots['TestHouseholdQuery::test_household_query_single_different_program_in_header 1'] = {
     'data': {
         'household': None
     },
@@ -301,6 +388,13 @@ snapshots['TestHouseholdQuery::test_query_households_by_search_full_name_filter_
     'data': {
         'allHouseholds': {
             'edges': [
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 2',
+                        'countryOrigin': 'Poland',
+                        'size': 2
+                    }
+                }
             ]
         }
     }

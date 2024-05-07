@@ -77,12 +77,12 @@ def encode_id_base64(id_string: Optional[str], model_name: str) -> Optional[str]
     return encode_id_base64_required(id_string, model_name)
 
 
-def get_program_id_from_headers(info_context_headers: Union[Dict, "HttpHeaders"]) -> Optional[str]:
+def get_program_id_from_headers(headers: Union[Dict, "HttpHeaders"]) -> Optional[str]:
     # TODO: need to double check if program_id is str or uuid?
     #  decoded/encoded ??
     # sometimes it get from info.context.headers or kwargs["Program"]: str
 
-    program_id = info_context_headers.get("Program")
+    program_id = headers.get("Program")
     program_id = decode_id_string(program_id) if program_id != "all" and program_id != "undefined" else None
     return program_id
 
@@ -250,7 +250,7 @@ def get_combined_attributes() -> Dict:
 
     flex_attrs = serialize_flex_attributes()
     return {
-        **FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.COLLECTOR])
+        **FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_ID, Scope.COLLECTOR])
         .apply_business_area()
         .to_dict_by("xlsx_field"),
         **flex_attrs["individuals"],

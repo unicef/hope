@@ -5,26 +5,6 @@ export const CREATE_PROGRAM_MUTATION = gql`
     createProgram(programData: $programData) {
       program {
         id
-        name
-        programmeCode
-        status
-        startDate
-        endDate
-        caId
-        budget
-        description
-        frequencyOfPayments
-        sector
-        scope
-        cashPlus
-        populationGoal
-        dataCollectingType {
-          id
-          code
-          label
-          active
-          individualFiltersAvailable
-        }
       }
       validationErrors
     }
