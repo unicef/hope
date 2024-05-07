@@ -107,6 +107,8 @@ ENV = env("ENV")
 # prefix all non-production emails
 if ENV != "prod":
     EMAIL_SUBJECT_PREFIX = f"{ENV}"
+else:
+    EMAIL_SUBJECT_PREFIX = ""
 
 RO_CONN = dict(**env.db("DATABASE_URL")).copy()
 RO_CONN.update(
@@ -277,6 +279,7 @@ OTHER_APPS = [
     "django_extensions",
     "django_celery_results",
     "django_celery_beat",
+    "django_filters",
     "explorer",
     "import_export",
     "rest_framework",
@@ -373,9 +376,9 @@ PHONENUMBER_DEFAULT_REGION = "US"
 
 SANCTION_LIST_CC_MAIL = env("SANCTION_LIST_CC_MAIL")
 
-GRIEVANCE_POSTGRES_ENABLED = os.getenv("GRIEVANCE_POSTGRES_ENABLED", True)
-
 RAPID_PRO_URL = env("RAPID_PRO_URL")
+
+DATA_UPLOAD_MAX_NUMBER_FIELDS = None
 
 # DJANGO CONSTANCE settings
 

@@ -30,7 +30,7 @@ from hct_mis_api.apps.account.permissions import (
     hopeOneOfPermissionClass,
     hopePermissionClass,
 )
-from hct_mis_api.apps.account.schema import PartnerNodeForProgram
+from hct_mis_api.apps.account.schema import PartnerNode
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import DataCollectingType
@@ -75,7 +75,8 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     total_number_of_households = graphene.Int()
     total_number_of_households_with_tp_in_program = graphene.Int()
     data_collecting_type = graphene.Field(DataCollectingTypeNode, source="data_collecting_type")
-    partners = graphene.List(PartnerNodeForProgram)
+    partners = graphene.List(PartnerNode)
+    is_social_worker_program = graphene.Boolean()
 
     class Meta:
         model = Program
@@ -94,14 +95,18 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
         return program.households_with_tp_in_program.count()
 
     @staticmethod
-    def resolve_partners(program: Program, info: Any, **kwargs: Any) -> List[Partner]:
-        # filter Partners by program_id and program.business_area_id
-        partners_list = []
-        for partner in Partner.objects.all():
-            partner.program = program
-            if partner.get_permissions().areas_for(str(program.business_area_id), str(program.pk)) is not None:
-                partners_list.append(partner)
-        return partners_list
+    def resolve_partners(program: Program, info: Any, **kwargs: Any) -> QuerySet[Partner]:
+        return (
+            Partner.objects.filter(
+                program_partner_through__program=program,
+            )
+            .annotate(partner_program=Value(program.id))
+            .distinct()
+        )
+
+    @staticmethod
+    def resolve_is_social_worker_program(program: Program, info: Any, **kwargs: Any) -> bool:
+        return program.is_social_worker_program
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -203,7 +208,7 @@ class Query(graphene.ObjectType):
             "data_collecting_type__isnull": False,
         }
         if not info.context.user.partner.is_unicef:
-            filters.update({"id__in": info.context.user.partner.program_ids})
+            filters.update({"id__in": info.context.user.partner.programs.values_list("id", flat=True)})
         return (
             Program.objects.filter(**filters)
             .exclude(data_collecting_type__code="unknown")

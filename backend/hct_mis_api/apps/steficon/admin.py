@@ -535,3 +535,22 @@ class RuleCommitAdmin(ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, HOPE
     change_list_template = None
     resource_class = RuleCommitResource
     form = RuleCommitAdminForm
+    fields = (
+        "version",
+        "rule",
+        "definition",
+        "is_release",
+        "enabled",
+        "deprecated",
+        "language",
+        "affected_fields",
+        "updated_by",
+    )
+
+    def get_readonly_fields(self, request: HttpRequest, obj: Optional[RuleCommit] = None) -> List[str]:
+        if is_root(request):
+            return ["updated_by"]
+        return ["updated_by", "version", "rule"]
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return is_root(request)

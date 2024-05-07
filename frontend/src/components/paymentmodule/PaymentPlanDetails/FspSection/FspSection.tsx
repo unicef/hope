@@ -63,9 +63,19 @@ export function FspSection({
         </Box>
         <Grid container spacing={3}>
           {deliveryMechanisms.map((el) => (
-            <Grid key={el.name} item xs={3}>
-              <LabelizedField label={el.name} value={el.fsp?.name} />
-            </Grid>
+            <>
+              <Grid key={el.name} item xs={3}>
+                <LabelizedField label={el.name} value={el.fsp?.name} />
+              </Grid>
+              {el.chosenConfiguration && (
+                <Grid key={el.chosenConfiguration} item xs={3}>
+                  <LabelizedField
+                    label="Configuration"
+                    value={el.chosenConfiguration}
+                  />
+                </Grid>
+              )}
+            </>
           ))}
         </Grid>
         <DividerLine />

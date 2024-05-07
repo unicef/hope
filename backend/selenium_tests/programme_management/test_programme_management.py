@@ -1,6 +1,9 @@
 import random
 from datetime import datetime
 
+from django.conf import settings
+from django.core.management import call_command
+
 import pytest
 from dateutil.relativedelta import relativedelta
 from helpers.date_time_format import FormatTime
@@ -9,6 +12,13 @@ from page_object.programme_management.programme_management import ProgrammeManag
 from selenium.webdriver import Keys
 
 pytestmark = pytest.mark.django_db(transaction=True)
+
+
+@pytest.fixture
+def create_programs() -> None:
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
+    return
 
 
 @pytest.mark.usefixtures("login")
@@ -66,7 +76,7 @@ class TestProgrammeManagement:
         assert "Regular" in pageProgrammeDetails.getLabelFreqOfPayment().text
         assert "-" in pageProgrammeDetails.getLabelAdministrativeAreas().text
         assert "No" in pageProgrammeDetails.getLabelCashPlus().text
-        assert "0" in pageProgrammeDetails.getLabelTotalNumberOfHouseholds().text
+        assert "0" in pageProgrammeDetails.getLabelProgramSize().text
 
     @pytest.mark.parametrize(
         "test_data",
@@ -125,7 +135,8 @@ class TestProgrammeManagement:
         assert "One-off" in pageProgrammeDetails.getLabelFreqOfPayment().text
         assert test_data["administrativeAreas"] in pageProgrammeDetails.getLabelAdministrativeAreas().text
         assert "Yes" in pageProgrammeDetails.getLabelCashPlus().text
-        assert "0" in pageProgrammeDetails.getLabelTotalNumberOfHouseholds().text
+        assert "0" in pageProgrammeDetails.getLabelProgramSize().text
+        assert test_data["description"] in pageProgrammeDetails.getLabelDescription().text
 
     @pytest.mark.parametrize(
         "test_data",
@@ -149,7 +160,7 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
-        pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
+        pageProgrammeManagement.getInputProgrammeName().send_keys("New Programme")
         pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
         pageProgrammeManagement.getInputEndDate().click()
@@ -171,7 +182,7 @@ class TestProgrammeManagement:
         assert "One-off" in pageProgrammeDetails.getLabelFreqOfPayment().text
         assert "-" in pageProgrammeDetails.getLabelAdministrativeAreas().text
         assert "No" in pageProgrammeDetails.getLabelCashPlus().text
-        assert "0" in pageProgrammeDetails.getLabelTotalNumberOfHouseholds().text
+        assert "0" in pageProgrammeDetails.getLabelProgramSize().text
 
     @pytest.mark.parametrize(
         "test_data",
@@ -217,7 +228,7 @@ class TestProgrammeManagement:
         assert "Regular" in pageProgrammeDetails.getLabelFreqOfPayment().text
         assert "-" in pageProgrammeDetails.getLabelAdministrativeAreas().text
         assert "Yes" in pageProgrammeDetails.getLabelCashPlus().text
-        assert "0" in pageProgrammeDetails.getLabelTotalNumberOfHouseholds().text
+        assert "0" in pageProgrammeDetails.getLabelProgramSize().text
 
     @pytest.mark.parametrize(
         "test_data",
@@ -262,7 +273,7 @@ class TestProgrammeManagement:
         assert "Regular" in pageProgrammeDetails.getLabelFreqOfPayment().text
         assert "-" in pageProgrammeDetails.getLabelAdministrativeAreas().text
         assert "Yes" in pageProgrammeDetails.getLabelCashPlus().text
-        assert "0" in pageProgrammeDetails.getLabelTotalNumberOfHouseholds().text
+        assert "0" in pageProgrammeDetails.getLabelProgramSize().text
         # Check Programme Management Page
         pageProgrammeManagement.getNavProgrammeManagement().click()
         pageProgrammeManagement.fillFiltersSearch(test_data["program_name"])
@@ -314,8 +325,10 @@ class TestProgrammeManagement:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getButtonNext().click()
-        pageProgrammeManagement.getButtonAddPartner().click()
+        pageProgrammeManagement.getAccessToProgram().click()
+        pageProgrammeManagement.selectWhoAccessToProgram("Only selected partners within the business area")
         pageProgrammeManagement.choosePartnerOption("UNHCR")
+        pageProgrammeManagement.getButtonAddPartner().click()
         pageProgrammeManagement.getButtonDelete().click()
         pageProgrammeManagement.getButtonDeletePopup().click()
         pageProgrammeManagement.getButtonSave().click()
@@ -372,7 +385,8 @@ class TestBusinessAreas:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getButtonNext().click()
-        pageProgrammeManagement.getButtonAddPartner().click()
+        pageProgrammeManagement.getAccessToProgram().click()
+        pageProgrammeManagement.selectWhoAccessToProgram("Only selected partners within the business area")
         pageProgrammeManagement.choosePartnerOption("UNHCR")
         programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
@@ -382,6 +396,49 @@ class TestBusinessAreas:
         )  # Check Details page
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
         assert "Business Area" in pageProgrammeDetails.getLabelAreaAccess().text
+
+    @pytest.mark.parametrize(
+        "test_data",
+        [
+            pytest.param(
+                {
+                    "program_name": "CheckParents - " + str(random.random()),
+                    "selector": "Health",
+                    "startDate": FormatTime(1, 1, 2022),
+                    "endDate": FormatTime(1, 2, 2032),
+                    "dataCollectingType": "Partial",
+                },
+                id="programme_management_page",
+            ),
+        ],
+    )
+    def test_copy_programme(
+        self,
+        change_super_user: None,
+        pageProgrammeManagement: ProgrammeManagement,
+        pageProgrammeDetails: ProgrammeDetails,
+        test_data: dict,
+    ) -> None:
+        # Go to Programme Management
+        pageProgrammeManagement.getNavProgrammeManagement().click()
+        # Create Programme
+        pageProgrammeManagement.getButtonNewProgram().click()
+        pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
+        pageProgrammeManagement.getInputStartDate().click()
+        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().click()
+        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
+        pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
+        pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
+        pageProgrammeManagement.getInputCashPlus().click()
+        pageProgrammeManagement.getButtonNext().click()
+        pageProgrammeManagement.getAccessToProgram().click()
+        pageProgrammeManagement.selectWhoAccessToProgram("None of the partners should have access")
+        pageProgrammeManagement.getButtonSave().click()
+        pageProgrammeDetails.getCopyProgram().click()
+        pageProgrammeManagement.getButtonNext().click()
+        pageProgrammeManagement.getButtonSave().click()
+        assert "Copy of Programme" in pageProgrammeDetails.getHeaderTitle().text
 
 
 @pytest.mark.usefixtures("login")
@@ -421,7 +478,8 @@ class TestAdminAreas:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getButtonNext().click()
-        pageProgrammeManagement.getButtonAddPartner().click()
+        pageProgrammeManagement.getAccessToProgram().click()
+        pageProgrammeManagement.selectWhoAccessToProgram("Only selected partners within the business area")
         pageProgrammeManagement.choosePartnerOption("UNHCR")
         pageProgrammeManagement.getLabelAdminArea().click()
         pageProgrammeManagement.chooseAreaAdmin1ByName("Baghlan").click()
@@ -475,7 +533,8 @@ class TestComeBackScenarios:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getButtonNext().click()
-        pageProgrammeManagement.getButtonAddPartner().click()
+        pageProgrammeManagement.getAccessToProgram().click()
+        pageProgrammeManagement.selectWhoAccessToProgram("Only selected partners within the business area")
         pageProgrammeManagement.choosePartnerOption("UNHCR")
         pageProgrammeManagement.getButtonBack().click()
         assert "Test Name" in pageProgrammeManagement.getInputProgrammeName().get_attribute("value")
@@ -497,7 +556,7 @@ class TestComeBackScenarios:
         assert "Regular" in pageProgrammeDetails.getLabelFreqOfPayment().text
         assert "-" in pageProgrammeDetails.getLabelAdministrativeAreas().text
         assert "Yes" in pageProgrammeDetails.getLabelCashPlus().text
-        assert "0" in pageProgrammeDetails.getLabelTotalNumberOfHouseholds().text
+        assert "0" in pageProgrammeDetails.getLabelProgramSize().text
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
 
 
@@ -537,3 +596,52 @@ class TestManualCalendar:
         assert str(datetime.now().strftime("15 %b %Y")) in pageProgrammeDetails.getLabelStartDate().text
         end_date = datetime.now() + relativedelta(months=1)
         assert str(end_date.strftime("25 %b %Y")) in pageProgrammeDetails.getLabelEndDate().text
+
+    @pytest.mark.parametrize(
+        "test_data",
+        [
+            pytest.param(
+                {
+                    "program_name": "CheckParents - " + str(random.random()),
+                    "selector": "Health",
+                    "startDate": FormatTime(1, 1, 2022),
+                    "endDate": FormatTime(1, 2, 2032),
+                    "dataCollectingType": "Partial",
+                    "partners_access": "None of the partners should have access",
+                },
+                id="none_of_the_partners_should_have_access",
+            ),
+            pytest.param(
+                {
+                    "program_name": "CheckParents - " + str(random.random()),
+                    "selector": "Health",
+                    "startDate": FormatTime(1, 1, 2022),
+                    "endDate": FormatTime(1, 2, 2032),
+                    "dataCollectingType": "Partial",
+                    "partners_access": "All partners within the business area",
+                },
+                id="all_partners_within_the_business_area",
+            ),
+        ],
+    )
+    def test_create_programme_accesses(
+        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+    ) -> None:
+        # Go to Programme Management
+        pageProgrammeManagement.getNavProgrammeManagement().click()
+        # Create Programme
+        pageProgrammeManagement.getButtonNewProgram().click()
+        pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
+        pageProgrammeManagement.getInputStartDate().click()
+        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().click()
+        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
+        pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
+        pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
+        pageProgrammeManagement.getInputCashPlus().click()
+        pageProgrammeManagement.getButtonNext().click()
+        pageProgrammeManagement.getAccessToProgram().click()
+        pageProgrammeManagement.selectWhoAccessToProgram(test_data["partners_access"])
+        pageProgrammeManagement.getButtonSave().click()
+        assert test_data["partners_access"] in pageProgrammeDetails.getLabelPartnerAccess().text
+        assert test_data["dataCollectingType"] in pageProgrammeDetails.getLabelDataCollectingType().text

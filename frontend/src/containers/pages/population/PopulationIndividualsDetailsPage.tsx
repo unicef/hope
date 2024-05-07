@@ -23,7 +23,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-import { AdminButton } from "@core/AdminButton";
+import { AdminButton } from '@core/AdminButton';
 
 const Container = styled.div`
   padding: 20px;

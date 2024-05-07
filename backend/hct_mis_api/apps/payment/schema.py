@@ -180,10 +180,8 @@ class FinancialServiceProviderNode(BaseNodePermissionMixin, DjangoObjectType):
     full_name = graphene.String(source="name")
     is_payment_gateway = graphene.Boolean()
 
-    def resolve_is_payment_gateway(self, info: Any) -> bool:
-        return (
-            self.payment_gateway_id and self.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
-        )
+    def resolve_is_payment_gateway(self, info: Any) -> graphene.Boolean:
+        return self.is_payment_gateway
 
     class Meta:
         model = FinancialServiceProvider
@@ -457,6 +455,7 @@ class DeliveryMechanismNode(DjangoObjectType):
     name = graphene.String()
     order = graphene.Int()
     fsp = graphene.Field(FinancialServiceProviderNode)
+    chosen_configuration = graphene.String()
 
     def resolve_name(self, info: Any) -> graphene.String:
         return self.delivery_mechanism
@@ -505,14 +504,22 @@ class VolumeByDeliveryMechanismNode(graphene.ObjectType):
         connection_class = ExtendedConnection
 
 
+class FspConfiguration(graphene.ObjectType):
+    id = graphene.String()
+    key = graphene.String()
+    label = graphene.String()
+
+
+class FspChoice(graphene.ObjectType):
+    id = graphene.String()
+    name = graphene.String()
+    configurations = graphene.List(FspConfiguration)
+
+    def resolve_id(self, info: Any) -> Optional[str]:
+        return encode_id_base64(self["id"], "FinancialServiceProvider")  # type: ignore
+
+
 class FspChoices(graphene.ObjectType):
-    class FspChoice(graphene.ObjectType):
-        id = graphene.String()
-        name = graphene.String()
-
-        def resolve_id(self, info: Any) -> Optional[str]:
-            return encode_id_base64(self["id"], "FinancialServiceProvider")  # type: ignore
-
     delivery_mechanism = graphene.String()
     fsps = graphene.List(FspChoice)
 
@@ -1068,6 +1075,7 @@ class Query(graphene.ObjectType):
     )
 
     def resolve_available_fsps_for_delivery_mechanisms(self, info: Any, input: Dict, **kwargs: Any) -> List:
+        business_area_slug = info.context.headers.get("Business-Area")
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input["payment_plan_id"]))
         delivery_mechanisms = (
             DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=payment_plan)
@@ -1080,12 +1088,13 @@ class Query(graphene.ObjectType):
                 Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism=mechanism)
                 | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
                 delivery_mechanisms__contains=[mechanism],
+                allowed_business_areas__slug=business_area_slug,
             ).distinct()
             return (
                 [
                     # This basically checks if FSP can accept ANY additional volume,
                     # more strict validation is performed in AssignFspToDeliveryMechanismMutation
-                    {"id": fsp.id, "name": fsp.name}
+                    {"id": fsp.id, "name": fsp.name, "configurations": fsp.configurations}
                     for fsp in fsps
                     if fsp.can_accept_any_volume()
                 ]
