@@ -115,6 +115,7 @@ def registration_xlsx_import_task(
 
         # TODO MB remove
         import traceback
+
         traceback.print_exception(type(e), e, e.__traceback__)
 
         from hct_mis_api.apps.registration_datahub.models import (
@@ -331,9 +332,9 @@ def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UU
     try:
         return ValidateXlsxImport().execute(import_data, is_social_worker_program)
     except Exception as e:
-
         # TODO MB remove
         import traceback
+
         traceback.print_exception(type(e), e, e.__traceback__)
 
         ImportData.objects.filter(

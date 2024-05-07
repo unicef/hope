@@ -1319,33 +1319,6 @@ class FinancialServiceProvider(LimitBusinessAreaModelMixin, TimeStampedUUIDModel
         ]
 
 
-class FinancialServiceProviderXlsxReport(TimeStampedUUIDModel):
-    # TODO: remove? do we using this one?
-    IN_PROGRESS = 1
-    COMPLETED = 2
-    FAILED = 3
-    STATUSES = (
-        (IN_PROGRESS, _("Processing")),
-        (COMPLETED, _("Generated")),
-        (FAILED, _("Failed")),
-    )
-    financial_service_provider = models.ForeignKey(
-        "payment.FinancialServiceProvider",
-        on_delete=models.CASCADE,
-        verbose_name=_("Financial Service Provider"),
-    )
-    file = models.FileField(blank=True, null=True, editable=False)
-    status = models.IntegerField(choices=STATUSES, blank=True, null=True, editable=False, db_index=True)
-
-    def __str__(self) -> str:
-        name_ = (
-            self.financial_service_provider.fsp_xlsx_template.name
-            if self.financial_service_provider.fsp_xlsx_template
-            else self.financial_service_provider.name
-        )
-        return f"{name_} ({self.status})"
-
-
 class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
     class Status(models.TextChoices):
         NOT_SENT = "NOT_SENT"

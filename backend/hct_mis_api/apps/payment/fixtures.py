@@ -42,7 +42,6 @@ from hct_mis_api.apps.payment.models import (
     CashPlan,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
-    FinancialServiceProviderXlsxReport,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
     GenericPayment,
@@ -230,13 +229,6 @@ class FspXlsxTemplatePerDeliveryMechanismFactory(DjangoModelFactory):
         getter=lambda c: c[0],
     )
     xlsx_template = factory.SubFactory(FinancialServiceProviderXlsxTemplateFactory)
-
-
-class FinancialServiceProviderXlsxReportFactory(DjangoModelFactory):
-    class Meta:
-        model = FinancialServiceProviderXlsxReport
-
-    financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
 
 
 class PaymentRecordFactory(DjangoModelFactory):

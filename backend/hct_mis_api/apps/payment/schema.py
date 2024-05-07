@@ -64,7 +64,6 @@ from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.filters import (
     FinancialServiceProviderFilter,
-    FinancialServiceProviderXlsxReportFilter,
     FinancialServiceProviderXlsxTemplateFilter,
     PaymentFilter,
     PaymentPlanFilter,
@@ -88,7 +87,6 @@ from hct_mis_api.apps.payment.models import (
     CashPlan,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
-    FinancialServiceProviderXlsxReport,
     FinancialServiceProviderXlsxTemplate,
     GenericPayment,
     Payment,
@@ -158,22 +156,6 @@ class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoOb
         model = FinancialServiceProviderXlsxTemplate
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
-
-
-class FinancialServiceProviderXlsxReportNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.PM_LOCK_AND_UNLOCK_FSP),)
-
-    class Meta:
-        model = FinancialServiceProviderXlsxReport
-        exclude = ("file",)
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-    report_url = graphene.String()
-    status = graphene.Int()
-
-    def resolve_report_url(self, info: Any, **kwargs: Any) -> graphene.String:
-        return self.file.url if self.file else ""
 
 
 class FinancialServiceProviderNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -953,13 +935,6 @@ class Query(graphene.ObjectType):
         FinancialServiceProviderXlsxTemplateNode,
         filterset_class=FinancialServiceProviderXlsxTemplateFilter,
     )
-
-    financial_service_provider_xlsx_report = relay.Node.Field(FinancialServiceProviderXlsxReportNode)
-    all_financial_service_provider_xlsx_reports = DjangoPermissionFilterConnectionField(
-        FinancialServiceProviderXlsxReportNode,
-        filterset_class=FinancialServiceProviderXlsxReportFilter,
-    )
-
     financial_service_provider = relay.Node.Field(FinancialServiceProviderNode)
     all_financial_service_providers = DjangoPermissionFilterConnectionField(
         FinancialServiceProviderNode,

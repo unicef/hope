@@ -33,7 +33,6 @@ from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoice
 from hct_mis_api.apps.payment.models import (
     CashPlan,
     FinancialServiceProvider,
-    FinancialServiceProviderXlsxReport,
     FinancialServiceProviderXlsxTemplate,
     Payment,
     PaymentPlan,
@@ -219,14 +218,6 @@ class FinancialServiceProviderXlsxTemplateFilter(FilterSet):
             "created_by",
         )
     )
-
-
-class FinancialServiceProviderXlsxReportFilter(FilterSet):
-    class Meta:
-        fields = ("status",)
-        model = FinancialServiceProviderXlsxReport
-
-    order_by = CustomOrderingFilter(fields=("status",))
 
 
 class FinancialServiceProviderFilter(FilterSet):
