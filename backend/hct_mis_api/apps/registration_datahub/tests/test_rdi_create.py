@@ -428,7 +428,6 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(list(documents), expected)
 
 
-@disabled_locally_test
 class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
     databases = {
         "default",
