@@ -11,6 +11,7 @@ import pytest
 from constance.test import override_config
 from openpyxl import Workbook
 
+from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.utils.mailjet import MailjetClient
 
 
@@ -295,3 +296,44 @@ class TestMailjet:
             mailjet.send_email()
             mocked_requests_post.assert_not_called()
         assert str(exc.value) == "You need to provide either template or custom email body"
+
+    @patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @override_settings(EMAIL_SUBJECT_PREFIX="test")
+    @override_config(ENABLE_MAILJET=True)
+    def test_email_user_via_mailjet(self, mocked_requests_post: Any) -> None:
+        user = UserFactory(email="testuser@email.com", username="testuser")
+        user.email_user(
+            subject="Test subject",
+            html_body="<h1>HTML Body</h1>",
+            from_email="sender@email.com",
+            from_email_display="Sender",
+            ccs=["testcc@email.com"],
+        )
+        mocked_requests_post.assert_called_once()
+        expected_data = json.dumps(
+            {
+                "Messages": [
+                    {
+                        "From": {"Email": "sender@email.com", "Name": "Sender"},
+                        "Subject": "[test] Test subject",
+                        "To": [
+                            {
+                                "Email": "testuser@email.com",
+                            },
+                        ],
+                        "Cc": [
+                            {
+                                "Email": "testcc@email.com",
+                            }
+                        ],
+                        "HTMLPart": "<h1>HTML Body</h1>",
+                    }
+                ]
+            }
+        )
+
+        mocked_requests_post.assert_called_with(
+            "https://api.mailjet.com/v3.1/send",
+            auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY),
+            data=expected_data,
+        )
