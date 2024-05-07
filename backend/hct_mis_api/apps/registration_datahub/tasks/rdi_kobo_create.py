@@ -43,7 +43,10 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
     logger,
 )
 from hct_mis_api.apps.registration_datahub.tasks.utils import get_submission_metadata
-from hct_mis_api.apps.registration_datahub.utils import find_attachment_in_kobo, calculate_hash_for_kobo_submission
+from hct_mis_api.apps.registration_datahub.utils import (
+    calculate_hash_for_kobo_submission,
+    find_attachment_in_kobo,
+)
 from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
 
 

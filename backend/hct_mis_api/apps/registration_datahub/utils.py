@@ -69,7 +69,7 @@ def calculate_hash_for_kobo_submission(submission: Dict) -> str:
             del submission_copy[key]
 
     d_string = json.dumps(submission_copy, sort_keys=True)
-    d_bytes = d_string.encode('utf-8')
+    d_bytes = d_string.encode("utf-8")
     hash_object = hashlib.sha256(d_bytes)
     hex_dig = hash_object.hexdigest()
     return hex_dig

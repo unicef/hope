@@ -45,7 +45,10 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.registration_datahub.models import KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
-from hct_mis_api.apps.registration_datahub.utils import find_attachment_in_kobo, calculate_hash_for_kobo_submission
+from hct_mis_api.apps.registration_datahub.utils import (
+    calculate_hash_for_kobo_submission,
+    find_attachment_in_kobo,
+)
 
 logger = logging.getLogger(__name__)
 
