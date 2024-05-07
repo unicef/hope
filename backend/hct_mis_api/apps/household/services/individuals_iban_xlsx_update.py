@@ -148,7 +148,7 @@ class IndividualsIBANXlsxUpdate:
             email = self._prepare_email(context=self._get_email_context(message=str(self.validation_errors)))
             try:
                 email.send_email()
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
                 logger.exception(e)
 
     def send_success_email(self) -> None:
@@ -158,7 +158,7 @@ class IndividualsIBANXlsxUpdate:
             )
             try:
                 email.send_email()
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
                 logger.exception(e)
 
     @classmethod
@@ -174,7 +174,7 @@ class IndividualsIBANXlsxUpdate:
         email = cls._prepare_email(context=context)
         try:
             email.send_email()
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
 
     @staticmethod

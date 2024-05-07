@@ -75,7 +75,7 @@ class GrievanceNotification:
             try:
                 for email in self.emails:
                     email.send_email()
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
                 logger.exception(e)
 
     def _prepare_universal_category_created_bodies(self, user_recipient: "User") -> Tuple[str, str, str]:

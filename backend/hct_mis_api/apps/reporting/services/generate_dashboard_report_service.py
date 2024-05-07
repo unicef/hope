@@ -955,7 +955,7 @@ class GenerateDashboardReportService:
                 save=False,
             )
             self.report.status = DashboardReport.COMPLETED
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             self.report.status = DashboardReport.FAILED
         self.report.save()

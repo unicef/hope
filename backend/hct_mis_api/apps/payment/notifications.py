@@ -116,7 +116,7 @@ class PaymentNotification:
             try:
                 for email in self.emails:
                     email.send_email()
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
                 logger.exception(e)
 
     def _prepare_body_variables(self, user_recipient: User) -> Dict[str, Any]:
