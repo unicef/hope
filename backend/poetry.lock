@@ -1893,6 +1893,21 @@ typing-extensions = ">=3.10.0"
 compatible-mypy = ["mypy (>=0.950,<0.970)"]
 
 [[package]]
+name = "drf-extensions"
+version = "0.7.1"
+description = "Extensions for Django REST Framework"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "drf-extensions-0.7.1.tar.gz", hash = "sha256:90abfc11a2221e8daf4cd54457e41ed38cd71134678de9622e806193db027db1"},
+    {file = "drf_extensions-0.7.1-py2.py3-none-any.whl", hash = "sha256:007910437e64aa1d5ad6fc47266a4ac4280e31761e6458eb30fcac7494ac7d4e"},
+]
+
+[package.dependencies]
+djangorestframework = ">=3.9.3"
+
+[[package]]
 name = "drf-jwt"
 version = "1.19.2"
 description = "JSON Web Token based authentication for Django REST framework"
@@ -5789,4 +5804,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.11.*"
-content-hash = "61f5047801c11fa81f2d2f323ee7161cb3eb232561d362b8e586d7eee8b87ad6"
+content-hash = "f3ff41968f7d1063c3ace890dab0d1a8489eba336bca94058e2270d68c398297"
