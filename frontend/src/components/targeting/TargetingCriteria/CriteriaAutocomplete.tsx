@@ -18,12 +18,20 @@ export function CriteriaAutocomplete({
 }): React.ReactElement {
   const [open, setOpen] = useState(false);
   const [newValue, setNewValue] = useState(null);
+  const [choicesWithoutDuplicates, setChoicesWithoutDuplicates] = useState();
+
   useEffect(() => {
     const optionValue =
       otherProps.choices.find((choice) => choice.name === field.value) || null;
     setNewValue(optionValue);
   }, [field.value, otherProps.choices]);
-
+  useEffect(() => {
+    const uniqueChoices = otherProps.choices.filter(
+      (choice, index, self) =>
+        index === self.findIndex((t) => t.name === choice.name),
+    );
+    setChoicesWithoutDuplicates(uniqueChoices);
+  }, [ otherProps.choices]);
   const isInvalid =
     get(otherProps.form.errors, field.name) &&
     get(otherProps.form.touched, field.name);
@@ -39,7 +47,7 @@ export function CriteriaAutocomplete({
       onClose={() => {
         setOpen(false);
       }}
-      options={otherProps.choices}
+      options={choicesWithoutDuplicates||[]}
       value={newValue}
       getOptionLabel={(option) => {
         if (option) {

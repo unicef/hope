@@ -2,7 +2,7 @@ from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
 
-class TDetailsPage(BaseComponents):
+class TargetingDetails(BaseComponents):
     # Locators
     titlePage = 'h5[data-cy="page-header-title"]'
     status = 'div[data-cy="target-population-status"]'

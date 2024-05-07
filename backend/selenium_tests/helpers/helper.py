@@ -2,7 +2,8 @@ import os
 from time import sleep
 from typing import Literal, Union
 
-from selenium.webdriver import Chrome
+from selenium.webdriver import Chrome, Keys
+from selenium.webdriver.common import actions
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
@@ -11,7 +12,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 class Common:
-    DEFAULT_TIMEOUT = 100
+    DEFAULT_TIMEOUT = 10
 
     def __init__(self, driver: Chrome):
         self.driver = driver
@@ -38,7 +39,7 @@ class Common:
         return self._wait(timeout).until(EC.visibility_of_element_located((element_type, locator)))
 
     def wait_for_disappear(
-        self, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
+            self, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
     ) -> Union[Literal[False, True], WebElement]:
         return self._wait(timeout).until_not(EC.visibility_of_element_located((element_type, locator)))
 
@@ -50,7 +51,7 @@ class Common:
         return self.driver.current_url
 
     def select_listbox_element(
-        self, name: str, listbox: str = 'ul[role="listbox"]', tag_name: str = "li"
+            self, name: str, listbox: str = 'ul[role="listbox"]', tag_name: str = "li"
     ) -> WebElement:
         select_element = self.wait_for(listbox)
         items = select_element.find_elements("tag name", tag_name)
@@ -77,6 +78,20 @@ class Common:
             self.wait_for(selectOption).click()
             self.wait_for_disappear(selectOption)
 
+    def select_multiple_option_by_name(self, *optionNames: [str]) -> None:
+        for optionName in optionNames:
+            selectOption = f'li[data-cy="select-option-{optionName}"]'
+            self.wait_for(selectOption).click()
+            self.screenshot("xd123")
+        actions = ActionChains(self.driver)
+        actions.send_keys(Keys.ESCAPE).perform()
+        try:
+            self.wait_for_disappear(selectOption)
+        except BaseException:
+            sleep(1)
+            self.wait_for(selectOption).click()
+            self.wait_for_disappear(selectOption)
+
     @staticmethod
     def choose_option(list_options: list, name: str) -> bool:
         for option in list_options:
@@ -90,7 +105,7 @@ class Common:
         return element.find_elements(element_type, locator)
 
     def screenshot(
-        self, file_name: str = "test", file_type: str = "png", file_path: str = "screenshot", delay_sec: int = 1
+            self, file_name: str = "test", file_type: str = "png", file_path: str = "screenshot", delay_sec: int = 1
     ) -> None:
         sleep(delay_sec)
         self.driver.get_screenshot_as_file(os.path.join(f"{file_path}", f"{file_name}.{file_type}"))
