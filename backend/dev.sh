@@ -19,7 +19,8 @@ else
         --reruns-delay 1 \
         --cov-report xml:coverage.xml \
         --randomly-seed=42 \
-        hct_mis_api/
+        hct_mis_api/ \
+        tests/
       ;;
     "lint")
       mkdir -p ./lint-results
