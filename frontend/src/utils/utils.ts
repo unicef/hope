@@ -425,8 +425,8 @@ export function camelizeObjectKeys(obj): { [key: string]: any } {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function camelizeArrayObjects(arr): { [key: string]: any }[] {
-  if (!arr) {
+export function camelizeArrayObjects(arr: any[]): { [key: string]: any }[] {
+  if (!Array.isArray(arr)) {
     return arr;
   }
   return arr.map(camelizeObjectKeys);
@@ -647,9 +647,9 @@ export const anon = (inputStr: string, shouldAnonymize: boolean): string => {
   if (!inputStr) return null;
   return shouldAnonymize
     ? inputStr
-      .split(' ')
-      .map((el) => el.substring(0, 2) + '*'.repeat(3))
-      .join(' ')
+        .split(' ')
+        .map((el) => el.substring(0, 2) + '*'.repeat(3))
+        .join(' ')
     : inputStr;
 };
 

@@ -72,15 +72,23 @@ function prepareInitialValueAddIndividual(
   return initialValues;
 }
 
-// eslint-disable-next-line
+interface Field {
+  value: string;
+}
+
+function mapFieldsToObjects(fields: { [key: string]: Field }) {
+  return Object.entries(fields || {})
+    .map(([fieldName, field]) =>
+      field.value !== undefined ? { fieldName, fieldValue: field.value } : null,
+    )
+    .filter(Boolean);
+}
+
 function prepareInitialValueEditIndividual(initialValues, ticket) {
   const {
     individual,
     individualDataUpdateTicketDetails: { individualData },
   } = ticket;
-
-  const initialValuesCopy = { ...initialValues }; // make a copy to avoid modifying the original object
-  initialValuesCopy.selectedIndividual = individual;
 
   const {
     documents,
@@ -98,59 +106,36 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
     ...rest
   } = individualData;
 
-  delete rest.documents;
-  delete rest.flex_fields;
-  delete rest.previous_payment_channels;
-  delete rest.previous_documents;
-  delete rest.previous_identities;
+  const { flex_fields: flexFields, ...remainingFields } = rest;
 
-  interface Field {
-    value: string;
-  }
+  const individualDataArray = mapFieldsToObjects(remainingFields);
+  const flexFieldsArray = mapFieldsToObjects(flexFields);
 
-  const individualDataArray = Object.entries(rest)
-    .map(([fieldName, field]: [string, Field]) => {
-      if (field.value !== undefined) {
-        return { fieldName, fieldValue: field.value };
-      }
-      return null;
-    })
-    .filter((field) => field !== null);
-
-  const flexFieldsArray = Object.entries(individualData.flex_fields)
-    .map(([fieldName, field]: [string, Field]) => {
-      if (field.value !== undefined) {
-        return { fieldName, fieldValue: field.value };
-      }
-      return null;
-    })
-    .filter((field) => field !== null);
-
-  initialValuesCopy.individualDataUpdateFields = [
-    ...individualDataArray,
-    ...flexFieldsArray,
-  ];
-
-  initialValuesCopy.individualDataUpdateFieldsDocuments =
-    camelizeArrayObjects(documents);
-  initialValuesCopy.individualDataUpdateDocumentsToRemove =
-    camelizeArrayObjects(documentsToRemove);
-  initialValuesCopy.individualDataUpdateFieldsIdentities =
-    camelizeArrayObjects(identities);
-  initialValuesCopy.individualDataUpdateIdentitiesToRemove =
-    camelizeArrayObjects(identitiesToRemove);
-  initialValuesCopy.individualDataUpdateDocumentsToEdit =
-    camelizeArrayObjects(documentsToEdit);
-  initialValuesCopy.individualDataUpdateIdentitiesToEdit =
-    camelizeArrayObjects(identitiesToEdit);
-  initialValuesCopy.individualDataUpdateFieldsPaymentChannels =
-    camelizeArrayObjects(paymentChannels);
-  initialValuesCopy.individualDataUpdatePaymentChannelsToRemove =
-    camelizeArrayObjects(paymentChannelsToRemove);
-  initialValuesCopy.individualDataUpdatePaymentChannelsToEdit =
-    camelizeArrayObjects(paymentChannelsToEdit);
-
-  return initialValuesCopy;
+  return {
+    ...initialValues,
+    selectedIndividual: individual,
+    individualDataUpdateFields: [...individualDataArray, ...flexFieldsArray],
+    individualDataUpdateFieldsDocuments: camelizeArrayObjects(documents),
+    individualDataUpdateDocumentsToRemove:
+      camelizeArrayObjects(documentsToRemove),
+    individualDataUpdateFieldsIdentities: camelizeArrayObjects(identities),
+    individualDataUpdateIdentitiesToRemove:
+      camelizeArrayObjects(identitiesToRemove),
+    individualDataUpdateDocumentsToEdit: camelizeArrayObjects(documentsToEdit),
+    individualDataUpdateIdentitiesToEdit:
+      camelizeArrayObjects(identitiesToEdit),
+    individualDataUpdateFieldsPaymentChannels:
+      camelizeArrayObjects(paymentChannels),
+    individualDataUpdatePaymentChannelsToRemove: camelizeArrayObjects(
+      paymentChannelsToRemove,
+    ),
+    individualDataUpdatePaymentChannelsToEdit: camelizeArrayObjects(
+      paymentChannelsToEdit,
+    ),
+    individualDataUpdateDeliveryMechanismDataToEdit: camelizeArrayObjects(
+      deliveryMechanismDataToEdit,
+    ),
+  };
 }
 
 function prepareInitialValueEditHousehold(
