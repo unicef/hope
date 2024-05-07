@@ -949,7 +949,7 @@ class TestVolumeByDeliveryMechanism(APITestCase):
                         "order": 1,
                     },
                     {
-                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_CASH,
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
                         "fspId": self.encoded_bank_of_america_fsp_id,
                         "order": 2,
                     },
