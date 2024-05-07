@@ -1,3 +1,5 @@
+import hashlib
+import json
 import re
 import sys
 from typing import Any, Dict, List, Optional
@@ -51,3 +53,23 @@ def find_attachment_in_kobo(attachments: List[Dict], value: str) -> Optional[Dic
         if regex_name.match(get_field_name(attachment["filename"])):
             return attachment
     return None
+
+
+def calculate_hash_for_kobo_submission(submission: Dict) -> str:
+    keys_to_remove = [
+        "_id",
+        "start",
+        "end",
+        "_submission_time",
+        "_attachments",
+    ]
+    submission_copy = submission.copy()
+    for key in keys_to_remove:
+        if key in submission_copy:
+            del submission_copy[key]
+
+    d_string = json.dumps(submission_copy, sort_keys=True)
+    d_bytes = d_string.encode('utf-8')
+    hash_object = hashlib.sha256(d_bytes)
+    hex_dig = hash_object.hexdigest()
+    return hex_dig
