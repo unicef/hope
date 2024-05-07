@@ -32,6 +32,7 @@ export const PROGRAM_QUERY = gql`
         individualFiltersAvailable
         householdFiltersAvailable
         description
+        type
       }
       partnerAccess
       partners {
