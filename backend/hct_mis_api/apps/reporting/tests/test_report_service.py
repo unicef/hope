@@ -201,11 +201,14 @@ class TestGenerateReportService(TestCase):
             report.save()
 
         report_service = self.GenerateReportService(report)
-        with patch(
-            "hct_mis_api.apps.reporting.services.generate_report_service.GenerateReportService.save_wb_file_in_db"
-        ) as mock_save_wb_file_in_db, patch(
-            "hct_mis_api.apps.reporting.services.generate_report_service.GenerateReportService.generate_workbook"
-        ) as mock_generate_workbook:
+        with (
+            patch(
+                "hct_mis_api.apps.reporting.services.generate_report_service.GenerateReportService.save_wb_file_in_db"
+            ) as mock_save_wb_file_in_db,
+            patch(
+                "hct_mis_api.apps.reporting.services.generate_report_service.GenerateReportService.generate_workbook"
+            ) as mock_generate_workbook,
+        ):
             report_service.generate_report()
             assert mock_generate_workbook.called
             assert mock_save_wb_file_in_db.called
