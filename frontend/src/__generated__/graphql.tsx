@@ -1471,6 +1471,7 @@ export type DeliveryMechanismNodeEdge = {
 };
 
 export enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
+  AtmCard = 'ATM_CARD',
   CardlessCashWithdrawal = 'CARDLESS_CASH_WITHDRAWAL',
   Cash = 'CASH',
   CashByFsp = 'CASH_BY_FSP',
@@ -4631,6 +4632,7 @@ export type PaymentConflictDataNode = {
 };
 
 export enum PaymentDeliveryType {
+  AtmCard = 'ATM_CARD',
   CardlessCashWithdrawal = 'CARDLESS_CASH_WITHDRAWAL',
   Cash = 'CASH',
   CashByFsp = 'CASH_BY_FSP',
@@ -5073,6 +5075,7 @@ export type PaymentRecordAndPaymentNode = {
 };
 
 export enum PaymentRecordDeliveryType {
+  AtmCard = 'ATM_CARD',
   CardlessCashWithdrawal = 'CARDLESS_CASH_WITHDRAWAL',
   Cash = 'CASH',
   CashByFsp = 'CASH_BY_FSP',
