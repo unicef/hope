@@ -35,6 +35,7 @@ exclude_lines =
     #if 0:
     if __name__ == .__main__.:
     if TYPE_CHECKING
+    ^\s*(import\s.+|from\s+.+import\s+.+) # skip imports
 
 fail_under = 15
 
