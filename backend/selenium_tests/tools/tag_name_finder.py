@@ -31,7 +31,6 @@ exit_loop = ""
 while exit_loop != "exit":
     exit_loop = input("Open the page and press Enter or write exit")
     ids = driver.find_elements(By.XPATH, f"//*[@{label}]")
-
     printing("Labels")
     print("\n")
     printing("Methods")
