@@ -133,7 +133,7 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
       paymentChannelsToEdit,
     ),
     individualDataUpdateDeliveryMechanismDataToEdit:
-      deliveryMechanismDataToEdit,
+       camelizeArrayObjects(deliveryMechanismDataToEdit),
   };
 }
 

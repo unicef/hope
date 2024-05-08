@@ -579,11 +579,11 @@ export const EditGrievancePage = (): React.ReactElement => {
                                     item: {
                                       id: string;
                                       label: string;
-                                      data_fields: Record<
+                                      dataFields: Record<
                                         string,
                                         {
                                           name: string;
-                                          previous_value: string;
+                                          previousValue: string;
                                           value: string;
                                         }
                                       >;
@@ -594,13 +594,13 @@ export const EditGrievancePage = (): React.ReactElement => {
                                       <Typography variant="subtitle1">
                                         Delivery Mechanism: {item.label}
                                       </Typography>
-                                      {Object.entries(item.data_fields).map(
+                                      {Object.entries(item.dataFields).map(
                                         (
                                           [_key, field]: [
                                             string,
                                             {
                                               name: string;
-                                              previous_value: string;
+                                              previousValue: string;
                                               value: string;
                                             },
                                           ],
@@ -621,7 +621,7 @@ export const EditGrievancePage = (): React.ReactElement => {
                                             </Grid>
                                             <Grid item xs={4}>
                                               <Field
-                                                name={`individualDataUpdateDeliveryMechanismDataToEdit[${index}].data_fields[${fieldIndex}].previous_value`}
+                                                name={`individualDataUpdateDeliveryMechanismDataToEdit[${index}].dataFields[${fieldIndex}].previous_value`}
                                                 type="text"
                                                 label={t('Current Value')}
                                                 component={FormikTextField}
@@ -630,7 +630,7 @@ export const EditGrievancePage = (): React.ReactElement => {
                                             </Grid>
                                             <Grid item xs={4}>
                                               <Field
-                                                name={`individualDataUpdateDeliveryMechanismDataToEdit[${index}].data_fields[${fieldIndex}].value`}
+                                                name={`individualDataUpdateDeliveryMechanismDataToEdit[${index}].dataFields[${fieldIndex}].value`}
                                                 type="text"
                                                 label={t('New Value')}
                                                 component={FormikTextField}

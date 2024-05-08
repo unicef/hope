@@ -415,7 +415,13 @@ export function camelizeObjectKeys(obj): { [key: string]: any } {
     return obj;
   }
   return Object.keys(obj).reduce((acc, current) => {
-    if (typeof obj[current] === 'object') {
+    if (obj[current] == null) {
+      acc[camelCase(current)] = obj[current];
+    }
+    else if (Array.isArray(obj[current])) {
+      acc[camelCase(current)] = camelizeArrayObjects(obj[current]);
+    }
+    else if (typeof obj[current] === 'object') {
       acc[camelToUnderscore(current)] = camelizeObjectKeys(obj[current]);
     } else {
       acc[camelCase(current)] = obj[current];
@@ -426,6 +432,7 @@ export function camelizeObjectKeys(obj): { [key: string]: any } {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function camelizeArrayObjects(arr: any[]): { [key: string]: any }[] {
+  console.log('camelizeArrayObjects', arr);
   if (!Array.isArray(arr)) {
     return arr;
   }

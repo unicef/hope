@@ -411,18 +411,18 @@ def prepare_edit_payment_channel(payment_channels: List[Dict]) -> List[Dict]:
 def prepare_edit_delivery_mechanism_data(delivery_mechanism_data: List[Dict]) -> List[Dict]:
     items = []
     for dmd in delivery_mechanism_data:
-        encoded_id = dmd.get("id")
+        _id = dmd.get("id")
         data_fields = dmd.get("data_fields", [])
-        delivery_mechanism_data = get_object_or_404(DeliveryMechanismData, id=decode_id_string(encoded_id))
+        delivery_mechanism_data = get_object_or_404(DeliveryMechanismData, id=_id)
         data = {
-            "id": encoded_id,
+            "id": _id,
             "label": dmd.get("label"),
             "approve_status": False,
             "data_fields": [
                 {
                     "name": field.get("name"),
                     "value": field.get("value"),
-                    "previous_value": delivery_mechanism_data.delivery_data.get(field, None),
+                    "previous_value": delivery_mechanism_data.delivery_data.get(field.get("name")),
                 }
                 for field in data_fields
             ],
