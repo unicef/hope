@@ -24,7 +24,7 @@ Row = Tuple[Cell]
 
 
 class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseService):
-    COLUMNS_TYPES = ("s", "s", "n", "s", "s", "s", "s", "s", "n", "n", "s")
+    COLUMNS_TYPES = ("s", "s", "n", "s", "s", "s", "s", "s", "n", "n", "s", "s")
     BATCH_SIZE = 1000
 
     def __init__(self, payment_plan: PaymentPlan, file: io.BytesIO) -> None:
@@ -66,7 +66,13 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
 
     def _save_payments(self, payments_to_save: List[Payment]) -> None:
         Payment.objects.bulk_update(
-            payments_to_save, fields=("entitlement_quantity", "entitlement_quantity_usd", "entitlement_date")
+            payments_to_save,
+            fields=(
+                "entitlement_quantity",
+                "entitlement_quantity_usd",
+                "entitlement_date",
+                "transaction_status_blockchain",
+            ),
         )
         payments_ids = [payment.id for payment in payments_to_save]
         payments = Payment.objects.filter(id__in=payments_ids).select_related("household_snapshot")
@@ -186,6 +192,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
     def _import_row(self, row: Row, exchange_rate: float) -> Optional[Payment]:
         payment_id = row[self.HEADERS.index("payment_id")].value
         entitlement_amount = row[self.HEADERS.index("entitlement_quantity")].value
+        transaction_status_blockchain = row[self.HEADERS.index("transaction_status_blockchain")].value
 
         payment = self.payments_dict.get(str(payment_id))
 
@@ -207,6 +214,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                     entitlement_quantity=converted_entitlement_amount,
                     entitlement_date=entitlement_date,
                     entitlement_quantity_usd=entitlement_quantity_usd,
+                    transaction_status_blockchain=transaction_status_blockchain,
                 )
         return None
 

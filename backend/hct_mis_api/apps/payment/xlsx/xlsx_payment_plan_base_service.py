@@ -12,4 +12,5 @@ class XlsxPaymentPlanBaseService:
         "entitlement_quantity",
         "entitlement_quantity_usd",
         "status",
+        "transaction_status_blockchain",
     )
