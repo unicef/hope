@@ -52,6 +52,7 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
 )
 from hct_mis_api.apps.core.field_attributes.fields_types import (
+    _DELIVERY_MECHANISM_DATA,
     _HOUSEHOLD,
     _INDIVIDUAL,
     Scope,
@@ -1103,7 +1104,11 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
     @classmethod
     def get_column_from_core_field(
-        cls, payment: "Payment", core_field_name: str, is_social_worker_program: bool
+        cls,
+        payment: "Payment",
+        core_field_name: str,
+        is_social_worker_program: bool,
+        delivery_mechanism_data: Optional["DeliveryMechanismData"] = None,
     ) -> Any:
         def parse_admin_area(obj: "Area") -> str:
             if not obj:
@@ -1116,18 +1121,25 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             core_fields_attributes = FieldFactory.from_scope(Scope.XLSX_PEOPLE).to_dict_by("name")
         else:
             core_fields_attributes = FieldFactory.not_from_scope(Scope.XLSX_PEOPLE).to_dict_by("name")
-        attr = core_fields_attributes[core_field_name]
-        lookup = attr["lookup"]
+        core_field = core_fields_attributes[core_field_name]
+
+        if delivery_mechanism_data and core_field["associated_with"] == _DELIVERY_MECHANISM_DATA:
+            return delivery_mechanism_data.delivery_data.get(core_field_name, None)
+
+        lookup = core_field["lookup"]
         lookup = lookup.replace("__", ".")
-        if attr["associated_with"] == _INDIVIDUAL:
-            if lookup_function := attr.get("lookup_function"):
+
+        if core_field["associated_with"] == _INDIVIDUAL:
+            if lookup_function := core_field.get("lookup_function"):
                 return lookup_function(collector)
             return nested_getattr(collector, lookup, None)
-        if attr["associated_with"] == _HOUSEHOLD:
+
+        if core_field["associated_with"] == _HOUSEHOLD:
             if core_field_name in {"admin1", "admin2", "admin3", "admin4"}:
                 admin_area = getattr(household, core_field_name)
                 return parse_admin_area(admin_area)
             return nested_getattr(household, lookup, None)
+
         return None
 
     @classmethod
@@ -2116,8 +2128,8 @@ class DeliveryMechanismData(DeliveryDataMixin, TimeStampedUUIDModel, SignatureMi
     )
     data = JSONField(default=dict, blank=True)
 
-    is_valid = models.BooleanField(default=False)
-    validation_errors = JSONField(default=dict)
+    is_valid: bool = models.BooleanField(default=False)  # type: ignore
+    validation_errors: dict = JSONField(default=dict)  # type: ignore
     possible_duplicate_of = models.ForeignKey(
         "self",
         on_delete=models.SET_NULL,
@@ -2125,7 +2137,7 @@ class DeliveryMechanismData(DeliveryDataMixin, TimeStampedUUIDModel, SignatureMi
         null=True,
         blank=True,
     )
-    unique_key = models.CharField(max_length=256, blank=True, null=True, unique=True, editable=False)
+    unique_key = models.CharField(max_length=256, blank=True, null=True, unique=True, editable=False)  # type: ignore
 
     signature_fields = (
         "data",

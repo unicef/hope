@@ -216,9 +216,7 @@ def handle_update_payment_channel(payment_channel: Dict) -> Optional[BankAccount
     return None
 
 
-def handle_add_delivery_mechanism_data(
-    delivery_mechanism_data: Dict, individual: Individual
-) -> Optional[DeliveryMechanismData]:
+def handle_add_delivery_mechanism_data(delivery_mechanism_data: Dict, individual: Individual) -> DeliveryMechanismData:
     return DeliveryMechanismData(
         individual=individual,
         delivery_mechanism=delivery_mechanism_data.get("delivery_mechanism"),
@@ -226,7 +224,7 @@ def handle_add_delivery_mechanism_data(
     )
 
 
-def handle_update_delivery_mechanism_data(delivery_mechanism_data: Dict) -> Optional[DeliveryMechanismData]:
+def handle_update_delivery_mechanism_data(delivery_mechanism_data: Dict) -> DeliveryMechanismData:
     delivery_mechanism_data_id = decode_id_string(delivery_mechanism_data.get("id"))
     dmd = get_object_or_404(DeliveryMechanismData, id=delivery_mechanism_data_id)
     for field in delivery_mechanism_data.get("fields", []):

@@ -105,7 +105,6 @@ def get_scope_id_issuer(individual: Individual) -> str:
 
 
 def get_debit_card_number(individual: Individual) -> str:
-    # TODO MB ???
     if bank_account_info := individual.bank_account_info.first():
         return bank_account_info.debit_card_number
     else:

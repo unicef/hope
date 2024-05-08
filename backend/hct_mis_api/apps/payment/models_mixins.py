@@ -27,7 +27,7 @@ class DeliveryDataMixin:
         }
         return associated_objects.get(associated_with)
 
-    @property
+    @cached_property
     def delivery_data(self) -> Dict:
         delivery_data = {}
         for field in self.delivery_mechanism_fields:
@@ -39,7 +39,7 @@ class DeliveryDataMixin:
 
         return delivery_data
 
-    def validate(self):
+    def validate(self) -> None:
         self.validation_errors = {}
         for required_field in self.required_fields:
             associated_object = self.get_associated_object(required_field["associated_with"])
@@ -95,6 +95,15 @@ class DeliveryDataMixin:
         return [field for field in self.delivery_mechanism_fields if field.get("unique_for_payment", False)]
 
     @classmethod
+    def get_required_delivery_mechanism_fields(cls, delivery_mechanism: str) -> List[dict]:
+        fields = cls.get_all_delivery_mechanisms_fields()
+        return [
+            field
+            for field in fields
+            if (delivery_mechanism in field.get("delivery_mechanisms", []) and field.get("required_for_payment", False))
+        ]
+
+    @classmethod
     def get_delivery_mechanism_fields(cls, delivery_mechanism: str) -> List[dict]:
         fields = cls.get_all_delivery_mechanisms_fields()
         return [field for field in fields if delivery_mechanism in field.get("delivery_mechanisms", [])]
@@ -108,7 +117,7 @@ class DeliveryDataMixin:
 
         global_fields = [
             _field
-            for _field in FieldFactory.from_scope(Scope.GLOBAL).to_dict_by(by).values()
+            for _field in FieldFactory.not_from_scope(Scope.DELIVERY_MECHANISM).to_dict_by(by).values()
             if _field.get("delivery_mechanisms", [])
         ]
         delivery_mechanisms_fields = [
@@ -136,10 +145,9 @@ class DeliveryDataMixin:
     def get_delivery_mechanisms_to_xlsx_fields_mapping(
         cls, by: str = "name", required: bool = False
     ) -> Dict[str, List[Dict]]:
-        fields = cls.get_all_delivery_mechanisms_fields()
         fields = {
             field[by]: field.get("delivery_mechanisms", [])
-            for field in fields
+            for field in cls.get_all_delivery_mechanisms_fields()
             if not required or field.get("required_for_payment", False)
         }
         dm_required_fields_map = defaultdict(list)

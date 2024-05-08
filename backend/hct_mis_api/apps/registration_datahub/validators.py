@@ -279,7 +279,9 @@ class ImportDataInstanceValidator:
         delivery_mechanisms_to_required_fields_mapping = (
             DeliveryMechanismData.get_delivery_mechanisms_to_xlsx_fields_mapping(by="xlsx_field", required=True)
         )
-        global_scope_xlsx_fields = list(FieldFactory.from_scope(Scope.GLOBAL).to_dict_by("xlsx_field").keys())
+        global_scope_xlsx_fields = list(
+            FieldFactory.not_from_scope(Scope.DELIVERY_MECHANISM).to_dict_by("xlsx_field").keys()
+        )
 
         try:
             all_rows_delivery_mechanisms_errors = []
@@ -294,7 +296,7 @@ class ImportDataInstanceValidator:
 
                 dm_to_drop = []
                 # drop delivery mechanism data validation for delivery mechanisms that contains only Scope.GLOBAL fields
-                for dm, fields in delivery_mechanisms_fields_values_dict.items():
+                for dm, fields in delivery_mechanisms_fields_values_dict.items(): # TODO MB Incompatible types in assignment (expression has type "Dict[Any, Any]", variable has type "List[Dict[Any, Any]]")  [assignment]
                     # if all fields are Scope.GLOBAL, drop delivery mechanism data
                     if all(field in global_scope_xlsx_fields for field in fields.keys()):
                         dm_to_drop.append(dm)

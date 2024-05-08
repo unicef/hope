@@ -49,35 +49,9 @@ class DeliveryMechanismChoices:
     )
 
 
-# DELIVERY_MECHANISM_REQUIRED_FIELDS = {
-#     # TODO add required fields for each delivery mechanism
-#     DeliveryMechanismChoices.DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_CASH: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_CASH_BY_FSP: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_CHEQUE: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_DEPOSIT_TO_CARD: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_MOBILE_MONEY: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_PRE_PAID_CARD: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_REFERRAL: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_ACCOUNT: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD: ["card_number", "expiry_date", "cardholder_name"],
-# }
-#
-#
-# DELIVERY_MECHANISM_UNIQUE_FIELDS = {
-#     # TODO add unique fields for each delivery mechanism
-#     DeliveryMechanismChoices.DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_CASH: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_CASH_BY_FSP: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_CHEQUE: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_DEPOSIT_TO_CARD: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_MOBILE_MONEY: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_PRE_PAID_CARD: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_REFERRAL: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_ACCOUNT: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER: [],
-#     DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD: ["card_number", "expiry_date", "cardholder_name"],
-# }
+"""
+TODO MB
+payment channel creation on import/merge KOBO / AURORA / FLEX?
+snapshots?
+data migration?
+"""

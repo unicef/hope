@@ -34,6 +34,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationPlan,
     ServiceProvider,
 )
+from hct_mis_api.apps.payment.models_mixins import DeliveryDataMixin
 from hct_mis_api.apps.payment.services.create_cash_plan_from_reconciliation import (
     CreateCashPlanReconciliationService,
 )
@@ -351,10 +352,28 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
     autocomplete_fields = ("financial_service_provider", "xlsx_template")
 
     def save_model(
-        self, request: HttpRequest, obj: FinancialServiceProviderXlsxTemplate, form: "Form", change: bool
+        self, request: HttpRequest, obj: FspXlsxTemplatePerDeliveryMechanism, form: "Form", change: bool
     ) -> None:
         if not change:
             obj.created_by = request.user
+        delivery_mechanism_required_fields = [
+            field["name"] for field in DeliveryDataMixin.get_required_delivery_mechanism_fields(obj.delivery_mechanism)
+        ]
+        missing_required_core_fields = [
+            required_field
+            for required_field in delivery_mechanism_required_fields
+            if required_field not in obj.xlsx_template.core_fields
+        ]
+        if missing_required_core_fields:
+            raise ValidationError(
+                f"{missing_required_core_fields} fields are required by delivery mechanism "
+                f"{obj.delivery_mechanism} and must be present in the template core fields"
+            )
+
+        if obj.delivery_mechanism not in obj.financial_service_provider.delivery_mechanisms:
+            raise ValidationError(
+                f"Delivery Mechanism {obj.delivery_mechanism} is not supported by Financial Service Provider {obj.financial_service_provider}"
+            )
         return super().save_model(request, obj, form, change)
 
     def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:

@@ -364,9 +364,9 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "full_name_i_c",
-        "required_for_payment": True,
-        "unique_for_payment": True,
-        "delivery_mechanisms": [DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD],
+        "required_for_payment": False,
+        "unique_for_payment": False,
+        "delivery_mechanisms": [dm[0] for dm in DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES],
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE, Scope.XLSX_PEOPLE],
     },
     {

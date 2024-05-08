@@ -351,7 +351,7 @@ class RdiMergeTask:
 
     def _create_grievance_ticket_for_delivery_mechanisms_errors(
         self, delivery_mechanism_data: DeliveryMechanismData, obj_hct: RegistrationDataImport, description: str
-    ):
+    ) -> Tuple[GrievanceTicket, TicketIndividualDataUpdateDetails]:
         # TODO MB move to utils and reuse when ticket close validation fails
         comments = f"This is a system generated ticket for RDI {obj_hct}"
         grievance_ticket = GrievanceTicket(
@@ -386,7 +386,7 @@ class RdiMergeTask:
 
     def _create_grievance_tickets_for_delivery_mechanisms_errors(
         self, delivery_mechanisms_data: List[DeliveryMechanismData], obj_hct: RegistrationDataImport
-    ):
+    ) -> None:
         grievance_tickets_to_create = []
         individual_data_update_tickets_to_create = []
         for delivery_mechanism_data in delivery_mechanisms_data:

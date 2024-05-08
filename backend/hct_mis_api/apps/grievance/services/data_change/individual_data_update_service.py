@@ -169,9 +169,9 @@ class IndividualDataUpdateService(DataChangeService):
             payment_channels_to_remove_with_approve_status
         )
         individual_data_with_approve_status["delivery_mechanism_data"] = delivery_mechanism_data_with_approve_status
-        individual_data_with_approve_status[
-            "delivery_mechanism_data_to_remove"
-        ] = delivery_mechanism_data_to_remove_with_approve_status
+        individual_data_with_approve_status["delivery_mechanism_data_to_remove"] = (
+            delivery_mechanism_data_to_remove_with_approve_status
+        )
         individual_data_with_approve_status["delivery_mechanism_data_to_edit"] = prepare_edit_delivery_mechanism_data(
             delivery_mechanism_data_to_edit
         )
@@ -273,9 +273,9 @@ class IndividualDataUpdateService(DataChangeService):
             payment_channels_to_remove_with_approve_status
         )
         individual_data_with_approve_status["delivery_mechanism_data"] = delivery_mechanism_data_with_approve_status
-        individual_data_with_approve_status[
-            "delivery_mechanism_data_to_remove"
-        ] = delivery_mechanism_data_to_remove_with_approve_status
+        individual_data_with_approve_status["delivery_mechanism_data_to_remove"] = (
+            delivery_mechanism_data_to_remove_with_approve_status
+        )
         individual_data_with_approve_status["delivery_mechanism_data_to_edit"] = prepare_edit_delivery_mechanism_data(
             delivery_mechanism_data_to_edit
         )
@@ -409,22 +409,23 @@ class IndividualDataUpdateService(DataChangeService):
         )
         BankAccountInfo.objects.filter(id__in=payment_channels_to_remove).delete()
 
-        def _validate_delivery_mechanism_data(delivery_mechanism_data):
-            delivery_mechanism_data.validate()
-            if not delivery_mechanism_data.is_valid:
+        def _validate_delivery_mechanism_data(dmd: DeliveryMechanismData) -> None:
+            dmd.refresh_from_db()
+            dmd.validate()
+            if not dmd.is_valid:
                 self.grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
                 description = (
-                    f"Missing required fields {list(delivery_mechanism_data.validation_errors.keys())}"
-                    f" values for delivery mechanism {delivery_mechanism_data.delivery_mechanism}"
+                    f"Missing required fields {list(dmd.validation_errors.keys())}"
+                    f" values for delivery mechanism {dmd.delivery_mechanism}"
                 )
                 self.grievance_ticket.description = description
             else:
-                delivery_mechanism_data.update_unique_field()
-                if not delivery_mechanism_data.is_valid:
+                dmd.update_unique_field()
+                if not dmd.is_valid:
                     self.grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
                     description = (
-                        f"Fields not unique {list(delivery_mechanism_data.validation_errors.keys())} across program"
-                        f" for delivery mechanism {delivery_mechanism_data.delivery_mechanism}, possible duplicate of {delivery_mechanism_data.possible_duplicate_of}"
+                        f"Fields not unique {list(dmd.validation_errors.keys())} across program"
+                        f" for delivery mechanism {dmd.delivery_mechanism}, possible duplicate of {dmd.possible_duplicate_of}"
                     )
                     self.grievance_ticket.description = description
 

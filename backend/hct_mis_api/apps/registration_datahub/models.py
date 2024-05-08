@@ -378,9 +378,9 @@ class ImportedDeliveryMechanismData(DeliveryDataMixin, TimeStampedUUIDModel):
         max_length=255, verbose_name=_("Delivery Mechanism"), choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES
     )
 
-    is_valid = models.BooleanField(default=False)
-    validation_errors = JSONField(default=dict)
-    unique_key = models.CharField(max_length=256, blank=True, null=True, unique=True, editable=False)
+    is_valid: bool = models.BooleanField(default=False)
+    validation_errors: dict = JSONField(default=dict)
+    unique_key = models.CharField(max_length=256, blank=True, null=True, unique=True, editable=False)  # type: ignore
 
 
 class RegistrationDataImportDatahub(TimeStampedUUIDModel):
