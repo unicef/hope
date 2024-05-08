@@ -180,7 +180,7 @@ class IndividualFactory(DjangoModelFactory):
         MARITAL_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
-    phone_no = factory.Sequence(lambda n: f"+48 609 456 {n%1000:03d}")
+    phone_no = factory.Sequence(lambda n: f"+48 609 456 {n % 1000:03d}")
     phone_no_valid = True
     phone_no_alternative = ""
     phone_no_alternative_valid = True
@@ -204,7 +204,7 @@ class BankAccountInfoFactory(DjangoModelFactory):
 
     individual = factory.SubFactory(IndividualFactory)
     bank_name = random.choice(["CityBank", "Santander", "JPMorgan"])
-    bank_account_number = factory.LazyAttribute(lambda x: random.randint(10**26, 10**27 - 1))
+    bank_account_number = factory.LazyAttribute(lambda x: random.randint(10 ** 26, 10 ** 27 - 1))
     bank_branch_name = random.choice(["BranchCityBank", "BranchSantander", "BranchJPMorgan"])
     account_holder_name = factory.Faker("last_name")
 
@@ -256,7 +256,7 @@ class EntitlementCardFactory(DjangoModelFactory):
 
 
 def create_household(
-    household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None
+        household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None
 ) -> Tuple[Household, List[Individual]]:
     if household_args is None:
         household_args = {}
@@ -306,7 +306,7 @@ def create_household(
 
 
 def create_household_for_fixtures(
-    household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None
+        household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None
 ) -> Tuple[Household, Individual]:
     if household_args is None:
         household_args = {}
@@ -355,7 +355,7 @@ def create_household_for_fixtures(
 
 
 def create_household_and_individuals(
-    household_data: Optional[Dict] = None, individuals_data: Optional[List[Dict]] = None, imported: bool = False
+        household_data: Optional[Dict] = None, individuals_data: Optional[List[Dict]] = None, imported: bool = False
 ) -> Tuple[Household, List[Individual]]:
     if household_data is None:
         household_data = {}
@@ -363,6 +363,13 @@ def create_household_and_individuals(
         individuals_data = []
     if household_data.get("size") is None:
         household_data["size"] = len(individuals_data)
+    if "program" not in household_data:
+        program = ProgramFactory()
+    else:
+        program = household_data["program"]
+    if "registration_data_import" not in household_data:
+        rdi = RegistrationDataImportFactory(program=program)
+        household_data["registration_data_import"] = rdi
     household: Household = HouseholdFactory.build(**household_data)
     household.program.save()
     household.household_collection.save()
@@ -371,7 +378,8 @@ def create_household_and_individuals(
     household.registration_data_import.save()
     household.program.save()
     individuals: List[Individual] = [
-        IndividualFactory(household=household, program=household.program, **individual_data)
+        IndividualFactory(household=household, program=household.program, registration_data_import=household_data["registration_data_import"],
+                          **individual_data)
         for individual_data in individuals_data
     ]
     household.head_of_household = individuals[0]

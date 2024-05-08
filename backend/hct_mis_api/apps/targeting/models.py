@@ -45,7 +45,6 @@ if TYPE_CHECKING:
 
     from django.db.models.query import QuerySet
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -385,9 +384,9 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
     def get_query(self) -> Q:
         query = super().get_query()
         if (
-            self.target_population
-            and self.target_population.status != TargetPopulation.STATUS_OPEN
-            and self.target_population.program is not None
+                self.target_population
+                and self.target_population.status != TargetPopulation.STATUS_OPEN
+                and self.target_population.program is not None
         ):
             query &= Q(size__gt=0)
 
@@ -446,7 +445,13 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
         :Residential Status != Refugee
     """
 
+    @property
+    def is_social_worker_program(self) -> bool:
+        return self.targeting_criteria_rule.targeting_criteria.target_population.program.is_social_worker_program
+
     def get_core_fields(self) -> List:
+        if self.is_social_worker_program:
+            return FieldFactory.from_only_scopes([Scope.TARGETING, Scope.XLSX_PEOPLE])
         return FieldFactory.from_scope(Scope.TARGETING).associated_with_household()
 
     comparison_method = models.CharField(
