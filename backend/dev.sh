@@ -13,6 +13,8 @@ else
   case "$1" in
     "test")
       wait_for_db db
+      pdm --version
+      pdm list
       pytest \
         -n auto \
         --reruns 3 \
