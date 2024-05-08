@@ -9,7 +9,9 @@ volumes:
 services:
   selenium:
     stdin_open: true
+    tty: true
     image: unicef/hct-mis-backend-dev
+    shm_size: 2gb
     environment:
       - REDIS_INSTANCE=redis:6379
       - PYTHONUNBUFFERED=1
@@ -33,6 +35,7 @@ services:
     volumes:
       - ./backend/report/screenshot/:/code/screenshot/
       - ./backend/report/:/code/report/
+      - backend-data:/data
       - backend-data-selenium:/data
       - ./backend/selenium_tests:/code/selenium_tests
       - ./backend/hct_mis_api:/code/hct_mis_api
@@ -44,7 +47,7 @@ services:
     command: |
       sh -c "
         waitforit -host=db_selenium -port=5432 -timeout=30 &&
-        pytest -svvv selenium_tests --html=./report/report.html
+        pytest -svvv selenium_tests --html-report=./report/report.html
       "
     ports:
       - "8080:8080"

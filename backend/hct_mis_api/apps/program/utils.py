@@ -1,11 +1,13 @@
 import re
-from typing import Dict, List, Sequence, Union
+from typing import Dict, List, Optional
 
+from django.conf import settings
 from django.db import transaction
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.models import DataCollectingType
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
     BankAccountInfo,
@@ -18,7 +20,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
 from hct_mis_api.apps.program.validators import validate_data_collecting_type
 from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 
@@ -389,18 +391,37 @@ def copy_bank_account_info_per_individual(
     return bank_accounts_info_list
 
 
-def update_partner_permissions_for_program(partner_data: Dict, business_area_pk: str, program_pk: str) -> None:
-    admin_areas = [area_id for area_id in partner_data.get("admin_areas", [])]
-    partner = Partner.objects.get(id=partner_data["id"])
-    partner_perms = partner.get_permissions()
-    partner_perms.set_program_areas(business_area_pk, program_pk, admin_areas)
-    partner.set_permissions(partner_perms)
-    partner.save()
+def create_program_partner_access(
+    partners_data: List, program: Program, partner_access: Optional[str] = None
+) -> List[Dict]:
+    if partner_access == Program.ALL_PARTNERS_ACCESS:
+        partners = Partner.objects.filter(allowed_business_areas=program.business_area).exclude(
+            name=settings.DEFAULT_EMPTY_PARTNER
+        )
+        partners_data = [{"partner": partner.id, "areas": []} for partner in partners]
+
+    for partner_data in partners_data:
+        program_partner, _ = ProgramPartnerThrough.objects.get_or_create(
+            program=program,
+            partner_id=partner_data["partner"],
+        )
+        if areas := partner_data.get("areas"):
+            program_partner.areas.set(Area.objects.filter(id__in=areas))
+            program_partner.full_area_access = False
+            program_partner.save(update_fields=["full_area_access"])
+        else:
+            # full area access
+            program_partner.full_area_access = True
+            program_partner.save(update_fields=["full_area_access"])
+    return partners_data
 
 
-def remove_program_permissions_for_exists_partners(
-    partner_exclude_ids: Sequence[Union[str, int]], business_area_pk: str, program_pk: str
-) -> None:
-    for partner in Partner.objects.exclude(id__in=partner_exclude_ids):
-        partner.get_permissions().remove_program_areas(business_area_pk, program_pk)
-        partner.save()
+def remove_program_partner_access(partners_data: List, program: Program) -> None:
+    partner_ids = [partner_data["partner"] for partner_data in partners_data]
+    existing_program_partner_access = ProgramPartnerThrough.objects.filter(
+        program=program,
+    )
+    removed_partner_access = existing_program_partner_access.exclude(
+        Q(partner_id__in=partner_ids) | Q(partner__name="UNICEF")
+    )
+    removed_partner_access.delete()

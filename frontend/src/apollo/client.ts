@@ -75,12 +75,13 @@ const redirectLink = new ApolloLink((operation, forward) => {
 
     // Check if the error message is "Permission Denied"
     const isPermissionDenied = response?.errors?.some(
-      (error) => error.message === 'Permission Denied',
+      (error) => error.message === 'Permission Denied: User is not authenticated.',
     );
 
-    // If the error message is "Permission Denied" or data is null, redirect to the access denied page
-    if (
-      (isPermissionDenied || (isDataNull(response.data) && !isMutation)) &&
+    if (isPermissionDenied) {
+      window.location.href = `${window.location.origin}/login?next=${window.location.pathname}`;
+    } else if (
+      ((isDataNull(response.data) && !isMutation)) &&
       !isAccessDeniedPage &&
       !isErrorPage
     ) {

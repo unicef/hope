@@ -162,30 +162,23 @@ def filter_based_on_partner_areas_2(
     lookup_id: str,
     id_container: Callable[[Any], List[Any]],
 ) -> QuerySet["GrievanceTicket", "Feedback"]:
-    business_area_id_str = str(business_area_id)
     try:
-        partner_permission = user_partner.get_permissions()
+        programs_for_business_area = []
         filter_q = Q()
-        if program_id:
-            areas = partner_permission.areas_for(business_area_id_str, str(program_id))
-            if areas is None:
-                return queryset.model.objects.none()
-            programs_permissions = {str(program_id): areas}.items()
-        else:
-            if business_area_permission := partner_permission.get_programs_for_business_area(business_area_id_str):
-                programs_permissions = business_area_permission.programs.items()
-                # if user does not have permission to any program in this business area -> only non-program tickets
-                if not programs_permissions:
-                    return queryset.model.objects.none()
-            else:
-                return queryset.model.objects.none()
+        if program_id and user_partner.has_program_access(program_id):
+            programs_for_business_area = [program_id]
+        elif not program_id:
+            programs_for_business_area = user_partner.get_program_ids_for_business_area(business_area_id)
+        # if user does not have access to any program/selected program -> return empty queryset for program-related obj
+        if not programs_for_business_area:
+            return queryset.model.objects.none()
+        programs_permissions = [
+            (program_id, user_partner.get_program_areas(program_id)) for program_id in programs_for_business_area
+        ]
         for perm_program_id, areas_ids in programs_permissions:
             program_q = Q(**{lookup_id: id_container(perm_program_id)})
             areas_null_and_program_q = program_q & Q(admin2__isnull=True)
-            if areas_ids:
-                filter_q |= Q(areas_null_and_program_q | Q(program_q & Q(admin2__in=areas_ids)))
-            else:
-                filter_q |= program_q  # empty areas -> full area access
+            filter_q |= Q(areas_null_and_program_q | Q(program_q & Q(admin2__in=areas_ids)))
 
         # add Feedbacks without program for "All Programmes" query
         if queryset.model is Feedback and not program_id:

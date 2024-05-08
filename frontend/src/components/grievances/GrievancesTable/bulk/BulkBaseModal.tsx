@@ -66,6 +66,7 @@ export function BulkBaseModal({
       startIcon={icon}
       disabled={!selectedTickets.length || !isActiveProgram}
       onClick={() => setDialogOpen(true)}
+      data-cy={`button-${buttonTitle}`}
     >
       {buttonTitle}
     </Button>

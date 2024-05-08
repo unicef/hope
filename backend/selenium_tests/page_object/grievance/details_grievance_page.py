@@ -8,6 +8,7 @@ class GrievanceDetailsPage(BaseComponents):
     title = 'h5[data-cy="page-header-title"]'
     buttonEdit = 'a[data-cy="button-edit"]'
     buttonSetInProgress = 'button[data-cy="button-set-to-in-progress"]'
+    buttonSendBack = 'button[data-cy="button-send-back"]'
     buttonCloseTicket = 'button[data-cy="button-close-ticket"]'
     buttonConfirm = 'button[data-cy="button-confirm"]'
     buttonAssignToMe = 'button[data-cy="button-assign-to-me"]'
@@ -20,6 +21,9 @@ class GrievanceDetailsPage(BaseComponents):
     ticketHouseholdID = 'div[data-cy="label-Household ID"]'
     ticketIndividualID = 'div[data-cy="label-Individual ID"]'
     ticketPaymentLabel = 'div[data-cy="label-Payment ID"]'
+    labelPaymentPlan = 'div[data-cy="label-Payment Plan"]'
+    labelPaymentPlanVerification = 'div[data-cy="label-Payment Plan Verification"]'
+    labelProgramme = 'div[data-cy="label-Programme"]'
     ticketCategoryBy = 'div[data-cy="label-Created By"]'
     dateCreation = 'div[data-cy="label-Date Created"]'
     lastModifiedDate = 'div[data-cy="label-Last Modified Date"]'
@@ -102,8 +106,14 @@ class GrievanceDetailsPage(BaseComponents):
     def getButtonCloseTicket(self) -> WebElement:
         return self.wait_for(self.buttonCloseTicket)
 
+    def getButtonSendBack(self) -> WebElement:
+        return self.wait_for(self.buttonSendBack)
+
     def getButtonConfirm(self) -> WebElement:
         return self.wait_for(self.buttonConfirm)
+
+    def getButtonEdit(self) -> WebElement:
+        return self.wait_for(self.buttonEdit)
 
     def getTicketStatus(self) -> WebElement:
         return self.wait_for(self.ticketStatus)
@@ -128,6 +138,15 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getTicketPaymentLabel(self) -> WebElement:
         return self.wait_for(self.ticketPaymentLabel)
+
+    def getLabelPaymentPlan(self) -> WebElement:
+        return self.wait_for(self.labelPaymentPlan)
+
+    def getLabelPaymentPlanVerification(self) -> WebElement:
+        return self.wait_for(self.labelPaymentPlanVerification)
+
+    def getLabelProgramme(self) -> WebElement:
+        return self.wait_for(self.labelProgramme)
 
     def getLabelPartner(self) -> WebElement:
         return self.wait_for(self.labelPartner)
@@ -155,6 +174,9 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getTicketDescription(self) -> WebElement:
         return self.wait_for(self.ticketDescription)
+
+    def getLabelComments(self) -> WebElement:
+        return self.wait_for(self.comments)
 
     def getCreateLinkedTicket(self) -> WebElement:
         return self.wait_for(self.createLinkedTicket)
@@ -200,6 +222,9 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getNewNoteField(self) -> WebElement:
         return self.wait_for(self.newNoteField)
+
+    def getButtonNewNote(self) -> WebElement:
+        return self.wait_for(self.buttonNewNote)
 
     def getLabelGENDER(self) -> WebElement:
         return self.wait_for(self.labelGENDER)
