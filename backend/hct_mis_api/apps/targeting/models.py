@@ -384,9 +384,9 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
     def get_query(self) -> Q:
         query = super().get_query()
         if (
-                self.target_population
-                and self.target_population.status != TargetPopulation.STATUS_OPEN
-                and self.target_population.program is not None
+            self.target_population
+            and self.target_population.status != TargetPopulation.STATUS_OPEN
+            and self.target_population.program is not None
         ):
             query &= Q(size__gt=0)
 

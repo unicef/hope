@@ -8,7 +8,7 @@ class TargetingDetails(BaseComponents):
     status = 'div[data-cy="target-population-status"]'
     criteria_container = 'div[data-cy="criteria-container"]'
     lock_button = 'button[data-cy="button-target-population-lock"]'
-    household_table_cell = 'table tr:nth-of-type({}) td:nth-of-type({})'
+    household_table_cell = "table tr:nth-of-type({}) td:nth-of-type({})"
     people_table_rows = '[data-cy="target-population-people-row"]'
     household_table_rows = '[data-cy="target-population-household-row"]'
 

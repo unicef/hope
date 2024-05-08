@@ -68,20 +68,20 @@ class TargetingCriteriaQueryingBase:
             return Q()
         return ~Q(
             (
-                    Q(individuals__ticket_duplicates__isnull=False)
-                    & ~Q(individuals__ticket_duplicates__ticket__status=GrievanceTicket.STATUS_CLOSED)
+                Q(individuals__ticket_duplicates__isnull=False)
+                & ~Q(individuals__ticket_duplicates__ticket__status=GrievanceTicket.STATUS_CLOSED)
             )
             | (
-                    Q(individuals__ticket_golden_records__isnull=False)
-                    & ~Q(individuals__ticket_golden_records__ticket__status=GrievanceTicket.STATUS_CLOSED)
+                Q(individuals__ticket_golden_records__isnull=False)
+                & ~Q(individuals__ticket_golden_records__ticket__status=GrievanceTicket.STATUS_CLOSED)
             )
             | (
-                    Q(representatives__ticket_duplicates__isnull=False)
-                    & ~Q(representatives__ticket_duplicates__ticket__status=GrievanceTicket.STATUS_CLOSED)
+                Q(representatives__ticket_duplicates__isnull=False)
+                & ~Q(representatives__ticket_duplicates__ticket__status=GrievanceTicket.STATUS_CLOSED)
             )
             | (
-                    Q(representatives__ticket_golden_records__isnull=False)
-                    & ~Q(representatives__ticket_golden_records__ticket__status=GrievanceTicket.STATUS_CLOSED)
+                Q(representatives__ticket_golden_records__isnull=False)
+                & ~Q(representatives__ticket_golden_records__ticket__status=GrievanceTicket.STATUS_CLOSED)
             )
         )
 
@@ -145,7 +145,7 @@ class TargetingCriteriaRuleQueryingBase:
 
 class TargetingIndividualRuleFilterBlockBase:
     def __init__(
-            self, individual_block_filters: Optional[Any] = None, target_only_hoh: Optional[List[Household]] = None
+        self, individual_block_filters: Optional[Any] = None, target_only_hoh: Optional[List[Household]] = None
     ) -> None:
         if individual_block_filters is not None:
             self.individual_block_filters = individual_block_filters
@@ -274,9 +274,9 @@ class TargetingCriteriaFilterBase:
         return arguments
 
     def get_query_for_lookup(
-            self,
-            lookup: str,
-            field_attr: str,
+        self,
+        lookup: str,
+        field_attr: str,
     ) -> Q:
         select_many = get_attr_value("type", field_attr, None) == TYPE_SELECT_MANY
         comparison_attribute = TargetingCriteriaFilterBase.COMPARISON_ATTRIBUTES.get(self.comparison_method)
@@ -329,8 +329,9 @@ class TargetingCriteriaFilterBase:
         core_field_attr = core_field_attrs[0]
         get_query = core_field_attr.get("get_query")
         if get_query:
-            return get_query(self.comparison_method, self.arguments,
-                             is_social_worker_query=self.is_social_worker_program)
+            return get_query(
+                self.comparison_method, self.arguments, is_social_worker_query=self.is_social_worker_program
+            )
         lookup = core_field_attr.get("lookup")
         if not lookup:
             logger.error(
