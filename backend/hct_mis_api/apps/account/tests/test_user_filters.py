@@ -125,9 +125,8 @@ class TestUserFilter(APITestCase):
         cls.user_with_unicef_partner_and_role_in_BA = UserFactory(
             partner=partner_unicef, username="unicef_user_with_role_in_BA"
         )
-        cls.create_user_role_with_permissions(
-            cls.user_with_unicef_partner_and_role_in_BA, [Permissions.USER_MANAGEMENT_VIEW_LIST], business_area
-        )
+        role = RoleFactory(name="User Management View Role", permissions=[Permissions.USER_MANAGEMENT_VIEW_LIST])
+        UserRoleFactory(user=cls.user_with_unicef_partner_and_role_in_BA, role=role, business_area=business_area)
 
         # user with UNICEF partner without role in BA
         UserFactory(partner=partner_unicef, username="unicef_user_without_role")
