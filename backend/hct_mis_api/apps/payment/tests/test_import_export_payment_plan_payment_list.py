@@ -132,7 +132,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertEqual(service.errors, error_msg)
 
     def test_import_invalid_file_with_unexpected_column(self) -> None:
-        error_msg = XlsxError(sheet="Payment Plan - Payment List", coordinates="L3", message="Unexpected value")
+        error_msg = XlsxError(sheet="Payment Plan - Payment List", coordinates="M3", message="Unexpected value")
         content = Path(
             f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/pp_payment_list_unexpected_column.xlsx"
         ).read_bytes()
@@ -170,6 +170,8 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
 
         self.assertEqual(to_decimal(wb.active["I2"].value), payment_1.entitlement_quantity)
         self.assertEqual(to_decimal(wb.active["I3"].value), payment_2.entitlement_quantity)
+        self.assertEqual("test_text_link_text_text", payment_1.transaction_status_blockchain)
+        self.assertEqual("test_text_link_test222", payment_2.transaction_status_blockchain)
 
     def test_export_payment_plan_payment_list(self) -> None:
         export_service = XlsxPaymentPlanExportService(self.payment_plan)
