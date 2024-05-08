@@ -11,9 +11,13 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_0_with_permi
     'data': {
         'createTargetPopulation': {
             'targetPopulation': {
+                'hasEmptyCriteria': False,
+                'hasEmptyIdsCriteria': True,
                 'name': 'Example name 5',
                 'status': 'OPEN',
                 'targetingCriteria': {
+                    'householdIds': '',
+                    'individualIds': '',
                     'rules': [
                         {
                             'filters': [
@@ -54,6 +58,90 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_1_without_pe
             ]
         }
     ]
+}
+
+snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id 1'] = {
+    'data': {
+        'createTargetPopulation': {
+            'targetPopulation': {
+                'hasEmptyCriteria': True,
+                'hasEmptyIdsCriteria': False,
+                'name': 'Test name 1',
+                'status': 'OPEN',
+                'targetingCriteria': {
+                    'householdIds': 'HH-1',
+                    'individualIds': '',
+                    'rules': [
+                    ]
+                },
+                'totalHouseholdsCount': None,
+                'totalIndividualsCount': None
+            }
+        }
+    }
+}
+
+snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id 2'] = {
+    'data': {
+        'createTargetPopulation': {
+            'targetPopulation': {
+                'hasEmptyCriteria': True,
+                'hasEmptyIdsCriteria': False,
+                'name': 'Test name 2',
+                'status': 'OPEN',
+                'targetingCriteria': {
+                    'householdIds': 'HH-1, HH-2, HH-3',
+                    'individualIds': 'IND-33',
+                    'rules': [
+                    ]
+                },
+                'totalHouseholdsCount': None,
+                'totalIndividualsCount': None
+            }
+        }
+    }
+}
+
+snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id 3'] = {
+    'data': {
+        'createTargetPopulation': {
+            'targetPopulation': {
+                'hasEmptyCriteria': True,
+                'hasEmptyIdsCriteria': False,
+                'name': 'Test name 3',
+                'status': 'OPEN',
+                'targetingCriteria': {
+                    'householdIds': 'HH-1',
+                    'individualIds': 'IND-33',
+                    'rules': [
+                    ]
+                },
+                'totalHouseholdsCount': None,
+                'totalIndividualsCount': None
+            }
+        }
+    }
+}
+
+snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id 4'] = {
+    'data': {
+        'createTargetPopulation': {
+            'targetPopulation': {
+                'hasEmptyCriteria': True,
+                'hasEmptyIdsCriteria': False,
+                'name': 'Test name 4',
+                'status': 'OPEN',
+                'targetingCriteria': {
+                    'householdIds': '',
+                    'individualIds': 'IND-33',
+                    'rules': [
+                    ]
+                },
+                'totalHouseholdsCount': None,
+                'totalIndividualsCount': None
+            }
+        }
+    }
 }
 
 snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_comparison_method_contains_0_with_permission 1'] = {

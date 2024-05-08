@@ -1068,7 +1068,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         {
                             "row_number": 1,
                             "header": "People",
-                            "message": f"Individual with index_id {index_id} have to has an external collector.",
+                            "message": f"Individual with index_id {index_id} has to have an external collector.",
                         }
                     )
                 if relationship == NON_BENEFICIARY and (pr_col is None and alt_col is None):

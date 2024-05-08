@@ -1,10 +1,8 @@
 import { Box, Button } from '@mui/material';
-import { Field } from 'formik';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { TargetPopulationQuery } from '@generated/graphql';
-import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { LoadingButton } from '@core/LoadingButton';
 import { PageHeader } from '@core/PageHeader';
@@ -15,16 +13,33 @@ interface EditTargetPopulationProps {
   baseUrl: string;
   targetPopulation: TargetPopulationQuery['targetPopulation'];
   loading: boolean;
+  category: string;
 }
 
-export function EditTargetPopulationHeader({
+export const EditTargetPopulationHeader = ({
   handleSubmit,
   values,
   baseUrl,
   targetPopulation,
   loading,
-}: EditTargetPopulationProps): React.ReactElement {
+  category,
+}: EditTargetPopulationProps): React.ReactElement => {
   const { t } = useTranslation();
+
+  const isSubmitDisabled = () => {
+    if (category === 'filters') {
+      return values.criterias?.length === 0 || !values.name || loading;
+    }
+    if (category === 'ids') {
+      return (
+        !(values.individualIds || values.householdIds) ||
+        !values.name ||
+        loading
+      );
+    }
+    return true;
+  };
+
   const { id } = useParams();
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -34,53 +49,32 @@ export function EditTargetPopulationHeader({
     },
   ];
 
-  const isTitleEditable = (): boolean => targetPopulation.status !== 'LOCKED';
-
   return (
     <PageHeader
-      title={
-        isTitleEditable() ? (
-          <Field
-            name="name"
-            label={t('Enter Target Population Name')}
-            type="text"
-            fullWidth
-            required
-            component={FormikTextField}
-            data-cy="target-population-name"
-            variant="standard"
-          />
-        ) : (
-          values.name
-        )
-      }
+      title={t('Edit Target Population')}
       breadCrumbs={breadCrumbsItems}
       hasInputComponent
     >
       <>
-        {values.name && (
-          <Box m={2}>
-            <Button
-              variant="outlined"
-              color="primary"
-              component={Link}
-              data-cy="button-cancel"
-              to={`/${baseUrl}/target-population/${targetPopulation.id}`}
-            >
-              {t('Cancel')}
-            </Button>
-          </Box>
-        )}
+        <Box m={2}>
+          <Button
+            variant="outlined"
+            color="primary"
+            component={Link}
+            data-cy="button-cancel"
+            to={`/${baseUrl}/target-population/${targetPopulation.id}`}
+          >
+            {t('Cancel')}
+          </Button>
+        </Box>
         <Box m={2}>
           <LoadingButton
             variant="contained"
             color="primary"
             onClick={handleSubmit}
+            disabled={isSubmitDisabled()}
             loading={loading}
             data-cy="button-save"
-            disabled={
-              values.targetingCriteria?.length === 0 || !values.name || loading
-            }
           >
             {t('Save')}
           </LoadingButton>
@@ -88,4 +82,4 @@ export function EditTargetPopulationHeader({
       </>
     </PageHeader>
   );
-}
+};

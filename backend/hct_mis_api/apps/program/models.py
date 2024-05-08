@@ -36,6 +36,29 @@ from hct_mis_api.apps.utils.validators import (
 )
 
 
+class ProgramPartnerThrough(TimeStampedUUIDModel):
+    program = models.ForeignKey(
+        "Program",
+        on_delete=models.CASCADE,
+        related_name="program_partner_through",
+    )
+    partner = models.ForeignKey(
+        "account.Partner",
+        on_delete=models.CASCADE,
+        related_name="program_partner_through",
+    )
+    areas = models.ManyToManyField("geo.Area", related_name="program_partner_through", blank=True)
+    full_area_access = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["program", "partner"],
+                name="unique_program_partner",
+            )
+        ]
+
+
 class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel, AdminUrlMixin):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -100,6 +123,16 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         (SCOPE_UNICEF, _("Unicef")),
     )
 
+    ALL_PARTNERS_ACCESS = "ALL_PARTNERS_ACCESS"
+    NONE_PARTNERS_ACCESS = "NONE_PARTNERS_ACCESS"
+    SELECTED_PARTNERS_ACCESS = "SELECTED_PARTNERS_ACCESS"
+
+    PARTNER_ACCESS_CHOICE = (
+        (ALL_PARTNERS_ACCESS, _("All partners access")),
+        (NONE_PARTNERS_ACCESS, _("None partners access")),
+        (SELECTED_PARTNERS_ACCESS, _("Selected partners access")),
+    )
+
     name = CICharField(
         max_length=255,
         validators=[
@@ -155,6 +188,13 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     individual_count = models.PositiveIntegerField(default=0)
     programme_code = models.CharField(max_length=4, null=True, blank=True)
 
+    partner_access = models.CharField(
+        max_length=50,
+        choices=PARTNER_ACCESS_CHOICE,
+        default=SELECTED_PARTNERS_ACCESS,
+    )
+    partners = models.ManyToManyField(to="account.Partner", through=ProgramPartnerThrough, related_name="programs")
+
     objects = SoftDeletableIsVisibleManager()
 
     def save(self, *args: Any, **kwargs: Any) -> None:
@@ -198,6 +238,8 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     @property
     def is_social_worker_program(self) -> bool:
+        if self.data_collecting_type is None:
+            return False
         return self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
 
     class Meta:

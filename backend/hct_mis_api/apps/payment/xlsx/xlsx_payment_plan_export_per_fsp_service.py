@@ -113,11 +113,14 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         template_column_list: List[str],
         ws: "Worksheet",
     ) -> None:
+        is_social_worker_program = None
         for i in range(0, len(payment_ids), self.batch_size):
             batch_ids = payment_ids[i : i + self.batch_size]
             payment_qs = Payment.objects.filter(id__in=batch_ids).order_by("unicef_id")
 
             for payment in payment_qs:
+                if is_social_worker_program is None:
+                    is_social_worker_program = payment.parent.program.is_social_worker_program
                 if self.payment_generate_token_and_order_numbers:
                     payment = generate_token_and_order_numbers(payment)
 
@@ -126,7 +129,9 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                     for column_name in template_column_list
                 ]
                 core_fields_row = [
-                    FinancialServiceProviderXlsxTemplate.get_column_from_core_field(payment, column_name)
+                    FinancialServiceProviderXlsxTemplate.get_column_from_core_field(
+                        payment, column_name, is_social_worker_program
+                    )
                     for column_name in fsp_xlsx_template.core_fields
                 ]
                 payment_row.extend(core_fields_row)

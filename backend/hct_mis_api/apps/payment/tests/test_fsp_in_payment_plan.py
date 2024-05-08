@@ -122,6 +122,7 @@ def payment_plan_setup(cls: Any) -> None:
             {"key": "config_11", "label": "Config 11", "id": "11"},
         ],
     )
+    cls.santander_fsp.allowed_business_areas.add(cls.business_area)
     cls.encoded_santander_fsp_id = encode_id_base64(cls.santander_fsp.id, "FinancialServiceProvider")
 
     cls.bank_of_america_fsp = FinancialServiceProviderFactory(
@@ -133,6 +134,7 @@ def payment_plan_setup(cls: Any) -> None:
         distribution_limit=1000,
         data_transfer_configuration=[{"key": "config_2", "label": "Config 2", "id": "2"}],
     )
+    cls.bank_of_america_fsp.allowed_business_areas.add(cls.business_area)
     cls.encoded_bank_of_america_fsp_id = encode_id_base64(cls.bank_of_america_fsp.id, "FinancialServiceProvider")
 
     cls.bank_of_europe_fsp = FinancialServiceProviderFactory(
@@ -145,7 +147,9 @@ def payment_plan_setup(cls: Any) -> None:
         ],
         data_transfer_configuration=[{"key": "config_3", "label": "Config 3", "id": "3"}],
     )
+    cls.bank_of_europe_fsp.allowed_business_areas.add(cls.business_area)
     cls.encoded_bank_of_europe_fsp_id = encode_id_base64(cls.bank_of_europe_fsp.id, "FinancialServiceProvider")
+
     FspXlsxTemplatePerDeliveryMechanismFactory(
         financial_service_provider=cls.santander_fsp, delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER
     )

@@ -71,7 +71,6 @@ from hct_mis_api.apps.grievance.models import (
 from hct_mis_api.apps.grievance.utils import (
     filter_grievance_tickets_based_on_partner_areas_2,
 )
-from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordAndPaymentNode
 from hct_mis_api.apps.program.models import Program
@@ -148,21 +147,9 @@ class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObje
                 # admin2 is empty or non-program ticket -> no restrictions for admin area
                 has_partner_area_access = True
             else:
-                partner_permission = partner.get_permissions()
-                partner_areas_list: Optional[List] = partner_permission.areas_for(
-                    str(business_area.id), ticket_program_id
+                has_partner_area_access = partner.has_area_access(
+                    area_id=object_instance.admin2.id, program_id=ticket_program_id
                 )
-                if partner_areas_list is not None:
-                    if partner_areas_list:
-                        has_partner_area_access = str(object_instance.admin2.id) in partner_areas_list
-                    else:
-                        # partner_areas_list is [] -> has access full area access
-                        has_partner_area_access = True
-                else:
-                    # partner_areas_list is None
-                    # don't have access to BA
-                    has_partner_area_access = False
-
         if (
             user.has_permission(perm, business_area, ticket_program_id) or check_creator or check_assignee
         ) and has_partner_area_access:
@@ -553,8 +540,6 @@ class Query(graphene.ObjectType):
     grievance_ticket_priority_choices = graphene.List(ChoiceObjectInt)
     grievance_ticket_urgency_choices = graphene.List(ChoiceObjectInt)
 
-    grievance_ticket_search_types_choices = graphene.List(ChoiceObject)
-
     def resolve_all_grievance_ticket(self, info: Any, **kwargs: Any) -> QuerySet:
         user = info.context.user
         program_id = get_program_id_from_headers(info.context.headers)
@@ -574,7 +559,11 @@ class Query(graphene.ObjectType):
 
         # Full access to all AdminAreas if is_unicef
         # and ignore filtering for Cross Area tickets
-        if not user.partner.is_unicef and not kwargs.get("is_cross_area", False):
+        if not user.partner.is_unicef and not (
+            kwargs.get("is_cross_area", False)
+            and program_id
+            and user.partner.has_full_area_access_in_program(program_id)
+        ):
             queryset = filter_grievance_tickets_based_on_partner_areas_2(
                 queryset, user.partner, business_area_id, program_id
             )
@@ -608,8 +597,8 @@ class Query(graphene.ObjectType):
 
         perm = Permissions.GRIEVANCES_CROSS_AREA_FILTER.value
 
-        return user.has_permission(perm, business_area, program_id) and user.partner.has_complete_access_in_program(
-            program_id, str(business_area.id)
+        return user.has_permission(perm, business_area, program_id) and user.partner.has_full_area_access_in_program(
+            program_id
         )
 
     def resolve_grievance_ticket_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
@@ -636,18 +625,6 @@ class Query(graphene.ObjectType):
 
     def resolve_grievance_ticket_urgency_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(URGENCY_CHOICES)
-
-    def resolve_grievance_ticket_search_types_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
-        search_types_choices = [
-            ("ticket_id", "Ticket ID"),
-            ("ticket_hh_id", "Household ID"),
-            ("full_name", "Full Name"),
-            ("phone_number", "Phone Number"),
-            ("registration_id", "Registration ID (Aurora)"),
-            ("bank_account_number", "Bank Account Number"),
-        ]
-        search_types_choices.extend(DocumentType.objects.all().order_by("label").values_list("key", "label"))
-        return [{"name": name, "value": value} for value, name in search_types_choices]
 
     def resolve_all_add_individuals_fields_attributes(self, info: Any, **kwargs: Any) -> List:
         business_area_slug = info.context.headers.get("Business-Area")

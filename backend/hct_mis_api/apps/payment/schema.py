@@ -1052,6 +1052,7 @@ class Query(graphene.ObjectType):
     )
 
     def resolve_available_fsps_for_delivery_mechanisms(self, info: Any, input: Dict, **kwargs: Any) -> List:
+        business_area_slug = info.context.headers.get("Business-Area")
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input["payment_plan_id"]))
         delivery_mechanisms = (
             DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=payment_plan)
@@ -1064,6 +1065,7 @@ class Query(graphene.ObjectType):
                 Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism=mechanism)
                 | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
                 delivery_mechanisms__contains=[mechanism],
+                allowed_business_areas__slug=business_area_slug,
             ).distinct()
             return (
                 [

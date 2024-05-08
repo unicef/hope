@@ -102,12 +102,16 @@ class GenerateReportContentHelpers:
             individual.sanction_list_possible_match,
             individual.deduplication_batch_status,
             individual.deduplication_golden_record_status,
-            individual.deduplication_golden_record_results.get("duplicates", "")
-            if individual.deduplication_golden_record_results
-            else "",
-            individual.deduplication_golden_record_results.get("possible_duplicates", "")
-            if individual.deduplication_golden_record_results
-            else "",
+            (
+                individual.deduplication_golden_record_results.get("duplicates", "")
+                if individual.deduplication_golden_record_results
+                else ""
+            ),
+            (
+                individual.deduplication_golden_record_results.get("possible_duplicates", "")
+                if individual.deduplication_golden_record_results
+                else ""
+            ),
             self._format_date(individual.first_registration_date),
             self._format_date(individual.last_registration_date),
         )
@@ -476,12 +480,16 @@ class GenerateReportContentHelpers:
             individual.sanction_list_possible_match,
             individual.deduplication_batch_status,
             individual.deduplication_golden_record_status,
-            individual.deduplication_golden_record_results.get("duplicates", "")
-            if individual.deduplication_golden_record_results
-            else "",
-            individual.deduplication_golden_record_results.get("possible_duplicates", "")
-            if individual.deduplication_golden_record_results
-            else "",
+            (
+                individual.deduplication_golden_record_results.get("duplicates", "")
+                if individual.deduplication_golden_record_results
+                else ""
+            ),
+            (
+                individual.deduplication_golden_record_results.get("possible_duplicates", "")
+                if individual.deduplication_golden_record_results
+                else ""
+            ),
         )
 
     @staticmethod

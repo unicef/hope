@@ -11,7 +11,9 @@ from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from page_object.admin_panel.admin_panel import AdminPanel
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
+from page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from page_object.grievance.feedback import Feedback
+from page_object.grievance.grievance_tickets import GrievanceTickets
 from page_object.grievance.new_feedback import NewFeedback
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
@@ -24,6 +26,7 @@ from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
 )
 from pytest_django.live_server_helper import LiveServer
+from pytest_html_reporter import attach
 from requests import Session
 from selenium import webdriver
 from selenium.webdriver import Chrome
@@ -32,7 +35,11 @@ from selenium.webdriver.chrome.options import Options
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    BusinessAreaPartnerThrough,
+    DataCollectingType,
+)
 from hct_mis_api.apps.geo.models import Country
 
 
@@ -132,7 +139,8 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
 @pytest.fixture
 def driver() -> Chrome:
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
+    if not os.environ.get("STREAM"):
+        chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument(
         "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
@@ -143,9 +151,11 @@ def driver() -> Chrome:
 
 
 @pytest.fixture(autouse=True)
-def browser(request: FixtureRequest, driver: Chrome) -> Chrome:
-    if request.config.getoption("--mapping"):
+def browser(driver: Chrome, request: FixtureRequest) -> Chrome:
+    if request.node.get_closest_marker("mapping"):
         driver.live_server = LiveServer("0.0.0.0:8080")
+    elif request.node.get_closest_marker("local"):
+        driver.live_server.url = "http://localhost:8080"
     else:
         driver.live_server = LiveServer("localhost")
     yield driver
@@ -186,6 +196,11 @@ def pageFeedback(request: FixtureRequest, browser: Chrome) -> Feedback:
 
 
 @pytest.fixture
+def pageGrievanceTickets(request: FixtureRequest, browser: Chrome) -> GrievanceTickets:
+    yield GrievanceTickets(browser)
+
+
+@pytest.fixture
 def pageFeedbackDetails(request: FixtureRequest, browser: Chrome) -> FeedbackDetailsPage:
     yield FeedbackDetailsPage(browser)
 
@@ -223,6 +238,11 @@ def pageIndividuals(request: FixtureRequest, browser: Chrome) -> Individuals:
 @pytest.fixture
 def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> IndividualsDetails:
     yield IndividualsDetails(browser)
+
+
+@pytest.fixture
+def pageGrievanceDetailsPage(request: FixtureRequest, browser: Chrome) -> GrievanceDetailsPage:
+    yield GrievanceDetailsPage(browser)
 
 
 @pytest.fixture
@@ -276,7 +296,7 @@ def create_super_user(business_area: BusinessArea) -> User:
         email="test@example.com",
         partner=partner,
     )
-    user_role = UserRole.objects.create(
+    UserRole.objects.create(
         user=user,
         role=Role.objects.get(name="Role"),
         business_area=BusinessArea.objects.get(name="Afghanistan"),
@@ -307,14 +327,10 @@ def create_super_user(business_area: BusinessArea) -> User:
         )
         data_collecting_type.limit_to.add(business_area)
         data_collecting_type.save()
-
-    partner.permissions = {
-        str(business_area.pk): {
-            "programs": {},
-            "roles": [str(user_role.id)],
-        }
-    }
-    partner.save()
+    ba_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
+        business_area=business_area, partner=partner
+    )
+    ba_partner_through.roles.set([role])
     return user
 
 
@@ -344,3 +360,4 @@ def screenshot(driver: Chrome, node_id: str) -> None:
     file_name = f'{node_id}_{datetime.today().strftime("%Y-%m-%d_%H.%M")}.png'.replace("/", "_").replace("::", "__")
     file_path = os.path.join("screenshot", file_name)
     driver.get_screenshot_as_file(file_path)
+    attach(data=driver.get_screenshot_as_png())

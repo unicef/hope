@@ -49,7 +49,7 @@ PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "bank_name_i_c",
-        "scope": [Scope.XLSX],
+        "scope": [Scope.XLSX, Scope.XLSX_PEOPLE],
     },
     {
         "id": "3d6a45f3-d3f7-48a0-801b-7a98c0da517a",
@@ -62,7 +62,7 @@ PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "bank_account_number_i_c",
-        "scope": [Scope.XLSX],
+        "scope": [Scope.XLSX, Scope.XLSX_PEOPLE],
     },
     {
         "id": "72e79eec-0c10-42d9-9c25-86162232a389",
@@ -75,7 +75,7 @@ PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "debit_card_issuer_i_c",
-        "scope": [Scope.XLSX],
+        "scope": [Scope.XLSX, Scope.XLSX_PEOPLE],
         "lookup_function": get_debit_card_issuer,
     },
     {
@@ -89,7 +89,7 @@ PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "debit_card_number_i_c",
-        "scope": [Scope.XLSX],
+        "scope": [Scope.XLSX, Scope.XLSX_PEOPLE],
         "lookup_function": get_debit_card_number,
     },
     {
@@ -103,7 +103,7 @@ PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "payment_delivery_phone_no_i_c",
-        "scope": [Scope.XLSX, Scope.INDIVIDUAL_UPDATE, Scope.TARGETING],
+        "scope": [Scope.XLSX, Scope.INDIVIDUAL_UPDATE, Scope.TARGETING, Scope.XLSX_PEOPLE],
     },
     {
         "id": "584c47fa-de3f-40a5-9889-251c7720c660",

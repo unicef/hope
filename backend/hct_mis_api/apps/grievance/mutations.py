@@ -591,17 +591,12 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
             if isinstance(grievance_ticket.ticket_details, TicketNeedsAdjudicationDetails):
                 partner = user.partner
-                if partner is None:
-                    raise PermissionDenied("Permission Denied: User does not have set partner")
 
                 if not partner.is_unicef:
-                    partner_permission = partner.get_permissions()
-
                     for selected_individual in grievance_ticket.ticket_details.selected_individuals.all():
-                        areas_ids = partner_permission.areas_for(
-                            str(grievance_ticket.business_area.id), str(selected_individual.program.id)
-                        )
-                        if areas_ids is None or str(selected_individual.household.admin2.id) not in areas_ids:
+                        if not partner.has_area_access(
+                            area_id=selected_individual.household.admin2.id, program_id=selected_individual.program.id
+                        ):
                             raise PermissionDenied("Permission Denied: User does not have access to close ticket")
 
             clear_cache(grievance_ticket.ticket_details, grievance_ticket.business_area.slug)
@@ -1052,7 +1047,9 @@ class DeleteHouseholdApproveMutation(PermissionMutation):
         reason_hh_id = reason_hh_id.strip() if reason_hh_id else None
         if reason_hh_id:
             # validate reason HH id
-            reason_hh_obj = get_object_or_404(Household, unicef_id=reason_hh_id)
+            reason_hh_obj = get_object_or_404(
+                Household, unicef_id=reason_hh_id, program=ticket_details.household.program
+            )
             if reason_hh_obj.withdrawn:
                 raise ValidationError(f"The provided household {reason_hh_obj.unicef_id} has to be active.")
             if reason_hh_obj == ticket_details.household:
@@ -1197,11 +1194,6 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
         user = info.context.user
         partner = user.partner
 
-        if partner is None:
-            raise PermissionDenied("Permission Denied: User does not have set partner")
-
-        partner_permission = partner.get_permissions()
-
         if selected_individual_id and selected_individual_ids:
             log_and_raise("Only one option for selected individuals is available")
 
@@ -1212,10 +1204,9 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
 
             # Validate partner's permission
             if not partner.is_unicef:
-                areas_ids = partner_permission.areas_for(
-                    str(grievance_ticket.business_area.id), str(selected_individual.program.id)
-                )
-                if areas_ids is None or selected_individual.household.admin2_id not in areas_ids:
+                if not partner.has_area_access(
+                    area_id=selected_individual.household.admin2.id, program_id=selected_individual.program.id
+                ):
                     raise PermissionDenied("Permission Denied: User does not have access to select individual")
 
             if selected_individual not in (
@@ -1233,10 +1224,9 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
             # Validate partner's permission
             if not partner.is_unicef:
                 for selected_individual in selected_individuals:
-                    areas_ids = partner_permission.areas_for(
-                        str(grievance_ticket.business_area.id), str(selected_individual.program.id)
-                    )
-                    if areas_ids is None or str(selected_individual.household.admin2.id) not in areas_ids:
+                    if not partner.has_area_access(
+                        area_id=selected_individual.household.admin2.id, program_id=selected_individual.program.id
+                    ):
                         raise PermissionDenied("Permission Denied: User does not have access to select individual")
 
             ticket_details.selected_individuals.remove(*ticket_details.selected_individuals.all())

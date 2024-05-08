@@ -2,7 +2,11 @@ import { Box, Grid, Typography } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ProgramQuery, ProgrammeChoiceDataQuery } from '@generated/graphql';
+import {
+  ProgrammeChoiceDataQuery,
+  ProgramPartnerAccess,
+  ProgramQuery,
+} from '@generated/graphql';
 import { MiśTheme } from '../../../theme';
 import { choicesToDict, programStatusToColor } from '@utils/utils';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
@@ -11,6 +15,7 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
+import { PartnerAccess } from '@components/programs/constants';
 import { DividerLine } from '@core/DividerLine';
 
 const NumberOfHouseHolds = styled.div`
@@ -47,21 +52,38 @@ export const ProgramDetails = ({
     programFrequencyOfPaymentsChoices,
   );
   const programSectorChoicesDict = choicesToDict(programSectorChoices);
-  const renderAdminAreasCount = (partner): React.ReactElement => (
-    <Grid container spacing={6}>
-      {partner.adminAreas?.map((area) => (
-        <Grid item xs={3} key={area.level}>
-          <LabelizedField
-            dataCy={`admin-area-${area.level}-total-count`}
-            label={t(`Admin Area ${area.level}`)}
-          >
-            {area.totalCount}
-          </LabelizedField>
-        </Grid>
-      ))}
-    </Grid>
+  const renderAdminAreasCount = (
+    partner: ProgramQuery['program']['partners'][0],
+  ): React.ReactElement => {
+    const counts = {};
+    partner.areas?.forEach(({ level }) => {
+      const currentCount = counts[level + 1] || 0;
+      counts[level + 1] = currentCount + 1;
+    });
+
+    return (
+      <Grid container spacing={6}>
+        {Object.keys(counts).map((level) => (
+          <Grid item xs={3} key={level}>
+            <LabelizedField
+              dataCy={`admin-area-${level}-total-count`}
+              label={t(`Admin Area ${level}`)}
+            >
+              {counts[level]}
+            </LabelizedField>
+          </Grid>
+        ))}
+      </Grid>
+    );
+  };
+
+  const partners = program.partners.filter(
+    (partner) => partner.name !== 'UNICEF',
   );
 
+  const showPartners =
+    program.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess &&
+    partners.length > 0;
   return (
     <ContainerColumnWithBorder data-cy="program-details-container">
       <Title>
@@ -136,16 +158,22 @@ export const ProgramDetails = ({
               value={program.cashPlus ? t('Yes') : t('No')}
             />
           </Grid>
+          <Grid item xs={4}>
+            <LabelizedField
+              label={t('Partner Access')}
+              value={PartnerAccess[program.partnerAccess]}
+            />
+          </Grid>
         </Grid>
         <NumberOfHouseHolds>
-          <LabelizedField label={t('Total Number of Households')}>
+          <LabelizedField label={t('Program size')}>
             <NumberOfHouseHoldsValue>
               {program.totalNumberOfHouseholds}
             </NumberOfHouseHoldsValue>
           </LabelizedField>
         </NumberOfHouseHolds>
       </OverviewContainer>
-      {program.partners.length > 0 && (
+      {showPartners && (
         <>
           <DividerLine />
           <Title>
@@ -153,7 +181,7 @@ export const ProgramDetails = ({
           </Title>
           <OverviewContainer>
             <Grid container spacing={6}>
-              {program.partners.map((partner) => (
+              {partners.map((partner) => (
                 <Grid
                   key={partner.id}
                   item

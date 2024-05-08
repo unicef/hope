@@ -1,6 +1,7 @@
 from typing import Any, List
 from unittest import skip
 
+from constance.test import override_config
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import (
@@ -9,7 +10,7 @@ from hct_mis_api.apps.account.fixtures import (
     UserFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import (
     create_afghanistan,
     generate_data_collecting_types,
@@ -32,12 +33,13 @@ from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
 )
 
 
-class TestIndividualQuery(APITestCase):
+@override_config(USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH=True)
+class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
     databases = "__all__"
 
     ALL_INDIVIDUALS_QUERY = """
-    query AllIndividuals($search: String, $searchType: String, $program: ID) {
-      allIndividuals(businessArea: "afghanistan", search: $search, searchType: $searchType, program: $program, orderBy:"id") {
+    query AllIndividuals($search: String, $documentType: String, $documentNumber: String, $program: ID) {
+      allIndividuals(businessArea: "afghanistan", search: $search, documentType: $documentType, documentNumber: $documentNumber, program: $program, orderBy:"id") {
         edges {
           node {
             fullName
@@ -69,6 +71,9 @@ class TestIndividualQuery(APITestCase):
         cls.partner = PartnerFactory(name="Test123")
         cls.user = UserFactory(partner=cls.partner)
 
+        cls.partner_no_access = PartnerFactory(name="Partner No Access")
+        cls.user_with_no_access = UserFactory(partner=cls.partner_no_access)
+
         cls.business_area = create_afghanistan()
         BusinessAreaFactory(name="Democratic Republic of Congo")
         BusinessAreaFactory(name="Sudan")
@@ -92,8 +97,12 @@ class TestIndividualQuery(APITestCase):
             status=Program.DRAFT,
             data_collecting_type=partial,
         )
-        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
-        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program_draft)
+        cls.program_other = ProgramFactory(
+            name="Test program OTHER",
+            business_area=cls.business_area,
+            status=Program.ACTIVE,
+            data_collecting_type=partial,
+        )
 
         cls.household_one = HouseholdFactory.build(business_area=cls.business_area, program=cls.program)
         cls.household_one.household_collection.save()
@@ -165,26 +174,31 @@ class TestIndividualQuery(APITestCase):
             IndividualFactory(household=cls.household_one, program=cls.program, **individual)
             for index, individual in enumerate(cls.individuals_to_create)
         ]
-        cls.household_one.head_of_household = cls.individuals[0]
         cls.individuals_from_hh_one = [ind for ind in cls.individuals if ind.household == cls.household_one]
         # cls.individuals_from_hh_two = [ind for ind in cls.individuals if ind.household == household_two]
         cls.household_one.head_of_household = cls.individuals_from_hh_one[0]
         # household_two.head_of_household = cls.individuals_from_hh_two[1]
         cls.household_one.save()
 
-        cls.bank_account_info = BankAccountInfoFactory(
-            individual=cls.individuals[5], bank_name="ING", bank_account_number=11110000222255558888999925
+        # individual in program that cls.user does not have access to
+        cls.household_2 = HouseholdFactory.build(business_area=cls.business_area, program=cls.program)
+        cls.household_2.household_collection.save()
+        cls.household_2.registration_data_import.imported_by.save()
+        cls.household_2.registration_data_import.program = cls.program
+        cls.household_2.registration_data_import.save()
+        cls.individual_to_create_2_data = {
+            "full_name": "Tester Test",
+            "given_name": "Tester",
+            "family_name": "Test",
+            "phone_no": "(953)681-4591",
+            "birth_date": "1943-07-30",
+            "id": "8ff39244-2884-459b-ad14-8d63a6fe4a4a",
+        }
+        cls.individual_2 = IndividualFactory(
+            household=cls.household_2, program=cls.program_other, **cls.individual_to_create_2_data
         )
-
-        cls.individual_unicef_id_to_search = Individual.objects.get(full_name="Benjamin Butler").unicef_id
-        cls.household_unicef_id_to_search = Individual.objects.get(full_name="Benjamin Butler").household.unicef_id
-
-        DocumentTypeFactory(key="national_id")
-        DocumentTypeFactory(key="national_passport")
-        DocumentTypeFactory(key="tax_id")
-        DocumentTypeFactory(key="birth_certificate")
-        DocumentTypeFactory(key="disability_card")
-        DocumentTypeFactory(key="drivers_license")
+        cls.household_2.head_of_household = cls.individual_2
+        cls.household_2.save()
 
         cls.bank_account_info = BankAccountInfoFactory(
             individual=cls.individuals[5], bank_name="ING", bank_account_number=11110000222255558888999925
@@ -256,15 +270,8 @@ class TestIndividualQuery(APITestCase):
 
         cls.household_one.set_admin_areas(cls.area2)
 
-        cls.partner.permissions = {
-            str(cls.business_area.id): {
-                "programs": {
-                    str(cls.program.id): [str(cls.household_one.admin_area.id)],
-                    str(cls.program_draft.id): [str(cls.household_one.admin_area.id)],
-                }
-            }
-        }
-        cls.partner.save()
+        cls.update_partner_access_to_program(cls.partner, cls.program, [cls.household_one.admin_area])
+        cls.update_partner_access_to_program(cls.partner, cls.program_draft, [cls.household_one.admin_area])
 
         # remove after data migration
         migrate_data_to_representations()
@@ -277,7 +284,6 @@ class TestIndividualQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    @skip(reason="Remove 2nd program after merging to develop")
     def test_individual_query_all(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
@@ -307,6 +313,23 @@ class TestIndividualQuery(APITestCase):
                 "user": self.user,
                 "headers": {
                     "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"id": self.id_to_base64(self.individuals[0].id, "IndividualNode")},
+        )
+
+    def test_individual_query_single_different_program_in_header(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], self.business_area, self.program
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.INDIVIDUAL_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_draft.id, "ProgramNode"),
                     "Business-Area": self.business_area.slug,
                 },
             },
@@ -354,7 +377,7 @@ class TestIndividualQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": "Jenna Franklin", "searchType": "full_name"},
+            variables={"search": "Jenna Franklin"},
         )
 
     def test_individual_query_draft(self) -> None:
@@ -393,7 +416,7 @@ class TestIndividualQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": "(953)682-4596", "searchType": "phone_no"},
+            variables={"search": "(953)682-4596"},
         )
 
     @parameterized.expand(
@@ -415,7 +438,7 @@ class TestIndividualQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": f"{self.national_id.document_number}", "searchType": "national_id"},
+            variables={"documentNumber": f"{self.national_id.document_number}", "documentType": "national_id"},
         )
 
     @parameterized.expand(
@@ -437,7 +460,10 @@ class TestIndividualQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": f"{self.national_passport.document_number}", "searchType": "national_passport"},
+            variables={
+                "documentNumber": f"{self.national_passport.document_number}",
+                "documentType": "national_passport",
+            },
         )
 
     @parameterized.expand(
@@ -459,51 +485,7 @@ class TestIndividualQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": "666-777-888", "searchType": "tax_id"},
-        )
-
-    @parameterized.expand(
-        [
-            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
-            ("without_permission", []),
-        ]
-    )
-    def test_query_individuals_by_search_registration_id_filter(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
-
-        self.snapshot_graphql_request(
-            request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={
-                "user": self.user,
-                "headers": {
-                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
-                    "Business-Area": self.business_area.slug,
-                },
-            },
-            variables={"search": "1", "searchType": "registration_id"},
-        )
-
-    @parameterized.expand(
-        [
-            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
-            ("without_permission", []),
-        ]
-    )
-    def test_query_individuals_by_search_without_search_type(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
-
-        self.snapshot_graphql_request(
-            request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={
-                "user": self.user,
-                "headers": {
-                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
-                    "Business-Area": self.business_area.slug,
-                },
-            },
-            variables={
-                "search": "1",
-            },
+            variables={"documentNumber": "666-777-888", "documentType": "tax_id"},
         )
 
     @parameterized.expand(
@@ -527,7 +509,7 @@ class TestIndividualQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": self.bank_account_info.bank_account_number, "searchType": "bank_account_number"},
+            variables={"search": self.bank_account_info.bank_account_number},
         )
 
     @parameterized.expand(
@@ -549,7 +531,7 @@ class TestIndividualQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": self.birth_certificate.document_number, "searchType": "birth_certificate"},
+            variables={"documentNumber": self.birth_certificate.document_number, "documentType": "birth_certificate"},
         )
 
     @parameterized.expand(
@@ -571,7 +553,7 @@ class TestIndividualQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": self.disability_card.document_number, "searchType": "disability_card"},
+            variables={"documentNumber": self.disability_card.document_number, "documentType": "disability_card"},
         )
 
     @parameterized.expand(
@@ -593,30 +575,7 @@ class TestIndividualQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": self.drivers_license.document_number, "searchType": "drivers_license"},
-        )
-
-    @parameterized.expand(
-        [
-            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
-            ("without_permission", []),
-        ]
-    )
-    def test_query_individuals_by_search_registration_id_filter_with_search_type(
-        self, _: Any, permissions: List[Permissions]
-    ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
-
-        self.snapshot_graphql_request(
-            request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={
-                "user": self.user,
-                "headers": {
-                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
-                    "Business-Area": self.business_area.slug,
-                },
-            },
-            variables={"search": "1", "searchType": "registration_id"},
+            variables={"documentNumber": self.drivers_license.document_number, "documentType": "drivers_license"},
         )
 
     @parameterized.expand(
@@ -638,4 +597,33 @@ class TestIndividualQuery(APITestCase):
                 },
             },
             variables={"admin2": [encode_id_base64(self.area2.id, "AreaNode")]},
+        )
+
+    def test_individual_query_all_for_all_programs(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    def test_individual_query_all_for_all_programs_user_with_no_program_access(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user_with_no_access, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area
+        )
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={
+                "user": self.user_with_no_access,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
         )
