@@ -73,17 +73,14 @@ export const UsersTableRow = ({
             <Box margin={1}>
               {mappedRoles.length ? mappedRoles : 'No roles assigned.'}
             </Box>
-            <Box margin={1}>
-              <GreyText>Partner Roles</GreyText>
-            </Box>
-            <Box margin={1}>
-              <GreyText>Country / Role</GreyText>
-            </Box>
-            <Box margin={1}>
-              {mappedPartnerRoles.length
-                ? mappedPartnerRoles
-                : 'No roles assigned.'}
-            </Box>
+            {mappedPartnerRoles.length && (
+              <>
+                <Box margin={1}>
+                  <GreyText>Partner Roles</GreyText>
+                </Box>
+                <Box margin={1}>{mappedPartnerRoles}</Box>
+              </>
+            )}
           </Collapse>
         </TableCell>
       </TableRow>
