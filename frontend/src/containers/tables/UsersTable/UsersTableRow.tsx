@@ -73,7 +73,7 @@ export const UsersTableRow = ({
             <Box margin={1}>
               {mappedRoles.length ? mappedRoles : 'No roles assigned.'}
             </Box>
-            {mappedPartnerRoles.length && (
+            {mappedPartnerRoles.length > 0 && (
               <>
                 <Box margin={1}>
                   <GreyText>Partner Roles</GreyText>

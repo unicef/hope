@@ -24,7 +24,7 @@ snapshots['TestUserFilter::test_users_by_business_area 1'] = {
                                     'name': 'Afghanistan'
                                 },
                                 'role': {
-                                    'name': 'Role with Permissions',
+                                    'name': 'User Management View Role',
                                     'permissions': [
                                         'USER_MANAGEMENT_VIEW_LIST'
                                     ]
