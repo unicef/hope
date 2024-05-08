@@ -35,7 +35,6 @@ services:
     volumes:
       - ./backend/report/screenshot/:/code/screenshot/
       - ./backend/report/:/code/report/
-      - backend-data:/data
       - backend-data-selenium:/data
       - ./backend/selenium_tests:/code/selenium_tests
       - ./backend/hct_mis_api:/code/hct_mis_api
