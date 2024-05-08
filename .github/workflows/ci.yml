@@ -224,6 +224,7 @@ jobs:
             run selenium
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
+        if: always()
         continue-on-error: true
         with:
           name: report
@@ -231,6 +232,7 @@ jobs:
           retention-days: 5
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
+        if: always()
         continue-on-error: true
         with:
           files: ./backend/coverage.xml
