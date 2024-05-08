@@ -377,11 +377,14 @@ def create_household_and_individuals(
     household.registration_data_import.program.save()
     household.registration_data_import.save()
     household.program.save()
+    for individual_data in individuals_data:
+        if "program" not in individual_data:
+            individual_data["program"] = program
+        if "registration_data_import" not in individual_data:
+            individual_data["registration_data_import"] = household_data["registration_data_import"]
     individuals: List[Individual] = [
         IndividualFactory(
             household=household,
-            program=household.program,
-            registration_data_import=household_data["registration_data_import"],
             **individual_data,
         )
         for individual_data in individuals_data

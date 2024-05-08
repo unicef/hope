@@ -384,9 +384,9 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
     def get_query(self) -> Q:
         query = super().get_query()
         if (
-            self.target_population
-            and self.target_population.status != TargetPopulation.STATUS_OPEN
-            and self.target_population.program is not None
+                self.target_population
+                and self.target_population.status != TargetPopulation.STATUS_OPEN
+                and self.target_population.program is not None
         ):
             query &= Q(size__gt=0)
 
@@ -447,7 +447,10 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
 
     @property
     def is_social_worker_program(self) -> bool:
-        return self.targeting_criteria_rule.targeting_criteria.target_population.program.is_social_worker_program
+        try:
+            return self.targeting_criteria_rule.targeting_criteria.target_population.program.is_social_worker_program
+        except (AttributeError, TargetingCriteriaRuleFilter.targeting_criteria_rule.RelatedObjectDoesNotExist,):
+            return False
 
     def get_core_fields(self) -> List:
         if self.is_social_worker_program:
@@ -479,6 +482,10 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
         :Residential Status = Refugee
         :Residential Status != Refugee
     """
+
+    @property
+    def is_social_worker_program(self) -> bool:
+        return False
 
     def get_core_fields(self) -> List:
         return FieldFactory.from_scope(Scope.TARGETING).associated_with_individual()
