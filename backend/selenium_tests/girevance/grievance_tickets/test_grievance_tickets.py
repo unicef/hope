@@ -146,7 +146,6 @@ class TestSmokeGrievanceTickets:
 
 @pytest.mark.usefixtures("login")
 class TestGrievanceTicketsHappyPath:
-
     @pytest.mark.skip(reason="ToDo")
     def test_grievance_tickets_create_new_ticket(
         self,
