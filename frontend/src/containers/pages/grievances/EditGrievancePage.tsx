@@ -254,6 +254,10 @@ export const EditGrievancePage = (): React.ReactElement => {
     (element) => ({ name: element.node.name, value: element.node.id }),
   );
 
+  const deliveryMechanismDataToEdit =
+    ticket?.individualDataUpdateTicketDetails?.individualData
+      ?.delivery_mechanism_data_to_edit;
+
   return (
     <Formik
       initialValues={initialValues}
@@ -564,40 +568,60 @@ export const EditGrievancePage = (): React.ReactElement => {
                         <BoxPadding>
                           <Title>
                             <Typography variant="h6">
-                              {t('Delivery Mechanisms')}
+                              {t('Delivery Mechanisms Data to Edit')}
                             </Typography>
                           </Title>
                           <Grid container spacing={3}>
-                            <Grid item xs={3}>
-                              <Field
-                                name="paymentChannelField1"
-                                fullWidth
-                                variant="outlined"
-                                label="Payment Channel Field 1"
-                                required
-                                component={FormikTextField}
-                              />
-                            </Grid>
-                            <Grid item xs={3}>
-                              <Field
-                                name="paymentChannelField2"
-                                fullWidth
-                                variant="outlined"
-                                label="Payment Channel Field 2"
-                                required
-                                component={FormikTextField}
-                              />
-                            </Grid>
-                            <Grid item xs={3}>
-                              <Field
-                                name="paymentChannelField3"
-                                fullWidth
-                                variant="outlined"
-                                label="Payment Channel Field 3"
-                                required
-                                component={FormikTextField}
-                              />
-                            </Grid>
+                            {values.individualDataUpdateDeliveryMechanismDataToEdit?.map(
+                              (item, index) => (
+                                <Grid container item xs={12} key={item.id}>
+                                  <Typography variant="subtitle1">
+                                    Delivery Mechanism: {item.label}
+                                  </Typography>
+                                  {Object.entries(item.data_fields).map(
+                                    ([key, field]: [
+                                      string,
+                                      {
+                                        name: string;
+                                        previousValue: string;
+                                        value: string;
+                                      },
+                                    ]) => (
+                                      <Grid
+                                        key={field.name}
+                                        container
+                                        alignItems="flex-end"
+                                        spacing={3}
+                                      >
+                                        <Grid item xs={4}>
+                                          <LabelizedField
+                                            label={t('Field Name')}
+                                          >
+                                            {field.name}
+                                          </LabelizedField>
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                          <Field
+                                            name={`deliveryMechanismDataToEdit[${index}].data_fields[${key}].previousValue`}
+                                            type="text"
+                                            label={t('Current Value')}
+                                            component={FormikTextField}
+                                          />
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                          <Field
+                                            name={`deliveryMechanismDataToEdit[${index}].data_fields[${key}].value`}
+                                            type="text"
+                                            label={t('New Value')}
+                                            component={FormikTextField}
+                                          />
+                                        </Grid>
+                                      </Grid>
+                                    ),
+                                  )}
+                                </Grid>
+                              ),
+                            )}
                           </Grid>
                         </BoxPadding>
                       </>
