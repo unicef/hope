@@ -12,8 +12,6 @@ driver.get(url)
 label = input("Choose the label (default it data-cy):")
 if not label:
     label = "data-cy"
-input("Open the page and press Enter")
-ids = driver.find_elements(By.XPATH, f"//*[@{label}]")
 
 
 def printing(what: str) -> None:
@@ -29,6 +27,9 @@ def printing(what: str) -> None:
             print(f"def {method_name}(self) -> WebElement: \n\treturn self.wait_for(self.{var_name})\n")
 
 
-printing("Labels")
-print("\n")
-printing("Methods")
+while 1:
+    input("Open the page and press Enter")
+    ids = driver.find_elements(By.XPATH, f"//*[@{label}]")
+    printing("Labels")
+    print("\n")
+    printing("Methods")

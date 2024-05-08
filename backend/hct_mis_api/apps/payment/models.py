@@ -277,6 +277,7 @@ class GenericPayment(TimeStampedUUIDModel):
     DELIVERY_TYPE_TRANSFER_TO_ACCOUNT = "Transfer to Account"
     DELIVERY_TYPE_VOUCHER = "Voucher"
     DELIVERY_TYPE_CASH_OVER_THE_COUNTER = "Cash over the counter"
+    DELIVERY_TYPE_ATM_CARD = "ATM Card"
     DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET = "Transfer to Digital Wallet"
 
     DELIVERY_TYPES_IN_CASH = (
@@ -291,6 +292,7 @@ class GenericPayment(TimeStampedUUIDModel):
         DELIVERY_TYPE_TRANSFER,
         DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
         DELIVERY_TYPE_CASH_OVER_THE_COUNTER,
+        DELIVERY_TYPE_ATM_CARD,
     )
     DELIVERY_TYPES_IN_VOUCHER = (DELIVERY_TYPE_VOUCHER,)
 
@@ -308,6 +310,7 @@ class GenericPayment(TimeStampedUUIDModel):
         (DELIVERY_TYPE_VOUCHER, _("Voucher")),
         (DELIVERY_TYPE_CASH_OVER_THE_COUNTER, _("Cash over the counter")),
         (DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET, _("Transfer to Digital Wallet")),
+        (DELIVERY_TYPE_ATM_CARD, _("ATM Card")),
     )
 
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
@@ -337,7 +340,7 @@ class GenericPayment(TimeStampedUUIDModel):
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
     transaction_reference_id = models.CharField(max_length=255, null=True)  # transaction_id
-    transaction_status_blockchain = models.CharField(max_length=128, null=True)
+    transaction_status_blockchain = models.CharField(max_length=255, null=True)
 
     class Meta:
         abstract = True

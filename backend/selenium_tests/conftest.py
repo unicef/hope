@@ -11,7 +11,9 @@ from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from page_object.admin_panel.admin_panel import AdminPanel
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
+from page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from page_object.grievance.feedback import Feedback
+from page_object.grievance.grievance_tickets import GrievanceTickets
 from page_object.grievance.new_feedback import NewFeedback
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
@@ -194,6 +196,11 @@ def pageFeedback(request: FixtureRequest, browser: Chrome) -> Feedback:
 
 
 @pytest.fixture
+def pageGrievanceTickets(request: FixtureRequest, browser: Chrome) -> GrievanceTickets:
+    yield GrievanceTickets(browser)
+
+
+@pytest.fixture
 def pageFeedbackDetails(request: FixtureRequest, browser: Chrome) -> FeedbackDetailsPage:
     yield FeedbackDetailsPage(browser)
 
@@ -231,6 +238,11 @@ def pageIndividuals(request: FixtureRequest, browser: Chrome) -> Individuals:
 @pytest.fixture
 def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> IndividualsDetails:
     yield IndividualsDetails(browser)
+
+
+@pytest.fixture
+def pageGrievanceDetailsPage(request: FixtureRequest, browser: Chrome) -> GrievanceDetailsPage:
+    yield GrievanceDetailsPage(browser)
 
 
 @pytest.fixture
