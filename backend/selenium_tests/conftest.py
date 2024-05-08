@@ -256,8 +256,8 @@ def pageDetailsTargeting(request: FixtureRequest, browser: Chrome) -> DetailsTar
 @pytest.fixture
 def pageCreateTargeting(request: FixtureRequest, browser: Chrome) -> CreateNew:
     yield CreateNew(browser)
-    
-    
+
+
 @pytest.fixture
 def pageGrievanceDetailsPage(request: FixtureRequest, browser: Chrome) -> GrievanceDetailsPage:
     yield GrievanceDetailsPage(browser)
