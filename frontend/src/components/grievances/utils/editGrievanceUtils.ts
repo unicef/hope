@@ -465,7 +465,7 @@ const grievanceTypeIssueTypeDict = {
   [GRIEVANCE_CATEGORIES.DATA_CHANGE]: true,
 };
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function prepareVariables(businessArea, values, ticket) {
+export function prepareVariables(_businessArea, values, ticket) {
   const mapDocumentationToUpdate = (
     documentationToUpdate,
   ): { id: number; name: string; file: File }[] | null => {

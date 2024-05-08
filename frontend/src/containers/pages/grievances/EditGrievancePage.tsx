@@ -625,6 +625,7 @@ export const EditGrievancePage = (): React.ReactElement => {
                                                 type="text"
                                                 label={t('Current Value')}
                                                 component={FormikTextField}
+                                                disabled
                                               />
                                             </Grid>
                                             <Grid item xs={4}>
