@@ -205,17 +205,20 @@ class RecordMixinAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         if request.method == "POST":
             form = FetchForm(request.POST)
             aurora_token = request.user.custom_fields.get("aurora_token")
-            if "detect" in request.POST:
-                ctx["metadata"] = get_metadata(aurora_token)
-            elif form.is_valid():
-                filters = {
-                    "id": form.cleaned_data.get("from_id", "") or "",
-                    "after": form.cleaned_data.get("after_date", "") or "",
-                }
-                if form.cleaned_data["registration"]:
-                    filters["registration"] = form.cleaned_data["registration"].source_id
-                info = fetch_records(aurora_token, form.cleaned_data["overwrite"], **filters)
-                ctx["info"] = info
+            try:
+                if "detect" in request.POST:
+                    ctx["metadata"] = get_metadata(aurora_token)
+                elif form.is_valid():
+                    filters = {
+                        "id": form.cleaned_data.get("from_id", "") or "",
+                        "after": form.cleaned_data.get("after_date", "") or "",
+                    }
+                    if form.cleaned_data["registration"]:
+                        filters["registration"] = form.cleaned_data["registration"].source_id
+                    info = fetch_records(aurora_token, form.cleaned_data["overwrite"], **filters)
+                    ctx["info"] = info
+            except BaseException as e:
+                messages.add_message(request, messages.ERROR, str(e))
         else:
             form = FetchForm()
 
