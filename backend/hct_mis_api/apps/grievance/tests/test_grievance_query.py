@@ -8,14 +8,13 @@ from django.utils import timezone
 import pytest
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.geo.models import Country
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
@@ -194,7 +193,8 @@ class TestGrievanceQuery(APITestCase):
         call_command("loadcountries")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
-        country = Country.objects.first()
+        country = CountryFactory(name="Afghanistan")
+        country.business_areas.set([cls.business_area])
         area_type = AreaTypeFactory(
             name="Admin type one",
             area_level=2,
@@ -206,20 +206,27 @@ class TestGrievanceQuery(APITestCase):
         cls.partner = PartnerFactory(name="Partner1")
         cls.partner_2 = PartnerFactory(name="Partner2")
         # update partner perms
-        cls.partner.permissions = {
-            str(cls.business_area.pk): {
-                "programs": {str(cls.program.id): [str(cls.admin_area_1.pk), str(cls.admin_area_2.pk)]},
-                "roles": ["e9e8c91a-c711-45b7-be8c-501c14d46330"],
-            }
-        }
-        cls.partner_2.permissions = {
-            str(cls.business_area.pk): {
-                "programs": {str(cls.program.id): [str(cls.admin_area_1.pk), str(cls.admin_area_2.pk)]},
-                "roles": ["e9e8c91a-c711-45b7-be8c-501c14d46330"],
-            }
-        }
-        cls.partner.save()
-        cls.partner_2.save()
+        role = RoleFactory(name="Partner Role", permissions=[Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS])
+        cls.update_partner_access_to_program(
+            cls.partner,
+            cls.program,
+            [cls.admin_area_1, cls.admin_area_2],
+        )
+        cls.add_partner_role_in_business_area(
+            cls.partner,
+            cls.business_area,
+            [role],
+        )
+        cls.update_partner_access_to_program(
+            cls.partner_2,
+            cls.program,
+            [cls.admin_area_1, cls.admin_area_2],
+        )
+        cls.add_partner_role_in_business_area(
+            cls.partner_2,
+            cls.business_area,
+            [role],
+        )
         cls.user = UserFactory.create(partner=cls.partner)
         cls.user2 = UserFactory.create(partner=cls.partner_2)
 
@@ -344,44 +351,41 @@ class TestGrievanceQuery(APITestCase):
         cls.user_with_unicef_partner = UserFactory(partner=partner_unicef, username="unicef_user")
 
         # user without access to program
-        partner_perms = {
-            str(cls.business_area.pk): {
-                "roles": [],
-                "programs": {},
-            }
-        }
-        partner = PartnerFactory(name="Partner Without Program", permissions=partner_perms)
-        cls.user_without_program = UserFactory(partner=partner, username="user_without_program")
+        partner_without_program = PartnerFactory(name="Partner Without Program")
+        cls.user_without_program = UserFactory(partner=partner_without_program, username="user_without_program")
 
         # user with full area access
-        partner_perms = {
-            str(cls.business_area.pk): {
-                "roles": [],
-                "programs": {str(cls.program.pk): []},
-            }
-        }
-        partner = PartnerFactory(name="Partner With Full Area Access", permissions=partner_perms)
-        cls.user_with_full_area_access = UserFactory(partner=partner, username="user_with_full_area_access")
+        partner_with_full_area_access = PartnerFactory(name="Partner With Full Area Access")
+        cls.update_partner_access_to_program(
+            partner_with_full_area_access,
+            cls.program,
+            full_area_access=True,
+        )
+        cls.user_with_full_area_access = UserFactory(
+            partner=partner_with_full_area_access, username="user_with_full_area_access"
+        )
 
         # user with access to admin area 1
-        partner_perms = {
-            str(cls.business_area.pk): {
-                "roles": [],
-                "programs": {str(cls.program.pk): [str(cls.admin_area_1.pk)]},
-            }
-        }
-        partner = PartnerFactory(name="Partner With Admin Area 1 Access", permissions=partner_perms)
-        cls.user_with_admin_area_1_access = UserFactory(partner=partner, username="user_with_admin_area_1_access")
+        partner_with_admin_area1_access = PartnerFactory(name="Partner With Admin Area 1 Access")
+        cls.update_partner_access_to_program(
+            partner_with_admin_area1_access,
+            cls.program,
+            [cls.admin_area_1],
+        )
+        cls.user_with_admin_area_1_access = UserFactory(
+            partner=partner_with_admin_area1_access, username="user_with_admin_area_1_access"
+        )
 
         # user with access to admin area 2
-        partner_perms = {
-            str(cls.business_area.pk): {
-                "roles": [],
-                "programs": {str(cls.program.pk): [str(cls.admin_area_2.pk)]},
-            }
-        }
-        partner = PartnerFactory(name="Partner With Admin Area 2 Access", permissions=partner_perms)
-        cls.user_with_admin_area_2_access = UserFactory(partner=partner, username="user_with_admin_area_2_access")
+        partner_with_admin_area2_access = PartnerFactory(name="Partner With Admin Area 2 Access")
+        cls.update_partner_access_to_program(
+            partner_with_admin_area2_access,
+            cls.program,
+            [cls.admin_area_2],
+        )
+        cls.user_with_admin_area_2_access = UserFactory(
+            partner=partner_with_admin_area2_access, username="user_with_admin_area_2_access"
+        )
 
     @parameterized.expand(
         [

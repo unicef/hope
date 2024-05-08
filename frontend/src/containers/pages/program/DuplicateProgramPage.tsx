@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   AllProgramsForChoicesDocument,
+  ProgramPartnerAccess,
   useAllAreasTreeQuery,
   useCopyProgramMutation,
   useProgramQuery,
@@ -18,8 +19,12 @@ import { programValidationSchema } from '@components/programs/CreateProgram/prog
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { hasPermissionInModule } from '../../../config/permissions';
+import {
+  hasPermissionInModule,
+  PERMISSIONS,
+} from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
+import { decodeIdString } from '@utils/utils';
 
 export const DuplicateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -46,6 +51,14 @@ export const DuplicateProgramPage = (): ReactElement => {
     const budgetToFixed = !Number.isNaN(budgetValue)
       ? budgetValue.toFixed(2)
       : 0;
+    const partnersToSet =
+      values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess
+        ? values.partners.map(({ id, areas, areaAccess }) => ({
+            partner: id,
+            areas: areaAccess === 'ADMIN_AREA' ? areas : [],
+            areaAccess,
+          }))
+        : [];
 
     try {
       const response = await mutate({
@@ -55,6 +68,7 @@ export const DuplicateProgramPage = (): ReactElement => {
             ...values,
             budget: budgetToFixed,
             businessAreaSlug: businessArea,
+            partners: partnersToSet,
           },
         },
         refetchQueries: () => [
@@ -88,6 +102,7 @@ export const DuplicateProgramPage = (): ReactElement => {
     cashPlus = false,
     frequencyOfPayments = 'REGULAR',
     partners,
+    partnerAccess = ProgramPartnerAccess.AllPartnersAccess,
   } = data.program;
 
   const initialValues = {
@@ -103,11 +118,14 @@ export const DuplicateProgramPage = (): ReactElement => {
     populationGoal,
     cashPlus,
     frequencyOfPayments,
-    partners: partners.map((partner) => ({
-      id: partner.id,
-      adminAreas: partner.adminAreas,
-      areaAccess: partner.areaAccess,
-    })),
+    partners: partners
+      .filter((partner) => partner.name !== 'UNICEF')
+      .map((partner) => ({
+        id: partner.id,
+        areas: partner.areas.map((area) => decodeIdString(area.id)),
+        areaAccess: partner.areaAccess,
+      })),
+    partnerAccess,
   };
   initialValues.budget =
     data.program.budget === '0.00' ? '' : data.program.budget;
@@ -127,11 +145,18 @@ export const DuplicateProgramPage = (): ReactElement => {
       'cashPlus',
       'frequencyOfPayments',
     ],
-    ['partners'],
+    ['partnerAccess'],
   ];
 
   const { allAreasTree } = treeData;
   const { userPartnerChoices } = userPartnerChoicesData;
+
+  const breadCrumbsItems: BreadCrumbsItem[] = [
+    {
+      title: t('Programme'),
+      to: `/${baseUrl}/details/${id}`,
+    },
+  ];
 
   return (
     <Formik
@@ -141,7 +166,13 @@ export const DuplicateProgramPage = (): ReactElement => {
       }}
       validationSchema={programValidationSchema(t)}
     >
-      {({ submitForm, values, validateForm, setFieldTouched }) => {
+      {({
+        submitForm,
+        values,
+        validateForm,
+        setFieldTouched,
+        setFieldValue,
+      }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
           .map((partner) => ({
@@ -160,13 +191,6 @@ export const DuplicateProgramPage = (): ReactElement => {
             stepFields[step].forEach((field) => setFieldTouched(field));
           }
         };
-
-        const breadCrumbsItems: BreadCrumbsItem[] = [
-          {
-            title: t('Programme'),
-            to: `/${baseUrl}/details/${id}`,
-          },
-        ];
 
         return (
           <>
@@ -213,6 +237,7 @@ export const DuplicateProgramPage = (): ReactElement => {
                   step={step}
                   setStep={setStep}
                   submitForm={submitForm}
+                  setFieldValue={setFieldValue}
                 />
               )}
             </Box>
