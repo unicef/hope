@@ -8,7 +8,8 @@ export const fakeApolloAllHouseholdsForPopulationTable = [
         businessArea: 'afghanistan',
         familySize: '{"min":"","max":""}',
         search: '',
-        searchType: 'household_id',
+        documentType: 'national_id',
+        documentNumber: '',
         admin2: '',
         residenceStatus: '',
         first: 10,
@@ -30,23 +31,20 @@ export const fakeApolloAllHouseholdsForPopulationTable = [
             {
               cursor: 'YXJyYXljb25uZWN0aW9uOjA=',
               node: {
-                id:
-                  'SG91c2Vob2xkTm9kZTowOWI4YWE2ZC1hOTViLTQ5NWEtYTM0ZS1kMGM0YmQyNWE4Njc=',
+                id: 'SG91c2Vob2xkTm9kZTowOWI4YWE2ZC1hOTViLTQ5NWEtYTM0ZS1kMGM0YmQyNWE4Njc=',
                 status: 'ACTIVE',
                 unicefId: 'HH-20-0000.0001',
                 hasDuplicates: false,
                 sanctionListPossibleMatch: false,
                 sanctionListConfirmedMatch: false,
                 headOfHousehold: {
-                  id:
-                    'SW5kaXZpZHVhbE5vZGU6N2JhZjlhMGItODQ4My00MDA0LTg2NzAtMGU4YTUwZjI1YTMw',
+                  id: 'SW5kaXZpZHVhbE5vZGU6N2JhZjlhMGItODQ4My00MDA0LTg2NzAtMGU4YTUwZjI1YTMw',
                   fullName: 'Agata Kowalska',
                   __typename: 'IndividualNode',
                 },
                 size: 4,
                 admin2: {
-                  id:
-                    'QXJlYU5vZGU6NzYxZjhkODQtOTljZi00MWExLTk1MmYtMTQ5ZWFhNjJkZDJh',
+                  id: 'QXJlYU5vZGU6NzYxZjhkODQtOTljZi00MWExLTk1MmYtMTQ5ZWFhNjJkZDJh',
                   name: 'Achin',
                   __typename: 'AreaNode',
                 },
