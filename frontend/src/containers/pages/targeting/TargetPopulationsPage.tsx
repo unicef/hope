@@ -13,6 +13,10 @@ import { getFilterFromQueryParams } from '@utils/utils';
 import { TargetingInfoDialog } from '../../dialogs/targetPopulation/TargetingInfoDialog';
 import { TargetPopulationTable } from '../../tables/targeting/TargetPopulationTable';
 import { CreateTPMenu } from '@components/targeting/CreateTPMenu';
+import {useProgramQuery} from "@generated/graphql";
+import {useBaseUrl} from "@hooks/useBaseUrl";
+import {TargetPopulationForPeopleTable} from "@containers/tables/targeting/TargetPopulationForPeopleTable";
+import {TargetPopulationForPeopleFilters} from "@components/targeting/TargetPopulationForPeopleFilters";
 
 const initialFilter = {
   name: '',
@@ -27,7 +31,10 @@ export const TargetPopulationsPage = (): React.ReactElement => {
   const location = useLocation();
   const { t } = useTranslation();
   const permissions = usePermissions();
-
+  const {  programId } = useBaseUrl();
+  const { data: programData } = useProgramQuery({
+    variables: { id: programId },
+  });
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
@@ -42,7 +49,13 @@ export const TargetPopulationsPage = (): React.ReactElement => {
 
   if (!hasPermissions(PERMISSIONS.TARGETING_VIEW_LIST, permissions))
     return <PermissionDenied />;
-
+  if (!programData) return null;
+  let Table = TargetPopulationTable;
+  let Filters = TargetPopulationFilters;
+  if (programData.program.isSocialWorkerProgram){
+    Table = TargetPopulationForPeopleTable
+    Filters = TargetPopulationForPeopleFilters
+  }
   return (
     <>
       <PageHeader title={t('Targeting')}>
@@ -59,14 +72,14 @@ export const TargetPopulationsPage = (): React.ReactElement => {
           {canCreate && <CreateTPMenu />}
         </>
       </PageHeader>
-      <TargetPopulationFilters
+      <Filters
         filter={filter}
         setFilter={setFilter}
         initialFilter={initialFilter}
         appliedFilter={appliedFilter}
         setAppliedFilter={setAppliedFilter}
       />
-      <TargetPopulationTable
+      <Table
         filter={appliedFilter}
         canViewDetails={hasPermissions(
           PERMISSIONS.TARGETING_VIEW_DETAILS,

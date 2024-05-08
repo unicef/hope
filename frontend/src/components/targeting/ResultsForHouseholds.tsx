@@ -53,7 +53,7 @@ interface ResultsProps {
   targetPopulation: TargetPopulationQuery['targetPopulation'];
 }
 
-export function Results({
+export function ResultsForHouseholds({
   targetPopulation,
 }: ResultsProps): React.ReactElement {
   const { t } = useTranslation();
