@@ -973,6 +973,7 @@ enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   VOUCHER
   CASH_OVER_THE_COUNTER
   TRANSFER_TO_DIGITAL_WALLET
+  ATM_CARD
 }
 
 type DiscardPaymentVerificationPlan {
@@ -2871,6 +2872,7 @@ enum PaymentDeliveryType {
   VOUCHER
   CASH_OVER_THE_COUNTER
   TRANSFER_TO_DIGITAL_WALLET
+  ATM_CARD
 }
 
 type PaymentDetailsApproveMutation {
@@ -3258,6 +3260,7 @@ enum PaymentRecordDeliveryType {
   VOUCHER
   CASH_OVER_THE_COUNTER
   TRANSFER_TO_DIGITAL_WALLET
+  ATM_CARD
 }
 
 enum PaymentRecordEntitlementCardStatus {
