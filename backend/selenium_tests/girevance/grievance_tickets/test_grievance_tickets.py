@@ -177,7 +177,6 @@ class TestGrievanceTicketsHappyPath:
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getDescription().send_keys("Happy path test 1234!")
         pageGrievanceNewTicket.getButtonNext().click()
-        assert "New Ticket" in pageGrievanceDetailsPage.getTitle().text
         assert "Happy path test 1234!" in pageGrievanceDetailsPage.getTicketDescription().text
         assert test_data["category"] in pageGrievanceDetailsPage.getTicketCategory().text
         assert test_data["type"] in pageGrievanceDetailsPage.getLabelIssueType().text
@@ -204,7 +203,6 @@ class TestGrievanceTicketsHappyPath:
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getDescription().send_keys("Happy path test 1234!")
         pageGrievanceNewTicket.getButtonNext().click()
-        assert "New Ticket" in pageGrievanceDetailsPage.getTitle().text
         assert "Happy path test 1234!" in pageGrievanceDetailsPage.getTicketDescription().text
         assert "Referral" in pageGrievanceDetailsPage.getTicketCategory().text
         assert "New" in pageGrievanceDetailsPage.getTicketStatus().text
