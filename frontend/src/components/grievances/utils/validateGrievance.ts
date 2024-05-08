@@ -89,7 +89,8 @@ export function validate(
         !values.individualDataUpdateIdentitiesToEdit?.length &&
         !values.individualDataUpdateFieldsPaymentChannels?.length &&
         !values.individualDataUpdatePaymentChannelsToRemove?.length &&
-        !values.individualDataUpdatePaymentChannelsToEdit?.length
+        !values.individualDataUpdatePaymentChannelsToEdit?.length &&
+        !values.individualDataUpdateDeliveryMechanismDataToEdit?.length
       ) {
         errors.individualDataUpdateFields =
           'Individual Data Change is Required';

@@ -566,63 +566,84 @@ export const EditGrievancePage = (): React.ReactElement => {
                           {dataChangeErrors(errors, touched)}
                         </BoxPadding>
                         <BoxPadding>
-                          <Title>
-                            <Typography variant="h6">
-                              {t('Delivery Mechanisms Data to Edit')}
-                            </Typography>
-                          </Title>
-                          <Grid container spacing={3}>
-                            {values.individualDataUpdateDeliveryMechanismDataToEdit?.map(
-                              (item, index) => (
-                                <Grid container item xs={12} key={item.id}>
-                                  <Typography variant="subtitle1">
-                                    Delivery Mechanism: {item.label}
-                                  </Typography>
-                                  {Object.entries(item.data_fields).map(
-                                    ([key, field]: [
-                                      string,
-                                      {
-                                        name: string;
-                                        previousValue: string;
-                                        value: string;
-                                      },
-                                    ]) => (
-                                      <Grid
-                                        key={field.name}
-                                        container
-                                        alignItems="flex-end"
-                                        spacing={3}
-                                      >
-                                        <Grid item xs={4}>
-                                          <LabelizedField
-                                            label={t('Field Name')}
+                          {deliveryMechanismDataToEdit && (
+                            <>
+                              <Title>
+                                <Typography variant="h6">
+                                  {t('Delivery Mechanisms Data to Edit')}
+                                </Typography>
+                              </Title>
+                              <Grid container spacing={3}>
+                                {values.individualDataUpdateDeliveryMechanismDataToEdit?.map(
+                                  (
+                                    item: {
+                                      id: string;
+                                      label: string;
+                                      data_fields: Record<
+                                        string,
+                                        {
+                                          name: string;
+                                          previous_value: string;
+                                          value: string;
+                                        }
+                                      >;
+                                    },
+                                    index: number,
+                                  ) => (
+                                    <Grid container item xs={12} key={item.id}>
+                                      <Typography variant="subtitle1">
+                                        Delivery Mechanism: {item.label}
+                                      </Typography>
+                                      {Object.entries(item.data_fields).map(
+                                        (
+                                          [_key, field]: [
+                                            string,
+                                            {
+                                              name: string;
+                                              previous_value: string;
+                                              value: string;
+                                            },
+                                          ],
+                                          fieldIndex: number,
+                                        ) => (
+                                          <Grid
+                                            key={field.name}
+                                            container
+                                            alignItems="flex-end"
+                                            spacing={3}
                                           >
-                                            {field.name}
-                                          </LabelizedField>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                          <Field
-                                            name={`deliveryMechanismDataToEdit[${index}].data_fields[${key}].previousValue`}
-                                            type="text"
-                                            label={t('Current Value')}
-                                            component={FormikTextField}
-                                          />
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                          <Field
-                                            name={`deliveryMechanismDataToEdit[${index}].data_fields[${key}].value`}
-                                            type="text"
-                                            label={t('New Value')}
-                                            component={FormikTextField}
-                                          />
-                                        </Grid>
-                                      </Grid>
-                                    ),
-                                  )}
-                                </Grid>
-                              ),
-                            )}
-                          </Grid>
+                                            <Grid item xs={4}>
+                                              <LabelizedField
+                                                label={t('Field Name')}
+                                              >
+                                                {field.name}
+                                              </LabelizedField>
+                                            </Grid>
+                                            <Grid item xs={4}>
+                                              <Field
+                                                name={`individualDataUpdateDeliveryMechanismDataToEdit[${index}].data_fields[${fieldIndex}].previous_value`}
+                                                type="text"
+                                                label={t('Current Value')}
+                                                component={FormikTextField}
+                                              />
+                                            </Grid>
+                                            <Grid item xs={4}>
+                                              <Field
+                                                name={`individualDataUpdateDeliveryMechanismDataToEdit[${index}].data_fields[${fieldIndex}].value`}
+                                                type="text"
+                                                label={t('New Value')}
+                                                component={FormikTextField}
+                                              />
+                                            </Grid>
+                                          </Grid>
+                                        ),
+                                      )}
+                                    </Grid>
+                                  ),
+                                )}
+                              </Grid>
+                            </>
+                          )}
                         </BoxPadding>
                       </>
                     )}

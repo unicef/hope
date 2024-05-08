@@ -132,9 +132,8 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
     individualDataUpdatePaymentChannelsToEdit: camelizeArrayObjects(
       paymentChannelsToEdit,
     ),
-    individualDataUpdateDeliveryMechanismDataToEdit: camelizeArrayObjects(
+    individualDataUpdateDeliveryMechanismDataToEdit:
       deliveryMechanismDataToEdit,
-    ),
   };
 }
 
@@ -389,6 +388,8 @@ function prepareEditIndividualVariables(requiredVariables, values) {
                 values.individualDataUpdatePaymentChannelsToRemove,
               paymentChannelsToEdit:
                 values.individualDataUpdatePaymentChannelsToEdit,
+              deliveryMechanismDataToEdit:
+                values.individualDataUpdateDeliveryMechanismDataToEdit,
             },
           },
         },
