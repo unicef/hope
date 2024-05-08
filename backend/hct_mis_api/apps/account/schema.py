@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import Q
 from django.utils.encoding import force_str
 from django.utils.functional import Promise
 
@@ -29,8 +30,8 @@ from hct_mis_api.apps.account.permissions import (
     hopeOneOfPermissionClass,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.schema import ChoiceObject
+from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
+from hct_mis_api.apps.core.schema import BusinessAreaNode, ChoiceObject
 from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.schema import AreaNode
@@ -66,6 +67,13 @@ class RoleNode(DjangoObjectType):
         exclude = ("id",)
 
 
+class PartnerRoleNode(DjangoObjectType):
+
+    class Meta:
+        model = BusinessAreaPartnerThrough
+        exclude = ("id",)
+
+
 class RoleChoiceObject(graphene.ObjectType):
     name = graphene.String()
     value = graphene.String()
@@ -96,9 +104,13 @@ class PartnerType(DjangoObjectType):
 
 class UserNode(DjangoObjectType):
     business_areas = DjangoFilterConnectionField(UserBusinessAreaNode)
+    partner_roles = graphene.List(PartnerRoleNode)
 
     def resolve_business_areas(self, info: Any) -> "QuerySet[BusinessArea]":
         return info.context.user.business_areas
+
+    def resolve_partner_roles(self, info: Any) -> "QuerySet[Role]":
+        return self.partner.business_area_partner_through.all()
 
     class Meta:
         model = get_user_model()
