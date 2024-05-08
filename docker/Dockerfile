@@ -40,29 +40,37 @@ RUN apt-get update \
   && mkdir -p -m 0700 /run/user/"${UID}" \
   && chown -R hope:hope /code /tmp /data /run/user/"${UID}"
 
-ENV PDM_PACKAGES=/packages
-ENV PYPACKAGES=$PDM_PACKAGES/__pypackages__/3.11
+# ENV PDM_PACKAGES=/packages
+ENV CODE=/code
+ENV PYPACKAGES=$CODE/__pypackages__/3.11
 ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
     PYTHONPATH=$PYTHONPATH:$PYPACKAGES/lib:/code \
     PATH=$PATH:$PYPACKAGES/bin \
     XDG_RUNTIME_DIR=/run/user/"${UID}"
 
-WORKDIR /code
+WORKDIR $CODE
 
 COPY --from=waitforit /data/waitforit /usr/local/bin/waitforit
 
-# Dist builder image
-FROM base as builder
-
-RUN pip install pdm==2.14.0 &&\
+RUN pip install pdm==2.15.2 &&\
     pip install --upgrade pip setuptools &&\
     pdm config cache_dir /var/cache/pdm &&\
     pdm config python.use_venv false &&\
     pdm config venv.in_project true &&\
-    pdm config install.cache true &&\
     pdm config check_update false
 
-WORKDIR $PDM_PACKAGES
+
+# Dist builder image
+FROM base as builder
+
+#RUN pip install pdm==2.15.2 &&\
+#    pip install --upgrade pip setuptools &&\
+#    pdm config cache_dir /var/cache/pdm &&\
+#    pdm config python.use_venv false &&\
+#    pdm config venv.in_project true &&\
+#    pdm config check_update false
+
+# WORKDIR $CODE
 COPY backend/pyproject.toml backend/pdm.lock ./
 RUN pdm sync --prod --no-editable --no-self
 
@@ -80,9 +88,10 @@ RUN apt-get update \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-RUN pdm sync --no-editable --no-self
-WORKDIR /code
+# WORKDIR $CODE
 COPY ./backend ./
+
+RUN pdm sync --no-editable --no-self
 
 COPY ./docker/entrypoint.sh /bin/
 ENTRYPOINT ["entrypoint.sh"]
@@ -91,8 +100,12 @@ ENTRYPOINT ["entrypoint.sh"]
 FROM base AS be-dist
 
 COPY --chown=hope:hope ./backend ./
-COPY --chown=hope:hope --from=builder $PDM_PACKAGES $PDM_PACKAGES
+# COPY --chown=hope:hope --from=builder $PDM_PACKAGES $PDM_PACKAGES
+COPY --chown=hope:hope --from=builder $PYPACKAGES $PYPACKAGES
 COPY --chown=hope:hope --from=certs /data/psql-cert.crt /code/psql-cert.crt
+
+# RUN pdm sync --no-editable --no-self
+
 USER hope
 
 COPY ./docker/entrypoint.sh /bin/
