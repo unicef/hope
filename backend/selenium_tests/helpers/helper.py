@@ -3,7 +3,6 @@ from time import sleep
 from typing import Literal, Union
 
 from selenium.webdriver import Chrome, Keys
-from selenium.webdriver.common import actions
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
@@ -39,7 +38,7 @@ class Common:
         return self._wait(timeout).until(EC.visibility_of_element_located((element_type, locator)))
 
     def wait_for_disappear(
-            self, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
+        self, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
     ) -> Union[Literal[False, True], WebElement]:
         return self._wait(timeout).until_not(EC.visibility_of_element_located((element_type, locator)))
 
@@ -51,7 +50,7 @@ class Common:
         return self.driver.current_url
 
     def select_listbox_element(
-            self, name: str, listbox: str = 'ul[role="listbox"]', tag_name: str = "li"
+        self, name: str, listbox: str = 'ul[role="listbox"]', tag_name: str = "li"
     ) -> WebElement:
         select_element = self.wait_for(listbox)
         items = select_element.find_elements("tag name", tag_name)
@@ -83,7 +82,7 @@ class Common:
             selectOption = f'li[data-cy="select-option-{optionName}"]'
             self.wait_for(selectOption).click()
         actions = ActionChains(self.driver)
-        actions.send_keys(Keys.ESCAPE).perform()
+        actions.send_keys(Keys.ESCAPE).perform()  # type: ignore
         try:
             self.wait_for_disappear(selectOption)
         except BaseException:
@@ -104,7 +103,7 @@ class Common:
         return element.find_elements(element_type, locator)
 
     def screenshot(
-            self, file_name: str = "test", file_type: str = "png", file_path: str = "screenshot", delay_sec: int = 1
+        self, file_name: str = "test", file_type: str = "png", file_path: str = "screenshot", delay_sec: int = 1
     ) -> None:
         sleep(delay_sec)
         self.driver.get_screenshot_as_file(os.path.join(f"{file_path}", f"{file_name}.{file_type}"))

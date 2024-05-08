@@ -9,7 +9,6 @@ class TargetingCreate(BaseComponents):
     addHouseholdRuleButton = '[data-cy="button-household-rule"]'
     addIndividualRuleButton = '[data-cy="button-individual-rule"]'
     addPeopleRuleButton = '[data-cy="button-household-rule"]'
-    addHouseholdeRuleButton = '[data-cy="button-household-rule"]'
     titlePage = 'h5[data-cy="page-header-title"]'
     fieldName = 'input[data-cy="input-name"]'
     targetingCriteriaAutoComplete = 'input[data-cy="autocomplete-target-criteria-option-{}"]'
@@ -39,9 +38,6 @@ class TargetingCreate(BaseComponents):
 
     def getAddPeopleRuleButton(self) -> WebElement:
         return self.wait_for(self.addPeopleRuleButton)
-
-    def getAddHouseholdRuleButton(self) -> WebElement:
-        return self.wait_for(self.addHouseholdeRuleButton)
 
     def getTargetingCriteriaAutoComplete(self, index: int = 0) -> WebElement:
         return self.wait_for(self.targetingCriteriaAutoComplete.format(index))
