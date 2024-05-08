@@ -82,7 +82,6 @@ class Common:
         for optionName in optionNames:
             selectOption = f'li[data-cy="select-option-{optionName}"]'
             self.wait_for(selectOption).click()
-            self.screenshot("xd123")
         actions = ActionChains(self.driver)
         actions.send_keys(Keys.ESCAPE).perform()
         try:

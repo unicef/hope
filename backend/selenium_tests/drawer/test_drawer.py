@@ -25,7 +25,7 @@ def normal_program() -> Program:
 
 
 @pytest.fixture
-def active_program() -> Program:
+def sw_program() -> Program:
     return get_program_with_dct_type_and_name("Active Program", status=Program.ACTIVE)
 
 
@@ -121,13 +121,13 @@ class TestDrawer:
     def test_inactive_draft_subheader(
         self,
         draft_program: Program,
-        active_program: Program,
+            sw_program,
         finished_program: Program,
         pageProgrammeManagement: ProgrammeManagement,
         pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
         draft_program_name = draft_program.name
-        active_program_name = active_program.name
+        active_program_name = sw_program.name
         finished_program_name = finished_program.name
         pageProgrammeManagement.selectGlobalProgramFilter(draft_program_name).click()
         assert draft_program_name in pageProgrammeDetails.getHeaderTitle().text
