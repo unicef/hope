@@ -35,6 +35,7 @@ services:
       - ./backend/report/:/code/report/
       - backend-data-selenium:/data
       - ./backend/selenium_tests:/code/selenium_tests
+      - ./backend/hct_mis_api:/code/hct_mis_api
       - type: volume
         source: backend-web-app-selenium
         target: /code/hct_mis_api/apps/web/static
