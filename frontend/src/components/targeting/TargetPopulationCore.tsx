@@ -15,7 +15,7 @@ import { TargetingCriteria } from './TargetingCriteria';
 import { TargetingHouseholds } from './TargetingHouseholds';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { TargetPopulationPeopleTable } from '@containers/tables/targeting/TargetPopulationPeopleTable';
-import {ResultsForPeople} from "@components/targeting/ResultsForPeople";
+import { ResultsForPeople } from '@components/targeting/ResultsForPeople';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -54,10 +54,10 @@ export const TargetPopulationCore = ({
   const householdIds = targetPopulation.targetingCriteria?.householdIds;
   const individualIds = targetPopulation.targetingCriteria?.individualIds;
   let ResultComponent = null;
-  if(targetPopulation.program.isSocialWorkerProgram ){
-    ResultComponent = ResultsForPeople
-  }else {
-    ResultComponent = ResultsForHouseholds
+  if (targetPopulation.program.isSocialWorkerProgram ) {
+    ResultComponent = ResultsForPeople;
+  } else {
+    ResultComponent = ResultsForHouseholds;
   }
   const recordsTable = targetPopulation.program.isSocialWorkerProgram ? (
     <TargetPopulationPeopleTable

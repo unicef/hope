@@ -21,10 +21,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { decodeIdString } from '@utils/utils';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import {
-  hasPermissionInModule,
-  PERMISSIONS,
-} from '../../../config/permissions';
+import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 
 export const EditProgramPage = (): ReactElement => {
@@ -98,8 +95,8 @@ export const EditProgramPage = (): ReactElement => {
       : 0;
     const partnersToSet =
       values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess
-        ? values.partners.map(({ id, areas, areaAccess }) => ({
-            partner: id,
+        ? values.partners.map(({ id: partnerId, areas, areaAccess }) => ({
+            partner: partnerId,
             areas: areaAccess === 'ADMIN_AREA' ? areas : [],
             areaAccess,
           }))

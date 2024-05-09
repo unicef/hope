@@ -146,7 +146,7 @@ export const TargetingCriteria = ({
     selectedProgram?.dataCollectingType?.individualFiltersAvailable;
   let householdFiltersAvailable =
     selectedProgram?.dataCollectingType?.householdFiltersAvailable;
-  let isSocialWorkingProgram =
+  const isSocialWorkingProgram =
     selectedProgram?.dataCollectingType?.type === DataCollectingTypeType.Social;
   // Allow use filters on non-migrated programs
   if (individualFiltersAvailable === undefined) {

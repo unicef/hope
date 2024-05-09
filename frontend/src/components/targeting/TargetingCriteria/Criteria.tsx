@@ -61,11 +61,10 @@ const CriteriaSetBox = styled.div`
 `;
 
 const CriteriaField = ({ field, choicesDict }): React.ReactElement => {
-  const extractChoiceLabel = (field, argument) => {
-    console.log('choicesDict', choicesDict, field, argument);
-    let choices = choicesDict?.[field.fieldName];
+  const extractChoiceLabel = (choiceField, argument) => {
+    let choices = choicesDict?.[choiceField.fieldName];
     if (!choices) {
-      choices = field.fieldAttribute.choices;
+      choices = choiceField.fieldAttribute.choices;
     }
     return choices?.length
       ? choices.find((each) => each.value === argument)?.labelEn
