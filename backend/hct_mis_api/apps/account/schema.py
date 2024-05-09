@@ -67,7 +67,6 @@ class RoleNode(DjangoObjectType):
 
 
 class PartnerRoleNode(DjangoObjectType):
-
     class Meta:
         model = BusinessAreaPartnerThrough
         exclude = ("id",)
