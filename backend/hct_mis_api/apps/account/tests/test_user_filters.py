@@ -123,9 +123,7 @@ class TestUserFilter(APITestCase):
         # user with role in BA and program access
         cls.program = ProgramFactory(name="Test Program")
         partner = PartnerFactory(name="Test Partner with Program Access")
-        cls.user_with_role_in_ba = UserFactory(
-            partner=partner, username="user_with_role_in_BA"
-        )
+        cls.user_with_role_in_ba = UserFactory(partner=partner, username="user_with_role_in_BA")
         cls.update_partner_access_to_program(partner=partner, program=cls.program)
         role = RoleFactory(name="User Management View Role", permissions=[Permissions.USER_MANAGEMENT_VIEW_LIST.value])
         UserRoleFactory(user=cls.user_with_role_in_ba, role=role, business_area=business_area)
