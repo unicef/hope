@@ -1877,7 +1877,7 @@ class FieldFactory(list):
         factory = cls()
         all_fields = copy.deepcopy(factory.all_fields)
         factory.scopes.update(scopes)
-        factory.extend(filter(lambda field: all(True for scope in scopes if scope in field["scope"]), all_fields))
+        factory.extend(filter(lambda field: all(scope in field["scope"] for scope in scopes), all_fields))
         if Scope.XLSX_PEOPLE in scopes:
             for field_attr in factory:
                 field_attr["xlsx_field"] = "pp_" + field_attr["xlsx_field"].replace("_h_c", "_i_c")
