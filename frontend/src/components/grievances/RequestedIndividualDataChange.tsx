@@ -60,6 +60,9 @@ export function RequestedIndividualDataChange({
     individualData.payment_channels_to_remove || [];
   const paymentChannelsToEdit = individualData.payment_channels_to_edit || [];
   const flexFields = individualData.flex_fields || {};
+  const deliveryMechanismDataToEdit =
+    individualData.delivery_mechanism_data_to_edit || [];
+
   delete individualData.flex_fields;
   delete individualData.documents;
   delete individualData.identities;
@@ -73,6 +76,8 @@ export function RequestedIndividualDataChange({
   delete individualData.previous_documents;
   delete individualData.previous_identities;
   delete individualData.previous_payment_channels;
+  delete individualData.delivery_mechanism_data_to_edit;
+  delete individualData.delivery_mechanism_data_to_remove;
 
   const entries = Object.entries(individualData);
   const entriesFlexFields = Object.entries(flexFields);
@@ -98,6 +103,9 @@ export function RequestedIndividualDataChange({
   ).length;
   allApprovedCount += entriesFlexFields.filter(
     ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
+  ).length;
+  allApprovedCount += deliveryMechanismDataToEdit.filter(
+    (el) => el.approve_status,
   ).length;
 
   const [isEdit, setEdit] = useState(allApprovedCount === 0);
@@ -152,8 +160,6 @@ export function RequestedIndividualDataChange({
   const selectedPaymentChannels = [];
   const selectedPaymentChannelsToRemove = [];
   const selectedPaymentChannelsToEdit = [];
-  const selectedDeliveryMechanismData = [];
-  const selectedDeliveryMechanismDataToRemove = [];
   const selectedDeliveryMechanismDataToEdit = [];
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < paymentChannels?.length; i++) {
@@ -171,6 +177,12 @@ export function RequestedIndividualDataChange({
   for (let i = 0; i < paymentChannelsToEdit?.length; i++) {
     if (paymentChannelsToEdit[i]?.approve_status) {
       selectedPaymentChannelsToEdit.push(i);
+    }
+  }
+  // eslint-disable-next-line no-plusplus
+  for (let i = 0; i < deliveryMechanismDataToEdit?.length; i++) {
+    if (deliveryMechanismDataToEdit[i]?.approve_status) {
+      selectedDeliveryMechanismDataToEdit.push(i);
     }
   }
 
@@ -212,7 +224,8 @@ export function RequestedIndividualDataChange({
       identitiesToEdit.length +
       paymentChannels.length +
       paymentChannelsToRemove.length +
-      paymentChannelsToEdit.length;
+      paymentChannelsToEdit.length +
+      deliveryMechanismDataToEdit.length;
 
     return allSelected === countAll;
   };
@@ -281,9 +294,7 @@ export function RequestedIndividualDataChange({
         selectedPaymentChannels,
         selectedPaymentChannelsToEdit,
         selectedPaymentChannelsToRemove,
-        selectedDeliveryMechanismData,
         selectedDeliveryMechanismDataToEdit,
-        selectedDeliveryMechanismDataToRemove,
       }}
       onSubmit={async (values) => {
         const individualApproveData = values.selected.reduce((prev, curr) => {
@@ -302,9 +313,6 @@ export function RequestedIndividualDataChange({
           values.selectedPaymentChannelsToRemove;
         const approvedPaymentChannelsToEdit =
           values.selectedPaymentChannelsToEdit;
-        const approvedDeliveryMechanismDataToCreate = values.selectedDeliveryMechanismData;
-        const approvedDeliveryMechanismDataToRemove =
-          values.selectedDeliveryMechanismDataToRemove;
         const approvedDeliveryMechanismDataToEdit =
           values.selectedDeliveryMechanismDataToEdit;
         const flexFieldsApproveData = values.selectedFlexFields.reduce(
@@ -329,8 +337,6 @@ export function RequestedIndividualDataChange({
               approvedPaymentChannelsToCreate,
               approvedPaymentChannelsToRemove,
               approvedPaymentChannelsToEdit,
-              approvedDeliveryMechanismDataToCreate,
-              approvedDeliveryMechanismDataToRemove,
               approvedDeliveryMechanismDataToEdit,
               flexFieldsApproveData: JSON.stringify(flexFieldsApproveData),
             },
