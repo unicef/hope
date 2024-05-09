@@ -69,8 +69,8 @@ def age_to_birth_date_query(comparison_method: str, args: Any, is_social_worker_
         return age_to_birth_date_range_query(field_name, args[0], None, is_social_worker_query=is_social_worker_query)
     if comparison_method == "LESS_THAN":
         return age_to_birth_date_range_query(field_name, None, args[0], is_social_worker_query=is_social_worker_query)
-    logger.error(f"Age filter query don't supports {comparison_method} type")
-    raise ValidationError(f"Age filter query don't supports {comparison_method} type")
+    logger.error(f"Age filter query don't supports {comparison_method} type")  # pragma: no cover
+    raise ValidationError(f"Age filter query don't supports {comparison_method} type")  # pragma: no cover
 
 
 def get_birth_certificate_document_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
