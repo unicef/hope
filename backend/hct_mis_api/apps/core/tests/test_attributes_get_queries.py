@@ -11,8 +11,10 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
     country_origin_query,
     country_query,
     get_birth_certificate_document_number_query,
+    get_birth_certificate_issuer_query,
     get_documents_issuer_query,
     get_drivers_license_document_number_query,
+    get_drivers_licensee_issuer_query,
     get_electoral_card_document_number_query,
     get_electoral_card_issuer_query,
     get_has_bank_account_number_query,
@@ -23,12 +25,14 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
     get_national_passport_document_number_query,
     get_national_passport_issuer_query,
     get_other_document_number_query,
+    get_other_issuer_query,
     get_receiver_poi_issuer_query,
     get_receiver_poi_number_query,
     get_role_query,
     get_scope_id_issuer_query,
     get_scope_id_number_query,
     get_tax_id_document_number_query,
+    get_tax_id_issuer_query,
     get_unhcr_id_issuer_query,
     get_unhcr_id_number_query,
     registration_data_import_query,
@@ -304,3 +308,27 @@ class TestAttributesGetQueries(APITestCase):
     def test_invalid_country_origin_comparison(self) -> None:
         with self.assertRaises(ValidationError):
             country_origin_query("INVALID", ["CAN"], is_social_worker_query=True)
+
+    def test_get_birth_certificate_issuer_query(self) -> None:
+        country_code = "USA"
+        result = get_birth_certificate_issuer_query(None, [country_code])
+        expected = Q(documents__type__type="BIRTH_CERTIFICATE", documents__type__country__iso_code3=country_code)
+        self.assertEqual(result, expected)
+
+    def test_get_tax_id_issuer_query(self) -> None:
+        country_code = "GBR"
+        result = get_tax_id_issuer_query(None, [country_code])
+        expected = Q(documents__type__type="TAX_ID", documents__type__country__iso_code3=country_code)
+        self.assertEqual(result, expected)
+
+    def test_get_drivers_licensee_issuer_query(self) -> None:
+        country_code = "CAN"
+        result = get_drivers_licensee_issuer_query(None, [country_code])
+        expected = Q(documents__type__type="DRIVERS_LICENSE", documents__type__country__iso_code3=country_code)
+        self.assertEqual(result, expected)
+
+    def test_get_other_issuer_query(self) -> None:
+        country_code = "AUS"
+        result = get_other_issuer_query(None, [country_code])
+        expected = Q(documents__type__type="OTHER", documents__type__country__iso_code3=country_code)
+        self.assertEqual(result, expected)
