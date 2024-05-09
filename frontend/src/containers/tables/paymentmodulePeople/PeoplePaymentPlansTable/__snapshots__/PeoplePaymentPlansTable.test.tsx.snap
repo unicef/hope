@@ -1,8 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`containers/tables/payments/PeoplePaymentPlansTable should render loading 1`] = `<div />`;
-
-exports[`containers/tables/payments/PeoplePaymentPlansTable should render loading 2`] = `
+exports[`containers/tables/payments/PeoplePaymentPlansTable should render loading 1`] = `
 <div>
   <div
     class="sc-iBdnpw dcYiFg"
@@ -366,17 +364,12 @@ exports[`containers/tables/payments/PeoplePaymentPlansTable should render loadin
             </tr>
             <tr
               class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
-              data-cy="table-row"
+              style="height: 70px;"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jibNxN css-1ex1afd-MuiTableCell-root"
                 colspan="11"
-              >
-                <span
-                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
-                  style="width: 100%; height: 70px;"
-                />
-              </td>
+              />
             </tr>
           </tbody>
         </table>
@@ -434,7 +427,7 @@ exports[`containers/tables/payments/PeoplePaymentPlansTable should render loadin
           <p
             class="MuiTablePagination-displayedRows css-levciy-MuiTablePagination-displayedRows"
           >
-            0–0 of 0
+            1–2 of 2
           </p>
           <div
             class="MuiBox-root css-nkn1dz"
