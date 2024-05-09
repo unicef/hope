@@ -49,6 +49,9 @@ class Common:
                 break
         return self.driver.current_url
 
+    def wait_for_text(self, text: str, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT) -> bool:
+        assert self._wait(timeout).until(EC.text_to_be_present_in_element((element_type, locator), text))
+
     def select_listbox_element(
         self, name: str, listbox: str = 'ul[role="listbox"]', tag_name: str = "li"
     ) -> WebElement:

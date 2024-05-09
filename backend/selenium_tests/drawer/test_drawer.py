@@ -42,6 +42,8 @@ def finished_program() -> Program:
 def get_program_with_dct_type_and_name(
         name: str, programme_code: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
 ) -> Program:
+    from time import sleep
+    sleep(2)
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
     program = ProgramFactory(
@@ -52,11 +54,7 @@ def get_program_with_dct_type_and_name(
         data_collecting_type=dct,
         status=status,
     )
-    if program.name:
-        return program
-    else:
-        return get_program_with_dct_type_and_name(name, programme_code, dct_type, status)
-
+    return program
 
 @pytest.mark.usefixtures("login")
 class TestDrawer:
@@ -134,10 +132,16 @@ class TestDrawer:
         draft_program_name = draft_program.name
         active_program_name = active_program.name
         finished_program_name = finished_program.name
+        print(f'in Test -> {Program.objects.filter(name=draft_program.name).first()} -> {str(draft_program)}')
+        print(f'in Test -> {Program.objects.filter(name=active_program.name).first()} -> {str(active_program)}')
+        print(f'in Test -> {Program.objects.filter(name=finished_program.name).first()} -> {str(finished_program)}')
         pageProgrammeManagement.selectGlobalProgramFilter(draft_program_name).click()
+        # pageProgrammeDetails.wait_for_text(pageProgrammeDetails.getHeaderTitle(), pageProgrammeDetails.getHeaderTitle().text)
+        pageProgrammeDetails.screenshot("1")
         assert draft_program_name in pageProgrammeDetails.getHeaderTitle().text
         assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "program inactive"
         pageProgrammeManagement.selectGlobalProgramFilter(active_program_name).click()
+        pageProgrammeDetails.screenshot(f'{tries} - 0', delay_sec=0)
         assert active_program_name in pageProgrammeDetails.getHeaderTitle().text
         with pytest.raises(TimeoutException):
             pageProgrammeDetails.getDrawerInactiveSubheader(timeout=0.05)
