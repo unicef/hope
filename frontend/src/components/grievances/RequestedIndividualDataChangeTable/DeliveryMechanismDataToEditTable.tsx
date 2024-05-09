@@ -45,6 +45,7 @@ export function DeliveryMechanismDataToEditTable({
   index,
   deliveryMechanismDataToEdit,
 }: DeliveryMechanismDataToEditTableProps): React.ReactElement {
+  console.log('deliveryMechanismDataToEdit', deliveryMechanismDataToEdit);
   const { t } = useTranslation();
   const { selectedDeliveryMechanismDataToEdit } = values;
   const handleSelectDeliveryMechanismDataToEdit = (
@@ -73,52 +74,62 @@ export function DeliveryMechanismDataToEditTable({
           </Typography>
         </Box>
       </TableTitle>
-      <StyledTable>
-        <TableHead>
-          <TableRow>
-            <TableCell align="left">
-              {isEdit ? (
-                <Checkbox
-                  color="primary"
-                  data-cy="checkbox-edit-delivery-mechanism-data"
-                  onChange={(): void => {
-                    handleSelectDeliveryMechanismDataToEdit(index);
-                  }}
-                  disabled={
-                    ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                  }
-                  checked={selectedDeliveryMechanismDataToEdit.includes(index)}
-                  inputProps={{ 'aria-labelledby': 'selected' }}
-                />
-              ) : (
-                selectedDeliveryMechanismDataToEdit.includes(index) && (
-                  <GreenIcon data-cy="green-check">
-                    <CheckCircleIcon />
-                  </GreenIcon>
-                )
-              )}
-            </TableCell>
-            <TableCell align="left">{t('Field')}</TableCell>
-            <TableCell align="left">{t('Current Value')}</TableCell>
-            <TableCell align="left">{t('New Value')}</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          <TableRow>
-            <TableCell />
-            {/* <TableCell align="left">{t('Bank Name')}</TableCell>
-            <TableCell align="left">
-              {deliveryMechanismDataToEdit.previous_value.bank_name}
-            </TableCell>
-            <TableCell align="left">
-              {renderNewOrNotUpdated(
-                deliveryMechanismDataToEdit.previous_value?.bank_name,
-                deliveryMechanismDataToEdit.value?.bank_name,
-              )}
-            </TableCell> */}
-          </TableRow>
-        </TableBody>
-      </StyledTable>
+      <>
+        <Box style={{ position: 'relative', top: '15px' }}>
+          <Typography variant="subtitle2">
+            {deliveryMechanismDataToEdit.label}
+          </Typography>
+        </Box>
+        <StyledTable>
+          <TableHead>
+            <TableRow>
+              <TableCell style={{ width: '1%' }} align="left">
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  {isEdit ? (
+                    <Checkbox
+                      color="primary"
+                      data-cy="checkbox-edit-delivery-mechanism-data"
+                      onChange={(): void => {
+                        handleSelectDeliveryMechanismDataToEdit(index);
+                      }}
+                      disabled={
+                        ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                      }
+                      checked={selectedDeliveryMechanismDataToEdit.includes(
+                        index,
+                      )}
+                      inputProps={{ 'aria-labelledby': 'selected' }}
+                    />
+                  ) : (
+                    selectedDeliveryMechanismDataToEdit.includes(index) && (
+                      <GreenIcon data-cy="green-check">
+                        <CheckCircleIcon />
+                      </GreenIcon>
+                    )
+                  )}
+                </div>
+              </TableCell>
+              <TableCell align="left">{t('Field')}</TableCell>
+              <TableCell align="left">{t('Previous Value')}</TableCell>
+              <TableCell align="left">{t('New Value')}</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {deliveryMechanismDataToEdit.data_fields.map(
+              (field, fieldIndex) => (
+                <TableRow key={fieldIndex}>
+                  <TableCell align="left"></TableCell>
+                  <TableCell align="left">{field.name}</TableCell>
+                  <TableCell align="left">
+                    {field.previous_value || '-'}
+                  </TableCell>
+                  <TableCell align="left">{field.value}</TableCell>
+                </TableRow>
+              ),
+            )}
+          </TableBody>
+        </StyledTable>
+      </>
     </>
   );
 }
