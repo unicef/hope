@@ -15,6 +15,7 @@ export const AllProgramsForChoices = gql`
     $startDate: Date
     $endDate: Date
     $orderBy: String
+    $name: String
   ) {
     allPrograms(
       before: $before
@@ -30,6 +31,7 @@ export const AllProgramsForChoices = gql`
       orderBy: $orderBy
       startDate: $startDate
       endDate: $endDate
+      name: $name
     ) {
       pageInfo {
         hasNextPage

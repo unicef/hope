@@ -44,9 +44,8 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                     class="sc-jsEeTM xQgAl"
                   >
                     <div
-                      class="sc-kFCroH iNLqSI"
+                      class="sc-kFCroH iNLqSI status-box-container"
                       data-cy="status-container"
-                      status="In Progress"
                     >
                       In Progress
                     </div>
@@ -76,9 +75,8 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                     class="sc-jsEeTM xQgAl"
                   >
                     <div
-                      class="sc-kFCroH jBgGcQ"
+                      class="sc-kFCroH jBgGcQ status-box-container"
                       data-cy="status-container"
-                      status="High"
                     >
                       High
                     </div>
@@ -108,9 +106,8 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                     class="sc-jsEeTM xQgAl"
                   >
                     <div
-                      class="sc-kFCroH jBgGcQ"
+                      class="sc-kFCroH jBgGcQ status-box-container"
                       data-cy="status-container"
-                      status="Very urgent"
                     >
                       Very urgent
                     </div>
