@@ -315,6 +315,9 @@ export function RequestedIndividualDataChange({
           values.selectedPaymentChannelsToEdit;
         const approvedDeliveryMechanismDataToEdit =
           values.selectedDeliveryMechanismDataToEdit;
+        //TODO MS: add when needed
+        const approvedDeliveryMechanismDataToCreate = [];
+        const approvedDeliveryMechanismDataToRemove = [];
         const flexFieldsApproveData = values.selectedFlexFields.reduce(
           (prev, curr) => {
             // eslint-disable-next-line no-param-reassign
@@ -338,6 +341,8 @@ export function RequestedIndividualDataChange({
               approvedPaymentChannelsToRemove,
               approvedPaymentChannelsToEdit,
               approvedDeliveryMechanismDataToEdit,
+              approvedDeliveryMechanismDataToCreate,
+              approvedDeliveryMechanismDataToRemove,
               flexFieldsApproveData: JSON.stringify(flexFieldsApproveData),
             },
           });

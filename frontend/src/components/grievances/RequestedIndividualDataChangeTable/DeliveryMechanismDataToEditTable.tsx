@@ -46,18 +46,24 @@ export function DeliveryMechanismDataToEditTable({
   deliveryMechanismDataToEdit,
 }: DeliveryMechanismDataToEditTableProps): React.ReactElement {
   console.log('deliveryMechanismDataToEdit', deliveryMechanismDataToEdit);
+
   const { t } = useTranslation();
   const { selectedDeliveryMechanismDataToEdit } = values;
   const handleSelectDeliveryMechanismDataToEdit = (
     deliveryMechanismDataIndex,
   ): void => {
+    console.log('deliveryMechanismDataIndex', deliveryMechanismDataIndex);
     handleSelected(
       deliveryMechanismDataIndex,
-      'selectedDeliveryMechanismDataToEdit ',
+      'selectedDeliveryMechanismDataToEdit',
       selectedDeliveryMechanismDataToEdit,
       setFieldValue,
     );
   };
+  console.log(
+    'selectedDeliveryMechanismDataToEdit',
+    selectedDeliveryMechanismDataToEdit,
+  );
   const renderNewOrNotUpdated = (prev, curr): React.ReactElement => {
     if (prev === curr) {
       return <GreyText>{t('Not updated')}</GreyText>;
@@ -90,6 +96,7 @@ export function DeliveryMechanismDataToEditTable({
                       color="primary"
                       data-cy="checkbox-edit-delivery-mechanism-data"
                       onChange={(): void => {
+                        console.log('index', index);
                         handleSelectDeliveryMechanismDataToEdit(index);
                       }}
                       disabled={

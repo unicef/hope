@@ -84,7 +84,7 @@ export function RequestedIndividualDataChangeTable({
 
   console.log('entries', entries);
   console.log('entriesFlexFields', entriesFlexFields);
-
+  console.log('deliveryMechanismDataToEdit', deliveryMechanismDataToEdit);
   return (
     <div>
       {entries?.length || entriesFlexFields?.length ? (

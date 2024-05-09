@@ -986,7 +986,6 @@ enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   VOUCHER
   ATM_CARD
   CASH_OVER_THE_COUNTER
-  ATM_CARD
 }
 
 type DiscardPaymentVerificationPlan {
@@ -1259,7 +1258,6 @@ type FinancialServiceProviderNode implements Node {
   dataTransferConfiguration: JSONString
   xlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxTemplateNodeConnection!
   paymentGatewayId: String
-  financialserviceproviderxlsxreportSet(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxReportNodeConnection!
   deliveryMechanismsPerPaymentPlan(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   fullName: String
@@ -1275,27 +1273,6 @@ type FinancialServiceProviderNodeConnection {
 
 type FinancialServiceProviderNodeEdge {
   node: FinancialServiceProviderNode
-  cursor: String!
-}
-
-type FinancialServiceProviderXlsxReportNode implements Node {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  financialServiceProvider: FinancialServiceProviderNode!
-  status: Int
-  reportUrl: String
-}
-
-type FinancialServiceProviderXlsxReportNodeConnection {
-  pageInfo: PageInfo!
-  edges: [FinancialServiceProviderXlsxReportNodeEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type FinancialServiceProviderXlsxReportNodeEdge {
-  node: FinancialServiceProviderXlsxReportNode
   cursor: String!
 }
 
@@ -2901,7 +2878,6 @@ enum PaymentDeliveryType {
   VOUCHER
   ATM_CARD
   CASH_OVER_THE_COUNTER
-  ATM_CARD
 }
 
 type PaymentDetailsApproveMutation {
@@ -3287,7 +3263,6 @@ enum PaymentRecordDeliveryType {
   VOUCHER
   ATM_CARD
   CASH_OVER_THE_COUNTER
-  ATM_CARD
 }
 
 enum PaymentRecordEntitlementCardStatus {
@@ -3698,8 +3673,6 @@ type Query {
   allPaymentRecordsAndPayments(businessArea: String!, program: String, household: ID, orderBy: String, first: Int, last: Int, before: String, after: String): PaginatedPaymentRecordsAndPaymentsNode
   financialServiceProviderXlsxTemplate(id: ID!): FinancialServiceProviderXlsxTemplateNode
   allFinancialServiceProviderXlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdBy: ID, orderBy: String): FinancialServiceProviderXlsxTemplateNodeConnection
-  financialServiceProviderXlsxReport(id: ID!): FinancialServiceProviderXlsxReportNode
-  allFinancialServiceProviderXlsxReports(offset: Int, before: String, after: String, first: Int, last: Int, status: String, orderBy: String): FinancialServiceProviderXlsxReportNodeConnection
   financialServiceProvider(id: ID!): FinancialServiceProviderNode
   allFinancialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int, createdBy: ID, name: String, visionVendorNumber: String, deliveryMechanisms: [String], distributionLimit: Float, communicationChannel: String, xlsxTemplates: [ID], orderBy: String): FinancialServiceProviderNodeConnection
   paymentRecordVerification(id: ID!): PaymentVerificationNode

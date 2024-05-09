@@ -1825,7 +1825,6 @@ export type FinancialServiceProviderNode = Node & {
   deliveryMechanisms: Array<Scalars['String']['output']>;
   deliveryMechanismsPerPaymentPlan: DeliveryMechanismNodeConnection;
   distributionLimit?: Maybe<Scalars['Float']['output']>;
-  financialserviceproviderxlsxreportSet: FinancialServiceProviderXlsxReportNodeConnection;
   fullName?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   isPaymentGateway?: Maybe<Scalars['Boolean']['output']>;
@@ -1849,15 +1848,6 @@ export type FinancialServiceProviderNodeAllowedBusinessAreasArgs = {
 
 
 export type FinancialServiceProviderNodeDeliveryMechanismsPerPaymentPlanArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type FinancialServiceProviderNodeFinancialserviceproviderxlsxreportSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -1895,30 +1885,6 @@ export type FinancialServiceProviderNodeEdge = {
   __typename?: 'FinancialServiceProviderNodeEdge';
   cursor: Scalars['String']['output'];
   node?: Maybe<FinancialServiceProviderNode>;
-};
-
-export type FinancialServiceProviderXlsxReportNode = Node & {
-  __typename?: 'FinancialServiceProviderXlsxReportNode';
-  createdAt: Scalars['DateTime']['output'];
-  financialServiceProvider: FinancialServiceProviderNode;
-  id: Scalars['ID']['output'];
-  reportUrl?: Maybe<Scalars['String']['output']>;
-  status?: Maybe<Scalars['Int']['output']>;
-  updatedAt: Scalars['DateTime']['output'];
-};
-
-export type FinancialServiceProviderXlsxReportNodeConnection = {
-  __typename?: 'FinancialServiceProviderXlsxReportNodeConnection';
-  edgeCount?: Maybe<Scalars['Int']['output']>;
-  edges: Array<Maybe<FinancialServiceProviderXlsxReportNodeEdge>>;
-  pageInfo: PageInfo;
-  totalCount?: Maybe<Scalars['Int']['output']>;
-};
-
-export type FinancialServiceProviderXlsxReportNodeEdge = {
-  __typename?: 'FinancialServiceProviderXlsxReportNodeEdge';
-  cursor: Scalars['String']['output'];
-  node?: Maybe<FinancialServiceProviderXlsxReportNode>;
 };
 
 export type FinancialServiceProviderXlsxTemplateNode = Node & {
@@ -5708,7 +5674,6 @@ export type Query = {
   allEditHouseholdFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>;
   allFeedbacks?: Maybe<FeedbackNodeConnection>;
   allFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>;
-  allFinancialServiceProviderXlsxReports?: Maybe<FinancialServiceProviderXlsxReportNodeConnection>;
   allFinancialServiceProviderXlsxTemplates?: Maybe<FinancialServiceProviderXlsxTemplateNodeConnection>;
   allFinancialServiceProviders?: Maybe<FinancialServiceProviderNodeConnection>;
   allGrievanceTicket?: Maybe<GrievanceTicketNodeConnection>;
@@ -5774,7 +5739,6 @@ export type Query = {
   feedback?: Maybe<FeedbackNode>;
   feedbackIssueTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   financialServiceProvider?: Maybe<FinancialServiceProviderNode>;
-  financialServiceProviderXlsxReport?: Maybe<FinancialServiceProviderXlsxReportNode>;
   financialServiceProviderXlsxTemplate?: Maybe<FinancialServiceProviderXlsxTemplateNode>;
   flagChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   grievanceTicket?: Maybe<GrievanceTicketNode>;
@@ -6051,17 +6015,6 @@ export type QueryAllFieldsAttributesArgs = {
   businessAreaSlug?: InputMaybe<Scalars['String']['input']>;
   flexField?: InputMaybe<Scalars['Boolean']['input']>;
   programId?: InputMaybe<Scalars['String']['input']>;
-};
-
-
-export type QueryAllFinancialServiceProviderXlsxReportsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -6684,11 +6637,6 @@ export type QueryFeedbackArgs = {
 
 
 export type QueryFinancialServiceProviderArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
-export type QueryFinancialServiceProviderXlsxReportArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -23467,7 +23415,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping of interface types */
 export type ResolversInterfaceTypes<RefType extends Record<string, unknown>> = {
-  Node: ( ApprovalProcessNode ) | ( AreaNode ) | ( AreaTypeNode ) | ( BankAccountInfoNode ) | ( BusinessAreaNode ) | ( CashPlanNode ) | ( CommunicationMessageNode ) | ( CommunicationMessageRecipientMapNode ) | ( DataCollectingTypeNode ) | ( DeliveryMechanismNode ) | ( DocumentNode ) | ( FeedbackMessageNode ) | ( FeedbackNode ) | ( FinancialServiceProviderNode ) | ( FinancialServiceProviderXlsxReportNode ) | ( FinancialServiceProviderXlsxTemplateNode ) | ( GrievanceDocumentNode ) | ( GrievanceTicketNode ) | ( HouseholdNode ) | ( ImportDataNode ) | ( ImportedDocumentNode ) | ( ImportedHouseholdNode ) | ( ImportedIndividualIdentityNode ) | ( ImportedIndividualNode ) | ( IndividualIdentityNode ) | ( IndividualNode ) | ( KoboImportDataNode ) | ( LogEntryNode ) | ( PaymentHouseholdSnapshotNode ) | ( PaymentNode ) | ( PaymentPlanNode ) | ( PaymentRecordNode ) | ( PaymentVerificationLogEntryNode ) | ( PaymentVerificationNode ) | ( PaymentVerificationPlanNode ) | ( PaymentVerificationSummaryNode ) | ( ProgramNode ) | ( RecipientNode ) | ( RegistrationDataImportDatahubNode ) | ( RegistrationDataImportNode ) | ( ReportNode ) | ( RuleCommitNode ) | ( SanctionListIndividualAliasNameNode ) | ( SanctionListIndividualCountriesNode ) | ( SanctionListIndividualDateOfBirthNode ) | ( SanctionListIndividualDocumentNode ) | ( SanctionListIndividualNationalitiesNode ) | ( SanctionListIndividualNode ) | ( ServiceProviderNode ) | ( SteficonRuleNode ) | ( SurveyNode ) | ( TargetPopulationNode ) | ( TicketAddIndividualDetailsNode ) | ( TicketComplaintDetailsNode ) | ( TicketDeleteHouseholdDetailsNode ) | ( TicketDeleteIndividualDetailsNode ) | ( TicketHouseholdDataUpdateDetailsNode ) | ( TicketIndividualDataUpdateDetailsNode ) | ( TicketNeedsAdjudicationDetailsNode ) | ( TicketNegativeFeedbackDetailsNode ) | ( TicketNoteNode ) | ( TicketPaymentVerificationDetailsNode ) | ( TicketPositiveFeedbackDetailsNode ) | ( TicketReferralDetailsNode ) | ( TicketSensitiveDetailsNode ) | ( TicketSystemFlaggingDetailsNode ) | ( UserBusinessAreaNode ) | ( UserNode ) | ( VolumeByDeliveryMechanismNode );
+  Node: ( ApprovalProcessNode ) | ( AreaNode ) | ( AreaTypeNode ) | ( BankAccountInfoNode ) | ( BusinessAreaNode ) | ( CashPlanNode ) | ( CommunicationMessageNode ) | ( CommunicationMessageRecipientMapNode ) | ( DataCollectingTypeNode ) | ( DeliveryMechanismNode ) | ( DocumentNode ) | ( FeedbackMessageNode ) | ( FeedbackNode ) | ( FinancialServiceProviderNode ) | ( FinancialServiceProviderXlsxTemplateNode ) | ( GrievanceDocumentNode ) | ( GrievanceTicketNode ) | ( HouseholdNode ) | ( ImportDataNode ) | ( ImportedDocumentNode ) | ( ImportedHouseholdNode ) | ( ImportedIndividualIdentityNode ) | ( ImportedIndividualNode ) | ( IndividualIdentityNode ) | ( IndividualNode ) | ( KoboImportDataNode ) | ( LogEntryNode ) | ( PaymentHouseholdSnapshotNode ) | ( PaymentNode ) | ( PaymentPlanNode ) | ( PaymentRecordNode ) | ( PaymentVerificationLogEntryNode ) | ( PaymentVerificationNode ) | ( PaymentVerificationPlanNode ) | ( PaymentVerificationSummaryNode ) | ( ProgramNode ) | ( RecipientNode ) | ( RegistrationDataImportDatahubNode ) | ( RegistrationDataImportNode ) | ( ReportNode ) | ( RuleCommitNode ) | ( SanctionListIndividualAliasNameNode ) | ( SanctionListIndividualCountriesNode ) | ( SanctionListIndividualDateOfBirthNode ) | ( SanctionListIndividualDocumentNode ) | ( SanctionListIndividualNationalitiesNode ) | ( SanctionListIndividualNode ) | ( ServiceProviderNode ) | ( SteficonRuleNode ) | ( SurveyNode ) | ( TargetPopulationNode ) | ( TicketAddIndividualDetailsNode ) | ( TicketComplaintDetailsNode ) | ( TicketDeleteHouseholdDetailsNode ) | ( TicketDeleteIndividualDetailsNode ) | ( TicketHouseholdDataUpdateDetailsNode ) | ( TicketIndividualDataUpdateDetailsNode ) | ( TicketNeedsAdjudicationDetailsNode ) | ( TicketNegativeFeedbackDetailsNode ) | ( TicketNoteNode ) | ( TicketPaymentVerificationDetailsNode ) | ( TicketPositiveFeedbackDetailsNode ) | ( TicketReferralDetailsNode ) | ( TicketSensitiveDetailsNode ) | ( TicketSystemFlaggingDetailsNode ) | ( UserBusinessAreaNode ) | ( UserNode ) | ( VolumeByDeliveryMechanismNode );
 };
 
 /** Mapping between all available schema types and the resolvers types */
@@ -23628,9 +23576,6 @@ export type ResolversTypes = {
   FinancialServiceProviderNode: ResolverTypeWrapper<FinancialServiceProviderNode>;
   FinancialServiceProviderNodeConnection: ResolverTypeWrapper<FinancialServiceProviderNodeConnection>;
   FinancialServiceProviderNodeEdge: ResolverTypeWrapper<FinancialServiceProviderNodeEdge>;
-  FinancialServiceProviderXlsxReportNode: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNode>;
-  FinancialServiceProviderXlsxReportNodeConnection: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNodeConnection>;
-  FinancialServiceProviderXlsxReportNodeEdge: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNodeEdge>;
   FinancialServiceProviderXlsxTemplateNode: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNode>;
   FinancialServiceProviderXlsxTemplateNodeConnection: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeConnection>;
   FinancialServiceProviderXlsxTemplateNodeEdge: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeEdge>;
@@ -24143,9 +24088,6 @@ export type ResolversParentTypes = {
   FinancialServiceProviderNode: FinancialServiceProviderNode;
   FinancialServiceProviderNodeConnection: FinancialServiceProviderNodeConnection;
   FinancialServiceProviderNodeEdge: FinancialServiceProviderNodeEdge;
-  FinancialServiceProviderXlsxReportNode: FinancialServiceProviderXlsxReportNode;
-  FinancialServiceProviderXlsxReportNodeConnection: FinancialServiceProviderXlsxReportNodeConnection;
-  FinancialServiceProviderXlsxReportNodeEdge: FinancialServiceProviderXlsxReportNodeEdge;
   FinancialServiceProviderXlsxTemplateNode: FinancialServiceProviderXlsxTemplateNode;
   FinancialServiceProviderXlsxTemplateNodeConnection: FinancialServiceProviderXlsxTemplateNodeConnection;
   FinancialServiceProviderXlsxTemplateNodeEdge: FinancialServiceProviderXlsxTemplateNodeEdge;
@@ -25405,7 +25347,6 @@ export type FinancialServiceProviderNodeResolvers<ContextType = any, ParentType 
   deliveryMechanisms?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   deliveryMechanismsPerPaymentPlan?: Resolver<ResolversTypes['DeliveryMechanismNodeConnection'], ParentType, ContextType, Partial<FinancialServiceProviderNodeDeliveryMechanismsPerPaymentPlanArgs>>;
   distributionLimit?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  financialserviceproviderxlsxreportSet?: Resolver<ResolversTypes['FinancialServiceProviderXlsxReportNodeConnection'], ParentType, ContextType, Partial<FinancialServiceProviderNodeFinancialserviceproviderxlsxreportSetArgs>>;
   fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isPaymentGateway?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
@@ -25429,30 +25370,6 @@ export type FinancialServiceProviderNodeConnectionResolvers<ContextType = any, P
 export type FinancialServiceProviderNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderNodeEdge'] = ResolversParentTypes['FinancialServiceProviderNodeEdge']> = {
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   node?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type FinancialServiceProviderXlsxReportNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxReportNode'] = ResolversParentTypes['FinancialServiceProviderXlsxReportNode']> = {
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  financialServiceProvider?: Resolver<ResolversTypes['FinancialServiceProviderNode'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  reportUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  status?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type FinancialServiceProviderXlsxReportNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxReportNodeConnection'] = ResolversParentTypes['FinancialServiceProviderXlsxReportNodeConnection']> = {
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  edges?: Resolver<Array<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportNodeEdge']>>, ParentType, ContextType>;
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type FinancialServiceProviderXlsxReportNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxReportNodeEdge'] = ResolversParentTypes['FinancialServiceProviderXlsxReportNodeEdge']> = {
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  node?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -26496,7 +26413,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'ApprovalProcessNode' | 'AreaNode' | 'AreaTypeNode' | 'BankAccountInfoNode' | 'BusinessAreaNode' | 'CashPlanNode' | 'CommunicationMessageNode' | 'CommunicationMessageRecipientMapNode' | 'DataCollectingTypeNode' | 'DeliveryMechanismNode' | 'DocumentNode' | 'FeedbackMessageNode' | 'FeedbackNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxReportNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'GrievanceDocumentNode' | 'GrievanceTicketNode' | 'HouseholdNode' | 'ImportDataNode' | 'ImportedDocumentNode' | 'ImportedHouseholdNode' | 'ImportedIndividualIdentityNode' | 'ImportedIndividualNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'KoboImportDataNode' | 'LogEntryNode' | 'PaymentHouseholdSnapshotNode' | 'PaymentNode' | 'PaymentPlanNode' | 'PaymentRecordNode' | 'PaymentVerificationLogEntryNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'ProgramNode' | 'RecipientNode' | 'RegistrationDataImportDatahubNode' | 'RegistrationDataImportNode' | 'ReportNode' | 'RuleCommitNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualDateOfBirthNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualNode' | 'ServiceProviderNode' | 'SteficonRuleNode' | 'SurveyNode' | 'TargetPopulationNode' | 'TicketAddIndividualDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketNoteNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'UserBusinessAreaNode' | 'UserNode' | 'VolumeByDeliveryMechanismNode', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'ApprovalProcessNode' | 'AreaNode' | 'AreaTypeNode' | 'BankAccountInfoNode' | 'BusinessAreaNode' | 'CashPlanNode' | 'CommunicationMessageNode' | 'CommunicationMessageRecipientMapNode' | 'DataCollectingTypeNode' | 'DeliveryMechanismNode' | 'DocumentNode' | 'FeedbackMessageNode' | 'FeedbackNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'GrievanceDocumentNode' | 'GrievanceTicketNode' | 'HouseholdNode' | 'ImportDataNode' | 'ImportedDocumentNode' | 'ImportedHouseholdNode' | 'ImportedIndividualIdentityNode' | 'ImportedIndividualNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'KoboImportDataNode' | 'LogEntryNode' | 'PaymentHouseholdSnapshotNode' | 'PaymentNode' | 'PaymentPlanNode' | 'PaymentRecordNode' | 'PaymentVerificationLogEntryNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'ProgramNode' | 'RecipientNode' | 'RegistrationDataImportDatahubNode' | 'RegistrationDataImportNode' | 'ReportNode' | 'RuleCommitNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualDateOfBirthNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualNode' | 'ServiceProviderNode' | 'SteficonRuleNode' | 'SurveyNode' | 'TargetPopulationNode' | 'TicketAddIndividualDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketNoteNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'UserBusinessAreaNode' | 'UserNode' | 'VolumeByDeliveryMechanismNode', ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
 };
 
@@ -27067,7 +26984,6 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allEditHouseholdFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>;
   allFeedbacks?: Resolver<Maybe<ResolversTypes['FeedbackNodeConnection']>, ParentType, ContextType, Partial<QueryAllFeedbacksArgs>>;
   allFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, Partial<QueryAllFieldsAttributesArgs>>;
-  allFinancialServiceProviderXlsxReports?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportNodeConnection']>, ParentType, ContextType, Partial<QueryAllFinancialServiceProviderXlsxReportsArgs>>;
   allFinancialServiceProviderXlsxTemplates?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNodeConnection']>, ParentType, ContextType, Partial<QueryAllFinancialServiceProviderXlsxTemplatesArgs>>;
   allFinancialServiceProviders?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNodeConnection']>, ParentType, ContextType, Partial<QueryAllFinancialServiceProvidersArgs>>;
   allGrievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllGrievanceTicketArgs, 'businessArea'>>;
@@ -27133,7 +27049,6 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   feedback?: Resolver<Maybe<ResolversTypes['FeedbackNode']>, ParentType, ContextType, RequireFields<QueryFeedbackArgs, 'id'>>;
   feedbackIssueTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType, RequireFields<QueryFinancialServiceProviderArgs, 'id'>>;
-  financialServiceProviderXlsxReport?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportNode']>, ParentType, ContextType, RequireFields<QueryFinancialServiceProviderXlsxReportArgs, 'id'>>;
   financialServiceProviderXlsxTemplate?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNode']>, ParentType, ContextType, RequireFields<QueryFinancialServiceProviderXlsxTemplateArgs, 'id'>>;
   flagChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType, RequireFields<QueryGrievanceTicketArgs, 'id'>>;
@@ -28642,9 +28557,6 @@ export type Resolvers<ContextType = any> = {
   FinancialServiceProviderNode?: FinancialServiceProviderNodeResolvers<ContextType>;
   FinancialServiceProviderNodeConnection?: FinancialServiceProviderNodeConnectionResolvers<ContextType>;
   FinancialServiceProviderNodeEdge?: FinancialServiceProviderNodeEdgeResolvers<ContextType>;
-  FinancialServiceProviderXlsxReportNode?: FinancialServiceProviderXlsxReportNodeResolvers<ContextType>;
-  FinancialServiceProviderXlsxReportNodeConnection?: FinancialServiceProviderXlsxReportNodeConnectionResolvers<ContextType>;
-  FinancialServiceProviderXlsxReportNodeEdge?: FinancialServiceProviderXlsxReportNodeEdgeResolvers<ContextType>;
   FinancialServiceProviderXlsxTemplateNode?: FinancialServiceProviderXlsxTemplateNodeResolvers<ContextType>;
   FinancialServiceProviderXlsxTemplateNodeConnection?: FinancialServiceProviderXlsxTemplateNodeConnectionResolvers<ContextType>;
   FinancialServiceProviderXlsxTemplateNodeEdge?: FinancialServiceProviderXlsxTemplateNodeEdgeResolvers<ContextType>;
