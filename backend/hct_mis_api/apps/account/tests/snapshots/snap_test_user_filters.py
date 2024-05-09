@@ -14,29 +14,6 @@ snapshots['TestUserFilter::test_users_by_business_area 1'] = {
                 {
                     'node': {
                         'partner': {
-                            'name': 'Test Partner with Program Access'
-                        },
-                        'partnerRoles': [
-                        ],
-                        'userRoles': [
-                            {
-                                'businessArea': {
-                                    'name': 'Afghanistan'
-                                },
-                                'role': {
-                                    'name': 'User Management View Role',
-                                    'permissions': [
-                                        'USER_MANAGEMENT_VIEW_LIST'
-                                    ]
-                                }
-                            }
-                        ],
-                        'username': 'user_with_role_in_BA'
-                    }
-                },
-                {
-                    'node': {
-                        'partner': {
                             'name': 'Default Empty Partner'
                         },
                         'partnerRoles': [
@@ -69,6 +46,12 @@ snapshots['TestUserFilter::test_users_by_business_area 1'] = {
                                     {
                                         'name': 'Test Role',
                                         'permissions': None
+                                    },
+                                    {
+                                        'name': 'User Management View Role',
+                                        'permissions': [
+                                            'USER_MANAGEMENT_VIEW_LIST'
+                                        ]
                                     }
                                 ]
                             }
@@ -87,14 +70,6 @@ snapshots['TestUserFilter::test_users_by_program 1'] = {
     'data': {
         'allUsers': {
             'edges': [
-                {
-                    'node': {
-                        'partner': {
-                            'name': 'Test Partner with Program Access'
-                        },
-                        'username': 'user_with_role_in_BA'
-                    }
-                },
                 {
                     'node': {
                         'partner': {
@@ -147,6 +122,12 @@ snapshots['TestUserFilter::test_users_by_roles 1'] = {
                                     {
                                         'name': 'Test Role',
                                         'permissions': None
+                                    },
+                                    {
+                                        'name': 'User Management View Role',
+                                        'permissions': [
+                                            'USER_MANAGEMENT_VIEW_LIST'
+                                        ]
                                     }
                                 ]
                             }

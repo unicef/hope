@@ -4,6 +4,7 @@ from hct_mis_api.apps.account.fixtures import (
     UserFactory,
     UserRoleFactory,
 )
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -117,16 +118,10 @@ class TestUserFilter(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        User.objects.all().delete()
         business_area = create_afghanistan()
         partner_unicef = PartnerFactory(name="UNICEF")
-
-        # user with role in BA and program access
         cls.program = ProgramFactory(name="Test Program")
-        partner = PartnerFactory(name="Test Partner with Program Access")
-        cls.user_with_role_in_ba = UserFactory(partner=partner, username="user_with_role_in_BA")
-        cls.update_partner_access_to_program(partner=partner, program=cls.program)
-        role = RoleFactory(name="User Management View Role", permissions=[Permissions.USER_MANAGEMENT_VIEW_LIST.value])
-        UserRoleFactory(user=cls.user_with_role_in_ba, role=role, business_area=business_area)
 
         # user with UNICEF partner without role in BA
         UserFactory(partner=partner_unicef, username="unicef_user_without_role")
@@ -142,23 +137,26 @@ class TestUserFilter(APITestCase):
         UserRoleFactory(user=user_with_test_role, role=cls.role, business_area=business_area)
 
         # user with partner with role in BA and access to program
+        role_management = RoleFactory(
+            name="User Management View Role", permissions=[Permissions.USER_MANAGEMENT_VIEW_LIST.value]
+        )
         partner_with_test_role = PartnerFactory(name="Partner With Test Role")
         cls.add_partner_role_in_business_area(
             partner=partner_with_test_role,
             business_area=business_area,
-            roles=[cls.role],
+            roles=[cls.role, role_management],
         )
         cls.update_partner_access_to_program(
             partner=partner_with_test_role,
             program=cls.program,
         )
-        UserFactory(username="user_with_partner_with_test_role", partner=partner_with_test_role)
+        cls.user = UserFactory(username="user_with_partner_with_test_role", partner=partner_with_test_role)
 
     def test_users_by_business_area(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.ALL_USERS_QUERY,
             variables={"businessArea": "afghanistan", "orderBy": "partner"},
-            context={"user": self.user_with_role_in_ba},
+            context={"user": self.user},
         )
 
     def test_users_by_program(self) -> None:
@@ -169,12 +167,12 @@ class TestUserFilter(APITestCase):
                 "program": encode_id_base64_required(self.program.id, "Program"),
                 "orderBy": "partner",
             },
-            context={"user": self.user_with_role_in_ba},
+            context={"user": self.user},
         )
 
     def test_users_by_roles(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.ALL_USERS_QUERY_FILTER_BY_ROLES,
-            variables={"businessArea": "afghanistan", "roles": str(self.role.id), "orderBy": "partner"},
-            context={"user": self.user_with_role_in_ba},
+            variables={"businessArea": "afghanistan", "roles": [str(self.role.id)], "orderBy": "partner"},
+            context={"user": self.user},
         )
