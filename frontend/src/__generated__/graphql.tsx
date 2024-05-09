@@ -5887,6 +5887,7 @@ export type QueryAllActiveProgramsArgs = {
   endDate?: InputMaybe<Scalars['Date']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
   numberOfHouseholds?: InputMaybe<Scalars['String']['input']>;
   numberOfHouseholdsWithTpInProgram?: InputMaybe<Scalars['String']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
@@ -6368,6 +6369,7 @@ export type QueryAllProgramsArgs = {
   endDate?: InputMaybe<Scalars['Date']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
   numberOfHouseholds?: InputMaybe<Scalars['String']['input']>;
   numberOfHouseholdsWithTpInProgram?: InputMaybe<Scalars['String']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
@@ -10670,6 +10672,7 @@ export type AllProgramsForChoicesQueryVariables = Exact<{
   startDate?: InputMaybe<Scalars['Date']['input']>;
   endDate?: InputMaybe<Scalars['Date']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -10680,7 +10683,7 @@ export type ProgramQueryVariables = Exact<{
 }>;
 
 
-export type ProgramQuery = { __typename?: 'Query', program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null } | null };
+export type ProgramQuery = { __typename?: 'Query', program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null } | null };
 
 export type ProgrammeChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -21010,7 +21013,7 @@ export type AllProgramsLazyQueryHookResult = ReturnType<typeof useAllProgramsLaz
 export type AllProgramsSuspenseQueryHookResult = ReturnType<typeof useAllProgramsSuspenseQuery>;
 export type AllProgramsQueryResult = Apollo.QueryResult<AllProgramsQuery, AllProgramsQueryVariables>;
 export const AllProgramsForChoicesDocument = gql`
-    query AllProgramsForChoices($before: String, $after: String, $first: Int, $last: Int, $status: [String], $sector: [String], $businessArea: String!, $search: String, $numberOfHouseholds: String, $budget: String, $startDate: Date, $endDate: Date, $orderBy: String) {
+    query AllProgramsForChoices($before: String, $after: String, $first: Int, $last: Int, $status: [String], $sector: [String], $businessArea: String!, $search: String, $numberOfHouseholds: String, $budget: String, $startDate: Date, $endDate: Date, $orderBy: String, $name: String) {
   allPrograms(
     before: $before
     after: $after
@@ -21025,6 +21028,7 @@ export const AllProgramsForChoicesDocument = gql`
     orderBy: $orderBy
     startDate: $startDate
     endDate: $endDate
+    name: $name
   ) {
     pageInfo {
       hasNextPage
@@ -21081,6 +21085,7 @@ export const AllProgramsForChoicesDocument = gql`
  *      startDate: // value for 'startDate'
  *      endDate: // value for 'endDate'
  *      orderBy: // value for 'orderBy'
+ *      name: // value for 'name'
  *   },
  * });
  */
@@ -21132,6 +21137,7 @@ export const ProgramDocument = gql`
       individualFiltersAvailable
       householdFiltersAvailable
       description
+      type
     }
     partnerAccess
     partners {

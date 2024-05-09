@@ -785,9 +785,8 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                     class="sc-dJGMql eSUODg"
                   >
                     <div
-                      class="sc-hIPBNq dKNoXr"
+                      class="sc-hIPBNq dKNoXr status-box-container"
                       data-cy="status-container"
-                      status="READY_FOR_CASH_ASSIST"
                     >
                       READY FOR CASH ASSIST
                     </div>
@@ -845,9 +844,8 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                     class="sc-dJGMql eSUODg"
                   >
                     <div
-                      class="sc-hIPBNq dKNoXr"
+                      class="sc-hIPBNq dKNoXr status-box-container"
                       data-cy="status-container"
-                      status="READY_FOR_CASH_ASSIST"
                     >
                       READY FOR CASH ASSIST
                     </div>
@@ -905,9 +903,8 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                     class="sc-dJGMql eSUODg"
                   >
                     <div
-                      class="sc-hIPBNq dKNoXr"
+                      class="sc-hIPBNq dKNoXr status-box-container"
                       data-cy="status-container"
-                      status="READY_FOR_CASH_ASSIST"
                     >
                       READY FOR CASH ASSIST
                     </div>
@@ -965,9 +962,8 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                     class="sc-dJGMql eSUODg"
                   >
                     <div
-                      class="sc-hIPBNq dKNoXr"
+                      class="sc-hIPBNq dKNoXr status-box-container"
                       data-cy="status-container"
-                      status="ASSIGNED"
                     >
                       ASSIGNED
                     </div>

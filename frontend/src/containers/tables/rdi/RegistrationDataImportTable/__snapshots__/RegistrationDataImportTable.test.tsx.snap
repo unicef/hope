@@ -833,9 +833,8 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                     class="sc-ifyrAs fSIDzb"
                   >
                     <div
-                      class="sc-dJGMql kaWknS"
+                      class="sc-dJGMql kaWknS status-box-container"
                       data-cy="status-container"
-                      status="IN_REVIEW"
                     >
                       IN REVIEW
                     </div>
