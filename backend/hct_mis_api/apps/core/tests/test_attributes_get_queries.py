@@ -8,16 +8,23 @@ from dateutil.relativedelta import relativedelta
 from hct_mis_api.apps.core.attributes_qet_queries import (
     age_to_birth_date_query,
     age_to_birth_date_range_query,
+    country_origin_query,
     country_query,
     get_birth_certificate_document_number_query,
+    get_documents_issuer_query,
     get_drivers_license_document_number_query,
     get_electoral_card_document_number_query,
+    get_electoral_card_issuer_query,
     get_has_bank_account_number_query,
     get_has_phone_number_query,
     get_has_tax_id_query,
     get_national_id_document_number_query,
+    get_national_id_issuer_query,
     get_national_passport_document_number_query,
+    get_national_passport_issuer_query,
     get_other_document_number_query,
+    get_receiver_poi_issuer_query,
+    get_receiver_poi_number_query,
     get_role_query,
     get_scope_id_issuer_query,
     get_scope_id_number_query,
@@ -250,7 +257,50 @@ class TestAttributesGetQueries(APITestCase):
         result = get_unhcr_id_issuer_query(None, ["UGA"])
         self.assertEqual(result, expected)
 
-        # With social worker prefix
         expected = Q(individuals__identities__partner__name=UNHCR, individuals__identities__country__iso_code3="UGA")
         result = get_unhcr_id_issuer_query(None, ["UGA"], True)
         self.assertEqual(result, expected)
+
+    def test_get_national_id_issuer_query(self) -> None:
+        expected = Q(documents__type__type="NATIONAL_ID", documents__type__country__iso_code3="USA")
+        result = get_national_id_issuer_query(None, ["USA"])
+        self.assertEqual(result, expected)
+
+    def test_get_national_passport_issuer_query(self) -> None:
+        expected = Q(documents__type__type="NATIONAL_PASSPORT", documents__type__country__iso_code3="GBR")
+        result = get_national_passport_issuer_query(None, ["GBR"])
+        self.assertEqual(result, expected)
+
+    def test_get_electoral_card_issuer_query(self) -> None:
+        expected = Q(documents__type__type="ELECTORAL_CARD", documents__type__country__iso_code3="IND")
+        result = get_electoral_card_issuer_query(None, ["IND"])
+        self.assertEqual(result, expected)
+
+    def test_get_documents_issuer_query(self) -> None:
+        expected = Q(documents__type__type="GENERIC_TYPE", documents__type__country__iso_code3="FRA")
+        result = get_documents_issuer_query("GENERIC_TYPE", "FRA")
+        self.assertEqual(result, expected)
+
+    def test_get_receiver_poi_number_query(self) -> None:
+        expected = Q(documents__type__key="receiver_poi", documents__document_number="12345")
+        result = get_receiver_poi_number_query(None, ["12345"])
+        self.assertEqual(result, expected)
+
+    def test_get_receiver_poi_issuer_query(self) -> None:
+        expected = Q(documents__type__type="receiver_poi", documents__type__country__iso_code3="CAN")
+        result = get_receiver_poi_issuer_query(None, ["CAN"])
+        self.assertEqual(result, expected)
+
+    def test_country_origin_query_equals(self) -> None:
+        expected = Q(individuals__country_origin="CA")
+        result = country_origin_query("EQUALS", ["CAN"], is_social_worker_query=True)
+        self.assertEqual(result, expected)
+
+    def test_country_origin_query_not_equals(self) -> None:
+        expected = ~Q(individuals__country_origin="CA")
+        result = country_origin_query("NOT_EQUALS", ["CAN"], is_social_worker_query=True)
+        self.assertEqual(result, expected)
+
+    def test_invalid_country_origin_comparison(self) -> None:
+        with self.assertRaises(ValidationError):
+            country_origin_query("INVALID", ["CAN"], is_social_worker_query=True)
