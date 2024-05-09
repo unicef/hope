@@ -47,6 +47,7 @@ export const DuplicateProgramPage = (): ReactElement => {
     useUserPartnerChoicesQuery();
 
   const handleSubmit = async (values): Promise<void> => {
+    delete values.editMode;
     const budgetValue = parseFloat(values.budget) ?? 0;
     const budgetToFixed = !Number.isNaN(budgetValue)
       ? budgetValue.toFixed(2)
@@ -106,6 +107,7 @@ export const DuplicateProgramPage = (): ReactElement => {
   } = data.program;
 
   const initialValues = {
+    editMode: false,
     name: `Copy of Programme: (${name})`,
     programmeCode: '',
     startDate,

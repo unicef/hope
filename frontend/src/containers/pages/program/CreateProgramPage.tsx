@@ -47,6 +47,7 @@ export const CreateProgramPage = (): ReactElement => {
   });
 
   const handleSubmit = async (values): Promise<void> => {
+    delete values.editMode;
     const budgetValue = parseFloat(values.budget) ?? 0;
     const budgetToFixed = !Number.isNaN(budgetValue)
       ? budgetValue.toFixed(2)
@@ -90,6 +91,7 @@ export const CreateProgramPage = (): ReactElement => {
   };
 
   const initialValues = {
+    editMode: false,
     name: '',
     programmeCode: '',
     startDate: '',
