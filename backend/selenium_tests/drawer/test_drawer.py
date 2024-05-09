@@ -118,7 +118,7 @@ class TestDrawer:
         actual_menu_items = pageProgrammeManagement.getDrawerItems().text.split("\n")
         assert expected_menu_items == actual_menu_items
 
-    @pytest.mark.skip(reason="Unstable test")
+    @pytest.mark.parametrize("tries", range(100))
     def test_inactive_draft_subheader(
         self,
         draft_program: Program,
@@ -126,6 +126,7 @@ class TestDrawer:
         finished_program: Program,
         pageProgrammeManagement: ProgrammeManagement,
         pageProgrammeDetails: ProgrammeDetails,
+            tries: None
     ) -> None:
         draft_program_name = draft_program.name
         active_program_name = active_program.name
@@ -133,12 +134,15 @@ class TestDrawer:
         pageProgrammeManagement.selectGlobalProgramFilter(draft_program_name).click()
         assert draft_program_name in pageProgrammeDetails.getHeaderTitle().text
         assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "program inactive"
-
         pageProgrammeManagement.selectGlobalProgramFilter(active_program_name).click()
         assert active_program_name in pageProgrammeDetails.getHeaderTitle().text
         with pytest.raises(TimeoutException):
             pageProgrammeDetails.getDrawerInactiveSubheader(timeout=0.05)
 
+        pageProgrammeDetails.screenshot(f'0 - {tries}', delay_sec=0)
         pageProgrammeManagement.selectGlobalProgramFilter(finished_program_name).click()
+        pageProgrammeDetails.screenshot(f'1 - {tries}', delay_sec=0)
         assert finished_program_name in pageProgrammeDetails.getHeaderTitle().text
+        pageProgrammeDetails.screenshot(f'2 - {tries}', delay_sec=0)
         assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "program inactive"
+        pageProgrammeDetails.screenshot(f'3 - {tries}', delay_sec=0)
