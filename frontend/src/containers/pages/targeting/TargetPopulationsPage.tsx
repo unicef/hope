@@ -13,10 +13,10 @@ import { getFilterFromQueryParams } from '@utils/utils';
 import { TargetingInfoDialog } from '../../dialogs/targetPopulation/TargetingInfoDialog';
 import { TargetPopulationTable } from '../../tables/targeting/TargetPopulationTable';
 import { CreateTPMenu } from '@components/targeting/CreateTPMenu';
-import {useProgramQuery} from "@generated/graphql";
-import {useBaseUrl} from "@hooks/useBaseUrl";
-import {TargetPopulationForPeopleTable} from "@containers/tables/targeting/TargetPopulationForPeopleTable";
-import {TargetPopulationForPeopleFilters} from "@components/targeting/TargetPopulationForPeopleFilters";
+import { useProgramQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { TargetPopulationForPeopleTable } from '@containers/tables/targeting/TargetPopulationForPeopleTable';
+import { TargetPopulationForPeopleFilters } from '@components/targeting/TargetPopulationForPeopleFilters';
 
 const initialFilter = {
   name: '',
@@ -52,9 +52,9 @@ export const TargetPopulationsPage = (): React.ReactElement => {
   if (!programData) return null;
   let Table = TargetPopulationTable;
   let Filters = TargetPopulationFilters;
-  if (programData.program.isSocialWorkerProgram){
-    Table = TargetPopulationForPeopleTable
-    Filters = TargetPopulationForPeopleFilters
+  if (programData.program.isSocialWorkerProgram) {
+    Table = TargetPopulationForPeopleTable;
+    Filters = TargetPopulationForPeopleFilters;
   }
   return (
     <>

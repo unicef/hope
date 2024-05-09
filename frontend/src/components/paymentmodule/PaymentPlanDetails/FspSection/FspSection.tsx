@@ -14,10 +14,10 @@ interface FspSectionProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export function FspSection({
+export const FspSection = ({
   baseUrl,
   paymentPlan,
-}: FspSectionProps): React.ReactElement {
+}: FspSectionProps): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const { isActiveProgram } = useProgramContext();
@@ -64,7 +64,7 @@ export function FspSection({
         <Grid container spacing={3}>
           {deliveryMechanisms.map((el) => (
             <>
-              <Grid key={el.name} item xs={3}>
+              <Grid key={`${el.name}-${el.fsp?.name}`} item xs={3}>
                 <LabelizedField label={el.name} value={el.fsp?.name} />
               </Grid>
               {el.chosenConfiguration && (
@@ -108,4 +108,4 @@ export function FspSection({
       </ContainerColumnWithBorder>
     </Box>
   );
-}
+};

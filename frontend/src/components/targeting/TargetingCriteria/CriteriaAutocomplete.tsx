@@ -47,7 +47,7 @@ export function CriteriaAutocomplete({
       onClose={() => {
         setOpen(false);
       }}
-      options={choicesWithoutDuplicates||[]}
+      options={choicesWithoutDuplicates || []}
       value={newValue}
       getOptionLabel={(option) => {
         if (option) {

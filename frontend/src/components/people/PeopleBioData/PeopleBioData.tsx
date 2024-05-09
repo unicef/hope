@@ -135,7 +135,6 @@ export const PeopleBioData = ({
   let peopleFromHouseholdData = null;
   if (individual?.household) {
     const household = individual.household;
-    console.log('household', household);
     peopleFromHouseholdData = (
       <>
         <Grid item xs={3}>

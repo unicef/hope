@@ -31,7 +31,6 @@ import { DialogTitleWrapper } from '../dialogs/DialogTitleWrapper';
 import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
 import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
 import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
-import {choicesToDict} from "@utils/utils";
 
 const ButtonBox = styled.div`
   width: 300px;
@@ -267,11 +266,7 @@ export const TargetCriteriaForm = ({
                         // eslint-disable-next-line
                         key={index}
                         index={index}
-                        data={
-                          isSocialWorkingProgram
-                            ? data
-                            : householdData
-                        }
+                        data={isSocialWorkingProgram ? data : householdData}
                         choicesDict={allDataChoicesDict}
                         each={each}
                         onChange={(e, object) => {
