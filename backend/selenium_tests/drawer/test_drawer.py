@@ -40,7 +40,7 @@ def finished_program() -> Program:
 
 
 def get_program_with_dct_type_and_name(
-    name: str, programme_code: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
+        name: str, programme_code: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
 ) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
@@ -52,16 +52,19 @@ def get_program_with_dct_type_and_name(
         data_collecting_type=dct,
         status=status,
     )
-    return program
+    if program.name:
+        return program
+    else:
+        return get_program_with_dct_type_and_name(name, programme_code, dct_type, status)
 
 
 @pytest.mark.usefixtures("login")
 class TestDrawer:
     def test_social_worker_program_drawer_order(
-        self,
-        social_worker_program: Program,
-        pageProgrammeManagement: ProgrammeManagement,
-        pageProgrammeDetails: ProgrammeDetails,
+            self,
+            social_worker_program: Program,
+            pageProgrammeManagement: ProgrammeManagement,
+            pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
         pageProgrammeManagement.selectGlobalProgramFilter("Worker Program").click()
         assert "Worker Program" in pageProgrammeDetails.getHeaderTitle().text
@@ -80,10 +83,10 @@ class TestDrawer:
         assert expected_menu_items == actual_menu_items
 
     def test_normal_program_drawer_order(
-        self,
-        normal_program: Program,
-        pageProgrammeManagement: ProgrammeManagement,
-        pageProgrammeDetails: ProgrammeDetails,
+            self,
+            normal_program: Program,
+            pageProgrammeManagement: ProgrammeManagement,
+            pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
         pageProgrammeManagement.selectGlobalProgramFilter("Normal Program").click()
         assert "Normal Program" in pageProgrammeDetails.getHeaderTitle().text
@@ -102,10 +105,10 @@ class TestDrawer:
         assert expected_menu_items == actual_menu_items
 
     def test_all_program_drawer_order(
-        self,
-        social_worker_program: Program,
-        pageProgrammeManagement: ProgrammeManagement,
-        pageProgrammeDetails: ProgrammeDetails,
+            self,
+            social_worker_program: Program,
+            pageProgrammeManagement: ProgrammeManagement,
+            pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
         expected_menu_items = [
             "Country Dashboard",
@@ -120,12 +123,12 @@ class TestDrawer:
 
     @pytest.mark.parametrize("tries", range(100))
     def test_inactive_draft_subheader(
-        self,
-        draft_program: Program,
-        active_program: Program,
-        finished_program: Program,
-        pageProgrammeManagement: ProgrammeManagement,
-        pageProgrammeDetails: ProgrammeDetails,
+            self,
+            draft_program: Program,
+            active_program: Program,
+            finished_program: Program,
+            pageProgrammeManagement: ProgrammeManagement,
+            pageProgrammeDetails: ProgrammeDetails,
             tries: None
     ) -> None:
         draft_program_name = draft_program.name
@@ -139,10 +142,7 @@ class TestDrawer:
         with pytest.raises(TimeoutException):
             pageProgrammeDetails.getDrawerInactiveSubheader(timeout=0.05)
 
-        pageProgrammeDetails.screenshot(f'0 - {tries}', delay_sec=0)
         pageProgrammeManagement.selectGlobalProgramFilter(finished_program_name).click()
-        pageProgrammeDetails.screenshot(f'1 - {tries}', delay_sec=0)
+        pageProgrammeDetails.screenshot(f'{tries} - 1', delay_sec=0)
         assert finished_program_name in pageProgrammeDetails.getHeaderTitle().text
-        pageProgrammeDetails.screenshot(f'2 - {tries}', delay_sec=0)
         assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "program inactive"
-        pageProgrammeDetails.screenshot(f'3 - {tries}', delay_sec=0)
