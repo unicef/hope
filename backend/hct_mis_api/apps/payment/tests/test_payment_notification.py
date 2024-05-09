@@ -292,9 +292,10 @@ class TestPaymentNotification(APITestCase):
             self.assertEqual(mailjet_client.subject, "Payment pending for Approval")
 
     @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
-    @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
-    @override_config(ENABLE_MAILJET=True)
-    @override_settings(CATCH_ALL_EMAIL="catchallemail@email.com")
+    @override_config(
+        SEND_PAYMENT_PLANS_NOTIFICATION=True, ENABLE_MAILJET=True, MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1
+    )
+    @override_settings(CATCH_ALL_EMAIL=["catchallemail@email.com", "catchallemail2@email.com"])
     def test_send_email_notification_catch_all_email(self, mock_post: Any) -> None:
         payment_notification = PaymentNotification(
             self.payment_plan,
@@ -306,7 +307,7 @@ class TestPaymentNotification(APITestCase):
         for mailjet_client in payment_notification.emails:
             self.assertEqual(
                 mailjet_client.recipients,
-                ["catchallemail@email.com"],
+                ["catchallemail@email.com", "catchallemail2@email.com"],
             )
         self.assertEqual(
             mock_post.call_count,
@@ -314,8 +315,9 @@ class TestPaymentNotification(APITestCase):
         )
 
     @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
-    @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
-    @override_config(ENABLE_MAILJET=True)
+    @override_config(
+        SEND_PAYMENT_PLANS_NOTIFICATION=True, ENABLE_MAILJET=True, MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1
+    )
     def test_send_email_notification_without_catch_all_email(self, mock_post: Any) -> None:
         payment_notification = PaymentNotification(
             self.payment_plan,
