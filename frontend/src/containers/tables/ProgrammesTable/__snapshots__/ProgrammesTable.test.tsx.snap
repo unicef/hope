@@ -608,9 +608,8 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                     class="sc-dJGMql eSUODg"
                   >
                     <div
-                      class="sc-hIPBNq dKNoXr"
+                      class="sc-hIPBNq dKNoXr status-box-container"
                       data-cy="status-container"
-                      status="ACTIVE"
                     >
                       ACTIVE
                     </div>
