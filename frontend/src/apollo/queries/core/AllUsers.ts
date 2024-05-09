@@ -7,6 +7,7 @@ export const ALL_USERS_QUERY = gql`
     $partner: [String]
     $roles: [String]
     $businessArea: String!
+    $program: String
     $first: Int
     $last: Int
     $after: String
@@ -19,6 +20,7 @@ export const ALL_USERS_QUERY = gql`
       partner: $partner
       roles: $roles
       businessArea: $businessArea
+      program: $program
       first: $first
       last: $last
       after: $after
@@ -51,6 +53,15 @@ export const ALL_USERS_QUERY = gql`
             role {
               name
               permissions
+            }
+          }
+          partnerRoles {
+            businessArea {
+                name
+                }
+            roles {
+                name
+                permissions
             }
           }
         }
