@@ -12,15 +12,23 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
     get_birth_certificate_document_number_query,
     get_drivers_license_document_number_query,
     get_electoral_card_document_number_query,
+    get_has_bank_account_number_query,
     get_has_phone_number_query,
+    get_has_tax_id_query,
     get_national_id_document_number_query,
     get_national_passport_document_number_query,
     get_other_document_number_query,
+    get_role_query,
+    get_scope_id_issuer_query,
+    get_scope_id_number_query,
     get_tax_id_document_number_query,
+    get_unhcr_id_issuer_query,
+    get_unhcr_id_number_query,
     registration_data_import_query,
 )
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.countries import Countries
+from hct_mis_api.apps.household.models import UNHCR, WFP
 
 
 class TestAttributesGetQueries(APITestCase):
@@ -139,3 +147,110 @@ class TestAttributesGetQueries(APITestCase):
     def test_get_other_document_number_query(self) -> None:
         q = get_other_document_number_query(None, ["QRST"])
         self.assertEqual(q, Q(documents__type__key="other", documents__document_number="QRST"))
+
+    def test_get_has_bank_account_number_query_true(self) -> None:
+        # Test for individuals who have a bank account number
+        expected_query = Q(bank_account_info__isnull=False) & ~Q(bank_account_info__bank_account_number="")
+        result = get_has_bank_account_number_query(None, [True])
+        self.assertEqual(result, expected_query)
+
+    def test_get_has_bank_account_number_query_false(self) -> None:
+        # Test for individuals who do not have a bank account number
+        expected_query = Q(bank_account_info__isnull=True) | Q(bank_account_info__bank_account_number="")
+        result = get_has_bank_account_number_query(None, [False])
+        self.assertEqual(result, expected_query)
+
+    def test_get_has_bank_account_number_query_social_worker_true(self) -> None:
+        # Test with social worker prefix for individuals who have a bank account number
+        expected_query = Q(individuals__bank_account_info__isnull=False) & ~Q(
+            individuals__bank_account_info__bank_account_number=""
+        )
+        result = get_has_bank_account_number_query(None, [True], is_social_worker_query=True)
+        self.assertEqual(result, expected_query)
+
+    def test_get_has_bank_account_number_query_social_worker_false(self) -> None:
+        # Test with social worker prefix for individuals who do not have a bank account number
+        expected_query = Q(individuals__bank_account_info__isnull=True) | Q(
+            individuals__bank_account_info__bank_account_number=""
+        )
+        result = get_has_bank_account_number_query(None, [False], is_social_worker_query=True)
+        self.assertEqual(result, expected_query)
+
+    def test_get_has_tax_id_query_true(self) -> None:
+        # Test for individuals who have a tax ID
+        expected_query = Q(documents__type__key__iexact="TAX_ID")
+        result = get_has_tax_id_query(None, [True])
+        self.assertEqual(result, expected_query)
+
+    def test_get_has_tax_id_query_false(self) -> None:
+        # Test for individuals who do not have a tax ID
+        expected_query = ~Q(documents__type__key__iexact="TAX_ID")
+        result = get_has_tax_id_query(None, [False])
+        self.assertEqual(result, expected_query)
+
+    def test_get_has_tax_id_query_social_worker_true(self) -> None:
+        # Test with social worker prefix for individuals who have a tax ID
+        expected_query = Q(individuals__documents__type__key__iexact="TAX_ID")
+        result = get_has_tax_id_query(None, [True], is_social_worker_query=True)
+        self.assertEqual(result, expected_query)
+
+    def test_get_has_tax_id_query_social_worker_false(self) -> None:
+        # Test with social worker prefix for individuals who do not have a tax ID
+        expected_query = ~Q(individuals__documents__type__key__iexact="TAX_ID")
+        result = get_has_tax_id_query(None, [False], is_social_worker_query=True)
+        self.assertEqual(result, expected_query)
+
+    def test_get_role_query(self) -> None:
+        # Without social worker prefix
+        expected = Q(households_and_roles__role="manager")
+        result = get_role_query(None, ["manager"])
+        self.assertEqual(result, expected)
+
+        # With social worker prefix
+        expected = Q(individuals__households_and_roles__role="manager")
+        result = get_role_query(None, ["manager"], True)
+        self.assertEqual(result, expected)
+
+    def test_get_scope_id_number_query(self) -> None:
+        # Without social worker prefix
+        expected = Q(identities__partner__name=WFP, identities__number="123456")
+        result = get_scope_id_number_query(None, ["123456"])
+        self.assertEqual(result, expected)
+
+        # With social worker prefix
+        expected = Q(individuals__identities__partner__name=WFP, individuals__identities__number="123456")
+        result = get_scope_id_number_query(None, ["123456"], True)
+        self.assertEqual(result, expected)
+
+    def test_get_scope_id_issuer_query(self) -> None:
+        # Without social worker prefix
+        expected = Q(identities__partner__name=WFP, identities__country__iso_code3="KEN")
+        result = get_scope_id_issuer_query(None, ["KEN"])
+        self.assertEqual(result, expected)
+
+        # With social worker prefix
+        expected = Q(individuals__identities__partner__name=WFP, individuals__identities__country__iso_code3="KEN")
+        result = get_scope_id_issuer_query(None, ["KEN"], True)
+        self.assertEqual(result, expected)
+
+    def test_get_unhcr_id_number_query(self) -> None:
+        # Without social worker prefix
+        expected = Q(identities__partner__name=UNHCR, identities__number="987654")
+        result = get_unhcr_id_number_query(None, ["987654"])
+        self.assertEqual(result, expected)
+
+        # With social worker prefix
+        expected = Q(individuals__identities__partner__name=UNHCR, individuals__identities__number="987654")
+        result = get_unhcr_id_number_query(None, ["987654"], True)
+        self.assertEqual(result, expected)
+
+    def test_get_unhcr_id_issuer_query(self) -> None:
+        # Without social worker prefix
+        expected = Q(identities__partner__name=UNHCR, identities__country__iso_code3="UGA")
+        result = get_unhcr_id_issuer_query(None, ["UGA"])
+        self.assertEqual(result, expected)
+
+        # With social worker prefix
+        expected = Q(individuals__identities__partner__name=UNHCR, individuals__identities__country__iso_code3="UGA")
+        result = get_unhcr_id_issuer_query(None, ["UGA"], True)
+        self.assertEqual(result, expected)
