@@ -15,6 +15,7 @@ import { IdentitiesToRemoveTable } from './IdentitiesToRemoveTable';
 import { PaymentChannelsTable } from './PaymentChannelsTable';
 import { PaymentChannelsToEditTable } from './PaymentChannelsToEditTable';
 import { PaymentChannelsToRemoveTable } from './PaymentChannelsToRemoveTable';
+import { DeliveryMechanismDataToEditTable } from './DeliveryMechanismDataToEditTable';
 
 interface RequestedIndividualDataChangeTableProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -47,9 +48,7 @@ export function RequestedIndividualDataChangeTable({
     payment_channels_to_edit: paymentChannelsToEdit,
     previous_payment_channels: previousPaymentChannels,
     flex_fields: flexFields,
-    delivery_mechanism_data: deliveryMechanismData,
     delivery_mechanism_data_to_edit: deliveryMechanismDataToEdit,
-    delivery_mechanism_data_to_remove: deliveryMechanismDataToRemove,
     ...restIndividualData
   } = individualData;
   const entries = restIndividualData && Object.entries(restIndividualData);
@@ -80,6 +79,9 @@ export function RequestedIndividualDataChangeTable({
   ) {
     return <LoadingComponent />;
   }
+
+  console.log('entries', entries);
+  console.log('entriesFlexFields', entriesFlexFields);
 
   return (
     <div>
@@ -118,7 +120,7 @@ export function RequestedIndividualDataChangeTable({
               index={index}
               document={document}
             />
-        ))
+          ))
         : null}
       {identities?.length ? (
         <IdentitiesTable
@@ -145,7 +147,7 @@ export function RequestedIndividualDataChangeTable({
               index={index}
               identity={identity}
             />
-        ))
+          ))
         : null}
       {paymentChannels?.length ? (
         <PaymentChannelsTable
@@ -167,7 +169,7 @@ export function RequestedIndividualDataChangeTable({
               index={index}
               paymentChannel={paymentChannel}
             />
-        ))
+          ))
         : null}
       {documentsToRemove?.length ? (
         <DocumentsToRemoveTable
@@ -201,6 +203,20 @@ export function RequestedIndividualDataChangeTable({
           previousPaymentChannels={previousPaymentChannels}
         />
       ) : null}
+      {deliveryMechanismDataToEdit?.length
+        ? deliveryMechanismDataToEdit.map(
+            (deliveryMechanismDataItem, index) => (
+              <DeliveryMechanismDataToEditTable
+                values={values}
+                isEdit={isEdit}
+                ticket={ticket}
+                index={index}
+                setFieldValue={setFieldValue}
+                deliveryMechanismDataToEdit={deliveryMechanismDataItem}
+              />
+            ),
+          )
+        : null}
     </div>
   );
 }
