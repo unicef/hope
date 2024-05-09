@@ -296,7 +296,12 @@ class ImportDataInstanceValidator:
 
                 dm_to_drop = []
                 # drop delivery mechanism data validation for delivery mechanisms that contains only Scope.GLOBAL fields
-                for dm, fields in delivery_mechanisms_fields_values_dict.items(): # TODO MB Incompatible types in assignment (expression has type "Dict[Any, Any]", variable has type "List[Dict[Any, Any]]")  [assignment]
+                for (
+                    dm,
+                    fields,
+                ) in (
+                    delivery_mechanisms_fields_values_dict.items()
+                ):  # TODO MB Incompatible types in assignment (expression has type "Dict[Any, Any]", variable has type "List[Dict[Any, Any]]")  [assignment]
                     # if all fields are Scope.GLOBAL, drop delivery mechanism data
                     if all(field in global_scope_xlsx_fields for field in fields.keys()):
                         dm_to_drop.append(dm)

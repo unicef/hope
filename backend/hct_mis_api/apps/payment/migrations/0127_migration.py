@@ -4,7 +4,6 @@ from django.db import migrations, models
 import django.db.models.deletion
 import django.db.models.manager
 import hct_mis_api.apps.account.models
-import hct_mis_api.apps.payment.models_mixins
 import model_utils.fields
 import uuid
 
@@ -789,7 +788,7 @@ class Migration(migrations.Migration):
                  models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
                                    related_name='possible_duplicates', to='payment.deliverymechanismdata')),
             ],
-            bases=(hct_mis_api.apps.payment.models_mixins.DeliveryDataMixin, models.Model),
+            bases=(models.Model, ),
             managers=[
                 ('signature_manager', django.db.models.manager.Manager()),
             ],

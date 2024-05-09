@@ -48,7 +48,6 @@ from hct_mis_api.apps.household.models import (
     WORK_STATUS_CHOICE,
 )
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.models_mixins import DeliveryDataMixin
 from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.phone import recalculate_phone_numbers_validity
@@ -366,7 +365,7 @@ class ImportedIndividualRoleInHousehold(TimeStampedUUIDModel):
         unique_together = ("role", "household")
 
 
-class ImportedDeliveryMechanismData(DeliveryDataMixin, TimeStampedUUIDModel):
+class ImportedDeliveryMechanismData(TimeStampedUUIDModel):
     individual = models.OneToOneField(
         "ImportedIndividual",
         on_delete=models.CASCADE,
@@ -378,8 +377,8 @@ class ImportedDeliveryMechanismData(DeliveryDataMixin, TimeStampedUUIDModel):
         max_length=255, verbose_name=_("Delivery Mechanism"), choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES
     )
 
-    is_valid: bool = models.BooleanField(default=False)
-    validation_errors: dict = JSONField(default=dict)
+    is_valid = models.BooleanField(default=False)
+    validation_errors = JSONField(default=dict)
     unique_key = models.CharField(max_length=256, blank=True, null=True, unique=True, editable=False)  # type: ignore
 
 

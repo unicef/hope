@@ -3,7 +3,6 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import hct_mis_api.apps.payment.models_mixins
 import model_utils.fields
 import uuid
 
@@ -41,6 +40,6 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=(hct_mis_api.apps.payment.models_mixins.DeliveryDataMixin, models.Model),
+            bases=(models.Model, ),
         ),
     ]
