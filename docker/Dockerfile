@@ -40,11 +40,11 @@ RUN apt-get update \
   && mkdir -p -m 0700 /run/user/"${UID}" \
   && chown -R hope:hope /code /tmp /data /run/user/"${UID}"
 
-# ENV PDM_PACKAGES=/packages
+ENV PDM_PACKAGES=/packages
 ENV CODE=/code
-ENV PYPACKAGES=$CODE/__pypackages__/3.11
+ENV PYPACKAGES=$PDM_PACKAGES/__pypackages__/3.11
 ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
-    PYTHONPATH=$PYTHONPATH:$PYPACKAGES/lib:/code \
+    PYTHONPATH=$PYTHONPATH:$PYPACKAGES/lib:$CODE \
     PATH=$PATH:$PYPACKAGES/bin \
     XDG_RUNTIME_DIR=/run/user/"${UID}"
 
@@ -70,7 +70,7 @@ FROM base as builder
 #    pdm config venv.in_project true &&\
 #    pdm config check_update false
 
-# WORKDIR $CODE
+WORKDIR $PDM_PACKAGES
 COPY backend/pyproject.toml backend/pdm.lock ./
 RUN pdm sync --prod --no-editable --no-self
 
@@ -88,10 +88,10 @@ RUN apt-get update \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-# WORKDIR $CODE
-COPY ./backend ./
-
 RUN pdm sync --no-editable --no-self
+
+WORKDIR $CODE
+COPY ./backend ./
 
 COPY ./docker/entrypoint.sh /bin/
 ENTRYPOINT ["entrypoint.sh"]
