@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Union, Dict
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from django import forms
 from django.conf import settings

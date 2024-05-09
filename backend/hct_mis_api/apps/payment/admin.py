@@ -22,6 +22,7 @@ from smart_admin.mixins import LinkedObjectsMixin
 from hct_mis_api.apps.payment.forms import ImportPaymentRecordsForm
 from hct_mis_api.apps.payment.models import (
     CashPlan,
+    DeliveryMechanismData,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -32,7 +33,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentRecord,
     PaymentVerification,
     PaymentVerificationPlan,
-    ServiceProvider, DeliveryMechanismData,
+    ServiceProvider,
 )
 from hct_mis_api.apps.payment.services.create_cash_plan_from_reconciliation import (
     CreateCashPlanReconciliationService,
@@ -356,7 +357,8 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
         if not change:
             obj.created_by = request.user
         delivery_mechanism_required_fields = [
-            field["name"] for field in DeliveryMechanismData.get_required_delivery_mechanism_fields(obj.delivery_mechanism)
+            field["name"]
+            for field in DeliveryMechanismData.get_required_delivery_mechanism_fields(obj.delivery_mechanism)
         ]
         missing_required_core_fields = [
             required_field
