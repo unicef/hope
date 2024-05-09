@@ -42,6 +42,8 @@ RUN apt-get update \
 
 ENV PDM_PACKAGES=/packages
 ENV CODE=/code
+ENV PDM_HOME=$PDM_PACKAGES
+ENV PDM_PROJECT=$PDM_PACKAGES
 ENV PYPACKAGES=$PDM_PACKAGES/__pypackages__/3.11
 ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
     PYTHONPATH=$PYTHONPATH:$PYPACKAGES/lib:$CODE \
@@ -62,13 +64,6 @@ RUN pip install pdm==2.15.2 &&\
 
 # Dist builder image
 FROM base as builder
-
-#RUN pip install pdm==2.15.2 &&\
-#    pip install --upgrade pip setuptools &&\
-#    pdm config cache_dir /var/cache/pdm &&\
-#    pdm config python.use_venv false &&\
-#    pdm config venv.in_project true &&\
-#    pdm config check_update false
 
 WORKDIR $PDM_PACKAGES
 COPY backend/pyproject.toml backend/pdm.lock ./
@@ -100,11 +95,8 @@ ENTRYPOINT ["entrypoint.sh"]
 FROM base AS be-dist
 
 COPY --chown=hope:hope ./backend ./
-# COPY --chown=hope:hope --from=builder $PDM_PACKAGES $PDM_PACKAGES
-COPY --chown=hope:hope --from=builder $PYPACKAGES $PYPACKAGES
+COPY --chown=hope:hope --from=builder $PDM_PACKAGES $PDM_PACKAGES
 COPY --chown=hope:hope --from=certs /data/psql-cert.crt /code/psql-cert.crt
-
-# RUN pdm sync --no-editable --no-self
 
 USER hope
 
