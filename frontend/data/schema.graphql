@@ -333,6 +333,7 @@ type BusinessAreaNode implements Node {
   active: Boolean!
   enableEmailNotification: Boolean!
   partners: [PartnerNode!]!
+  businessAreaPartnerThrough: [PartnerRoleNode!]!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   dataCollectingTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
   partnerSet: [PartnerNode!]!
@@ -985,6 +986,7 @@ enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   VOUCHER
   ATM_CARD
   CASH_OVER_THE_COUNTER
+  ATM_CARD
 }
 
 type DiscardPaymentVerificationPlan {
@@ -2836,6 +2838,7 @@ type PartnerNode {
   rght: Int!
   treeId: Int!
   level: Int!
+  businessAreaPartnerThrough: [PartnerRoleNode!]!
   businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   partnerSet: [PartnerNode!]!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
@@ -2844,6 +2847,14 @@ type PartnerNode {
   programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   areas: [AreaNode]
   areaAccess: String
+}
+
+type PartnerRoleNode {
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  businessArea: UserBusinessAreaNode!
+  partner: PartnerNode!
+  roles: [RoleNode!]!
 }
 
 type PartnerType {
@@ -2857,6 +2868,7 @@ type PartnerType {
   rght: Int!
   treeId: Int!
   level: Int!
+  businessAreaPartnerThrough: [PartnerRoleNode!]!
   businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   partnerSet: [PartnerNode!]!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
@@ -2889,6 +2901,7 @@ enum PaymentDeliveryType {
   VOUCHER
   ATM_CARD
   CASH_OVER_THE_COUNTER
+  ATM_CARD
 }
 
 type PaymentDetailsApproveMutation {
@@ -3274,6 +3287,7 @@ enum PaymentRecordDeliveryType {
   VOUCHER
   ATM_CARD
   CASH_OVER_THE_COUNTER
+  ATM_CARD
 }
 
 enum PaymentRecordEntitlementCardStatus {
@@ -3770,7 +3784,7 @@ type Query {
   allHouseholdsFlexFieldsAttributes: [FieldAttributeNode]
   allIndividualsFlexFieldsAttributes: [FieldAttributeNode]
   me: UserNode
-  allUsers(offset: Int, before: String, after: String, first: Int, last: Int, status: [String], partner: [String], businessArea: String!, search: String, roles: [String], isTicketCreator: Boolean, isSurveyCreator: Boolean, isMessageCreator: Boolean, isFeedbackCreator: Boolean, orderBy: String): UserNodeConnection
+  allUsers(offset: Int, before: String, after: String, first: Int, last: Int, status: [String], partner: [String], businessArea: String!, program: String, search: String, roles: [String], isTicketCreator: Boolean, isSurveyCreator: Boolean, isMessageCreator: Boolean, isFeedbackCreator: Boolean, orderBy: String): UserNodeConnection
   userRolesChoices: [RoleChoiceObject]
   userStatusChoices: [ChoiceObject]
   userPartnerChoices: [ChoiceObject]
@@ -4085,6 +4099,7 @@ type RoleNode {
   name: String!
   subsystem: RoleSubsystem!
   permissions: [String!]
+  businessAreaPartnerThrough: [PartnerRoleNode!]!
   userRoles: [UserRoleNode!]!
 }
 
@@ -5138,6 +5153,7 @@ type UserBusinessAreaNode implements Node {
   active: Boolean!
   enableEmailNotification: Boolean!
   partners: [PartnerNode!]!
+  businessAreaPartnerThrough: [PartnerRoleNode!]!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   dataCollectingTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
   partnerSet: [PartnerNode!]!
@@ -5217,6 +5233,7 @@ type UserNode implements Node {
   feedbackMessages(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackMessageNodeConnection!
   surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
   businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection
+  partnerRoles: [PartnerRoleNode]
 }
 
 type UserNodeConnection {

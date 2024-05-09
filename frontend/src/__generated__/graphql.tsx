@@ -430,6 +430,7 @@ export type BulkUpdateGrievanceTicketsUrgencyMutation = {
 export type BusinessAreaNode = Node & {
   __typename?: 'BusinessAreaNode';
   active: Scalars['Boolean']['output'];
+  businessAreaPartnerThrough: Array<PartnerRoleNode>;
   cashplanSet: CashPlanNodeConnection;
   children: UserBusinessAreaNodeConnection;
   code: Scalars['String']['output'];
@@ -4489,6 +4490,7 @@ export type PartnerNode = {
   allowedBusinessAreas: UserBusinessAreaNodeConnection;
   areaAccess?: Maybe<Scalars['String']['output']>;
   areas?: Maybe<Array<Maybe<AreaNode>>>;
+  businessAreaPartnerThrough: Array<PartnerRoleNode>;
   businessAreas: UserBusinessAreaNodeConnection;
   grievanceticketSet: GrievanceTicketNodeConnection;
   id: Scalars['ID']['output'];
@@ -4563,9 +4565,19 @@ export type PartnerNodeUserSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
+export type PartnerRoleNode = {
+  __typename?: 'PartnerRoleNode';
+  businessArea: UserBusinessAreaNode;
+  createdAt: Scalars['DateTime']['output'];
+  partner: PartnerNode;
+  roles: Array<RoleNode>;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
 export type PartnerType = {
   __typename?: 'PartnerType';
   allowedBusinessAreas: UserBusinessAreaNodeConnection;
+  businessAreaPartnerThrough: Array<PartnerRoleNode>;
   businessAreas: UserBusinessAreaNodeConnection;
   grievanceticketSet: GrievanceTicketNodeConnection;
   id: Scalars['ID']['output'];
@@ -6543,6 +6555,7 @@ export type QueryAllUsersArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   partner?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  program?: InputMaybe<Scalars['String']['input']>;
   roles?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   search?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
@@ -7286,6 +7299,7 @@ export type RoleChoiceObject = {
 
 export type RoleNode = {
   __typename?: 'RoleNode';
+  businessAreaPartnerThrough: Array<PartnerRoleNode>;
   createdAt: Scalars['DateTime']['output'];
   name: Scalars['String']['output'];
   permissions?: Maybe<Array<Scalars['String']['output']>>;
@@ -8604,6 +8618,7 @@ export type UploadImportDataXlsxFileAsync = {
 export type UserBusinessAreaNode = Node & {
   __typename?: 'UserBusinessAreaNode';
   active: Scalars['Boolean']['output'];
+  businessAreaPartnerThrough: Array<PartnerRoleNode>;
   cashplanSet: CashPlanNodeConnection;
   children: UserBusinessAreaNodeConnection;
   code: Scalars['String']['output'];
@@ -8914,6 +8929,7 @@ export type UserNode = Node & {
   logs: PaymentVerificationLogEntryNodeConnection;
   messages: CommunicationMessageNodeConnection;
   partner?: Maybe<PartnerNode>;
+  partnerRoles?: Maybe<Array<Maybe<PartnerRoleNode>>>;
   registrationDataImports: RegistrationDataImportNodeConnection;
   reports: ReportNodeConnection;
   sentDeliveryMechanisms: DeliveryMechanismNodeConnection;
@@ -10010,6 +10026,7 @@ export type AllUsersQueryVariables = Exact<{
   partner?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
   roles?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
   businessArea: Scalars['String']['input'];
+  program?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
@@ -10018,7 +10035,7 @@ export type AllUsersQueryVariables = Exact<{
 }>;
 
 
-export type AllUsersQuery = { __typename?: 'Query', allUsers?: { __typename?: 'UserNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'UserNodeEdge', cursor: string, node?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, username: string, email: string, isActive: boolean, lastLogin?: any | null, status: UserStatus, partner?: { __typename?: 'PartnerNode', name?: string | null } | null, userRoles: Array<{ __typename?: 'UserRoleNode', businessArea: { __typename?: 'UserBusinessAreaNode', name: string }, role: { __typename?: 'RoleNode', name: string, permissions?: Array<string> | null } }> } | null } | null> } | null };
+export type AllUsersQuery = { __typename?: 'Query', allUsers?: { __typename?: 'UserNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'UserNodeEdge', cursor: string, node?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, username: string, email: string, isActive: boolean, lastLogin?: any | null, status: UserStatus, partner?: { __typename?: 'PartnerNode', name?: string | null } | null, userRoles: Array<{ __typename?: 'UserRoleNode', businessArea: { __typename?: 'UserBusinessAreaNode', name: string }, role: { __typename?: 'RoleNode', name: string, permissions?: Array<string> | null } }>, partnerRoles?: Array<{ __typename?: 'PartnerRoleNode', businessArea: { __typename?: 'UserBusinessAreaNode', name: string }, roles: Array<{ __typename?: 'RoleNode', name: string, permissions?: Array<string> | null }> } | null> | null } | null } | null> } | null };
 
 export type AllUsersForFiltersQueryVariables = Exact<{
   businessArea: Scalars['String']['input'];
@@ -16252,13 +16269,14 @@ export type AllSanctionListIndividualsLazyQueryHookResult = ReturnType<typeof us
 export type AllSanctionListIndividualsSuspenseQueryHookResult = ReturnType<typeof useAllSanctionListIndividualsSuspenseQuery>;
 export type AllSanctionListIndividualsQueryResult = Apollo.QueryResult<AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables>;
 export const AllUsersDocument = gql`
-    query AllUsers($search: String, $status: [String], $partner: [String], $roles: [String], $businessArea: String!, $first: Int, $last: Int, $after: String, $before: String, $orderBy: String) {
+    query AllUsers($search: String, $status: [String], $partner: [String], $roles: [String], $businessArea: String!, $program: String, $first: Int, $last: Int, $after: String, $before: String, $orderBy: String) {
   allUsers(
     search: $search
     status: $status
     partner: $partner
     roles: $roles
     businessArea: $businessArea
+    program: $program
     first: $first
     last: $last
     after: $after
@@ -16293,6 +16311,15 @@ export const AllUsersDocument = gql`
             permissions
           }
         }
+        partnerRoles {
+          businessArea {
+            name
+          }
+          roles {
+            name
+            permissions
+          }
+        }
       }
       cursor
     }
@@ -16319,6 +16346,7 @@ export const AllUsersDocument = gql`
  *      partner: // value for 'partner'
  *      roles: // value for 'roles'
  *      businessArea: // value for 'businessArea'
+ *      program: // value for 'program'
  *      first: // value for 'first'
  *      last: // value for 'last'
  *      after: // value for 'after'
@@ -23727,6 +23755,7 @@ export type ResolversTypes = {
   PaginatedCashPlanAndPaymentPlanNode: ResolverTypeWrapper<PaginatedCashPlanAndPaymentPlanNode>;
   PaginatedPaymentRecordsAndPaymentsNode: ResolverTypeWrapper<PaginatedPaymentRecordsAndPaymentsNode>;
   PartnerNode: ResolverTypeWrapper<PartnerNode>;
+  PartnerRoleNode: ResolverTypeWrapper<PartnerRoleNode>;
   PartnerType: ResolverTypeWrapper<PartnerType>;
   PaymentConflictDataNode: ResolverTypeWrapper<PaymentConflictDataNode>;
   PaymentDeliveryType: PaymentDeliveryType;
@@ -24214,6 +24243,7 @@ export type ResolversParentTypes = {
   PaginatedCashPlanAndPaymentPlanNode: PaginatedCashPlanAndPaymentPlanNode;
   PaginatedPaymentRecordsAndPaymentsNode: PaginatedPaymentRecordsAndPaymentsNode;
   PartnerNode: PartnerNode;
+  PartnerRoleNode: PartnerRoleNode;
   PartnerType: PartnerType;
   PaymentConflictDataNode: PaymentConflictDataNode;
   PaymentDetailsApproveMutation: PaymentDetailsApproveMutation;
@@ -24628,6 +24658,7 @@ export type BulkUpdateGrievanceTicketsUrgencyMutationResolvers<ContextType = any
 
 export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['BusinessAreaNode'] = ResolversParentTypes['BusinessAreaNode']> = {
   active?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  businessAreaPartnerThrough?: Resolver<Array<ResolversTypes['PartnerRoleNode']>, ParentType, ContextType>;
   cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeCashplanSetArgs>>;
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeChildrenArgs>>;
   code?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -26503,6 +26534,7 @@ export type PartnerNodeResolvers<ContextType = any, ParentType extends Resolvers
   allowedBusinessAreas?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, Partial<PartnerNodeAllowedBusinessAreasArgs>>;
   areaAccess?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   areas?: Resolver<Maybe<Array<Maybe<ResolversTypes['AreaNode']>>>, ParentType, ContextType>;
+  businessAreaPartnerThrough?: Resolver<Array<ResolversTypes['PartnerRoleNode']>, ParentType, ContextType>;
   businessAreas?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, Partial<PartnerNodeBusinessAreasArgs>>;
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, Partial<PartnerNodeGrievanceticketSetArgs>>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -26521,8 +26553,18 @@ export type PartnerNodeResolvers<ContextType = any, ParentType extends Resolvers
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type PartnerRoleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PartnerRoleNode'] = ResolversParentTypes['PartnerRoleNode']> = {
+  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  partner?: Resolver<ResolversTypes['PartnerNode'], ParentType, ContextType>;
+  roles?: Resolver<Array<ResolversTypes['RoleNode']>, ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type PartnerTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PartnerType'] = ResolversParentTypes['PartnerType']> = {
   allowedBusinessAreas?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, Partial<PartnerTypeAllowedBusinessAreasArgs>>;
+  businessAreaPartnerThrough?: Resolver<Array<ResolversTypes['PartnerRoleNode']>, ParentType, ContextType>;
   businessAreas?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, Partial<PartnerTypeBusinessAreasArgs>>;
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, Partial<PartnerTypeGrievanceticketSetArgs>>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -27413,6 +27455,7 @@ export type RoleChoiceObjectResolvers<ContextType = any, ParentType extends Reso
 };
 
 export type RoleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RoleNode'] = ResolversParentTypes['RoleNode']> = {
+  businessAreaPartnerThrough?: Resolver<Array<ResolversTypes['PartnerRoleNode']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   permissions?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
@@ -28304,6 +28347,7 @@ export type UploadImportDataXlsxFileAsyncResolvers<ContextType = any, ParentType
 
 export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserBusinessAreaNode'] = ResolversParentTypes['UserBusinessAreaNode']> = {
   active?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  businessAreaPartnerThrough?: Resolver<Array<ResolversTypes['PartnerRoleNode']>, ParentType, ContextType>;
   cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeCashplanSetArgs>>;
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeChildrenArgs>>;
   code?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -28410,6 +28454,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   logs?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, Partial<UserNodeLogsArgs>>;
   messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, Partial<UserNodeMessagesArgs>>;
   partner?: Resolver<Maybe<ResolversTypes['PartnerNode']>, ParentType, ContextType>;
+  partnerRoles?: Resolver<Maybe<Array<Maybe<ResolversTypes['PartnerRoleNode']>>>, ParentType, ContextType>;
   registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, Partial<UserNodeRegistrationDataImportsArgs>>;
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, Partial<UserNodeReportsArgs>>;
   sentDeliveryMechanisms?: Resolver<ResolversTypes['DeliveryMechanismNodeConnection'], ParentType, ContextType, Partial<UserNodeSentDeliveryMechanismsArgs>>;
@@ -28678,6 +28723,7 @@ export type Resolvers<ContextType = any> = {
   PaginatedCashPlanAndPaymentPlanNode?: PaginatedCashPlanAndPaymentPlanNodeResolvers<ContextType>;
   PaginatedPaymentRecordsAndPaymentsNode?: PaginatedPaymentRecordsAndPaymentsNodeResolvers<ContextType>;
   PartnerNode?: PartnerNodeResolvers<ContextType>;
+  PartnerRoleNode?: PartnerRoleNodeResolvers<ContextType>;
   PartnerType?: PartnerTypeResolvers<ContextType>;
   PaymentConflictDataNode?: PaymentConflictDataNodeResolvers<ContextType>;
   PaymentDetailsApproveMutation?: PaymentDetailsApproveMutationResolvers<ContextType>;

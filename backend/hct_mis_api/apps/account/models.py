@@ -1,6 +1,6 @@
 import logging
 from functools import lru_cache
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 from django import forms
@@ -31,6 +31,7 @@ from hct_mis_api.apps.account.utils import test_conditional
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
 from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
 from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.utils.mailjet import MailjetClient
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
@@ -263,6 +264,33 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             self.has_permission(Permissions.CAN_ADD_BUSINESS_AREA_TO_PARTNER.name, role.business_area)
             for role in self.cached_user_roles()
         )
+
+    def email_user(  # type: ignore
+        self,
+        subject: str,
+        html_body: Optional[str] = None,
+        text_body: Optional[str] = None,
+        mailjet_template_id: Optional[int] = None,
+        body_variables: Optional[Dict[str, Any]] = None,
+        from_email: Optional[str] = None,
+        from_email_display: Optional[str] = None,
+        ccs: Optional[list[str]] = None,
+    ) -> None:
+        """
+        Send email to this user via Mailjet.
+        """
+        email = MailjetClient(
+            recipients=[self.email],
+            subject=subject,
+            html_body=html_body,
+            text_body=text_body,
+            mailjet_template_id=mailjet_template_id,
+            variables=body_variables,
+            ccs=ccs,
+            from_email=from_email,
+            from_email_display=from_email_display,
+        )
+        email.send_email()
 
     class Meta:
         permissions = (

@@ -88,7 +88,6 @@ STATICFILES_FINDERS = (
 MANIFEST_FILE = "web/.vite/manifest.json"
 
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
-CATCH_ALL_EMAIL = env("CATCH_ALL_EMAIL", default="")
 
 EMAIL_BACKEND = env("EMAIL_BACKEND") if not DEBUG else "django.core.mail.backends.console.EmailBackend"
 EMAIL_HOST = env("EMAIL_HOST")
