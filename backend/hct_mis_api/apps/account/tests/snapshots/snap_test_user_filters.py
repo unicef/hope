@@ -14,7 +14,7 @@ snapshots['TestUserFilter::test_users_by_business_area 1'] = {
                 {
                     'node': {
                         'partner': {
-                            'name': 'UNICEF'
+                            'name': 'Test Partner with Program Access'
                         },
                         'partnerRoles': [
                         ],
@@ -31,7 +31,7 @@ snapshots['TestUserFilter::test_users_by_business_area 1'] = {
                                 }
                             }
                         ],
-                        'username': 'unicef_user_with_role_in_BA'
+                        'username': 'user_with_role_in_BA'
                     }
                 },
                 {
@@ -90,9 +90,9 @@ snapshots['TestUserFilter::test_users_by_program 1'] = {
                 {
                     'node': {
                         'partner': {
-                            'name': 'UNICEF'
+                            'name': 'Test Partner with Program Access'
                         },
-                        'username': 'unicef_user_with_role_in_BA'
+                        'username': 'user_with_role_in_BA'
                     }
                 },
                 {

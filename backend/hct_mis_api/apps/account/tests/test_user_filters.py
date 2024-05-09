@@ -118,15 +118,17 @@ class TestUserFilter(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         business_area = create_afghanistan()
-
-        # user with UNICEF partner and role in BA
         partner_unicef = PartnerFactory(name="UNICEF")
-        cls.program = ProgramFactory(name="Program")
-        cls.user_with_unicef_partner_and_role_in_BA = UserFactory(
-            partner=partner_unicef, username="unicef_user_with_role_in_BA"
+
+        # user with role in BA and program access
+        cls.program = ProgramFactory(name="Test Program")
+        partner = PartnerFactory(name="Test Partner with Program Access")
+        cls.user_with_role_in_ba = UserFactory(
+            partner=partner, username="user_with_role_in_BA"
         )
-        role = RoleFactory(name="User Management View Role", permissions=[Permissions.USER_MANAGEMENT_VIEW_LIST])
-        UserRoleFactory(user=cls.user_with_unicef_partner_and_role_in_BA, role=role, business_area=business_area)
+        cls.update_partner_access_to_program(partner=partner, program=cls.program)
+        role = RoleFactory(name="User Management View Role", permissions=[Permissions.USER_MANAGEMENT_VIEW_LIST.value])
+        UserRoleFactory(user=cls.user_with_role_in_ba, role=role, business_area=business_area)
 
         # user with UNICEF partner without role in BA
         UserFactory(partner=partner_unicef, username="unicef_user_without_role")
@@ -158,7 +160,7 @@ class TestUserFilter(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_USERS_QUERY,
             variables={"businessArea": "afghanistan", "orderBy": "partner"},
-            context={"user": self.user_with_unicef_partner_and_role_in_BA},
+            context={"user": self.user_with_role_in_ba},
         )
 
     def test_users_by_program(self) -> None:
@@ -169,12 +171,12 @@ class TestUserFilter(APITestCase):
                 "program": encode_id_base64_required(self.program.id, "Program"),
                 "orderBy": "partner",
             },
-            context={"user": self.user_with_unicef_partner_and_role_in_BA},
+            context={"user": self.user_with_role_in_ba},
         )
 
     def test_users_by_roles(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.ALL_USERS_QUERY_FILTER_BY_ROLES,
             variables={"businessArea": "afghanistan", "roles": str(self.role.id), "orderBy": "partner"},
-            context={"user": self.user_with_unicef_partner_and_role_in_BA},
+            context={"user": self.user_with_role_in_ba},
         )
