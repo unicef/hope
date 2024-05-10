@@ -17,20 +17,6 @@ import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { IndividualsListTable } from '../../tables/population/IndividualsListTable';
 
-const initialFilter = {
-  search: '',
-  searchType: 'individual_id',
-  admin2: '',
-  sex: '',
-  ageMin: '',
-  ageMax: '',
-  flags: [],
-  orderBy: 'unicef_id',
-  status: '',
-  lastRegistrationDateMin: '',
-  lastRegistrationDateMax: '',
-};
-
 export function PopulationIndividualsPage(): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
@@ -39,15 +25,31 @@ export function PopulationIndividualsPage(): React.ReactElement {
   const { data: householdChoicesData, loading: householdChoicesLoading } =
     useHouseholdChoiceDataQuery();
 
+  const { data: individualChoicesData, loading: individualChoicesLoading } =
+    useIndividualChoiceDataQuery();
+
+  const initialFilter = {
+    search: '',
+    documentType: individualChoicesData?.documentTypeChoices?.[0]?.value,
+    documentNumber: '',
+    admin2: '',
+    sex: '',
+    ageMin: '',
+    ageMax: '',
+    flags: [],
+    orderBy: 'unicef_id',
+    status: '',
+    lastRegistrationDateMin: '',
+    lastRegistrationDateMax: '',
+  };
+
+
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-
-  const { data: individualChoicesData, loading: individualChoicesLoading } =
-    useIndividualChoiceDataQuery();
 
   if (householdChoicesLoading || individualChoicesLoading)
     return <LoadingComponent />;

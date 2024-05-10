@@ -1,9 +1,10 @@
 import contextlib
 import logging
 from typing import Dict, List, Tuple
+from uuid import UUID
 
 from django.core.cache import cache
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.forms import model_to_dict
 
 from hct_mis_api.apps.account.models import Partner
@@ -191,7 +192,7 @@ class RdiMergeTask:
                 household_data["country_origin"] = country_origin
 
             if record := imported_household.flex_registrations_record:
-                household_data["registration_id"] = record.registration
+                household_data["registration_id"] = str(record.registration)
 
             if enumerator_rec_id := imported_household.enumerator_rec_id:
                 household_data["flex_fields"].update({"enumerator_id": enumerator_rec_id})
@@ -375,7 +376,7 @@ class RdiMergeTask:
                     kobo_submissions = []
                     for imported_household in imported_households:
                         kobo_submission_uuid = imported_household.kobo_submission_uuid
-                        kobo_asset_id = imported_household.detail_id
+                        kobo_asset_id = imported_household.detail_id or imported_household.kobo_asset_id
                         kobo_submission_time = imported_household.kobo_submission_time
                         if kobo_submission_uuid and kobo_asset_id and kobo_submission_time:
                             submission = KoboImportedSubmission(
@@ -389,6 +390,12 @@ class RdiMergeTask:
                     if kobo_submissions:
                         KoboImportedSubmission.objects.bulk_create(kobo_submissions)
                     logger.info(f"RDI:{registration_data_import_id} Created {len(kobo_submissions)} kobo submissions")
+
+                    for imported_household in imported_households:
+                        program_registration_id = imported_household.program_registration_id
+                        if program_registration_id:
+                            household = households_dict[imported_household.id]
+                            self._update_program_registration_id(household.id, program_registration_id)
 
                     # DEDUPLICATION
 
@@ -497,3 +504,10 @@ class RdiMergeTask:
         except Exception as e:
             logger.error(e)
             raise
+
+    def _update_program_registration_id(self, household_id: UUID, program_registration_id: str, count: int = 0) -> None:
+        try:
+            with transaction.atomic():
+                Household.objects.filter(id=household_id).update(registration_id=f"{program_registration_id}#{count}")
+        except IntegrityError:
+            self._update_program_registration_id(household_id, program_registration_id, count=count + 1)

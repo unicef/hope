@@ -4,11 +4,11 @@ import { RegistrationDataImportDetailsPage } from '../pages/rdi/RegistrationData
 import { RegistrationDataImportPage } from '../pages/rdi/RegistrationDataImportPage';
 import { RegistrationHouseholdDetailsPage } from '../pages/rdi/RegistrationHouseholdDetailsPage';
 import { RegistrationIndividualDetailsPage } from '../pages/rdi/RegistrationIndividualDetailsPage';
-import {RegistrationPeopleDetailsPage} from "@containers/pages/rdi/people/RegistrationPeopleDetailsPage";
+import { RegistrationPeopleDetailsPage } from '@containers/pages/rdi/people/RegistrationPeopleDetailsPage';
 import {
-  RegistrationDataImportForPeopleDetailsPage
-} from "@containers/pages/rdi/people/RegistrationDataImportForPeopleDetailsPage";
-import {RegistrationDataForPeopleImportPage} from "@containers/pages/rdi/people/RegistrationDataForPeopleImportPage";
+  RegistrationDataImportForPeopleDetailsPage,
+} from '@containers/pages/rdi/people/RegistrationDataImportForPeopleDetailsPage';
+import { RegistrationDataForPeopleImportPage } from '@containers/pages/rdi/people/RegistrationDataForPeopleImportPage';
 
 export const RegistrationRoutes = (): React.ReactElement => {
   const registrationRoutes = [
