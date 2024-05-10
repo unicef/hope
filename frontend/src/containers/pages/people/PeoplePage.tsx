@@ -10,14 +10,14 @@ import {
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import { IndividualsFilter } from '@components/population/IndividualsFilter';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { PeopleListTable } from '@containers/tables/people/PeopleListTable';
+import { PeopleFilter } from '@components/people/PeopleFilter';
 
-export function PeoplePage(): React.ReactElement {
+export const PeoplePage = (): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const { businessArea } = useBaseUrl();
@@ -64,7 +64,7 @@ export function PeoplePage(): React.ReactElement {
   return (
     <>
       <PageHeader title={t('People')} />
-      <IndividualsFilter
+      <PeopleFilter
         filter={filter}
         choicesData={individualChoicesData}
         setFilter={setFilter}
@@ -80,7 +80,6 @@ export function PeoplePage(): React.ReactElement {
         <PeopleListTable
           filter={appliedFilter}
           businessArea={businessArea}
-          choicesData={householdChoicesData}
           canViewDetails={hasPermissions(
             PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
             permissions,
@@ -89,4 +88,4 @@ export function PeoplePage(): React.ReactElement {
       </Box>
     </>
   );
-}
+};
