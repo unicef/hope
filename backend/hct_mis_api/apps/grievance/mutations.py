@@ -848,8 +848,10 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
         individual_approve_data = {to_snake_case(key): value for key, value in individual_approve_data.items()}
         individual_data_details = grievance_ticket.individual_data_update_ticket_details
         individual_data = individual_data_details.individual_data
-        cls.verify_approve_data_against_object_data(individual_data, individual_approve_data)
-        cls.verify_approve_data_against_object_data(individual_data.get("flex_fields"), flex_fields_approve_data)
+        if individual_approve_data:
+            cls.verify_approve_data_against_object_data(individual_data, individual_approve_data)
+        if flex_fields_approve_data:
+            cls.verify_approve_data_against_object_data(individual_data.get("flex_fields"), flex_fields_approve_data)
 
         documents_mapping = {
             "documents": approved_documents_to_create,
