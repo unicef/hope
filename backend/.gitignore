@@ -3,6 +3,7 @@ Makefile
 *.isorted
 test_times.txt
 screenshot
+pytest_screenshots
 report
 archive
 output.json
