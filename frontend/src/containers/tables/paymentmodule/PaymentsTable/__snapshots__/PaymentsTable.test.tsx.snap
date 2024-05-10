@@ -73,7 +73,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
                     role="button"
                     tabindex="0"
                   >
-                    Payment Id
+                    Payment ID
                     <svg
                       aria-hidden="true"
                       class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
@@ -97,7 +97,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
                     role="button"
                     tabindex="0"
                   >
-                    Household Id
+                    Household ID
                     <svg
                       aria-hidden="true"
                       class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
@@ -700,7 +700,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                     role="button"
                     tabindex="0"
                   >
-                    Payment Id
+                    Payment ID
                     <svg
                       aria-hidden="true"
                       class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
@@ -724,7 +724,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                     role="button"
                     tabindex="0"
                   >
-                    Household Id
+                    Household ID
                     <svg
                       aria-hidden="true"
                       class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"

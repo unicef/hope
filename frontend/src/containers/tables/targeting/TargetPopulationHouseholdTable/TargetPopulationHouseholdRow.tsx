@@ -29,6 +29,7 @@ export function TargetPopulationHouseholdTableRow({
       hover
       onClick={canViewDetails ? handleClick : undefined}
       role="checkbox"
+      data-cy="target-population-household-row"
       key={household.id}
     >
       <TableCell align="left">

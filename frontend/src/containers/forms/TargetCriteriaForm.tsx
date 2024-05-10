@@ -84,6 +84,7 @@ interface TargetCriteriaFormPropTypes {
   onClose: () => void;
   individualFiltersAvailable: boolean;
   householdFiltersAvailable: boolean;
+  isSocialWorkingProgram: boolean;
 }
 
 const associatedWith = (type) => (item) => item.associatedWith === type;
@@ -96,6 +97,7 @@ export const TargetCriteriaForm = ({
   onClose,
   individualFiltersAvailable,
   householdFiltersAvailable,
+  isSocialWorkingProgram,
 }: TargetCriteriaFormPropTypes): React.ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
@@ -110,6 +112,7 @@ export const TargetCriteriaForm = ({
   const initialValue = mapCriteriaToInitialValues(criteria);
   const [individualData, setIndividualData] = useState(null);
   const [householdData, setHouseholdData] = useState(null);
+  const [allDataChoicesDict, setAllDataChoicesDict] = useState(null);
   useEffect(() => {
     if (loading) return;
     const filteredIndividualData = {
@@ -125,10 +128,17 @@ export const TargetCriteriaForm = ({
       ),
     };
     setHouseholdData(filteredHouseholdData);
+    const allDataChoicesDictTmp = data?.allFieldsAttributes?.reduce(
+      (acc, item) => {
+        acc[item.name] = item.choices;
+        return acc;
+      },
+      {},
+    );
+    setAllDataChoicesDict(allDataChoicesDictTmp);
   }, [data, loading]);
 
   if (!data) return null;
-
   const validate = ({
     filters,
     individualsFiltersBlocks,
@@ -256,7 +266,8 @@ export const TargetCriteriaForm = ({
                         // eslint-disable-next-line
                         key={index}
                         index={index}
-                        data={householdData}
+                        data={isSocialWorkingProgram ? data : householdData}
+                        choicesDict={allDataChoicesDict}
                         each={each}
                         onChange={(e, object) => {
                           if (object) {
@@ -271,7 +282,7 @@ export const TargetCriteriaForm = ({
                   </ArrayFieldWrapper>
                 )}
               />
-              {householdFiltersAvailable ? (
+              {householdFiltersAvailable || isSocialWorkingProgram ? (
                 <Box display="flex" flexDirection="column">
                   <ButtonBox>
                     <Button
@@ -284,12 +295,12 @@ export const TargetCriteriaForm = ({
                       startIcon={<AddCircleOutline />}
                       data-cy="button-household-rule"
                     >
-                      ADD HOUSEHOLD RULE
+                      ADD {isSocialWorkingProgram ? 'PEOPLE' : 'HOUSEHOLD'} RULE
                     </Button>
                   </ButtonBox>
                 </Box>
               ) : null}
-              {individualFiltersAvailable ? (
+              {individualFiltersAvailable && !isSocialWorkingProgram ? (
                 <>
                   {householdFiltersAvailable ? (
                     <AndDivider>
@@ -310,6 +321,7 @@ export const TargetCriteriaForm = ({
                             blockIndex={index}
                             data={individualData}
                             values={values}
+                            choicesToDict={allDataChoicesDict}
                             onDelete={() => arrayHelpers.remove(index)}
                           />
                         ))}

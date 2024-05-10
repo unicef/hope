@@ -40,6 +40,15 @@ export const AllPaymentsForTable = gql`
               id
               name
             }
+            individuals {
+              edges {
+                node {
+                  id
+                  unicefId
+                  fullName
+                }
+              }
+            }
           }
           entitlementQuantity
           entitlementQuantityUsd
@@ -68,6 +77,7 @@ export const AllPaymentsForTable = gql`
           }
           collector {
             id
+            unicefId
             fullName
           }
           financialServiceProvider {

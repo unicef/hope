@@ -425,7 +425,12 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             <div
               data-cy="label-Data Collecting Type"
             >
-              -
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                data collecting type
+              </span>
             </div>
           </div>
         </div>
