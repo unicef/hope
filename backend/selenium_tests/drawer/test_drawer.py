@@ -52,8 +52,6 @@ def get_program_with_dct_type_and_name(
         data_collecting_type=dct,
         status=status,
     )
-    from time import sleep
-    sleep(2)
     return program
 
 @pytest.mark.usefixtures("login")
@@ -135,9 +133,9 @@ class TestDrawer:
         print(f'in Test -> {Program.objects.filter(name=draft_program.name).first()} -> {str(draft_program)}')
         print(f'in Test -> {Program.objects.filter(name=active_program.name).first()} -> {str(active_program)}')
         print(f'in Test -> {Program.objects.filter(name=finished_program.name).first()} -> {str(finished_program)}')
+        pageProgrammeManagement.screenshot("0", delay_sec=0.5)
         pageProgrammeManagement.selectGlobalProgramFilter(draft_program_name).click()
         # pageProgrammeDetails.wait_for_text(pageProgrammeDetails.getHeaderTitle(), pageProgrammeDetails.getHeaderTitle().text)
-        pageProgrammeDetails.screenshot("1")
         assert draft_program_name in pageProgrammeDetails.getHeaderTitle().text
         assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "program inactive"
         pageProgrammeManagement.selectGlobalProgramFilter(active_program_name).click()
