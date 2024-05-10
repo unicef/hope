@@ -25,7 +25,6 @@ export function PeopleListTable({
   businessArea,
   filter,
   canViewDetails,
-  choicesData,
 }: PeopleListTableProps): React.ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();

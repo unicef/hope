@@ -227,7 +227,7 @@ export const GlobalProgramSelect = () => {
       );
       setPrograms(newProgramsList);
     }
-  }, [programsList?.allPrograms]);
+  }, [programsList?.allPrograms, inputValue]);
 
   const handleClose = () => {
     setAnchorEl(null);
