@@ -71,11 +71,13 @@ export function TargetCriteriaFilterBlocks({
   blockIndex,
   data,
   values,
+  choicesToDict,
   onDelete,
 }: {
   blockIndex: number;
   data: ImportedIndividualFieldsQuery;
   values;
+  choicesToDict;
   onDelete: () => void;
 }): React.ReactElement {
   const { t } = useTranslation();
@@ -104,6 +106,7 @@ export function TargetCriteriaFilterBlocks({
                         index={index}
                         data={data}
                         each={each}
+                        choicesDict={choicesToDict}
                         onChange={(e, object) => {
                           if (object) {
                             return chooseFieldType(object, arrayHelpers, index);

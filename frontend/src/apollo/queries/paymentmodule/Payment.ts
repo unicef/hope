@@ -39,6 +39,7 @@ export const Payment = gql`
         unicefId
         headOfHousehold {
           id
+          unicefId
           phoneNo
           phoneNoAlternative
           phoneNoValid

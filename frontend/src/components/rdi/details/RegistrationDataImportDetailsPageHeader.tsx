@@ -135,7 +135,7 @@ export const RegistrationDataImportDetailsPageHeader = ({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Registration Data import'),
-      to: `/${baseUrl}/registration-data-import/`,
+      to: '..',
     },
   ];
 
@@ -144,7 +144,7 @@ export const RegistrationDataImportDetailsPageHeader = ({
       <PageHeader
         title={registration.name}
         breadCrumbs={canViewList ? breadCrumbsItems : null}
-        handleBack={() => navigate(`/${baseUrl}/registration-data-import/`)}
+        handleBack={() => navigate('..')}
         flags={<AdminButton adminUrl={registration.adminUrl} />}
       >
         {registration.erased ? null : buttons}
