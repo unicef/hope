@@ -328,3 +328,7 @@ CURRENCY_CHOICES = (
     (ZWL, _("Zimbabwean dollar")),
     (USDC, _("Digital currency")),
 )
+
+# TODO: add in future in case to have more 'digital currency' method for checking currency have a type/flag digital
+#  currency like is_digital_currency(currency: str) -> bool
+#  For now only USDC is digital currency

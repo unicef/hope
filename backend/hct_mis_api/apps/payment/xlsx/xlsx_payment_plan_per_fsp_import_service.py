@@ -231,6 +231,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 "additional_collector_name",
                 "additional_document_type",
                 "additional_document_number",
+                "transaction_status_blockchain",
             ),
             batch_size=500,
         )
@@ -305,6 +306,11 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         else:
             additional_document_number = None
 
+        if "transaction_status_blockchain" in self.xlsx_headers:
+            transaction_status_blockchain = row[self.xlsx_headers.index("transaction_status_blockchain")].value
+        else:
+            transaction_status_blockchain = None
+
         if isinstance(delivery_date, str):
             delivery_date = parse(delivery_date)
 
@@ -328,6 +334,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 or (additional_document_type != payment.additional_document_type)
                 or (additional_document_number != payment.additional_document_number)
                 or (reference_id != payment.transaction_reference_id)
+                or (transaction_status_blockchain != payment.transaction_status_blockchain)
             ):
                 payment.delivered_quantity = delivered_quantity
                 payment.delivered_quantity_usd = get_quantity_in_usd(
@@ -348,6 +355,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 payment.additional_document_type = additional_document_type
                 payment.additional_document_number = additional_document_number
                 payment.transaction_reference_id = reference_id
+                payment.transaction_status_blockchain = transaction_status_blockchain
 
                 self.payments_to_save.append(payment)
                 # update PaymentVerification status
