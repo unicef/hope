@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:ef8462f43c002e6aacd67e9fe7a1b6b35c22a074a826d6ad665f2092dd70cde3"
+content_hash = "sha256:3e6bd19f985e81902a2e378cb1ed700020522de56355abca8e9bbcab1bc391e3"
 
 [[package]]
 name = "amqp"
@@ -121,19 +121,19 @@ files = [
 
 [[package]]
 name = "azure-storage-blob"
-version = "12.19.1"
-requires_python = ">=3.7"
+version = "12.20.0"
+requires_python = ">=3.8"
 summary = "Microsoft Azure Blob Storage Client Library for Python"
 groups = ["default"]
 dependencies = [
-    "azure-core<2.0.0,>=1.28.0",
+    "azure-core>=1.28.0",
     "cryptography>=2.1.4",
     "isodate>=0.6.1",
-    "typing-extensions>=4.3.0",
+    "typing-extensions>=4.6.0",
 ]
 files = [
-    {file = "azure-storage-blob-12.19.1.tar.gz", hash = "sha256:13e16ba42fc54ac2c7e8f976062173a5c82b9ec0594728e134aac372965a11b0"},
-    {file = "azure_storage_blob-12.19.1-py3-none-any.whl", hash = "sha256:c5530dc51c21c9564e4eb706cd499befca8819b10dd89716d3fc90d747556243"},
+    {file = "azure-storage-blob-12.20.0.tar.gz", hash = "sha256:eeb91256e41d4b5b9bad6a87fd0a8ade07dd58aa52344e2c8d2746e27a017d3b"},
+    {file = "azure_storage_blob-12.20.0-py3-none-any.whl", hash = "sha256:de6b3bf3a90e9341a6bcb96a2ebe981dffff993e9045818f6549afea827a52a9"},
 ]
 
 [[package]]
@@ -1147,7 +1147,7 @@ files = [
 
 [[package]]
 name = "django-markdownify"
-version = "0.9.4"
+version = "0.9.5"
 summary = "Markdown template filter for Django."
 groups = ["default"]
 dependencies = [
@@ -1156,8 +1156,8 @@ dependencies = [
     "markdown",
 ]
 files = [
-    {file = "django_markdownify-0.9.4-py3-none-any.whl", hash = "sha256:952b1f67d0aa1258986e4962c65ec37104dd99f2fdc7225bee80cdc386243bb7"},
-    {file = "django_markdownify-0.9.4.tar.gz", hash = "sha256:c3b7edcd720ab6cc45666d9df01c80a72d164076911604ffc7a48752199bc0d3"},
+    {file = "django_markdownify-0.9.5-py3-none-any.whl", hash = "sha256:2c4ae44e386c209453caf5e9ea1b74f64535985d338ad2d5ad5e7089cc94be86"},
+    {file = "django_markdownify-0.9.5.tar.gz", hash = "sha256:34c34eba4a797282a5c5bd97b13cec84d6a4c0673ad47ce1c1d000d74dd8d4ab"},
 ]
 
 [[package]]
@@ -1499,6 +1499,19 @@ dependencies = [
 files = [
     {file = "djangorestframework-stubs-1.7.0.tar.gz", hash = "sha256:6e8a80a0716d8af02aa387dae47f8ef97b6c0efdf159d83a5918d582f8b1ea07"},
     {file = "djangorestframework_stubs-1.7.0-py3-none-any.whl", hash = "sha256:3ac1447fc87f68fe7d8622d4725b5cef820bcc17918f36c7da3f667363fb7a43"},
+]
+
+[[package]]
+name = "drf-extensions"
+version = "0.7.1"
+summary = "Extensions for Django REST Framework"
+groups = ["default"]
+dependencies = [
+    "djangorestframework>=3.9.3",
+]
+files = [
+    {file = "drf-extensions-0.7.1.tar.gz", hash = "sha256:90abfc11a2221e8daf4cd54457e41ed38cd71134678de9622e806193db027db1"},
+    {file = "drf_extensions-0.7.1-py2.py3-none-any.whl", hash = "sha256:007910437e64aa1d5ad6fc47266a4ac4280e31761e6458eb30fcac7494ac7d4e"},
 ]
 
 [[package]]

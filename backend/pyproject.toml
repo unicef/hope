@@ -190,6 +190,7 @@ dependencies = [
     "djangorestframework<4.0.0,>=3.13.1",
     "drf-jwt<2.0.0,>=1.19.2",
     "drf-spectacular[sidecar]<1.0,>=0.27",
+    "drf-extensions==0.7.1",
     "elasticsearch-dsl<8.0.0,>=7.0.0",
     "factory-boy<4,>=3",
     "gevent<24.0,>=23.9",

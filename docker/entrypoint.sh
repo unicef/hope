@@ -12,9 +12,6 @@ else
   case "$1" in
     "dev")
       wait_for_db db
-      pdm info
-      pdm list
-      echo "$PATH"
       python manage.py collectstatic --no-input --no-default-ignore
       python manage.py migratealldb
       python manage.py runserver 0.0.0.0:8000
