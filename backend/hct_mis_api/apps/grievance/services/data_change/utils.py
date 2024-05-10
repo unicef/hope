@@ -225,8 +225,7 @@ def handle_add_delivery_mechanism_data(delivery_mechanism_data: Dict, individual
 
 
 def handle_update_delivery_mechanism_data(delivery_mechanism_data: Dict) -> DeliveryMechanismData:
-    delivery_mechanism_data_id = decode_id_string(delivery_mechanism_data.get("id"))
-    dmd = get_object_or_404(DeliveryMechanismData, id=delivery_mechanism_data_id)
+    dmd = get_object_or_404(DeliveryMechanismData, id=delivery_mechanism_data.get("id"))
     for field in delivery_mechanism_data.get("fields", []):
         dmd.data[field] = field.get("value", None)  # TODO MB handle core fields?
     return dmd
