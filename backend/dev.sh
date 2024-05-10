@@ -13,9 +13,6 @@ else
   case "$1" in
     "test")
       wait_for_db db
-      pdm info
-      pdm list
-      echo "$PATH"
       pytest \
         -n auto \
         --reruns 3 \
