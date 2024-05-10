@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:3e6bd19f985e81902a2e378cb1ed700020522de56355abca8e9bbcab1bc391e3"
+content_hash = "sha256:d08971a66371fb964876fccec780e2fd1c0acd1cada639641cd44d5616250d26"
 
 [[package]]
 name = "amqp"
@@ -3014,6 +3014,20 @@ dependencies = [
 files = [
     {file = "pytest_html-4.1.1-py3-none-any.whl", hash = "sha256:c8152cea03bd4e9bee6d525573b67bbc6622967b72b9628dda0ea3e2a0b5dd71"},
     {file = "pytest_html-4.1.1.tar.gz", hash = "sha256:70a01e8ae5800f4a074b56a4cb1025c8f4f9b038bba5fe31e3c98eb996686f07"},
+]
+
+[[package]]
+name = "pytest-html-reporter"
+version = "0.2.9"
+requires_python = ">=3.5"
+summary = "Generates a static html report based on pytest framework"
+groups = ["default"]
+dependencies = [
+    "Pillow",
+    "pytest",
+]
+files = [
+    {file = "pytest-html-reporter-0.2.9.tar.gz", hash = "sha256:0f1c526d1533c40961ebe3b7af6127e2f0c7719f22d49d93d94e635af7bc280b"},
 ]
 
 [[package]]
