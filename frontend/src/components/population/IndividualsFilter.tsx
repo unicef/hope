@@ -19,6 +19,7 @@ import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { useProgramContext } from '../../programContext';
+import { DocumentSearchField } from '@core/DocumentSearchField';
 
 interface IndividualsFilterProps {
   filter;
@@ -77,37 +78,22 @@ export function IndividualsFilter({
       isOnPaper={isOnPaper}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid container alignItems="flex-end" item xs={6} spacing={0}>
-          <Grid item xs={8}>
-            <SearchTextField
-              label={t('Search')}
-              value={filter.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-              data-cy="ind-filters-search"
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <SelectFilter
-              onChange={(e) => handleFilterChange('searchType', e.target.value)}
-              label={t('Search Type')}
-              value={filter.searchType}
-              borderRadius="0px 4px 4px 0px"
-              data-cy="filter-search-type"
-              fullWidth
-              disableClearable
-            >
-              {choicesData?.individualSearchTypesChoices.map(
-                ({ name, value }) => (
-                  <MenuItem key={value} value={value}>
-                    {name}
-                  </MenuItem>
-                ),
-              )}
-            </SelectFilter>
-          </Grid>
+        <Grid item xs={3}>
+          <SearchTextField
+            label={t('Search')}
+            value={filter.search}
+            onChange={(e) => handleFilterChange('search', e.target.value)}
+            data-cy="ind-filters-search"
+          />
         </Grid>
+        <DocumentSearchField
+          onChange={handleFilterChange}
+          type={filter.documentType}
+          number={filter.documentNumber}
+          choices={choicesData?.documentTypeChoices}
+        />
         {isAllPrograms && (
-          <Grid item xs={2}>
+          <Grid item xs={3}>
             <SelectFilter
               onChange={(e) => handleFilterChange('program', e.target.value)}
               label={t('Programme')}
@@ -125,7 +111,7 @@ export function IndividualsFilter({
           </Grid>
         )}
         {showAdminAreaFilter && (
-          <Grid item xs={2}>
+          <Grid item xs={3}>
             <AdminAreaAutocomplete
               name="admin2"
               value={filter.admin2}
@@ -138,7 +124,7 @@ export function IndividualsFilter({
             />
           </Grid>
         )}
-        <Grid item xs={2}>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('sex', e.target.value)}
             value={filter.sex}

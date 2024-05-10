@@ -34,7 +34,8 @@ export function PeopleListTable({
     businessArea,
     sex: [filter.sex],
     search: filter.search.trim(),
-    searchType: filter.searchType,
+    documentType: filter.documentType,
+    documentNumber: filter.documentNumber.trim(),
     admin2: [filter.admin2],
     flags: filter.flags,
     status: filter.status,
@@ -61,7 +62,6 @@ export function PeopleListTable({
             key={row.id}
             individual={row}
             canViewDetails={canViewDetails}
-            choicesData={choicesData}
           />
         )}
       />

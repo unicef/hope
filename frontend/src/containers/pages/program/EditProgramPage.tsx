@@ -4,6 +4,7 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
+  ProgramPartnerAccess,
   useAllAreasTreeQuery,
   useProgramQuery,
   useUpdateProgramMutation,
@@ -20,7 +21,10 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { decodeIdString } from '@utils/utils';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { hasPermissionInModule } from '../../../config/permissions';
+import {
+  hasPermissionInModule,
+  PERMISSIONS,
+} from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 
 export const EditProgramPage = (): ReactElement => {
@@ -80,6 +84,7 @@ export const EditProgramPage = (): ReactElement => {
     frequencyOfPayments = 'REGULAR',
     version,
     partners,
+    partnerAccess = ProgramPartnerAccess.AllPartnersAccess,
   } = data.program;
 
   const handleSubmit = async (values): Promise<void> => {
@@ -91,6 +96,14 @@ export const EditProgramPage = (): ReactElement => {
     const populationGoalParsed = !Number.isNaN(populationGoalValue)
       ? populationGoalValue
       : 0;
+    const partnersToSet =
+      values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess
+        ? values.partners.map(({ id, areas, areaAccess }) => ({
+            partner: id,
+            areas: areaAccess === 'ADMIN_AREA' ? areas : [],
+            areaAccess,
+          }))
+        : [];
 
     try {
       const response = await mutate({
@@ -100,6 +113,7 @@ export const EditProgramPage = (): ReactElement => {
             ...values,
             budget: budgetToFixed,
             populationGoal: populationGoalParsed,
+            partners: partnersToSet,
           },
           version,
         },
@@ -124,11 +138,14 @@ export const EditProgramPage = (): ReactElement => {
     populationGoal,
     cashPlus,
     frequencyOfPayments,
-    partners: partners.map((partner) => ({
-      id: partner.id,
-      adminAreas: partner.adminAreas.flatMap((area) => area.ids),
-      areaAccess: partner.areaAccess,
-    })),
+    partners: partners
+      .filter((partner) => partner.name !== 'UNICEF')
+      .map((partner) => ({
+        id: partner.id,
+        areas: partner.areas.map((area) => decodeIdString(area.id)),
+        areaAccess: partner.areaAccess,
+      })),
+    partnerAccess,
   };
   initialValues.budget =
     data.program.budget === '0.00' ? '' : data.program.budget;
@@ -150,11 +167,18 @@ export const EditProgramPage = (): ReactElement => {
       'cashPlus',
       'frequencyOfPayments',
     ],
-    ['partners'],
+    ['partnerAccess'],
   ];
 
   const { allAreasTree } = treeData;
   const { userPartnerChoices } = userPartnerChoicesData;
+
+  const breadCrumbsItems: BreadCrumbsItem[] = [
+    {
+      title: t('Programme'),
+      to: `/${baseUrl}/details/${id}`,
+    },
+  ];
 
   return (
     <Formik
@@ -164,7 +188,13 @@ export const EditProgramPage = (): ReactElement => {
       }}
       validationSchema={programValidationSchema(t)}
     >
-      {({ submitForm, values, validateForm, setFieldTouched }) => {
+      {({
+        submitForm,
+        values,
+        validateForm,
+        setFieldTouched,
+        setFieldValue,
+      }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
           .map((partner) => ({
@@ -183,13 +213,6 @@ export const EditProgramPage = (): ReactElement => {
             stepFields[step].forEach((field) => setFieldTouched(field));
           }
         };
-
-        const breadCrumbsItems: BreadCrumbsItem[] = [
-          {
-            title: t('Programme'),
-            to: `/${baseUrl}/details/${id}`,
-          },
-        ];
 
         return (
           <>
@@ -236,6 +259,7 @@ export const EditProgramPage = (): ReactElement => {
                   step={step}
                   setStep={setStep}
                   submitForm={submitForm}
+                  setFieldValue={setFieldValue}
                 />
               )}
             </Box>

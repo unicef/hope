@@ -272,6 +272,7 @@ class GenericPayment(TimeStampedUUIDModel):
     DELIVERY_TYPE_TRANSFER_TO_ACCOUNT = "Transfer to Account"
     DELIVERY_TYPE_VOUCHER = "Voucher"
     DELIVERY_TYPE_CASH_OVER_THE_COUNTER = "Cash over the counter"
+    DELIVERY_TYPE_ATM_CARD = "ATM Card"
 
     DELIVERY_TYPES_IN_CASH = (
         DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL,
@@ -285,6 +286,7 @@ class GenericPayment(TimeStampedUUIDModel):
         DELIVERY_TYPE_TRANSFER,
         DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
         DELIVERY_TYPE_CASH_OVER_THE_COUNTER,
+        DELIVERY_TYPE_ATM_CARD,
     )
     DELIVERY_TYPES_IN_VOUCHER = (DELIVERY_TYPE_VOUCHER,)
 
@@ -301,6 +303,7 @@ class GenericPayment(TimeStampedUUIDModel):
         (DELIVERY_TYPE_TRANSFER_TO_ACCOUNT, _("Transfer to Account")),
         (DELIVERY_TYPE_VOUCHER, _("Voucher")),
         (DELIVERY_TYPE_CASH_OVER_THE_COUNTER, _("Cash over the counter")),
+        (DELIVERY_TYPE_ATM_CARD, _("ATM Card")),
     )
 
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
@@ -582,7 +585,11 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
     class Meta:
         verbose_name = "Payment Plan"
         ordering = ["created_at"]
-        constraints = [models.UniqueConstraint(fields=["name", "program"], name="name_unique_per_program")]
+        constraints = [
+            UniqueConstraint(
+                fields=["name", "program", "is_removed"], condition=Q(is_removed=False), name="name_unique_per_program"
+            )
+        ]
 
     def __str__(self) -> str:
         return self.unicef_id or ""
