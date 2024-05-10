@@ -103,6 +103,7 @@ USER hope
 COPY ./docker/entrypoint.sh /bin/
 ENTRYPOINT ["entrypoint.sh"]
 
+
 # Frontend builder
 FROM node:18.19.0-buster-slim AS frontend-builder
 
