@@ -30,7 +30,7 @@ AllProgramsQuery['allPrograms']['edges'][number]['node']
   },
   {
     disablePadding: false,
-    label: 'Num. of Households',
+    label: 'Program Size',
     // disabled because number_of_households is not a field in the program model
     id: 'number_of_households',
     numeric: true,

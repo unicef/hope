@@ -1,3 +1,4 @@
+import uuid
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
 
 import graphene
@@ -26,17 +27,20 @@ if TYPE_CHECKING:
 
     from graphene.types.structures import List as GrapheneList
 
-    from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.targeting.models import TargetingIndividualBlockRuleFilter
 
 
-def get_field_by_name(field_name: str, business_area: "BusinessArea") -> Dict:
-    factory = FieldFactory.from_scope(Scope.TARGETING)
-    factory.apply_business_area(business_area.slug)
+def get_field_by_name(field_name: str, target_population: target_models.TargetPopulation) -> Dict:
+    scopes = [Scope.TARGETING]
+    if target_population.program.is_social_worker_program:
+        scopes.append(Scope.XLSX_PEOPLE)
+    factory = FieldFactory.from_only_scopes(scopes)
+    factory.apply_business_area(target_population.business_area.slug)
     field = factory.to_dict_by("name")[field_name]
-    choices = field.get("choices")
+    choices = field.get("choices") or field.get("_choices")
     if choices and callable(choices):
         field["choices"] = choices()
+    field["id"] = uuid.uuid4()
     return field
 
 
@@ -61,9 +65,12 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
             return FlexibleAttribute.objects.get(name=parent.field_name)
         else:
             field_attribute = get_field_by_name(
-                parent.field_name, parent.targeting_criteria_rule.targeting_criteria.target_population.business_area
+                parent.field_name, parent.targeting_criteria_rule.targeting_criteria.target_population
             )
-            return filter_choices(field_attribute, parent.arguments)  # type: ignore # can't convert graphene list to list
+            parent.targeting_criteria_rule
+            return filter_choices(
+                field_attribute, parent.arguments  # type: ignore # can't convert graphene list to list
+            )
 
     class Meta:
         model = target_models.TargetingCriteriaRuleFilter
@@ -82,7 +89,7 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
 
         field_attribute = get_field_by_name(
             parent.field_name,
-            parent.individuals_filters_block.targeting_criteria_rule.targeting_criteria.target_population.business_area,
+            parent.individuals_filters_block.targeting_criteria_rule.targeting_criteria.target_population,
         )
         return filter_choices(field_attribute, parent.arguments)  # type: ignore # can't convert graphene list to list
 

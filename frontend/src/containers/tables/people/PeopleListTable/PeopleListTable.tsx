@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import {
   AllIndividualsForPopulationTableQueryVariables,
   AllIndividualsQueryVariables,
-  HouseholdChoiceDataQuery,
   IndividualNode,
   useAllIndividualsForPopulationTableQuery,
 } from '@generated/graphql';
@@ -18,7 +17,6 @@ interface PeopleListTableProps {
   filter;
   businessArea: string;
   canViewDetails: boolean;
-  choicesData: HouseholdChoiceDataQuery;
 }
 
 export function PeopleListTable({
