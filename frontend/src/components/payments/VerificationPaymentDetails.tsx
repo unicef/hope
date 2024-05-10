@@ -1,12 +1,10 @@
-import { Grid, Paper, Typography } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import {
   choicesToDict,
   formatCurrencyWithSymbol,
-  getPhoneNoLabel,
   paymentStatusDisplayMap,
   paymentStatusToColor,
   verificationRecordsStatusToColor,
@@ -17,12 +15,10 @@ import { LabelizedField } from '@core/LabelizedField';
 import { StatusBox } from '@core/StatusBox';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { Title } from '@core/Title';
-
-const Overview = styled(Paper)`
-  margin: 20px;
-  padding: ${({ theme }) => theme.spacing(8)}
-    ${({ theme }) => theme.spacing(11)};
-`;
+import { Overview } from '@components/payments/Overview';
+import { HouseholdDetails } from '@components/payments/HouseholdDetails';
+import { useProgramContext } from '../../programContext';
+import { IndividualDetails } from '@components/payments/IndividualDetails';
 
 interface VerificationPaymentDetailsProps {
   payment: PaymentQuery['payment'];
@@ -36,6 +32,7 @@ export function VerificationPaymentDetails({
   choicesData,
 }: VerificationPaymentDetailsProps): React.ReactElement {
   const { t } = useTranslation();
+  const { isSocialDctType } = useProgramContext();
   const deliveryTypeDict = choicesToDict(
     choicesData.paymentRecordDeliveryTypeChoices,
   );
@@ -94,49 +91,11 @@ export function VerificationPaymentDetails({
           </Grid>
         </Grid>
       </ContainerColumnWithBorder>
-      <Overview>
-        <Title>
-          <Typography variant="h6">{t('Household')}</Typography>
-        </Title>
-        <Grid container spacing={3}>
-          <Grid item xs={3}>
-            <LabelizedField
-              label={t('HOUSEHOLD ID')}
-              value={payment.household.unicefId}
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <LabelizedField
-              label={t('HEAD OF HOUSEHOLD')}
-              value={payment.household.headOfHousehold.fullName}
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <LabelizedField
-              label={t('TOTAL PERSON COVERED')}
-              value={payment.household.size}
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <LabelizedField
-              label={t('PHONE NUMBER')}
-              value={getPhoneNoLabel(
-                payment.household.headOfHousehold.phoneNo,
-                payment.household.headOfHousehold.phoneNoValid,
-              )}
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <LabelizedField
-              label={t('ALT. PHONE NUMBER')}
-              value={getPhoneNoLabel(
-                payment.household.headOfHousehold.phoneNoAlternative,
-                payment.household.headOfHousehold.phoneNoAlternativeValid,
-              )}
-            />
-          </Grid>
-        </Grid>
-      </Overview>
+      {isSocialDctType ? (
+        <IndividualDetails individual={payment.household.headOfHousehold} />
+      ) : (
+        <HouseholdDetails household={payment.household} />
+      )}
       <Overview>
         <Title>
           <Typography variant="h6">{t('Entitlement Details')}</Typography>

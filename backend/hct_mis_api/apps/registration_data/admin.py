@@ -180,10 +180,14 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             self.message_user(request, "An error occurred while processing RDI delete", messages.ERROR)
 
     @staticmethod
-    def delete_merged_rdi_visible(o: Any, r: Any) -> bool:
-        is_correct_status = o.status == RegistrationDataImport.MERGED
-        is_not_used_in_targeting = HouseholdSelection.objects.filter(household__registration_data_import=o).count() == 0
-        is_not_used_by_payment_record = PaymentRecord.objects.filter(household__registration_data_import=o).count() == 0
+    def delete_merged_rdi_visible(rdi: RegistrationDataImport) -> bool:
+        is_correct_status = rdi.status == RegistrationDataImport.MERGED
+        is_not_used_in_targeting = (
+            HouseholdSelection.objects.filter(household__registration_data_import=rdi).count() == 0
+        )
+        is_not_used_by_payment_record = (
+            PaymentRecord.objects.filter(household__registration_data_import=rdi).count() == 0
+        )
         return is_correct_status and is_not_used_in_targeting and is_not_used_by_payment_record
 
     @staticmethod
@@ -212,7 +216,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
 
     @button(
         permission=is_root,
-        visible=lambda o, r: RegistrationDataImportAdmin.delete_merged_rdi_visible(o, r),
+        visible=lambda btn: RegistrationDataImportAdmin.delete_merged_rdi_visible(btn.original),
     )
     def delete_merged_rdi(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
         try:

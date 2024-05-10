@@ -43,7 +43,10 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
     logger,
 )
 from hct_mis_api.apps.registration_datahub.tasks.utils import get_submission_metadata
-from hct_mis_api.apps.registration_datahub.utils import find_attachment_in_kobo
+from hct_mis_api.apps.registration_datahub.utils import (
+    calculate_hash_for_kobo_submission,
+    find_attachment_in_kobo,
+)
 from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
 
 
@@ -203,9 +206,17 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         individuals_ids_hash_dict = {}
         bank_accounts_to_create = []
         collectors_to_create = defaultdict(list)
+        household_hash_list = []
         household_batch_size = 50
         for reduced_submission_chunk in chunks(self.reduced_submissions, household_batch_size):
             for household in reduced_submission_chunk:
+                # AB#199540
+                household_hash = calculate_hash_for_kobo_submission(household)
+                submission_duplicate = household_hash in household_hash_list
+                if submission_duplicate:
+                    continue
+                household_hash_list.append(household_hash)
+
                 submission_meta_data = get_submission_metadata(household)
                 if self.business_area.get_sys_option("ignore_amended_kobo_submissions"):
                     submission_meta_data["amended"] = False

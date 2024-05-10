@@ -26,19 +26,14 @@ export function VerificationsTable({
 
   const initialVariables: AllPaymentVerificationsQueryVariables = {
     ...filter,
-    // TODO: cleanup
-    // paymentVerificationPlan: filter.cashPlanPaymentVerification,
-    // search: filter.search,
-    // status: filter.status,
-    // verificationChannel: filter.verificationChannel,
     businessArea,
     paymentPlanId,
   };
 
   return (
     <UniversalTable<
-    PaymentVerificationNode,
-    AllPaymentVerificationsQueryVariables
+      PaymentVerificationNode,
+      AllPaymentVerificationsQueryVariables
     >
       title={t('Verification Records')}
       headCells={headCells}
