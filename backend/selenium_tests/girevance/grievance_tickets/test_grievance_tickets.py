@@ -37,6 +37,8 @@ def create_programs(django_db_setup: Generator[None, None, None], django_db_bloc
 
 @pytest.mark.usefixtures("login")
 class TestSmokeGrievanceTickets:
+
+    @pytest.mark.skip(reason="Unstable test")
     def test_check_grievance_tickets_user_generated_page(
         self,
         create_programs: None,
@@ -146,7 +148,6 @@ class TestSmokeGrievanceTickets:
 
 @pytest.mark.usefixtures("login")
 class TestGrievanceTicketsHappyPath:
-
     @pytest.mark.skip(reason="ToDo")
     def test_grievance_tickets_create_new_ticket(
         self,

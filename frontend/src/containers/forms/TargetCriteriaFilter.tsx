@@ -37,6 +37,7 @@ export function TargetingCriteriaFilter({
   onChange,
   values,
   onClick,
+  choicesDict,
 }: {
   index: number;
   data: ImportedIndividualFieldsQuery;
@@ -44,6 +45,7 @@ export function TargetingCriteriaFilter({
   onChange: (e, object) => void;
   values;
   onClick: () => void;
+  choicesDict;
 }): React.ReactElement {
   const { t } = useTranslation();
   const shouldShowDivider = index + 1 < values.filters.length;
@@ -60,7 +62,12 @@ export function TargetingCriteriaFilter({
       />
       {each.fieldName && (
         <div data-cy="autocomplete-target-criteria-values">
-          <SubField field={each} index={index} baseName={`filters[${index}]`} />
+          <SubField
+            field={each}
+            index={index}
+            baseName={`filters[${index}]`}
+            choicesDict={choicesDict}
+          />
         </div>
       )}
       {shouldShowDivider && (

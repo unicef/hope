@@ -19,10 +19,7 @@ import { programValidationSchema } from '@components/programs/CreateProgram/prog
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import {
-  hasPermissionInModule,
-  PERMISSIONS,
-} from '../../../config/permissions';
+import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { decodeIdString } from '@utils/utils';
 
@@ -53,8 +50,8 @@ export const DuplicateProgramPage = (): ReactElement => {
       : 0;
     const partnersToSet =
       values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess
-        ? values.partners.map(({ id, areas, areaAccess }) => ({
-            partner: id,
+        ? values.partners.map(({ id: partnerId, areas, areaAccess }) => ({
+            partner: partnerId,
             areas: areaAccess === 'ADMIN_AREA' ? areas : [],
             areaAccess,
           }))
