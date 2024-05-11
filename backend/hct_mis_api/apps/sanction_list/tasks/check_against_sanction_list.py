@@ -1,10 +1,10 @@
+import base64
+import io
 from datetime import date, datetime
 from itertools import permutations
-from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING
 
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -17,6 +17,7 @@ from hct_mis_api.apps.sanction_list.models import (
     SanctionListIndividual,
     UploadedXLSXFile,
 )
+from hct_mis_api.apps.utils.mailjet import MailjetClient
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -127,20 +128,23 @@ class CheckAgainstSanctionListTask:
         for i in range(1, len(header_row_names) + 1):
             attachment_ws.column_dimensions[get_column_letter(i)].width = 30
 
-        with NamedTemporaryFile() as tmp:
-            attachment = bytes(tmp.read())
+        buffer = io.BytesIO()
+        attachment_wb.save(buffer)
+        buffer.seek(0)
 
-        msg = EmailMultiAlternatives(
+        attachment_content = buffer.getvalue()
+        base64_encoded_content = base64.b64encode(attachment_content).decode("utf-8")
+
+        email = MailjetClient(
             subject=subject,
-            from_email=settings.EMAIL_HOST_USER,
-            to=[uploaded_file.associated_email],
-            cc=[settings.SANCTION_LIST_CC_MAIL],
-            body=text_body,
+            recipients=[uploaded_file.associated_email],
+            html_body=html_body,
+            text_body=text_body,
+            ccs=[settings.SANCTION_LIST_CC_MAIL],
         )
-        msg.attach(
-            f"{subject}.xlsx",
-            attachment,
-            "application/vnd.ms-excel",
+        email.attach_file(
+            attachment=base64_encoded_content,
+            filename=f"{subject}.xlsx",
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-        msg.attach_alternative(html_body, "text/html")
-        msg.send()
+        email.send_email()

@@ -17,7 +17,12 @@ const InlineField = styled.div`
   width: 48%;
 `;
 
-export function SubField({ field, index, baseName }): React.ReactElement {
+export function SubField({
+  field,
+  index,
+  baseName,
+  choicesDict,
+}): React.ReactElement {
   const { t } = useTranslation();
   switch (field.fieldAttribute.type) {
     case 'DECIMAL':
@@ -104,7 +109,7 @@ export function SubField({ field, index, baseName }): React.ReactElement {
         <Field
           name={`${baseName}.value`}
           label={`${field.fieldAttribute.labelEn}`}
-          choices={field.fieldAttribute.choices}
+          choices={choicesDict[field.fieldName]}
           index={index}
           component={FormikAutocomplete}
           data-cy="select-one-autocomplete"
@@ -113,7 +118,7 @@ export function SubField({ field, index, baseName }): React.ReactElement {
         <Field
           name={`${baseName}.value`}
           label={`${field.fieldAttribute.labelEn}`}
-          choices={field.fieldAttribute.choices}
+          choices={choicesDict[field.fieldName]}
           index={index}
           component={FormikSelectField}
           data-cy="select-one-select"
@@ -124,7 +129,7 @@ export function SubField({ field, index, baseName }): React.ReactElement {
         <Field
           name={`${baseName}.value`}
           label={`${field.fieldAttribute.labelEn}`}
-          choices={field.fieldAttribute.choices}
+          choices={choicesDict[field.fieldName]}
           index={index}
           multiple
           component={FormikSelectField}

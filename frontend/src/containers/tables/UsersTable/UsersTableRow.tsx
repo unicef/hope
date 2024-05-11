@@ -17,16 +17,25 @@ interface UsersTableRowProps {
   user: UserNode;
 }
 
-export function UsersTableRow({
+export const UsersTableRow = ({
   user,
-}: UsersTableRowProps): React.ReactElement {
+}: UsersTableRowProps): React.ReactElement => {
   const [open, setOpen] = useState(false);
 
   const mappedRoles = user?.userRoles?.map((el) => (
     <p key={el.role.name}>
-      {el.businessArea.name} /{el.role.name}
+      {el.businessArea.name} / {el.role.name}
     </p>
   ));
+
+  const mappedPartnerRoles = user?.partnerRoles?.map((el) =>
+    el.roles.map((role) => (
+      <p key={role.name}>
+        {el.businessArea.name} / {role.name}
+      </p>
+    )),
+  );
+
   return (
     <>
       <TableRow key={user.id}>
@@ -64,9 +73,17 @@ export function UsersTableRow({
             <Box margin={1}>
               {mappedRoles.length ? mappedRoles : 'No roles assigned.'}
             </Box>
+            {mappedPartnerRoles.length > 0 && (
+              <>
+                <Box margin={1}>
+                  <GreyText>Partner Roles</GreyText>
+                </Box>
+                <Box margin={1}>{mappedPartnerRoles}</Box>
+              </>
+            )}
           </Collapse>
         </TableCell>
       </TableRow>
     </>
   );
-}
+};

@@ -6,7 +6,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
     class="sc-hLQSwg gYvGVw"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-eDLKkx edwVeM css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-eDLKkx kTiBFR css-1ps6pg7-MuiPaper-root"
     >
       <div
         class="MuiTableContainer-root sc-fsYfdN css-rorn0c-MuiTableContainer-root"
@@ -344,7 +344,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
     class="sc-hLQSwg gYvGVw"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-eDLKkx edwVeM css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-eDLKkx kTiBFR css-1ps6pg7-MuiPaper-root"
     >
       <div
         class="MuiTableContainer-root sc-fsYfdN css-rorn0c-MuiTableContainer-root"

@@ -891,10 +891,9 @@ def send_email_notification_on_commit(service: Any, user: "User") -> None:
     context = service.get_email_context(user)
     transaction.on_commit(
         lambda: user.email_user(
-            context["title"],
-            render_to_string(service.text_template, context=context),
-            settings.EMAIL_HOST_USER,
-            html_message=render_to_string(service.html_template, context=context),
+            subject=context["title"],
+            html_body=render_to_string(service.html_template, context=context),
+            text_body=render_to_string(service.text_template, context=context),
         )
     )
 
@@ -904,16 +903,13 @@ def send_email_notification(
     user: Optional["User"] = None,
     context_kwargs: Optional[Dict] = None,
 ) -> None:
-    if context_kwargs is None:
-        context_kwargs = {}
     if context_kwargs:
         context = service.get_email_context(**context_kwargs)
     else:
         context = service.get_email_context(user) if user else service.get_email_context()
     user = user or service.user
     user.email_user(
-        context["title"],
-        render_to_string(service.text_template, context=context),
-        settings.EMAIL_HOST_USER,
-        html_message=render_to_string(service.html_template, context=context),
+        subject=context["title"],
+        html_body=render_to_string(service.html_template, context=context),
+        text_body=render_to_string(service.text_template, context=context),
     )

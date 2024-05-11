@@ -236,7 +236,12 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-Data Collecting Type"
             >
-              -
+              <span
+                class="sc-hLQSwg hXyiIZ"
+                color="textSecondary"
+              >
+                data collecting type
+              </span>
             </div>
           </div>
         </div>

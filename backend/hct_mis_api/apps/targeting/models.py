@@ -45,7 +45,6 @@ if TYPE_CHECKING:
 
     from django.db.models.query import QuerySet
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -446,7 +445,19 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
         :Residential Status != Refugee
     """
 
+    @property
+    def is_social_worker_program(self) -> bool:
+        try:
+            return self.targeting_criteria_rule.targeting_criteria.target_population.program.is_social_worker_program
+        except (
+            AttributeError,
+            TargetingCriteriaRuleFilter.targeting_criteria_rule.RelatedObjectDoesNotExist,
+        ):
+            return False
+
     def get_core_fields(self) -> List:
+        if self.is_social_worker_program:
+            return FieldFactory.from_only_scopes([Scope.TARGETING, Scope.XLSX_PEOPLE])
         return FieldFactory.from_scope(Scope.TARGETING).associated_with_household()
 
     comparison_method = models.CharField(
@@ -474,6 +485,10 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
         :Residential Status = Refugee
         :Residential Status != Refugee
     """
+
+    @property
+    def is_social_worker_program(self) -> bool:
+        return False
 
     def get_core_fields(self) -> List:
         return FieldFactory.from_scope(Scope.TARGETING).associated_with_individual()

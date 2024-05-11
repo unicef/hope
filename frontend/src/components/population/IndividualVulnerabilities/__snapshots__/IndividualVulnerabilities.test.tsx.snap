@@ -4,7 +4,7 @@ exports[`components/population/IndividualVulnerabilities should render 1`] = `
 <div>
   <div>
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN ctvplS css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN ctuPcH css-1ps6pg7-MuiPaper-root"
     >
       <div
         class="sc-dmyCSP ljiJAm"
