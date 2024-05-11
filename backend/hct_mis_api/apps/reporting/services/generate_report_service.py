@@ -8,7 +8,6 @@ from django.conf import settings
 from django.contrib.postgres.aggregates.general import ArrayAgg
 from django.contrib.postgres.fields import ArrayField
 from django.core.files import File
-from django.core.mail import EmailMultiAlternatives
 from django.db import models
 from django.db.models import (
     Case,
@@ -53,6 +52,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationPlan,
 )
 from hct_mis_api.apps.reporting.models import Report
+from hct_mis_api.apps.utils.mailjet import MailjetClient
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User
@@ -293,8 +293,8 @@ class GenerateReportContentHelpers:
     def get_payment_plans(report: Report) -> QuerySet[PaymentPlan]:
         filter_vars = {
             "business_area": report.business_area,
-            "dispersion_start_date__gte": report.date_from,
-            "dispersion_end_date__lte": report.date_to,
+            "start_date__gte": report.date_from,
+            "end_date__lte": report.date_to,
         }
         if report.program:
             filter_vars["program_cycle__program"] = report.program
@@ -886,14 +886,13 @@ class GenerateReportService:
         }
         text_body = render_to_string("report.txt", context=context)
         html_body = render_to_string("report.html", context=context)
-        msg = EmailMultiAlternatives(
+        email = MailjetClient(
             subject="HOPE report generated",
-            from_email=settings.EMAIL_HOST_USER,
-            to=[self.report.created_by.email],
-            body=text_body,
+            recipients=[self.report.created_by.email],
+            html_body=html_body,
+            text_body=text_body,
         )
-        msg.attach_alternative(html_body, "text/html")
-        msg.send()
+        email.send_email()
 
     def _add_missing_headers(self, ws: Worksheet, column_to_start: int, column_to_finish: int, label: str) -> None:
         for x in range(column_to_start, column_to_finish + 1):

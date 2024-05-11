@@ -9,7 +9,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
       class="sc-fsYfdN iJWUfq"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-qZrbh lhqvQi css-1ps6pg7-MuiPaper-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-qZrbh jpxerT css-1ps6pg7-MuiPaper-root"
       >
         <div
           class="MuiTableContainer-root sc-csKJxZ css-rorn0c-MuiTableContainer-root"
@@ -452,7 +452,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
       class="sc-fsYfdN iJWUfq"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-qZrbh lhqvQi css-1ps6pg7-MuiPaper-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-qZrbh jpxerT css-1ps6pg7-MuiPaper-root"
       >
         <div
           class="MuiTableContainer-root sc-csKJxZ css-rorn0c-MuiTableContainer-root"
@@ -785,9 +785,8 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                     class="sc-dJGMql eSUODg"
                   >
                     <div
-                      class="sc-hIPBNq dKNoXr"
+                      class="sc-hIPBNq dKNoXr status-box-container"
                       data-cy="status-container"
-                      status="READY_FOR_CASH_ASSIST"
                     >
                       READY FOR CASH ASSIST
                     </div>
@@ -845,9 +844,8 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                     class="sc-dJGMql eSUODg"
                   >
                     <div
-                      class="sc-hIPBNq dKNoXr"
+                      class="sc-hIPBNq dKNoXr status-box-container"
                       data-cy="status-container"
-                      status="READY_FOR_CASH_ASSIST"
                     >
                       READY FOR CASH ASSIST
                     </div>
@@ -905,9 +903,8 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                     class="sc-dJGMql eSUODg"
                   >
                     <div
-                      class="sc-hIPBNq dKNoXr"
+                      class="sc-hIPBNq dKNoXr status-box-container"
                       data-cy="status-container"
-                      status="READY_FOR_CASH_ASSIST"
                     >
                       READY FOR CASH ASSIST
                     </div>
@@ -965,9 +962,8 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                     class="sc-dJGMql eSUODg"
                   >
                     <div
-                      class="sc-hIPBNq dKNoXr"
+                      class="sc-hIPBNq dKNoXr status-box-container"
                       data-cy="status-container"
-                      status="ASSIGNED"
                     >
                       ASSIGNED
                     </div>
