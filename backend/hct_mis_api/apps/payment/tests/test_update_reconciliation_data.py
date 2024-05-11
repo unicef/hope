@@ -208,7 +208,8 @@ class TestDeliveryDate(APITestCase):
         self.assertEqual(payment_1.transaction_reference_id, "ref1")
         self.assertEqual(payment_2.transaction_reference_id, "ref2")
 
-    def test_upload_transaction_status_blockchain(self) -> None:
+    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=1.0)
+    def test_upload_transaction_status_blockchain(self, mock_exchange_rate: Any) -> None:
         pp = PaymentPlanFactory(
             dispersion_start_date=datetime(2024, 2, 10).date(),
             dispersion_end_date=datetime(2024, 12, 10).date(),
