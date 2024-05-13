@@ -225,7 +225,6 @@ jobs:
             -f ./deployment/docker-compose.selenium.yml \
             run selenium
       - name: Upload Artifact
-        if: always()
         uses: actions/upload-artifact@v4
         if: always()
         continue-on-error: true
@@ -234,7 +233,6 @@ jobs:
           path: ./backend/report/
           retention-days: 5
       - name: Upload coverage to Codecov
-        if: always()
         uses: codecov/codecov-action@v4
         if: always()
         continue-on-error: true
