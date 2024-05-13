@@ -2,7 +2,7 @@ import os
 from time import sleep
 from typing import Literal, Union
 
-from selenium.webdriver import Chrome
+from selenium.webdriver import Chrome, Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
@@ -70,6 +70,19 @@ class Common:
     def select_option_by_name(self, optionName: str) -> None:
         selectOption = f'li[data-cy="select-option-{optionName}"]'
         self.wait_for(selectOption).click()
+        try:
+            self.wait_for_disappear(selectOption)
+        except BaseException:
+            sleep(1)
+            self.wait_for(selectOption).click()
+            self.wait_for_disappear(selectOption)
+
+    def select_multiple_option_by_name(self, *optionNames: [str]) -> None:
+        for optionName in optionNames:
+            selectOption = f'li[data-cy="select-option-{optionName}"]'
+            self.wait_for(selectOption).click()
+        actions = ActionChains(self.driver)
+        actions.send_keys(Keys.ESCAPE).perform()  # type: ignore
         try:
             self.wait_for_disappear(selectOption)
         except BaseException:

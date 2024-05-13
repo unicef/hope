@@ -15,5 +15,3 @@ export const partnerAccessChoices = Object.entries(PartnerAccess).map(
     label,
   }),
 );
-
-console.log(partnerAccessChoices);

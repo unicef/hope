@@ -1,7 +1,12 @@
-from django.conf import settings
-from django.test import TestCase
+from typing import Any
+from unittest import mock
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from django.conf import settings
+from django.test import TestCase, override_settings
+
+from constance.test import override_config
+
+from hct_mis_api.apps.account.fixtures import RoleFactory, UserFactory, UserRoleFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -33,6 +38,8 @@ class TestFinishVerificationPlan(TestCase):
         business_area = create_afghanistan()
         payment_record_amount = 10
         user = UserFactory()
+        role = RoleFactory(name="Releaser")
+        UserRoleFactory(user=user, role=role, business_area=business_area)
 
         afghanistan_areas_qs = Area.objects.filter(area_type__area_level=2, area_type__country__iso_code3="AFG")
 
@@ -92,7 +99,10 @@ class TestFinishVerificationPlan(TestCase):
             EntitlementCardFactory(household=household)
         cls.verification = cash_plan.get_payment_verification_plans.first()
 
-    def test_create_tickets_with_admin2_same_as_in_household(self) -> None:
+    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @override_settings(EMAIL_SUBJECT_PREFIX="test")
+    @override_config(SEND_GRIEVANCES_NOTIFICATION=True, ENABLE_MAILJET=True)
+    def test_create_tickets_with_admin2_same_as_in_household(self, mocked_requests_post: Any) -> None:
         VerificationPlanStatusChangeServices(self.verification).finish()
 
         ticket = GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION).first()
@@ -102,3 +112,5 @@ class TestFinishVerificationPlan(TestCase):
         self.assertIsNotNone(ticket.admin2_id)
         self.assertIsNotNone(household.admin2_id)
         self.assertEqual(ticket.admin2_id, household.admin2_id)
+
+        self.assertEqual(mocked_requests_post.call_count, 10)

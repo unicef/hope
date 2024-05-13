@@ -25,9 +25,9 @@ from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
 )
-from page_object.targeting.create_new import CreateNew
-from page_object.targeting.t_details_page import DetailsTargeting
 from page_object.targeting.targeting import Targeting
+from page_object.targeting.targeting_create import TargetingCreate
+from page_object.targeting.targeting_details import TargetingDetails
 from pytest_django.live_server_helper import LiveServer
 from pytest_html_reporter import attach
 from requests import Session
@@ -51,6 +51,9 @@ def pytest_addoption(parser) -> None:  # type: ignore
 
 
 def pytest_configure() -> None:
+    # delete all old screenshots
+    for file in os.listdir("report/screenshot"):
+        os.remove(os.path.join("report/screenshot", file))
     from django.conf import settings
 
     settings.DEBUG = True
@@ -249,13 +252,13 @@ def pageTargeting(request: FixtureRequest, browser: Chrome) -> Targeting:
 
 
 @pytest.fixture
-def pageDetailsTargeting(request: FixtureRequest, browser: Chrome) -> DetailsTargeting:
-    yield DetailsTargeting(browser)
+def pageTargetingDetails(request: FixtureRequest, browser: Chrome) -> TargetingDetails:
+    yield TargetingDetails(browser)
 
 
 @pytest.fixture
-def pageCreateTargeting(request: FixtureRequest, browser: Chrome) -> CreateNew:
-    yield CreateNew(browser)
+def pageTargetingCreate(request: FixtureRequest, browser: Chrome) -> TargetingCreate:
+    yield TargetingCreate(browser)
 
 
 @pytest.fixture
