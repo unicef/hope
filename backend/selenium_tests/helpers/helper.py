@@ -20,6 +20,11 @@ class Common:
     def _wait(self, timeout: int = DEFAULT_TIMEOUT) -> WebDriverWait:
         return WebDriverWait(self.driver, timeout)
 
+    @staticmethod
+    def _wait_using_element(element: WebElement, timeout: int = DEFAULT_TIMEOUT) -> WebDriverWait:
+        # find and wait only in other element area (instead of whole driver)
+        return WebDriverWait(element, timeout)
+
     def get(self, locator: str, element_type: str = By.CSS_SELECTOR) -> WebElement:
         return self.driver.find_element(element_type, locator)
 
@@ -56,8 +61,9 @@ class Common:
         items = select_element.find_elements("tag name", tag_name)
         for item in items:
             if name in item.text:
+                self._wait().until(EC.element_to_be_clickable((By.XPATH, f"//*[contains(text(), '{name}')]")))
                 return item
-        return select_element
+        assert False, f"Element: {name} is not in the list."
 
     def check_page_after_click(self, button: WebElement, url_fragment: str) -> None:
         programme_creation_url = self.driver.current_url
