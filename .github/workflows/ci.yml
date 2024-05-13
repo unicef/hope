@@ -36,6 +36,8 @@ jobs:
             ${{ runner.os }}-node-
       - run: yarn install --frozen-lockfile
         working-directory: frontend
+      - run: yarn lint
+        working-directory: frontend
       - run: yarn test --watchAll=false
         working-directory: frontend
 
@@ -225,6 +227,7 @@ jobs:
       - name: Upload Artifact
         if: always()
         uses: actions/upload-artifact@v4
+        if: always()
         continue-on-error: true
         with:
           name: report
@@ -233,6 +236,7 @@ jobs:
       - name: Upload coverage to Codecov
         if: always()
         uses: codecov/codecov-action@v4
+        if: always()
         continue-on-error: true
         with:
           files: ./backend/coverage.xml
