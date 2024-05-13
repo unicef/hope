@@ -393,10 +393,8 @@ class IndividualDataUpdateService(DataChangeService):
             handle_add_delivery_mechanism_data(delivery_mechanism, new_individual)
             for delivery_mechanism in delivery_mechanism_data
         ]
-        delivery_mechanism_data_to_update = [
-            handle_update_delivery_mechanism_data(delivery_mechanism)
-            for delivery_mechanism in delivery_mechanism_data_to_edit
-        ]
+        delivery_mechanism_data_to_update = handle_update_delivery_mechanism_data(delivery_mechanism_data_to_edit)
+
         Document.objects.bulk_create(documents_to_create)
         Document.objects.bulk_update(documents_to_update, ["document_number", "type", "photo", "country"])
         Document.objects.filter(id__in=documents_to_remove).delete()
@@ -409,35 +407,15 @@ class IndividualDataUpdateService(DataChangeService):
         )
         BankAccountInfo.objects.filter(id__in=payment_channels_to_remove).delete()
 
-        def _validate_delivery_mechanism_data(dmd: DeliveryMechanismData) -> None:
-            dmd.refresh_from_db()
-            dmd.validate()
-            if not dmd.is_valid:
-                self.grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
-                description = (
-                    f"Missing required fields {list(dmd.validation_errors.keys())}"
-                    f" values for delivery mechanism {dmd.delivery_mechanism}"
-                )
-                self.grievance_ticket.description = description
-            else:
-                dmd.update_unique_field()
-                if not dmd.is_valid:
-                    self.grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
-                    description = (
-                        f"Fields not unique {list(dmd.validation_errors.keys())} across program"
-                        f" for delivery mechanism {dmd.delivery_mechanism}, possible duplicate of {dmd.possible_duplicate_of}"
-                    )
-                    self.grievance_ticket.description = description
-
         if delivery_mechanism_data_to_update:
             DeliveryMechanismData.objects.bulk_update(delivery_mechanism_data_to_update, ["data"])
             for delivery_mechanism_data in delivery_mechanism_data_to_update:
-                _validate_delivery_mechanism_data(delivery_mechanism_data)
+                delivery_mechanism_data.revalidate_for_grievance_ticket(self.grievance_ticket)
 
         if delivery_mechanism_data_to_create:
             DeliveryMechanismData.objects.bulk_create(delivery_mechanism_data_to_create)
             for delivery_mechanism_data in delivery_mechanism_data_to_create:
-                _validate_delivery_mechanism_data(delivery_mechanism_data)
+                delivery_mechanism_data.revalidate_for_grievance_ticket(self.grievance_ticket)
 
         if delivery_mechanism_data_to_remove:
             DeliveryMechanismData.objects.filter(id__in=delivery_mechanism_data_to_remove).delete()

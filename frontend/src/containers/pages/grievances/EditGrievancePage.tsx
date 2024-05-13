@@ -634,6 +634,7 @@ export const EditGrievancePage = (): React.ReactElement => {
                                                 type="text"
                                                 label={t('New Value')}
                                                 component={FormikTextField}
+                                                required
                                               />
                                             </Grid>
                                           </Grid>

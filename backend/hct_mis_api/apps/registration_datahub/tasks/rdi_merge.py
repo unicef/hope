@@ -352,7 +352,6 @@ class RdiMergeTask:
     def _create_grievance_ticket_for_delivery_mechanisms_errors(
         self, delivery_mechanism_data: DeliveryMechanismData, obj_hct: RegistrationDataImport, description: str
     ) -> Tuple[GrievanceTicket, TicketIndividualDataUpdateDetails]:
-        # TODO MB move to utils and reuse when ticket close validation fails
         comments = f"This is a system generated ticket for RDI {obj_hct}"
         grievance_ticket = GrievanceTicket(
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
@@ -363,19 +362,7 @@ class RdiMergeTask:
             description=description,
             comments=comments,
         )
-        individual_data_with_approve_status = {
-            "id": str(delivery_mechanism_data.id),
-            "label": delivery_mechanism_data.delivery_mechanism,
-            "approve_status": False,
-            "data_fields": [
-                {
-                    "name": field,
-                    "value": None,
-                    "previous_value": delivery_mechanism_data.delivery_data.get(field),
-                }
-                for field, value in delivery_mechanism_data.validation_errors.items()
-            ],
-        }
+        individual_data_with_approve_status = delivery_mechanism_data.get_grievance_ticket_payload_for_errors()
         individual_data_update_ticket = TicketIndividualDataUpdateDetails(
             individual_data={"delivery_mechanism_data_to_edit": [individual_data_with_approve_status]},
             individual=delivery_mechanism_data.individual,

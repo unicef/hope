@@ -87,6 +87,7 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User
     from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClient
     from hct_mis_api.apps.geo.models import Area
+    from hct_mis_api.apps.grievance.models import GrievanceTicket
     from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
@@ -1122,7 +1123,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         if is_social_worker_program:
             core_fields_attributes = FieldFactory.from_scope(Scope.XLSX_PEOPLE).to_dict_by("name")
         else:
-            core_fields_attributes = FieldFactory.not_from_scope(Scope.XLSX_PEOPLE).to_dict_by("name")
+            core_fields_attributes = FieldFactory.from_scopes(
+                [Scope.GLOBAL, Scope.XLSX, Scope.DELIVERY_MECHANISM]
+            ).to_dict_by("name")
         core_field = core_fields_attributes[core_field_name]
 
         if delivery_mechanism_data and core_field["associated_with"] == _DELIVERY_MECHANISM_DATA:
@@ -2172,7 +2175,7 @@ class DeliveryMechanismData(TimeStampedUUIDModel, SignatureMixin):
         associated_objects = {
             _INDIVIDUAL: self.individual,
             _HOUSEHOLD: self.individual.household,
-            _DELIVERY_MECHANISM_DATA: json.loads(self.data),
+            _DELIVERY_MECHANISM_DATA: json.loads(self.data) if not isinstance(self.data, dict) else self.data,
         }
         return associated_objects.get(associated_with)
 
@@ -2304,6 +2307,55 @@ class DeliveryMechanismData(TimeStampedUUIDModel, SignatureMixin):
             for dm in delivery_mechanisms:
                 dm_required_fields_map[dm].append(field_name)
         return dm_required_fields_map
+
+    def get_grievance_ticket_payload_for_errors(self) -> Dict[str, Any]:
+        return {
+            "id": str(self.id),
+            "label": self.delivery_mechanism,
+            "approve_status": False,
+            "data_fields": [
+                {
+                    "name": field,
+                    "value": None,
+                    "previous_value": self.delivery_data.get(field),
+                }
+                for field, value in self.validation_errors.items()
+            ],
+        }
+
+    def revalidate_for_grievance_ticket(self, grievance_ticket: "GrievanceTicket") -> None:
+        from hct_mis_api.apps.grievance.models import GrievanceTicket
+
+        self.refresh_from_db()
+        self.validate()
+        if not self.is_valid:
+            grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+            description = (
+                f"Missing required fields {list(self.validation_errors.keys())}"
+                f" values for delivery mechanism {self.delivery_mechanism}"
+            )
+            grievance_ticket.description = description
+            individual_data_with_approve_status = self.get_grievance_ticket_payload_for_errors()
+            grievance_ticket.individual_data_update_ticket_details.individual_data = {
+                "delivery_mechanism_data_to_edit": [individual_data_with_approve_status]
+            }
+            grievance_ticket.individual_data_update_ticket_details.save()
+            grievance_ticket.save()
+        else:
+            self.update_unique_field()
+            if not self.is_valid:
+                grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+                description = (
+                    f"Fields not unique {list(self.validation_errors.keys())} across program"
+                    f" for delivery mechanism {self.delivery_mechanism}, possible duplicate of {self.possible_duplicate_of}"
+                )
+                grievance_ticket.description = description
+                individual_data_with_approve_status = self.get_grievance_ticket_payload_for_errors()
+                grievance_ticket.individual_data_update_ticket_details.individual_data = {
+                    "delivery_mechanism_data_to_edit": [individual_data_with_approve_status]
+                }
+                grievance_ticket.individual_data_update_ticket_details.save()
+                grievance_ticket.save()
 
     def save(self, *args: Any, validate: bool = True, deduplicate: bool = False, **kwargs: Any) -> None:
         if validate:

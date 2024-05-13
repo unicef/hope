@@ -30,7 +30,7 @@ class DeduplicateAndCheckAgainstSanctionsListTask:
     def execute(self, should_populate_index: bool, individuals_ids: List[str]) -> None:
         individuals = Individual.objects.filter(id__in=individuals_ids)
         business_area = individuals.first().business_area
-        program = individuals.first().program
+        program_id = individuals.first().program_id
 
         if should_populate_index is True:
             populate_index(individuals, get_individual_doc(business_area.slug))
@@ -40,7 +40,7 @@ class DeduplicateAndCheckAgainstSanctionsListTask:
             HardDocumentDeduplication().deduplicate(Document.objects.filter(individual_id__in=individuals_ids))
             return
 
-        DeduplicateTask(business_area.slug, program).deduplicate_individuals_from_other_source(individuals)
+        DeduplicateTask(business_area.slug, program_id).deduplicate_individuals_from_other_source(individuals)
 
         golden_record_duplicates = individuals.filter(deduplication_golden_record_status=DUPLICATE)
 

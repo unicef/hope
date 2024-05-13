@@ -290,6 +290,8 @@ class ImportDataInstanceValidator:
                 delivery_mechanisms_fields_values_dict = defaultdict(dict)
 
                 for delivery_mechanism_xlsx_field_name, value in data.items():
+                    if not value:
+                        continue
                     for dm, fields in delivery_mechanisms_to_required_fields_mapping.items():
                         if delivery_mechanism_xlsx_field_name in fields:
                             delivery_mechanisms_fields_values_dict[dm][delivery_mechanism_xlsx_field_name] = value
@@ -420,6 +422,9 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
     def date_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
+            if not self.required_validator(value, header, *args, **kwargs):
+                return False
+
             if self.integer_validator(value, header, *args, **kwargs):
                 return False
 
