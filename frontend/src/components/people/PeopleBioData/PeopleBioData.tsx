@@ -20,6 +20,7 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { DocumentPopulationPhotoModal } from '../../population/DocumentPopulationPhotoModal';
 import { LinkedGrievancesModal } from '../../population/LinkedGrievancesModal/LinkedGrievancesModal';
+import { useProgramContext } from '../../../programContext';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -37,15 +38,15 @@ interface PeopleBioDataProps {
   choicesData: HouseholdChoiceDataQuery;
   grievancesChoices: GrievancesChoiceDataQuery;
 }
-export function PeopleBioData({
+export const PeopleBioData = ({
   individual,
   baseUrl,
   businessArea,
   choicesData,
   grievancesChoices,
-}: PeopleBioDataProps): React.ReactElement {
+}: PeopleBioDataProps): React.ReactElement => {
   const { t } = useTranslation();
-
+  const { selectedProgram } = useProgramContext();
   const maritalStatusChoicesDict = choicesToDict(
     choicesData.maritalStatusChoices,
   );
@@ -56,6 +57,10 @@ export function PeopleBioData({
   );
   const severityOfDisabilityChoicesDict = choicesToDict(
     choicesData.severityOfDisabilityChoices,
+  );
+
+  const residenceChoicesDict = choicesToDict(
+    choicesData.residenceStatusChoices,
   );
 
   const mappedIndividualDocuments = individual?.documents?.edges?.map(
@@ -126,6 +131,77 @@ export function PeopleBioData({
       </>
     );
   };
+
+  let peopleFromHouseholdData = null;
+  if (individual?.household) {
+    const household = individual.household;
+    peopleFromHouseholdData = (
+      <>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Residence Status')}>
+            {residenceChoicesDict[household?.residenceStatus]}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Country')}>
+            {household?.country}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Country of Origin')}>
+            {household.countryOrigin}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Address')}>
+            {household.address}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Vilage')}>
+            {household.village}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Zip Code')}>
+            {household.zipCode}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Administrative Level 1')}>
+            {household?.admin1?.name}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Administrative Level 2')}>
+            {household?.admin2?.name}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Administrative Level 3')}>
+            {household?.admin3?.name}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Administrative Level 4')}>
+            {household?.admin4?.name}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={6}>
+          <LabelizedField label={t('Geolocation')}>
+            {household?.geopoint
+              ? `${household?.geopoint?.coordinates[0]}, ${household?.geopoint?.coordinates[1]}`
+              : '-'}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Data Collecting Type')}>
+            {selectedProgram?.dataCollectingType?.label}
+          </LabelizedField>
+        </Grid>
+      </>
+    );
+  }
 
   return (
     <Overview>
@@ -198,6 +274,7 @@ export function PeopleBioData({
             {individual?.preferredLanguage}
           </LabelizedField>
         </Grid>
+        {peopleFromHouseholdData}
         <Grid item xs={12}>
           <BorderBox />
         </Grid>
@@ -302,4 +379,4 @@ export function PeopleBioData({
       </Grid>
     </Overview>
   );
-}
+};

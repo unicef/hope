@@ -1,11 +1,6 @@
 version: '3.7'
-
 volumes:
-  backend-data:
   backend-web-app:
-  db:
-  data_es:
-
 services:
   selenium:
     stdin_open: true
@@ -30,7 +25,6 @@ services:
       - ../backend:/code/
       - ../backend/report/screenshot/:/code/screenshot/
       - ../backend/report/:/code/report/
-      - backend-data:/data
       - type: volume
         source: backend-web-app
         target: /code/hct_mis_api/apps/web
@@ -71,7 +65,6 @@ services:
   db:
     image: kartoza/postgis:14-3
     volumes:
-      - db:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d
     environment:
       - POSTGRES_MULTIPLE_DATABASES=unicef_hct_mis_cashassist,rdi_datahub,mis_datahub,erp_datahub,ca_datahub
@@ -101,7 +94,5 @@ services:
       memlock:
         soft: -1
         hard: -1
-    volumes:
-      - data_es:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
