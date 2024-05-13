@@ -79,7 +79,7 @@ export const ProgramForm = ({ values }: ProgramFormPropTypes): ReactElement => {
             initialFocusedDate={values.startDate}
             fullWidth
             decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
-            minDate={today}
+            minDate={values.startDate}
             data-cy="input-end-date"
           />
         </Grid>
