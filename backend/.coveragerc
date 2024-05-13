@@ -14,6 +14,7 @@ omit =
         hct_mis_api/libs/*,
         hct_mis_api/settings/*,
         hct_mis_api/settings.py,
+        hct_mis_api/conftest.py,
         hct_mis_api/config/settings.py
         hct_mis_api/apps/core/management/commands/*
 
@@ -34,6 +35,7 @@ exclude_lines =
     #if 0:
     if __name__ == .__main__.:
     if TYPE_CHECKING
+    ^\s*(import\s.+|from\s+.+import\s+.+) # skip imports
 
 fail_under = 15
 

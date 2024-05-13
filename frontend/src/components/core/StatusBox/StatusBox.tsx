@@ -15,16 +15,16 @@ const StatusContainer = styled.div`
 `;
 
 interface StatusBoxContainerProps {
-  status: string;
+  $status: string;
   $statusToColor: (theme: any, status: string) => string;
   theme: any;
 }
 
 const StatusBoxContainer = styled.div<StatusBoxContainerProps>`
-  color: ${({ status, $statusToColor, theme }) =>
-    $statusToColor(theme, status)};
-  background-color: ${({ status, $statusToColor, theme }) =>
-    `${$statusToColor(theme, status)}${opacityToHex(0.15)}`};
+  color: ${({ $status, $statusToColor, theme }) =>
+    $statusToColor(theme, $status)};
+  background-color: ${({ $status, $statusToColor, theme }) =>
+    `${$statusToColor(theme, $status)}${opacityToHex(0.15)}`};
   border-radius: 16px;
   font-family: Roboto;
   font-size: 10px;
@@ -47,7 +47,8 @@ export const StatusBox = ({
   return (
     <StatusContainer>
       <StatusBoxContainer
-        status={status}
+        className="status-box-container"
+        $status={status}
         $statusToColor={statusToColor}
         data-cy={dataCy || 'status-container'}
       >

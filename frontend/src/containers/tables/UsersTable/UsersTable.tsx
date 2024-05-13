@@ -15,9 +15,9 @@ interface UsersTableProps {
   filter;
 }
 
-export function UsersTable({ filter }: UsersTableProps): ReactElement {
+export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
 
   const initialVariables = {
     search: filter.search,
@@ -25,6 +25,7 @@ export function UsersTable({ filter }: UsersTableProps): ReactElement {
     roles: filter.roles,
     status: filter.status,
     businessArea,
+    program: programId,
   };
   return (
     <TableWrapper>
@@ -41,4 +42,4 @@ export function UsersTable({ filter }: UsersTableProps): ReactElement {
       />
     </TableWrapper>
   );
-}
+};

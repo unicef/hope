@@ -41,9 +41,8 @@ exports[`components/ProgramDetails should render 1`] = `
                   class="sc-eDLKkx deAQag"
                 >
                   <div
-                    class="sc-jTQCzO cQZnmW"
+                    class="sc-jTQCzO cQZnmW status-box-container"
                     data-cy="status-container"
-                    status="FINISHED"
                   >
                     FINISHED
                   </div>
