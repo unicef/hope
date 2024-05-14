@@ -9,7 +9,6 @@ from page_object.grievance.grievance_tickets import GrievanceTickets
 from page_object.grievance.new_ticket import NewTicket
 from pytest_django import DjangoDbBlocker
 
-
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
