@@ -1611,7 +1611,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "registration_data_import",
-        "scope": [Scope.TARGETING],
+        "scope": [Scope.TARGETING, Scope.XLSX_PEOPLE],
     },
     {
         "id": "e4aa9cdf-2c9e-4e22-9928-2b63a6ea4ef0",

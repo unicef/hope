@@ -33,7 +33,7 @@ class TestMailjet:
             {
                 "Messages": [
                     {
-                        "From": {"Email": settings.EMAIL_HOST_USER, "Name": settings.DEFAULT_FROM_EMAIL},
+                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
                         "Subject": "[test] Subject for email with Template",
                         "To": [
                             {
@@ -81,7 +81,7 @@ class TestMailjet:
             {
                 "Messages": [
                     {
-                        "From": {"Email": settings.EMAIL_HOST_USER, "Name": settings.DEFAULT_FROM_EMAIL},
+                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
                         "Subject": "[test] Subject for email with Template for Catch All",
                         "To": [
                             {
@@ -127,7 +127,7 @@ class TestMailjet:
             {
                 "Messages": [
                     {
-                        "From": {"Email": settings.EMAIL_HOST_USER, "Name": settings.DEFAULT_FROM_EMAIL},
+                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
                         "Subject": "[test] Subject for email with HTML and Text body",
                         "To": [
                             {
@@ -171,7 +171,7 @@ class TestMailjet:
             {
                 "Messages": [
                     {
-                        "From": {"Email": settings.EMAIL_HOST_USER, "Name": settings.DEFAULT_FROM_EMAIL},
+                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
                         "Subject": "[test] Subject for email with Text body",
                         "To": [
                             {
@@ -238,7 +238,7 @@ class TestMailjet:
             {
                 "Messages": [
                     {
-                        "From": {"Email": settings.EMAIL_HOST_USER, "Name": settings.DEFAULT_FROM_EMAIL},
+                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
                         "Subject": "[test] Subject for email with Template and Attachments",
                         "To": [
                             {
