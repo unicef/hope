@@ -159,9 +159,9 @@ class IndividualDataUpdateService(DataChangeService):
             identities_to_remove_with_approve_status
         )
         individual_data_with_approve_status["payment_channels"] = payment_channels_with_approve_status
-        individual_data_with_approve_status["payment_channels_to_remove"] = (
-            payment_channels_to_remove_with_approve_status
-        )
+        individual_data_with_approve_status[
+            "payment_channels_to_remove"
+        ] = payment_channels_to_remove_with_approve_status
         individual_data_with_approve_status["payment_channels_to_edit"] = prepare_edit_payment_channel(
             payment_channels_to_edit
         )
@@ -169,9 +169,9 @@ class IndividualDataUpdateService(DataChangeService):
             payment_channels_to_remove_with_approve_status
         )
         individual_data_with_approve_status["delivery_mechanism_data"] = delivery_mechanism_data_with_approve_status
-        individual_data_with_approve_status["delivery_mechanism_data_to_remove"] = (
-            delivery_mechanism_data_to_remove_with_approve_status
-        )
+        individual_data_with_approve_status[
+            "delivery_mechanism_data_to_remove"
+        ] = delivery_mechanism_data_to_remove_with_approve_status
         individual_data_with_approve_status["delivery_mechanism_data_to_edit"] = prepare_edit_delivery_mechanism_data(
             delivery_mechanism_data_to_edit
         )
@@ -263,9 +263,9 @@ class IndividualDataUpdateService(DataChangeService):
             identities_to_remove_with_approve_status
         )
         individual_data_with_approve_status["payment_channels"] = payment_channels_with_approve_status
-        individual_data_with_approve_status["payment_channels_to_remove"] = (
-            payment_channels_to_remove_with_approve_status
-        )
+        individual_data_with_approve_status[
+            "payment_channels_to_remove"
+        ] = payment_channels_to_remove_with_approve_status
         individual_data_with_approve_status["payment_channels_to_edit"] = prepare_edit_payment_channel(
             payment_channels_to_edit
         )
@@ -273,9 +273,9 @@ class IndividualDataUpdateService(DataChangeService):
             payment_channels_to_remove_with_approve_status
         )
         individual_data_with_approve_status["delivery_mechanism_data"] = delivery_mechanism_data_with_approve_status
-        individual_data_with_approve_status["delivery_mechanism_data_to_remove"] = (
-            delivery_mechanism_data_to_remove_with_approve_status
-        )
+        individual_data_with_approve_status[
+            "delivery_mechanism_data_to_remove"
+        ] = delivery_mechanism_data_to_remove_with_approve_status
         individual_data_with_approve_status["delivery_mechanism_data_to_edit"] = prepare_edit_delivery_mechanism_data(
             delivery_mechanism_data_to_edit
         )
