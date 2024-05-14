@@ -251,6 +251,8 @@ class TestPushPeople(HOPEApiTestCase):
             ("invalid_phone_no_alternative", "phone_no", "invalid", False),
             ("valid_phone_no", "phone_no_alternative", "+48 632 215 789", True),
             ("valid_phone_no_alternative", "phone_no_alternative", "+48 632 215 789", True),
+            ("phone_no_alternative_as_null", "phone_no_alternative", None, False),
+            ("phone_no_as_null", "phone_no", None, False),
         ]
     )
     def test_upload_single_person_with_phone_number(
