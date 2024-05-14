@@ -149,7 +149,6 @@ class TestSmokeGrievanceTickets:
 
 @pytest.mark.usefixtures("login")
 class TestGrievanceTicketsHappyPath:
-
     @pytest.mark.parametrize(
         "test_data",
         [
