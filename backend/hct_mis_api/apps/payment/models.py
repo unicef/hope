@@ -1153,7 +1153,11 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             core_fields_attributes = FieldFactory.from_scope(Scope.XLSX_PEOPLE).to_dict_by("name")
         else:
             core_fields_attributes = FieldFactory.not_from_scope(Scope.XLSX_PEOPLE).to_dict_by("name")
-        attr = core_fields_attributes[core_field_name]
+        attr = core_fields_attributes.get(core_field_name)
+        if not attr:
+            # Some fields can be added to the template, such as 'size' or 'collect_individual_data'
+            # which are not applicable to "People" export.
+            return None
         lookup = attr["lookup"]
         lookup = lookup.replace("__", ".")
         if attr["associated_with"] == _INDIVIDUAL:
