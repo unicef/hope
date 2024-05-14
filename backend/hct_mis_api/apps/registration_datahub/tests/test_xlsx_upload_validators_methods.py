@@ -157,6 +157,7 @@ class TestXLSXValidatorsMethods(APITestCase):
         )
         upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
         upload_xlsx_instance_validator.rows_validator(wb["Households"])
+        upload_xlsx_instance_validator.errors = []
         upload_xlsx_instance_validator.rows_validator(wb["Individuals"])
         expected = [
             {
@@ -430,6 +431,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
             for sheet, expected_values in file:
                 upload_xlsx_instance_validator.image_loader = SheetImageLoader(sheet)
+                upload_xlsx_instance_validator.errors = []
                 upload_xlsx_instance_validator.rows_validator(sheet, self.business_area.slug)
                 self.assertEqual(upload_xlsx_instance_validator.errors, expected_values)
 

@@ -833,13 +833,11 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             file_suffix = Path(xlsx_file.name).suffix
             if file_suffix != ".xlsx":
                 self.errors.append(
-                    [
-                        {
-                            "row_number": 1,
-                            "header": f"{xlsx_file.name}",
-                            "message": "Only .xlsx files are accepted for import",
-                        }
-                    ]
+                    {
+                        "row_number": 1,
+                        "header": f"{xlsx_file.name}",
+                        "message": "Only .xlsx files are accepted for import",
+                    }
                 )
                 return
         except Exception as e:

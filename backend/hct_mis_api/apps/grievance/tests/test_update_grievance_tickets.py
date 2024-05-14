@@ -546,6 +546,9 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "documents_to_remove": [],
                 "previous_identities": {},
                 "identities_to_remove": [],
+                "delivery_mechanism_data": [],
+                "delivery_mechanism_data_to_edit": [],
+                "delivery_mechanism_data_to_remove": [],
             }
 
         else:
@@ -569,9 +572,6 @@ class TestUpdateGrievanceTickets(APITestCase):
                     {"value": self.id_to_base64(self.birth_certificate.id, "DocumentNode"), "approve_status": False},
                 ],
                 "estimated_birth_date": False,
-                "delivery_mechanism_data": [],
-                "delivery_mechanism_data_to_edit": [],
-                "delivery_mechanism_data_to_remove": [],
             }
         self.assertEqual(result, expected_result)
         if name == "without_permission":
