@@ -332,4 +332,4 @@ class TestFinancialServiceProviderModel(TestCase):
         self.assertIsNone(result)
 
         result = fsp_xlsx_template.get_column_from_core_field(payment, "size", False)
-        self.assertIsNone(result)
+        self.assertIsNotNone(result)
