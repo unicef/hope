@@ -1,0 +1,557 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcessStepper should render default step Sent for Approval Date 1`] = `
+<div>
+  <div
+    class="MuiStepper-root MuiStepper-horizontal css-m5vj9m-MuiStepper-root"
+  >
+    <div
+      class="MuiStep-root MuiStep-horizontal Mui-completed css-1bw0nnu-MuiStep-root"
+    >
+      <span
+        class="MuiStepLabel-root MuiStepLabel-horizontal css-ascpo7-MuiStepLabel-root"
+      >
+        <span
+          class="MuiStepLabel-iconContainer Mui-completed css-vnkopk-MuiStepLabel-iconContainer"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-completed css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            data-testid="CheckCircleIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm-2 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"
+            />
+          </svg>
+        </span>
+        <span
+          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+        >
+          <span
+            class="MuiStepLabel-label Mui-completed css-16iqojc-MuiStepLabel-label"
+          >
+            Approval (1/1)
+          </span>
+        </span>
+      </span>
+    </div>
+    <div
+      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-active css-j5w0w9-MuiStepConnector-root"
+    >
+      <span
+        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-z7uhs0-MuiStepConnector-line"
+      />
+    </div>
+    <div
+      class="MuiStep-root MuiStep-horizontal css-1bw0nnu-MuiStep-root"
+    >
+      <span
+        class="MuiStepLabel-root MuiStepLabel-horizontal css-ascpo7-MuiStepLabel-root"
+      >
+        <span
+          class="MuiStepLabel-iconContainer Mui-active css-vnkopk-MuiStepLabel-iconContainer"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-active css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="12"
+            />
+            <text
+              class="MuiStepIcon-text css-117w1su-MuiStepIcon-text"
+              dominant-baseline="central"
+              text-anchor="middle"
+              x="12"
+              y="12"
+            >
+              2
+            </text>
+          </svg>
+        </span>
+        <span
+          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+        >
+          <span
+            class="MuiStepLabel-label Mui-active css-16iqojc-MuiStepLabel-label"
+          >
+            Authorization (0/1)
+          </span>
+        </span>
+      </span>
+    </div>
+    <div
+      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-disabled css-j5w0w9-MuiStepConnector-root"
+    >
+      <span
+        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-z7uhs0-MuiStepConnector-line"
+      />
+    </div>
+    <div
+      class="MuiStep-root MuiStep-horizontal css-1bw0nnu-MuiStep-root"
+    >
+      <span
+        class="MuiStepLabel-root MuiStepLabel-horizontal Mui-disabled css-ascpo7-MuiStepLabel-root"
+      >
+        <span
+          class="MuiStepLabel-iconContainer Mui-disabled css-vnkopk-MuiStepLabel-iconContainer"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="12"
+            />
+            <text
+              class="MuiStepIcon-text css-117w1su-MuiStepIcon-text"
+              dominant-baseline="central"
+              text-anchor="middle"
+              x="12"
+              y="12"
+            >
+              3
+            </text>
+          </svg>
+        </span>
+        <span
+          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+        >
+          <span
+            class="MuiStepLabel-label Mui-disabled css-16iqojc-MuiStepLabel-label"
+          >
+            Finance Release (0/1)
+          </span>
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcessStepper should render step Sent for Approval Date 1`] = `
+<div>
+  <div
+    class="MuiStepper-root MuiStepper-horizontal css-m5vj9m-MuiStepper-root"
+  >
+    <div
+      class="MuiStep-root MuiStep-horizontal Mui-completed css-1bw0nnu-MuiStep-root"
+    >
+      <span
+        class="MuiStepLabel-root MuiStepLabel-horizontal css-ascpo7-MuiStepLabel-root"
+      >
+        <span
+          class="MuiStepLabel-iconContainer Mui-completed css-vnkopk-MuiStepLabel-iconContainer"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-completed css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            data-testid="CheckCircleIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm-2 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"
+            />
+          </svg>
+        </span>
+        <span
+          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+        >
+          <span
+            class="MuiStepLabel-label Mui-completed css-16iqojc-MuiStepLabel-label"
+          >
+            Approval (1/1)
+          </span>
+        </span>
+      </span>
+    </div>
+    <div
+      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-active css-j5w0w9-MuiStepConnector-root"
+    >
+      <span
+        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-z7uhs0-MuiStepConnector-line"
+      />
+    </div>
+    <div
+      class="MuiStep-root MuiStep-horizontal css-1bw0nnu-MuiStep-root"
+    >
+      <span
+        class="MuiStepLabel-root MuiStepLabel-horizontal css-ascpo7-MuiStepLabel-root"
+      >
+        <span
+          class="MuiStepLabel-iconContainer Mui-active css-vnkopk-MuiStepLabel-iconContainer"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-active css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="12"
+            />
+            <text
+              class="MuiStepIcon-text css-117w1su-MuiStepIcon-text"
+              dominant-baseline="central"
+              text-anchor="middle"
+              x="12"
+              y="12"
+            >
+              2
+            </text>
+          </svg>
+        </span>
+        <span
+          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+        >
+          <span
+            class="MuiStepLabel-label Mui-active css-16iqojc-MuiStepLabel-label"
+          >
+            Authorization (0/1)
+          </span>
+        </span>
+      </span>
+    </div>
+    <div
+      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-disabled css-j5w0w9-MuiStepConnector-root"
+    >
+      <span
+        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-z7uhs0-MuiStepConnector-line"
+      />
+    </div>
+    <div
+      class="MuiStep-root MuiStep-horizontal css-1bw0nnu-MuiStep-root"
+    >
+      <span
+        class="MuiStepLabel-root MuiStepLabel-horizontal Mui-disabled css-ascpo7-MuiStepLabel-root"
+      >
+        <span
+          class="MuiStepLabel-iconContainer Mui-disabled css-vnkopk-MuiStepLabel-iconContainer"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="12"
+            />
+            <text
+              class="MuiStepIcon-text css-117w1su-MuiStepIcon-text"
+              dominant-baseline="central"
+              text-anchor="middle"
+              x="12"
+              y="12"
+            >
+              3
+            </text>
+          </svg>
+        </span>
+        <span
+          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+        >
+          <span
+            class="MuiStepLabel-label Mui-disabled css-16iqojc-MuiStepLabel-label"
+          >
+            Finance Release (0/1)
+          </span>
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcessStepper should render step Sent for Authorization Date 1`] = `
+<div>
+  <div
+    class="MuiStepper-root MuiStepper-horizontal css-m5vj9m-MuiStepper-root"
+  >
+    <div
+      class="MuiStep-root MuiStep-horizontal Mui-completed css-1bw0nnu-MuiStep-root"
+    >
+      <span
+        class="MuiStepLabel-root MuiStepLabel-horizontal css-ascpo7-MuiStepLabel-root"
+      >
+        <span
+          class="MuiStepLabel-iconContainer Mui-completed css-vnkopk-MuiStepLabel-iconContainer"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-completed css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            data-testid="CheckCircleIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm-2 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"
+            />
+          </svg>
+        </span>
+        <span
+          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+        >
+          <span
+            class="MuiStepLabel-label Mui-completed css-16iqojc-MuiStepLabel-label"
+          >
+            Approval (1/1)
+          </span>
+        </span>
+      </span>
+    </div>
+    <div
+      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-active css-j5w0w9-MuiStepConnector-root"
+    >
+      <span
+        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-z7uhs0-MuiStepConnector-line"
+      />
+    </div>
+    <div
+      class="MuiStep-root MuiStep-horizontal css-1bw0nnu-MuiStep-root"
+    >
+      <span
+        class="MuiStepLabel-root MuiStepLabel-horizontal css-ascpo7-MuiStepLabel-root"
+      >
+        <span
+          class="MuiStepLabel-iconContainer Mui-active css-vnkopk-MuiStepLabel-iconContainer"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-active css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="12"
+            />
+            <text
+              class="MuiStepIcon-text css-117w1su-MuiStepIcon-text"
+              dominant-baseline="central"
+              text-anchor="middle"
+              x="12"
+              y="12"
+            >
+              2
+            </text>
+          </svg>
+        </span>
+        <span
+          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+        >
+          <span
+            class="MuiStepLabel-label Mui-active css-16iqojc-MuiStepLabel-label"
+          >
+            Authorization (0/1)
+          </span>
+        </span>
+      </span>
+    </div>
+    <div
+      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-disabled css-j5w0w9-MuiStepConnector-root"
+    >
+      <span
+        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-z7uhs0-MuiStepConnector-line"
+      />
+    </div>
+    <div
+      class="MuiStep-root MuiStep-horizontal css-1bw0nnu-MuiStep-root"
+    >
+      <span
+        class="MuiStepLabel-root MuiStepLabel-horizontal Mui-disabled css-ascpo7-MuiStepLabel-root"
+      >
+        <span
+          class="MuiStepLabel-iconContainer Mui-disabled css-vnkopk-MuiStepLabel-iconContainer"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="12"
+            />
+            <text
+              class="MuiStepIcon-text css-117w1su-MuiStepIcon-text"
+              dominant-baseline="central"
+              text-anchor="middle"
+              x="12"
+              y="12"
+            >
+              3
+            </text>
+          </svg>
+        </span>
+        <span
+          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+        >
+          <span
+            class="MuiStepLabel-label Mui-disabled css-16iqojc-MuiStepLabel-label"
+          >
+            Finance Release (0/1)
+          </span>
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcessStepper should render step Sent for Finance Release Date 1`] = `
+<div>
+  <div
+    class="MuiStepper-root MuiStepper-horizontal css-m5vj9m-MuiStepper-root"
+  >
+    <div
+      class="MuiStep-root MuiStep-horizontal Mui-completed css-1bw0nnu-MuiStep-root"
+    >
+      <span
+        class="MuiStepLabel-root MuiStepLabel-horizontal css-ascpo7-MuiStepLabel-root"
+      >
+        <span
+          class="MuiStepLabel-iconContainer Mui-completed css-vnkopk-MuiStepLabel-iconContainer"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-completed css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            data-testid="CheckCircleIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm-2 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"
+            />
+          </svg>
+        </span>
+        <span
+          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+        >
+          <span
+            class="MuiStepLabel-label Mui-completed css-16iqojc-MuiStepLabel-label"
+          >
+            Approval (1/1)
+          </span>
+        </span>
+      </span>
+    </div>
+    <div
+      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-active css-j5w0w9-MuiStepConnector-root"
+    >
+      <span
+        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-z7uhs0-MuiStepConnector-line"
+      />
+    </div>
+    <div
+      class="MuiStep-root MuiStep-horizontal css-1bw0nnu-MuiStep-root"
+    >
+      <span
+        class="MuiStepLabel-root MuiStepLabel-horizontal css-ascpo7-MuiStepLabel-root"
+      >
+        <span
+          class="MuiStepLabel-iconContainer Mui-active css-vnkopk-MuiStepLabel-iconContainer"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-active css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="12"
+            />
+            <text
+              class="MuiStepIcon-text css-117w1su-MuiStepIcon-text"
+              dominant-baseline="central"
+              text-anchor="middle"
+              x="12"
+              y="12"
+            >
+              2
+            </text>
+          </svg>
+        </span>
+        <span
+          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+        >
+          <span
+            class="MuiStepLabel-label Mui-active css-16iqojc-MuiStepLabel-label"
+          >
+            Authorization (0/1)
+          </span>
+        </span>
+      </span>
+    </div>
+    <div
+      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-disabled css-j5w0w9-MuiStepConnector-root"
+    >
+      <span
+        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-z7uhs0-MuiStepConnector-line"
+      />
+    </div>
+    <div
+      class="MuiStep-root MuiStep-horizontal css-1bw0nnu-MuiStep-root"
+    >
+      <span
+        class="MuiStepLabel-root MuiStepLabel-horizontal Mui-disabled css-ascpo7-MuiStepLabel-root"
+      >
+        <span
+          class="MuiStepLabel-iconContainer Mui-disabled css-vnkopk-MuiStepLabel-iconContainer"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="12"
+            />
+            <text
+              class="MuiStepIcon-text css-117w1su-MuiStepIcon-text"
+              dominant-baseline="central"
+              text-anchor="middle"
+              x="12"
+              y="12"
+            >
+              3
+            </text>
+          </svg>
+        </span>
+        <span
+          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+        >
+          <span
+            class="MuiStepLabel-label Mui-disabled css-16iqojc-MuiStepLabel-label"
+          >
+            Finance Release (0/1)
+          </span>
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;

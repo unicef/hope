@@ -118,7 +118,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         destination_currency: str  # "USD"
         """
         return {
-            "amount": int(obj.entitlement_quantity * 100),
+            "amount": obj.entitlement_quantity,
             "phone_no": str(obj.collector.phone_no),
             "last_name": obj.collector.family_name,
             "first_name": obj.collector.given_name,
@@ -146,7 +146,8 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
     parent: str
     status: str
     hope_status: str
-    extra_data: dict
+    auth_code: str
+    payout_amount: float
     fsp_code: str
     message: Optional[str] = None
 
@@ -392,7 +393,7 @@ class PaymentGatewayService:
                 _payment.reason_for_unsuccessful_payment = matching_pg_payment.message
                 update_fields.append("reason_for_unsuccessful_payment")
 
-            delivered_quantity = matching_pg_payment.extra_data.get("delivered_quantity", None)
+            delivered_quantity = matching_pg_payment.payout_amount
             if _payment.status in [
                 Payment.STATUS_SUCCESS,
                 Payment.STATUS_DISTRIBUTION_SUCCESS,
@@ -400,7 +401,6 @@ class PaymentGatewayService:
             ]:
                 update_fields.extend(["delivered_quantity", "delivered_quantity_usd"])
                 try:
-                    delivered_quantity = int(delivered_quantity) / 100
                     _payment.delivered_quantity = delivered_quantity
                     _payment.delivered_quantity_usd = get_quantity_in_usd(
                         amount=Decimal(delivered_quantity),

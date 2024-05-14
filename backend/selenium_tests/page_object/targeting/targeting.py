@@ -1,5 +1,9 @@
+from time import sleep
+
 from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
+
+from hct_mis_api.apps.core.utils import encode_id_base64
 
 
 class Targeting(BaseComponents):
@@ -10,11 +14,14 @@ class Targeting(BaseComponents):
     programFilter = 'div[data-cy="filters-program"]'
     minNumberOfHouseholds = 'div[data-cy="filters-total-households-count-min"]'
     maxNumberOfHouseholds = 'div[data-cy="filters-total-households-count-max"]'
-    buttonCreateNew = 'a[data-cy="button-target-population-create-new"]'
+    buttonCreateNew = 'button[data-cy="button-new-tp"]'
+    buttonCreateNewByFilters = 'li[data-cy="menu-item-filters"]'
     tabTitle = 'h6[data-cy="table-title"]'
     tabColumnLabel = 'span[data-cy="table-label"]'
     statusOptions = 'li[role="option"]'
     rows = 'tr[role="checkbox"]'
+    createUserFilters = 'div[data-cy="menu-item-filters-text"]'
+    createUseIDs = 'div[data-cy="menu-item-ids-text"]'
 
     # Texts
 
@@ -30,6 +37,13 @@ class Targeting(BaseComponents):
     textTabCreatedBy = "Created by"
     buttonApply = 'button[data-cy="button-filters-apply"]'
     buttonClear = 'button[data-cy="button-filters-clear"]'
+
+    def navigate_to_page(self, business_area_slug: str, program_id: str) -> None:
+        self.driver.get(self.get_page_url(business_area_slug, program_id))
+
+    def get_page_url(self, business_area_slug: str, program_id: str) -> str:
+        encoded_program_id = encode_id_base64(program_id, "Program")
+        return f"{self.driver.live_server.url}/{business_area_slug}/programs/{encoded_program_id}/target-population"
 
     # Elements
 
@@ -54,26 +68,14 @@ class Targeting(BaseComponents):
     def getButtonCreateNew(self) -> WebElement:
         return self.wait_for(self.buttonCreateNew)
 
+    def getButtonCreateNewByFilters(self) -> WebElement:
+        return self.wait_for(self.buttonCreateNewByFilters)
+
     def getTabTitle(self) -> WebElement:
         return self.wait_for(self.tabTitle)
 
-    def getTabColumnName(self) -> WebElement:
-        return self.wait_for(self.tabColumnLabel).eq(0)
-
-    def getTabColumnStatus(self) -> WebElement:
-        return self.wait_for(self.tabColumnLabel).eq(1)
-
-    def getTabColumnNOHouseholds(self) -> WebElement:
-        return self.wait_for(self.tabColumnLabel).eq(2)
-
-    def getTabColumnDateCreated(self) -> WebElement:
-        return self.wait_for(self.tabColumnLabel).eq(3)
-
-    def getTabColumnLastEdited(self) -> WebElement:
-        return self.wait_for(self.tabColumnLabel).eq(4)
-
-    def getTabColumnCreatedBy(self) -> WebElement:
-        return self.wait_for(self.tabColumnLabel).eq(5)
+    def getTabColumnLabel(self) -> list[WebElement]:
+        return self.get_elements(self.tabColumnLabel)
 
     def getStatusOption(self) -> WebElement:
         return self.wait_for(self.statusOptions)
@@ -84,30 +86,19 @@ class Targeting(BaseComponents):
     def getClear(self) -> WebElement:
         return self.wait_for(self.buttonClear)
 
-    def getTargetPopulationsRows(self) -> WebElement:
-        return self.wait_for(self.rows)
+    def getTargetPopulationsRows(self) -> list[WebElement]:
+        return self.get_elements(self.rows)
 
-    def checkElementsOnPage(self) -> None:
-        self.getTitlePage().should("be.visible").contains(self.textTitlePage)
-        # self.getButtonFiltersExpand().click()
-        self.getSearchFilter().should("be.visible")
-        self.getStatusFilter().should("be.visible")
-        self.getMinNumberOfHouseholdsFilter().should("be.visible")
-        self.getMaxNumberOfHouseholdsFilter().should("be.visible")
-        self.getButtonCreateNew().should("be.visible").contains(self.textCreateNew)
-        self.getTabTitle().should("be.visible").contains(self.textTabTitle)
-        self.getTabColumnName().should("be.visible").contains(self.textTabName)
-        self.getTabColumnStatus().should("be.visible").contains(self.textTabStatus)
-        self.getTabColumnNOHouseholds()
-        self.getTabColumnDateCreated()
-        self.getTabColumnLastEdited()
-        self.getTabColumnCreatedBy()
+    def chooseTargetPopulations(self, number: int) -> WebElement:
+        try:
+            self.wait_for(self.rows)
+            return self.get_elements(self.rows)[number]
+        except IndexError:
+            sleep(1)
+            return self.get_elements(self.rows)[number]
 
-    def selectStatus(self, status: str) -> None:
-        self.getStatusFilter().click()
-        self.getStatusOption().contains(status).click()
-        self.pressEscapeFromElement(self.getStatusOption().contains(status))
-        self.getApply().click()
+    def getCreateUseFilters(self) -> WebElement:
+        return self.wait_for(self.createUserFilters)
 
-    def chooseTargetPopulationRow(self, row: int) -> WebElement:
-        return self.getTargetPopulationsRows().eq(row)
+    def getCreateUseIDs(self) -> WebElement:
+        return self.wait_for(self.createUseIDs)

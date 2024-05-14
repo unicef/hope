@@ -15,6 +15,7 @@ from page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from page_object.grievance.feedback import Feedback
 from page_object.grievance.grievance_tickets import GrievanceTickets
 from page_object.grievance.new_feedback import NewFeedback
+from page_object.grievance.new_ticket import NewTicket
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
 from page_object.programme_population.households import Households
@@ -25,6 +26,9 @@ from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
 )
+from page_object.targeting.targeting import Targeting
+from page_object.targeting.targeting_create import TargetingCreate
+from page_object.targeting.targeting_details import TargetingDetails
 from pytest_django.live_server_helper import LiveServer
 from pytest_html_reporter import attach
 from requests import Session
@@ -48,6 +52,9 @@ def pytest_addoption(parser) -> None:  # type: ignore
 
 
 def pytest_configure() -> None:
+    # delete all old screenshots
+    for file in os.listdir("report/screenshot"):
+        os.remove(os.path.join("report/screenshot", file))
     from django.conf import settings
 
     settings.DEBUG = True
@@ -241,8 +248,28 @@ def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> Individu
 
 
 @pytest.fixture
+def pageTargeting(request: FixtureRequest, browser: Chrome) -> Targeting:
+    yield Targeting(browser)
+
+
+@pytest.fixture
+def pageTargetingDetails(request: FixtureRequest, browser: Chrome) -> TargetingDetails:
+    yield TargetingDetails(browser)
+
+
+@pytest.fixture
+def pageTargetingCreate(request: FixtureRequest, browser: Chrome) -> TargetingCreate:
+    yield TargetingCreate(browser)
+
+
+@pytest.fixture
 def pageGrievanceDetailsPage(request: FixtureRequest, browser: Chrome) -> GrievanceDetailsPage:
     yield GrievanceDetailsPage(browser)
+
+
+@pytest.fixture
+def pageGrievanceNewTicket(request: FixtureRequest, browser: Chrome) -> NewTicket:
+    yield NewTicket(browser)
 
 
 @pytest.fixture

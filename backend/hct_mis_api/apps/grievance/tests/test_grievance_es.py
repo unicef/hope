@@ -362,7 +362,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             }
         )
 
-        cls.es.index(
+        cls.es.index(  # type: ignore
             index="test_es_db",
             doc_type="_doc",
             id=cls.grievance_ticket_1.id,
@@ -405,7 +405,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             }
         )
 
-        cls.es.index(
+        cls.es.index(  # type: ignore
             index="test_es_db",
             doc_type="_doc",
             id=cls.grievance_ticket_2.id,
@@ -447,7 +447,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             }
         )
 
-        cls.es.index(
+        cls.es.index(  # type: ignore
             index="test_es_db",
             doc_type="_doc",
             id=cls.grievance_ticket_3.id,

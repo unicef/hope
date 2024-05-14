@@ -17,14 +17,10 @@ import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
 import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  hasPermissionInModule,
-  PERMISSIONS,
-} from '../../../config/permissions';
+import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { useNavigate } from 'react-router-dom';
-import { decodeIdString } from '@utils/utils';
 
 export const CreateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -47,6 +43,7 @@ export const CreateProgramPage = (): ReactElement => {
   });
 
   const handleSubmit = async (values): Promise<void> => {
+    delete values.editMode;
     const budgetValue = parseFloat(values.budget) ?? 0;
     const budgetToFixed = !Number.isNaN(budgetValue)
       ? budgetValue.toFixed(2)
@@ -90,6 +87,7 @@ export const CreateProgramPage = (): ReactElement => {
   };
 
   const initialValues = {
+    editMode: false,
     name: '',
     programmeCode: '',
     startDate: '',

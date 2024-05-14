@@ -9,7 +9,6 @@ import * as Yup from 'yup';
 import {
   ImportDataStatus,
   useCreateRegistrationXlsxImportMutation,
-  useProgramQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -44,14 +43,11 @@ export function CreateImportFromXlsxForm({
     loading: saveXlsxLoading,
     xlsxImportData,
   } = useSaveXlsxImportDataAndCheckStatus();
-  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [createImport] = useCreateRegistrationXlsxImportMutation();
-  const { data: programData } = useProgramQuery({
-    variables: { id: programId },
-  });
 
   const onSubmit = async (values): Promise<void> => {
     setSubmitDisabled(true);
@@ -68,15 +64,9 @@ export function CreateImportFromXlsxForm({
           },
         },
       });
-      if (programData.program.isSocialWorkerProgram) {
-        navigate(
-          `/${baseUrl}/registration-data-import-for-people/${data.data.registrationXlsxImport.registrationDataImport.id}`,
-        );
-      } else {
-        navigate(
-          `/${baseUrl}/registration-data-import/${data.data.registrationXlsxImport.registrationDataImport.id}`,
-        );
-      }
+      navigate(
+        `/${baseUrl}/registration-data-import/${data.data.registrationXlsxImport.registrationDataImport.id}`,
+      );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
       setSubmitDisabled(false);

@@ -294,8 +294,8 @@ class GenerateReportContentHelpers:
     def get_payment_plans(report: Report) -> QuerySet[PaymentPlan]:
         filter_vars = {
             "business_area": report.business_area,
-            "dispersion_start_date__gte": report.date_from,
-            "dispersion_end_date__lte": report.date_to,
+            "start_date__gte": report.date_from,
+            "end_date__lte": report.date_to,
         }
         if report.program:
             filter_vars["program_cycle__program"] = report.program

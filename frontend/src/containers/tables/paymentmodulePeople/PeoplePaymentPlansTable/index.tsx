@@ -1,0 +1,1 @@
+export { PeoplePaymentPlansTable } from './PeoplePaymentPlansTable';

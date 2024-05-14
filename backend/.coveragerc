@@ -1,7 +1,7 @@
 [run]
 branch = True
 source = hct_mis_api
-concurrency=multiprocessing
+concurrency=multiprocessing,thread
 
 omit =
         */selenium_tests/**

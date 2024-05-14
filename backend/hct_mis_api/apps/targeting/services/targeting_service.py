@@ -329,7 +329,9 @@ class TargetingCriteriaFilterBase:
         core_field_attr = core_field_attrs[0]
         get_query = core_field_attr.get("get_query")
         if get_query:
-            return get_query(self.comparison_method, self.arguments)
+            return get_query(
+                self.comparison_method, self.arguments, is_social_worker_query=self.is_social_worker_program
+            )
         lookup = core_field_attr.get("lookup")
         if not lookup:
             logger.error(

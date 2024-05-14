@@ -1,3 +1,6 @@
+from typing import Any
+
+from parameterized import parameterized
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -241,3 +244,40 @@ class TestPushPeople(HOPEApiTestCase):
                 {"birth_date": ["This field is required."], "type": ["This field is required."]},
             ],
         )
+
+    @parameterized.expand(
+        [
+            ("invalid_phone_no", "phone_no", "invalid", False),
+            ("invalid_phone_no_alternative", "phone_no", "invalid", False),
+            ("valid_phone_no", "phone_no_alternative", "+48 632 215 789", True),
+            ("valid_phone_no_alternative", "phone_no_alternative", "+48 632 215 789", True),
+            ("phone_no_alternative_as_null", "phone_no_alternative", None, False),
+            ("phone_no_as_null", "phone_no", None, False),
+        ]
+    )
+    def test_upload_single_person_with_phone_number(
+        self, _: Any, field_name: str, phone_number: str, expected_value: bool
+    ) -> None:
+        data = [
+            {
+                "residence_status": "IDP",
+                "village": "village1",
+                "country": "AF",
+                "collect_individual_data": COLLECT_TYPE_FULL,
+                "full_name": "John Doe",
+                "birth_date": "2000-01-01",
+                "sex": "MALE",
+                "type": "",
+                field_name: phone_number,
+            }
+        ]
+        response = self.client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        response_json = response.json()
+
+        rdi_datahub = RegistrationDataImportDatahub.objects.filter(id=response_json["id"]).first()
+        self.assertIsNotNone(rdi_datahub)
+        ind = ImportedIndividual.objects.filter(registration_data_import=rdi_datahub).first()
+        self.assertIsNotNone(ind)
+        self.assertEqual(ind.full_name, "John Doe")
+        self.assertEqual(getattr(ind, f"{field_name}_valid"), expected_value)
