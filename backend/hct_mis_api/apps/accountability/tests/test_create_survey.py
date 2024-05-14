@@ -138,9 +138,10 @@ class TestCreateSurvey(APITestCase):
         households = [create_household({"size": 3})[0] for _ in range(3)]
         self.tp.households.set(households)
 
-        with patch.object(django.db.transaction, "on_commit", lambda t: t()), patch(
-            "hct_mis_api.apps.accountability.celery_tasks.send_survey_to_users.delay"
-        ) as task_mock:
+        with (
+            patch.object(django.db.transaction, "on_commit", lambda t: t()),
+            patch("hct_mis_api.apps.accountability.celery_tasks.send_survey_to_users.delay") as task_mock,
+        ):
             self.snapshot_graphql_request(
                 request_string=self.CREATE_SURVEY_MUTATION,
                 context={
@@ -259,11 +260,12 @@ class TestCreateSurvey(APITestCase):
         )
 
     def test_getting_available_flows(self) -> None:
-        with patch(
-            "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)
-        ), patch(
-            "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.get_flows",
-            MagicMock(return_value=[{"uuid": 123, "name": "flow2"}, {"uuid": 234, "name": "flow2"}]),
+        with (
+            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch(
+                "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.get_flows",
+                MagicMock(return_value=[{"uuid": 123, "name": "flow2"}, {"uuid": 234, "name": "flow2"}]),
+            ),
         ):
             self.snapshot_graphql_request(
                 request_string=self.AVAILABLE_FLOWS,

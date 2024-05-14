@@ -60,9 +60,9 @@ class XlsxExportTargetingService:
         return self.workbook
 
     def _add_version(self) -> None:
-        self.ws_meta[XlsxExportTargetingService.VERSION_CELL_NAME_COORDINATES] = (
-            XlsxExportTargetingService.VERSION_CELL_NAME
-        )
+        self.ws_meta[
+            XlsxExportTargetingService.VERSION_CELL_NAME_COORDINATES
+        ] = XlsxExportTargetingService.VERSION_CELL_NAME
         self.ws_meta[XlsxExportTargetingService.VERSION_CELL_COORDINATES] = XlsxExportTargetingService.VERSION
 
     def _create_workbook(self) -> openpyxl.Workbook:
