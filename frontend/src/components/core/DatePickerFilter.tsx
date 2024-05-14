@@ -14,7 +14,7 @@ export const DatePickerFilter = ({
   const datePickerValue = value ? parseISO(value) : null;
   const calculatedDataCy =
     dataCy === 'date-picker-filter'
-      ? `date-picker-filter-${props?.label}`
+      ? `date-picker-filter-${props?.label || props?.placeholder || ''}`
       : dataCy;
 
   return (
