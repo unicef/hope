@@ -596,7 +596,7 @@ export const EditGrievancePage = (): React.ReactElement => {
                                       </Typography>
                                       {Object.entries(item.dataFields).map(
                                         (
-                                          [_key, field]: [
+                                          [, field]: [
                                             string,
                                             {
                                               name: string;

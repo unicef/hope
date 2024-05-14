@@ -82,9 +82,6 @@ export function RequestedIndividualDataChangeTable({
     return <LoadingComponent />;
   }
 
-  console.log('entries', entries);
-  console.log('entriesFlexFields', entriesFlexFields);
-  console.log('deliveryMechanismDataToEdit', deliveryMechanismDataToEdit);
   return (
     <div>
       {entries?.length || entriesFlexFields?.length ? (
@@ -209,6 +206,7 @@ export function RequestedIndividualDataChangeTable({
         ? deliveryMechanismDataToEdit.map(
             (deliveryMechanismDataItem, index) => (
               <DeliveryMechanismDataToEditTable
+                key={deliveryMechanismDataItem?.id}
                 values={values}
                 isEdit={isEdit}
                 ticket={ticket}

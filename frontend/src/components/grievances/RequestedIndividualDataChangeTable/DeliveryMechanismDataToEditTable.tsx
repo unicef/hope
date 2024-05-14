@@ -20,9 +20,6 @@ import { handleSelected } from '../utils/helpers';
 const GreenIcon = styled.div`
   color: #28cb15;
 `;
-const GreyText = styled.div`
-  color: #9e9e9e;
-`;
 
 const StyledTable = styled(Table)`
   min-width: 100px;
@@ -37,22 +34,19 @@ export interface DeliveryMechanismDataToEditTableProps {
   deliveryMechanismDataToEdit;
 }
 
-export function DeliveryMechanismDataToEditTable({
+export const DeliveryMechanismDataToEditTable = ({
   values,
   isEdit,
   ticket,
   setFieldValue,
   index,
   deliveryMechanismDataToEdit,
-}: DeliveryMechanismDataToEditTableProps): React.ReactElement {
-  console.log('deliveryMechanismDataToEdit', deliveryMechanismDataToEdit);
-
+}: DeliveryMechanismDataToEditTableProps): React.ReactElement => {
   const { t } = useTranslation();
   const { selectedDeliveryMechanismDataToEdit } = values;
   const handleSelectDeliveryMechanismDataToEdit = (
     deliveryMechanismDataIndex,
   ): void => {
-    console.log('deliveryMechanismDataIndex', deliveryMechanismDataIndex);
     handleSelected(
       deliveryMechanismDataIndex,
       'selectedDeliveryMechanismDataToEdit',
@@ -60,17 +54,6 @@ export function DeliveryMechanismDataToEditTable({
       setFieldValue,
     );
   };
-  console.log(
-    'selectedDeliveryMechanismDataToEdit',
-    selectedDeliveryMechanismDataToEdit,
-  );
-  const renderNewOrNotUpdated = (prev, curr): React.ReactElement => {
-    if (prev === curr) {
-      return <GreyText>{t('Not updated')}</GreyText>;
-    }
-    return <span>{curr}</span>;
-  };
-
   return (
     <>
       <TableTitle>
@@ -139,4 +122,4 @@ export function DeliveryMechanismDataToEditTable({
       </>
     </>
   );
-}
+};
