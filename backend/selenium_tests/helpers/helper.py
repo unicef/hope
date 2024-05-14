@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 class Common:
-    DEFAULT_TIMEOUT = 100
+    DEFAULT_TIMEOUT = 10
 
     def __init__(self, driver: Chrome):
         self.driver = driver
@@ -107,3 +107,12 @@ class Common:
     ) -> None:
         sleep(delay_sec)
         self.driver.get_screenshot_as_file(os.path.join(f"{file_path}", f"{file_name}.{file_type}"))
+
+    def get_value_of_attributes(self, attribute: str = "data-cy") -> None:
+        sleep(1)
+        ids = self.driver.find_elements(By.XPATH, f"//*[@{attribute}]")
+        for ii in ids:
+            try:
+                print(f"{ii.text}: {ii.get_attribute(attribute)}")  # type: ignore
+            except BaseException:
+                print(f"No text: {ii.get_attribute(attribute)}")  # type: ignore
