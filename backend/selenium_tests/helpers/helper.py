@@ -63,7 +63,7 @@ class Common:
             if name in item.text:
                 self._wait().until(EC.element_to_be_clickable((By.XPATH, f"//*[contains(text(), '{name}')]")))
                 return item
-        assert False, f"Element: {name} is not in the list."
+        raise AssertionError(f"Element: {name} is not in the list.")
 
     def check_page_after_click(self, button: WebElement, url_fragment: str) -> None:
         programme_creation_url = self.driver.current_url
