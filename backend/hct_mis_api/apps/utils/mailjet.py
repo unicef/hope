@@ -32,8 +32,8 @@ class MailjetClient:
         self.recipients = settings.CATCH_ALL_EMAIL if settings.CATCH_ALL_EMAIL else recipients
         self.ccs = ccs or []
         self.variables = variables
-        self.from_email = from_email or settings.EMAIL_HOST_USER
-        self.from_email_display = from_email_display or settings.DEFAULT_FROM_EMAIL
+        self.from_email = from_email or settings.DEFAULT_EMAIL
+        self.from_email_display = from_email_display or settings.DEFAULT_EMAIL_DISPLAY
         self.attachments = []
 
     def _validate_email_data(self) -> None:
