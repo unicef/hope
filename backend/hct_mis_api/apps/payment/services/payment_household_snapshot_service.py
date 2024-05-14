@@ -109,7 +109,7 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
     return PaymentHouseholdSnapshot(payment=payment, snapshot_data=household_data, household_id=household.id)
 
 
-def get_individual_snapshot(individual: Individual) -> dict:
+def get_individual_snapshot(individual: Individual, is_hh_collector: bool = False) -> dict:
     all_individual_data_dict = individual.__dict__
     keys = [key for key in all_individual_data_dict.keys() if key not in excluded_individual_fields]
     individual_data = {}
@@ -140,6 +140,11 @@ def get_individual_snapshot(individual: Individual) -> dict:
             "bank_name": bank_account_info.bank_name,
             "bank_account_number": bank_account_info.bank_account_number,
             "debit_card_number": bank_account_info.debit_card_number,
+        }
+
+    if is_hh_collector:
+        individual_data["delivery_mechanisms_data"] = {
+            dmd.delivery_mechanism: dmd.delivery_data for dmd in individual.delivery_mechanisms_data.all()
         }
 
     return individual_data

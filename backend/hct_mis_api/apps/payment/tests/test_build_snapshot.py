@@ -57,7 +57,7 @@ class TestBuildSnapshot(TestCase):
             )
             cls.p2 = PaymentFactory(
                 parent=cls.pp,
-                conflicted=True,
+                conflicted=False,
                 household=cls.hh2,
                 head_of_household=cls.hoh2,
                 entitlement_quantity=100.00,

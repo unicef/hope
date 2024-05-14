@@ -338,7 +338,7 @@ class TestFSPSetup(APITestCase):
                 paymentPlanId=encoded_payment_plan_id,
                 deliveryMechanisms=[
                     DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
-                    GenericPayment.DELIVERY_TYPE_TRANSFER,
+                    DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
                 ],
             )
         )
