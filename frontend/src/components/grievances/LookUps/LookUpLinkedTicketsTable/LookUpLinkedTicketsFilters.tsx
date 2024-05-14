@@ -89,7 +89,7 @@ export function LookUpLinkedTicketsFilters({
             label="From"
             onChange={(date) => handleFilterChange('createdAtRangeMin', date)}
             value={filter.createdAtRangeMin}
-            data-cy="filters-creation-date-from"
+            dataCy="filters-creation-date-from"
           />
         </Grid>
         <Grid item xs={3}>
@@ -97,7 +97,7 @@ export function LookUpLinkedTicketsFilters({
             label={t('To')}
             onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
             value={filter.createdAtRangeMax}
-            data-cy="filters-creation-date-to"
+            dataCy="filters-creation-date-to"
           />
         </Grid>
         <Grid item xs={3}>

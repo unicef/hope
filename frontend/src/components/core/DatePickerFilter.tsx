@@ -12,25 +12,29 @@ export const DatePickerFilter = ({
   ...props
 }): React.ReactElement => {
   const datePickerValue = value ? parseISO(value) : null;
+  const calculatedDataCy =
+    dataCy === 'date-picker-filter'
+      ? `date-picker-filter-${props?.label}`
+      : dataCy;
 
   return (
-    <Box display="flex" flexDirection="column" >
-    {topLabel ? <FieldLabel>{topLabel}</FieldLabel> : null}
-    <FormControl data-cy={dataCy} size="small">
-      <DesktopDatePicker
-        slotProps={{ textField: { size: 'small' } }}
-        onChange={(date) => {
-          if (date) {
-            onChange(formatISO(date));
-          } else {
-            onChange(null);
-          }
-        }}
-        value={datePickerValue || null}
-        format="yyyy-MM-dd"
-        {...props}
-      />
-    </FormControl>
-  </Box>
+    <Box display="flex" flexDirection="column">
+      {topLabel ? <FieldLabel>{topLabel}</FieldLabel> : null}
+      <FormControl data-cy={calculatedDataCy} size="small">
+        <DesktopDatePicker
+          slotProps={{ textField: { size: 'small' } }}
+          onChange={(date) => {
+            if (date) {
+              onChange(formatISO(date));
+            } else {
+              onChange(null);
+            }
+          }}
+          value={datePickerValue || null}
+          format="yyyy-MM-dd"
+          {...props}
+        />
+      </FormControl>
+    </Box>
   );
 };

@@ -116,7 +116,7 @@ export function LookUpRegistrationFiltersCommunication({
             placeholder={t('From')}
             onChange={(date) => handleFilterChange('importDateRangeMin', date)}
             value={filter.importDateRangeMin}
-            data-cy="filter-import-date-range-min"
+            dataCy="filter-import-date-range-min"
           />
         </Grid>
         <Grid item xs={3}>
@@ -124,7 +124,7 @@ export function LookUpRegistrationFiltersCommunication({
             placeholder={t('To')}
             onChange={(date) => handleFilterChange('importDateRangeMax', date)}
             value={filter.importDateRangeMax}
-            data-cy="filter-import-date-range-max"
+            dataCy="filter-import-date-range-max"
           />
         </Grid>
       </Grid>
