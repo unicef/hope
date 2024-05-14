@@ -54,16 +54,15 @@ WORKDIR $CODE
 
 COPY --from=waitforit /data/waitforit /usr/local/bin/waitforit
 
+# Dist builder image
+FROM base as builder
+
 RUN pip install pdm==2.15.2 &&\
     pip install --upgrade pip setuptools &&\
     pdm config cache_dir /var/cache/pdm &&\
     pdm config python.use_venv false &&\
     pdm config venv.in_project true &&\
     pdm config check_update false
-
-
-# Dist builder image
-FROM base as builder
 
 WORKDIR $PDM_PACKAGES
 COPY backend/pyproject.toml backend/pdm.lock ./
