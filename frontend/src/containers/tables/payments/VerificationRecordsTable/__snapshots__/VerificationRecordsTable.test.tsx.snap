@@ -886,6 +886,11 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
+                De*** La*** Sc***
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
                 HH-22-0000.0007
               </td>
               <td
@@ -960,6 +965,11 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                     PENDING
                   </div>
                 </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                Jo*** Sa*** Ma***
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
@@ -1042,6 +1052,11 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
+                Kr*** Ka*** Ru***
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
                 HH-22-0000.0005
               </td>
               <td
@@ -1120,6 +1135,11 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
+                Ba*** Je*** Ja***
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
                 HH-22-0000.0006
               </td>
               <td
@@ -1194,6 +1214,11 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                     PENDING
                   </div>
                 </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                Mi*** Er*** Wi***
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
