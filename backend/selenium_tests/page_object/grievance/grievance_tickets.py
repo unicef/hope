@@ -198,6 +198,7 @@ class GrievanceTickets(BaseComponents):
         return self.wait_for(self.statusOptions)
 
     def getSelectAll(self) -> WebElement:
+        self.getTabTicketID()
         return self.driver.find_element(By.XPATH, f"//*[@{self.selectAll}]")
 
     def getButtonAssign(self) -> WebElement:
