@@ -351,6 +351,7 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     snapshot_collector_bank_name = graphene.String(description="Get from Household Snapshot")
     snapshot_collector_bank_account_number = graphene.String(description="Get from Household Snapshot")
     snapshot_collector_debit_card_number = graphene.String(description="Get from Household Snapshot")
+    fsp_auth_code = graphene.String()
 
     class Meta:
         model = Payment
@@ -449,6 +450,17 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     def _parse_pp_conflict_data(cls, conflicts_data: List) -> List[Any]:
         """parse list of conflicted payment plans data from Payment model json annotations"""
         return [json.loads(conflict) for conflict in conflicts_data]
+
+    def resolve_fsp_auth_code(self, info: Any) -> str:
+        user = info.context.user
+
+        if not user.has_permission(
+            Permissions.PM_VIEW_FSP_AUTH_CODE.value,
+            self.business_area,
+            self.program_id,
+        ):
+            return ""
+        return self.fsp_auth_code  # type: ignore
 
 
 class DeliveryMechanismNode(DjangoObjectType):

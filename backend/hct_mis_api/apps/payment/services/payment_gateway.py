@@ -386,7 +386,8 @@ class PaymentGatewayService:
 
             _payment.status = matching_pg_payment.hope_status
             _payment.status_date = now()
-            update_fields = ["status", "status_date"]
+            _payment.fsp_auth_code = matching_pg_payment.auth_code
+            update_fields = ["status", "status_date", "auth_code"]
 
             if _payment.status not in Payment.ALLOW_CREATE_VERIFICATION and matching_pg_payment.message:
                 _payment.reason_for_unsuccessful_payment = matching_pg_payment.message

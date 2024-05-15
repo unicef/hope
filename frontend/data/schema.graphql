@@ -2925,6 +2925,7 @@ type PaymentNode implements Node {
   additionalCollectorName: String
   additionalDocumentType: String
   additionalDocumentNumber: String
+  fspAuthCode: String
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   householdSnapshot: PaymentHouseholdSnapshotNode
   adminUrl: String
