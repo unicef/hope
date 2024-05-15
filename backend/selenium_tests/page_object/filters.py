@@ -6,6 +6,7 @@ class Filters(Common):
     filtersSearch = 'div[data-cy="filters-search"]'
     filtersStatus = 'div[data-cy="filters-status"]'
     filtersSector = 'div[data-cy="filters-sector"]'
+    dataPickerFilter = 'div[data-cy="date-picker-filter"]'
     filtersNumberOfHouseholdsMin = 'div[data-cy="filters-number-of-households-min"]'
     filtersNumberOfHouseholdsMax = 'div[data-cy="filters-number-of-households-max"]'
     filtersBudgetMin = 'div[data-cy="filters-budget-min"]'
@@ -41,6 +42,12 @@ class Filters(Common):
     filterStatus = 'div[data-cy="filter-status"]'
     filterSizeMin = 'div[data-cy="filter-size-min"]'
     filterSizeMax = 'div[data-cy="filter-size-max"]'
+    globalProgramFilter = 'button[data-cy="global-program-filter"]'
+    reportTypeFilter = 'div[data-cy="report-type-filter"]'
+    reportCreatedFromFilter = 'div[data-cy="report-created-from-filter"]'
+    reportCreatedToFilter = 'div[data-cy="report-created-to-filter"]'
+    reportStatusFilter = 'div[data-cy="report-status-filter"]'
+    reportOnlyMyFilter = 'span[data-cy="report-only-my-filter"]'
 
     buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
     buttonFiltersApply = 'button[data-cy="button-filters-apply"]'
@@ -164,3 +171,21 @@ class Filters(Common):
 
     def getFilterSizeMax(self) -> WebElement:
         return self.wait_for(self.filterSizeMax)
+
+    def getGlobalProgramFilter(self) -> WebElement:
+        return self.wait_for(self.globalProgramFilter)
+
+    def getReportTypeFilter(self) -> WebElement:
+        return self.wait_for(self.reportTypeFilter)
+
+    def getReportCreatedFromFilter(self) -> WebElement:
+        return self.wait_for(self.reportCreatedFromFilter)
+
+    def getReportCreatedToFilter(self) -> WebElement:
+        return self.wait_for(self.reportCreatedToFilter)
+
+    def getReportStatusFilter(self) -> WebElement:
+        return self.wait_for(self.reportStatusFilter)
+
+    def getReportOnlyMyFilter(self) -> WebElement:
+        return self.wait_for(self.reportOnlyMyFilter)
