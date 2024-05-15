@@ -7,7 +7,8 @@ import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { ApprovalSection } from '@components/managerialConsole/ApprovalSection';
 import { AuthorizationSection } from '@components/managerialConsole/AuthorizationSection';
-import { ReleaseSection } from '@components/managerialConsole/ReleaseSection';
+import { PendingForReleaseSection } from '@components/managerialConsole/PendingForReleaseSection';
+// import { ReleasedSection } from '@components/managerialConsole/ReleasedSection';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -88,6 +89,16 @@ export const ManagerialConsolePage: React.FC = () => {
       fetchPaymentPlansManagerial(businessArea, { status: 'IN_REVIEW' }),
   });
 
+  // const {
+  //   data: releasedData,
+  //   isLoading: releasedLoading,
+  //   refetch: refetchReleased,
+  // } = useQuery({
+  //   queryKey: ['paymentPlansReleased', businessArea],
+  //   queryFn: () =>
+  //     fetchPaymentPlansManagerial(businessArea, { status: 'RELEASED' }),
+  // });
+
   const bulkAction = useMutation({
     mutationFn: (params: { ids: string[]; action: string; comment: string }) =>
       bulkActionPaymentPlansManagerial(
@@ -162,7 +173,7 @@ export const ManagerialConsolePage: React.FC = () => {
       )}
       {canReview && (
         <Box mb={6}>
-          <ReleaseSection
+          <PendingForReleaseSection
             selectedInReview={selectedInReview}
             setSelectedInReview={setSelectedInReview}
             handleSelect={handleSelect}
@@ -172,6 +183,7 @@ export const ManagerialConsolePage: React.FC = () => {
           />
         </Box>
       )}
+      {/* {canSeeReleased && <ReleasedSection releasedData={releasedData} />} */}
     </>
   );
 };
