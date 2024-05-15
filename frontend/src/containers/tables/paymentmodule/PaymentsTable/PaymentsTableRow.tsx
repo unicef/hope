@@ -14,8 +14,8 @@ import {
 } from '@utils/utils';
 import { AllPaymentsForTableQuery, PaymentStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import {hasPermissions, PERMISSIONS} from "../../../../config/permissions";
-import {usePermissions} from "@hooks/usePermissions";
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { usePermissions } from '@hooks/usePermissions';
 
 export const StyledLink = styled.div`
   color: #000;

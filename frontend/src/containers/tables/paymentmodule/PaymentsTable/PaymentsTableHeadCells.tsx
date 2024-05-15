@@ -1,6 +1,6 @@
 import { AllPaymentsForTableQuery } from '@generated/graphql';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import {PERMISSIONS} from "../../../../config/permissions";
+import { PERMISSIONS } from '../../../../config/permissions';
 
 export const headCells: HeadCell<
   AllPaymentsForTableQuery['allPayments']['edges'][number]['node']
