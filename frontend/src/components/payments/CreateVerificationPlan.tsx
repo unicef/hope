@@ -12,7 +12,6 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import {
-  PaymentVerificationPlanVerificationChannel,
   useAllAdminAreasQuery,
   useAllRapidProFlowsLazyQuery,
   useCreatePaymentVerificationPlanMutation,
@@ -135,7 +134,9 @@ export const CreateVerificationPlan = ({
       variables: {
         businessAreaSlug: businessArea,
       },
+      fetchPolicy: 'network-only',
     });
+
   const { data } = useAllAdminAreasQuery({
     variables: {
       first: 100,
@@ -156,12 +157,7 @@ export const CreateVerificationPlan = ({
   useEffect(() => {
     if (open) {
       loadSampleSize();
-      if (
-        formValues.verificationChannel ===
-        PaymentVerificationPlanVerificationChannel.Rapidpro
-      ) {
-        loadRapidProFlows();
-      }
+      loadRapidProFlows();
     }
   }, [formValues, open, loadSampleSize, loadRapidProFlows]);
 
