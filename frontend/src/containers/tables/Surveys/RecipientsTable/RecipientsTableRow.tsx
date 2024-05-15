@@ -38,6 +38,7 @@ export const RecipientsTableRow = ({
   };
 
   if (choicesLoading) return <LoadingComponent />;
+  if (!choicesData) return null;
 
   const residenceStatusChoiceDict = choicesToDict(
     choicesData?.residenceStatusChoices,

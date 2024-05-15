@@ -15,7 +15,6 @@ import {
   IndividualDisability,
   IndividualNode,
 } from '@generated/graphql';
-import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
@@ -46,9 +45,7 @@ export function PeopleBioData({
   grievancesChoices,
 }: PeopleBioDataProps): React.ReactElement {
   const { t } = useTranslation();
-  const relationshipChoicesDict = choicesToDict(
-    choicesData.relationshipChoices,
-  );
+
   const maritalStatusChoicesDict = choicesToDict(
     choicesData.maritalStatusChoices,
   );
@@ -96,7 +93,6 @@ export function PeopleBioData({
       </Box>
     </Grid>
   ));
-
 
   const renderBankAccountInfo = (): React.ReactNode => {
     if (!individual?.bankAccountInfo) {
