@@ -9,6 +9,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import JSONField, Q, UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 
+from constance import config
 from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from model_utils import Choices
@@ -73,9 +74,12 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     long_name = models.CharField(max_length=255)
     region_code = models.CharField(max_length=8)
     region_name = models.CharField(max_length=8)
+
+    # TODO: deprecated to remove in the next release
     kobo_username = models.CharField(max_length=255, null=True, blank=True)
     kobo_token = models.CharField(max_length=255, null=True, blank=True)
     kobo_url = models.URLField(max_length=255, null=True, blank=True)
+
     rapid_pro_host = models.URLField(null=True, blank=True)
     rapid_pro_payment_verification_token = models.CharField(max_length=40, null=True, blank=True)
     rapid_pro_messages_token = models.CharField(max_length=40, null=True, blank=True)
@@ -163,6 +167,11 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
 
     def __str__(self) -> str:
         return self.name
+
+    def get_kobo_token(self) -> str:
+        if config.KOBO_ENABLE_SINGLE_USER_ACCESS:
+            return settings.KOBO_MASTER_API_TOKEN
+        return self.kobo_token
 
     def natural_key(self) -> Tuple[str]:
         return (self.code,)

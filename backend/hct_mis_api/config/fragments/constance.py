@@ -209,6 +209,11 @@ Clear Cache,clear-cache/
         "Time To Live for REST API cache",
         "positive_integers",
     ),
+    "KOBO_ENABLE_SINGLE_USER_ACCESS": (
+        False,
+        "Enable single user access to Kobo API",
+        bool,
+    ),
 }
 
 CONSTANCE_DBS = ("default",)

@@ -14,7 +14,7 @@ from typing import (
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.db.models import Q
+from django.db.models import F, Q
 
 import graphene
 from constance import config
@@ -28,8 +28,12 @@ from graphql import GraphQLError
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import FILTERABLE_TYPES, Scope
-from hct_mis_api.apps.core.kobo.api import KoboAPI
-from hct_mis_api.apps.core.kobo.common import reduce_asset, reduce_assets_list
+from hct_mis_api.apps.core.kobo.api import CountryCodeNotProvided, KoboAPI
+from hct_mis_api.apps.core.kobo.common import (
+    filter_by_owner,
+    reduce_asset,
+    reduce_assets_list,
+)
 from hct_mis_api.apps.core.languages import Language, Languages
 from hct_mis_api.apps.core.models import (
     BusinessArea,
@@ -308,7 +312,8 @@ def get_fields_attr_generators(
 
 def resolve_asset(business_area_slug: str, uid: str) -> Dict:
     try:
-        assets = KoboAPI(business_area_slug).get_single_project_data(uid)
+        business_area = BusinessArea.objects.get(slug=business_area_slug)
+        assets = KoboAPI(token=business_area.get_kobo_token()).get_single_project_data(uid)
     except ObjectDoesNotExist as e:
         logger.exception(f"Provided business area: {business_area_slug}, does not exist.")
         raise GraphQLError("Provided business area does not exist.") from e
@@ -321,13 +326,21 @@ def resolve_asset(business_area_slug: str, uid: str) -> Dict:
 
 def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) -> List:
     try:
-        assets = KoboAPI(business_area_slug).get_all_projects_data()
+        business_area = BusinessArea.objects.annotate(country_code=F("countries__iso_code3")).get(
+            slug=business_area_slug
+        )
+        assets = KoboAPI(token=business_area.get_kobo_token()).get_all_projects_data(business_area.country_code)
+
+        if not config.KOBO_ENABLE_SINGLE_USER_ACCESS:
+            assets = filter_by_owner(assets, business_area.kobo_username)
     except ObjectDoesNotExist as e:
         logger.exception(f"Provided business area: {business_area_slug}, does not exist.")
         raise GraphQLError("Provided business area does not exist.") from e
     except AttributeError as error:
         logger.exception(error)
         raise GraphQLError(str(error)) from error
+    except CountryCodeNotProvided:
+        raise GraphQLError(f"Business area {business_area_slug} does not have a country code.")
 
     return reduce_assets_list(assets, only_deployed=only_deployed)
 
