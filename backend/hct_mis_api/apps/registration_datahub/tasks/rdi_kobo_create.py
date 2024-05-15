@@ -79,7 +79,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             return None
         current_download_url = attachment.get("download_url", "")
         download_url = current_download_url.replace("?format=json", "")
-        api = KoboAPI(self.business_area.slug)
+        api = KoboAPI(token=self.business_area.get_kobo_token())
         image_bytes = api.get_attached_file(download_url)
         file = File(image_bytes, name=value)
         if is_flex_field:

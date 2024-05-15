@@ -11,6 +11,7 @@ from hct_mis_api.apps.core.kobo.common import (
     KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
     get_field_name,
 )
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import rename_dict_keys
 from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -32,7 +33,8 @@ def _get_file(attachments: List, value: Any, business_area_slug: str) -> Union[F
     if not download_url:
         return download_url
 
-    api = KoboAPI(business_area_slug)
+    business_area = BusinessArea.objects.get(slug=business_area_slug)
+    api = KoboAPI(token=business_area.get_kobo_token())
     image_bytes = api.get_attached_file(download_url)
     file = File(image_bytes, name=value)
 
