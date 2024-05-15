@@ -123,7 +123,7 @@ export const GlobalProgramSelect = () => {
   ] = useAllProgramsForChoicesLazyQuery({
     variables: {
       businessArea,
-      first: 5,
+      first: 10,
       orderBy: 'name',
       status: [ProgramStatus.Active, ProgramStatus.Draft],
     },
@@ -248,16 +248,24 @@ export const GlobalProgramSelect = () => {
   };
 
   const searchPrograms = () => {
-    void loadProgramsList({
-      variables: {
-        businessArea,
-        first: 5,
-        orderBy: 'name',
-        status: [ProgramStatus.Active, ProgramStatus.Draft],
-        name: inputValue,
-      },
-      fetchPolicy: 'network-only',
-    });
+    if (!inputValue) {
+      void loadProgramsList();
+    } else {
+      void loadProgramsList({
+        variables: {
+          businessArea,
+          first: 10,
+          orderBy: 'name',
+          status: [
+            ProgramStatus.Active,
+            ProgramStatus.Draft,
+            ProgramStatus.Finished,
+          ],
+          name: inputValue,
+        },
+        fetchPolicy: 'network-only',
+      });
+    }
   };
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {

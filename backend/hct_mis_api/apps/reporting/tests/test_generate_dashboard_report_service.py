@@ -90,7 +90,7 @@ class TestGenerateDashboardReportService(TestCase):
             {
                 "Messages": [
                     {
-                        "From": {"Email": settings.EMAIL_HOST_USER, "Name": settings.DEFAULT_FROM_EMAIL},
+                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
                         "Subject": "[test] HOPE report generated",
                         "To": [
                             {
