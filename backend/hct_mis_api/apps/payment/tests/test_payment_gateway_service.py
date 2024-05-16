@@ -1,8 +1,10 @@
+import os
 from typing import Any
 from unittest import mock
 
 from django.utils import timezone
 
+import pytest
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -34,6 +36,12 @@ from hct_mis_api.apps.payment.services.payment_gateway import (
 )
 
 
+@pytest.fixture(autouse=True)
+def mock_payment_gateway_env_vars():
+    with mock.patch.dict(os.environ, {"PAYMENT_GATEWAY_API_KEY": "TEST", "PAYMENT_GATEWAY_API_URL": "TEST"}):
+        yield
+
+
 class TestPaymentGatewayService(APITestCase):
     databases = ("default",)
 
@@ -48,7 +56,6 @@ class TestPaymentGatewayService(APITestCase):
             end_date=timezone.datetime(2021, 7, 10, tzinfo=utc),
             status=PaymentPlan.Status.ACCEPTED,
         )
-
         cls.pg_fsp = FinancialServiceProviderFactory(
             name="Western Union",
             delivery_mechanisms=[

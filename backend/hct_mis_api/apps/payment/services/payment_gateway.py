@@ -197,9 +197,9 @@ class PaymentGatewayAPI:
         GET_FSPS = "fsp/"
         GET_PAYMENT_RECORDS = "payment_records/"
 
-    def __init__(self, api_key: Optional[str] = None, api_url: Optional[str] = None) -> None:
-        self.api_key = api_key or os.getenv("PAYMENT_GATEWAY_API_KEY")
-        self.api_url = api_url or os.getenv("PAYMENT_GATEWAY_API_URL")
+    def __init__(self) -> None:
+        self.api_key = os.getenv("PAYMENT_GATEWAY_API_KEY")
+        self.api_url = os.getenv("PAYMENT_GATEWAY_API_URL")
 
         if not self.api_key or not self.api_url:
             raise self.PaymentGatewayMissingAPICredentialsException("Missing Payment Gateway API Key/URL")
