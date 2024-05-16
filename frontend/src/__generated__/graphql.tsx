@@ -4728,7 +4728,7 @@ export type PaymentNode = Node & {
   tokenNumber?: Maybe<Scalars['Int']['output']>;
   totalPersonsCovered?: Maybe<Scalars['Int']['output']>;
   transactionReferenceId?: Maybe<Scalars['String']['output']>;
-  transactionStatusBlockchain?: Maybe<Scalars['String']['output']>;
+  transactionStatusBlockchainLink?: Maybe<Scalars['String']['output']>;
   unicefId?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
   verification?: Maybe<PaymentVerificationNode>;
@@ -5139,7 +5139,7 @@ export type PaymentRecordNode = Node & {
   targetPopulationCashAssistId: Scalars['String']['output'];
   totalPersonsCovered: Scalars['Int']['output'];
   transactionReferenceId?: Maybe<Scalars['String']['output']>;
-  transactionStatusBlockchain?: Maybe<Scalars['String']['output']>;
+  transactionStatusBlockchainLink?: Maybe<Scalars['String']['output']>;
   unicefId?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
   verification?: Maybe<PaymentVerificationNode>;
@@ -26679,7 +26679,7 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   tokenNumber?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   totalPersonsCovered?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   transactionReferenceId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  transactionStatusBlockchain?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  transactionStatusBlockchainLink?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   verification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>;
@@ -26830,7 +26830,7 @@ export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends Res
   targetPopulationCashAssistId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   totalPersonsCovered?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   transactionReferenceId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  transactionStatusBlockchain?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  transactionStatusBlockchainLink?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   verification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>;

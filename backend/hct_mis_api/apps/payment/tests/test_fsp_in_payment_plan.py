@@ -311,6 +311,33 @@ class TestFSPSetup(APITestCase):
             {"name": GenericPayment.DELIVERY_TYPE_VOUCHER, "order": 2},
         )
 
+    def test_error_when_choosing_delivery_mechanism_with_usdc_currency(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            total_households_count=1,
+            status=PaymentPlan.Status.LOCKED,
+            program=self.program,
+            currency=USDC,
+        )
+        assert payment_plan.currency == USDC
+        encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
+        variables = dict(
+            input=dict(
+                paymentPlanId=encoded_payment_plan_id,
+                deliveryMechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER],
+            )
+        )
+        response_with_error = self.graphql_request(
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context=self.context,
+            variables=variables,
+        )
+
+        assert "errors" in response_with_error, response_with_error
+        assert (
+            response_with_error["errors"][0]["message"]
+            == "For currency USDC can be assigned only delivery mechanism Transfer to Digital Wallet"
+        )
+
     def test_being_able_to_get_possible_delivery_mechanisms(self) -> None:
         query = """
             query AllDeliveryMechanisms {

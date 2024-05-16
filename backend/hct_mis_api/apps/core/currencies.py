@@ -326,7 +326,7 @@ CURRENCY_CHOICES = (
     (ZAR, _("South African rand")),
     (ZMW, _("Zambian kwacha")),
     (ZWL, _("Zimbabwean dollar")),
-    (USDC, _("Digital currency")),
+    (USDC, _("USD Coin")),
 )
 
 # TODO: add in future in case to have more 'digital currency' method for checking currency have a type/flag digital
