@@ -1,6 +1,8 @@
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.steficon.fixtures import RuleFactory
 from hct_mis_api.apps.steficon.forms import RuleForm
+from hct_mis_api.apps.steficon.models import Rule
 
 
 class TestRuleForm(APITestCase):
@@ -42,3 +44,31 @@ class TestRuleForm(APITestCase):
             self.assertTrue(form_with_black.is_valid())
             cleaned_data_with_black = form_with_black.clean()
             self.assertNotEqual(cleaned_data_with_black.get("definition", ""), "result.value=0")
+
+        # update only clean with 'allowed_business_areas' field
+        rule = RuleFactory(
+            name="Rule_1", type=Rule.TYPE_TARGETING, language="python", flags={"individual_data_needed": False}
+        )
+        rule.refresh_from_db()
+        self.assertEqual(rule.allowed_business_areas.all().count(), 0)
+
+        form_data = {
+            "allowed_business_areas": [self.business_area],
+            "definition": rule.definition,
+            "deprecated": rule.deprecated,
+            "description": rule.description,
+            "enabled": rule.enabled,
+            "flags": rule.flags,
+            "language": rule.language,
+            "name": rule.name,
+            "security": rule.security,
+            "type": rule.type,
+        }
+        form = RuleForm(data=form_data, instance=rule)
+        form.is_valid()
+        self.assertIn("allowed_business_areas", form.cleaned_data)
+
+        # save and check if allowed_business_areas updated
+        form.save()
+        rule.refresh_from_db()
+        self.assertEqual(rule.allowed_business_areas.all().count(), 1)
