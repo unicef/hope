@@ -20,10 +20,6 @@ from hct_mis_api.apps.utils.exceptions import log_and_raise
 logger = logging.getLogger(__name__)
 
 
-class TokenNotProvided(Exception):
-    pass
-
-
 class CountryCodeNotProvided(Exception):
     pass
 
@@ -42,19 +38,12 @@ class KoboAPI:
     LIMIT = 30_000
     FORMAT = "json"
 
-    def __init__(self, kpi_url: str = settings.KOBO_KF_URL, token: str = settings.KOBO_MASTER_API_TOKEN) -> None:
-        self._kpi_url = kpi_url
-        self._token = token
+    def __init__(self, kpi_url: Optional[str] = None, token: Optional[str] = None) -> None:
+        self._kpi_url = kpi_url or settings.KOBO_KF_URL
+        self._token = token or settings.KOBO_MASTER_API_TOKEN
 
         self._client = KoboRequestsSession()
-        self._check_token()
         self._set_token()
-
-    def _check_token(self) -> None:
-        if not self._token:
-            msg = "KOBO Token is not provided"
-            logger.error(msg)
-            raise TokenNotProvided(msg)
 
     def _set_token(self) -> None:
         retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504], allowed_methods=False)
@@ -150,7 +139,7 @@ class KoboAPI:
         endpoint = "api/v2/assets"
         query_params = f"format={self.FORMAT}&limit={self.LIMIT}"
         if config.KOBO_ENABLE_SINGLE_USER_ACCESS:
-            query_params += f"&q=settings__country_codes__icontains:{country_code}"
+            query_params += f"&q=settings__country_codes__icontains:{country_code.upper()}"
         url = f"{self._kpi_url}/{endpoint}?{query_params}"
         return self._get_paginated_request(url)
 
