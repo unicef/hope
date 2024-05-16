@@ -123,6 +123,7 @@ dev = [
     "pytest-repeat<1.0.0,>=0.9.3",
     "flaky<4.0.0,>=3.8.1",
     "pytest-html>=4.1.1",
+    "pytest-vcr>=1.0.2",
 ]
 
 [tool.pdm.build]
