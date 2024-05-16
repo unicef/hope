@@ -917,6 +917,13 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
                 raise GraphQLError("Delivery mechanism cannot be empty.")
             if delivery_mechanism not in [choice[0] for choice in GenericPayment.DELIVERY_TYPE_CHOICE]:
                 raise GraphQLError(f"Delivery mechanism '{delivery_mechanism}' is not valid.")
+            if (
+                payment_plan.currency == USDC
+                and delivery_mechanism != GenericPayment.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET
+            ):
+                raise GraphQLError(
+                    "For currency USDC can be assigned only delivery mechanism Transfer to Digital Wallet"
+                )
 
         DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=payment_plan).delete()
         current_time = timezone.now()

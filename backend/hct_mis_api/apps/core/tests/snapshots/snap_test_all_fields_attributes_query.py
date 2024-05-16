@@ -52323,10 +52323,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'DKK'
                     },
                     {
-                        'labelEn': 'Digital currency',
+                        'labelEn': 'USD Coin',
                         'labels': [
                             {
-                                'label': 'Digital currency',
+                                'label': 'USD Coin',
                                 'language': 'English(EN)'
                             }
                         ],

@@ -2919,7 +2919,7 @@ type PaymentNode implements Node {
   deliveredQuantityUsd: Float
   deliveryDate: DateTime
   transactionReferenceId: String
-  transactionStatusBlockchain: String
+  transactionStatusBlockchainLink: String
   parent: PaymentPlanNode!
   conflicted: Boolean!
   excluded: Boolean!
@@ -3297,7 +3297,7 @@ type PaymentRecordNode implements Node {
   deliveredQuantityUsd: Float
   deliveryDate: DateTime
   transactionReferenceId: String
-  transactionStatusBlockchain: String
+  transactionStatusBlockchainLink: String
   caId: String
   caHashId: UUID
   parent: CashPlanNode

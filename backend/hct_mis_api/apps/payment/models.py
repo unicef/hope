@@ -340,7 +340,7 @@ class GenericPayment(TimeStampedUUIDModel):
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
     transaction_reference_id = models.CharField(max_length=255, null=True)  # transaction_id
-    transaction_status_blockchain = models.CharField(max_length=255, null=True)
+    transaction_status_blockchain_link = models.CharField(max_length=255, null=True)
 
     class Meta:
         abstract = True
@@ -1126,7 +1126,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("additional_document_number", _("Additional Document Number")),
         ("registration_token", _("Registration Token")),
         ("status", _("Status")),
-        ("transaction_status_blockchain", _("Transaction Status on the Blockchain")),
+        ("transaction_status_blockchain_link", _("Transaction Status on the Blockchain")),
     )
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
@@ -1227,7 +1227,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "additional_document_type": (payment, "additional_document_type"),
             "additional_document_number": (payment, "additional_document_number"),
             "status": (payment, "payment_status"),
-            "transaction_status_blockchain": (payment, "transaction_status_blockchain"),
+            "transaction_status_blockchain_link": (payment, "transaction_status_blockchain_link"),
         }
         additional_columns = {"registration_token": cls.get_registration_token_doc_number}
         if column_name in additional_columns:
