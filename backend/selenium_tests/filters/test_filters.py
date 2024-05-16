@@ -223,5 +223,6 @@ class TestSmokeFilters:
                 var_name = "".join(var_name)  # type: ignore
                 print(f"filters.{var_name}, ")
                 list_locators.append(f'{i.tag_name}[data-cy="{i.get_attribute("data-cy")}"]')
+            print(list_locators)
             for locator in programs[nav_menu]:
                 assert locator in list_locators
