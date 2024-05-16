@@ -74,6 +74,11 @@ class Filters(BaseComponents):
     filtersIssueType = 'div[data-cy="filters-issue-type"]'
     filterImportDateRangeMin = 'div[data-cy="filter-import-date-range-min"]'
     filterImportDateRangeMax = 'div[data-cy="filter-import-date-range-max"]'
+    filtersTargetPopulationAutocomplete = 'div[data-cy="filters-target-population-autocomplete"]'
+    targetPopulationInput = 'div[data-cy="Target Population-input"]'
+    createdByInput = 'div[data-cy="Created by-input"]'
+    filtersTotalEntitledQuantityFrom = 'div[data-cy="date-picker-filter-From"]'
+    filtersTotalEntitledQuantityTo = 'div[data-cy="date-picker-filter-To"]'
 
     buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
     buttonFiltersApply = 'button[data-cy="button-filters-apply"]'

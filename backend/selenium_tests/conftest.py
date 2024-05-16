@@ -36,7 +36,7 @@ from requests import Session
 from selenium import webdriver
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
-
+from flags.models import FlagState
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
@@ -278,6 +278,7 @@ def pageGrievanceNewTicket(request: FixtureRequest, browser: Chrome) -> NewTicke
     yield NewTicket(browser)
 
 
+
 @pytest.fixture
 def business_area() -> BusinessArea:
     business_area, _ = BusinessArea.objects.get_or_create(
@@ -290,10 +291,13 @@ def business_area() -> BusinessArea:
             "region_name": "SAR",
             "slug": "afghanistan",
             "has_data_sharing_agreement": True,
-            "is_payment_plan_applicable": False,
+            "is_payment_plan_applicable": True,
+            "is_accountability_applicable": True,
             "kobo_token": "XXX",
         },
     )
+    FlagState.objects.get_or_create(
+        **{'name': 'ALLOW_ACCOUNTABILITY_MODULE', 'condition': 'boolean', 'value': 'True', 'required': False})
     return business_area
 
 

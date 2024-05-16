@@ -156,6 +156,13 @@ class TestSmokeFilters:
                 filters.datePickerFilterFrom,
                 filters.datePickerFilterTo,
             ],
+            "Payment Module": [
+                filters.selectFilter,
+                filters.filtersTotalEntitledQuantityFrom,
+                filters.filtersTotalEntitledQuantityTo,
+                filters.datePickerFilterFrom,
+                filters.datePickerFilterTo,
+            ],
             "Payment Verification": [
                 filters.filterSearch,
                 filters.selectFilter,
@@ -196,10 +203,30 @@ class TestSmokeFilters:
                 filters.filtersCreationDateFrom,
                 filters.filtersCreationDateTo,
             ],
-            "Accountability": [],
-            "Surveys": [],
+            "Accountability": [
+                filters.filtersTargetPopulationAutocomplete,
+                filters.targetPopulationInput,
+                filters.filtersCreatedByAutocomplete,
+                filters.createdByInput,
+                filters.filtersCreationDateFrom,
+                filters.filtersCreationDateTo
+            ],
+            "Surveys": [
+                filters.filtersSearch,
+                filters.filtersTargetPopulationAutocomplete,
+                filters.targetPopulationInput,
+                filters.filtersCreatedByAutocomplete,
+                filters.createdByInput,
+                filters.filtersCreationDateFrom,
+                filters.filtersCreationDateTo,
+            ],
             "Programme Users": [],
-            "Program Log": [],
+            "Program Log": [
+                filters.filtersSearch,
+                filters.selectFilter,
+                filters.filtersResidenceStatus,
+                filters.userInput,
+            ],
         }
 
         for nav_menu in programs:
