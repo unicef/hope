@@ -43,12 +43,16 @@ export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
     },
     { field: 'program', headerName: t('Programme Name'), width: 200 },
     {
-      field: 'released_on_date',
+      field: 'last_approval_process_date',
       headerName: t('Released on'),
       width: 200,
       renderCell: (params) => <UniversalMoment>{params.value}</UniversalMoment>,
     },
-    { field: 'released_by', headerName: t('Released by'), width: 200 },
+    {
+      field: 'last_approval_process_by',
+      headerName: t('Released by'),
+      width: 200,
+    },
   ];
 
   const filteredRows =
