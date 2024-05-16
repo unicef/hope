@@ -1,6 +1,5 @@
-from selenium.webdriver.remote.webelement import WebElement
-
 from page_object.base_components import BaseComponents
+from selenium.webdriver.remote.webelement import WebElement
 
 
 class Filters(BaseComponents):
