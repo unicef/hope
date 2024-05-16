@@ -8,6 +8,7 @@ from django.test import TestCase
 
 from dateutil.relativedelta import relativedelta
 
+from hct_mis_api.apps.core.currencies import USDC
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
@@ -21,6 +22,7 @@ from hct_mis_api.apps.payment.fixtures import (
 )
 from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
@@ -123,6 +125,10 @@ class TestPaymentPlanModel(TestCase):
         # create not conflicted payment
         PaymentFactory(parent=pp1, conflicted=False, currency="PLN")
         self.assertEqual(pp1.can_be_locked, True)
+
+    def test_get_exchange_rate_for_usdc_currency(self) -> None:
+        pp = PaymentPlanFactory(currency=USDC)
+        self.assertEqual(pp.get_exchange_rate(), 1.0)
 
 
 class TestPaymentModel(TestCase):
@@ -323,3 +329,12 @@ class TestFinancialServiceProviderModel(TestCase):
 
         self.assertEqual(fsp1.configurations, [])
         self.assertEqual(fsp2.configurations, [])
+
+    def test_fsp_template_get_column_from_core_field(self) -> None:
+        payment = PaymentFactory()
+        fsp_xlsx_template = FinancialServiceProviderXlsxTemplate
+        result = fsp_xlsx_template.get_column_from_core_field(payment, "invalid_people_field_name", True)
+        self.assertIsNone(result)
+
+        result = fsp_xlsx_template.get_column_from_core_field(payment, "size", False)
+        self.assertIsNotNone(result)

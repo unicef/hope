@@ -53373,6 +53373,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'TMT'
                     },
                     {
+                        'labelEn': 'USD Coin',
+                        'labels': [
+                            {
+                                'label': 'USD Coin',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'USDC'
+                    },
+                    {
                         'labelEn': 'Ugandan shilling',
                         'labels': [
                             {
