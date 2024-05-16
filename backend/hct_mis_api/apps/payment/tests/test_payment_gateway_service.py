@@ -37,7 +37,7 @@ from hct_mis_api.apps.payment.services.payment_gateway import (
 
 
 @pytest.fixture(autouse=True)
-def mock_payment_gateway_env_vars():
+def mock_payment_gateway_env_vars() -> None:
     with mock.patch.dict(os.environ, {"PAYMENT_GATEWAY_API_KEY": "TEST", "PAYMENT_GATEWAY_API_URL": "TEST"}):
         yield
 
