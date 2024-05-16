@@ -5,7 +5,6 @@ import pytest
 from page_object.filters import Filters
 from selenium.webdriver.common.by import By
 
-
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
@@ -28,17 +27,44 @@ class TestSmokeFilters:
                          filters.filtersNumberOfHouseholdsMin,
                          filters.filtersNumberOfHouseholdsMax,
                          filters.filtersSector,
-                         # filters.dateStart
-                         # filters.dateEnd
+                         filters.filtersStartDate,
+                         filters.filtersEndDate,
                          filters.filtersStatus,
                          filters.filtersSearch],
-            "Grievance": [filters.filtersProgramState,
-                          filters.filtersActiveTickets,
+            "Grievance": [filters.filtersSearch,
+                          filters.selectFilter,
+                          filters.filtersDocumentType,
+                          filters.filtersDocumentNumber,
+                          filters.filtersProgram,
+                          filters.programmeInput,
+                          filters.selectFilter,
+                          filters.filtersStatus,
+                          filters.filtersFsp,
+                          filters.filtersCreationDateFrom,
+                          filters.filtersCreationDateTo,
+                          filters.selectFilter,
+                          filters.filtersCategory,
+                          filters.filtersAdminLevel,
+                          filters.filtersAssignee,
+                          filters.assignedToInput,
+                          filters.filtersCreatedByAutocomplete,
+                          filters.registrationDataImportInput,
+                          filters.filtersPreferredLanguage,
+                          filters.filtersPriority,
                           filters.filtersUrgency,
-                          filters.filtersPriority
+                          filters.filtersActiveTickets,
+                          filters.filtersProgramState,
                           ],
-            "Reporting": [],
-            "Activity Log": [],
+            "Reporting": [filters.reportOnlyMyFilter,
+                          filters.reportStatusFilter,
+                          filters.reportCreatedToFilter,
+                          filters.reportCreatedFromFilter,
+                          filters.reportTypeFilter
+                          ],
+            "Activity Log": [filters.filtersResidenceStatus,
+                             filters.filtersSearch,
+                             filters.userInput,
+                             filters.selectFilter],
         }
 
         for nav_menu in all_programs:
