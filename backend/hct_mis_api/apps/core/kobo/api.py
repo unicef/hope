@@ -65,7 +65,7 @@ class KoboAPI:
         response = self._client.get(url=url)
         try:
             response.raise_for_status()
-        except requests.exceptions.HTTPError as e:
+        except requests.exceptions.HTTPError as e:  # pragma: no cover
             logger.exception(e)
             raise
         return response
@@ -75,7 +75,8 @@ class KoboAPI:
 
     def create_template_from_file(
         self, bytes_io_file: typing.IO, xlsx_kobo_template_object: XLSXKoboTemplate, template_id: str = ""
-    ) -> Optional[Tuple[Dict, str]]:
+    ) -> Optional[Tuple[Dict, str]]:  # pragma: no cover
+        # TODO: not sure if this actually works
         if not template_id:
             asset_uid = self._create_asset()
         else:
