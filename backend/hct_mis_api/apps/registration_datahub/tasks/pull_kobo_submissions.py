@@ -27,7 +27,6 @@ class PullKoboSubmissions:
         submissions = kobo_api.get_project_submissions(
             kobo_import_data.kobo_asset_id, kobo_import_data.only_active_submissions
         )
-        business_area = BusinessArea.objects.get(slug=kobo_import_data.business_area_slug)
         validator = KoboProjectImportDataInstanceValidator(program)
         skip_validate_pictures = kobo_import_data.pull_pictures is False
         validation_errors = validator.validate_everything(submissions, business_area, skip_validate_pictures)
