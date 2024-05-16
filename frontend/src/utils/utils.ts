@@ -500,6 +500,7 @@ export function formatCurrencyWithSymbol(
   currency = 'USD',
 ): string {
   const amountCleared = amount || 0;
+  if (currency === 'USDC') return `${amountCleared} ${currency}`;
   // if currency is unknown, simply format using most common formatting option, and don't show currency symbol
   if (!currency) return formatCurrency(amountCleared, true);
   // undefined forces to use local browser settings
@@ -647,9 +648,9 @@ export const anon = (inputStr: string, shouldAnonymize: boolean): string => {
   if (!inputStr) return null;
   return shouldAnonymize
     ? inputStr
-      .split(' ')
-      .map((el) => el.substring(0, 2) + '*'.repeat(3))
-      .join(' ')
+        .split(' ')
+        .map((el) => el.substring(0, 2) + '*'.repeat(3))
+        .join(' ')
     : inputStr;
 };
 
