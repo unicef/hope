@@ -460,7 +460,7 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
             self.program_id,
         ):
             return ""
-        return self.fsp_auth_code  # type: ignore
+        return self.fsp_auth_code or ""  # type: ignore
 
 
 class DeliveryMechanismNode(DjangoObjectType):

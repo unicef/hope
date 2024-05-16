@@ -180,6 +180,7 @@ class TestPaymentPlanQueries(APITestCase):
               paymentPlanEndDate
             }
             unicefId
+            fspAuthCode
           }
         }
         totalCount
@@ -232,7 +233,7 @@ class TestPaymentPlanQueries(APITestCase):
             hoh2 = IndividualFactory(household=None)
             hh1 = HouseholdFactory(head_of_household=hoh1)
             hh2 = HouseholdFactory(head_of_household=hoh2)
-            PaymentFactory(
+            cls.p1 = PaymentFactory(
                 parent=cls.pp,
                 conflicted=False,
                 household=hh1,
@@ -242,8 +243,9 @@ class TestPaymentPlanQueries(APITestCase):
                 delivered_quantity=50.00,
                 delivered_quantity_usd=100.00,
                 currency="PLN",
+                fsp_auth_code="123",
             )
-            p2 = PaymentFactory(
+            cls.p2 = PaymentFactory(
                 parent=cls.pp,
                 conflicted=True,
                 household=hh2,
@@ -253,6 +255,7 @@ class TestPaymentPlanQueries(APITestCase):
                 delivered_quantity=50.00,
                 delivered_quantity_usd=100.00,
                 currency="PLN",
+                fsp_auth_code=None,
             )
 
             # create hard conflicted payment
@@ -270,7 +273,7 @@ class TestPaymentPlanQueries(APITestCase):
 
             PaymentFactory(
                 parent=cls.pp_conflicted,
-                household=p2.household,
+                household=cls.p2.household,
                 conflicted=False,
                 entitlement_quantity=100.00,
                 entitlement_quantity_usd=200.00,
@@ -278,6 +281,7 @@ class TestPaymentPlanQueries(APITestCase):
                 delivered_quantity_usd=100.00,
                 financial_service_provider=FinancialServiceProviderFactory(name="xxx"),
                 currency="PLN",
+                fsp_auth_code="789",
             )
             PaymentFactory(
                 parent=cls.pp_conflicted,
@@ -288,6 +292,7 @@ class TestPaymentPlanQueries(APITestCase):
                 delivered_quantity_usd=00.00,
                 financial_service_provider=FinancialServiceProviderFactory(name="yyy"),
                 currency="PLN",
+                fsp_auth_code="987",
             )
 
             IndividualFactory(household=hh1, sex="FEMALE", birth_date=datetime.now().date() - relativedelta(years=5))
@@ -326,6 +331,12 @@ class TestPaymentPlanQueries(APITestCase):
 
     @freeze_time("2020-10-10")
     def test_fetch_all_payments_for_open_payment_plan(self) -> None:
+        from hct_mis_api.apps.account.models import UserRole
+
+        role = UserRole.objects.get(user=self.user).role
+        role.permissions.append("PM_VIEW_FSP_AUTH_CODE")
+        role.save()
+
         self.snapshot_graphql_request(
             request_string=self.ALL_PAYMENTS_QUERY,
             context={"user": self.user},
