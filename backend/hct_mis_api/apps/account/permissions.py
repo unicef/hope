@@ -65,7 +65,10 @@ class Permissions(Enum):
     TARGETING_UNLOCK = auto()
     TARGETING_SEND = auto()
 
+    # Payment Managerial View
     PAYMENT_VIEW_LIST_MANAGERIAL = auto()
+    PAYMENT_VIEW_LIST_MANAGERIAL_RELEASED = auto()
+
     # Payment Verification
     PAYMENT_VERIFICATION_VIEW_LIST = auto()
     PAYMENT_VERIFICATION_VIEW_DETAILS = auto()
