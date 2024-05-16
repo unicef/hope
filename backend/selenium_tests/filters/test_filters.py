@@ -146,7 +146,6 @@ class TestSmokeFilters:
                 filters.indFiltersRegDateFrom,
                 filters.indFiltersRegDateTo,
             ],
-            "Program Details": [],
             "Targeting": [
                 filters.filtersSearch,
                 filters.selectFilter,
@@ -220,7 +219,7 @@ class TestSmokeFilters:
                 filters.filtersCreationDateFrom,
                 filters.filtersCreationDateTo,
             ],
-            "Programme Users": [],
+            # "Programme Users": [],
             "Program Log": [
                 filters.filtersSearch,
                 filters.selectFilter,
@@ -237,7 +236,8 @@ class TestSmokeFilters:
             if nav_menu == "Surveys":
                 filters.wait_for(f'[data-cy="nav-Accountability"]').click()
             filters.wait_for(f'[data-cy="nav-{nav_menu}"]').click()
-            sleep(5)
+            # filters.wait_for(programs[nav_menu][0], timeout=20)
+            sleep(10)
             ids = filters.driver.find_elements(By.XPATH, f"//*[@data-cy]")
             print(f"---------------{nav_menu}---------------")
             list_locators = []

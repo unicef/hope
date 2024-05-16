@@ -4,6 +4,7 @@ from selenium.webdriver.remote.webelement import WebElement
 
 class Filters(BaseComponents):
     filtersSearch = 'div[data-cy="filters-search"]'
+    searchTextField = 'div[data-cy="search-text-field"]'
     indFiltersSearch = 'div[data-cy="ind-filters-search"]'
     indFiltersGender = 'div[data-cy="ind-filters-gender"]'
     indFiltersAgeFrom = 'div[data-cy="ind-filters-age-from"]'
