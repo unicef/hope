@@ -22,6 +22,7 @@ from hct_mis_api.apps.payment.fixtures import (
 )
 from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
@@ -328,3 +329,12 @@ class TestFinancialServiceProviderModel(TestCase):
 
         self.assertEqual(fsp1.configurations, [])
         self.assertEqual(fsp2.configurations, [])
+
+    def test_fsp_template_get_column_from_core_field(self) -> None:
+        payment = PaymentFactory()
+        fsp_xlsx_template = FinancialServiceProviderXlsxTemplate
+        result = fsp_xlsx_template.get_column_from_core_field(payment, "invalid_people_field_name", True)
+        self.assertIsNone(result)
+
+        result = fsp_xlsx_template.get_column_from_core_field(payment, "size", False)
+        self.assertIsNotNone(result)
