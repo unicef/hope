@@ -387,7 +387,7 @@ class PaymentGatewayService:
             _payment.status = matching_pg_payment.hope_status
             _payment.status_date = now()
             _payment.fsp_auth_code = matching_pg_payment.auth_code
-            update_fields = ["status", "status_date", "auth_code"]
+            update_fields = ["status", "status_date", "fsp_auth_code"]
 
             if _payment.status not in Payment.ALLOW_CREATE_VERIFICATION and matching_pg_payment.message:
                 _payment.reason_for_unsuccessful_payment = matching_pg_payment.message
@@ -405,7 +405,7 @@ class PaymentGatewayService:
                     _payment.delivered_quantity_usd = get_quantity_in_usd(
                         amount=Decimal(delivered_quantity),
                         currency=_payment_plan.currency,
-                        exchange_rate=Decimal(exchange_rate),
+                        exchange_rate=Decimal(_exchange_rate),
                         currency_exchange_date=_payment_plan.currency_exchange_date,
                     )
                 except (ValueError, TypeError):
@@ -428,9 +428,11 @@ class PaymentGatewayService:
             if not payment_plan.is_reconciled:
                 if payment_plan.splits.exists():
                     for split in payment_plan.splits.filter(sent_to_payment_gateway=True):
-                        pg_payment_records = self.api.get_records_for_payment_instruction(split.id)
-                        for payment in split.payments.filter(status=Payment.STATUS_PENDING).order_by("unicef_id"):
-                            update_payment(payment, pg_payment_records, split, payment_plan, exchange_rate)
+                        pending_payments = split.payments.filter(status=Payment.STATUS_PENDING).order_by("unicef_id")
+                        if pending_payments.exists():
+                            pg_payment_records = self.api.get_records_for_payment_instruction(split.id)
+                            for payment in pending_payments:
+                                update_payment(payment, pg_payment_records, split, payment_plan, exchange_rate)
                 else:
                     for delivery_mechanism in payment_plan.delivery_mechanisms.filter(
                         financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
@@ -441,6 +443,9 @@ class PaymentGatewayService:
                             financial_service_provider=delivery_mechanism.financial_service_provider,
                             status=Payment.STATUS_PENDING,
                         ).order_by("unicef_id")
-                        pg_payment_records = self.api.get_records_for_payment_instruction(delivery_mechanism.id)
-                        for payment in pending_payments:
-                            update_payment(payment, pg_payment_records, delivery_mechanism, payment_plan, exchange_rate)
+                        if pending_payments.exists():
+                            pg_payment_records = self.api.get_records_for_payment_instruction(delivery_mechanism.id)
+                            for payment in pending_payments:
+                                update_payment(
+                                    payment, pg_payment_records, delivery_mechanism, payment_plan, exchange_rate
+                                )
