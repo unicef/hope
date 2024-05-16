@@ -135,7 +135,6 @@ class BaseComponents(Common):
 
     def selectGlobalProgramFilter(self, name: str) -> WebElement:
         self.getGlobalProgramFilter().click()
-        self.screenshot("0")
         return self.select_listbox_element(name)
 
     def getDrawerInactiveSubheader(self, timeout: int = Common.DEFAULT_TIMEOUT) -> WebElement:

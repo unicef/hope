@@ -1,9 +1,23 @@
-from helpers.helper import Common
 from selenium.webdriver.remote.webelement import WebElement
 
+from page_object.base_components import BaseComponents
 
-class Filters(Common):
+
+class Filters(BaseComponents):
     filtersSearch = 'div[data-cy="filters-search"]'
+    indFiltersSearch = 'div[data-cy="ind-filters-search"]'
+    indFiltersGender = 'div[data-cy="ind-filters-gender"]'
+    indFiltersAgeFrom = 'div[data-cy="ind-filters-age-from"]'
+    indFiltersAgeTo = 'div[data-cy="ind-filters-age-to"]'
+    indFiltersFlags = 'div[data-cy="ind-filters-flags"]'
+    indFiltersOrderBy = 'div[data-cy="ind-filters-order-by"]'
+    indFiltersStatus = 'div[data-cy="ind-filters-status"]'
+    indFiltersRegDateFrom = 'div[data-cy="ind-filters-reg-data-from"]'
+    indFiltersRegDateTo = 'div[data-cy="ind-filters-reg-data-to"]'
+    datePickerFilterFrom = 'div[data-cy="date-picker-filter-from"]'
+    datePickerFilterTo = 'div[data-cy="date-picker-filter-to"]'
+    filterFsp = 'div[data-cy="filter-fsp"]'
+    filterModality = 'div[data-cy="filter-modality"]'
     filtersStatus = 'div[data-cy="filters-status"]'
     filtersSector = 'div[data-cy="filters-sector"]'
     dataPickerFilter = 'div[data-cy="date-picker-filter"]'
@@ -48,17 +62,21 @@ class Filters(Common):
     reportCreatedToFilter = 'div[data-cy="report-created-to-filter"]'
     reportStatusFilter = 'div[data-cy="report-status-filter"]'
     reportOnlyMyFilter = 'span[data-cy="report-only-my-filter"]'
-    programmeInput = '[data-cy="Programme-input"]'
-    filtersCreationDateFrom = '[data-cy="filters-creation-date-from"]'
-    filtersCreationDateTo = '[data-cy="filters-creation-date-to"]'
+    programmeInput = 'div[data-cy="Programme-input"]'
+    filtersCreationDateFrom = 'div[data-cy="filters-creation-date-from"]'
+    filtersCreationDateTo = 'div[data-cy="filters-creation-date-to"]'
     userInput = 'div[data-cy="User-input"]'
     selectFilter = 'div[data-cy="select-filter"]'
     filtersEndDate = 'div[data-cy="filters-end-date"]'
     filtersStartDate = 'div[data-cy="filters-start-date"]'
-    assignedToInput = '[data-cy="Assigned To-input"]'
+    assignedToInput = 'div[data-cy="Assigned To-input"]'
+    filtersIssueType = 'div[data-cy="filters-issue-type"]'
+    filterImportDateRangeMin = 'div[data-cy="filter-import-date-range-min"]'
+    filterImportDateRangeMax = 'div[data-cy="filter-import-date-range-max"]'
 
     buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
     buttonFiltersApply = 'button[data-cy="button-filters-apply"]'
+    importedByInput = 'div[data-cy="Imported By-input"]'
 
     def getFiltersSearch(self) -> WebElement:
         return self.wait_for(self.filtersSearch)
