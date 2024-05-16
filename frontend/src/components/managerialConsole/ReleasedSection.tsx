@@ -13,7 +13,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Box,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
@@ -68,6 +67,7 @@ export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
     <TextField
       label="Search"
       value={searchText}
+      size="small"
       onChange={(e) => setSearchText(e.target.value)}
       InputProps={{
         startAdornment: (
