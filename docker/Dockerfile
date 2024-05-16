@@ -39,14 +39,12 @@ RUN apt-get update \
   && mkdir -p -m 0700 /run/user/"${UID}" \
   && chown -R hope:hope /code /tmp /data /run/user/"${UID}"
 
-ENV PDM_PACKAGES=/packages
 ENV CODE=/code
+ENV PDM_PACKAGES=/packages
+ENV PDM_CHECK_UPDATE=false
 ENV PDM_NO_SELF=True
-ENV PDM_PROJECT=$PDM_PACKAGES
-ENV PYPACKAGES=$PDM_PACKAGES/__pypackages__/3.11
 ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
-    PYTHONPATH=$PYPACKAGES/lib:$CODE:$PYTHONPATH \
-    PATH=$PYPACKAGES/bin:$PATH \
+    PATH=$PDM_PACKAGES/.venv/bin:$PATH \
     XDG_RUNTIME_DIR=/run/user/"${UID}"
 
 WORKDIR $CODE
@@ -58,11 +56,7 @@ FROM base as builder
 
 RUN pip install --upgrade pip &&\
     pip install pdm==2.15.2 &&\
-    pip install setuptools==71.1.0 &&\
-    pdm config cache_dir /var/cache/pdm &&\
-    pdm config python.use_venv false &&\
-    pdm config venv.in_project true &&\
-    pdm config check_update false
+    pip install setuptools==71.1.0
 
 WORKDIR $PDM_PACKAGES
 COPY backend/pyproject.toml backend/pdm.lock ./
