@@ -8,7 +8,7 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import { ApprovalSection } from '@components/managerialConsole/ApprovalSection';
 import { AuthorizationSection } from '@components/managerialConsole/AuthorizationSection';
 import { PendingForReleaseSection } from '@components/managerialConsole/PendingForReleaseSection';
-// import { ReleasedSection } from '@components/managerialConsole/ReleasedSection';
+import { ReleasedSection } from '@components/managerialConsole/ReleasedSection';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -89,15 +89,15 @@ export const ManagerialConsolePage: React.FC = () => {
       fetchPaymentPlansManagerial(businessArea, { status: 'IN_REVIEW' }),
   });
 
-  // const {
-  //   data: releasedData,
-  //   isLoading: releasedLoading,
-  //   refetch: refetchReleased,
-  // } = useQuery({
-  //   queryKey: ['paymentPlansReleased', businessArea],
-  //   queryFn: () =>
-  //     fetchPaymentPlansManagerial(businessArea, { status: 'RELEASED' }),
-  // });
+  const {
+    data: releasedData,
+    isLoading: releasedLoading,
+    refetch: refetchReleased,
+  } = useQuery({
+    queryKey: ['paymentPlansReleased', businessArea],
+    queryFn: () =>
+      fetchPaymentPlansManagerial(businessArea, { status: 'ACCEPTED' }),
+  });
 
   const bulkAction = useMutation({
     mutationFn: (params: { ids: string[]; action: string; comment: string }) =>
@@ -111,6 +111,7 @@ export const ManagerialConsolePage: React.FC = () => {
       refetchInApproval();
       refetchInAuthorization();
       refetchInReview();
+      refetchReleased();
       showMessage(t('Action completed successfully'));
     },
   });
@@ -119,6 +120,7 @@ export const ManagerialConsolePage: React.FC = () => {
     inApprovalLoading ||
     inAuthorizationLoading ||
     inReviewLoading ||
+    releasedLoading ||
     !permissions
   ) {
     return <LoadingComponent />;
@@ -134,6 +136,11 @@ export const ManagerialConsolePage: React.FC = () => {
   );
   const canReview = hasPermissions(
     'PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW',
+    permissions,
+  );
+
+  const canSeeReleased = hasPermissions(
+    'PAYMENT_VIEW_LIST_MANAGERIAL_RELEASED',
     permissions,
   );
 
@@ -183,7 +190,7 @@ export const ManagerialConsolePage: React.FC = () => {
           />
         </Box>
       )}
-      {/* {canSeeReleased && <ReleasedSection releasedData={releasedData} />} */}
+      {canSeeReleased && <ReleasedSection releasedData={releasedData} />}
     </>
   );
 };

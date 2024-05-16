@@ -2,18 +2,27 @@ import React, { useState } from 'react';
 import { BaseSection } from '@components/core/BaseSection';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { DataGrid } from '@mui/x-data-grid';
 import { BlackLink } from '@components/core/BlackLink';
 import { UniversalMoment } from '@components/core/UniversalMoment';
-import { TextField, InputAdornment } from '@mui/material';
+import {
+  TextField,
+  InputAdornment,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Box,
+} from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
 interface ReleasedSectionProps {
-  ReleasedData: any;
+  releasedData: any;
 }
 
 export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
-  ReleasedData,
+  releasedData,
 }) => {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
@@ -44,7 +53,7 @@ export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
   ];
 
   const filteredRows =
-    ReleasedData?.results?.filter((row: any) =>
+    releasedData?.results?.filter((row: any) =>
       columns.some((column) =>
         row[column.field]
           ?.toString()
@@ -53,29 +62,50 @@ export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
       ),
     ) || [];
 
+  const title = t('Released Payment Plans');
+
+  const buttons = (
+    <TextField
+      label="Search"
+      value={searchText}
+      onChange={(e) => setSearchText(e.target.value)}
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <SearchIcon />
+          </InputAdornment>
+        ),
+      }}
+    />
+  );
+
   return (
-    <BaseSection title={t('Released Payment Plans')}>
+    <BaseSection title={title} buttons={buttons}>
       <>
-        <TextField
-          label="Search"
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-        />
-        <DataGrid
-          rows={filteredRows}
-          columns={columns}
-          pageSize={5}
-          rowsPerPageOptions={[5]}
-          checkboxSelection={false}
-          disableSelectionOnClick
-        />
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                {columns.map((column) => (
+                  <TableCell key={column.field}>{column.headerName}</TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredRows.map((row) => (
+                <TableRow key={row.id}>
+                  {columns.map((column) => (
+                    <TableCell key={column.field}>
+                      {column.renderCell
+                        ? column.renderCell({ value: row[column.field], row })
+                        : row[column.field]}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </>
     </BaseSection>
   );
