@@ -19,11 +19,11 @@ interface PeopleListTableProps {
   canViewDetails: boolean;
 }
 
-export function PeopleListTable({
+export const PeopleListTable = ({
   businessArea,
   filter,
   canViewDetails,
-}: PeopleListTableProps): React.ReactElement {
+}: PeopleListTableProps): React.ReactElement => {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const initialVariables: AllIndividualsForPopulationTableQueryVariables = {
@@ -64,4 +64,4 @@ export function PeopleListTable({
       />
     </TableWrapper>
   );
-}
+};
