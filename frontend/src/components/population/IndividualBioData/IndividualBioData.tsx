@@ -144,6 +144,38 @@ export function IndividualBioData({
     );
   };
 
+  const renderDigitalWalletInfo = (): React.ReactNode => {
+    if (
+      !individual?.walletName ||
+      !individual?.blockchainName ||
+      !individual?.walletAddress
+    ) {
+      return null;
+    }
+    return (
+      <>
+        <Grid item xs={12}>
+          <BorderBox />
+        </Grid>
+        <Grid item xs={4}>
+          <LabelizedField label={t('Wallet Name')}>
+            {individual?.walletName}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={4}>
+          <LabelizedField label={t('Blockchain Name')}>
+            {individual?.blockchainName}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={4}>
+          <LabelizedField label={t('Wallet Address')}>
+            {individual?.walletAddress}
+          </LabelizedField>
+        </Grid>
+      </>
+    );
+  };
+
   return (
     <Overview>
       <Title>
@@ -335,6 +367,7 @@ export function IndividualBioData({
           )}
         </Grid>
         {renderBankAccountInfo()}
+        {renderDigitalWalletInfo()}
       </Grid>
     </Overview>
   );
