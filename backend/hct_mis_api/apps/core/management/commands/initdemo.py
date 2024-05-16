@@ -61,6 +61,7 @@ class Command(BaseCommand):
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/account/fixtures/data.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/businessareapartnerthrough.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/documenttype.json")
@@ -86,6 +87,8 @@ class Command(BaseCommand):
         generate_real_cash_plans()
         generate_reconciled_payment_plan()
         update_fsps()
+
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/programpartnerthrough.json")
 
         email_list = [
             "jan.romaniak@kellton.com",

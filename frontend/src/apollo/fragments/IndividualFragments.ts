@@ -189,6 +189,9 @@ export const individualDetailed = gql`
     }
     preferredLanguage
     paymentDeliveryPhoneNo
+    walletName
+    walletAddress
+    blockchainName
   }
 `;
 
