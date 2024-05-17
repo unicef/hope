@@ -973,6 +973,7 @@ enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   TRANSFER_TO_ACCOUNT
   VOUCHER
   CASH_OVER_THE_COUNTER
+  TRANSFER_TO_DIGITAL_WALLET
   ATM_CARD
 }
 
@@ -2009,6 +2010,7 @@ enum ImportedHouseholdCurrency {
   ZAR
   ZMW
   ZWL
+  USDC
 }
 
 type ImportedHouseholdNode implements Node {
@@ -2222,6 +2224,9 @@ type ImportedIndividualNode implements Node {
   misUnicefId: String
   programId: UUID
   ageAtRegistration: Int
+  walletName: String!
+  blockchainName: String!
+  walletAddress: String!
   importedhousehold: ImportedHouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
   identities(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualIdentityNodeConnection!
@@ -2399,6 +2404,9 @@ type IndividualNode implements Node {
   preferredLanguage: String
   relationshipConfirmed: Boolean!
   ageAtRegistration: Int
+  walletName: String!
+  blockchainName: String!
+  walletAddress: String!
   program: ProgramNode
   copiedFrom: IndividualNode
   originUnicefId: String
@@ -2874,6 +2882,7 @@ enum PaymentDeliveryType {
   TRANSFER_TO_ACCOUNT
   VOUCHER
   CASH_OVER_THE_COUNTER
+  TRANSFER_TO_DIGITAL_WALLET
   ATM_CARD
 }
 
@@ -2910,6 +2919,7 @@ type PaymentNode implements Node {
   deliveredQuantityUsd: Float
   deliveryDate: DateTime
   transactionReferenceId: String
+  transactionStatusBlockchainLink: String
   parent: PaymentPlanNode!
   conflicted: Boolean!
   excluded: Boolean!
@@ -2925,6 +2935,7 @@ type PaymentNode implements Node {
   additionalCollectorName: String
   additionalDocumentType: String
   additionalDocumentNumber: String
+  fspAuthCode: String
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   householdSnapshot: PaymentHouseholdSnapshotNode
   adminUrl: String
@@ -3136,6 +3147,7 @@ enum PaymentPlanCurrency {
   ZAR
   ZMW
   ZWL
+  USDC
 }
 
 type PaymentPlanNode implements Node {
@@ -3259,6 +3271,7 @@ enum PaymentRecordDeliveryType {
   TRANSFER_TO_ACCOUNT
   VOUCHER
   CASH_OVER_THE_COUNTER
+  TRANSFER_TO_DIGITAL_WALLET
   ATM_CARD
 }
 
@@ -3285,6 +3298,7 @@ type PaymentRecordNode implements Node {
   deliveredQuantityUsd: Float
   deliveryDate: DateTime
   transactionReferenceId: String
+  transactionStatusBlockchainLink: String
   caId: String
   caHashId: UUID
   parent: CashPlanNode
