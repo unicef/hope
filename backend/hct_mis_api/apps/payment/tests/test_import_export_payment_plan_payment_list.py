@@ -180,9 +180,9 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         wb = export_service.generate_workbook()
         payment = self.payment_plan.eligible_payments.order_by("unicef_id").first()
         self.assertEqual(wb.active["A2"].value, str(payment.unicef_id))
-        self.assertEqual(wb.active["I2"].value, payment.entitlement_quantity)
-        self.assertEqual(wb.active["J2"].value, payment.entitlement_quantity_usd)
-        self.assertEqual(wb.active["D2"].value, "")
+        self.assertEqual(wb.active["J2"].value, payment.entitlement_quantity)
+        self.assertEqual(wb.active["K2"].value, payment.entitlement_quantity_usd)
+        self.assertEqual(wb.active["E2"].value, "")
 
     def test_export_payment_plan_payment_list_per_fsp(self) -> None:
         financial_service_provider1 = FinancialServiceProviderFactory(
