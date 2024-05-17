@@ -962,6 +962,50 @@ class TestPaymentPlanReconciliation(APITestCase):
             },
         )
 
+    def test_apply_steficon_rule_with_wrong_payment_plan_status(self) -> None:
+        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+        rule = RuleFactory(name="SomeRule")
+
+        self.snapshot_graphql_request(
+            request_string=SET_STEFICON_RULE_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": encode_id_base64(payment_plan.id, "PaymentPlan"),
+                "steficonRuleId": encode_id_base64(rule.id, "Rule"),
+            },
+        )
+
+        payment_plan.status = PaymentPlan.Status.LOCKED
+        payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN
+        payment_plan.save()
+        payment_plan.refresh_from_db(fields=["status", "background_action_status"])
+
+        self.assertEqual(payment_plan.status, PaymentPlan.Status.LOCKED)
+        self.assertEqual(payment_plan.background_action_status, PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN)
+        self.snapshot_graphql_request(
+            request_string=SET_STEFICON_RULE_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": encode_id_base64(payment_plan.id, "PaymentPlan"),
+                "steficonRuleId": encode_id_base64(rule.id, "Rule"),
+            },
+        )
+
+    def test_error_message_when_engine_rule_not_enabled_or_deprecated(self) -> None:
+        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
+        rule_not_enabled = RuleFactory(enabled=False)
+        rule_deprecated = RuleFactory(deprecated=True)
+
+        for rule in [rule_not_enabled, rule_deprecated]:
+            self.snapshot_graphql_request(
+                request_string=SET_STEFICON_RULE_MUTATION,
+                context={"user": self.user},
+                variables={
+                    "paymentPlanId": encode_id_base64(payment_plan.id, "PaymentPlan"),
+                    "steficonRuleId": encode_id_base64(rule.id, "Rule"),
+                },
+            )
+
     def test_follow_up_pp_entitlements_updated_with_file(self) -> None:
         content = Path(f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/pp_payment_list_valid.xlsx").read_bytes()
         pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED)
@@ -985,5 +1029,38 @@ class TestPaymentPlanReconciliation(APITestCase):
             variables={
                 "paymentPlanId": encode_id_base64(pp.id, "PaymentPlan"),
                 "file": BytesIO(content),
+            },
+        )
+
+    def test_import_with_wrong_payment_plan_status(self) -> None:
+        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+
+        self.assertEqual(payment_plan.status, PaymentPlan.Status.OPEN)
+        self.snapshot_graphql_request(
+            request_string=IMPORT_XLSX_PER_FSP_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": encode_id_base64(payment_plan.id, "PaymentPlan"),
+                "file": BytesIO(b"some data"),
+            },
+        )
+
+    def test_assign_fsp_mutation_payment_plan_wrong_status(self) -> None:
+        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+        fsp = FinancialServiceProviderFactory()
+        encoded_santander_fsp_id = encode_id_base64(fsp.id, "FinancialServiceProvider")
+
+        self.snapshot_graphql_request(
+            request_string=ASSIGN_FSPS_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": encode_id_base64(payment_plan.id, "PaymentPlan"),
+                "mappings": [
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_CASH,
+                        "fspId": encoded_santander_fsp_id,
+                        "order": 1,
+                    }
+                ],
             },
         )
