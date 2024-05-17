@@ -919,7 +919,7 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
                 raise GraphQLError(f"Delivery mechanism '{delivery_mechanism}' is not valid.")
             if (
                 payment_plan.currency == USDC
-                and delivery_mechanism != GenericPayment.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET
+                and delivery_mechanism != DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET
             ):
                 raise GraphQLError(
                     "For currency USDC can be assigned only delivery mechanism Transfer to Digital Wallet"
@@ -961,7 +961,7 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
 
         if payment_plan.currency == USDC:
             for mapping in mappings:
-                if mapping["delivery_mechanism"] != GenericPayment.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET:
+                if mapping["delivery_mechanism"] != DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET:
                     raise GraphQLError(
                         "For currency USDC can be assigned only delivery mechanism Transfer to Digital Wallet"
                     )

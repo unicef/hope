@@ -1060,7 +1060,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                 "paymentPlanId": encode_id_base64(payment_plan.id, "PaymentPlan"),
                 "mappings": [
                     {
-                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_CASH,
+                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
                         "fspId": encoded_santander_fsp_id,
                         "order": 1,
                     }

@@ -15,6 +15,7 @@ class DeliveryMechanismChoices:
     DELIVERY_TYPE_VOUCHER = "Voucher"
     DELIVERY_TYPE_ATM_CARD = "ATM Card"
     DELIVERY_TYPE_CASH_OVER_THE_COUNTER = "Cash over the counter"
+    DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET = "Transfer to Digital Wallet"
 
     DELIVERY_TYPES_IN_CASH = (
         DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL,
@@ -29,6 +30,7 @@ class DeliveryMechanismChoices:
         DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
         DELIVERY_TYPE_ATM_CARD,
         DELIVERY_TYPE_CASH_OVER_THE_COUNTER,
+        DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
     )
     DELIVERY_TYPES_IN_VOUCHER = (DELIVERY_TYPE_VOUCHER,)
 
@@ -46,6 +48,7 @@ class DeliveryMechanismChoices:
         (DELIVERY_TYPE_VOUCHER, _("Voucher")),
         (DELIVERY_TYPE_ATM_CARD, _("ATM Card")),
         (DELIVERY_TYPE_CASH_OVER_THE_COUNTER, _("Cash over the counter")),
+        (DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET, _("Transfer to Digital Wallet")),
     )
 
 

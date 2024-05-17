@@ -330,7 +330,7 @@ class TestFSPSetup(APITestCase):
         variables = dict(
             input=dict(
                 paymentPlanId=encoded_payment_plan_id,
-                deliveryMechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER],
+                deliveryMechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER, DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER],
             )
         )
         response_with_error = self.graphql_request(
@@ -978,14 +978,14 @@ class TestVolumeByDeliveryMechanism(APITestCase):
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
             financial_service_provider=self.santander_fsp,
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
             delivery_mechanism_order=1,
         )
 
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
             financial_service_provider=self.bank_of_america_fsp,
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
             delivery_mechanism_order=2,
         )
 
@@ -1002,12 +1002,12 @@ class TestVolumeByDeliveryMechanism(APITestCase):
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
                     {
-                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_CASH,
+                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
                         "fspId": self.encoded_santander_fsp_id,
                         "order": 1,
                     },
                     {
-                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
+                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
                         "fspId": self.encoded_bank_of_america_fsp_id,
                         "order": 2,
                     },
@@ -1025,13 +1025,13 @@ class TestVolumeByDeliveryMechanism(APITestCase):
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
             financial_service_provider=self.santander_fsp,
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
             delivery_mechanism_order=1,
         )
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
             financial_service_provider=self.bank_of_america_fsp,
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
             delivery_mechanism_order=2,
         )
         mutation_response = self.graphql_request(
@@ -1041,12 +1041,12 @@ class TestVolumeByDeliveryMechanism(APITestCase):
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
                     {
-                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
+                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
                         "fspId": self.encoded_santander_fsp_id,
                         "order": 1,
                     },
                     {
-                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
+                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
                         "fspId": self.encoded_bank_of_america_fsp_id,
                         "order": 2,
                     },
