@@ -68,7 +68,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         if not Household.objects.all().count():
             for n in range(1, 4):
                 create_household(
-                    {"size": n, "address": "Lorem Ipsum", "country_origin": country_origin},
+                    {"size": n, "address": "Lorem Ipsum", "country_origin": country_origin, "village": "TEST_VILLAGE"},
                 )
 
         if ServiceProvider.objects.count() < 3:
@@ -132,7 +132,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertEqual(service.errors, error_msg)
 
     def test_import_invalid_file_with_unexpected_column(self) -> None:
-        error_msg = XlsxError(sheet="Payment Plan - Payment List", coordinates="L3", message="Unexpected value")
+        error_msg = XlsxError(sheet="Payment Plan - Payment List", coordinates="M3", message="Unexpected value")
         content = Path(
             f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/pp_payment_list_unexpected_column.xlsx"
         ).read_bytes()
@@ -168,8 +168,8 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         payment_1.refresh_from_db()
         payment_2.refresh_from_db()
 
-        self.assertEqual(to_decimal(wb.active["I2"].value), payment_1.entitlement_quantity)
-        self.assertEqual(to_decimal(wb.active["I3"].value), payment_2.entitlement_quantity)
+        self.assertEqual(to_decimal(wb.active["J2"].value), payment_1.entitlement_quantity)
+        self.assertEqual(to_decimal(wb.active["J3"].value), payment_2.entitlement_quantity)
 
     def test_export_payment_plan_payment_list(self) -> None:
         export_service = XlsxPaymentPlanExportService(self.payment_plan)
@@ -182,7 +182,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertEqual(wb.active["A2"].value, str(payment.unicef_id))
         self.assertEqual(wb.active["J2"].value, payment.entitlement_quantity)
         self.assertEqual(wb.active["K2"].value, payment.entitlement_quantity_usd)
-        self.assertEqual(wb.active["E2"].value, "")
+        self.assertEqual(wb.active["E2"].value, "TEST_VILLAGE")
 
     def test_export_payment_plan_payment_list_per_fsp(self) -> None:
         financial_service_provider1 = FinancialServiceProviderFactory(
