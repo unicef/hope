@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cash_assist_datahub', '0019_migration'),
+        ('cash_assist_datahub', '0020_migration'),
     ]
 
     operations = [

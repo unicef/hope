@@ -8,7 +8,7 @@ import hct_mis_api.apps.account.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('account', '0067_migration'),
+        ('account', '0068_migration'),
     ]
 
     operations = [

@@ -10,7 +10,7 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('registration_datahub', '0111_migration'),
+        ('registration_datahub', '0112_migration'),
     ]
 
     operations = [
