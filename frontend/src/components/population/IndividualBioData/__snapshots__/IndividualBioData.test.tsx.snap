@@ -726,6 +726,64 @@ exports[`components/population/IndividualBioData should render 1`] = `
           </div>
         </div>
       </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
+      >
+        <div
+          class="sc-fHejqy hpSvKY"
+        />
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-guDLey RwNuC"
+            color="textSecondary"
+          >
+            Wallet Name
+          </span>
+          <div
+            data-cy="label-Wallet Name"
+          >
+            -
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-guDLey RwNuC"
+            color="textSecondary"
+          >
+            Blockchain Name
+          </span>
+          <div
+            data-cy="label-Blockchain Name"
+          >
+            -
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-guDLey RwNuC"
+            color="textSecondary"
+          >
+            Wallet Address
+          </span>
+          <div
+            data-cy="label-Wallet Address"
+          >
+            -
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
