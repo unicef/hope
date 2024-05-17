@@ -3,7 +3,6 @@ from django.core.management import call_command
 
 import pytest
 from page_object.filters import Filters
-from selenium.common.exceptions import TimeoutException
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -15,9 +14,9 @@ def create_programs() -> None:
     return
 
 
+@pytest.mark.usefixtures("login")
 class TestSmokeFilters:
-
-    def test_filters_all_programs(self, login, create_programs, filters: Filters):
+    def test_filters_all_programs(self, create_programs: None, filters: Filters) -> None:
         all_programs = {
             "Country Dashboard": [filters.globalProgramFilter, filters.globalProgramFilterContainer],
             "Programs": [
@@ -86,7 +85,7 @@ class TestSmokeFilters:
 
         for nav_menu in all_programs:
             if nav_menu == "Feedback":
-                filters.wait_for(f'[data-cy="nav-Grievance"]').click()
+                filters.wait_for('[data-cy="nav-Grievance"]').click()
             filters.wait_for(f'[data-cy="nav-{nav_menu}"]').click()
             for locator in all_programs[nav_menu]:
                 try:
@@ -94,7 +93,7 @@ class TestSmokeFilters:
                 except BaseException:
                     raise Exception(f"Element {locator} not found on the {nav_menu} page.")
 
-    def test_filters_selected_program(self, login, create_programs, filters: Filters):
+    def test_filters_selected_program(self, create_programs: None, filters: Filters) -> None:
         filters.selectGlobalProgramFilter("Test Programm").click()
 
         programs = {
@@ -201,7 +200,7 @@ class TestSmokeFilters:
                 filters.targetPopulationInput,
                 filters.createdByInput,
                 filters.filtersCreationDateFrom,
-                filters.filtersCreationDateTo
+                filters.filtersCreationDateTo,
             ],
             "Surveys": [
                 filters.filtersSearch,
@@ -222,15 +221,14 @@ class TestSmokeFilters:
 
         for nav_menu in programs:
             if nav_menu == "Feedback":
-                filters.wait_for(f'[data-cy="nav-Grievance"]').click()
+                filters.wait_for('[data-cy="nav-Grievance"]').click()
             if nav_menu == "Individuals":
-                filters.wait_for(f'[data-cy="nav-Program Population"]').click()
+                filters.wait_for('[data-cy="nav-Program Population"]').click()
             if nav_menu == "Surveys":
-                filters.wait_for(f'[data-cy="nav-Accountability"]').click()
+                filters.wait_for('[data-cy="nav-Accountability"]').click()
             filters.wait_for(f'[data-cy="nav-{nav_menu}"]').click()
             for locator in programs[nav_menu]:
                 try:
                     filters.wait_for(locator, timeout=20)
                 except BaseException:
                     raise Exception(f"Element {locator} not found on the {nav_menu} page.")
-

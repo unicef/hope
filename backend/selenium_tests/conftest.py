@@ -9,6 +9,7 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
+from flags.models import FlagState
 from page_object.admin_panel.admin_panel import AdminPanel
 from page_object.filters import Filters
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
@@ -36,7 +37,7 @@ from requests import Session
 from selenium import webdriver
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
-from flags.models import FlagState
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
@@ -278,7 +279,6 @@ def pageGrievanceNewTicket(request: FixtureRequest, browser: Chrome) -> NewTicke
     yield NewTicket(browser)
 
 
-
 @pytest.fixture
 def business_area() -> BusinessArea:
     business_area, _ = BusinessArea.objects.get_or_create(
@@ -297,7 +297,8 @@ def business_area() -> BusinessArea:
         },
     )
     FlagState.objects.get_or_create(
-        **{'name': 'ALLOW_ACCOUNTABILITY_MODULE', 'condition': 'boolean', 'value': 'True', 'required': False})
+        **{"name": "ALLOW_ACCOUNTABILITY_MODULE", "condition": "boolean", "value": "True", "required": False}
+    )
     return business_area
 
 
