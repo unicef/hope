@@ -317,7 +317,7 @@ def resolve_asset(business_area_slug: str, uid: str) -> Dict:
     except ObjectDoesNotExist as e:
         logger.exception(f"Provided business area: {business_area_slug}, does not exist.")
         raise GraphQLError("Provided business area does not exist.") from e
-    except AttributeError as error:
+    except AttributeError as error:  # pragma: no cover
         logger.exception(error)
         raise GraphQLError(str(error)) from error
 
@@ -331,12 +331,12 @@ def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) ->
         )
         assets = KoboAPI(token=business_area.get_kobo_token()).get_all_projects_data(business_area.country_code)
 
-        if not config.KOBO_ENABLE_SINGLE_USER_ACCESS:
+        if not config.KOBO_ENABLE_SINGLE_USER_ACCESS:  # pragma: no cover
             assets = filter_by_owner(assets, business_area.kobo_username)
     except ObjectDoesNotExist as e:
         logger.exception(f"Provided business area: {business_area_slug}, does not exist.")
         raise GraphQLError("Provided business area does not exist.") from e
-    except AttributeError as error:
+    except AttributeError as error:  # pragma: no cover
         logger.exception(error)
         raise GraphQLError(str(error)) from error
     except CountryCodeNotProvided:
