@@ -1709,6 +1709,7 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel, AdminUr
     additional_document_number = models.CharField(
         max_length=128, blank=True, null=True, help_text="Use this field for reconciliation data"
     )
+    fsp_auth_code = models.CharField(max_length=128, blank=True, null=True, help_text="FSP Auth Code")
 
     @property
     def full_name(self) -> str:
