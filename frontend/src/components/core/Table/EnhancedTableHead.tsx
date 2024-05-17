@@ -81,6 +81,7 @@ export function EnhancedTableHead<T>(
             <Checkbox
               color="primary"
               indeterminate={numSelected > 0 && numSelected < rowCount}
+              data-cy="checkbox-select-all"
               checked={rowCount > 0 && numSelected === rowCount}
               onChange={(event) => onSelectAllClick(event, data)}
               inputProps={{ 'aria-label': 'select all' }}
