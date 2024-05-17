@@ -38,13 +38,13 @@ interface IndividualBioDataProps {
   choicesData: HouseholdChoiceDataQuery;
   grievancesChoices: GrievancesChoiceDataQuery;
 }
-export function IndividualBioData({
+export const IndividualBioData = ({
   individual,
   baseUrl,
   businessArea,
   choicesData,
   grievancesChoices,
-}: IndividualBioDataProps): React.ReactElement {
+}: IndividualBioDataProps): React.ReactElement => {
   const { t } = useTranslation();
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
@@ -364,4 +364,4 @@ export function IndividualBioData({
       </Grid>
     </Overview>
   );
-}
+};
