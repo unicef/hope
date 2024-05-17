@@ -1,5 +1,4 @@
 from page_object.base_components import BaseComponents
-from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
 
@@ -46,7 +45,7 @@ class GrievanceTickets(BaseComponents):
     ticketListRow = 'tr[role="checkbox"]'
     statusOptions = 'li[role="option"]'
     filtersCreatedBy = 'div[data-cy="filters-created-by-input"]'
-    selectAll = 'aria-label="select all"'
+    selectAll = 'span[data-cy="checkbox-select-all"]'
     tableLabel = 'span[data-cy="table-label"]'
     buttonAssign = 'button[data-cy="button-Assign"]'
     buttonSetPriority = 'button[data-cy="button-Set priority"]'
@@ -198,9 +197,7 @@ class GrievanceTickets(BaseComponents):
         return self.wait_for(self.statusOptions)
 
     def getSelectAll(self) -> WebElement:
-        self.getTabTicketID()
-        self.wait_for(self.selectAll)
-        return self.driver.find_element(By.XPATH, f"//*[@{self.selectAll}]")
+        return self.wait_for(self.selectAll)
 
     def getButtonAssign(self) -> WebElement:
         return self.wait_for(self.buttonAssign)
