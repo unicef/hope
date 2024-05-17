@@ -78,11 +78,39 @@ class KoboAPI:
     ) -> Optional[Tuple[Dict, str]]:  # pragma: no cover
         # TODO: not sure if this actually works
         if not template_id:
-            asset_uid = self._create_asset()
+            data = {
+                "name": "Untitled",
+                "asset_type": "template",
+                "description": "",
+                "sector": "",
+                "country": "",
+                "share-metadata": False,
+            }
+            endpoint = "api/v2/assets"
+            query_params = f"format={self.FORMAT}"
+            url = f"{self._kpi_url}/{endpoint}?{query_params}"
+            asset_response = self._post_request(url=url, data=data)
+            try:
+                asset_response.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                logger.exception(e)
+                raise
+            asset_response_dict = asset_response.json()
+            asset_uid = asset_response_dict.get("uid")
         else:
             asset_uid = template_id
 
-        url = self._create_import_file(asset_uid, bytes_io_file)
+        file_import_data = {
+            "assetUid": asset_uid,
+            "destination": f"{self._kpi_url}/assets/{asset_uid}?format={self.FORMAT}",
+        }
+        file_import_response = self._post_request(
+            url=f"{self._kpi_url}/imports?format={self.FORMAT}",
+            data=file_import_data,
+            files={"file": bytes_io_file},  # type: ignore # FIXME
+        )
+        file_import_response_dict = file_import_response.json()
+        url = file_import_response_dict.get("url")
 
         attempts = 5
         while attempts >= 0:
@@ -99,40 +127,6 @@ class KoboAPI:
 
         log_and_raise("Fetching import data took too long", error_type=RetryError)
         return None
-
-    def _create_import_file(self, asset_uid: str, bytes_io_file: typing.IO) -> str:
-        file_import_data = {
-            "assetUid": asset_uid,
-            "destination": f"{self._kpi_url}/assets/{asset_uid}?format={self.FORMAT}",
-        }
-        file_import_response = self._post_request(
-            url=f"{self._kpi_url}/imports?format={self.FORMAT}",
-            data=file_import_data,
-            files={"file": bytes_io_file},  # type: ignore # FIXME
-        )
-        file_import_response_dict = file_import_response.json()
-        return file_import_response_dict.get("url")
-
-    def _create_asset(self) -> str:
-        data = {
-            "name": "Untitled",
-            "asset_type": "template",
-            "description": "",
-            "sector": "",
-            "country": "",
-            "share-metadata": False,
-        }
-        endpoint = "api/v2/assets"
-        query_params = f"format={self.FORMAT}"
-        url = f"{self._kpi_url}/{endpoint}?{query_params}"
-        asset_response = self._post_request(url=url, data=data)
-        try:
-            asset_response.raise_for_status()
-        except requests.exceptions.HTTPError as e:
-            logger.exception(e)
-            raise
-        asset_response_dict = asset_response.json()
-        return asset_response_dict.get("uid")
 
     def get_all_projects_data(self, country_code: str) -> List:
         if not country_code:
