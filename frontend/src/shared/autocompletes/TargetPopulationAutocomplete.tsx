@@ -58,7 +58,6 @@ export function TargetPopulationAutocomplete({
     });
 
   const isMounted = useRef(true);
-
   const loadDataCallback = useCallback(() => {
     const asyncLoadData = async () => {
       if (isMounted.current && businessArea) {
@@ -105,8 +104,7 @@ export function TargetPopulationAutocomplete({
     setAppliedFilter,
   );
 
-  const allEdges = get(data, 'allTargetPopulations.edges', []);
-
+  const allEdges = get(data, 'allTargetPopulation.edges', []);
   return (
     <BaseAutocomplete
       value={value}

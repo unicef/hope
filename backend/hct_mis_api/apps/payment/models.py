@@ -48,7 +48,7 @@ from psycopg2._range import NumericRange
 
 from hct_mis_api.apps.account.models import HorizontalChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES, USDC
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     CORE_FIELDS_ATTRIBUTES,
@@ -180,6 +180,11 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
         return self.ca_id if isinstance(self, CashPlan) else self.unicef_id
 
     def get_exchange_rate(self, exchange_rates_client: Optional["ExchangeRateClient"] = None) -> float:
+        if self.currency == USDC:
+            # TODO: is it good place for that?
+            # exchange rate for Digital currency
+            return 1.0
+
         if exchange_rates_client is None:
             exchange_rates_client = ExchangeRates()
 
@@ -293,6 +298,7 @@ class GenericPayment(TimeStampedUUIDModel):
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
     transaction_reference_id = models.CharField(max_length=255, null=True)  # transaction_id
+    transaction_status_blockchain_link = models.CharField(max_length=255, null=True)
 
     class Meta:
         abstract = True
@@ -1078,6 +1084,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("additional_document_number", _("Additional Document Number")),
         ("registration_token", _("Registration Token")),
         ("status", _("Status")),
+        ("transaction_status_blockchain_link", _("Transaction Status on the Blockchain")),
     )
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
@@ -1126,7 +1133,11 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             core_fields_attributes = FieldFactory.from_scopes(
                 [Scope.GLOBAL, Scope.XLSX, Scope.DELIVERY_MECHANISM]
             ).to_dict_by("name")
-        core_field = core_fields_attributes[core_field_name]
+        core_field = core_fields_attributes.get(core_field_name)
+        if not core_field:
+            # Some fields can be added to the template, such as 'size' or 'collect_individual_data'
+            # which are not applicable to "People" export.
+            return None
 
         if delivery_mechanism_data and core_field["associated_with"] == _DELIVERY_MECHANISM_DATA:
             return delivery_mechanism_data.delivery_data.get(core_field_name, None)
@@ -1191,6 +1202,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "additional_document_type": (payment, "additional_document_type"),
             "additional_document_number": (payment, "additional_document_number"),
             "status": (payment, "payment_status"),
+            "transaction_status_blockchain_link": (payment, "transaction_status_blockchain_link"),
         }
         additional_columns = {"registration_token": cls.get_registration_token_doc_number}
         if column_name in additional_columns:
@@ -1273,7 +1285,7 @@ class FinancialServiceProvider(LimitBusinessAreaModelMixin, TimeStampedUUIDModel
     name = models.CharField(max_length=100, unique=True)
     vision_vendor_number = models.CharField(max_length=100, unique=True)
     delivery_mechanisms = HorizontalChoiceArrayField(
-        models.CharField(choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES, max_length=24)
+        models.CharField(choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICE, max_length=32)
     )
     distribution_limit = models.DecimalField(
         decimal_places=2,
@@ -1434,7 +1446,7 @@ class CashPlan(ConcurrencyModel, AdminUrlMixin, GenericPaymentPlan):
     comments = models.CharField(max_length=255, null=True)
     delivery_type = models.CharField(
         choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
-        max_length=24,
+        max_length=32,
         null=True,
         db_index=True,
     )
@@ -1641,6 +1653,7 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel, AdminUr
     additional_document_number = models.CharField(
         max_length=128, blank=True, null=True, help_text="Use this field for reconciliation data"
     )
+    fsp_auth_code = models.CharField(max_length=128, blank=True, null=True, help_text="FSP Auth Code")
 
     @property
     def full_name(self) -> str:

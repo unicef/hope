@@ -13,6 +13,7 @@ exports[`components/core/DocumentSearchField should render 1`] = `
       >
         <div
           class="MuiFormControl-root MuiFormControl-fullWidth sc-beySPh eVDjfH css-q8hpuo-MuiFormControl-root"
+          data-cy="select-filter"
         >
           <div
             class="MuiBox-root css-70qvj9"

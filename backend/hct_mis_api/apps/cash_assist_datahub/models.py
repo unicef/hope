@@ -136,9 +136,9 @@ class PaymentRecord(SessionModel):
     entitlement_card_status = models.CharField(max_length=20, null=True)
     entitlement_card_issue_date = models.DateField(null=True)
     delivery_type = models.CharField(
-        choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
+        choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICE,
         default=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
-        max_length=24,
+        max_length=32,
         null=True,
     )
     currency = models.CharField(max_length=4, null=True)

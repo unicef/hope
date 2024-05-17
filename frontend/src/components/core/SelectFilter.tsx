@@ -54,6 +54,7 @@ export const SelectFilter = ({
   borderRadius = '4px',
   fullWidth = true,
   disableClearable = false,
+  dataCy = 'select-filter',
   ...otherProps
 }): React.ReactElement => {
   const checkValue = (value): boolean => {
@@ -72,6 +73,7 @@ export const SelectFilter = ({
         fullWidth={fullWidth}
         variant="outlined"
         size="small"
+        data-cy={dataCy}
       >
         <Box display="flex" alignItems="center">
           <InputLabel>{label}</InputLabel>

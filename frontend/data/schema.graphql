@@ -929,18 +929,6 @@ type DeliveredQuantityNode {
   currency: String
 }
 
-input DeliveryMechanismDataObjectType {
-  label: String!
-  approveStatus: Boolean!
-  dataFields: [DeliveryMechanismDataPayloadFieldObjectType]!
-}
-
-input DeliveryMechanismDataPayloadFieldObjectType {
-  name: String!
-  value: String!
-  previousValue: String
-}
-
 type DeliveryMechanismNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -984,8 +972,9 @@ enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   TRANSFER
   TRANSFER_TO_ACCOUNT
   VOUCHER
-  ATM_CARD
   CASH_OVER_THE_COUNTER
+  TRANSFER_TO_DIGITAL_WALLET
+  ATM_CARD
 }
 
 type DiscardPaymentVerificationPlan {
@@ -1076,13 +1065,6 @@ input EditBankTransferObjectType {
   bankAccountNumber: String!
   bankBranchName: String
   accountHolderName: String!
-}
-
-input EditDeliveryMechanismDataObjectType {
-  id: ID!
-  label: String!
-  approveStatus: Boolean!
-  dataFields: [DeliveryMechanismDataPayloadFieldObjectType]!
 }
 
 input EditIndividualDocumentObjectType {
@@ -1258,6 +1240,7 @@ type FinancialServiceProviderNode implements Node {
   dataTransferConfiguration: JSONString
   xlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxTemplateNodeConnection!
   paymentGatewayId: String
+  financialserviceproviderxlsxreportSet(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxReportNodeConnection!
   deliveryMechanismsPerPaymentPlan(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   fullName: String
@@ -1273,6 +1256,27 @@ type FinancialServiceProviderNodeConnection {
 
 type FinancialServiceProviderNodeEdge {
   node: FinancialServiceProviderNode
+  cursor: String!
+}
+
+type FinancialServiceProviderXlsxReportNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  financialServiceProvider: FinancialServiceProviderNode!
+  status: Int
+  reportUrl: String
+}
+
+type FinancialServiceProviderXlsxReportNodeConnection {
+  pageInfo: PageInfo!
+  edges: [FinancialServiceProviderXlsxReportNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type FinancialServiceProviderXlsxReportNodeEdge {
+  node: FinancialServiceProviderXlsxReportNode
   cursor: String!
 }
 
@@ -1758,7 +1762,6 @@ type ImportDataNode implements Node {
   numberOfIndividuals: Int
   error: String!
   validationErrors: String!
-  deliveryMechanismsValidationErrors: String!
   createdById: UUID
   registrationDataImport: RegistrationDataImportDatahubNode
   koboimportdata: KoboImportDataNode
@@ -1771,7 +1774,6 @@ enum ImportDataStatus {
   FINISHED
   ERROR
   VALIDATION_ERROR
-  DELIVERY_MECHANISMS_VALIDATION_ERROR
 }
 
 type ImportXLSXPaymentPlanPaymentListMutation {
@@ -2008,6 +2010,7 @@ enum ImportedHouseholdCurrency {
   ZAR
   ZMW
   ZWL
+  USDC
 }
 
 type ImportedHouseholdNode implements Node {
@@ -2221,6 +2224,9 @@ type ImportedIndividualNode implements Node {
   misUnicefId: String
   programId: UUID
   ageAtRegistration: Int
+  walletName: String!
+  blockchainName: String!
+  walletAddress: String!
   importedhousehold: ImportedHouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
   identities(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualIdentityNodeConnection!
@@ -2398,6 +2404,9 @@ type IndividualNode implements Node {
   preferredLanguage: String
   relationshipConfirmed: Boolean!
   ageAtRegistration: Int
+  walletName: String!
+  blockchainName: String!
+  walletAddress: String!
   program: ProgramNode
   copiedFrom: IndividualNode
   originUnicefId: String
@@ -2535,9 +2544,6 @@ input IndividualUpdateDataObjectType {
   preferredLanguage: String
   flexFields: Arg
   paymentDeliveryPhoneNo: String
-  deliveryMechanismData: [DeliveryMechanismDataObjectType]
-  deliveryMechanismDataToEdit: [EditDeliveryMechanismDataObjectType]
-  deliveryMechanismDataToRemove: [ID]
 }
 
 type InvalidPaymentVerificationPlan {
@@ -2600,7 +2606,6 @@ type KoboImportDataNode implements Node {
   numberOfIndividuals: Int
   error: String!
   validationErrors: String!
-  deliveryMechanismsValidationErrors: String!
   createdById: UUID
   importdataPtr: ImportDataNode!
   koboAssetId: String!
@@ -2697,7 +2702,7 @@ type Mutations {
   updateGrievanceTicket(input: UpdateGrievanceTicketInput!, version: BigInt): UpdateGrievanceTicketMutation
   grievanceStatusChange(grievanceTicketId: ID, status: Int, version: BigInt): GrievanceStatusChangeMutation
   createTicketNote(noteInput: CreateTicketNoteInput!, version: BigInt): CreateTicketNoteMutation
-  approveIndividualDataChange(approvedDeliveryMechanismDataToCreate: [Int], approvedDeliveryMechanismDataToEdit: [Int], approvedDeliveryMechanismDataToRemove: [Int], approvedDocumentsToCreate: [Int], approvedDocumentsToEdit: [Int], approvedDocumentsToRemove: [Int], approvedIdentitiesToCreate: [Int], approvedIdentitiesToEdit: [Int], approvedIdentitiesToRemove: [Int], approvedPaymentChannelsToCreate: [Int], approvedPaymentChannelsToEdit: [Int], approvedPaymentChannelsToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
+  approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToEdit: [Int], approvedDocumentsToRemove: [Int], approvedIdentitiesToCreate: [Int], approvedIdentitiesToEdit: [Int], approvedIdentitiesToRemove: [Int], approvedPaymentChannelsToCreate: [Int], approvedPaymentChannelsToEdit: [Int], approvedPaymentChannelsToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
   approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString, version: BigInt): HouseholdDataChangeApproveMutation
   approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
@@ -2876,8 +2881,9 @@ enum PaymentDeliveryType {
   TRANSFER
   TRANSFER_TO_ACCOUNT
   VOUCHER
-  ATM_CARD
   CASH_OVER_THE_COUNTER
+  TRANSFER_TO_DIGITAL_WALLET
+  ATM_CARD
 }
 
 type PaymentDetailsApproveMutation {
@@ -2913,6 +2919,7 @@ type PaymentNode implements Node {
   deliveredQuantityUsd: Float
   deliveryDate: DateTime
   transactionReferenceId: String
+  transactionStatusBlockchainLink: String
   parent: PaymentPlanNode!
   conflicted: Boolean!
   excluded: Boolean!
@@ -2928,6 +2935,7 @@ type PaymentNode implements Node {
   additionalCollectorName: String
   additionalDocumentType: String
   additionalDocumentNumber: String
+  fspAuthCode: String
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   householdSnapshot: PaymentHouseholdSnapshotNode
   adminUrl: String
@@ -3139,6 +3147,7 @@ enum PaymentPlanCurrency {
   ZAR
   ZMW
   ZWL
+  USDC
 }
 
 type PaymentPlanNode implements Node {
@@ -3261,8 +3270,9 @@ enum PaymentRecordDeliveryType {
   TRANSFER
   TRANSFER_TO_ACCOUNT
   VOUCHER
-  ATM_CARD
   CASH_OVER_THE_COUNTER
+  TRANSFER_TO_DIGITAL_WALLET
+  ATM_CARD
 }
 
 enum PaymentRecordEntitlementCardStatus {
@@ -3288,6 +3298,7 @@ type PaymentRecordNode implements Node {
   deliveredQuantityUsd: Float
   deliveryDate: DateTime
   transactionReferenceId: String
+  transactionStatusBlockchainLink: String
   caId: String
   caHashId: UUID
   parent: CashPlanNode
@@ -3673,6 +3684,8 @@ type Query {
   allPaymentRecordsAndPayments(businessArea: String!, program: String, household: ID, orderBy: String, first: Int, last: Int, before: String, after: String): PaginatedPaymentRecordsAndPaymentsNode
   financialServiceProviderXlsxTemplate(id: ID!): FinancialServiceProviderXlsxTemplateNode
   allFinancialServiceProviderXlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdBy: ID, orderBy: String): FinancialServiceProviderXlsxTemplateNodeConnection
+  financialServiceProviderXlsxReport(id: ID!): FinancialServiceProviderXlsxReportNode
+  allFinancialServiceProviderXlsxReports(offset: Int, before: String, after: String, first: Int, last: Int, status: String, orderBy: String): FinancialServiceProviderXlsxReportNodeConnection
   financialServiceProvider(id: ID!): FinancialServiceProviderNode
   allFinancialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int, createdBy: ID, name: String, visionVendorNumber: String, deliveryMechanisms: [String], distributionLimit: Float, communicationChannel: String, xlsxTemplates: [ID], orderBy: String): FinancialServiceProviderNodeConnection
   paymentRecordVerification(id: ID!): PaymentVerificationNode
@@ -3939,7 +3952,6 @@ type RegistrationDataImportNode implements Node {
   program: ProgramNode
   erased: Boolean!
   refuseReason: String
-  allowDeliveryMechanismsValidationErrors: Boolean!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
@@ -3996,7 +4008,6 @@ input RegistrationKoboImportMutationInput {
   pullPictures: Boolean
   businessAreaSlug: String
   screenBeneficiary: Boolean
-  allowDeliveryMechanismsValidationErrors: Boolean
 }
 
 type RegistrationXlsxImportMutation {
@@ -4009,7 +4020,6 @@ input RegistrationXlsxImportMutationInput {
   name: String
   businessAreaSlug: String
   screenBeneficiary: Boolean
-  allowDeliveryMechanismsValidationErrors: Boolean
 }
 
 type ReportNode implements Node {
