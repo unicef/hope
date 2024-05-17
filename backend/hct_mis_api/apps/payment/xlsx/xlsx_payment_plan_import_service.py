@@ -24,7 +24,7 @@ Row = Tuple[Cell]
 
 
 class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseService):
-    COLUMNS_TYPES = ("s", "s", "n", "s", "s", "s", "s", "s", "n", "n", "s")
+    COLUMNS_TYPES = ("s", "s", "n", "s", "s", "s", "s", "s", "s", "n", "n", "s")
     BATCH_SIZE = 1000
 
     def __init__(self, payment_plan: PaymentPlan, file: io.BytesIO) -> None:
