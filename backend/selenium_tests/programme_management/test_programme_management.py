@@ -661,11 +661,10 @@ class TestManualCalendar:
         pageProgrammeManagement.getInputProgrammeCode().send_keys("NEW1")
         pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(Keys.CONTROL + "a")
-        pageProgrammeManagement.getInputStartDate().send_keys(FormatTime(1, 1, 2022).numerically_formatted_date)
+        pageProgrammeManagement.getInputStartDate().send_keys(str(FormatTime(1, 1, 2022).numerically_formatted_date))
         pageProgrammeManagement.getInputEndDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(Keys.CONTROL + "a")
         pageProgrammeManagement.getInputEndDate().send_keys(FormatTime(1, 10, 2022).numerically_formatted_date)
-        pageProgrammeDetails.screenshot("0", delay_sec=0)
         pageProgrammeManagement.getButtonNext().click()
         programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
