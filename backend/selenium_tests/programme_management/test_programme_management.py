@@ -49,7 +49,7 @@ class TestProgrammeManagement:
         ],
     )
     def test_create_programme(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+            self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -98,7 +98,7 @@ class TestProgrammeManagement:
         ],
     )
     def test_create_programme_optional_values(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+            self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -154,7 +154,7 @@ class TestProgrammeManagement:
         ],
     )
     def test_create_programme_Frequency_of_Payment(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+            self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -200,7 +200,7 @@ class TestProgrammeManagement:
         ],
     )
     def test_create_programme_Cash_Plus(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+            self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -246,7 +246,7 @@ class TestProgrammeManagement:
         ],
     )
     def test_create_programme_check(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+            self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -310,7 +310,7 @@ class TestProgrammeManagement:
         ],
     )
     def test_create_programme_delete_partners(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+            self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -337,7 +337,7 @@ class TestProgrammeManagement:
             assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
 
     def test_create_programme_cancel_scenario(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails
+            self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -366,11 +366,11 @@ class TestBusinessAreas:
         ],
     )
     def test_create_programme_add_partners_Business_Area(
-        self,
-        change_super_user: None,
-        pageProgrammeManagement: ProgrammeManagement,
-        pageProgrammeDetails: ProgrammeDetails,
-        test_data: dict,
+            self,
+            change_super_user: None,
+            pageProgrammeManagement: ProgrammeManagement,
+            pageProgrammeDetails: ProgrammeDetails,
+            test_data: dict,
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -414,11 +414,11 @@ class TestBusinessAreas:
         ],
     )
     def test_copy_programme(
-        self,
-        change_super_user: None,
-        pageProgrammeManagement: ProgrammeManagement,
-        pageProgrammeDetails: ProgrammeDetails,
-        test_data: dict,
+            self,
+            change_super_user: None,
+            pageProgrammeManagement: ProgrammeManagement,
+            pageProgrammeDetails: ProgrammeDetails,
+            test_data: dict,
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -460,11 +460,11 @@ class TestAdminAreas:
         ],
     )
     def test_create_programme_add_partners_Admin_Area(
-        self,
-        change_super_user: None,
-        pageProgrammeManagement: ProgrammeManagement,
-        pageProgrammeDetails: ProgrammeDetails,
-        test_data: dict,
+            self,
+            change_super_user: None,
+            pageProgrammeManagement: ProgrammeManagement,
+            pageProgrammeDetails: ProgrammeDetails,
+            test_data: dict,
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -515,11 +515,11 @@ class TestComeBackScenarios:
         ],
     )
     def test_create_programme_back_scenarios(
-        self,
-        change_super_user: None,
-        pageProgrammeManagement: ProgrammeManagement,
-        pageProgrammeDetails: ProgrammeDetails,
-        test_data: dict,
+            self,
+            change_super_user: None,
+            pageProgrammeManagement: ProgrammeManagement,
+            pageProgrammeDetails: ProgrammeDetails,
+            test_data: dict,
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -578,7 +578,7 @@ class TestManualCalendar:
         ],
     )
     def test_create_programme_chose_dates_via_calendar(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+            self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -626,7 +626,7 @@ class TestManualCalendar:
         ],
     )
     def test_create_programme_accesses(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+            self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -646,3 +646,33 @@ class TestManualCalendar:
         pageProgrammeManagement.getButtonSave().click()
         assert test_data["partners_access"] in pageProgrammeDetails.getLabelPartnerAccess().text
         assert test_data["dataCollectingType"] in pageProgrammeDetails.getLabelDataCollectingType().text
+
+    @pytest.mark.skip("Unskip after fix bug")
+    def test_edit_programme(self, create_programs: None,
+                            pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails
+                            ) -> None:
+        pageProgrammeManagement.getNavProgrammeManagement().click()
+        pageProgrammeManagement.getTableRowByProgramName("Test Programm").click()
+
+        pageProgrammeManagement.getButtonEditProgram().click()
+        pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.getInputProgrammeName().send_keys("New name after Edit")
+        pageProgrammeManagement.getInputProgrammeCode().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.getInputProgrammeCode().send_keys("NEW1")
+        pageProgrammeManagement.getInputStartDate().click()
+        pageProgrammeManagement.getInputStartDate().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.getInputStartDate().send_keys(FormatTime(1, 1, 2022).numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().click()
+        pageProgrammeManagement.getInputStartDate().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.getInputEndDate().send_keys(FormatTime(1, 10, 2022).numerically_formatted_date)
+        pageProgrammeDetails.screenshot("0", delay_sec=0)
+        pageProgrammeManagement.getButtonNext().click()
+        programme_creation_url = pageProgrammeManagement.driver.current_url
+        pageProgrammeManagement.getButtonSave().click()
+        pageProgrammeManagement.getAccessToProgram().click()
+        pageProgrammeManagement.selectWhoAccessToProgram("None of the partners should have access")
+        # Check Details page
+        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
+        assert "New name after Edit" in pageProgrammeDetails.getHeaderTitle().text
+        assert FormatTime(1, 1, 2022).date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
+        assert FormatTime(1, 10, 2022).date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
