@@ -145,13 +145,6 @@ export function IndividualBioData({
   };
 
   const renderDigitalWalletInfo = (): React.ReactNode => {
-    if (
-      !individual?.walletName ||
-      !individual?.blockchainName ||
-      !individual?.walletAddress
-    ) {
-      return null;
-    }
     return (
       <>
         <Grid item xs={12}>
