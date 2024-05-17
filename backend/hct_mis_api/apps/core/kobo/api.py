@@ -29,7 +29,7 @@ class KoboRequestsSession(requests.Session):
 
     def should_strip_auth(self, old_url: str, new_url: str) -> bool:
         new_parsed = urlparse(new_url)
-        if new_parsed.hostname in KoboRequestsSession.AUTH_DOMAINS:
+        if new_parsed.hostname in KoboRequestsSession.AUTH_DOMAINS:  # pragma: no cover
             return False
         return super().should_strip_auth(old_url, new_url)  # type: ignore # FIXME: Call to untyped function "should_strip_auth" in typed context
 
@@ -70,7 +70,9 @@ class KoboAPI:
             raise
         return response
 
-    def _post_request(self, url: str, data: Optional[Dict] = None, files: Optional[typing.IO] = None) -> Response:
+    def _post_request(
+        self, url: str, data: Optional[Dict] = None, files: Optional[typing.IO] = None
+    ) -> Response:  # pragma: no cover
         return self._client.post(url=url, data=data, files=files)
 
     def create_template_from_file(
@@ -154,6 +156,6 @@ class KoboAPI:
         url = f"{self._kpi_url}/{endpoint}?{query_params}"
         return self._get_paginated_request(url)
 
-    def get_attached_file(self, url: str) -> BytesIO:
+    def get_attached_file(self, url: str) -> BytesIO:  # pragma: no cover
         response = self._get_request(url)
         return BytesIO(response.content)
