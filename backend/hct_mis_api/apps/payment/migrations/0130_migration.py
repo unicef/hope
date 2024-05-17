@@ -10,7 +10,7 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payment', '0128_migration'),
+        ('payment', '0129_migration'),
     ]
 
     operations = [
