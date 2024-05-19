@@ -200,10 +200,8 @@ class RuleForm(forms.ModelForm):
         exclude = ("updated_by", "created_by")
 
     def clean(self) -> Optional[Dict]:
-        if (  # pragma: no_cover
-            len(self.cleaned_data.keys()) == 1 and "allowed_business_areas" in self.cleaned_data.keys()
-        ):
-            # working just for update 'allowed_business_areas'
+        if len(self.cleaned_data.keys()) == 1 and "allowed_business_areas" in self.cleaned_data.keys():
+            # added that just for update 'allowed_business_areas'
             return self.cleaned_data
         self._validate_unique = True
         code = self.cleaned_data.get("definition", "")
