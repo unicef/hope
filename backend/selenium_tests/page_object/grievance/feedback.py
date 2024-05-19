@@ -11,8 +11,8 @@ class Feedback(BaseComponents):
     filterSearch = 'div[data-cy="filters-search"]'
     filterIssueType = 'div[data-cy="filters-issue-type"]'
     filterCreatedBy = 'div[data-cy="Created by-input"]'
-    filterCreationDateFrom = 'div[data-cy="date-picker-filter"]'
-    filterCreationDateTo = 'div[data-cy="date-picker-filter"]'
+    filterCreationDateFrom = 'div[data-cy="filters-creation-date-from"]'
+    filterCreationDateTo = 'div[data-cy="filters-creation-date-to"]'
     buttonClear = 'button[data-cy="button-filters-clear"]'
     buttonApply = 'button[data-cy="button-filters-apply"]'
     tableTitle = 'h6[data-cy="table-title"]'
@@ -55,10 +55,10 @@ class Feedback(BaseComponents):
         return self.wait_for(self.filterCreatedBy)
 
     def getFilterCreationDateFrom(self) -> WebElement:
-        return self.get_elements(self.filterCreationDateFrom)[0]
+        return self.get_elements(self.filterCreationDateFrom)
 
     def getFilterCreationDateTo(self) -> WebElement:
-        return self.get_elements(self.filterCreationDateTo)[1]
+        return self.get_elements(self.filterCreationDateTo)
 
     def getButtonClear(self) -> WebElement:
         return self.wait_for(self.buttonClear)
