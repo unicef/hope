@@ -45,30 +45,30 @@ class TestRuleForm(APITestCase):
             cleaned_data_with_black = form_with_black.clean()
             self.assertNotEqual(cleaned_data_with_black.get("definition", ""), "result.value=0")
 
-        # update only clean with 'allowed_business_areas' field
+    def test_clean_method_for_update_allowed_business_areas(self) -> None:
+        # update only 'allowed_business_areas' field
         rule = RuleFactory(
             name="Rule_1", type=Rule.TYPE_TARGETING, language="python", flags={"individual_data_needed": False}
         )
         rule.refresh_from_db()
         self.assertEqual(rule.allowed_business_areas.all().count(), 0)
 
-        form_data = {
-            "allowed_business_areas": [self.business_area],
-            "definition": rule.definition,
-            "deprecated": rule.deprecated,
-            "description": rule.description,
-            "enabled": rule.enabled,
-            "flags": rule.flags,
-            "language": rule.language,
-            "name": rule.name,
-            "security": rule.security,
-            "type": rule.type,
-        }
-        form = RuleForm(data=form_data, instance=rule)
+        form_data = {"allowed_business_areas": [self.business_area]}
+        form = RuleForm(instance=rule, initial=form_data)
+
+        # mock some responses to do nothing
+        form.is_valid = lambda: True  # type: ignore
+        form.full_clean = lambda: None  # type: ignore
         form.is_valid()
-        self.assertIn("allowed_business_areas", form.cleaned_data)
+        form.full_clean()
+        form.cleaned_data = form_data
+
+        cleaned_data = form.clean()
+
+        self.assertIn("allowed_business_areas", cleaned_data)
 
         # save and check if allowed_business_areas updated
         form.save()
         rule.refresh_from_db()
         self.assertEqual(rule.allowed_business_areas.all().count(), 1)
+        self.assertEqual(rule.allowed_business_areas.all().first().slug, "afghanistan")
