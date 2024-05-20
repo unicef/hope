@@ -422,7 +422,9 @@ class PaymentPlanSplit(TimeStampedUUIDModel):
     class SplitType(models.TextChoices):
         BY_RECORDS = "BY_RECORDS", "By Records"
         BY_COLLECTOR = "BY_COLLECTOR", "By Collector"
+        BY_ADMIN_AREA1 = "BY_ADMIN_AREA1", "By Admin Area 1"
         BY_ADMIN_AREA2 = "BY_ADMIN_AREA2", "By Admin Area 2"
+        BY_ADMIN_AREA3 = "BY_ADMIN_AREA3", "By Admin Area 3"
 
     payment_plan = models.ForeignKey(
         "payment.PaymentPlan",
