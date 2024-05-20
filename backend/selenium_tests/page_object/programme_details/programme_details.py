@@ -20,6 +20,10 @@ class ProgrammeDetails(BaseComponents):
     labelAdminArea2 = 'div[data-cy="label-Admin Area 2"]'
     labelPartnerName = 'h6[data-cy="label-partner-name"]'
     labelPartnerAccess = 'div[data-cy="label-Partner Access"]'
+    buttonRemoveProgram = 'button[data-cy="button-remove-program"]'
+    buttonEditProgram = 'a[data-cy="button-edit-program"]'
+    buttonActivateProgram = 'button[data-cy="button-activate-program"]'
+    labelProgrammeCode = 'div[data-cy="label-Programme Code"]'
 
     def getLabelPartnerName(self) -> WebElement:
         return self.wait_for(self.labelPartnerName)
@@ -71,3 +75,15 @@ class ProgrammeDetails(BaseComponents):
 
     def getLabelDescription(self) -> WebElement:
         return self.wait_for(self.labelDescription)
+
+    def getButtonRemoveProgram(self) -> WebElement:
+        return self.wait_for(self.buttonRemoveProgram)
+
+    def getButtonEditProgram(self) -> WebElement:
+        return self.wait_for(self.buttonEditProgram)
+
+    def getButtonActivateProgram(self) -> WebElement:
+        return self.wait_for(self.buttonActivateProgram)
+
+    def getLabelProgrammeCode(self) -> WebElement:
+        return self.wait_for(self.labelProgrammeCode)
