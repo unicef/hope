@@ -1,4 +1,5 @@
 from datetime import datetime
+from time import sleep
 
 import pytest
 from dateutil.relativedelta import relativedelta
@@ -52,6 +53,7 @@ def get_program_with_dct_type_and_name(
         data_collecting_type=dct,
         status=status,
     )
+    # sleep(2)
     return program
 
 
@@ -120,7 +122,7 @@ class TestDrawer:
         actual_menu_items = pageProgrammeManagement.getDrawerItems().text.split("\n")
         assert expected_menu_items == actual_menu_items
 
-    @pytest.mark.skip(reason="Unstable test")
+    # @pytest.mark.skip(reason="Unstable test")
     def test_inactive_draft_subheader(
         self,
         draft_program: Program,
