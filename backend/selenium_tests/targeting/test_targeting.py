@@ -270,3 +270,8 @@ class TestCreateTargeting:
         actions = ActionChains(pageTargetingDetails.driver)
         actions.move_to_element(pageTargetingDetails.getHouseholdTableCell(1, 1)).perform()  # type: ignore
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
+
+@pytest.mark.usefixtures("login")
+class TestTargeting:
+    def test_smoke_targeting_page(self, create_programs: None, add_targeting: None, pageTargeting: Targeting) -> None:
+        pass
