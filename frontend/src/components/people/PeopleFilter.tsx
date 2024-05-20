@@ -249,7 +249,7 @@ export function PeopleFilter({
               handleFilterChange('lastRegistrationDateMin', date)
             }
             value={filter.lastRegistrationDateMin}
-            data-cy="ind-filters-reg-date-from"
+            dataCy="ind-filters-reg-date-from"
           />
         </Grid>
         <Grid item xs={2}>
@@ -259,7 +259,7 @@ export function PeopleFilter({
               handleFilterChange('lastRegistrationDateMax', date)
             }
             value={filter.lastRegistrationDateMax}
-            data-cy="ind-filters-reg-date-to"
+            dataCy="ind-filters-reg-date-to"
           />
         </Grid>
         {isAllPrograms && (
