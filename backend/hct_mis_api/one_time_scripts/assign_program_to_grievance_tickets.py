@@ -100,9 +100,8 @@ def assign_program_to_feedback() -> None:
         default=Value(None),
     )
 
-    feedbacks = (
-        Feedback.objects.filter(program__isnull=True)
-        .exclude(household_lookup__isnull=True, individual_lookup__isnull=True)
+    feedbacks = Feedback.objects.filter(program__isnull=True).exclude(
+        household_lookup__isnull=True, individual_lookup__isnull=True
     )
 
     feedback_ids = list(feedbacks.values_list("id", flat=True))
