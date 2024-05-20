@@ -1,5 +1,4 @@
 from datetime import datetime
-from time import sleep
 
 import pytest
 from dateutil.relativedelta import relativedelta
@@ -144,5 +143,6 @@ class TestDrawer:
             pageProgrammeDetails.getDrawerInactiveSubheader(timeout=0.05)
 
         pageProgrammeManagement.selectGlobalProgramFilter(finished_program_name).click()
+        # AssertionError: Element: Finished Program is not in the list.
         assert finished_program_name in pageProgrammeDetails.getHeaderTitle().text
         assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "program inactive"
