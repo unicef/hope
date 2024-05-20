@@ -354,6 +354,7 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
     def save_model(
         self, request: HttpRequest, obj: FspXlsxTemplatePerDeliveryMechanism, form: "Form", change: bool
     ) -> None:
+        # TODO MB add for same validation for inline
         if not change:
             obj.created_by = request.user
         delivery_mechanism_required_fields = [

@@ -42,4 +42,17 @@ class Migration(migrations.Migration):
             },
             bases=(models.Model, ),
         ),
+        migrations.AlterField(
+            model_name='importeddeliverymechanismdata',
+            name='delivery_mechanism',
+            field=models.CharField(choices=[('Cardless cash withdrawal', 'Cardless cash withdrawal'), ('Cash', 'Cash'),
+                                            ('Cash by FSP', 'Cash by FSP'), ('Cheque', 'Cheque'),
+                                            ('Deposit to Card', 'Deposit to Card'), ('Mobile Money', 'Mobile Money'),
+                                            ('Pre-paid card', 'Pre-paid card'), ('Referral', 'Referral'),
+                                            ('Transfer', 'Transfer'), ('Transfer to Account', 'Transfer to Account'),
+                                            ('Voucher', 'Voucher'), ('ATM Card', 'ATM Card'),
+                                            ('Cash over the counter', 'Cash over the counter'),
+                                            ('Transfer to Digital Wallet', 'Transfer to Digital Wallet')],
+                                   max_length=255, verbose_name='Delivery Mechanism'),
+        ),
     ]

@@ -330,7 +330,10 @@ class TestFSPSetup(APITestCase):
         variables = dict(
             input=dict(
                 paymentPlanId=encoded_payment_plan_id,
-                deliveryMechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER, DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER],
+                deliveryMechanisms=[
+                    DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+                    DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+                ],
             )
         )
         response_with_error = self.graphql_request(

@@ -26,7 +26,6 @@ from hct_mis_api.apps.payment.fixtures import (
 )
 from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
-    GenericPayment,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
