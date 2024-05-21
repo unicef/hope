@@ -1272,7 +1272,7 @@ class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
     def __str__(self) -> str:
         return f"{self.financial_service_provider.name} - {self.xlsx_template} - {self.delivery_mechanism}"
 
-    def clean(self):
+    def clean(self) -> None:
         delivery_mechanism_required_fields = [
             field["name"]
             for field in DeliveryMechanismData.get_required_delivery_mechanism_fields(self.delivery_mechanism)
