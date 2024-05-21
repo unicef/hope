@@ -76,6 +76,7 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     total_number_of_households_with_tp_in_program = graphene.Int()
     data_collecting_type = graphene.Field(DataCollectingTypeNode, source="data_collecting_type")
     partners = graphene.List(PartnerNodeForProgram)
+    is_social_worker_program = graphene.Boolean()
 
     class Meta:
         model = Program
@@ -102,6 +103,10 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
             if partner.get_permissions().areas_for(str(program.business_area_id), str(program.pk)) is not None:
                 partners_list.append(partner)
         return partners_list
+
+    @staticmethod
+    def resolve_is_social_worker_program(program: Program, info: Any, **kwargs: Any) -> bool:
+        return program.is_social_worker_program
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):

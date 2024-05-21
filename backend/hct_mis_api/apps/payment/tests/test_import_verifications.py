@@ -311,9 +311,9 @@ class TestXlsxVerificationImport(APITestCase):
         payment_verification = PaymentVerification.objects.get(payment_object_id=payment_record_id)
         self.assertEqual(payment_verification.status, PaymentVerification.STATUS_PENDING)
         wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "YES"
-        wb.active[
-            f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"
-        ] = payment_verification.payment_obj.delivered_quantity
+        wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"] = (
+            payment_verification.payment_obj.delivered_quantity
+        )
         with NamedTemporaryFile() as tmp:
             wb.save(tmp.name)
             file = io.BytesIO(tmp.read())

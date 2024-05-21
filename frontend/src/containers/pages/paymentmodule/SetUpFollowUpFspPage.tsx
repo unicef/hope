@@ -19,6 +19,7 @@ export const SetUpFollowUpFspPage = (): React.ReactElement => {
       {
         deliveryMechanism: '',
         fsp: '',
+        chosenConfiguration: '',
       },
     ],
   };

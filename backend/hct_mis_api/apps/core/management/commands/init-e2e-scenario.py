@@ -95,7 +95,7 @@ def init_targeting(seed: str) -> None:
 
 
 def init_clear(seed: str) -> None:
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hct_mis_api.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hct_mis_api.config.settings")
     execute_from_command_line(["init-e2e-scenario.py", "initcypress", "--skip-drop"])
 
 

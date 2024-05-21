@@ -277,6 +277,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     ) -> None:
         individuals_to_create_list = []
         documents_and_identities_to_create = []
+        # fix for support new field 'detail_id' in ImportedHousehold
+        submission_meta_data["detail_id"] = submission_meta_data.get("kobo_asset_id", "")
         household_obj = ImportedHousehold(**submission_meta_data)
         self.attachments = household.get("_attachments", [])
         registration_date = None

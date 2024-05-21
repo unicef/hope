@@ -30,9 +30,6 @@ def update_individual_relationship_typo(apps, schema_editor):
     Individual.objects.filter(relationship="GRANDDAUGHER_GRANDSON").update(relationship="GRANDDAUGHTER_GRANDSON")
 
 
-def _fix_documents_duplicates(apps, schema_editor):
-    from hct_mis_api.one_time_scripts.fix_documents_duplicates import fix_documents_duplicates
-    fix_documents_duplicates()
 
 
 class Migration(migrations.Migration):
@@ -323,7 +320,6 @@ class Migration(migrations.Migration):
             name='size',
             field=models.PositiveIntegerField(blank=True, db_index=True, null=True),
         ),
-        migrations.RunPython(_fix_documents_duplicates, migrations.RunPython.noop),
         migrations.RemoveConstraint(
             model_name='document',
             name='unique_for_individual_if_not_removed_and_valid',

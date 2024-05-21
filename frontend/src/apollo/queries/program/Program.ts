@@ -21,6 +21,7 @@ export const PROGRAM_QUERY = gql`
       totalNumberOfHouseholds
       totalNumberOfHouseholdsWithTpInProgram
       administrativeAreasOfImplementation
+      isSocialWorkerProgram
       version
       adminUrl
       dataCollectingType {

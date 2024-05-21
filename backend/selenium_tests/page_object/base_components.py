@@ -11,11 +11,11 @@ class BaseComponents(Common):
     sideNav = 'div[data-cy="side-nav"]'
     navCountryDashboard = 'a[data-cy="nav-Country Dashboard"]'
     navRegistrationDataImport = 'a[data-cy="nav-Registration Data Import"]'
-    navProgrammePopulation = 'a[data-cy="nav-Programme Population"]'
+    navProgrammePopulation = 'a[data-cy="nav-Program Population"]'
     navHouseholds = 'a[data-cy="nav-Households"]'
     navIndividuals = 'a[data-cy="nav-Individuals"]'
-    navProgrammeManagement = 'a[data-cy="nav-Programme Management"]'
-    navProgrammeDetails = 'a[data-cy="nav-Programme Details"]'
+    navProgrammeManagement = 'a[data-cy="nav-Programs"]'
+    navProgrammeDetails = 'a[data-cy="nav-Program Details"]'
     navTargeting = 'a[data-cy="nav-Targeting"]'
     navCashAssist = 'a[data-cy="nav-Cash Assist"]'
     navPaymentModule = 'a[data-cy="nav-Payment Module"]'
@@ -34,6 +34,8 @@ class BaseComponents(Common):
     navResourcesToolsAndMaterials = 'a[data-cy="nav-resources-Tools and Materials"]'
     navResourcesReleaseNote = 'a[data-cy="nav-resources-Release Note"]'
     mainContent = 'div[data-cy="main-content"]'
+    drawerItems = 'div[data-cy="drawer-items"]'
+    drawerInactiveSubheader = 'div[data-cy="program-inactive-subheader"]'
 
     # Text
     globalProgramFilterText = "All Programmes"
@@ -128,6 +130,12 @@ class BaseComponents(Common):
     def getNavResourcesReleaseNote(self) -> WebElement:
         return self.wait_for(self.navResourcesReleaseNote)
 
+    def getDrawerItems(self) -> WebElement:
+        return self.wait_for(self.drawerItems)
+
     def selectGlobalProgramFilter(self, name: str) -> WebElement:
         self.getGlobalProgramFilter().click()
         return self.select_listbox_element(name)
+
+    def getDrawerInactiveSubheader(self, timeout: int = Common.DEFAULT_TIMEOUT) -> WebElement:
+        return self.wait_for(self.drawerInactiveSubheader, timeout=timeout)

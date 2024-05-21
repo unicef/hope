@@ -71,7 +71,6 @@ from hct_mis_api.apps.grievance.models import (
 from hct_mis_api.apps.grievance.utils import (
     filter_grievance_tickets_based_on_partner_areas_2,
 )
-from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordAndPaymentNode
 from hct_mis_api.apps.program.models import Program
@@ -122,8 +121,8 @@ class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObje
         super().check_node_permission(info, object_instance)
         business_area = object_instance.business_area
         user = info.context.user
-        # TODO: grievances should be cross program ??? remove program_id
-        program_id = get_program_id_from_headers(info.context.headers)
+        # when selected All programs in GPF program_id is None
+        program_id: Optional[str] = get_program_id_from_headers(info.context.headers)
 
         if object_instance.category == GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE:
             perm = Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE.value
@@ -143,8 +142,6 @@ class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObje
         partner = user.partner
         has_partner_area_access = partner.is_unicef
         ticket_program_id = str(object_instance.programs.first().id) if object_instance.programs.first() else None
-        if program_id and ticket_program_id != program_id:
-            log_and_raise("Ticket does not belong to the selected program")
         if not partner.is_unicef:
             if not object_instance.admin2 or not ticket_program_id:
                 # admin2 is empty or non-program ticket -> no restrictions for admin area
@@ -555,8 +552,6 @@ class Query(graphene.ObjectType):
     grievance_ticket_priority_choices = graphene.List(ChoiceObjectInt)
     grievance_ticket_urgency_choices = graphene.List(ChoiceObjectInt)
 
-    grievance_ticket_search_types_choices = graphene.List(ChoiceObject)
-
     def resolve_all_grievance_ticket(self, info: Any, **kwargs: Any) -> QuerySet:
         user = info.context.user
         program_id = get_program_id_from_headers(info.context.headers)
@@ -587,6 +582,8 @@ class Query(graphene.ObjectType):
                 .prefetch_related(*to_prefetch)
                 .filter(business_area_id=business_area_id, programs=None)
             )
+        else:
+            queryset = queryset.filter(programs__id=program_id)
 
         return queryset.annotate(
             total=Case(
@@ -636,18 +633,6 @@ class Query(graphene.ObjectType):
 
     def resolve_grievance_ticket_urgency_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(URGENCY_CHOICES)
-
-    def resolve_grievance_ticket_search_types_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
-        search_types_choices = [
-            ("ticket_id", "Ticket ID"),
-            ("ticket_hh_id", "Household ID"),
-            ("full_name", "Full Name"),
-            ("phone_number", "Phone Number"),
-            ("registration_id", "Registration ID (Aurora)"),
-            ("bank_account_number", "Bank Account Number"),
-        ]
-        search_types_choices.extend(DocumentType.objects.all().order_by("label").values_list("key", "label"))
-        return [{"name": name, "value": value} for value, name in search_types_choices]
 
     def resolve_all_add_individuals_fields_attributes(self, info: Any, **kwargs: Any) -> List:
         business_area_slug = info.context.headers.get("Business-Area")

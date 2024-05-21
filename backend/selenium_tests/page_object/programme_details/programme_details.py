@@ -12,7 +12,7 @@ class ProgrammeDetails(BaseComponents):
     labelFreqOfPayment = 'div[data-cy="label-Frequency of Payment"]'
     labelAdministrativeAreas = 'div[data-cy="label-Administrative Areas of implementation"]'
     labelCashPlus = 'div[data-cy="label-CASH+"]'
-    labelTotalNumberOfHouseholds = 'div[data-cy="label-Total Number of Households"]'
+    labelProgramSize = 'div[data-cy="label-Program size"]'
     labelDescription = 'div[data-cy="label-Description"]'
     labelAreaAccess = 'div[data-cy="label-Area Access"]'
     labelAdminArea1 = 'div[data-cy="labelized-field-container-admin-area-1-total-count"]'
@@ -58,5 +58,5 @@ class ProgrammeDetails(BaseComponents):
     def getLabelCashPlus(self) -> WebElement:
         return self.wait_for(self.labelCashPlus)
 
-    def getLabelTotalNumberOfHouseholds(self) -> WebElement:
-        return self.wait_for(self.labelTotalNumberOfHouseholds)
+    def getLabelProgramSize(self) -> WebElement:
+        return self.wait_for(self.labelProgramSize)

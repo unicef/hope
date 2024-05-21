@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Sequence, Tuple
+from typing import Any, List
 
 from django.db import models
 from django.db.models import Count, F, Func, Q, QuerySet, Window
@@ -18,15 +18,12 @@ from django_filters import (
 )
 
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.es_filters import ElasticSearchFilterSet
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string, get_program_id_from_headers
-from hct_mis_api.apps.geo.models import ValidityQuerySet
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
-from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_query
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
-from hct_mis_api.apps.household.models import HEAD, DocumentType, Household, Individual
+from hct_mis_api.apps.household.models import HEAD, Household, Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.models import Program
 
@@ -68,54 +65,7 @@ class GrievanceOrderingFilter(OrderingFilter):
         return super().filter(qs, value)
 
 
-class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
-    USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH: Tuple = (
-        "search",
-        "created_at_range",
-        "assigned_to",
-        "registration_data_import",
-        "status",
-        "issue_type",
-        "category",
-        "admin",
-        "priority",
-        "urgency",
-        "grievance_type",
-        "grievance_status",
-        "business_area",
-        "program",
-    )
-
-    def elasticsearch_filter_queryset(self) -> List[str]:
-        grievance_es_query_dict = create_es_query(self.prepare_filters(self.USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH))
-        return execute_es_query(grievance_es_query_dict)
-
-    def prepare_filters(self, allowed_fields: Sequence[str]) -> Dict:
-        filters = {}
-        for field in allowed_fields:
-            if self.form.data.get(field):
-                if field == "program":
-                    filters["programs"] = decode_id_string(self.form.data[field])
-                elif field in (
-                    "category",
-                    "status",
-                    "issue_type",
-                    "priority",
-                    "urgency",
-                    "admin",
-                    "registration_data_import",
-                ):
-                    filters[field] = self.form.data[field]
-                else:
-                    filters[field] = self.form.cleaned_data[field]
-
-        if isinstance(filters.get("admin"), ValidityQuerySet):
-            filters.pop("admin")
-
-        return filters
-
-
-class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
+class GrievanceTicketFilter(FilterSet):
     SEARCH_TICKET_TYPES_LOOKUPS = {
         "complaint_ticket_details": {
             "individual": ("preferred_language",),
@@ -145,7 +95,8 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
     )
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
-    search_type = CharFilter(method="search_type_filter")
+    document_type = CharFilter(method="document_type_filter")
+    document_number = CharFilter(method="document_number_filter")
 
     status = TypedMultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES, coerce=int)
     fsp = CharFilter(method="fsp_filter")
@@ -203,7 +154,8 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
             return qs.filter(programs__in=[decode_id_string(value)])
         return qs
 
-    def preferred_language_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+    def preferred_language_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:  # pragma: no cover
+        # TODO: test needed
         q_obj = Q()
         for ticket_type, ticket_fields in self.SEARCH_TICKET_TYPES_LOOKUPS.items():
             for field, lookups in ticket_fields.items():
@@ -214,64 +166,46 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         search = value.strip()
-        search_type = self.data.get("search_type")
+        query = Q()
 
-        if search_type == "ticket_id":
-            values = list(map(str.strip, search.split(",")))
-            if len(values) > 1:
-                return qs.filter(unicef_id__in=values)
-            return qs.filter(unicef_id__icontains=search)
-        if search_type == "ticket_hh_id":
-            return qs.filter(household_unicef_id__icontains=search)
-        if search_type == "full_name":
-            unicef_ids = (
-                Individual.objects.filter(Q(full_name__icontains=search) & Q(relationship=HEAD))
-                .select_related("household")
-                .values_list("household__unicef_id", flat=True)
-            )
-            return qs.filter(household_unicef_id__in=unicef_ids)
-        if search_type == "registration_id":
-            try:
-                int(search)
-            except ValueError:
-                return qs.none()
-            unicef_ids = (
-                Individual.objects.filter(relationship=HEAD, registration_id=search)
-                .select_related("household")
-                .values_list("household__unicef_id", flat=True)
-            )
-            return qs.filter(household_unicef_id__in=unicef_ids)
-        if search_type == "phone_number":
-            unicef_ids = (
-                Individual.objects.filter(relationship=HEAD)
-                .filter(Q(phone_no__icontains=search) | Q(phone_no_alternative__icontains=search))
-                .select_related("household")
-                .values_list("household__unicef_id", flat=True)
-            )
-            return qs.filter(household_unicef_id__in=unicef_ids)
-        if search_type == "bank_account_number":
-            unicef_ids = (
-                Individual.objects.filter(relationship=HEAD)
-                .filter(bank_account_info__bank_account_number__icontains=search)
-                .select_related("household")
-                .values_list("household__unicef_id", flat=True)
-            )
-            return qs.filter(household_unicef_id__in=unicef_ids)
-        if DocumentType.objects.filter(key=search_type).exists():
-            unicef_ids = (
-                Individual.objects.filter(
-                    Q(relationship=HEAD)
-                    & Q(documents__type__key=search_type)
-                    & Q(documents__document_number__icontains=search)
-                )
-                .select_related("household")
-                .values_list("household__unicef_id", flat=True)
-            )
-            return qs.filter(household_unicef_id__in=unicef_ids)
-        raise KeyError(f"Invalid search search_type '{search_type}'")
+        values = list(map(str.strip, search.split(",")))
+        if len(values) > 1:
+            query |= Q(unicef_id__in=values)
+        else:
+            query |= Q(unicef_id__icontains=search)
 
-    def search_type_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        query |= Q(household_unicef_id__icontains=search)
+        unicef_ids = (
+            Individual.objects.filter(relationship=HEAD)
+            .filter(
+                Q(full_name__icontains=search)
+                | Q(registration_id__icontains=search)
+                | Q(phone_no__icontains=search)
+                | Q(phone_no_alternative__icontains=search)
+                | Q(bank_account_info__bank_account_number__icontains=search)
+            )
+            .select_related("household")
+            .values_list("household__unicef_id", flat=True)
+        )
+        query |= Q(household_unicef_id__in=unicef_ids)
+        return qs.filter(query)
+
+    def document_type_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return qs
+
+    def document_number_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        document_number = value.strip()
+        document_type = self.data.get("document_type")
+        unicef_ids = (
+            Individual.objects.filter(
+                Q(relationship=HEAD)
+                & Q(documents__type__key=document_type)
+                & Q(documents__document_number__icontains=document_number)
+            )
+            .select_related("household")
+            .values_list("household__unicef_id", flat=True)
+        )
+        return qs.filter(household_unicef_id__in=unicef_ids)
 
     def fsp_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value:

@@ -6,7 +6,7 @@ class Households(BaseComponents):
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
     hhFiltersSearch = 'div[data-cy="hh-filters-search"]'
-    filterSearchType = 'div[data-cy="filter-search-type"]'
+    filterDocumentType = 'div[data-cy="filters-document-type"]'
     hhFiltersResidenceStatus = 'div[data-cy="hh-filters-residence-status"]'
     hhFiltersAdmin2 = 'div[data-cy="hh-filters-admin2"]'
     adminLevel2Input = 'div[data-cy="Admin Level 2-input"]'
@@ -41,8 +41,8 @@ class Households(BaseComponents):
     def getHhFiltersSearch(self) -> WebElement:
         return self.wait_for(self.hhFiltersSearch)
 
-    def getFilterSearchType(self) -> WebElement:
-        return self.wait_for(self.filterSearchType)
+    def getFilterDocumentType(self) -> WebElement:
+        return self.wait_for(self.filterDocumentType)
 
     def getHhFiltersResidenceStatus(self) -> WebElement:
         return self.wait_for(self.hhFiltersResidenceStatus)
@@ -116,6 +116,9 @@ class Households(BaseComponents):
     def getHouseholdTableRows(self) -> WebElement:
         return self.wait_for(self.householdTableRow)
 
+    def getHouseholdsRows(self) -> list[WebElement]:
+        self.getHouseholdTableRows()
+        return self.get_elements(self.householdTableRow)
+
     def getHouseholdsRowByNumber(self, number: int) -> WebElement:
-        self.wait_for(self.getHouseholdTableRows)
-        return self.get_elements(self.getHouseholdTableRows)[number]
+        return self.getHouseholdsRows()[number]

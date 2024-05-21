@@ -257,10 +257,10 @@ exports[`components/ProgramDetails should render 1`] = `
             class="sc-guDLey RwNuC"
             color="textSecondary"
           >
-            Total Number of Households
+            Program size
           </span>
           <div
-            data-cy="label-Total Number of Households"
+            data-cy="label-Program size"
           >
             <span
               class="sc-dmyCSP bGPBYf"
