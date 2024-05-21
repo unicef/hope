@@ -53,6 +53,8 @@ class ProgrammeManagement(BaseComponents):
     buttonEditProgram = 'a[data-cy="button-edit-program"]'
     inputProgrammeCode = 'input[data-cy="input-programmeCode"]'
     tableRow = 'tr[data-cy="table-row-{}"]'
+    menuUserProfile = 'button[data-cy="menu-user-profile"]'
+    menuItemClearCache = 'li[data-cy="menu-item-clear-cache"]'
 
     def getCalendarIcon(self) -> WebElement:
         return self.wait_for(self.calendarIcon)
@@ -207,3 +209,9 @@ class ProgrammeManagement(BaseComponents):
 
     def getTableRowByProgramName(self, program_name: str) -> WebElement:
         return self.wait_for(self.tableRow.format(program_name))
+
+    def getMenuUserProfile(self) -> WebElement:
+        return self.wait_for(self.menuUserProfile)
+
+    def getMenuItemClearCache(self) -> WebElement:
+        return self.wait_for(self.menuItemClearCache)
