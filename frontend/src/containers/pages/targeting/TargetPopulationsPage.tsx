@@ -3,19 +3,20 @@ import { Info } from '@mui/icons-material';
 import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation } from 'react-router-dom';
-import { ButtonTooltip } from '@components/core/ButtonTooltip';
+import { useLocation } from 'react-router-dom';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { TargetPopulationFilters } from '@components/targeting/TargetPopulationFilters';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { TargetingInfoDialog } from '../../dialogs/targetPopulation/TargetingInfoDialog';
 import { TargetPopulationTable } from '../../tables/targeting/TargetPopulationTable';
-import { useProgramContext } from '../../../programContext';
 import { CreateTPMenu } from '@components/targeting/CreateTPMenu';
+import { useProgramQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { TargetPopulationForPeopleTable } from '@containers/tables/targeting/TargetPopulationForPeopleTable';
+import { TargetPopulationForPeopleFilters } from '@components/targeting/TargetPopulationForPeopleFilters';
 
 const initialFilter = {
   name: '',
@@ -29,10 +30,11 @@ const initialFilter = {
 export const TargetPopulationsPage = (): React.ReactElement => {
   const location = useLocation();
   const { t } = useTranslation();
-  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
-  const { isActiveProgram } = useProgramContext();
-
+  const {  programId } = useBaseUrl();
+  const { data: programData } = useProgramQuery({
+    variables: { id: programId },
+  });
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
@@ -47,7 +49,13 @@ export const TargetPopulationsPage = (): React.ReactElement => {
 
   if (!hasPermissions(PERMISSIONS.TARGETING_VIEW_LIST, permissions))
     return <PermissionDenied />;
-
+  if (!programData) return null;
+  let Table = TargetPopulationTable;
+  let Filters = TargetPopulationFilters;
+  if (programData.program.isSocialWorkerProgram) {
+    Table = TargetPopulationForPeopleTable;
+    Filters = TargetPopulationForPeopleFilters;
+  }
   return (
     <>
       <PageHeader title={t('Targeting')}>
@@ -64,14 +72,14 @@ export const TargetPopulationsPage = (): React.ReactElement => {
           {canCreate && <CreateTPMenu />}
         </>
       </PageHeader>
-      <TargetPopulationFilters
+      <Filters
         filter={filter}
         setFilter={setFilter}
         initialFilter={initialFilter}
         appliedFilter={appliedFilter}
         setAppliedFilter={setAppliedFilter}
       />
-      <TargetPopulationTable
+      <Table
         filter={appliedFilter}
         canViewDetails={hasPermissions(
           PERMISSIONS.TARGETING_VIEW_DETAILS,

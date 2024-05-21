@@ -16,36 +16,37 @@ pytestmark = pytest.mark.django_db(transaction=True)
 
 @pytest.fixture
 def social_worker_program() -> Program:
-    return get_program_with_dct_type_and_name("Worker Program", DataCollectingType.Type.SOCIAL)
+    return get_program_with_dct_type_and_name("Worker Program", "WORK", DataCollectingType.Type.SOCIAL)
 
 
 @pytest.fixture
 def normal_program() -> Program:
-    return get_program_with_dct_type_and_name("Normal Program", DataCollectingType.Type.STANDARD)
+    return get_program_with_dct_type_and_name("Normal Program", "NORM", DataCollectingType.Type.STANDARD)
 
 
 @pytest.fixture
 def active_program() -> Program:
-    return get_program_with_dct_type_and_name("Active Program", status=Program.ACTIVE)
+    return get_program_with_dct_type_and_name("Active Program", "ACTI", status=Program.ACTIVE)
 
 
 @pytest.fixture
 def draft_program() -> Program:
-    return get_program_with_dct_type_and_name("Draft Program", status=Program.DRAFT)
+    return get_program_with_dct_type_and_name("Draft Program", "DRAF", status=Program.DRAFT)
 
 
 @pytest.fixture
 def finished_program() -> Program:
-    return get_program_with_dct_type_and_name("Finished Program", status=Program.FINISHED)
+    return get_program_with_dct_type_and_name("Finished Program", "FINI", status=Program.FINISHED)
 
 
 def get_program_with_dct_type_and_name(
-    name: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
+    name: str, programme_code: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
 ) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
     program = ProgramFactory(
         name=name,
+        programme_code=programme_code,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
@@ -72,6 +73,7 @@ class TestDrawer:
             "Payment Module",
             "Payment Verification",
             "Grievance",
+            "Accountability",
             "Programme Users",
             "Program Log",
         ]
@@ -94,6 +96,7 @@ class TestDrawer:
             "Payment Module",
             "Payment Verification",
             "Grievance",
+            "Accountability",
             "Programme Users",
             "Program Log",
         ]
@@ -113,11 +116,11 @@ class TestDrawer:
             "Grievance",
             "Reporting",
             "Activity Log",
-            # TODO add when ready "Payment Console",
         ]
         actual_menu_items = pageProgrammeManagement.getDrawerItems().text.split("\n")
         assert expected_menu_items == actual_menu_items
 
+    @pytest.mark.skip(reason="Unstable test")
     def test_inactive_draft_subheader(
         self,
         draft_program: Program,

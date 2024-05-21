@@ -59,21 +59,10 @@ class TestPaymentNotification(APITestCase):
         # potential recipients
         partner_unicef = PartnerFactory.create(name="UNICEF")
         partner_with_program_access = PartnerFactory.create(name="Partner with program access")
-        partner_with_program_access.permissions = {
-            str(cls.business_area.id): {
-                "programs": {str(cls.program.id): []},
-                "roles": [],
-            }
-        }
-        partner_with_program_access.save()
+        cls.update_partner_access_to_program(partner_with_program_access, cls.program)
+
         partner_without_program_access = PartnerFactory.create(name="Partner without program access")
-        partner_without_program_access.permissions = {
-            str(cls.business_area.id): {
-                "programs": {str(cls.program2.id): []},
-                "roles": [],
-            }
-        }
-        partner_without_program_access.save()
+        cls.update_partner_access_to_program(partner_without_program_access, cls.program2)
         # users with action permissions
         cls.user_with_approval_permission_partner_unicef = UserFactory.create(partner=partner_unicef)
         cls.create_user_role_with_permissions(
@@ -144,23 +133,28 @@ class TestPaymentNotification(APITestCase):
         partner_with_action_permissions_and_program_access = PartnerFactory.create(
             name="Partner with action permissions and program access"
         )
-        partner_with_action_permissions_and_program_access.permissions = {
-            str(cls.business_area.id): {
-                "programs": {str(cls.program.id): []},
-                "roles": [str(role.pk)],
-            }
-        }
-        partner_with_action_permissions_and_program_access.save()
+        cls.update_partner_access_to_program(
+            partner_with_action_permissions_and_program_access,
+            cls.program,
+        )
+        cls.add_partner_role_in_business_area(
+            partner_with_action_permissions_and_program_access,
+            cls.business_area,
+            [role],
+        )
         partner_with_action_permissions_without_program_access = PartnerFactory.create(
             name="Partner with action permissions and without program access"
         )
-        partner_with_action_permissions_without_program_access.permissions = {
-            str(cls.business_area.id): {
-                "programs": {str(cls.program2.id): []},
-                "roles": [str(role.pk)],
-            }
-        }
-        partner_with_action_permissions_without_program_access.save()
+        cls.update_partner_access_to_program(
+            partner_with_action_permissions_without_program_access,
+            cls.program2,
+        )
+        cls.add_partner_role_in_business_area(
+            partner_with_action_permissions_without_program_access,
+            cls.business_area,
+            [role],
+        )
+
         cls.user_with_partner_action_permissions_and_program_access = UserFactory.create(
             partner=partner_with_action_permissions_and_program_access
         )
@@ -298,9 +292,10 @@ class TestPaymentNotification(APITestCase):
             self.assertEqual(mailjet_client.subject, "Payment pending for Approval")
 
     @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
-    @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
-    @override_config(ENABLE_MAILJET=True)
-    @override_settings(CATCH_ALL_EMAIL="catchallemail@email.com")
+    @override_config(
+        SEND_PAYMENT_PLANS_NOTIFICATION=True, ENABLE_MAILJET=True, MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1
+    )
+    @override_settings(CATCH_ALL_EMAIL=["catchallemail@email.com", "catchallemail2@email.com"])
     def test_send_email_notification_catch_all_email(self, mock_post: Any) -> None:
         payment_notification = PaymentNotification(
             self.payment_plan,
@@ -312,7 +307,7 @@ class TestPaymentNotification(APITestCase):
         for mailjet_client in payment_notification.emails:
             self.assertEqual(
                 mailjet_client.recipients,
-                ["catchallemail@email.com"],
+                ["catchallemail@email.com", "catchallemail2@email.com"],
             )
         self.assertEqual(
             mock_post.call_count,
@@ -320,8 +315,9 @@ class TestPaymentNotification(APITestCase):
         )
 
     @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
-    @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
-    @override_config(ENABLE_MAILJET=True)
+    @override_config(
+        SEND_PAYMENT_PLANS_NOTIFICATION=True, ENABLE_MAILJET=True, MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1
+    )
     def test_send_email_notification_without_catch_all_email(self, mock_post: Any) -> None:
         payment_notification = PaymentNotification(
             self.payment_plan,

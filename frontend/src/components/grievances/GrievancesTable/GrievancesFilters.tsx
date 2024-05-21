@@ -27,6 +27,7 @@ import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
+import { DocumentSearchField } from '@core/DocumentSearchField';
 
 interface GrievancesFiltersProps {
   filter;
@@ -37,6 +38,7 @@ interface GrievancesFiltersProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
+
 export const GrievancesFilters = ({
   filter,
   choicesData,
@@ -129,40 +131,12 @@ export const GrievancesFilters = ({
             borderRadius="4px 0px 0px 4px"
           />
         </Grid>
-        <Grid container item xs={6} spacing={3}>
-          <Grid item xs={6}>
-            <SelectFilter
-              onChange={(e) =>
-                handleFilterChange('documentType', e.target.value)
-              }
-              label="Document Type"
-              value={filter.documentType}
-              borderRadius="0px 4px 4px 0px"
-              data-cy="filters-document-type"
-              fullWidth
-              disableClearable
-            >
-              {choicesData?.documentTypeChoices?.map(
-                ({ name, value }) => (
-                  <MenuItem key={value} value={value}>
-                    {name}
-                  </MenuItem>
-                ),
-              )}
-            </SelectFilter>
-          </Grid>
-          <Grid item xs={6}>
-            <SearchTextField
-              value={filter.documentNumber}
-              label="Document Number"
-              onChange={(e) =>
-                handleFilterChange('documentNumber', e.target.value)
-              }
-              data-cy="filters-document-number"
-              borderRadius="4px 0px 0px 4px"
-            />
-          </Grid>
-        </Grid>
+        <DocumentSearchField
+          onChange={handleFilterChange}
+          type={filter.documentType}
+          number={filter.documentNumber}
+          choices={choicesData?.documentTypeChoices}
+        />
         {isAllPrograms && (
           <Grid item xs={3}>
             <ProgramAutocomplete
@@ -208,7 +182,7 @@ export const GrievancesFilters = ({
             onChange={(date) => handleFilterChange('createdAtRangeMin', date)}
             value={filter.createdAtRangeMin}
             fullWidth
-            data-cy="filters-creation-date-from"
+            dataCy="filters-creation-date-from"
           />
         </Grid>
         <Grid item xs={2}>
@@ -217,7 +191,7 @@ export const GrievancesFilters = ({
             onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
             value={filter.createdAtRangeMax}
             fullWidth
-            data-cy="filters-creation-date-to"
+            dataCy="filters-creation-date-to"
           />
         </Grid>
         <Grid item xs={3}>

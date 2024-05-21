@@ -79,7 +79,7 @@ export function ProgrammesFilters({
         <Grid item xs={2}>
           <DatePickerFilter
             label="Start Date"
-            data-cy="filters-start-date"
+            dataCy="filters-start-date"
             onChange={(date) =>
               handleFilterChange(
                 'startDate',
@@ -92,7 +92,7 @@ export function ProgrammesFilters({
         <Grid item xs={2}>
           <DatePickerFilter
             label="End Date"
-            data-cy="filters-end-date"
+            dataCy="filters-end-date"
             onChange={(date) =>
               handleFilterChange(
                 'endDate',
@@ -106,7 +106,7 @@ export function ProgrammesFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange('sector', e.target.value)}
             label="Sector"
-            data-cy="filters-sector"
+            dataCy="filters-sector"
             value={filter.sector}
             multiple
           >
@@ -120,7 +120,7 @@ export function ProgrammesFilters({
         <Grid item xs={2}>
           <NumberTextField
             data-cy="filters-number-of-households-min"
-            topLabel="Num. of Households"
+            topLabel="Program Size"
             placeholder="From"
             value={filter.numberOfHouseholdsMin}
             onChange={(e) =>

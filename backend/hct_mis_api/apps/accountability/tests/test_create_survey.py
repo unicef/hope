@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import django
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.celery_tasks import send_survey_to_users
 from hct_mis_api.apps.accountability.models import Survey
@@ -44,10 +44,11 @@ class TestCreateSurvey(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
-        cls.user = UserFactory(first_name="John", last_name="Doe")
+        partner = PartnerFactory(name="Partner")
+        cls.user = UserFactory(first_name="John", last_name="Doe", partner=partner)
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
         cls.tp = TargetPopulationFactory(business_area=cls.business_area, program=cls.program)
-        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
+        cls.update_partner_access_to_program(partner, cls.program)
 
     def test_create_survey_without_permission(self) -> None:
         self.create_user_role_with_permissions(self.user, [], self.business_area)
@@ -137,9 +138,10 @@ class TestCreateSurvey(APITestCase):
         households = [create_household({"size": 3})[0] for _ in range(3)]
         self.tp.households.set(households)
 
-        with patch.object(django.db.transaction, "on_commit", lambda t: t()), patch(
-            "hct_mis_api.apps.accountability.celery_tasks.send_survey_to_users.delay"
-        ) as task_mock:
+        with (
+            patch.object(django.db.transaction, "on_commit", lambda t: t()),
+            patch("hct_mis_api.apps.accountability.celery_tasks.send_survey_to_users.delay") as task_mock,
+        ):
             self.snapshot_graphql_request(
                 request_string=self.CREATE_SURVEY_MUTATION,
                 context={
@@ -258,11 +260,12 @@ class TestCreateSurvey(APITestCase):
         )
 
     def test_getting_available_flows(self) -> None:
-        with patch(
-            "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)
-        ), patch(
-            "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.get_flows",
-            MagicMock(return_value=[{"uuid": 123, "name": "flow2"}, {"uuid": 234, "name": "flow2"}]),
+        with (
+            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch(
+                "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.get_flows",
+                MagicMock(return_value=[{"uuid": 123, "name": "flow2"}, {"uuid": 234, "name": "flow2"}]),
+            ),
         ):
             self.snapshot_graphql_request(
                 request_string=self.AVAILABLE_FLOWS,

@@ -6,7 +6,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render loadi
     class="sc-iBdnpw dcYiFg"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN bNxSeJ css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN dTdCVM css-1ps6pg7-MuiPaper-root"
     >
       <div
         class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
@@ -489,7 +489,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
     class="sc-iBdnpw dcYiFg"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN bNxSeJ css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN dTdCVM css-1ps6pg7-MuiPaper-root"
     >
       <div
         class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
@@ -876,13 +876,17 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                   class="sc-ifyrAs fSIDzb"
                 >
                   <div
-                    class="sc-dJGMql iKMXMO"
+                    class="sc-dJGMql iKMXMO status-box-container"
                     data-cy="status-container"
-                    status="PENDING"
                   >
                     PENDING
                   </div>
                 </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                De*** La*** Sc***
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
@@ -896,9 +900,8 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                   class="sc-ifyrAs fSIDzb"
                 >
                   <div
-                    class="sc-dJGMql fQdggy"
+                    class="sc-dJGMql fQdggy status-box-container"
                     data-cy="status-container"
-                    status="ACTIVE"
                   >
                     ACTIVE
                   </div>
@@ -956,13 +959,17 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                   class="sc-ifyrAs fSIDzb"
                 >
                   <div
-                    class="sc-dJGMql iKMXMO"
+                    class="sc-dJGMql iKMXMO status-box-container"
                     data-cy="status-container"
-                    status="PENDING"
                   >
                     PENDING
                   </div>
                 </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                Jo*** Sa*** Ma***
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
@@ -976,9 +983,8 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                   class="sc-ifyrAs fSIDzb"
                 >
                   <div
-                    class="sc-dJGMql fQdggy"
+                    class="sc-dJGMql fQdggy status-box-container"
                     data-cy="status-container"
-                    status="ACTIVE"
                   >
                     ACTIVE
                   </div>
@@ -1036,13 +1042,17 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                   class="sc-ifyrAs fSIDzb"
                 >
                   <div
-                    class="sc-dJGMql iKMXMO"
+                    class="sc-dJGMql iKMXMO status-box-container"
                     data-cy="status-container"
-                    status="PENDING"
                   >
                     PENDING
                   </div>
                 </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                Kr*** Ka*** Ru***
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
@@ -1056,9 +1066,8 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                   class="sc-ifyrAs fSIDzb"
                 >
                   <div
-                    class="sc-dJGMql fQdggy"
+                    class="sc-dJGMql fQdggy status-box-container"
                     data-cy="status-container"
-                    status="ACTIVE"
                   >
                     ACTIVE
                   </div>
@@ -1116,13 +1125,17 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                   class="sc-ifyrAs fSIDzb"
                 >
                   <div
-                    class="sc-dJGMql iKMXMO"
+                    class="sc-dJGMql iKMXMO status-box-container"
                     data-cy="status-container"
-                    status="PENDING"
                   >
                     PENDING
                   </div>
                 </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                Ba*** Je*** Ja***
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
@@ -1136,9 +1149,8 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                   class="sc-ifyrAs fSIDzb"
                 >
                   <div
-                    class="sc-dJGMql fQdggy"
+                    class="sc-dJGMql fQdggy status-box-container"
                     data-cy="status-container"
-                    status="ACTIVE"
                   >
                     ACTIVE
                   </div>
@@ -1196,13 +1208,17 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                   class="sc-ifyrAs fSIDzb"
                 >
                   <div
-                    class="sc-dJGMql iKMXMO"
+                    class="sc-dJGMql iKMXMO status-box-container"
                     data-cy="status-container"
-                    status="PENDING"
                   >
                     PENDING
                   </div>
                 </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                Mi*** Er*** Wi***
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
@@ -1216,9 +1232,8 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                   class="sc-ifyrAs fSIDzb"
                 >
                   <div
-                    class="sc-dJGMql fQdggy"
+                    class="sc-dJGMql fQdggy status-box-container"
                     data-cy="status-container"
-                    status="ACTIVE"
                   >
                     ACTIVE
                   </div>

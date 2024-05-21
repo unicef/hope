@@ -7,6 +7,66 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots['TestPaymentPlanReconciliation::test_apply_steficon_rule_with_wrong_payment_plan_status 1'] = {
+    'data': {
+        'setSteficonRuleOnPaymentPlanPaymentList': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 5,
+                    'line': 3
+                }
+            ],
+            'message': "You can run formula only for 'Locked' status of Payment Plan",
+            'path': [
+                'setSteficonRuleOnPaymentPlanPaymentList'
+            ]
+        }
+    ]
+}
+
+snapshots['TestPaymentPlanReconciliation::test_apply_steficon_rule_with_wrong_payment_plan_status 2'] = {
+    'data': {
+        'setSteficonRuleOnPaymentPlanPaymentList': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 5,
+                    'line': 3
+                }
+            ],
+            'message': 'Rule Engine run in progress',
+            'path': [
+                'setSteficonRuleOnPaymentPlanPaymentList'
+            ]
+        }
+    ]
+}
+
+snapshots['TestPaymentPlanReconciliation::test_assign_fsp_mutation_payment_plan_wrong_status 1'] = {
+    'data': {
+        'assignFspToDeliveryMechanism': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 5,
+                    'line': 3
+                }
+            ],
+            'message': 'Payment plan must be locked to assign FSP to delivery mechanism',
+            'path': [
+                'assignFspToDeliveryMechanism'
+            ]
+        }
+    ]
+}
+
 snapshots['TestPaymentPlanReconciliation::test_correct_message_displayed_when_file_is_protected 1'] = {
     'data': {
         'importXlsxPaymentPlanPaymentListPerFsp': None
@@ -22,6 +82,46 @@ snapshots['TestPaymentPlanReconciliation::test_correct_message_displayed_when_fi
             'message': 'Wrong file type or password protected .zip file. Upload another file, or remove the password.',
             'path': [
                 'importXlsxPaymentPlanPaymentListPerFsp'
+            ]
+        }
+    ]
+}
+
+snapshots['TestPaymentPlanReconciliation::test_error_message_when_engine_rule_not_enabled_or_deprecated 1'] = {
+    'data': {
+        'setSteficonRuleOnPaymentPlanPaymentList': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 5,
+                    'line': 3
+                }
+            ],
+            'message': 'This engine rule is not enabled or is deprecated.',
+            'path': [
+                'setSteficonRuleOnPaymentPlanPaymentList'
+            ]
+        }
+    ]
+}
+
+snapshots['TestPaymentPlanReconciliation::test_error_message_when_engine_rule_not_enabled_or_deprecated 2'] = {
+    'data': {
+        'setSteficonRuleOnPaymentPlanPaymentList': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 5,
+                    'line': 3
+                }
+            ],
+            'message': 'This engine rule is not enabled or is deprecated.',
+            'path': [
+                'setSteficonRuleOnPaymentPlanPaymentList'
             ]
         }
     ]
@@ -60,4 +160,24 @@ snapshots['TestPaymentPlanReconciliation::test_follow_up_pp_entitlements_updated
             'paymentPlan': None
         }
     }
+}
+
+snapshots['TestPaymentPlanReconciliation::test_import_with_wrong_payment_plan_status 1'] = {
+    'data': {
+        'importXlsxPaymentPlanPaymentListPerFsp': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 5,
+                    'line': 3
+                }
+            ],
+            'message': 'You can only import for ACCEPTED or FINISHED Payment Plan',
+            'path': [
+                'importXlsxPaymentPlanPaymentListPerFsp'
+            ]
+        }
+    ]
 }

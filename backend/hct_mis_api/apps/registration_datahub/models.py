@@ -49,7 +49,10 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
-from hct_mis_api.apps.utils.phone import recalculate_phone_numbers_validity
+from hct_mis_api.apps.utils.phone import (
+    calculate_phone_numbers_validity,
+    recalculate_phone_numbers_validity,
+)
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -296,6 +299,9 @@ class ImportedIndividual(TimeStampedUUIDModel):
         null=True, db_index=True, blank=True
     )  # TODO temporary null=True until we migrate backward all data
     age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True)
+    wallet_name = models.CharField(max_length=64, blank=True, default="")
+    blockchain_name = models.CharField(max_length=64, blank=True, default="")
+    wallet_address = models.CharField(max_length=128, blank=True, default="")
 
     @property
     def age(self) -> int:
@@ -337,6 +343,9 @@ class ImportedIndividual(TimeStampedUUIDModel):
     def role(self) -> Optional[str]:
         role = self.households_and_roles.first()
         return role.role if role is not None else ROLE_NO_ROLE
+
+    def validate_phone_numbers(self) -> None:
+        calculate_phone_numbers_validity(self)
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         recalculate_phone_numbers_validity(self, ImportedIndividual)

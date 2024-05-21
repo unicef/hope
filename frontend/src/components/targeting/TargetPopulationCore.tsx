@@ -10,11 +10,12 @@ import {
   useTargetPopulationHouseholdsQuery,
 } from '@generated/graphql';
 import { PaperContainer } from './PaperContainer';
-import { Results } from './Results';
+import { ResultsForHouseholds } from './ResultsForHouseholds';
 import { TargetingCriteria } from './TargetingCriteria';
 import { TargetingHouseholds } from './TargetingHouseholds';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { TargetPopulationPeopleTable } from '@containers/tables/targeting/TargetPopulationPeopleTable';
+import { ResultsForPeople } from '@components/targeting/ResultsForPeople';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -52,7 +53,9 @@ export const TargetPopulationCore = ({
   if (!targetPopulation) return null;
   const householdIds = targetPopulation.targetingCriteria?.householdIds;
   const individualIds = targetPopulation.targetingCriteria?.individualIds;
-
+  const ResultComponent = targetPopulation.program.isSocialWorkerProgram
+    ? ResultsForPeople
+    : ResultsForHouseholds;
   const recordsTable = targetPopulation.program.isSocialWorkerProgram ? (
     <TargetPopulationPeopleTable
       id={id}
@@ -137,7 +140,7 @@ export const TargetPopulationCore = ({
           </Box>
         </PaperContainer>
       ) : null}
-      <Results targetPopulation={targetPopulation} />
+      <ResultComponent targetPopulation={targetPopulation} />
       {recordInfo}
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={targetPopulation.id} />

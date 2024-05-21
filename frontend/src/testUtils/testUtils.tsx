@@ -59,7 +59,22 @@ export class ApolloLoadingLink extends MockLink {
 }
 
 export const fakeContextProgram = {
-  id: 1,
-  name: 'someName',
-  status: ProgramStatus.Active,
+  selectedProgram: {
+    id: '1',
+    name: 'someName',
+    status: ProgramStatus.Active,
+    dataCollectingType: {
+      id: '1',
+      householdFiltersAvailable: true,
+      individualFiltersAvailable: true,
+      label: 'data collecting type',
+      code: '123',
+      type: 'full',
+      children: null,
+    },
+  },
+  setSelectedProgram: () => {},
+  isActiveProgram: true,
+  isSocialDctType: false,
+  isStandardDctType: true,
 };

@@ -14,16 +14,24 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import encode_id_base64_required
+from hct_mis_api.apps.core.utils import encode_id_base64, encode_id_base64_required
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hct_mis_api.apps.payment.models import (
+    GenericPayment,
+    PaymentPlan,
+    PaymentVerification,
+    PaymentVerificationPlan,
+)
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
@@ -33,6 +41,16 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
 )
+
+EDIT_PAYMENT_VERIFICATION_MUTATION = """
+mutation EditPaymentVerificationPlan($input: EditPaymentVerificationInput!) {
+  editPaymentVerificationPlan(input: $input) {
+    paymentPlan {
+      status
+    }
+  }
+}
+"""
 
 
 class TestPaymentVerificationMutations(APITestCase):
@@ -211,3 +229,27 @@ class TestPaymentVerificationMutations(APITestCase):
             UpdatePaymentVerificationReceivedAndReceivedAmount().mutate(
                 None, info, payment_verification_id, received_amount=Decimal(21.36), received=True
             )
+
+    def test_edit_payment_verification_plan_mutation(self) -> None:
+        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.FINISHED, business_area=self.business_area)
+        PaymentVerificationSummaryFactory(generic_fk_obj=payment_plan)
+        PaymentFactory(parent=payment_plan, currency="PLN", status=GenericPayment.STATUS_SUCCESS)
+        payment_verification_plan = PaymentVerificationPlanFactory(
+            generic_fk_obj=payment_plan,
+            status=PaymentVerificationPlan.STATUS_PENDING,
+        )
+        input_dict = {
+            "paymentVerificationPlanId": encode_id_base64(payment_verification_plan.id, "PaymentVerificationPlan"),
+            "sampling": "FULL_LIST",
+            "verificationChannel": "MANUAL",
+            "businessAreaSlug": "afghanistan",
+            "fullListArguments": {"excludedAdminAreas": []},
+            "randomSamplingArguments": None,
+            "rapidProArguments": None,
+        }
+
+        self.snapshot_graphql_request(
+            request_string=EDIT_PAYMENT_VERIFICATION_MUTATION,
+            context={"user": self.user},
+            variables={"input": input_dict},
+        )

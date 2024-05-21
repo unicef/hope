@@ -7,6 +7,7 @@ export const programValidationSchema = (
   t: TFunction<'translation', undefined>,
 ): Yup.ObjectSchema<any, any, any, any> =>
   Yup.object().shape({
+    editMode: Yup.boolean(),
     name: Yup.string()
       .required(t('Programme Name is required'))
       .min(3, t('Too short'))
@@ -14,7 +15,10 @@ export const programValidationSchema = (
     programmeCode: Yup.string()
       .min(4, t('Programme code has to be 4 characters'))
       .max(4, t('Programme code has to be 4 characters'))
-      .matches(/^[A-Za-z0-9\-/.]{4}$/, t('Programme code may only contain letters, digits and \'-\', \'/\', \'.\'.'))
+      .matches(
+        /^[A-Za-z0-9\-/.]{4}$/,
+        t("Programme code may only contain letters, digits and '-', '/', '.'."),
+      )
       .nullable(),
     startDate: Yup.date()
       .required(t('Start Date is required'))
@@ -22,7 +26,6 @@ export const programValidationSchema = (
     endDate: Yup.date()
       .transform((curr, orig) => (orig === '' ? null : curr))
       .required(t('End Date is required'))
-      .min(today, t('End Date cannot be in the past'))
       .when('startDate', (startDate, schema) =>
         startDate instanceof Date && !isNaN(startDate.getTime())
           ? schema.min(
@@ -32,7 +35,12 @@ export const programValidationSchema = (
               ).format('YYYY-MM-DD')}`,
             )
           : schema,
-      ),
+      )
+      .when('editMode', ([editMode], schema) => {
+        return editMode
+          ? schema
+          : schema.min(today, t('End Date cannot be in the past'));
+      }),
     sector: Yup.string().required(t('Sector is required')),
     dataCollectingTypeCode: Yup.string().required(
       t('Data Collecting Type is required'),
@@ -47,6 +55,7 @@ export const programValidationSchema = (
       .max(255, t('Too long'))
       .nullable(),
     populationGoal: Yup.number().min(0).max(99999999, t('Number is too big')),
+    partnerAccess: Yup.string().required(),
     partners: Yup.array().of(
       Yup.object().shape({
         id: Yup.string().required(t('Partner ID is required')),

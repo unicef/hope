@@ -2,7 +2,7 @@ import os
 from time import sleep
 from typing import Literal, Union
 
-from selenium.webdriver import Chrome
+from selenium.webdriver import Chrome, Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 class Common:
-    DEFAULT_TIMEOUT = 100
+    DEFAULT_TIMEOUT = 10
 
     def __init__(self, driver: Chrome):
         self.driver = driver
@@ -19,6 +19,11 @@ class Common:
 
     def _wait(self, timeout: int = DEFAULT_TIMEOUT) -> WebDriverWait:
         return WebDriverWait(self.driver, timeout)
+
+    @staticmethod
+    def _wait_using_element(element: WebElement, timeout: int = DEFAULT_TIMEOUT) -> WebDriverWait:
+        # find and wait only in other element area (instead of whole driver)
+        return WebDriverWait(element, timeout)
 
     def get(self, locator: str, element_type: str = By.CSS_SELECTOR) -> WebElement:
         return self.driver.find_element(element_type, locator)
@@ -56,8 +61,9 @@ class Common:
         items = select_element.find_elements("tag name", tag_name)
         for item in items:
             if name in item.text:
+                self._wait().until(EC.element_to_be_clickable((By.XPATH, f"//*[contains(text(), '{name}')]")))
                 return item
-        return select_element
+        raise AssertionError(f"Element: {name} is not in the list.")
 
     def check_page_after_click(self, button: WebElement, url_fragment: str) -> None:
         programme_creation_url = self.driver.current_url
@@ -70,6 +76,19 @@ class Common:
     def select_option_by_name(self, optionName: str) -> None:
         selectOption = f'li[data-cy="select-option-{optionName}"]'
         self.wait_for(selectOption).click()
+        try:
+            self.wait_for_disappear(selectOption)
+        except BaseException:
+            sleep(1)
+            self.wait_for(selectOption).click()
+            self.wait_for_disappear(selectOption)
+
+    def select_multiple_option_by_name(self, *optionNames: [str]) -> None:
+        for optionName in optionNames:
+            selectOption = f'li[data-cy="select-option-{optionName}"]'
+            self.wait_for(selectOption).click()
+        actions = ActionChains(self.driver)
+        actions.send_keys(Keys.ESCAPE).perform()  # type: ignore
         try:
             self.wait_for_disappear(selectOption)
         except BaseException:
@@ -94,3 +113,12 @@ class Common:
     ) -> None:
         sleep(delay_sec)
         self.driver.get_screenshot_as_file(os.path.join(f"{file_path}", f"{file_name}.{file_type}"))
+
+    def get_value_of_attributes(self, attribute: str = "data-cy") -> None:
+        sleep(1)
+        ids = self.driver.find_elements(By.XPATH, f"//*[@{attribute}]")
+        for ii in ids:
+            try:
+                print(f"{ii.text}: {ii.get_attribute(attribute)}")  # type: ignore
+            except BaseException:
+                print(f"No text: {ii.get_attribute(attribute)}")  # type: ignore

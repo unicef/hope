@@ -8,7 +8,7 @@ import { Box, Button, Checkbox, FormControlLabel, Grid } from '@mui/material';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { Field } from 'formik';
 import * as React from 'react';
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -19,6 +19,8 @@ import {
 } from './TargetingCriteriaDisabled';
 import { VulnerabilityScoreComponent } from './VulnerabilityScoreComponent';
 import { useProgramContext } from 'src/programContext';
+import { useCachedImportedIndividualFieldsQuery } from '@hooks/useCachedImportedIndividualFields';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Title = styled.div`
   padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
@@ -95,9 +97,22 @@ export const TargetingCriteria = ({
   const { t } = useTranslation();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
+  const { businessArea, programId } = useBaseUrl();
+  const { data: allCoreFieldsAttributesData, loading } =
+    useCachedImportedIndividualFieldsQuery(businessArea, programId);
   const [isOpen, setOpen] = useState(false);
   const [criteriaIndex, setIndex] = useState(null);
   const [criteriaObject, setCriteria] = useState({});
+  const [allDataChoicesDict, setAllDataChoicesDict] = useState(null);
+  useEffect(() => {
+    if (loading) return;
+    const allDataChoicesDictTmp =
+      allCoreFieldsAttributesData?.allFieldsAttributes?.reduce((acc, item) => {
+        acc[item.name] = item.choices;
+        return acc;
+      }, {});
+    setAllDataChoicesDict(allDataChoicesDictTmp);
+  }, [allCoreFieldsAttributesData, loading]);
   const regex = /(create|edit-tp)/;
   const isDetailsPage = !regex.test(location.pathname);
   const openModal = (criteria): void => {
@@ -131,7 +146,8 @@ export const TargetingCriteria = ({
     selectedProgram?.dataCollectingType?.individualFiltersAvailable;
   let householdFiltersAvailable =
     selectedProgram?.dataCollectingType?.householdFiltersAvailable;
-
+  const isSocialWorkingProgram =
+    selectedProgram?.dataCollectingType?.type === DataCollectingTypeType.Social;
   // Allow use filters on non-migrated programs
   if (individualFiltersAvailable === undefined) {
     individualFiltersAvailable = true;
@@ -171,6 +187,7 @@ export const TargetingCriteria = ({
           open={isOpen}
           onClose={() => closeModal()}
           addCriteria={addCriteria}
+          isSocialWorkingProgram={isSocialWorkingProgram}
           individualFiltersAvailable={individualFiltersAvailable}
           householdFiltersAvailable={householdFiltersAvailable}
         />
@@ -183,6 +200,7 @@ export const TargetingCriteria = ({
                     <Fragment key={criteria.id || index}>
                       <Criteria
                         isEdit={isEdit}
+                        choicesDict={allDataChoicesDict}
                         canRemove={rules.length > 1}
                         rules={criteria.filters}
                         individualsFiltersBlocks={

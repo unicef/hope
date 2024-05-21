@@ -295,6 +295,17 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
+    def get_readonly_fields(self, request: HttpRequest, obj: Optional[Any] = None) -> list:
+        readonly_fields = list(super().get_readonly_fields(request, obj) or [])
+        # not editable for is_superuser
+        if not is_root(request):
+            readonly_fields.extend(
+                ["name", "type", "enabled", "deprecated", "language", "definition", "description", "flags"]
+            )
+        if not request.user.is_superuser:
+            readonly_fields.append("allowed_business_areas")
+        return readonly_fields
+
     def check_sync_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return is_root(request)
 
@@ -302,7 +313,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
         return is_root(request)
 
     def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
-        return is_root(request)
+        return request.user.is_superuser
 
     def get_ignored_linked_objects(self, request: HttpRequest) -> List[str]:
         return ["history"]
@@ -535,3 +546,22 @@ class RuleCommitAdmin(ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, HOPE
     change_list_template = None
     resource_class = RuleCommitResource
     form = RuleCommitAdminForm
+    fields = (
+        "version",
+        "rule",
+        "definition",
+        "is_release",
+        "enabled",
+        "deprecated",
+        "language",
+        "affected_fields",
+        "updated_by",
+    )
+
+    def get_readonly_fields(self, request: HttpRequest, obj: Optional[RuleCommit] = None) -> List[str]:
+        if is_root(request):
+            return ["updated_by"]
+        return ["updated_by", "version", "rule"]
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return is_root(request)

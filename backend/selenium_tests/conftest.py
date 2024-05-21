@@ -9,10 +9,15 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
+from flags.models import FlagState
 from page_object.admin_panel.admin_panel import AdminPanel
+from page_object.filters import Filters
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
+from page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from page_object.grievance.feedback import Feedback
+from page_object.grievance.grievance_tickets import GrievanceTickets
 from page_object.grievance.new_feedback import NewFeedback
+from page_object.grievance.new_ticket import NewTicket
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
 from page_object.programme_population.households import Households
@@ -23,6 +28,9 @@ from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
 )
+from page_object.targeting.targeting import Targeting
+from page_object.targeting.targeting_create import TargetingCreate
+from page_object.targeting.targeting_details import TargetingDetails
 from pytest_django.live_server_helper import LiveServer
 from pytest_html_reporter import attach
 from requests import Session
@@ -33,7 +41,11 @@ from selenium.webdriver.chrome.options import Options
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    BusinessAreaPartnerThrough,
+    DataCollectingType,
+)
 from hct_mis_api.apps.geo.models import Country
 
 
@@ -42,6 +54,9 @@ def pytest_addoption(parser) -> None:  # type: ignore
 
 
 def pytest_configure() -> None:
+    # delete all old screenshots
+    for file in os.listdir("report/screenshot"):
+        os.remove(os.path.join("report/screenshot", file))
     from django.conf import settings
 
     settings.DEBUG = True
@@ -170,6 +185,11 @@ def login(browser: Chrome) -> Chrome:
 
 
 @pytest.fixture
+def filters(request: FixtureRequest, browser: Chrome) -> Filters:
+    yield Filters(browser)
+
+
+@pytest.fixture
 def pageProgrammeManagement(request: FixtureRequest, browser: Chrome) -> ProgrammeManagement:
     yield ProgrammeManagement(browser)
 
@@ -187,6 +207,11 @@ def pageAdminPanel(request: FixtureRequest, browser: Chrome) -> AdminPanel:
 @pytest.fixture
 def pageFeedback(request: FixtureRequest, browser: Chrome) -> Feedback:
     yield Feedback(browser)
+
+
+@pytest.fixture
+def pageGrievanceTickets(request: FixtureRequest, browser: Chrome) -> GrievanceTickets:
+    yield GrievanceTickets(browser)
 
 
 @pytest.fixture
@@ -230,6 +255,31 @@ def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> Individu
 
 
 @pytest.fixture
+def pageTargeting(request: FixtureRequest, browser: Chrome) -> Targeting:
+    yield Targeting(browser)
+
+
+@pytest.fixture
+def pageTargetingDetails(request: FixtureRequest, browser: Chrome) -> TargetingDetails:
+    yield TargetingDetails(browser)
+
+
+@pytest.fixture
+def pageTargetingCreate(request: FixtureRequest, browser: Chrome) -> TargetingCreate:
+    yield TargetingCreate(browser)
+
+
+@pytest.fixture
+def pageGrievanceDetailsPage(request: FixtureRequest, browser: Chrome) -> GrievanceDetailsPage:
+    yield GrievanceDetailsPage(browser)
+
+
+@pytest.fixture
+def pageGrievanceNewTicket(request: FixtureRequest, browser: Chrome) -> NewTicket:
+    yield NewTicket(browser)
+
+
+@pytest.fixture
 def business_area() -> BusinessArea:
     business_area, _ = BusinessArea.objects.get_or_create(
         **{
@@ -241,9 +291,13 @@ def business_area() -> BusinessArea:
             "region_name": "SAR",
             "slug": "afghanistan",
             "has_data_sharing_agreement": True,
-            "is_payment_plan_applicable": False,
+            "is_payment_plan_applicable": True,
+            "is_accountability_applicable": True,
             "kobo_token": "XXX",
         },
+    )
+    FlagState.objects.get_or_create(
+        **{"name": "ALLOW_ACCOUNTABILITY_MODULE", "condition": "boolean", "value": "True", "required": False}
     )
     return business_area
 
@@ -280,7 +334,7 @@ def create_super_user(business_area: BusinessArea) -> User:
         email="test@example.com",
         partner=partner,
     )
-    user_role = UserRole.objects.create(
+    UserRole.objects.create(
         user=user,
         role=Role.objects.get(name="Role"),
         business_area=BusinessArea.objects.get(name="Afghanistan"),
@@ -311,14 +365,10 @@ def create_super_user(business_area: BusinessArea) -> User:
         )
         data_collecting_type.limit_to.add(business_area)
         data_collecting_type.save()
-
-    partner.permissions = {
-        str(business_area.pk): {
-            "programs": {},
-            "roles": [str(user_role.id)],
-        }
-    }
-    partner.save()
+    ba_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
+        business_area=business_area, partner=partner
+    )
+    ba_partner_through.roles.set([role])
     return user
 
 

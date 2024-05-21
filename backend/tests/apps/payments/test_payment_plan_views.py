@@ -1,5 +1,9 @@
+import json
 from typing import Any, Callable
 
+from django.core.cache import cache
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 import pytest
@@ -93,9 +97,22 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        update_user_partner_perm_for_program: Callable,
+        update_partner_access_to_program: Callable,
         id_to_base64: Callable,
     ) -> None:
+        def _test_list() -> Any:
+            """
+            Helper function to test list payment plans now and again to test caching
+            """
+            response = self.client.get(self.url)
+            assert response.status_code == status.HTTP_200_OK
+            response_json = response.json()["results"]
+            assert len(response_json) == 2
+            assert self.payment_plan1.unicef_id in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
+            assert self.payment_plan2.unicef_id in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
+            assert self.payment_plan3.unicef_id not in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
+            return response
+
         self.set_up(api_client, afghanistan, id_to_base64)
         create_user_role_with_permissions(
             self.user,
@@ -109,14 +126,22 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         assert len(response_json) == 1
         assert response_json[0]["unicef_id"] == self.payment_plan1.unicef_id
 
-        update_user_partner_perm_for_program(self.user, self.afghanistan, self.program2)
-        response = self.client.get(self.url)
-        assert response.status_code == status.HTTP_200_OK
-        response_json = response.json()["results"]
-        assert len(response_json) == 2
-        assert self.payment_plan1.unicef_id in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
-        assert self.payment_plan2.unicef_id in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
-        assert self.payment_plan3.unicef_id not in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
+        update_partner_access_to_program(self.partner, self.program2)
+
+        with CaptureQueriesContext(connection) as ctx:
+            response = _test_list()
+
+            etag = response.headers["etag"]
+            assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
+            assert len(ctx.captured_queries) == 26
+
+        # Test that reoccurring request use cached data
+        with CaptureQueriesContext(connection) as ctx:
+            response = _test_list()
+            etag_second_call = response.headers["etag"]
+            assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
+            assert etag_second_call == etag
+            assert len(ctx.captured_queries) == 12
 
     def test_list_payment_plans_approval_process_data(
         self,
@@ -133,6 +158,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         )
         approval_approval = ApprovalFactory(approval_process=approval_process, type=Approval.APPROVAL)
         approval_authorization = ApprovalFactory(approval_process=approval_process, type=Approval.AUTHORIZATION)
+        approval_release = ApprovalFactory(approval_process=approval_process, type=Approval.FINANCE_RELEASE)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PM_VIEW_LIST, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
@@ -170,6 +196,17 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         )
         assert response_json[0]["last_approval_process_by"] == str(approval_authorization.created_by)
 
+        self.payment_plan1.status = PaymentPlan.Status.ACCEPTED
+        self.payment_plan1.save()
+        response = self.client.get(self.url)
+        assert response.status_code == status.HTTP_200_OK
+        response_json = response.json()["results"]
+        assert len(response_json) == 1
+        assert response_json[0]["last_approval_process_date"] == approval_release.created_at.strftime(
+            "%Y-%m-%dT%H:%M:%S.%fZ"
+        )
+        assert response_json[0]["last_approval_process_by"] == str(approval_release.created_by)
+
     def _bulk_approve_action_response(self) -> Any:
         ApprovalProcessFactory(payment_plan=self.payment_plan1)
         ApprovalProcessFactory(payment_plan=self.payment_plan2)
@@ -193,7 +230,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        update_user_partner_perm_for_program: Callable,
+        update_partner_access_to_program: Callable,
         id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan, id_to_base64)
@@ -207,7 +244,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             self.afghanistan,
             self.program1,
         )
-        update_user_partner_perm_for_program(self.user, self.afghanistan, self.program2)
+        update_partner_access_to_program(self.partner, self.program2)
         response = self._bulk_approve_action_response()
         assert response.status_code == status.HTTP_204_NO_CONTENT
         self.payment_plan1.refresh_from_db()
@@ -220,7 +257,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        update_user_partner_perm_for_program: Callable,
+        update_partner_access_to_program: Callable,
         id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan, id_to_base64)
@@ -230,7 +267,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             self.afghanistan,
             self.program1,
         )
-        update_user_partner_perm_for_program(self.user, self.afghanistan, self.program2)
+        update_partner_access_to_program(self.partner, self.program2)
         response = self._bulk_approve_action_response()
         assert response.status_code == status.HTTP_403_FORBIDDEN
         self.payment_plan1.refresh_from_db()
@@ -296,7 +333,7 @@ class TestPaymentPlanList(PaymentPlanTestMixin):
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        update_user_partner_perm_for_program: Callable,
+        update_partner_access_to_program: Callable,
         id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan, id_to_base64)
@@ -306,7 +343,7 @@ class TestPaymentPlanList(PaymentPlanTestMixin):
             self.afghanistan,
             self.program1,
         )
-        update_user_partner_perm_for_program(self.user, self.afghanistan, self.program2)
+        update_partner_access_to_program(self.partner, self.program2)
         response = self.client.get(self.url)
         assert response.status_code == status.HTTP_200_OK
         response_json = response.json()["results"]

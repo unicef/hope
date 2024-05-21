@@ -19,6 +19,7 @@ import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { useProgramContext } from '../../programContext';
+import { DocumentSearchField } from '@core/DocumentSearchField';
 
 interface IndividualsFilterProps {
   filter;
@@ -85,39 +86,12 @@ export function IndividualsFilter({
             data-cy="ind-filters-search"
           />
         </Grid>
-        <Grid container item xs={6} spacing={3}>
-          <Grid item xs={6}>
-            <SelectFilter
-              onChange={(e) =>
-                handleFilterChange('documentType', e.target.value)
-              }
-              label={t('Document Type')}
-              value={filter.documentType}
-              borderRadius="0px 4px 4px 0px"
-              data-cy="filters-document-type"
-              fullWidth
-              disableClearable
-            >
-              {choicesData?.documentTypeChoices.map(
-                ({ name, value }) => (
-                  <MenuItem key={value} value={value}>
-                    {name}
-                  </MenuItem>
-                ),
-              )}
-            </SelectFilter>
-          </Grid>
-          <Grid item xs={6}>
-            <SearchTextField
-              label={t('Document number')}
-              value={filter.documentNumber}
-              onChange={(e) =>
-                handleFilterChange('documentNumber', e.target.value)
-              }
-              data-cy="filters-document-number"
-            />
-          </Grid>
-        </Grid>
+        <DocumentSearchField
+          onChange={handleFilterChange}
+          type={filter.documentType}
+          number={filter.documentNumber}
+          choices={choicesData?.documentTypeChoices}
+        />
         {isAllPrograms && (
           <Grid item xs={3}>
             <SelectFilter
@@ -251,7 +225,7 @@ export function IndividualsFilter({
               handleFilterChange('lastRegistrationDateMin', date)
             }
             value={filter.lastRegistrationDateMin}
-            data-cy="ind-filters-reg-date-from"
+            dataCy="ind-filters-reg-date-from"
           />
         </Grid>
         <Grid item xs={2}>
@@ -261,7 +235,7 @@ export function IndividualsFilter({
               handleFilterChange('lastRegistrationDateMax', date)
             }
             value={filter.lastRegistrationDateMax}
-            data-cy="ind-filters-reg-date-to"
+            dataCy="ind-filters-reg-date-to"
           />
         </Grid>
         {isAllPrograms && (

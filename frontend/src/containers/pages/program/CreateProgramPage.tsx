@@ -4,6 +4,7 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllProgramsForChoicesDocument,
+  ProgramPartnerAccess,
   useAllAreasTreeQuery,
   useCreateProgramMutation,
   useUserPartnerChoicesQuery,
@@ -42,6 +43,7 @@ export const CreateProgramPage = (): ReactElement => {
   });
 
   const handleSubmit = async (values): Promise<void> => {
+    delete values.editMode;
     const budgetValue = parseFloat(values.budget) ?? 0;
     const budgetToFixed = !Number.isNaN(budgetValue)
       ? budgetValue.toFixed(2)
@@ -50,6 +52,14 @@ export const CreateProgramPage = (): ReactElement => {
     const populationGoalParsed = !Number.isNaN(populationGoalValue)
       ? populationGoalValue
       : 0;
+    const partnersToSet =
+      values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess
+        ? values.partners.map(({ id, areas, areaAccess }) => ({
+            partner: id,
+            areas: areaAccess === 'ADMIN_AREA' ? areas : [],
+            areaAccess,
+          }))
+        : [];
 
     try {
       const response = await mutate({
@@ -59,6 +69,7 @@ export const CreateProgramPage = (): ReactElement => {
             budget: budgetToFixed,
             populationGoal: populationGoalParsed,
             businessAreaSlug: businessArea,
+            partners: partnersToSet,
           },
         },
         refetchQueries: () => [
@@ -76,6 +87,7 @@ export const CreateProgramPage = (): ReactElement => {
   };
 
   const initialValues = {
+    editMode: false,
     name: '',
     programmeCode: '',
     startDate: '',
@@ -89,6 +101,7 @@ export const CreateProgramPage = (): ReactElement => {
     cashPlus: false,
     frequencyOfPayments: 'REGULAR',
     partners: [],
+    partnerAccess: ProgramPartnerAccess.AllPartnersAccess,
   };
 
   const stepFields = [
@@ -106,7 +119,7 @@ export const CreateProgramPage = (): ReactElement => {
       'cashPlus',
       'frequencyOfPayments',
     ],
-    ['partners'],
+    ['partnerAccess'],
   ];
 
   if (treeLoading || userPartnerChoicesLoading) return <LoadingComponent />;
@@ -133,7 +146,13 @@ export const CreateProgramPage = (): ReactElement => {
       }}
       validationSchema={programValidationSchema(t)}
     >
-      {({ submitForm, values, validateForm, setFieldTouched }) => {
+      {({
+        submitForm,
+        values,
+        validateForm,
+        setFieldTouched,
+        setFieldValue,
+      }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
           .map((partner) => ({
@@ -198,6 +217,7 @@ export const CreateProgramPage = (): ReactElement => {
                   step={step}
                   setStep={setStep}
                   submitForm={submitForm}
+                  setFieldValue={setFieldValue}
                 />
               )}
             </Box>

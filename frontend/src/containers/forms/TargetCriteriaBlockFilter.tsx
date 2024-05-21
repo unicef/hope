@@ -10,11 +10,13 @@ export function TargetCriteriaBlockFilter({
   each,
   onChange,
   onDelete,
+  choicesDict,
 }: {
   blockIndex: number;
   index: number;
   data: ImportedIndividualFieldsQuery;
   each;
+  choicesDict;
   onChange: (e, object) => void;
   onDelete: () => void;
 }): React.ReactElement {
@@ -34,6 +36,7 @@ export function TargetCriteriaBlockFilter({
           <SubField
             field={each}
             index={index}
+            choicesDict={choicesDict}
             baseName={`individualsFiltersBlocks[${blockIndex}].individualBlockFilters[${index}]`}
           />
         </div>

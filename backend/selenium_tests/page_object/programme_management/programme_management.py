@@ -30,6 +30,7 @@ class ProgrammeManagement(BaseComponents):
     buttonBack = 'button[data-cy="button-back"]'
     buttonCancel = 'a[data-cy="button-cancel"]'
     buttonSave = 'button[data-cy="button-save"]'
+    selectPartnerAccess = 'div[data-cy="select-partnerAccess"]'
     buttonAddPartner = 'button[data-cy="button-add-partner"]'
     inputPartner = 'div[data-cy="select-partners[0].id"]'
     buttonDelete = 'button[data-cy="button-delete"]'
@@ -49,6 +50,9 @@ class ProgrammeManagement(BaseComponents):
     )
     filtersSearch = '//*[@data-cy="filters-search"]/div/input'
     buttonApply = 'button[data-cy="button-filters-clear"]'
+    buttonEditProgram = 'a[data-cy="button-edit-program"]'
+    inputProgrammeCode = 'input[data-cy="input-programmeCode"]'
+    tableRow = 'tr[data-cy="table-row-{}"]'
 
     def getCalendarIcon(self) -> WebElement:
         return self.wait_for(self.calendarIcon)
@@ -66,6 +70,12 @@ class ProgrammeManagement(BaseComponents):
         locator = f'tr[data-cy="table-row-{programName}"]'
         self.wait_for(locator)
         return self.get_elements(locator)[0].text.split("\n")
+
+    def getAccessToProgram(self) -> WebElement:
+        return self.wait_for(self.selectPartnerAccess)
+
+    def selectWhoAccessToProgram(self, name: str) -> None:
+        self.select_option_by_name(name)
 
     def getButtonAddPartner(self) -> WebElement:
         return self.wait_for(self.buttonAddPartner)
@@ -177,6 +187,12 @@ class ProgrammeManagement(BaseComponents):
     def getButtonApply(self) -> WebElement:
         return self.wait_for(self.buttonApply)
 
+    def getButtonEditProgram(self) -> WebElement:
+        return self.wait_for(self.buttonEditProgram)
+
+    def getInputProgrammeCode(self) -> WebElement:
+        return self.wait_for(self.inputProgrammeCode)
+
     def getInputDescription(self) -> WebElement:
         return self.wait_for(self.inputDescription)
 
@@ -188,3 +204,6 @@ class ProgrammeManagement(BaseComponents):
 
     def getInputPopulation(self) -> WebElement:
         return self.wait_for(self.inputPopulation)
+
+    def getTableRowByProgramName(self, program_name: str) -> WebElement:
+        return self.wait_for(self.tableRow.format(program_name))

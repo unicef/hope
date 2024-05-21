@@ -1602,7 +1602,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "registration_data_import",
-        "scope": [Scope.TARGETING],
+        "scope": [Scope.TARGETING, Scope.XLSX_PEOPLE],
     },
     {
         "id": "e4aa9cdf-2c9e-4e22-9928-2b63a6ea4ef0",
@@ -1815,6 +1815,45 @@ CORE_FIELDS_ATTRIBUTES = [
         "scope": [Scope.XLSX_PEOPLE],
     },
     {
+        "id": "15b7b623-0dee-4212-a32a-a6d6f6877b4e",
+        "type": TYPE_STRING,
+        "name": "wallet_name",
+        "lookup": "wallet_name",
+        "label": {"English(EN)": "Wallet Name"},
+        "hint": "",
+        "required": False,
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "wallet_name_i_c",
+        "scope": [Scope.XLSX, Scope.INDIVIDUAL_UPDATE],
+    },
+    {
+        "id": "0010bc3e-0a4a-452b-a776-2cc4b760a0fd",
+        "type": TYPE_STRING,
+        "name": "blockchain_name",
+        "lookup": "blockchain_name",
+        "label": {"English(EN)": "Blockchain Name"},
+        "hint": "",
+        "required": False,
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "blockchain_name_i_c",
+        "scope": [Scope.XLSX, Scope.INDIVIDUAL_UPDATE],
+    },
+    {
+        "id": "15d35efa-8f36-4a40-b9ed-a7812a665e01",
+        "type": TYPE_STRING,
+        "name": "wallet_address",
+        "lookup": "wallet_address",
+        "label": {"English(EN)": "Wallet Address"},
+        "hint": "",
+        "required": False,
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "wallet_address_i_c",
+        "scope": [Scope.XLSX, Scope.INDIVIDUAL_UPDATE],
+    },
+    {
         "id": "8ef6fd85-032f-42cf-8f1f-3398f88316af",
         "type": TYPE_STRING,
         "name": "registration_id",
@@ -1837,7 +1876,7 @@ class FieldFactory(list):
         super().__init__(*args, **kwargs)
         self.scopes: Iterable = scopes or set()
         if fields:
-            self.extend(fields)
+            self.extend(copy.deepcopy(fields))
         self.all_fields = copy.deepcopy(CORE_FIELDS_ATTRIBUTES)
 
     def extend(self, __iterable: Iterable[dict]) -> None:
@@ -1865,11 +1904,22 @@ class FieldFactory(list):
     def from_scopes(cls, scopes: list[Scope]) -> "FieldFactory":
         factory = cls()
         all_fields = copy.deepcopy(factory.all_fields)
+        factory.scopes.update(scopes)
         factory.extend(filter(lambda field: any(True for scope in scopes if scope in field["scope"]), all_fields))
         if Scope.XLSX_PEOPLE in scopes:
             for field_attr in factory:
                 field_attr["xlsx_field"] = "pp_" + field_attr["xlsx_field"].replace("_h_c", "_i_c")
+        return factory
+
+    @classmethod
+    def from_only_scopes(cls, scopes: list[Scope]) -> "FieldFactory":
+        factory = cls()
+        all_fields = copy.deepcopy(factory.all_fields)
         factory.scopes.update(scopes)
+        factory.extend(filter(lambda field: all(scope in field["scope"] for scope in scopes), all_fields))
+        if Scope.XLSX_PEOPLE in scopes:
+            for field_attr in factory:
+                field_attr["xlsx_field"] = "pp_" + field_attr["xlsx_field"].replace("_h_c", "_i_c")
         return factory
 
     @classmethod

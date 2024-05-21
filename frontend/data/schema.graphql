@@ -151,12 +151,6 @@ type ApprovalProcessNodeEdge {
   cursor: String!
 }
 
-type AreaGroupNode {
-  ids: [ID]
-  level: Int
-  totalCount: Int
-}
-
 type AreaNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -338,9 +332,11 @@ type BusinessAreaNode implements Node {
   isAccountabilityApplicable: Boolean
   active: Boolean!
   enableEmailNotification: Boolean!
+  partners: [PartnerNode!]!
+  businessAreaPartnerThrough: [PartnerRoleNode!]!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   dataCollectingTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
-  partnerSet: [PartnerNodeForProgram!]!
+  partnerSet: [PartnerNode!]!
   userRoles: [UserRoleNode!]!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individualSet(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -615,7 +611,8 @@ input CopyProgramInput {
   administrativeAreasOfImplementation: String
   businessAreaSlug: String
   dataCollectingTypeCode: String
-  partners: [PartnerProgramInput]
+  partners: [ProgramPartnerThroughInput]
+  partnerAccess: String
   programmeCode: String
 }
 
@@ -777,7 +774,8 @@ input CreateProgramInput {
   administrativeAreasOfImplementation: String
   businessAreaSlug: String
   dataCollectingTypeCode: String
-  partners: [PartnerProgramInput]
+  partners: [ProgramPartnerThroughInput]
+  partnerAccess: String
   programmeCode: String
 }
 
@@ -975,6 +973,8 @@ enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   TRANSFER_TO_ACCOUNT
   VOUCHER
   CASH_OVER_THE_COUNTER
+  TRANSFER_TO_DIGITAL_WALLET
+  ATM_CARD
 }
 
 type DiscardPaymentVerificationPlan {
@@ -2010,6 +2010,7 @@ enum ImportedHouseholdCurrency {
   ZAR
   ZMW
   ZWL
+  USDC
 }
 
 type ImportedHouseholdNode implements Node {
@@ -2223,6 +2224,9 @@ type ImportedIndividualNode implements Node {
   misUnicefId: String
   programId: UUID
   ageAtRegistration: Int
+  walletName: String!
+  blockchainName: String!
+  walletAddress: String!
   importedhousehold: ImportedHouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
   identities(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualIdentityNodeConnection!
@@ -2400,6 +2404,9 @@ type IndividualNode implements Node {
   preferredLanguage: String
   relationshipConfirmed: Boolean!
   ageAtRegistration: Int
+  walletName: String!
+  blockchainName: String!
+  walletAddress: String!
   program: ProgramNode
   copiedFrom: IndividualNode
   originUnicefId: String
@@ -2802,46 +2809,54 @@ type PaginatedPaymentRecordsAndPaymentsNode {
   totalCount: Int
 }
 
-type PartnerNodeForProgram {
-  id: ID
+type PartnerNode {
+  id: ID!
   allowedBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   name: String
-  parent: PartnerNodeForProgram
+  parent: PartnerNode
   isUn: Boolean!
   permissions: JSONString!
   lft: Int!
   rght: Int!
   treeId: Int!
   level: Int!
-  partnerSet: [PartnerNodeForProgram!]!
+  businessAreaPartnerThrough: [PartnerRoleNode!]!
+  businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
+  partnerSet: [PartnerNode!]!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
   individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
-  adminAreas: [AreaGroupNode]
+  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
+  areas: [AreaNode]
   areaAccess: String
 }
 
-input PartnerProgramInput {
-  id: String!
-  areaAccess: String
-  adminAreas: [String]
+type PartnerRoleNode {
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  businessArea: UserBusinessAreaNode!
+  partner: PartnerNode!
+  roles: [RoleNode!]!
 }
 
 type PartnerType {
   id: ID!
   allowedBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   name: String!
-  parent: PartnerNodeForProgram
+  parent: PartnerNode
   isUn: Boolean!
   permissions: JSONString!
   lft: Int!
   rght: Int!
   treeId: Int!
   level: Int!
-  partnerSet: [PartnerNodeForProgram!]!
+  businessAreaPartnerThrough: [PartnerRoleNode!]!
+  businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
+  partnerSet: [PartnerNode!]!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
   individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
 }
 
 type PaymentConflictDataNode {
@@ -2867,6 +2882,8 @@ enum PaymentDeliveryType {
   TRANSFER_TO_ACCOUNT
   VOUCHER
   CASH_OVER_THE_COUNTER
+  TRANSFER_TO_DIGITAL_WALLET
+  ATM_CARD
 }
 
 type PaymentDetailsApproveMutation {
@@ -2902,6 +2919,7 @@ type PaymentNode implements Node {
   deliveredQuantityUsd: Float
   deliveryDate: DateTime
   transactionReferenceId: String
+  transactionStatusBlockchainLink: String
   parent: PaymentPlanNode!
   conflicted: Boolean!
   excluded: Boolean!
@@ -2917,6 +2935,7 @@ type PaymentNode implements Node {
   additionalCollectorName: String
   additionalDocumentType: String
   additionalDocumentNumber: String
+  fspAuthCode: String
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   householdSnapshot: PaymentHouseholdSnapshotNode
   adminUrl: String
@@ -3128,6 +3147,7 @@ enum PaymentPlanCurrency {
   ZAR
   ZMW
   ZWL
+  USDC
 }
 
 type PaymentPlanNode implements Node {
@@ -3251,6 +3271,8 @@ enum PaymentRecordDeliveryType {
   TRANSFER_TO_ACCOUNT
   VOUCHER
   CASH_OVER_THE_COUNTER
+  TRANSFER_TO_DIGITAL_WALLET
+  ATM_CARD
 }
 
 enum PaymentRecordEntitlementCardStatus {
@@ -3276,6 +3298,7 @@ type PaymentRecordNode implements Node {
   deliveredQuantityUsd: Float
   deliveryDate: DateTime
   transactionReferenceId: String
+  transactionStatusBlockchainLink: String
   caId: String
   caHashId: UUID
   parent: CashPlanNode
@@ -3537,6 +3560,8 @@ type ProgramNode implements Node {
   householdCount: Int!
   individualCount: Int!
   programmeCode: String
+  partnerAccess: ProgramPartnerAccess!
+  partners: [PartnerNode]
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -3557,7 +3582,6 @@ type ProgramNode implements Node {
   totalUndeliveredQuantity: Decimal
   totalNumberOfHouseholds: Int
   totalNumberOfHouseholdsWithTpInProgram: Int
-  partners: [PartnerNodeForProgram]
   isSocialWorkerProgram: Boolean
 }
 
@@ -3571,6 +3595,18 @@ type ProgramNodeConnection {
 type ProgramNodeEdge {
   node: ProgramNode
   cursor: String!
+}
+
+enum ProgramPartnerAccess {
+  ALL_PARTNERS_ACCESS
+  NONE_PARTNERS_ACCESS
+  SELECTED_PARTNERS_ACCESS
+}
+
+input ProgramPartnerThroughInput {
+  partner: String
+  areas: [String]
+  areaAccess: String
 }
 
 enum ProgramScope {
@@ -3691,7 +3727,7 @@ type Query {
   dataCollectingType(id: ID!): DataCollectingTypeNode
   dataCollectionTypeChoices: [DataCollectingTypeChoiceObject]
   program(id: ID!): ProgramNode
-  allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, orderBy: String): ProgramNodeConnection
+  allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, name: String, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, orderBy: String): ProgramNodeConnection
   chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   chartTotalTransferredByMonth(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   cashPlan(id: ID!): CashPlanNode
@@ -3702,7 +3738,7 @@ type Query {
   programScopeChoices: [ChoiceObject]
   cashPlanStatusChoices: [ChoiceObject]
   dataCollectingTypeChoices: [ChoiceObject]
-  allActivePrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, orderBy: String): ProgramNodeConnection
+  allActivePrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, name: String, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, orderBy: String): ProgramNodeConnection
   targetPopulation(id: ID!): TargetPopulationNode
   allTargetPopulation(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, totalHouseholdsCountWithValidPhoneNoMax: Int, totalHouseholdsCountWithValidPhoneNoMin: Int, orderBy: String): TargetPopulationNodeConnection
   targetPopulationHouseholds(targetPopulation: ID!, offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
@@ -3734,7 +3770,7 @@ type Query {
   allHouseholdsFlexFieldsAttributes: [FieldAttributeNode]
   allIndividualsFlexFieldsAttributes: [FieldAttributeNode]
   me: UserNode
-  allUsers(offset: Int, before: String, after: String, first: Int, last: Int, status: [String], partner: [String], businessArea: String!, search: String, roles: [String], isTicketCreator: Boolean, isSurveyCreator: Boolean, isMessageCreator: Boolean, isFeedbackCreator: Boolean, orderBy: String): UserNodeConnection
+  allUsers(offset: Int, before: String, after: String, first: Int, last: Int, status: [String], partner: [String], businessArea: String!, program: String, search: String, roles: [String], isTicketCreator: Boolean, isSurveyCreator: Boolean, isMessageCreator: Boolean, isFeedbackCreator: Boolean, orderBy: String): UserNodeConnection
   userRolesChoices: [RoleChoiceObject]
   userStatusChoices: [ChoiceObject]
   userPartnerChoices: [ChoiceObject]
@@ -4046,6 +4082,7 @@ type RoleNode {
   name: String!
   subsystem: RoleSubsystem!
   permissions: [String!]
+  businessAreaPartnerThrough: [PartnerRoleNode!]!
   userRoles: [UserRoleNode!]!
 }
 
@@ -5036,7 +5073,8 @@ input UpdateProgramInput {
   populationGoal: Int
   administrativeAreasOfImplementation: String
   dataCollectingTypeCode: String
-  partners: [PartnerProgramInput]
+  partners: [ProgramPartnerThroughInput]
+  partnerAccess: String
   programmeCode: String
 }
 
@@ -5097,9 +5135,11 @@ type UserBusinessAreaNode implements Node {
   isAccountabilityApplicable: Boolean
   active: Boolean!
   enableEmailNotification: Boolean!
+  partners: [PartnerNode!]!
+  businessAreaPartnerThrough: [PartnerRoleNode!]!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   dataCollectingTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
-  partnerSet: [PartnerNodeForProgram!]!
+  partnerSet: [PartnerNode!]!
   userRoles: [UserRoleNode!]!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individualSet(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -5145,7 +5185,7 @@ type UserNode implements Node {
   dateJoined: DateTime!
   id: ID!
   status: UserStatus!
-  partner: PartnerNodeForProgram
+  partner: PartnerNode
   email: String!
   availableForExport: Boolean!
   customFields: JSONString!
@@ -5176,6 +5216,7 @@ type UserNode implements Node {
   feedbackMessages(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackMessageNodeConnection!
   surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
   businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection
+  partnerRoles: [PartnerRoleNode]
 }
 
 type UserNodeConnection {

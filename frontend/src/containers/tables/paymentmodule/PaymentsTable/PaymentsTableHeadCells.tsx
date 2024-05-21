@@ -1,8 +1,9 @@
 import { AllPaymentsForTableQuery } from '@generated/graphql';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import { PERMISSIONS } from '../../../../config/permissions';
 
 export const headCells: HeadCell<
-AllPaymentsForTableQuery['allPayments']['edges'][number]['node']
+  AllPaymentsForTableQuery['allPayments']['edges'][number]['node']
 >[] = [
   {
     disablePadding: false,
@@ -12,13 +13,13 @@ AllPaymentsForTableQuery['allPayments']['edges'][number]['node']
   },
   {
     disablePadding: false,
-    label: 'Payment Id',
+    label: 'Payment ID',
     id: 'unicef_id',
     numeric: false,
   },
   {
     disablePadding: false,
-    label: 'Household Id',
+    label: 'Household ID',
     id: 'household__unicef_id',
     numeric: false,
   },
@@ -57,6 +58,13 @@ AllPaymentsForTableQuery['allPayments']['edges'][number]['node']
     label: 'Delivered Quantity',
     id: 'delivered_quantity',
     numeric: false,
+  },
+    {
+    disablePadding: false,
+    label: 'FSP Auth Code',
+    id: 'fsp_auth_code',
+    numeric: false,
+    requiredPermission: PERMISSIONS.PM_VIEW_FSP_AUTH_CODE,
   },
   {
     disablePadding: false,
