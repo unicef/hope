@@ -16,7 +16,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
-interface ReleaseSectionProps {
+interface PendingForReleaseSectionProps {
   selectedInReview: any[];
   setSelectedInReview: (value: React.SetStateAction<any[]>) => void;
   handleSelect: (
@@ -36,7 +36,9 @@ interface ReleaseSectionProps {
   bulkAction: any;
 }
 
-export const ReleaseSection: React.FC<ReleaseSectionProps> = ({
+export const PendingForReleaseSection: React.FC<
+  PendingForReleaseSectionProps
+> = ({
   selectedInReview,
   setSelectedInReview,
   handleSelect,

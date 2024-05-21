@@ -1067,6 +1067,13 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
                     .last()
                 ):
                     return ModifiedData(approval.created_at, approval.created_by)
+            if self.status == PaymentPlan.Status.ACCEPTED:
+                if (
+                    approval := approval_process.approvals.filter(type=Approval.FINANCE_RELEASE)
+                    .order_by("created_at")
+                    .last()
+                ):
+                    return ModifiedData(approval.created_at, approval.created_by)
         return ModifiedData(self.updated_at)
 
     @property
