@@ -32,14 +32,14 @@ index_settings = {
 
 
 class IndividualDocument(Document):
-    id = fields.KeywordField()    # The boost parameter on field mappings has been removed
+    id = fields.KeywordField()  # The boost parameter on field mappings has been removed
     given_name = fields.TextField(
         analyzer=name_synonym_analyzer, fields={"phonetic": fields.TextField(analyzer=phonetic_analyzer)}
     )
     middle_name = fields.TextField(analyzer=phonetic_analyzer)
     family_name = fields.TextField(fields={"phonetic": fields.TextField(analyzer=phonetic_analyzer)})
     full_name = fields.TextField(analyzer=phonetic_analyzer)
-    birth_date = fields.DateField()   # Before es 8, similarity parameter on DateField failed silently
+    birth_date = fields.DateField()  # Before es 8, similarity parameter on DateField failed silently
     phone_no = fields.KeywordField("phone_no.__str__", similarity="boolean")
     phone_no_alternative = fields.KeywordField("phone_no_alternative.__str__", similarity="boolean")
     phone_no_text = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
