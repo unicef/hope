@@ -7,7 +7,7 @@ import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { IndividualFlags } from '@components/population/IndividualFlags';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { choicesToDict, sexToCapitalize } from '@utils/utils';
+import { sexToCapitalize } from '@utils/utils';
 
 interface IndividualsListTableRowProps {
   individual: IndividualNode;
@@ -18,14 +18,9 @@ interface IndividualsListTableRowProps {
 export function PeopleListTableRow({
   individual,
   canViewDetails,
-  choicesData,
 }: IndividualsListTableRowProps): React.ReactElement {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
-
-  const relationshipChoicesDict = choicesToDict(
-    choicesData.relationshipChoices,
-  );
 
   const individualDetailsPath = `/${baseUrl}/population/people/${individual.id}`;
   const handleClick = (): void => {
