@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 from django.db.transaction import atomic
@@ -15,6 +15,7 @@ from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hct_mis_api.api.endpoints.rdi.mixin import get_photo_from_stream
 from hct_mis_api.api.endpoints.rdi.upload import BirthDateValidator, DocumentSerializer
 from hct_mis_api.api.models import Grant
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
     BLANK,
     COLLECT_TYPES,
@@ -53,10 +54,22 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     country = serializers.CharField(allow_blank=True, required=True)
     collect_individual_data = serializers.ChoiceField(choices=COLLECT_TYPES)
     residence_status = serializers.ChoiceField(choices=RESIDENCE_STATUS_CHOICE)
-    village = serializers.CharField(allow_blank=True, required=False)
+    village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
 
     phone_no = serializers.CharField(allow_null=True, allow_blank=True, required=False)
     phone_no_alternative = serializers.CharField(allow_null=True, allow_blank=True, required=False)
+
+    admin1 = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
+    admin2 = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
+    admin3 = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
+    admin4 = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.fields["admin1"].choices = Area.objects.filter(area_type__area_level=1).values_list("p_code", "name")
+        self.fields["admin2"].choices = Area.objects.filter(area_type__area_level=2).values_list("p_code", "name")
+        self.fields["admin3"].choices = Area.objects.filter(area_type__area_level=3).values_list("p_code", "name")
+        self.fields["admin4"].choices = Area.objects.filter(area_type__area_level=4).values_list("p_code", "name")
 
     class Meta:
         model = ImportedIndividual
@@ -94,12 +107,20 @@ class PeopleUploadMixin:
             return None
         household_fields = [field.name for field in ImportedHousehold._meta.get_fields()]
         household_data = {field: value for field, value in person_data.items() if field in household_fields}
-        return ImportedHousehold.objects.create(
+        household_data["village"] = household_data.get("village") or ""
+        household_data["admin1"] = household_data.get("admin1") or ""
+        household_data["admin2"] = household_data.get("admin2") or ""
+        household_data["admin3"] = household_data.get("admin3") or ""
+        household_data["admin4"] = household_data.get("admin4") or ""
+        household = ImportedHousehold.objects.create(
             registration_data_import=rdi,
             program_id=program_id,
             collect_type=ImportedHousehold.CollectType.SINGLE.value,
             **household_data,
         )
+        household.set_admin_areas()
+        household.save()
+        return household
 
     def _create_individual(
         self,
