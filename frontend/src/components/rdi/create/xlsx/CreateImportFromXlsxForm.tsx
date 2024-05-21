@@ -135,7 +135,7 @@ export function CreateImportFromXlsxForm({
             <Field
               name="allowDeliveryMechanismsValidationErrors"
               fullWidth
-              label={t('Allow Delivery Mechanisms Validation Errors')}
+              label={t('Ignore Delivery Mechanisms Validation Errors and Create Grievance Tickets')}
               variant="outlined"
               component={FormikCheckboxField}
             />

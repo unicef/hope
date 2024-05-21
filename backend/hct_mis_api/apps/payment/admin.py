@@ -22,7 +22,6 @@ from smart_admin.mixins import LinkedObjectsMixin
 from hct_mis_api.apps.payment.forms import ImportPaymentRecordsForm
 from hct_mis_api.apps.payment.models import (
     CashPlan,
-    DeliveryMechanismData,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -354,28 +353,8 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
     def save_model(
         self, request: HttpRequest, obj: FspXlsxTemplatePerDeliveryMechanism, form: "Form", change: bool
     ) -> None:
-        # TODO MB add for same validation for inline
         if not change:
             obj.created_by = request.user
-        delivery_mechanism_required_fields = [
-            field["name"]
-            for field in DeliveryMechanismData.get_required_delivery_mechanism_fields(obj.delivery_mechanism)
-        ]
-        missing_required_core_fields = [
-            required_field
-            for required_field in delivery_mechanism_required_fields
-            if required_field not in obj.xlsx_template.core_fields
-        ]
-        if missing_required_core_fields:
-            raise ValidationError(
-                f"{missing_required_core_fields} fields are required by delivery mechanism "
-                f"{obj.delivery_mechanism} and must be present in the template core fields"
-            )
-
-        if obj.delivery_mechanism not in obj.financial_service_provider.delivery_mechanisms:
-            raise ValidationError(
-                f"Delivery Mechanism {obj.delivery_mechanism} is not supported by Financial Service Provider {obj.financial_service_provider}"
-            )
         return super().save_model(request, obj, form, change)
 
     def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
@@ -445,8 +424,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         ("data_transfer_configuration",),
         ("allowed_business_areas",),
     )
-
-    readonly_fields = ("fsp_xlsx_templates",)
+    readonly_fields = ("fsp_xlsx_templates", "data_transfer_configuration")
     inlines = (FspXlsxTemplatePerDeliveryMechanismAdminInline,)
 
     def fsp_xlsx_templates(self, obj: FinancialServiceProvider) -> str:
