@@ -2,7 +2,7 @@ import { Box, Checkbox, Collapse, Grid, IconButton } from '@mui/material';
 import { ArrowDropDown, ArrowRight } from '@mui/icons-material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { TreeItem, SimpleTreeView } from '@mui/x-tree-view';
+import { TreeItem, TreeView } from '@mui/x-tree-view';
 import { Field } from 'formik';
 import * as React from 'react';
 import { useState } from 'react';
@@ -86,7 +86,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   const renderNode = (node: AreaTreeNode): React.ReactElement => (
     <TreeItem
       key={node.id}
-      itemId={node.id}
+      nodeId={node.id}
       label={
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Checkbox
@@ -184,16 +184,15 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
       </Box>
       <Collapse in={isAdminAreaExpanded}>
         <Box style={{ maxHeight: '30vh', overflow: 'auto', width: '50%' }}>
-          <SimpleTreeView
-            slots={{
-              expandIcon: ChevronRightIcon,
-              collapseIcon: ExpandMoreIcon,
-            }}
+          <TreeView
             multiSelect
-            selectedItems={(values.partners[index]?.areas || []).map(String)}
+            defaultCollapseIcon={<ExpandMoreIcon />}
+            defaultExpandIcon={<ChevronRightIcon />}
+            defaultExpanded={(values.partners[index]?.areas || []).map(String)}
+            defaultSelected={(values.partners[index]?.areas || []).map(String)}
           >
             {allAreasTree.length > 0 && allAreasTree.map(renderNode)}
-          </SimpleTreeView>
+          </TreeView>
         </Box>
       </Collapse>
     </Box>
