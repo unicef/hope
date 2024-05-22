@@ -157,7 +157,9 @@ export function EditVerificationPlan({
       variables: {
         businessAreaSlug: businessArea,
       },
+      fetchPolicy: 'network-only',
     });
+
   const { data } = useAllAdminAreasQuery({
     variables: {
       first: 100,
@@ -179,9 +181,7 @@ export function EditVerificationPlan({
   useEffect(() => {
     if (open) {
       loadSampleSize();
-      if (formValues.verificationChannel === 'RAPIDPRO') {
-        loadRapidProFlows();
-      }
+      loadRapidProFlows();
     }
   }, [formValues, open, loadSampleSize, loadRapidProFlows]);
 

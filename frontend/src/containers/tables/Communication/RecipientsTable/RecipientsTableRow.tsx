@@ -32,6 +32,8 @@ export const RecipientsTableRow = ({
     useHouseholdChoiceDataQuery({
       fetchPolicy: 'cache-first',
     });
+  if (choicesLoading) return <LoadingComponent />;
+  if (!choicesData) return null;
   const residenceStatusChoiceDict = choicesToDict(
     choicesData.residenceStatusChoices,
   );
@@ -39,7 +41,6 @@ export const RecipientsTableRow = ({
   const handleClick = (): void => {
     navigate(householdDetailsPath);
   };
-  if (choicesLoading) return <LoadingComponent />;
   return (
     <ClickableTableRow
       hover
