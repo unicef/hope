@@ -268,7 +268,7 @@ class TestCreateTargeting:
 
 @pytest.mark.usefixtures("login")
 class TestTargeting:
-    def test_targeting_create_use_ids(
+    def test_targeting_create_use_ids_hh(
             self, create_programs: None,
             household_with_disability: Household,
             add_targeting: None, pageTargeting: Targeting,
@@ -284,12 +284,124 @@ class TestTargeting:
         pageTargetingCreate.getInputHouseholdids().send_keys(household_with_disability.unicef_id)
         pageTargetingCreate.getInputName().send_keys(f"Target Population for {household_with_disability.unicef_id}")
         pageTargetingCreate.getButtonTargetPopulationCreate().click()
-        pageTargetingCreate.screenshot("1")
+        pageTargetingDetails.getLabelStatus()
         # Installed 1488 object(s) from 1 fixture(s)
         target_population = TargetPopulation.objects.get(name=f"Target Population for {household_with_disability.unicef_id}")
-        assert str(target_population.total_individuals_count) == pageTargetingDetails.getLabelTargetedIndividuals().text
+        assert '8' == str(target_population.total_individuals_count) == pageTargetingDetails.getLabelTargetedIndividuals().text
         assert str(target_population.total_households_count) == pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
         assert str(target_population.status) in pageTargetingDetails.getLabelStatus().text
+        pageTargetingDetails.getButtonRebuild().click()
         # pageTargetingCreate.getInputIncludedIndividualIds()
         # pageTargetingCreate.getInputIncludedHouseholdIds()
         # pageTargetingCreate.getInputIndividualids()
+
+    def test_targeting_create_use_ids_individual(
+            self, create_programs: None,
+            household_with_disability: Household,
+            add_targeting: None, pageTargeting: Targeting,
+            pageTargetingDetails: TargetingDetails,
+            pageTargetingCreate: TargetingCreate
+    ) -> None:
+        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.getNavTargeting().click()
+        pageTargeting.getButtonCreateNew().click()
+        pageTargeting.getCreateUseIDs().click()
+        assert "New Target Population" in pageTargetingCreate.getPageHeaderTitle().text
+        assert "SAVE" in pageTargetingCreate.getButtonTargetPopulationCreate().text
+        pageTargetingCreate.getInputIndividualids().send_keys(household_with_disability.unicef_id)
+        pageTargetingCreate.getInputName().send_keys(f"Target Population for {household_with_disability.unicef_id}")
+        pageTargetingCreate.getButtonTargetPopulationCreate().click()
+        pageTargetingDetails.getLabelStatus()
+        # Installed 1488 object(s) from 1 fixture(s)
+        target_population = TargetPopulation.objects.get(name=f"Target Population for {household_with_disability.unicef_id}")
+        assert '8' == str(target_population.total_individuals_count) == pageTargetingDetails.getLabelTargetedIndividuals().text
+        assert str(target_population.total_households_count) == pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
+        assert str(target_population.status) in pageTargetingDetails.getLabelStatus().text
+        pageTargetingDetails.screenshot("1")
+        pageTargetingDetails.getButtonRebuild().click()
+        from time import sleep
+        sleep(5)
+        pageTargetingDetails.screenshot("2")
+        pageTargetingDetails.screenshot("3")
+
+    def test_targeting_rebuild(
+            self, create_programs: None,
+            household_with_disability: Household,
+            add_targeting: None, pageTargeting: Targeting,
+            pageTargetingDetails: TargetingDetails,
+            pageTargetingCreate: TargetingCreate
+    ) -> None:
+        pass
+
+    def test_targeting_mark_ready(
+            self, create_programs: None,
+            household_with_disability: Household,
+            add_targeting: None, pageTargeting: Targeting,
+            pageTargetingDetails: TargetingDetails,
+            pageTargetingCreate: TargetingCreate
+    ) -> None:
+        pass
+
+    def test_targeting_mark_ready_failed(
+            self, create_programs: None,
+            household_with_disability: Household,
+            add_targeting: None, pageTargeting: Targeting,
+            pageTargetingDetails: TargetingDetails,
+            pageTargetingCreate: TargetingCreate
+    ) -> None:
+        pass
+
+    def test_copy_targeting(
+            self, create_programs: None,
+            household_with_disability: Household,
+            add_targeting: None, pageTargeting: Targeting,
+            pageTargetingDetails: TargetingDetails,
+            pageTargetingCreate: TargetingCreate
+    ) -> None:
+        pass
+
+    def test_edit_targeting(
+            self, create_programs: None,
+            household_with_disability: Household,
+            add_targeting: None, pageTargeting: Targeting,
+            pageTargetingDetails: TargetingDetails,
+            pageTargetingCreate: TargetingCreate
+    ) -> None:
+        pass
+
+    def test_delete_targeting(
+            self, create_programs: None,
+            household_with_disability: Household,
+            add_targeting: None, pageTargeting: Targeting,
+            pageTargetingDetails: TargetingDetails,
+            pageTargetingCreate: TargetingCreate
+    ) -> None:
+        pass
+
+    def test_excluded_target_population_entries(
+            self, create_programs: None,
+            household_with_disability: Household,
+            add_targeting: None, pageTargeting: Targeting,
+            pageTargetingDetails: TargetingDetails,
+            pageTargetingCreate: TargetingCreate
+    ) -> None:
+        pass
+
+    def test_targeting_filters_and_labels(
+            self, create_programs: None,
+            household_with_disability: Household,
+            add_targeting: None, pageTargeting: Targeting,
+            pageTargetingDetails: TargetingDetails,
+            pageTargetingCreate: TargetingCreate
+    ) -> None:
+        #ponaciskaj labelki dla kolejności i zobacz filtry w detalach tez hh np!
+        pass
+
+    def test_targeting_info_button(
+            self, create_programs: None,
+            household_with_disability: Household,
+            add_targeting: None, pageTargeting: Targeting,
+            pageTargetingDetails: TargetingDetails,
+            pageTargetingCreate: TargetingCreate
+    ) -> None:
+        pass
