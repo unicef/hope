@@ -9,6 +9,7 @@ from hct_mis_api.api.tests.base import HOPEApiTestCase
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_FULL,
     FEMALE,
@@ -60,6 +61,15 @@ class TestPushPeople(HOPEApiTestCase):
         )
 
         cls.url = reverse("api:rdi-push-people", args=[cls.business_area.slug, str(cls.rdi.id)])
+
+        country = CountryFactory()
+        admin_type_1 = AreaTypeFactory(country=country, area_level=1)
+        admin_type_2 = AreaTypeFactory(country=country, area_level=2, parent=admin_type_1)
+        admin_type_3 = AreaTypeFactory(country=country, area_level=3, parent=admin_type_2)
+
+        area1 = AreaFactory(parent=None, p_code="AF01", area_type=admin_type_1)
+        area2 = AreaFactory(parent=area1, p_code="AF0101", area_type=admin_type_2)
+        AreaFactory(parent=area2, p_code="AF010101", area_type=admin_type_3)
 
     def test_upload_single_person(self) -> None:
         data = [
@@ -279,3 +289,61 @@ class TestPushPeople(HOPEApiTestCase):
         self.assertIsNotNone(ind)
         self.assertEqual(ind.full_name, "John Doe")
         self.assertEqual(getattr(ind, f"{field_name}_valid"), expected_value)
+
+    @parameterized.expand(
+        [
+            ("valid-village", "village1", "village1"),
+            ("empty-village", "", ""),
+            ("null-village", None, ""),
+        ]
+    )
+    def test_push_single_person_with_village(self, _: Any, village: str, expected_value: str) -> None:
+        data = [
+            {
+                "residence_status": "IDP",
+                "village": village,
+                "country": "AF",
+                "collect_individual_data": COLLECT_TYPE_FULL,
+                "full_name": "John Doe",
+                "birth_date": "2000-01-01",
+                "sex": "MALE",
+                "type": "",
+            }
+        ]
+        response = self.client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        response_json = response.json()
+
+        rdi_datahub = RegistrationDataImportDatahub.objects.filter(id=response_json["id"]).first()
+        self.assertIsNotNone(rdi_datahub)
+        ind = ImportedIndividual.objects.filter(registration_data_import=rdi_datahub).first()
+        self.assertEqual(ind.household.village, expected_value)
+
+    def test_push_single_person_with_admin_areas(self) -> None:
+        data = [
+            {
+                "residence_status": "IDP",
+                "village": "village1",
+                "country": "AF",
+                "collect_individual_data": COLLECT_TYPE_FULL,
+                "full_name": "John Doe",
+                "birth_date": "2000-01-01",
+                "sex": "MALE",
+                "type": "",
+                "admin1": "AF01",
+                "admin2": "AF0101",
+                "admin3": "",
+                "admin4": None,
+            }
+        ]
+        response = self.client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        response_json = response.json()
+
+        rdi_datahub = RegistrationDataImportDatahub.objects.filter(id=response_json["id"]).first()
+        self.assertIsNotNone(rdi_datahub)
+        ind = ImportedIndividual.objects.filter(registration_data_import=rdi_datahub).first()
+        self.assertEqual(ind.household.admin1, "AF01")
+        self.assertEqual(ind.household.admin2, "AF0101")
+        self.assertEqual(ind.household.admin3, "")
+        self.assertEqual(ind.household.admin4, "")
