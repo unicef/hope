@@ -10,17 +10,15 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 interface TotalAmountTransferredSectionByAdminAreaSectionProps {
   year: string;
   filter;
-  businessArea: string;
 }
 export function TotalAmountTransferredSectionByAdminAreaSection({
   year,
   filter,
-  businessArea,
 }: TotalAmountTransferredSectionByAdminAreaSectionProps): React.ReactElement {
   const { t } = useTranslation();
   const [orderBy, setOrderBy] = useState('totalCashTransferred');
   const [order, setOrder] = useState('desc');
-  const { programId } = useBaseUrl();
+  const { businessArea, programId, isGlobal } = useBaseUrl();
   const variables = {
     year: parseInt(year, 10),
     businessAreaSlug: businessArea,
@@ -43,11 +41,10 @@ export function TotalAmountTransferredSectionByAdminAreaSection({
   });
 
   useEffect(() => {
-    if (businessArea !== 'global') {
-      loadCountry();
+    if (!isGlobal) {
+      void loadCountry();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [businessArea]);
+  }, [isGlobal, loadCountry]);
 
   const handleSortAdminArea = (event, property): void => {
     let direction = '';

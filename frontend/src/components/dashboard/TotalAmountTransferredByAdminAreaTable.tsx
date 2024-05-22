@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { formatCurrency, formatNumber } from '@utils/utils';
 import { CountryChartsQuery } from '@generated/graphql';
 import { EnhancedTableHead } from '@core/Table/EnhancedTableHead';
+import { useProgramContext } from '../../programContext';
 
 interface TotalAmountTransferredByAdminAreaTableProps {
   data: CountryChartsQuery['tableTotalCashTransferredByAdministrativeArea']['data'];
@@ -20,6 +21,7 @@ export function TotalAmountTransferredByAdminAreaTable({
   orderBy,
 }: TotalAmountTransferredByAdminAreaTableProps): React.ReactElement {
   const { t } = useTranslation();
+  const { isSocialDctType } = useProgramContext();
 
   const headCells = [
     {
@@ -34,13 +36,22 @@ export function TotalAmountTransferredByAdminAreaTable({
       id: 'totalCashTransferred',
       numeric: true,
     },
-    {
+  ];
+  if (isSocialDctType) {
+    headCells.push({
+      disablePadding: false,
+      label: t('People Reached'),
+      id: 'totalHouseholds',
+      numeric: true,
+    });
+  } else {
+    headCells.push({
       disablePadding: false,
       label: t('Households Reached'),
       id: 'totalHouseholds',
       numeric: true,
-    },
-  ];
+    });
+  }
   if (!data) return null;
 
   const renderRows = (): Array<React.ReactElement> =>
