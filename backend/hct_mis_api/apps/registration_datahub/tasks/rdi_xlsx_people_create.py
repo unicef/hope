@@ -14,6 +14,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import SheetImageLoader, serialize_flex_attributes
 from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
+from hct_mis_api.apps.payment.models import DeliveryMechanismData
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
@@ -45,7 +46,9 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         self.index_id: Optional[int] = None
         self.households_to_update = []
         self.COMBINED_FIELDS: Dict = {
-            **FieldFactory.from_scopes([Scope.XLSX_PEOPLE]).apply_business_area().to_dict_by("xlsx_field"),
+            **FieldFactory.from_scopes([Scope.XLSX_PEOPLE, Scope.DELIVERY_MECHANISM])
+            .apply_business_area()
+            .to_dict_by("xlsx_field"),
             **serialize_flex_attributes()["individuals"],
         }
 
@@ -171,6 +174,9 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             self.individuals.append(obj_to_create)
 
     def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
+        delivery_mechanism_xlsx_fields = DeliveryMechanismData.get_scope_delivery_mechanisms_fields(by="xlsx_field")
+        delivery_mechanism_xlsx_fields
+
         complex_fields: Dict[str, Dict[str, Callable]] = {
             "individuals": {
                 "pp_photo_i_c": self._handle_image_field,
@@ -201,6 +207,12 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 "pp_first_registration_date_i_c": self._handle_datetime,
             },
         }
+        complex_fields["individuals"].update(
+            {
+                f"pp_{field['xlsx_field']}": self._handle_delivery_mechanism_fields
+                for field in delivery_mechanism_xlsx_fields
+            }
+        )
         document_complex_types: Dict[str, Callable] = {}
         for document_type in ImportedDocumentType.objects.all():
             document_complex_types[f"pp_{document_type.key}_i_c"] = self._handle_document_fields
@@ -251,6 +263,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         self._create_identities()
         self._create_collectors()
         self._create_bank_accounts_infos()
+        self._create_delivery_mechanisms_data()
 
     @transaction.atomic(using="registration_datahub")
     def execute(

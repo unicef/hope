@@ -435,6 +435,93 @@ class TestXLSXValidatorsMethods(APITestCase):
                 upload_xlsx_instance_validator.rows_validator(sheet, self.business_area.slug)
                 self.assertEqual(upload_xlsx_instance_validator.errors, expected_values)
 
+    def test_rows_validator_with_delivery_mechanisms_errors(self) -> None:
+        self.maxDiff = None
+        wb = openpyxl.load_workbook(
+            f"{self.FILES_DIR_PATH}/rdi_import_3_hh_missing_required_delivery_fields.xlsx",
+            data_only=True,
+        )
+
+        expected_validation_errors = (
+            (
+                wb["Households"],
+                [],
+            ),
+            (
+                wb["Individuals"],
+                [
+                    {
+                        "header": "name_of_cardholder_atm_card_i_c",
+                        "message": "Field name_of_cardholder_atm_card_i_c is required for delivery "
+                        "mechanism ATM Card",
+                        "row_number": 3,
+                    },
+                    {
+                        "header": "name_of_cardholder_atm_card_i_c",
+                        "message": "Field name_of_cardholder_atm_card_i_c is required for delivery "
+                        "mechanism ATM Card",
+                        "row_number": 14,
+                    },
+                    {
+                        "header": "card_expiry_date_atm_card_i_c",
+                        "message": "Field card_expiry_date_atm_card_i_c is required for delivery " "mechanism ATM Card",
+                        "row_number": 15,
+                    },
+                    {
+                        "header": "name_of_cardholder_atm_card_i_c",
+                        "message": "Field name_of_cardholder_atm_card_i_c is required for delivery "
+                        "mechanism ATM Card",
+                        "row_number": 15,
+                    },
+                ],
+            ),
+        )
+        upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+        for sheet, expected_values in expected_validation_errors:
+            upload_xlsx_instance_validator.image_loader = SheetImageLoader(sheet)
+            upload_xlsx_instance_validator.rows_validator(sheet, self.business_area.slug)
+            self.assertEqual(upload_xlsx_instance_validator.errors, [])
+            self.assertEqual(upload_xlsx_instance_validator.delivery_mechanisms_errors, expected_values)
+
+    def test_people_rows_validator_with_delivery_mechanisms_errors(self) -> None:
+        self.maxDiff = None
+        wb = openpyxl.load_workbook(
+            f"{self.FILES_DIR_PATH}/rdi_import_1_hh_10_people_missing_required_delivery_fields.xlsx",
+            data_only=True,
+        )
+
+        expected_validation_errors = (
+            (
+                wb["People"],
+                [
+                    {
+                        "header": "pp_card_expiry_date_atm_card_i_c",
+                        "message": "Field pp_card_expiry_date_atm_card_i_c is required for delivery "
+                        "mechanism ATM Card",
+                        "row_number": 4,
+                    },
+                    {
+                        "header": "pp_name_of_cardholder_atm_card_i_c",
+                        "message": "Field pp_name_of_cardholder_atm_card_i_c is required for "
+                        "delivery mechanism ATM Card",
+                        "row_number": 4,
+                    },
+                    {
+                        "header": "pp_name_of_cardholder_atm_card_i_c",
+                        "message": "Field pp_name_of_cardholder_atm_card_i_c is required for "
+                        "delivery mechanism ATM Card",
+                        "row_number": 5,
+                    },
+                ],
+            ),
+        )
+        upload_xlsx_instance_validator = UploadXLSXInstanceValidator(is_social_worker_program=True)
+        for sheet, expected_values in expected_validation_errors:
+            upload_xlsx_instance_validator.image_loader = SheetImageLoader(sheet)
+            upload_xlsx_instance_validator.rows_validator(sheet, self.business_area.slug)
+            self.assertEqual(upload_xlsx_instance_validator.errors, [])
+            self.assertEqual(upload_xlsx_instance_validator.delivery_mechanisms_errors, expected_values)
+
     def test_validate_file_extension(self) -> None:
         file_path, expected_values = (
             f"{self.FILES_DIR_PATH}/" f"image.png",

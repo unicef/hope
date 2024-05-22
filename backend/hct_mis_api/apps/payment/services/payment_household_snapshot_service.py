@@ -159,6 +159,3 @@ def get_needs_adjudication_tickets_count(individual: Individual) -> int:
         .count()
     )
     return golden_records_count + possible_duplicates_count
-
-
-# TODO MB DELIVERY_MECHANISM_DATA

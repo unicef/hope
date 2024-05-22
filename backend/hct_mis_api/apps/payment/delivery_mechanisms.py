@@ -50,11 +50,3 @@ class DeliveryMechanismChoices:
         (DELIVERY_TYPE_CASH_OVER_THE_COUNTER, _("Cash over the counter")),
         (DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET, _("Transfer to Digital Wallet")),
     )
-
-
-"""
-TODO MB
-payment channel creation on import/merge KOBO / AURORA / FLEX?
-snapshots?
-data migration?
-"""

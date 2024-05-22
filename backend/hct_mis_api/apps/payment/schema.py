@@ -418,7 +418,6 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
 
     @classmethod
     def get_collector_field(cls, payment: "Payment", field_name: str) -> Union[None, str, Dict]:
-        # TODO MB get from DeliveryMechanismData ???? SNAPSHOT???
         """return primary_collector or alternate_collector field value or None"""
         if household_snapshot := getattr(payment, "household_snapshot", None):
             household_snapshot_data = household_snapshot.snapshot_data

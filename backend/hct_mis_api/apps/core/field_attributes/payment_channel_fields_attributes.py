@@ -15,7 +15,7 @@ PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
     {
         "id": "22085a8d-205d-42a9-b5b3-951b51f11915",
         "type": TYPE_STRING,
-        "name": "account_holder_name",  # TODO MB bank account info
+        "name": "account_holder_name",
         "lookup": "account_holder_name",
         "label": {"English(EN)": "Account holder name"},
         "hint": "",
@@ -28,7 +28,7 @@ PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
     {
         "id": "e9d964b9-aa85-4a0f-b1eb-4755bdad7592",
         "type": TYPE_STRING,
-        "name": "bank_branch_name",  # TODO MB bank account info
+        "name": "bank_branch_name",
         "lookup": "bank_branch_name",
         "label": {"English(EN)": "Bank branch name"},
         "hint": "",
@@ -41,7 +41,7 @@ PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
     {
         "id": "e5766962-1455-4ebc-8fad-fc89cdde792b",
         "type": TYPE_STRING,
-        "name": "bank_name",  # TODO MB bank account info
+        "name": "bank_name",
         "lookup": "bank_name",
         "required": False,
         "label": {"English(EN)": "Bank name"},
@@ -54,7 +54,7 @@ PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
     {
         "id": "3d6a45f3-d3f7-48a0-801b-7a98c0da517a",
         "type": TYPE_STRING,
-        "name": "bank_account_number",  # TODO MB bank account info
+        "name": "bank_account_number",
         "lookup": "bank_account_number",
         "required": False,
         "label": {"English(EN)": "Bank account number"},
@@ -67,7 +67,7 @@ PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
     {
         "id": "72e79eec-0c10-42d9-9c25-86162232a389",
         "type": TYPE_STRING,
-        "name": "debit_card_issuer",  # TODO MB bank account info
+        "name": "debit_card_issuer",
         "lookup": "debit_card_issuer",
         "required": False,
         "label": {"English(EN)": "Debit Card Issuer"},
@@ -81,7 +81,7 @@ PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
     {
         "id": "4a2ae111-3450-41a4-8d26-5eb20f4e233c",
         "type": TYPE_STRING,
-        "name": "debit_card_number",  # TODO MB bank account info
+        "name": "debit_card_number",
         "lookup": "debit_card_number",
         "required": False,
         "label": {"English(EN)": "Debit card number"},
@@ -95,7 +95,7 @@ PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
     {
         "id": "4a2ae111-3450-41a4-8d26-5eb20f4e233c",
         "type": TYPE_STRING,
-        "name": "payment_delivery_phone_no",  # TODO MB this an Individual Field
+        "name": "payment_delivery_phone_no",
         "lookup": "payment_delivery_phone_no",
         "required": False,
         "label": {"English(EN)": "Payment delivery phone number"},
@@ -231,6 +231,54 @@ PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
         "unique_for_payment": False,
         "delivery_mechanisms": [DeliveryMechanismChoices.DELIVERY_TYPE_CASH_OVER_THE_COUNTER],
         "xlsx_field": "mobile_phone_number_cash_over_the_counter_i_c",
+        "scope": [Scope.XLSX, Scope.XLSX_PEOPLE, Scope.DELIVERY_MECHANISM],
+    },
+    {
+        "id": "52d1044c-8bf7-4526-985d-541cf1850c30",
+        "type": TYPE_STRING,
+        "name": "wallet_name_transfer_to_digital_wallet",
+        "lookup": "wallet_name_transfer_to_digital_wallet",
+        "label": {"English(EN)": "Wallet Name"},
+        "hint": "",
+        "required": False,
+        "choices": [],
+        "associated_with": _DELIVERY_MECHANISM_DATA,
+        "required_for_payment": False,
+        "unique_for_payment": False,
+        "delivery_mechanisms": [DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET],
+        "xlsx_field": "wallet_name_transfer_to_digital_wallet_i_c",
+        "scope": [Scope.XLSX, Scope.XLSX_PEOPLE, Scope.DELIVERY_MECHANISM],
+    },
+    {
+        "id": "af08e8a7-890a-4467-a989-3a2173e4de2e",
+        "type": TYPE_STRING,
+        "name": "blockchain_name_transfer_to_digital_wallet",
+        "lookup": "blockchain_name_transfer_to_digital_wallet",
+        "label": {"English(EN)": "Blockchain Name"},
+        "hint": "",
+        "required": False,
+        "choices": [],
+        "associated_with": _DELIVERY_MECHANISM_DATA,
+        "required_for_payment": True,
+        "unique_for_payment": True,
+        "delivery_mechanisms": [DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET],
+        "xlsx_field": "blockchain_name_transfer_to_digital_wallet_i_c",
+        "scope": [Scope.XLSX, Scope.XLSX_PEOPLE, Scope.DELIVERY_MECHANISM],
+    },
+    {
+        "id": "15d35efa-8f36-4a40-b9ed-a7812a665e01",
+        "type": TYPE_STRING,
+        "name": "wallet_address_transfer_to_digital_wallet",
+        "lookup": "wallet_address_transfer_to_digital_wallet",
+        "label": {"English(EN)": "Wallet Address"},
+        "hint": "",
+        "required": False,
+        "choices": [],
+        "associated_with": _DELIVERY_MECHANISM_DATA,
+        "required_for_payment": True,
+        "unique_for_payment": True,
+        "delivery_mechanisms": [DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET],
+        "xlsx_field": "wallet_address_transfer_to_digital_wallet_i_c",
         "scope": [Scope.XLSX, Scope.XLSX_PEOPLE, Scope.DELIVERY_MECHANISM],
     },
 ]

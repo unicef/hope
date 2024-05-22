@@ -468,11 +468,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "pregnant_i_c": self._handle_bool_field,
                 "fchild_hoh_i_c": self._handle_bool_field,
                 "child_hoh_i_c": self._handle_bool_field,
-                "bank_name_i_c": self._handle_bank_account_fields,  # TODO MB ?
-                "bank_account_number_i_c": self._handle_bank_account_fields,  # TODO MB ?
-                "debit_card_number_i_c": self._handle_bank_account_fields,  # TODO MB ?
-                "account_holder_name_i_c": self._handle_bank_account_fields,  # TODO MB ?
-                "bank_branch_name_i_c": self._handle_bank_account_fields,  # TODO MB ?
+                "bank_name_i_c": self._handle_bank_account_fields,
+                "bank_account_number_i_c": self._handle_bank_account_fields,
+                "debit_card_number_i_c": self._handle_bank_account_fields,
+                "account_holder_name_i_c": self._handle_bank_account_fields,
+                "bank_branch_name_i_c": self._handle_bank_account_fields,
                 "first_registration_date_i_c": self._handle_datetime,
                 "unhcr_id_no_i_c": self._handle_identity_fields,
                 "unhcr_id_photo_i_c": self._handle_identity_photo,

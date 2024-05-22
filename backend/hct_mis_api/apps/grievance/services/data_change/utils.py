@@ -223,14 +223,6 @@ def handle_update_payment_channel(payment_channel: Dict) -> Optional[BankAccount
     return None
 
 
-def handle_add_delivery_mechanism_data(delivery_mechanism_data: Dict, individual: Individual) -> DeliveryMechanismData:
-    return DeliveryMechanismData(
-        individual=individual,
-        delivery_mechanism=delivery_mechanism_data.get("delivery_mechanism"),
-        data=delivery_mechanism_data.get("data"),  # TODO MB handle core fields?
-    )
-
-
 def handle_update_delivery_mechanism_data(delivery_mechanism_datas: List[Dict]) -> List[DeliveryMechanismData]:
     delivery_mechanism_datas_to_update = []
     all_fields: dict = FieldFactory(CORE_FIELDS_ATTRIBUTES).to_dict_by("name")

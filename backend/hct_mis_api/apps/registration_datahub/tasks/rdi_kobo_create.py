@@ -185,7 +185,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         business_area_id: str,
         program_id: Optional[str] = None,
     ) -> None:
-        # TODO MB delivery data implementation?????
         registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
             id=registration_data_import_id,
         )

@@ -24,7 +24,11 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     TYPE_SELECT_ONE,
     FieldFactory,
 )
-from hct_mis_api.apps.core.field_attributes.fields_types import Scope
+from hct_mis_api.apps.core.field_attributes.fields_types import (
+    _DELIVERY_MECHANISM_DATA,
+    _INDIVIDUAL,
+    Scope,
+)
 from hct_mis_api.apps.core.kobo.common import (
     KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
     get_field_name,
@@ -121,10 +125,14 @@ class ImportDataInstanceValidator:
         self.delivery_mechanisms_xlsx_fields = list(
             set([_field["xlsx_field"] for _field in DeliveryMechanismData.get_all_delivery_mechanisms_fields()])
         )
+        if self.is_social_worker_program:
+            self.delivery_mechanisms_xlsx_fields = [f"pp_{field}" for field in self.delivery_mechanisms_xlsx_fields]
 
     def get_combined_attributes(self) -> Dict:
         scope_list = (
-            [Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID] if not self.is_social_worker_program else [Scope.XLSX_PEOPLE]
+            [Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.DELIVERY_MECHANISM]
+            if not self.is_social_worker_program
+            else [Scope.XLSX_PEOPLE, Scope.DELIVERY_MECHANISM]
         )
         fields = FieldFactory.from_scopes(scope_list).apply_business_area()
 
@@ -135,7 +143,7 @@ class ImportDataInstanceValidator:
         return {
             **fields.associated_with_household().to_dict_by("xlsx_field"),
             **flex_attrs["individuals"],
-            **fields.associated_with_individual().to_dict_by("xlsx_field"),
+            **fields._associated_with([_INDIVIDUAL, _DELIVERY_MECHANISM_DATA]).to_dict_by("xlsx_field"),
             **flex_attrs["households"],
         }
 
@@ -282,6 +290,11 @@ class ImportDataInstanceValidator:
         delivery_mechanisms_to_required_fields_mapping = (
             DeliveryMechanismData.get_delivery_mechanisms_to_xlsx_fields_mapping(by="xlsx_field", required=True)
         )
+        if self.is_social_worker_program:
+            delivery_mechanisms_to_required_fields_mapping = {
+                dm: [f"pp_{field}" for field in fields]
+                for dm, fields in delivery_mechanisms_to_required_fields_mapping.items()
+            }
         global_scope_xlsx_fields = list(
             FieldFactory.not_from_scope(Scope.DELIVERY_MECHANISM).to_dict_by("xlsx_field").keys()
         )
@@ -351,7 +364,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         if self.is_social_worker_program:
             return {
                 "people": {
-                    **core_fields.associated_with_individual().to_dict_by("xlsx_field"),
+                    **core_fields._associated_with([_INDIVIDUAL, _DELIVERY_MECHANISM_DATA]).to_dict_by("xlsx_field"),
                     **flex_fields["individuals"],
                 },
             }
@@ -362,7 +375,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     **flex_fields["households"],
                 },
                 "individuals": {
-                    **core_fields.associated_with_individual().to_dict_by("xlsx_field"),
+                    **core_fields._associated_with([_INDIVIDUAL, _DELIVERY_MECHANISM_DATA]).to_dict_by("xlsx_field"),
                     **flex_fields["individuals"],
                 },
             }

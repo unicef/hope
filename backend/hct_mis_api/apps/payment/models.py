@@ -2339,7 +2339,7 @@ class DeliveryMechanismData(TimeStampedUUIDModel, SignatureMixin):
     @classmethod
     def get_delivery_mechanisms_to_xlsx_fields_mapping(
         cls, by: str = "name", required: bool = False
-    ) -> Dict[str, List[Dict]]:
+    ) -> Dict[str, List[str]]:
         fields = {
             field[by]: field.get("delivery_mechanisms", [])
             for field in cls.get_all_delivery_mechanisms_fields()
