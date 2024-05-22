@@ -132,6 +132,31 @@ export const PeopleBioData = ({
     );
   };
 
+  const renderDigitalWalletInfo = (): React.ReactNode => {
+    return (
+      <>
+        <Grid item xs={12}>
+          <BorderBox />
+        </Grid>
+        <Grid item xs={4}>
+          <LabelizedField label={t('Wallet Name')}>
+            {individual?.walletName}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={4}>
+          <LabelizedField label={t('Blockchain Name')}>
+            {individual?.blockchainName}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={4}>
+          <LabelizedField label={t('Wallet Address')}>
+            {individual?.walletAddress}
+          </LabelizedField>
+        </Grid>
+      </>
+    );
+  };
+
   let peopleFromHouseholdData = null;
   if (individual?.household) {
     const household = individual.household;
@@ -376,6 +401,7 @@ export const PeopleBioData = ({
           )}
         </Grid>
         {renderBankAccountInfo()}
+        {renderDigitalWalletInfo()}
       </Grid>
     </Overview>
   );

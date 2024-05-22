@@ -646,3 +646,34 @@ class TestManualCalendar:
         pageProgrammeManagement.getButtonSave().click()
         assert test_data["partners_access"] in pageProgrammeDetails.getLabelPartnerAccess().text
         assert test_data["dataCollectingType"] in pageProgrammeDetails.getLabelDataCollectingType().text
+
+    def test_edit_programme(
+        self,
+        create_programs: None,
+        pageProgrammeManagement: ProgrammeManagement,
+        pageProgrammeDetails: ProgrammeDetails,
+    ) -> None:
+        pageProgrammeManagement.getNavProgrammeManagement().click()
+        pageProgrammeManagement.getTableRowByProgramName("Test Programm").click()
+
+        pageProgrammeManagement.getButtonEditProgram().click()
+        pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.getInputProgrammeName().send_keys("New name after Edit")
+        pageProgrammeManagement.getInputProgrammeCode().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.getInputProgrammeCode().send_keys("NEW1")
+        pageProgrammeManagement.getInputStartDate().click()
+        pageProgrammeManagement.getInputStartDate().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.getInputStartDate().send_keys(str(FormatTime(1, 1, 2022).numerically_formatted_date))
+        pageProgrammeManagement.getInputEndDate().click()
+        pageProgrammeManagement.getInputEndDate().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.getInputEndDate().send_keys(FormatTime(1, 10, 2022).numerically_formatted_date)
+        pageProgrammeManagement.getButtonNext().click()
+        pageProgrammeManagement.getAccessToProgram().click()
+        pageProgrammeManagement.selectWhoAccessToProgram("None of the partners should have access")
+        pageProgrammeManagement.getButtonSave().click()
+        programme_creation_url = pageProgrammeManagement.driver.current_url
+        # Check Details page
+        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
+        assert "New name after Edit" in pageProgrammeDetails.getHeaderTitle().text
+        assert FormatTime(1, 1, 2022).date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
+        assert FormatTime(1, 10, 2022).date_in_text_format in pageProgrammeDetails.getLabelEndDate().text

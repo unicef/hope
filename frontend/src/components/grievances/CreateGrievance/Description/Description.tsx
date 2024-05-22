@@ -1,6 +1,7 @@
 import { Box, FormHelperText, Grid, GridSize, Typography } from '@mui/material';
 import { Field } from 'formik';
 import * as React from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -70,6 +71,15 @@ export function Description({
     },
     fetchPolicy: 'network-only',
   });
+
+  // Set program value based on selected household or individual
+  useEffect(() => {
+    if (values.selectedHousehold?.program?.id) {
+      setFieldValue('program', values.selectedHousehold.program.id);
+    } else if (values.selectedIndividual?.program?.id) {
+      setFieldValue('program', values.selectedIndividual.program.id);
+    }
+  }, [values.selectedHousehold, values.selectedIndividual, setFieldValue]);
 
   const categoryChoices: {
     [id: number]: string;
