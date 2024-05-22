@@ -38,13 +38,13 @@ interface IndividualBioDataProps {
   choicesData: HouseholdChoiceDataQuery;
   grievancesChoices: GrievancesChoiceDataQuery;
 }
-export function IndividualBioData({
+export const IndividualBioData = ({
   individual,
   baseUrl,
   businessArea,
   choicesData,
   grievancesChoices,
-}: IndividualBioDataProps): React.ReactElement {
+}: IndividualBioDataProps): React.ReactElement => {
   const { t } = useTranslation();
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
@@ -145,13 +145,6 @@ export function IndividualBioData({
   };
 
   const renderDigitalWalletInfo = (): React.ReactNode => {
-    if (
-      !individual?.walletName ||
-      !individual?.blockchainName ||
-      !individual?.walletAddress
-    ) {
-      return null;
-    }
     return (
       <>
         <Grid item xs={12}>
@@ -371,4 +364,4 @@ export function IndividualBioData({
       </Grid>
     </Overview>
   );
-}
+};

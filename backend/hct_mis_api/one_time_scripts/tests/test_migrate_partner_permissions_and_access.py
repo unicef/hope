@@ -14,6 +14,7 @@ from hct_mis_api.one_time_scripts.migrate_partner_permissions_and_access import 
 class TestMigratePartnerPermissionsAndAccess(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        cls.partner_unicef = PartnerFactory(name="UNICEF", permissions={})
         cls.afghanistan = create_afghanistan()
         cls.ukraine = create_ukraine()
 
@@ -49,7 +50,6 @@ class TestMigratePartnerPermissionsAndAccess(TestCase):
         cls.area_in_ukr_1 = AreaFactory(name="Area in Ukr 1", area_type=area_type_ukr)
         cls.area_in_ukr_2 = AreaFactory(name="Area in Ukr 2", area_type=area_type_ukr)
 
-        cls.partner_unicef = PartnerFactory(name="UNICEF", permissions={})
         cls.partner_default_empty = PartnerFactory(name=settings.DEFAULT_EMPTY_PARTNER, permissions={})
 
         perm_no_access = {
@@ -107,8 +107,10 @@ class TestMigratePartnerPermissionsAndAccess(TestCase):
         # UNICEF Partner - full area access to all programs, no roles
         self.assertEqual(self.partner_unicef.program_partner_through.count(), 4)
         self.assertEqual(self.partner_unicef.business_area_partner_through.count(), 0)
-        print(Area.objects.filter(area_type__country__business_areas=self.afghanistan).count())
-        print(Area.objects.filter(area_type__country__business_areas=self.ukraine).count())
+        self.assertEqual(
+            self.partner_unicef.program_partner_through.filter(program=self.program_in_afg_1).first().full_area_access,
+            True,
+        )
         self.assertEqual(
             self.partner_unicef.program_partner_through.filter(program=self.program_in_afg_1).first().areas.count(),
             areas_count_in_afg,
@@ -124,6 +126,10 @@ class TestMigratePartnerPermissionsAndAccess(TestCase):
         self.assertIn(
             self.area_in_afg_3,
             self.partner_unicef.program_partner_through.filter(program=self.program_in_afg_1).first().areas.all(),
+        )
+        self.assertEqual(
+            self.partner_unicef.program_partner_through.filter(program=self.program_in_afg_2).first().full_area_access,
+            True,
         )
         self.assertEqual(
             self.partner_unicef.program_partner_through.filter(program=self.program_in_afg_2).first().areas.count(),
@@ -142,6 +148,10 @@ class TestMigratePartnerPermissionsAndAccess(TestCase):
             self.partner_unicef.program_partner_through.filter(program=self.program_in_afg_2).first().areas.all(),
         )
         self.assertEqual(
+            self.partner_unicef.program_partner_through.filter(program=self.program_in_ukr_1).first().full_area_access,
+            True,
+        )
+        self.assertEqual(
             self.partner_unicef.program_partner_through.filter(program=self.program_in_ukr_1).first().areas.count(),
             areas_count_in_ukr,
         )
@@ -152,6 +162,10 @@ class TestMigratePartnerPermissionsAndAccess(TestCase):
         self.assertIn(
             self.area_in_ukr_2,
             self.partner_unicef.program_partner_through.filter(program=self.program_in_ukr_1).first().areas.all(),
+        )
+        self.assertEqual(
+            self.partner_unicef.program_partner_through.filter(program=self.program_in_ukr_2).first().full_area_access,
+            True,
         )
         self.assertEqual(
             self.partner_unicef.program_partner_through.filter(program=self.program_in_ukr_2).first().areas.count(),
@@ -216,6 +230,12 @@ class TestMigratePartnerPermissionsAndAccess(TestCase):
         self.assertEqual(
             self.partner_without_role.program_partner_through.filter(program=self.program_in_afg_2)
             .first()
+            .full_area_access,
+            True,
+        )
+        self.assertEqual(
+            self.partner_without_role.program_partner_through.filter(program=self.program_in_afg_2)
+            .first()
             .areas.count(),
             areas_count_in_afg,
         )
@@ -230,6 +250,12 @@ class TestMigratePartnerPermissionsAndAccess(TestCase):
         self.assertIn(
             self.area_in_afg_3,
             self.partner_without_role.program_partner_through.filter(program=self.program_in_afg_2).first().areas.all(),
+        )
+        self.assertEqual(
+            self.partner_without_role.program_partner_through.filter(program=self.program_in_ukr_1)
+            .first()
+            .full_area_access,
+            True,
         )
         self.assertEqual(
             self.partner_without_role.program_partner_through.filter(program=self.program_in_ukr_1)
@@ -289,6 +315,10 @@ class TestMigratePartnerPermissionsAndAccess(TestCase):
             self.partner.program_partner_through.filter(program=self.program_in_afg_1).first().areas.all(),
         )
         self.assertEqual(
+            self.partner.program_partner_through.filter(program=self.program_in_afg_2).first().full_area_access,
+            True,
+        )
+        self.assertEqual(
             self.partner.program_partner_through.filter(program=self.program_in_afg_2).first().areas.count(),
             areas_count_in_afg,
         )
@@ -303,6 +333,10 @@ class TestMigratePartnerPermissionsAndAccess(TestCase):
         self.assertIn(
             self.area_in_afg_3,
             self.partner.program_partner_through.filter(program=self.program_in_afg_2).first().areas.all(),
+        )
+        self.assertEqual(
+            self.partner.program_partner_through.filter(program=self.program_in_ukr_1).first().full_area_access,
+            True,
         )
         self.assertEqual(
             self.partner.program_partner_through.filter(program=self.program_in_ukr_1).first().areas.count(),
