@@ -425,14 +425,14 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
     def date_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
-            # if self.integer_validator(value, header, *args, **kwargs):
-            #     return False
-
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
 
             if not self.not_empty_validator(value):
                 return True
+
+            if self.integer_validator(value, header, *args, **kwargs):
+                return False
 
             if isinstance(value, datetime):
                 return True
