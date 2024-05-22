@@ -73,6 +73,7 @@ class TestDrawer:
             "Payment Module",
             "Payment Verification",
             "Grievance",
+            "Accountability",
             "Programme Users",
             "Program Log",
         ]
@@ -95,6 +96,7 @@ class TestDrawer:
             "Payment Module",
             "Payment Verification",
             "Grievance",
+            "Accountability",
             "Programme Users",
             "Program Log",
         ]

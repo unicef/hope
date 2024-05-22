@@ -9,7 +9,6 @@ from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_STRING, Sco
 
 
 class TestCoreFields(APITestCase):
-
     def setUp(self) -> None:
         self.scopes = [Scope.GLOBAL, Scope.XLSX_PEOPLE]
         super().setUp()

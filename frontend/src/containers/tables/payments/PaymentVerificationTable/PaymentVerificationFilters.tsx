@@ -115,7 +115,7 @@ export const PaymentVerificationFilters = ({
           <DatePickerFilter
             label="Start Date"
             fullWidth
-            data-cy="filter-start-date"
+            dataCy="filter-start-date"
             onChange={(date) => handleFilterChange('startDate', date)}
             value={filter.startDate}
           />
@@ -124,7 +124,7 @@ export const PaymentVerificationFilters = ({
           <DatePickerFilter
             label="End Date"
             fullWidth
-            data-cy="filter-end-date"
+            dataCy="filter-end-date"
             onChange={(date) => handleFilterChange('endDate', date)}
             value={filter.endDate}
           />

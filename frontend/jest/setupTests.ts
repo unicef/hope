@@ -14,6 +14,7 @@ import {
   Chart as ChartJS,
   LinearScale,
 } from 'chart.js';
+import * as usePermissionsModule from '@hooks/usePermissions';
 
 global.Date.now = () => new Date('1970-01-01T00:00:00.000Z').getTime();
 process.env.TZ = 'UTC';
@@ -31,6 +32,7 @@ global.beforeEach(() => {
   jest
     .spyOn(useProgramContextModule, 'useProgramContext')
     .mockReturnValue(fakeContextProgram);
+  jest.spyOn(usePermissionsModule, 'usePermissions').mockReturnValue([]);
 });
 
 global.ResizeObserver = class {
