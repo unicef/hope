@@ -97,6 +97,9 @@ input AddIndividualDataObjectType {
   preferredLanguage: String
   flexFields: Arg
   paymentDeliveryPhoneNo: String
+  blockchainName: String
+  walletAddress: String
+  walletName: String
 }
 
 input AddIndividualIssueTypeExtras {
@@ -2544,6 +2547,9 @@ input IndividualUpdateDataObjectType {
   preferredLanguage: String
   flexFields: Arg
   paymentDeliveryPhoneNo: String
+  blockchainName: String
+  walletAddress: String
+  walletName: String
 }
 
 type InvalidPaymentVerificationPlan {
