@@ -148,8 +148,7 @@ export const Drawer = ({
     if (!isAllPrograms) {
       getProgram();
     }
-  }, [programId, getProgram, isAllPrograms]);
-
+  }, [programId, isAllPrograms, getProgram]);
   useEffect(() => {
     if (
       !showMismatchedDialog &&
