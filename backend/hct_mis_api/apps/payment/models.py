@@ -422,7 +422,9 @@ class PaymentPlanSplit(TimeStampedUUIDModel):
     class SplitType(models.TextChoices):
         BY_RECORDS = "BY_RECORDS", "By Records"
         BY_COLLECTOR = "BY_COLLECTOR", "By Collector"
+        BY_ADMIN_AREA1 = "BY_ADMIN_AREA1", "By Admin Area 1"
         BY_ADMIN_AREA2 = "BY_ADMIN_AREA2", "By Admin Area 2"
+        BY_ADMIN_AREA3 = "BY_ADMIN_AREA3", "By Admin Area 3"
 
     payment_plan = models.ForeignKey(
         "payment.PaymentPlan",
@@ -1065,6 +1067,13 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
                     .last()
                 ):
                     return ModifiedData(approval.created_at, approval.created_by)
+            if self.status == PaymentPlan.Status.ACCEPTED:
+                if (
+                    approval := approval_process.approvals.filter(type=Approval.FINANCE_RELEASE)
+                    .order_by("created_at")
+                    .last()
+                ):
+                    return ModifiedData(approval.created_at, approval.created_by)
         return ModifiedData(self.updated_at)
 
     @property
@@ -1209,6 +1218,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "household_id": (payment.household, "unicef_id"),
             "household_size": (payment.household, "size"),
             "admin_level_2": (payment.household.admin2, "name"),
+            "village": (payment.household, "village"),
             "collector_name": (payment.collector, "full_name"),
             "alternate_collector_full_name": (alternate_collector, "full_name"),
             "alternate_collector_given_name": (alternate_collector, "given_name"),

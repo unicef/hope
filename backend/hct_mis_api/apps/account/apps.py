@@ -11,6 +11,8 @@ class AccountConfig(AppConfig):
     def ready(self) -> None:
         from hijack.signals import hijack_started
 
+        import hct_mis_api.apps.account.signals  # noqa
+
         hijack_started.connect(log_impersonate)
 
 
