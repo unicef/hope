@@ -182,7 +182,7 @@ export const GrievancesFilters = ({
             onChange={(date) => handleFilterChange('createdAtRangeMin', date)}
             value={filter.createdAtRangeMin}
             fullWidth
-            data-cy="filters-creation-date-from"
+            dataCy="filters-creation-date-from"
           />
         </Grid>
         <Grid item xs={2}>
@@ -191,7 +191,7 @@ export const GrievancesFilters = ({
             onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
             value={filter.createdAtRangeMax}
             fullWidth
-            data-cy="filters-creation-date-to"
+            dataCy="filters-creation-date-to"
           />
         </Grid>
         <Grid item xs={3}>

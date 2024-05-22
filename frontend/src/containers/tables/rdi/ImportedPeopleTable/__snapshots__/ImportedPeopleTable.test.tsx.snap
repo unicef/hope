@@ -836,6 +836,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
+                Se*** Ha***
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
                 None
               </td>
               <td

@@ -5,7 +5,7 @@ export function usePermissions(): string[] {
   const { data, loading } = useCachedMe();
   const { businessArea } = useBaseUrl();
   if (loading || !data) {
-    return null;
+    return [];
   }
   // eslint-disable-next-line no-restricted-syntax
   for (const businessAreaEdge of data.me.businessAreas.edges) {

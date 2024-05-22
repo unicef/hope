@@ -84,6 +84,7 @@ export const AllPaymentsForTable = gql`
             id
             name
           }
+          fspAuthCode
         }
       }
     }

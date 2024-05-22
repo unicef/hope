@@ -86,6 +86,12 @@ export function GrievancesTablePage(): React.ReactElement {
           category: '',
           program: '',
         });
+        setAppliedFilter({
+          ...appliedFilter,
+          grievanceType: GrievanceTypes[newValue],
+          category: '',
+          program: '',
+        });
         navigate(newValue === 0 ? userGeneratedPath : systemGeneratedPath);
       }}
       indicatorColor="primary"
