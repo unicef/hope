@@ -5,6 +5,7 @@ class XlsxPaymentPlanBaseService:
         "household_id",
         "household_size",
         "admin_level_2",
+        "village",
         "collector_name",
         "payment_channel",
         "fsp_name",
