@@ -22,15 +22,15 @@ const Overview = styled(Paper)`
   }
 `;
 
-interface HouseholdVulnerabilitiesProps {
+interface HouseholdAdditionalRegistrationInformationProps {
   household: HouseholdNode;
   flexFieldsData: AllHouseholdsFlexFieldsAttributesQuery;
 }
 
-export function HouseholdVulnerabilities({
+export const HouseholdAdditionalRegistrationInformation = ({
   household,
   flexFieldsData,
-}: HouseholdVulnerabilitiesProps): React.ReactElement {
+}: HouseholdAdditionalRegistrationInformationProps): React.ReactElement => {
   const { t } = useTranslation();
 
   const flexAttributesDict = useArrayToDict(
@@ -90,7 +90,9 @@ export function HouseholdVulnerabilities({
     <div>
       <Overview>
         <Title>
-          <Typography variant="h6">{t('Vulnerabilities')}</Typography>
+          <Typography variant="h6">
+            {t('Additional Registration information')}
+          </Typography>
         </Title>
         <Grid container spacing={6}>
           {fields.map((field, i) => (
@@ -103,4 +105,4 @@ export function HouseholdVulnerabilities({
       </Overview>
     </div>
   );
-}
+};
