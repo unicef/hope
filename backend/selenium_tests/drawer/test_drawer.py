@@ -6,6 +6,7 @@ from dateutil.relativedelta import relativedelta
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
 from selenium.common import TimeoutException
+from selenium.webdriver.common.keys import Keys
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
@@ -137,16 +138,6 @@ class TestDrawer:
         pageProgrammeManagement.getMenuUserProfile().click()
         pageProgrammeManagement.getMenuItemClearCache().click()
 
-        assert Program.objects.all().count() == 3
-        print("==>> ", Program.objects.all(), Program.objects.all().values_list("status", flat=True))
-        assert Program.objects.filter(status=Program.ACTIVE).count() == 1
-        assert Program.objects.filter(status=Program.DRAFT).count() == 1
-        assert Program.objects.filter(status=Program.FINISHED).count() == 1
-
-        pageProgrammeManagement.selectGlobalProgramFilter(draft_program_name).click()
-        pageProgrammeManagement.selectGlobalProgramFilter(active_program_name).click()
-        print("==>>> Programs is there !!!")
-
         pageProgrammeManagement.selectGlobalProgramFilter(draft_program_name).click()
         assert draft_program_name in pageProgrammeDetails.getHeaderTitle().text
         assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "program inactive"
@@ -156,7 +147,12 @@ class TestDrawer:
         with pytest.raises(TimeoutException):
             pageProgrammeDetails.getDrawerInactiveSubheader(timeout=0.05)
 
-        # have to add search for Finished program
-        # pageProgrammeManagement.selectGlobalProgramFilter(finished_program_name).click()
-        # assert finished_program_name in pageProgrammeDetails.getHeaderTitle().text
-        # assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "program inactive"
+        # first have to search Finished program because of default filtering
+        pageProgrammeManagement.getGlobalProgramFilter().click()
+        pageProgrammeManagement.getGlobalProgramFilter().send_keys("Draft Program")
+        pageProgrammeManagement.getGlobalProgramFilter().send_keys(Keys.ENTER)
+        pageProgrammeManagement.getGlobalProgramFilter().click()
+
+        pageProgrammeManagement.selectGlobalProgramFilter(finished_program_name).click()
+        assert finished_program_name in pageProgrammeDetails.getHeaderTitle().text
+        assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "program inactive"
