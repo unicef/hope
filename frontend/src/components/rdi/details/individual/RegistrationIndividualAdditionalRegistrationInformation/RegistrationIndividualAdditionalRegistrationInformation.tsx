@@ -20,16 +20,16 @@ const Overview = styled(Paper)`
   margin-bottom: ${({ theme }) => theme.spacing(6)};
 `;
 
-interface RegistrationIndividualVulnerabilitiesProps {
+interface RegistrationIndividualAdditionalRegistrationInformationProps {
   individual: ImportedIndividualDetailedFragment;
   flexFieldsData: AllIndividualsFlexFieldsAttributesQuery;
 }
 
-export function RegistrationIndividualVulnerabilities({
+export const RegistrationIndividualAdditionalRegistrationInformation = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   individual,
   flexFieldsData,
-}: RegistrationIndividualVulnerabilitiesProps): React.ReactElement {
+}: RegistrationIndividualAdditionalRegistrationInformationProps): React.ReactElement => {
   const { t } = useTranslation();
   const flexAttributesDict = useArrayToDict(
     flexFieldsData?.allIndividualsFlexFieldsAttributes,
@@ -84,11 +84,13 @@ export function RegistrationIndividualVulnerabilities({
   return (
     <Overview>
       <Title>
-        <Typography variant="h6">{t('Vulnerabilities')}</Typography>
+        <Typography variant="h6">
+          {t('Additional Registration information')}
+        </Typography>
       </Title>
       <Grid container spacing={6}>
         {fields}
       </Grid>
     </Overview>
   );
-}
+};
