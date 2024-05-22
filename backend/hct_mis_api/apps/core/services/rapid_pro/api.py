@@ -250,8 +250,7 @@ class RapidProAPI:
     def _broadcast_message_batch(self, phone_numbers: List[str], message: str) -> None:
         data = {
             "urns": [f"{config.RAPID_PRO_PROVIDER}:{phone_number}" for phone_number in phone_numbers],
-            "text": {"eng": message},
-            "base_language": "eng",
+            "text": message,
         }
         try:
             self._handle_post_request(f"{RapidProAPI.BROADCAST_START_ENDPOINT}", data)
