@@ -170,6 +170,7 @@ export function CreateFeedbackPage(): React.ReactElement {
     program: isAllPrograms ? '' : programId,
     verificationRequired: false,
   };
+
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },
   });
@@ -258,6 +259,19 @@ export function CreateFeedbackPage(): React.ReactElement {
       {({ submitForm, values, setFieldValue, errors, touched }) => {
         const isAnonymousTicket =
           !values.selectedHousehold?.id && !values.selectedIndividual?.id;
+
+        // Set program value based on selected household or individual
+        if (
+          values.selectedHousehold?.program?.id &&
+          values.program !== values.selectedHousehold.program.id
+        ) {
+          setFieldValue('program', values.selectedHousehold.program.id);
+        } else if (
+          values.selectedIndividual?.program?.id &&
+          values.program !== values.selectedIndividual.program.id
+        ) {
+          setFieldValue('program', values.selectedIndividual.program.id);
+        }
         return (
           <>
             <PageHeader

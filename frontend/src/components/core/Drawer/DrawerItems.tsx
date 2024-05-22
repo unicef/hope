@@ -73,7 +73,6 @@ export const DrawerItems = ({
       getProgram();
     }
   }, [programId, getProgram, isAllPrograms]);
-
   const permissions = usePermissions();
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
