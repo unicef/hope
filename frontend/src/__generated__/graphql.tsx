@@ -94,6 +94,7 @@ export type ActivatePaymentVerificationPlan = {
 export type AddIndividualDataObjectType = {
   administrationOfRutf?: InputMaybe<Scalars['Boolean']['input']>;
   birthDate: Scalars['Date']['input'];
+  blockchainName?: InputMaybe<Scalars['String']['input']>;
   businessArea?: InputMaybe<Scalars['String']['input']>;
   commsDisability?: InputMaybe<Scalars['String']['input']>;
   disability?: InputMaybe<Scalars['String']['input']>;
@@ -123,6 +124,8 @@ export type AddIndividualDataObjectType = {
   seeingDisability?: InputMaybe<Scalars['String']['input']>;
   selfcareDisability?: InputMaybe<Scalars['String']['input']>;
   sex: Scalars['String']['input'];
+  walletAddress?: InputMaybe<Scalars['String']['input']>;
+  walletName?: InputMaybe<Scalars['String']['input']>;
   whoAnswersAltPhone?: InputMaybe<Scalars['String']['input']>;
   whoAnswersPhone?: InputMaybe<Scalars['String']['input']>;
   workStatus?: InputMaybe<Scalars['String']['input']>;
@@ -3647,6 +3650,7 @@ export enum IndividualSex {
 export type IndividualUpdateDataObjectType = {
   administrationOfRutf?: InputMaybe<Scalars['Boolean']['input']>;
   birthDate?: InputMaybe<Scalars['Date']['input']>;
+  blockchainName?: InputMaybe<Scalars['String']['input']>;
   commsDisability?: InputMaybe<Scalars['String']['input']>;
   disability?: InputMaybe<Scalars['String']['input']>;
   documents?: InputMaybe<Array<InputMaybe<IndividualDocumentObjectType>>>;
@@ -3682,6 +3686,8 @@ export type IndividualUpdateDataObjectType = {
   selfcareDisability?: InputMaybe<Scalars['String']['input']>;
   sex?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
+  walletAddress?: InputMaybe<Scalars['String']['input']>;
+  walletName?: InputMaybe<Scalars['String']['input']>;
   whoAnswersAltPhone?: InputMaybe<Scalars['String']['input']>;
   whoAnswersPhone?: InputMaybe<Scalars['String']['input']>;
   workStatus?: InputMaybe<Scalars['String']['input']>;
