@@ -75,7 +75,7 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends \
     add-apt-repository ppa:canary-chromium-builds/stage \
     apt update \
-    apt list -a chromium-browser
+    apt list -a chromium-browser \
     chromium-driver=127.0.6496.0 \
     chromium=127.0.6496.0 \
     ffmpeg \
