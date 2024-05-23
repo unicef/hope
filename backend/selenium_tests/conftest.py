@@ -156,7 +156,6 @@ def driver() -> Chrome:
     )
     chrome_options.add_argument("--enable-logging")
     chrome_options.add_argument("--window-size=1920,1080")
-    chrome_options.add_argument('--remote-debugging-pipe')
     return webdriver.Chrome(options=chrome_options)
 
 
