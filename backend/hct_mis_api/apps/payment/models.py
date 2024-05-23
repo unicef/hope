@@ -1189,6 +1189,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "household_id": (payment.household, "unicef_id"),
             "household_size": (payment.household, "size"),
             "admin_level_2": (payment.household.admin2, "name"),
+            "village": (payment.household, "village"),
             "collector_name": (payment.collector, "full_name"),
             "alternate_collector_full_name": (alternate_collector, "full_name"),
             "alternate_collector_given_name": (alternate_collector, "given_name"),
