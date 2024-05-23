@@ -74,10 +74,10 @@ FROM builder AS dev
 
 RUN apt-get update && \
     apt-get install -y software-properties-common && \
-    rm -rf /var/lib/apt/lists/*
-RUN add-apt-repository ppa:canonical-chromium-builds/stage
-RUN apt update
-RUN apt list -a chromium-browser
+    rm -rf /var/lib/apt/lists/* \
+    add-apt-repository ppa:canonical-chromium-builds/stage \
+    apt update \
+    apt list -a chromium-browser \
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
