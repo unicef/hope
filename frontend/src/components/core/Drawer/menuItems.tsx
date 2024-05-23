@@ -35,11 +35,10 @@ export type MenuItem = {
   flag?: string;
   external?: boolean;
   scopes: string[];
-  isSocialWorker?: boolean
+  isSocialWorker?: boolean;
 };
 export const SCOPE_PROGRAM = 'SCOPE_PROGRAM';
 export const SCOPE_ALL_PROGRAMS = 'SCOPE_ALL_PROGRAMS';
-
 
 export const menuItems: MenuItem[] = [
   {
@@ -55,16 +54,6 @@ export const menuItems: MenuItem[] = [
     href: '/registration-data-import',
     selectedRegexp: /^\/registration-data-import.*$/,
     icon: <AutorenewIcon />,
-    isSocialWorker: false,
-    permissions: [PERMISSIONS.RDI_VIEW_DETAILS, PERMISSIONS.RDI_VIEW_LIST],
-    scopes: [SCOPE_PROGRAM],
-  },
-  {
-    name: 'Registration Data Import',
-    href: '/registration-data-import-for-people',
-    selectedRegexp: /^\/registration-data-import.*$/,
-    icon: <AutorenewIcon />,
-    isSocialWorker: true,
     permissions: [PERMISSIONS.RDI_VIEW_DETAILS, PERMISSIONS.RDI_VIEW_LIST],
     scopes: [SCOPE_PROGRAM],
   },

@@ -180,7 +180,7 @@ class IndividualFactory(DjangoModelFactory):
         MARITAL_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
-    phone_no = factory.Sequence(lambda n: f"+48 609 456 {n%1000:03d}")
+    phone_no = factory.Sequence(lambda n: f"+48 609 456 {n % 1000:03d}")
     phone_no_valid = True
     phone_no_alternative = ""
     phone_no_alternative_valid = True
@@ -273,6 +273,7 @@ def create_household(
 
     household.head_of_household = individuals[0]
     household.household_collection.save()
+    household.program.save()
     # household.registration_data_import.imported_by.partner.save()
     household.registration_data_import.imported_by.save()
     household.registration_data_import.program.save()
@@ -317,6 +318,7 @@ def create_household_for_fixtures(
     )
 
     household.household_collection.save()
+    household.program.save()
     household.head_of_household = individuals[0]
     household.registration_data_import.imported_by.save()
     household.registration_data_import.program.save()
@@ -361,14 +363,30 @@ def create_household_and_individuals(
         individuals_data = []
     if household_data.get("size") is None:
         household_data["size"] = len(individuals_data)
+    if "program" not in household_data:
+        program = ProgramFactory()
+    else:
+        program = household_data["program"]
+    if "registration_data_import" not in household_data:
+        rdi = RegistrationDataImportFactory(program=program)
+        household_data["registration_data_import"] = rdi
     household: Household = HouseholdFactory.build(**household_data)
+    household.program.save()
     household.household_collection.save()
     household.registration_data_import.imported_by.save()
     household.registration_data_import.program.save()
     household.registration_data_import.save()
     household.program.save()
+    for individual_data in individuals_data:
+        if "program" not in individual_data:
+            individual_data["program"] = program
+        if "registration_data_import" not in individual_data:
+            individual_data["registration_data_import"] = household_data["registration_data_import"]
     individuals: List[Individual] = [
-        IndividualFactory(household=household, program=household.program, **individual_data)
+        IndividualFactory(
+            household=household,
+            **individual_data,
+        )
         for individual_data in individuals_data
     ]
     household.head_of_household = individuals[0]

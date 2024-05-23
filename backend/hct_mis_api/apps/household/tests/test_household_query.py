@@ -2,15 +2,17 @@ from typing import Any, List
 
 from django.conf import settings
 
+from constance.test import override_config
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import (
     BusinessAreaFactory,
     PartnerFactory,
+    RoleFactory,
     UserFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import (
     create_afghanistan,
     generate_data_collecting_types,
@@ -27,8 +29,8 @@ from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
 )
 
 ALL_HOUSEHOLD_QUERY = """
-      query AllHouseholds($search: String, $searchType: String, $program: ID) {
-        allHouseholds(search: $search, searchType: $searchType, orderBy: "size", program: $program, businessArea: "afghanistan") {
+      query AllHouseholds($search: String, $documentType: String, $documentNumber: String, $program: ID) {
+        allHouseholds(search: $search, documentType: $documentType, documentNumber: $documentNumber, orderBy: "size", program: $program, businessArea: "afghanistan") {
           edges {
             node {
               size
@@ -124,7 +126,9 @@ HOUSEHOLD_QUERY = """
     """
 
 
-class TestHouseholdQuery(APITestCase):
+@override_config(USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH=True)
+class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
+    databases = "__all__"
     fixtures = (
         f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
         f"{settings.PROJECT_ROOT}/apps/household/fixtures/documenttype.json",
@@ -135,6 +139,9 @@ class TestHouseholdQuery(APITestCase):
         cls.partner = PartnerFactory(name="NOT_UNICEF")
         cls.user = UserFactory.create(partner=cls.partner)
         cls.business_area = create_afghanistan()
+
+        cls.partner_no_access = PartnerFactory(name="Partner No Access")
+        cls.user_with_no_access = UserFactory(partner=cls.partner_no_access)
 
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
         generate_data_collecting_types()
@@ -156,29 +163,34 @@ class TestHouseholdQuery(APITestCase):
             business_area=cls.business_area,
             status=Program.DRAFT,
         )
-
-        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program_one)
-        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program_two)
-        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program_draft)
+        cls.program_other = ProgramFactory(
+            name="Test program OTHER",
+            business_area=cls.business_area,
+            status=Program.ACTIVE,
+        )
 
         cls.households = []
         country_origin = geo_models.Country.objects.filter(iso_code2="PL").first()
 
         for index, family_size in enumerate(family_sizes_list):
-            (household, individuals) = create_household(
-                {"size": family_size, "address": f"Lorem Ipsum {family_size}", "country_origin": country_origin},
-            )
             if index % 2:
-                household.programs.add(cls.program_one)
-                household.program_id = cls.program_one.pk
-                household.save()
+                program = cls.program_one
             else:
-                household.programs.add(cls.program_two)
-                household.program_id = cls.program_two.pk
-                household.save()
-                # added for testing migrate_data_to_representations script
-                if family_size == 14:
-                    household.programs.add(cls.program_one)
+                program = cls.program_two
+
+            (household, individuals) = create_household(
+                {
+                    "size": family_size,
+                    "address": f"Lorem Ipsum {family_size}",
+                    "country_origin": country_origin,
+                    "program": program,
+                },
+            )
+            household.programs.add(program)
+            household.save()
+            # added for testing migrate_data_to_representations script
+            if family_size == 14:
+                household.programs.add(cls.program_one)
 
             area_type_level_1 = AreaTypeFactory(
                 name="State1",
@@ -202,22 +214,30 @@ class TestHouseholdQuery(APITestCase):
         household.head_of_household.save()
         household.head_of_household.refresh_from_db()
 
+        # household in program that cls.user does not have access to
+        create_household(
+            {
+                "size": 5,
+                "address": "Lorem Ipsumm 5",
+                "country_origin": country_origin,
+                "program": cls.program_other,
+            },
+        )
+
         DocumentFactory(
             document_number="123-456-789",
             type=DocumentType.objects.get(key="national_id"),
             individual=household.head_of_household,
         )
 
-        cls.partner.permissions = {
-            str(cls.business_area.id): {
-                "programs": {
-                    str(cls.program_one.id): [str(cls.households[0].admin_area.id)],
-                    str(cls.program_two.id): [str(cls.households[0].admin_area.id)],
-                    str(cls.program_draft.id): [str(cls.households[0].admin_area.id)],
-                }
-            }
-        }
-        cls.partner.save()
+        role = RoleFactory(name="Test Role", permissions=[Permissions.PROGRAMME_CREATE])
+        cls.add_partner_role_in_business_area(
+            cls.partner,
+            cls.business_area,
+            [role],
+        )
+        for program in [cls.program_one, cls.program_two, cls.program_draft]:
+            cls.update_partner_access_to_program(cls.partner, program, [cls.households[0].admin_area])
 
         # remove after data migration
         BusinessAreaFactory(name="Democratic Republic of Congo")
@@ -278,6 +298,23 @@ class TestHouseholdQuery(APITestCase):
             variables={"id": self.id_to_base64(self.households[0].id, "HouseholdNode")},
         )
 
+    def test_household_query_single_different_program_in_header(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS], self.business_area
+        )
+
+        self.snapshot_graphql_request(
+            request_string=HOUSEHOLD_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_one.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"id": self.id_to_base64(self.households[0].id, "HouseholdNode")},
+        )
+
     def test_household_query_draft(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area
@@ -314,7 +351,7 @@ class TestHouseholdQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": f"{household.unicef_id}", "searchType": "household_id"},
+            variables={"search": f"{household.unicef_id}"},
         )
 
     @parameterized.expand(
@@ -337,7 +374,7 @@ class TestHouseholdQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": f"{household.head_of_household.unicef_id}", "searchType": "individual_id"},
+            variables={"search": f"{household.head_of_household.unicef_id}"},
         )
 
     @parameterized.expand(
@@ -360,7 +397,7 @@ class TestHouseholdQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": f"{household.head_of_household.full_name}", "searchType": "individual_id"},
+            variables={"search": f"{household.head_of_household.full_name}"},
         )
 
     @parameterized.expand(
@@ -381,7 +418,7 @@ class TestHouseholdQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": "+18663567905", "searchType": "phone_no"},
+            variables={"search": "+18663567905"},
         )
 
     @parameterized.expand(
@@ -402,31 +439,7 @@ class TestHouseholdQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": "123-456-789", "searchType": "national_id"},
-        )
-
-    @parameterized.expand(
-        [
-            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], "123"),
-            ("with_permission_wrong_type_in_search", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], "123/123"),
-            ("without_permission", [], "123"),
-        ]
-    )
-    def test_query_households_by_registration_id_filter(
-        self, _: Any, permissions: List[Permissions], search: str
-    ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        self.snapshot_graphql_request(
-            request_string=ALL_HOUSEHOLD_QUERY,
-            context={
-                "user": self.user,
-                "headers": {
-                    "Program": self.id_to_base64(self.program_two.id, "ProgramNode"),
-                    "Business-Area": self.business_area.slug,
-                },
-            },
-            variables={"search": search, "searchType": "registration_id"},
+            variables={"documentNumber": "123-456-789", "documentType": "national_id"},
         )
 
     @parameterized.expand(
@@ -470,5 +483,35 @@ class TestHouseholdQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": "qwerty12345", "searchType": "kobo_asset_id"},
+            variables={"search": "qwerty12345"},
+        )
+
+    def test_household_query_all_for_all_programs(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area
+        )
+
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    def test_household_query_all_for_all_programs_user_with_no_program_access(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user_with_no_access, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area
+        )
+
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={
+                "user": self.user_with_no_access,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
         )

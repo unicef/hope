@@ -66,7 +66,12 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
 
     def _save_payments(self, payments_to_save: List[Payment]) -> None:
         Payment.objects.bulk_update(
-            payments_to_save, fields=("entitlement_quantity", "entitlement_quantity_usd", "entitlement_date")
+            payments_to_save,
+            fields=(
+                "entitlement_quantity",
+                "entitlement_quantity_usd",
+                "entitlement_date",
+            ),
         )
         payments_ids = [payment.id for payment in payments_to_save]
         payments = Payment.objects.filter(id__in=payments_ids).select_related("household_snapshot")

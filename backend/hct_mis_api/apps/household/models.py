@@ -505,7 +505,14 @@ class Household(
     detail_id = models.CharField(
         max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
     )
-    registration_id = models.IntegerField(blank=True, null=True, verbose_name="Registration ID (Aurora)")
+    registration_id = CICharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        unique=True,
+        db_index=True,
+        verbose_name=_("Beneficiary Program Registration Id"),
+    )
     total_cash_received_usd = models.DecimalField(
         null=True,
         decimal_places=2,
@@ -995,11 +1002,19 @@ class Individual(
     detail_id = models.CharField(
         max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
     )
-    registration_id = models.IntegerField(blank=True, null=True, verbose_name="Registration ID (Aurora)")
+    registration_id = CICharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name=_("Beneficiary Program Registration Id"),
+    )
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
     relationship_confirmed = models.BooleanField(default=False)
     age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True)
+    wallet_name = models.CharField(max_length=64, blank=True, default="")
+    blockchain_name = models.CharField(max_length=64, blank=True, default="")
+    wallet_address = models.CharField(max_length=128, blank=True, default="")
 
     program = models.ForeignKey(
         "program.Program", null=True, blank=True, db_index=True, related_name="individuals", on_delete=models.SET_NULL

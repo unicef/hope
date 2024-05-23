@@ -37,10 +37,12 @@ export const PAYMENT_RECORD_QUERY = gql`
         unicefId
         headOfHousehold {
           id
+          unicefId
           phoneNo
           phoneNoAlternative
           phoneNoValid
           phoneNoAlternativeValid
+          fullName
         }
       }
       parent {

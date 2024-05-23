@@ -11,7 +11,8 @@ export const AllGrievanceTicket = gql`
     $issueType: String
     $businessArea: String!
     $search: String
-    $searchType: String
+    $documentType: String
+    $documentNumber: String
     $status: [String]
     $fsp: String
     $createdAtRange: String
@@ -43,7 +44,8 @@ export const AllGrievanceTicket = gql`
       issueType: $issueType
       businessArea: $businessArea
       search: $search
-      searchType: $searchType
+      documentType: $documentType
+      documentNumber: $documentNumber
       status: $status
       fsp: $fsp
       createdAtRange: $createdAtRange

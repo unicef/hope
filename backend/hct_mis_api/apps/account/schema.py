@@ -29,11 +29,11 @@ from hct_mis_api.apps.account.permissions import (
     hopeOneOfPermissionClass,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.geo.schema import AreaGroupNode
+from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.household.models import Household, Individual
 
 logger = logging.getLogger(__name__)
@@ -63,6 +63,13 @@ class UserRoleNode(DjangoObjectType):
 class RoleNode(DjangoObjectType):
     class Meta:
         model = Role
+        exclude = ("id",)
+
+
+class PartnerRoleNode(DjangoObjectType):
+
+    class Meta:
+        model = BusinessAreaPartnerThrough
         exclude = ("id",)
 
 
@@ -96,9 +103,13 @@ class PartnerType(DjangoObjectType):
 
 class UserNode(DjangoObjectType):
     business_areas = DjangoFilterConnectionField(UserBusinessAreaNode)
+    partner_roles = graphene.List(PartnerRoleNode)
 
     def resolve_business_areas(self, info: Any) -> "QuerySet[BusinessArea]":
         return info.context.user.business_areas
+
+    def resolve_partner_roles(self, info: Any) -> "QuerySet[Role]":
+        return self.partner.business_area_partner_through.all()
 
     class Meta:
         model = get_user_model()
@@ -138,38 +149,22 @@ class JSONLazyString(graphene.Scalar):
         return json.loads(value)
 
 
-class PartnerNodeForProgram(DjangoObjectType):
-    id = graphene.ID()
+class PartnerNode(DjangoObjectType):
     name = graphene.String()
-    admin_areas = graphene.List(AreaGroupNode)
+    areas = graphene.List(AreaNode)
     area_access = graphene.String()
 
     class Meta:
         model = Partner
 
-    @staticmethod
-    def _get_areas_ids(partner: Partner, info_context_headers: Dict) -> List[str]:
-        if program_id := partner.program.id:
-            program = partner.program
-            areas_ids = partner.get_permissions().areas_for(str(program.business_area_id), str(program_id))
-            return areas_ids if areas_ids else []
-        else:
-            return []
-
-    def resolve_admin_areas(self, info: Any, **kwargs: Any) -> List[Dict]:
-        areas_ids = PartnerNodeForProgram._get_areas_ids(self, info.context.headers)
-        return_list = []
-        for level in [1, 2, 3, 4]:
-            ids = Area.objects.filter(area_type__area_level=level, id__in=areas_ids).values_list("id", flat=True)
-            return_list.append({"ids": ids, "level": level, "total_count": len(ids)})
-        return return_list
+    def resolve_areas(self, info: Any) -> "List[Area]":
+        return self.program_partner_through.get(program_id=self.partner_program).areas.all()
 
     def resolve_area_access(self, info: Any, **kwargs: Any) -> str:
-        areas_ids = PartnerNodeForProgram._get_areas_ids(self, info.context.headers)
-        if len(areas_ids) != 0:
-            return "ADMIN_AREA"
-        else:
+        if self.program_partner_through.get(program_id=self.partner_program).full_area_access:
             return "BUSINESS_AREA"
+        else:
+            return "ADMIN_AREA"
 
 
 class Query(graphene.ObjectType):

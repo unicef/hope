@@ -7,11 +7,12 @@ from django.utils import timezone
 
 from constance import config
 
-from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
+from hct_mis_api.apps.account.models import Partner, User, UserRole
 from hct_mis_api.apps.account.permissions import (
     DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER,
     Permissions,
 )
+from hct_mis_api.apps.core.models import BusinessAreaPartnerThrough
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.utils.mailjet import MailjetClient
@@ -78,24 +79,22 @@ class PaymentNotification:
             .distinct()
         )
 
-        partners_recipients = []
-        partners_with_program_access = []
-        for partner in Partner.objects.all():
-            program_ids = partner.get_program_ids_for_business_area(str(business_area.id))
-            if str(program.id) in program_ids:
-                partners_with_program_access.append(partner)
-                partner_roles_ids = partner.get_permissions().roles_for(str(business_area.id))
-                if Role.objects.filter(id__in=partner_roles_ids, permissions__contains=[permission]).exists():
-                    partners_recipients.append(partner)
+        ba_partner_with_permission = BusinessAreaPartnerThrough.objects.filter(
+            business_area=business_area,
+            roles__permissions__contains=[permission],
+        ).distinct()
+        partners_with_permission = Partner.objects.filter(business_area_partner_through__in=ba_partner_with_permission)
+        partner_role_q = Q(partner__in=partners_with_permission)
 
-        program_access_q = Q(partner__in=partners_with_program_access)
+        program_access_q = Q(partner__in=program.partners.all())
+
         unicef_q = (
             Q(user_roles__business_area=business_area, partner__name="UNICEF")
             if permission in DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER
             else Q()
         )
         return User.objects.filter(
-            (Q(user_roles__in=user_roles) & program_access_q) | Q(partner__in=partners_recipients) | unicef_q
+            (Q(user_roles__in=user_roles) & program_access_q) | Q(partner_role_q & program_access_q) | unicef_q
         ).distinct()
 
     def _prepare_emails(self) -> List[MailjetClient]:
@@ -113,13 +112,12 @@ class PaymentNotification:
         return email
 
     def send_email_notification(self) -> None:
-        if not config.SEND_PAYMENT_PLANS_NOTIFICATION or not self.enable_email_notification:
-            return
-        try:
-            for email in self.emails:
-                email.send_email()
-        except Exception as e:
-            logger.exception(e)
+        if config.SEND_PAYMENT_PLANS_NOTIFICATION and self.enable_email_notification:
+            try:
+                for email in self.emails:
+                    email.send_email()
+            except Exception as e:  # pragma: no cover
+                logger.exception(e)
 
     def _prepare_body_variables(self, user_recipient: User) -> Dict[str, Any]:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"

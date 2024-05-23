@@ -45,7 +45,7 @@ from psycopg2._range import NumericRange
 
 from hct_mis_api.apps.account.models import HorizontalChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES, USDC
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     CORE_FIELDS_ATTRIBUTES,
@@ -174,6 +174,11 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
         return self.ca_id if isinstance(self, CashPlan) else self.unicef_id
 
     def get_exchange_rate(self, exchange_rates_client: Optional["ExchangeRateClient"] = None) -> float:
+        if self.currency == USDC:
+            # TODO: is it good place for that?
+            # exchange rate for Digital currency
+            return 1.0
+
         if exchange_rates_client is None:
             exchange_rates_client = ExchangeRates()
 
@@ -272,6 +277,8 @@ class GenericPayment(TimeStampedUUIDModel):
     DELIVERY_TYPE_TRANSFER_TO_ACCOUNT = "Transfer to Account"
     DELIVERY_TYPE_VOUCHER = "Voucher"
     DELIVERY_TYPE_CASH_OVER_THE_COUNTER = "Cash over the counter"
+    DELIVERY_TYPE_ATM_CARD = "ATM Card"
+    DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET = "Transfer to Digital Wallet"
 
     DELIVERY_TYPES_IN_CASH = (
         DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL,
@@ -285,6 +292,7 @@ class GenericPayment(TimeStampedUUIDModel):
         DELIVERY_TYPE_TRANSFER,
         DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
         DELIVERY_TYPE_CASH_OVER_THE_COUNTER,
+        DELIVERY_TYPE_ATM_CARD,
     )
     DELIVERY_TYPES_IN_VOUCHER = (DELIVERY_TYPE_VOUCHER,)
 
@@ -301,6 +309,8 @@ class GenericPayment(TimeStampedUUIDModel):
         (DELIVERY_TYPE_TRANSFER_TO_ACCOUNT, _("Transfer to Account")),
         (DELIVERY_TYPE_VOUCHER, _("Voucher")),
         (DELIVERY_TYPE_CASH_OVER_THE_COUNTER, _("Cash over the counter")),
+        (DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET, _("Transfer to Digital Wallet")),
+        (DELIVERY_TYPE_ATM_CARD, _("ATM Card")),
     )
 
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
@@ -312,7 +322,7 @@ class GenericPayment(TimeStampedUUIDModel):
     status_date = models.DateTimeField()
     household = models.ForeignKey("household.Household", on_delete=models.CASCADE)
     head_of_household = models.ForeignKey("household.Individual", on_delete=models.CASCADE, null=True)
-    delivery_type = models.CharField(choices=DELIVERY_TYPE_CHOICE, max_length=24, null=True)
+    delivery_type = models.CharField(choices=DELIVERY_TYPE_CHOICE, max_length=32, null=True)
     currency = models.CharField(
         max_length=4,
     )
@@ -330,6 +340,7 @@ class GenericPayment(TimeStampedUUIDModel):
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
     transaction_reference_id = models.CharField(max_length=255, null=True)  # transaction_id
+    transaction_status_blockchain_link = models.CharField(max_length=255, null=True)
 
     class Meta:
         abstract = True
@@ -582,7 +593,11 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
     class Meta:
         verbose_name = "Payment Plan"
         ordering = ["created_at"]
-        constraints = [models.UniqueConstraint(fields=["name", "program"], name="name_unique_per_program")]
+        constraints = [
+            UniqueConstraint(
+                fields=["name", "program", "is_removed"], condition=Q(is_removed=False), name="name_unique_per_program"
+            )
+        ]
 
     def __str__(self) -> str:
         return self.unicef_id or ""
@@ -1111,6 +1126,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("additional_document_number", _("Additional Document Number")),
         ("registration_token", _("Registration Token")),
         ("status", _("Status")),
+        ("transaction_status_blockchain_link", _("Transaction Status on the Blockchain")),
     )
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
@@ -1216,6 +1232,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "additional_document_type": (payment, "additional_document_type"),
             "additional_document_number": (payment, "additional_document_number"),
             "status": (payment, "payment_status"),
+            "transaction_status_blockchain_link": (payment, "transaction_status_blockchain_link"),
         }
         additional_columns = {"registration_token": cls.get_registration_token_doc_number}
         if column_name in additional_columns:
@@ -1298,7 +1315,7 @@ class FinancialServiceProvider(LimitBusinessAreaModelMixin, TimeStampedUUIDModel
     name = models.CharField(max_length=100, unique=True)
     vision_vendor_number = models.CharField(max_length=100, unique=True)
     delivery_mechanisms = HorizontalChoiceArrayField(
-        models.CharField(choices=GenericPayment.DELIVERY_TYPE_CHOICE, max_length=24)
+        models.CharField(choices=GenericPayment.DELIVERY_TYPE_CHOICE, max_length=32)
     )
     distribution_limit = models.DecimalField(
         decimal_places=2,
@@ -1486,7 +1503,7 @@ class CashPlan(ConcurrencyModel, AdminUrlMixin, GenericPaymentPlan):
     comments = models.CharField(max_length=255, null=True)
     delivery_type = models.CharField(
         choices=GenericPayment.DELIVERY_TYPE_CHOICE,
-        max_length=24,
+        max_length=32,
         null=True,
         db_index=True,
     )

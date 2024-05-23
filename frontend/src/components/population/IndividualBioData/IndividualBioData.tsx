@@ -38,13 +38,13 @@ interface IndividualBioDataProps {
   choicesData: HouseholdChoiceDataQuery;
   grievancesChoices: GrievancesChoiceDataQuery;
 }
-export function IndividualBioData({
+export const IndividualBioData = ({
   individual,
   baseUrl,
   businessArea,
   choicesData,
   grievancesChoices,
-}: IndividualBioDataProps): React.ReactElement {
+}: IndividualBioDataProps): React.ReactElement => {
   const { t } = useTranslation();
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
@@ -138,6 +138,31 @@ export function IndividualBioData({
         <Grid item xs={3}>
           <LabelizedField label={t('Bank branch name')}>
             {individual?.bankAccountInfo?.bankBranchName}
+          </LabelizedField>
+        </Grid>
+      </>
+    );
+  };
+
+  const renderDigitalWalletInfo = (): React.ReactNode => {
+    return (
+      <>
+        <Grid item xs={12}>
+          <BorderBox />
+        </Grid>
+        <Grid item xs={4}>
+          <LabelizedField label={t('Wallet Name')}>
+            {individual?.walletName}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={4}>
+          <LabelizedField label={t('Blockchain Name')}>
+            {individual?.blockchainName}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={4}>
+          <LabelizedField label={t('Wallet Address')}>
+            {individual?.walletAddress}
           </LabelizedField>
         </Grid>
       </>
@@ -335,7 +360,8 @@ export function IndividualBioData({
           )}
         </Grid>
         {renderBankAccountInfo()}
+        {renderDigitalWalletInfo()}
       </Grid>
     </Overview>
   );
-}
+};

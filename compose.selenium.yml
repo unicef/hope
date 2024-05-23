@@ -3,13 +3,15 @@ version: '3.7'
 volumes:
   backend-data-selenium:
   backend-web-app-selenium:
-  db-selenium:
+  db-selenium-data:
   data_es-selenium:
 
 services:
   selenium:
     stdin_open: true
+    tty: true
     image: unicef/hct-mis-backend-dev
+    shm_size: 2gb
     environment:
       - REDIS_INSTANCE=redis:6379
       - PYTHONUNBUFFERED=1
@@ -19,11 +21,11 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - CACHE_LOCATION=redis://redis:6379/1
-      - DATABASE_URL=postgis://postgres:postgres@db:5432/postgres
-      - DATABASE_URL_HUB_MIS=postgis://postgres:postgres@db:5432/mis_datahub
-      - DATABASE_URL_HUB_CA=postgis://postgres:postgres@db:5432/ca_datahub
-      - DATABASE_URL_HUB_ERP=postgis://postgres:postgres@db:5432/erp_datahub
-      - DATABASE_URL_HUB_REGISTRATION=postgis://postgres:postgres@db:5432/rdi_datahub
+      - DATABASE_URL=postgis://postgres:postgres@db_selenium:5432/postgres
+      - DATABASE_URL_HUB_MIS=postgis://postgres:postgres@db_selenium:5432/mis_datahub
+      - DATABASE_URL_HUB_CA=postgis://postgres:postgres@db_selenium:5432/ca_datahub
+      - DATABASE_URL_HUB_ERP=postgis://postgres:postgres@db_selenium:5432/erp_datahub
+      - DATABASE_URL_HUB_REGISTRATION=postgis://postgres:postgres@db_selenium:5432/rdi_datahub
       - USE_DUMMY_EXCHANGE_RATES=yes
       - CELERY_TASK_ALWAYS_EAGER=true
     build:
@@ -35,6 +37,7 @@ services:
       - ./backend/report/:/code/report/
       - backend-data-selenium:/data
       - ./backend/selenium_tests:/code/selenium_tests
+      - ./backend/hct_mis_api:/code/hct_mis_api
       - type: volume
         source: backend-web-app-selenium
         target: /code/hct_mis_api/apps/web/static
@@ -42,13 +45,13 @@ services:
           nocopy: false
     command: |
       sh -c "
-        waitforit -host=db -port=5432 -timeout=30 &&
-        pytest -svvv selenium_tests --html=./report/report.html
+        waitforit -host=db_selenium -port=5432 -timeout=30 &&
+        pytest -svvv selenium_tests --html-report=./report/report.html
       "
     ports:
       - "8080:8080"
     depends_on:
-      db:
+      db_selenium:
         condition: service_started
       redis:
         condition: service_started
@@ -75,13 +78,11 @@ services:
   redis:
     restart: always
     image: redis:4.0.11-alpine3.8
-    expose:
-      - "6379"
 
-  db:
+  db_selenium:
     image: kartoza/postgis:14-3
     volumes:
-      - db-selenium:/var/lib/postgresql/data
+      - db-selenium-data:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d
     environment:
       - POSTGRES_MULTIPLE_DATABASES=unicef_hct_mis_cashassist,rdi_datahub,mis_datahub,erp_datahub,ca_datahub
@@ -91,8 +92,6 @@ services:
       - PGUSER=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
       - POSTGRES_SSL_MODE=off
-    ports:
-      - "5433:5432"
 
   elasticsearch:
     image: unicef/hct-elasticsearch

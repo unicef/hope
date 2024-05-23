@@ -6,7 +6,7 @@ class BaseComponents(Common):
     # Labels
     businessAreaContainer = 'div[data-cy="business-area-container"]'
     globalProgramFilterContainer = 'div[data-cy="global-program-filter-container"]'
-    globalProgramFilter = 'div[data-cy="global-program-filter"]'
+    globalProgramFilter = 'button[data-cy="global-program-filter"]'
     menuUserProfile = 'button[data-cy="menu-user-profile"]'
     sideNav = 'div[data-cy="side-nav"]'
     navCountryDashboard = 'a[data-cy="nav-Country Dashboard"]'
