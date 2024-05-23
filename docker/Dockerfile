@@ -77,7 +77,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* \
     add-apt-repository ppa:canonical-chromium-builds/stage \
     apt update \
-    apt list -a chromium-browser \
+    apt list -a chromium-browser
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
