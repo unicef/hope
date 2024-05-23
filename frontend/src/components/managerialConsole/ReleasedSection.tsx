@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BaseSection } from '@components/core/BaseSection';
 import { useTranslation } from 'react-i18next';
+import moment from 'moment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { BlackLink } from '@components/core/BlackLink';
 import { UniversalMoment } from '@components/core/UniversalMoment';
@@ -57,12 +58,16 @@ export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
 
   const filteredRows =
     releasedData?.results?.filter((row: any) =>
-      columns.some((column) =>
-        row[column.field]
+      columns.some((column) => {
+        if (column.field === 'last_approval_process_date') {
+          const date = moment(row[column.field]).format('D MMMM YYYY');
+          return date.toLowerCase().includes(searchText.toLowerCase());
+        }
+        return row[column.field]
           ?.toString()
           .toLowerCase()
-          .includes(searchText.toLowerCase()),
-      ),
+          .includes(searchText.toLowerCase());
+      }),
     ) || [];
 
   const title = t('Released Payment Plans');
