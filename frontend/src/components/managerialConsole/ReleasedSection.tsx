@@ -29,8 +29,7 @@ export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
   const { businessArea } = useBaseUrl();
   const [searchText, setSearchText] = useState('');
   const [sortField, setSortField] = useState(null);
-  const [sortDirection, setSortDirection] = useState('asc');
-
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const handleSort = (field) => {
     const newSortDirection =
       sortField === field && sortDirection === 'asc' ? 'desc' : 'asc';
