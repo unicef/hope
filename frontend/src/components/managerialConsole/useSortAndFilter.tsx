@@ -29,6 +29,10 @@ export const ProgramSelect: React.FC<ProgramSelectProps> = ({
     setSelectedProgram(event.target.value);
   };
 
+  if (programs.length === 0) {
+    return <div>Programme</div>;
+  }
+
   return (
     <Select
       value={selectedProgram}
