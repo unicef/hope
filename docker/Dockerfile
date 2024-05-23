@@ -71,7 +71,7 @@ RUN pdm sync --prod --no-editable --no-self
 # Dev image
 FROM builder AS dev
 
-RUN apt-get install software-properties-common
+RUN apt-get install -y --no-install-recommends software-properties-common
 RUN add-apt-repository ppa:canonical-chromium-builds/stage
 RUN apt update
 RUN apt list -a chromium-browser
