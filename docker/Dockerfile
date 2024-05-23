@@ -73,8 +73,8 @@ FROM builder AS dev
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-    chromium-driver=125.0.6422.60-1~deb12u1 \
-    chromium=125.0.6422.60-1~deb12u1 \
+    chromium-driver \
+    chromium \
     ffmpeg \
     xorg \
     x11-apps \
