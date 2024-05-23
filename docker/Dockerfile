@@ -73,8 +73,8 @@ FROM builder AS dev
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-    chromium-driver \
-    chromium \
+    chromium-driver==125.0.6422.60 \
+    chromium==125.0.6422.60 \
     ffmpeg \
     xorg \
     x11-apps \
