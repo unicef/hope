@@ -14,6 +14,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TableSortLabel,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
@@ -27,6 +28,14 @@ export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const [searchText, setSearchText] = useState('');
+  const [sortField, setSortField] = useState(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const handleSort = (field) => {
+    const newSortDirection =
+      sortField === field && sortDirection === 'asc' ? 'desc' : 'asc';
+    setSortField(field);
+    setSortDirection(newSortDirection);
+  };
 
   const columns = [
     {
@@ -70,6 +79,16 @@ export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
       }),
     ) || [];
 
+  const sortedRows = [...filteredRows].sort((a, b) => {
+    if (a[sortField] < b[sortField]) {
+      return sortDirection === 'asc' ? -1 : 1;
+    }
+    if (a[sortField] > b[sortField]) {
+      return sortDirection === 'asc' ? 1 : -1;
+    }
+    return 0;
+  });
+
   const title = t('Released Payment Plans');
 
   const buttons = (
@@ -96,12 +115,20 @@ export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
             <TableHead>
               <TableRow>
                 {columns.map((column) => (
-                  <TableCell key={column.field}>{column.headerName}</TableCell>
+                  <TableCell key={column.field}>
+                    <TableSortLabel
+                      active={sortField === column.field}
+                      direction={sortDirection}
+                      onClick={() => handleSort(column.field)}
+                    >
+                      {column.headerName}
+                    </TableSortLabel>
+                  </TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredRows.map((row) => (
+              {sortedRows.map((row) => (
                 <TableRow key={row.id}>
                   {columns.map((column) => (
                     <TableCell key={column.field}>
