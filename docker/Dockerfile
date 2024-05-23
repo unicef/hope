@@ -71,10 +71,14 @@ RUN pdm sync --prod --no-editable --no-self
 # Dev image
 FROM builder AS dev
 
+RUN add-apt-repository ppa:canonical-chromium-builds/stage
+RUN apt update
+RUN apt list -a chromium-browser
+
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-    chromium-driver \
-    chromium \
+    chromium-driver=121.0.6167.139-1~deb12u1 \
+    chromium=121.0.6167.139-1~deb12u1 \
     ffmpeg \
     xorg \
     x11-apps \
