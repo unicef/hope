@@ -1,3 +1,4 @@
+import json
 from io import BytesIO
 from pathlib import Path
 from typing import Any
@@ -5,7 +6,10 @@ from unittest import mock
 
 from django.conf import settings
 from django.core.files import File
-from django.test import TestCase
+from django.template.loader import render_to_string
+from django.test import TestCase, override_settings
+
+from constance.test import override_config
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -128,66 +132,82 @@ class TestIndividualXlsxUpdate(TestCase):
         for individual in cls.individuals:
             individual.save()
 
-    @mock.patch(
-        "hct_mis_api.apps.household.services.individuals_iban_xlsx_update.IndividualsIBANXlsxUpdate._prepare_email"
-    )
-    def test_update_individuals_iban_from_xlsx_task_invalid_file_error(self, prepare_email_mock: Any) -> None:
+    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @override_settings(EMAIL_SUBJECT_PREFIX="test")
+    @override_config(ENABLE_MAILJET=True)
+    def test_update_individuals_iban_from_xlsx_task_invalid_file_error(self, mocked_requests_post: Any) -> None:
         update_individuals_iban_from_xlsx_task.run(
             xlsx_update_file_id=self.xlsx_invalid_file.id,
             uploaded_by_id=self.user.id,
         )
-        prepare_email_mock.assert_called_once_with(
-            context={
-                "first_name": self.user.first_name,
-                "last_name": self.user.last_name,
-                "email": self.user.email,
-                "message": "There was an unexpected error during Individuals IBAN update: 'Worksheet Individuals does not exist.'",
-                "upload_file_id": str(self.xlsx_invalid_file.id),
-            }
+
+        context = {
+            "first_name": self.user.first_name,
+            "last_name": self.user.last_name,
+            "email": self.user.email,
+            "message": "There was an unexpected error during Individuals IBAN update: 'Worksheet Individuals does not exist.'",
+            "upload_file_id": str(self.xlsx_invalid_file.id),
+        }
+
+        expected_data = self._get_expected_email_body(context)
+
+        mocked_requests_post.assert_called_once_with(
+            "https://api.mailjet.com/v3.1/send",
+            auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY),
+            data=expected_data,
         )
 
-    @mock.patch(
-        "hct_mis_api.apps.household.services.individuals_iban_xlsx_update.IndividualsIBANXlsxUpdate._prepare_email"
-    )
+    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @override_settings(EMAIL_SUBJECT_PREFIX="test")
+    @override_config(ENABLE_MAILJET=True)
     def test_update_individuals_iban_from_xlsx_task_invalid_file_bad_columns_fail(
-        self, prepare_email_mock: Any
+        self, mocked_requests_post: Any
     ) -> None:
         update_individuals_iban_from_xlsx_task.run(
             xlsx_update_file_id=self.xlsx_invalid_file_bad_columns.id,
             uploaded_by_id=self.user.id,
         )
-        prepare_email_mock.assert_called_once_with(
-            context={
-                "first_name": self.user.first_name,
-                "last_name": self.user.last_name,
-                "email": self.user.email,
-                "message": "['No UNICEF_ID column in provided file', 'No IBAN column in provided file', 'No BANK_NAME column in provided file']",
-                "upload_file_id": str(self.xlsx_invalid_file_bad_columns.id),
-            }
+        context = {
+            "first_name": self.user.first_name,
+            "last_name": self.user.last_name,
+            "email": self.user.email,
+            "message": "['No UNICEF_ID column in provided file', 'No IBAN column in provided file', 'No BANK_NAME column in provided file']",
+            "upload_file_id": str(self.xlsx_invalid_file_bad_columns.id),
+        }
+        expected_data = self._get_expected_email_body(context)
+
+        mocked_requests_post.assert_called_once_with(
+            "https://api.mailjet.com/v3.1/send",
+            auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY),
+            data=expected_data,
         )
 
-    @mock.patch(
-        "hct_mis_api.apps.household.services.individuals_iban_xlsx_update.IndividualsIBANXlsxUpdate._prepare_email"
-    )
-    def test_update_individuals_iban_from_xlsx_task_invalid_no_match_fail(self, prepare_email_mock: Any) -> None:
+    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @override_settings(EMAIL_SUBJECT_PREFIX="test")
+    @override_config(ENABLE_MAILJET=True)
+    def test_update_individuals_iban_from_xlsx_task_invalid_no_match_fail(self, mocked_requests_post: Any) -> None:
         update_individuals_iban_from_xlsx_task.run(
             xlsx_update_file_id=self.xlsx_invalid_file_no_match.id,
             uploaded_by_id=self.user.id,
         )
-        prepare_email_mock.assert_called_once_with(
-            context={
-                "first_name": self.user.first_name,
-                "last_name": self.user.last_name,
-                "email": self.user.email,
-                "message": "['No matching Individuals for rows: [2, 3]']",
-                "upload_file_id": str(self.xlsx_invalid_file_no_match.id),
-            }
+        context = {
+            "first_name": self.user.first_name,
+            "last_name": self.user.last_name,
+            "email": self.user.email,
+            "message": "['No matching Individuals for rows: [2, 3]']",
+            "upload_file_id": str(self.xlsx_invalid_file_no_match.id),
+        }
+        expected_data = self._get_expected_email_body(context)
+        mocked_requests_post.assert_called_once_with(
+            "https://api.mailjet.com/v3.1/send",
+            auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY),
+            data=expected_data,
         )
 
-    @mock.patch(
-        "hct_mis_api.apps.household.services.individuals_iban_xlsx_update.IndividualsIBANXlsxUpdate._prepare_email"
-    )
-    def test_update_individuals_iban_from_xlsx_task_valid_match(self, prepare_email_mock: Any) -> None:
+    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @override_settings(EMAIL_SUBJECT_PREFIX="test")
+    @override_config(ENABLE_MAILJET=True)
+    def test_update_individuals_iban_from_xlsx_task_valid_match(self, mocked_requests_post: Any) -> None:
         # creating BankAccountInfo for only one individual, second one should be populated on demand
         BankAccountInfoFactory(individual=self.individuals[0])
         self.individuals[0].save()
@@ -197,15 +217,20 @@ class TestIndividualXlsxUpdate(TestCase):
             uploaded_by_id=self.user.id,
         )
 
-        prepare_email_mock.assert_called_once_with(
-            context={
-                "first_name": self.user.first_name,
-                "last_name": self.user.last_name,
-                "email": self.user.email,
-                "message": "All of the Individuals IBAN number we're updated successfully",
-                "upload_file_id": str(self.xlsx_valid_file.id),
-            }
+        context = {
+            "first_name": self.user.first_name,
+            "last_name": self.user.last_name,
+            "email": self.user.email,
+            "message": "All of the Individuals IBAN number we're updated successfully",
+            "upload_file_id": str(self.xlsx_valid_file.id),
+        }
+        expected_data = self._get_expected_email_body(context)
+        mocked_requests_post.assert_called_once_with(
+            "https://api.mailjet.com/v3.1/send",
+            auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY),
+            data=expected_data,
         )
+
         bank_account_info_0 = self.individuals[0].bank_account_info.first()
         bank_account_info_1 = self.individuals[1].bank_account_info.first()
         self.assertEqual(bank_account_info_0.bank_account_number, "1111111111")
@@ -213,20 +238,50 @@ class TestIndividualXlsxUpdate(TestCase):
         self.assertEqual(bank_account_info_1.bank_account_number, "2222222222")
         self.assertEqual(bank_account_info_1.bank_name, "Bank")
 
-    @mock.patch(
-        "hct_mis_api.apps.household.services.individuals_iban_xlsx_update.IndividualsIBANXlsxUpdate._prepare_email"
-    )
-    def test_update_individuals_iban_from_xlsx_task_invalid_empty_cell(self, prepare_email_mock: Any) -> None:
+    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @override_settings(EMAIL_SUBJECT_PREFIX="test")
+    @override_config(ENABLE_MAILJET=True)
+    def test_update_individuals_iban_from_xlsx_task_invalid_empty_cell(self, mocked_requests_post: Any) -> None:
         update_individuals_iban_from_xlsx_task.run(
             xlsx_update_file_id=self.xlsx_invalid_file_empty_cell.id,
             uploaded_by_id=self.user.id,
         )
-        prepare_email_mock.assert_called_once_with(
-            context={
-                "first_name": self.user.first_name,
-                "last_name": self.user.last_name,
-                "email": self.user.email,
-                "message": "There was an unexpected error during Individuals IBAN update: BankAccountInfo data is missing for Individual IND-88-0000.0002 in Row 3, One of IBAN/BANK_NAME value was not provided. Please validate also other rows for missing data.",
-                "upload_file_id": str(self.xlsx_invalid_file_empty_cell.id),
+        context = {
+            "first_name": self.user.first_name,
+            "last_name": self.user.last_name,
+            "email": self.user.email,
+            "message": "There was an unexpected error during Individuals IBAN update: BankAccountInfo data is missing for Individual IND-88-0000.0002 in Row 3, One of IBAN/BANK_NAME value was not provided. Please validate also other rows for missing data.",
+            "upload_file_id": str(self.xlsx_invalid_file_empty_cell.id),
+        }
+        expected_data = self._get_expected_email_body(context)
+        mocked_requests_post.assert_called_once_with(
+            "https://api.mailjet.com/v3.1/send",
+            auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY),
+            data=expected_data,
+        )
+
+    def _get_expected_email_body(self, context: dict) -> str:
+        return json.dumps(
+            {
+                "Messages": [
+                    {
+                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
+                        "Subject": f"[test] Individual IBANs xlsx [{context['upload_file_id']}] update result",
+                        "To": [
+                            {
+                                "Email": "test@example.com",
+                            },
+                        ],
+                        "Cc": [],
+                        "HTMLPart": render_to_string(
+                            "admin/household/individual/individuals_iban_xlsx_update_email.txt",
+                            context=context,
+                        ),
+                        "TextPart": render_to_string(
+                            "admin/household/individual/individuals_iban_xlsx_update_email.txt",
+                            context=context,
+                        ),
+                    }
+                ]
             }
         )

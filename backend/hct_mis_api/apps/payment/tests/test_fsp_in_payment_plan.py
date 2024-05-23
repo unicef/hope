@@ -5,6 +5,7 @@ from graphql import GraphQLError
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.currencies import USDC
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
@@ -20,7 +21,11 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentFactory,
     PaymentPlanFactory,
 )
-from hct_mis_api.apps.payment.models import GenericPayment, PaymentPlan
+from hct_mis_api.apps.payment.models import (
+    DeliveryMechanismPerPaymentPlan,
+    GenericPayment,
+    PaymentPlan,
+)
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -112,20 +117,30 @@ def payment_plan_setup(cls: Any) -> None:
     cls.santander_fsp = FinancialServiceProviderFactory(
         name="Santander",
         distribution_limit=None,
-        delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_CASH],
+        delivery_mechanisms=[
+            GenericPayment.DELIVERY_TYPE_TRANSFER,
+            GenericPayment.DELIVERY_TYPE_CASH,
+            GenericPayment.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
+        ],
         data_transfer_configuration=[
             {"key": "config_1", "label": "Config 1", "id": "1"},
             {"key": "config_11", "label": "Config 11", "id": "11"},
         ],
     )
+    cls.santander_fsp.allowed_business_areas.add(cls.business_area)
     cls.encoded_santander_fsp_id = encode_id_base64(cls.santander_fsp.id, "FinancialServiceProvider")
 
     cls.bank_of_america_fsp = FinancialServiceProviderFactory(
         name="Bank of America",
-        delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER, GenericPayment.DELIVERY_TYPE_CASH],
+        delivery_mechanisms=[
+            GenericPayment.DELIVERY_TYPE_VOUCHER,
+            GenericPayment.DELIVERY_TYPE_CASH,
+            GenericPayment.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
+        ],
         distribution_limit=1000,
         data_transfer_configuration=[{"key": "config_2", "label": "Config 2", "id": "2"}],
     )
+    cls.bank_of_america_fsp.allowed_business_areas.add(cls.business_area)
     cls.encoded_bank_of_america_fsp_id = encode_id_base64(cls.bank_of_america_fsp.id, "FinancialServiceProvider")
 
     cls.bank_of_europe_fsp = FinancialServiceProviderFactory(
@@ -138,7 +153,9 @@ def payment_plan_setup(cls: Any) -> None:
         ],
         data_transfer_configuration=[{"key": "config_3", "label": "Config 3", "id": "3"}],
     )
+    cls.bank_of_europe_fsp.allowed_business_areas.add(cls.business_area)
     cls.encoded_bank_of_europe_fsp_id = encode_id_base64(cls.bank_of_europe_fsp.id, "FinancialServiceProvider")
+
     FspXlsxTemplatePerDeliveryMechanismFactory(
         financial_service_provider=cls.santander_fsp, delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER
     )
@@ -292,6 +309,33 @@ class TestFSPSetup(APITestCase):
         self.assertEqual(
             payment_plan_with_delivery_mechanisms["deliveryMechanisms"][1],
             {"name": GenericPayment.DELIVERY_TYPE_VOUCHER, "order": 2},
+        )
+
+    def test_error_when_choosing_delivery_mechanism_with_usdc_currency(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            total_households_count=1,
+            status=PaymentPlan.Status.LOCKED,
+            program=self.program,
+            currency=USDC,
+        )
+        assert payment_plan.currency == USDC
+        encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
+        variables = dict(
+            input=dict(
+                paymentPlanId=encoded_payment_plan_id,
+                deliveryMechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER],
+            )
+        )
+        response_with_error = self.graphql_request(
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context=self.context,
+            variables=variables,
+        )
+
+        assert "errors" in response_with_error, response_with_error
+        assert (
+            response_with_error["errors"][0]["message"]
+            == "For currency USDC can be assigned only delivery mechanism Transfer to Digital Wallet"
         )
 
     def test_being_able_to_get_possible_delivery_mechanisms(self) -> None:
@@ -910,6 +954,87 @@ class TestVolumeByDeliveryMechanism(APITestCase):
         self.assertEqual(new_data[1]["volumeUsd"], 0)
         self.assertEqual(new_data[2]["volume"], 500)
         self.assertEqual(new_data[2]["volumeUsd"], 100)
+
+    def test_delivery_mechanism_validation_for_usdc(self) -> None:
+        DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=self.payment_plan,
+            financial_service_provider=self.santander_fsp,
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+            delivery_mechanism_order=1,
+        )
+
+        DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=self.payment_plan,
+            financial_service_provider=self.bank_of_america_fsp,
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+            delivery_mechanism_order=2,
+        )
+
+        self.payment_plan.currency = USDC
+        self.payment_plan.save()
+
+        self.payment_plan.refresh_from_db(fields=["currency"])
+        assert self.payment_plan.currency == USDC
+
+        assign_fsps_mutation_response_with_error = self.graphql_request(
+            request_string=ASSIGN_FSPS_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": self.encoded_payment_plan_id,
+                "mappings": [
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_CASH,
+                        "fspId": self.encoded_santander_fsp_id,
+                        "order": 1,
+                    },
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
+                        "fspId": self.encoded_bank_of_america_fsp_id,
+                        "order": 2,
+                    },
+                ],
+            },
+        )
+        assert "errors" in assign_fsps_mutation_response_with_error, assign_fsps_mutation_response_with_error
+        assert (
+            assign_fsps_mutation_response_with_error["errors"][0]["message"]
+            == "For currency USDC can be assigned only delivery mechanism Transfer to Digital Wallet"
+        )
+        # remove unused objects
+        DeliveryMechanismPerPaymentPlan.objects.all().delete()
+        # and create new
+        DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=self.payment_plan,
+            financial_service_provider=self.santander_fsp,
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
+            delivery_mechanism_order=1,
+        )
+        DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=self.payment_plan,
+            financial_service_provider=self.bank_of_america_fsp,
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
+            delivery_mechanism_order=2,
+        )
+        mutation_response = self.graphql_request(
+            request_string=ASSIGN_FSPS_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": self.encoded_payment_plan_id,
+                "mappings": [
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
+                        "fspId": self.encoded_santander_fsp_id,
+                        "order": 1,
+                    },
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
+                        "fspId": self.encoded_bank_of_america_fsp_id,
+                        "order": 2,
+                    },
+                ],
+            },
+        )
+        assert "errors" not in mutation_response, mutation_response
 
 
 class TestValidateFSPPerDeliveryMechanism(APITestCase):

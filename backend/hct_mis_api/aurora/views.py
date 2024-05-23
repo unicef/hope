@@ -21,9 +21,12 @@ class FetchDataView(ProcessFormView):
 
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseRedirectToReferrer:
         if "_fetch" in request.POST:
-            messages.add_message(request, messages.SUCCESS, "Data fetched")
             aurora_token = request.user.custom_fields.get("aurora_token")
-            fetch_metadata(aurora_token)
+            try:
+                fetch_metadata(aurora_token)
+                messages.add_message(request, messages.SUCCESS, "Data fetched")
+            except Exception as e:
+                messages.add_message(request, messages.ERROR, str(e))
         return HttpResponseRedirectToReferrer(request)
 
 

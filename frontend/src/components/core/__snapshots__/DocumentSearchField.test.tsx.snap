@@ -1,0 +1,147 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/core/DocumentSearchField should render 1`] = `
+<div>
+  <div
+    class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-grid-xs-6 css-137v0wv-MuiGrid-root"
+  >
+    <div
+      class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+    >
+      <div
+        class="sc-eDLKkx jFMHa-d"
+      >
+        <div
+          class="MuiFormControl-root MuiFormControl-fullWidth sc-beySPh eVDjfH css-q8hpuo-MuiFormControl-root"
+        >
+          <div
+            class="MuiBox-root css-70qvj9"
+          >
+            <label
+              class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiFormLabel-filled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined css-c63xp4-MuiFormLabel-root-MuiInputLabel-root"
+              data-shrink="true"
+            >
+              Document Type
+            </label>
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall sc-jTQCzO ePdTqF css-26qevy-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root"
+              data-cy="filters-document-type"
+            >
+              <div
+                aria-controls=":r0:"
+                aria-expanded="false"
+                aria-haspopup="listbox"
+                class="MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-jedpe8-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
+                role="combobox"
+                tabindex="0"
+              >
+                <div
+                  class="MuiBox-root css-70qvj9"
+                >
+                  <div
+                    class="sc-gLLuof hzhzCP"
+                  >
+                    Document 1
+                  </div>
+                </div>
+              </div>
+              <input
+                aria-hidden="true"
+                aria-invalid="false"
+                class="MuiSelect-nativeInput css-yf8vq0-MuiSelect-nativeInput"
+                tabindex="-1"
+                value="Document 1"
+              />
+              <svg
+                aria-hidden="true"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiSelect-iconOutlined css-hfutr2-MuiSvgIcon-root-MuiSelect-icon"
+                data-testid="ArrowDropDownIcon"
+                focusable="false"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M7 10l5 5 5-5z"
+                />
+              </svg>
+              <fieldset
+                aria-hidden="true"
+                class="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
+              >
+                <legend
+                  class="css-14lo706"
+                >
+                  <span>
+                    Document Type
+                  </span>
+                </legend>
+              </fieldset>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-8 css-vok43g-MuiGrid-root"
+    >
+      <div
+        class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root sc-iBdnpw itEnZP css-wb57ya-MuiFormControl-root-MuiTextField-root"
+        data-cy="filters-document-number"
+      >
+        <label
+          class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiFormLabel-filled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined css-c63xp4-MuiFormLabel-root-MuiInputLabel-root"
+          data-shrink="true"
+          for=":r1:"
+          id=":r1:-label"
+        >
+          Document Number
+        </label>
+        <div
+          class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-sizeSmall MuiInputBase-adornedStart css-11wfgpq-MuiInputBase-root-MuiOutlinedInput-root"
+        >
+          <div
+            class="MuiInputAdornment-root MuiInputAdornment-positionStart MuiInputAdornment-outlined MuiInputAdornment-sizeSmall css-ittuaa-MuiInputAdornment-root"
+          >
+            <span
+              class="notranslate"
+            >
+              ​
+            </span>
+            <svg
+              aria-hidden="true"
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+              data-testid="SearchIcon"
+              focusable="false"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"
+              />
+            </svg>
+          </div>
+          <input
+            aria-invalid="false"
+            class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall MuiInputBase-inputAdornedStart css-1ua80n0-MuiInputBase-input-MuiOutlinedInput-input"
+            id=":r1:"
+            maxlength="200"
+            placeholder="Document Number"
+            type="text"
+            value="123123123"
+          />
+          <fieldset
+            aria-hidden="true"
+            class="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
+          >
+            <legend
+              class="css-14lo706"
+            >
+              <span>
+                Document Number
+              </span>
+            </legend>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

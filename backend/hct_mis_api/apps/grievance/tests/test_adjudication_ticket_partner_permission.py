@@ -166,7 +166,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
 
     def test_select_individual_when_partner_with_permission(self) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
-        partner.permissions = {str(self.business_area.id): {"programs": {str(self.program.id): [str(self.doshi.id)]}}}
+        self.update_partner_access_to_program(partner, self.program, [self.doshi])
 
         self.user.partner = partner
         self.user.save()
@@ -203,9 +203,134 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
             },
         )
 
+    def test_select_individual_when_partner_with_permission_with_selectedIndividualId(self) -> None:
+        partner = PartnerFactory(name="NOT_UNICEF")
+        self.update_partner_access_to_program(partner, self.program, [self.doshi])
+
+        self.user.partner = partner
+        self.user.save()
+
+        self.individuals_1[0].program = self.program
+        self.individuals_1[0].save()
+
+        self.ticket_details.selected_individuals.add(self.individuals_1[0])  # doshi guy
+
+        self.create_user_role_with_permissions(
+            self.user,
+            [
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+            ],
+            self.business_area,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=APPROVE_NEEDS_ADJUDICATION_MUTATION,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={
+                "grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"),
+                "selectedIndividualId": encode_id_base64(
+                    self.individuals_1[0].id, "IndividualNode"
+                ),  # guy from doshi admin2
+            },
+        )
+
+    def test_select_individual_when_partner_with_permission_with_selectedIndividualId_incorrect(self) -> None:
+        partner = PartnerFactory(name="NOT_UNICEF")
+        self.update_partner_access_to_program(partner, self.program, [self.doshi])
+
+        self.user.partner = partner
+        self.user.save()
+
+        self.individuals_1[0].program = self.program
+        self.individuals_1[0].save()
+
+        self.ticket_details.selected_individuals.add(self.individuals_1[0])  # doshi guy
+
+        self.create_user_role_with_permissions(
+            self.user,
+            [
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+            ],
+            self.business_area,
+        )
+
+        _, individuals = create_household(
+            {"size": 1, "business_area": self.business_area, "admin2": self.doshi, "program": self.program},
+            {"given_name": "Tester", "family_name": "Test", "middle_name": "", "full_name": "Tester Test"},
+        )
+
+        self.snapshot_graphql_request(
+            request_string=APPROVE_NEEDS_ADJUDICATION_MUTATION,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={
+                "grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"),
+                "selectedIndividualId": encode_id_base64(
+                    individuals[0].id, "IndividualNode"
+                ),  # individual that is not in the ticket
+            },
+        )
+
+    def test_select_individual_when_partner_with_permission_with_selected_individual_and_selected_individuals(
+        self,
+    ) -> None:
+        partner = PartnerFactory(name="NOT_UNICEF")
+        self.update_partner_access_to_program(partner, self.program, [self.doshi])
+
+        self.user.partner = partner
+        self.user.save()
+
+        self.individuals_1[0].program = self.program
+        self.individuals_1[0].save()
+
+        self.ticket_details.selected_individuals.add(self.individuals_1[0])  # doshi guy
+
+        self.create_user_role_with_permissions(
+            self.user,
+            [
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+            ],
+            self.business_area,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=APPROVE_NEEDS_ADJUDICATION_MUTATION,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={
+                "grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"),
+                "selectedIndividualIds": [
+                    encode_id_base64(self.individuals_1[0].id, "IndividualNode")  # guy from doshi admin2
+                ],
+                "selectedIndividualId": encode_id_base64(self.individuals_1[0].id, "IndividualNode"),
+            },
+        )
+
     def test_select_individual_when_partner_with_permission_and_no_selected_program(self) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
-        partner.permissions = {str(self.business_area.id): {"programs": {str(self.program.id): [str(self.doshi.id)]}}}
+        self.update_partner_access_to_program(partner, self.program, [self.doshi])
 
         self.user.partner = partner
         self.user.save()
@@ -244,7 +369,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
 
     def test_close_ticket_when_partner_with_permission(self) -> None:
         partner = PartnerFactory()
-        partner.permissions = {str(self.business_area.id): {"programs": {str(self.program.id): [str(self.doshi.id)]}}}
+        self.update_partner_access_to_program(partner, self.program, [self.doshi])
 
         self.user.partner = partner
         self.user.save()
@@ -273,7 +398,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
 
     def test_close_ticket_when_partner_with_permission_and_no_selected_program(self) -> None:
         partner = PartnerFactory()
-        partner.permissions = {str(self.business_area.id): {"programs": {str(self.program.id): [str(self.doshi.id)]}}}
+        self.update_partner_access_to_program(partner, self.program, [self.doshi])
 
         self.user.partner = partner
         self.user.save()
@@ -302,7 +427,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
 
     def test_select_individual_when_partner_does_not_have_permission(self) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
-        partner.permissions = {str(self.business_area.id): {"programs": {str(self.program.id): [str(self.doshi.id)]}}}
+        self.update_partner_access_to_program(partner, self.program, [self.doshi])
 
         self.user.partner = partner
         self.user.save()
@@ -339,7 +464,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
     )
     def test_close_ticket_when_partner_does_not_have_permission(self, mock: Any) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
-        partner.permissions = {str(self.business_area.id): {"programs": {str(self.program.id): [str(self.burka.id)]}}}
+        self.update_partner_access_to_program(partner, self.program, [self.burka])
 
         self.ticket_details.selected_individuals.add(self.individuals_1[0])  # doshi guy, should fail
 

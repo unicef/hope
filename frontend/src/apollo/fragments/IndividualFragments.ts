@@ -72,6 +72,10 @@ export const individualMinimal = gql`
           }
         }
       }
+      totalCashReceivedUsd
+      lastRegistrationDate
+      start
+      firstRegistrationDate
     }
   }
 `;
@@ -129,10 +133,30 @@ export const individualDetailed = gql`
     enrolledInNutritionProgramme
     administrationOfRutf
     household {
+      registrationDataImport {
+        name
+        dataSource
+        importDate
+        importedBy {
+          firstName
+          lastName
+          email
+          username
+        }
+      }
       status
       id
+      residenceStatus
       address
+      village
+      zipCode
+      geopoint
+      country
       countryOrigin
+      deliveredQuantities {
+        totalDeliveredQuantity
+        currency
+      }
       adminArea {
         id
         name
@@ -165,6 +189,9 @@ export const individualDetailed = gql`
     }
     preferredLanguage
     paymentDeliveryPhoneNo
+    walletName
+    walletAddress
+    blockchainName
   }
 `;
 

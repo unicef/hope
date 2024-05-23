@@ -14,6 +14,7 @@ import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
+import { DocumentSearchField } from '@core/DocumentSearchField';
 
 interface HouseholdFiltersProps {
   filter;
@@ -65,35 +66,20 @@ export function HouseholdFilters({
       isOnPaper={isOnPaper}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid container alignItems="flex-end" item xs={6} spacing={0}>
-          <Grid item xs={8}>
-            <SearchTextField
-              label={t('Search')}
-              value={filter.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-              data-cy="hh-filters-search"
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <SelectFilter
-              onChange={(e) => handleFilterChange('searchType', e.target.value)}
-              label={t('Search Type')}
-              value={filter.searchType}
-              borderRadius="0px 4px 4px 0px"
-              data-cy="filter-search-type"
-              fullWidth
-              disableClearable
-            >
-              {choicesData?.householdSearchTypesChoices.map(
-                ({ name, value }) => (
-                  <MenuItem key={value} value={value}>
-                    {name}
-                  </MenuItem>
-                ),
-              )}
-            </SelectFilter>
-          </Grid>
+        <Grid item xs={3}>
+          <SearchTextField
+            label={t('Search')}
+            value={filter.search}
+            onChange={(e) => handleFilterChange('search', e.target.value)}
+            data-cy="hh-filters-search"
+          />
         </Grid>
+        <DocumentSearchField
+          onChange={handleFilterChange}
+          type={filter.documentType}
+          number={filter.documentNumber}
+          choices={choicesData?.documentTypeChoices}
+        />
         {isAllPrograms && (
           <Grid item xs={3}>
             <SelectFilter

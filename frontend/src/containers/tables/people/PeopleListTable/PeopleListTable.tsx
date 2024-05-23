@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import {
   AllIndividualsForPopulationTableQueryVariables,
   AllIndividualsQueryVariables,
-  HouseholdChoiceDataQuery,
   IndividualNode,
   useAllIndividualsForPopulationTableQuery,
 } from '@generated/graphql';
@@ -18,15 +17,13 @@ interface PeopleListTableProps {
   filter;
   businessArea: string;
   canViewDetails: boolean;
-  choicesData: HouseholdChoiceDataQuery;
 }
 
-export function PeopleListTable({
+export const PeopleListTable = ({
   businessArea,
   filter,
   canViewDetails,
-  choicesData,
-}: PeopleListTableProps): React.ReactElement {
+}: PeopleListTableProps): React.ReactElement => {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const initialVariables: AllIndividualsForPopulationTableQueryVariables = {
@@ -34,7 +31,8 @@ export function PeopleListTable({
     businessArea,
     sex: [filter.sex],
     search: filter.search.trim(),
-    searchType: filter.searchType,
+    documentType: filter.documentType,
+    documentNumber: filter.documentNumber.trim(),
     admin2: [filter.admin2],
     flags: filter.flags,
     status: filter.status,
@@ -61,10 +59,9 @@ export function PeopleListTable({
             key={row.id}
             individual={row}
             canViewDetails={canViewDetails}
-            choicesData={choicesData}
           />
         )}
       />
     </TableWrapper>
   );
-}
+};

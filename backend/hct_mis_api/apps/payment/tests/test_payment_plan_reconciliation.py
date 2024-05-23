@@ -21,7 +21,7 @@ from openpyxl import load_workbook
 from parameterized import parameterized
 from pytz import utc
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -262,7 +262,8 @@ class TestPaymentPlanReconciliation(APITestCase):
             is_payment_plan_applicable=True,
         )
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.user = UserFactory.create()
+        partner = PartnerFactory(name="Partner")
+        cls.user = UserFactory.create(partner=partner)
         cls.all_necessary_permissions = [
             Permissions.PM_CREATE,
             Permissions.PM_VIEW_DETAILS,
@@ -336,7 +337,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
         program = Program.objects.get(id=decode_id_string_required(program_id))
-        self.update_user_partner_perm_for_program(self.user, self.business_area, program)
+        self.update_partner_access_to_program(self.user.partner, program)
 
         create_target_population_response = self.graphql_request(
             request_string=CREATE_TARGET_POPULATION_MUTATION,
@@ -961,6 +962,50 @@ class TestPaymentPlanReconciliation(APITestCase):
             },
         )
 
+    def test_apply_steficon_rule_with_wrong_payment_plan_status(self) -> None:
+        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+        rule = RuleFactory(name="SomeRule")
+
+        self.snapshot_graphql_request(
+            request_string=SET_STEFICON_RULE_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": encode_id_base64(payment_plan.id, "PaymentPlan"),
+                "steficonRuleId": encode_id_base64(rule.id, "Rule"),
+            },
+        )
+
+        payment_plan.status = PaymentPlan.Status.LOCKED
+        payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN
+        payment_plan.save()
+        payment_plan.refresh_from_db(fields=["status", "background_action_status"])
+
+        self.assertEqual(payment_plan.status, PaymentPlan.Status.LOCKED)
+        self.assertEqual(payment_plan.background_action_status, PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN)
+        self.snapshot_graphql_request(
+            request_string=SET_STEFICON_RULE_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": encode_id_base64(payment_plan.id, "PaymentPlan"),
+                "steficonRuleId": encode_id_base64(rule.id, "Rule"),
+            },
+        )
+
+    def test_error_message_when_engine_rule_not_enabled_or_deprecated(self) -> None:
+        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
+        rule_not_enabled = RuleFactory(enabled=False)
+        rule_deprecated = RuleFactory(deprecated=True)
+
+        for rule in [rule_not_enabled, rule_deprecated]:
+            self.snapshot_graphql_request(
+                request_string=SET_STEFICON_RULE_MUTATION,
+                context={"user": self.user},
+                variables={
+                    "paymentPlanId": encode_id_base64(payment_plan.id, "PaymentPlan"),
+                    "steficonRuleId": encode_id_base64(rule.id, "Rule"),
+                },
+            )
+
     def test_follow_up_pp_entitlements_updated_with_file(self) -> None:
         content = Path(f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/pp_payment_list_valid.xlsx").read_bytes()
         pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED)
@@ -984,5 +1029,38 @@ class TestPaymentPlanReconciliation(APITestCase):
             variables={
                 "paymentPlanId": encode_id_base64(pp.id, "PaymentPlan"),
                 "file": BytesIO(content),
+            },
+        )
+
+    def test_import_with_wrong_payment_plan_status(self) -> None:
+        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+
+        self.assertEqual(payment_plan.status, PaymentPlan.Status.OPEN)
+        self.snapshot_graphql_request(
+            request_string=IMPORT_XLSX_PER_FSP_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": encode_id_base64(payment_plan.id, "PaymentPlan"),
+                "file": BytesIO(b"some data"),
+            },
+        )
+
+    def test_assign_fsp_mutation_payment_plan_wrong_status(self) -> None:
+        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+        fsp = FinancialServiceProviderFactory()
+        encoded_santander_fsp_id = encode_id_base64(fsp.id, "FinancialServiceProvider")
+
+        self.snapshot_graphql_request(
+            request_string=ASSIGN_FSPS_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": encode_id_base64(payment_plan.id, "PaymentPlan"),
+                "mappings": [
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_CASH,
+                        "fspId": encoded_santander_fsp_id,
+                        "order": 1,
+                    }
+                ],
             },
         )

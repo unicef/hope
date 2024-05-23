@@ -4,7 +4,7 @@ export default class Grievance extends BaseComponent {
   // Locators
   titlePage = 'h5[data-cy="page-header-title"]';
   searchFilter = 'div[data-cy="filters-search"]';
-  ticketTypeFilter = 'div[data-cy="filters-search-type"]';
+  ticketTypeFilter = 'div[data-cy="filters-document-type"]';
   ticketId = 'li[data-value="ticket_id"]';
   householdId = 'li[data-value="ticket_hh_id"]';
   familyName = 'li[data-value="full_name"]';

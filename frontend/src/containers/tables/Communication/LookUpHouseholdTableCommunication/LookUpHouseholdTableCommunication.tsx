@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import styled from 'styled-components';
 import {
+  AllHouseholdsForPopulationTableQueryVariables,
   AllHouseholdsQuery,
   AllHouseholdsQueryVariables,
   HouseholdChoiceDataQuery,
@@ -57,14 +58,15 @@ export function LookUpHouseholdTableCommunication({
     }
     return undefined;
   };
-  const initialVariables: AllHouseholdsQueryVariables = {
+  const initialVariables: AllHouseholdsForPopulationTableQueryVariables = {
     businessArea,
     familySize: JSON.stringify({
       min: filter.householdSizeMin,
       max: filter.householdSizeMax,
     }),
     search: filter.search.trim(),
-    searchType: filter.searchType,
+    documentType: filter.documentType,
+    documentNumber: filter.documentNumber.trim(),
     admin2: filter.admin2,
     residenceStatus: filter.residenceStatus,
     withdrawn: matchWithdrawnValue(),
@@ -79,8 +81,8 @@ export function LookUpHouseholdTableCommunication({
 
   const handleCheckboxClick = (
     _event:
-    | React.MouseEvent<HTMLButtonElement, MouseEvent>
-    | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>
+      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
     name: string,
   ): void => {
     const selectedIndex = selected.indexOf(name);
@@ -126,8 +128,8 @@ export function LookUpHouseholdTableCommunication({
 
   const renderTable = (): React.ReactElement => (
     <UniversalTable<
-    AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
-    AllHouseholdsQueryVariables
+      AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
+      AllHouseholdsQueryVariables
     >
       headCells={householdMultiSelect ? headCells.slice(1) : headCells}
       rowsPerPageOptions={[5, 10, 15, 20]}

@@ -10,34 +10,35 @@ import {
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import { IndividualsFilter } from '@components/population/IndividualsFilter';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { PeopleListTable } from '@containers/tables/people/PeopleListTable';
+import { PeopleFilter } from '@components/people/PeopleFilter';
 
-const initialFilter = {
-  search: '',
-  searchType: 'individual_id',
-  admin2: '',
-  sex: '',
-  ageMin: '',
-  ageMax: '',
-  flags: [],
-  orderBy: 'unicef_id',
-  status: '',
-  lastRegistrationDateMin: '',
-  lastRegistrationDateMax: '',
-};
-
-export function PeoplePage(): React.ReactElement {
+export const PeoplePage = (): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const { data: householdChoicesData, loading: householdChoicesLoading } =
     useHouseholdChoiceDataQuery();
+
+  const initialFilter = {
+    search: '',
+    documentType: householdChoicesData?.documentTypeChoices?.[0].value,
+    documentNumber: '',
+    admin2: '',
+    sex: '',
+    ageMin: '',
+    ageMax: '',
+    flags: [],
+    orderBy: 'unicef_id',
+    status: '',
+    lastRegistrationDateMin: '',
+    lastRegistrationDateMax: '',
+  };
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -63,7 +64,7 @@ export function PeoplePage(): React.ReactElement {
   return (
     <>
       <PageHeader title={t('People')} />
-      <IndividualsFilter
+      <PeopleFilter
         filter={filter}
         choicesData={individualChoicesData}
         setFilter={setFilter}
@@ -79,7 +80,6 @@ export function PeoplePage(): React.ReactElement {
         <PeopleListTable
           filter={appliedFilter}
           businessArea={businessArea}
-          choicesData={householdChoicesData}
           canViewDetails={hasPermissions(
             PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
             permissions,
@@ -88,4 +88,4 @@ export function PeoplePage(): React.ReactElement {
       </Box>
     </>
   );
-}
+};
