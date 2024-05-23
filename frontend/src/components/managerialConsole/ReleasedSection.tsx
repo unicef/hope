@@ -6,6 +6,8 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { BlackLink } from '@components/core/BlackLink';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import {
+  MenuItem,
+  Select,
   TextField,
   InputAdornment,
   Table,
@@ -15,8 +17,12 @@ import {
   TableHead,
   TableRow,
   TableSortLabel,
+  SelectChangeEvent,
+  IconButton,
+  Box,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import { Close } from '@mui/icons-material';
 
 interface ReleasedSectionProps {
   releasedData: any;
@@ -30,12 +36,25 @@ export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
   const [searchText, setSearchText] = useState('');
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [selectedProgram, setSelectedProgram] = useState('');
+
   const handleSort = (field) => {
     const newSortDirection =
       sortField === field && sortDirection === 'asc' ? 'desc' : 'asc';
     setSortField(field);
     setSortDirection(newSortDirection);
   };
+
+  const handleProgramChange = (event: SelectChangeEvent<string>) => {
+    setSelectedProgram(event.target.value);
+  };
+
+  const programs = releasedData?.results?.reduce((acc, row) => {
+    if (!acc.includes(row.program)) {
+      acc.push(row.program);
+    }
+    return acc;
+  }, []);
 
   const columns = [
     {
@@ -68,6 +87,14 @@ export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
   const filteredRows =
     releasedData?.results?.filter((row: any) =>
       columns.some((column) => {
+        if (selectedProgram !== '' && row.program !== selectedProgram) {
+          return false;
+        }
+        if (column.field === 'program') {
+          return (
+            row[column.field] === selectedProgram || selectedProgram === ''
+          );
+        }
         if (column.field === 'last_approval_process_date') {
           const date = moment(row[column.field]).format('D MMMM YYYY');
           return date.toLowerCase().includes(searchText.toLowerCase());
@@ -116,13 +143,50 @@ export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
               <TableRow>
                 {columns.map((column) => (
                   <TableCell key={column.field}>
-                    <TableSortLabel
-                      active={sortField === column.field}
-                      direction={sortDirection}
-                      onClick={() => handleSort(column.field)}
-                    >
-                      {column.headerName}
-                    </TableSortLabel>
+                    {column.field === 'program' ? (
+                      <Select
+                        value={selectedProgram}
+                        onChange={handleProgramChange}
+                        displayEmpty
+                        fullWidth
+                        size="small"
+                        renderValue={(selected) => selected || 'Programme'}
+                        endAdornment={
+                          selectedProgram !== '' && (
+                            <InputAdornment position="end">
+                              <Box mr={2}>
+                                <IconButton
+                                  size="small"
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    setSelectedProgram('');
+                                  }}
+                                >
+                                  <Close />
+                                </IconButton>
+                              </Box>
+                            </InputAdornment>
+                          )
+                        }
+                      >
+                        <MenuItem value="">
+                          <em>Programme</em>
+                        </MenuItem>
+                        {programs.map((program) => (
+                          <MenuItem value={program} key={program}>
+                            {program}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    ) : (
+                      <TableSortLabel
+                        active={sortField === column.field}
+                        direction={sortDirection}
+                        onClick={() => handleSort(column.field)}
+                      >
+                        {column.headerName}
+                      </TableSortLabel>
+                    )}
                   </TableCell>
                 ))}
               </TableRow>
