@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BaseSection } from '@components/core/BaseSection';
 import { useTranslation } from 'react-i18next';
+import moment from 'moment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { BlackLink } from '@components/core/BlackLink';
 import { UniversalMoment } from '@components/core/UniversalMoment';
@@ -13,6 +14,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TableSortLabel,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
@@ -26,6 +28,14 @@ export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const [searchText, setSearchText] = useState('');
+  const [sortField, setSortField] = useState(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const handleSort = (field) => {
+    const newSortDirection =
+      sortField === field && sortDirection === 'asc' ? 'desc' : 'asc';
+    setSortField(field);
+    setSortDirection(newSortDirection);
+  };
 
   const columns = [
     {
@@ -57,13 +67,27 @@ export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
 
   const filteredRows =
     releasedData?.results?.filter((row: any) =>
-      columns.some((column) =>
-        row[column.field]
+      columns.some((column) => {
+        if (column.field === 'last_approval_process_date') {
+          const date = moment(row[column.field]).format('D MMMM YYYY');
+          return date.toLowerCase().includes(searchText.toLowerCase());
+        }
+        return row[column.field]
           ?.toString()
           .toLowerCase()
-          .includes(searchText.toLowerCase()),
-      ),
+          .includes(searchText.toLowerCase());
+      }),
     ) || [];
+
+  const sortedRows = [...filteredRows].sort((a, b) => {
+    if (a[sortField] < b[sortField]) {
+      return sortDirection === 'asc' ? -1 : 1;
+    }
+    if (a[sortField] > b[sortField]) {
+      return sortDirection === 'asc' ? 1 : -1;
+    }
+    return 0;
+  });
 
   const title = t('Released Payment Plans');
 
@@ -91,12 +115,20 @@ export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
             <TableHead>
               <TableRow>
                 {columns.map((column) => (
-                  <TableCell key={column.field}>{column.headerName}</TableCell>
+                  <TableCell key={column.field}>
+                    <TableSortLabel
+                      active={sortField === column.field}
+                      direction={sortDirection}
+                      onClick={() => handleSort(column.field)}
+                    >
+                      {column.headerName}
+                    </TableSortLabel>
+                  </TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredRows.map((row) => (
+              {sortedRows.map((row) => (
                 <TableRow key={row.id}>
                   {columns.map((column) => (
                     <TableCell key={column.field}>
