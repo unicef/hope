@@ -58,6 +58,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
     def __init__(self, payment_plan: PaymentPlan):
         self.batch_size = 5000
         self.payment_plan = payment_plan
+        self.is_social_worker_program = self.payment_plan.program.is_social_worker_program
         # TODO: in future will be per BA or program flag?
         self.payment_generate_token_and_order_numbers = True
 
@@ -89,8 +90,15 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
     def add_headers(self, ws: "Worksheet", fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate") -> List[str]:
         # get headers
         column_list = list(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS)
-        template_column_list = []
-        if fsp_xlsx_template and fsp_xlsx_template.columns:
+        template_column_list = fsp_xlsx_template.columns
+
+        # remove column for People
+        if self.is_social_worker_program:
+            for col_name in ["household_id", "household_size"]:
+                column_list.pop(col_name)
+                template_column_list.pop(col_name)
+
+        if fsp_xlsx_template and template_column_list:
             template_column_list = fsp_xlsx_template.columns
             diff_columns = list(set(template_column_list).difference(set(column_list)))
             if diff_columns:
@@ -113,14 +121,11 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         template_column_list: List[str],
         ws: "Worksheet",
     ) -> None:
-        is_social_worker_program = None
         for i in range(0, len(payment_ids), self.batch_size):
             batch_ids = payment_ids[i : i + self.batch_size]
             payment_qs = Payment.objects.filter(id__in=batch_ids).order_by("unicef_id")
 
             for payment in payment_qs:
-                if is_social_worker_program is None:
-                    is_social_worker_program = payment.parent.program.is_social_worker_program
                 if self.payment_generate_token_and_order_numbers:
                     payment = generate_token_and_order_numbers(payment)
 
@@ -130,7 +135,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 ]
                 core_fields_row = [
                     FinancialServiceProviderXlsxTemplate.get_column_from_core_field(
-                        payment, column_name, is_social_worker_program
+                        payment, column_name, self.is_social_worker_program
                     )
                     for column_name in fsp_xlsx_template.core_fields
                 ]
