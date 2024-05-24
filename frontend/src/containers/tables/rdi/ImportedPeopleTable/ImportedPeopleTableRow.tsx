@@ -33,8 +33,8 @@ export function ImportedPeopleTableRow({
     choices.deduplicationGoldenRecordStatusChoices,
   );
 
-  const importedIndividualPath = `/${baseUrl}/registration-data-import/individual/${individual.id}`;
-  const mergedIndividualPath = `/${baseUrl}/population/individuals/${individual.id}`;
+  const importedIndividualPath = `/${baseUrl}/registration-data-import/people/${individual.id}`;
+  const mergedIndividualPath = `/${baseUrl}/population/people/${individual.id}`;
   const url = isMerged ? mergedIndividualPath : importedIndividualPath;
 
   const handleClick = (e): void => {
