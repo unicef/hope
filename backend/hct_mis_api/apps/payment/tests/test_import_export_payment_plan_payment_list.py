@@ -9,10 +9,12 @@ from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 
+from graphql import GraphQLError
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea, FileTemp
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, FileTemp
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
@@ -46,6 +48,7 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_service import (
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 def valid_file() -> File:
@@ -75,25 +78,25 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
             ServiceProviderFactory.create_batch(3)
         program = RealProgramFactory()
         cls.payment_plan = PaymentPlanFactory(program=program, business_area=cls.business_area)
-        fsp_1 = FinancialServiceProviderFactory(
+        cls.fsp_1 = FinancialServiceProviderFactory(
             name="Test FSP 1",
             delivery_mechanisms=[Payment.DELIVERY_TYPE_CASH],
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
             vision_vendor_number=123456789,
         )
         FspXlsxTemplatePerDeliveryMechanismFactory(
-            financial_service_provider=fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
+            financial_service_provider=cls.fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
         )
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=cls.payment_plan,
-            financial_service_provider=fsp_1,
+            financial_service_provider=cls.fsp_1,
             delivery_mechanism=Payment.DELIVERY_TYPE_CASH,
             delivery_mechanism_order=1,
         )
         program.households.set(Household.objects.all().values_list("id", flat=True))
         for household in program.households.all():
             PaymentFactory(
-                parent=cls.payment_plan, household=household, financial_service_provider=fsp_1, currency="PLN"
+                parent=cls.payment_plan, household=household, financial_service_provider=cls.fsp_1, currency="PLN"
             )
 
         cls.user = UserFactory()
@@ -310,3 +313,69 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         with zipfile.ZipFile(self.payment_plan.export_file_per_fsp.file, mode="r") as zip_file:
             file_list = zip_file.namelist()
             self.assertEqual(splits_count, len(file_list))
+
+    def test_export_per_fsp_if_no_fsp_assigned_to_payment_plan(self) -> None:
+        self.payment_plan.status = PaymentPlan.Status.ACCEPTED
+        self.payment_plan.save()
+        self.payment_plan.delivery_mechanisms.all().delete()
+
+        self.assertEqual(self.payment_plan.delivery_mechanisms.count(), 0)
+
+        export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
+        with self.assertRaises(GraphQLError) as e:
+            export_service.export_per_fsp(self.user)
+        self.assertEqual(
+            e.exception.message,
+            f"Not possible to generate export file. "
+            f"There aren't any FSP(s) assigned to Payment Plan {self.payment_plan.unicef_id}.",
+        )
+
+        DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=self.payment_plan,
+            financial_service_provider=self.fsp_1,
+            delivery_mechanism=Payment.DELIVERY_TYPE_CASH,
+            delivery_mechanism_order=1,
+        )
+        # set generate_token_and_order_numbers to False
+        export_service.payment_generate_token_and_order_numbers = False
+        export_service.export_per_fsp(self.user)
+        self.payment_plan.refresh_from_db()
+        self.assertTrue(self.payment_plan.has_export_file)
+        self.assertIsNotNone(self.payment_plan.payment_list_export_file_link)
+
+    def test_export_payment_plan_per_fsp_with_people_program(self) -> None:
+        # check with default program
+        self.payment_plan.status = PaymentPlan.Status.ACCEPTED
+        self.payment_plan.save()
+        export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
+        export_service.export_per_fsp(self.user)
+        self.assertFalse(self.payment_plan.program.is_social_worker_program)
+
+        delivery_mechanism_per_payment_plan = self.payment_plan.delivery_mechanisms.first()
+        fsp = delivery_mechanism_per_payment_plan.financial_service_provider
+        wb, ws_fsp = export_service.open_workbook(fsp.name)
+        fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism_per_payment_plan.delivery_mechanism)
+        template_column_list = export_service.add_headers(ws_fsp, fsp_xlsx_template)
+        self.assertIn("household_id", template_column_list)
+        self.assertIn("household_size", template_column_list)
+
+        # create Program for People export
+        program_sw = ProgramFactory(data_collecting_type__type=DataCollectingType.Type.SOCIAL)
+        self.payment_plan.program = program_sw
+        self.payment_plan.save()
+
+        export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
+        export_service.export_per_fsp(self.user)
+
+        self.payment_plan.refresh_from_db()
+        self.assertTrue(self.payment_plan.has_export_file)
+        self.assertTrue(self.payment_plan.program.is_social_worker_program)
+
+        delivery_mechanism_per_payment_plan = self.payment_plan.delivery_mechanisms.first()
+        fsp = delivery_mechanism_per_payment_plan.financial_service_provider
+        wb, ws_fsp = export_service.open_workbook(fsp.name)
+        fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism_per_payment_plan.delivery_mechanism)
+
+        template_column_list = export_service.add_headers(ws_fsp, fsp_xlsx_template)
+        self.assertNotIn("Household ID", template_column_list)
+        self.assertNotIn("Household Size", template_column_list)
