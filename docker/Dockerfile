@@ -79,10 +79,8 @@ RUN apt-get update \
     xorg \
     x11-apps \
     dbus \
-    curl \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
-
 
 RUN pdm sync --no-editable --no-self
 
