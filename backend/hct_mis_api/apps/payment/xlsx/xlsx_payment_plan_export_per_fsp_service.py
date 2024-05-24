@@ -95,7 +95,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         # remove column for People
         if self.is_social_worker_program:
             for col_name in ["household_id", "household_size"]:
-                column_list.pop(col_name)
+                column_list.pop(col_name)  # type: ignore
                 template_column_list.pop(col_name)
 
         if fsp_xlsx_template and template_column_list:
