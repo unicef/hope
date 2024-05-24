@@ -9,7 +9,6 @@ import {
   useGlobalAreaChartsLazyQuery,
 } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
-import { TabPanel } from '@components/core/TabPanel';
 import { DashboardPaper } from '@components/dashboard/DashboardPaper';
 import { PaymentsChart } from '@components/dashboard/charts/PaymentsChart';
 import { ProgrammesBySector } from '@components/dashboard/charts/ProgrammesBySector';
@@ -24,6 +23,9 @@ import { TotalNumberOfChildrenReachedSection } from '@components/dashboard/secti
 import { TotalNumberOfHouseholdsReachedSection } from '@components/dashboard/sections/TotalNumberOfHouseholdsReachedSection/TotalNumberOfHouseholdsReachedSection';
 import { TotalNumberOfIndividualsReachedSection } from '@components/dashboard/sections/TotalNumberOfIndividualsReachedSection/TotalNumberOfIndividualsReachedSection';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useProgramContext } from '../../../programContext';
+import { TotalNumberOfPeopleReachedSection } from '@components/dashboard/sections/TotalNumberOfPeopleReachedSection';
+import { TotalAmountTransferredSectionByAdminAreaForPeopleSection } from '@components/dashboard/sections/TotalAmountTransferredByAdminAreaForPeopleSection';
 
 const PaddingContainer = styled.div`
   padding: 20px;
@@ -67,6 +69,7 @@ export const DashboardYearPage = ({
 }: DashboardYearPageProps): React.ReactElement => {
   const { t } = useTranslation();
   const { businessArea, isGlobal, isAllPrograms, programId } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
 
   const variables: AllChartsQueryVariables = {
     year: parseInt(year, 10),
@@ -144,40 +147,76 @@ export const DashboardYearPage = ({
               />
             </DashboardPaper>
           </Box>
+          {!isGlobal && (
+            <>
+              {(isAllPrograms || !isSocialDctType) && (
+                <Box mb={6}>
+                  <TotalAmountTransferredSectionByAdminAreaSection
+                    year={year}
+                    filter={filter}
+                  />
+                </Box>
+              )}
+              {(isAllPrograms || isSocialDctType) && (
+                <Box mb={6}>
+                  <TotalAmountTransferredSectionByAdminAreaForPeopleSection
+                    year={year}
+                    filter={filter}
+                  />
+                </Box>
+              )}
+            </>
+          )}
           <Box mb={6}>
-            <TotalAmountTransferredSectionByAdminAreaSection
-              year={year}
-              filter={filter}
+            <PaymentVerificationSection
+              data={data.chartPaymentVerification}
+              isSocialDctType={isSocialDctType}
             />
-          </Box>
-          <Box mb={6}>
-            <PaymentVerificationSection data={data.chartPaymentVerification} />
           </Box>
         </Grid>
         <Grid item xs={4}>
           <PaddingLeftContainer>
             <Grid container spacing={6}>
-              <Grid item xs={12}>
-                <TotalNumberOfHouseholdsReachedSection
-                  data={data.sectionHouseholdsReached}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TotalNumberOfIndividualsReachedSection
-                  data={data.sectionIndividualsReached}
-                  chartDataIndividuals={
-                    data.chartIndividualsReachedByAgeAndGender
-                  }
-                  chartDataIndividualsDisability={
-                    data.chartIndividualsWithDisabilityReachedByAge
-                  }
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TotalNumberOfChildrenReachedSection
-                  data={data.sectionChildReached}
-                />
-              </Grid>
+              {(isAllPrograms || !isSocialDctType) && (
+                <>
+                  <Grid item xs={12}>
+                    <TotalNumberOfHouseholdsReachedSection
+                      data={data.sectionHouseholdsReached}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TotalNumberOfIndividualsReachedSection
+                      data={data.sectionIndividualsReached}
+                      chartDataIndividuals={
+                        data.chartIndividualsReachedByAgeAndGender
+                      }
+                      chartDataIndividualsDisability={
+                        data.chartIndividualsWithDisabilityReachedByAge
+                      }
+                    />
+                  </Grid>
+                </>
+              )}
+              {(isAllPrograms || isSocialDctType) && (
+                <Grid item xs={12}>
+                  <TotalNumberOfPeopleReachedSection
+                    data={data.sectionIndividualsReached}
+                    chartDataIndividuals={
+                      data.chartIndividualsReachedByAgeAndGender
+                    }
+                    chartDataIndividualsDisability={
+                      data.chartIndividualsWithDisabilityReachedByAge
+                    }
+                  />
+                </Grid>
+              )}
+              {data.sectionChildReached && (
+                <Grid item xs={12}>
+                  <TotalNumberOfChildrenReachedSection
+                    data={data.sectionChildReached}
+                  />
+                </Grid>
+              )}
               <Grid item xs={12}>
                 <Box mb={6}>
                   <DashboardPaper

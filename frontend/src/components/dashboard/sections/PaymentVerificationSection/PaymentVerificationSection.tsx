@@ -4,16 +4,16 @@ import { useTranslation } from 'react-i18next';
 import { AllChartsQuery } from '@generated/graphql';
 import { PaymentVerificationChart } from '../../charts/PaymentVerificationChart';
 import { DashboardPaper } from '../../DashboardPaper';
-import { useProgramContext } from '../../../../programContext';
 
 interface PaymentVerificationSectionProps {
   data: AllChartsQuery['chartPaymentVerification'];
+  isSocialDctType: boolean;
 }
 export function PaymentVerificationSection({
   data,
+  isSocialDctType,
 }: PaymentVerificationSectionProps): React.ReactElement {
   const { t } = useTranslation();
-  const { isSocialDctType } = useProgramContext();
   if (!data) return null;
 
   const renderContacted = () => {
