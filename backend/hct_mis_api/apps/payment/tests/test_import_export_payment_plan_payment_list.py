@@ -372,6 +372,11 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertTrue(self.payment_plan.program.is_social_worker_program)
 
         delivery_mechanism_per_payment_plan = self.payment_plan.delivery_mechanisms.first()
+        # add core fields
+        delivery_mechanism_per_payment_plan.core_fields = ["age", "zip_code"]
+        delivery_mechanism_per_payment_plan.save()
+        delivery_mechanism_per_payment_plan.refresh_from_db()
+
         fsp = delivery_mechanism_per_payment_plan.financial_service_provider
         wb, ws_fsp = export_service.open_workbook(fsp.name)
         fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism_per_payment_plan.delivery_mechanism)
@@ -379,3 +384,24 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         template_column_list = export_service.add_headers(ws_fsp, fsp_xlsx_template)
         self.assertNotIn("Household ID", template_column_list)
         self.assertNotIn("Household Size", template_column_list)
+        # check core fields
+        self.assertNotIn("Zip code", template_column_list)
+        self.assertNotIn("Age (calculated)", template_column_list)
+
+        # get_template error
+        self.assertEqual(
+            FspXlsxTemplatePerDeliveryMechanism.objects.filter(
+                delivery_mechanism=GenericPayment.DELIVERY_TYPE_ATM_CARD, financial_service_provider=self.fsp_1
+            ).count(),
+            0,
+        )
+
+        export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
+        with self.assertRaises(GraphQLError) as e:
+            export_service.get_template(self.fsp_1, GenericPayment.DELIVERY_TYPE_ATM_CARD)
+        self.assertEqual(
+            e.exception.message,
+            f"Not possible to generate export file. There isn't any FSP XLSX Template assigned to Payment "
+            f"Plan {self.payment_plan.unicef_id} for FSP {self.fsp_1.name} and delivery "
+            f"mechanism {GenericPayment.DELIVERY_TYPE_ATM_CARD}.",
+        )
