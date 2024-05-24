@@ -88,29 +88,19 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         return fsp_xlsx_template_per_delivery_mechanism.xlsx_template
 
     def add_headers(self, ws: "Worksheet", fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate") -> List[str]:
-        # get headers
-        column_list = list(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS)
+        # get fsp_xlsx_template columns
         template_column_list = fsp_xlsx_template.columns
 
         # remove column for People
         if self.is_social_worker_program:
             for col_name in ["household_id", "household_size"]:
-                column_list.remove(col_name)
                 template_column_list.remove(col_name)
 
-        if fsp_xlsx_template and template_column_list:
-            template_column_list = fsp_xlsx_template.columns
-            diff_columns = list(set(template_column_list).difference(set(column_list)))
-            if diff_columns:
-                msg = f"Please contact admin because we can't export columns: {diff_columns}"
-                log_and_raise(msg)
-            column_list = list(template_column_list)
-
         for core_field in fsp_xlsx_template.core_fields:
-            column_list.append(core_field)
+            template_column_list.append(core_field)
 
         # add headers
-        ws.append(column_list)
+        ws.append(template_column_list)
 
         return template_column_list
 
