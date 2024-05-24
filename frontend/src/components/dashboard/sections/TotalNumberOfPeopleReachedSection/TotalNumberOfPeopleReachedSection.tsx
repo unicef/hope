@@ -27,15 +27,15 @@ const Title = styled(Box)`
   font-weight: normal;
 `;
 interface TotalNumberOfPeopleReachedSectionProps {
-  data: AllChartsQuery['sectionIndividualsReached'];
-  chartDataIndividuals: AllChartsQuery['chartIndividualsReachedByAgeAndGender'];
-  chartDataIndividualsDisability: AllChartsQuery['chartIndividualsWithDisabilityReachedByAge'];
+  data: AllChartsQuery['sectionPeopleReached'];
+  chartDataPeople: AllChartsQuery['chartPeopleReachedByAgeAndGender'];
+  chartDataPeopleDisability: AllChartsQuery['chartPeopleWithDisabilityReachedByAge'];
 }
 
 export function TotalNumberOfPeopleReachedSection({
   data,
-  chartDataIndividuals,
-  chartDataIndividualsDisability,
+  chartDataPeople,
+  chartDataPeopleDisability,
 }: TotalNumberOfPeopleReachedSectionProps): React.ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { t } = useTranslation();
@@ -74,7 +74,7 @@ export function TotalNumberOfPeopleReachedSection({
               </Title>
               <ChartWrapper>
                 <IndividualsReachedByAgeAndGenderGroupsChart
-                  data={chartDataIndividuals}
+                  data={chartDataPeople}
                 />
               </ChartWrapper>
             </Box>
@@ -83,7 +83,7 @@ export function TotalNumberOfPeopleReachedSection({
                 {t('People with Disability Reached by Age Groups')}
               </Title>
               <IndividualsWithDisabilityReachedByAgeGroupsChart
-                data={chartDataIndividualsDisability}
+                data={chartDataPeopleDisability}
               />
             </Box>
           </DialogContainer>

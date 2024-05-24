@@ -200,12 +200,10 @@ export const DashboardYearPage = ({
               {(isAllPrograms || isSocialDctType) && (
                 <Grid item xs={12}>
                   <TotalNumberOfPeopleReachedSection
-                    data={data.sectionIndividualsReached}
-                    chartDataIndividuals={
-                      data.chartIndividualsReachedByAgeAndGender
-                    }
-                    chartDataIndividualsDisability={
-                      data.chartIndividualsWithDisabilityReachedByAge
+                    data={data.sectionPeopleReached}
+                    chartDataPeople={data.chartPeopleReachedByAgeAndGender}
+                    chartDataPeopleDisability={
+                      data.chartPeopleWithDisabilityReachedByAge
                     }
                   />
                 </Grid>

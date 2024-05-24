@@ -545,6 +545,13 @@ class Query(graphene.ObjectType):
         program=graphene.String(required=False),
         administrative_area=graphene.String(required=False),
     )
+    section_people_reached = graphene.Field(
+        SectionTotalNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True),
+        program=graphene.String(required=False),
+        administrative_area=graphene.String(required=False),
+    )
     section_child_reached = graphene.Field(
         SectionTotalNode,
         business_area_slug=graphene.String(required=True),
@@ -559,7 +566,21 @@ class Query(graphene.ObjectType):
         program=graphene.String(required=False),
         administrative_area=graphene.String(required=False),
     )
+    chart_people_reached_by_age_and_gender = graphene.Field(
+        ChartDatasetNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True),
+        program=graphene.String(required=False),
+        administrative_area=graphene.String(required=False),
+    )
     chart_individuals_with_disability_reached_by_age = graphene.Field(
+        ChartDetailedDatasetsNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True),
+        program=graphene.String(required=False),
+        administrative_area=graphene.String(required=False),
+    )
+    chart_people_with_disability_reached_by_age = graphene.Field(
         ChartDetailedDatasetsNode,
         business_area_slug=graphene.String(required=True),
         year=graphene.Int(required=True),
@@ -746,23 +767,34 @@ class Query(graphene.ObjectType):
         return to_choice_object(WORK_STATUS_CHOICE)
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    @cached_in_django_cache(24)
+    # @cached_in_django_cache(24)
     def resolve_section_households_reached(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, int]:
         payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
-        )
+        ).filter(household__collect_type=Household.CollectType.STANDARD.value)
         return {"total": payment_items_qs.values_list("household", flat=True).distinct().count()}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    @cached_in_django_cache(24)
+    # @cached_in_django_cache(24)
     def resolve_section_individuals_reached(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, int]:
         payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
-        )
+        ).filter(household__collect_type=Household.CollectType.STANDARD.value)
+        households_ids = payment_items_qs.values_list("household", flat=True).distinct()
+        return Household.objects.filter(pk__in=households_ids).aggregate(total=Sum(Coalesce("size", 0)))
+
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    # @cached_in_django_cache(24)
+    def resolve_section_people_reached(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict[str, int]:
+        payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
+        ).filter(household__collect_type=Household.CollectType.SINGLE.value)
         households_ids = payment_items_qs.values_list("household", flat=True).distinct()
         return Household.objects.filter(pk__in=households_ids).aggregate(total=Sum(Coalesce("size", 0)))
 
@@ -787,7 +819,7 @@ class Query(graphene.ObjectType):
         return {"total": sum(sum_lists_with_values(household_child_counts, len(households_child_params)))}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    @cached_in_django_cache(24)
+    # @cached_in_django_cache(24)
     def resolve_chart_individuals_reached_by_age_and_gender(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict:
@@ -805,7 +837,35 @@ class Query(graphene.ObjectType):
         ]
         payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
-        )
+        ).filter(household__collect_type=Household.CollectType.STANDARD.value)
+        households_ids = payment_items_qs.values_list("household", flat=True).distinct()
+        household_child_counts = Household.objects.filter(pk__in=households_ids).values_list(*households_params)
+
+        return {
+            "labels": INDIVIDUALS_CHART_LABELS,
+            "datasets": [{"data": sum_lists_with_values(household_child_counts, len(households_params))}],
+        }
+
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    # @cached_in_django_cache(24)
+    def resolve_chart_people_reached_by_age_and_gender(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict:
+        households_params = [
+            "female_age_group_0_5_count",
+            "female_age_group_6_11_count",
+            "female_age_group_12_17_count",
+            "female_age_group_18_59_count",
+            "female_age_group_60_count",
+            "male_age_group_0_5_count",
+            "male_age_group_6_11_count",
+            "male_age_group_12_17_count",
+            "male_age_group_18_59_count",
+            "male_age_group_60_count",
+        ]
+        payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
+        ).filter(household__collect_type=Household.CollectType.SINGLE.value)
         households_ids = payment_items_qs.values_list("household", flat=True).distinct()
         household_child_counts = Household.objects.filter(pk__in=households_ids).values_list(*households_params)
 
@@ -846,7 +906,69 @@ class Query(graphene.ObjectType):
 
         payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
+        ).filter(household__collect_type=Household.CollectType.STANDARD.value)
+        households_ids = payment_items_qs.values_list("household", flat=True).distinct()
+
+        households_with_disability_counts = Household.objects.filter(pk__in=households_ids).values_list(
+            *households_params_with_disability
         )
+        sum_of_with_disability = sum_lists_with_values(
+            households_with_disability_counts, len(households_params_with_disability)
+        )
+
+        households_totals_counts = Household.objects.filter(pk__in=households_ids).values_list(*households_params_total)
+        sum_of_totals = sum_lists_with_values(households_totals_counts, len(households_params_total))
+
+        sum_of_without_disability = []
+
+        for i, total in enumerate(sum_of_totals):
+            if not total:
+                sum_of_without_disability.append(0)
+            elif not sum_of_with_disability[i]:
+                sum_of_without_disability.append(total)
+            else:
+                sum_of_without_disability.append(total - sum_of_with_disability[i])
+
+        datasets = [
+            {"label": "with disability", "data": sum_of_with_disability},
+            {"label": "without disability", "data": sum_of_without_disability},
+            {"label": "total", "data": sum_of_totals},
+        ]
+        return {"labels": INDIVIDUALS_CHART_LABELS, "datasets": datasets}
+
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
+    def resolve_chart_people_with_disability_reached_by_age(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict:
+        households_params_with_disability = [
+            "female_age_group_0_5_disabled_count",
+            "female_age_group_6_11_disabled_count",
+            "female_age_group_12_17_disabled_count",
+            "female_age_group_18_59_disabled_count",
+            "female_age_group_60_disabled_count",
+            "male_age_group_0_5_disabled_count",
+            "male_age_group_6_11_disabled_count",
+            "male_age_group_12_17_disabled_count",
+            "male_age_group_18_59_disabled_count",
+            "male_age_group_60_disabled_count",
+        ]
+        households_params_total = [
+            "female_age_group_0_5_count",
+            "female_age_group_6_11_count",
+            "female_age_group_12_17_count",
+            "female_age_group_18_59_count",
+            "female_age_group_60_count",
+            "male_age_group_0_5_count",
+            "male_age_group_6_11_count",
+            "male_age_group_12_17_count",
+            "male_age_group_18_59_count",
+            "male_age_group_60_count",
+        ]
+
+        payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
+        ).filter(household__collect_type=Household.CollectType.SINGLE.value)
         households_ids = payment_items_qs.values_list("household", flat=True).distinct()
 
         households_with_disability_counts = Household.objects.filter(pk__in=households_ids).values_list(
