@@ -1,3 +1,5 @@
+from time import sleep
+
 from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -12,6 +14,7 @@ class NewTicket(BaseComponents):
     lookUpTabs = 'button[role="tab"]'
     householdTableRow = 'tr[data-cy="household-table-row"]'
     individualTableRow = 'tr[data-cy="individual-table-row"]'
+    tableRow = '[data-cy="table-row"]'
     receivedConsent = 'span[data-cy="input-consent"]'
     individualID = 'div[data-cy="label-INDIVIDUAL ID"]'
     householdID = 'div[data-cy="label-HOUSEHOLD ID"]'
@@ -61,6 +64,7 @@ class NewTicket(BaseComponents):
     individualFieldName = 'div[data-cy="select-individualDataUpdateFields[0].fieldName"]'
     inputValue = 'input[data-cy="input-householdDataUpdateFields[0].fieldValue"]'
     partner = 'div[data-cy="select-partner"]'
+    tablePagination = '[data-cy="table-pagination"]'
 
     # Texts
     textLookUpHousehold = "LOOK UP HOUSEHOLD"
@@ -116,16 +120,16 @@ class NewTicket(BaseComponents):
         return self.wait_for(self.statusOptions)
 
     def getHouseholdTab(self) -> WebElement:
-        return self.wait_for(self.lookUpTabs).contains(self.textLookUpHousehold)
+        return self.wait_for(self.lookUpTabs)
 
     def getIndividualTab(self) -> WebElement:
-        return self.wait_for(self.lookUpTabs).contains(self.textLookUpIndividual)
+        return self.wait_for(self.lookUpTabs)
 
     def getHouseholdTableRows(self, number: int) -> WebElement:
-        return self.wait_for(self.householdTableRow).eq(number)
+        return self.wait_for(self.householdTableRow)[number]
 
     def getIndividualTableRows(self, number: int) -> WebElement:
-        return self.wait_for(self.individualTableRow).eq(number)
+        return self.wait_for(self.individualTableRow)[number]
 
     def getReceivedConsent(self) -> WebElement:
         return self.wait_for(self.receivedConsent)
@@ -274,15 +278,15 @@ class NewTicket(BaseComponents):
     def getPartner(self) -> WebElement:
         return self.wait_for(self.partner)
 
-    def checkElementsOnPage(self) -> None:
-        self.getTitle().contains(self.textTitle)
-        self.getButtonNext().contains(self.textNext)
-        self.getSelectCategory().should("be.visible")
+    def getTablePagination(self) -> WebElement:
+        return self.wait_for(self.tablePagination)
 
-    def chooseCategory(self, category: str) -> None:
-        self.getSelectCategory().click()
-        self.getOption().contains(category).click()
+    def getTableRow(self) -> WebElement:
+        return self.wait_for(self.tableRow)
 
-    def chooseIssueType(self, issue: str) -> None:
-        self.getIssueType().should("be.visible").click()
-        self.getOption().contains(issue).click()
+    def waitForNoResults(self) -> bool:
+        for _ in range(10):
+            if "No results" in self.getTableRow().text:
+                return True
+            sleep(1)
+        return False

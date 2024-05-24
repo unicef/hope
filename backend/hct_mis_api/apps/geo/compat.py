@@ -51,7 +51,7 @@ class GeoCountryField(models.CharField):
         include_blank: bool = True,
         blank_choice: Optional[List[Union[Tuple[Any, Any], Tuple[str, Iterable[Tuple[Any, Any]]]]]] = None,
         *args: Any,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> List:
         if self.choices and self.choices[0] == (None, None):
             self.choices = Country.objects.all().values_list("iso_code2", "name")

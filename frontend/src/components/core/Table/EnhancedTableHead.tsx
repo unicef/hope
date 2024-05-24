@@ -5,6 +5,8 @@ import TableCell from '@mui/material/TableCell';
 import styled from 'styled-components';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import { Checkbox } from '@mui/material';
+import { hasPermissions } from '../../../config/permissions';
+import { usePermissions } from '@hooks/usePermissions';
 
 type Order = 'asc' | 'desc';
 
@@ -16,6 +18,7 @@ export interface HeadCell<T> {
   weight?: number;
   dataCy?: string;
   disableSort?: boolean;
+  requiredPermission?: string;
 }
 
 const VisuallyHidden = styled.span`
@@ -73,6 +76,7 @@ export function EnhancedTableHead<T>(
     (property: keyof T | string) => (event: React.MouseEvent<unknown>) => {
       onRequestSort(event, property);
     };
+  const permissions = usePermissions();
   return (
     <TableHead>
       <TableRow>
@@ -81,41 +85,51 @@ export function EnhancedTableHead<T>(
             <Checkbox
               color="primary"
               indeterminate={numSelected > 0 && numSelected < rowCount}
+              data-cy="checkbox-select-all"
               checked={rowCount > 0 && numSelected === rowCount}
               onChange={(event) => onSelectAllClick(event, data)}
               inputProps={{ 'aria-label': 'select all' }}
             />
           </TableCell>
         ) : null}
-        {headCells.map((headCell) => (
-          <TableCell
-            key={headCell.id.toString()}
-            align={headCell.numeric ? 'right' : 'left'}
-            padding={headCell.disablePadding ? 'none' : 'normal'}
-            sortDirection={orderBy === headCell.id ? order : false}
-            data-cy={headCell.dataCy}
-          >
-            {allowSort && !headCell.disableSort ? (
-              <TableSortLabelStyled
-                data-cy="table-label"
-                active={orderBy === headCell.id}
-                direction={orderBy === headCell.id ? order : 'asc'}
-                onClick={createSortHandler(headCell.id)}
+        {headCells.map((headCell) => {
+          const canRenderCell =
+            !headCell.requiredPermission ||
+            hasPermissions(headCell.requiredPermission, permissions);
+          return (
+            canRenderCell && (
+              <TableCell
+                key={headCell.id.toString()}
+                align={headCell.numeric ? 'right' : 'left'}
+                padding={headCell.disablePadding ? 'none' : 'normal'}
+                sortDirection={orderBy === headCell.id ? order : false}
+                data-cy={headCell.dataCy}
               >
-                {headCell.label}
-                {orderBy === headCell.id && (
-                  <VisuallyHidden>
-                    {order === 'desc'
-                      ? 'sorted descending'
-                      : 'sorted ascending'}
-                  </VisuallyHidden>
+                {allowSort && !headCell.disableSort ? (
+                  <TableSortLabelStyled
+                    data-cy="table-label"
+                    active={orderBy === headCell.id}
+                    direction={orderBy === headCell.id ? order : 'asc'}
+                    onClick={createSortHandler(headCell.id)}
+                  >
+                    {headCell.label}
+                    {orderBy === headCell.id && (
+                      <VisuallyHidden>
+                        {order === 'desc'
+                          ? 'sorted descending'
+                          : 'sorted ascending'}
+                      </VisuallyHidden>
+                    )}
+                  </TableSortLabelStyled>
+                ) : (
+                  <StyledLabel data-cy="table-label">
+                    {headCell.label}
+                  </StyledLabel>
                 )}
-              </TableSortLabelStyled>
-            ) : (
-              <StyledLabel data-cy="table-label">{headCell.label}</StyledLabel>
-            )}
-          </TableCell>
-        ))}
+              </TableCell>
+            )
+          );
+        })}
       </TableRow>
     </TableHead>
   );

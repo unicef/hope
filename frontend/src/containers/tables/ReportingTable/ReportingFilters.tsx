@@ -57,6 +57,7 @@ export function ReportingFilters({
             label={t('Report Type')}
             onChange={(e) => handleFilterChange('type', e.target.value)}
             value={filter.type}
+            dataCy="report-type-filter"
           >
             {choicesData.reportTypesChoices.map((item) => (
               <MenuItem key={item.value} value={item.value}>
@@ -67,6 +68,7 @@ export function ReportingFilters({
         </Grid>
         <Grid item xs={3}>
           <DatePickerFilter
+            dataCy="report-created-from-filter"
             topLabel={t('Creation Date')}
             placeholder={t('From')}
             onChange={(date) => handleFilterChange('createdFrom', date)}
@@ -75,6 +77,7 @@ export function ReportingFilters({
         </Grid>
         <Grid item xs={3}>
           <DatePickerFilter
+            dataCy="report-created-to-filter"
             placeholder={t('To')}
             onChange={(date) => handleFilterChange('createdTo', date)}
             value={filter.createdTo}
@@ -82,6 +85,7 @@ export function ReportingFilters({
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
+            dataCy="report-status-filter"
             label="Status"
             onChange={(e) => handleFilterChange('status', e.target.value)}
             value={filter.status}
@@ -97,6 +101,7 @@ export function ReportingFilters({
           <FormControlLabel
             control={
               <Checkbox
+                data-cy="report-only-my-filter"
                 checked={filter.onlyMy}
                 onChange={(_e, checked) =>
                   handleFilterChange('onlyMy', checked)

@@ -6,6 +6,7 @@ from django.core.management import call_command
 import pytest
 from page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from page_object.grievance.grievance_tickets import GrievanceTickets
+from page_object.grievance.new_ticket import NewTicket
 from pytest_django import DjangoDbBlocker
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -37,7 +38,6 @@ def create_programs(django_db_setup: Generator[None, None, None], django_db_bloc
 
 @pytest.mark.usefixtures("login")
 class TestSmokeGrievanceTickets:
-
     @pytest.mark.skip(reason="Unstable test")
     def test_check_grievance_tickets_user_generated_page(
         self,
@@ -148,12 +148,64 @@ class TestSmokeGrievanceTickets:
 
 @pytest.mark.usefixtures("login")
 class TestGrievanceTicketsHappyPath:
+    @pytest.mark.parametrize(
+        "test_data",
+        [
+            pytest.param({"category": "Sensitive Grievance", "type": "Miscellaneous"}, id="Sensitive Grievance"),
+            pytest.param({"category": "Grievance Complaint", "type": "Other Complaint"}, id="Grievance Complaint"),
+        ],
+    )
     @pytest.mark.skip(reason="ToDo")
     def test_grievance_tickets_create_new_ticket(
         self,
         pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        test_data: dict,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getButtonNewTicket().click()
-        pageGrievanceTickets.screenshot("HappyPath")
+        pageGrievanceNewTicket.getSelectCategory().click()
+        pageGrievanceNewTicket.select_option_by_name(test_data["category"])
+        pageGrievanceNewTicket.getIssueType().click()
+        pageGrievanceNewTicket.select_option_by_name(test_data["type"])
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getHouseholdTab()
+        assert pageGrievanceNewTicket.waitForNoResults()
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getReceivedConsent().click()
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getDescription().send_keys("Happy path test 1234!")
+        pageGrievanceNewTicket.getButtonNext().click()
+        assert "Happy path test 1234!" in pageGrievanceDetailsPage.getTicketDescription().text
+        assert test_data["category"] in pageGrievanceDetailsPage.getTicketCategory().text
+        assert test_data["type"] in pageGrievanceDetailsPage.getLabelIssueType().text
+        assert "New" in pageGrievanceDetailsPage.getTicketStatus().text
+        assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
+        assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
+
+    def test_grievance_tickets_create_new_ticket_referral(
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+    ) -> None:
+        pageGrievanceTickets.getNavGrievance().click()
+        assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
+        pageGrievanceTickets.getButtonNewTicket().click()
+        pageGrievanceNewTicket.getSelectCategory().click()
+        pageGrievanceNewTicket.select_option_by_name("Referral")
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getHouseholdTab()
+        assert pageGrievanceNewTicket.waitForNoResults()
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getReceivedConsent().click()
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getDescription().send_keys("Happy path test 1234!")
+        pageGrievanceNewTicket.getButtonNext().click()
+        assert "Happy path test 1234!" in pageGrievanceDetailsPage.getTicketDescription().text
+        assert "Referral" in pageGrievanceDetailsPage.getTicketCategory().text
+        assert "New" in pageGrievanceDetailsPage.getTicketStatus().text
+        assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
+        assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
