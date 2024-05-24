@@ -73,14 +73,25 @@ FROM builder AS dev
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-    chromium-driver \
-    chromium \
     ffmpeg \
     xorg \
     x11-apps \
     dbus \
+    curl \
+    nodejs \
+    npm \
   && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* \
+  && npm install -g npx \
+  && npm --version \
+  && node --version
+
+
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+ENV NVM_DIR=/root/.nvm
+RUN . "$NVM_DIR/nvm.sh" && nvm install 20 \
+  && npx @puppeteer/browsers install chromedriver@116.0.5793.0 \
+  && npx @puppeteer/browsers install chrome@116.0.5793.0 \
 
 RUN pdm sync --no-editable --no-self
 
