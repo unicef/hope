@@ -80,13 +80,8 @@ RUN apt-get update \
     x11-apps \
     dbus \
     curl \
-    nodejs \
-    npm \
   && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* \
-  && npm install -g npx \
-  && npm --version \
-  && node --version
+  && rm -rf /var/lib/apt/lists/*
 
 
 RUN pdm sync --no-editable --no-self
