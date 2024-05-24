@@ -73,11 +73,8 @@ FROM builder AS dev
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-    add-apt-repository ppa:canonical-chromium-builds/stage \
-    apt update \
-    apt list -a chromium-browser \
-    chromium-driver=121.0.6167.139-1~deb12u1 \
-    chromium=121.0.6167.139-1~deb12u1 \
+    chromium-driver \
+    chromium \
     ffmpeg \
     xorg \
     x11-apps \
