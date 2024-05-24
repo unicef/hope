@@ -90,8 +90,8 @@ RUN apt-get update \
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
 ENV NVM_DIR=/root/.nvm
 RUN . "$NVM_DIR/nvm.sh" && nvm install 20 \
-  && npx @puppeteer/browsers install chromedriver@116.0.5793.0 \
-  && npx @puppeteer/browsers install chrome@116.0.5793.0 \
+  && npx @puppeteer/browsers install chromedriver@125.0.6422.60 \
+  && npx @puppeteer/browsers install chrome@125.0.6422.60
 
 RUN pdm sync --no-editable --no-self
 
