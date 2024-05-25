@@ -29,6 +29,7 @@ from hct_mis_api.apps.payment.fixtures import (
 )
 from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
     GenericPayment,
     Payment,
@@ -353,9 +354,10 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
 
         delivery_mechanism_per_payment_plan = self.payment_plan.delivery_mechanisms.first()
         fsp = delivery_mechanism_per_payment_plan.financial_service_provider
-        wb, ws_fsp = export_service.open_workbook(fsp.name)
+        _, ws_fsp = export_service.open_workbook(fsp.name)
         fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism_per_payment_plan.delivery_mechanism)
         template_column_list = export_service.add_headers(ws_fsp, fsp_xlsx_template)
+        self.assertEqual(len(template_column_list), len(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS))
         self.assertIn("household_id", template_column_list)
         self.assertIn("household_size", template_column_list)
 
@@ -371,22 +373,22 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertTrue(self.payment_plan.has_export_file)
         self.assertTrue(self.payment_plan.program.is_social_worker_program)
 
-        delivery_mechanism_per_payment_plan = self.payment_plan.delivery_mechanisms.first()
         # add core fields
-        delivery_mechanism_per_payment_plan.core_fields = ["age", "zip_code"]
-        delivery_mechanism_per_payment_plan.save()
-        delivery_mechanism_per_payment_plan.refresh_from_db()
+        fsp_xlsx_template.core_fields = ["age", "zip_code"]
+        fsp_xlsx_template.save()
+        fsp_xlsx_template.refresh_from_db()
 
-        fsp = delivery_mechanism_per_payment_plan.financial_service_provider
-        wb, ws_fsp = export_service.open_workbook(fsp.name)
+        _, ws_fsp = export_service.open_workbook(fsp.name)
         fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism_per_payment_plan.delivery_mechanism)
 
         template_column_list = export_service.add_headers(ws_fsp, fsp_xlsx_template)
-        self.assertNotIn("Household ID", template_column_list)
-        self.assertNotIn("Household Size", template_column_list)
+        self.assertEqual(len(template_column_list), 27)  # DEFAULT_COLUMNS - hh_id and - hh_size + 2 core fields
+        self.assertNotIn("household_id", template_column_list)
+        self.assertNotIn("household_size", template_column_list)
         # check core fields
-        self.assertNotIn("Zip code", template_column_list)
-        self.assertNotIn("Age (calculated)", template_column_list)
+        self.assertListEqual(fsp_xlsx_template.core_fields, ["age", "zip_code"])
+        self.assertIn("age", template_column_list)
+        self.assertIn("zip_code", template_column_list)
 
         # get_template error
         self.assertEqual(
@@ -395,7 +397,6 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
             ).count(),
             0,
         )
-
         export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
         with self.assertRaises(GraphQLError) as e:
             export_service.get_template(self.fsp_1, GenericPayment.DELIVERY_TYPE_ATM_CARD)
