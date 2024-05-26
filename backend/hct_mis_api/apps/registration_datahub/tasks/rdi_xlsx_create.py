@@ -29,8 +29,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import (
+from hct_mis_api.apps.registration_data.models import (
     ImportData,
     ImportedBankAccountInfo,
     ImportedDocument,
@@ -39,6 +38,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
     ImportedIndividualIdentity,
     ImportedIndividualRoleInHousehold,
+    RegistrationDataImport,
     RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
@@ -611,7 +611,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             self._create_collectors()
             self._create_bank_accounts_infos()
 
-    @transaction.atomic(using="registration_datahub")
+    @transaction.atomic
     def execute(
         self, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: str
     ) -> None:

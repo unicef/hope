@@ -20,7 +20,7 @@ from adminfilters.filters import ChoicesFieldComboFilter, NumberFilter, ValueFil
 from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 
-from hct_mis_api.apps.registration_datahub.models import (
+from hct_mis_api.apps.registration_data.models import (
     ImportData,
     ImportedBankAccountInfo,
     ImportedDocument,

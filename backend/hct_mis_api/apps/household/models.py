@@ -311,6 +311,13 @@ INDIVIDUAL_FLAGS_CHOICES = (
     (SANCTION_LIST_POSSIBLE_MATCH, "Sanction list possible match"),
 )
 
+PENDING = "PENDING"
+MERGED = "MERGED"
+MERGE_CHOICES = (
+    (PENDING, "Pending"),
+    (MERGED, "Merged"),
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -546,6 +553,7 @@ class Household(
     migrated_at = models.DateTimeField(null=True, blank=True)
     is_recalculated_group_ages = models.BooleanField(default=False)  # TODO remove after migration
     collect_type = models.CharField(choices=CollectType.choices, default=CollectType.STANDARD.value, max_length=8)
+    rdi_merge_status = models.CharField(choices=MERGE_CHOICES, default=PENDING, max_length=10)
 
     class Meta:
         verbose_name = "Household"
@@ -713,6 +721,7 @@ class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDMo
         related_name="copied_to",
         help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
+    rdi_merge_status = models.CharField(choices=MERGE_CHOICES, default=PENDING, max_length=10)
 
     def clean(self) -> None:
         from django.core.exceptions import ValidationError
@@ -787,6 +796,7 @@ class IndividualIdentity(SoftDeletableIsOriginalModel, TimeStampedModel):
         related_name="copied_to",
         help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
+    rdi_merge_status = models.CharField(choices=MERGE_CHOICES, default=PENDING, max_length=10)
 
     class Meta:
         verbose_name_plural = "Individual Identities"
@@ -821,6 +831,7 @@ class IndividualRoleInHousehold(SoftDeletableIsOriginalModel, TimeStampedUUIDMod
         related_name="copied_to",
         help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
+    rdi_merge_status = models.CharField(choices=MERGE_CHOICES, default=PENDING, max_length=10)
 
     class Meta:
         unique_together = [("role", "household"), ("household", "individual")]
@@ -1033,6 +1044,7 @@ class Individual(
     is_original = models.BooleanField(db_index=True, default=False)
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
+    rdi_merge_status = models.CharField(choices=MERGE_CHOICES, default=PENDING, max_length=10)
 
     vector_column = SearchVectorField(null=True)
 
@@ -1282,6 +1294,7 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
         related_name="copied_to",
         help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
+    rdi_merge_status = models.CharField(choices=MERGE_CHOICES, default=PENDING, max_length=10)
 
     def __str__(self) -> str:
         return f"{self.bank_account_number} ({self.bank_name})"
