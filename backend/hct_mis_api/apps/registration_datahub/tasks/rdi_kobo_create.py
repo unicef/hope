@@ -24,8 +24,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import (
+from hct_mis_api.apps.registration_data.models import (
     ImportData,
     ImportedBankAccountInfo,
     ImportedDocument,
@@ -35,6 +34,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividualIdentity,
     ImportedIndividualRoleInHousehold,
     KoboImportedSubmission,
+    RegistrationDataImport,
     RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask

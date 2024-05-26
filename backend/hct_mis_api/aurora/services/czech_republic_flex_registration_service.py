@@ -22,7 +22,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from hct_mis_api.apps.registration_datahub.models import (
+from hct_mis_api.apps.registration_data.models import (
     ImportedBankAccountInfo,
     ImportedDocument,
     ImportedDocumentType,

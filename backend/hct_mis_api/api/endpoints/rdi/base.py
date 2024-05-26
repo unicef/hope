@@ -19,7 +19,7 @@ from hct_mis_api.api.models import Grant
 from hct_mis_api.api.utils import humanize_errors
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import (
+from hct_mis_api.apps.registration_data.models import (
     ImportedHousehold,
     RegistrationDataImportDatahub,
 )

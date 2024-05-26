@@ -17,15 +17,15 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_datahub.fixtures import (
-    RegistrationDataImportDatahubFactory,
-    create_imported_household_and_individuals,
-)
-from hct_mis_api.apps.registration_datahub.models import (
+from hct_mis_api.apps.registration_data.models import (
     DUPLICATE_IN_BATCH,
     UNIQUE_IN_BATCH,
     ImportData,
     ImportedIndividual,
+)
+from hct_mis_api.apps.registration_datahub.fixtures import (
+    RegistrationDataImportDatahubFactory,
+    create_imported_household_and_individuals,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.utils.elasticsearch_utils import populate_index

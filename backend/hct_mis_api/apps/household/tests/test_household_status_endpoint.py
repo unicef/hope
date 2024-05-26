@@ -19,15 +19,13 @@ from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
 )
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
+from hct_mis_api.apps.registration_data.models import ImportedIndividualRoleInHousehold
 from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedDocumentFactory,
     ImportedDocumentTypeFactory,
     ImportedHouseholdFactory,
     ImportedIndividualFactory,
     RegistrationDataImportDatahubFactory,
-)
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation

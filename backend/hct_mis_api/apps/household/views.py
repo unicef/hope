@@ -19,7 +19,7 @@ from hct_mis_api.apps.household.serializers import (
     serialize_by_household,
     serialize_by_individual,
 )
-from hct_mis_api.apps.registration_datahub.models import (
+from hct_mis_api.apps.registration_data.models import (
     ImportedDocument,
     ImportedHousehold,
 )

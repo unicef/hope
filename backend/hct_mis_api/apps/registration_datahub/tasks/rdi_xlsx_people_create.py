@@ -14,13 +14,13 @@ from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import SheetImageLoader, serialize_flex_attributes
 from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import (
+from hct_mis_api.apps.registration_data.models import (
     ImportData,
     ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
+    RegistrationDataImport,
     RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
