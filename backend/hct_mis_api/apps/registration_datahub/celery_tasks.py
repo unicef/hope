@@ -108,7 +108,7 @@ def registration_xlsx_import_task(
         return True
     except Exception as e:
         logger.warning(e)
-        from hct_mis_api.apps.registration_datahub.models import (
+        from hct_mis_api.apps.registration_data.models import (
             RegistrationDataImportDatahub,
         )
 
@@ -142,7 +142,7 @@ def registration_kobo_import_task(
         )
     except Exception as e:
         logger.warning(e)
-        from hct_mis_api.apps.registration_datahub.models import (
+        from hct_mis_api.apps.registration_data.models import (
             RegistrationDataImportDatahub,
         )
 
@@ -160,7 +160,7 @@ def registration_kobo_import_task(
 def registration_kobo_import_hourly_task(self: Any) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
-        from hct_mis_api.apps.registration_datahub.models import (
+        from hct_mis_api.apps.registration_data.models import (
             RegistrationDataImportDatahub,
         )
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
@@ -193,7 +193,7 @@ def registration_kobo_import_hourly_task(self: Any) -> None:
 def registration_xlsx_import_hourly_task(self: Any) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
-        from hct_mis_api.apps.registration_datahub.models import (
+        from hct_mis_api.apps.registration_data.models import (
             RegistrationDataImportDatahub,
         )
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
@@ -264,7 +264,7 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
 @sentry_tags
 def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
     try:
-        from hct_mis_api.apps.registration_datahub.models import (
+        from hct_mis_api.apps.registration_data.models import (
             RegistrationDataImportDatahub,
         )
         from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
@@ -310,7 +310,7 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID") -> Dict:
 @sentry_tags
 def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> Dict:
     from hct_mis_api.apps.program.models import Program
-    from hct_mis_api.apps.registration_datahub.models import ImportData
+    from hct_mis_api.apps.registration_data.models import ImportData
     from hct_mis_api.apps.registration_datahub.tasks.validatate_xlsx_import import (
         ValidateXlsxImport,
     )
