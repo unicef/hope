@@ -120,7 +120,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
         records_with_error = []
 
         try:
-            with atomic("registration_datahub"):
+            with atomic():
                 for record_id in records_ids_to_import:
                     record = Record.objects.defer("data").get(id=record_id)
                     try:
@@ -132,7 +132,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
 
                 # rollback if at least one Record is invalid
                 if records_with_error:
-                    transaction.set_rollback(True, using="registration_datahub")
+                    transaction.set_rollback(True)
 
             if not records_with_error:
                 number_of_individuals = ImportedIndividual.objects.filter(registration_data_import=rdi_datahub).count()
