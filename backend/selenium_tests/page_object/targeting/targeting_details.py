@@ -1,3 +1,5 @@
+from time import sleep
+
 from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -8,13 +10,14 @@ class TargetingDetails(BaseComponents):
     status = 'div[data-cy="target-population-status"]'
     criteria_container = 'div[data-cy="criteria-container"]'
     lock_button = 'button[data-cy="button-target-population-lock"]'
+    lockPopupButton = 'button[data-cy="button-target-population-modal-lock"]'
     household_table_cell = "table tr:nth-of-type({}) td:nth-of-type({})"
     people_table_rows = '[data-cy="target-population-people-row"]'
     household_table_rows = '[data-cy="target-population-household-row"]'
-
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
     buttonTargetPopulationDuplicate = 'button[data-cy="button-target-population-duplicate"]'
+    inputName = 'input[data-cy="input-name"]'
     buttonDelete = 'button[data-cy="button-delete"]'
     buttonEdit = 'a[data-cy="button-edit"]'
     buttonRebuild = 'button[data-cy="button-rebuild"]'
@@ -22,6 +25,8 @@ class TargetingDetails(BaseComponents):
     detailsTitle = 'div[data-cy="details-title"]'
     detailsGrid = 'div[data-cy="details-grid"]'
     labelStatus = 'div[data-cy="label-Status"]'
+    buttonMarkReady = 'button[data-cy="button-target-population-send-to-hope"]'
+    buttonPopupMarkReady = 'button[data-cy="button-target-population-modal-send-to-hope"]'
     targetPopulationStatus = 'div[data-cy="target-population-status"]'
     labelizedFieldContainerCreatedBy = 'div[data-cy="labelized-field-container-created-by"]'
     labelCreatedBy = 'div[data-cy="label-created by"]'
@@ -55,6 +60,11 @@ class TargetingDetails(BaseComponents):
     def getButtonTargetPopulationDuplicate(self) -> WebElement:
         return self.wait_for(self.buttonTargetPopulationDuplicate)
 
+    def getInputName(self) -> WebElement:
+        return self.wait_for(self.inputName)
+
+
+
     def getButtonDelete(self) -> WebElement:
         return self.wait_for(self.buttonDelete)
 
@@ -76,8 +86,22 @@ class TargetingDetails(BaseComponents):
     def getLabelStatus(self) -> WebElement:
         return self.wait_for(self.labelStatus)
 
+    def waitForLabelStatus(self, status: str) -> WebElement:
+        for _ in range(10):
+            sleep(1)
+            if status.upper() in self.getLabelStatus().text:
+                return self.wait_for(self.labelStatus)
+        else:
+            raise Exception(f"Status: {status.capitalize()} does not occur.")
+
     def getTargetPopulationStatus(self) -> WebElement:
         return self.wait_for(self.targetPopulationStatus)
+
+    def getButtonMarkReady(self) -> WebElement:
+        return self.wait_for(self.buttonMarkReady)
+
+    def getButtonPopupMarkReady(self) -> WebElement:
+        return self.wait_for(self.buttonPopupMarkReady)
 
     def getLabelizedFieldContainerCreatedBy(self) -> WebElement:
         return self.wait_for(self.labelizedFieldContainerCreatedBy)
@@ -150,6 +174,9 @@ class TargetingDetails(BaseComponents):
 
     def getLockButton(self) -> WebElement:
         return self.wait_for(self.lock_button)
+
+    def getLockPopupButton(self) -> WebElement:
+        return self.wait_for(self.lockPopupButton)
 
     def getHouseholdTableCell(self, row: int, column: int) -> WebElement:
         return self.wait_for(self.household_table_cell.format(row, column))

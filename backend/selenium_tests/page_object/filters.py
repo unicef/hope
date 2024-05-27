@@ -1,3 +1,5 @@
+from time import sleep
+
 from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -99,6 +101,17 @@ class Filters(BaseComponents):
 
     def getFiltersStatus(self) -> WebElement:
         return self.wait_for(self.filtersStatus)
+
+    def selectFiltersSatus(self, status: str) -> None:
+        self.getFiltersStatus().click()
+        self.wait_for(f'li[data-value="{status.upper()}"]').click()
+        for _ in range(10):
+            sleep(1)
+            if status.capitalize() in self.getFiltersStatus().text:
+                self.getButtonFiltersApply().click()
+                break
+        else:
+            raise Exception(f"Status: {status.capitalize()} does not occur.")
 
     def getFiltersFsp(self) -> WebElement:
         return self.wait_for(self.filtersFsp)

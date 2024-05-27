@@ -25,6 +25,8 @@ from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 
 from hct_mis_api.apps.account.models import User
 
+from selenium_tests.page_object.filters import Filters
+
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
@@ -99,10 +101,9 @@ def create_targeting(household_without_disabilities) -> TargetPopulation:
         business_area=BusinessArea.objects.get(slug="afghanistan"),
         program=Program.objects.get(name="Test Programm"),
         created_by=User.objects.first(),
-    )
-    full_rebuild(target_population)
+    )[0]
     target_population.save()
-    target_population.households.set(household_without_disabilities)
+    target_population.households.set([household_without_disabilities])
     return target_population
 
 
@@ -370,28 +371,39 @@ class TestTargeting:
         pageTargeting.getNavTargeting().click()
         pageTargeting.chooseTargetPopulations(0).click()
         pageTargetingDetails.getLabelStatus()
-        pageTargetingDetails.screenshot("0")
         pageTargetingDetails.getButtonRebuild().click()
         pageTargetingDetails.getStatusContainer()
         pageTargetingDetails.disappearStatusContainer()
+        # assert "2" in pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
+        # assert "8" in pageTargetingDetails.getLabelTargetedIndividuals().text
 
-        pageTargetingDetails.screenshot("1")
-
-    def test_targeting_mark_ready(
+    @pytest.mark.parametrize("x", range(100))
+    def test_targeting_mark_ready2(
             self,
+            x,
             create_programs: None,
             household_with_disability: Household,
             add_targeting: None,
             pageTargeting: Targeting,
+            filters: Filters,
             pageTargetingDetails: TargetingDetails,
             pageTargetingCreate: TargetingCreate,
     ) -> None:
-        pass
+        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.getNavTargeting().click()
+        filters.selectFiltersSatus("OPEN")
+        pageTargeting.chooseTargetPopulations(0).click()
+        pageTargetingDetails.getLabelStatus()
+        pageTargetingDetails.getLockButton().click()
+        pageTargetingDetails.getLockPopupButton().click()
+        pageTargetingDetails.waitForLabelStatus("LOCKED")
+        pageTargetingDetails.getButtonMarkReady().click()
+        pageTargetingDetails.getButtonPopupMarkReady().click()
+        pageTargetingDetails.waitForLabelStatus("READY")
 
     def test_targeting_mark_ready_failed(
             self,
             create_programs: None,
-            household_with_disability: Household,
             add_targeting: None,
             pageTargeting: Targeting,
             pageTargetingDetails: TargetingDetails,
@@ -402,13 +414,19 @@ class TestTargeting:
     def test_copy_targeting(
             self,
             create_programs: None,
-            household_with_disability: Household,
             add_targeting: None,
             pageTargeting: Targeting,
             pageTargetingDetails: TargetingDetails,
             pageTargetingCreate: TargetingCreate,
     ) -> None:
-        pass
+        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.getNavTargeting().click()
+        pageTargeting.chooseTargetPopulations(0).click()
+        pageTargetingDetails.getButtonTargetPopulationDuplicate().click()
+        pageTargetingDetails.getInputName().send_keys("a1!")
+        pageTargetingDetails.find_elements(pageTargetingDetails.buttonTargetPopulationDuplicate)[1].click()
+        # Check all data copied properly
+        pageTargetingDetails.screenshot("1")
 
     def test_edit_targeting(
             self,
