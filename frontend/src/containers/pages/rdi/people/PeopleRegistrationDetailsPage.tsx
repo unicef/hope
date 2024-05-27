@@ -8,7 +8,7 @@ import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { ImportedIndividualPhotoModal } from '@components/population/ImportedIndividualPhotoModal';
 import { RegistrationIndividualBioData } from '@components/rdi/details/individual/RegistrationIndividualBioData/RegistrationIndividualBioData';
-import { RegistrationIndividualVulnerabilities } from '@components/rdi/details/individual/RegistrationIndividualVulnerabilities/RegistrationIndividualVulnerabilities';
+import { RegistrationIndividualAdditionalRegistrationInformation } from '@components/rdi/details/individual/RegistrationIndividualAdditionalRegistrationInformation/RegistrationIndividualAdditionalRegistrationInformation';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
@@ -28,7 +28,7 @@ const Container = styled.div`
   }
 `;
 
-export function PeopleRegistrationDetailsPage(): React.ReactElement {
+export const PeopleRegistrationDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
@@ -82,11 +82,11 @@ export function PeopleRegistrationDetailsPage(): React.ReactElement {
           individual={importedIndividual}
           choicesData={choicesData}
         />
-        <RegistrationIndividualVulnerabilities
+        <RegistrationIndividualAdditionalRegistrationInformation
           individual={importedIndividual}
           flexFieldsData={flexFieldsData}
         />
       </Container>
     </div>
   );
-}
+};

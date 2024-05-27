@@ -1,0 +1,1 @@
+export { IndividualAdditionalRegistrationInformation } from './IndividualAdditionalRegistrationInformation';
