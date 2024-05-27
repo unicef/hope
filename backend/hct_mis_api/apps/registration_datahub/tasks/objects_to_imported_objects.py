@@ -139,7 +139,7 @@ class CreateImportedObjectsFromObjectsTask:
     def _prepare_imported_households(
         self,
             households: List[Household],
-            obj_hct: RegistrationDataImportDatahub, # change from RegistrationDataImport
+            obj_hct: RegistrationDataImportDatahub,
             import_to_program_id: str,
     ) -> Dict[int, ImportedHousehold]:
         imported_households_dict = {}

@@ -251,13 +251,13 @@ class RegistrationProgramPopulationImportMutation(BaseValidator, PermissionMutat
         program = Program.objects.get(id=import_to_program_id)
         if program.status == Program.FINISHED:
             raise ValidationError("In order to proceed this action, program status must not be finished")
-        #
+
         # # TODO: delete me
         # print(registration_data_import_data)
         # registration_data_import_data["import_data_id"] = "ed719fdf-509b-4dd7-9373-c36089d620da"
-        # registration_data_import_data["import_from_program_id"] = import_to_program_id
+        # registration_data_import_data["import_from_program_id"] = "UHJvZ3JhbU5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMDAw"
         # # TODO: endofdelete
-
+        registration_data_import_data["import_from_program_id"] = decode_id_string_required(registration_data_import_data["import_from_program_id"])
         import_from_program_id = registration_data_import_data["import_from_program_id"]
         (
             created_obj_datahub,

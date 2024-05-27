@@ -17,7 +17,7 @@ class RegistrationKoboImportMutationInput(graphene.InputObjectType):
 
 
 class RegistrationProgramPopulationImportMutationInput(graphene.InputObjectType):
-    import_from_program_id = graphene.ID()
+    import_from_program_id = graphene.String()
     name = graphene.String()
     business_area_slug = graphene.String()
     screen_beneficiary = graphene.Boolean()

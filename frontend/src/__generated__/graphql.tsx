@@ -7181,7 +7181,7 @@ export type RegistrationProgramPopulationImportMutation = {
 
 export type RegistrationProgramPopulationImportMutationInput = {
   businessAreaSlug?: InputMaybe<Scalars['String']['input']>;
-  importFromProgramId?: InputMaybe<Scalars['ID']['input']>;
+  importFromProgramId?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   screenBeneficiary?: InputMaybe<Scalars['Boolean']['input']>;
 };

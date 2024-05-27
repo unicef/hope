@@ -4004,7 +4004,7 @@ type RegistrationProgramPopulationImportMutation {
 }
 
 input RegistrationProgramPopulationImportMutationInput {
-  importFromProgramId: ID
+  importFromProgramId: String
   name: String
   businessAreaSlug: String
   screenBeneficiary: Boolean

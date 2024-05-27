@@ -6,7 +6,7 @@ from django.db.models.functions import Lower
 from django_filters import CharFilter, DateFilter, FilterSet, MultipleChoiceFilter, BooleanFilter
 
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
-from hct_mis_api.apps.core.utils import CustomOrderingFilter
+from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string_required
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
@@ -24,7 +24,7 @@ class ProgramFilter(FilterSet):
     start_date = DateFilter(field_name="start_date", lookup_expr="gte")
     end_date = DateFilter(field_name="end_date", lookup_expr="lte")
     data_collecting_type = CharFilter(field_name="data_collecting_type__code", lookup_expr="exact")
-    name = CharFilter(field_name="name", lookup_expr="istartswith")
+    name = CharFilter(field_name="name", lookup_expr="icontains")
     compatible_dct = BooleanFilter(method="compatible_dct_filter")
 
     class Meta:
@@ -78,10 +78,10 @@ class ProgramFilter(FilterSet):
         return qs.filter(q_obj)
 
     def compatible_dct_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
-        program_id = self.request.query_params.get("program_id")
+        program_id = decode_id_string_required(self.request.headers.get("Program"))
         if value:
             current_program = Program.objects.get(id=program_id)
-            return qs.filter(data_collecting_type__compatible_with=current_program.data_collecting_type)
+            return qs.filter(data_collecting_type__compatible_types=current_program.data_collecting_type)
         return qs
 
 
