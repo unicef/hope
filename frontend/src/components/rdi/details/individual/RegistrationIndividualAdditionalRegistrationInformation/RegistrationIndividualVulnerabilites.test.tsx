@@ -1,13 +1,13 @@
 import * as React from 'react';
-import { RegistrationIndividualVulnerabilities } from '.';
+import { RegistrationIndividualAdditionalRegistrationInformation } from '.';
 import { fakeAllIndividualsFlexFieldsAttributes } from '../../../../../../fixtures/core/fakeAllIndividualsFlexFieldsAttributes';
 import { fakeImportedIndividualDetailedFragment } from '../../../../../../fixtures/registration/fakeImportedIndividualDetailedFragment';
 import { render } from '../../../../../testUtils/testUtils';
 
-describe('components/rdi/details/individual/RegistrationIndividualVulnerabilities', () => {
+describe('components/rdi/details/individual/RegistrationIndividualAdditionalRegistrationInformation', () => {
   it('should render', () => {
     const { container } = render(
-      <RegistrationIndividualVulnerabilities
+      <RegistrationIndividualAdditionalRegistrationInformation
         individual={fakeImportedIndividualDetailedFragment}
         flexFieldsData={fakeAllIndividualsFlexFieldsAttributes}
       />,

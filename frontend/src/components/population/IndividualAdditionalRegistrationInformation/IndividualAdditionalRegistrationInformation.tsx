@@ -19,15 +19,15 @@ const Overview = styled(Paper)`
   margin-top: ${({ theme }) => theme.spacing(6)};
   margin-bottom: ${({ theme }) => theme.spacing(4)};
 `;
-interface IndividualVulnerabilitesProps {
+interface IndividualAdditionalRegistrationInformationProps {
   individual: IndividualNode;
   flexFieldsData: AllIndividualsFlexFieldsAttributesQuery;
 }
 
-export function IndividualVulnerabilities({
+export const IndividualAdditionalRegistrationInformation = ({
   individual,
   flexFieldsData,
-}: IndividualVulnerabilitesProps): React.ReactElement {
+}: IndividualAdditionalRegistrationInformationProps): React.ReactElement => {
   const { t } = useTranslation();
   const flexAttributesDict = useArrayToDict(
     flexFieldsData?.allIndividualsFlexFieldsAttributes,
@@ -85,7 +85,9 @@ export function IndividualVulnerabilities({
     <div>
       <Overview>
         <Title>
-          <Typography variant="h6">{t('Vulnerabilities')}</Typography>
+          <Typography variant="h6">
+            {t('Additional Registration information')}
+          </Typography>
         </Title>
         <Grid container spacing={6}>
           {fields.map((field, i) => (
@@ -98,4 +100,4 @@ export function IndividualVulnerabilities({
       </Overview>
     </div>
   );
-}
+};
