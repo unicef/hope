@@ -44,6 +44,7 @@ class TargetingDetails(BaseComponents):
     tableTitle = 'h6[data-cy="table-title"]'
     tableLabel = 'span[data-cy="table-label"]'
     tablePagination = 'div[data-cy="table-pagination"]'
+    statusContainer = 'div[data-cy="status-container"]'
 
     # Texts
     # Elements
@@ -158,3 +159,9 @@ class TargetingDetails(BaseComponents):
 
     def getHouseholdTableRows(self) -> list[WebElement]:
         return self.get_elements(self.household_table_rows)
+
+    def getStatusContainer(self) -> WebElement:
+        return self.wait_for(self.statusContainer)
+
+    def disappearStatusContainer(self) -> WebElement:
+        return self.wait_for_disappear(self.statusContainer)
