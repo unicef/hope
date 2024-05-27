@@ -9752,6 +9752,13 @@ export type CreateRegistrationKoboImportMutationVariables = Exact<{
 
 export type CreateRegistrationKoboImportMutation = { __typename?: 'Mutations', registrationKoboImport?: { __typename?: 'RegistrationKoboImportMutation', validationErrors?: any | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, name: string, dataSource: RegistrationDataImportDataSource, datahubId?: any | null, screenBeneficiary: boolean } | null } | null };
 
+export type CreateRegistrationProgramPopulationImportMutationVariables = Exact<{
+  registrationDataImportData: RegistrationProgramPopulationImportMutationInput;
+}>;
+
+
+export type CreateRegistrationProgramPopulationImportMutation = { __typename?: 'Mutations', registrationProgramPopulationImport?: { __typename?: 'RegistrationProgramPopulationImportMutation', validationErrors?: any | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, name: string, dataSource: RegistrationDataImportDataSource, datahubId?: any | null, screenBeneficiary: boolean } | null } | null };
+
 export type CreateRegistrationXlsxImportMutationVariables = Exact<{
   registrationDataImportData: RegistrationXlsxImportMutationInput;
 }>;
@@ -10697,6 +10704,7 @@ export type AllProgramsForChoicesQueryVariables = Exact<{
   endDate?: InputMaybe<Scalars['Date']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  compatibleDct?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
 
@@ -14844,6 +14852,48 @@ export function useCreateRegistrationKoboImportMutation(baseOptions?: Apollo.Mut
 export type CreateRegistrationKoboImportMutationHookResult = ReturnType<typeof useCreateRegistrationKoboImportMutation>;
 export type CreateRegistrationKoboImportMutationResult = Apollo.MutationResult<CreateRegistrationKoboImportMutation>;
 export type CreateRegistrationKoboImportMutationOptions = Apollo.BaseMutationOptions<CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables>;
+export const CreateRegistrationProgramPopulationImportDocument = gql`
+    mutation CreateRegistrationProgramPopulationImport($registrationDataImportData: RegistrationProgramPopulationImportMutationInput!) {
+  registrationProgramPopulationImport(
+    registrationDataImportData: $registrationDataImportData
+  ) {
+    registrationDataImport {
+      id
+      name
+      dataSource
+      datahubId
+      screenBeneficiary
+    }
+    validationErrors
+  }
+}
+    `;
+export type CreateRegistrationProgramPopulationImportMutationFn = Apollo.MutationFunction<CreateRegistrationProgramPopulationImportMutation, CreateRegistrationProgramPopulationImportMutationVariables>;
+
+/**
+ * __useCreateRegistrationProgramPopulationImportMutation__
+ *
+ * To run a mutation, you first call `useCreateRegistrationProgramPopulationImportMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateRegistrationProgramPopulationImportMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createRegistrationProgramPopulationImportMutation, { data, loading, error }] = useCreateRegistrationProgramPopulationImportMutation({
+ *   variables: {
+ *      registrationDataImportData: // value for 'registrationDataImportData'
+ *   },
+ * });
+ */
+export function useCreateRegistrationProgramPopulationImportMutation(baseOptions?: Apollo.MutationHookOptions<CreateRegistrationProgramPopulationImportMutation, CreateRegistrationProgramPopulationImportMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateRegistrationProgramPopulationImportMutation, CreateRegistrationProgramPopulationImportMutationVariables>(CreateRegistrationProgramPopulationImportDocument, options);
+      }
+export type CreateRegistrationProgramPopulationImportMutationHookResult = ReturnType<typeof useCreateRegistrationProgramPopulationImportMutation>;
+export type CreateRegistrationProgramPopulationImportMutationResult = Apollo.MutationResult<CreateRegistrationProgramPopulationImportMutation>;
+export type CreateRegistrationProgramPopulationImportMutationOptions = Apollo.BaseMutationOptions<CreateRegistrationProgramPopulationImportMutation, CreateRegistrationProgramPopulationImportMutationVariables>;
 export const CreateRegistrationXlsxImportDocument = gql`
     mutation CreateRegistrationXlsxImport($registrationDataImportData: RegistrationXlsxImportMutationInput!) {
   registrationXlsxImport(registrationDataImportData: $registrationDataImportData) {
@@ -21045,7 +21095,7 @@ export type AllProgramsLazyQueryHookResult = ReturnType<typeof useAllProgramsLaz
 export type AllProgramsSuspenseQueryHookResult = ReturnType<typeof useAllProgramsSuspenseQuery>;
 export type AllProgramsQueryResult = Apollo.QueryResult<AllProgramsQuery, AllProgramsQueryVariables>;
 export const AllProgramsForChoicesDocument = gql`
-    query AllProgramsForChoices($before: String, $after: String, $first: Int, $last: Int, $status: [String], $sector: [String], $businessArea: String!, $search: String, $numberOfHouseholds: String, $budget: String, $startDate: Date, $endDate: Date, $orderBy: String, $name: String) {
+    query AllProgramsForChoices($before: String, $after: String, $first: Int, $last: Int, $status: [String], $sector: [String], $businessArea: String!, $search: String, $numberOfHouseholds: String, $budget: String, $startDate: Date, $endDate: Date, $orderBy: String, $name: String, $compatibleDct: Boolean) {
   allPrograms(
     before: $before
     after: $after
@@ -21061,6 +21111,7 @@ export const AllProgramsForChoicesDocument = gql`
     startDate: $startDate
     endDate: $endDate
     name: $name
+    compatibleDct: $compatibleDct
   ) {
     pageInfo {
       hasNextPage
@@ -21118,6 +21169,7 @@ export const AllProgramsForChoicesDocument = gql`
  *      endDate: // value for 'endDate'
  *      orderBy: // value for 'orderBy'
  *      name: // value for 'name'
+ *      compatibleDct: // value for 'compatibleDct'
  *   },
  * });
  */
