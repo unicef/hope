@@ -24,6 +24,7 @@ from hct_mis_api.apps.registration_data.models import (
     ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
+    Record,
     RegistrationDataImportDatahub,
 )
 
@@ -191,3 +192,8 @@ class ImportedBankAccountInfoFactory(DjangoModelFactory):
     bank_account_number = random.randint(10**26, 10**27 - 1)
     bank_branch_name = random.choice(["BranchCityBank", "BranchSantander", "BranchJPMorgan"])
     account_holder_name = factory.Faker("last_name")
+
+
+class RecordFactory(DjangoModelFactory):
+    class Meta:
+        model = Record
