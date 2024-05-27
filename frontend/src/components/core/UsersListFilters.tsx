@@ -68,6 +68,7 @@ export function UsersListFilters({
             onChange={(e) => handleFilterChange('partner', e.target.value)}
             label={t('Partner')}
             value={filter.partner}
+            data-cy="partner-filter"
           >
             {choices.userPartnerChoices.map((item) => (
               <MenuItem key={item.value} value={item.value}>
@@ -81,6 +82,7 @@ export function UsersListFilters({
             onChange={(e) => handleFilterChange('roles', e.target.value)}
             label={t('Role')}
             value={filter.roles}
+            dataCy="role-filter"
           >
             {choices.userRolesChoices.map((item) => (
               <MenuItem key={item.value} value={item.value}>
@@ -94,6 +96,7 @@ export function UsersListFilters({
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
             value={filter.status}
+            dataCy="status-filter"
           >
             {choices.userStatusChoices.map((item) => (
               <MenuItem key={item.value} value={item.value}>

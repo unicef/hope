@@ -97,6 +97,9 @@ input AddIndividualDataObjectType {
   preferredLanguage: String
   flexFields: Arg
   paymentDeliveryPhoneNo: String
+  blockchainName: String
+  walletAddress: String
+  walletName: String
 }
 
 input AddIndividualIssueTypeExtras {
@@ -2544,6 +2547,9 @@ input IndividualUpdateDataObjectType {
   preferredLanguage: String
   flexFields: Arg
   paymentDeliveryPhoneNo: String
+  blockchainName: String
+  walletAddress: String
+  walletName: String
 }
 
 type InvalidPaymentVerificationPlan {
@@ -2935,6 +2941,7 @@ type PaymentNode implements Node {
   additionalCollectorName: String
   additionalDocumentType: String
   additionalDocumentNumber: String
+  fspAuthCode: String
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   householdSnapshot: PaymentHouseholdSnapshotNode
   adminUrl: String

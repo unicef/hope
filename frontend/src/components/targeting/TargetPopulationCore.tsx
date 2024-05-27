@@ -53,12 +53,9 @@ export const TargetPopulationCore = ({
   if (!targetPopulation) return null;
   const householdIds = targetPopulation.targetingCriteria?.householdIds;
   const individualIds = targetPopulation.targetingCriteria?.individualIds;
-  let ResultComponent = null;
-  if (targetPopulation.program.isSocialWorkerProgram ) {
-    ResultComponent = ResultsForPeople;
-  } else {
-    ResultComponent = ResultsForHouseholds;
-  }
+  const ResultComponent = targetPopulation.program.isSocialWorkerProgram
+    ? ResultsForPeople
+    : ResultsForHouseholds;
   const recordsTable = targetPopulation.program.isSocialWorkerProgram ? (
     <TargetPopulationPeopleTable
       id={id}

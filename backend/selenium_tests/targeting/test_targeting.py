@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from django.conf import settings
+from django.core.management import call_command
 from django.db import transaction
 
 import pytest
@@ -85,6 +87,109 @@ def get_program_with_dct_type_and_name(
         status=status,
     )
     return program
+
+
+@pytest.fixture
+def create_programs() -> None:
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
+    return
+
+
+@pytest.fixture
+def add_targeting() -> None:
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/documenttype.json")
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data-cypress.json")
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data-cypress.json")
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/targeting/fixtures/data-cypress.json")
+
+
+@pytest.mark.usefixtures("login")
+class TestSmokeTargeting:
+    def test_smoke_targeting_page(self, create_programs: None, add_targeting: None, pageTargeting: Targeting) -> None:
+        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.getNavTargeting().click()
+        assert "Targeting" in pageTargeting.getTitlePage().text
+        assert "CREATE NEW" in pageTargeting.getButtonCreateNew().text
+        expected_column_names = ["Name", "Status", "Num. of Households", "Date Created", "Last Edited", "Created by"]
+        assert expected_column_names == [name.text for name in pageTargeting.getTabColumnLabel()]
+        assert 2 == len(pageTargeting.getTargetPopulationsRows())
+        pageTargeting.getButtonCreateNew().click()
+        assert "Use Filters" in pageTargeting.getCreateUseFilters().text
+        assert "Use IDs" in pageTargeting.getCreateUseIDs().text
+
+    def test_smoke_targeting_create_use_filters(
+        self, create_programs: None, add_targeting: None, pageTargeting: Targeting, pageTargetingCreate: TargetingCreate
+    ) -> None:
+        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.getNavTargeting().click()
+        pageTargeting.getButtonCreateNew().click()
+        pageTargeting.getCreateUseFilters().click()
+        assert "New Target Population" in pageTargetingCreate.getPageHeaderTitle().text
+        assert "SAVE" in pageTargetingCreate.getButtonTargetPopulationCreate().text
+        pageTargetingCreate.getInputName()
+        pageTargetingCreate.getDivTargetPopulationAddCriteria().click()
+        pageTargetingCreate.getButtonHouseholdRule().click()
+        pageTargetingCreate.getButtonIndividualRule().click()
+        pageTargetingCreate.getAutocompleteTargetCriteriaOption().click()
+
+    def test_smoke_targeting_create_use_ids(
+        self, create_programs: None, add_targeting: None, pageTargeting: Targeting, pageTargetingCreate: TargetingCreate
+    ) -> None:
+        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.getNavTargeting().click()
+        pageTargeting.getButtonCreateNew().click()
+        pageTargeting.getCreateUseIDs().click()
+        assert "New Target Population" in pageTargetingCreate.getPageHeaderTitle().text
+        assert "SAVE" in pageTargetingCreate.getButtonTargetPopulationCreate().text
+        pageTargetingCreate.getInputName()
+        pageTargetingCreate.getInputIncludedHouseholdIds()
+        pageTargetingCreate.getInputHouseholdids()
+        pageTargetingCreate.getInputIncludedIndividualIds()
+        pageTargetingCreate.getInputIndividualids()
+
+    def test_smoke_targeting_details_page(
+        self,
+        create_programs: None,
+        add_targeting: None,
+        pageTargeting: Targeting,
+        pageTargetingDetails: TargetingDetails,
+    ) -> None:
+        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.getNavTargeting().click()
+        pageTargeting.chooseTargetPopulations(0).click()
+        assert "Copy TP" in pageTargetingDetails.getPageHeaderTitle().text
+        pageTargetingDetails.getButtonTargetPopulationDuplicate()
+        pageTargetingDetails.getButtonDelete()
+        assert "EDIT" in pageTargetingDetails.getButtonEdit().text
+        assert "REBUILD" in pageTargetingDetails.getButtonRebuild().text
+        assert "LOCK" in pageTargetingDetails.getButtonTargetPopulationLock().text
+        assert "Details" in pageTargetingDetails.getDetailsTitle().text
+        assert "OPEN" in pageTargetingDetails.getLabelStatus().text
+        assert "OPEN" in pageTargetingDetails.getTargetPopulationStatus().text
+        assert "CREATED BY" in pageTargetingDetails.getLabelizedFieldContainerCreatedBy().text
+        pageTargetingDetails.getLabelCreatedBy()
+        assert "PROGRAMME POPULATION CLOSE DATE" in pageTargetingDetails.getLabelizedFieldContainerCloseDate().text
+        assert "PROGRAMME" in pageTargetingDetails.getLabelizedFieldContainerProgramName().text
+        assert "Test Programm" in pageTargetingDetails.getLabelProgramme().text
+        assert "SEND BY" in pageTargetingDetails.getLabelizedFieldContainerSendBy().text
+        assert "-" in pageTargetingDetails.getLabelSendBy().text
+        assert "-" in pageTargetingDetails.getLabelSendDate().text
+        assert "-" in pageTargetingDetails.getCriteriaContainer().text
+        assert "0" in pageTargetingDetails.getLabelFemaleChildren().text
+        assert "0" in pageTargetingDetails.getLabelMaleChildren().text
+        assert "0" in pageTargetingDetails.getLabelMaleAdults().text
+        assert "2" in pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
+        assert "8" in pageTargetingDetails.getLabelTargetedIndividuals().text
+        assert "Households" in pageTargetingDetails.getTableTitle().text
+        expected_menu_items = [
+            "ID",
+            "Head of Household",
+            "Household Size",
+            "Administrative Level 2",
+            "Score",
+        ]
+        assert expected_menu_items == [i.text for i in pageTargetingDetails.getTableLabel()]
 
 
 @pytest.mark.usefixtures("login")

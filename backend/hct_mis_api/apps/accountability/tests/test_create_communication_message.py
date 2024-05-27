@@ -113,9 +113,10 @@ mutation CreateAccountabilityCommunicationMessage (
             self.user, [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE], self.business_area
         )
         broadcast_message_mock = MagicMock(return_value=None)
-        with patch(
-            "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)
-        ), patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock):
+        with (
+            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+        ):
             self.snapshot_graphql_request(
                 request_string=self.MUTATION,
                 context={
@@ -151,9 +152,10 @@ mutation CreateAccountabilityCommunicationMessage (
             self.user, [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE], self.business_area
         )
         broadcast_message_mock = MagicMock(return_value=None)
-        with patch(
-            "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)
-        ), patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock):
+        with (
+            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+        ):
             self.snapshot_graphql_request(
                 request_string=self.MUTATION,
                 context={

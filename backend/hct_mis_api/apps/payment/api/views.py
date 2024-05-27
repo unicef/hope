@@ -78,6 +78,7 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
                 PaymentPlan.Status.IN_APPROVAL,
                 PaymentPlan.Status.IN_AUTHORIZATION,
                 PaymentPlan.Status.IN_REVIEW,
+                PaymentPlan.Status.ACCEPTED,
             ],
             program__in=program_ids,
         )

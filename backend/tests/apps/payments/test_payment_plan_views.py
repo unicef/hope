@@ -158,6 +158,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         )
         approval_approval = ApprovalFactory(approval_process=approval_process, type=Approval.APPROVAL)
         approval_authorization = ApprovalFactory(approval_process=approval_process, type=Approval.AUTHORIZATION)
+        approval_release = ApprovalFactory(approval_process=approval_process, type=Approval.FINANCE_RELEASE)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PM_VIEW_LIST, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
@@ -194,6 +195,17 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             "%Y-%m-%dT%H:%M:%S.%fZ"
         )
         assert response_json[0]["last_approval_process_by"] == str(approval_authorization.created_by)
+
+        self.payment_plan1.status = PaymentPlan.Status.ACCEPTED
+        self.payment_plan1.save()
+        response = self.client.get(self.url)
+        assert response.status_code == status.HTTP_200_OK
+        response_json = response.json()["results"]
+        assert len(response_json) == 1
+        assert response_json[0]["last_approval_process_date"] == approval_release.created_at.strftime(
+            "%Y-%m-%dT%H:%M:%S.%fZ"
+        )
+        assert response_json[0]["last_approval_process_by"] == str(approval_release.created_by)
 
     def _bulk_approve_action_response(self) -> Any:
         ApprovalProcessFactory(payment_plan=self.payment_plan1)

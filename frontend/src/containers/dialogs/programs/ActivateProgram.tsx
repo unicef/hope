@@ -3,17 +3,13 @@ import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  AllProgramsQuery,
   ProgramQuery,
   ProgramStatus,
   useUpdateProgramMutation,
 } from '@generated/graphql';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
-import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { programCompare } from '@utils/utils';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
@@ -32,33 +28,10 @@ export const ActivateProgram = ({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl } = useBaseUrl();
   const { selectedProgram, setSelectedProgram } = useProgramContext();
 
-  const [mutate, { loading }] = useUpdateProgramMutation({
-    update(cache, { data: { updateProgram } }) {
-      cache.writeQuery({
-        query: PROGRAM_QUERY,
-        variables: {
-          id: program.id,
-        },
-        data: { program: updateProgram.program },
-      });
-      const allProgramsData: AllProgramsQuery = cache.readQuery({
-        query: ALL_PROGRAMS_QUERY,
-        variables: { businessArea },
-      });
-
-      if (allProgramsData && allProgramsData.allPrograms) {
-        allProgramsData.allPrograms.edges.sort(programCompare);
-        cache.writeQuery({
-          query: ALL_PROGRAMS_QUERY,
-          variables: { businessArea },
-          data: allProgramsData,
-        });
-      }
-    },
-  });
+  const [mutate, { loading }] = useUpdateProgramMutation();
 
   const activateProgram = async (): Promise<void> => {
     const response = await mutate({
