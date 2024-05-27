@@ -14,6 +14,7 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedDocumentTypeFactory,
     ImportedHouseholdFactory,
     ImportedIndividualFactory,
+    ImportedIndividualIdentityFactory,
     RecordFactory,
     RegistrationDataImportDatahubFactory,
 )
@@ -52,6 +53,11 @@ class TestRegistrationDataModels(TestCase):
 
         # ImportedDocumentType
         cls.imported_document_type = ImportedDocumentTypeFactory(label="some_label")
+
+        # ImportedIndividualIdentity
+        cls.imported_individual_identity = ImportedIndividualIdentityFactory(
+            individual=cls.imported_individual_3, document_number="123456789"
+        )
 
         # Record
         cls.record = RecordFactory(
@@ -98,3 +104,6 @@ class TestRegistrationDataModels(TestCase):
 
     def test_record_get_data(self) -> None:
         self.assertEqual(self.record.get_data(), {})
+
+    def test_iimported_individual_identity_str(self) -> None:
+        self.assertEqual(str(self.imported_individual_identity), "UNICEF Jane Doe 123456789")
