@@ -382,11 +382,19 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
 
     def clean(self) -> Optional[Dict[str, Any]]:
         if self.instance:
-            payment_plans = self.locked_payment_plans_for_fsp(self.instance)
-            if payment_plans.exists():
-                raise ValidationError(
-                    f"Cannot modify {self.instance}, it is assigned to following Payment Plans: {list(payment_plans)}"
-                )
+            protected_fields = [
+                "name",
+                "vision_vendor_number",
+                "distribution_limit",
+                "communication_channel",
+                "xlsx_templates",
+            ]
+            if any(x in self.changed_data for x in protected_fields):
+                payment_plans = self.locked_payment_plans_for_fsp(self.instance)
+                if payment_plans.exists():
+                    raise ValidationError(
+                        f"Cannot modify {self.instance}, it is assigned to following Payment Plans: {list(payment_plans)}"
+                    )
 
         return super().clean()
 
