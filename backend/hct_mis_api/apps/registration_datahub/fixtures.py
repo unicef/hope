@@ -24,6 +24,7 @@ from hct_mis_api.apps.registration_data.models import (
     ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
+    ImportedIndividualIdentity,
     Record,
     RegistrationDataImportDatahub,
 )
@@ -197,3 +198,11 @@ class ImportedBankAccountInfoFactory(DjangoModelFactory):
 class RecordFactory(DjangoModelFactory):
     class Meta:
         model = Record
+
+
+class ImportedIndividualIdentityFactory(DjangoModelFactory):
+    class Meta:
+        model = ImportedIndividualIdentity
+
+    individual = factory.SubFactory(ImportedIndividualFactory)
+    partner = "UNICEF"
