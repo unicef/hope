@@ -63,7 +63,8 @@ class TargetingDetails(BaseComponents):
     def getInputName(self) -> WebElement:
         return self.wait_for(self.inputName)
 
-
+    def disappearInputName(self) -> WebElement:
+        return self.wait_for_disappear(self.inputName)
 
     def getButtonDelete(self) -> WebElement:
         return self.wait_for(self.buttonDelete)

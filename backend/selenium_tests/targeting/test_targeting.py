@@ -24,6 +24,7 @@ from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 
 from hct_mis_api.apps.account.models import User
+from selenium.webdriver.common.by import By
 
 from selenium_tests.page_object.filters import Filters
 
@@ -424,7 +425,9 @@ class TestTargeting:
         pageTargeting.chooseTargetPopulations(0).click()
         pageTargetingDetails.getButtonTargetPopulationDuplicate().click()
         pageTargetingDetails.getInputName().send_keys("a1!")
-        pageTargetingDetails.find_elements(pageTargetingDetails.buttonTargetPopulationDuplicate)[1].click()
+        pageTargetingDetails.get_elements(pageTargetingDetails.buttonTargetPopulationDuplicate)[1].click()
+        pageTargetingDetails.disappearInputName()
+        assert "a1!" in pageTargetingDetails.getTitlePage().text
         # Check all data copied properly
         pageTargetingDetails.screenshot("1")
 
