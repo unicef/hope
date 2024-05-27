@@ -3909,6 +3909,7 @@ export type Mutations = {
   reassignRole?: Maybe<ReassignRoleMutation>;
   refuseRegistrationDataImport?: Maybe<RefuseRegistrationDataImportMutation>;
   registrationKoboImport?: Maybe<RegistrationKoboImportMutation>;
+  registrationProgramPopulationImport?: Maybe<RegistrationProgramPopulationImportMutation>;
   registrationXlsxImport?: Maybe<RegistrationXlsxImportMutation>;
   rerunDedupe?: Maybe<RegistrationDeduplicationMutation>;
   restartCreateReport?: Maybe<RestartCreateReport>;
@@ -4295,6 +4296,11 @@ export type MutationsRefuseRegistrationDataImportArgs = {
 
 export type MutationsRegistrationKoboImportArgs = {
   registrationDataImportData: RegistrationKoboImportMutationInput;
+};
+
+
+export type MutationsRegistrationProgramPopulationImportArgs = {
+  registrationDataImportData: RegistrationProgramPopulationImportMutationInput;
 };
 
 
@@ -5883,6 +5889,7 @@ export type QueryAllActiveProgramsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   budget?: InputMaybe<Scalars['String']['input']>;
   businessArea: Scalars['String']['input'];
+  compatibleDct?: InputMaybe<Scalars['Boolean']['input']>;
   dataCollectingType?: InputMaybe<Scalars['String']['input']>;
   endDate?: InputMaybe<Scalars['Date']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -6365,6 +6372,7 @@ export type QueryAllProgramsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   budget?: InputMaybe<Scalars['String']['input']>;
   businessArea: Scalars['String']['input'];
+  compatibleDct?: InputMaybe<Scalars['Boolean']['input']>;
   dataCollectingType?: InputMaybe<Scalars['String']['input']>;
   endDate?: InputMaybe<Scalars['Date']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -6980,6 +6988,7 @@ export enum RegistrationDataImportDataSource {
   Edopomoga = 'EDOPOMOGA',
   FlexRegistration = 'FLEX_REGISTRATION',
   Kobo = 'KOBO',
+  ProgramPopulation = 'PROGRAM_POPULATION',
   Xls = 'XLS'
 }
 
@@ -7161,6 +7170,19 @@ export type RegistrationKoboImportMutationInput = {
   importDataId?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   pullPictures?: InputMaybe<Scalars['Boolean']['input']>;
+  screenBeneficiary?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type RegistrationProgramPopulationImportMutation = {
+  __typename?: 'RegistrationProgramPopulationImportMutation';
+  registrationDataImport?: Maybe<RegistrationDataImportNode>;
+  validationErrors?: Maybe<Scalars['Arg']['output']>;
+};
+
+export type RegistrationProgramPopulationImportMutationInput = {
+  businessAreaSlug?: InputMaybe<Scalars['String']['input']>;
+  importFromProgramId?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
   screenBeneficiary?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
@@ -23805,6 +23827,8 @@ export type ResolversTypes = {
   RegistrationDeduplicationMutation: ResolverTypeWrapper<RegistrationDeduplicationMutation>;
   RegistrationKoboImportMutation: ResolverTypeWrapper<RegistrationKoboImportMutation>;
   RegistrationKoboImportMutationInput: RegistrationKoboImportMutationInput;
+  RegistrationProgramPopulationImportMutation: ResolverTypeWrapper<RegistrationProgramPopulationImportMutation>;
+  RegistrationProgramPopulationImportMutationInput: RegistrationProgramPopulationImportMutationInput;
   RegistrationXlsxImportMutation: ResolverTypeWrapper<RegistrationXlsxImportMutation>;
   RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput;
   ReportNode: ResolverTypeWrapper<ReportNode>;
@@ -24268,6 +24292,8 @@ export type ResolversParentTypes = {
   RegistrationDeduplicationMutation: RegistrationDeduplicationMutation;
   RegistrationKoboImportMutation: RegistrationKoboImportMutation;
   RegistrationKoboImportMutationInput: RegistrationKoboImportMutationInput;
+  RegistrationProgramPopulationImportMutation: RegistrationProgramPopulationImportMutation;
+  RegistrationProgramPopulationImportMutationInput: RegistrationProgramPopulationImportMutationInput;
   RegistrationXlsxImportMutation: RegistrationXlsxImportMutation;
   RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput;
   ReportNode: ReportNode;
@@ -26435,6 +26461,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   reassignRole?: Resolver<Maybe<ResolversTypes['ReassignRoleMutation']>, ParentType, ContextType, RequireFields<MutationsReassignRoleArgs, 'grievanceTicketId' | 'householdId' | 'individualId' | 'role'>>;
   refuseRegistrationDataImport?: Resolver<Maybe<ResolversTypes['RefuseRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsRefuseRegistrationDataImportArgs, 'id'>>;
   registrationKoboImport?: Resolver<Maybe<ResolversTypes['RegistrationKoboImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationKoboImportArgs, 'registrationDataImportData'>>;
+  registrationProgramPopulationImport?: Resolver<Maybe<ResolversTypes['RegistrationProgramPopulationImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationProgramPopulationImportArgs, 'registrationDataImportData'>>;
   registrationXlsxImport?: Resolver<Maybe<ResolversTypes['RegistrationXlsxImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationXlsxImportArgs, 'registrationDataImportData'>>;
   rerunDedupe?: Resolver<Maybe<ResolversTypes['RegistrationDeduplicationMutation']>, ParentType, ContextType, RequireFields<MutationsRerunDedupeArgs, 'registrationDataImportDatahubId'>>;
   restartCreateReport?: Resolver<Maybe<ResolversTypes['RestartCreateReport']>, ParentType, ContextType, RequireFields<MutationsRestartCreateReportArgs, 'reportData'>>;
@@ -27352,6 +27379,12 @@ export type RegistrationDeduplicationMutationResolvers<ContextType = any, Parent
 };
 
 export type RegistrationKoboImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationKoboImportMutation'] = ResolversParentTypes['RegistrationKoboImportMutation']> = {
+  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>;
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type RegistrationProgramPopulationImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationProgramPopulationImportMutation'] = ResolversParentTypes['RegistrationProgramPopulationImportMutation']> = {
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>;
   validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -28739,6 +28772,7 @@ export type Resolvers<ContextType = any> = {
   RegistrationDataImportNodeEdge?: RegistrationDataImportNodeEdgeResolvers<ContextType>;
   RegistrationDeduplicationMutation?: RegistrationDeduplicationMutationResolvers<ContextType>;
   RegistrationKoboImportMutation?: RegistrationKoboImportMutationResolvers<ContextType>;
+  RegistrationProgramPopulationImportMutation?: RegistrationProgramPopulationImportMutationResolvers<ContextType>;
   RegistrationXlsxImportMutation?: RegistrationXlsxImportMutationResolvers<ContextType>;
   ReportNode?: ReportNodeResolvers<ContextType>;
   ReportNodeConnection?: ReportNodeConnectionResolvers<ContextType>;

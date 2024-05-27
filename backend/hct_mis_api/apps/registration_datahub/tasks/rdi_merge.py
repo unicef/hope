@@ -26,7 +26,7 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
     IndividualIdentity,
-    IndividualRoleInHousehold,
+    IndividualRoleInHousehold, HouseholdCollection, IndividualCollection,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
@@ -197,6 +197,26 @@ class RdiMergeTask:
             if enumerator_rec_id := imported_household.enumerator_rec_id:
                 household_data["flex_fields"].update({"enumerator_id": enumerator_rec_id})
 
+            if unicef_id := imported_household.mis_unicef_id:
+                household_data["unicef_id"] = unicef_id
+                # find other household with same unicef_id and group them in the same collection
+                household_from_collection = Household.objects.filter(
+                    unicef_id=unicef_id,
+                    business_area=obj_hct.business_area
+                ).first()
+                if household_from_collection:
+                    if collection := household_from_collection.household_collection:
+                        household_data["household_collection"] = collection
+                    else:
+                        household_collection = HouseholdCollection.object.create()
+                        household_data["household_collection"] = household_collection
+                        household_from_collection.household_collection = household_collection
+                        household_from_collection.save(update_fields=["household_collection"])
+                else:
+                    household_collection = HouseholdCollection.object.create()
+                    household_data["household_collection"] = household_collection
+
+
             household = Household(
                 **household_data,
                 registration_data_import=obj_hct,
@@ -265,6 +285,25 @@ class RdiMergeTask:
 
             values["phone_no_valid"] = is_valid_phone_number(str(phone_no))
             values["phone_no_alternative_valid"] = is_valid_phone_number(str(phone_no_alternative))
+
+            if unicef_id := imported_individual.mis_unicef_id:
+                imported_individual["unicef_id"] = unicef_id
+                # find other individual with same unicef_id and group them in the same collection
+                individual_from_collection = Individual.objects.filter(
+                    unicef_id=unicef_id,
+                    business_area=obj_hct.business_area
+                ).first()
+                if individual_from_collection:
+                    if collection := individual_from_collection.individual_collection:
+                        values["individual_collection"] = collection
+                    else:
+                        individual_collection = IndividualCollection.object.create()
+                        values["individual_collection"] = individual_collection
+                        individual_from_collection.individual_collection = individual_collection
+                        individual_from_collection.save(update_fields=["individual_collection"])
+                else:
+                    individual_collection = IndividualCollection.object.create()
+                    values["individual_collection"] = individual_collection
 
             individual = Individual(
                 **values,

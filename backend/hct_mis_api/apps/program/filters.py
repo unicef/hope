@@ -3,7 +3,7 @@ from typing import Any, Dict
 from django.db.models import Count, Q, QuerySet
 from django.db.models.functions import Lower
 
-from django_filters import CharFilter, DateFilter, FilterSet, MultipleChoiceFilter
+from django_filters import CharFilter, DateFilter, FilterSet, MultipleChoiceFilter, BooleanFilter
 
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
@@ -24,7 +24,8 @@ class ProgramFilter(FilterSet):
     start_date = DateFilter(field_name="start_date", lookup_expr="gte")
     end_date = DateFilter(field_name="end_date", lookup_expr="lte")
     data_collecting_type = CharFilter(field_name="data_collecting_type__code", lookup_expr="exact")
-    name = CharFilter(field_name="name", lookup_expr="icontains")
+    name = CharFilter(field_name="name", lookup_expr="istartswith")
+    compatible_dct = BooleanFilter(method="compatible_dct_filter")
 
     class Meta:
         fields = (
@@ -75,6 +76,13 @@ class ProgramFilter(FilterSet):
         for value in values:
             q_obj |= Q(name__istartswith=value)
         return qs.filter(q_obj)
+
+    def compatible_dct_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
+        program_id = self.request.query_params.get("program_id")
+        if value:
+            current_program = Program.objects.get(id=program_id)
+            return qs.filter(data_collecting_type__compatible_with=current_program.data_collecting_type)
+        return qs
 
 
 class ChartProgramFilter(FilterSet):
