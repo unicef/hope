@@ -1,12 +1,9 @@
-import React, { useState } from 'react';
 import { BaseSection } from '@components/core/BaseSection';
-import { useTranslation } from 'react-i18next';
-import moment from 'moment';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { BlackLink } from '@components/core/BlackLink';
 import { UniversalMoment } from '@components/core/UniversalMoment';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import SearchIcon from '@mui/icons-material/Search';
 import {
-  TextField,
   InputAdornment,
   Table,
   TableBody,
@@ -15,8 +12,11 @@ import {
   TableHead,
   TableRow,
   TableSortLabel,
+  TextField,
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
 
 interface ReleasedSectionProps {
   releasedData: any;
@@ -28,14 +28,22 @@ export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const [searchText, setSearchText] = useState('');
-  const [sortField, setSortField] = useState(null);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const handleSort = (field) => {
-    const newSortDirection =
-      sortField === field && sortDirection === 'asc' ? 'desc' : 'asc';
-    setSortField(field);
-    setSortDirection(newSortDirection);
-  };
+  const {
+    sortField,
+    sortDirection,
+    selectedProgram,
+    setSelectedProgram,
+    handleSort,
+    sortRows,
+    filterRows,
+  } = useSortAndFilter({ initialSortField: null, initialSortDirection: 'asc' });
+
+  const programs = releasedData?.results?.reduce((acc, row) => {
+    if (!acc.includes(row.program)) {
+      acc.push(row.program);
+    }
+    return acc;
+  }, []);
 
   const columns = [
     {
@@ -65,29 +73,13 @@ export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
     },
   ];
 
-  const filteredRows =
-    releasedData?.results?.filter((row: any) =>
-      columns.some((column) => {
-        if (column.field === 'last_approval_process_date') {
-          const date = moment(row[column.field]).format('D MMMM YYYY');
-          return date.toLowerCase().includes(searchText.toLowerCase());
-        }
-        return row[column.field]
-          ?.toString()
-          .toLowerCase()
-          .includes(searchText.toLowerCase());
-      }),
-    ) || [];
-
-  const sortedRows = [...filteredRows].sort((a, b) => {
-    if (a[sortField] < b[sortField]) {
-      return sortDirection === 'asc' ? -1 : 1;
-    }
-    if (a[sortField] > b[sortField]) {
-      return sortDirection === 'asc' ? 1 : -1;
-    }
-    return 0;
-  });
+  const filteredRows = filterRows(
+    releasedData?.results || [],
+    'last_approval_process_date',
+    searchText,
+    columns,
+  );
+  const sortedRows = sortRows(filteredRows);
 
   const title = t('Released Payment Plans');
 
@@ -116,13 +108,21 @@ export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
               <TableRow>
                 {columns.map((column) => (
                   <TableCell key={column.field}>
-                    <TableSortLabel
-                      active={sortField === column.field}
-                      direction={sortDirection}
-                      onClick={() => handleSort(column.field)}
-                    >
-                      {column.headerName}
-                    </TableSortLabel>
+                    {column.field === 'program' ? (
+                      <ProgramSelect
+                        selectedProgram={selectedProgram}
+                        setSelectedProgram={setSelectedProgram}
+                        programs={programs}
+                      />
+                    ) : (
+                      <TableSortLabel
+                        active={sortField === column.field}
+                        direction={sortDirection}
+                        onClick={() => handleSort(column.field)}
+                      >
+                        {column.headerName}
+                      </TableSortLabel>
+                    )}
                   </TableCell>
                 ))}
               </TableRow>
