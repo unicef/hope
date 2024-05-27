@@ -123,7 +123,7 @@ export const GlobalProgramSelect = () => {
   ] = useAllProgramsForChoicesLazyQuery({
     variables: {
       businessArea,
-      first: 5,
+      first: 10,
       orderBy: 'name',
       status: [ProgramStatus.Active, ProgramStatus.Draft],
     },
@@ -248,16 +248,24 @@ export const GlobalProgramSelect = () => {
   };
 
   const searchPrograms = () => {
-    void loadProgramsList({
-      variables: {
-        businessArea,
-        first: 5,
-        orderBy: 'name',
-        status: [ProgramStatus.Active, ProgramStatus.Draft],
-        name: inputValue,
-      },
-      fetchPolicy: 'network-only',
-    });
+    if (!inputValue) {
+      void loadProgramsList();
+    } else {
+      void loadProgramsList({
+        variables: {
+          businessArea,
+          first: 10,
+          orderBy: 'name',
+          status: [
+            ProgramStatus.Active,
+            ProgramStatus.Draft,
+            ProgramStatus.Finished,
+          ],
+          name: inputValue,
+        },
+        fetchPolicy: 'network-only',
+      });
+    }
   };
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -323,7 +331,9 @@ export const GlobalProgramSelect = () => {
             noOptionsText="No results"
             renderOption={(props, option) => (
               <li {...props}>
-                <NameBox title={option.name}>{option.name}</NameBox>
+                <NameBox data-cy="select-option-name" title={option.name}>
+                  {option.name}
+                </NameBox>
                 {option.status && (
                   <StatusBox
                     status={option.status}
@@ -357,11 +367,14 @@ export const GlobalProgramSelect = () => {
                       <InputAdornment position="end">
                         {loadingProgramsList && <CircularProgress />}
                         {inputValue && (
-                          <IconButton onClick={clearInput}>
+                          <IconButton data-cy="clear-icon" onClick={clearInput}>
                             <ClearIcon />
                           </IconButton>
                         )}
-                        <IconButton onClick={searchPrograms}>
+                        <IconButton
+                          data-cy="search-icon"
+                          onClick={searchPrograms}
+                        >
                           <SearchIcon />
                         </IconButton>
                       </InputAdornment>

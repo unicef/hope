@@ -65,7 +65,10 @@ class Permissions(Enum):
     TARGETING_UNLOCK = auto()
     TARGETING_SEND = auto()
 
+    # Payment Managerial View
     PAYMENT_VIEW_LIST_MANAGERIAL = auto()
+    PAYMENT_VIEW_LIST_MANAGERIAL_RELEASED = auto()
+
     # Payment Verification
     PAYMENT_VERIFICATION_VIEW_LIST = auto()
     PAYMENT_VERIFICATION_VIEW_DETAILS = auto()
@@ -103,6 +106,7 @@ class Permissions(Enum):
     PM_MARK_PAYMENT_AS_FAILED = auto()
     PM_EXPORT_PDF_SUMMARY = auto()
     PM_SEND_TO_PAYMENT_GATEWAY = auto()
+    PM_VIEW_FSP_AUTH_CODE = auto()
 
     # Payment Module Admin
     PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE = auto()

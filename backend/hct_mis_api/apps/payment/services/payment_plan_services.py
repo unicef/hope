@@ -700,12 +700,19 @@ class PaymentPlanService:
                 )
             payments_chunks = list(chunks(list(payments.order_by("unicef_id").values_list("id", flat=True)), chunks_no))
 
-        elif split_type == PaymentPlanSplit.SplitType.BY_ADMIN_AREA2:
+        elif split_type in [
+            PaymentPlanSplit.SplitType.BY_ADMIN_AREA1,
+            PaymentPlanSplit.SplitType.BY_ADMIN_AREA2,
+            PaymentPlanSplit.SplitType.BY_ADMIN_AREA3,
+        ]:
+            area_level = split_type[-1]
             grouped_payments = list(
-                payments.order_by("household__admin2__p_code", "unicef_id").select_related("household__admin2")
+                payments.order_by(f"household__admin{area_level}__p_code", "unicef_id").select_related(
+                    f"household__admin{area_level}"
+                )
             )
             payments_chunks = []
-            for _, payments in groupby(grouped_payments, key=lambda x: x.household.admin2):  # type: ignore
+            for _, payments in groupby(grouped_payments, key=lambda x: getattr(x.household, f"admin{area_level}")):  # type: ignore
                 payments_chunks.append([payment.id for payment in payments])
 
         elif split_type == PaymentPlanSplit.SplitType.BY_COLLECTOR:

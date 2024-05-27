@@ -24,7 +24,7 @@ class ProgramFilter(FilterSet):
     start_date = DateFilter(field_name="start_date", lookup_expr="gte")
     end_date = DateFilter(field_name="end_date", lookup_expr="lte")
     data_collecting_type = CharFilter(field_name="data_collecting_type__code", lookup_expr="exact")
-    name = CharFilter(field_name="name", lookup_expr="icontains")
+    name = CharFilter(field_name="name", lookup_expr="istartswith")
     compatible_dct = BooleanFilter(method="compatible_dct_filter")
 
     class Meta:

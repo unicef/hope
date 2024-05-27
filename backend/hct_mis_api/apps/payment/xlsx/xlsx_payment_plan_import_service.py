@@ -24,7 +24,7 @@ Row = Tuple[Cell]
 
 
 class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseService):
-    COLUMNS_TYPES = ("s", "s", "n", "s", "s", "s", "s", "s", "n", "n", "s")
+    COLUMNS_TYPES = ("s", "s", "n", "s", "s", "s", "s", "s", "s", "n", "n", "s")
     BATCH_SIZE = 1000
 
     def __init__(self, payment_plan: PaymentPlan, file: io.BytesIO) -> None:
@@ -66,7 +66,12 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
 
     def _save_payments(self, payments_to_save: List[Payment]) -> None:
         Payment.objects.bulk_update(
-            payments_to_save, fields=("entitlement_quantity", "entitlement_quantity_usd", "entitlement_date")
+            payments_to_save,
+            fields=(
+                "entitlement_quantity",
+                "entitlement_quantity_usd",
+                "entitlement_date",
+            ),
         )
         payments_ids = [payment.id for payment in payments_to_save]
         payments = Payment.objects.filter(id__in=payments_ids).select_related("household_snapshot")

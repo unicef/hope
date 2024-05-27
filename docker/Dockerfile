@@ -22,6 +22,7 @@ RUN apt-get update \
     libpq-dev \
     python3-psycopg2 \
     python3-gdal \
+    python3-dev \
     gdal-bin \
     libcairo2 \
     libcairo2-dev \
@@ -39,28 +40,33 @@ RUN apt-get update \
   && mkdir -p -m 0700 /run/user/"${UID}" \
   && chown -R hope:hope /code /tmp /data /run/user/"${UID}"
 
+ENV PDM_PACKAGES=/packages
+ENV CODE=/code
+ENV PDM_NO_SELF=True
+ENV PDM_PROJECT=$PDM_PACKAGES
+ENV PYPACKAGES=$PDM_PACKAGES/__pypackages__/3.11
 ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
-    VIRTUAL_ENV=/opt/venv \
-    POETRY_HOME=/opt/poetry \
-    PATH=/opt/venv/bin:/opt/poetry/bin:${PATH} \
+    PYTHONPATH=$PYPACKAGES/lib:$CODE:$PYTHONPATH \
+    PATH=$PYPACKAGES/bin:$PATH \
     XDG_RUNTIME_DIR=/run/user/"${UID}"
 
-WORKDIR /code
+WORKDIR $CODE
 
 COPY --from=waitforit /data/waitforit /usr/local/bin/waitforit
 
 # Dist builder image
 FROM base as builder
 
-RUN python3 -m venv --copies $VIRTUAL_ENV &&\
-    python3 -m venv --copies $POETRY_HOME &&\
-    $POETRY_HOME/bin/pip install lockfile==0.12.2 &&\
-    $POETRY_HOME/bin/pip install poetry==1.3.0 &&\
-    poetry config virtualenvs.create false &&\
-    poetry config cache-dir /var/cache/poetry
+RUN pip install pdm==2.15.2 &&\
+    pip install --upgrade pip setuptools &&\
+    pdm config cache_dir /var/cache/pdm &&\
+    pdm config python.use_venv false &&\
+    pdm config venv.in_project true &&\
+    pdm config check_update false
 
-COPY backend/pyproject.toml backend/poetry.lock ./
-RUN poetry install --without dev
+WORKDIR $PDM_PACKAGES
+COPY backend/pyproject.toml backend/pdm.lock ./
+RUN pdm sync --prod --no-editable --no-self
 
 # Dev image
 FROM builder AS dev
@@ -76,7 +82,9 @@ RUN apt-get update \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-RUN poetry install
+RUN pdm sync --no-editable --no-self
+
+WORKDIR $CODE
 COPY ./backend ./
 
 COPY ./docker/entrypoint.sh /bin/
@@ -86,7 +94,7 @@ ENTRYPOINT ["entrypoint.sh"]
 FROM base AS be-dist
 
 COPY --chown=hope:hope ./backend ./
-COPY --chown=hope:hope --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
+COPY --chown=hope:hope --from=builder $PDM_PACKAGES $PDM_PACKAGES
 COPY --chown=hope:hope --from=certs /data/psql-cert.crt /code/psql-cert.crt
 
 USER hope

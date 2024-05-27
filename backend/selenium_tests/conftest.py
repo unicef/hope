@@ -9,7 +9,9 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
+from flags.models import FlagState
 from page_object.admin_panel.admin_panel import AdminPanel
+from page_object.filters import Filters
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from page_object.grievance.feedback import Feedback
@@ -149,9 +151,6 @@ def driver() -> Chrome:
     if not os.environ.get("STREAM"):
         chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument(
-        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
-    )
     chrome_options.add_argument("--enable-logging")
     chrome_options.add_argument("--window-size=1920,1080")
     return webdriver.Chrome(options=chrome_options)
@@ -180,6 +179,11 @@ def login(browser: Chrome) -> Chrome:
     browser.add_cookie({"name": "sessionid", "value": pytest.SESSION_ID})
     browser.get(f"{browser.live_server.url}")
     return browser
+
+
+@pytest.fixture
+def filters(request: FixtureRequest, browser: Chrome) -> Filters:
+    yield Filters(browser)
 
 
 @pytest.fixture
@@ -284,9 +288,13 @@ def business_area() -> BusinessArea:
             "region_name": "SAR",
             "slug": "afghanistan",
             "has_data_sharing_agreement": True,
-            "is_payment_plan_applicable": False,
+            "is_payment_plan_applicable": True,
+            "is_accountability_applicable": True,
             "kobo_token": "XXX",
         },
+    )
+    FlagState.objects.get_or_create(
+        **{"name": "ALLOW_ACCOUNTABILITY_MODULE", "condition": "boolean", "value": "True", "required": False}
     )
     return business_area
 
