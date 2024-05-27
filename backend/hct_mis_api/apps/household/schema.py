@@ -767,7 +767,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(WORK_STATUS_CHOICE)
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    # @cached_in_django_cache(24)
+    @cached_in_django_cache(24)
     def resolve_section_households_reached(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, int]:
@@ -777,7 +777,7 @@ class Query(graphene.ObjectType):
         return {"total": payment_items_qs.values_list("household", flat=True).distinct().count()}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    # @cached_in_django_cache(24)
+    @cached_in_django_cache(24)
     def resolve_section_individuals_reached(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, int]:
@@ -788,7 +788,7 @@ class Query(graphene.ObjectType):
         return Household.objects.filter(pk__in=households_ids).aggregate(total=Sum(Coalesce("size", 0)))
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    # @cached_in_django_cache(24)
+    @cached_in_django_cache(24)
     def resolve_section_people_reached(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, int]:
@@ -819,7 +819,7 @@ class Query(graphene.ObjectType):
         return {"total": sum(sum_lists_with_values(household_child_counts, len(households_child_params)))}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    # @cached_in_django_cache(24)
+    @cached_in_django_cache(24)
     def resolve_chart_individuals_reached_by_age_and_gender(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict:
@@ -847,7 +847,7 @@ class Query(graphene.ObjectType):
         }
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    # @cached_in_django_cache(24)
+    @cached_in_django_cache(24)
     def resolve_chart_people_reached_by_age_and_gender(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict:
