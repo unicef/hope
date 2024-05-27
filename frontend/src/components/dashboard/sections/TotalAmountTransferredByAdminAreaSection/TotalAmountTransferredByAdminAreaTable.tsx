@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { formatCurrency, formatNumber } from '@utils/utils';
 import { CountryChartsQuery } from '@generated/graphql';
 import { EnhancedTableHead } from '@core/Table/EnhancedTableHead';
-import { useProgramContext } from '../../../../programContext';
 
 interface TotalAmountTransferredByAdminAreaTableProps {
   data: CountryChartsQuery['tableTotalCashTransferredByAdministrativeArea']['data'];
