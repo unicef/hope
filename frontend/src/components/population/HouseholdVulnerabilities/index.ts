@@ -1,1 +1,0 @@
-export { HouseholdVulnerabilities } from './HouseholdVulnerabilities';
