@@ -36,6 +36,10 @@ class BaseComponents(Common):
     mainContent = 'div[data-cy="main-content"]'
     drawerItems = 'div[data-cy="drawer-items"]'
     drawerInactiveSubheader = 'div[data-cy="program-inactive-subheader"]'
+    menuItemClearCache = 'li[data-cy="menu-item-clear-cache"]'
+    globalProgramFilterSearchInput = 'input[data-cy="search-input-gpf"]'
+    globalProgramFilterSearchButton = 'button[data-cy="search-icon"]'
+    globalProgramFilterClearButton = 'button[data-cy="clear-icon"]'
 
     # Text
     globalProgramFilterText = "All Programmes"
@@ -134,8 +138,21 @@ class BaseComponents(Common):
         return self.wait_for(self.drawerItems)
 
     def selectGlobalProgramFilter(self, name: str) -> WebElement:
+        # TODO: remove this one after fix bug with cache
+        self.getMenuUserProfile().click()
+        self.getMenuItemClearCache().click()
+
         self.getGlobalProgramFilter().click()
         return self.select_listbox_element(name)
 
     def getDrawerInactiveSubheader(self, timeout: int = Common.DEFAULT_TIMEOUT) -> WebElement:
         return self.wait_for(self.drawerInactiveSubheader, timeout=timeout)
+
+    def getMenuItemClearCache(self) -> WebElement:
+        return self.wait_for(self.menuItemClearCache)
+
+    def getGlobalProgramFilterSearchButton(self) -> WebElement:
+        return self.wait_for(self.globalProgramFilterSearchButton)
+
+    def getGlobalProgramFilterSearchInput(self) -> WebElement:
+        return self.wait_for(self.globalProgramFilterSearchInput)

@@ -6,7 +6,6 @@ from dateutil.relativedelta import relativedelta
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
 from selenium.common import TimeoutException
-from selenium.webdriver.common.keys import Keys
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
@@ -134,9 +133,6 @@ class TestDrawer:
         draft_program_name = draft_program.name
         active_program_name = active_program.name
         finished_program_name = finished_program.name
-        # clear_cache
-        pageProgrammeManagement.getMenuUserProfile().click()
-        pageProgrammeManagement.getMenuItemClearCache().click()
 
         pageProgrammeManagement.selectGlobalProgramFilter(draft_program_name).click()
         assert draft_program_name in pageProgrammeDetails.getHeaderTitle().text
@@ -149,10 +145,10 @@ class TestDrawer:
 
         # first have to search Finished program because of default filtering
         pageProgrammeManagement.getGlobalProgramFilter().click()
-        pageProgrammeManagement.getGlobalProgramFilter().send_keys("Draft Program")
-        pageProgrammeManagement.getGlobalProgramFilter().send_keys(Keys.ENTER)
-        pageProgrammeManagement.getGlobalProgramFilter().click()
+        pageProgrammeManagement.getGlobalProgramFilterSearchInput().send_keys("Finished")
+        pageProgrammeManagement.getGlobalProgramFilterSearchButton().click()
 
-        pageProgrammeManagement.selectGlobalProgramFilter(finished_program_name).click()
+        # pageProgrammeManagement.selectGlobalProgramFilter(finished_program_name).click()
+        pageProgrammeManagement.select_listbox_element(finished_program_name).click()
         assert finished_program_name in pageProgrammeDetails.getHeaderTitle().text
         assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "program inactive"
