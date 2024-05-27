@@ -1,12 +1,12 @@
 #!/bin/bash
 set -e
 
-old_version=$(cd backend && poetry version --short)
-(cd backend && poetry version $1)
+old_version=$(cd backend && pdm show --version)
+(cd backend && sed -i "s/version = \"$old_version\"/version = \"$1\"/" pyproject.toml)
 (cd frontend && npm version $1)
 
 
-current_version=$(cd backend && poetry version --short)
+current_version=$(cd backend && pdm show --version)
 
 echo "Bumping version from $old_version to $current_version"
 

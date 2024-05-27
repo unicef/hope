@@ -269,7 +269,6 @@ export const EditTargetPopulation = ({
           {category === 'filters' && (
             <Exclusions initialOpen={Boolean(values.excludedIds)} />
           )}
-          ,
           <Box
             pt={3}
             pb={3}

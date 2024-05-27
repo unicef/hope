@@ -46,6 +46,9 @@ class PeopleSerializer(serializers.ModelSerializer):
     residence_status = serializers.ChoiceField(choices=RESIDENCE_STATUS_CHOICE)
     village = serializers.CharField(allow_blank=True, required=False)
 
+    phone_no = serializers.CharField(allow_null=True, allow_blank=True, required=False)
+    phone_no_alternative = serializers.CharField(allow_null=True, allow_blank=True, required=False)
+
     class Meta:
         model = ImportedIndividual
         exclude = [
@@ -89,6 +92,8 @@ class PeopleUploadMixin:
 
             individual_fields = [field.name for field in ImportedIndividual._meta.get_fields()]
             individual_data = {field: value for field, value in person_data.items() if field in individual_fields}
+            individual_data["phone_no"] = individual_data.get("phone_no") or ""
+            individual_data["phone_no_alternative"] = individual_data.get("phone_no_alternative") or ""
 
             ind = ImportedIndividual.objects.create(
                 household=hh,
@@ -96,6 +101,8 @@ class PeopleUploadMixin:
                 program_id=program_id,
                 **individual_data,
             )
+            ind.validate_phone_numbers()
+            ind.save(update_fields=("phone_no_valid", "phone_no_alternative_valid"))
             hh.head_of_household = ind
             hh.individuals_and_roles.create(individual=ind, role=ROLE_PRIMARY)
             hh.save()

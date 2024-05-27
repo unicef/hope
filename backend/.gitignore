@@ -8,3 +8,4 @@ report
 archive
 output.json
 pytest_html_report.html
+.pdm-python

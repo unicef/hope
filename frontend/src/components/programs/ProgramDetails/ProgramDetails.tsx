@@ -55,7 +55,12 @@ export const ProgramDetails = ({
   const renderAdminAreasCount = (
     partner: ProgramQuery['program']['partners'][0],
   ): React.ReactElement => {
-    const counts = {};
+    const counts = {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+    };
     partner.areas?.forEach(({ level }) => {
       const currentCount = counts[level + 1] || 0;
       counts[level + 1] = currentCount + 1;

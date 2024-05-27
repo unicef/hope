@@ -186,6 +186,9 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     preferred_language = graphene.String()
     flex_fields = Arg()
     payment_delivery_phone_no = graphene.String()
+    blockchain_name = graphene.String()
+    wallet_address = graphene.String()
+    wallet_name = graphene.String()
 
 
 class AddIndividualDataObjectType(graphene.InputObjectType):
@@ -223,6 +226,9 @@ class AddIndividualDataObjectType(graphene.InputObjectType):
     preferred_language = graphene.String()
     flex_fields = Arg()
     payment_delivery_phone_no = graphene.String()
+    blockchain_name = graphene.String()
+    wallet_address = graphene.String()
+    wallet_name = graphene.String()
 
 
 class HouseholdDataUpdateIssueTypeExtras(graphene.InputObjectType):
