@@ -436,11 +436,8 @@ class TestTargeting:
         assert "2" in pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
         assert "8" in pageTargetingDetails.getLabelTargetedIndividuals().text
 
-
-    @pytest.mark.parametrize("x", range(100))
     def test_edit_targeting(
             self,
-            x,
             create_programs: None,
             household_with_disability: Household,
             add_targeting: None,
