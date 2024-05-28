@@ -143,7 +143,7 @@ class BaseComponents(Common):
         self.getMenuItemClearCache().click()
 
         self.getGlobalProgramFilter().click()
-        if name != "All Programme":
+        if name != "All Programmes":
             self.getGlobalProgramFilterSearchInput().send_keys(name)
             self.getGlobalProgramFilterSearchButton().click()
 
