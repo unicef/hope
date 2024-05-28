@@ -144,11 +144,6 @@ class TestDrawer:
             pageProgrammeDetails.getDrawerInactiveSubheader(timeout=0.05)
 
         # first have to search Finished program because of default filtering
-        pageProgrammeManagement.getGlobalProgramFilter().click()
-        pageProgrammeManagement.getGlobalProgramFilterSearchInput().send_keys("Finished")
-        pageProgrammeManagement.getGlobalProgramFilterSearchButton().click()
-
-        # pageProgrammeManagement.selectGlobalProgramFilter(finished_program_name).click()
-        pageProgrammeManagement.select_listbox_element(finished_program_name).click()
+        pageProgrammeManagement.selectGlobalProgramFilter(finished_program_name).click()
         assert finished_program_name in pageProgrammeDetails.getHeaderTitle().text
         assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "program inactive"
