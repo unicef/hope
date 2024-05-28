@@ -47,6 +47,16 @@ class Common:
     ) -> Union[Literal[False, True], WebElement]:
         return self._wait(timeout).until_not(EC.visibility_of_element_located((element_type, locator)))
 
+    def wait_for_text_disappear(
+        self, text: str, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
+    ) -> Union[Literal[False, True], WebElement]:
+        return self._wait(timeout).until_not(EC.text_to_be_present_in_element((element_type, locator), text))
+
+    def wait_for_text(
+        self, text: str, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
+    ) -> Union[Literal[False, True], bool]:
+        return self._wait(timeout).until(EC.text_to_be_present_in_element((element_type, locator), text))
+
     def wait_for_new_url(self, old_url: str, retry: int = 5) -> str:
         for _ in range(retry):
             sleep(1)
