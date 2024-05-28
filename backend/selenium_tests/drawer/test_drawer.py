@@ -1,5 +1,4 @@
 from datetime import datetime
-from time import sleep
 
 import pytest
 from dateutil.relativedelta import relativedelta
@@ -53,7 +52,6 @@ def get_program_with_dct_type_and_name(
         data_collecting_type=dct,
         status=status,
     )
-    sleep(2)
     return program
 
 
