@@ -12,9 +12,9 @@ interface TotalAmountTransferredByCountrySectionProps {
 export function TotalAmountTransferredByCountrySection({
   data,
 }: TotalAmountTransferredByCountrySectionProps): React.ReactElement {
-  const { businessArea } = useBaseUrl();
+  const { isGlobal } = useBaseUrl();
   const { t } = useTranslation();
-  if (businessArea !== 'global') {
+  if (!isGlobal) {
     return null;
   }
   return (
