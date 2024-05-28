@@ -65,6 +65,7 @@ class PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer(ReadOnlyMo
         return {
             "user": self.context["user_email"],
             "config_key": obj.payment_plan.business_area.code,  # obj.chosen_configuration,
+            "delivery_mechanism": obj.delivery_mechanism.lower().replace(" ", "_"),
         }
 
     def get_payload(self, obj: Any) -> Dict:

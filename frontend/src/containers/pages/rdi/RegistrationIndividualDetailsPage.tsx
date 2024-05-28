@@ -8,7 +8,7 @@ import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { ImportedIndividualPhotoModal } from '@components/population/ImportedIndividualPhotoModal';
 import { RegistrationIndividualBioData } from '@components/rdi/details/individual/RegistrationIndividualBioData/RegistrationIndividualBioData';
-import { RegistrationIndividualVulnerabilities } from '@components/rdi/details/individual/RegistrationIndividualVulnerabilities/RegistrationIndividualVulnerabilities';
+import { RegistrationIndividualAdditionalRegistrationInformation } from '@components/rdi/details/individual/RegistrationIndividualAdditionalRegistrationInformation/RegistrationIndividualAdditionalRegistrationInformation';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
@@ -55,11 +55,11 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)
       ? [
-        {
-          title: t('Registration Data import'),
-          to: `/${baseUrl}/registration-data-import/`,
-        },
-      ]
+          {
+            title: t('Registration Data import'),
+            to: `/${baseUrl}/registration-data-import/`,
+          },
+        ]
       : []),
     {
       title: importedIndividual.registrationDataImport.name,
@@ -93,7 +93,7 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
           individual={importedIndividual}
           choicesData={choicesData}
         />
-        <RegistrationIndividualVulnerabilities
+        <RegistrationIndividualAdditionalRegistrationInformation
           individual={importedIndividual}
           flexFieldsData={flexFieldsData}
         />
