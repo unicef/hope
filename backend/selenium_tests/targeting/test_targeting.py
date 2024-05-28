@@ -421,7 +421,8 @@ class TestTargeting:
             pageTargetingDetails: TargetingDetails,
             pageTargetingCreate: TargetingCreate,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        program = Program.objects.get(name="Test Programm")
+        pageTargeting.selectGlobalProgramFilter(program.name).click()
         pageTargeting.getNavTargeting().click()
         pageTargeting.chooseTargetPopulations(0).click()
         pageTargetingDetails.getButtonTargetPopulationDuplicate().click()
@@ -429,11 +430,17 @@ class TestTargeting:
         pageTargetingDetails.get_elements(pageTargetingDetails.buttonTargetPopulationDuplicate)[1].click()
         pageTargetingDetails.disappearInputName()
         assert "a1!" in pageTargetingDetails.getTitlePage().text
-        # Check all data copied properly
-        pageTargetingDetails.screenshot("1")
+        assert "OPEN" in pageTargetingDetails.getTargetPopulationStatus().text
+        assert "PROGRAMME" in pageTargetingDetails.getLabelizedFieldContainerProgramName().text
+        assert "Test Programm" in pageTargetingDetails.getLabelProgramme().text
+        assert "2" in pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
+        assert "8" in pageTargetingDetails.getLabelTargetedIndividuals().text
 
+
+    @pytest.mark.parametrize("x", range(100))
     def test_edit_targeting(
             self,
+            x,
             create_programs: None,
             household_with_disability: Household,
             add_targeting: None,
@@ -454,7 +461,6 @@ class TestTargeting:
         pageTargetingDetails.getHouseholdSizeTo().send_keys("9")
         pageTargetingCreate.get_elements(pageTargetingCreate.targetingCriteriaAddDialogSaveButton)[1].click()
         pageTargetingCreate.getButtonSave().click()
-        pageTargetingDetails.getButtonEdit()
         assert "New Test Data" in pageTargetingDetails.getTitlePage().text
         assert "9" in pageTargetingDetails.getCriteriaContainer().text
 
