@@ -20,6 +20,7 @@ class TargetingDetails(BaseComponents):
     inputName = 'input[data-cy="input-name"]'
     buttonDelete = 'button[data-cy="button-delete"]'
     buttonEdit = 'a[data-cy="button-edit"]'
+    buttonIconEdit = 'button[data-cy="button-edit"]'
     buttonRebuild = 'button[data-cy="button-rebuild"]'
     buttonTargetPopulationLock = 'button[data-cy="button-target-population-lock"]'
     detailsTitle = 'div[data-cy="details-title"]'
@@ -50,6 +51,8 @@ class TargetingDetails(BaseComponents):
     tableLabel = 'span[data-cy="table-label"]'
     tablePagination = 'div[data-cy="table-pagination"]'
     statusContainer = 'div[data-cy="status-container"]'
+    householdSizeFrom = 'input[data-cy="input-filters[0].value.from"]'
+    householdSizeTo = 'input[data-cy="input-filters[0].value.to"]'
 
     # Texts
     # Elements
@@ -71,6 +74,9 @@ class TargetingDetails(BaseComponents):
 
     def getButtonEdit(self) -> WebElement:
         return self.wait_for(self.buttonEdit)
+
+    def getButtonIconEdit(self) -> WebElement:
+        return self.wait_for(self.buttonIconEdit)
 
     def getButtonRebuild(self) -> WebElement:
         return self.wait_for(self.buttonRebuild)
@@ -191,5 +197,11 @@ class TargetingDetails(BaseComponents):
     def getStatusContainer(self) -> WebElement:
         return self.wait_for(self.statusContainer)
 
-    def disappearStatusContainer(self) -> WebElement:
+    def disappearStatusContainer(self) -> bool:
         return self.wait_for_disappear(self.statusContainer)
+
+    def getHouseholdSizeFrom(self) -> WebElement:
+        return self.wait_for(self.householdSizeFrom)
+
+    def getHouseholdSizeTo(self) -> WebElement:
+        return self.wait_for(self.householdSizeTo)

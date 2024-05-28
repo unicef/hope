@@ -39,6 +39,7 @@ class TargetingCreate(BaseComponents):
     buttonHouseholdRule = 'button[data-cy="button-household-rule"]'
     buttonIndividualRule = 'button[data-cy="button-individual-rule"]'
     buttonTargetPopulationAddCriteria = 'button[data-cy="button-target-population-add-criteria"]'
+    buttonSave = 'button[data-cy="button-save"]'
     # Texts
     textTargetingCriteria = "Targeting Criteria"
 
@@ -131,3 +132,6 @@ class TargetingCreate(BaseComponents):
 
     def getTargetPopulationSaveButton(self) -> WebElement:
         return self.wait_for(self.targetPopulationSaveButton)
+
+    def getButtonSave(self) -> WebElement:
+        return self.wait_for(self.buttonSave)
