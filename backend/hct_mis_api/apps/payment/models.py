@@ -1168,7 +1168,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         if is_social_worker_program:
             core_fields_attributes = FieldFactory.from_scope(Scope.XLSX_PEOPLE).to_dict_by("name")
         else:
-            core_fields_attributes = FieldFactory.not_from_scope(Scope.XLSX_PEOPLE).to_dict_by("name")
+            core_fields_attributes = FieldFactory(CORE_FIELDS_ATTRIBUTES).to_dict_by("name")
         attr = core_fields_attributes.get(core_field_name)
         if not attr:
             # Some fields can be added to the template, such as 'size' or 'collect_individual_data'
