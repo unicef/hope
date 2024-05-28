@@ -3,7 +3,13 @@ from typing import Any, Dict
 from django.db.models import Count, Q, QuerySet
 from django.db.models.functions import Lower
 
-from django_filters import CharFilter, DateFilter, FilterSet, MultipleChoiceFilter, BooleanFilter
+from django_filters import (
+    BooleanFilter,
+    CharFilter,
+    DateFilter,
+    FilterSet,
+    MultipleChoiceFilter,
+)
 
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string_required

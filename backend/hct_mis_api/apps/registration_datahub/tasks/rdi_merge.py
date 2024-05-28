@@ -24,9 +24,11 @@ from hct_mis_api.apps.household.models import (
     Document,
     DocumentType,
     Household,
+    HouseholdCollection,
     Individual,
+    IndividualCollection,
     IndividualIdentity,
-    IndividualRoleInHousehold, HouseholdCollection, IndividualCollection,
+    IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
@@ -204,8 +206,7 @@ class RdiMergeTask:
                 household_data["unicef_id"] = unicef_id
                 # find other household with same unicef_id and group them in the same collection
                 household_from_collection = Household.objects.filter(
-                    unicef_id=unicef_id,
-                    business_area=obj_hct.business_area
+                    unicef_id=unicef_id, business_area=obj_hct.business_area
                 ).first()
                 if household_from_collection:
                     if collection := household_from_collection.household_collection:
@@ -218,7 +219,6 @@ class RdiMergeTask:
                 else:
                     household_collection = HouseholdCollection.object.create()
                     household_data["household_collection"] = household_collection
-
 
             household = Household(
                 **household_data,
@@ -290,11 +290,10 @@ class RdiMergeTask:
             values["phone_no_alternative_valid"] = is_valid_phone_number(str(phone_no_alternative))
 
             if unicef_id := imported_individual.mis_unicef_id:
-                imported_individual["unicef_id"] = unicef_id
+                values["unicef_id"] = unicef_id
                 # find other individual with same unicef_id and group them in the same collection
                 individual_from_collection = Individual.objects.filter(
-                    unicef_id=unicef_id,
-                    business_area=obj_hct.business_area
+                    unicef_id=unicef_id, business_area=obj_hct.business_area
                 ).first()
                 if individual_from_collection:
                     if collection := individual_from_collection.individual_collection:

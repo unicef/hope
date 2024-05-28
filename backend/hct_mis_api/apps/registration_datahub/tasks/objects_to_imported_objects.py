@@ -7,18 +7,23 @@ from django.utils import timezone
 
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.models import (
+    HEAD,
     BankAccountInfo,
     Household,
     Individual,
-    IndividualRoleInHousehold, HEAD,
+    IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
+    ImportedDocument,
+    ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
+    ImportedIndividualIdentity,
     ImportedIndividualRoleInHousehold,
-    RegistrationDataImportDatahub, Record, ImportedDocumentType, ImportedDocument, ImportedIndividualIdentity,
+    Record,
+    RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
@@ -29,6 +34,7 @@ class CreateImportedObjectsFromObjectsTask:
     """
     Reversed RdiMergeTask, creation of imported objects from objects, like ImportedHousehold from Household etc.
     """
+
     HOUSEHOLD_FIELDS = (
         "consent_sign",
         "consent",
@@ -138,9 +144,9 @@ class CreateImportedObjectsFromObjectsTask:
 
     def _prepare_imported_households(
         self,
-            households: List[Household],
-            obj_hct: RegistrationDataImportDatahub,
-            import_to_program_id: str,
+        households: List[Household],
+        obj_hct: RegistrationDataImportDatahub,
+        import_to_program_id: str,
     ) -> Dict[int, ImportedHousehold]:
         imported_households_dict = {}
         countries = {}
@@ -161,7 +167,7 @@ class CreateImportedObjectsFromObjectsTask:
 
             if registration := household.registration_id:
                 # new Record object, needed only to hold registration value
-                household_data["flex_registrations_record"] = Record(
+                household_data["flex_registrations_record"] = Record.objects.create(
                     registration=registration,
                     timestamp=timezone.now(),
                     source_id=0,
@@ -170,12 +176,11 @@ class CreateImportedObjectsFromObjectsTask:
             if enumerator_rec_id := household.flex_fields.get("enumerator_id"):
                 household_data["enumerator_rec_id"] = enumerator_rec_id
 
-
             imported_household = ImportedHousehold(
                 **household_data,
                 registration_data_import=obj_hct,
                 program_id=import_to_program_id,
-                mis_unicef_id=household.unicef_id
+                mis_unicef_id=household.unicef_id,
             )
             self.unmerge_admin_areas(household, imported_household)
             imported_households_dict[household.id] = imported_household
@@ -187,9 +192,7 @@ class CreateImportedObjectsFromObjectsTask:
     ) -> Tuple[List, List]:
         imported_documents_to_create = []
         for document in individual.documents.all():
-            imported_document_type = ImportedDocumentType.objects.get(
-                key=document.type.key
-            )
+            imported_document_type = ImportedDocumentType.objects.get(key=document.type.key)
             imported_document = ImportedDocument(
                 document_number=document.document_number,
                 country=document.country.iso_code2,
@@ -207,7 +210,7 @@ class CreateImportedObjectsFromObjectsTask:
                 partner=partner_name,
                 document_number=identity.number,
                 individual=imported_individual,
-                country=identity.country.iso_code2
+                country=identity.country.iso_code2,
             )
             imported_identities_to_create.append(imported_identity)
 
@@ -225,11 +228,6 @@ class CreateImportedObjectsFromObjectsTask:
         imported_identities_to_create = []
         for individual in individuals:
             values = model_to_dict(individual, fields=self.INDIVIDUAL_FIELDS)
-
-            if not values.get("phone_no_valid"):
-                values["phone_no_valid"] = False
-            if not values.get("phone_no_alternative_valid"):
-                values["phone_no_alternative_valid"] = False
 
             imported_household = imported_households_dict.get(individual.household.id) if individual.household else None
 
@@ -249,11 +247,14 @@ class CreateImportedObjectsFromObjectsTask:
             )
 
             if (
-                imported_household and individual.household and
-                getattr(individual, "heading_household", None) == individual.household
+                imported_household
+                and individual.household
+                and getattr(individual, "heading_household", None) == individual.household
             ):
                 imported_household.head_of_household = imported_individual
-                # imported_individual.relationship = HEAD
+                # this relationship needs to be change for future steps -
+                # it indicates that this individual is head of household (even tho head_of_household field is set on hh)
+                imported_individual.relationship = HEAD
 
             imported_individuals_dict[individual.id] = imported_individual
 
@@ -307,18 +308,16 @@ class CreateImportedObjectsFromObjectsTask:
                 program=import_from_program_id,
                 withdrawn=False,
             ).exclude(household_collection__households__program=import_to_program_id)
-            individuals = Individual.objects.filter(
-                program=import_from_program_id,
-                withdrawn=False,
-                duplicate=False,
-            ).exclude(
-                individual_collection__individuals__program=import_to_program_id
-            ).order_by(
-                "first_registration_date"
+            individuals = (
+                Individual.objects.filter(
+                    program=import_from_program_id,
+                    withdrawn=False,
+                    duplicate=False,
+                )
+                .exclude(individual_collection__individuals__program=import_to_program_id)
+                .order_by("first_registration_date")
             )
-            roles = IndividualRoleInHousehold.objects.filter(
-                household__in=households, individual__in=individuals
-            )
+            roles = IndividualRoleInHousehold.objects.filter(household__in=households, individual__in=individuals)
             bank_account_infos = BankAccountInfo.objects.filter(individual__in=individuals)
             with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
                 imported_households_dict = self._prepare_imported_households(households, obj_hub, import_to_program_id)
@@ -352,8 +351,7 @@ class CreateImportedObjectsFromObjectsTask:
                 ImportedIndividualRoleInHousehold.objects.bulk_create(imported_roles_to_create)
                 ImportedBankAccountInfo.objects.bulk_create(imported_bank_account_infos_to_create)
                 logger.info(
-                    f"RDI:{registration_data_import_id} "
-                    f"Created {len(imported_households_dict)} imported households"
+                    f"RDI:{registration_data_import_id} " f"Created {len(imported_households_dict)} imported households"
                 )
         except Exception as e:
             logger.error(e)

@@ -19,7 +19,9 @@ from hct_mis_api.apps.registration_datahub.models import ImportedHousehold
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
 )
-from hct_mis_api.apps.registration_datahub.tasks.rdi_program_population_create import RdiProgramPopulationCreateTask
+from hct_mis_api.apps.registration_datahub.tasks.rdi_program_population_create import (
+    RdiProgramPopulationCreateTask,
+)
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 
@@ -125,21 +127,17 @@ def registration_xlsx_import_task(
 @log_start_and_end
 @sentry_tags
 def registration_program_population_import_task(
-        self: Any,
-        registration_data_import_id: str,
-        business_area_id: str,
-        import_from_program_id: "UUID",
-        import_to_program_id: "UUID",
+    self: Any,
+    registration_data_import_id: str,
+    business_area_id: str,
+    import_from_program_id: "UUID",
+    import_to_program_id: "UUID",
 ) -> bool:
     try:
-        from hct_mis_api.apps.program.models import Program
-
         cache_key = f"registration_program_population_import_task-{registration_data_import_id}"
         with locked_cache(key=cache_key) as locked:
             if not locked:
-                raise AlreadyRunningException(
-                    f"Task with key {cache_key} is already running"
-                )
+                raise AlreadyRunningException(f"Task with key {cache_key} is already running")
 
             rdi = RegistrationDataImport.objects.get(datahub_id=registration_data_import_id)
             set_sentry_business_area_tag(rdi.business_area.name)

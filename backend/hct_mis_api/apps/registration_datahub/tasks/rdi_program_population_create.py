@@ -7,8 +7,9 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hct_mis_api.apps.registration_datahub.tasks.objects_to_imported_objects import CreateImportedObjectsFromObjectsTask
-
+from hct_mis_api.apps.registration_datahub.tasks.objects_to_imported_objects import (
+    CreateImportedObjectsFromObjectsTask,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -17,10 +18,10 @@ class RdiProgramPopulationCreateTask:
     @transaction.atomic(using="registration_datahub")
     def execute(
         self,
-            registration_data_import_id: str,
-            business_area_id: str,
-            import_from_program_id: str,
-            import_to_program_id: str,
+        registration_data_import_id: str,
+        business_area_id: str,
+        import_from_program_id: str,
+        import_to_program_id: str,
     ) -> None:
         registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
             id=registration_data_import_id,

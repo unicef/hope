@@ -30,13 +30,15 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
     pull_kobo_submissions_task,
     rdi_deduplication_task,
     registration_kobo_import_task,
+    registration_program_population_import_task,
     registration_xlsx_import_task,
-    validate_xlsx_import_task, registration_program_population_import_task,
+    validate_xlsx_import_task,
 )
 from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.inputs import (
     RegistrationKoboImportMutationInput,
-    RegistrationXlsxImportMutationInput, RegistrationProgramPopulationImportMutationInput,
+    RegistrationProgramPopulationImportMutationInput,
+    RegistrationXlsxImportMutationInput,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
@@ -119,9 +121,6 @@ def create_registration_data_import_for_import_program_population(
     user: "User",
     import_to_program_id: str,
 ) -> Tuple[RegistrationDataImportDatahub, RegistrationDataImport, BusinessArea]:
-    # # TODO: deleteme
-    # registration_data_import_data.pop("import_data_id")
-    # # TODO: endofdelete
     business_area = BusinessArea.objects.get(slug=registration_data_import_data.pop("business_area_slug"))
     pull_pictures = registration_data_import_data.pop("pull_pictures", True)
     screen_beneficiary = registration_data_import_data.pop("screen_beneficiary", False)
@@ -130,14 +129,15 @@ def create_registration_data_import_for_import_program_population(
         business_area_slug=business_area.slug,
         **registration_data_import_data,
     )
-    # Calculate number_of_individuals and number_of_households.
-    # Note that if some households and individuals already exists the count will not be true
-    households = Household.objects.filter(program_id=import_from_program_id, withdrawn=False)
+    households = Household.objects.filter(
+        program_id=import_from_program_id,
+        withdrawn=False,
+    ).exclude(household_collection__households__program=import_to_program_id)
     individuals = Individual.objects.filter(
         program_id=import_from_program_id,
         withdrawn=False,
         duplicate=False,
-    )
+    ).exclude(individual_collection__individuals__program=import_to_program_id)
     created_obj_hct = RegistrationDataImport(
         status=RegistrationDataImport.IMPORTING,
         imported_by=user,
@@ -238,7 +238,7 @@ class RegistrationProgramPopulationImportMutation(BaseValidator, PermissionMutat
     registration_data_import = graphene.Field(RegistrationDataImportNode)
 
     class Arguments:
-        registration_data_import_data = RegistrationProgramPopulationImportMutationInput(required=True) # RegistrationXlsxImportMutationInput(required=True)#
+        registration_data_import_data = RegistrationProgramPopulationImportMutationInput(required=True)
 
     @classmethod
     @transaction.atomic(using="default")
@@ -252,13 +252,8 @@ class RegistrationProgramPopulationImportMutation(BaseValidator, PermissionMutat
         if program.status == Program.FINISHED:
             raise ValidationError("In order to proceed this action, program status must not be finished")
 
-        # # TODO: delete me
-        # print(registration_data_import_data)
-        # registration_data_import_data["import_data_id"] = "ed719fdf-509b-4dd7-9373-c36089d620da"
-        # registration_data_import_data["import_from_program_id"] = "UHJvZ3JhbU5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMDAw"
-        # # TODO: endofdelete
-        registration_data_import_data["import_from_program_id"] = decode_id_string_required(registration_data_import_data["import_from_program_id"])
-        import_from_program_id = registration_data_import_data["import_from_program_id"]
+        import_from_program_id = decode_id_string_required(registration_data_import_data["import_from_program_id"])
+        registration_data_import_data["import_from_program_id"] = import_from_program_id
         (
             created_obj_datahub,
             created_obj_hct,
@@ -274,6 +269,9 @@ class RegistrationProgramPopulationImportMutation(BaseValidator, PermissionMutat
             and not business_area.should_check_against_sanction_list()
         ):
             raise ValidationError("Cannot check against sanction list")
+
+        if created_obj_hct.number_of_households == 0 and created_obj_hct.number_of_individuals == 0:
+            raise ValidationError("This action would result in importing 0 households and 0 individuals.")
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,
             "business_area",
