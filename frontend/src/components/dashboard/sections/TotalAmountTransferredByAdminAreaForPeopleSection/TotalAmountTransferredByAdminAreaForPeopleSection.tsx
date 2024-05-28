@@ -4,17 +4,17 @@ import { useCountryChartsLazyQuery } from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { CardTextLightLarge } from '../../DashboardCard';
 import { DashboardPaper } from '../../DashboardPaper';
-import { TotalAmountTransferredByAdminAreaTable } from './TotalAmountTransferredByAdminAreaTable';
+import { TotalAmountTransferredByAdminAreaTableForPeople } from './TotalAmountTransferredByAdminAreaTableForPeople';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
-interface TotalAmountTransferredSectionByAdminAreaSectionProps {
+interface TotalAmountTransferredSectionByAdminAreaSectionForPeopleProps {
   year: string;
   filter;
 }
-export function TotalAmountTransferredSectionByAdminAreaSection({
+export function TotalAmountTransferredSectionByAdminAreaForPeopleSection({
   year,
   filter,
-}: TotalAmountTransferredSectionByAdminAreaSectionProps): React.ReactElement {
+}: TotalAmountTransferredSectionByAdminAreaSectionForPeopleProps): React.ReactElement {
   const { t } = useTranslation();
   const [orderBy, setOrderBy] = useState('totalCashTransferred');
   const [order, setOrder] = useState('desc');
@@ -57,7 +57,7 @@ export function TotalAmountTransferredSectionByAdminAreaSection({
       extraPaddingTitle={false}
     >
       <CardTextLightLarge>{t('IN USD')}</CardTextLightLarge>
-      <TotalAmountTransferredByAdminAreaTable
+      <TotalAmountTransferredByAdminAreaTableForPeople
         data={countryData?.tableTotalCashTransferredByAdministrativeArea?.data}
         handleSort={handleSortAdminArea}
         order={order}
