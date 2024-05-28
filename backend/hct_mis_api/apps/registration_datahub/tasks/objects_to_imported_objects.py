@@ -353,6 +353,6 @@ class CreateImportedObjectsFromObjectsTask:
                 logger.info(
                     f"RDI:{registration_data_import_id} " f"Created {len(imported_households_dict)} imported households"
                 )
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.error(e)
             raise

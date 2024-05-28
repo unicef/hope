@@ -212,12 +212,12 @@ class RdiMergeTask:
                     if collection := household_from_collection.household_collection:
                         household_data["household_collection"] = collection
                     else:
-                        household_collection = HouseholdCollection.object.create()
+                        household_collection = HouseholdCollection.objects.create()
                         household_data["household_collection"] = household_collection
                         household_from_collection.household_collection = household_collection
                         household_from_collection.save(update_fields=["household_collection"])
                 else:
-                    household_collection = HouseholdCollection.object.create()
+                    household_collection = HouseholdCollection.objects.create()
                     household_data["household_collection"] = household_collection
 
             household = Household(
@@ -299,12 +299,12 @@ class RdiMergeTask:
                     if collection := individual_from_collection.individual_collection:
                         values["individual_collection"] = collection
                     else:
-                        individual_collection = IndividualCollection.object.create()
+                        individual_collection = IndividualCollection.objects.create()
                         values["individual_collection"] = individual_collection
                         individual_from_collection.individual_collection = individual_collection
                         individual_from_collection.save(update_fields=["individual_collection"])
                 else:
-                    individual_collection = IndividualCollection.object.create()
+                    individual_collection = IndividualCollection.objects.create()
                     values["individual_collection"] = individual_collection
 
             individual = Individual(

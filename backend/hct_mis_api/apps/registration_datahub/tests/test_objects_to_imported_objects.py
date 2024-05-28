@@ -39,6 +39,13 @@ class TestCreateImportedObjectsFromObjectsTask(APITestCase):
     def setUpTestData(cls) -> None:
         cls.afghanistan = create_afghanistan()
         country = CountryFactory()
+        country_origin = CountryFactory(
+            name="Poland",
+            short_name="Poland",
+            iso_code2="PL",
+            iso_code3="POL",
+            iso_num="0616",
+        )
         cls.program_from = ProgramFactory(business_area=cls.afghanistan)
         cls.program_to = ProgramFactory(business_area=cls.afghanistan)
         cls.registration_data_import = RegistrationDataImportFactory(
@@ -67,6 +74,8 @@ class TestCreateImportedObjectsFromObjectsTask(APITestCase):
                 "admin4": AreaFactory(),
                 "registration_id": "1234567890",
                 "flex_fields": {"enumerator_id": "123", "some": "thing"},
+                "country": country,
+                "country_origin": country_origin,
             },
             individuals_data=[
                 {

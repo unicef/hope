@@ -1,3 +1,6 @@
+from typing import Any
+from unittest.mock import patch
+
 from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -231,4 +234,32 @@ class TestRegistrationProgramPopulationImportTask(BaseElasticSearchTestCase):
         self.assertEqual(
             self.registration_data_import_datahub.import_done,
             RegistrationDataImportDatahub.DONE,
+        )
+
+    def test_registration_program_population_import_ba_postpone_deduplication(self) -> None:
+        self.afghanistan.postpone_deduplication = True
+        self.afghanistan.save()
+        self.registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
+        self.registration_data_import.save()
+
+        self._run_task()
+
+        self.registration_data_import.refresh_from_db()
+        self.assertEqual(
+            self.registration_data_import.status,
+            RegistrationDataImport.IN_REVIEW,
+        )
+
+    @patch("hct_mis_api.apps.registration_datahub.celery_tasks.locked_cache")
+    def test_registration_program_population_import_locked_cache(self, mocked_locked_cache: Any) -> None:
+        mocked_locked_cache.return_value.__enter__.return_value = False
+        self.registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
+        self.registration_data_import.save()
+
+        self._run_task()
+
+        self.registration_data_import.refresh_from_db()
+        self.assertEqual(
+            self.registration_data_import.status,
+            RegistrationDataImport.IMPORT_SCHEDULED,
         )
