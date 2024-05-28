@@ -143,6 +143,10 @@ class BaseComponents(Common):
         self.getMenuItemClearCache().click()
 
         self.getGlobalProgramFilter().click()
+        self.getGlobalProgramFilterSearchInput().send_keys(name)
+        self.getGlobalProgramFilterSearchButton().click()
+
+        self.wait_for_text_disappear("All Programmes", '[data-cy="select-option-name"]')
         return self.select_listbox_element(name)
 
     def getDrawerInactiveSubheader(self, timeout: int = Common.DEFAULT_TIMEOUT) -> WebElement:
