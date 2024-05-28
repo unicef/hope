@@ -21,6 +21,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.household.fixtures import create_household
 from selenium_tests.page_object.filters import Filters
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -89,6 +90,7 @@ def get_program_with_dct_type_and_name(
 
 @pytest.fixture
 def create_targeting(household_without_disabilities: Household) -> TargetPopulation:
+    program = Program.objects.first()
     target_population = TargetPopulation.objects.update_or_create(
         pk=UUID("00000000-0000-0000-0000-faceb00c0123"),
         name="Test Target Population",
@@ -99,7 +101,15 @@ def create_targeting(household_without_disabilities: Household) -> TargetPopulat
         created_by=User.objects.first(),
     )[0]
     target_population.save()
-    target_population.households.set([household_without_disabilities])
+    household, _ = create_household(
+        household_args={
+            "unicef_id": "HH-00-0000.0442",
+            "business_area": program.business_area,
+            "program": program,
+            "residence_status": HOST,
+        },
+    )
+    target_population.households.set([household])
     return target_population
 
 
