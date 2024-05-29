@@ -26,7 +26,6 @@ import {
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
   useAllProgramsForChoicesQuery,
-  useAllUsersQuery,
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
 } from '@generated/graphql';
@@ -122,9 +121,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
     documentation: [],
     individualDataUpdateFields: [{ fieldName: null, fieldValue: null }],
   };
-  const { data: userData, loading: userDataLoading } = useAllUsersQuery({
-    variables: { businessArea, first: 1000 },
-  });
 
   const { data: choicesData, loading: choicesLoading } =
     useGrievancesChoiceDataQuery();
@@ -161,7 +157,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
     values.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
 
   if (
-    userDataLoading ||
     choicesLoading ||
     allAddIndividualFieldsDataLoading ||
     householdFieldsLoading ||
@@ -175,7 +170,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
 
   if (
     !choicesData ||
-    !userData ||
     !allAddIndividualFieldsData ||
     !householdFieldsData ||
     !householdFieldsDict ||
