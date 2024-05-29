@@ -362,6 +362,7 @@ export const GlobalProgramSelect = () => {
                 autoFocus
                 onChange={handleOnChangeInput}
                 onKeyDown={handleEnter}
+                onFocus={() => loadProgramsList()}
                 InputProps={{
                   ...params.InputProps,
                   endAdornment: (
