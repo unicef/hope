@@ -353,6 +353,9 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             business_area=self.rdi.business_area,
             household=None,
         )
+        individual_without_collection.individual_collection = None
+        individual_without_collection.save()
+
         individual_collection = IndividualCollectionFactory()
         IndividualFactory(
             unicef_id="IND-8",
@@ -368,6 +371,8 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 business_area=self.rdi.business_area,
                 unicef_id="HH-9",
             )
+            household.household_collection = None
+            household.save()
             if household_collection_exists:
                 household_collection = HouseholdCollectionFactory()
                 household.household_collection = household_collection
