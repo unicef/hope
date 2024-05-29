@@ -789,9 +789,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 return errors
             errors.extend(self.validate_index_id(wb))
             errors.extend(self.validate_collectors_size(wb))
-            errors.extend(self.validate_collectors(wb))
             if self.is_social_worker_program:
                 errors.extend(self.validate_people_collectors(wb))
+            else:
+                errors.extend(self.validate_collectors(wb))
 
             if not self.is_social_worker_program:
                 individuals_sheet = wb["Individuals"]
