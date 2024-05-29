@@ -10,7 +10,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 
-
 class Common:
     DEFAULT_TIMEOUT = 10
 
@@ -135,7 +134,7 @@ class Common:
                 print(f"No text: {ii.get_attribute(attribute)}")  # type: ignore
 
     def mouse_on_element(self, element: WebElement) -> None:
-        hover = ActionChains(self.driver).move_to_element(element)
+        hover = ActionChains(self.driver).move_to_element(element)  # type: ignore
         hover.perform()
 
     def wait_for_element_clickable(self, locator: str) -> bool:

@@ -53,6 +53,7 @@ class TargetingDetails(BaseComponents):
     statusContainer = 'div[data-cy="status-container"]'
     householdSizeFrom = 'input[data-cy="input-filters[0].value.from"]'
     householdSizeTo = 'input[data-cy="input-filters[0].value.to"]'
+    dialogBox = 'div[role="dialog"]'
 
     # Texts
     # Elements
@@ -205,3 +206,6 @@ class TargetingDetails(BaseComponents):
 
     def getHouseholdSizeTo(self) -> WebElement:
         return self.wait_for(self.householdSizeTo)
+
+    def getDialogBox(self) -> WebElement:
+        return self.wait_for(self.dialogBox)

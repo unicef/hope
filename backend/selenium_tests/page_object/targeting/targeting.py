@@ -24,6 +24,8 @@ class Targeting(BaseComponents):
     createUseIDs = 'div[data-cy="menu-item-ids-text"]'
     buttonInactiveCreateNew = 'a[data-cy="button-target-population-create-new"]'
     tooltip = 'div[role="tooltip"]'
+    statusContainer = 'div[data-cy="status-container"]'
+    loadingRows = 'tr[data-cy="table-row"]'
 
     # Texts
 
@@ -110,3 +112,16 @@ class Targeting(BaseComponents):
 
     def geTooltip(self) -> WebElement:
         return self.wait_for(self.tooltip)
+
+    def getStatusContainer(self) -> WebElement:
+        return self.wait_for(self.statusContainer)
+
+    def getLoadingRows(self) -> WebElement:
+        return self.wait_for(self.loadingRows)
+
+    def disappearLoadingRows(self) -> WebElement:
+        try:
+            self.getLoadingRows()
+        except BaseException:
+            self.getStatusContainer()
+        return self.wait_for_disappear(self.loadingRows)
