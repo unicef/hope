@@ -44,7 +44,6 @@ export const DuplicateProgramPage = (): ReactElement => {
     useUserPartnerChoicesQuery();
 
   const handleSubmit = async (values): Promise<void> => {
-    delete values.editMode;
     const budgetValue = parseFloat(values.budget) ?? 0;
     const budgetToFixed = !Number.isNaN(budgetValue)
       ? budgetValue.toFixed(2)
@@ -57,13 +56,14 @@ export const DuplicateProgramPage = (): ReactElement => {
             areaAccess,
           }))
         : [];
+    const { editMode, ...requestValues } = values;
 
     try {
       const response = await mutate({
         variables: {
           programData: {
             id,
-            ...values,
+            ...requestValues,
             budget: budgetToFixed,
             businessAreaSlug: businessArea,
             partners: partnersToSet,
