@@ -12,7 +12,7 @@ from django_filters import (
 )
 
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
-from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string_required
+from hct_mis_api.apps.core.utils import CustomOrderingFilter, get_program_id_from_headers
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
@@ -84,8 +84,8 @@ class ProgramFilter(FilterSet):
         return qs.filter(q_obj)
 
     def compatible_dct_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
-        program_id = decode_id_string_required(self.request.headers.get("Program"))
-        if value:
+        program_id = get_program_id_from_headers(self.request.headers)
+        if value and program_id:
             current_program = Program.objects.get(id=program_id)
             return qs.filter(data_collecting_type__compatible_types=current_program.data_collecting_type)
         return qs
