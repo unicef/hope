@@ -347,6 +347,9 @@ class TestFinancialServiceProviderModel(TestCase):
                 "full_name": "John Doe",
                 "phone_no": "+48577123654",
                 "phone_no_alternative": "+48111222333",
+                "wallet_name": "wallet_name_Ind_111",
+                "blockchain_name": "blockchain_name_Ind_111",
+                "wallet_address": "wallet_address_Ind_111",
             },
         )
         document_type = DocumentTypeFactory(key="national_id")
@@ -380,9 +383,19 @@ class TestFinancialServiceProviderModel(TestCase):
         self.assertEqual(admin2, f"{area2.p_code} - {area2.name}")
         admin3 = fsp_xlsx_template.get_column_from_core_field(payment, "admin3")
         self.assertEqual(admin3, f"{area3.p_code} - {area3.name}")
+        given_name = fsp_xlsx_template.get_column_from_core_field(payment, "given_name")
+        self.assertEqual(given_name, individuals[0].given_name)
+        ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(payment, "unicef_id")
+        self.assertEqual(ind_unicef_id, individuals[0].unicef_id)
         phone_no = fsp_xlsx_template.get_column_from_core_field(payment, "phone_no")
-        self.assertEqual(phone_no, str(individuals[0].phone_no))
+        self.assertEqual(phone_no, individuals[0].phone_no)
         phone_no_alternative = fsp_xlsx_template.get_column_from_core_field(payment, "phone_no_alternative")
         self.assertEqual(phone_no_alternative, individuals[0].phone_no_alternative)
         national_id_no = fsp_xlsx_template.get_column_from_core_field(payment, "national_id_no")
         self.assertEqual(national_id_no, document.document_number)
+        wallet_name = fsp_xlsx_template.get_column_from_core_field(payment, "wallet_name")
+        self.assertEqual(wallet_name, individuals[0].wallet_name)
+        blockchain_name = fsp_xlsx_template.get_column_from_core_field(payment, "blockchain_name")
+        self.assertEqual(blockchain_name, individuals[0].blockchain_name)
+        wallet_address = fsp_xlsx_template.get_column_from_core_field(payment, "wallet_address")
+        self.assertEqual(wallet_address, individuals[0].wallet_address)
