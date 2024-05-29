@@ -22,6 +22,8 @@ class Targeting(BaseComponents):
     rows = 'tr[role="checkbox"]'
     createUserFilters = 'div[data-cy="menu-item-filters-text"]'
     createUseIDs = 'div[data-cy="menu-item-ids-text"]'
+    buttonInactiveCreateNew = 'a[data-cy="button-target-population-create-new"]'
+    tooltip = 'div[role="tooltip"]'
 
     # Texts
 
@@ -102,3 +104,9 @@ class Targeting(BaseComponents):
 
     def getCreateUseIDs(self) -> WebElement:
         return self.wait_for(self.createUseIDs)
+
+    def getButtonInactiveCreateNew(self) -> WebElement:
+        return self.wait_for(self.buttonInactiveCreateNew)
+
+    def geTooltip(self) -> WebElement:
+        return self.wait_for(self.tooltip)
