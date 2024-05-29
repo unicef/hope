@@ -8,13 +8,8 @@ from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
-    FspXlsxTemplatePerDeliveryMechanismFactory,
     FinancialServiceProviderXlsxTemplateFactory,
-)
-from hct_mis_api.apps.payment.models import (
-    FspXlsxTemplatePerDeliveryMechanism,
-    FinancialServiceProviderXlsxTemplate,
-    FinancialServiceProvider,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
 )
 
 

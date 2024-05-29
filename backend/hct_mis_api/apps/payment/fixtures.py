@@ -40,6 +40,7 @@ from hct_mis_api.apps.payment.models import (
     Approval,
     ApprovalProcess,
     CashPlan,
+    DeliveryMechanismData,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -675,6 +676,17 @@ class DeliveryMechanismPerPaymentPlanFactory(DjangoModelFactory):
         getter=lambda c: c[0],
     )
     delivery_mechanism_order = factory.fuzzy.FuzzyInteger(1, 4)
+
+
+class DeliveryMechanismDataFactory(DjangoModelFactory):
+    individual = factory.SubFactory(IndividualFactory)
+    delivery_mechanism = factory.fuzzy.FuzzyChoice(
+        DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
+        getter=lambda c: c[0],
+    )
+
+    class Meta:
+        model = DeliveryMechanismData
 
 
 def create_payment_verification_plan_with_status(

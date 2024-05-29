@@ -2261,6 +2261,7 @@ class DeliveryMechanismData(TimeStampedUUIDModel, SignatureMixin):
 
             unique_key = sha256.hexdigest()
             possible_duplicates = self.__class__.objects.filter(
+                is_valid=True,
                 unique_key__isnull=False,
                 unique_key=unique_key,
                 individual__program=self.individual.program,
@@ -2282,11 +2283,11 @@ class DeliveryMechanismData(TimeStampedUUIDModel, SignatureMixin):
     def delivery_mechanism_fields(self) -> List[dict]:
         return self.get_delivery_mechanism_fields(self.delivery_mechanism)
 
-    @property
+    @cached_property
     def required_fields(self) -> List[dict]:
         return [field for field in self.delivery_mechanism_fields if field.get("required_for_payment", False)]
 
-    @property
+    @cached_property
     def unique_fields(self) -> List[dict]:
         return [field for field in self.delivery_mechanism_fields if field.get("unique_for_payment", False)]
 
@@ -2400,10 +2401,3 @@ class DeliveryMechanismData(TimeStampedUUIDModel, SignatureMixin):
                 }
                 grievance_ticket.individual_data_update_ticket_details.save()
                 grievance_ticket.save()
-
-    def save(self, *args: Any, validate: bool = True, deduplicate: bool = False, **kwargs: Any) -> None:
-        if validate:
-            self.validate()
-        if deduplicate:
-            self.update_unique_field()
-        super().save(*args, **kwargs)

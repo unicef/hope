@@ -335,7 +335,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
             financial_service_provider=self.fsp_1,
-            delivery_mechanism=Payment.DELIVERY_TYPE_CASH,
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
             delivery_mechanism_order=1,
         )
         # set generate_token_and_order_numbers to False
@@ -394,16 +394,17 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         # get_template error
         self.assertEqual(
             FspXlsxTemplatePerDeliveryMechanism.objects.filter(
-                delivery_mechanism=GenericPayment.DELIVERY_TYPE_ATM_CARD, financial_service_provider=self.fsp_1
+                delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
+                financial_service_provider=self.fsp_1,
             ).count(),
             0,
         )
         export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
         with self.assertRaises(GraphQLError) as e:
-            export_service.get_template(self.fsp_1, GenericPayment.DELIVERY_TYPE_ATM_CARD)
+            export_service.get_template(self.fsp_1, DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD)
         self.assertEqual(
             e.exception.message,
             f"Not possible to generate export file. There isn't any FSP XLSX Template assigned to Payment "
             f"Plan {self.payment_plan.unicef_id} for FSP {self.fsp_1.name} and delivery "
-            f"mechanism {GenericPayment.DELIVERY_TYPE_ATM_CARD}.",
+            f"mechanism {DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD}.",
         )
