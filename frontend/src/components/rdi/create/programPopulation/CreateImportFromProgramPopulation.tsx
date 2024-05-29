@@ -40,6 +40,7 @@ export const CreateImportFromProgramPopulationForm = ({
         businessArea,
         compatibleDct: true,
       },
+      fetchPolicy: 'network-only',
     });
 
   const onSubmit = async (values): Promise<void> => {
