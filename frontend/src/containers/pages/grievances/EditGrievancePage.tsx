@@ -9,7 +9,6 @@ import {
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
   useAllProgramsForChoicesQuery,
-  useAllUsersQuery,
   useGrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
   useGrievancesChoiceDataQuery,
@@ -107,10 +106,6 @@ export const EditGrievancePage = (): React.ReactElement => {
   const { data: currentUserData, loading: currentUserDataLoading } =
     useMeQuery();
 
-  const { data: userData, loading: userDataLoading } = useAllUsersQuery({
-    variables: { businessArea, first: 1000 },
-  });
-
   const { data: choicesData, loading: choicesLoading } =
     useGrievancesChoiceDataQuery();
 
@@ -141,7 +136,6 @@ export const EditGrievancePage = (): React.ReactElement => {
   );
 
   if (
-    userDataLoading ||
     choicesLoading ||
     ticketLoading ||
     allAddIndividualFieldsDataLoading ||
@@ -153,7 +147,6 @@ export const EditGrievancePage = (): React.ReactElement => {
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
   if (
     !choicesData ||
-    !userData ||
     !ticketData ||
     !currentUserData ||
     permissions === null ||
@@ -373,13 +366,13 @@ export const EditGrievancePage = (): React.ReactElement => {
                                 >
                                   {ticket.household.unicefId}
                                 </BlackLink>
-                                ) : (
+                              ) : (
                                 <div>
                                   {ticket.household?.id
                                     ? ticket.household.unicefId
                                     : '-'}
                                 </div>
-                                )}
+                              )}
                             </span>
                           </LabelizedField>
                         </Grid>
@@ -394,13 +387,13 @@ export const EditGrievancePage = (): React.ReactElement => {
                                 >
                                   {ticket.individual.unicefId}
                                 </BlackLink>
-                                ) : (
+                              ) : (
                                 <div>
                                   {ticket.individual?.id
                                     ? ticket.individual.unicefId
                                     : '-'}
                                 </div>
-                                )}
+                              )}
                             </span>
                           </LabelizedField>
                         </Grid>
