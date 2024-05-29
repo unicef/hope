@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from uuid import UUID
 
 from django.conf import settings
@@ -7,7 +7,6 @@ from django.db import transaction
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from django.utils import timezone
 from page_object.targeting.targeting import Targeting
 from page_object.targeting.targeting_create import TargetingCreate
 from page_object.targeting.targeting_details import TargetingDetails
