@@ -26,9 +26,13 @@ class Targeting(BaseComponents):
     tooltip = 'div[role="tooltip"]'
     statusContainer = 'div[data-cy="status-container"]'
     loadingRows = 'tr[data-cy="table-row"]'
+    buttonTargetPopulation = 'button[data-cy="button-target-population-info"]'
+    buttonApply = 'button[data-cy="button-filters-apply"]'
+    buttonClear = 'button[data-cy="button-filters-clear"]'
+    tabFieldList = 'button[data-cy="tab-field-list"]'
+    tabTargetingDiagram = 'button[data-cy="tab-targeting-diagram"]'
 
     # Texts
-
     textTitlePage = "Targeting"
     textCreateNew = "Create new"
     textTabTitle = "Target Populations"
@@ -39,8 +43,6 @@ class Targeting(BaseComponents):
     textTabDateCreated = "Date Created"
     textTabLastEdited = "Last Edited"
     textTabCreatedBy = "Created by"
-    buttonApply = 'button[data-cy="button-filters-apply"]'
-    buttonClear = 'button[data-cy="button-filters-clear"]'
 
     def navigate_to_page(self, business_area_slug: str, program_id: str) -> None:
         self.driver.get(self.get_page_url(business_area_slug, program_id))
@@ -115,6 +117,15 @@ class Targeting(BaseComponents):
 
     def getStatusContainer(self) -> WebElement:
         return self.wait_for(self.statusContainer)
+
+    def getTabFieldList(self) -> WebElement:
+        return self.wait_for(self.tabFieldList)
+
+    def getTabTargetingDiagram(self) -> WebElement:
+        return self.wait_for(self.tabTargetingDiagram)
+
+    def getButtonTargetPopulation(self) -> WebElement:
+        return self.wait_for(self.buttonTargetPopulation)
 
     def getLoadingRows(self) -> WebElement:
         return self.wait_for(self.loadingRows)

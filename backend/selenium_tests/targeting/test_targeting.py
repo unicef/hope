@@ -24,6 +24,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from selenium.webdriver.common.by import By
 from selenium_tests.page_object.filters import Filters
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -510,7 +511,7 @@ class TestTargeting:
         pageTargeting.mouse_on_element(pageTargeting.getButtonInactiveCreateNew())
         assert "Program has to be active to create a new Target Population" in pageTargeting.geTooltip().text
 
-    def test_excluded_target_population_entries(
+    def test_exclude_households_with_active_adjudication_ticket(
         self,
         create_programs: None,
         household_with_disability: Household,
@@ -519,7 +520,18 @@ class TestTargeting:
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
     ) -> None:
-        pass
+        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.getNavTargeting().click()
+        pageTargeting.getButtonCreateNew().click()
+        pageTargeting.getCreateUseIDs().click()
+        pageTargetingCreate.getInputHouseholdids().send_keys(household_with_disability.unicef_id)
+        pageTargetingCreate.getInputName().send_keys(f"Test {household_with_disability.unicef_id}")
+        pageTargetingCreate.getInputFlagexcludeifactiveadjudicationticket().click()
+        pageTargetingCreate.getButtonTargetPopulationCreate().click()
+        pageTargetingDetails.getLabelStatus()
+        pageTargetingDetails.getCheckboxExcludeIfActiveAdjudicationTicket()
+        pageTargetingDetails.getIconSelected()
+
 
     def test_targeting_filters_and_labels(
         self,
@@ -527,22 +539,28 @@ class TestTargeting:
         household_with_disability: Household,
         add_targeting: None,
         pageTargeting: Targeting,
-        pageTargetingDetails: TargetingDetails,
-        pageTargetingCreate: TargetingCreate,
+        filters: Filters,
     ) -> None:
-        # ponaciskaj labelki dla kolejności i zobacz filtry w detalach tez hh np!
-        pass
+        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.getNavTargeting().click()
+        filters.getFiltersSearch().click()
+        from time import sleep
+        sleep(1)
+        filters.getFiltersSearch().send_keys("123123")
+        filters.getFiltersTotalHouseholdsCountMin().click()
+        filters.getFiltersTotalHouseholdsCountMin().send_keys("1")
+        filters.screenshot("1")
 
     def test_targeting_info_button(
         self,
         create_programs: None,
-        household_with_disability: Household,
-        add_targeting: None,
         pageTargeting: Targeting,
-        pageTargetingDetails: TargetingDetails,
-        pageTargetingCreate: TargetingCreate,
     ) -> None:
-        pass
+        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.getNavTargeting().click()
+        pageTargeting.getButtonTargetPopulation().click()
+        pageTargeting.getTabFieldList()
+        pageTargeting.getTabTargetingDiagram().click()
 
     def test_targeting_parametrized_ruls_filters(
         self,

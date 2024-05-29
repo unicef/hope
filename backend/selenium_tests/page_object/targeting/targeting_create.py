@@ -25,6 +25,8 @@ class TargetingCreate(BaseComponents):
     inputIncludedIndividualIds = 'div[data-cy="input-included-individual-ids"]'
     inputIndividualids = 'input[data-cy="input-individualIds"]'
     inputFlagexcludeifactiveadjudicationticket = 'span[data-cy="input-flagExcludeIfActiveAdjudicationTicket"]'
+    iconSelected = '[data-testid="CheckBoxIcon"]'
+    iconNotSelected = '[data-testid="CheckBoxOutlineBlankIcon"]'
     inputName = 'input[data-cy="input-name"]'
     divTargetPopulationAddCriteria = 'div[data-cy="button-target-population-add-criteria"]'
     titleExcludedEntries = 'h6[data-cy="title-excluded-entries"]'
@@ -40,6 +42,7 @@ class TargetingCreate(BaseComponents):
     buttonIndividualRule = 'button[data-cy="button-individual-rule"]'
     buttonTargetPopulationAddCriteria = 'button[data-cy="button-target-population-add-criteria"]'
     buttonSave = 'button[data-cy="button-save"]'
+
     # Texts
     textTargetingCriteria = "Targeting Criteria"
 
@@ -66,6 +69,12 @@ class TargetingCreate(BaseComponents):
 
     def getInputFlagexcludeifactiveadjudicationticket(self) -> WebElement:
         return self.wait_for(self.inputFlagexcludeifactiveadjudicationticket)
+
+    def getIconNotSelected(self) -> WebElement:
+        return self.wait_for(self.iconNotSelected)
+
+    def getIconSelected(self) -> WebElement:
+        return self.wait_for(self.iconSelected)
 
     def getButtonTargetPopulationAddCriteria(self) -> WebElement:
         return self.wait_for(self.buttonTargetPopulationAddCriteria)
