@@ -476,10 +476,8 @@ class TestTargeting:
     ) -> None:
         pass
 
-    @pytest.mark.parametrize("x", range(100))
     def test_targeting_different_program_statuses(
             self,
-            x,
             create_programs: None,
             pageTargeting: Targeting,
             pageTargetingDetails: TargetingDetails,
