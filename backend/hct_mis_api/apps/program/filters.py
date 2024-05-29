@@ -12,7 +12,10 @@ from django_filters import (
 )
 
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
-from hct_mis_api.apps.core.utils import CustomOrderingFilter, get_program_id_from_headers
+from hct_mis_api.apps.core.utils import (
+    CustomOrderingFilter,
+    get_program_id_from_headers,
+)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
