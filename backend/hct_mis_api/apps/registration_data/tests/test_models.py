@@ -105,5 +105,5 @@ class TestRegistrationDataModels(TestCase):
     def test_record_get_data(self) -> None:
         self.assertEqual(self.record.get_data(), {})
 
-    def test_iimported_individual_identity_str(self) -> None:
+    def test_imported_individual_identity_str(self) -> None:
         self.assertEqual(str(self.imported_individual_identity), "UNICEF Jane Doe 123456789")
