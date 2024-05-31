@@ -252,8 +252,6 @@ class CreateImportedObjectsFromObjectsTask:
                 and getattr(individual, "heading_household", None) == individual.household
             ):
                 imported_household.head_of_household = imported_individual
-                # this relationship needs to be change for future steps -
-                # it indicates that this individual is head of household (even tho head_of_household field is set on hh)
                 imported_individual.relationship = HEAD
 
             imported_individuals_dict[individual.id] = imported_individual
