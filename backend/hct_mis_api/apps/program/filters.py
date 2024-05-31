@@ -90,7 +90,9 @@ class ProgramFilter(FilterSet):
         program_id = get_program_id_from_headers(self.request.headers)
         if value and program_id:
             current_program = Program.objects.get(id=program_id)
-            return qs.filter(data_collecting_type__compatible_types=current_program.data_collecting_type)
+            return qs.filter(data_collecting_type__compatible_types=current_program.data_collecting_type).exclude(
+                id=program_id
+            )
         return qs
 
 
