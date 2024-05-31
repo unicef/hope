@@ -216,9 +216,6 @@ class RdiMergeTask:
                         household_data["household_collection"] = household_collection
                         household_from_collection.household_collection = household_collection
                         household_from_collection.save(update_fields=["household_collection"])
-                else:
-                    household_collection = HouseholdCollection.objects.create()
-                    household_data["household_collection"] = household_collection
 
             household = Household(
                 **household_data,
@@ -303,9 +300,6 @@ class RdiMergeTask:
                         values["individual_collection"] = individual_collection
                         individual_from_collection.individual_collection = individual_collection
                         individual_from_collection.save(update_fields=["individual_collection"])
-                else:
-                    individual_collection = IndividualCollection.objects.create()
-                    values["individual_collection"] = individual_collection
 
             individual = Individual(
                 **values,
