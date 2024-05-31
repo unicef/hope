@@ -10,7 +10,7 @@ from dateutil.relativedelta import relativedelta
 
 from hct_mis_api.apps.core.currencies import USDC
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
@@ -333,8 +333,12 @@ class TestFinancialServiceProviderModel(TestCase):
     def test_fsp_template_get_column_from_core_field(self) -> None:
         payment = PaymentFactory()
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplate
-        result = fsp_xlsx_template.get_column_from_core_field(payment, "invalid_people_field_name", True)
+        payment.parent.program.data_collecting_type.type = DataCollectingType.Type.SOCIAL
+        payment.parent.program.data_collecting_type.save()
+        result = fsp_xlsx_template.get_column_from_core_field(payment, "invalid_people_field_name")
         self.assertIsNone(result)
 
-        result = fsp_xlsx_template.get_column_from_core_field(payment, "size", False)
+        payment.parent.program.data_collecting_type.type = DataCollectingType.Type.STANDARD
+        payment.parent.program.data_collecting_type.save()
+        result = fsp_xlsx_template.get_column_from_core_field(payment, "size")
         self.assertIsNotNone(result)
