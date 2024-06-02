@@ -23,10 +23,18 @@ from hct_mis_api.apps.core.utils import (
     SheetImageLoader,
 )
 from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.geo.models import Country as GeoCountry
+from hct_mis_api.apps.household.fixtures import IndividualFactory
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,
     IDENTIFICATION_TYPE_TAX_ID,
+    BankAccountInfo,
+    Document,
+    DocumentType,
+    Household,
+    Individual,
+    IndividualIdentity,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -38,7 +46,6 @@ from hct_mis_api.apps.registration_data.models import (
     ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
-    ImportedIndividualIdentity,
     RegistrationDataImport,
 )
 from hct_mis_api.apps.registration_datahub.fixtures import (
@@ -110,7 +117,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         cls.registration_data_import.hct_id = hct_rdi.id
         cls.registration_data_import.save()
         cls.business_area = BusinessArea.objects.first()
-        ImportedDocumentType.objects.create(
+        DocumentType.objects.create(
             label="Tax Number Identification",
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
         )
@@ -120,8 +127,8 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         task = self.RdiXlsxCreateTask()
         task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
 
-        households_count = ImportedHousehold.objects.count()
-        individuals_count = ImportedIndividual.objects.count()
+        households_count = Household.objects.count()
+        individuals_count = Individual.objects.count()
 
         self.assertEqual(3, households_count)
         self.assertEqual(6, individuals_count)
@@ -138,13 +145,13 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             "email": "fake_email_123@mail.com",
             # "preferred_language": "pl", # TODO: fix this? (rebase issue?)
         }
-        matching_individuals = ImportedIndividual.objects.filter(**individual_data)
+        matching_individuals = Individual.objects.filter(**individual_data)
 
         self.assertEqual(matching_individuals.count(), 1)
 
         household_data = {
             "residence_status": "REFUGEE",
-            "country": "AF",
+            "country": GeoCountry.objects.get(iso_code2="AF").id,
             "zip_code": "2153",
             "flex_fields": {},
         }
@@ -167,16 +174,16 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             self.business_area.id,
             self.program.id,
         )
-        self.assertEqual(ImportedIndividualIdentity.objects.count(), 2)
+        self.assertEqual(IndividualIdentity.objects.count(), 2)
         self.assertEqual(
-            ImportedIndividualIdentity.objects.filter(
-                document_number="TEST", country="PL", partner="WFP", individual__full_name="Some Full Name"
+            IndividualIdentity.objects.filter(
+                number="TEST", country__iso_code2="PL", partner__name="WFP", individual__full_name="Some Full Name"
             ).count(),
             1,
         )
         self.assertEqual(
-            ImportedIndividualIdentity.objects.filter(
-                document_number="WTG", country="PL", individual__full_name="Some Full Name", partner="UNHCR"
+            IndividualIdentity.objects.filter(
+                number="WTG", country__iso_code2="PL", partner__name="UNHCR", individual__full_name="Some Full Name"
             ).count(),
             1,
         )
@@ -298,9 +305,9 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
     def test_create_documents(self) -> None:
         task = self.RdiXlsxCreateTask()
-        individual = ImportedIndividualFactory()
+        individual = IndividualFactory()
         task.business_area = self.business_area
-        doc_type = ImportedDocumentType.objects.create(
+        doc_type = DocumentType.objects.create(
             label="Birth Certificate",
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
         )
@@ -316,15 +323,16 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         }
         task._create_documents()
 
-        documents = ImportedDocument.objects.values("document_number", "type_id")
+        documents = Document.objects.values("document_number", "type_id")
         self.assertEqual(documents.count(), 1)
 
         expected = [{"document_number": "CD1247246Q12W", "type_id": doc_type.id}]
         self.assertEqual(list(documents), expected)
 
-        document = ImportedDocument.objects.first()
+        document = Document.objects.first()
         photo = document.photo.name
-        self.assertTrue(photo.startswith("image") and photo.endswith(".png"))
+        self.assertTrue(photo.startswith("image"))
+        self.assertTrue(photo.endswith(".png"))
 
     def test_cast_value(self) -> None:
         task = self.RdiXlsxCreateTask()
@@ -378,7 +386,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         task = self.RdiXlsxCreateTask()
         task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
 
-        bank_account_info = ImportedBankAccountInfo.objects.get(individual__detail_id=7)
+        bank_account_info = BankAccountInfo.objects.get(individual__detail_id=7)
         self.assertEqual(bank_account_info.bank_name, "Bank testowy")
         self.assertEqual(bank_account_info.bank_account_number, "PL70 1410 2006 0000 3200 0926 4671")
         self.assertEqual(bank_account_info.debit_card_number, "5241 6701 2345 6789")
@@ -387,7 +395,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         task = self.RdiXlsxCreateTask()
         task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
 
-        document = ImportedDocument.objects.filter(individual__detail_id=5).first()
+        document = Document.objects.filter(individual__detail_id=5).first()
         self.assertEqual(document.type.key, IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
         self.assertEqual(document.document_number, "CD1247246Q12W")
 
@@ -395,15 +403,15 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         task = self.RdiXlsxCreateTask()
         task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
 
-        individual = ImportedIndividual.objects.get(detail_id=3)
+        individual = Individual.objects.get(detail_id=3)
         self.assertEqual(individual.seeing_disability, "")
         self.assertEqual(individual.hearing_disability, "")
 
     def test_create_receiver_poi_document(self) -> None:
         task = self.RdiXlsxCreateTask()
-        individual = ImportedIndividualFactory()
+        individual = IndividualFactory()
         task.business_area = self.business_area
-        doc_type = ImportedDocumentType.objects.get_or_create(
+        doc_type = DocumentType.objects.get_or_create(
             label="Receiver POI",
             key="receiver_poi",
         )[0]
@@ -419,7 +427,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         }
         task._create_documents()
 
-        documents = ImportedDocument.objects.values("document_number", "type_id")
+        documents = Document.objects.values("document_number", "type_id")
         self.assertEqual(documents.count(), 1)
 
         expected = [{"document_number": "TEST123_qwerty", "type_id": doc_type.id}]
