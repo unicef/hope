@@ -32,10 +32,6 @@ from hct_mis_api.aurora.services.sri_lanka_flex_registration_service import (
 
 
 class TestSriLankaRegistrationService(TestCase):
-    databases = {
-        "default",
-        "registration_datahub",
-    }
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
