@@ -13,6 +13,8 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
     _INDIVIDUAL,
 )
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketIndividualDataUpdateDetails
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import LOT_DIFFICULTY
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
@@ -269,8 +271,111 @@ class TestDeliveryMechanismDataModel(TestCase):
                         "previous_value": None,
                     },
                 ],
-            }
+            },
         )
 
     def test_revalidate_for_grievance_ticket(self) -> None:
-        pass
+        ba = BusinessArea.objects.get(slug="afghanistan")
+        grievance_ticket = GrievanceTicket.objects.create(
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+            admin2=self.ind.household.admin2,
+            business_area=ba,
+            description="description",
+            comments="",
+        )
+        individual_data_update_ticket = TicketIndividualDataUpdateDetails.objects.create(
+            individual_data={"delivery_mechanism_data_to_edit": []},
+            individual=self.ind,
+            ticket=grievance_ticket,
+        )
+        dmd = DeliveryMechanismDataFactory(
+            individual=self.ind,
+            is_valid=False,
+            validation_errors={
+                "full_name": "Missing required payment data",
+                "name_of_cardholder_atm_card": "Missing required payment data",
+            },
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
+        )
+
+        with mock.patch.object(dmd, "validate"):
+            dmd.revalidate_for_grievance_ticket(grievance_ticket)
+            grievance_ticket.refresh_from_db()
+            self.assertEqual(grievance_ticket.status, GrievanceTicket.STATUS_IN_PROGRESS)
+            self.assertEqual(
+                grievance_ticket.description,
+                "Missing required fields ['full_name', 'name_of_cardholder_atm_card'] values for delivery mechanism ATM Card",
+            )
+            self.assertEqual(
+                individual_data_update_ticket.individual_data,
+                {
+                    "delivery_mechanism_data_to_edit": [
+                        {
+                            "id": str(dmd.id),
+                            "label": dmd.delivery_mechanism,
+                            "approve_status": False,
+                            "data_fields": [
+                                {
+                                    "name": "full_name",
+                                    "value": None,
+                                    "previous_value": dmd.individual.full_name,
+                                },
+                                {
+                                    "name": "name_of_cardholder_atm_card",
+                                    "value": None,
+                                    "previous_value": None,
+                                },
+                            ],
+                        }
+                    ]
+                },
+            )
+
+            dmd.is_valid = True
+            dmd.validation_errors = {}
+            dmd.save()
+
+            def update_unique_field_side_effect():
+                dmd.unique_key = None
+                dmd.is_valid = False
+                dmd.validation_errors = {
+                    "aaa": "Payment data not unique across Program",
+                    "bbb": "Payment data not unique across Program",
+                }
+                dmd.possible_duplicate_of = dmd
+                dmd.save()
+
+            with mock.patch.object(dmd, "update_unique_field", side_effect=update_unique_field_side_effect):
+                dmd.revalidate_for_grievance_ticket(grievance_ticket)
+
+                self.assertEqual(grievance_ticket.status, GrievanceTicket.STATUS_IN_PROGRESS)
+                self.assertEqual(
+                    grievance_ticket.description,
+                    f"Fields not unique ['aaa', 'bbb'] across program"
+                    f" for delivery mechanism {dmd.delivery_mechanism}, possible duplicate of {dmd}",
+                )
+                self.assertEqual(
+                    individual_data_update_ticket.individual_data,
+                    {
+                        "delivery_mechanism_data_to_edit": [
+                            {
+                                "id": str(dmd.id),
+                                "label": dmd.delivery_mechanism,
+                                "approve_status": False,
+                                "data_fields": [
+                                    {
+                                        "name": "full_name",
+                                        "value": None,
+                                        "previous_value": dmd.individual.full_name,
+                                    },
+                                    {
+                                        "name": "name_of_cardholder_atm_card",
+                                        "value": None,
+                                        "previous_value": None,
+                                    },
+                                ],
+                            }
+                        ]
+                    },
+                )
