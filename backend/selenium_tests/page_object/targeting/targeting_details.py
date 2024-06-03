@@ -41,6 +41,8 @@ class TargetingDetails(BaseComponents):
     labelSendDate = 'div[data-cy="label-Send date"]'
     criteriaContainer = 'div[data-cy="criteria-container"]'
     checkboxExcludeIfActiveAdjudicationTicket = 'span[data-cy="checkbox-exclude-if-active-adjudication-ticket"]'
+    checkboxExcludeIfOnSanctionList = 'span[data-cy="checkbox-exclude-if-on-sanction-list"]'
+    iconSelected = '[data-testid="CheckBoxIcon"]'
     labelFemaleChildren = 'div[data-cy="label-Female Children"]'
     labelFemaleAdults = 'div[data-cy="label-Female Adults"]'
     labelMaleChildren = 'div[data-cy="label-Male Children"]'
@@ -60,6 +62,9 @@ class TargetingDetails(BaseComponents):
 
     def getPageHeaderTitle(self) -> WebElement:
         return self.wait_for(self.pageHeaderTitle)
+
+    def waitForTextTitlePage(self, text: str) -> bool:
+        return self.wait_for_text(text, self.titlePage)
 
     def getButtonTargetPopulationDuplicate(self) -> WebElement:
         return self.wait_for(self.buttonTargetPopulationDuplicate)
@@ -146,6 +151,12 @@ class TargetingDetails(BaseComponents):
 
     def getCheckboxExcludeIfActiveAdjudicationTicket(self) -> WebElement:
         return self.wait_for(self.checkboxExcludeIfActiveAdjudicationTicket)
+
+    def getCheckboxExcludeIfOnSanctionList(self) -> WebElement:
+        return self.wait_for(self.checkboxExcludeIfOnSanctionList)
+
+    def getIconSelected(self) -> WebElement:
+        return self.wait_for(self.iconSelected)
 
     def getLabelFemaleChildren(self) -> WebElement:
         return self.wait_for(self.labelFemaleChildren)

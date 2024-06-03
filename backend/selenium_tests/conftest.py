@@ -287,6 +287,7 @@ def business_area() -> BusinessArea:
             "region_code": "64",
             "region_name": "SAR",
             "slug": "afghanistan",
+            "screen_beneficiary": True,
             "has_data_sharing_agreement": True,
             "is_payment_plan_applicable": True,
             "is_accountability_applicable": True,

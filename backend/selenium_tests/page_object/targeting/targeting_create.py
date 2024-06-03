@@ -24,6 +24,7 @@ class TargetingCreate(BaseComponents):
     inputHouseholdids = 'input[data-cy="input-householdIds"]'
     inputIncludedIndividualIds = 'div[data-cy="input-included-individual-ids"]'
     inputIndividualids = 'input[data-cy="input-individualIds"]'
+    inputFlagexcludeifonsanctionlist = 'span[data-cy="input-flagExcludeIfOnSanctionList"]'
     inputFlagexcludeifactiveadjudicationticket = 'span[data-cy="input-flagExcludeIfActiveAdjudicationTicket"]'
     iconSelected = '[data-testid="CheckBoxIcon"]'
     iconNotSelected = '[data-testid="CheckBoxOutlineBlankIcon"]'
@@ -69,6 +70,9 @@ class TargetingCreate(BaseComponents):
 
     def getInputFlagexcludeifactiveadjudicationticket(self) -> WebElement:
         return self.wait_for(self.inputFlagexcludeifactiveadjudicationticket)
+
+    def getInputFlagexcludeifonsanctionlist(self) -> WebElement:
+        return self.wait_for(self.inputFlagexcludeifonsanctionlist)
 
     def getIconNotSelected(self) -> WebElement:
         return self.wait_for(self.iconNotSelected)

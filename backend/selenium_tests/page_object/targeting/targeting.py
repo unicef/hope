@@ -56,6 +56,9 @@ class Targeting(BaseComponents):
     def getTitlePage(self) -> WebElement:
         return self.wait_for(self.titlePage)
 
+    def waitForTextTitlePage(self, text: str) -> bool:
+        return self.wait_for_text(text, self.titlePage)
+
     def getSearchFilter(self) -> WebElement:
         return self.wait_for(self.searchFilter)
 

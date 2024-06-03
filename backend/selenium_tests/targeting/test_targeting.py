@@ -11,7 +11,6 @@ from page_object.targeting.targeting import Targeting
 from page_object.targeting.targeting_create import TargetingCreate
 from page_object.targeting.targeting_details import TargetingDetails
 from selenium.webdriver import ActionChains, Keys
-from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
@@ -379,8 +378,6 @@ class TestTargeting:
         pageTargetingDetails.getButtonRebuild().click()
         pageTargetingDetails.getStatusContainer()
         pageTargetingDetails.disappearStatusContainer()
-        # assert "2" in pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
-        # assert "8" in pageTargetingDetails.getLabelTargetedIndividuals().text
 
     def test_targeting_mark_ready(
         self,
@@ -403,16 +400,6 @@ class TestTargeting:
         pageTargetingDetails.getButtonMarkReady().click()
         pageTargetingDetails.getButtonPopupMarkReady().click()
         pageTargetingDetails.waitForLabelStatus("READY")
-
-    def test_targeting_mark_ready_failed(
-        self,
-        create_programs: None,
-        add_targeting: None,
-        pageTargeting: Targeting,
-        pageTargetingDetails: TargetingDetails,
-        pageTargetingCreate: TargetingCreate,
-    ) -> None:
-        pass
 
     def test_copy_targeting(
         self,
@@ -460,7 +447,7 @@ class TestTargeting:
         pageTargetingCreate.get_elements(pageTargetingCreate.targetingCriteriaAddDialogSaveButton)[1].click()
         pageTargetingCreate.getButtonSave().click()
         pageTargetingDetails.getButtonEdit()
-        assert "New Test Data" in pageTargetingDetails.getTitlePage().text
+        assert pageTargetingDetails.waitForTextTitlePage("New Test Data")
         assert "9" in pageTargetingDetails.getCriteriaContainer().text
 
     def test_delete_targeting(
@@ -532,6 +519,38 @@ class TestTargeting:
         pageTargetingDetails.getCheckboxExcludeIfActiveAdjudicationTicket()
         pageTargetingDetails.getIconSelected()
 
+    def test_exclude_households_with_sanction_screen_flag(
+        self,
+        create_programs: None,
+        household_with_disability: Household,
+        add_targeting: None,
+        pageTargeting: Targeting,
+        pageTargetingDetails: TargetingDetails,
+        pageTargetingCreate: TargetingCreate,
+    ) -> None:
+        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.getNavTargeting().click()
+        pageTargeting.getButtonCreateNew().click()
+        pageTargeting.getCreateUseIDs().click()
+        pageTargetingCreate.getInputHouseholdids().send_keys(household_with_disability.unicef_id)
+        pageTargetingCreate.getInputName().send_keys(f"Test {household_with_disability.unicef_id}")
+        pageTargetingCreate.getInputFlagexcludeifonsanctionlist().click()
+        pageTargetingCreate.getButtonTargetPopulationCreate().click()
+        pageTargetingDetails.getLabelStatus()
+        pageTargetingDetails.getCheckboxExcludeIfOnSanctionList()
+        pageTargetingDetails.getIconSelected()
+
+    def test_targeting_info_button(
+        self,
+        create_programs: None,
+        pageTargeting: Targeting,
+    ) -> None:
+        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.getNavTargeting().click()
+        pageTargeting.getButtonTargetPopulation().click()
+        pageTargeting.getTabFieldList()
+        pageTargeting.getTabTargetingDiagram().click()
+
     def test_targeting_filters_and_labels(
         self,
         create_programs: None,
@@ -551,21 +570,20 @@ class TestTargeting:
         filters.getFiltersTotalHouseholdsCountMin().send_keys("1")
         filters.screenshot("1")
 
-    def test_targeting_info_button(
-        self,
-        create_programs: None,
-        pageTargeting: Targeting,
-    ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
-        pageTargeting.getNavTargeting().click()
-        pageTargeting.getButtonTargetPopulation().click()
-        pageTargeting.getTabFieldList()
-        pageTargeting.getTabTargetingDiagram().click()
-
     def test_targeting_parametrized_ruls_filters(
         self,
         create_programs: None,
         household_with_disability: Household,
+        add_targeting: None,
+        pageTargeting: Targeting,
+        pageTargetingDetails: TargetingDetails,
+        pageTargetingCreate: TargetingCreate,
+    ) -> None:
+        pass
+
+    def test_targeting_mark_ready_failed(
+        self,
+        create_programs: None,
         add_targeting: None,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
