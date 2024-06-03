@@ -7,7 +7,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.household.fixtures import BankAccountInfoFactory, create_household
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_OTHER,
@@ -412,3 +412,30 @@ class TestDocument(TestCase):
             )
         except IntegrityError:
             self.fail("Shouldn't raise any errors!")
+
+
+class TestIndividualModel(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        create_afghanistan()
+        ProgramFactory()
+
+    def test_bank_name(self) -> None:
+        individual = create_household({"size": 1})[1][0]
+        bank_account_info = BankAccountInfoFactory(individual=individual)
+        self.assertEqual(individual.bank_name, bank_account_info.bank_name)
+
+    def test_bank_account_number(self) -> None:
+        individual = create_household({"size": 1})[1][0]
+        bank_account_info = BankAccountInfoFactory(individual=individual)
+        self.assertEqual(individual.bank_account_number, bank_account_info.bank_account_number)
+
+    def test_account_holder_name(self) -> None:
+        individual = create_household({"size": 1})[1][0]
+        bank_account_info = BankAccountInfoFactory(individual=individual)
+        self.assertEqual(individual.account_holder_name, bank_account_info.account_holder_name)
+
+    def test_bank_branch_name(self) -> None:
+        individual = create_household({"size": 1})[1][0]
+        bank_account_info = BankAccountInfoFactory(individual=individual)
+        self.assertEqual(individual.bank_branch_name, bank_account_info.bank_branch_name)
