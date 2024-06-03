@@ -75,7 +75,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
     def hub(self, button: button) -> Optional[str]:
         obj = button.context.get("original")
         if obj:
-            return reverse("admin:registration_datahub_registrationdataimportdatahub_change", args=[obj.datahub_id])
+            return reverse("admin:registration_data_registrationdataimportdatahub_change", args=[obj.datahub_id])
 
         button.visible = False
         return None

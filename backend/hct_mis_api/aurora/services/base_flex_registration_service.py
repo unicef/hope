@@ -11,10 +11,9 @@ from django.db.transaction import atomic
 from django.forms import modelform_factory
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.registration_data.models import (
+from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.registration_data.models import (  # ImportedHousehold,; ImportedIndividual,
     ImportData,
-    ImportedHousehold,
-    ImportedIndividual,
     RegistrationDataImport,
     RegistrationDataImportDatahub,
 )
@@ -135,8 +134,8 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
                     transaction.set_rollback(True)
 
             if not records_with_error:
-                number_of_individuals = ImportedIndividual.objects.filter(registration_data_import=rdi_datahub).count()
-                number_of_households = ImportedHousehold.objects.filter(registration_data_import=rdi_datahub).count()
+                number_of_individuals = Individual.objects.filter(registration_data_import=rdi).count()
+                number_of_households = Household.objects.filter(registration_data_import=rdi).count()
 
                 import_data.number_of_individuals = number_of_individuals
                 rdi.number_of_individuals = number_of_individuals
