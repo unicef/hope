@@ -12,7 +12,7 @@ from django.forms import modelform_factory
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.registration_data.models import (  # ImportedHousehold,; ImportedIndividual,
+from hct_mis_api.apps.registration_data.models import (
     ImportData,
     RegistrationDataImport,
     RegistrationDataImportDatahub,

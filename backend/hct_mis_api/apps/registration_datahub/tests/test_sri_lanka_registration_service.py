@@ -10,17 +10,16 @@ from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_NATIONAL_ID
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.models import (
-    ImportedBankAccountInfo,
-    ImportedDocument,
-    ImportedDocumentType,
-    ImportedHousehold,
-    ImportedIndividual,
-    ImportedIndividualRoleInHousehold,
-    RegistrationDataImport,
+from hct_mis_api.apps.household.models import (
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+    BankAccountInfo,
+    Document,
+    DocumentType,
+    Household,
+    Individual,
+    IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,
@@ -41,7 +40,7 @@ class TestSriLankaRegistrationService(TestCase):
 
     @classmethod
     def setUp(cls) -> None:
-        ImportedDocumentType.objects.create(
+        DocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
             label=IDENTIFICATION_TYPE_NATIONAL_ID,
         )
@@ -164,37 +163,33 @@ class TestSriLankaRegistrationService(TestCase):
             Record.objects.filter(id__in=records_ids, ignored=False, status=Record.STATUS_IMPORTED).count(), 2
         )
 
-        self.assertEqual(ImportedHousehold.objects.count(), 1)
-        self.assertEqual(ImportedIndividualRoleInHousehold.objects.count(), 1)
-        self.assertEqual(ImportedBankAccountInfo.objects.count(), 1)
-        self.assertEqual(ImportedDocument.objects.count(), 1)
+        self.assertEqual(Household.objects.count(), 1)
+        self.assertEqual(IndividualRoleInHousehold.objects.count(), 1)
+        self.assertEqual(BankAccountInfo.objects.count(), 1)
+        self.assertEqual(Document.objects.count(), 1)
 
-        bank_acc_info = ImportedBankAccountInfo.objects.first()
+        bank_acc_info = BankAccountInfo.objects.first()
         self.assertEqual(bank_acc_info.account_holder_name, "Test Holder Name 123")
         self.assertEqual(bank_acc_info.bank_branch_name, "Branch Name 123")
+        self.assertEqual(bank_acc_info.rdi_merge_status, "PENDING")
 
-        imported_household = ImportedHousehold.objects.first()
-        self.assertEqual(imported_household.admin1, "LK1")
-        self.assertEqual(imported_household.admin1_title, "SriLanka admin1")
-        self.assertEqual(imported_household.admin2, "LK11")
-        self.assertEqual(imported_household.admin2_title, "SriLanka admin2")
-        self.assertEqual(imported_household.admin3, "LK1163")
-        self.assertEqual(imported_household.admin3_title, "SriLanka admin3")
-        self.assertEqual(imported_household.admin4, "LK1163020")
-        self.assertEqual(imported_household.admin4_title, "SriLanka admin4")
-        self.assertEqual(imported_household.admin_area, "LK1163020")
-        self.assertEqual(imported_household.admin_area_title, "SriLanka admin4")
+        household = Household.objects.first()
+        self.assertEqual(household.admin1.p_code, "LK1")
+        self.assertEqual(household.admin2.p_code, "LK11")
+        self.assertEqual(household.admin3.p_code, "LK1163")
+        self.assertEqual(household.admin4.p_code, "LK1163020")
+        self.assertEqual(household.admin_area.p_code, "LK1163020")
 
-        registration_datahub_import = imported_household.registration_data_import
-        registration_data_import = RegistrationDataImport.objects.get(id=registration_datahub_import.hct_id)
+        registration_data_import = household.registration_data_import
+
         self.assertEqual(registration_data_import.program, self.program)
 
         self.assertEqual(
-            ImportedIndividual.objects.filter(relationship="HEAD").first().flex_fields, {"has_nic_number_i_c": "n"}
+            Individual.objects.filter(relationship="HEAD").first().flex_fields, {"has_nic_number_i_c": "n"}
         )
 
         self.assertEqual(
-            ImportedIndividual.objects.filter(full_name="Dome").first().flex_fields,
+            Individual.objects.filter(full_name="Dome").first().flex_fields,
             {
                 "confirm_nic_number": "123456789V",
                 "branch_or_branch_code": "7472_002",
@@ -203,8 +198,8 @@ class TestSriLankaRegistrationService(TestCase):
                 "does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi": "n",
             },
         )
-        self.assertEqual(ImportedIndividual.objects.filter(full_name="Dome").first().email, "email999@mail.com")
-        self.assertEqual(ImportedIndividual.objects.filter(full_name="Dome").first().age_at_registration, 43)
+        self.assertEqual(Individual.objects.filter(full_name="Dome").first().email, "email999@mail.com")
+        self.assertEqual(Individual.objects.filter(full_name="Dome").first().age_at_registration, 43)
 
     def test_import_record_twice(self) -> None:
         service = SriLankaRegistrationService(self.registration)
@@ -214,9 +209,9 @@ class TestSriLankaRegistrationService(TestCase):
         self.records[0].refresh_from_db()
 
         self.assertEqual(Record.objects.first().status, Record.STATUS_IMPORTED)
-        self.assertEqual(ImportedHousehold.objects.count(), 1)
+        self.assertEqual(Household.objects.count(), 1)
 
         # Process again, but no new household created
         service.process_records(rdi.id, [self.records[0].id])
         self.records[0].refresh_from_db()
-        self.assertEqual(ImportedHousehold.objects.count(), 1)
+        self.assertEqual(Household.objects.count(), 1)
