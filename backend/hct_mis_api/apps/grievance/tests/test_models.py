@@ -146,7 +146,8 @@ class TestDeliveryMechanismDataModel(TestCase):
                         self.assertEqual(
                             dmd_2.validation_errors,
                             {
-                                "['seeing_disability', 'name_of_cardholder_atm_card']": "Payment data not unique across Program"
+                                "seeing_disability": "Payment data not unique across Program",
+                                "name_of_cardholder_atm_card": "Payment data not unique across Program",
                             },
                         )
                         self.assertEqual(dmd_2.possible_duplicate_of, dmd_1)
@@ -237,7 +238,39 @@ class TestDeliveryMechanismDataModel(TestCase):
         )
 
     def test_get_grievance_ticket_payload_for_errors(self) -> None:
-        pass
+        dmd = DeliveryMechanismDataFactory(
+            individual=self.ind,
+            validation_errors={
+                "full_name": "Missing required payment data",
+                "number_of_children": "Missing required payment data",
+                "name_of_cardholder_atm_card": "Missing required payment data",
+            },
+        )
+        self.assertEqual(
+            dmd.get_grievance_ticket_payload_for_errors(),
+            {
+                "id": str(dmd.id),
+                "label": dmd.delivery_mechanism,
+                "approve_status": False,
+                "data_fields": [
+                    {
+                        "name": "full_name",
+                        "value": None,
+                        "previous_value": dmd.individual.full_name,
+                    },
+                    {
+                        "name": "number_of_children",
+                        "value": None,
+                        "previous_value": None,
+                    },
+                    {
+                        "name": "name_of_cardholder_atm_card",
+                        "value": None,
+                        "previous_value": None,
+                    },
+                ],
+            }
+        )
 
     def test_revalidate_for_grievance_ticket(self) -> None:
         pass

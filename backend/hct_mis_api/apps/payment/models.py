@@ -2272,9 +2272,8 @@ class DeliveryMechanismData(TimeStampedUUIDModel, SignatureMixin):
             if possible_duplicates.exists():
                 self.unique_key = None
                 self.is_valid = False
-                self.validation_errors[str([field["name"] for field in self.unique_fields])] = str(
-                    self.VALIDATION_ERROR_DATA_NOT_UNIQUE
-                )
+                for field in self.unique_fields:
+                    self.validation_errors[field["name"]] = str(self.VALIDATION_ERROR_DATA_NOT_UNIQUE)
                 self.possible_duplicate_of = possible_duplicates.first()
             else:
                 self.unique_key = unique_key
