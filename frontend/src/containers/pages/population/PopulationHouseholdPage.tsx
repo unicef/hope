@@ -26,6 +26,7 @@ export function PopulationHouseholdPage(): React.ReactElement {
     documentType: choicesData?.documentTypeChoices?.[0]?.value,
     documentNumber: '',
     residenceStatus: '',
+    admin1: '',
     admin2: '',
     householdSizeMin: '',
     householdSizeMax: '',

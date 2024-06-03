@@ -90,6 +90,7 @@ export function LookUpHouseholdFiltersCommunication({
         <Grid item xs={3}>
           <AdminAreaAutocomplete
             name="admin2"
+            level={2}
             value={filter.admin2}
             filter={filter}
             setFilter={setFilter}

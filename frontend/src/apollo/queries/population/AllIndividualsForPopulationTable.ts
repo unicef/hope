@@ -21,6 +21,7 @@ export const AllIndividualsForPopulationTable = gql`
     $businessArea: String
     $adminArea: ID
     $withdrawn: Boolean
+    $admin1: [ID]
     $admin2: [ID]
     $flags: [String]
     $program: ID
@@ -46,6 +47,7 @@ export const AllIndividualsForPopulationTable = gql`
       businessArea: $businessArea
       household_AdminArea: $adminArea
       withdrawn: $withdrawn
+      admin1: $admin1
       admin2: $admin2
       flags: $flags
       program: $program

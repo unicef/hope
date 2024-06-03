@@ -2411,6 +2411,7 @@ export type HouseholdNodeHouseholdDataUpdateTicketDetailsArgs = {
 
 
 export type HouseholdNodeIndividualsArgs = {
+  admin1?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   admin2?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   after?: InputMaybe<Scalars['String']['input']>;
   age?: InputMaybe<Scalars['String']['input']>;
@@ -6088,6 +6089,7 @@ export type QueryAllFinancialServiceProvidersArgs = {
 
 
 export type QueryAllGrievanceTicketArgs = {
+  admin1?: InputMaybe<Scalars['ID']['input']>;
   admin2?: InputMaybe<Scalars['ID']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
   area?: InputMaybe<Scalars['String']['input']>;
@@ -6131,6 +6133,7 @@ export type QueryAllGrievanceTicketArgs = {
 export type QueryAllHouseholdsArgs = {
   address?: InputMaybe<Scalars['String']['input']>;
   address_Startswith?: InputMaybe<Scalars['String']['input']>;
+  admin1?: InputMaybe<Scalars['ID']['input']>;
   admin2?: InputMaybe<Scalars['ID']['input']>;
   adminArea?: InputMaybe<Scalars['ID']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6187,6 +6190,7 @@ export type QueryAllImportedIndividualsArgs = {
 
 
 export type QueryAllIndividualsArgs = {
+  admin1?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   admin2?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   after?: InputMaybe<Scalars['String']['input']>;
   age?: InputMaybe<Scalars['String']['input']>;
@@ -10166,6 +10170,7 @@ export type AllGrievanceTicketQueryVariables = Exact<{
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
   fsp?: InputMaybe<Scalars['String']['input']>;
   createdAtRange?: InputMaybe<Scalars['String']['input']>;
+  admin1?: InputMaybe<Scalars['ID']['input']>;
   admin2?: InputMaybe<Scalars['ID']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   registrationDataImport?: InputMaybe<Scalars['ID']['input']>;
@@ -10536,6 +10541,7 @@ export type AllHouseholdsForPopulationTableQueryVariables = Exact<{
   documentNumber?: InputMaybe<Scalars['String']['input']>;
   residenceStatus?: InputMaybe<Scalars['String']['input']>;
   lastRegistrationDate?: InputMaybe<Scalars['String']['input']>;
+  admin1?: InputMaybe<Scalars['ID']['input']>;
   admin2?: InputMaybe<Scalars['ID']['input']>;
   withdrawn?: InputMaybe<Scalars['Boolean']['input']>;
   headOfHouseholdPhoneNoValid?: InputMaybe<Scalars['Boolean']['input']>;
@@ -10593,6 +10599,7 @@ export type AllIndividualsForPopulationTableQueryVariables = Exact<{
   businessArea?: InputMaybe<Scalars['String']['input']>;
   adminArea?: InputMaybe<Scalars['ID']['input']>;
   withdrawn?: InputMaybe<Scalars['Boolean']['input']>;
+  admin1?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
   admin2?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
   flags?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
   program?: InputMaybe<Scalars['ID']['input']>;
@@ -17429,7 +17436,7 @@ export type AllGrievanceDashboardChartsLazyQueryHookResult = ReturnType<typeof u
 export type AllGrievanceDashboardChartsSuspenseQueryHookResult = ReturnType<typeof useAllGrievanceDashboardChartsSuspenseQuery>;
 export type AllGrievanceDashboardChartsQueryResult = Apollo.QueryResult<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
-    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $documentType: String, $documentNumber: String, $status: [String], $fsp: String, $createdAtRange: String, $admin2: ID, $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $createdBy: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String, $grievanceType: String, $grievanceStatus: String, $priority: String, $urgency: String, $preferredLanguage: String, $program: String, $isActiveProgram: Boolean, $isCrossArea: Boolean) {
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $documentType: String, $documentNumber: String, $status: [String], $fsp: String, $createdAtRange: String, $admin1: ID, $admin2: ID, $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $createdBy: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String, $grievanceType: String, $grievanceStatus: String, $priority: String, $urgency: String, $preferredLanguage: String, $program: String, $isActiveProgram: Boolean, $isCrossArea: Boolean) {
   allGrievanceTicket(
     before: $before
     after: $after
@@ -17446,6 +17453,7 @@ export const AllGrievanceTicketDocument = gql`
     fsp: $fsp
     createdAtRange: $createdAtRange
     orderBy: $orderBy
+    admin1: $admin1
     admin2: $admin2
     registrationDataImport: $registrationDataImport
     assignedTo: $assignedTo
@@ -17535,6 +17543,7 @@ export const AllGrievanceTicketDocument = gql`
  *      status: // value for 'status'
  *      fsp: // value for 'fsp'
  *      createdAtRange: // value for 'createdAtRange'
+ *      admin1: // value for 'admin1'
  *      admin2: // value for 'admin2'
  *      orderBy: // value for 'orderBy'
  *      registrationDataImport: // value for 'registrationDataImport'
@@ -20191,7 +20200,7 @@ export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHousehold
 export type AllHouseholdsSuspenseQueryHookResult = ReturnType<typeof useAllHouseholdsSuspenseQuery>;
 export type AllHouseholdsQueryResult = Apollo.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllHouseholdsForPopulationTableDocument = gql`
-    query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $documentType: String, $documentNumber: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean, $headOfHouseholdPhoneNoValid: Boolean, $program: ID, $isActiveProgram: Boolean) {
+    query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $documentType: String, $documentNumber: String, $residenceStatus: String, $lastRegistrationDate: String, $admin1: ID, $admin2: ID, $withdrawn: Boolean, $headOfHouseholdPhoneNoValid: Boolean, $program: ID, $isActiveProgram: Boolean) {
   allHouseholds(
     after: $after
     before: $before
@@ -20207,6 +20216,7 @@ export const AllHouseholdsForPopulationTableDocument = gql`
     documentNumber: $documentNumber
     residenceStatus: $residenceStatus
     lastRegistrationDate: $lastRegistrationDate
+    admin1: $admin1
     admin2: $admin2
     withdrawn: $withdrawn
     headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid
@@ -20286,6 +20296,7 @@ export const AllHouseholdsForPopulationTableDocument = gql`
  *      documentNumber: // value for 'documentNumber'
  *      residenceStatus: // value for 'residenceStatus'
  *      lastRegistrationDate: // value for 'lastRegistrationDate'
+ *      admin1: // value for 'admin1'
  *      admin2: // value for 'admin2'
  *      withdrawn: // value for 'withdrawn'
  *      headOfHouseholdPhoneNoValid: // value for 'headOfHouseholdPhoneNoValid'
@@ -20464,7 +20475,7 @@ export type AllIndividualsLazyQueryHookResult = ReturnType<typeof useAllIndividu
 export type AllIndividualsSuspenseQueryHookResult = ReturnType<typeof useAllIndividualsSuspenseQuery>;
 export type AllIndividualsQueryResult = Apollo.QueryResult<AllIndividualsQuery, AllIndividualsQueryVariables>;
 export const AllIndividualsForPopulationTableDocument = gql`
-    query AllIndividualsForPopulationTable($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $documentType: String, $documentNumber: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String], $program: ID, $isActiveProgram: Boolean) {
+    query AllIndividualsForPopulationTable($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $documentType: String, $documentNumber: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin1: [ID], $admin2: [ID], $flags: [String], $program: ID, $isActiveProgram: Boolean) {
   allIndividuals(
     before: $before
     after: $after
@@ -20485,6 +20496,7 @@ export const AllIndividualsForPopulationTableDocument = gql`
     businessArea: $businessArea
     household_AdminArea: $adminArea
     withdrawn: $withdrawn
+    admin1: $admin1
     admin2: $admin2
     flags: $flags
     program: $program
@@ -20559,6 +20571,7 @@ export const AllIndividualsForPopulationTableDocument = gql`
  *      businessArea: // value for 'businessArea'
  *      adminArea: // value for 'adminArea'
  *      withdrawn: // value for 'withdrawn'
+ *      admin1: // value for 'admin1'
  *      admin2: // value for 'admin2'
  *      flags: // value for 'flags'
  *      program: // value for 'program'
