@@ -97,6 +97,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             for col_name in ["individual_id"]:
                 if col_name in fsp_template_columns:
                     fsp_template_columns.remove(col_name)
+
         # added list() to remove choices display value
         return list(fsp_template_columns)
 
