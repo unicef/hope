@@ -882,8 +882,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             self.validate_index_id(wb)
             self.validate_collectors_size(wb)
 
-
-
             if self.is_social_worker_program:
                 self.validate_people_collectors(wb)
             else:

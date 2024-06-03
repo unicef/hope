@@ -15,7 +15,9 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import LOT_DIFFICULTY
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory
+from hct_mis_api.apps.payment.models import DeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
@@ -150,19 +152,89 @@ class TestDeliveryMechanismDataModel(TestCase):
                         self.assertEqual(dmd_2.possible_duplicate_of, dmd_1)
 
     def test_delivery_mechanism_fields(self) -> None:
-        pass
+        dmd = DeliveryMechanismDataFactory(
+            individual=self.ind, delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD
+        )
+        self.assertEqual(
+            [field["name"] for field in dmd.delivery_mechanism_fields],
+            [
+                "full_name",
+                "card_number_atm_card",
+                "card_expiry_date_atm_card",
+                "name_of_cardholder_atm_card",
+            ],
+        )
 
     def test_required_fields(self) -> None:
-        pass
+        dmd = DeliveryMechanismDataFactory(
+            individual=self.ind, delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD
+        )
+        self.assertEqual(
+            [field["name"] for field in dmd.required_fields],
+            [
+                "card_number_atm_card",
+                "card_expiry_date_atm_card",
+                "name_of_cardholder_atm_card",
+            ],
+        )
 
     def test_unique_fields(self) -> None:
-        pass
+        dmd = DeliveryMechanismDataFactory(
+            individual=self.ind, delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD
+        )
+        self.assertEqual(
+            [field["name"] for field in dmd.unique_fields],
+            [
+                "card_number_atm_card",
+                "card_expiry_date_atm_card",
+                "name_of_cardholder_atm_card",
+            ],
+        )
+
+    def test_get_all_delivery_mechanisms_fields(self) -> None:
+        fields = DeliveryMechanismData.get_all_delivery_mechanisms_fields()
+        self.assertEqual(
+            [fields["name"] for fields in fields],
+            [
+                "full_name",
+                "card_number_atm_card",
+                "card_expiry_date_atm_card",
+                "name_of_cardholder_atm_card",
+                "card_number_deposit_to_card",
+                "delivery_phone_number_mobile_money",
+                "bank_name_transfer_to_account",
+                "bank_account_number_transfer_to_account",
+                "mobile_phone_number_cash_over_the_counter",
+                "wallet_name_transfer_to_digital_wallet",
+                "blockchain_name_transfer_to_digital_wallet",
+                "wallet_address_transfer_to_digital_wallet",
+            ],
+        )
 
     def test_get_required_delivery_mechanism_fields(self) -> None:
-        pass
+        fields = DeliveryMechanismData.get_required_delivery_mechanism_fields(
+            DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD
+        )
+        self.assertEqual(
+            [fields["name"] for fields in fields],
+            [
+                "card_number_atm_card",
+                "card_expiry_date_atm_card",
+                "name_of_cardholder_atm_card",
+            ],
+        )
 
     def test_get_delivery_mechanism_fields(self) -> None:
-        pass
+        fields = DeliveryMechanismData.get_delivery_mechanism_fields(DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD)
+        self.assertEqual(
+            [fields["name"] for fields in fields],
+            [
+                "full_name",
+                "card_number_atm_card",
+                "card_expiry_date_atm_card",
+                "name_of_cardholder_atm_card",
+            ],
+        )
 
     def test_get_grievance_ticket_payload_for_errors(self) -> None:
         pass
