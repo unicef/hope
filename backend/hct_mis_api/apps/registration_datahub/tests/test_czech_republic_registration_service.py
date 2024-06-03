@@ -36,10 +36,6 @@ from hct_mis_api.aurora.services.czech_republic_flex_registration_service import
 
 
 class TestCzechRepublicRegistrationService(TestCase):
-    databases = {
-        "default",
-        "registration_datahub",
-    }
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
@@ -228,18 +224,18 @@ class TestCzechRepublicRegistrationService(TestCase):
         )
         self.assertEqual(Household.objects.count(), 1)
 
-        imported_household = Household.objects.first()
-        self.assertEqual(imported_household.consent, True)
-        self.assertEqual(imported_household.consent_sharing, [GOVERNMENT_PARTNER, PRIVATE_PARTNER])
-        self.assertEqual(imported_household.country, geo_models.Country.objects.get(iso_code2="CZ"))
-        self.assertEqual(imported_household.country_origin, geo_models.Country.objects.get(iso_code2="CZ"))
-        self.assertEqual(imported_household.size, 4)
-        self.assertEqual(imported_household.zip_code, "19017")
-        self.assertEqual(imported_household.village, "Praha")
-        self.assertEqual(imported_household.head_of_household, Individual.objects.get(full_name="Ivan Drago"))
-        self.assertEqual(imported_household.rdi_merge_status, "PENDING")
+        household = Household.objects.first()
+        self.assertEqual(household.consent, True)
+        self.assertEqual(household.consent_sharing, [GOVERNMENT_PARTNER, PRIVATE_PARTNER])
+        self.assertEqual(household.country, geo_models.Country.objects.get(iso_code2="CZ"))
+        self.assertEqual(household.country_origin, geo_models.Country.objects.get(iso_code2="CZ"))
+        self.assertEqual(household.size, 4)
+        self.assertEqual(household.zip_code, "19017")
+        self.assertEqual(household.village, "Praha")
+        self.assertEqual(household.head_of_household, Individual.objects.get(full_name="Ivan Drago"))
+        self.assertEqual(household.rdi_merge_status, "PENDING")
 
-        registration_data_import = imported_household.registration_data_import
+        registration_data_import = household.registration_data_import
         self.assertEqual(registration_data_import.program, self.program)
 
         head_of_household = Individual.objects.get(full_name="Ivan Drago")
@@ -259,7 +255,7 @@ class TestCzechRepublicRegistrationService(TestCase):
 
         primary_role = IndividualRoleInHousehold.objects.first()
         self.assertEqual(primary_role.individual, primary_collector)
-        self.assertEqual(primary_role.household, imported_household)
+        self.assertEqual(primary_role.household, household)
         self.assertEqual(BankAccountInfo.objects.count(), 1)
 
         first_child = Individual.objects.get(given_name="John")
