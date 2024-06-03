@@ -11,6 +11,7 @@ from page_object.targeting.targeting import Targeting
 from page_object.targeting.targeting_create import TargetingCreate
 from page_object.targeting.targeting_details import TargetingDetails
 from selenium.webdriver import ActionChains, Keys
+from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
@@ -24,7 +25,6 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
-from selenium.webdriver.common.by import By
 from selenium_tests.page_object.filters import Filters
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -532,7 +532,6 @@ class TestTargeting:
         pageTargetingDetails.getCheckboxExcludeIfActiveAdjudicationTicket()
         pageTargetingDetails.getIconSelected()
 
-
     def test_targeting_filters_and_labels(
         self,
         create_programs: None,
@@ -545,6 +544,7 @@ class TestTargeting:
         pageTargeting.getNavTargeting().click()
         filters.getFiltersSearch().click()
         from time import sleep
+
         sleep(1)
         filters.getFiltersSearch().send_keys("123123")
         filters.getFiltersTotalHouseholdsCountMin().click()
