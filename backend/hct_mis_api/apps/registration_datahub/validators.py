@@ -1,3 +1,4 @@
+import itertools
 import logging
 import re
 from collections import Counter, defaultdict
@@ -947,7 +948,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
     def validate_people_collectors(self, wb: Workbook) -> List[Dict[str, Any]]:
         try:
-            errors, index_ids, primary_collector_ids, alternate_collector_ids, relationship_column = [], [], [], [], []
+            errors, index_ids, primary_collector_ids, relationship_column = [], [], [], []
             people_sheet = wb["People"]
             first_row = people_sheet[1]
 
@@ -964,13 +965,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             min_col=pr_collector_id_col, max_col=pr_collector_id_col, min_row=3, values_only=True
                         )
                     )[0]
-                if header.value == "pp_alternate_collector_id":
-                    alt_collector_id_col = int(header.column)
-                    alternate_collector_ids = list(
-                        people_sheet.iter_cols(
-                            min_col=alt_collector_id_col, max_col=alt_collector_id_col, min_row=3, values_only=True
-                        )
-                    )[0]
                 if header.value == "pp_relationship_i_c":
                     relationship_col = int(header.column)
                     relationship_column = list(
@@ -978,10 +972,9 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             min_col=relationship_col, max_col=relationship_col, min_row=3, values_only=True
                         )
                     )[0]
-            alt_ids = [int(i) for i in alternate_collector_ids if i is not None]
             pr_ids = [int(i) for i in primary_collector_ids if i is not None]
-            for index_id, relationship, pr_col, alt_col in zip(
-                index_ids, relationship_column, primary_collector_ids, alternate_collector_ids
+            for index_id, relationship, pr_col in itertools.zip_longest(
+                index_ids, relationship_column, primary_collector_ids, fillvalue=None
             ):
                 if relationship not in [HEAD, NON_BENEFICIARY] and index_id is not None:
                     errors.append(
@@ -992,27 +985,21 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             f"Value can be {HEAD} or {NON_BENEFICIARY}",
                         }
                     )
-                if (
-                    relationship == HEAD
-                    and index_id is not None
-                    and int(index_id) not in pr_ids
-                    and int(index_id) not in alt_ids
-                ):
+                if relationship == HEAD and index_id is not None and int(index_id) not in pr_ids:
                     errors.append(
                         {
                             "row_number": 1,
                             "header": "People",
-                            "message": f"Individual with index_id {index_id} has to have an external collector.",
+                            "message": f"Individual with index_id {index_id} has to have an Primary collector.",
                         }
                     )
-                if relationship == NON_BENEFICIARY and (pr_col is None and alt_col is None):
+                if relationship == NON_BENEFICIARY and (pr_col is None):
                     errors.append(
                         {
                             "row_number": 1,
                             "header": "People",
-                            "message": f"Invalid value in field 'pp_primary_collector_id' or "
-                            f"'pp_alternate_collector_id' for Individual with index_id {index_id}. "
-                            f"Both fields can't be empty.",
+                            "message": f"Invalid value in field 'pp_primary_collector_id' for Individual with index_id {index_id}. "
+                            f"Value cannot be empty for relationship {NON_BENEFICIARY}",
                         }
                     )
 

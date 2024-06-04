@@ -16,6 +16,7 @@ export const AllHouseholdsForPopulationTable = gql`
     $documentNumber: String
     $residenceStatus: String
     $lastRegistrationDate: String
+    $admin1: ID
     $admin2: ID
     $withdrawn: Boolean
     $headOfHouseholdPhoneNoValid: Boolean
@@ -37,6 +38,7 @@ export const AllHouseholdsForPopulationTable = gql`
       documentNumber: $documentNumber
       residenceStatus: $residenceStatus
       lastRegistrationDate: $lastRegistrationDate
+      admin1: $admin1
       admin2: $admin2
       withdrawn: $withdrawn
       headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid

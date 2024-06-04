@@ -117,18 +117,6 @@ export function HouseholdFilters({
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
-          <AdminAreaAutocomplete
-            name="admin2"
-            value={filter.admin2}
-            filter={filter}
-            setFilter={setFilter}
-            initialFilter={initialFilter}
-            appliedFilter={appliedFilter}
-            setAppliedFilter={setAppliedFilter}
-            dataCy="hh-filters-admin2"
-          />
-        </Grid>
-        <Grid item xs={3}>
           <NumberTextField
             topLabel={t('Household Size')}
             value={filter.householdSizeMin}
@@ -203,6 +191,34 @@ export function HouseholdFilters({
             </SelectFilter>
           </Grid>
         )}
+        <Grid item xs={3}>
+          <AdminAreaAutocomplete
+            name="admin1"
+            level={1}
+            value={filter.admin1}
+            filter={filter}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+            disabled={filter.admin2}
+            dataCy="hh-filters-admin1"
+          />
+        </Grid>
+        <Grid item xs={3}>
+          <AdminAreaAutocomplete
+            name="admin2"
+            level={2}
+            value={filter.admin2}
+            filter={filter}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+            disabled={filter.admin1}
+            dataCy="hh-filters-admin2"
+          />
+        </Grid>
       </Grid>
     </FiltersSection>
   );

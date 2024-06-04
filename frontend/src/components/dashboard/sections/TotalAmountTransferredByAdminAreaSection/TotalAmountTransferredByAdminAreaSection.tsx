@@ -4,73 +4,52 @@ import { useCountryChartsLazyQuery } from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { CardTextLightLarge } from '../../DashboardCard';
 import { DashboardPaper } from '../../DashboardPaper';
-import { TotalAmountTransferredByAdminAreaTable } from '../../TotalAmountTransferredByAdminAreaTable';
+import { TotalAmountTransferredByAdminAreaTable } from './TotalAmountTransferredByAdminAreaTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface TotalAmountTransferredSectionByAdminAreaSectionProps {
   year: string;
   filter;
-  businessArea: string;
 }
 export function TotalAmountTransferredSectionByAdminAreaSection({
   year,
   filter,
-  businessArea,
 }: TotalAmountTransferredSectionByAdminAreaSectionProps): React.ReactElement {
   const { t } = useTranslation();
   const [orderBy, setOrderBy] = useState('totalCashTransferred');
   const [order, setOrder] = useState('desc');
-  const { programId } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const variables = {
     year: parseInt(year, 10),
     businessAreaSlug: businessArea,
     program: programId,
     administrativeArea: filter.administrativeArea?.node?.id,
   };
-  const [
-    loadCountry,
-    {
-      data: countryData,
-      loading: countryLoading,
-      refetch: refetchAdminAreaChart,
-    },
-  ] = useCountryChartsLazyQuery({
-    variables: {
-      ...variables,
-      orderBy,
-      order,
-    },
-  });
+  const [loadCountry, { data: countryData, loading: countryLoading }] =
+    useCountryChartsLazyQuery({
+      variables: {
+        ...variables,
+        orderBy,
+        order,
+      },
+      fetchPolicy: 'cache-and-network',
+    });
 
   useEffect(() => {
-    if (businessArea !== 'global') {
-      loadCountry();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [businessArea]);
+    void loadCountry();
+  }, [loadCountry, orderBy, order]);
 
-  const handleSortAdminArea = (event, property): void => {
-    let direction = '';
+  const handleSortAdminArea = (_, property): void => {
     if (property !== orderBy) {
       setOrderBy(property.toString());
-      direction = order;
+      setOrder('desc');
     } else {
-      direction = order === 'desc' ? 'asc' : 'desc';
-      setOrder(direction);
+      setOrder((currOrder) => (currOrder === 'desc' ? 'asc' : 'desc'));
     }
-    const variablesRefetch = {
-      ...variables,
-      orderBy: property,
-      order: direction,
-    };
-    refetchAdminAreaChart(variablesRefetch);
   };
 
   if (countryLoading) return <LoadingComponent />;
-
-  if (businessArea === 'global' || !countryData) {
-    return null;
-  }
+  if (!countryData) return null;
 
   return (
     <DashboardPaper

@@ -77,7 +77,6 @@ export const EditProgramPage = (): ReactElement => {
   } = data.program;
 
   const handleSubmit = async (values): Promise<void> => {
-    delete values.editMode;
     const budgetValue = parseFloat(values.budget) ?? 0;
     const budgetToFixed = !Number.isNaN(budgetValue)
       ? budgetValue.toFixed(2)
@@ -94,13 +93,14 @@ export const EditProgramPage = (): ReactElement => {
             areaAccess,
           }))
         : [];
+    const { editMode, ...requestValues } = values;
 
     try {
       const response = await mutate({
         variables: {
           programData: {
             id,
-            ...values,
+            ...requestValues,
             budget: budgetToFixed,
             populationGoal: populationGoalParsed,
             partners: partnersToSet,

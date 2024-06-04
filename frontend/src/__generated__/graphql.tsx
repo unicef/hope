@@ -2411,6 +2411,7 @@ export type HouseholdNodeHouseholdDataUpdateTicketDetailsArgs = {
 
 
 export type HouseholdNodeIndividualsArgs = {
+  admin1?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   admin2?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   after?: InputMaybe<Scalars['String']['input']>;
   age?: InputMaybe<Scalars['String']['input']>;
@@ -3923,6 +3924,7 @@ export type Mutations = {
   reassignRole?: Maybe<ReassignRoleMutation>;
   refuseRegistrationDataImport?: Maybe<RefuseRegistrationDataImportMutation>;
   registrationKoboImport?: Maybe<RegistrationKoboImportMutation>;
+  registrationProgramPopulationImport?: Maybe<RegistrationProgramPopulationImportMutation>;
   registrationXlsxImport?: Maybe<RegistrationXlsxImportMutation>;
   rerunDedupe?: Maybe<RegistrationDeduplicationMutation>;
   restartCreateReport?: Maybe<RestartCreateReport>;
@@ -4309,6 +4311,11 @@ export type MutationsRefuseRegistrationDataImportArgs = {
 
 export type MutationsRegistrationKoboImportArgs = {
   registrationDataImportData: RegistrationKoboImportMutationInput;
+};
+
+
+export type MutationsRegistrationProgramPopulationImportArgs = {
+  registrationDataImportData: RegistrationProgramPopulationImportMutationInput;
 };
 
 
@@ -5747,6 +5754,8 @@ export type Query = {
   chartIndividualsWithDisabilityReachedByAge?: Maybe<ChartDetailedDatasetsNode>;
   chartPayment?: Maybe<ChartDatasetNode>;
   chartPaymentVerification?: Maybe<ChartPaymentVerification>;
+  chartPeopleReachedByAgeAndGender?: Maybe<ChartDatasetNode>;
+  chartPeopleWithDisabilityReachedByAge?: Maybe<ChartDetailedDatasetsNode>;
   chartProgrammesBySector?: Maybe<ChartDetailedDatasetsNode>;
   chartTotalTransferredByMonth?: Maybe<ChartDetailedDatasetsNode>;
   chartTotalTransferredCashByCountry?: Maybe<ChartDetailedDatasetsNode>;
@@ -5822,6 +5831,7 @@ export type Query = {
   sectionChildReached?: Maybe<SectionTotalNode>;
   sectionHouseholdsReached?: Maybe<SectionTotalNode>;
   sectionIndividualsReached?: Maybe<SectionTotalNode>;
+  sectionPeopleReached?: Maybe<SectionTotalNode>;
   sectionTotalTransferred?: Maybe<SectionTotalNode>;
   severityOfDisabilityChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   sexChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
@@ -5903,6 +5913,7 @@ export type QueryAllActiveProgramsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   budget?: InputMaybe<Scalars['String']['input']>;
   businessArea: Scalars['String']['input'];
+  compatibleDct?: InputMaybe<Scalars['Boolean']['input']>;
   dataCollectingType?: InputMaybe<Scalars['String']['input']>;
   endDate?: InputMaybe<Scalars['Date']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -6088,6 +6099,7 @@ export type QueryAllFinancialServiceProvidersArgs = {
 
 
 export type QueryAllGrievanceTicketArgs = {
+  admin1?: InputMaybe<Scalars['ID']['input']>;
   admin2?: InputMaybe<Scalars['ID']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
   area?: InputMaybe<Scalars['String']['input']>;
@@ -6131,6 +6143,7 @@ export type QueryAllGrievanceTicketArgs = {
 export type QueryAllHouseholdsArgs = {
   address?: InputMaybe<Scalars['String']['input']>;
   address_Startswith?: InputMaybe<Scalars['String']['input']>;
+  admin1?: InputMaybe<Scalars['ID']['input']>;
   admin2?: InputMaybe<Scalars['ID']['input']>;
   adminArea?: InputMaybe<Scalars['ID']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6187,6 +6200,7 @@ export type QueryAllImportedIndividualsArgs = {
 
 
 export type QueryAllIndividualsArgs = {
+  admin1?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   admin2?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   after?: InputMaybe<Scalars['String']['input']>;
   age?: InputMaybe<Scalars['String']['input']>;
@@ -6385,6 +6399,7 @@ export type QueryAllProgramsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   budget?: InputMaybe<Scalars['String']['input']>;
   businessArea: Scalars['String']['input'];
+  compatibleDct?: InputMaybe<Scalars['Boolean']['input']>;
   dataCollectingType?: InputMaybe<Scalars['String']['input']>;
   endDate?: InputMaybe<Scalars['Date']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -6603,6 +6618,22 @@ export type QueryChartPaymentArgs = {
 
 
 export type QueryChartPaymentVerificationArgs = {
+  administrativeArea?: InputMaybe<Scalars['String']['input']>;
+  businessAreaSlug: Scalars['String']['input'];
+  program?: InputMaybe<Scalars['String']['input']>;
+  year: Scalars['Int']['input'];
+};
+
+
+export type QueryChartPeopleReachedByAgeAndGenderArgs = {
+  administrativeArea?: InputMaybe<Scalars['String']['input']>;
+  businessAreaSlug: Scalars['String']['input'];
+  program?: InputMaybe<Scalars['String']['input']>;
+  year: Scalars['Int']['input'];
+};
+
+
+export type QueryChartPeopleWithDisabilityReachedByAgeArgs = {
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
   businessAreaSlug: Scalars['String']['input'];
   program?: InputMaybe<Scalars['String']['input']>;
@@ -6834,6 +6865,14 @@ export type QuerySectionIndividualsReachedArgs = {
 };
 
 
+export type QuerySectionPeopleReachedArgs = {
+  administrativeArea?: InputMaybe<Scalars['String']['input']>;
+  businessAreaSlug: Scalars['String']['input'];
+  program?: InputMaybe<Scalars['String']['input']>;
+  year: Scalars['Int']['input'];
+};
+
+
 export type QuerySectionTotalTransferredArgs = {
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
   businessAreaSlug: Scalars['String']['input'];
@@ -7000,6 +7039,7 @@ export enum RegistrationDataImportDataSource {
   Edopomoga = 'EDOPOMOGA',
   FlexRegistration = 'FLEX_REGISTRATION',
   Kobo = 'KOBO',
+  ProgramPopulation = 'PROGRAM_POPULATION',
   Xls = 'XLS'
 }
 
@@ -7181,6 +7221,19 @@ export type RegistrationKoboImportMutationInput = {
   importDataId?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   pullPictures?: InputMaybe<Scalars['Boolean']['input']>;
+  screenBeneficiary?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type RegistrationProgramPopulationImportMutation = {
+  __typename?: 'RegistrationProgramPopulationImportMutation';
+  registrationDataImport?: Maybe<RegistrationDataImportNode>;
+  validationErrors?: Maybe<Scalars['Arg']['output']>;
+};
+
+export type RegistrationProgramPopulationImportMutationInput = {
+  businessAreaSlug?: InputMaybe<Scalars['String']['input']>;
+  importFromProgramId?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
   screenBeneficiary?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
@@ -9750,6 +9803,13 @@ export type CreateRegistrationKoboImportMutationVariables = Exact<{
 
 export type CreateRegistrationKoboImportMutation = { __typename?: 'Mutations', registrationKoboImport?: { __typename?: 'RegistrationKoboImportMutation', validationErrors?: any | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, name: string, dataSource: RegistrationDataImportDataSource, datahubId?: any | null, screenBeneficiary: boolean } | null } | null };
 
+export type CreateRegistrationProgramPopulationImportMutationVariables = Exact<{
+  registrationDataImportData: RegistrationProgramPopulationImportMutationInput;
+}>;
+
+
+export type CreateRegistrationProgramPopulationImportMutation = { __typename?: 'Mutations', registrationProgramPopulationImport?: { __typename?: 'RegistrationProgramPopulationImportMutation', validationErrors?: any | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, name: string, dataSource: RegistrationDataImportDataSource, datahubId?: any | null, screenBeneficiary: boolean } | null } | null };
+
 export type CreateRegistrationXlsxImportMutationVariables = Exact<{
   registrationDataImportData: RegistrationXlsxImportMutationInput;
 }>;
@@ -10166,6 +10226,7 @@ export type AllGrievanceTicketQueryVariables = Exact<{
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
   fsp?: InputMaybe<Scalars['String']['input']>;
   createdAtRange?: InputMaybe<Scalars['String']['input']>;
+  admin1?: InputMaybe<Scalars['ID']['input']>;
   admin2?: InputMaybe<Scalars['ID']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   registrationDataImport?: InputMaybe<Scalars['ID']['input']>;
@@ -10536,6 +10597,7 @@ export type AllHouseholdsForPopulationTableQueryVariables = Exact<{
   documentNumber?: InputMaybe<Scalars['String']['input']>;
   residenceStatus?: InputMaybe<Scalars['String']['input']>;
   lastRegistrationDate?: InputMaybe<Scalars['String']['input']>;
+  admin1?: InputMaybe<Scalars['ID']['input']>;
   admin2?: InputMaybe<Scalars['ID']['input']>;
   withdrawn?: InputMaybe<Scalars['Boolean']['input']>;
   headOfHouseholdPhoneNoValid?: InputMaybe<Scalars['Boolean']['input']>;
@@ -10593,6 +10655,7 @@ export type AllIndividualsForPopulationTableQueryVariables = Exact<{
   businessArea?: InputMaybe<Scalars['String']['input']>;
   adminArea?: InputMaybe<Scalars['ID']['input']>;
   withdrawn?: InputMaybe<Scalars['Boolean']['input']>;
+  admin1?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
   admin2?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
   flags?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
   program?: InputMaybe<Scalars['ID']['input']>;
@@ -10695,6 +10758,7 @@ export type AllProgramsForChoicesQueryVariables = Exact<{
   endDate?: InputMaybe<Scalars['Date']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  compatibleDct?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
 
@@ -10889,7 +10953,7 @@ export type AllChartsQueryVariables = Exact<{
 }>;
 
 
-export type AllChartsQuery = { __typename?: 'Query', chartProgrammesBySector?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartPaymentVerification?: { __typename?: 'ChartPaymentVerification', labels?: Array<string | null> | null, households?: number | null, averageSampleSize?: number | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartVolumeByDeliveryMechanism?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartPayment?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartGrievances?: { __typename?: 'ChartGrievanceTicketsNode', labels?: Array<string | null> | null, totalNumberOfGrievances?: number | null, totalNumberOfFeedback?: number | null, totalNumberOfOpenSensitive?: number | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, sectionHouseholdsReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionIndividualsReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionChildReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, chartIndividualsReachedByAgeAndGender?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartIndividualsWithDisabilityReachedByAge?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null, sectionTotalTransferred?: { __typename?: 'SectionTotalNode', total?: number | null } | null, chartTotalTransferredByMonth?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null };
+export type AllChartsQuery = { __typename?: 'Query', chartProgrammesBySector?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartPaymentVerification?: { __typename?: 'ChartPaymentVerification', labels?: Array<string | null> | null, households?: number | null, averageSampleSize?: number | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartVolumeByDeliveryMechanism?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartPayment?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartGrievances?: { __typename?: 'ChartGrievanceTicketsNode', labels?: Array<string | null> | null, totalNumberOfGrievances?: number | null, totalNumberOfFeedback?: number | null, totalNumberOfOpenSensitive?: number | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, sectionHouseholdsReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionIndividualsReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionPeopleReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionChildReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, chartIndividualsReachedByAgeAndGender?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartIndividualsWithDisabilityReachedByAge?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null, chartPeopleReachedByAgeAndGender?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartPeopleWithDisabilityReachedByAge?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null, sectionTotalTransferred?: { __typename?: 'SectionTotalNode', total?: number | null } | null, chartTotalTransferredByMonth?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null };
 
 export type CountryChartsQueryVariables = Exact<{
   businessAreaSlug: Scalars['String']['input'];
@@ -14845,6 +14909,48 @@ export function useCreateRegistrationKoboImportMutation(baseOptions?: Apollo.Mut
 export type CreateRegistrationKoboImportMutationHookResult = ReturnType<typeof useCreateRegistrationKoboImportMutation>;
 export type CreateRegistrationKoboImportMutationResult = Apollo.MutationResult<CreateRegistrationKoboImportMutation>;
 export type CreateRegistrationKoboImportMutationOptions = Apollo.BaseMutationOptions<CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables>;
+export const CreateRegistrationProgramPopulationImportDocument = gql`
+    mutation CreateRegistrationProgramPopulationImport($registrationDataImportData: RegistrationProgramPopulationImportMutationInput!) {
+  registrationProgramPopulationImport(
+    registrationDataImportData: $registrationDataImportData
+  ) {
+    registrationDataImport {
+      id
+      name
+      dataSource
+      datahubId
+      screenBeneficiary
+    }
+    validationErrors
+  }
+}
+    `;
+export type CreateRegistrationProgramPopulationImportMutationFn = Apollo.MutationFunction<CreateRegistrationProgramPopulationImportMutation, CreateRegistrationProgramPopulationImportMutationVariables>;
+
+/**
+ * __useCreateRegistrationProgramPopulationImportMutation__
+ *
+ * To run a mutation, you first call `useCreateRegistrationProgramPopulationImportMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateRegistrationProgramPopulationImportMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createRegistrationProgramPopulationImportMutation, { data, loading, error }] = useCreateRegistrationProgramPopulationImportMutation({
+ *   variables: {
+ *      registrationDataImportData: // value for 'registrationDataImportData'
+ *   },
+ * });
+ */
+export function useCreateRegistrationProgramPopulationImportMutation(baseOptions?: Apollo.MutationHookOptions<CreateRegistrationProgramPopulationImportMutation, CreateRegistrationProgramPopulationImportMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateRegistrationProgramPopulationImportMutation, CreateRegistrationProgramPopulationImportMutationVariables>(CreateRegistrationProgramPopulationImportDocument, options);
+      }
+export type CreateRegistrationProgramPopulationImportMutationHookResult = ReturnType<typeof useCreateRegistrationProgramPopulationImportMutation>;
+export type CreateRegistrationProgramPopulationImportMutationResult = Apollo.MutationResult<CreateRegistrationProgramPopulationImportMutation>;
+export type CreateRegistrationProgramPopulationImportMutationOptions = Apollo.BaseMutationOptions<CreateRegistrationProgramPopulationImportMutation, CreateRegistrationProgramPopulationImportMutationVariables>;
 export const CreateRegistrationXlsxImportDocument = gql`
     mutation CreateRegistrationXlsxImport($registrationDataImportData: RegistrationXlsxImportMutationInput!) {
   registrationXlsxImport(registrationDataImportData: $registrationDataImportData) {
@@ -17429,7 +17535,7 @@ export type AllGrievanceDashboardChartsLazyQueryHookResult = ReturnType<typeof u
 export type AllGrievanceDashboardChartsSuspenseQueryHookResult = ReturnType<typeof useAllGrievanceDashboardChartsSuspenseQuery>;
 export type AllGrievanceDashboardChartsQueryResult = Apollo.QueryResult<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
-    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $documentType: String, $documentNumber: String, $status: [String], $fsp: String, $createdAtRange: String, $admin2: ID, $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $createdBy: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String, $grievanceType: String, $grievanceStatus: String, $priority: String, $urgency: String, $preferredLanguage: String, $program: String, $isActiveProgram: Boolean, $isCrossArea: Boolean) {
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $documentType: String, $documentNumber: String, $status: [String], $fsp: String, $createdAtRange: String, $admin1: ID, $admin2: ID, $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $createdBy: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String, $grievanceType: String, $grievanceStatus: String, $priority: String, $urgency: String, $preferredLanguage: String, $program: String, $isActiveProgram: Boolean, $isCrossArea: Boolean) {
   allGrievanceTicket(
     before: $before
     after: $after
@@ -17446,6 +17552,7 @@ export const AllGrievanceTicketDocument = gql`
     fsp: $fsp
     createdAtRange: $createdAtRange
     orderBy: $orderBy
+    admin1: $admin1
     admin2: $admin2
     registrationDataImport: $registrationDataImport
     assignedTo: $assignedTo
@@ -17535,6 +17642,7 @@ export const AllGrievanceTicketDocument = gql`
  *      status: // value for 'status'
  *      fsp: // value for 'fsp'
  *      createdAtRange: // value for 'createdAtRange'
+ *      admin1: // value for 'admin1'
  *      admin2: // value for 'admin2'
  *      orderBy: // value for 'orderBy'
  *      registrationDataImport: // value for 'registrationDataImport'
@@ -20191,7 +20299,7 @@ export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHousehold
 export type AllHouseholdsSuspenseQueryHookResult = ReturnType<typeof useAllHouseholdsSuspenseQuery>;
 export type AllHouseholdsQueryResult = Apollo.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllHouseholdsForPopulationTableDocument = gql`
-    query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $documentType: String, $documentNumber: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean, $headOfHouseholdPhoneNoValid: Boolean, $program: ID, $isActiveProgram: Boolean) {
+    query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $documentType: String, $documentNumber: String, $residenceStatus: String, $lastRegistrationDate: String, $admin1: ID, $admin2: ID, $withdrawn: Boolean, $headOfHouseholdPhoneNoValid: Boolean, $program: ID, $isActiveProgram: Boolean) {
   allHouseholds(
     after: $after
     before: $before
@@ -20207,6 +20315,7 @@ export const AllHouseholdsForPopulationTableDocument = gql`
     documentNumber: $documentNumber
     residenceStatus: $residenceStatus
     lastRegistrationDate: $lastRegistrationDate
+    admin1: $admin1
     admin2: $admin2
     withdrawn: $withdrawn
     headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid
@@ -20286,6 +20395,7 @@ export const AllHouseholdsForPopulationTableDocument = gql`
  *      documentNumber: // value for 'documentNumber'
  *      residenceStatus: // value for 'residenceStatus'
  *      lastRegistrationDate: // value for 'lastRegistrationDate'
+ *      admin1: // value for 'admin1'
  *      admin2: // value for 'admin2'
  *      withdrawn: // value for 'withdrawn'
  *      headOfHouseholdPhoneNoValid: // value for 'headOfHouseholdPhoneNoValid'
@@ -20464,7 +20574,7 @@ export type AllIndividualsLazyQueryHookResult = ReturnType<typeof useAllIndividu
 export type AllIndividualsSuspenseQueryHookResult = ReturnType<typeof useAllIndividualsSuspenseQuery>;
 export type AllIndividualsQueryResult = Apollo.QueryResult<AllIndividualsQuery, AllIndividualsQueryVariables>;
 export const AllIndividualsForPopulationTableDocument = gql`
-    query AllIndividualsForPopulationTable($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $documentType: String, $documentNumber: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String], $program: ID, $isActiveProgram: Boolean) {
+    query AllIndividualsForPopulationTable($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $documentType: String, $documentNumber: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin1: [ID], $admin2: [ID], $flags: [String], $program: ID, $isActiveProgram: Boolean) {
   allIndividuals(
     before: $before
     after: $after
@@ -20485,6 +20595,7 @@ export const AllIndividualsForPopulationTableDocument = gql`
     businessArea: $businessArea
     household_AdminArea: $adminArea
     withdrawn: $withdrawn
+    admin1: $admin1
     admin2: $admin2
     flags: $flags
     program: $program
@@ -20559,6 +20670,7 @@ export const AllIndividualsForPopulationTableDocument = gql`
  *      businessArea: // value for 'businessArea'
  *      adminArea: // value for 'adminArea'
  *      withdrawn: // value for 'withdrawn'
+ *      admin1: // value for 'admin1'
  *      admin2: // value for 'admin2'
  *      flags: // value for 'flags'
  *      program: // value for 'program'
@@ -21047,7 +21159,7 @@ export type AllProgramsLazyQueryHookResult = ReturnType<typeof useAllProgramsLaz
 export type AllProgramsSuspenseQueryHookResult = ReturnType<typeof useAllProgramsSuspenseQuery>;
 export type AllProgramsQueryResult = Apollo.QueryResult<AllProgramsQuery, AllProgramsQueryVariables>;
 export const AllProgramsForChoicesDocument = gql`
-    query AllProgramsForChoices($before: String, $after: String, $first: Int, $last: Int, $status: [String], $sector: [String], $businessArea: String!, $search: String, $numberOfHouseholds: String, $budget: String, $startDate: Date, $endDate: Date, $orderBy: String, $name: String) {
+    query AllProgramsForChoices($before: String, $after: String, $first: Int, $last: Int, $status: [String], $sector: [String], $businessArea: String!, $search: String, $numberOfHouseholds: String, $budget: String, $startDate: Date, $endDate: Date, $orderBy: String, $name: String, $compatibleDct: Boolean) {
   allPrograms(
     before: $before
     after: $after
@@ -21063,6 +21175,7 @@ export const AllProgramsForChoicesDocument = gql`
     startDate: $startDate
     endDate: $endDate
     name: $name
+    compatibleDct: $compatibleDct
   ) {
     pageInfo {
       hasNextPage
@@ -21120,6 +21233,7 @@ export const AllProgramsForChoicesDocument = gql`
  *      endDate: // value for 'endDate'
  *      orderBy: // value for 'orderBy'
  *      name: // value for 'name'
+ *      compatibleDct: // value for 'compatibleDct'
  *   },
  * });
  */
@@ -22269,6 +22383,14 @@ export const AllChartsDocument = gql`
   ) {
     total
   }
+  sectionPeopleReached(
+    businessAreaSlug: $businessAreaSlug
+    year: $year
+    program: $program
+    administrativeArea: $administrativeArea
+  ) {
+    total
+  }
   sectionChildReached(
     businessAreaSlug: $businessAreaSlug
     year: $year
@@ -22289,6 +22411,29 @@ export const AllChartsDocument = gql`
     labels
   }
   chartIndividualsWithDisabilityReachedByAge(
+    businessAreaSlug: $businessAreaSlug
+    year: $year
+    program: $program
+    administrativeArea: $administrativeArea
+  ) {
+    datasets {
+      data
+      label
+    }
+    labels
+  }
+  chartPeopleReachedByAgeAndGender(
+    businessAreaSlug: $businessAreaSlug
+    year: $year
+    program: $program
+    administrativeArea: $administrativeArea
+  ) {
+    datasets {
+      data
+    }
+    labels
+  }
+  chartPeopleWithDisabilityReachedByAge(
     businessAreaSlug: $businessAreaSlug
     year: $year
     program: $program
@@ -23829,6 +23974,8 @@ export type ResolversTypes = {
   RegistrationDeduplicationMutation: ResolverTypeWrapper<RegistrationDeduplicationMutation>;
   RegistrationKoboImportMutation: ResolverTypeWrapper<RegistrationKoboImportMutation>;
   RegistrationKoboImportMutationInput: RegistrationKoboImportMutationInput;
+  RegistrationProgramPopulationImportMutation: ResolverTypeWrapper<RegistrationProgramPopulationImportMutation>;
+  RegistrationProgramPopulationImportMutationInput: RegistrationProgramPopulationImportMutationInput;
   RegistrationXlsxImportMutation: ResolverTypeWrapper<RegistrationXlsxImportMutation>;
   RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput;
   ReportNode: ResolverTypeWrapper<ReportNode>;
@@ -24292,6 +24439,8 @@ export type ResolversParentTypes = {
   RegistrationDeduplicationMutation: RegistrationDeduplicationMutation;
   RegistrationKoboImportMutation: RegistrationKoboImportMutation;
   RegistrationKoboImportMutationInput: RegistrationKoboImportMutationInput;
+  RegistrationProgramPopulationImportMutation: RegistrationProgramPopulationImportMutation;
+  RegistrationProgramPopulationImportMutationInput: RegistrationProgramPopulationImportMutationInput;
   RegistrationXlsxImportMutation: RegistrationXlsxImportMutation;
   RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput;
   ReportNode: ReportNode;
@@ -26465,6 +26614,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   reassignRole?: Resolver<Maybe<ResolversTypes['ReassignRoleMutation']>, ParentType, ContextType, RequireFields<MutationsReassignRoleArgs, 'grievanceTicketId' | 'householdId' | 'individualId' | 'role'>>;
   refuseRegistrationDataImport?: Resolver<Maybe<ResolversTypes['RefuseRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsRefuseRegistrationDataImportArgs, 'id'>>;
   registrationKoboImport?: Resolver<Maybe<ResolversTypes['RegistrationKoboImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationKoboImportArgs, 'registrationDataImportData'>>;
+  registrationProgramPopulationImport?: Resolver<Maybe<ResolversTypes['RegistrationProgramPopulationImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationProgramPopulationImportArgs, 'registrationDataImportData'>>;
   registrationXlsxImport?: Resolver<Maybe<ResolversTypes['RegistrationXlsxImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationXlsxImportArgs, 'registrationDataImportData'>>;
   rerunDedupe?: Resolver<Maybe<ResolversTypes['RegistrationDeduplicationMutation']>, ParentType, ContextType, RequireFields<MutationsRerunDedupeArgs, 'registrationDataImportDatahubId'>>;
   restartCreateReport?: Resolver<Maybe<ResolversTypes['RestartCreateReport']>, ParentType, ContextType, RequireFields<MutationsRestartCreateReportArgs, 'reportData'>>;
@@ -27113,6 +27263,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   chartIndividualsWithDisabilityReachedByAge?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartIndividualsWithDisabilityReachedByAgeArgs, 'businessAreaSlug' | 'year'>>;
   chartPayment?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartPaymentArgs, 'businessAreaSlug' | 'year'>>;
   chartPaymentVerification?: Resolver<Maybe<ResolversTypes['ChartPaymentVerification']>, ParentType, ContextType, RequireFields<QueryChartPaymentVerificationArgs, 'businessAreaSlug' | 'year'>>;
+  chartPeopleReachedByAgeAndGender?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartPeopleReachedByAgeAndGenderArgs, 'businessAreaSlug' | 'year'>>;
+  chartPeopleWithDisabilityReachedByAge?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartPeopleWithDisabilityReachedByAgeArgs, 'businessAreaSlug' | 'year'>>;
   chartProgrammesBySector?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartProgrammesBySectorArgs, 'businessAreaSlug' | 'year'>>;
   chartTotalTransferredByMonth?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartTotalTransferredByMonthArgs, 'businessAreaSlug' | 'year'>>;
   chartTotalTransferredCashByCountry?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartTotalTransferredCashByCountryArgs, 'year'>>;
@@ -27188,6 +27340,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   sectionChildReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionChildReachedArgs, 'businessAreaSlug' | 'year'>>;
   sectionHouseholdsReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionHouseholdsReachedArgs, 'businessAreaSlug' | 'year'>>;
   sectionIndividualsReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionIndividualsReachedArgs, 'businessAreaSlug' | 'year'>>;
+  sectionPeopleReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionPeopleReachedArgs, 'businessAreaSlug' | 'year'>>;
   sectionTotalTransferred?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionTotalTransferredArgs, 'businessAreaSlug' | 'year'>>;
   severityOfDisabilityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   sexChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
@@ -27385,6 +27538,12 @@ export type RegistrationDeduplicationMutationResolvers<ContextType = any, Parent
 };
 
 export type RegistrationKoboImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationKoboImportMutation'] = ResolversParentTypes['RegistrationKoboImportMutation']> = {
+  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>;
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type RegistrationProgramPopulationImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationProgramPopulationImportMutation'] = ResolversParentTypes['RegistrationProgramPopulationImportMutation']> = {
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>;
   validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -28772,6 +28931,7 @@ export type Resolvers<ContextType = any> = {
   RegistrationDataImportNodeEdge?: RegistrationDataImportNodeEdgeResolvers<ContextType>;
   RegistrationDeduplicationMutation?: RegistrationDeduplicationMutationResolvers<ContextType>;
   RegistrationKoboImportMutation?: RegistrationKoboImportMutationResolvers<ContextType>;
+  RegistrationProgramPopulationImportMutation?: RegistrationProgramPopulationImportMutationResolvers<ContextType>;
   RegistrationXlsxImportMutation?: RegistrationXlsxImportMutationResolvers<ContextType>;
   ReportNode?: ReportNodeResolvers<ContextType>;
   ReportNodeConnection?: ReportNodeConnectionResolvers<ContextType>;

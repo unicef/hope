@@ -16,12 +16,13 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { DashboardYearPage } from './DashboardYearPage';
+import { TabPanel } from '@components/core/TabPanel';
 
 export function DashboardPage(): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const permissions = usePermissions();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, isGlobal } = useBaseUrl();
   const [selectedTab, setSelectedTab] = useState(0);
   const initialFilter = {
     administrativeArea: '',
@@ -76,7 +77,7 @@ export function DashboardPage(): React.ReactElement {
       </PageHeader>
       {hasPermissionToView ? (
         <>
-          {businessArea !== 'global' ? (
+          {!isGlobal ? (
             <DashboardFilters
               filter={filter}
               setFilter={setFilter}
@@ -93,11 +94,12 @@ export function DashboardPage(): React.ReactElement {
               </Typography>
             </DashboardPaper>
           )}
-          <DashboardYearPage
-            selectedTab={selectedTab}
-            year={years[selectedTab]}
-            filter={appliedFilter}
-          />
+          <TabPanel value={selectedTab} index={selectedTab}>
+            <DashboardYearPage
+              year={years[selectedTab]}
+              filter={appliedFilter}
+            />
+          </TabPanel>
         </>
       ) : (
         <PermissionDenied />

@@ -16,6 +16,7 @@ export const AllGrievanceTicket = gql`
     $status: [String]
     $fsp: String
     $createdAtRange: String
+    $admin1: ID
     $admin2: ID
     $orderBy: String
     $registrationDataImport: ID
@@ -50,6 +51,7 @@ export const AllGrievanceTicket = gql`
       fsp: $fsp
       createdAtRange: $createdAtRange
       orderBy: $orderBy
+      admin1: $admin1
       admin2: $admin2
       registrationDataImport: $registrationDataImport
       assignedTo: $assignedTo
