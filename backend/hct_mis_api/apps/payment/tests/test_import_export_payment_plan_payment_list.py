@@ -14,16 +14,17 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.fixtures import create_household, BankAccountInfoFactory
+from hct_mis_api.apps.household.fixtures import BankAccountInfoFactory, create_household
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
     PaymentPlanFactory,
     RealProgramFactory,
-    ServiceProviderFactory, FinancialServiceProviderXlsxTemplateFactory,
+    ServiceProviderFactory,
 )
 from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
@@ -311,7 +312,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
             file_list = zip_file.namelist()
             self.assertEqual(splits_count, len(file_list))
 
-    def test_payment_row_bank_information(self):
+    def test_payment_row_bank_information(self) -> None:
         core_fields = [
             "account_holder_name",
             "bank_branch_name",
@@ -330,9 +331,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
             bank_name="JPMorgan",
             bank_account_number="362277220020615398848112903",
         )
-        payment = PaymentFactory(
-            parent=self.payment_plan, household=household
-        )
+        payment = PaymentFactory(parent=self.payment_plan, household=household)
 
         account_holder_name_index = headers.index("account_holder_name")
         bank_branch_name_index = headers.index("bank_branch_name")
