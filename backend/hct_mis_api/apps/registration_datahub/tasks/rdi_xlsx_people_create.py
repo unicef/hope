@@ -107,23 +107,38 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                     obj_to_create.household = self.households[self.index_id]
 
                 if header in complex_fields[sheet_title]:
-                    fn_complex: Callable = complex_fields[sheet_title][header]
-                    value = fn_complex(
-                        value=cell_value,
-                        cell=cell,
-                        header=header,
-                        row_num=cell.row,
-                        individual=obj_to_create if sheet_title == "individuals" else None,
-                        household=obj_to_create if sheet_title == "households" else None,
-                        is_field_required=current_field.get("required", False),
-                    )
+                    if header in ("country_h_c", "country_origin_h_c"):
+                        from hct_mis_api.apps.geo.models import Country as GeoCountry
 
-                    if value is not None:
                         setattr(
                             obj_to_create,
                             combined_fields[header]["name"],
-                            value,
+                            GeoCountry.objects.get(iso_code3=cell.value),
                         )
+                    elif header in ("admin1_h_c", "admin2_h_c"):
+                        setattr(
+                            obj_to_create,
+                            combined_fields[header]["name"],
+                            Area.objects.get(p_code=cell.value),
+                        )
+                    else:
+                        fn_complex: Callable = complex_fields[sheet_title][header]
+                        value = fn_complex(
+                            value=cell_value,
+                            cell=cell,
+                            header=header,
+                            row_num=cell.row,
+                            individual=obj_to_create if sheet_title == "individuals" else None,
+                            household=obj_to_create if sheet_title == "households" else None,
+                            is_field_required=current_field.get("required", False),
+                        )
+
+                        if value is not None:
+                            setattr(
+                                obj_to_create,
+                                combined_fields[header]["name"],
+                                value,
+                            )
                 elif hasattr(
                     obj_to_create,
                     combined_fields[header]["name"],
@@ -138,21 +153,6 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                             household.head_of_household = obj_to_create
                             self.households_to_update.append(household)
 
-                    if header in ("country_h_c", "country_origin_h_c"):
-                        from hct_mis_api.apps.geo.models import Country as GeoCountry
-
-                        setattr(
-                            obj_to_create,
-                            combined_fields[header]["name"],
-                            GeoCountry.objects.get(iso_code3=value),
-                        )
-                    elif header in ("admin1_h_c", "admin2_h_c"):
-                        setattr(
-                            obj_to_create,
-                            combined_fields[header]["name"],
-                            Area.objects.get(p_code=value),
-                        )
-                    else:
                         setattr(
                             obj_to_create,
                             combined_fields[header]["name"],
@@ -240,11 +240,11 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
 
         hh_obj = partial(
             Household,
-            registration_data_import=registration_data_import,
+            registration_data_import=rdi,
             program_id=rdi.program.id,
             collect_type=Household.CollectType.SINGLE.value,
         )
-        ind_obj = partial(Individual, registration_data_import=registration_data_import, program_id=rdi.program.id)
+        ind_obj = partial(Individual, registration_data_import=rdi, program_id=rdi.program.id)
 
         first_row = sheet[1]
 
@@ -273,7 +273,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         self._create_collectors()
         self._create_bank_accounts_infos()
 
-    @transaction.atomic(using="registration_datahub")
+    @transaction.atomic()
     def execute(
         self, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: str
     ) -> None:
