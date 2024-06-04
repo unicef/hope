@@ -51,11 +51,7 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     CORE_FIELDS_ATTRIBUTES,
     FieldFactory,
 )
-from hct_mis_api.apps.core.field_attributes.fields_types import (
-    _HOUSEHOLD,
-    _INDIVIDUAL,
-    Scope,
-)
+from hct_mis_api.apps.core.field_attributes.fields_types import _HOUSEHOLD, _INDIVIDUAL
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.utils import nested_getattr
@@ -1164,9 +1160,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     )
 
     @classmethod
-    def get_column_from_core_field(
-        cls, payment: "Payment", core_field_name: str, is_social_worker_program: bool
-    ) -> Any:
+    def get_column_from_core_field(cls, payment: "Payment", core_field_name: str) -> Any:
         def parse_admin_area(obj: "Area") -> str:
             if not obj:
                 return ""
@@ -1174,10 +1168,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
         collector = payment.collector
         household = payment.household
-        if is_social_worker_program:
-            core_fields_attributes = FieldFactory.from_scope(Scope.XLSX_PEOPLE).to_dict_by("name")
-        else:
-            core_fields_attributes = FieldFactory.not_from_scope(Scope.XLSX_PEOPLE).to_dict_by("name")
+        core_fields_attributes = FieldFactory(CORE_FIELDS_ATTRIBUTES).to_dict_by("name")
         attr = core_fields_attributes.get(core_field_name)
         if not attr:
             # Some fields can be added to the template, such as 'size' or 'collect_individual_data'
