@@ -115,7 +115,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             for payment in payment_qs:
                 ws.append(self.get_payment_row(payment, fsp_xlsx_template))
 
-    def get_payment_row(self, payment: Payment, fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate"):
+    def get_payment_row(self, payment: Payment, fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate") -> List[str]:
         if self.payment_generate_token_and_order_numbers:
             payment = generate_token_and_order_numbers(payment)
         payment_row = [
