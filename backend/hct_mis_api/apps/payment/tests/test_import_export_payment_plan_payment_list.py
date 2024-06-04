@@ -357,9 +357,12 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         _, ws_fsp = export_service.open_workbook(fsp.name)
         fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism_per_payment_plan.delivery_mechanism)
         template_column_list = export_service.add_headers(ws_fsp, fsp_xlsx_template)
-        self.assertEqual(len(template_column_list), len(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS))
+        self.assertEqual(
+            len(template_column_list), len(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS) - 1
+        )  # - ind_id
         self.assertIn("household_id", template_column_list)
         self.assertIn("household_size", template_column_list)
+        self.assertNotIn("individual_id", template_column_list)
 
         # create Program for People export
         program_sw = ProgramFactory(data_collecting_type__type=DataCollectingType.Type.SOCIAL)
@@ -375,6 +378,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
 
         # add core fields
         fsp_xlsx_template.core_fields = ["age", "zip_code"]
+        fsp_xlsx_template.columns = fsp_xlsx_template.DEFAULT_COLUMNS
         fsp_xlsx_template.save()
         fsp_xlsx_template.refresh_from_db()
 
@@ -382,9 +386,10 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism_per_payment_plan.delivery_mechanism)
 
         template_column_list = export_service.add_headers(ws_fsp, fsp_xlsx_template)
-        self.assertEqual(len(template_column_list), 27)  # DEFAULT_COLUMNS - hh_id and - hh_size + 2 core fields
+        self.assertEqual(len(template_column_list), 28)  # DEFAULT_COLUMNS -hh_id and -hh_size +ind_id +2 core fields
         self.assertNotIn("household_id", template_column_list)
         self.assertNotIn("household_size", template_column_list)
+        self.assertIn("individual_id", template_column_list)
         # check core fields
         self.assertListEqual(fsp_xlsx_template.core_fields, ["age", "zip_code"])
         self.assertIn("age", template_column_list)

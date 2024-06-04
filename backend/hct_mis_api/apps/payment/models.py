@@ -1107,6 +1107,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     COLUMNS_CHOICES = (
         ("payment_id", _("Payment ID")),
         ("household_id", _("Household ID")),
+        ("individual_id", _("Individual ID")),
         ("household_size", _("Household Size")),
         ("collector_name", _("Collector Name")),
         ("alternate_collector_full_name", _("Alternate collector Full Name")),
@@ -1189,6 +1190,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
     @classmethod
     def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> Union[str, float, list]:
+        # we can get if needed payment.parent.program.is_social_worker_program
         alternate_collector = None
         alternate_collector_column_names = (
             "alternate_collector_full_name",
@@ -1206,8 +1208,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
         map_obj_name_column = {
             "payment_id": (payment, "unicef_id"),
-            "household_id": (payment.household, "unicef_id"),
-            "household_size": (payment.household, "size"),
+            "individual_id": (payment.household.individuals.first(), "unicef_id"),  # add for people export
+            "household_id": (payment.household, "unicef_id"),  # remove for people export
+            "household_size": (payment.household, "size"),  # remove for people export
             "admin_level_2": (payment.household.admin2, "name"),
             "village": (payment.household, "village"),
             "collector_name": (payment.collector, "full_name"),
