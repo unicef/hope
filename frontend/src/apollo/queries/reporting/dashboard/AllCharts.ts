@@ -84,6 +84,14 @@ export const Allcharts = gql`
     ) {
       total
     }
+    sectionPeopleReached(
+      businessAreaSlug: $businessAreaSlug
+      year: $year
+      program: $program
+      administrativeArea: $administrativeArea
+    ) {
+      total
+    }
     sectionChildReached(
       businessAreaSlug: $businessAreaSlug
       year: $year
@@ -105,6 +113,29 @@ export const Allcharts = gql`
       labels
     }
     chartIndividualsWithDisabilityReachedByAge(
+      businessAreaSlug: $businessAreaSlug
+      year: $year
+      program: $program
+      administrativeArea: $administrativeArea
+    ) {
+      datasets {
+        data
+        label
+      }
+      labels
+    }
+    chartPeopleReachedByAgeAndGender(
+      businessAreaSlug: $businessAreaSlug
+      year: $year
+      program: $program
+      administrativeArea: $administrativeArea
+    ) {
+      datasets {
+        data
+      }
+      labels
+    }
+    chartPeopleWithDisabilityReachedByAge(
       businessAreaSlug: $businessAreaSlug
       year: $year
       program: $program
