@@ -21,6 +21,7 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string_required,
 )
 from hct_mis_api.apps.core.validators import BaseValidator, raise_program_status_is
+from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import (
     ImportData,
@@ -384,7 +385,6 @@ class EraseRegistrationDataImportMutation(PermissionMutation):
 
     @classmethod
     @transaction.atomic(using="default")
-    @transaction.atomic(using="registration_datahub")
     @is_authenticated
     @raise_program_status_is(Program.FINISHED)
     def mutate(cls, root: Any, info: Any, id: Optional[str], **kwargs: Any) -> "EraseRegistrationDataImportMutation":
@@ -405,7 +405,7 @@ class EraseRegistrationDataImportMutation(PermissionMutation):
             logger.error(msg)
             raise GraphQLError(msg)
 
-        ImportedHousehold.objects.filter(registration_data_import=obj_hct.datahub_id).delete()
+        Household.all_objects.filter(registration_data_import=obj_hct).delete()
 
         obj_hct.erased = True
         obj_hct.save()

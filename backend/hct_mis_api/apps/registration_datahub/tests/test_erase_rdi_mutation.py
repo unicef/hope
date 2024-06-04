@@ -5,21 +5,13 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import (
-    ImportedHousehold,
-    ImportedIndividual,
-    RegistrationDataImport,
-)
-from hct_mis_api.apps.registration_datahub.fixtures import (
-    ImportedHouseholdFactory,
-    ImportedIndividualFactory,
-    RegistrationDataImportDatahubFactory,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 class TestEraseRdiMutation(APITestCase):
-    databases = "__all__"
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     ERASE_IMPORT_QUERY = """
@@ -42,24 +34,17 @@ class TestEraseRdiMutation(APITestCase):
 
         # Correct status
         cls.rdi_1 = RegistrationDataImportFactory(status=RegistrationDataImport.MERGE_ERROR)
-        cls.rdi_hub_1 = RegistrationDataImportDatahubFactory()
-        cls.rdi_1.datahub_id = cls.rdi_hub_1.id
-        cls.rdi_1.save()
-
         # Wrong status
         cls.rdi_2 = RegistrationDataImportFactory(status=RegistrationDataImport.IN_REVIEW)
-        cls.rdi_hub_2 = RegistrationDataImportDatahubFactory()
-        cls.rdi_2.datahub_id = cls.rdi_hub_2.id
-        cls.rdi_2.save()
 
     def test_erase_registration_data_import_removes_data_links(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area)
 
-        imported_household = ImportedHouseholdFactory(registration_data_import=self.rdi_hub_1)
-        ImportedIndividualFactory(household=imported_household)
+        imported_household = HouseholdFactory(registration_data_import=self.rdi_1)
+        IndividualFactory(household=imported_household)
 
-        self.assertEqual(ImportedHousehold.objects.count(), 1)
-        self.assertEqual(ImportedIndividual.objects.count(), 1)
+        self.assertEqual(Household.objects.count(), 1)
+        self.assertEqual(Individual.objects.count(), 1)
 
         self.graphql_request(
             request_string=self.ERASE_IMPORT_QUERY,
@@ -69,17 +54,17 @@ class TestEraseRdiMutation(APITestCase):
 
         self.assertEqual(RegistrationDataImport.objects.filter(erased=True).count(), 1)
 
-        self.assertEqual(ImportedHousehold.objects.count(), 0)
-        self.assertEqual(ImportedIndividual.objects.count(), 0)
+        self.assertEqual(Household.objects.count(), 0)
+        self.assertEqual(Individual.objects.count(), 0)
 
     def test_erase_registration_data_import_raises_error_when_wrong_status(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area)
 
-        imported_household = ImportedHouseholdFactory(registration_data_import=self.rdi_hub_2)
-        ImportedIndividualFactory(household=imported_household)
+        imported_household = HouseholdFactory(registration_data_import=self.rdi_2)
+        IndividualFactory(household=imported_household)
 
-        self.assertEqual(ImportedHousehold.objects.count(), 1)
-        self.assertEqual(ImportedIndividual.objects.count(), 1)
+        self.assertEqual(Household.objects.count(), 1)
+        self.assertEqual(Individual.objects.count(), 1)
 
         abort_mutation_response = self.graphql_request(
             request_string=self.ERASE_IMPORT_QUERY,
@@ -94,7 +79,9 @@ class TestEraseRdiMutation(APITestCase):
         )
 
         self.assertEqual(RegistrationDataImport.objects.filter(erased=True).count(), 0)
-        self.assertEqual(RegistrationDataImport.objects.filter(erased=False).count(), 2)
+        self.assertEqual(
+            RegistrationDataImport.objects.filter(erased=False).count(), RegistrationDataImport.objects.count()
+        )
 
-        self.assertEqual(ImportedHousehold.objects.count(), 1)
-        self.assertEqual(ImportedIndividual.objects.count(), 1)
+        self.assertEqual(Household.objects.count(), 1)
+        self.assertEqual(Individual.objects.count(), 1)
