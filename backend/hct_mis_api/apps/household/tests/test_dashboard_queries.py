@@ -37,7 +37,7 @@ class TestDashboardQueries(APITestCase):
       }}
     """
 
-    QUERY_chartIndividualsReachedByAgeAndGender = """
+    QUERY_CHART_REACHED_BY_AGE_AND_GENDER = """
     query {query_name}(
         $businessAreaSlug: String!
         $year: Int!
@@ -58,7 +58,7 @@ class TestDashboardQueries(APITestCase):
       }}
     """
 
-    QUERY_chartIndividualsWithDisabilityReachedByAge = """
+    QUERY_CHART_WITH_DISABILITY_REACHED_BY_AGE = """
     query {query_name}(
         $businessAreaSlug: String!
         $year: Int!
@@ -218,6 +218,7 @@ class TestDashboardQueries(APITestCase):
             ("sectionHouseholdsReached",),
             ("sectionIndividualsReached",),
             ("sectionChildReached",),
+            ("sectionPeopleReached",),
         ]
     )
     def test_sections(self, query_name: str) -> None:
@@ -230,12 +231,25 @@ class TestDashboardQueries(APITestCase):
     @parameterized.expand(
         [
             ("chartIndividualsReachedByAgeAndGender",),
-            ("chartIndividualsWithDisabilityReachedByAge",),
+            ("chartPeopleReachedByAgeAndGender",),
         ]
     )
-    def test_charts(self, query_name: str) -> None:
+    def test_charts_reached_by_age_and_gender(self, query_name: str) -> None:
         self.snapshot_graphql_request(
-            request_string=getattr(self, f"QUERY_{query_name}").format(query_name=query_name),
+            request_string=self.QUERY_CHART_REACHED_BY_AGE_AND_GENDER.format(query_name=query_name),
+            variables={"businessAreaSlug": "afghanistan", "year": 2021},
+            context={"user": self.user},
+        )
+
+    @parameterized.expand(
+        [
+            ("chartIndividualsWithDisabilityReachedByAge",),
+            ("chartPeopleWithDisabilityReachedByAge",),
+        ]
+    )
+    def test_charts_individuals_with_disability_reached_by_age(self, query_name: str) -> None:
+        self.snapshot_graphql_request(
+            request_string=self.QUERY_CHART_WITH_DISABILITY_REACHED_BY_AGE.format(query_name=query_name),
             variables={"businessAreaSlug": "afghanistan", "year": 2021},
             context={"user": self.user},
         )

@@ -5753,6 +5753,8 @@ export type Query = {
   chartIndividualsWithDisabilityReachedByAge?: Maybe<ChartDetailedDatasetsNode>;
   chartPayment?: Maybe<ChartDatasetNode>;
   chartPaymentVerification?: Maybe<ChartPaymentVerification>;
+  chartPeopleReachedByAgeAndGender?: Maybe<ChartDatasetNode>;
+  chartPeopleWithDisabilityReachedByAge?: Maybe<ChartDetailedDatasetsNode>;
   chartProgrammesBySector?: Maybe<ChartDetailedDatasetsNode>;
   chartTotalTransferredByMonth?: Maybe<ChartDetailedDatasetsNode>;
   chartTotalTransferredCashByCountry?: Maybe<ChartDetailedDatasetsNode>;
@@ -5828,6 +5830,7 @@ export type Query = {
   sectionChildReached?: Maybe<SectionTotalNode>;
   sectionHouseholdsReached?: Maybe<SectionTotalNode>;
   sectionIndividualsReached?: Maybe<SectionTotalNode>;
+  sectionPeopleReached?: Maybe<SectionTotalNode>;
   sectionTotalTransferred?: Maybe<SectionTotalNode>;
   severityOfDisabilityChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   sexChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
@@ -6618,6 +6621,22 @@ export type QueryChartPaymentVerificationArgs = {
 };
 
 
+export type QueryChartPeopleReachedByAgeAndGenderArgs = {
+  administrativeArea?: InputMaybe<Scalars['String']['input']>;
+  businessAreaSlug: Scalars['String']['input'];
+  program?: InputMaybe<Scalars['String']['input']>;
+  year: Scalars['Int']['input'];
+};
+
+
+export type QueryChartPeopleWithDisabilityReachedByAgeArgs = {
+  administrativeArea?: InputMaybe<Scalars['String']['input']>;
+  businessAreaSlug: Scalars['String']['input'];
+  program?: InputMaybe<Scalars['String']['input']>;
+  year: Scalars['Int']['input'];
+};
+
+
 export type QueryChartProgrammesBySectorArgs = {
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
   businessAreaSlug: Scalars['String']['input'];
@@ -6835,6 +6854,14 @@ export type QuerySectionHouseholdsReachedArgs = {
 
 
 export type QuerySectionIndividualsReachedArgs = {
+  administrativeArea?: InputMaybe<Scalars['String']['input']>;
+  businessAreaSlug: Scalars['String']['input'];
+  program?: InputMaybe<Scalars['String']['input']>;
+  year: Scalars['Int']['input'];
+};
+
+
+export type QuerySectionPeopleReachedArgs = {
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
   businessAreaSlug: Scalars['String']['input'];
   program?: InputMaybe<Scalars['String']['input']>;
@@ -10919,7 +10946,7 @@ export type AllChartsQueryVariables = Exact<{
 }>;
 
 
-export type AllChartsQuery = { __typename?: 'Query', chartProgrammesBySector?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartPaymentVerification?: { __typename?: 'ChartPaymentVerification', labels?: Array<string | null> | null, households?: number | null, averageSampleSize?: number | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartVolumeByDeliveryMechanism?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartPayment?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartGrievances?: { __typename?: 'ChartGrievanceTicketsNode', labels?: Array<string | null> | null, totalNumberOfGrievances?: number | null, totalNumberOfFeedback?: number | null, totalNumberOfOpenSensitive?: number | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, sectionHouseholdsReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionIndividualsReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionChildReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, chartIndividualsReachedByAgeAndGender?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartIndividualsWithDisabilityReachedByAge?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null, sectionTotalTransferred?: { __typename?: 'SectionTotalNode', total?: number | null } | null, chartTotalTransferredByMonth?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null };
+export type AllChartsQuery = { __typename?: 'Query', chartProgrammesBySector?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartPaymentVerification?: { __typename?: 'ChartPaymentVerification', labels?: Array<string | null> | null, households?: number | null, averageSampleSize?: number | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartVolumeByDeliveryMechanism?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartPayment?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartGrievances?: { __typename?: 'ChartGrievanceTicketsNode', labels?: Array<string | null> | null, totalNumberOfGrievances?: number | null, totalNumberOfFeedback?: number | null, totalNumberOfOpenSensitive?: number | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, sectionHouseholdsReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionIndividualsReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionPeopleReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionChildReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, chartIndividualsReachedByAgeAndGender?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartIndividualsWithDisabilityReachedByAge?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null, chartPeopleReachedByAgeAndGender?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartPeopleWithDisabilityReachedByAge?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null, sectionTotalTransferred?: { __typename?: 'SectionTotalNode', total?: number | null } | null, chartTotalTransferredByMonth?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null };
 
 export type CountryChartsQueryVariables = Exact<{
   businessAreaSlug: Scalars['String']['input'];
@@ -22343,6 +22370,14 @@ export const AllChartsDocument = gql`
   ) {
     total
   }
+  sectionPeopleReached(
+    businessAreaSlug: $businessAreaSlug
+    year: $year
+    program: $program
+    administrativeArea: $administrativeArea
+  ) {
+    total
+  }
   sectionChildReached(
     businessAreaSlug: $businessAreaSlug
     year: $year
@@ -22363,6 +22398,29 @@ export const AllChartsDocument = gql`
     labels
   }
   chartIndividualsWithDisabilityReachedByAge(
+    businessAreaSlug: $businessAreaSlug
+    year: $year
+    program: $program
+    administrativeArea: $administrativeArea
+  ) {
+    datasets {
+      data
+      label
+    }
+    labels
+  }
+  chartPeopleReachedByAgeAndGender(
+    businessAreaSlug: $businessAreaSlug
+    year: $year
+    program: $program
+    administrativeArea: $administrativeArea
+  ) {
+    datasets {
+      data
+    }
+    labels
+  }
+  chartPeopleWithDisabilityReachedByAge(
     businessAreaSlug: $businessAreaSlug
     year: $year
     program: $program
@@ -27192,6 +27250,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   chartIndividualsWithDisabilityReachedByAge?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartIndividualsWithDisabilityReachedByAgeArgs, 'businessAreaSlug' | 'year'>>;
   chartPayment?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartPaymentArgs, 'businessAreaSlug' | 'year'>>;
   chartPaymentVerification?: Resolver<Maybe<ResolversTypes['ChartPaymentVerification']>, ParentType, ContextType, RequireFields<QueryChartPaymentVerificationArgs, 'businessAreaSlug' | 'year'>>;
+  chartPeopleReachedByAgeAndGender?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartPeopleReachedByAgeAndGenderArgs, 'businessAreaSlug' | 'year'>>;
+  chartPeopleWithDisabilityReachedByAge?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartPeopleWithDisabilityReachedByAgeArgs, 'businessAreaSlug' | 'year'>>;
   chartProgrammesBySector?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartProgrammesBySectorArgs, 'businessAreaSlug' | 'year'>>;
   chartTotalTransferredByMonth?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartTotalTransferredByMonthArgs, 'businessAreaSlug' | 'year'>>;
   chartTotalTransferredCashByCountry?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartTotalTransferredCashByCountryArgs, 'year'>>;
@@ -27267,6 +27327,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   sectionChildReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionChildReachedArgs, 'businessAreaSlug' | 'year'>>;
   sectionHouseholdsReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionHouseholdsReachedArgs, 'businessAreaSlug' | 'year'>>;
   sectionIndividualsReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionIndividualsReachedArgs, 'businessAreaSlug' | 'year'>>;
+  sectionPeopleReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionPeopleReachedArgs, 'businessAreaSlug' | 'year'>>;
   sectionTotalTransferred?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionTotalTransferredArgs, 'businessAreaSlug' | 'year'>>;
   severityOfDisabilityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   sexChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
