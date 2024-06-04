@@ -102,6 +102,7 @@ export function LookUpLinkedTicketsFilters({
         </Grid>
         <Grid item xs={3}>
           <AdminAreaAutocomplete
+            level={2}
             name="admin2"
             value={filter.admin2}
             setFilter={setFilter}

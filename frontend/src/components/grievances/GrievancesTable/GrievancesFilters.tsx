@@ -226,18 +226,6 @@ export const GrievancesFilters = ({
           </Grid>
         )}
         <Grid item xs={3}>
-          <AdminAreaAutocomplete
-            filter={filter}
-            name="admin2"
-            value={filter.admin2}
-            setFilter={setFilter}
-            initialFilter={initialFilter}
-            appliedFilter={appliedFilter}
-            setAppliedFilter={setAppliedFilter}
-            dataCy="filters-admin-level"
-          />
-        </Grid>
-        <Grid item xs={3}>
           <AssigneeAutocomplete
             filter={filter}
             label={t('Assigned To')}
@@ -396,6 +384,34 @@ export const GrievancesFilters = ({
               </SelectFilter>
             </Grid>
           )}
+        <Grid item xs={3}>
+          <AdminAreaAutocomplete
+            level={1}
+            filter={filter}
+            name="admin1"
+            value={filter.admin1}
+            disabled={filter.admin2}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+            dataCy="filters-admin-level-1"
+          />
+        </Grid>
+        <Grid item xs={3}>
+          <AdminAreaAutocomplete
+            level={2}
+            filter={filter}
+            name="admin2"
+            value={filter.admin2}
+            disabled={filter.admin1}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+            dataCy="filters-admin-level-2"
+          />
+        </Grid>
       </Grid>
     </FiltersSection>
   );
