@@ -251,8 +251,9 @@ export const TargetCriteriaForm = ({
                 )
               }
               <DialogDescription>
-                All rules defined below have to be true for the entire
-                household.
+                {isSocialWorkingProgram
+                  ? ''
+                  : 'All rules defined below have to be true for the entire household.'}
               </DialogDescription>
               <FieldArray
                 name="filters"
