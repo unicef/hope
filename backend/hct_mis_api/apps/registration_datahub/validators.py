@@ -792,20 +792,17 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             errors.extend(self.validate_collectors_size(wb))
             if self.is_social_worker_program:
                 errors.extend(self.validate_people_collectors(wb))
+                people_sheet = wb["People"]
+                self.image_loader = SheetImageLoader(people_sheet)
+                errors.extend(self.rows_validator(people_sheet))
             else:
                 errors.extend(self.validate_collectors(wb))
-
-            if not self.is_social_worker_program:
                 individuals_sheet = wb["Individuals"]
                 household_sheet = wb["Households"]
                 self.image_loader = SheetImageLoader(household_sheet)
                 errors.extend(self.rows_validator(household_sheet, business_area_slug))
                 self.image_loader = SheetImageLoader(individuals_sheet)
                 errors.extend(self.rows_validator(individuals_sheet))
-            else:
-                people_sheet = wb["People"]
-                self.image_loader = SheetImageLoader(people_sheet)
-                errors.extend(self.rows_validator(people_sheet))
             return errors
         except Exception as e:
             logger.exception(e)
