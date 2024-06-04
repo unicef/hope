@@ -8,6 +8,7 @@
       "code": "full_test",
       "description": "Full individual collected",
       "active": true,
+      "type": "SOCIAL",
       "individual_filters_available": true,
       "household_filters_available": true,
       "compatible_types": [],

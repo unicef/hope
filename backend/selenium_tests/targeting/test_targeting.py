@@ -11,6 +11,7 @@ from page_object.targeting.targeting import Targeting
 from page_object.targeting.targeting_create import TargetingCreate
 from page_object.targeting.targeting_details import TargetingDetails
 from selenium.webdriver import ActionChains, Keys
+from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
@@ -498,7 +499,7 @@ class TestTargeting:
         pageTargeting.mouse_on_element(pageTargeting.getButtonInactiveCreateNew())
         assert "Program has to be active to create a new Target Population" in pageTargeting.geTooltip().text
 
-    def test_exclude_households_with_active_adjudication_ticket(
+    def test_exclude_households_with_active_adjudication_ticket_for_people(
         self,
         create_programs: None,
         household_with_disability: Household,
@@ -516,10 +517,10 @@ class TestTargeting:
         pageTargetingCreate.getInputFlagexcludeifactiveadjudicationticket().click()
         pageTargetingCreate.getButtonTargetPopulationCreate().click()
         pageTargetingDetails.getLabelStatus()
-        pageTargetingDetails.getCheckboxExcludeIfActiveAdjudicationTicket()
+        pageTargetingDetails.getCheckboxExcludePeopleIfActiveAdjudicationTicket()
         pageTargetingDetails.getIconSelected()
 
-    def test_exclude_households_with_sanction_screen_flag(
+    def test_exclude_households_with_sanction_screen_flag_people(
         self,
         create_programs: None,
         household_with_disability: Household,
@@ -535,10 +536,17 @@ class TestTargeting:
         pageTargetingCreate.getInputHouseholdids().send_keys(household_with_disability.unicef_id)
         pageTargetingCreate.getInputName().send_keys(f"Test {household_with_disability.unicef_id}")
         pageTargetingCreate.getInputFlagexcludeifonsanctionlist().click()
+        pageTargetingCreate.screenshot("123")
         pageTargetingCreate.getButtonTargetPopulationCreate().click()
         pageTargetingDetails.getLabelStatus()
         pageTargetingDetails.getCheckboxExcludeIfOnSanctionList()
-        pageTargetingDetails.getIconSelected()
+        assert (
+            "Exclude People with an active sanction screen flag"
+            in pageTargetingDetails.getCheckboxExcludeIfOnSanctionList().find_element(By.XPATH, "./..").text
+        )
+        pageTargetingDetails.getCheckboxExcludeIfOnSanctionList().find_element(
+            By.CSS_SELECTOR, pageTargetingDetails.iconSelected
+        )
 
     def test_targeting_info_button(
         self,
