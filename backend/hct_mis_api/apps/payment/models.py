@@ -335,8 +335,8 @@ class GenericPayment(TimeStampedUUIDModel):
         decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
-    transaction_reference_id = models.CharField(max_length=255, null=True)  # transaction_id
-    transaction_status_blockchain_link = models.CharField(max_length=255, null=True)
+    transaction_reference_id = models.CharField(max_length=255, null=True, blank=True)  # transaction_id
+    transaction_status_blockchain_link = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         abstract = True
