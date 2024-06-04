@@ -101,11 +101,15 @@ export const TargetPopulationCore = ({
           </Box>
           <Box mb={2}>
             {householdIds.length > 0 && (
-              <IdContainer>{householdIds}</IdContainer>
+              <IdContainer data-cy="household-ids-container">
+                {householdIds}
+              </IdContainer>
             )}
           </Box>
           {individualIds.length > 0 && (
-            <IdContainer>{individualIds}</IdContainer>
+            <IdContainer data-cy="household-ids-container">
+              {individualIds}
+            </IdContainer>
           )}
           <TargetingCriteria
             rules={targetPopulation.targetingCriteria?.rules || []}
