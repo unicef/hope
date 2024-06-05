@@ -198,11 +198,16 @@ export const CreateVerificationPlan = ({
     setFormValues(values);
   };
 
-  const getSampleSizePercentage = (): string =>
-    `(${getPercentage(
-      sampleSizesData?.sampleSize?.sampleSize,
-      sampleSizesData?.sampleSize?.paymentRecordCount,
-    )})`;
+  const getSampleSizePercentage = (): string => {
+    const sampleSize = sampleSizesData?.sampleSize?.sampleSize;
+    const paymentRecordCount = sampleSizesData?.sampleSize?.paymentRecordCount;
+
+    if (isNaN(sampleSize) || isNaN(paymentRecordCount)) {
+      return '';
+    }
+
+    return `(${getPercentage(sampleSize, paymentRecordCount)})`;
+  };
 
   const getTooltipTitle = (): string => {
     if (!canCreatePaymentVerificationPlan) {
@@ -299,16 +304,25 @@ export const CreateVerificationPlan = ({
                         />
                       )}
                       <Box pt={3}>
-                        <Box
-                          pb={3}
-                          pt={3}
-                          fontSize={16}
-                          fontWeight="fontWeightBold"
-                        >
-                          Sample size: {sampleSizesData?.sampleSize?.sampleSize}{' '}
-                          out of{' '}
-                          {sampleSizesData?.sampleSize?.paymentRecordCount}{' '}
-                          {getSampleSizePercentage()}
+                        <Box pt={3}>
+                          <Box
+                            pb={3}
+                            pt={3}
+                            fontSize={16}
+                            fontWeight="fontWeightBold"
+                          >
+                            Sample size:
+                            {isNaN(sampleSizesData?.sampleSize?.sampleSize)
+                              ? ''
+                              : sampleSizesData?.sampleSize?.sampleSize}{' '}
+                            out of{' '}
+                            {isNaN(
+                              sampleSizesData?.sampleSize?.paymentRecordCount,
+                            )
+                              ? ''
+                              : sampleSizesData?.sampleSize?.paymentRecordCount}
+                            {getSampleSizePercentage()}
+                          </Box>
                         </Box>
                         <Box fontSize={12} color="#797979">
                           {t('This option is recommended for RapidPro')}
