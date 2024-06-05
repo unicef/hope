@@ -705,7 +705,7 @@ class TestTargeting:
         pageTargeting.disappearLoadingRows()
         assert "est NEW TP" in pageTargeting.chooseTargetPopulations(0).text
 
-    def test_targeting_parametrized_ruls_filters(
+    def test_targeting_parametrized_rules_filters(
         self,
         create_programs: None,
         household_with_disability: Household,
@@ -714,7 +714,11 @@ class TestTargeting:
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
     ) -> None:
-        pass
+        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.getNavTargeting().click()
+        pageTargeting.getButtonCreateNew().click()
+        pageTargeting.getButtonCreateNewByFilters().click()
+        assert "New Target Population" in pageTargetingCreate.getTitlePage().text
 
     def test_targeting_mark_ready_failed(
         self,
