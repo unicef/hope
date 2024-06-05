@@ -14,6 +14,8 @@ import {
 } from '@utils/utils';
 import { AllPaymentsForTableQuery, PaymentStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -66,6 +68,7 @@ export const PeoplePaymentsTableRow = ({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const paymentDetailsPath = `/${baseUrl}/payment-module/payments/${payment.id}`;
+  const permissions = usePermissions();
 
   const handleDialogWarningOpen = (
     e: React.SyntheticEvent<HTMLDivElement>,
@@ -171,6 +174,11 @@ export const PeoplePaymentsTableRow = ({
       <TableCell data-cy="delivered-quantity-cell" align="left">
         {renderDeliveredQuantity()}
       </TableCell>
+      {hasPermissions(PERMISSIONS.PM_VIEW_FSP_AUTH_CODE, permissions) && (
+        <TableCell data-cy="fsp-auth-code-cell" align="left">
+          {payment.fspAuthCode || '-'}
+        </TableCell>
+      )}
       <TableCell>{renderMark()}</TableCell>
     </ClickableTableRow>
   );
