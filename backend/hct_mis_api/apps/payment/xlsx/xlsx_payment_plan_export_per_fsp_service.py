@@ -101,13 +101,20 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         # added list() to remove choices display value
         return list(fsp_template_columns)
 
+    def _remove_core_fields_for_people(self, fsp_template_core_fields: List[str]) -> List[str]:
+        """remove columns and return list"""
+        if self.is_social_worker_program:
+            for field_name in ["household_unicef_id"]:
+                if field_name in fsp_template_core_fields:
+                    fsp_template_core_fields.remove(field_name)
+        return list(fsp_template_core_fields)
+
     def add_headers(self, ws: "Worksheet", fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate") -> List[str]:
         """return columns list from FSP template [columns + core_field]"""
-        # get fsp_xlsx_template columns and remove for People
-        template_column_list = self._remove_column_for_people(fsp_xlsx_template.columns)
-
-        for core_field in fsp_xlsx_template.core_fields:
-            template_column_list.append(core_field)
+        # get fsp_xlsx_template columns with core fields and remove for People
+        template_column_list = self._remove_column_for_people(
+            fsp_xlsx_template.columns
+        ) + self._remove_core_fields_for_people(fsp_xlsx_template.core_fields)
 
         # add headers
         ws.append(template_column_list)
@@ -121,7 +128,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         payment_ids: List[int],
     ) -> None:
         fsp_template_columns = self._remove_column_for_people(fsp_xlsx_template.columns)
-        fsp_template_core_fields = fsp_xlsx_template.core_fields
+        fsp_template_core_fields = self._remove_core_fields_for_people(fsp_xlsx_template.core_fields)
 
         for i in range(0, len(payment_ids), self.batch_size):
             batch_ids = payment_ids[i : i + self.batch_size]

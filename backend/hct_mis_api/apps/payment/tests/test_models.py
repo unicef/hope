@@ -373,13 +373,19 @@ class TestFinancialServiceProviderModel(TestCase):
         payment.parent.program.data_collecting_type = data_collecting_type
         payment.parent.program.save()
 
+        # check invalid filed name
         result = fsp_xlsx_template.get_column_from_core_field(payment, "invalid_people_field_name")
         self.assertIsNone(result)
 
+        # People program
+        given_name = fsp_xlsx_template.get_column_from_core_field(payment, "given_name")
+        self.assertEqual(given_name, individuals[0].given_name)
+        ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(payment, "individual_unicef_id")
+        self.assertEqual(ind_unicef_id, individuals[0].unicef_id)
+
+        # Standard program
         payment.parent.program.data_collecting_type.type = DataCollectingType.Type.STANDARD
         payment.parent.program.data_collecting_type.save()
-        result = fsp_xlsx_template.get_column_from_core_field(payment, "size")
-        self.assertIsNotNone(result)
 
         # check fields value
         size = fsp_xlsx_template.get_column_from_core_field(payment, "size")

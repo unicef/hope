@@ -377,23 +377,28 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertTrue(self.payment_plan.program.is_social_worker_program)
 
         # add core fields
-        fsp_xlsx_template.core_fields = ["age", "zip_code"]
+        fsp_xlsx_template.core_fields = ["age", "zip_code", "household_unicef_id", "individual_unicef_id"]
         fsp_xlsx_template.columns = fsp_xlsx_template.DEFAULT_COLUMNS
         fsp_xlsx_template.save()
-        fsp_xlsx_template.refresh_from_db()
 
         _, ws_fsp = export_service.open_workbook(fsp.name)
         fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism_per_payment_plan.delivery_mechanism)
 
         template_column_list = export_service.add_headers(ws_fsp, fsp_xlsx_template)
-        self.assertEqual(len(template_column_list), 28)  # DEFAULT_COLUMNS -hh_id and -hh_size +ind_id +2 core fields
+        fsp_xlsx_template.refresh_from_db()
+        # remove for people 'household_unicef_id' core_field
+        self.assertEqual(len(template_column_list), 29)  # DEFAULT_COLUMNS -hh_id and -hh_size +ind_id +3 core fields
         self.assertNotIn("household_id", template_column_list)
         self.assertNotIn("household_size", template_column_list)
         self.assertIn("individual_id", template_column_list)
         # check core fields
-        self.assertListEqual(fsp_xlsx_template.core_fields, ["age", "zip_code"])
+        self.assertListEqual(
+            fsp_xlsx_template.core_fields, ["age", "zip_code", "household_unicef_id", "individual_unicef_id"]
+        )
         self.assertIn("age", template_column_list)
         self.assertIn("zip_code", template_column_list)
+        self.assertNotIn("household_unicef_id", template_column_list)
+        self.assertIn("individual_unicef_id", template_column_list)
 
         # get_template error
         self.assertEqual(
