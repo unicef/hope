@@ -33,6 +33,11 @@ class Targeting(BaseComponents):
     tabFieldList = 'button[data-cy="tab-field-list"]'
     tabTargetingDiagram = 'button[data-cy="tab-targeting-diagram"]'
     name = 'th[data-cy="name"]'
+    status = 'th[data-cy="status"]'
+    numOfHouseholds = 'th[data-cy="num-of-households"]'
+    dateCreated = 'th[data-cy="date-created"]'
+    lastEdited = 'th[data-cy="last-edited"]'
+    createdBy = 'th[data-cy="created-by"]'
 
     # Texts
     textTitlePage = "Targeting"
@@ -144,6 +149,21 @@ class Targeting(BaseComponents):
 
     def getColumnName(self) -> WebElement:
         return self.wait_for(self.name).find_element(By.CSS_SELECTOR, self.tabColumnLabel)
+
+    def getColumnStatus(self) -> WebElement:
+        return self.wait_for(self.status).find_element(By.CSS_SELECTOR, self.tabColumnLabel)
+
+    def getColumnNumOfHouseholds(self) -> WebElement:
+        return self.wait_for(self.numOfHouseholds).find_element(By.CSS_SELECTOR, self.tabColumnLabel)
+
+    def getColumnDateCreated(self) -> WebElement:
+        return self.wait_for(self.dateCreated).find_element(By.CSS_SELECTOR, self.tabColumnLabel)
+
+    def getColumnLastEdited(self) -> WebElement:
+        return self.wait_for(self.lastEdited).find_element(By.CSS_SELECTOR, self.tabColumnLabel)
+
+    def getColumnCreatedBy(self) -> WebElement:
+        return self.wait_for(self.createdBy).find_element(By.CSS_SELECTOR, self.tabColumnLabel)
 
     def disappearLoadingRows(self) -> WebElement:
         try:

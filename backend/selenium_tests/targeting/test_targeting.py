@@ -680,6 +680,30 @@ class TestTargeting:
         pageTargeting.getColumnName().click()
         pageTargeting.disappearLoadingRows()
         assert "Test NEW TP" in pageTargeting.chooseTargetPopulations(0).text
+        pageTargeting.getColumnStatus().click()
+        pageTargeting.disappearLoadingRows()
+        assert "Test NEW TP" in pageTargeting.chooseTargetPopulations(0).text
+        pageTargeting.getColumnStatus().click()
+        pageTargeting.disappearLoadingRows()
+        assert "Copy TP" in pageTargeting.chooseTargetPopulations(0).text
+        pageTargeting.getColumnNumOfHouseholds().click()
+        pageTargeting.disappearLoadingRows()
+        assert "Test NEW TP" in pageTargeting.chooseTargetPopulations(0).text
+        pageTargeting.getColumnDateCreated().click()
+        pageTargeting.disappearLoadingRows()
+        assert "Test NEW TP" in pageTargeting.chooseTargetPopulations(0).text
+        pageTargeting.getColumnDateCreated().click()
+        pageTargeting.disappearLoadingRows()
+        assert "Copy TP" in pageTargeting.chooseTargetPopulations(0).text
+        pageTargeting.getColumnLastEdited().click()
+        pageTargeting.disappearLoadingRows()
+        assert "Test NEW TP" in pageTargeting.chooseTargetPopulations(0).text
+        pageTargeting.getColumnLastEdited().click()
+        pageTargeting.disappearLoadingRows()
+        assert "Copy TP" in pageTargeting.chooseTargetPopulations(0).text
+        pageTargeting.getColumnCreatedBy().click()
+        pageTargeting.disappearLoadingRows()
+        assert "est NEW TP" in pageTargeting.chooseTargetPopulations(0).text
 
     def test_targeting_parametrized_ruls_filters(
         self,
