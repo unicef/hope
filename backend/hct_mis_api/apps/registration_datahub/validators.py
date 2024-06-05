@@ -1,3 +1,4 @@
+import itertools
 import logging
 import re
 from collections import Counter, defaultdict
@@ -884,20 +885,18 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
             if self.is_social_worker_program:
                 self.validate_people_collectors(wb)
+                people_sheet = wb["People"]
+                self.image_loader = SheetImageLoader(people_sheet)
+                self.rows_validator(people_sheet)
+
             else:
                 self.validate_collectors(wb)
-
-            if not self.is_social_worker_program:
                 individuals_sheet = wb["Individuals"]
                 household_sheet = wb["Households"]
                 self.image_loader = SheetImageLoader(household_sheet)
                 self.rows_validator(household_sheet, business_area_slug)
                 self.image_loader = SheetImageLoader(individuals_sheet)
                 self.rows_validator(individuals_sheet)
-            else:
-                people_sheet = wb["People"]
-                self.image_loader = SheetImageLoader(people_sheet)
-                self.rows_validator(people_sheet)
 
             return self.errors, self.delivery_mechanisms_errors
         except Exception as e:
@@ -1057,13 +1056,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             min_col=pr_collector_id_col, max_col=pr_collector_id_col, min_row=3, values_only=True
                         )
                     )[0]
-                if header.value == "pp_alternate_collector_id":
-                    alt_collector_id_col = int(header.column)
-                    alternate_collector_ids = list(
-                        people_sheet.iter_cols(
-                            min_col=alt_collector_id_col, max_col=alt_collector_id_col, min_row=3, values_only=True
-                        )
-                    )[0]
                 if header.value == "pp_relationship_i_c":
                     relationship_col = int(header.column)
                     relationship_column = list(
@@ -1071,10 +1063,9 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             min_col=relationship_col, max_col=relationship_col, min_row=3, values_only=True
                         )
                     )[0]
-            alt_ids = [int(i) for i in alternate_collector_ids if i is not None]
             pr_ids = [int(i) for i in primary_collector_ids if i is not None]
-            for index_id, relationship, pr_col, alt_col in zip(
-                index_ids, relationship_column, primary_collector_ids, alternate_collector_ids
+            for index_id, relationship, pr_col in itertools.zip_longest(
+                index_ids, relationship_column, primary_collector_ids, fillvalue=None
             ):
                 if relationship not in [HEAD, NON_BENEFICIARY] and index_id is not None:
                     self.errors.append(
@@ -1089,23 +1080,21 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     relationship == HEAD
                     and index_id is not None
                     and int(index_id) not in pr_ids
-                    and int(index_id) not in alt_ids
                 ):
                     self.errors.append(
                         {
                             "row_number": 1,
                             "header": "People",
-                            "message": f"Individual with index_id {index_id} has to have an external collector.",
+                            "message": f"Individual with index_id {index_id} has to have an Primary collector.",
                         }
                     )
-                if relationship == NON_BENEFICIARY and (pr_col is None and alt_col is None):
+                if relationship == NON_BENEFICIARY and (pr_col is None):
                     self.errors.append(
                         {
                             "row_number": 1,
                             "header": "People",
-                            "message": f"Invalid value in field 'pp_primary_collector_id' or "
-                            f"'pp_alternate_collector_id' for Individual with index_id {index_id}. "
-                            f"Both fields can't be empty.",
+                            "message": f"Invalid value in field 'pp_primary_collector_id' for Individual with index_id {index_id}. "
+                            f"Value cannot be empty for relationship {NON_BENEFICIARY}",
                         }
                     )
 

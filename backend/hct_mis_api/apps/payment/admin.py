@@ -382,7 +382,13 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
 
     def clean(self) -> Optional[Dict[str, Any]]:
         if self.instance:
-            protected_fields = ["name", "distribution_limit", "communication_channel"]
+            protected_fields = [
+                "name",
+                "vision_vendor_number",
+                "distribution_limit",
+                "communication_channel",
+                "xlsx_templates",
+            ]
             if any(x in self.changed_data for x in protected_fields):
                 payment_plans = self.locked_payment_plans_for_fsp(self.instance)
                 if payment_plans.exists():

@@ -135,18 +135,36 @@ export function PeopleFilter({
           </Grid>
         )}
         {showAdminAreaFilter && (
-          <Grid item xs={2}>
-            <AdminAreaAutocomplete
-              name="admin2"
-              value={filter.admin2}
-              setFilter={setFilter}
-              filter={filter}
-              initialFilter={initialFilter}
-              appliedFilter={appliedFilter}
-              setAppliedFilter={setAppliedFilter}
-              dataCy="ind-filters-admin2"
-            />
-          </Grid>
+          <>
+            <Grid item xs={2}>
+              <AdminAreaAutocomplete
+                level={1}
+                name="admin1"
+                value={filter.admin1}
+                disabled={filter.admin2}
+                setFilter={setFilter}
+                filter={filter}
+                initialFilter={initialFilter}
+                appliedFilter={appliedFilter}
+                setAppliedFilter={setAppliedFilter}
+                dataCy="ind-filters-admin1"
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <AdminAreaAutocomplete
+                level={2}
+                name="admin2"
+                value={filter.admin2}
+                disabled={filter.admin1}
+                setFilter={setFilter}
+                filter={filter}
+                initialFilter={initialFilter}
+                appliedFilter={appliedFilter}
+                setAppliedFilter={setAppliedFilter}
+                dataCy="ind-filters-admin2"
+              />
+            </Grid>
+          </>
         )}
         <Grid item xs={2}>
           <SelectFilter

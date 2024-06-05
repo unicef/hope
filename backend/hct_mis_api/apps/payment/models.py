@@ -297,8 +297,8 @@ class GenericPayment(TimeStampedUUIDModel):
         decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
-    transaction_reference_id = models.CharField(max_length=255, null=True)  # transaction_id
-    transaction_status_blockchain_link = models.CharField(max_length=255, null=True)
+    transaction_reference_id = models.CharField(max_length=255, null=True, blank=True)  # transaction_id
+    transaction_status_blockchain_link = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -1069,6 +1069,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     COLUMNS_CHOICES = (
         ("payment_id", _("Payment ID")),
         ("household_id", _("Household ID")),
+        ("individual_id", _("Individual ID")),
         ("household_size", _("Household Size")),
         ("collector_name", _("Collector Name")),
         ("alternate_collector_full_name", _("Alternate collector Full Name")),
@@ -1136,12 +1137,8 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
         collector = payment.collector
         household = payment.household
-        if is_social_worker_program:
-            core_fields_attributes = FieldFactory.from_scope(Scope.XLSX_PEOPLE).to_dict_by("name")
-        else:
-            core_fields_attributes = FieldFactory.from_scopes(
-                [Scope.GLOBAL, Scope.XLSX, Scope.DELIVERY_MECHANISM]
-            ).to_dict_by("name")
+
+        core_fields_attributes = FieldFactory(CORE_FIELDS_ATTRIBUTES).to_dict_by("name")
         core_field = core_fields_attributes.get(core_field_name)
         if not core_field:
             # Some fields can be added to the template, such as 'size' or 'collect_individual_data'
@@ -1169,6 +1166,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
     @classmethod
     def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> Union[str, float, list]:
+        # we can get if needed payment.parent.program.is_social_worker_program
         alternate_collector = None
         alternate_collector_column_names = (
             "alternate_collector_full_name",
@@ -1186,8 +1184,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
         map_obj_name_column = {
             "payment_id": (payment, "unicef_id"),
-            "household_id": (payment.household, "unicef_id"),
-            "household_size": (payment.household, "size"),
+            "individual_id": (payment.household.individuals.first(), "unicef_id"),  # add for people export
+            "household_id": (payment.household, "unicef_id"),  # remove for people export
+            "household_size": (payment.household, "size"),  # remove for people export
             "admin_level_2": (payment.household.admin2, "name"),
             "village": (payment.household, "village"),
             "collector_name": (payment.collector, "full_name"),

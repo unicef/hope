@@ -18,6 +18,7 @@ import { BaseAutocomplete } from './BaseAutocomplete';
 export function AdminAreaAutocomplete({
   disabled,
   name,
+  level,
   filter,
   value,
   initialFilter,
@@ -28,6 +29,7 @@ export function AdminAreaAutocomplete({
 }: {
   disabled?: boolean;
   name: string;
+  level: number;
   filter;
   value: string;
   initialFilter;
@@ -49,7 +51,7 @@ export function AdminAreaAutocomplete({
       first: 20,
       name: debouncedInputText,
       businessArea,
-      level: 2,
+      level,
     },
     fetchPolicy: 'cache-and-network',
   });
@@ -97,7 +99,7 @@ export function AdminAreaAutocomplete({
     <BaseAutocomplete
       value={value}
       disabled={disabled}
-      label={t('Admin Level 2')}
+      label={t(`Admin Level ${level}`)}
       dataCy={dataCy}
       loadData={loadData}
       loading={loading}

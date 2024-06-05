@@ -150,6 +150,8 @@ export const TargetCriteriaForm = ({
         filter.value.length === 0);
 
     const filterEmptyFromTo = (filter): boolean =>
+      typeof filter.value === 'object' &&
+      filter.value !== null &&
       Object.prototype.hasOwnProperty.call(filter.value, 'from') &&
       Object.prototype.hasOwnProperty.call(filter.value, 'to') &&
       !filter.value.from &&

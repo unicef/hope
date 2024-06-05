@@ -647,10 +647,10 @@ def chart_permission_decorator(
         from hct_mis_api.apps.core.models import BusinessArea
 
         _, resolve_info = args
-        program_id = get_program_id_from_headers(resolve_info.context.headers)
         if resolve_info.context.user.is_authenticated:
             business_area_slug = kwargs.get("business_area_slug", "global")
             business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
+            program_id = get_program_id_from_headers(resolve_info.context.headers)
             if any(
                 resolve_info.context.user.has_permission(per.name, business_area, program_id) for per in permissions
             ):

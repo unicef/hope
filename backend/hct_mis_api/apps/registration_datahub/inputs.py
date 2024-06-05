@@ -18,3 +18,10 @@ class RegistrationKoboImportMutationInput(graphene.InputObjectType):
     business_area_slug = graphene.String()
     screen_beneficiary = graphene.Boolean()
     allow_delivery_mechanisms_validation_errors = graphene.Boolean()
+
+
+class RegistrationProgramPopulationImportMutationInput(graphene.InputObjectType):
+    import_from_program_id = graphene.String()
+    name = graphene.String()
+    business_area_slug = graphene.String()
+    screen_beneficiary = graphene.Boolean()

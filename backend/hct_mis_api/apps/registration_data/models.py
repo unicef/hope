@@ -71,12 +71,14 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     API = "API"
     FLEX_REGISTRATION = "FLEX_REGISTRATION"
     EDOPOMOGA = "EDOPOMOGA"
+    PROGRAM_POPULATION = "PROGRAM_POPULATION"
     DATA_SOURCE_CHOICE = (
         (XLS, "Excel"),
         (KOBO, "KoBo"),
         (FLEX_REGISTRATION, "Flex Registration"),
         (API, "Flex API"),
         (EDOPOMOGA, "eDopomoga"),
+        (PROGRAM_POPULATION, "Program Population"),
     )
     name = CICharField(
         max_length=255,
