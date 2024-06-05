@@ -317,9 +317,7 @@ class KoboImportedSubmission(models.Model):
     kobo_submission_uuid = models.UUIDField()  # ImportedHousehold.kobo_submission_uuid
     kobo_asset_id = models.CharField(max_length=150)  # ImportedHousehold.detail_id
     kobo_submission_time = models.DateTimeField()  # ImportedHousehold.kobo_submission_time
-    imported_household = models.ForeignKey(
-        "registration_data.ImportedHousehold", blank=True, null=True, on_delete=models.SET_NULL
-    )
+    imported_household = models.ForeignKey("household.Household", blank=True, null=True, on_delete=models.SET_NULL)
     amended = models.BooleanField(default=False, blank=True)
 
     registration_data_import = models.ForeignKey(

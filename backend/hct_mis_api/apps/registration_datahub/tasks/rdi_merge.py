@@ -4,7 +4,7 @@ from typing import Dict, List, Tuple
 from uuid import UUID
 
 from django.core.cache import cache
-from django.db import IntegrityError, transaction
+from django.db import transaction
 from django.forms import model_to_dict
 
 from hct_mis_api.apps.account.models import Partner
@@ -29,10 +29,8 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.registration_data.models import (
-    ImportedBankAccountInfo,
     ImportedHousehold,
     ImportedIndividual,
-    ImportedIndividualRoleInHousehold,
     KoboImportedSubmission,
     RegistrationDataImport,
     RegistrationDataImportDatahub,
@@ -337,68 +335,46 @@ class RdiMergeTask:
         try:
             obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id)
             obj_hub = RegistrationDataImportDatahub.objects.get(hct_id=registration_data_import_id)
-            imported_households = ImportedHousehold.objects.filter(registration_data_import=obj_hub)
-            imported_individuals = ImportedIndividual.objects.filter(registration_data_import=obj_hub).order_by(
+            households = Household.objects.filter(registration_data_import=obj_hct)
+            individuals = Individual.objects.filter(registration_data_import=obj_hct).order_by(
                 "first_registration_date"
             )
-            imported_roles = ImportedIndividualRoleInHousehold.objects.filter(
-                household__in=imported_households, individual__in=imported_individuals
-            )
-            imported_bank_account_infos = ImportedBankAccountInfo.objects.filter(individual__in=imported_individuals)
+            roles = IndividualRoleInHousehold.objects.filter(household__in=households, individual__in=individuals)
+            bank_account_infos = BankAccountInfo.objects.filter(individual__in=individuals)
             household_ids = []
             try:
                 with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
                     old_obj_hct = copy_model_object(obj_hct)
 
-                    households_dict = self._prepare_households(imported_households, obj_hct)
-                    (
-                        individuals_dict,
-                        documents_to_create,
-                        identities_to_create,
-                    ) = self._prepare_individuals(imported_individuals, households_dict, obj_hct)
-
-                    roles_to_create = self._prepare_roles(imported_roles, households_dict, individuals_dict)
-                    bank_account_infos_to_create = self._prepare_bank_account_info(
-                        imported_bank_account_infos, individuals_dict
-                    )
-                    logger.info(f"RDI:{registration_data_import_id} Creating {len(households_dict)} households")
-                    Household.objects.bulk_create(households_dict.values())
-                    Individual.objects.bulk_create(individuals_dict.values())
-                    Document.objects.bulk_create(documents_to_create)
-                    IndividualIdentity.objects.bulk_create(identities_to_create)
-                    IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
-                    BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
-                    logger.info(f"RDI:{registration_data_import_id} Created {len(households_dict)} households")
-                    individual_ids = [str(individual.id) for individual in individuals_dict.values()]
-                    household_ids = [str(household.id) for household in households_dict.values()]
+                    individual_ids = [str(individual.id) for individual in individuals]
+                    household_ids = [str(household.id) for household in households]
 
                     transaction.on_commit(lambda: recalculate_population_fields_task(household_ids))
                     logger.info(
                         f"RDI:{registration_data_import_id} Recalculated population fields for {len(household_ids)} households"
                     )
                     kobo_submissions = []
-                    for imported_household in imported_households:
-                        kobo_submission_uuid = imported_household.kobo_submission_uuid
-                        kobo_asset_id = imported_household.detail_id or imported_household.kobo_asset_id
-                        kobo_submission_time = imported_household.kobo_submission_time
+                    for household in households:
+                        kobo_submission_uuid = household.kobo_submission_uuid
+                        kobo_asset_id = household.detail_id or household.kobo_asset_id
+                        kobo_submission_time = household.kobo_submission_time
                         if kobo_submission_uuid and kobo_asset_id and kobo_submission_time:
                             submission = KoboImportedSubmission(
                                 kobo_submission_uuid=kobo_submission_uuid,
                                 kobo_asset_id=kobo_asset_id,
                                 kobo_submission_time=kobo_submission_time,
                                 registration_data_import=obj_hub,
-                                imported_household=imported_household,
+                                imported_household=household,
                             )
                             kobo_submissions.append(submission)
                     if kobo_submissions:
                         KoboImportedSubmission.objects.bulk_create(kobo_submissions)
                     logger.info(f"RDI:{registration_data_import_id} Created {len(kobo_submissions)} kobo submissions")
 
-                    for imported_household in imported_households:
-                        program_registration_id = imported_household.program_registration_id
-                        if program_registration_id:
-                            household = households_dict[imported_household.id]
-                            self._update_program_registration_id(household.id, program_registration_id)
+                    for household in households:
+                        registration_id = household.registration_id
+                        if registration_id:
+                            self._update_program_registration_id(household.id, registration_id)
 
                     # DEDUPLICATION
 
@@ -465,7 +441,16 @@ class RdiMergeTask:
 
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
-                    imported_households.delete()
+
+                    households.update(rdi_merge_status="MERGED")
+                    individuals.update(rdi_merge_status="MERGED")
+                    roles.update(rdi_merge_status="MERGED")
+                    bank_account_infos.update(rdi_merge_status="MERGED")
+                    Document.objects.filter(individual_id__in=individual_ids).update(rdi_merge_status="MERGED")
+                    IndividualRoleInHousehold.objects.filter(individual_id__in=individual_ids).update(
+                        rdi_merge_status="MERGED"
+                    )
+
                     logger.info(f"RDI:{registration_data_import_id} Saved registration data import")
                     transaction.on_commit(lambda: deduplicate_documents.delay())
                     rdi_merged.send(sender=obj_hct.__class__, instance=obj_hct)
@@ -489,7 +474,7 @@ class RdiMergeTask:
 
                 # proactively try to remove also es data for imported individuals
                 remove_elasticsearch_documents_by_matching_ids(
-                    list(imported_individuals.values_list("id", flat=True)),
+                    list(individuals.values_list("id", flat=True)),
                     get_imported_individual_doc(obj_hct.business_area.slug),
                 )
                 raise
@@ -508,9 +493,8 @@ class RdiMergeTask:
             logger.error(e)
             raise
 
-    def _update_program_registration_id(self, household_id: UUID, program_registration_id: str, count: int = 0) -> None:
-        try:
-            with transaction.atomic():
-                Household.objects.filter(id=household_id).update(registration_id=f"{program_registration_id}#{count}")
-        except IntegrityError:
-            self._update_program_registration_id(household_id, program_registration_id, count=count + 1)
+    def _update_program_registration_id(self, household_id: UUID, registration_id: str) -> None:
+        count = 0
+        while Household.objects.filter(registration_id=f"{registration_id}#{count}").exists():
+            count += 1
+        Household.objects.filter(id=household_id).update(registration_id=f"{registration_id}#{count}")

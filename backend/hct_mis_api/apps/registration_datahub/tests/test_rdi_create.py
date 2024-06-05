@@ -143,7 +143,6 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             "birth_date": date(1963, 2, 3),
             "marital_status": "MARRIED",
             "email": "fake_email_123@mail.com",
-            # "preferred_language": "pl", # TODO: fix this? (rebase issue?)
         }
         matching_individuals = Individual.objects.filter(**individual_data)
 

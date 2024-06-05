@@ -518,7 +518,6 @@ class Household(
         max_length=100,
         blank=True,
         null=True,
-        unique=True,
         db_index=True,
         verbose_name=_("Beneficiary Program Registration Id"),
     )
@@ -556,6 +555,9 @@ class Household(
     is_recalculated_group_ages = models.BooleanField(default=False)  # TODO remove after migration
     collect_type = models.CharField(choices=CollectType.choices, default=CollectType.STANDARD.value, max_length=8)
     rdi_merge_status = models.CharField(choices=MERGE_CHOICES, default=PENDING, max_length=10)
+
+    kobo_submission_uuid = models.UUIDField(null=True, default=None)
+    kobo_submission_time = models.DateTimeField(max_length=150, blank=True, null=True)
 
     class Meta:
         verbose_name = "Household"
