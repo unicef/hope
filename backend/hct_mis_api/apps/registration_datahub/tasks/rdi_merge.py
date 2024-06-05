@@ -370,9 +370,9 @@ class RdiMergeTask:
     def _prepare_bank_account_info(
         self, imported_bank_account_infos: List[ImportedBankAccountInfo], individuals_dict: Dict
     ) -> List:
-        bank_account_infos_to_create = []
+        roles_to_create = []
         for imported_bank_account_info in imported_bank_account_infos:
-            bank_account_info = BankAccountInfo(
+            role = BankAccountInfo(
                 individual=individuals_dict.get(imported_bank_account_info.individual.id),
                 bank_name=imported_bank_account_info.bank_name,
                 bank_account_number=imported_bank_account_info.bank_account_number.replace(" ", ""),
@@ -380,9 +380,9 @@ class RdiMergeTask:
                 bank_branch_name=imported_bank_account_info.bank_branch_name,
                 account_holder_name=imported_bank_account_info.account_holder_name,
             )
-            bank_account_infos_to_create.append(bank_account_info)
+            roles_to_create.append(role)
 
-        return bank_account_infos_to_create
+        return roles_to_create
 
     def _create_grievance_ticket_for_delivery_mechanisms_errors(
         self, delivery_mechanism_data: DeliveryMechanismData, obj_hct: RegistrationDataImport, description: str
