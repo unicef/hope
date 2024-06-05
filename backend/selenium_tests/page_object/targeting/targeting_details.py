@@ -153,10 +153,10 @@ class TargetingDetails(BaseComponents):
         return self.wait_for(self.criteriaContainer)
 
     def getCheckboxExcludeIfActiveAdjudicationTicket(self) -> WebElement:
-        return self.wait_for(self.checkboxExcludeIfActiveAdjudicationTicket)
+        return self.get(self.checkboxExcludeIfActiveAdjudicationTicket)
 
     def getCheckboxExcludePeopleIfActiveAdjudicationTicket(self) -> WebElement:
-        return self.wait_for(self.checkboxExcludePeopleIfActiveAdjudicationTicket)
+        return self.get(self.checkboxExcludePeopleIfActiveAdjudicationTicket)
 
     def getCheckboxExcludeIfOnSanctionList(self) -> WebElement:
         return self.wait_for(self.checkboxExcludeIfOnSanctionList)

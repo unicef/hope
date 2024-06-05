@@ -54,12 +54,10 @@ class TestProgrammeDetails:
         pageProgrammeDetails.selectGlobalProgramFilter("Test For Edit").click()
         # Check Details page
         assert "Test For Edit" in pageProgrammeDetails.getHeaderTitle().text
-        pageProgrammeDetails.screenshot("0")
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
         assert "Test For Edit" in pageProgrammeDetails.getHeaderTitle().text
         assert "REMOVE" in pageProgrammeDetails.getButtonRemoveProgram().text
         assert "EDIT PROGRAMME" in pageProgrammeDetails.getButtonEditProgram().text
-        pageProgrammeDetails.screenshot("1")
         assert "ACTIVATE" in pageProgrammeDetails.getButtonActivateProgram().text
         assert "" in pageProgrammeDetails.getCopyProgram().text
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
