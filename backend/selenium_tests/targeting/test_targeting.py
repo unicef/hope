@@ -78,7 +78,7 @@ def household_refugee() -> Household:
 
 
 def get_program_with_dct_type_and_name(
-        name: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
+    name: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
 ) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
@@ -147,8 +147,7 @@ class TestSmokeTargeting:
         assert "Use IDs" in pageTargeting.getCreateUseIDs().text
 
     def test_smoke_targeting_create_use_filters(
-            self, create_programs: None, add_targeting: None, pageTargeting: Targeting,
-            pageTargetingCreate: TargetingCreate
+        self, create_programs: None, add_targeting: None, pageTargeting: Targeting, pageTargetingCreate: TargetingCreate
     ) -> None:
         pageTargeting.selectGlobalProgramFilter("Test Programm").click()
         pageTargeting.getNavTargeting().click()
@@ -163,8 +162,7 @@ class TestSmokeTargeting:
         pageTargetingCreate.getAutocompleteTargetCriteriaOption().click()
 
     def test_smoke_targeting_create_use_ids(
-            self, create_programs: None, add_targeting: None, pageTargeting: Targeting,
-            pageTargetingCreate: TargetingCreate
+        self, create_programs: None, add_targeting: None, pageTargeting: Targeting, pageTargetingCreate: TargetingCreate
     ) -> None:
         pageTargeting.selectGlobalProgramFilter("Test Programm").click()
         pageTargeting.getNavTargeting().click()
@@ -179,11 +177,11 @@ class TestSmokeTargeting:
         pageTargetingCreate.getInputIndividualids()
 
     def test_smoke_targeting_details_page(
-            self,
-            create_programs: None,
-            add_targeting: None,
-            pageTargeting: Targeting,
-            pageTargetingDetails: TargetingDetails,
+        self,
+        create_programs: None,
+        add_targeting: None,
+        pageTargeting: Targeting,
+        pageTargetingDetails: TargetingDetails,
     ) -> None:
         pageTargeting.selectGlobalProgramFilter("Test Programm").click()
         pageTargeting.getNavTargeting().click()
@@ -225,13 +223,13 @@ class TestSmokeTargeting:
 @pytest.mark.usefixtures("login")
 class TestCreateTargeting:
     def test_create_targeting_for_people(
-            self,
-            sw_program: Program,
-            household_with_disability: Household,
-            household_without_disabilities: Household,
-            pageTargeting: Targeting,
-            pageTargetingCreate: TargetingCreate,
-            pageTargetingDetails: TargetingDetails,
+        self,
+        sw_program: Program,
+        household_with_disability: Household,
+        household_without_disabilities: Household,
+        pageTargeting: Targeting,
+        pageTargetingCreate: TargetingCreate,
+        pageTargetingDetails: TargetingDetails,
     ) -> None:
         pageTargeting.navigate_to_page("afghanistan", sw_program.id)
         pageTargeting.getButtonCreateNew().click()
@@ -257,20 +255,20 @@ class TestCreateTargeting:
         assert pageTargetingDetails.getCriteriaContainer().text == disability_expected_criteria_text
         assert Household.objects.count() == 2
         assert (
-                pageTargetingDetails.getHouseholdTableCell(1, 1).text
-                == household_with_disability.individuals.first().unicef_id
+            pageTargetingDetails.getHouseholdTableCell(1, 1).text
+            == household_with_disability.individuals.first().unicef_id
         )
         assert len(pageTargetingDetails.getPeopleTableRows()) == 1
 
     def test_create_targeting_for_normal_program(
-            self,
-            non_sw_program: Program,
-            household_with_disability: Household,
-            household_without_disabilities: Household,
-            household_refugee: Household,
-            pageTargeting: Targeting,
-            pageTargetingCreate: TargetingCreate,
-            pageTargetingDetails: TargetingDetails,
+        self,
+        non_sw_program: Program,
+        household_with_disability: Household,
+        household_without_disabilities: Household,
+        household_refugee: Household,
+        pageTargeting: Targeting,
+        pageTargetingCreate: TargetingCreate,
+        pageTargetingDetails: TargetingDetails,
     ) -> None:
         pageTargeting.navigate_to_page("afghanistan", non_sw_program.id)
         pageTargeting.getButtonCreateNew().click()
@@ -305,13 +303,13 @@ class TestCreateTargeting:
 @pytest.mark.usefixtures("login")
 class TestTargeting:
     def test_targeting_create_use_ids_hh(
-            self,
-            create_programs: None,
-            household_with_disability: Household,
-            add_targeting: None,
-            pageTargeting: Targeting,
-            pageTargetingDetails: TargetingDetails,
-            pageTargetingCreate: TargetingCreate,
+        self,
+        create_programs: None,
+        household_with_disability: Household,
+        add_targeting: None,
+        pageTargeting: Targeting,
+        pageTargetingDetails: TargetingDetails,
+        pageTargetingCreate: TargetingCreate,
     ) -> None:
         pageTargeting.selectGlobalProgramFilter("Test Programm").click()
         pageTargeting.getNavTargeting().click()
@@ -327,23 +325,23 @@ class TestTargeting:
             name=f"Target Population for {household_with_disability.unicef_id}"
         )
         assert (
-                "8"
-                == str(target_population.total_individuals_count)
-                == pageTargetingDetails.getLabelTargetedIndividuals().text
+            "8"
+            == str(target_population.total_individuals_count)
+            == pageTargetingDetails.getLabelTargetedIndividuals().text
         )
         assert (
-                str(target_population.total_households_count) == pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
+            str(target_population.total_households_count) == pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
         )
         assert str(target_population.status) in pageTargetingDetails.getLabelStatus().text
 
     def test_targeting_create_use_ids_individual(
-            self,
-            create_programs: None,
-            household_with_disability: Household,
-            add_targeting: None,
-            pageTargeting: Targeting,
-            pageTargetingDetails: TargetingDetails,
-            pageTargetingCreate: TargetingCreate,
+        self,
+        create_programs: None,
+        household_with_disability: Household,
+        add_targeting: None,
+        pageTargeting: Targeting,
+        pageTargetingDetails: TargetingDetails,
+        pageTargetingCreate: TargetingCreate,
     ) -> None:
         pageTargeting.selectGlobalProgramFilter("Test Programm").click()
         pageTargeting.getNavTargeting().click()
@@ -357,23 +355,23 @@ class TestTargeting:
         pageTargetingDetails.getLabelStatus()
         target_population = TargetPopulation.objects.get(name="Target Population for IND-88-0000.0002")
         assert (
-                "4"
-                == str(target_population.total_individuals_count)
-                == pageTargetingDetails.getLabelTargetedIndividuals().text
+            "4"
+            == str(target_population.total_individuals_count)
+            == pageTargetingDetails.getLabelTargetedIndividuals().text
         )
         assert (
-                str(target_population.total_households_count) == pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
+            str(target_population.total_households_count) == pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
         )
         assert str(target_population.status) in pageTargetingDetails.getLabelStatus().text
         pageTargetingDetails.getButtonRebuild().click()
 
     def test_targeting_rebuild(
-            self,
-            create_programs: None,
-            create_targeting: TargetPopulation,
-            pageTargeting: Targeting,
-            pageTargetingDetails: TargetingDetails,
-            pageTargetingCreate: TargetingCreate,
+        self,
+        create_programs: None,
+        create_targeting: TargetPopulation,
+        pageTargeting: Targeting,
+        pageTargetingDetails: TargetingDetails,
+        pageTargetingCreate: TargetingCreate,
     ) -> None:
         pageTargeting.selectGlobalProgramFilter("Test Programm").click()
         pageTargeting.getNavTargeting().click()
@@ -384,14 +382,14 @@ class TestTargeting:
         pageTargetingDetails.disappearStatusContainer()
 
     def test_targeting_mark_ready(
-            self,
-            create_programs: None,
-            household_with_disability: Household,
-            add_targeting: None,
-            pageTargeting: Targeting,
-            filters: Filters,
-            pageTargetingDetails: TargetingDetails,
-            pageTargetingCreate: TargetingCreate,
+        self,
+        create_programs: None,
+        household_with_disability: Household,
+        add_targeting: None,
+        pageTargeting: Targeting,
+        filters: Filters,
+        pageTargetingDetails: TargetingDetails,
+        pageTargetingCreate: TargetingCreate,
     ) -> None:
         pageTargeting.selectGlobalProgramFilter("Test Programm").click()
         pageTargeting.getNavTargeting().click()
@@ -406,12 +404,12 @@ class TestTargeting:
         pageTargetingDetails.waitForLabelStatus("READY")
 
     def test_copy_targeting(
-            self,
-            create_programs: None,
-            add_targeting: None,
-            pageTargeting: Targeting,
-            pageTargetingDetails: TargetingDetails,
-            pageTargetingCreate: TargetingCreate,
+        self,
+        create_programs: None,
+        add_targeting: None,
+        pageTargeting: Targeting,
+        pageTargetingDetails: TargetingDetails,
+        pageTargetingCreate: TargetingCreate,
     ) -> None:
         program = Program.objects.get(name="Test Programm")
         pageTargeting.selectGlobalProgramFilter(program.name).click()
@@ -429,13 +427,13 @@ class TestTargeting:
         assert "8" in pageTargetingDetails.getLabelTargetedIndividuals().text
 
     def test_edit_targeting(
-            self,
-            create_programs: None,
-            household_with_disability: Household,
-            add_targeting: None,
-            pageTargeting: Targeting,
-            pageTargetingDetails: TargetingDetails,
-            pageTargetingCreate: TargetingCreate,
+        self,
+        create_programs: None,
+        household_with_disability: Household,
+        add_targeting: None,
+        pageTargeting: Targeting,
+        pageTargetingDetails: TargetingDetails,
+        pageTargetingCreate: TargetingCreate,
     ) -> None:
         pageTargeting.selectGlobalProgramFilter("Test Programm").click()
         pageTargeting.getNavTargeting().click()
@@ -455,12 +453,12 @@ class TestTargeting:
         assert "9" in pageTargetingDetails.getCriteriaContainer().text
 
     def test_delete_targeting(
-            self,
-            create_programs: None,
-            household_with_disability: Household,
-            add_targeting: None,
-            pageTargeting: Targeting,
-            pageTargetingDetails: TargetingDetails,
+        self,
+        create_programs: None,
+        household_with_disability: Household,
+        add_targeting: None,
+        pageTargeting: Targeting,
+        pageTargetingDetails: TargetingDetails,
     ) -> None:
         pageTargeting.selectGlobalProgramFilter("Test Programm").click()
         pageTargeting.getNavTargeting().click()
@@ -479,11 +477,11 @@ class TestTargeting:
         assert "Test NEW TP" in new_list[0].text
 
     def test_targeting_different_program_statuses(
-            self,
-            create_programs: None,
-            pageTargeting: Targeting,
-            pageTargetingDetails: TargetingDetails,
-            pageTargetingCreate: TargetingCreate,
+        self,
+        create_programs: None,
+        pageTargeting: Targeting,
+        pageTargetingDetails: TargetingDetails,
+        pageTargetingCreate: TargetingCreate,
     ) -> None:
         program = Program.objects.get(name="Test Programm")
         program.status = Program.DRAFT
@@ -519,17 +517,17 @@ class TestTargeting:
                 },
                 id="Program population",
             ),
-        ]
+        ],
     )
     def test_exclude_households_with_active_adjudication_ticket(
-            self,
-            test_data: dict,
-            create_programs: None,
-            household_with_disability: Household,
-            add_targeting: None,
-            pageTargeting: Targeting,
-            pageTargetingDetails: TargetingDetails,
-            pageTargetingCreate: TargetingCreate,
+        self,
+        test_data: dict,
+        create_programs: None,
+        household_with_disability: Household,
+        add_targeting: None,
+        pageTargeting: Targeting,
+        pageTargetingDetails: TargetingDetails,
+        pageTargetingCreate: TargetingCreate,
     ) -> None:
         program = Program.objects.get(name="Test Programm")
         program.data_collecting_type.type = test_data["type"]
@@ -550,22 +548,25 @@ class TestTargeting:
         if test_data["type"] == "SOCIAL":
             pageTargetingDetails.getCheckboxExcludePeopleIfActiveAdjudicationTicket()
             pageTargetingDetails.getCheckboxExcludePeopleIfActiveAdjudicationTicket().find_element(
-                By.CSS_SELECTOR, pageTargetingDetails.iconSelected)
+                By.CSS_SELECTOR, pageTargetingDetails.iconSelected
+            )
             assert (
-                    test_data["text"]
-                    in pageTargetingDetails.getCheckboxExcludePeopleIfActiveAdjudicationTicket().find_element(By.XPATH,
-                                                                                                        "./..").text
+                test_data["text"]
+                in pageTargetingDetails.getCheckboxExcludePeopleIfActiveAdjudicationTicket()
+                .find_element(By.XPATH, "./..")
+                .text
             )
         elif test_data["type"] == "STANDARD":
             pageTargetingDetails.getCheckboxExcludeIfActiveAdjudicationTicket()
             pageTargetingDetails.getCheckboxExcludeIfActiveAdjudicationTicket().find_element(
-                By.CSS_SELECTOR, pageTargetingDetails.iconSelected)
-            assert (
-                    test_data["text"]
-                    in pageTargetingDetails.getCheckboxExcludeIfActiveAdjudicationTicket().find_element(By.XPATH,
-                                                                                                        "./..").text
+                By.CSS_SELECTOR, pageTargetingDetails.iconSelected
             )
-
+            assert (
+                test_data["text"]
+                in pageTargetingDetails.getCheckboxExcludeIfActiveAdjudicationTicket()
+                .find_element(By.XPATH, "./..")
+                .text
+            )
 
     @pytest.mark.parametrize(
         "test_data",
@@ -584,17 +585,17 @@ class TestTargeting:
                 },
                 id="Program population",
             ),
-        ]
+        ],
     )
     def test_exclude_households_with_sanction_screen_flag(
-            self,
-            test_data: dict,
-            create_programs: None,
-            household_with_disability: Household,
-            add_targeting: None,
-            pageTargeting: Targeting,
-            pageTargetingDetails: TargetingDetails,
-            pageTargetingCreate: TargetingCreate,
+        self,
+        test_data: dict,
+        create_programs: None,
+        household_with_disability: Household,
+        add_targeting: None,
+        pageTargeting: Targeting,
+        pageTargetingDetails: TargetingDetails,
+        pageTargetingCreate: TargetingCreate,
     ) -> None:
         program = Program.objects.get(name="Test Programm")
         program.data_collecting_type.type = test_data["type"]
@@ -619,12 +620,13 @@ class TestTargeting:
         )
         with pytest.raises(NoSuchElementException):
             pageTargetingDetails.getCheckboxExcludePeopleIfActiveAdjudicationTicket().find_element(
-                By.CSS_SELECTOR, pageTargetingDetails.iconSelected)
+                By.CSS_SELECTOR, pageTargetingDetails.iconSelected
+            )
 
     def test_targeting_info_button(
-            self,
-            create_programs: None,
-            pageTargeting: Targeting,
+        self,
+        create_programs: None,
+        pageTargeting: Targeting,
     ) -> None:
         pageTargeting.selectGlobalProgramFilter("Test Programm").click()
         pageTargeting.getNavTargeting().click()
@@ -633,12 +635,12 @@ class TestTargeting:
         pageTargeting.getTabTargetingDiagram().click()
 
     def test_targeting_filters_and_labels(
-            self,
-            create_programs: None,
-            household_with_disability: Household,
-            add_targeting: None,
-            pageTargeting: Targeting,
-            filters: Filters,
+        self,
+        create_programs: None,
+        household_with_disability: Household,
+        add_targeting: None,
+        pageTargeting: Targeting,
+        filters: Filters,
     ) -> None:
         pageTargeting.selectGlobalProgramFilter("Test Programm").click()
         pageTargeting.getNavTargeting().click()
@@ -651,22 +653,22 @@ class TestTargeting:
         filters.getFiltersTotalHouseholdsCountMin().send_keys("1")
 
     def test_targeting_parametrized_ruls_filters(
-            self,
-            create_programs: None,
-            household_with_disability: Household,
-            add_targeting: None,
-            pageTargeting: Targeting,
-            pageTargetingDetails: TargetingDetails,
-            pageTargetingCreate: TargetingCreate,
+        self,
+        create_programs: None,
+        household_with_disability: Household,
+        add_targeting: None,
+        pageTargeting: Targeting,
+        pageTargetingDetails: TargetingDetails,
+        pageTargetingCreate: TargetingCreate,
     ) -> None:
         pass
 
     def test_targeting_mark_ready_failed(
-            self,
-            create_programs: None,
-            add_targeting: None,
-            pageTargeting: Targeting,
-            pageTargetingDetails: TargetingDetails,
-            pageTargetingCreate: TargetingCreate,
+        self,
+        create_programs: None,
+        add_targeting: None,
+        pageTargeting: Targeting,
+        pageTargetingDetails: TargetingDetails,
+        pageTargetingCreate: TargetingCreate,
     ) -> None:
         pass
