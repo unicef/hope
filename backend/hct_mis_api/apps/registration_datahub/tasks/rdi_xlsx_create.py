@@ -565,6 +565,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                     household.head_of_household = obj_to_create
                                     households_to_update.append(household)
 
+                            if header == "org_enumerator_h_c":
+                                obj_to_create.flex_fields["enumerator_id"] = cell.value
+
                             if header in ("country_h_c", "country_origin_h_c"):
                                 from hct_mis_api.apps.geo.models import (
                                     Country as GeoCountry,

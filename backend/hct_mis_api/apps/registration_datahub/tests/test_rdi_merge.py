@@ -9,6 +9,7 @@ from freezegun import freeze_time
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import (
     BROTHER_SISTER,
     COLLECT_TYPE_FULL,
@@ -19,18 +20,12 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     Household,
     Individual,
+    IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import (
-    ImportedHousehold,
-    ImportedIndividual,
-    ImportedIndividualRoleInHousehold,
-    KoboImportedSubmission,
-)
+from hct_mis_api.apps.registration_data.models import KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.fixtures import (
-    ImportedHouseholdFactory,
-    ImportedIndividualFactory,
     RegistrationDataImportDatahubFactory,
 )
 from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
@@ -100,7 +95,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         super().setUpTestData()
 
     @classmethod
-    def set_imported_individuals(cls, imported_household: ImportedHouseholdFactory) -> None:
+    def set_imported_individuals(cls, household: HouseholdFactory) -> None:
         individuals_to_create = [
             {
                 "full_name": "Benjamin Butler",
@@ -109,8 +104,8 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "relationship": HEAD,
                 "birth_date": "1962-02-02",  # age 39
                 "sex": "MALE",
-                "registration_data_import": cls.rdi_hub,
-                "household": imported_household,
+                "registration_data_import": cls.rdi,
+                "household": household,
                 "email": "fake_email_1@com",
                 "wallet_name": "Wallet Name 1",
                 "blockchain_name": "Blockchain Name 1",
@@ -123,8 +118,8 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "relationship": COUSIN,
                 "birth_date": "2017-02-15",  # age 4
                 "sex": "MALE",
-                "registration_data_import": cls.rdi_hub,
-                "household": imported_household,
+                "registration_data_import": cls.rdi,
+                "household": household,
                 "email": "fake_email_2@com",
             },
             {
@@ -134,8 +129,8 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "relationship": COUSIN,
                 "birth_date": "2011-12-21",  # age 10
                 "sex": "MALE",
-                "registration_data_import": cls.rdi_hub,
-                "household": imported_household,
+                "registration_data_import": cls.rdi,
+                "household": household,
                 "email": "fake_email_3@com",
             },
             {
@@ -145,8 +140,8 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "relationship": BROTHER_SISTER,
                 "birth_date": "2006-03-23",  # age 15
                 "sex": "MALE",
-                "registration_data_import": cls.rdi_hub,
-                "household": imported_household,
+                "registration_data_import": cls.rdi,
+                "household": household,
                 "email": "fake_email_4@com",
             },
             {
@@ -156,8 +151,8 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "relationship": BROTHER_SISTER,
                 "birth_date": "2005-02-21",  # age 16
                 "sex": "MALE",
-                "registration_data_import": cls.rdi_hub,
-                "household": imported_household,
+                "registration_data_import": cls.rdi,
+                "household": household,
                 "email": "fake_email_5@com",
             },
             {
@@ -167,12 +162,12 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "relationship": BROTHER_SISTER,
                 "birth_date": "2005-10-10",  # age 16
                 "sex": "FEMALE",
-                "registration_data_import": cls.rdi_hub,
+                "registration_data_import": cls.rdi,
                 "phone_no": "+41 (0) 78 927 2696",
                 "phone_no_alternative": "+41 (0) 78 927 2696",
                 "phone_no_valid": None,
                 "phone_no_alternative_valid": None,
-                "household": imported_household,
+                "household": household,
                 "email": "fake_email_6@com",
             },
             {
@@ -182,12 +177,12 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "relationship": BROTHER_SISTER,
                 "birth_date": "1996-11-29",  # age 25
                 "sex": "FEMALE",
-                "registration_data_import": cls.rdi_hub,
+                "registration_data_import": cls.rdi,
                 "phone_no": "wrong-phone",
                 "phone_no_alternative": "definitely-wrong-phone",
                 "phone_no_valid": None,
                 "phone_no_alternative_valid": None,
-                "household": imported_household,
+                "household": household,
                 "email": "fake_email_7@com",
             },
             {
@@ -197,46 +192,40 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "relationship": BROTHER_SISTER,
                 "birth_date": "1956-03-03",  # age 65
                 "sex": "MALE",
-                "registration_data_import": cls.rdi_hub,
-                "household": imported_household,
+                "registration_data_import": cls.rdi,
+                "household": household,
                 "email": "",
             },
         ]
 
-        cls.individuals = [ImportedIndividualFactory(**individual) for individual in individuals_to_create]
+        cls.individuals = [IndividualFactory(**individual) for individual in individuals_to_create]
 
     @freeze_time("2022-01-01")
     def test_merge_rdi_and_recalculation(self) -> None:
-        imported_household = ImportedHouseholdFactory(
+        household = HouseholdFactory(
             collect_individual_data=COLLECT_TYPE_FULL,
-            registration_data_import=self.rdi_hub,
-            admin_area=self.area4.p_code,
-            admin_area_title=self.area4.name,
-            admin4=self.area4.p_code,
-            admin4_title=self.area4.name,
+            registration_data_import=self.rdi,
+            admin_area=self.area4,
+            admin4=self.area4,
             zip_code="00-123",
-            enumerator_rec_id=1234567890,
             detail_id="123456123",
             kobo_asset_id="Test_asset_id",
             kobo_submission_uuid="c09130af-6c9c-4dba-8c7f-1b2ff1970d19",
             kobo_submission_time="2022-02-22T12:22:22",
+            flex_fields={"enumerator_id": 1234567890},
         )
-        self.set_imported_individuals(imported_household)
+        self.set_imported_individuals(household)
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
 
         households = Household.objects.all()
         individuals = Individual.objects.all()
 
-        imported_households = ImportedHousehold.objects.all()
-        imported_individuals = ImportedIndividual.objects.all()
         household = households.first()
 
         self.assertEqual(1, households.count())
-        self.assertEqual(0, imported_households.count())  # Removed after successful merge
         self.assertEqual(household.collect_individual_data, COLLECT_TYPE_FULL)
         self.assertEqual(8, individuals.count())
-        self.assertEqual(0, imported_individuals.count())  # Removed after successful merge
         self.assertEqual(household.flex_fields.get("enumerator_id"), 1234567890)
         self.assertEqual(household.detail_id, "123456123")
 
@@ -317,11 +306,11 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
 
     @freeze_time("2022-01-01")
     def test_merge_rdi_and_recalculation_for_collect_data_partial(self) -> None:
-        imported_household = ImportedHouseholdFactory(
+        household = HouseholdFactory(
             collect_individual_data=COLLECT_TYPE_PARTIAL,
-            registration_data_import=self.rdi_hub,
+            registration_data_import=self.rdi,
         )
-        self.set_imported_individuals(imported_household)
+        self.set_imported_individuals(household)
 
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
@@ -368,21 +357,21 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         self.assertEqual(household_data, expected)
 
     def test_registration_id_from_program_registration_id_should_be_unique(self) -> None:
-        imported_household = ImportedHouseholdFactory(
-            registration_data_import=self.rdi_hub,
-            program_registration_id="ABCD-123123",
+        household = HouseholdFactory(
+            registration_data_import=self.rdi,
+            registration_id="ABCD-123123",
         )
-        self.set_imported_individuals(imported_household)
-        imported_household = ImportedHouseholdFactory(
-            registration_data_import=self.rdi_hub,
-            program_registration_id="ABCD-123123",
+        self.set_imported_individuals(household)
+        household = HouseholdFactory(
+            registration_data_import=self.rdi,
+            registration_id="ABCD-123123",
         )
-        self.set_imported_individuals(imported_household)
-        imported_household = ImportedHouseholdFactory(
-            registration_data_import=self.rdi_hub,
-            program_registration_id="ABCD-111111",
+        self.set_imported_individuals(household)
+        household = HouseholdFactory(
+            registration_data_import=self.rdi,
+            registration_id="ABCD-111111",
         )
-        self.set_imported_individuals(imported_household)
+        self.set_imported_individuals(household)
 
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
@@ -395,18 +384,15 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         self.assertEqual(registrations_ids, expected_registrations_ids)
 
     def test_merging_external_collector(self) -> None:
-        imported_household = ImportedHouseholdFactory(
+        household = HouseholdFactory(
             collect_individual_data=COLLECT_TYPE_FULL,
-            registration_data_import=self.rdi_hub,
-            admin_area=self.area4.p_code,
-            admin_area_title=self.area4.name,
-            admin4=self.area4.p_code,
-            admin4_title=self.area4.name,
+            registration_data_import=self.rdi,
+            admin_area=self.area4,
+            admin4=self.area4,
             zip_code="00-123",
-            enumerator_rec_id=1234567890,
         )
-        self.set_imported_individuals(imported_household)
-        external_collector = ImportedIndividualFactory(
+        self.set_imported_individuals(household)
+        external_collector = IndividualFactory(
             **{
                 "full_name": "External Collector",
                 "given_name": "External",
@@ -414,13 +400,11 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "relationship": NON_BENEFICIARY,
                 "birth_date": "1962-02-02",  # age 39
                 "sex": "MALE",
-                "registration_data_import": self.rdi_hub,
+                "registration_data_import": self.rdi,
                 "email": "xd@com",
             }
         )
-        role = ImportedIndividualRoleInHousehold(
-            individual=external_collector, household=imported_household, role=ROLE_ALTERNATE
-        )
+        role = IndividualRoleInHousehold(individual=external_collector, household=household, role=ROLE_ALTERNATE)
         role.save()
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
