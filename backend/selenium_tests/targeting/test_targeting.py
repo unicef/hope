@@ -634,7 +634,7 @@ class TestTargeting:
         pageTargeting.getTabFieldList()
         pageTargeting.getTabTargetingDiagram().click()
 
-    def test_targeting_filters_and_labels(
+    def test_targeting_filters(
         self,
         create_programs: None,
         household_with_disability: Household,
@@ -647,8 +647,39 @@ class TestTargeting:
         filters.getFiltersSearch().send_keys("Copy")
         filters.getButtonFiltersApply().click()
         pageTargeting.countTargetPopulations(1)
+        assert "OPEN" in pageTargeting.getStatusContainer().text
+        filters.getButtonFiltersClear().click()
+        filters.getFiltersStatus().click()
+        filters.select_listbox_element("Open").click()
         filters.getButtonFiltersApply().click()
-        filters.screenshot("0")
+        pageTargeting.countTargetPopulations(1)
+        assert "OPEN" in pageTargeting.getStatusContainer().text
+        filters.getButtonFiltersClear().click()
+        filters.getFiltersTotalHouseholdsCountMin().send_keys("10")
+        filters.getFiltersTotalHouseholdsCountMax().send_keys("10")
+        filters.getButtonFiltersApply().click()
+        pageTargeting.countTargetPopulations(0)
+        filters.getButtonFiltersClear().click()
+        filters.getFiltersTotalHouseholdsCountMin().send_keys("1")
+        filters.getFiltersTotalHouseholdsCountMax().send_keys("3")
+        pageTargeting.countTargetPopulations(2)
+        filters.getButtonFiltersClear().click()
+
+    def test_targeting_and_labels(
+        self,
+        create_programs: None,
+        household_with_disability: Household,
+        add_targeting: None,
+        pageTargeting: Targeting,
+    ) -> None:
+        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.getNavTargeting().click()
+        pageTargeting.getColumnName().click()
+        pageTargeting.disappearLoadingRows()
+        assert "Copy TP" in pageTargeting.chooseTargetPopulations(0).text
+        pageTargeting.getColumnName().click()
+        pageTargeting.disappearLoadingRows()
+        assert "Test NEW TP" in pageTargeting.chooseTargetPopulations(0).text
 
     def test_targeting_parametrized_ruls_filters(
         self,
