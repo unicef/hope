@@ -9,8 +9,8 @@ import {
 import { MiśTheme } from '../../theme';
 import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
-import {FieldBorder} from "@core/FieldBorder";
-import {Pie} from "react-chartjs-2";
+import { FieldBorder } from '@core/FieldBorder';
+import { Pie } from 'react-chartjs-2';
 
 const colors = {
   femaleChildren: '#5F02CF',

@@ -43,26 +43,29 @@ export function MergeRegistrationDataImportDialog({
     }
     showMessage(t('Registration Data Import Merging started'));
   };
-  let dataCountInformation = <div>
-    <strong>
-      {registration.numberOfHouseholds} {t('households and')}{' '}
-      {registration.numberOfIndividuals}{' '}
-      {t('individuals will be merged.')}{' '}
-    </strong>
-    {t('Do you want to proceed?')}
-  </div>;
-  if(isSocialDctType) {
-    dataCountInformation = <div>
+  let dataCountInformation = (
+    <div>
       <strong>
+        {registration.numberOfHouseholds} {t('households and')}{' '}
         {registration.numberOfIndividuals} {t('individuals will be merged.')}{' '}
       </strong>
       {t('Do you want to proceed?')}
-    </div>;
+    </div>
+  );
+  if (isSocialDctType) {
+    dataCountInformation = (
+      <div>
+        <strong>
+          {registration.numberOfIndividuals} {t('individuals will be merged.')}{' '}
+        </strong>
+        {t('Do you want to proceed?')}
+      </div>
+    );
   }
   return (
     <span>
       <Button
-        startIcon={<MergeTypeRoundedIcon/>}
+        startIcon={<MergeTypeRoundedIcon />}
         color="primary"
         variant="contained"
         onClick={() => setOpen(true)}
