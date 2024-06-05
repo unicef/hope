@@ -16,8 +16,7 @@ import { Box } from '@mui/material';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PERMISSIONS, hasPermissions } from 'src/config/permissions';
-
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 export const ManagerialConsolePage: React.FC = () => {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();

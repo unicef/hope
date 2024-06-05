@@ -14,8 +14,7 @@ import {
 } from '@utils/utils';
 import { AllPaymentsForTableQuery, PaymentStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePermissions } from '@hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -58,17 +57,18 @@ interface PeoplePaymentsTableRowProps {
   onWarningClick?: (
     payment: AllPaymentsForTableQuery['allPayments']['edges'][number]['node'],
   ) => void;
+  permissions;
 }
 
 export const PeoplePaymentsTableRow = ({
   payment,
   canViewDetails,
   onWarningClick,
+  permissions,
 }: PeoplePaymentsTableRowProps): React.ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const paymentDetailsPath = `/${baseUrl}/payment-module/payments/${payment.id}`;
-  const permissions = usePermissions();
 
   const handleDialogWarningOpen = (
     e: React.SyntheticEvent<HTMLDivElement>,
