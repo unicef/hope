@@ -8,6 +8,7 @@ from freezegun import freeze_time
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.celery_tasks import recalculate_population_fields_task
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
     AUNT_UNCLE,
@@ -391,3 +392,9 @@ class TestRecalculateData(TestCase):
         self.assertEqual(household.children_disabled_count, 2)
         self.assertEqual(household.female_children_disabled_count, 2)
         self.assertIs(household.is_recalculated_group_ages, True)
+
+    @freeze_time("2021-07-30")
+    def test_recalculate_population_fields_task(self) -> None:
+        recalculate_population_fields_task(household_ids=[self.household.pk])
+        household = Household.objects.get(pk=self.household.pk)
+        self.assertEqual(household.size, 6)
