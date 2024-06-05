@@ -1,6 +1,7 @@
 from time import sleep
 
 from page_object.base_components import BaseComponents
+from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
 
@@ -88,7 +89,7 @@ class Filters(BaseComponents):
     importedByInput = 'div[data-cy="Imported By-input"]'
 
     def getFiltersSearch(self) -> WebElement:
-        return self.wait_for(self.filtersSearch)
+        return self.wait_for(self.filtersSearch).find_element(By.XPATH, './div/input')
 
     def getFiltersDocumentType(self) -> WebElement:
         return self.wait_for(self.filtersDocumentType)

@@ -644,13 +644,11 @@ class TestTargeting:
     ) -> None:
         pageTargeting.selectGlobalProgramFilter("Test Programm").click()
         pageTargeting.getNavTargeting().click()
-        filters.getFiltersSearch().click()
-        from time import sleep
-
-        sleep(1)
-        filters.getFiltersSearch().send_keys("123123")
-        filters.getFiltersTotalHouseholdsCountMin().click()
-        filters.getFiltersTotalHouseholdsCountMin().send_keys("1")
+        filters.getFiltersSearch().send_keys("Copy")
+        filters.getButtonFiltersApply().click()
+        pageTargeting.countTargetPopulations(1)
+        filters.getButtonFiltersApply().click()
+        filters.screenshot("0")
 
     def test_targeting_parametrized_ruls_filters(
         self,

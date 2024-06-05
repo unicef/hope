@@ -106,6 +106,13 @@ class Targeting(BaseComponents):
             sleep(1)
             return self.get_elements(self.rows)[number]
 
+    def countTargetPopulations(self, number: int) -> None:
+        for _ in range(5):
+            if len(self.getTargetPopulationsRows()) == number:
+                break
+        else:
+            raise TimeoutError(f"{len(self.getTargetPopulationsRows())} target populations instead of {number}")
+
     def getCreateUseFilters(self) -> WebElement:
         return self.wait_for(self.createUserFilters)
 
