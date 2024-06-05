@@ -1039,7 +1039,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
     def validate_people_collectors(self, wb: Workbook) -> None:
         try:
-            index_ids, primary_collector_ids, alternate_collector_ids, relationship_column = [], [], [], []
+            index_ids, primary_collector_ids, relationship_column = [], [], []
             people_sheet = wb["People"]
             first_row = people_sheet[1]
 
@@ -1076,11 +1076,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             f"Value can be {HEAD} or {NON_BENEFICIARY}",
                         }
                     )
-                if (
-                    relationship == HEAD
-                    and index_id is not None
-                    and int(index_id) not in pr_ids
-                ):
+                if relationship == HEAD and index_id is not None and int(index_id) not in pr_ids:
                     self.errors.append(
                         {
                             "row_number": 1,

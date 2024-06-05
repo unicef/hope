@@ -58,7 +58,6 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
     _DELIVERY_MECHANISM_DATA,
     _HOUSEHOLD,
     _INDIVIDUAL,
-    Scope,
 )
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
@@ -1127,7 +1126,6 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         cls,
         payment: "Payment",
         core_field_name: str,
-        is_social_worker_program: bool,
         delivery_mechanism_data: Optional["DeliveryMechanismData"] = None,
     ) -> Any:
         def parse_admin_area(obj: "Area") -> str:

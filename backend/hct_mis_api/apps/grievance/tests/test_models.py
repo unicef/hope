@@ -14,7 +14,10 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
 )
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketIndividualDataUpdateDetails
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketIndividualDataUpdateDetails,
+)
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import LOT_DIFFICULTY
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
@@ -336,7 +339,7 @@ class TestDeliveryMechanismDataModel(TestCase):
             dmd.validation_errors = {}
             dmd.save()
 
-            def update_unique_field_side_effect():
+            def update_unique_field_side_effect() -> None:
                 dmd.unique_key = None
                 dmd.is_valid = False
                 dmd.validation_errors = {
