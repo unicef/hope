@@ -51,51 +51,58 @@ const TabsContainer = styled.div`
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareVariables(
-  paymentVerificationPlanId,
-  selectedTab,
+  cashOrPaymentPlanId: string,
+  paymentVerificationPlanId: string | undefined,
+  selectedTab: number,
   values,
-  businessArea,
-  cashOrPaymentPlanId = null,
+  businessArea: string,
+  shouldUseCashOrPaymentPlanId: boolean = false,
 ) {
+  const getFullListArguments = (): { excludedAdminAreas: string[] } | null => {
+    return selectedTab === 0
+      ? { excludedAdminAreas: values.excludedAdminAreasFull || [] }
+      : null;
+  };
+
+  const getRapidProArguments = (): { flowId: string } | null => {
+    return values.verificationChannel === 'RAPIDPRO'
+      ? { flowId: values.rapidProFlow || '' }
+      : null;
+  };
+
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const getRandomSamplingArguments = () => {
+    if (selectedTab !== 1) return null;
+
+    const age = values.ageCheckbox
+      ? {
+          min: values.filterAgeMin || null,
+          max: values.filterAgeMax || null,
+        }
+      : null;
+
+    return {
+      confidenceInterval: values.confidenceInterval! * 0.01,
+      marginOfError: values.marginOfError! * 0.01,
+      excludedAdminAreas: values.adminCheckbox
+        ? values.excludedAdminAreasRandom || []
+        : [],
+      age,
+      sex: values.sexCheckbox ? values.filterSex || null : null,
+    };
+  };
+
   return {
     input: {
-      ...(cashOrPaymentPlanId && {
-        cashOrPaymentPlanId,
+      ...(shouldUseCashOrPaymentPlanId && {
+        cashOrPaymentPlanId: cashOrPaymentPlanId,
       }),
-      ...(paymentVerificationPlanId && {
-        paymentVerificationPlanId,
-      }),
+      ...(paymentVerificationPlanId && { paymentVerificationPlanId }),
       sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
-      fullListArguments:
-        selectedTab === 0
-          ? {
-              excludedAdminAreas: values.excludedAdminAreasFull || [],
-            }
-          : null,
-      verificationChannel: values.verificationChannel,
-      rapidProArguments:
-        values.verificationChannel === 'RAPIDPRO'
-          ? {
-              flowId: values.rapidProFlow,
-            }
-          : null,
-      randomSamplingArguments:
-        selectedTab === 1
-          ? {
-              confidenceInterval: values.confidenceInterval * 0.01,
-              marginOfError: values.marginOfError * 0.01,
-              excludedAdminAreas: values.adminCheckbox
-                ? values.excludedAdminAreasRandom
-                : [],
-              age: values.ageCheckbox
-                ? {
-                    min: values.filterAgeMin || null,
-                    max: values.filterAgeMax || null,
-                  }
-                : null,
-              sex: values.sexCheckbox ? values.filterSex : null,
-            }
-          : null,
+      fullListArguments: getFullListArguments(),
+      verificationChannel: values.verificationChannel || '',
+      rapidProArguments: getRapidProArguments(),
+      randomSamplingArguments: getRandomSamplingArguments(),
       businessAreaSlug: businessArea,
     },
   };
@@ -138,8 +145,7 @@ export function EditVerificationPlan({
       paymentVerificationPlanNode.excludedAdminAreasFilter || [],
     excludedAdminAreasRandom:
       paymentVerificationPlanNode.excludedAdminAreasFilter || [],
-    verificationChannel:
-      paymentVerificationPlanNode.verificationChannel || null,
+    verificationChannel: paymentVerificationPlanNode.verificationChannel || '',
     rapidProFlow: paymentVerificationPlanNode.rapidProFlowId || '',
     adminCheckbox:
       paymentVerificationPlanNode.excludedAdminAreasFilter?.length !== 0,
@@ -174,6 +180,7 @@ export function EditVerificationPlan({
       selectedTab,
       formValues,
       businessArea,
+      true,
     ),
     fetchPolicy: 'network-only',
   });
@@ -188,7 +195,7 @@ export function EditVerificationPlan({
   const submit = async (values): Promise<void> => {
     const { errors } = await mutate({
       variables: prepareVariables(
-        null,
+        cashOrPaymentPlanId,
         paymentVerificationPlanNode.id,
         selectedTab,
         values,
@@ -217,15 +224,21 @@ export function EditVerificationPlan({
   };
 
   const getSampleSizePercentage = (): string => {
-    if (sampleSizesData?.sampleSize?.paymentRecordCount !== 0) {
-      return ` (${
-        (sampleSizesData?.sampleSize?.sampleSize /
-          sampleSizesData?.sampleSize?.paymentRecordCount) *
-        100
-      })%`;
+    const sampleSize = sampleSizesData?.sampleSize?.sampleSize;
+    const paymentRecordCount = sampleSizesData?.sampleSize?.paymentRecordCount;
+
+    if (
+      !sampleSize ||
+      !paymentRecordCount ||
+      isNaN(sampleSize) ||
+      isNaN(paymentRecordCount)
+    ) {
+      return '';
     }
-    return ' (0%)';
+
+    return ` (${(sampleSize / paymentRecordCount) * 100}%)`;
   };
+
   return (
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values, setValues }) => {
@@ -308,9 +321,16 @@ export function EditVerificationPlan({
                           fontSize={16}
                           fontWeight="fontWeightBold"
                         >
-                          Sample size: {sampleSizesData?.sampleSize?.sampleSize}{' '}
+                          Sample size:
+                          {isNaN(sampleSizesData?.sampleSize?.sampleSize)
+                            ? ' 0'
+                            : ` ${sampleSizesData?.sampleSize?.sampleSize}`}{' '}
                           out of{' '}
-                          {sampleSizesData?.sampleSize?.paymentRecordCount}
+                          {isNaN(
+                            sampleSizesData?.sampleSize?.paymentRecordCount,
+                          )
+                            ? ' 0'
+                            : ` ${sampleSizesData?.sampleSize?.paymentRecordCount}`}
                           {getSampleSizePercentage()}
                         </Box>
                         <Box fontSize={12} color="#797979">
@@ -446,14 +466,23 @@ export function EditVerificationPlan({
                         fontSize={16}
                         fontWeight="fontWeightBold"
                       >
-                        Sample size: {sampleSizesData?.sampleSize?.sampleSize}{' '}
-                        out of {sampleSizesData?.sampleSize?.paymentRecordCount}{' '}
+                        Sample size:
+                        {isNaN(sampleSizesData?.sampleSize?.sampleSize)
+                          ? ' 0'
+                          : ` ${sampleSizesData?.sampleSize?.sampleSize}`}{' '}
+                        out of{' '}
+                        {isNaN(sampleSizesData?.sampleSize?.paymentRecordCount)
+                          ? ' 0'
+                          : ` ${sampleSizesData?.sampleSize?.paymentRecordCount}`}
                         {getSampleSizePercentage()}
                       </Box>
                       <Field
                         name="verificationChannel"
                         label="Verification Channel"
-                        style={{ flexDirection: 'row' }}
+                        style={{
+                          flexDirection: 'row',
+                        }}
+                        alignItems="center"
                         choices={[
                           { value: 'RAPIDPRO', name: 'RAPIDPRO' },
                           { value: 'XLSX', name: 'XLSX' },
