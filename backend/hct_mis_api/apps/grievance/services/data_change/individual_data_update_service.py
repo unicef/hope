@@ -328,7 +328,9 @@ class IndividualDataUpdateService(DataChangeService):
             for identity in individual_data.pop("payment_channels_to_edit", [])
             if is_approved(identity)
         ]
-        _ = [dmd for dmd in individual_data.pop("delivery_mechanism_data", []) if is_approved(dmd)]
+        _ = [
+            dmd for dmd in individual_data.pop("delivery_mechanism_data", []) if is_approved(dmd)
+        ]  # missing implementation for delivery mechanism data create
         delivery_mechanism_data_to_remove_encoded = individual_data.pop("delivery_mechanism_data_to_remove", [])
         delivery_mechanism_data_to_remove = [
             decode_id_string(data["value"]) for data in delivery_mechanism_data_to_remove_encoded if is_approved(data)
@@ -386,7 +388,6 @@ class IndividualDataUpdateService(DataChangeService):
         payment_channels_to_update = [
             handle_update_payment_channel(payment_channel) for payment_channel in payment_channels_to_edit
         ]
-        delivery_mechanism_data_to_create = []
         delivery_mechanism_data_to_update = handle_update_delivery_mechanism_data(delivery_mechanism_data_to_edit)
 
         Document.objects.bulk_create(documents_to_create)
@@ -404,11 +405,6 @@ class IndividualDataUpdateService(DataChangeService):
         if delivery_mechanism_data_to_update:
             DeliveryMechanismData.objects.bulk_update(delivery_mechanism_data_to_update, ["data"])
             for delivery_mechanism_data in delivery_mechanism_data_to_update:
-                delivery_mechanism_data.revalidate_for_grievance_ticket(self.grievance_ticket)
-
-        if delivery_mechanism_data_to_create:
-            DeliveryMechanismData.objects.bulk_create(delivery_mechanism_data_to_create)
-            for delivery_mechanism_data in delivery_mechanism_data_to_create:
                 delivery_mechanism_data.revalidate_for_grievance_ticket(self.grievance_ticket)
 
         if delivery_mechanism_data_to_remove:

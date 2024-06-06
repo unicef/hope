@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                                             ('Transfer', 'Transfer'), ('Transfer to Account', 'Transfer to Account'),
                                             ('Voucher', 'Voucher'), ('ATM Card', 'ATM Card'),
                                             ('Cash over the counter', 'Cash over the counter')], db_index=True,
-                                   max_length=24, null=True),
+                                   max_length=32, null=True),
         ),
         migrations.AlterField(
             model_name='deliverymechanismperpaymentplan',
@@ -746,7 +746,7 @@ class Migration(migrations.Migration):
                                             ('Pre-paid card', 'Pre-paid card'), ('Referral', 'Referral'),
                                             ('Transfer', 'Transfer'), ('Transfer to Account', 'Transfer to Account'),
                                             ('Voucher', 'Voucher'), ('ATM Card', 'ATM Card'),
-                                            ('Cash over the counter', 'Cash over the counter')], max_length=24,
+                                            ('Cash over the counter', 'Cash over the counter')], max_length=32,
                                    null=True),
         ),
         migrations.AlterField(
@@ -758,7 +758,7 @@ class Migration(migrations.Migration):
                                             ('Pre-paid card', 'Pre-paid card'), ('Referral', 'Referral'),
                                             ('Transfer', 'Transfer'), ('Transfer to Account', 'Transfer to Account'),
                                             ('Voucher', 'Voucher'), ('ATM Card', 'ATM Card'),
-                                            ('Cash over the counter', 'Cash over the counter')], max_length=24,
+                                            ('Cash over the counter', 'Cash over the counter')], max_length=32,
                                    null=True),
         ),
         migrations.CreateModel(
