@@ -332,9 +332,9 @@ class IndividualDataUpdateService(DataChangeService):
             dmd for dmd in individual_data.pop("delivery_mechanism_data", []) if is_approved(dmd)
         ]  # missing implementation for delivery mechanism data create
         delivery_mechanism_data_to_remove_encoded = individual_data.pop("delivery_mechanism_data_to_remove", [])
-        delivery_mechanism_data_to_remove = [
+        _ = [
             decode_id_string(data["value"]) for data in delivery_mechanism_data_to_remove_encoded if is_approved(data)
-        ]
+        ]  # missing implementation for delivery mechanism data remove
         delivery_mechanism_data_to_edit = [
             dmd for dmd in individual_data.pop("delivery_mechanism_data_to_edit", []) if is_approved(dmd)
         ]
@@ -406,9 +406,6 @@ class IndividualDataUpdateService(DataChangeService):
             DeliveryMechanismData.objects.bulk_update(delivery_mechanism_data_to_update, ["data"])
             for delivery_mechanism_data in delivery_mechanism_data_to_update:
                 delivery_mechanism_data.revalidate_for_grievance_ticket(self.grievance_ticket)
-
-        if delivery_mechanism_data_to_remove:
-            DeliveryMechanismData.objects.filter(id__in=delivery_mechanism_data_to_remove).delete()
 
         if new_individual.household:
             recalculate_data(new_individual.household)
