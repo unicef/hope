@@ -16,11 +16,12 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, FileTemp
 from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.household.fixtures import BankAccountInfoFactory, create_household
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -314,6 +315,39 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         with zipfile.ZipFile(self.payment_plan.export_file_per_fsp.file, mode="r") as zip_file:
             file_list = zip_file.namelist()
             self.assertEqual(splits_count, len(file_list))
+
+    def test_payment_row_bank_information(self) -> None:
+        core_fields = [
+            "account_holder_name",
+            "bank_branch_name",
+            "bank_name",
+            "bank_account_number",
+        ]
+        export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
+        fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(core_fields=core_fields)
+        headers = export_service.prepare_headers(fsp_xlsx_template)
+        household, _ = create_household({"size": 1})
+        individual = household.primary_collector
+        BankAccountInfoFactory(
+            individual=individual,
+            account_holder_name="Kowalski",
+            bank_branch_name="BranchJPMorgan",
+            bank_name="JPMorgan",
+            bank_account_number="362277220020615398848112903",
+        )
+        payment = PaymentFactory(parent=self.payment_plan, household=household)
+
+        account_holder_name_index = headers.index("account_holder_name")
+        bank_branch_name_index = headers.index("bank_branch_name")
+        bank_name_index = headers.index("bank_name")
+        bank_account_number_index = headers.index("bank_account_number")
+
+        payment_row = export_service.get_payment_row(payment, fsp_xlsx_template)
+
+        self.assertEqual(payment_row[account_holder_name_index], "Kowalski")
+        self.assertEqual(payment_row[bank_branch_name_index], "BranchJPMorgan")
+        self.assertEqual(payment_row[bank_name_index], "JPMorgan")
+        self.assertEqual(payment_row[bank_account_number_index], "362277220020615398848112903")
 
     def test_export_payment_plan_per_fsp_with_people_program(self) -> None:
         # check with default program
