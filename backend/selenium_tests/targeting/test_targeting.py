@@ -719,6 +719,32 @@ class TestTargeting:
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getButtonCreateNewByFilters().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
+        pageTargetingCreate.getAddCriteriaButton().click()
+        pageTargetingCreate.getAddPeopleRuleButton().click()
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
+        pageTargeting.screenshot("123")
+
+    @pytest.mark.skip()
+    def test_targeting_parametrized_rules_filters_and_or(
+        self,
+        create_programs: None,
+        household_with_disability: Household,
+        add_targeting: None,
+        pageTargeting: Targeting,
+        pageTargetingDetails: TargetingDetails,
+        pageTargetingCreate: TargetingCreate,
+    ) -> None:
+        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.getNavTargeting().click()
+        pageTargeting.getButtonCreateNew().click()
+        pageTargeting.getButtonCreateNewByFilters().click()
+        assert "New Target Population" in pageTargetingCreate.getTitlePage().text
+        pageTargetingCreate.getAddCriteriaButton().click()
+        pageTargetingCreate.getAddPeopleRuleButton().click()
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
+        from selenium_tests.tools.tag_name_finder import printing
+        printing("Mapping", pageTargetingCreate.driver)
+        pageTargeting.screenshot("123")
 
     def test_targeting_mark_ready_failed(
         self,
