@@ -112,14 +112,14 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         # get headers
         column_list = list(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS)
         if fsp_xlsx_template and fsp_xlsx_template.columns:
-            template_column_list = fsp_xlsx_template.columns
+            template_column_list = self._remove_column_for_people(fsp_xlsx_template.columns)
             diff_columns = list(set(template_column_list).difference(set(column_list)))
             if diff_columns:
                 msg = f"Please contact admin because we can't export columns: {diff_columns}"
                 log_and_raise(msg)
             column_list = list(template_column_list)
 
-        for core_field in fsp_xlsx_template.core_fields:
+        for core_field in self._remove_core_fields_for_people(fsp_xlsx_template.core_fields):
             column_list.append(core_field)
 
         return column_list

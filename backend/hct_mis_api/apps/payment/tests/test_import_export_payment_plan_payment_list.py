@@ -361,7 +361,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         fsp = delivery_mechanism_per_payment_plan.financial_service_provider
         _, ws_fsp = export_service.open_workbook(fsp.name)
         fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism_per_payment_plan.delivery_mechanism)
-        template_column_list = export_service.add_headers(ws_fsp, fsp_xlsx_template)
+        template_column_list = export_service.prepare_headers(fsp_xlsx_template)
         self.assertEqual(
             len(template_column_list), len(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS) - 1
         )  # - ind_id
@@ -389,7 +389,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         _, ws_fsp = export_service.open_workbook(fsp.name)
         fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism_per_payment_plan.delivery_mechanism)
 
-        template_column_list = export_service.add_headers(ws_fsp, fsp_xlsx_template)
+        template_column_list = export_service.prepare_headers(fsp_xlsx_template)
         fsp_xlsx_template.refresh_from_db()
         # remove for people 'household_unicef_id' core_field
         self.assertEqual(len(template_column_list), 29)  # DEFAULT_COLUMNS -hh_id and -hh_size +ind_id +3 core fields
