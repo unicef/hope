@@ -192,3 +192,27 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
                 }
             },
         )
+
+    def test_registration_data_import_create_validate_import_data(self) -> None:
+        program = ProgramFactory(status=Program.ACTIVE)
+
+        import_data_obj = ImportData.objects.create(
+            file=self.valid_file,
+            number_of_households=3,
+            number_of_individuals=6,
+            status=ImportData.STATUS_VALIDATION_ERROR,
+        )
+        self.create_user_role_with_permissions(self.user, [Permissions.RDI_IMPORT_DATA], self.business_area)
+        self.update_partner_access_to_program(self.user.partner, program)
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_REGISTRATION_DATA_IMPORT,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(program.id, "ProgramNode")}},
+            variables={
+                "registrationDataImportData": {
+                    "importDataId": self.id_to_base64(import_data_obj.id, "ImportDataNode"),
+                    "name": "New Import of Data 123",
+                    "businessAreaSlug": self.business_area_slug,
+                    "allowDeliveryMechanismsValidationErrors": False,
+                }
+            },
+        )

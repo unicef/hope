@@ -7,61 +7,105 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots["TestRegistrationDataImportDatahubMutations::test_registration_data_import_create_0_with_permission 1"] = {
-    "data": {
-        "registrationXlsxImport": {
-            "registrationDataImport": {
-                "name": "New Import of Data 123",
-                "numberOfHouseholds": 3,
-                "numberOfIndividuals": 6,
-                "status": "IMPORT_SCHEDULED",
+snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_import_create_0_with_permission 1'] = {
+    'data': {
+        'registrationXlsxImport': {
+            'registrationDataImport': {
+                'name': 'New Import of Data 123',
+                'numberOfHouseholds': 3,
+                'numberOfIndividuals': 6,
+                'status': 'IMPORT_SCHEDULED'
             }
         }
     }
 }
 
-snapshots["TestRegistrationDataImportDatahubMutations::test_registration_data_import_create_1_without_permission 1"] = {
-    "data": {"registrationXlsxImport": None},
-    "errors": [
+snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_import_create_1_without_permission 1'] = {
+    'data': {
+        'registrationXlsxImport': None
+    },
+    'errors': [
         {
-            "locations": [{"column": 7, "line": 5}],
-            "message": "Permission Denied: User does not have correct permission.",
-            "path": ["registrationXlsxImport"],
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 5
+                }
+            ],
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'registrationXlsxImport'
+            ]
         }
-    ],
+    ]
 }
 
-snapshots[
-    "TestRegistrationDataImportDatahubMutations::test_registration_data_import_datahub_upload_0_with_permission 1"
-] = {
-    "data": {
-        "uploadImportDataXlsxFileAsync": {
-            "errors": [],
-            "importData": {"numberOfHouseholds": None, "numberOfIndividuals": None, "xlsxValidationErrors": []},
+snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_import_create_validate_import_data 1'] = {
+    'data': {
+        'registrationXlsxImport': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 5
+                }
+            ],
+            'message': "['Cannot import file containing validation errors']",
+            'path': [
+                'registrationXlsxImport'
+            ]
+        }
+    ]
+}
+
+snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_import_datahub_upload_0_with_permission 1'] = {
+    'data': {
+        'uploadImportDataXlsxFileAsync': {
+            'errors': [
+            ],
+            'importData': {
+                'numberOfHouseholds': None,
+                'numberOfIndividuals': None,
+                'xlsxValidationErrors': [
+                ]
+            }
         }
     }
 }
 
-snapshots[
-    "TestRegistrationDataImportDatahubMutations::test_registration_data_import_datahub_upload_1_with_permission_invalid_file 1"
-] = {
-    "data": {
-        "uploadImportDataXlsxFileAsync": {
-            "errors": [],
-            "importData": {"numberOfHouseholds": None, "numberOfIndividuals": None, "xlsxValidationErrors": []},
+snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_import_datahub_upload_1_with_permission_invalid_file 1'] = {
+    'data': {
+        'uploadImportDataXlsxFileAsync': {
+            'errors': [
+            ],
+            'importData': {
+                'numberOfHouseholds': None,
+                'numberOfIndividuals': None,
+                'xlsxValidationErrors': [
+                ]
+            }
         }
     }
 }
 
-snapshots[
-    "TestRegistrationDataImportDatahubMutations::test_registration_data_import_datahub_upload_2_without_permission 1"
-] = {
-    "data": {"uploadImportDataXlsxFileAsync": None},
-    "errors": [
+snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_import_datahub_upload_2_without_permission 1'] = {
+    'data': {
+        'uploadImportDataXlsxFileAsync': None
+    },
+    'errors': [
         {
-            "locations": [{"column": 7, "line": 5}],
-            "message": "Permission Denied: User does not have correct permission.",
-            "path": ["uploadImportDataXlsxFileAsync"],
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 5
+                }
+            ],
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'uploadImportDataXlsxFileAsync'
+            ]
         }
-    ],
+    ]
 }
