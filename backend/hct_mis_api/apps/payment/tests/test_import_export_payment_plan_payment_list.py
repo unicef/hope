@@ -349,7 +349,6 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertEqual(payment_row[bank_name_index], "JPMorgan")
         self.assertEqual(payment_row[bank_account_number_index], "362277220020615398848112903")
 
-
     def test_export_per_fsp_if_no_fsp_assigned_to_payment_plan(self) -> None:
         self.payment_plan.status = PaymentPlan.Status.ACCEPTED
         self.payment_plan.save()
@@ -393,7 +392,9 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism_per_payment_plan.delivery_mechanism)
         template_column_list = export_service.prepare_headers(fsp_xlsx_template)
         self.assertEqual(
-            len(template_column_list), len(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS) - 1
+            len(template_column_list),
+            len(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS) - 1,
+            template_column_list,
         )  # - ind_id
         self.assertIn("household_id", template_column_list)
         self.assertIn("household_size", template_column_list)
