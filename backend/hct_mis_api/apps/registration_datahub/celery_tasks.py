@@ -114,13 +114,6 @@ def registration_xlsx_import_task(
         logger.info(str(e))
         return True
     except Exception as e:
-        logger.warning(e)
-
-        # TODO MB remove
-        import traceback
-
-        traceback.print_exception(type(e), e, e.__traceback__)
-
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
         )
@@ -371,7 +364,7 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID") -> Dict:
 def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> Dict:
     from hct_mis_api.apps.program.models import Program
     from hct_mis_api.apps.registration_datahub.models import ImportData
-    from hct_mis_api.apps.registration_datahub.tasks.validatate_xlsx_import import (
+    from hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import import (
         ValidateXlsxImport,
     )
 
@@ -382,11 +375,6 @@ def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UU
     try:
         return ValidateXlsxImport().execute(import_data, is_social_worker_program)
     except Exception as e:
-        # TODO MB remove
-        import traceback
-
-        traceback.print_exception(type(e), e, e.__traceback__)
-
         ImportData.objects.filter(
             id=import_data.id,
         ).update(status=ImportData.STATUS_ERROR, error=str(e))
