@@ -738,6 +738,7 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
                         "approve_status": True,
                         "data_fields": [
                             {"name": "name_of_cardholder_atm_card", "value": "Marek"},
+                            {"name": "full_name", "value": "MarekMarek"},
                         ],
                     },
                 ],
@@ -754,5 +755,6 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
         )
         individual = self.individuals[0]
         individual.refresh_from_db()
+        self.assertEqual(individual.full_name, "MarekMarek")
         dmd.refresh_from_db()
         self.assertEqual(dmd.data, {"name_of_cardholder_atm_card": "Marek"})
