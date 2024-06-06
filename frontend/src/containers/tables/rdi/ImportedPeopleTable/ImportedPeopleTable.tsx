@@ -10,8 +10,8 @@ import {
   useAllMergedIndividualsQuery,
 } from '@generated/graphql';
 import { UniversalTable } from '../../UniversalTable';
-import { headCells as importedIndividualHeadCells } from './ImportedPeopleTableHeadCells';
-import { headCells as mergedIndividualHeadCells } from './MergedPeopleTableHeadCells';
+import { headCells as importedPeopleTableHeadCells } from './ImportedPeopleTableHeadCells';
+import { headCells as mergedPeopleTableHeadCells } from './MergedPeopleTableHeadCells';
 import { ImportedPeopleTableRow } from './ImportedPeopleTableRow';
 
 interface ImportedPeopleTableProps {
@@ -72,7 +72,7 @@ export function ImportedPeopleTable({
         AllMergedIndividualsQueryVariables
         >
           title={title}
-          headCells={mergedIndividualHeadCells}
+          headCells={mergedPeopleTableHeadCells}
           query={useAllMergedIndividualsQuery}
           queriedObjectName="allMergedIndividuals"
           rowsPerPageOptions={rowsPerPageOptions}
@@ -93,7 +93,7 @@ export function ImportedPeopleTable({
         AllImportedIndividualsQueryVariables
         >
           title={title}
-          headCells={importedIndividualHeadCells}
+          headCells={importedPeopleTableHeadCells}
           query={useAllImportedIndividualsQuery}
           queriedObjectName="allImportedIndividuals"
           rowsPerPageOptions={rowsPerPageOptions}
