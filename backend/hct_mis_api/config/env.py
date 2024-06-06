@@ -13,7 +13,7 @@ DEFAULTS = {
     "SECRET_KEY": (str, ""),
     "DATA_VOLUME": (str, "/data"),
     "HCT_MIS_UPLOADS_PATH": (str, ""),
-    "DEFAULT_FROM_EMAIL": (str, "HCT-MIS Stage <noreply@hct-mis.org>"),
+    "DEFAULT_FROM_EMAIL": (str, "HOPE Stage <hope@mail.unicef.org>"),
     "EMAIL_BACKEND": (str, "django.core.mail.backends.smtp.EmailBackend"),
     "EMAIL_HOST": (str, ""),
     "EMAIL_PORT": (str, ""),
