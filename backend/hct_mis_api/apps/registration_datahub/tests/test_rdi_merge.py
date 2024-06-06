@@ -43,6 +43,7 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
     RegistrationDataImportDatahubFactory,
 )
 from hct_mis_api.apps.registration_datahub.models import (
+    ImportedDeliveryMechanismData,
     ImportedHousehold,
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
@@ -618,11 +619,11 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
         self.assertEqual(data_not_valid_ticket.ticket.category, GrievanceTicket.CATEGORY_DATA_CHANGE)
         self.assertEqual(data_not_valid_ticket.ticket.registration_data_import, self.rdi)
 
-        deta_not_unique_ticket = TicketIndividualDataUpdateDetails.objects.get(
+        data_not_unique_ticket = TicketIndividualDataUpdateDetails.objects.get(
             individual=ind3,
         )
         self.assertEqual(
-            deta_not_unique_ticket.individual_data,
+            data_not_unique_ticket.individual_data,
             {
                 "delivery_mechanism_data_to_edit": [
                     {
@@ -639,15 +640,36 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
             },
         )
         self.assertEqual(
-            deta_not_unique_ticket.ticket.comments, f"This is a system generated ticket for RDI {self.rdi}"
+            data_not_unique_ticket.ticket.comments, f"This is a system generated ticket for RDI {self.rdi}"
         )
         self.assertEqual(
-            deta_not_unique_ticket.ticket.description,
+            data_not_unique_ticket.ticket.description,
             f"Fields not unique ['card_number_atm_card', 'card_expiry_date_atm_card', 'name_of_cardholder_atm_card'] across program"
             f" for delivery mechanism {dmd3.delivery_mechanism}, possible duplicate of {dmd}",
         )
         self.assertEqual(
-            deta_not_unique_ticket.ticket.issue_type, GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE
+            data_not_unique_ticket.ticket.issue_type, GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE
         )
-        self.assertEqual(deta_not_unique_ticket.ticket.category, GrievanceTicket.CATEGORY_DATA_CHANGE)
-        self.assertEqual(deta_not_unique_ticket.ticket.registration_data_import, self.rdi)
+        self.assertEqual(data_not_unique_ticket.ticket.category, GrievanceTicket.CATEGORY_DATA_CHANGE)
+        self.assertEqual(data_not_unique_ticket.ticket.registration_data_import, self.rdi)
+
+    def test_prepare_delivery_mechanisms_data(self) -> None:
+        ind = ImportedIndividualFactory(household=None)
+        ind2 = ImportedIndividualFactory(household=None)
+        hh = ImportedHouseholdFactory(head_of_household=ind)
+        ind.household = hh
+        ind.save()
+        ind2.household = hh
+        ind2.save()
+
+        # valid data
+        dmd = ImportedDeliveryMechanismData(
+            individual=ind,
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
+        )
+        dmd2 = ImportedDeliveryMechanismData(
+            individual=ind2,
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
+        )
+        delivery_mechanisms_data_to_create = RdiMergeTask()._prepare_delivery_mechanisms_data([dmd, dmd2], {})
+        self.assertEqual(2, len(delivery_mechanisms_data_to_create))
