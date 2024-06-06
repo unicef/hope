@@ -509,7 +509,6 @@ class Household(
         max_length=100,
         blank=True,
         null=True,
-        unique=True,
         db_index=True,
         verbose_name=_("Beneficiary Program Registration Id"),
     )

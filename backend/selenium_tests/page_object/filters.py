@@ -34,7 +34,7 @@ class Filters(BaseComponents):
     filtersDocumentNumber = 'div[data-cy="filters-document-number"]'
     filtersFsp = 'div[data-cy="filters-fsp"]'
     filtersCategory = 'div[data-cy="filters-category"]'
-    filtersAdminLevel = 'div[data-cy="filters-admin-level"]'
+    filtersAdminLevel = 'div[data-cy="filters-admin-level-2"]'
     filtersAssignee = 'div[data-cy="filters-assignee"]'
     filtersCreatedByAutocomplete = 'div[data-cy="filters-created-by-autocomplete"]'
     filtersRegistrationDataImport = 'div[data-cy="filters-registration-data-import"]'

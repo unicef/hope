@@ -131,9 +131,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                     for column_name in fsp_template_columns
                 ]
                 core_fields_row = [
-                    FinancialServiceProviderXlsxTemplate.get_column_from_core_field(
-                        payment, column_name, self.is_social_worker_program
-                    )
+                    FinancialServiceProviderXlsxTemplate.get_column_from_core_field(payment, column_name)
                     for column_name in fsp_template_core_fields
                 ]
                 payment_row.extend(core_fields_row)
