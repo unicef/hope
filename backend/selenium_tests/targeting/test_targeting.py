@@ -745,13 +745,3 @@ class TestTargeting:
         from selenium_tests.tools.tag_name_finder import printing
         printing("Mapping", pageTargetingCreate.driver)
         pageTargeting.screenshot("123")
-
-    def test_targeting_mark_ready_failed(
-        self,
-        create_programs: None,
-        add_targeting: None,
-        pageTargeting: Targeting,
-        pageTargetingDetails: TargetingDetails,
-        pageTargetingCreate: TargetingCreate,
-    ) -> None:
-        pass
