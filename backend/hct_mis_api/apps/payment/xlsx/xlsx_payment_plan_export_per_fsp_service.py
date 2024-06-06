@@ -90,38 +90,33 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
     def _remove_column_for_people(self, fsp_template_columns: List[str]) -> List[str]:
         """remove columns and return list"""
         if self.is_social_worker_program:
-            for col_name in ["household_id", "household_size"]:
-                if col_name in fsp_template_columns:
-                    fsp_template_columns.remove(col_name)
-        else:
-            for col_name in ["individual_id"]:
-                if col_name in fsp_template_columns:
-                    fsp_template_columns.remove(col_name)
-        # added list() to remove choices display value
-        return list(fsp_template_columns)
+            return list(
+                filter(lambda col_name: col_name not in ["household_id", "household_size"], fsp_template_columns)
+            )
+        return list(filter(lambda col_name: col_name not in ["individual_id"], fsp_template_columns))
 
     def _remove_core_fields_for_people(self, fsp_template_core_fields: List[str]) -> List[str]:
         """remove columns and return list"""
         if self.is_social_worker_program:
-            for field_name in ["household_unicef_id"]:
-                if field_name in fsp_template_core_fields:
-                    fsp_template_core_fields.remove(field_name)
+            return list(filter(lambda col_name: col_name not in ["household_unicef_id"], fsp_template_core_fields))
         return list(fsp_template_core_fields)
 
     def prepare_headers(self, fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate") -> List[str]:
         # get headers
         column_list = list(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS)
         if fsp_xlsx_template and fsp_xlsx_template.columns:
-            template_column_list = self._remove_column_for_people(fsp_xlsx_template.columns)
+            template_column_list = fsp_xlsx_template.columns
             diff_columns = list(set(template_column_list).difference(set(column_list)))
             if diff_columns:
                 msg = f"Please contact admin because we can't export columns: {diff_columns}"
                 log_and_raise(msg)
             column_list = list(template_column_list)
 
-        for core_field in self._remove_core_fields_for_people(fsp_xlsx_template.core_fields):
+        for core_field in fsp_xlsx_template.core_fields:
             column_list.append(core_field)
 
+        column_list = self._remove_column_for_people(column_list)
+        column_list = self._remove_core_fields_for_people(column_list)
         return column_list
 
     def add_rows(
