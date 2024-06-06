@@ -39,6 +39,7 @@ import { Tabs, Tab } from '@core/Tabs';
 import { FormikEffect } from '@core/FormikEffect';
 import { LoadingButton } from '@core/LoadingButton';
 import { TabPanel } from '@core/TabPanel';
+import { RapidProFlowsLoader } from './RapidProFlowsLoader';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -111,19 +112,21 @@ function prepareVariables(
 export interface Props {
   paymentVerificationPlanNode: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
   cashOrPaymentPlanId: string;
+  isPaymentPlan: boolean;
 }
 
-export function EditVerificationPlan({
+export const EditVerificationPlan = ({
   paymentVerificationPlanNode,
   cashOrPaymentPlanId,
-}: Props): React.ReactElement {
+  isPaymentPlan,
+}: Props): React.ReactElement => {
   const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
   const [mutate, { loading }] = useEditPaymentVerificationPlanMutation();
-  const { businessArea } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
   const navigate = useNavigate();
   useEffect(() => {
@@ -188,17 +191,16 @@ export function EditVerificationPlan({
   useEffect(() => {
     if (open) {
       loadSampleSize();
-      loadRapidProFlows();
     }
-  }, [formValues, open, loadSampleSize, loadRapidProFlows]);
+  }, [open, loadSampleSize, loadRapidProFlows, selectedTab]);
 
-  const submit = async (values): Promise<void> => {
+  const submit = async (mutationVariables): Promise<void> => {
     const { errors } = await mutate({
       variables: prepareVariables(
         cashOrPaymentPlanId,
         paymentVerificationPlanNode.id,
         selectedTab,
-        values,
+        mutationVariables,
         businessArea,
       ),
       refetchQueries,
@@ -219,8 +221,8 @@ export function EditVerificationPlan({
       }))
     : [];
 
-  const handleFormChange = (values): void => {
-    setFormValues(values);
+  const handleFormChange = (fValues): void => {
+    setFormValues(fValues);
   };
 
   const getSampleSizePercentage = (): string => {
@@ -243,20 +245,29 @@ export function EditVerificationPlan({
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values, setValues }) => {
         // Redirect to error page if no flows available
+
         if (
           !rapidProFlows?.allRapidProFlows?.length &&
           values.verificationChannel === 'RAPIDPRO'
         ) {
+          //TODO MS Add last successful page as PV details page
           navigate(`/error/${businessArea}`, {
             state: {
               errorMessage: t(
                 'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
               ),
+
+              lastSuccessfulPage: `/${baseUrl}/payment-verification/${isPaymentPlan ? 'payment-plan' : 'cash-plan'}/${cashOrPaymentPlanId}`,
             },
           });
         }
         return (
           <Form>
+            <RapidProFlowsLoader
+              open={open}
+              verificationChannel={values.verificationChannel}
+              loadRapidProFlows={loadRapidProFlows}
+            />
             <AutoSubmitFormOnEnter />
             <FormikEffect
               values={values}
@@ -421,40 +432,44 @@ export function EditVerificationPlan({
                         <Grid container>
                           {values.ageCheckbox && (
                             <Grid item xs={12}>
-                              <Grid container>
-                                <Grid item xs={4}>
-                                  <Field
-                                    name="filterAgeMin"
-                                    label={t('Minimum Age')}
-                                    type="number"
-                                    color="primary"
-                                    component={FormikTextField}
-                                  />
+                              <Box mt={6}>
+                                <Grid container>
+                                  <Grid item xs={4}>
+                                    <Field
+                                      name="filterAgeMin"
+                                      label={t('Minimum Age')}
+                                      type="number"
+                                      color="primary"
+                                      component={FormikTextField}
+                                    />
+                                  </Grid>
+                                  <Grid item xs={4}>
+                                    <Field
+                                      name="filterAgeMax"
+                                      label={t('Maximum Age')}
+                                      type="number"
+                                      color="primary"
+                                      component={FormikTextField}
+                                    />
+                                  </Grid>
                                 </Grid>
-                                <Grid item xs={4}>
-                                  <Field
-                                    name="filterAgeMax"
-                                    label={t('Maximum Age')}
-                                    type="number"
-                                    color="primary"
-                                    component={FormikTextField}
-                                  />
-                                </Grid>
-                              </Grid>
+                              </Box>
                             </Grid>
                           )}
                           {values.sexCheckbox && (
                             <Grid item xs={5}>
-                              <Field
-                                name="filterSex"
-                                label={t('Gender')}
-                                color="primary"
-                                choices={[
-                                  { value: 'FEMALE', name: t('Female') },
-                                  { value: 'MALE', name: t('Male') },
-                                ]}
-                                component={FormikSelectField}
-                              />
+                              <Box mt={6}>
+                                <Field
+                                  name="filterSex"
+                                  label={t('Gender')}
+                                  color="primary"
+                                  choices={[
+                                    { value: 'FEMALE', name: t('Female') },
+                                    { value: 'MALE', name: t('Male') },
+                                  ]}
+                                  component={FormikSelectField}
+                                />
+                              </Box>
                             </Grid>
                           )}
                         </Grid>
@@ -526,4 +541,4 @@ export function EditVerificationPlan({
       }}
     </Formik>
   );
-}
+};

@@ -39,6 +39,7 @@ import { FormikEffect } from '@core/FormikEffect';
 import { LoadingButton } from '@core/LoadingButton';
 import { TabPanel } from '@core/TabPanel';
 import { Tabs, Tab } from '@core/Tabs';
+import { RapidProFlowsLoader } from './RapidProFlowsLoader';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -112,11 +113,13 @@ export interface Props {
   cashOrPaymentPlanId: string;
   canCreatePaymentVerificationPlan: boolean;
   version: number;
+  isPaymentPlan: boolean;
 }
 export const CreateVerificationPlan = ({
   cashOrPaymentPlanId,
   canCreatePaymentVerificationPlan,
   version,
+  isPaymentPlan,
 }: Props): React.ReactElement => {
   const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
@@ -125,7 +128,7 @@ export const CreateVerificationPlan = ({
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
   const [mutate, { loading }] = useCreatePaymentVerificationPlanMutation();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, baseUrl } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
   const [formValues, setFormValues] = useState(initialValues);
 
@@ -157,9 +160,8 @@ export const CreateVerificationPlan = ({
   useEffect(() => {
     if (open) {
       loadSampleSize();
-      loadRapidProFlows();
     }
-  }, [formValues, open, loadSampleSize, loadRapidProFlows]);
+  }, [formValues, open, loadSampleSize]);
 
   const submit = async (values): Promise<void> => {
     try {
@@ -234,12 +236,18 @@ export const CreateVerificationPlan = ({
               errorMessage: t(
                 'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
               ),
+              lastSuccessfulPage: `/${baseUrl}/payment-verification/${isPaymentPlan ? 'payment-plan' : 'cash-plan'}/${cashOrPaymentPlanId}`,
             },
           });
         }
 
         return (
           <Form>
+            <RapidProFlowsLoader
+              open={open}
+              verificationChannel={values.verificationChannel}
+              loadRapidProFlows={loadRapidProFlows}
+            />
             <AutoSubmitFormOnEnter />
             <FormikEffect
               values={values}
@@ -410,40 +418,44 @@ export const CreateVerificationPlan = ({
                         <Grid container>
                           {values.ageCheckbox && (
                             <Grid item xs={12}>
-                              <Grid container>
-                                <Grid item xs={4}>
-                                  <Field
-                                    name="filterAgeMin"
-                                    label={t('Minimum Age')}
-                                    type="number"
-                                    color="primary"
-                                    component={FormikTextField}
-                                  />
+                              <Box mt={6}>
+                                <Grid container>
+                                  <Grid item xs={4}>
+                                    <Field
+                                      name="filterAgeMin"
+                                      label={t('Minimum Age')}
+                                      type="number"
+                                      color="primary"
+                                      component={FormikTextField}
+                                    />
+                                  </Grid>
+                                  <Grid item xs={4}>
+                                    <Field
+                                      name="filterAgeMax"
+                                      label={t('Maximum Age')}
+                                      type="number"
+                                      color="primary"
+                                      component={FormikTextField}
+                                    />
+                                  </Grid>
                                 </Grid>
-                                <Grid item xs={4}>
-                                  <Field
-                                    name="filterAgeMax"
-                                    label={t('Maximum Age')}
-                                    type="number"
-                                    color="primary"
-                                    component={FormikTextField}
-                                  />
-                                </Grid>
-                              </Grid>
+                              </Box>
                             </Grid>
                           )}
                           {values.sexCheckbox && (
                             <Grid item xs={5}>
-                              <Field
-                                name="filterSex"
-                                label={t('Gender')}
-                                color="primary"
-                                choices={[
-                                  { value: 'FEMALE', name: t('Female') },
-                                  { value: 'MALE', name: t('Male') },
-                                ]}
-                                component={FormikSelectField}
-                              />
+                              <Box mt={6}>
+                                <Field
+                                  name="filterSex"
+                                  label={t('Gender')}
+                                  color="primary"
+                                  choices={[
+                                    { value: 'FEMALE', name: t('Female') },
+                                    { value: 'MALE', name: t('Male') },
+                                  ]}
+                                  component={FormikSelectField}
+                                />
+                              </Box>
                             </Grid>
                           )}
                         </Grid>
