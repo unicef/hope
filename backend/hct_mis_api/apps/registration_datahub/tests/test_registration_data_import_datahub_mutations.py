@@ -30,6 +30,11 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         importData {
           numberOfHouseholds
           numberOfIndividuals
+          xlsxValidationErrors {
+            rowNumber
+            header
+            message
+            }
         }
         errors {
           rowNumber
@@ -112,19 +117,29 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
             f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
         )
 
+        xlsx_invalid_file_path = f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/rdi_import_3_hh_missing_required_delivery_fields.xlsx"
+
         with open(xlsx_valid_file_path, "rb") as file:
             cls.valid_file = SimpleUploadedFile(file.name, file.read())
+        with open(xlsx_invalid_file_path, "rb") as file:
+            cls.invalid_file = SimpleUploadedFile(file.name, file.read())
 
     @parameterized.expand(
         [
-            ("with_permission", [Permissions.RDI_IMPORT_DATA], True),
-            ("without_permission", [], False),
+            ("with_permission", [Permissions.RDI_IMPORT_DATA], True, True),
+            ("with_permission_invalid_file", [Permissions.RDI_IMPORT_DATA], True, False),
+            ("without_permission", [], False, False),
         ]
     )
     def test_registration_data_import_datahub_upload(
-        self, _: Any, permissions: List[Permissions], should_have_import_data: bool
+        self, _: Any, permissions: List[Permissions], should_have_import_data: bool, file_valid: bool
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        if file_valid:
+            file = self.valid_file
+        else:
+            file = self.invalid_file
+
         self.snapshot_graphql_request(
             request_string=self.UPLOAD_REGISTRATION_DATA_IMPORT_DATAHUB,
             context={
@@ -134,10 +149,10 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"file": self.valid_file, "businessAreaSlug": self.business_area_slug},
+            variables={"file": file, "businessAreaSlug": self.business_area_slug},
         )
 
-        if should_have_import_data:
+        if should_have_import_data and file_valid:
             import_data_obj = ImportData.objects.first()
             self.assertIn(
                 "new_reg_data_import",
