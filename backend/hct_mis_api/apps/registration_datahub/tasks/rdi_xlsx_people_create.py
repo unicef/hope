@@ -176,7 +176,6 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
 
     def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
         delivery_mechanism_xlsx_fields = DeliveryMechanismData.get_scope_delivery_mechanisms_fields(by="xlsx_field")
-        delivery_mechanism_xlsx_fields
 
         complex_fields: Dict[str, Dict[str, Callable]] = {
             "individuals": {
