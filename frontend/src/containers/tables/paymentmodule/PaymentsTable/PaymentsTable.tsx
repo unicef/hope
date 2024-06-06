@@ -80,6 +80,7 @@ export function PaymentsTable({
                 onWarningClick={(payment) => {
                   setDialogPayment(payment);
                 }}
+                permissions={permissions}
               />
             )}
           />

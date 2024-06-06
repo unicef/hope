@@ -1106,6 +1106,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     COLUMNS_CHOICES = (
         ("payment_id", _("Payment ID")),
+        ("individual_id", _("Individual ID")),
         ("household_id", _("Household ID")),
         ("individual_id", _("Individual ID")),
         ("household_size", _("Household Size")),
