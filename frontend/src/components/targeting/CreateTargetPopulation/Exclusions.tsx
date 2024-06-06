@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { PaperContainer } from '../PaperContainer';
+import { useProgramContext } from '../../../programContext';
 
 export function Exclusions({
   initialOpen = false,
@@ -15,12 +16,16 @@ export function Exclusions({
 }): React.ReactElement {
   const [isExclusionsOpen, setExclusionsOpen] = useState(initialOpen);
   const { t } = useTranslation();
-
+  const { isSocialDctType } = useProgramContext();
   return (
     <PaperContainer>
       <Box display="flex" justifyContent="space-between">
         <Typography data-cy="title-excluded-entries" variant="h6">
-          {t('Excluded Target Population Entries (Households or Individuals)')}
+          {isSocialDctType
+            ? t('Excluded Target Population Entries')
+            : t(
+                'Excluded Target Population Entries (Households or Individuals)',
+              )}
         </Typography>
         <Button
           variant="outlined"
@@ -43,7 +48,11 @@ export function Exclusions({
                 name="excludedIds"
                 fullWidth
                 variant="outlined"
-                label={t('Household or Individual IDs to exclude')}
+                label={
+                  isSocialDctType
+                    ? t('Individual IDs to exclude')
+                    : t('Household or Individual IDs to exclude')
+                }
                 component={FormikTextField}
               />
             </Grid>

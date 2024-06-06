@@ -22,7 +22,7 @@ export const IndividualDetails = ({ individual }): React.ReactElement => {
         </Grid>
         <Grid item xs={3}>
           <LabelizedField
-            label={t('INDIVIDUAL (FULL NAME)')}
+            label={t('INDIVIDUAL')}
             value={individual.fullName}
           />
         </Grid>
