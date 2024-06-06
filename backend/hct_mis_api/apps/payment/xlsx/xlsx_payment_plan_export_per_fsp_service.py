@@ -97,50 +97,62 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             for col_name in ["individual_id"]:
                 if col_name in fsp_template_columns:
                     fsp_template_columns.remove(col_name)
-
         # added list() to remove choices display value
         return list(fsp_template_columns)
 
-    def add_headers(self, ws: "Worksheet", fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate") -> List[str]:
-        """return columns list from FSP template [columns + core_field]"""
-        # get fsp_xlsx_template columns and remove for People
-        template_column_list = self._remove_column_for_people(fsp_xlsx_template.columns)
+    def _remove_core_fields_for_people(self, fsp_template_core_fields: List[str]) -> List[str]:
+        """remove columns and return list"""
+        if self.is_social_worker_program:
+            for field_name in ["household_unicef_id"]:
+                if field_name in fsp_template_core_fields:
+                    fsp_template_core_fields.remove(field_name)
+        return list(fsp_template_core_fields)
 
-        for core_field in fsp_xlsx_template.core_fields:
-            template_column_list.append(core_field)
+    def prepare_headers(self, fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate") -> List[str]:
+        # get headers
+        column_list = list(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS)
+        if fsp_xlsx_template and fsp_xlsx_template.columns:
+            template_column_list = self._remove_column_for_people(fsp_xlsx_template.columns)
+            diff_columns = list(set(template_column_list).difference(set(column_list)))
+            if diff_columns:
+                msg = f"Please contact admin because we can't export columns: {diff_columns}"
+                log_and_raise(msg)
+            column_list = list(template_column_list)
 
-        # add headers
-        ws.append(template_column_list)
+        for core_field in self._remove_core_fields_for_people(fsp_xlsx_template.core_fields):
+            column_list.append(core_field)
 
-        return template_column_list
+        return column_list
 
     def add_rows(
         self,
-        ws: "Worksheet",
         fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate",
         payment_ids: List[int],
+        ws: "Worksheet",
     ) -> None:
-        fsp_template_columns = self._remove_column_for_people(fsp_xlsx_template.columns)
-        fsp_template_core_fields = fsp_xlsx_template.core_fields
-
         for i in range(0, len(payment_ids), self.batch_size):
             batch_ids = payment_ids[i : i + self.batch_size]
             payment_qs = Payment.objects.filter(id__in=batch_ids).order_by("unicef_id")
 
             for payment in payment_qs:
-                if self.payment_generate_token_and_order_numbers:
-                    payment = generate_token_and_order_numbers(payment)
+                ws.append(self.get_payment_row(payment, fsp_xlsx_template))
 
-                payment_row = [
-                    FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name)
-                    for column_name in fsp_template_columns
-                ]
-                core_fields_row = [
-                    FinancialServiceProviderXlsxTemplate.get_column_from_core_field(payment, column_name)
-                    for column_name in fsp_template_core_fields
-                ]
-                payment_row.extend(core_fields_row)
-                ws.append(list(map(self.right_format_for_xlsx, payment_row)))
+    def get_payment_row(self, payment: Payment, fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate") -> List[str]:
+        fsp_template_columns = self._remove_column_for_people(fsp_xlsx_template.columns)
+        fsp_template_core_fields = self._remove_core_fields_for_people(fsp_xlsx_template.core_fields)
+
+        if self.payment_generate_token_and_order_numbers:
+            payment = generate_token_and_order_numbers(payment)
+        payment_row = [
+            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name)
+            for column_name in fsp_template_columns
+        ]
+        core_fields_row = [
+            FinancialServiceProviderXlsxTemplate.get_column_from_core_field(payment, column_name)
+            for column_name in fsp_template_core_fields
+        ]
+        payment_row.extend(core_fields_row)
+        return list(map(self.right_format_for_xlsx, payment_row))
 
     def save_workbook(self, zip_file: zipfile.ZipFile, wb: "Workbook", filename: str) -> None:
         with NamedTemporaryFile() as tmp:
@@ -164,8 +176,8 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 .order_by("unicef_id")
                 .values_list("id", flat=True)
             )
-            self.add_headers(ws_fsp, fsp_xlsx_template)
-            self.add_rows(ws_fsp, fsp_xlsx_template, payment_ids)
+            ws_fsp.append(self.prepare_headers(fsp_xlsx_template))
+            self.add_rows(fsp_xlsx_template, payment_ids, ws_fsp)
             self._adjust_column_width_from_col(ws_fsp)
             self.save_workbook(
                 zip_file,
@@ -190,8 +202,8 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             wb, ws_fsp = self.open_workbook(f"{fsp.name}-chunk{i + 1}")
             fsp_xlsx_template = self.get_template(fsp, delivery_mechanism)
             payment_ids = list(split.payments.all().order_by("unicef_id").values_list("id", flat=True))
-            self.add_headers(ws_fsp, fsp_xlsx_template)
-            self.add_rows(ws_fsp, fsp_xlsx_template, payment_ids)
+            ws_fsp.append(self.prepare_headers(fsp_xlsx_template))
+            self.add_rows(fsp_xlsx_template, payment_ids, ws_fsp)
             self._adjust_column_width_from_col(ws_fsp)
             self.save_workbook(
                 zip_file,

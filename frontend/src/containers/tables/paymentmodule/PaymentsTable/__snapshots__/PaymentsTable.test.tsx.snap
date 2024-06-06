@@ -457,6 +457,12 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
                   data-cy="delivered-quantity-cell"
                 />
                 <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+                  data-cy="fsp-auth-code-cell"
+                >
+                  -
+                </td>
+                <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
                 />
               </tr>
@@ -506,6 +512,12 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
                   data-cy="delivered-quantity-cell"
                 />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+                  data-cy="fsp-auth-code-cell"
+                >
+                  -
+                </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
                 />
@@ -1084,6 +1096,12 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                   data-cy="delivered-quantity-cell"
                 />
                 <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+                  data-cy="fsp-auth-code-cell"
+                >
+                  -
+                </td>
+                <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
                 />
               </tr>
@@ -1133,6 +1151,12 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
                   data-cy="delivered-quantity-cell"
                 />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+                  data-cy="fsp-auth-code-cell"
+                >
+                  -
+                </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
                 />
