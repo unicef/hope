@@ -39,6 +39,7 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedBankAccountInfo,
+    ImportedDeliveryMechanismData,
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
@@ -424,6 +425,35 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
         expected = [{"document_number": "TEST123_qwerty", "type_id": doc_type.id}]
         self.assertEqual(list(documents), expected)
+
+    def test_create_delivery_mechanism_data(self) -> None:
+        task = self.RdiXlsxCreateTask()
+        task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
+        self.assertEqual(ImportedDeliveryMechanismData.objects.count(), 3)
+
+        dmd1 = ImportedDeliveryMechanismData.objects.get(individual__detail_id=3)
+        dmd2 = ImportedDeliveryMechanismData.objects.get(individual__detail_id=4)
+        dmd3 = ImportedDeliveryMechanismData.objects.get(individual__detail_id=5)
+        self.assertEqual(
+            json.loads(dmd1.data),
+            {"card_number_atm_card": "164260858", "card_expiry_date_atm_card": "1995-06-03T00:00:00"},
+        )
+        self.assertEqual(
+            json.loads(dmd2.data),
+            {
+                "card_number_atm_card": "1975549730",
+                "card_expiry_date_atm_card": "2022-02-17T00:00:00",
+                "name_of_cardholder_atm_card": "Name1",
+            },
+        )
+        self.assertEqual(
+            json.loads(dmd3.data),
+            {
+                "card_number_atm_card": "870567340",
+                "card_expiry_date_atm_card": "2016-06-27T00:00:00",
+                "name_of_cardholder_atm_card": "Name2",
+            },
+        )
 
 
 class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
