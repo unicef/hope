@@ -1106,6 +1106,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     COLUMNS_CHOICES = (
         ("payment_id", _("Payment ID")),
+        ("individual_id", _("Individual ID")),
         ("household_id", _("Household ID")),
         ("household_size", _("Household Size")),
         ("collector_name", _("Collector Name")),
@@ -1206,8 +1207,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
         map_obj_name_column = {
             "payment_id": (payment, "unicef_id"),
-            "household_id": (payment.household, "unicef_id"),
-            "household_size": (payment.household, "size"),
+            "individual_id": (payment.household.individuals.first(), "unicef_id"),  # add for people export
+            "household_id": (payment.household, "unicef_id"),  # remove for people export
+            "household_size": (payment.household, "size"),  # remove for people export
             "admin_level_2": (payment.household.admin2, "name"),
             "village": (payment.household, "village"),
             "collector_name": (payment.collector, "full_name"),
