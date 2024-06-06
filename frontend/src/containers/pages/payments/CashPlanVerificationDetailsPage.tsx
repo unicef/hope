@@ -142,6 +142,7 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
               cashPlan.canCreatePaymentVerificationPlan
             }
             version={cashPlan.version}
+            isPaymentPlan={false}
           />
         )}
 
