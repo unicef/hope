@@ -1,3 +1,5 @@
+from time import sleep
+
 from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -14,6 +16,7 @@ class TargetingCreate(BaseComponents):
     targetingCriteriaAutoComplete = 'input[data-cy="autocomplete-target-criteria-option-{}"]'
     targetingCriteriaValue = '[data-cy="select-filters[{}].value"]'
     targetingCriteriaAddDialogSaveButton = 'button[data-cy="button-target-population-add-criteria"]'
+    targetingCriteriaAddDialogSaveButtonEdit = 'button[data-cy="button-target-population-add-criteria"]'
     criteriaContainer = 'div[data-cy="criteria-container"]'
     targetPopulationSaveButton = 'button[data-cy="button-target-population-create"]'
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
@@ -43,6 +46,12 @@ class TargetingCreate(BaseComponents):
     buttonIndividualRule = 'button[data-cy="button-individual-rule"]'
     buttonTargetPopulationAddCriteria = 'button[data-cy="button-target-population-add-criteria"]'
     buttonSave = 'button[data-cy="button-save"]'
+    inputFiltersValueFrom = 'input[data-cy="input-filters[{}].value.from"]'
+    inputFiltersValueTo = 'input[data-cy="input-filters[{}].value.to"]'
+    inputFiltersValue = 'input[data-cy="input-filters[{}].value"]'
+    autocompleteTargetCriteriaValues = 'div[data-cy="autocomplete-target-criteria-values"]'
+    selectMany = 'div[data-cy="select-many"]'
+    buttonEdit = 'button[data-cy="button-edit"]'
 
     # Texts
     textTargetingCriteria = "Targeting Criteria"
@@ -131,6 +140,13 @@ class TargetingCreate(BaseComponents):
     def getTargetingCriteriaAutoComplete(self, index: int = 0) -> WebElement:
         return self.wait_for(self.targetingCriteriaAutoComplete.format(index))
 
+    def getTargetingCriteriaAutoCompleteIndividual(self, index: int = 0) -> WebElement:
+        for _ in range(5):
+            if len(self.get_elements(self.targetingCriteriaAutoComplete.format(index))) >= 2:
+                break
+            sleep(1)
+        return self.get_elements(self.targetingCriteriaAutoComplete.format(index))[1]
+
     def getTargetingCriteriaValue(self, index: int = 0) -> WebElement:
         return self.wait_for(self.targetingCriteriaValue.format(index))
 
@@ -148,3 +164,21 @@ class TargetingCreate(BaseComponents):
 
     def getButtonSave(self) -> WebElement:
         return self.wait_for(self.buttonSave)
+
+    def getInputFiltersValueFrom(self, fiter_number: int = 0) -> WebElement:
+        return self.wait_for(self.inputFiltersValueFrom.format(fiter_number))
+
+    def getInputFiltersValueTo(self, fiter_number: int = 0) -> WebElement:
+        return self.wait_for(self.inputFiltersValueTo.format(fiter_number))
+
+    def getInputFiltersValue(self, fiter_number: str) -> WebElement:
+        return self.wait_for(self.inputFiltersValue.format(fiter_number))
+
+    def getAutocompleteTargetCriteriaValues(self) -> WebElement:
+        return self.wait_for(self.autocompleteTargetCriteriaValues)
+
+    def getSelectMany(self) -> WebElement:
+        return self.wait_for(self.selectMany)
+
+    def getButtonEdit(self) -> WebElement:
+        return self.wait_for(self.buttonEdit)

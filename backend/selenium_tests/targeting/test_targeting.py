@@ -204,11 +204,12 @@ class TestSmokeTargeting:
         assert "-" in pageTargetingDetails.getLabelSendBy().text
         assert "-" in pageTargetingDetails.getLabelSendDate().text
         assert "-" in pageTargetingDetails.getCriteriaContainer().text
-        assert "0" in pageTargetingDetails.getLabelFemaleChildren().text
-        assert "0" in pageTargetingDetails.getLabelMaleChildren().text
-        assert "0" in pageTargetingDetails.getLabelMaleAdults().text
-        assert "2" in pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
-        assert "8" in pageTargetingDetails.getLabelTargetedIndividuals().text
+        assert "6" in pageTargetingDetails.getLabelFemaleChildren().text
+        assert "1" in pageTargetingDetails.getLabelMaleChildren().text
+        assert "2" in pageTargetingDetails.getLabelFemaleAdults().text
+        assert "1" in pageTargetingDetails.getLabelMaleAdults().text
+        assert "3" in pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
+        assert "7" in pageTargetingDetails.getLabelTargetedIndividuals().text
         assert "Households" in pageTargetingDetails.getTableTitle().text
         expected_menu_items = [
             "ID",
@@ -691,6 +692,7 @@ class TestTargeting:
         assert "Test NEW TP" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnDateCreated().click()
         pageTargeting.disappearLoadingRows()
+        pageTargeting.screenshot("5")
         assert "Test NEW TP" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnDateCreated().click()
         pageTargeting.disappearLoadingRows()
@@ -722,9 +724,17 @@ class TestTargeting:
         pageTargetingCreate.getAddCriteriaButton().click()
         pageTargetingCreate.getAddPeopleRuleButton().click()
         pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        pageTargeting.screenshot("123")
+        pageTargetingCreate.select_listbox_element("Females Age 0 - 5").click()
+        pageTargetingCreate.getInputFiltersValueFrom(0).send_keys("0")
+        pageTargetingCreate.getInputFiltersValueTo(0).send_keys("1")
+        pageTargetingCreate.getInputFiltersValueTo(0).send_keys("1")
+        pageTargetingCreate.getButtonTargetPopulationAddCriteria().click()
+        pageTargetingCreate.getInputName().send_keys("Target Population for Females Age 0 - 5")
+        pageTargetingCreate.getInputFlagexcludeifactiveadjudicationticket().click()
+        pageTargetingCreate.getButtonTargetPopulationCreate().click()
+        pageTargetingDetails.getLabelStatus()
+        assert "Females Age 0 - 5: 11" in pageTargetingCreate.getCriteriaContainer().text
 
-    @pytest.mark.skip()
     def test_targeting_parametrized_rules_filters_and_or(
         self,
         create_programs: None,
@@ -742,6 +752,45 @@ class TestTargeting:
         pageTargetingCreate.getAddCriteriaButton().click()
         pageTargetingCreate.getAddPeopleRuleButton().click()
         pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        from selenium_tests.tools.tag_name_finder import printing
-        printing("Mapping", pageTargetingCreate.driver)
-        pageTargeting.screenshot("123")
+        pageTargetingCreate.select_listbox_element("Females Age 0 - 5").click()
+        pageTargetingCreate.getInputFiltersValueFrom(0).send_keys("0")
+        pageTargetingCreate.getInputFiltersValueTo(0).send_keys("1")
+        pageTargetingCreate.getButtonHouseholdRule().click()
+        pageTargetingCreate.getTargetingCriteriaAutoComplete(1).click()
+        pageTargetingCreate.select_listbox_element("Village").click()
+        pageTargetingCreate.getInputFiltersValue(1).send_keys("Testtown")
+        pageTargetingCreate.getButtonIndividualRule().click()
+        pageTargetingCreate.getTargetingCriteriaAutoCompleteIndividual().click()
+        pageTargetingCreate.select_listbox_element("Does the Individual have disability?").click()
+        pageTargetingCreate.getSelectMany().click()
+        pageTargetingCreate.select_multiple_option_by_name(HEARING, SEEING)
+        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
+        assert "Females Age 0 - 5: 1" in pageTargetingCreate.getCriteriaContainer().text
+        assert "Village: Testtown" in pageTargetingCreate.getCriteriaContainer().text
+        assert (
+            "Does the Individual have disability?: Difficulty hearing (even if using a hearing aid), Difficulty seeing (even if wearing glasses)"
+            in pageTargetingCreate.getCriteriaContainer().text
+        )
+        pageTargetingCreate.getButtonEdit().click()
+        pageTargetingCreate.getTargetingCriteriaAutoCompleteIndividual()
+        pageTargetingCreate.get_elements(pageTargetingCreate.targetingCriteriaAddDialogSaveButton)[1].click()
+        pageTargetingCreate.getInputName().send_keys("Target Population")
+        assert "ADD 'OR'FILTER" in pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().text
+        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
+        pageTargetingCreate.getAddHouseholdRuleButton().click()
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
+        pageTargetingCreate.select_listbox_element("Males age 0 - 5 with disability").click()
+        pageTargetingCreate.getInputFiltersValueFrom(0).send_keys("1")
+        pageTargetingCreate.getInputFiltersValueTo(0).send_keys("10")
+        pageTargetingCreate.get_elements(pageTargetingCreate.targetingCriteriaAddDialogSaveButton)[1].click()
+        pageTargetingCreate.getTargetPopulationSaveButton().click()
+        assert "Females Age 0 - 5: 1" in pageTargetingCreate.getCriteriaContainer().text
+        assert "Village: Testtown" in pageTargetingCreate.getCriteriaContainer().text
+        assert (
+            "Does the Individual have disability?: Difficulty hearing (even if using a hearing aid), Difficulty seeing (even if wearing glasses)"
+            in pageTargetingCreate.getCriteriaContainer().text
+        )
+        assert (
+            "Males age 0 - 5 with disability: 1 -10"
+            in pageTargetingCreate.get_elements(pageTargetingCreate.criteriaContainer)[1].text
+        )
