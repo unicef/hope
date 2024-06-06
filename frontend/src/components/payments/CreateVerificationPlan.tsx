@@ -463,6 +463,7 @@ export const CreateVerificationPlan = ({
                         name="verificationChannel"
                         label={t('Verification Channel')}
                         style={{ flexDirection: 'row' }}
+                        alignItems="center"
                         choices={[
                           { value: 'RAPIDPRO', name: 'RAPIDPRO' },
                           { value: 'XLSX', name: 'XLSX' },
