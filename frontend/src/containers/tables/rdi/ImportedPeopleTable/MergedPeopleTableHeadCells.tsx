@@ -22,7 +22,7 @@ export const headCells: HeadCell<MergedIndividualMinimalFragment>[] = [
   },
   {
     disablePadding: false,
-    label: 'Relationship to HoH',
+    label: 'Type',
     id: 'relationship',
     numeric: false,
   },
