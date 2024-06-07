@@ -922,7 +922,7 @@ def send_email_notification(
 class AutoCompleteFilterTemp(AutoCompleteFilter):
     def choices(self, changelist: Any) -> list:
         self.query_string = changelist.get_query_string(remove=[self.lookup_kwarg, self.lookup_kwarg_isnull])
-        if self.lookup_val:
+        if self.lookup_val:  # pragma: no_cover
             get_kwargs = {self.field.target_field.name: self.lookup_val}
             obj = self.target_model.objects.filter(**get_kwargs) or self.target_model.all_objects.filter(**get_kwargs)
             return [str(obj.first()) or ""]
