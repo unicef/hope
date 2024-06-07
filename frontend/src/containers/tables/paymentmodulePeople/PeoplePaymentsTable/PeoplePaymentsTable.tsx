@@ -80,6 +80,7 @@ export const PeoplePaymentsTable = ({
                 onWarningClick={(payment) => {
                   setDialogPayment(payment);
                 }}
+                permissions={permissions}
               />
             )}
           />
