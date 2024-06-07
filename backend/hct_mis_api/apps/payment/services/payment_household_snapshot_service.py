@@ -92,7 +92,9 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
         if str(household.primary_collector.id) in individuals_dict:
             household_data["primary_collector"] = individuals_dict[str(household.primary_collector.id)]
         else:
-            household_data["primary_collector"] = get_individual_snapshot(household.primary_collector)
+            household_data["primary_collector"] = get_individual_snapshot(
+                household.primary_collector, is_hh_collector=True
+            )
             household_data["needs_adjudication_tickets_count"] += household_data["primary_collector"][
                 "needs_adjudication_tickets_count"
             ]
@@ -100,7 +102,9 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
         if str(household.alternate_collector.id) in individuals_dict:
             household_data["alternate_collector"] = individuals_dict[str(household.alternate_collector.id)]
         else:
-            household_data["alternate_collector"] = get_individual_snapshot(household.alternate_collector)
+            household_data["alternate_collector"] = get_individual_snapshot(
+                household.alternate_collector, is_hh_collector=True
+            )
             household_data["needs_adjudication_tickets_count"] += household_data["alternate_collector"][
                 "needs_adjudication_tickets_count"
             ]
