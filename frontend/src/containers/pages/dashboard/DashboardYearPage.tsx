@@ -223,7 +223,7 @@ export const DashboardYearPage = ({
                     extraPaddingTitle={false}
                   >
                     <CardTextLight large>
-                      {t('Delivery type in CashAssist')}
+                      {t('Delivery Type')}
                     </CardTextLight>
                     <VolumeByDeliveryMechanism
                       data={data.chartVolumeByDeliveryMechanism}
