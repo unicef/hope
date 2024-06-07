@@ -180,7 +180,7 @@ class ImportDataInstanceValidator:
     def get_all_fields(self) -> Dict:
         try:
             return self.get_combined_attributes()
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -248,7 +248,7 @@ class ImportDataInstanceValidator:
                             invalid_rows.append(error)
 
             return invalid_rows
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -283,7 +283,7 @@ class ImportDataInstanceValidator:
                         invalid_rows.append(error)
 
             return invalid_rows
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -338,7 +338,7 @@ class ImportDataInstanceValidator:
                 all_rows_delivery_mechanisms_errors.extend(delivery_mechanisms_errors)
 
             return all_rows_delivery_mechanisms_errors
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -387,7 +387,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 return False
             if value is None:
                 return True
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
         return None
@@ -406,7 +406,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             # need to use Exception because of how Graphene catches errors
             except Exception:
                 return False
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -420,7 +420,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             return True
         except InvalidOperation:
             return False
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -433,7 +433,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
             pattern = re.compile(r"^(-?\d+\.\d+?,\s*-?\d+\.\d+?)$")
             return bool(re.match(pattern, value))
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -457,7 +457,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             except Exception:
                 return False
             return True
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -473,7 +473,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 return True
             except (phonenumbers.NumberParseException, TypeError):
                 return False
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -521,14 +521,14 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 return False
 
             return False
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
     def not_empty_validator(self, value: str, *args: Any, **kwargs: Any) -> bool:
         try:
             return not (value is None or value == "")
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -543,7 +543,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 if value in ("True", "False"):
                     return True
             return False
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -556,7 +556,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 return is_not_empty
 
             return True
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -565,7 +565,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             if self.required_validator(value, header, *args, **kwargs):
                 return True
             return self.image_loader.image_in(cell)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -784,7 +784,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             self.errors.extend([*invalid_rows, *invalid_doc_rows, *invalid_ident_rows])
             self.delivery_mechanisms_errors.extend(invalid_delivery_mechanisms)
 
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -841,7 +841,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     )
                     return
 
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -857,7 +857,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     }
                 )
                 return
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -899,7 +899,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 self.rows_validator(individuals_sheet)
 
             return self.errors, self.delivery_mechanisms_errors
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -945,7 +945,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 for hh_id in erroneous_collectors_ids
             )
             return errors
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -981,7 +981,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             )
             self.errors.extend(self.validate_collectors_unique(primary_collectors_data, alternate_collectors_data))
 
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -1005,7 +1005,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         }
                     )
             return errors
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -1033,7 +1033,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     )
                     return
 
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -1094,7 +1094,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         }
                     )
 
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -1136,7 +1136,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         }
                     )
 
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -1182,14 +1182,14 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
     def get_expected_household_fields(self) -> Set:
         try:
             return {field["xlsx_field"] for field in self.combined_fields["households"].values() if field["required"]}
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
     def get_expected_individuals_fields(self) -> Set:
         try:
             return {field["xlsx_field"] for field in self.combined_fields["individuals"].values() if field["required"]}
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -1220,7 +1220,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 if value in ("True", "False", True, False, "0", "1", "TRUE", "FALSE", "true", "false"):
                     return None
                 return f"Invalid value {value} of type {value_type_name} for " f"field {field} of type bool"
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
         return None
@@ -1246,7 +1246,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             is_valid_image = isinstance(value, str) and is_correct_attachment
 
             return None if is_valid_image else message
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -1291,7 +1291,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 matched = re.match(pattern_date, value)
 
             return None if matched else message
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -1336,7 +1336,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 return None
 
             return None
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -1372,7 +1372,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                     }
 
             return None
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -1563,6 +1563,6 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             identities_errors = self.identity_validator(identities_numbers, is_xlsx=False)
 
             return [*errors, *document_errors, *identities_errors]
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
