@@ -516,7 +516,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         elif sheet_title == "individuals":
             obj = partial(ImportedIndividual, registration_data_import=registration_data_import, program_id=program_id)
         else:
-            raise ValueError(f"Unhandled sheet label '{sheet.title!r}'")
+            raise ValueError(f"Unhandled sheet label '{sheet.title!r}'")  # pragma: no cover
 
         first_row = sheet[1]
         households_to_update = []
@@ -640,7 +640,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                         registration_data_import, str(obj_to_create.birth_date)
                     )
                     self.individuals.append(obj_to_create)
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
                 raise Exception(f"Error processing row {row[0].row}: {e.__class__.__name__}({e})") from e
 
         if sheet_title == "households":

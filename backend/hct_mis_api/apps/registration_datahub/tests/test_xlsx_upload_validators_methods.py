@@ -28,6 +28,19 @@ class TestXLSXValidatorsMethods(APITestCase):
         cls.country = CountryFactory()
         cls.business_area.countries.add(cls.country)
 
+    def test_string_validator(self) -> None:
+        validator = UploadXLSXInstanceValidator()
+        self.assertTrue(validator.string_validator("Marek", "full_name_i_c"))
+        self.assertFalse(validator.string_validator("", "full_name_i_c"))
+        self.assertFalse(validator.string_validator(None, "full_name_i_c"))
+
+    def test_float_validator(self) -> None:
+        validator = UploadXLSXInstanceValidator()
+        self.assertFalse(validator.float_validator(None, "estimated_birth_date_i_c"))
+        self.assertTrue(validator.float_validator(None, "age_at_registration"))
+        self.assertTrue(validator.float_validator(1.1, "estimated_birth_date_i_c"))
+        self.assertFalse(validator.float_validator("1.a1a", "estimated_birth_date_i_c"))
+
     def test_geolocation_validator(self) -> None:
         # test correct values:
         correct_values = (
@@ -532,6 +545,12 @@ class TestXLSXValidatorsMethods(APITestCase):
             upload_xlsx_instance_validator.validate_file_extension(file)
             self.assertEqual(upload_xlsx_instance_validator.errors[0]["row_number"], expected_values[0]["row_number"])
             self.assertEqual(upload_xlsx_instance_validator.errors[0]["message"], expected_values[0]["message"])
+
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+            errors, delivery_mechanisms_errors = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
+            self.assertEqual(errors[0]["row_number"], expected_values[0]["row_number"])
+            self.assertEqual(errors[0]["message"], expected_values[0]["message"])
+            self.assertEqual(delivery_mechanisms_errors, [])
 
     def test_validate_file_content_as_xlsx(self) -> None:
         file_path, expected_values = (
