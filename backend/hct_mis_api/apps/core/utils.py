@@ -29,6 +29,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 
 import pytz
+from adminfilters.autocomplete import AutoCompleteFilter
 from django_filters import OrderingFilter
 from PIL import Image
 
@@ -913,3 +914,17 @@ def send_email_notification(
         html_body=render_to_string(service.html_template, context=context),
         text_body=render_to_string(service.text_template, context=context),
     )
+
+
+# temporary fix for filter
+# https://github.com/saxix/django-adminfilters/blob/676765e3bf25038595a29756014c01e11c5a5d39/src/adminfilters/autocomplete.py#L55
+# not working with .all_objects()
+class AutoCompleteFilterTemp(AutoCompleteFilter):
+    def choices(self, changelist: Any) -> list:
+        self.query_string = changelist.get_query_string(remove=[self.lookup_kwarg, self.lookup_kwarg_isnull])
+        if self.lookup_val:
+            get_kwargs = {self.field.target_field.name: self.lookup_val}
+            obj = self.target_model.objects.filter(**get_kwargs) or self.target_model.all_objects.filter(**get_kwargs)
+            return [str(obj.first()) or ""]
+
+        return []

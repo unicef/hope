@@ -9,6 +9,7 @@ from django.utils import timezone
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.combo import RelatedFieldComboFilter
 
+from hct_mis_api.apps.core.utils import AutoCompleteFilterTemp
 from hct_mis_api.apps.household.models import FOSTER_CHILD, Document, DocumentType
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableAdminMixin
 
@@ -22,7 +23,7 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     raw_id_fields = ("individual", "copied_from", "program")
     list_filter = (
         ("type", RelatedFieldComboFilter),
-        ("individual", AutoCompleteFilter),
+        ("individual", AutoCompleteFilterTemp),
         ("country", AutoCompleteFilter),
     )
     autocomplete_fields = ["type"]
