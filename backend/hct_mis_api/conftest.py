@@ -101,9 +101,11 @@ def pytest_unconfigure(config: Config) -> None:
     del sys._called_from_pytest
 
 
-disabled_locally_test = pytest.mark.skip(
-    reason="Elasticsearch error - to investigate",
+disabled_locally_test = pytest.mark.skipif(
+    "config.getoption('--localhost')",
+    reason="Only run when --localhost is given",
 )
+
 
 
 @pytest.fixture(scope="session")
