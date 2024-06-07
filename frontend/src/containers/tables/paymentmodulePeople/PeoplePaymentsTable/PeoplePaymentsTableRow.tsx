@@ -107,7 +107,7 @@ export const PeoplePaymentsTableRow = ({
   };
 
   const individual = payment?.household?.individuals?.edges?.[0]?.node;
-  const individualDetailsPath = `/${baseUrl}/population/individuals/${individual?.id}`;
+  const individualDetailsPath = `/${baseUrl}/population/people/${individual?.id}`;
 
   return (
     <ClickableTableRow hover role="checkbox" key={payment.id}>
