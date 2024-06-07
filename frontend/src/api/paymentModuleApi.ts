@@ -4,9 +4,14 @@ export const fetchPaymentPlansManagerial = async (
   businessAreaSlug,
   params = {},
 ) => {
+  const paramsWithNoLimit = {
+    ...params,
+    limit: 10000,
+    offset: 0,
+  };
   const response = await api.get(
     `${businessAreaSlug}/payments/payment-plans-managerial/`,
-    params,
+    paramsWithNoLimit,
   );
   return response;
 };
