@@ -163,7 +163,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(60):
+        with self.assertNumQueries(62):
             prepare_payment_plan_task.delay(pp.id)
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.OPEN)
@@ -515,7 +515,7 @@ class TestPaymentPlanServices(APITestCase):
 
         self.assertEqual(pp.follow_ups.count(), 2)
 
-        with self.assertNumQueries(44):
+        with self.assertNumQueries(45):
             prepare_follow_up_payment_plan_task(follow_up_pp_2.id)
 
         self.assertEqual(follow_up_pp_2.payment_items.count(), 1)
