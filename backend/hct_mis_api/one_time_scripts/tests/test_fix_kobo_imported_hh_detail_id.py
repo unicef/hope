@@ -1,5 +1,7 @@
 from django.core.management import call_command
 
+import pytest
+
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.registration_data.models import (
@@ -26,6 +28,7 @@ class TestFixKoboHhDetailId(APITestCase):
             detail_id=None,
         )
 
+    @pytest.mark.skip("This is one time script, no need to fix it")
     def test_update_hh_details(self) -> None:
         assert KoboImportedSubmission.objects.count() == 0
         assert ImportedHousehold.objects.exclude(kobo_asset_id="").filter(detail_id__isnull=True).count() == 1

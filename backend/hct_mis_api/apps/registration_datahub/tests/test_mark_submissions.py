@@ -9,10 +9,10 @@ from django.utils import timezone
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import HouseholdFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import ImportData, KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.fixtures import (
-    ImportedHouseholdFactory,
     RegistrationDataImportDatahubFactory,
 )
 from hct_mis_api.apps.registration_datahub.tasks.mark_submissions import MarkSubmissions
@@ -68,8 +68,8 @@ class TestMarkSubmissions(TestCase):
         )
 
         submission_uuid = uuid.uuid4()
-        imported_household = ImportedHouseholdFactory(
-            registration_data_import=registration_data_import_data_hub,
+        imported_household = HouseholdFactory(
+            registration_data_import=registration_data_import,
             kobo_submission_uuid=submission_uuid,
         )
         KoboImportedSubmission.objects.create(

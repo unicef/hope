@@ -558,6 +558,7 @@ class Household(
 
     kobo_submission_uuid = models.UUIDField(null=True, default=None)
     kobo_submission_time = models.DateTimeField(max_length=150, blank=True, null=True)
+    enumerator_rec_id = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Household"
