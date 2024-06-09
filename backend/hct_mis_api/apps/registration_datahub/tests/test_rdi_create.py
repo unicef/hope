@@ -152,7 +152,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             "residence_status": "REFUGEE",
             "country": GeoCountry.objects.get(iso_code2="AF").id,
             "zip_code": "2153",
-            "flex_fields": {},
+            "flex_fields": {"enumerator_id": "UNICEF"},
         }
         household = matching_individuals.first().household
         household_obj_data = model_to_dict(household, ("residence_status", "country", "zip_code", "flex_fields"))

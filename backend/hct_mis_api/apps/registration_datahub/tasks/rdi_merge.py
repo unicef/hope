@@ -196,7 +196,7 @@ class RdiMergeTask:
                 household_data["registration_id"] = str(record.registration)
 
             if enumerator_rec_id := imported_household.enumerator_rec_id:
-                household_data["flex_fields"].update({"enumerator_id": enumerator_rec_id})
+                household_data["enumerator_rec_id"] = enumerator_rec_id
 
             household = Household(
                 **household_data,
