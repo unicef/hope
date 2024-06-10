@@ -245,7 +245,8 @@ export const EditVerificationPlan = ({
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values, setValues }) => {
         // Redirect to error page if no flows available
-        if (rapidProFlows &&
+        if (
+          rapidProFlows &&
           !rapidProFlows?.allRapidProFlows?.length &&
           values.verificationChannel === 'RAPIDPRO'
         ) {
@@ -330,7 +331,7 @@ export const EditVerificationPlan = ({
                           fontSize={16}
                           fontWeight="fontWeightBold"
                         >
-                          Sample size:
+                          Sample size:{' '}
                           {isNaN(sampleSizesData?.sampleSize?.sampleSize)
                             ? ' 0'
                             : ` ${sampleSizesData?.sampleSize?.sampleSize}`}{' '}
@@ -479,7 +480,7 @@ export const EditVerificationPlan = ({
                         fontSize={16}
                         fontWeight="fontWeightBold"
                       >
-                        Sample size:
+                        Sample size:{' '}
                         {isNaN(sampleSizesData?.sampleSize?.sampleSize)
                           ? ' 0'
                           : ` ${sampleSizesData?.sampleSize?.sampleSize}`}{' '}
