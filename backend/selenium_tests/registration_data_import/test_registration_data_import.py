@@ -116,7 +116,6 @@ class TestSmokeRegistrationDataImport:
 
 
 class TestRegistrationDataImport:
-    @pytest.mark.skip(reason="Unstable test")
     def test_smoke_registration_data_import_happy_path(
         self,
         registration_datahub: None,
