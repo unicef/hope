@@ -208,6 +208,7 @@ class TestDeliveryMechanismDataModel(TestCase):
                 "name_of_cardholder_atm_card",
                 "card_number_deposit_to_card",
                 "delivery_phone_number_mobile_money",
+                "provider_mobile_money",
                 "bank_name_transfer_to_account",
                 "bank_account_number_transfer_to_account",
                 "mobile_phone_number_cash_over_the_counter",
