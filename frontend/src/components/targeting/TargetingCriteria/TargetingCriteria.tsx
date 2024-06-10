@@ -275,24 +275,47 @@ export const TargetingCriteria = ({
                       )}
                     </Grid>
                     <Grid item xs={6}>
-                      {screenBeneficiary && (
-                        <FormControlLabel
-                          disabled
-                          control={
-                            <Checkbox
-                              data-cy="checkbox-exclude-if-on-sanction-list"
-                              color="primary"
-                              name="flagExcludeIfOnSanctionList"
-                            />
-                          }
-                          checked={Boolean(
-                            targetPopulation?.targetingCriteria
-                              ?.flagExcludeIfOnSanctionList,
-                          )}
-                          label={t(
-                            'Exclude Households with an active sanction screen flag',
-                          )}
-                        />
+                      {screenBeneficiary && isSocialDctType && (
+                        <Grid item xs={6}>
+                          <FormControlLabel
+                            disabled
+                            control={
+                              <Checkbox
+                                data-cy="checkbox-exclude-if-on-sanction-list"
+                                color="primary"
+                                name="flagExcludeIfOnSanctionList"
+                              />
+                            }
+                            checked={Boolean(
+                              targetPopulation?.targetingCriteria
+                                ?.flagExcludeIfOnSanctionList,
+                            )}
+                            label={t(
+                              'Exclude People with an active sanction screen flag',
+                            )}
+                          />
+                        </Grid>
+                      )}
+                      {screenBeneficiary && isStandardDctType && (
+                        <Grid item xs={6}>
+                          <FormControlLabel
+                            disabled
+                            control={
+                              <Checkbox
+                                data-cy="checkbox-exclude-if-on-sanction-list"
+                                color="primary"
+                                name="flagExcludeIfOnSanctionList"
+                              />
+                            }
+                            checked={Boolean(
+                              targetPopulation?.targetingCriteria
+                                ?.flagExcludeIfOnSanctionList,
+                            )}
+                            label={t(
+                              'Exclude Households with an active sanction screen flag',
+                            )}
+                          />
+                        </Grid>
                       )}
                     </Grid>
                   </Grid>

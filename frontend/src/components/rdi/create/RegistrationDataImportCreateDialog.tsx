@@ -22,6 +22,7 @@ import { ButtonTooltip } from '@core/ButtonTooltip';
 import { useProgramContext } from '../../../programContext';
 import { CreateImportFromKoboForm } from './kobo/CreateImportFromKoboForm';
 import { CreateImportFromXlsxForm } from './xlsx/CreateImportFromXlsxForm';
+import { CreateImportFromProgramPopulationForm } from './programPopulation/CreateImportFromProgramPopulation';
 
 const ComboBox = styled(Select)`
   & {
@@ -41,7 +42,7 @@ const StyledDialogFooter = styled(DialogFooter)`
   }
 `;
 
-export function RegistrationDataImportCreateDialog(): React.ReactElement {
+export const RegistrationDataImportCreateDialog = (): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [importType, setImportType] = useState('');
@@ -55,6 +56,13 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
       setSubmitDisabled(true);
     }
   }, [open]);
+
+  useEffect(() => {
+    if (importType === 'programPopulation') {
+      setSubmitDisabled(false);
+    }
+  }, [importType]);
+
   const openModalButton = (
     <ButtonTooltip
       variant="contained"
@@ -84,6 +92,14 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
     case 'excel':
       importTypeForm = (
         <CreateImportFromXlsxForm
+          setSubmitForm={setSubmitForm}
+          setSubmitDisabled={setSubmitDisabled}
+        />
+      );
+      break;
+    case 'programPopulation':
+      importTypeForm = (
+        <CreateImportFromProgramPopulationForm
           setSubmitForm={setSubmitForm}
           setSubmitDisabled={setSubmitDisabled}
         />
@@ -133,6 +149,13 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
               <MenuItem data-cy="kobo-menu-item" key="kobo" value="kobo">
                 Kobo
               </MenuItem>
+              <MenuItem
+                data-cy="program-population-menu-item"
+                key="program-population"
+                value="programPopulation"
+              >
+                Program Population
+              </MenuItem>
             </ComboBox>
           </FormControl>
           <Box mt={2}>{importTypeForm}</Box>
@@ -163,4 +186,4 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
       </Dialog>
     </span>
   );
-}
+};
