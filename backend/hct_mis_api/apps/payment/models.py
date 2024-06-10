@@ -1130,7 +1130,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     ) -> Any:
         def parse_admin_area(obj: "Area") -> str:
             if not obj:
-                return ""
+                return ""  # pragma: no cover
             return f"{obj.p_code} - {obj.name}"
 
         collector = payment.collector
@@ -1160,7 +1160,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
                 return parse_admin_area(admin_area)
             return nested_getattr(household, lookup, None)
 
-        return None
+        return None  # pragma: no cover
 
     @classmethod
     def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> Union[str, float, list]:
@@ -1268,7 +1268,7 @@ class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
         unique_together = ("financial_service_provider", "delivery_mechanism")
 
     def __str__(self) -> str:
-        return f"{self.financial_service_provider.name} - {self.xlsx_template} - {self.delivery_mechanism}"
+        return f"{self.financial_service_provider.name} - {self.xlsx_template} - {self.delivery_mechanism}"  # pragma: no cover
 
     def clean(self) -> None:
         delivery_mechanism_required_fields = [

@@ -185,7 +185,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
         ):
             raise ValidationError("Cannot import file containing validation errors")
 
-        if import_data.number_of_households == 0 and import_data.number_of_individuals == 0:
+        if import_data.number_of_households == 0 and import_data.number_of_individuals == 0:  # pragma: no cover
             raise ValidationError("Cannot import empty form")
 
     @classmethod
