@@ -289,7 +289,7 @@ class ImportDataInstanceValidator:
 
     def delivery_mechanisms_validator(self, xlsx_delivery_mechanisms_dict: Dict) -> List[Dict[str, Any]]:
         delivery_mechanisms_to_required_fields_mapping = (
-            DeliveryMechanismData.get_delivery_mechanisms_to_xlsx_fields_mapping(by="xlsx_field", required=True)
+            DeliveryMechanismData.get_delivery_mechanisms_to_xlsx_fields_mapping(by="xlsx_field")
         )
         if self.is_social_worker_program:
             delivery_mechanisms_to_required_fields_mapping = {

@@ -2335,13 +2335,11 @@ class DeliveryMechanismData(TimeStampedUUIDModel, SignatureMixin):
         return delivery_mechanisms_fields
 
     @classmethod
-    def get_delivery_mechanisms_to_xlsx_fields_mapping(
-        cls, by: str = "name", required: bool = False
-    ) -> Dict[str, List[str]]:
+    def get_delivery_mechanisms_to_xlsx_fields_mapping(cls, by: str = "name") -> Dict[str, List[str]]:
         fields = {
             field[by]: field.get("delivery_mechanisms", [])
             for field in cls.get_all_delivery_mechanisms_fields()
-            if not required or field.get("required_for_payment", False)
+            if field.get("required_for_payment", False)
         }
         dm_required_fields_map = defaultdict(list)
         for field_name, delivery_mechanisms in fields.items():
