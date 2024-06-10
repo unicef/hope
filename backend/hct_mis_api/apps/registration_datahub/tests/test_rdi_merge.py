@@ -5,7 +5,6 @@ from django.conf import settings
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.forms import model_to_dict
 
-import pytest
 from freezegun import freeze_time
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
@@ -201,7 +200,6 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
 
         cls.individuals = [IndividualFactory(**individual) for individual in individuals_to_create]
 
-    @pytest.mark.skip("NEED TO BE FIXED")
     @freeze_time("2022-01-01")
     def test_merge_rdi_and_recalculation(self) -> None:
         household = HouseholdFactory(
@@ -209,6 +207,9 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             registration_data_import=self.rdi,
             admin_area=self.area4,
             admin4=self.area4,
+            admin3=self.area3,
+            admin2=self.area2,
+            admin1=self.area1,
             zip_code="00-123",
             detail_id="123456123",
             kobo_asset_id="Test_asset_id",
@@ -217,6 +218,9 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             flex_fields={"enumerator_id": 1234567890},
         )
         self.set_imported_individuals(household)
+        household.head_of_household = Individual.objects.first()
+        household.save()
+
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
 
@@ -306,7 +310,6 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         }
         self.assertEqual(household_data, expected)
 
-    @pytest.mark.skip("NEED TO BE FIXED")
     @freeze_time("2022-01-01")
     def test_merge_rdi_and_recalculation_for_collect_data_partial(self) -> None:
         household = HouseholdFactory(
@@ -314,6 +317,9 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             registration_data_import=self.rdi,
         )
         self.set_imported_individuals(household)
+
+        household.head_of_household = Individual.objects.first()
+        household.save()
 
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
