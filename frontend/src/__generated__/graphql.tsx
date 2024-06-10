@@ -1314,7 +1314,6 @@ export type DataCollectingTypeNode = Node & {
   __typename?: 'DataCollectingTypeNode';
   active: Scalars['Boolean']['output'];
   code: Scalars['String']['output'];
-  compatibleTypes: DataCollectingTypeNodeConnection;
   created: Scalars['DateTime']['output'];
   datacollectingtypeSet: DataCollectingTypeNodeConnection;
   deprecated: Scalars['Boolean']['output'];
@@ -1323,7 +1322,6 @@ export type DataCollectingTypeNode = Node & {
   id: Scalars['ID']['output'];
   individualFiltersAvailable: Scalars['Boolean']['output'];
   label: Scalars['String']['output'];
-  limitTo: UserBusinessAreaNodeConnection;
   modified: Scalars['DateTime']['output'];
   programs: ProgramNodeConnection;
   recalculateComposition: Scalars['Boolean']['output'];
@@ -1332,29 +1330,10 @@ export type DataCollectingTypeNode = Node & {
 };
 
 
-export type DataCollectingTypeNodeCompatibleTypesArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
 export type DataCollectingTypeNodeDatacollectingtypeSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type DataCollectingTypeNodeLimitToArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  id?: InputMaybe<Scalars['UUID']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -25211,7 +25190,6 @@ export type DataCollectingTypeChoiceObjectResolvers<ContextType = any, ParentTyp
 export type DataCollectingTypeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DataCollectingTypeNode'] = ResolversParentTypes['DataCollectingTypeNode']> = {
   active?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   code?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  compatibleTypes?: Resolver<ResolversTypes['DataCollectingTypeNodeConnection'], ParentType, ContextType, Partial<DataCollectingTypeNodeCompatibleTypesArgs>>;
   created?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   datacollectingtypeSet?: Resolver<ResolversTypes['DataCollectingTypeNodeConnection'], ParentType, ContextType, Partial<DataCollectingTypeNodeDatacollectingtypeSetArgs>>;
   deprecated?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -25220,7 +25198,6 @@ export type DataCollectingTypeNodeResolvers<ContextType = any, ParentType extend
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   individualFiltersAvailable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  limitTo?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, Partial<DataCollectingTypeNodeLimitToArgs>>;
   modified?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, Partial<DataCollectingTypeNodeProgramsArgs>>;
   recalculateComposition?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
