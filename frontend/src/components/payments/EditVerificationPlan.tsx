@@ -245,12 +245,10 @@ export const EditVerificationPlan = ({
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values, setValues }) => {
         // Redirect to error page if no flows available
-
-        if (
+        if (rapidProFlows &&
           !rapidProFlows?.allRapidProFlows?.length &&
           values.verificationChannel === 'RAPIDPRO'
         ) {
-          //TODO MS Add last successful page as PV details page
           navigate(`/error/${businessArea}`, {
             state: {
               errorMessage: t(
