@@ -5,8 +5,8 @@ import { fakeApolloAllPaymentsForTable } from '../../../../../fixtures/payments/
 import { fakeApolloAllPaymentPlansForTable } from '../../../../../fixtures/payments/fakeApolloAllPaymentPlansForTable';
 import { render } from '../../../../testUtils/testUtils';
 import { PaymentPlanQuery } from '@generated/graphql';
-import { PERMISSIONS } from '../../../../config/permissions';
 import { PeoplePaymentsTable } from './PeoplePaymentsTable';
+import { PERMISSIONS } from '../../../../config/permissions';
 
 const paymentPlan = fakeApolloAllPaymentPlansForTable[0].result.data
   .allPaymentPlans.edges[0].node as PaymentPlanQuery['paymentPlan'];
@@ -19,7 +19,10 @@ describe('containers/tables/paymentmodule/PeoplePaymentsTable', () => {
           canViewDetails={false}
           businessArea="afghanistan"
           paymentPlan={paymentPlan}
-          permissions={[PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION]}
+          permissions={[
+            PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION,
+            PERMISSIONS.PM_VIEW_FSP_AUTH_CODE,
+          ]}
         />
       </MockedProvider>,
     );
@@ -35,7 +38,10 @@ describe('containers/tables/paymentmodule/PeoplePaymentsTable', () => {
           canViewDetails={false}
           businessArea="afghanistan"
           paymentPlan={paymentPlan}
-          permissions={[PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION]}
+          permissions={[
+            PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION,
+            PERMISSIONS.PM_VIEW_FSP_AUTH_CODE,
+          ]}
         />
       </MockedProvider>,
     );

@@ -11,7 +11,6 @@ import {
   useUserPartnerChoicesQuery,
 } from '@generated/graphql';
 import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/core/AllLogEntries';
-import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { DetailsStep } from '@components/programs/CreateProgram/DetailsStep';
@@ -54,13 +53,6 @@ export const EditProgramPage = (): ReactElement => {
         },
       },
     ],
-    update(cache, { data: { updateProgram } }) {
-      cache.writeQuery({
-        query: PROGRAM_QUERY,
-        variables: { id },
-        data: { program: updateProgram.program },
-      });
-    },
   });
 
   if (loadingProgram || treeLoading || userPartnerChoicesLoading)
@@ -101,13 +93,14 @@ export const EditProgramPage = (): ReactElement => {
             areaAccess,
           }))
         : [];
+    const { editMode, ...requestValues } = values;
 
     try {
       const response = await mutate({
         variables: {
           programData: {
             id,
-            ...values,
+            ...requestValues,
             budget: budgetToFixed,
             populationGoal: populationGoalParsed,
             partners: partnersToSet,
@@ -123,6 +116,7 @@ export const EditProgramPage = (): ReactElement => {
   };
 
   const initialValues = {
+    editMode: true,
     name,
     programmeCode,
     startDate,

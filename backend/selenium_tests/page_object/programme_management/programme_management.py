@@ -50,6 +50,9 @@ class ProgrammeManagement(BaseComponents):
     )
     filtersSearch = '//*[@data-cy="filters-search"]/div/input'
     buttonApply = 'button[data-cy="button-filters-clear"]'
+    buttonEditProgram = 'a[data-cy="button-edit-program"]'
+    inputProgrammeCode = 'input[data-cy="input-programmeCode"]'
+    tableRow = 'tr[data-cy="table-row-{}"]'
 
     def getCalendarIcon(self) -> WebElement:
         return self.wait_for(self.calendarIcon)
@@ -184,6 +187,12 @@ class ProgrammeManagement(BaseComponents):
     def getButtonApply(self) -> WebElement:
         return self.wait_for(self.buttonApply)
 
+    def getButtonEditProgram(self) -> WebElement:
+        return self.wait_for(self.buttonEditProgram)
+
+    def getInputProgrammeCode(self) -> WebElement:
+        return self.wait_for(self.inputProgrammeCode)
+
     def getInputDescription(self) -> WebElement:
         return self.wait_for(self.inputDescription)
 
@@ -195,3 +204,6 @@ class ProgrammeManagement(BaseComponents):
 
     def getInputPopulation(self) -> WebElement:
         return self.wait_for(self.inputPopulation)
+
+    def getTableRowByProgramName(self, program_name: str) -> WebElement:
+        return self.wait_for(self.tableRow.format(program_name))

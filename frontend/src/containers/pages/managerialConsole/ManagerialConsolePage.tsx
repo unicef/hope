@@ -7,7 +7,8 @@ import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { ApprovalSection } from '@components/managerialConsole/ApprovalSection';
 import { AuthorizationSection } from '@components/managerialConsole/AuthorizationSection';
-import { ReleaseSection } from '@components/managerialConsole/ReleaseSection';
+import { PendingForReleaseSection } from '@components/managerialConsole/PendingForReleaseSection';
+import { ReleasedSection } from '@components/managerialConsole/ReleasedSection';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -15,8 +16,7 @@ import { Box } from '@mui/material';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PERMISSIONS, hasPermissions } from 'src/config/permissions';
-
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 export const ManagerialConsolePage: React.FC = () => {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
@@ -88,6 +88,16 @@ export const ManagerialConsolePage: React.FC = () => {
       fetchPaymentPlansManagerial(businessArea, { status: 'IN_REVIEW' }),
   });
 
+  const {
+    data: releasedData,
+    isLoading: releasedLoading,
+    refetch: refetchReleased,
+  } = useQuery({
+    queryKey: ['paymentPlansReleased', businessArea],
+    queryFn: () =>
+      fetchPaymentPlansManagerial(businessArea, { status: 'ACCEPTED' }),
+  });
+
   const bulkAction = useMutation({
     mutationFn: (params: { ids: string[]; action: string; comment: string }) =>
       bulkActionPaymentPlansManagerial(
@@ -100,6 +110,7 @@ export const ManagerialConsolePage: React.FC = () => {
       refetchInApproval();
       refetchInAuthorization();
       refetchInReview();
+      refetchReleased();
       showMessage(t('Action completed successfully'));
     },
   });
@@ -108,6 +119,7 @@ export const ManagerialConsolePage: React.FC = () => {
     inApprovalLoading ||
     inAuthorizationLoading ||
     inReviewLoading ||
+    releasedLoading ||
     !permissions
   ) {
     return <LoadingComponent />;
@@ -123,6 +135,11 @@ export const ManagerialConsolePage: React.FC = () => {
   );
   const canReview = hasPermissions(
     'PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW',
+    permissions,
+  );
+
+  const canSeeReleased = hasPermissions(
+    'PAYMENT_VIEW_LIST_MANAGERIAL_RELEASED',
     permissions,
   );
 
@@ -162,7 +179,7 @@ export const ManagerialConsolePage: React.FC = () => {
       )}
       {canReview && (
         <Box mb={6}>
-          <ReleaseSection
+          <PendingForReleaseSection
             selectedInReview={selectedInReview}
             setSelectedInReview={setSelectedInReview}
             handleSelect={handleSelect}
@@ -172,6 +189,7 @@ export const ManagerialConsolePage: React.FC = () => {
           />
         </Box>
       )}
+      {canSeeReleased && <ReleasedSection releasedData={releasedData} />}
     </>
   );
 };

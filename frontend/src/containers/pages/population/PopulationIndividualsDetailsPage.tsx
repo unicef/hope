@@ -17,7 +17,7 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import { IndividualBioData } from '@components/population/IndividualBioData/IndividualBioData';
 import { IndividualFlags } from '@components/population/IndividualFlags';
 import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
-import { IndividualVulnerabilities } from '@components/population/IndividualVulnerabilities/IndividualVunerabilities';
+import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -34,7 +34,7 @@ const Container = styled.div`
   }
 `;
 
-export function PopulationIndividualsDetailsPage(): React.ReactElement {
+export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea } = useBaseUrl();
@@ -118,7 +118,7 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
           choicesData={choicesData}
           grievancesChoices={grievancesChoices}
         />
-        <IndividualVulnerabilities
+        <IndividualAdditionalRegistrationInformation
           flexFieldsData={flexFieldsData}
           individual={individual as IndividualNode}
         />
@@ -128,4 +128,4 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
       </Container>
     </>
   );
-}
+};

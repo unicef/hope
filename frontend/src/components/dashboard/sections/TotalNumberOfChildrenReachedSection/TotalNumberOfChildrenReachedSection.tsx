@@ -19,7 +19,6 @@ export function TotalNumberOfChildrenReachedSection({
   data,
 }: TotalNumberOfChildrenReachedSectionProps): React.ReactElement {
   const { t } = useTranslation();
-  if (!data) return null;
   return (
     <DashboardCard color="#4CD0E0">
       <CardTitle>{t('TOTAL NUMBER OF CHILDREN REACHED')}</CardTitle>

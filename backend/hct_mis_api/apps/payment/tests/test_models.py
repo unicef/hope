@@ -9,8 +9,8 @@ from django.test import TestCase
 from dateutil.relativedelta import relativedelta
 
 from hct_mis_api.apps.core.currencies import USDC
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
@@ -34,6 +34,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     PaymentPlanSplit,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestPaymentPlanModel(TestCase):
@@ -366,13 +367,25 @@ class TestFinancialServiceProviderModel(TestCase):
         household.admin3 = area3
         household.save()
 
-        payment = PaymentFactory(household=household, collector=individuals[0])
+        payment = PaymentFactory(program=ProgramFactory(), household=household, collector=individuals[0])
+        data_collecting_type = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplate
-        result = fsp_xlsx_template.get_column_from_core_field(payment, "invalid_random_field_name")
+        payment.parent.program.data_collecting_type = data_collecting_type
+        payment.parent.program.save()
+
+        # check invalid filed name
+        result = fsp_xlsx_template.get_column_from_core_field(payment, "invalid_people_field_name")
         self.assertIsNone(result)
 
-        result = fsp_xlsx_template.get_column_from_core_field(payment, "size")
-        self.assertIsNotNone(result)
+        # People program
+        given_name = fsp_xlsx_template.get_column_from_core_field(payment, "given_name")
+        self.assertEqual(given_name, individuals[0].given_name)
+        ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(payment, "individual_unicef_id")
+        self.assertEqual(ind_unicef_id, individuals[0].unicef_id)
+
+        # Standard program
+        payment.parent.program.data_collecting_type.type = DataCollectingType.Type.STANDARD
+        payment.parent.program.data_collecting_type.save()
 
         # check fields value
         size = fsp_xlsx_template.get_column_from_core_field(payment, "size")
@@ -385,8 +398,10 @@ class TestFinancialServiceProviderModel(TestCase):
         self.assertEqual(admin3, f"{area3.p_code} - {area3.name}")
         given_name = fsp_xlsx_template.get_column_from_core_field(payment, "given_name")
         self.assertEqual(given_name, individuals[0].given_name)
-        ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(payment, "unicef_id")
+        ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(payment, "individual_unicef_id")
         self.assertEqual(ind_unicef_id, individuals[0].unicef_id)
+        hh_unicef_id = fsp_xlsx_template.get_column_from_core_field(payment, "household_unicef_id")
+        self.assertEqual(hh_unicef_id, household.unicef_id)
         phone_no = fsp_xlsx_template.get_column_from_core_field(payment, "phone_no")
         self.assertEqual(phone_no, individuals[0].phone_no)
         phone_no_alternative = fsp_xlsx_template.get_column_from_core_field(payment, "phone_no_alternative")

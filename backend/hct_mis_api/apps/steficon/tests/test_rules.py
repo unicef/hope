@@ -5,7 +5,7 @@ from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.household.fixtures import HouseholdFactory
-from hct_mis_api.apps.steficon.admin import RuleCommitAdmin
+from hct_mis_api.apps.steficon.admin import RuleAdmin, RuleCommitAdmin
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.config import settings
 
@@ -149,4 +149,52 @@ class TestBasicRule(TestCase):
         self.assertEqual(
             RuleCommitAdmin(Mock(), Mock()).get_readonly_fields(Mock(user=UserFactory(is_superuser=False))),
             ["updated_by", "version", "rule"],
+        )
+
+    def test_get_readonly_fields(self) -> None:
+        # is_root
+        self.assertEqual(
+            RuleAdmin(Mock(), Mock()).get_readonly_fields(
+                Mock(user=self.user, headers={"x-root-token": settings.ROOT_TOKEN})
+            ),
+            ["created_by", "created_at", "updated_by", "updated_at", "version"],
+        )
+        # is_superuser
+        self.assertEqual(
+            RuleAdmin(Mock(), Mock()).get_readonly_fields(Mock(user=UserFactory(is_superuser=True))),
+            [
+                "created_by",
+                "created_at",
+                "updated_by",
+                "updated_at",
+                "version",
+                "name",
+                "type",
+                "enabled",
+                "deprecated",
+                "language",
+                "definition",
+                "description",
+                "flags",
+            ],
+        )
+        # just regular staff user
+        self.assertEqual(
+            RuleAdmin(Mock(), Mock()).get_readonly_fields(Mock(user=UserFactory(is_superuser=False))),
+            [
+                "created_by",
+                "created_at",
+                "updated_by",
+                "updated_at",
+                "version",
+                "name",
+                "type",
+                "enabled",
+                "deprecated",
+                "language",
+                "definition",
+                "description",
+                "flags",
+                "allowed_business_areas",
+            ],
         )

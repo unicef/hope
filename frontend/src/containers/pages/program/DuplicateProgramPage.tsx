@@ -56,13 +56,14 @@ export const DuplicateProgramPage = (): ReactElement => {
             areaAccess,
           }))
         : [];
+    const { editMode, ...requestValues } = values;
 
     try {
       const response = await mutate({
         variables: {
           programData: {
             id,
-            ...values,
+            ...requestValues,
             budget: budgetToFixed,
             businessAreaSlug: businessArea,
             partners: partnersToSet,
@@ -103,6 +104,7 @@ export const DuplicateProgramPage = (): ReactElement => {
   } = data.program;
 
   const initialValues = {
+    editMode: false,
     name: `Copy of Programme: (${name})`,
     programmeCode: '',
     startDate,

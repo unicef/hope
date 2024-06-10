@@ -94,6 +94,7 @@ export type ActivatePaymentVerificationPlan = {
 export type AddIndividualDataObjectType = {
   administrationOfRutf?: InputMaybe<Scalars['Boolean']['input']>;
   birthDate: Scalars['Date']['input'];
+  blockchainName?: InputMaybe<Scalars['String']['input']>;
   businessArea?: InputMaybe<Scalars['String']['input']>;
   commsDisability?: InputMaybe<Scalars['String']['input']>;
   disability?: InputMaybe<Scalars['String']['input']>;
@@ -123,6 +124,8 @@ export type AddIndividualDataObjectType = {
   seeingDisability?: InputMaybe<Scalars['String']['input']>;
   selfcareDisability?: InputMaybe<Scalars['String']['input']>;
   sex: Scalars['String']['input'];
+  walletAddress?: InputMaybe<Scalars['String']['input']>;
+  walletName?: InputMaybe<Scalars['String']['input']>;
   whoAnswersAltPhone?: InputMaybe<Scalars['String']['input']>;
   whoAnswersPhone?: InputMaybe<Scalars['String']['input']>;
   workStatus?: InputMaybe<Scalars['String']['input']>;
@@ -3647,6 +3650,7 @@ export enum IndividualSex {
 export type IndividualUpdateDataObjectType = {
   administrationOfRutf?: InputMaybe<Scalars['Boolean']['input']>;
   birthDate?: InputMaybe<Scalars['Date']['input']>;
+  blockchainName?: InputMaybe<Scalars['String']['input']>;
   commsDisability?: InputMaybe<Scalars['String']['input']>;
   disability?: InputMaybe<Scalars['String']['input']>;
   documents?: InputMaybe<Array<InputMaybe<IndividualDocumentObjectType>>>;
@@ -3682,6 +3686,8 @@ export type IndividualUpdateDataObjectType = {
   selfcareDisability?: InputMaybe<Scalars['String']['input']>;
   sex?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
+  walletAddress?: InputMaybe<Scalars['String']['input']>;
+  walletName?: InputMaybe<Scalars['String']['input']>;
   whoAnswersAltPhone?: InputMaybe<Scalars['String']['input']>;
   whoAnswersPhone?: InputMaybe<Scalars['String']['input']>;
   workStatus?: InputMaybe<Scalars['String']['input']>;
@@ -4699,6 +4705,7 @@ export type PaymentNode = Node & {
   excluded: Scalars['Boolean']['output'];
   financialServiceProvider?: Maybe<FinancialServiceProviderNode>;
   followUps: PaymentNodeConnection;
+  fspAuthCode?: Maybe<Scalars['String']['output']>;
   fullName?: Maybe<Scalars['String']['output']>;
   headOfHousehold?: Maybe<IndividualNode>;
   household: HouseholdNode;
@@ -5740,6 +5747,8 @@ export type Query = {
   chartIndividualsWithDisabilityReachedByAge?: Maybe<ChartDetailedDatasetsNode>;
   chartPayment?: Maybe<ChartDatasetNode>;
   chartPaymentVerification?: Maybe<ChartPaymentVerification>;
+  chartPeopleReachedByAgeAndGender?: Maybe<ChartDatasetNode>;
+  chartPeopleWithDisabilityReachedByAge?: Maybe<ChartDetailedDatasetsNode>;
   chartProgrammesBySector?: Maybe<ChartDetailedDatasetsNode>;
   chartTotalTransferredByMonth?: Maybe<ChartDetailedDatasetsNode>;
   chartTotalTransferredCashByCountry?: Maybe<ChartDetailedDatasetsNode>;
@@ -5815,6 +5824,7 @@ export type Query = {
   sectionChildReached?: Maybe<SectionTotalNode>;
   sectionHouseholdsReached?: Maybe<SectionTotalNode>;
   sectionIndividualsReached?: Maybe<SectionTotalNode>;
+  sectionPeopleReached?: Maybe<SectionTotalNode>;
   sectionTotalTransferred?: Maybe<SectionTotalNode>;
   severityOfDisabilityChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   sexChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
@@ -6603,6 +6613,22 @@ export type QueryChartPaymentVerificationArgs = {
 };
 
 
+export type QueryChartPeopleReachedByAgeAndGenderArgs = {
+  administrativeArea?: InputMaybe<Scalars['String']['input']>;
+  businessAreaSlug: Scalars['String']['input'];
+  program?: InputMaybe<Scalars['String']['input']>;
+  year: Scalars['Int']['input'];
+};
+
+
+export type QueryChartPeopleWithDisabilityReachedByAgeArgs = {
+  administrativeArea?: InputMaybe<Scalars['String']['input']>;
+  businessAreaSlug: Scalars['String']['input'];
+  program?: InputMaybe<Scalars['String']['input']>;
+  year: Scalars['Int']['input'];
+};
+
+
 export type QueryChartProgrammesBySectorArgs = {
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
   businessAreaSlug: Scalars['String']['input'];
@@ -6820,6 +6846,14 @@ export type QuerySectionHouseholdsReachedArgs = {
 
 
 export type QuerySectionIndividualsReachedArgs = {
+  administrativeArea?: InputMaybe<Scalars['String']['input']>;
+  businessAreaSlug: Scalars['String']['input'];
+  program?: InputMaybe<Scalars['String']['input']>;
+  year: Scalars['Int']['input'];
+};
+
+
+export type QuerySectionPeopleReachedArgs = {
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
   businessAreaSlug: Scalars['String']['input'];
   program?: InputMaybe<Scalars['String']['input']>;
@@ -9258,6 +9292,8 @@ export type MergedIndividualMinimalFragment = { __typename?: 'IndividualNode', i
 
 export type PaymentRecordDetailsFragment = { __typename?: 'PaymentRecordNode', id: string, status: PaymentRecordStatus, statusDate: any, caId?: string | null, caHashId?: any | null, registrationCaId?: string | null, fullName: string, distributionModality: string, totalPersonsCovered: number, currency: string, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveredQuantityUsd?: number | null, deliveryDate?: any | null, deliveryType?: PaymentRecordDeliveryType | null, entitlementCardIssueDate?: any | null, entitlementCardNumber?: string | null, transactionReferenceId?: string | null, verification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, statusDate?: any | null, receivedAmount?: number | null } | null, household: { __typename?: 'HouseholdNode', id: string, status?: string | null, size?: number | null, unicefId?: string | null, headOfHousehold: { __typename?: 'IndividualNode', id: string, phoneNo: string, phoneNoAlternative: string, phoneNoValid?: boolean | null, phoneNoAlternativeValid?: boolean | null } }, targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string }, parent?: { __typename?: 'CashPlanNode', id: string, caId?: string | null, program: { __typename?: 'ProgramNode', id: string, name: string }, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, verificationChannel: PaymentVerificationPlanVerificationChannel } | null } | null> } | null } | null, serviceProvider: { __typename?: 'ServiceProviderNode', id: string, fullName?: string | null, shortName?: string | null } };
 
+export type ProgramDetailsFragment = { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null };
+
 export type RegistrationMinimalFragment = { __typename?: 'RegistrationDataImportNode', id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, numberOfIndividuals: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null };
 
 export type RegistrationDetailedFragment = { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, batchDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null };
@@ -9732,7 +9768,7 @@ export type UpdateProgramMutationVariables = Exact<{
 }>;
 
 
-export type UpdateProgramMutation = { __typename?: 'Mutations', updateProgram?: { __typename?: 'UpdateProgram', validationErrors?: any | null, program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, version: any, partnerAccess: ProgramPartnerAccess, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null } | null } | null };
+export type UpdateProgramMutation = { __typename?: 'Mutations', updateProgram?: { __typename?: 'UpdateProgram', validationErrors?: any | null, program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null } | null } | null };
 
 export type CreateRegistrationKoboImportMutationVariables = Exact<{
   registrationDataImportData: RegistrationKoboImportMutationInput;
@@ -10366,7 +10402,7 @@ export type AllPaymentsForTableQueryVariables = Exact<{
 }>;
 
 
-export type AllPaymentsForTableQuery = { __typename?: 'Query', allPayments?: { __typename?: 'PaymentNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'PaymentNodeEdge', cursor: string, node?: { __typename?: 'PaymentNode', id: string, unicefId?: string | null, status: PaymentStatus, entitlementQuantity?: number | null, entitlementQuantityUsd?: number | null, currency: string, deliveredQuantity?: number | null, deliveredQuantityUsd?: number | null, paymentPlanHardConflicted?: boolean | null, paymentPlanSoftConflicted?: boolean | null, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, size?: number | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null, individuals?: { __typename?: 'IndividualNodeConnection', edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string } | null } | null> } | null }, paymentPlanHardConflictedData?: Array<{ __typename?: 'PaymentConflictDataNode', paymentPlanUnicefId?: string | null, paymentPlanId?: string | null, paymentPlanStartDate?: string | null, paymentPlanEndDate?: string | null, paymentPlanStatus?: string | null, paymentId?: string | null, paymentUnicefId?: string | null } | null> | null, paymentPlanSoftConflictedData?: Array<{ __typename?: 'PaymentConflictDataNode', paymentPlanUnicefId?: string | null, paymentPlanId?: string | null, paymentPlanStartDate?: string | null, paymentPlanEndDate?: string | null, paymentPlanStatus?: string | null, paymentId?: string | null, paymentUnicefId?: string | null } | null> | null, collector: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, financialServiceProvider?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null } | null> } | null };
+export type AllPaymentsForTableQuery = { __typename?: 'Query', allPayments?: { __typename?: 'PaymentNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'PaymentNodeEdge', cursor: string, node?: { __typename?: 'PaymentNode', id: string, unicefId?: string | null, status: PaymentStatus, entitlementQuantity?: number | null, entitlementQuantityUsd?: number | null, currency: string, deliveredQuantity?: number | null, deliveredQuantityUsd?: number | null, paymentPlanHardConflicted?: boolean | null, paymentPlanSoftConflicted?: boolean | null, fspAuthCode?: string | null, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, size?: number | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null, individuals?: { __typename?: 'IndividualNodeConnection', edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string } | null } | null> } | null }, paymentPlanHardConflictedData?: Array<{ __typename?: 'PaymentConflictDataNode', paymentPlanUnicefId?: string | null, paymentPlanId?: string | null, paymentPlanStartDate?: string | null, paymentPlanEndDate?: string | null, paymentPlanStatus?: string | null, paymentId?: string | null, paymentUnicefId?: string | null } | null> | null, paymentPlanSoftConflictedData?: Array<{ __typename?: 'PaymentConflictDataNode', paymentPlanUnicefId?: string | null, paymentPlanId?: string | null, paymentPlanStartDate?: string | null, paymentPlanEndDate?: string | null, paymentPlanStatus?: string | null, paymentId?: string | null, paymentUnicefId?: string | null } | null> | null, collector: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, financialServiceProvider?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null } | null> } | null };
 
 export type CashPlanQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -10880,7 +10916,7 @@ export type AllChartsQueryVariables = Exact<{
 }>;
 
 
-export type AllChartsQuery = { __typename?: 'Query', chartProgrammesBySector?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartPaymentVerification?: { __typename?: 'ChartPaymentVerification', labels?: Array<string | null> | null, households?: number | null, averageSampleSize?: number | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartVolumeByDeliveryMechanism?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartPayment?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartGrievances?: { __typename?: 'ChartGrievanceTicketsNode', labels?: Array<string | null> | null, totalNumberOfGrievances?: number | null, totalNumberOfFeedback?: number | null, totalNumberOfOpenSensitive?: number | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, sectionHouseholdsReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionIndividualsReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionChildReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, chartIndividualsReachedByAgeAndGender?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartIndividualsWithDisabilityReachedByAge?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null, sectionTotalTransferred?: { __typename?: 'SectionTotalNode', total?: number | null } | null, chartTotalTransferredByMonth?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null };
+export type AllChartsQuery = { __typename?: 'Query', chartProgrammesBySector?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartPaymentVerification?: { __typename?: 'ChartPaymentVerification', labels?: Array<string | null> | null, households?: number | null, averageSampleSize?: number | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartVolumeByDeliveryMechanism?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartPayment?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartGrievances?: { __typename?: 'ChartGrievanceTicketsNode', labels?: Array<string | null> | null, totalNumberOfGrievances?: number | null, totalNumberOfFeedback?: number | null, totalNumberOfOpenSensitive?: number | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, sectionHouseholdsReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionIndividualsReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionPeopleReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionChildReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, chartIndividualsReachedByAgeAndGender?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartIndividualsWithDisabilityReachedByAge?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null, chartPeopleReachedByAgeAndGender?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartPeopleWithDisabilityReachedByAge?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null, sectionTotalTransferred?: { __typename?: 'SectionTotalNode', total?: number | null } | null, chartTotalTransferredByMonth?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null };
 
 export type CountryChartsQueryVariables = Exact<{
   businessAreaSlug: Scalars['String']['input'];
@@ -11959,6 +11995,51 @@ export const PaymentRecordDetailsFragmentDoc = gql`
     id
     fullName
     shortName
+  }
+}
+    `;
+export const ProgramDetailsFragmentDoc = gql`
+    fragment programDetails on ProgramNode {
+  id
+  name
+  programmeCode
+  startDate
+  endDate
+  status
+  caId
+  caHashId
+  description
+  budget
+  frequencyOfPayments
+  cashPlus
+  populationGoal
+  scope
+  sector
+  totalNumberOfHouseholds
+  totalNumberOfHouseholdsWithTpInProgram
+  administrativeAreasOfImplementation
+  isSocialWorkerProgram
+  version
+  adminUrl
+  dataCollectingType {
+    id
+    code
+    label
+    active
+    individualFiltersAvailable
+    householdFiltersAvailable
+    description
+    type
+  }
+  partnerAccess
+  partners {
+    id
+    name
+    areaAccess
+    areas {
+      id
+      level
+    }
   }
 }
     `;
@@ -14718,49 +14799,12 @@ export const UpdateProgramDocument = gql`
     mutation UpdateProgram($programData: UpdateProgramInput!, $version: BigInt!) {
   updateProgram(programData: $programData, version: $version) {
     program {
-      id
-      name
-      programmeCode
-      startDate
-      endDate
-      status
-      caId
-      caHashId
-      description
-      budget
-      frequencyOfPayments
-      cashPlus
-      populationGoal
-      scope
-      sector
-      totalNumberOfHouseholds
-      totalNumberOfHouseholdsWithTpInProgram
-      administrativeAreasOfImplementation
-      version
-      dataCollectingType {
-        id
-        code
-        label
-        active
-        individualFiltersAvailable
-        householdFiltersAvailable
-        description
-      }
-      partnerAccess
-      partners {
-        id
-        name
-        areaAccess
-        areas {
-          id
-          level
-        }
-      }
+      ...programDetails
     }
     validationErrors
   }
 }
-    `;
+    ${ProgramDetailsFragmentDoc}`;
 export type UpdateProgramMutationFn = Apollo.MutationFunction<UpdateProgramMutation, UpdateProgramMutationVariables>;
 
 /**
@@ -19069,6 +19113,7 @@ export const AllPaymentsForTableDocument = gql`
           id
           name
         }
+        fspAuthCode
       }
     }
   }
@@ -21124,50 +21169,10 @@ export type AllProgramsForChoicesQueryResult = Apollo.QueryResult<AllProgramsFor
 export const ProgramDocument = gql`
     query Program($id: ID!) {
   program(id: $id) {
-    id
-    name
-    programmeCode
-    startDate
-    endDate
-    status
-    caId
-    caHashId
-    description
-    budget
-    frequencyOfPayments
-    cashPlus
-    populationGoal
-    scope
-    sector
-    totalNumberOfHouseholds
-    totalNumberOfHouseholdsWithTpInProgram
-    administrativeAreasOfImplementation
-    isSocialWorkerProgram
-    version
-    adminUrl
-    dataCollectingType {
-      id
-      code
-      label
-      active
-      individualFiltersAvailable
-      householdFiltersAvailable
-      description
-      type
-    }
-    partnerAccess
-    partners {
-      id
-      name
-      areaAccess
-      areas {
-        id
-        level
-      }
-    }
+    ...programDetails
   }
 }
-    `;
+    ${ProgramDetailsFragmentDoc}`;
 
 /**
  * __useProgramQuery__
@@ -22291,6 +22296,14 @@ export const AllChartsDocument = gql`
   ) {
     total
   }
+  sectionPeopleReached(
+    businessAreaSlug: $businessAreaSlug
+    year: $year
+    program: $program
+    administrativeArea: $administrativeArea
+  ) {
+    total
+  }
   sectionChildReached(
     businessAreaSlug: $businessAreaSlug
     year: $year
@@ -22311,6 +22324,29 @@ export const AllChartsDocument = gql`
     labels
   }
   chartIndividualsWithDisabilityReachedByAge(
+    businessAreaSlug: $businessAreaSlug
+    year: $year
+    program: $program
+    administrativeArea: $administrativeArea
+  ) {
+    datasets {
+      data
+      label
+    }
+    labels
+  }
+  chartPeopleReachedByAgeAndGender(
+    businessAreaSlug: $businessAreaSlug
+    year: $year
+    program: $program
+    administrativeArea: $administrativeArea
+  ) {
+    datasets {
+      data
+    }
+    labels
+  }
+  chartPeopleWithDisabilityReachedByAge(
     businessAreaSlug: $businessAreaSlug
     year: $year
     program: $program
@@ -26650,6 +26686,7 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   excluded?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>;
   followUps?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, Partial<PaymentNodeFollowUpsArgs>>;
+  fspAuthCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   headOfHousehold?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>;
   household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>;
@@ -27134,6 +27171,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   chartIndividualsWithDisabilityReachedByAge?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartIndividualsWithDisabilityReachedByAgeArgs, 'businessAreaSlug' | 'year'>>;
   chartPayment?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartPaymentArgs, 'businessAreaSlug' | 'year'>>;
   chartPaymentVerification?: Resolver<Maybe<ResolversTypes['ChartPaymentVerification']>, ParentType, ContextType, RequireFields<QueryChartPaymentVerificationArgs, 'businessAreaSlug' | 'year'>>;
+  chartPeopleReachedByAgeAndGender?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartPeopleReachedByAgeAndGenderArgs, 'businessAreaSlug' | 'year'>>;
+  chartPeopleWithDisabilityReachedByAge?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartPeopleWithDisabilityReachedByAgeArgs, 'businessAreaSlug' | 'year'>>;
   chartProgrammesBySector?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartProgrammesBySectorArgs, 'businessAreaSlug' | 'year'>>;
   chartTotalTransferredByMonth?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartTotalTransferredByMonthArgs, 'businessAreaSlug' | 'year'>>;
   chartTotalTransferredCashByCountry?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartTotalTransferredCashByCountryArgs, 'year'>>;
@@ -27209,6 +27248,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   sectionChildReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionChildReachedArgs, 'businessAreaSlug' | 'year'>>;
   sectionHouseholdsReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionHouseholdsReachedArgs, 'businessAreaSlug' | 'year'>>;
   sectionIndividualsReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionIndividualsReachedArgs, 'businessAreaSlug' | 'year'>>;
+  sectionPeopleReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionPeopleReachedArgs, 'businessAreaSlug' | 'year'>>;
   sectionTotalTransferred?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionTotalTransferredArgs, 'businessAreaSlug' | 'year'>>;
   severityOfDisabilityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   sexChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
