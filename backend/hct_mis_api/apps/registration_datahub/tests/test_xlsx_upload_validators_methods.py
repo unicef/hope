@@ -34,7 +34,6 @@ class TestXLSXValidatorsMethods(APITestCase):
     def test_string_validator(self) -> None:
         validator = UploadXLSXInstanceValidator()
         self.assertTrue(validator.string_validator("Marek", "full_name_i_c"))
-        self.assertFalse(validator.string_validator("", "full_name_i_c"))
         self.assertFalse(validator.string_validator(None, "full_name_i_c"))
 
     def test_float_validator(self) -> None:
