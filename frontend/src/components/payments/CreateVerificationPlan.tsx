@@ -223,11 +223,13 @@ export const CreateVerificationPlan = ({
     return '';
   };
 
+
+
   return (
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values, setValues }) => {
         // Redirect to error page if no flows available
-        if (
+        if (rapidProFlows &&
           !rapidProFlows?.allRapidProFlows?.length &&
           values.verificationChannel === 'RAPIDPRO'
         ) {
