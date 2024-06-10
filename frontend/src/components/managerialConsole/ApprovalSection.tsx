@@ -1,20 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BaseSection } from '@components/core/BaseSection';
 import {
   Table,
-  TableBody,
   TableCell,
   TableHead,
   TableRow,
   Checkbox,
   Box,
+  TableSortLabel,
+  TableBody,
+  InputAdornment,
+  TextField,
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 import { useTranslation } from 'react-i18next';
 import { ApprovePaymentPlansModal } from '@components/managerialConsole/ApprovePaymentPlansModal';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
 
 interface ApprovalSectionProps {
   selectedApproved: any[];
@@ -34,6 +39,7 @@ interface ApprovalSectionProps {
   ) => void;
   inApprovalData: any;
   bulkAction: any;
+  enableSearch?: boolean;
 }
 
 export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
@@ -43,14 +49,34 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
   handleSelectAll,
   inApprovalData,
   bulkAction,
+  enableSearch = false,
 }) => {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const { showMessage } = useSnackbar();
+  const [searchText, setSearchText] = useState('');
+
+  const {
+    sortField,
+    sortDirection,
+    selectedProgram,
+    setSelectedProgram,
+    handleSort,
+    sortRows,
+    filterRows,
+  } = useSortAndFilter({ initialSortField: null, initialSortDirection: 'asc' });
+
   const handleSelectAllApproved = () => {
     const ids = inApprovalData.results.map((plan) => plan.id);
     handleSelectAll(ids, selectedApproved, setSelectedApproved);
   };
+
+  const programs = inApprovalData?.results?.reduce((acc, row) => {
+    if (!acc.includes(row.program)) {
+      acc.push(row.program);
+    }
+    return acc;
+  }, []);
 
   const allSelected = inApprovalData?.results?.every((plan) =>
     selectedApproved.includes(plan.id),
@@ -60,29 +86,83 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
     .filter((plan) => selectedApproved.includes(plan.id))
     .map((plan) => plan.unicef_id);
 
-  return (
-    <BaseSection
-      title={t('Payment Plans pending for Approval')}
-      buttons={
-        <ApprovePaymentPlansModal
-          selectedPlansIds={selectedApproved}
-          selectedPlansUnicefIds={selectedPlansUnicefIds}
-          onApprove={async (_, comment) => {
-            try {
-              await bulkAction.mutateAsync({
-                ids: selectedApproved,
-                action: 'APPROVE',
-                comment: comment,
-              });
-              showMessage(t('Payment Plan(s) Approved'));
-              setSelectedApproved([]);
-            } catch (e) {
-              showMessage(e.message);
-            }
+  const columns = [
+    {
+      field: 'unicef_id',
+      headerName: t('Payment Plan ID'),
+      width: 200,
+      renderCell: (params) => (
+        <BlackLink
+          to={`/${businessArea}/programs/${params.row.program_id}/payment-module/${params.row.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${params.row.id}`}
+          newTab={true}
+        >
+          {params.value}
+        </BlackLink>
+      ),
+    },
+    { field: 'program', headerName: t('Programme Name'), width: 200 },
+    {
+      field: 'last_approval_process_date',
+      headerName: t('Last Modified Date'),
+      width: 200,
+      renderCell: (params) => <UniversalMoment>{params.value}</UniversalMoment>,
+    },
+    {
+      field: 'last_approval_process_by',
+      headerName: t('Sent for Approval by'),
+      width: 200,
+    },
+  ];
+
+  const filteredRows = filterRows(
+    inApprovalData?.results || [],
+    'last_approval_process_date',
+    searchText,
+    columns,
+  );
+  const sortedRows = sortRows(filteredRows);
+
+  const title = t('Payment Plans pending for Approval');
+
+  const buttons = (
+    <>
+      {enableSearch && (
+        <TextField
+          label="Search"
+          value={searchText}
+          size="small"
+          onChange={(e) => setSearchText(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
           }}
         />
-      }
-    >
+      )}
+      <ApprovePaymentPlansModal
+        selectedPlansIds={selectedApproved}
+        selectedPlansUnicefIds={selectedPlansUnicefIds}
+        onApprove={async (_, comment) => {
+          try {
+            await bulkAction.mutateAsync({
+              ids: selectedApproved,
+              action: 'APPROVE',
+              comment: comment,
+            });
+            showMessage(t('Payment Plan(s) Approved'));
+            setSelectedApproved([]);
+          } catch (e) {
+            showMessage(e.message);
+          }
+        }}
+      />
+    </>
+  );
+
+  return (
+    <BaseSection title={title} buttons={buttons}>
       <Table>
         <TableHead>
           <TableRow>
@@ -94,48 +174,45 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
                 />
               </Box>
             </TableCell>
-            <TableCell align="left" style={{ width: '22.5%' }}>
-              <Box sx={{ flex: 1 }}>{t('Payment Plan ID')}</Box>
-            </TableCell>
-            <TableCell align="left" style={{ width: '22.5%' }}>
-              <Box sx={{ flex: 1 }}>{t('Programme Name')}</Box>
-            </TableCell>
-            <TableCell align="left" style={{ width: '22.5%' }}>
-              <Box sx={{ flex: 1 }}>{t('Last Modified Date')}</Box>
-            </TableCell>
-            <TableCell align="left" style={{ width: '22.5%' }}>
-              <Box sx={{ flex: 1 }}>{t('Sent for Approval by')}</Box>
-            </TableCell>
+            {columns.map((column) => (
+              <TableCell key={column.field}>
+                {column.field === 'program' ? (
+                  <ProgramSelect
+                    selectedProgram={selectedProgram}
+                    setSelectedProgram={setSelectedProgram}
+                    programs={programs}
+                  />
+                ) : (
+                  <TableSortLabel
+                    active={sortField === column.field}
+                    direction={sortDirection}
+                    onClick={() => handleSort(column.field)}
+                  >
+                    {column.headerName}
+                  </TableSortLabel>
+                )}
+              </TableCell>
+            ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {inApprovalData?.results?.map((plan: any) => (
-            <TableRow key={plan.id}>
+          {sortedRows.map((row) => (
+            <TableRow key={row.id}>
               <TableCell padding="checkbox">
                 <Checkbox
-                  checked={selectedApproved.includes(plan.id)}
+                  checked={selectedApproved.includes(row.id)}
                   onChange={() =>
-                    handleSelect(selectedApproved, setSelectedApproved, plan.id)
+                    handleSelect(selectedApproved, setSelectedApproved, row.id)
                   }
                 />
               </TableCell>
-              <TableCell align="left">
-                <BlackLink
-                  to={`/${businessArea}/programs/${plan.program_id}/payment-module/${plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${plan.id}`}
-                  newTab={true}
-                >
-                  {plan.unicef_id}
-                </BlackLink>
-              </TableCell>
-              <TableCell align="left">{plan.program}</TableCell>
-              <TableCell align="left">
-                <UniversalMoment>
-                  {plan.last_approval_process_date}
-                </UniversalMoment>
-              </TableCell>
-              <TableCell align="left">
-                {plan.last_approval_process_by}
-              </TableCell>
+              {columns.map((column) => (
+                <TableCell key={column.field} align="left">
+                  {column.renderCell
+                    ? column.renderCell({ value: row[column.field], row })
+                    : row[column.field]}
+                </TableCell>
+              ))}
             </TableRow>
           ))}
         </TableBody>

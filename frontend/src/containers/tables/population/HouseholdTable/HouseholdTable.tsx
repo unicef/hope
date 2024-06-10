@@ -47,6 +47,7 @@ export function HouseholdTable({
     search: filter.search.trim(),
     documentType: filter.documentType,
     documentNumber: filter.documentNumber.trim(),
+    admin1: filter.admin1,
     admin2: filter.admin2,
     residenceStatus: filter.residenceStatus,
     withdrawn: matchWithdrawnValue(),

@@ -335,8 +335,8 @@ class GenericPayment(TimeStampedUUIDModel):
         decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
-    transaction_reference_id = models.CharField(max_length=255, null=True)  # transaction_id
-    transaction_status_blockchain_link = models.CharField(max_length=255, null=True)
+    transaction_reference_id = models.CharField(max_length=255, null=True, blank=True)  # transaction_id
+    transaction_status_blockchain_link = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -1106,8 +1106,8 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     COLUMNS_CHOICES = (
         ("payment_id", _("Payment ID")),
-        ("individual_id", _("Individual ID")),
         ("household_id", _("Household ID")),
+        ("individual_id", _("Individual ID")),
         ("household_size", _("Household Size")),
         ("collector_name", _("Collector Name")),
         ("alternate_collector_full_name", _("Alternate collector Full Name")),
@@ -1190,6 +1190,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
     @classmethod
     def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> Union[str, float, list]:
+        # we can get if needed payment.parent.program.is_social_worker_program
         alternate_collector = None
         alternate_collector_column_names = (
             "alternate_collector_full_name",

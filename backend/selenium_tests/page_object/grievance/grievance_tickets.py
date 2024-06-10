@@ -18,7 +18,7 @@ class GrievanceTickets(BaseComponents):
     fspFilter = 'div[data-cy="filters-fsp"]'
     categoryFilter = 'div[data-cy="filters-category"]'
     assigneeFilter = 'div[data-cy="filters-assignee"]'
-    adminLevelFilter = 'div[data-cy="filters-admin-level"]'
+    adminLevelFilter = 'div[data-cy="filters-admin-level-2"]'
     registrationDataImportFilter = 'div[data-cy="filters-registration-data-import"]'
     preferredLanguageFilter = 'div[data-cy="filters-preferred-language"]'
     priorityFilter = 'div[data-cy="filters-priority'

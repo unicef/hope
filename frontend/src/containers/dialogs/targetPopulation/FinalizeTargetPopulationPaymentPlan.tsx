@@ -11,6 +11,7 @@ import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
+import { useProgramContext } from '../../../programContext';
 
 export interface FinalizeTargetPopulationPaymentPlanProps {
   open: boolean;
@@ -30,6 +31,7 @@ export const FinalizeTargetPopulationPaymentPlan = ({
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
   const [mutate, { loading }] = useFinalizeTpMutation();
+  const { isSocialDctType } = useProgramContext();
   const onSubmit = (id: string): void => {
     mutate({
       variables: {
@@ -57,7 +59,8 @@ export const FinalizeTargetPopulationPaymentPlan = ({
         <DialogDescription>
           {t('Are you sure you want to send')} {totalHouseholds}{' '}
           {t(
-            'households to HOPE? They will be accessible in Payment Module. Target population will not be editable further.',
+            (isSocialDctType ? 'individuals' : 'households') +
+              ' to HOPE? They will be accessible in Payment Module. Target population will not be editable further.',
           )}
         </DialogDescription>
       </DialogContent>

@@ -30,7 +30,7 @@ export function MergeRegistrationDataImportDialog({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { isActiveProgram } = useProgramContext();
+  const { isActiveProgram, isSocialDctType } = useProgramContext();
 
   const [mutate, { loading }] = useMergeRdiMutation({
     variables: { id: registration.id },
@@ -43,6 +43,25 @@ export function MergeRegistrationDataImportDialog({
     }
     showMessage(t('Registration Data Import Merging started'));
   };
+  let dataCountInformation = (
+    <div>
+      <strong>
+        {registration.numberOfHouseholds} {t('households and')}{' '}
+        {registration.numberOfIndividuals} {t('individuals will be merged.')}{' '}
+      </strong>
+      {t('Do you want to proceed?')}
+    </div>
+  );
+  if (isSocialDctType) {
+    dataCountInformation = (
+      <div>
+        <strong>
+          {registration.numberOfIndividuals} {t('individuals will be merged.')}{' '}
+        </strong>
+        {t('Do you want to proceed?')}
+      </div>
+    );
+  }
   return (
     <span>
       <Button
@@ -67,14 +86,7 @@ export function MergeRegistrationDataImportDialog({
         <DialogContent>
           <DialogDescription>
             <div>{t('Are your sure you want to merge this data import?')}</div>
-            <div>
-              <strong>
-                {registration.numberOfHouseholds} {t('households and')}{' '}
-                {registration.numberOfIndividuals}{' '}
-                {t('individuals will be merged.')}{' '}
-              </strong>
-              {t('Do you want to proceed?')}
-            </div>
+            {dataCountInformation}
           </DialogDescription>
         </DialogContent>
         <DialogFooter>

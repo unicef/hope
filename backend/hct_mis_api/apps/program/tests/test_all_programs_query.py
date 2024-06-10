@@ -16,8 +16,8 @@ from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 
 class TestAllProgramsQuery(APITestCase):
     ALL_PROGRAMS_QUERY = """
-    query AllPrograms($businessArea: String!, $orderBy: String) {
-        allPrograms(businessArea: $businessArea, orderBy: $orderBy) {
+    query AllPrograms($businessArea: String!, $orderBy: String, $compatibleDct: Boolean) {
+        allPrograms(businessArea: $businessArea, orderBy: $orderBy, compatibleDct: $compatibleDct) {
           totalCount
           edges {
             node {
@@ -33,6 +33,10 @@ class TestAllProgramsQuery(APITestCase):
         create_afghanistan()
         generate_data_collecting_types()
         data_collecting_type = DataCollectingType.objects.get(code="full_collection")
+        cls.data_collecting_type_compatible = DataCollectingType.objects.get(code="size_only")
+        cls.data_collecting_type_compatible.compatible_types.add(cls.data_collecting_type_compatible)
+        data_collecting_type.compatible_types.add(cls.data_collecting_type_compatible, data_collecting_type)
+
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.business_area.data_collecting_types.set(DataCollectingType.objects.all().values_list("id", flat=True))
 
@@ -116,4 +120,35 @@ class TestAllProgramsQuery(APITestCase):
                 },
             },
             variables={"businessArea": self.business_area.slug, "orderBy": "name"},
+        )
+
+    def test_all_programs_query_filter_dct(self) -> None:
+        program = ProgramFactory.create(
+            name="Program for dct filter",
+            status=Program.ACTIVE,
+            business_area=self.business_area,
+            data_collecting_type=self.data_collecting_type_compatible,
+            partner_access=Program.ALL_PARTNERS_ACCESS,
+        )
+        # program that does not have the current program in the compatible types
+        ProgramFactory.create(
+            name="Program not compatible",
+            status=Program.ACTIVE,
+            business_area=self.business_area,
+            data_collecting_type=DataCollectingType.objects.get(code="partial_individuals"),
+            partner_access=Program.ALL_PARTNERS_ACCESS,
+        )
+
+        user = UserFactory.create(partner=self.unicef_partner)
+        self.create_user_role_with_permissions(user, [Permissions.RDI_MERGE_IMPORT], self.business_area)
+        self.snapshot_graphql_request(
+            request_string=self.ALL_PROGRAMS_QUERY,
+            context={
+                "user": user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(program.id, "ProgramNode"),
+                },
+            },
+            variables={"businessArea": self.business_area.slug, "orderBy": "name", "compatibleDct": True},
         )

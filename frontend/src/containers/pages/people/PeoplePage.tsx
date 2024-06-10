@@ -29,6 +29,7 @@ export const PeoplePage = (): React.ReactElement => {
     search: '',
     documentType: householdChoicesData?.documentTypeChoices?.[0].value,
     documentNumber: '',
+    admin1: '',
     admin2: '',
     sex: '',
     ageMin: '',
