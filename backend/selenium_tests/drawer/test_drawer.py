@@ -66,6 +66,7 @@ class TestDrawer:
         pageProgrammeManagement.selectGlobalProgramFilter("Worker Program").click()
         assert "Worker Program" in pageProgrammeDetails.getHeaderTitle().text
         expected_menu_items = [
+            "Country Dashboard",
             "Registration Data Import",
             "People",
             "Program Details",
@@ -73,6 +74,7 @@ class TestDrawer:
             "Payment Module",
             "Payment Verification",
             "Grievance",
+            "Accountability",
             "Programme Users",
             "Program Log",
         ]
@@ -88,6 +90,7 @@ class TestDrawer:
         pageProgrammeManagement.selectGlobalProgramFilter("Normal Program").click()
         assert "Normal Program" in pageProgrammeDetails.getHeaderTitle().text
         expected_menu_items = [
+            "Country Dashboard",
             "Registration Data Import",
             "Program Population",
             "Program Details",
@@ -95,6 +98,7 @@ class TestDrawer:
             "Payment Module",
             "Payment Verification",
             "Grievance",
+            "Accountability",
             "Programme Users",
             "Program Log",
         ]

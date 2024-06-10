@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/population/HouseholdAdditionalRegistrationInformation should render 1`] = `
+<div>
+  <div>
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN kXkoVF css-1ps6pg7-MuiPaper-root"
+    >
+      <div
+        class="sc-dmyCSP ljiJAm"
+      >
+        <h6
+          class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+        >
+          Additional Registration information
+        </h6>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6 css-zow5z4-MuiGrid-root"
+      />
+    </div>
+  </div>
+</div>
+`;

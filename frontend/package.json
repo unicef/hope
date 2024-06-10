@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -122,6 +122,6 @@
     "prettier": "3.2.5",
     "react-test-renderer": "^18.2.0",
     "ts-jest": "^29.1.2",
-    "typescript": "^5.3.3"
+    "typescript": "~5.3.3"
   }
 }

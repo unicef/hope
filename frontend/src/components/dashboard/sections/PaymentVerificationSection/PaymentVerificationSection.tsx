@@ -7,19 +7,31 @@ import { DashboardPaper } from '../../DashboardPaper';
 
 interface PaymentVerificationSectionProps {
   data: AllChartsQuery['chartPaymentVerification'];
+  isSocialDctType: boolean;
 }
 export function PaymentVerificationSection({
   data,
+  isSocialDctType,
 }: PaymentVerificationSectionProps): React.ReactElement {
   const { t } = useTranslation();
   if (!data) return null;
+
+  const renderContacted = () => {
+    if (isSocialDctType) {
+      return data.households === 1
+        ? t('Person contacted')
+        : t('People contacted');
+    }
+    return data.households === 1
+      ? t('Household contacted')
+      : t('Households contacted');
+  };
 
   return (
     <DashboardPaper title={t('Payment Verification')}>
       <Box mt={3}>
         <Typography variant="subtitle2">
-          {data.households}{' '}
-          {data.households === 1 ? t('Household') : t('Households contacted')}
+          {data.households} {renderContacted()}
         </Typography>
         <Typography variant="caption">
           {(data.averageSampleSize * 100).toFixed(0)}%{t('average sampling')}

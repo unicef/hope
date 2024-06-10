@@ -59,12 +59,13 @@ export const CreateProgramPage = (): ReactElement => {
             areaAccess,
           }))
         : [];
+    const { editMode, ...requestValues } = values;
 
     try {
       const response = await mutate({
         variables: {
           programData: {
-            ...values,
+            ...requestValues,
             budget: budgetToFixed,
             populationGoal: populationGoalParsed,
             businessAreaSlug: businessArea,
@@ -86,6 +87,7 @@ export const CreateProgramPage = (): ReactElement => {
   };
 
   const initialValues = {
+    editMode: false,
     name: '',
     programmeCode: '',
     startDate: '',

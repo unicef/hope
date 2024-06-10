@@ -289,8 +289,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr DDbss css-1ex1afd-MuiTableCell-root"
-                  colspan="10"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr eIzMdV css-1ex1afd-MuiTableCell-root"
+                  colspan="11"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -303,8 +303,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr DDbss css-1ex1afd-MuiTableCell-root"
-                  colspan="10"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr eIzMdV css-1ex1afd-MuiTableCell-root"
+                  colspan="11"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -317,8 +317,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr DDbss css-1ex1afd-MuiTableCell-root"
-                  colspan="10"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr eIzMdV css-1ex1afd-MuiTableCell-root"
+                  colspan="11"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -331,8 +331,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr DDbss css-1ex1afd-MuiTableCell-root"
-                  colspan="10"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr eIzMdV css-1ex1afd-MuiTableCell-root"
+                  colspan="11"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -345,8 +345,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr DDbss css-1ex1afd-MuiTableCell-root"
-                  colspan="10"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr eIzMdV css-1ex1afd-MuiTableCell-root"
+                  colspan="11"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -359,8 +359,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr DDbss css-1ex1afd-MuiTableCell-root"
-                  colspan="10"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr eIzMdV css-1ex1afd-MuiTableCell-root"
+                  colspan="11"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -373,8 +373,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr DDbss css-1ex1afd-MuiTableCell-root"
-                  colspan="10"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr eIzMdV css-1ex1afd-MuiTableCell-root"
+                  colspan="11"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -387,8 +387,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr DDbss css-1ex1afd-MuiTableCell-root"
-                  colspan="10"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr eIzMdV css-1ex1afd-MuiTableCell-root"
+                  colspan="11"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -401,8 +401,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr DDbss css-1ex1afd-MuiTableCell-root"
-                  colspan="10"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr eIzMdV css-1ex1afd-MuiTableCell-root"
+                  colspan="11"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -457,6 +457,12 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
                   data-cy="delivered-quantity-cell"
                 />
                 <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+                  data-cy="fsp-auth-code-cell"
+                >
+                  -
+                </td>
+                <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
                 />
               </tr>
@@ -507,6 +513,12 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
                   data-cy="delivered-quantity-cell"
                 />
                 <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+                  data-cy="fsp-auth-code-cell"
+                >
+                  -
+                </td>
+                <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
                 />
               </tr>
@@ -515,8 +527,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
                 style="height: 70px;"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr DDbss css-1ex1afd-MuiTableCell-root"
-                  colspan="10"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr eIzMdV css-1ex1afd-MuiTableCell-root"
+                  colspan="11"
                 />
               </tr>
             </tbody>
@@ -916,8 +928,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr DDbss css-1ex1afd-MuiTableCell-root"
-                  colspan="10"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr eIzMdV css-1ex1afd-MuiTableCell-root"
+                  colspan="11"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -930,8 +942,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr DDbss css-1ex1afd-MuiTableCell-root"
-                  colspan="10"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr eIzMdV css-1ex1afd-MuiTableCell-root"
+                  colspan="11"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -944,8 +956,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr DDbss css-1ex1afd-MuiTableCell-root"
-                  colspan="10"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr eIzMdV css-1ex1afd-MuiTableCell-root"
+                  colspan="11"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -958,8 +970,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr DDbss css-1ex1afd-MuiTableCell-root"
-                  colspan="10"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr eIzMdV css-1ex1afd-MuiTableCell-root"
+                  colspan="11"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -972,8 +984,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr DDbss css-1ex1afd-MuiTableCell-root"
-                  colspan="10"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr eIzMdV css-1ex1afd-MuiTableCell-root"
+                  colspan="11"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -986,8 +998,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr DDbss css-1ex1afd-MuiTableCell-root"
-                  colspan="10"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr eIzMdV css-1ex1afd-MuiTableCell-root"
+                  colspan="11"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -1000,8 +1012,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr DDbss css-1ex1afd-MuiTableCell-root"
-                  colspan="10"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr eIzMdV css-1ex1afd-MuiTableCell-root"
+                  colspan="11"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -1014,8 +1026,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr DDbss css-1ex1afd-MuiTableCell-root"
-                  colspan="10"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr eIzMdV css-1ex1afd-MuiTableCell-root"
+                  colspan="11"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -1028,8 +1040,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr DDbss css-1ex1afd-MuiTableCell-root"
-                  colspan="10"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr eIzMdV css-1ex1afd-MuiTableCell-root"
+                  colspan="11"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -1084,6 +1096,12 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                   data-cy="delivered-quantity-cell"
                 />
                 <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+                  data-cy="fsp-auth-code-cell"
+                >
+                  -
+                </td>
+                <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
                 />
               </tr>
@@ -1134,6 +1152,12 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                   data-cy="delivered-quantity-cell"
                 />
                 <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+                  data-cy="fsp-auth-code-cell"
+                >
+                  -
+                </td>
+                <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
                 />
               </tr>
@@ -1142,8 +1166,8 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 style="height: 70px;"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr DDbss css-1ex1afd-MuiTableCell-root"
-                  colspan="10"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr eIzMdV css-1ex1afd-MuiTableCell-root"
+                  colspan="11"
                 />
               </tr>
             </tbody>
