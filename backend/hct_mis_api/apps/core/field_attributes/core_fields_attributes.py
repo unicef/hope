@@ -1626,7 +1626,7 @@ CORE_FIELDS_ATTRIBUTES = [
     {
         "id": "df2b2588-68af-4dea-89ab-c5a53a5764be",
         "type": TYPE_STRING,
-        "name": "unicef_id",
+        "name": "household_unicef_id",
         "lookup": "unicef_id",
         "required": False,
         "label": {"English(EN)": f"{TEMPLATE_HOUSEHOLD} unicef id"},
@@ -1639,7 +1639,7 @@ CORE_FIELDS_ATTRIBUTES = [
     {
         "id": "bb9bcb76-c9e4-4e83-8b9a-6c8bb35cb84c",
         "type": TYPE_STRING,
-        "name": "unicef_id",
+        "name": "individual_unicef_id",
         "lookup": "unicef_id",
         "required": False,
         "label": {"English(EN)": f"{TEMPLATE_INDIVIDUAL} unicef id"},
