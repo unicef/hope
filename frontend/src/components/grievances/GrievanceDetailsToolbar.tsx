@@ -50,7 +50,7 @@ const countApprovedAndUnapproved = (
   return { approved, notApproved };
 };
 
-export function GrievanceDetailsToolbar({
+export const GrievanceDetailsToolbar = ({
   ticket,
   canEdit,
   canSetInProgress,
@@ -68,7 +68,7 @@ export function GrievanceDetailsToolbar({
   canSendBack: boolean;
   canClose: boolean;
   canAssign: boolean;
-}): React.ReactElement {
+}): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
@@ -103,81 +103,94 @@ export function GrievanceDetailsToolbar({
         ticket.householdDataUpdateTicketDetails?.householdData || {};
       const individualData =
         ticket.individualDataUpdateTicketDetails?.individualData || {};
+
       const allData = {
         ...householdData,
         ...individualData,
         ...householdData?.flex_fields,
         ...individualData?.flex_fields,
       };
-      const excludedKeys = [
-        'previous_documents',
-        'previous_identities',
-        'previous_payment_channels',
-        'flex_fields',
-      ];
+      const filterData = (data: any) => {
+        const excludedKeys = [
+          'previous_documents',
+          'previous_identities',
+          'previous_payment_channels',
+          'flex_fields',
+        ];
 
-      const filteredData = Object.keys(allData)
-        .filter((key) => !excludedKeys.includes(key))
-        .reduce(
-          (obj, key) => ({
-            ...obj,
-            [key]: allData[key],
-          }),
-          {},
-        );
+        return Object.keys(data)
+          .filter((key) => !excludedKeys.includes(key))
+          .reduce((obj, key) => ({ ...obj, [key]: data[key] }), {});
+      };
+
+      const generateConfirmationText = (
+        approved: number,
+        notApproved: number,
+      ): string => {
+        if (!notApproved) {
+          return '';
+        }
+
+        if (!approved) {
+          return t(
+            'You approved 0 changes, remaining proposed changes will be automatically rejected upon ticket closure.',
+          );
+        }
+
+        const approvedText = `${approved} change${approved > 1 ? 's' : ''}`;
+        return `You approved ${approvedText}. Remaining change requests (${notApproved}) will be automatically rejected.`;
+      };
+
+      const filteredData = filterData(allData);
 
       const { approved, notApproved } = countApprovedAndUnapproved(
         Object.values(filteredData),
       );
 
-      if (!notApproved) {
-        return '';
-      }
-
-      if (!approved) {
-        return t(
-          'You approved 0 changes, remaining proposed changes will be automatically rejected upon ticket closure.',
-        );
-      }
-
-      const approvedText = `${approved} change${approved > 1 ? 's' : ''}`;
-      return `You approved ${approvedText}. Remaining change requests (${notApproved}) will be automatically rejected.`;
+      return generateConfirmationText(approved, notApproved);
     };
 
   const getClosingConfirmationExtraTextForOtherTypes = (): string => {
-    const hasApproveOption =
-      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
-      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION ||
+    const isDataChangeCategory =
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE;
+    const isDeduplicationCategory =
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION;
+    const isSystemFlaggingCategory =
       ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING;
+
+    const hasApproveOption =
+      isDataChangeCategory ||
+      isDeduplicationCategory ||
+      isSystemFlaggingCategory;
 
     if (!hasApproveOption) {
       return '';
     }
 
+    const isDeleteIndividualIssue =
+      ticket.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL;
+    const isAddIndividualIssue =
+      ticket.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL;
+
     const notApprovedDeleteIndividualChanges =
-      ticket.issueType?.toString() ===
-        GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
+      isDeleteIndividualIssue &&
       ticket.deleteIndividualTicketDetails?.approveStatus === false;
-
     const notApprovedAddIndividualChanges =
-      ticket.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL &&
+      isAddIndividualIssue &&
       ticket.addIndividualTicketDetails?.approveStatus === false;
-
     const notApprovedSystemFlaggingChanges =
-      ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING &&
+      isSystemFlaggingCategory &&
       ticket.systemFlaggingTicketDetails?.approveStatus === false;
 
     const noDuplicatesFound =
-      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+      isDeduplicationCategory &&
       !ticket.needsAdjudicationTicketDetails?.selectedIndividual &&
       !ticket.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion;
-
     const noDuplicatesFoundMultiple =
-      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+      isDeduplicationCategory &&
       ticket.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion &&
       !ticket.needsAdjudicationTicketDetails?.selectedIndividuals.length;
 
-    // added msg handling for
     let confirmationMessage = '';
     if (notApprovedDeleteIndividualChanges) {
       confirmationMessage = t(
@@ -187,11 +200,7 @@ export function GrievanceDetailsToolbar({
       confirmationMessage = t('You did not approve any changes.');
     } else if (notApprovedSystemFlaggingChanges) {
       confirmationMessage = '';
-    } else if (noDuplicatesFound) {
-      confirmationMessage = t(
-        'By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found',
-      );
-    } else if (noDuplicatesFoundMultiple) {
+    } else if (noDuplicatesFound || noDuplicatesFoundMultiple) {
       confirmationMessage = t(
         'By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found',
       );
@@ -218,8 +227,8 @@ export function GrievanceDetailsToolbar({
   const closingWarningText =
     ticket?.businessArea.postponeDeduplication === true
       ? t(
-        'This ticket will be closed without running the deduplication process.',
-      )
+          'This ticket will be closed without running the deduplication process.',
+        )
       : null;
 
   const changeState = async (status): Promise<void> => {
@@ -236,12 +245,14 @@ export function GrievanceDetailsToolbar({
   };
 
   const getClosingConfirmationText = (): string => {
-    if (ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION) {
-      return getClosingConfirmationExtraText();
-    }
+    const isDeduplicationCategory =
+      ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION;
+    const isSystemFlaggingCategory =
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING;
+
     let additionalContent = '';
     const notApprovedSystemFlaggingChanges =
-      ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING &&
+      isSystemFlaggingCategory &&
       ticket.systemFlaggingTicketDetails?.approveStatus === false;
 
     if (notApprovedSystemFlaggingChanges) {
@@ -252,15 +263,48 @@ export function GrievanceDetailsToolbar({
 
     const householdHasOneIndividual =
       ticket.household?.activeIndividualsCount === 1;
-    if (householdHasOneIndividual) {
-      additionalContent = t(
+    if (
+      (isDeduplicationCategory || isSystemFlaggingCategory) &&
+      householdHasOneIndividual
+    ) {
+      additionalContent += t(
         ' When you close this ticket, the household that this Individual is a member of will be deactivated.',
       );
     }
+
+    if (isDeduplicationCategory) {
+      return getClosingConfirmationExtraText() + additionalContent;
+    }
+
     return `${closingConfirmationText}${additionalContent}`;
   };
 
-  let closeButton = (
+  const isDeduplicationCategory =
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION;
+  const hasDuplicatedDocument =
+    ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument;
+  const isMultipleDuplicatesVersion =
+    ticket?.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion;
+  const selectedIndividual =
+    ticket?.needsAdjudicationTicketDetails?.selectedIndividual;
+  const selectedIndividualsLength =
+    ticket?.needsAdjudicationTicketDetails?.selectedIndividuals.length;
+
+  const shouldShowButtonDialog =
+    isDeduplicationCategory &&
+    hasDuplicatedDocument &&
+    ((isMultipleDuplicatesVersion && selectedIndividualsLength) ||
+      (!isMultipleDuplicatesVersion && selectedIndividual));
+
+  const closeButton = shouldShowButtonDialog ? (
+    <ButtonDialog
+      title={t('Duplicate Document Conflict')}
+      buttonText={t('Close Ticket')}
+      message={t(
+        'The individuals have matching document numbers. HOPE requires that document numbers are unique. Please resolve before closing the ticket.',
+      )}
+    />
+  ) : (
     <LoadingButton
       loading={loading}
       color="primary"
@@ -268,10 +312,9 @@ export function GrievanceDetailsToolbar({
       onClick={() =>
         confirm({
           title: t('Close ticket'),
-          extraContent:
-            ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION
-              ? closingConfirmationText
-              : getClosingConfirmationExtraText(),
+          extraContent: isDeduplicationCategory
+            ? closingConfirmationText
+            : getClosingConfirmationExtraText(),
           content: getClosingConfirmationText(),
           warningContent: closingWarningText,
           continueText: t('close ticket'),
@@ -289,39 +332,6 @@ export function GrievanceDetailsToolbar({
       {t('Close Ticket')}
     </LoadingButton>
   );
-  if (
-    ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
-    ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument &&
-    !ticket?.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion &&
-    !!ticket?.needsAdjudicationTicketDetails?.selectedIndividual
-  ) {
-    closeButton = (
-      <ButtonDialog
-        title={t('Duplicate Document Conflict')}
-        buttonText={t('Close Ticket')}
-        message={t(
-          'The individuals have matching document numbers. HOPE requires that document numbers are unique. Please resolve before closing the ticket.',
-        )}
-      />
-    );
-  }
-
-  if (
-    ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
-    ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument &&
-    ticket?.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion &&
-    !!ticket?.needsAdjudicationTicketDetails?.selectedIndividuals.length
-  ) {
-    closeButton = (
-      <ButtonDialog
-        title={t('Duplicate Document Conflict')}
-        buttonText={t('Close Ticket')}
-        message={t(
-          'The individuals have matching document numbers. HOPE requires that document numbers are unique. Please resolve before closing the ticket.',
-        )}
-      />
-    );
-  }
 
   const canCreateDataChange = (): boolean =>
     [
@@ -535,4 +545,4 @@ export function GrievanceDetailsToolbar({
       </Box>
     </PageHeader>
   );
-}
+};
