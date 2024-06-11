@@ -1,4 +1,4 @@
-FROM docker.io/bitnami/elasticsearch:7.10.0-debian-10-r0
+FROM elasticsearch:7.10.1
 
 RUN elasticsearch-plugin install --batch analysis-phonetic
 

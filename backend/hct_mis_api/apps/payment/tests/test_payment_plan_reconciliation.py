@@ -297,7 +297,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         cls.household_3, cls.individual_3 = cls.create_household_and_individual()
 
         cls.data_collecting_type = DataCollectingType.objects.create(
-            code="full", description="Full individual collected", active=True
+            code="full", description="Full individual collected", active=True, type="STANDARD"
         )
         cls.data_collecting_type.limit_to.add(cls.business_area)
 
@@ -715,7 +715,7 @@ class TestPaymentPlanReconciliation(APITestCase):
 
             # update xls, delivered_quantity != entitlement_quantity
             sheet.cell(
-                row=2, column=FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS.index("delivered_quantity") + 1
+                row=2, column=FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS.index("delivered_quantity")
             ).value = 666
             workbook.save(filled_file_path)
 
@@ -742,7 +742,7 @@ class TestPaymentPlanReconciliation(APITestCase):
 
             # update xls, delivered_quantity == entitlement_quantity
             sheet.cell(
-                row=2, column=FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS.index("delivered_quantity") + 1
+                row=2, column=FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS.index("delivered_quantity")
             ).value = payment.entitlement_quantity
             workbook.save(filled_file_path)
 

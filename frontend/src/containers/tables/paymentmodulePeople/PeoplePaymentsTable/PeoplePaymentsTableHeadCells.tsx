@@ -1,5 +1,6 @@
 import { AllPaymentsForTableQuery } from '@generated/graphql';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import { PERMISSIONS } from '../../../../config/permissions';
 
 export const headCells: HeadCell<
   AllPaymentsForTableQuery['allPayments']['edges'][number]['node']
@@ -53,6 +54,13 @@ export const headCells: HeadCell<
     label: 'Delivered Quantity',
     id: 'delivered_quantity',
     numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'FSP Auth Code',
+    id: 'fsp_auth_code',
+    numeric: false,
+    requiredPermission: PERMISSIONS.PM_VIEW_FSP_AUTH_CODE,
   },
   {
     disablePadding: false,

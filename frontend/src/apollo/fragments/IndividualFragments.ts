@@ -64,6 +64,18 @@ export const individualMinimal = gql`
         level
         pCode
       }
+      admin3 {
+        id
+        name
+        level
+        pCode
+      }
+      admin4 {
+        id
+        name
+        level
+        pCode
+      }
       programs {
         edges {
           node {

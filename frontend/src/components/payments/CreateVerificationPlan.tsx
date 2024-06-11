@@ -39,6 +39,7 @@ import { FormikEffect } from '@core/FormikEffect';
 import { LoadingButton } from '@core/LoadingButton';
 import { TabPanel } from '@core/TabPanel';
 import { Tabs, Tab } from '@core/Tabs';
+import { RapidProFlowsLoader } from './RapidProFlowsLoader';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -112,11 +113,13 @@ export interface Props {
   cashOrPaymentPlanId: string;
   canCreatePaymentVerificationPlan: boolean;
   version: number;
+  isPaymentPlan: boolean;
 }
 export const CreateVerificationPlan = ({
   cashOrPaymentPlanId,
   canCreatePaymentVerificationPlan,
   version,
+  isPaymentPlan,
 }: Props): React.ReactElement => {
   const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
@@ -125,8 +128,8 @@ export const CreateVerificationPlan = ({
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
   const [mutate, { loading }] = useCreatePaymentVerificationPlanMutation();
-  const { businessArea } = useBaseUrl();
-  const { isActiveProgram } = useProgramContext();
+  const { businessArea, baseUrl } = useBaseUrl();
+  const { isActiveProgram, isSocialDctType } = useProgramContext();
   const [formValues, setFormValues] = useState(initialValues);
 
   const [loadRapidProFlows, { data: rapidProFlows }] =
@@ -157,9 +160,8 @@ export const CreateVerificationPlan = ({
   useEffect(() => {
     if (open) {
       loadSampleSize();
-      loadRapidProFlows();
     }
-  }, [formValues, open, loadSampleSize, loadRapidProFlows]);
+  }, [formValues, open, loadSampleSize]);
 
   const submit = async (values): Promise<void> => {
     try {
@@ -198,11 +200,16 @@ export const CreateVerificationPlan = ({
     setFormValues(values);
   };
 
-  const getSampleSizePercentage = (): string =>
-    `(${getPercentage(
-      sampleSizesData?.sampleSize?.sampleSize,
-      sampleSizesData?.sampleSize?.paymentRecordCount,
-    )})`;
+  const getSampleSizePercentage = (): string => {
+    const sampleSize = sampleSizesData?.sampleSize?.sampleSize;
+    const paymentRecordCount = sampleSizesData?.sampleSize?.paymentRecordCount;
+
+    if (isNaN(sampleSize) || isNaN(paymentRecordCount)) {
+      return '';
+    }
+
+    return `(${getPercentage(sampleSize, paymentRecordCount)})`;
+  };
 
   const getTooltipTitle = (): string => {
     if (!canCreatePaymentVerificationPlan) {
@@ -229,12 +236,18 @@ export const CreateVerificationPlan = ({
               errorMessage: t(
                 'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
               ),
+              lastSuccessfulPage: `/${baseUrl}/payment-verification/${isPaymentPlan ? 'payment-plan' : 'cash-plan'}/${cashOrPaymentPlanId}`,
             },
           });
         }
 
         return (
           <Form>
+            <RapidProFlowsLoader
+              open={open}
+              verificationChannel={values.verificationChannel}
+              loadRapidProFlows={loadRapidProFlows}
+            />
             <AutoSubmitFormOnEnter />
             <FormikEffect
               values={values}
@@ -299,16 +312,25 @@ export const CreateVerificationPlan = ({
                         />
                       )}
                       <Box pt={3}>
-                        <Box
-                          pb={3}
-                          pt={3}
-                          fontSize={16}
-                          fontWeight="fontWeightBold"
-                        >
-                          Sample size: {sampleSizesData?.sampleSize?.sampleSize}{' '}
-                          out of{' '}
-                          {sampleSizesData?.sampleSize?.paymentRecordCount}{' '}
-                          {getSampleSizePercentage()}
+                        <Box pt={3}>
+                          <Box
+                            pb={3}
+                            pt={3}
+                            fontSize={16}
+                            fontWeight="fontWeightBold"
+                          >
+                            Sample size:
+                            {isNaN(sampleSizesData?.sampleSize?.sampleSize)
+                              ? ''
+                              : sampleSizesData?.sampleSize?.sampleSize}{' '}
+                            out of{' '}
+                            {isNaN(
+                              sampleSizesData?.sampleSize?.paymentRecordCount,
+                            )
+                              ? ''
+                              : sampleSizesData?.sampleSize?.paymentRecordCount}
+                            {getSampleSizePercentage()}
+                          </Box>
                         </Box>
                         <Box fontSize={12} color="#797979">
                           {t('This option is recommended for RapidPro')}
@@ -374,12 +396,14 @@ export const CreateVerificationPlan = ({
                           />
                           <Field
                             name="ageCheckbox"
-                            label={t('Age of HoH')}
+                            label={t(isSocialDctType ? 'Age' : 'Age of HoH')}
                             component={FormikCheckboxField}
                           />
                           <Field
                             name="sexCheckbox"
-                            label={t('Gender of HoH')}
+                            label={t(
+                              isSocialDctType ? 'Gender' : 'Gender of HoH',
+                            )}
                             component={FormikCheckboxField}
                           />
                         </Box>
@@ -396,40 +420,44 @@ export const CreateVerificationPlan = ({
                         <Grid container>
                           {values.ageCheckbox && (
                             <Grid item xs={12}>
-                              <Grid container>
-                                <Grid item xs={4}>
-                                  <Field
-                                    name="filterAgeMin"
-                                    label={t('Minimum Age')}
-                                    type="number"
-                                    color="primary"
-                                    component={FormikTextField}
-                                  />
+                              <Box mt={6}>
+                                <Grid container>
+                                  <Grid item xs={4}>
+                                    <Field
+                                      name="filterAgeMin"
+                                      label={t('Minimum Age')}
+                                      type="number"
+                                      color="primary"
+                                      component={FormikTextField}
+                                    />
+                                  </Grid>
+                                  <Grid item xs={4}>
+                                    <Field
+                                      name="filterAgeMax"
+                                      label={t('Maximum Age')}
+                                      type="number"
+                                      color="primary"
+                                      component={FormikTextField}
+                                    />
+                                  </Grid>
                                 </Grid>
-                                <Grid item xs={4}>
-                                  <Field
-                                    name="filterAgeMax"
-                                    label={t('Maximum Age')}
-                                    type="number"
-                                    color="primary"
-                                    component={FormikTextField}
-                                  />
-                                </Grid>
-                              </Grid>
+                              </Box>
                             </Grid>
                           )}
                           {values.sexCheckbox && (
                             <Grid item xs={5}>
-                              <Field
-                                name="filterSex"
-                                label={t('Gender')}
-                                color="primary"
-                                choices={[
-                                  { value: 'FEMALE', name: t('Female') },
-                                  { value: 'MALE', name: t('Male') },
-                                ]}
-                                component={FormikSelectField}
-                              />
+                              <Box mt={6}>
+                                <Field
+                                  name="filterSex"
+                                  label={t('Gender')}
+                                  color="primary"
+                                  choices={[
+                                    { value: 'FEMALE', name: t('Female') },
+                                    { value: 'MALE', name: t('Male') },
+                                  ]}
+                                  component={FormikSelectField}
+                                />
+                              </Box>
                             </Grid>
                           )}
                         </Grid>
@@ -449,6 +477,7 @@ export const CreateVerificationPlan = ({
                         name="verificationChannel"
                         label={t('Verification Channel')}
                         style={{ flexDirection: 'row' }}
+                        alignItems="center"
                         choices={[
                           { value: 'RAPIDPRO', name: 'RAPIDPRO' },
                           { value: 'XLSX', name: 'XLSX' },

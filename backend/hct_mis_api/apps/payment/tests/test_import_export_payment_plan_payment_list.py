@@ -16,11 +16,12 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, FileTemp
 from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.household.fixtures import BankAccountInfoFactory, create_household
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -315,6 +316,39 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
             file_list = zip_file.namelist()
             self.assertEqual(splits_count, len(file_list))
 
+    def test_payment_row_bank_information(self) -> None:
+        core_fields = [
+            "account_holder_name",
+            "bank_branch_name",
+            "bank_name",
+            "bank_account_number",
+        ]
+        export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
+        fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(core_fields=core_fields)
+        headers = export_service.prepare_headers(fsp_xlsx_template)
+        household, _ = create_household({"size": 1})
+        individual = household.primary_collector
+        BankAccountInfoFactory(
+            individual=individual,
+            account_holder_name="Kowalski",
+            bank_branch_name="BranchJPMorgan",
+            bank_name="JPMorgan",
+            bank_account_number="362277220020615398848112903",
+        )
+        payment = PaymentFactory(parent=self.payment_plan, household=household)
+
+        account_holder_name_index = headers.index("account_holder_name")
+        bank_branch_name_index = headers.index("bank_branch_name")
+        bank_name_index = headers.index("bank_name")
+        bank_account_number_index = headers.index("bank_account_number")
+
+        payment_row = export_service.get_payment_row(payment, fsp_xlsx_template)
+
+        self.assertEqual(payment_row[account_holder_name_index], "Kowalski")
+        self.assertEqual(payment_row[bank_branch_name_index], "BranchJPMorgan")
+        self.assertEqual(payment_row[bank_name_index], "JPMorgan")
+        self.assertEqual(payment_row[bank_account_number_index], "362277220020615398848112903")
+
     def test_export_per_fsp_if_no_fsp_assigned_to_payment_plan(self) -> None:
         self.payment_plan.status = PaymentPlan.Status.ACCEPTED
         self.payment_plan.save()
@@ -356,10 +390,15 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         fsp = delivery_mechanism_per_payment_plan.financial_service_provider
         _, ws_fsp = export_service.open_workbook(fsp.name)
         fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism_per_payment_plan.delivery_mechanism)
-        template_column_list = export_service.add_headers(ws_fsp, fsp_xlsx_template)
-        self.assertEqual(len(template_column_list), len(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS))
+        template_column_list = export_service.prepare_headers(fsp_xlsx_template)
+        self.assertEqual(
+            len(template_column_list),
+            len(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS) - 1,
+            template_column_list,
+        )  # - ind_id
         self.assertIn("household_id", template_column_list)
         self.assertIn("household_size", template_column_list)
+        self.assertNotIn("individual_id", template_column_list)
 
         # create Program for People export
         program_sw = ProgramFactory(data_collecting_type__type=DataCollectingType.Type.SOCIAL)
@@ -374,21 +413,29 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertTrue(self.payment_plan.program.is_social_worker_program)
 
         # add core fields
-        fsp_xlsx_template.core_fields = ["age", "zip_code"]
+        fsp_xlsx_template.core_fields = ["age", "zip_code", "household_unicef_id", "individual_unicef_id"]
+        fsp_xlsx_template.columns = fsp_xlsx_template.DEFAULT_COLUMNS
         fsp_xlsx_template.save()
         fsp_xlsx_template.refresh_from_db()
 
         _, ws_fsp = export_service.open_workbook(fsp.name)
         fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism_per_payment_plan.delivery_mechanism)
 
-        template_column_list = export_service.add_headers(ws_fsp, fsp_xlsx_template)
-        self.assertEqual(len(template_column_list), 27)  # DEFAULT_COLUMNS - hh_id and - hh_size + 2 core fields
+        template_column_list = export_service.prepare_headers(fsp_xlsx_template)
+        fsp_xlsx_template.refresh_from_db()
+        # remove for people 'household_unicef_id' core_field
+        self.assertEqual(len(template_column_list), 29)  # DEFAULT_COLUMNS -hh_id and -hh_size +ind_id +3 core fields
         self.assertNotIn("household_id", template_column_list)
         self.assertNotIn("household_size", template_column_list)
+        self.assertIn("individual_id", template_column_list)
         # check core fields
-        self.assertListEqual(fsp_xlsx_template.core_fields, ["age", "zip_code"])
+        self.assertListEqual(
+            fsp_xlsx_template.core_fields, ["age", "zip_code", "household_unicef_id", "individual_unicef_id"]
+        )
         self.assertIn("age", template_column_list)
         self.assertIn("zip_code", template_column_list)
+        self.assertNotIn("household_unicef_id", template_column_list)
+        self.assertIn("individual_unicef_id", template_column_list)
 
         # get_template error
         self.assertEqual(
