@@ -543,6 +543,8 @@ class RdiMergeTask:
     def _update_program_registration_id(self, household_id: UUID, program_registration_id: str, count: int = 0) -> None:
         try:
             with transaction.atomic():
-                Household.objects.filter(id=household_id).update(registration_id=f"{program_registration_id}#{count}")
+                Household.objects.filter(id=household_id).update(
+                    program_registration_id=f"{program_registration_id}#{count}"
+                )
         except IntegrityError:
             self._update_program_registration_id(household_id, program_registration_id, count=count + 1)
