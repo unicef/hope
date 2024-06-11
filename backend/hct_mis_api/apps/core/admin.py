@@ -739,9 +739,3 @@ class DataCollectingTypeAdmin(AdminFiltersMixin, admin.ModelAdmin):
         "recalculate_composition",
     )
     filter_horizontal = ("compatible_types", "limit_to")
-
-    # def save_model(self, request, obj, form, change):
-    #     # Set a flag to skip validation of type vs compatible types as they might be changed in the same form
-    #     obj.skip_type_validation = True
-    #     print("noww")
-    #     obj.save()

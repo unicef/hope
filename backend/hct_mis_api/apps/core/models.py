@@ -481,18 +481,17 @@ class DataCollectingType(TimeStampedModel):
         ordering = ("-weight",)
 
     def clean(self) -> None:
-        print("calleddd")
         super().clean()
-        print(getattr(self, "skip_type_validation", False))
-        if self.pk and self.type and self.compatible_types.exists() and not getattr(self, "skip_type_validation", False):
+        if (
+            self.pk
+            and self.type
+            and self.compatible_types.exists()
+            and not getattr(self, "skip_type_validation", False)
+        ):
             incompatible_dcts = self.compatible_types.exclude(Q(type=self.type) | Q(pk=self.pk))
             if incompatible_dcts.exists():
-                print(getattr(self, "skip_type_validation", False))
-                print(self.type)
-                print(incompatible_dcts)
                 raise ValidationError("Type of DCT cannot be changed if it has compatible DCTs of different type.")
 
-    def save(self, *args, **kwargs) -> None:
-        print("sejv")
+    def save(self, *args: Any, **kwargs: Any) -> None:
         self.full_clean()
         super().save(*args, **kwargs)
