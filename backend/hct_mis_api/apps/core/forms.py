@@ -68,10 +68,11 @@ class DataCollectingTypeForm(forms.ModelForm):
                 msg = "Type of DCT cannot be changed if it has compatible DCTs of different type"
                 self.add_error("type", forms.ValidationError(msg))
             msg = (
-                f"DCTs of different types cannot be compatible with each other."
+                f"DCTs of different types cannot be compatible with each other. "
                 f"Following DCTs are not of type {type}: {list(incompatible_dcts.values_list('label', flat=True))}"
             )
             self.add_error("compatible_types", forms.ValidationError(msg))
+
 
     def is_valid(self) -> bool:
         # Set a flag to skip validation of type vs compatible types as they might be changed in the same form
