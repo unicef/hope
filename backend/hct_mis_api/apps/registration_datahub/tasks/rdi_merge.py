@@ -486,7 +486,7 @@ class RdiMergeTask:
                             registration_data_import=obj_hct,
                         )
                         logger.info(
-                            "RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)} needs adjudication"
+                            f"RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)} needs adjudication"
                         )
 
                     # SANCTION LIST CHECK
