@@ -12,6 +12,7 @@ from _pytest.runner import CallInfo
 from flags.models import FlagState
 from page_object.admin_panel.admin_panel import AdminPanel
 from page_object.filters import Filters
+from page_object.payment_module.payment_module import PaymentModule
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from page_object.grievance.feedback import Feedback
@@ -255,6 +256,11 @@ def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> Individu
 @pytest.fixture
 def pageTargeting(request: FixtureRequest, browser: Chrome) -> Targeting:
     yield Targeting(browser)
+
+
+@pytest.fixture
+def pagePaymentModule(request: FixtureRequest, browser: Chrome) -> PaymentModule:
+    yield PaymentModule(browser)
 
 
 @pytest.fixture
