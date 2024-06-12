@@ -13,6 +13,7 @@ import {
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
 import { DropzoneField } from './DropzoneField';
 import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
@@ -58,6 +59,8 @@ export function CreateImportFromXlsxForm({
             name: values.name,
             screenBeneficiary: values.screenBeneficiary,
             businessAreaSlug: businessArea,
+            allowDeliveryMechanismsValidationErrors:
+              values.allowDeliveryMechanismsValidationErrors,
           },
         },
       });
@@ -75,6 +78,7 @@ export function CreateImportFromXlsxForm({
       name: '',
       screenBeneficiary: false,
       file: null,
+      allowDeliveryMechanismsValidationErrors: false,
     },
     validationSchema,
     onSubmit,
@@ -99,10 +103,17 @@ export function CreateImportFromXlsxForm({
     setSubmitForm(formik.submitForm);
   }, [formik.submitForm]);
   useEffect(() => {
-    if (xlsxImportData?.status === ImportDataStatus.Finished) {
+    if (
+      xlsxImportData?.status === ImportDataStatus.Finished ||
+      (xlsxImportData?.status ===
+        ImportDataStatus.DeliveryMechanismsValidationError &&
+        formik.values.allowDeliveryMechanismsValidationErrors)
+    ) {
       setSubmitDisabled(false);
+    } else {
+      setSubmitDisabled(true);
     }
-  }, [xlsxImportData]);
+  }, [xlsxImportData, formik.values.allowDeliveryMechanismsValidationErrors]);
 
   return (
     <FormikProvider value={formik}>
@@ -116,6 +127,20 @@ export function CreateImportFromXlsxForm({
           variant="outlined"
           component={FormikTextField}
         />
+      </Box>
+      <Box mt={2}>
+        {xlsxImportData?.status ===
+          ImportDataStatus.DeliveryMechanismsValidationError && (
+          <Box mt={2}>
+            <Field
+              name="allowDeliveryMechanismsValidationErrors"
+              fullWidth
+              label={t('Ignore Delivery Mechanisms Validation Errors and Create Grievance Tickets')}
+              variant="outlined"
+              component={FormikCheckboxField}
+            />
+          </Box>
+        )}
       </Box>
       <ScreenBeneficiaryField />
       {saveXlsxLoading ? (

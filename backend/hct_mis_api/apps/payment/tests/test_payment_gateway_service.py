@@ -17,6 +17,7 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualRoleInHouseholdFactory,
 )
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
@@ -25,7 +26,6 @@ from hct_mis_api.apps.payment.fixtures import (
 )
 from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
-    GenericPayment,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
@@ -59,7 +59,7 @@ class TestPaymentGatewayService(APITestCase):
         cls.pg_fsp = FinancialServiceProviderFactory(
             name="Western Union",
             delivery_mechanisms=[
-                GenericPayment.DELIVERY_TYPE_CASH_OVER_THE_COUNTER,
+                DeliveryMechanismChoices.DELIVERY_TYPE_CASH_OVER_THE_COUNTER,
             ],
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             payment_gateway_id="123",
@@ -67,7 +67,7 @@ class TestPaymentGatewayService(APITestCase):
         cls.dm = DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=cls.pp,
             financial_service_provider=cls.pg_fsp,
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH_OVER_THE_COUNTER,
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH_OVER_THE_COUNTER,
             sent_to_payment_gateway=True,
         )
         cls.payments = []

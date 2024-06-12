@@ -409,27 +409,33 @@ export function camelToUnderscore(key): string {
   return key.replace(/([A-Z])/g, '_$1').toLowerCase();
 }
 
+//eslint-disable-next-line @typescript-eslint/no-use-before-define
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function camelizeArrayObjects(arr: any[]): { [key: string]: any }[] {
+  if (!Array.isArray(arr)) {
+    return arr;
+  }
+  //eslint-disable-next-line @typescript-eslint/no-use-before-define
+  return arr.map(camelizeObjectKeys);
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function camelizeObjectKeys(obj): { [key: string]: any } {
   if (!obj) {
     return obj;
   }
   return Object.keys(obj).reduce((acc, current) => {
-    if (typeof obj[current] === 'object') {
+    if (obj[current] == null) {
+      acc[camelCase(current)] = obj[current];
+    } else if (Array.isArray(obj[current])) {
+      acc[camelCase(current)] = camelizeArrayObjects(obj[current]);
+    } else if (typeof obj[current] === 'object') {
       acc[camelToUnderscore(current)] = camelizeObjectKeys(obj[current]);
     } else {
       acc[camelCase(current)] = obj[current];
     }
     return acc;
   }, {});
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function camelizeArrayObjects(arr): { [key: string]: any }[] {
-  if (!arr) {
-    return arr;
-  }
-  return arr.map(camelizeObjectKeys);
 }
 
 export function columnToOrderBy(
