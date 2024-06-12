@@ -149,6 +149,7 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
               paymentPlan.canCreatePaymentVerificationPlan
             }
             version={paymentPlan.version}
+            isPaymentPlan={true}
           />
         )}
 

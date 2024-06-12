@@ -1,6 +1,5 @@
 import { MockedProvider } from '@apollo/react-testing';
 import { act } from '@testing-library/react';
-import * as React from 'react';
 import wait from 'waait';
 import { fakeApolloAllPaymentsForTable } from '../../../../../fixtures/payments/fakeApolloAllPaymentsForTable';
 import { fakeApolloAllPaymentPlansForTable } from '../../../../../fixtures/payments/fakeApolloAllPaymentPlansForTable';
@@ -20,7 +19,10 @@ describe('containers/tables/paymentmodule/PaymentsTable', () => {
           canViewDetails={false}
           businessArea="afghanistan"
           paymentPlan={paymentPlan}
-          permissions={[PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION]}
+          permissions={[
+            PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION,
+            PERMISSIONS.PM_VIEW_FSP_AUTH_CODE,
+          ]}
         />
       </MockedProvider>,
     );
@@ -31,15 +33,15 @@ describe('containers/tables/paymentmodule/PaymentsTable', () => {
 
   it('should render loading', async () => {
     const { container } = render(
-      <MockedProvider
-        addTypename={false}
-        mocks={fakeApolloAllPaymentsForTable}
-      >
+      <MockedProvider addTypename={false} mocks={fakeApolloAllPaymentsForTable}>
         <PaymentsTable
           canViewDetails={false}
           businessArea="afghanistan"
           paymentPlan={paymentPlan}
-          permissions={[PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION]}
+          permissions={[
+            PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION,
+            PERMISSIONS.PM_VIEW_FSP_AUTH_CODE,
+          ]}
         />
       </MockedProvider>,
     );

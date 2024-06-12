@@ -66,6 +66,7 @@ class TestDrawer:
         pageProgrammeManagement.selectGlobalProgramFilter("Worker Program").click()
         assert "Worker Program" in pageProgrammeDetails.getHeaderTitle().text
         expected_menu_items = [
+            "Country Dashboard",
             "Registration Data Import",
             "People",
             "Program Details",
@@ -89,6 +90,7 @@ class TestDrawer:
         pageProgrammeManagement.selectGlobalProgramFilter("Normal Program").click()
         assert "Normal Program" in pageProgrammeDetails.getHeaderTitle().text
         expected_menu_items = [
+            "Country Dashboard",
             "Registration Data Import",
             "Program Population",
             "Program Details",
@@ -120,7 +122,6 @@ class TestDrawer:
         actual_menu_items = pageProgrammeManagement.getDrawerItems().text.split("\n")
         assert expected_menu_items == actual_menu_items
 
-    @pytest.mark.skip(reason="Unstable test")
     def test_inactive_draft_subheader(
         self,
         draft_program: Program,
@@ -132,6 +133,7 @@ class TestDrawer:
         draft_program_name = draft_program.name
         active_program_name = active_program.name
         finished_program_name = finished_program.name
+
         pageProgrammeManagement.selectGlobalProgramFilter(draft_program_name).click()
         assert draft_program_name in pageProgrammeDetails.getHeaderTitle().text
         assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "program inactive"
@@ -141,6 +143,7 @@ class TestDrawer:
         with pytest.raises(TimeoutException):
             pageProgrammeDetails.getDrawerInactiveSubheader(timeout=0.05)
 
+        # first have to search Finished program because of default filtering
         pageProgrammeManagement.selectGlobalProgramFilter(finished_program_name).click()
         assert finished_program_name in pageProgrammeDetails.getHeaderTitle().text
         assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "program inactive"

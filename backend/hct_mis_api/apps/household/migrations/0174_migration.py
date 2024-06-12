@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
             model_name='household',
             name='registration_id',
             field=django.contrib.postgres.fields.citext.CICharField(blank=True, db_index=True, max_length=100,
-                                                                    null=True, unique=True,
+                                                                    null=True,
                                                                     verbose_name='Beneficiary Program Registration Id'),
         ),
         migrations.AlterField(

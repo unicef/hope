@@ -559,6 +559,13 @@ class Household(
     kobo_submission_uuid = models.UUIDField(null=True, default=None)
     kobo_submission_time = models.DateTimeField(max_length=150, blank=True, null=True)
     enumerator_rec_id = models.PositiveIntegerField(blank=True, null=True)
+    mis_unicef_id = models.CharField(max_length=255, null=True)
+    flex_registrations_record = models.ForeignKey(
+        "registration_data.Record",
+        related_name="households",
+        on_delete=models.SET_NULL,
+        null=True,
+    )
 
     class Meta:
         verbose_name = "Household"
@@ -1050,6 +1057,7 @@ class Individual(
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
     rdi_merge_status = models.CharField(choices=MERGE_CHOICES, default=PENDING, max_length=10)
+    mis_unicef_id = models.CharField(max_length=255, null=True)
 
     vector_column = SearchVectorField(null=True)
 
@@ -1121,6 +1129,16 @@ class Individual(
     def bank_account_number(self) -> str:
         bank_account_info = self.bank_account_info.first()
         return bank_account_info.bank_account_number if bank_account_info else None
+
+    @property
+    def account_holder_name(self) -> str:
+        bank_account_info = self.bank_account_info.first()
+        return bank_account_info.account_holder_name if bank_account_info else None
+
+    @property
+    def bank_branch_name(self) -> str:
+        bank_account_info = self.bank_account_info.first()
+        return bank_account_info.bank_branch_name if bank_account_info else None
 
     def withdraw(self) -> None:
         self.documents.update(status=Document.STATUS_INVALID)

@@ -100,6 +100,7 @@ class HouseholdFilter(FilterSet):
             "head_of_household__full_name": ["exact", "startswith"],
             "size": ["range", "lte", "gte"],
             "admin_area": ["exact"],
+            "admin1": ["exact"],
             "admin2": ["exact"],
             "target_populations": ["exact"],
             "residence_status": ["exact"],
@@ -271,7 +272,8 @@ class IndividualFilter(FilterSet):
     document_type = CharFilter(method="document_type_filter")
     document_number = CharFilter(method="document_number_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
-    admin2 = GlobalIDMultipleChoiceFilter(field_name="household__admin_area")
+    admin1 = GlobalIDMultipleChoiceFilter(field_name="household__admin1")
+    admin2 = GlobalIDMultipleChoiceFilter(field_name="household__admin2")
     status = MultipleChoiceFilter(choices=INDIVIDUAL_STATUS_CHOICES, method="status_filter")
     excluded_id = CharFilter(method="filter_excluded_id")
     withdrawn = BooleanFilter(field_name="withdrawn")

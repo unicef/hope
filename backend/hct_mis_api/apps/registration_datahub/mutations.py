@@ -35,12 +35,14 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
     pull_kobo_submissions_task,
     rdi_deduplication_task,
     registration_kobo_import_task,
+    registration_program_population_import_task,
     registration_xlsx_import_task,
     validate_xlsx_import_task,
 )
 from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.inputs import (
     RegistrationKoboImportMutationInput,
+    RegistrationProgramPopulationImportMutationInput,
     RegistrationXlsxImportMutationInput,
 )
 from hct_mis_api.apps.registration_datahub.schema import (
@@ -106,6 +108,58 @@ def create_registration_data_import_objects(
         created_obj_datahub,
         created_obj_hct,
         import_data_obj,
+        business_area,
+    )
+
+
+@transaction.atomic(using="default")
+@transaction.atomic(using="registration_datahub")
+def create_registration_data_import_for_import_program_population(
+    registration_data_import_data: Dict,
+    user: "User",
+    import_to_program_id: str,
+) -> Tuple[RegistrationDataImportDatahub, RegistrationDataImport, BusinessArea]:
+    business_area = BusinessArea.objects.get(slug=registration_data_import_data.pop("business_area_slug"))
+    pull_pictures = registration_data_import_data.pop("pull_pictures", True)
+    screen_beneficiary = registration_data_import_data.pop("screen_beneficiary", False)
+    import_from_program_id = registration_data_import_data.pop("import_from_program_id", None)
+    created_obj_datahub = RegistrationDataImportDatahub.objects.create(
+        business_area_slug=business_area.slug,
+        **registration_data_import_data,
+    )
+    households = Household.objects.filter(
+        program_id=import_from_program_id,
+        withdrawn=False,
+    ).exclude(household_collection__households__program=import_to_program_id)
+    individuals = Individual.objects.filter(
+        program_id=import_from_program_id,
+        withdrawn=False,
+        duplicate=False,
+    ).exclude(individual_collection__individuals__program=import_to_program_id)
+    created_obj_hct = RegistrationDataImport(
+        status=RegistrationDataImport.IMPORTING,
+        imported_by=user,
+        data_source=RegistrationDataImport.PROGRAM_POPULATION,
+        number_of_individuals=individuals.count(),
+        number_of_households=households.count(),
+        business_area=business_area,
+        pull_pictures=pull_pictures,
+        screen_beneficiary=screen_beneficiary,
+        program_id=import_to_program_id,
+        **registration_data_import_data,
+    )
+    created_obj_hct.full_clean()
+    created_obj_hct.save()
+
+    created_obj_datahub.hct_id = created_obj_hct.id
+    created_obj_datahub.save()
+
+    created_obj_hct.datahub_id = created_obj_datahub.id
+    created_obj_hct.save()
+
+    return (
+        created_obj_datahub,
+        created_obj_hct,
         business_area,
     )
 
@@ -176,6 +230,68 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
         )
 
         return RegistrationXlsxImportMutation(registration_data_import=created_obj_hct)
+
+
+class RegistrationProgramPopulationImportMutation(BaseValidator, PermissionMutation, ValidationErrorMutationMixin):
+    registration_data_import = graphene.Field(RegistrationDataImportNode)
+
+    class Arguments:
+        registration_data_import_data = RegistrationProgramPopulationImportMutationInput(required=True)
+
+    @classmethod
+    @transaction.atomic(using="default")
+    @transaction.atomic(using="registration_datahub")
+    @is_authenticated
+    def processed_mutate(
+        cls, root: Any, info: Any, registration_data_import_data: Dict
+    ) -> "RegistrationProgramPopulationImportMutation":
+        import_to_program_id: str = decode_id_string_required(info.context.headers.get("Program"))
+        program = Program.objects.get(id=import_to_program_id)
+        if program.status == Program.FINISHED:
+            raise ValidationError("In order to proceed this action, program status must not be finished")
+
+        import_from_program_id = decode_id_string_required(registration_data_import_data["import_from_program_id"])
+        registration_data_import_data["import_from_program_id"] = import_from_program_id
+        (
+            created_obj_datahub,
+            created_obj_hct,
+            business_area,
+        ) = create_registration_data_import_for_import_program_population(
+            registration_data_import_data, info.context.user, import_to_program_id
+        )
+
+        cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
+
+        if (
+            created_obj_hct.should_check_against_sanction_list()
+            and not business_area.should_check_against_sanction_list()
+        ):
+            raise ValidationError("Cannot check against sanction list")
+
+        if created_obj_hct.number_of_households == 0 and created_obj_hct.number_of_individuals == 0:
+            raise ValidationError("This action would result in importing 0 households and 0 individuals.")
+        log_create(
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            import_to_program_id,
+            None,
+            created_obj_hct,
+        )
+
+        created_obj_hct.status = RegistrationDataImport.IMPORT_SCHEDULED
+        created_obj_hct.save(update_fields=["status"])
+
+        transaction.on_commit(
+            lambda: registration_program_population_import_task.delay(
+                registration_data_import_id=str(created_obj_datahub.id),
+                business_area_id=str(business_area.id),
+                import_from_program_id=str(import_from_program_id),
+                import_to_program_id=str(import_to_program_id),
+            )
+        )
+
+        return RegistrationProgramPopulationImportMutation(registration_data_import=created_obj_hct)
 
 
 class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
@@ -494,6 +610,7 @@ class Mutations(graphene.ObjectType):
     upload_import_data_xlsx_file_async = UploadImportDataXLSXFileAsync.Field()
     delete_registration_data_import = DeleteRegistrationDataImport.Field()
     registration_xlsx_import = RegistrationXlsxImportMutation.Field()
+    registration_program_population_import = RegistrationProgramPopulationImportMutation.Field()
     registration_kobo_import = RegistrationKoboImportMutation.Field()
     save_kobo_import_data_async = SaveKoboProjectImportDataAsync.Field()
     merge_registration_data_import = MergeRegistrationDataImportMutation.Field()

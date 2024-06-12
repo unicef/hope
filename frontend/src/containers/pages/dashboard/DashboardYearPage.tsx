@@ -9,7 +9,6 @@ import {
   useGlobalAreaChartsLazyQuery,
 } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
-import { TabPanel } from '@components/core/TabPanel';
 import { DashboardPaper } from '@components/dashboard/DashboardPaper';
 import { PaymentsChart } from '@components/dashboard/charts/PaymentsChart';
 import { ProgrammesBySector } from '@components/dashboard/charts/ProgrammesBySector';
@@ -24,6 +23,9 @@ import { TotalNumberOfChildrenReachedSection } from '@components/dashboard/secti
 import { TotalNumberOfHouseholdsReachedSection } from '@components/dashboard/sections/TotalNumberOfHouseholdsReachedSection/TotalNumberOfHouseholdsReachedSection';
 import { TotalNumberOfIndividualsReachedSection } from '@components/dashboard/sections/TotalNumberOfIndividualsReachedSection/TotalNumberOfIndividualsReachedSection';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useProgramContext } from '../../../programContext';
+import { TotalNumberOfPeopleReachedSection } from '@components/dashboard/sections/TotalNumberOfPeopleReachedSection';
+import { TotalAmountTransferredSectionByAdminAreaForPeopleSection } from '@components/dashboard/sections/TotalAmountTransferredByAdminAreaForPeopleSection';
 
 const PaddingContainer = styled.div`
   padding: 20px;
@@ -58,17 +60,16 @@ const CardTextLight = styled.div<CardTextLightProps>`
 
 interface DashboardYearPageProps {
   year: string;
-  selectedTab: number;
   filter;
 }
 
 export const DashboardYearPage = ({
   year,
-  selectedTab,
   filter,
 }: DashboardYearPageProps): React.ReactElement => {
   const { t } = useTranslation();
   const { businessArea, isGlobal, isAllPrograms, programId } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
 
   const variables: AllChartsQueryVariables = {
     year: parseInt(year, 10),
@@ -98,10 +99,9 @@ export const DashboardYearPage = ({
 
   useEffect(() => {
     if (isGlobal) {
-      loadGlobal();
+      void loadGlobal();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [businessArea]);
+  }, [isGlobal, loadGlobal]);
 
   if (isGlobal) {
     if (loading || globalLoading) return <LoadingComponent />;
@@ -112,108 +112,137 @@ export const DashboardYearPage = ({
   }
 
   return (
-    <TabPanel value={selectedTab} index={selectedTab}>
-      <PaddingContainer>
-        <Grid container spacing={3}>
-          <Grid item xs={8}>
+    <PaddingContainer>
+      <Grid container spacing={3}>
+        <Grid item xs={8}>
+          <Box mb={6}>
+            <TotalAmountTransferredSection
+              data={data.sectionTotalTransferred}
+            />
+          </Box>
+          {isGlobal && (
             <Box mb={6}>
-              <TotalAmountTransferredSection
-                data={data.sectionTotalTransferred}
+              <TotalAmountTransferredByCountrySection
+                data={globalData?.chartTotalTransferredCashByCountry}
               />
             </Box>
-            {isGlobal && (
-              <Box mb={6}>
-                <TotalAmountTransferredByCountrySection
-                  data={globalData?.chartTotalTransferredCashByCountry}
-                />
-              </Box>
-            )}
-            {isAllPrograms && (
-              <Box mb={6}>
-                <DashboardPaper title={t('Number of Programmes by Sector')}>
-                  <ChartWrapper
-                    numberOfProgrammes={
-                      data.chartProgrammesBySector?.labels.length || 0
-                    }
-                  >
-                    <ProgrammesBySector data={data.chartProgrammesBySector} />
-                  </ChartWrapper>
-                </DashboardPaper>
-              </Box>
-            )}
+          )}
+          {isAllPrograms && (
             <Box mb={6}>
-              <DashboardPaper title={t('Total Transferred by Month')}>
-                <TotalTransferredByMonth
-                  data={data.chartTotalTransferredByMonth}
-                />
+              <DashboardPaper title={t('Number of Programmes by Sector')}>
+                <ChartWrapper
+                  numberOfProgrammes={
+                    data.chartProgrammesBySector?.labels.length || 0
+                  }
+                >
+                  <ProgrammesBySector data={data.chartProgrammesBySector} />
+                </ChartWrapper>
               </DashboardPaper>
             </Box>
-            <Box mb={6}>
-              <TotalAmountTransferredSectionByAdminAreaSection
-                year={year}
-                filter={filter}
-                businessArea={businessArea}
+          )}
+          <Box mb={6}>
+            <DashboardPaper title={t('Total Transferred by Month')}>
+              <TotalTransferredByMonth
+                data={data.chartTotalTransferredByMonth}
               />
-            </Box>
-            <Box mb={6}>
-              <PaymentVerificationSection
-                data={data.chartPaymentVerification}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={4}>
-            <PaddingLeftContainer>
-              <Grid container spacing={6}>
+            </DashboardPaper>
+          </Box>
+          {!isGlobal && (
+            <>
+              {(isAllPrograms || !isSocialDctType) && (
+                <Box mb={6}>
+                  <TotalAmountTransferredSectionByAdminAreaSection
+                    year={year}
+                    filter={filter}
+                  />
+                </Box>
+              )}
+              {(isAllPrograms || isSocialDctType) && (
+                <Box mb={6}>
+                  <TotalAmountTransferredSectionByAdminAreaForPeopleSection
+                    year={year}
+                    filter={filter}
+                  />
+                </Box>
+              )}
+            </>
+          )}
+          <Box mb={6}>
+            <PaymentVerificationSection
+              data={data.chartPaymentVerification}
+              isSocialDctType={isSocialDctType}
+            />
+          </Box>
+        </Grid>
+        <Grid item xs={4}>
+          <PaddingLeftContainer>
+            <Grid container spacing={6}>
+              {(isAllPrograms || !isSocialDctType) && (
+                <>
+                  <Grid item xs={12}>
+                    <TotalNumberOfHouseholdsReachedSection
+                      data={data.sectionHouseholdsReached}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TotalNumberOfIndividualsReachedSection
+                      data={data.sectionIndividualsReached}
+                      chartDataIndividuals={
+                        data.chartIndividualsReachedByAgeAndGender
+                      }
+                      chartDataIndividualsDisability={
+                        data.chartIndividualsWithDisabilityReachedByAge
+                      }
+                    />
+                  </Grid>
+                </>
+              )}
+              {(isAllPrograms || isSocialDctType) && (
                 <Grid item xs={12}>
-                  <TotalNumberOfHouseholdsReachedSection
-                    data={data.sectionHouseholdsReached}
+                  <TotalNumberOfPeopleReachedSection
+                    data={data.sectionPeopleReached}
+                    chartDataPeople={data.chartPeopleReachedByAgeAndGender}
+                    chartDataPeopleDisability={
+                      data.chartPeopleWithDisabilityReachedByAge
+                    }
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <TotalNumberOfIndividualsReachedSection
-                    data={data.sectionIndividualsReached}
-                    chartDataIndividuals={
-                      data.chartIndividualsReachedByAgeAndGender
-                    }
-                    chartDataIndividualsDisability={
-                      data.chartIndividualsWithDisabilityReachedByAge
-                    }
-                  />
-                </Grid>
+              )}
+              {data.sectionChildReached && (
                 <Grid item xs={12}>
                   <TotalNumberOfChildrenReachedSection
                     data={data.sectionChildReached}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <Box mb={6}>
-                    <DashboardPaper
-                      title={t('Volume by Delivery Mechanism in USD')}
-                      noMarginTop
-                      extraPaddingTitle={false}
-                    >
-                      <CardTextLight large>
-                        {t('Delivery type in CashAssist')}
-                      </CardTextLight>
-                      <VolumeByDeliveryMechanism
-                        data={data.chartVolumeByDeliveryMechanism}
-                      />
-                    </DashboardPaper>
-                  </Box>
-                  <Box mb={6}>
-                    <GrievancesSection data={data.chartGrievances} />
-                  </Box>
-                  <Box mb={6}>
-                    <DashboardPaper title="Payments">
-                      <PaymentsChart data={data.chartPayment} />
-                    </DashboardPaper>
-                  </Box>
-                </Grid>
+              )}
+              <Grid item xs={12}>
+                <Box mb={6}>
+                  <DashboardPaper
+                    title={t('Volume by Delivery Mechanism in USD')}
+                    noMarginTop
+                    extraPaddingTitle={false}
+                  >
+                    <CardTextLight large>
+                      {t('Delivery type in CashAssist')}
+                    </CardTextLight>
+                    <VolumeByDeliveryMechanism
+                      data={data.chartVolumeByDeliveryMechanism}
+                    />
+                  </DashboardPaper>
+                </Box>
+                <Box mb={6}>
+                  <GrievancesSection data={data.chartGrievances} />
+                </Box>
+                <Box mb={6}>
+                  <DashboardPaper title="Payments">
+                    <PaymentsChart data={data.chartPayment} />
+                  </DashboardPaper>
+                </Box>
               </Grid>
-            </PaddingLeftContainer>
-          </Grid>
+            </Grid>
+          </PaddingLeftContainer>
         </Grid>
-      </PaddingContainer>
-    </TabPanel>
+      </Grid>
+    </PaddingContainer>
   );
 };

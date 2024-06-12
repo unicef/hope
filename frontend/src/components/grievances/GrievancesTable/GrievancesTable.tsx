@@ -67,6 +67,7 @@ export function GrievancesTable({
     issueType: filter.issueType,
     assignedTo: filter.assignedTo,
     createdBy: filter.createdBy,
+    admin1: filter.admin1,
     admin2: filter.admin2,
     registrationDataImport: filter.registrationDataImport,
     cashPlan: filter.cashPlan,

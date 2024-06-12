@@ -39,6 +39,7 @@ import { Tabs, Tab } from '@core/Tabs';
 import { FormikEffect } from '@core/FormikEffect';
 import { LoadingButton } from '@core/LoadingButton';
 import { TabPanel } from '@core/TabPanel';
+import { RapidProFlowsLoader } from './RapidProFlowsLoader';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -51,51 +52,58 @@ const TabsContainer = styled.div`
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareVariables(
-  paymentVerificationPlanId,
-  selectedTab,
+  cashOrPaymentPlanId: string,
+  paymentVerificationPlanId: string | undefined,
+  selectedTab: number,
   values,
-  businessArea,
-  cashOrPaymentPlanId = null,
+  businessArea: string,
+  shouldUseCashOrPaymentPlanId: boolean = false,
 ) {
+  const getFullListArguments = (): { excludedAdminAreas: string[] } | null => {
+    return selectedTab === 0
+      ? { excludedAdminAreas: values.excludedAdminAreasFull || [] }
+      : null;
+  };
+
+  const getRapidProArguments = (): { flowId: string } | null => {
+    return values.verificationChannel === 'RAPIDPRO'
+      ? { flowId: values.rapidProFlow || '' }
+      : null;
+  };
+
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const getRandomSamplingArguments = () => {
+    if (selectedTab !== 1) return null;
+
+    const age = values.ageCheckbox
+      ? {
+          min: values.filterAgeMin || null,
+          max: values.filterAgeMax || null,
+        }
+      : null;
+
+    return {
+      confidenceInterval: values.confidenceInterval! * 0.01,
+      marginOfError: values.marginOfError! * 0.01,
+      excludedAdminAreas: values.adminCheckbox
+        ? values.excludedAdminAreasRandom || []
+        : [],
+      age,
+      sex: values.sexCheckbox ? values.filterSex || null : null,
+    };
+  };
+
   return {
     input: {
-      ...(cashOrPaymentPlanId && {
-        cashOrPaymentPlanId,
+      ...(shouldUseCashOrPaymentPlanId && {
+        cashOrPaymentPlanId: cashOrPaymentPlanId,
       }),
-      ...(paymentVerificationPlanId && {
-        paymentVerificationPlanId,
-      }),
+      ...(paymentVerificationPlanId && { paymentVerificationPlanId }),
       sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
-      fullListArguments:
-        selectedTab === 0
-          ? {
-              excludedAdminAreas: values.excludedAdminAreasFull || [],
-            }
-          : null,
-      verificationChannel: values.verificationChannel,
-      rapidProArguments:
-        values.verificationChannel === 'RAPIDPRO'
-          ? {
-              flowId: values.rapidProFlow,
-            }
-          : null,
-      randomSamplingArguments:
-        selectedTab === 1
-          ? {
-              confidenceInterval: values.confidenceInterval * 0.01,
-              marginOfError: values.marginOfError * 0.01,
-              excludedAdminAreas: values.adminCheckbox
-                ? values.excludedAdminAreasRandom
-                : [],
-              age: values.ageCheckbox
-                ? {
-                    min: values.filterAgeMin || null,
-                    max: values.filterAgeMax || null,
-                  }
-                : null,
-              sex: values.sexCheckbox ? values.filterSex : null,
-            }
-          : null,
+      fullListArguments: getFullListArguments(),
+      verificationChannel: values.verificationChannel || '',
+      rapidProArguments: getRapidProArguments(),
+      randomSamplingArguments: getRandomSamplingArguments(),
       businessAreaSlug: businessArea,
     },
   };
@@ -104,19 +112,21 @@ function prepareVariables(
 export interface Props {
   paymentVerificationPlanNode: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
   cashOrPaymentPlanId: string;
+  isPaymentPlan: boolean;
 }
 
-export function EditVerificationPlan({
+export const EditVerificationPlan = ({
   paymentVerificationPlanNode,
   cashOrPaymentPlanId,
-}: Props): React.ReactElement {
+  isPaymentPlan,
+}: Props): React.ReactElement => {
   const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
   const [mutate, { loading }] = useEditPaymentVerificationPlanMutation();
-  const { businessArea } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
   const navigate = useNavigate();
   useEffect(() => {
@@ -138,8 +148,7 @@ export function EditVerificationPlan({
       paymentVerificationPlanNode.excludedAdminAreasFilter || [],
     excludedAdminAreasRandom:
       paymentVerificationPlanNode.excludedAdminAreasFilter || [],
-    verificationChannel:
-      paymentVerificationPlanNode.verificationChannel || null,
+    verificationChannel: paymentVerificationPlanNode.verificationChannel || '',
     rapidProFlow: paymentVerificationPlanNode.rapidProFlowId || '',
     adminCheckbox:
       paymentVerificationPlanNode.excludedAdminAreasFilter?.length !== 0,
@@ -174,6 +183,7 @@ export function EditVerificationPlan({
       selectedTab,
       formValues,
       businessArea,
+      true,
     ),
     fetchPolicy: 'network-only',
   });
@@ -181,17 +191,16 @@ export function EditVerificationPlan({
   useEffect(() => {
     if (open) {
       loadSampleSize();
-      loadRapidProFlows();
     }
-  }, [formValues, open, loadSampleSize, loadRapidProFlows]);
+  }, [open, loadSampleSize, loadRapidProFlows, selectedTab]);
 
-  const submit = async (values): Promise<void> => {
+  const submit = async (mutationVariables): Promise<void> => {
     const { errors } = await mutate({
       variables: prepareVariables(
-        null,
+        cashOrPaymentPlanId,
         paymentVerificationPlanNode.id,
         selectedTab,
-        values,
+        mutationVariables,
         businessArea,
       ),
       refetchQueries,
@@ -212,25 +221,32 @@ export function EditVerificationPlan({
       }))
     : [];
 
-  const handleFormChange = (values): void => {
-    setFormValues(values);
+  const handleFormChange = (fValues): void => {
+    setFormValues(fValues);
   };
 
   const getSampleSizePercentage = (): string => {
-    if (sampleSizesData?.sampleSize?.paymentRecordCount !== 0) {
-      return ` (${
-        (sampleSizesData?.sampleSize?.sampleSize /
-          sampleSizesData?.sampleSize?.paymentRecordCount) *
-        100
-      })%`;
+    const sampleSize = sampleSizesData?.sampleSize?.sampleSize;
+    const paymentRecordCount = sampleSizesData?.sampleSize?.paymentRecordCount;
+
+    if (
+      !sampleSize ||
+      !paymentRecordCount ||
+      isNaN(sampleSize) ||
+      isNaN(paymentRecordCount)
+    ) {
+      return '';
     }
-    return ' (0%)';
+
+    return ` (${(sampleSize / paymentRecordCount) * 100}%)`;
   };
+
   return (
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values, setValues }) => {
         // Redirect to error page if no flows available
         if (
+          rapidProFlows &&
           !rapidProFlows?.allRapidProFlows?.length &&
           values.verificationChannel === 'RAPIDPRO'
         ) {
@@ -239,11 +255,18 @@ export function EditVerificationPlan({
               errorMessage: t(
                 'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
               ),
+
+              lastSuccessfulPage: `/${baseUrl}/payment-verification/${isPaymentPlan ? 'payment-plan' : 'cash-plan'}/${cashOrPaymentPlanId}`,
             },
           });
         }
         return (
           <Form>
+            <RapidProFlowsLoader
+              open={open}
+              verificationChannel={values.verificationChannel}
+              loadRapidProFlows={loadRapidProFlows}
+            />
             <AutoSubmitFormOnEnter />
             <FormikEffect
               values={values}
@@ -308,9 +331,16 @@ export function EditVerificationPlan({
                           fontSize={16}
                           fontWeight="fontWeightBold"
                         >
-                          Sample size: {sampleSizesData?.sampleSize?.sampleSize}{' '}
+                          Sample size:{' '}
+                          {isNaN(sampleSizesData?.sampleSize?.sampleSize)
+                            ? ' 0'
+                            : ` ${sampleSizesData?.sampleSize?.sampleSize}`}{' '}
                           out of{' '}
-                          {sampleSizesData?.sampleSize?.paymentRecordCount}
+                          {isNaN(
+                            sampleSizesData?.sampleSize?.paymentRecordCount,
+                          )
+                            ? ' 0'
+                            : ` ${sampleSizesData?.sampleSize?.paymentRecordCount}`}
                           {getSampleSizePercentage()}
                         </Box>
                         <Box fontSize={12} color="#797979">
@@ -401,40 +431,44 @@ export function EditVerificationPlan({
                         <Grid container>
                           {values.ageCheckbox && (
                             <Grid item xs={12}>
-                              <Grid container>
-                                <Grid item xs={4}>
-                                  <Field
-                                    name="filterAgeMin"
-                                    label={t('Minimum Age')}
-                                    type="number"
-                                    color="primary"
-                                    component={FormikTextField}
-                                  />
+                              <Box mt={6}>
+                                <Grid container>
+                                  <Grid item xs={4}>
+                                    <Field
+                                      name="filterAgeMin"
+                                      label={t('Minimum Age')}
+                                      type="number"
+                                      color="primary"
+                                      component={FormikTextField}
+                                    />
+                                  </Grid>
+                                  <Grid item xs={4}>
+                                    <Field
+                                      name="filterAgeMax"
+                                      label={t('Maximum Age')}
+                                      type="number"
+                                      color="primary"
+                                      component={FormikTextField}
+                                    />
+                                  </Grid>
                                 </Grid>
-                                <Grid item xs={4}>
-                                  <Field
-                                    name="filterAgeMax"
-                                    label={t('Maximum Age')}
-                                    type="number"
-                                    color="primary"
-                                    component={FormikTextField}
-                                  />
-                                </Grid>
-                              </Grid>
+                              </Box>
                             </Grid>
                           )}
                           {values.sexCheckbox && (
                             <Grid item xs={5}>
-                              <Field
-                                name="filterSex"
-                                label={t('Gender')}
-                                color="primary"
-                                choices={[
-                                  { value: 'FEMALE', name: t('Female') },
-                                  { value: 'MALE', name: t('Male') },
-                                ]}
-                                component={FormikSelectField}
-                              />
+                              <Box mt={6}>
+                                <Field
+                                  name="filterSex"
+                                  label={t('Gender')}
+                                  color="primary"
+                                  choices={[
+                                    { value: 'FEMALE', name: t('Female') },
+                                    { value: 'MALE', name: t('Male') },
+                                  ]}
+                                  component={FormikSelectField}
+                                />
+                              </Box>
                             </Grid>
                           )}
                         </Grid>
@@ -446,14 +480,23 @@ export function EditVerificationPlan({
                         fontSize={16}
                         fontWeight="fontWeightBold"
                       >
-                        Sample size: {sampleSizesData?.sampleSize?.sampleSize}{' '}
-                        out of {sampleSizesData?.sampleSize?.paymentRecordCount}{' '}
+                        Sample size:{' '}
+                        {isNaN(sampleSizesData?.sampleSize?.sampleSize)
+                          ? ' 0'
+                          : ` ${sampleSizesData?.sampleSize?.sampleSize}`}{' '}
+                        out of{' '}
+                        {isNaN(sampleSizesData?.sampleSize?.paymentRecordCount)
+                          ? ' 0'
+                          : ` ${sampleSizesData?.sampleSize?.paymentRecordCount}`}
                         {getSampleSizePercentage()}
                       </Box>
                       <Field
                         name="verificationChannel"
                         label="Verification Channel"
-                        style={{ flexDirection: 'row' }}
+                        style={{
+                          flexDirection: 'row',
+                        }}
+                        alignItems="center"
                         choices={[
                           { value: 'RAPIDPRO', name: 'RAPIDPRO' },
                           { value: 'XLSX', name: 'XLSX' },
@@ -497,4 +540,4 @@ export function EditVerificationPlan({
       }}
     </Formik>
   );
-}
+};

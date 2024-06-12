@@ -1,4 +1,4 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch:7.8.0
+FROM elasticsearch:7.10.1
 
 RUN elasticsearch-plugin install --batch analysis-phonetic
 

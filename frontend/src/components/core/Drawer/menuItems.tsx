@@ -47,7 +47,7 @@ export const menuItems: MenuItem[] = [
     selectedRegexp: /^\/$/,
     icon: <DashboardIcon />,
     permissions: [PERMISSIONS.DASHBOARD_VIEW_COUNTRY],
-    scopes: [SCOPE_ALL_PROGRAMS],
+    scopes: [SCOPE_ALL_PROGRAMS, SCOPE_PROGRAM],
   },
   {
     name: 'Registration Data Import',
