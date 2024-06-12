@@ -74,23 +74,35 @@ class TestDataCollectingTypeForm(TestCase):
         social_dct.compatible_types.add(social_dct_2)
 
         form = DataCollectingTypeForm(
-            {**self.form_data, "type": DataCollectingType.Type.STANDARD, "compatible_types": DataCollectingType.objects.filter(id__in=[social_dct.id, social_dct_2.id])}, instance=social_dct,
+            {
+                **self.form_data,
+                "type": DataCollectingType.Type.STANDARD,
+                "compatible_types": DataCollectingType.objects.filter(id__in=[social_dct.id, social_dct_2.id]),
+            },
+            instance=social_dct,
         )
         self.assertFalse(form.is_valid())
         self.assertEqual(
             form.errors["type"][0], "Type of DCT cannot be changed if it has compatible DCTs of different type"
         )
         self.assertEqual(
-            form.errors["compatible_types"][0], f"DCTs of different types cannot be compatible with each other. Following DCTs are not of type STANDARD: ['{str(social_dct_2.label)}']"
+            form.errors["compatible_types"][0],
+            f"DCTs of different types cannot be compatible with each other. Following DCTs are not of type STANDARD: ['{str(social_dct_2.label)}']",
         )
 
     def test_cannot_add_compatible_dct_with_different_type(self) -> None:
         social_dct = DataCollectingTypeFactory(label="Social DCT", type=DataCollectingType.Type.SOCIAL)
         standard_dct = DataCollectingTypeFactory(label="Standard DCT", type=DataCollectingType.Type.STANDARD)
         form = DataCollectingTypeForm(
-            {**self.form_data, "type": DataCollectingType.Type.SOCIAL, "compatible_types": DataCollectingType.objects.filter(id=standard_dct.id)}, instance=social_dct,
+            {
+                **self.form_data,
+                "type": DataCollectingType.Type.SOCIAL,
+                "compatible_types": DataCollectingType.objects.filter(id=standard_dct.id),
+            },
+            instance=social_dct,
         )
         self.assertFalse(form.is_valid())
         self.assertEqual(
-            form.errors["compatible_types"][0], f"DCTs of different types cannot be compatible with each other. Following DCTs are not of type SOCIAL: ['{str(standard_dct.label)}']"
+            form.errors["compatible_types"][0],
+            f"DCTs of different types cannot be compatible with each other. Following DCTs are not of type SOCIAL: ['{str(standard_dct.label)}']",
         )

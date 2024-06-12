@@ -73,7 +73,6 @@ class DataCollectingTypeForm(forms.ModelForm):
             )
             self.add_error("compatible_types", forms.ValidationError(msg))
 
-
     def is_valid(self) -> bool:
         # Set a flag to skip validation of type vs compatible types as they might be changed in the same form
         self.instance.skip_type_validation = True
