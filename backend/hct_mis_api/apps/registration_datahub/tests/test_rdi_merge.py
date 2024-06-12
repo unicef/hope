@@ -17,7 +17,6 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualCollectionFactory,
     IndividualFactory,
 )
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import (
     BROTHER_SISTER,
     COLLECT_TYPE_FULL,

@@ -12,11 +12,22 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import HEAD, MALE, ROLE_PRIMARY, Individual, Document, IndividualIdentity, \
-    BankAccountInfo, IndividualRoleInHousehold, Household
+from hct_mis_api.apps.household.models import (
+    HEAD,
+    MALE,
+    ROLE_PRIMARY,
+    BankAccountInfo,
+    Document,
+    Household,
+    Individual,
+    IndividualIdentity,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_datahub.fixtures import RegistrationDataImportDatahubFactory
+from hct_mis_api.apps.registration_datahub.fixtures import (
+    RegistrationDataImportDatahubFactory,
+)
 from hct_mis_api.apps.registration_datahub.models import ImportedHousehold
 from hct_mis_api.apps.registration_datahub.tasks.objects_to_imported_objects import (
     CreateImportedObjectsFromObjectsTask,
@@ -24,7 +35,6 @@ from hct_mis_api.apps.registration_datahub.tasks.objects_to_imported_objects imp
 
 
 class TestCreateImportedObjectsFromObjectsTask(APITestCase):
-
     @classmethod
     def setUpTestData(cls) -> None:
         cls.afghanistan = create_afghanistan()
