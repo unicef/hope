@@ -1,4 +1,7 @@
 from typing import Any, List
+from unittest.mock import patch
+
+from django.contrib.auth.models import AnonymousUser
 
 from parameterized import parameterized
 
@@ -151,4 +154,17 @@ class TestAllProgramsQuery(APITestCase):
                 },
             },
             variables={"businessArea": self.business_area.slug, "orderBy": "name", "compatibleDct": True},
+        )
+
+    @patch("django.contrib.auth.models.AnonymousUser.is_authenticated", new_callable=lambda: False)
+    def test_all_programs_query_user_not_authenticated(self, mock_is_authenticated: Any) -> None:
+        self.snapshot_graphql_request(
+            request_string=self.ALL_PROGRAMS_QUERY,
+            context={
+                "user": AnonymousUser,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"businessArea": self.business_area.slug, "orderBy": "name"},
         )
