@@ -259,3 +259,22 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         updated_target_population = TargetPopulation.objects.get(id=self.draft_target_population.id)
 
         assert "wrong" not in updated_target_population.name
+
+    def test_update_name_unique_constraint(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_UPDATE], self.business_area)
+        variables = copy.deepcopy(VARIABLES)
+        variables["updateTargetPopulationInput"]["id"] = self.id_to_base64(
+            self.draft_target_population.id, "TargetPopulationNode"
+        )
+        variables["updateTargetPopulationInput"]["name"] = self.approved_target_population.name
+
+        response_error = self.graphql_request(
+            request_string=MUTATION_QUERY,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            variables=variables,
+        )
+        assert "errors" in response_error
+        self.assertIn(
+            f"Target population with name: {variables['updateTargetPopulationInput']['name']} and program: {self.program.name} already exists.",
+            response_error["errors"][0]["message"],
+        )

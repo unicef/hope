@@ -179,7 +179,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
         assert "errors" in response_error
         self.assertEqual(TargetPopulation.objects.count(), 1)
         self.assertIn(
-            f"Target population with name: {variables['createTargetPopulationInput']['name']}, program: {self.program.name} and business_area: {variables['createTargetPopulationInput']['businessAreaSlug']} already exists.",
+            f"Target population with name: {variables['createTargetPopulationInput']['name']} and program: {self.program.name} already exists.",
             response_error["errors"][0]["message"],
         )
 
