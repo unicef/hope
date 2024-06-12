@@ -290,17 +290,6 @@ class AllowAuthenticated(BasePermission):
         return info.context.user.is_authenticated
 
 
-def compare_program_id_with_url(
-    user: Any, business_area: BusinessArea, business_area_arg: str, url: Optional[Any]
-) -> bool:
-    url = urlparse(url)
-    url_elements = str(url.path).rsplit("/", 1)
-    if url_elements[0] == f"/{business_area_arg}/programs/all/details":
-        program_id = decode_id_string(url_elements[1])
-        return user.partner.has_program_access(program_id)
-    return True
-
-
 def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: Any) -> bool:
     if not user.is_authenticated:
         return False
@@ -316,13 +305,7 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
     if business_area is None:
         return False
     program_id = get_program_id_from_headers(kwargs)
-    # is_unicef has access to all Programs
-    if user.partner.is_unicef:
-        return any(user.has_permission(permission.name, business_area) for permission in permissions)
-    else:
-        if not compare_program_id_with_url(user, business_area, business_area_arg, kwargs.get("Referer")):
-            return False
-        return any(user.has_permission(permission.name, business_area, program_id) for permission in permissions)
+    return any(user.has_permission(permission.name, business_area, program_id) for permission in permissions)
 
 
 def hopePermissionClass(permission: Permissions) -> Type[BasePermission]:
