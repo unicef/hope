@@ -7,30 +7,7 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestFSPRelatedSchema::test_query_all_financial_service_provider_xlsx_reports 1'] = {
-    'data': {
-        'allFinancialServiceProviderXlsxReports': {
-            'edges': [
-                {
-                    'node': {
-                        'financialServiceProvider': {
-                            'name': 'FSP_1'
-                        },
-                        'status': 2
-                    }
-                },
-                {
-                    'node': {
-                        'financialServiceProvider': {
-                            'name': 'FSP_2'
-                        },
-                        'status': 1
-                    }
-                }
-            ]
-        }
-    }
-}
+
 
 snapshots['TestFSPRelatedSchema::test_query_all_financial_service_provider_xlsx_templates 1'] = {
     'data': {
@@ -98,16 +75,6 @@ snapshots['TestFSPRelatedSchema::test_query_single_financial_service_provider 1'
     }
 }
 
-snapshots['TestFSPRelatedSchema::test_query_single_financial_service_provider_xlsx_report 1'] = {
-    'data': {
-        'financialServiceProviderXlsxReport': {
-            'financialServiceProvider': {
-                'name': 'FSP_1'
-            },
-            'status': 2
-        }
-    }
-}
 
 snapshots['TestFSPRelatedSchema::test_query_single_financial_service_provider_xlsx_template 1'] = {
     'data': {

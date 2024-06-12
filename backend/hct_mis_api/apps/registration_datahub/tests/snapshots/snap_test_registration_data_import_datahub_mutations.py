@@ -40,6 +40,26 @@ snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_im
     ]
 }
 
+snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_import_create_validate_import_data 1'] = {
+    'data': {
+        'registrationXlsxImport': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 5
+                }
+            ],
+            'message': "['Cannot import file containing validation errors']",
+            'path': [
+                'registrationXlsxImport'
+            ]
+        }
+    ]
+}
+
 snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_import_datahub_upload_0_with_permission 1'] = {
     'data': {
         'uploadImportDataXlsxFileAsync': {
@@ -47,13 +67,30 @@ snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_im
             ],
             'importData': {
                 'numberOfHouseholds': None,
-                'numberOfIndividuals': None
+                'numberOfIndividuals': None,
+                'xlsxValidationErrors': [
+                ]
             }
         }
     }
 }
 
-snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_import_datahub_upload_1_without_permission 1'] = {
+snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_import_datahub_upload_1_with_permission_invalid_file 1'] = {
+    'data': {
+        'uploadImportDataXlsxFileAsync': {
+            'errors': [
+            ],
+            'importData': {
+                'numberOfHouseholds': None,
+                'numberOfIndividuals': None,
+                'xlsxValidationErrors': [
+                ]
+            }
+        }
+    }
+}
+
+snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_import_datahub_upload_2_without_permission 1'] = {
     'data': {
         'uploadImportDataXlsxFileAsync': None
     },

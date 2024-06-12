@@ -1419,6 +1419,18 @@ export type DeliveredQuantityNode = {
   totalDeliveredQuantity?: Maybe<Scalars['Decimal']['output']>;
 };
 
+export type DeliveryMechanismDataObjectType = {
+  approveStatus: Scalars['Boolean']['input'];
+  dataFields: Array<InputMaybe<DeliveryMechanismDataPayloadFieldObjectType>>;
+  label: Scalars['String']['input'];
+};
+
+export type DeliveryMechanismDataPayloadFieldObjectType = {
+  name: Scalars['String']['input'];
+  previousValue?: InputMaybe<Scalars['String']['input']>;
+  value: Scalars['String']['input'];
+};
+
 export type DeliveryMechanismNode = Node & {
   __typename?: 'DeliveryMechanismNode';
   chosenConfiguration?: Maybe<Scalars['String']['output']>;
@@ -1583,6 +1595,13 @@ export type EditBankTransferObjectType = {
   bankName: Scalars['String']['input'];
   id: Scalars['ID']['input'];
   type: Scalars['String']['input'];
+};
+
+export type EditDeliveryMechanismDataObjectType = {
+  approveStatus: Scalars['Boolean']['input'];
+  dataFields: Array<InputMaybe<DeliveryMechanismDataPayloadFieldObjectType>>;
+  id: Scalars['ID']['input'];
+  label: Scalars['String']['input'];
 };
 
 export type EditIndividualDocumentObjectType = {
@@ -1789,7 +1808,6 @@ export type FinancialServiceProviderNode = Node & {
   deliveryMechanisms: Array<Scalars['String']['output']>;
   deliveryMechanismsPerPaymentPlan: DeliveryMechanismNodeConnection;
   distributionLimit?: Maybe<Scalars['Float']['output']>;
-  financialserviceproviderxlsxreportSet: FinancialServiceProviderXlsxReportNodeConnection;
   fullName?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   isPaymentGateway?: Maybe<Scalars['Boolean']['output']>;
@@ -1813,15 +1831,6 @@ export type FinancialServiceProviderNodeAllowedBusinessAreasArgs = {
 
 
 export type FinancialServiceProviderNodeDeliveryMechanismsPerPaymentPlanArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type FinancialServiceProviderNodeFinancialserviceproviderxlsxreportSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -1859,30 +1868,6 @@ export type FinancialServiceProviderNodeEdge = {
   __typename?: 'FinancialServiceProviderNodeEdge';
   cursor: Scalars['String']['output'];
   node?: Maybe<FinancialServiceProviderNode>;
-};
-
-export type FinancialServiceProviderXlsxReportNode = Node & {
-  __typename?: 'FinancialServiceProviderXlsxReportNode';
-  createdAt: Scalars['DateTime']['output'];
-  financialServiceProvider: FinancialServiceProviderNode;
-  id: Scalars['ID']['output'];
-  reportUrl?: Maybe<Scalars['String']['output']>;
-  status?: Maybe<Scalars['Int']['output']>;
-  updatedAt: Scalars['DateTime']['output'];
-};
-
-export type FinancialServiceProviderXlsxReportNodeConnection = {
-  __typename?: 'FinancialServiceProviderXlsxReportNodeConnection';
-  edgeCount?: Maybe<Scalars['Int']['output']>;
-  edges: Array<Maybe<FinancialServiceProviderXlsxReportNodeEdge>>;
-  pageInfo: PageInfo;
-  totalCount?: Maybe<Scalars['Int']['output']>;
-};
-
-export type FinancialServiceProviderXlsxReportNodeEdge = {
-  __typename?: 'FinancialServiceProviderXlsxReportNodeEdge';
-  cursor: Scalars['String']['output'];
-  node?: Maybe<FinancialServiceProviderXlsxReportNode>;
 };
 
 export type FinancialServiceProviderXlsxTemplateNode = Node & {
@@ -2639,6 +2624,7 @@ export type ImportDataNode = Node & {
   createdAt: Scalars['DateTime']['output'];
   createdById?: Maybe<Scalars['UUID']['output']>;
   dataType: ImportDataDataType;
+  deliveryMechanismsValidationErrors: Scalars['String']['output'];
   error: Scalars['String']['output'];
   file?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -2653,6 +2639,7 @@ export type ImportDataNode = Node & {
 };
 
 export enum ImportDataStatus {
+  DeliveryMechanismsValidationError = 'DELIVERY_MECHANISMS_VALIDATION_ERROR',
   Error = 'ERROR',
   Finished = 'FINISHED',
   Pending = 'PENDING',
@@ -3632,6 +3619,9 @@ export type IndividualUpdateDataObjectType = {
   birthDate?: InputMaybe<Scalars['Date']['input']>;
   blockchainName?: InputMaybe<Scalars['String']['input']>;
   commsDisability?: InputMaybe<Scalars['String']['input']>;
+  deliveryMechanismData?: InputMaybe<Array<InputMaybe<DeliveryMechanismDataObjectType>>>;
+  deliveryMechanismDataToEdit?: InputMaybe<Array<InputMaybe<EditDeliveryMechanismDataObjectType>>>;
+  deliveryMechanismDataToRemove?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   disability?: InputMaybe<Scalars['String']['input']>;
   documents?: InputMaybe<Array<InputMaybe<IndividualDocumentObjectType>>>;
   documentsToEdit?: InputMaybe<Array<InputMaybe<EditIndividualDocumentObjectType>>>;
@@ -3731,6 +3721,7 @@ export type KoboImportDataNode = Node & {
   createdAt: Scalars['DateTime']['output'];
   createdById?: Maybe<Scalars['UUID']['output']>;
   dataType: ImportDataDataType;
+  deliveryMechanismsValidationErrors: Scalars['String']['output'];
   error: Scalars['String']['output'];
   file?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -3968,6 +3959,9 @@ export type MutationsApproveHouseholdDataChangeArgs = {
 
 
 export type MutationsApproveIndividualDataChangeArgs = {
+  approvedDeliveryMechanismDataToCreate?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  approvedDeliveryMechanismDataToEdit?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  approvedDeliveryMechanismDataToRemove?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
   approvedDocumentsToCreate?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
   approvedDocumentsToEdit?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
   approvedDocumentsToRemove?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
@@ -5686,7 +5680,6 @@ export type Query = {
   allEditHouseholdFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>;
   allFeedbacks?: Maybe<FeedbackNodeConnection>;
   allFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>;
-  allFinancialServiceProviderXlsxReports?: Maybe<FinancialServiceProviderXlsxReportNodeConnection>;
   allFinancialServiceProviderXlsxTemplates?: Maybe<FinancialServiceProviderXlsxTemplateNodeConnection>;
   allFinancialServiceProviders?: Maybe<FinancialServiceProviderNodeConnection>;
   allGrievanceTicket?: Maybe<GrievanceTicketNodeConnection>;
@@ -5754,7 +5747,6 @@ export type Query = {
   feedback?: Maybe<FeedbackNode>;
   feedbackIssueTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   financialServiceProvider?: Maybe<FinancialServiceProviderNode>;
-  financialServiceProviderXlsxReport?: Maybe<FinancialServiceProviderXlsxReportNode>;
   financialServiceProviderXlsxTemplate?: Maybe<FinancialServiceProviderXlsxTemplateNode>;
   flagChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   grievanceTicket?: Maybe<GrievanceTicketNode>;
@@ -6034,17 +6026,6 @@ export type QueryAllFieldsAttributesArgs = {
   businessAreaSlug?: InputMaybe<Scalars['String']['input']>;
   flexField?: InputMaybe<Scalars['Boolean']['input']>;
   programId?: InputMaybe<Scalars['String']['input']>;
-};
-
-
-export type QueryAllFinancialServiceProviderXlsxReportsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -6692,11 +6673,6 @@ export type QueryFinancialServiceProviderArgs = {
 };
 
 
-export type QueryFinancialServiceProviderXlsxReportArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
 export type QueryFinancialServiceProviderXlsxTemplateArgs = {
   id: Scalars['ID']['input'];
 };
@@ -7079,6 +7055,7 @@ export type RegistrationDataImportDatahubNodeEdge = {
 export type RegistrationDataImportNode = Node & {
   __typename?: 'RegistrationDataImportNode';
   adminUrl?: Maybe<Scalars['String']['output']>;
+  allowDeliveryMechanismsValidationErrors: Scalars['Boolean']['output'];
   batchDuplicates: Scalars['Int']['output'];
   batchDuplicatesCountAndPercentage?: Maybe<CountAndPercentageNode>;
   batchPossibleDuplicates: Scalars['Int']['output'];
@@ -7196,6 +7173,7 @@ export type RegistrationKoboImportMutation = {
 };
 
 export type RegistrationKoboImportMutationInput = {
+  allowDeliveryMechanismsValidationErrors?: InputMaybe<Scalars['Boolean']['input']>;
   businessAreaSlug?: InputMaybe<Scalars['String']['input']>;
   importDataId?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -7223,6 +7201,7 @@ export type RegistrationXlsxImportMutation = {
 };
 
 export type RegistrationXlsxImportMutationInput = {
+  allowDeliveryMechanismsValidationErrors?: InputMaybe<Scalars['Boolean']['input']>;
   businessAreaSlug?: InputMaybe<Scalars['String']['input']>;
   importDataId?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -9411,6 +9390,9 @@ export type ApproveIndividualDataChangeMutationVariables = Exact<{
   approvedPaymentChannelsToCreate?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>> | InputMaybe<Scalars['Int']['input']>>;
   approvedPaymentChannelsToEdit?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>> | InputMaybe<Scalars['Int']['input']>>;
   approvedPaymentChannelsToRemove?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>> | InputMaybe<Scalars['Int']['input']>>;
+  approvedDeliveryMechanismDataToCreate?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>> | InputMaybe<Scalars['Int']['input']>>;
+  approvedDeliveryMechanismDataToEdit?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>> | InputMaybe<Scalars['Int']['input']>>;
+  approvedDeliveryMechanismDataToRemove?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>> | InputMaybe<Scalars['Int']['input']>>;
 }>;
 
 
@@ -12879,7 +12861,7 @@ export type ApproveHouseholdDataChangeMutationHookResult = ReturnType<typeof use
 export type ApproveHouseholdDataChangeMutationResult = Apollo.MutationResult<ApproveHouseholdDataChangeMutation>;
 export type ApproveHouseholdDataChangeMutationOptions = Apollo.BaseMutationOptions<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>;
 export const ApproveIndividualDataChangeDocument = gql`
-    mutation ApproveIndividualDataChange($grievanceTicketId: ID!, $individualApproveData: JSONString, $flexFieldsApproveData: JSONString, $approvedDocumentsToCreate: [Int], $approvedDocumentsToRemove: [Int], $approvedDocumentsToEdit: [Int], $approvedIdentitiesToCreate: [Int], $approvedIdentitiesToEdit: [Int], $approvedIdentitiesToRemove: [Int], $approvedPaymentChannelsToCreate: [Int], $approvedPaymentChannelsToEdit: [Int], $approvedPaymentChannelsToRemove: [Int]) {
+    mutation ApproveIndividualDataChange($grievanceTicketId: ID!, $individualApproveData: JSONString, $flexFieldsApproveData: JSONString, $approvedDocumentsToCreate: [Int], $approvedDocumentsToRemove: [Int], $approvedDocumentsToEdit: [Int], $approvedIdentitiesToCreate: [Int], $approvedIdentitiesToEdit: [Int], $approvedIdentitiesToRemove: [Int], $approvedPaymentChannelsToCreate: [Int], $approvedPaymentChannelsToEdit: [Int], $approvedPaymentChannelsToRemove: [Int], $approvedDeliveryMechanismDataToCreate: [Int], $approvedDeliveryMechanismDataToEdit: [Int], $approvedDeliveryMechanismDataToRemove: [Int]) {
   approveIndividualDataChange(
     grievanceTicketId: $grievanceTicketId
     individualApproveData: $individualApproveData
@@ -12893,6 +12875,9 @@ export const ApproveIndividualDataChangeDocument = gql`
     approvedPaymentChannelsToCreate: $approvedPaymentChannelsToCreate
     approvedPaymentChannelsToEdit: $approvedPaymentChannelsToEdit
     approvedPaymentChannelsToRemove: $approvedPaymentChannelsToRemove
+    approvedDeliveryMechanismDataToCreate: $approvedDeliveryMechanismDataToCreate
+    approvedDeliveryMechanismDataToEdit: $approvedDeliveryMechanismDataToEdit
+    approvedDeliveryMechanismDataToRemove: $approvedDeliveryMechanismDataToRemove
   ) {
     grievanceTicket {
       id
@@ -12935,6 +12920,9 @@ export type ApproveIndividualDataChangeMutationFn = Apollo.MutationFunction<Appr
  *      approvedPaymentChannelsToCreate: // value for 'approvedPaymentChannelsToCreate'
  *      approvedPaymentChannelsToEdit: // value for 'approvedPaymentChannelsToEdit'
  *      approvedPaymentChannelsToRemove: // value for 'approvedPaymentChannelsToRemove'
+ *      approvedDeliveryMechanismDataToCreate: // value for 'approvedDeliveryMechanismDataToCreate'
+ *      approvedDeliveryMechanismDataToEdit: // value for 'approvedDeliveryMechanismDataToEdit'
+ *      approvedDeliveryMechanismDataToRemove: // value for 'approvedDeliveryMechanismDataToRemove'
  *   },
  * });
  */
@@ -23601,7 +23589,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping of interface types */
 export type ResolversInterfaceTypes<RefType extends Record<string, unknown>> = {
-  Node: ( ApprovalProcessNode ) | ( AreaNode ) | ( AreaTypeNode ) | ( BankAccountInfoNode ) | ( BusinessAreaNode ) | ( CashPlanNode ) | ( CommunicationMessageNode ) | ( CommunicationMessageRecipientMapNode ) | ( DataCollectingTypeNode ) | ( DeliveryMechanismNode ) | ( DocumentNode ) | ( FeedbackMessageNode ) | ( FeedbackNode ) | ( FinancialServiceProviderNode ) | ( FinancialServiceProviderXlsxReportNode ) | ( FinancialServiceProviderXlsxTemplateNode ) | ( GrievanceDocumentNode ) | ( GrievanceTicketNode ) | ( HouseholdNode ) | ( ImportDataNode ) | ( ImportedDocumentNode ) | ( ImportedHouseholdNode ) | ( ImportedIndividualIdentityNode ) | ( ImportedIndividualNode ) | ( IndividualIdentityNode ) | ( IndividualNode ) | ( KoboImportDataNode ) | ( LogEntryNode ) | ( PaymentHouseholdSnapshotNode ) | ( PaymentNode ) | ( PaymentPlanNode ) | ( PaymentRecordNode ) | ( PaymentVerificationLogEntryNode ) | ( PaymentVerificationNode ) | ( PaymentVerificationPlanNode ) | ( PaymentVerificationSummaryNode ) | ( ProgramNode ) | ( RecipientNode ) | ( RegistrationDataImportDatahubNode ) | ( RegistrationDataImportNode ) | ( ReportNode ) | ( RuleCommitNode ) | ( SanctionListIndividualAliasNameNode ) | ( SanctionListIndividualCountriesNode ) | ( SanctionListIndividualDateOfBirthNode ) | ( SanctionListIndividualDocumentNode ) | ( SanctionListIndividualNationalitiesNode ) | ( SanctionListIndividualNode ) | ( ServiceProviderNode ) | ( SteficonRuleNode ) | ( SurveyNode ) | ( TargetPopulationNode ) | ( TicketAddIndividualDetailsNode ) | ( TicketComplaintDetailsNode ) | ( TicketDeleteHouseholdDetailsNode ) | ( TicketDeleteIndividualDetailsNode ) | ( TicketHouseholdDataUpdateDetailsNode ) | ( TicketIndividualDataUpdateDetailsNode ) | ( TicketNeedsAdjudicationDetailsNode ) | ( TicketNegativeFeedbackDetailsNode ) | ( TicketNoteNode ) | ( TicketPaymentVerificationDetailsNode ) | ( TicketPositiveFeedbackDetailsNode ) | ( TicketReferralDetailsNode ) | ( TicketSensitiveDetailsNode ) | ( TicketSystemFlaggingDetailsNode ) | ( UserBusinessAreaNode ) | ( UserNode ) | ( VolumeByDeliveryMechanismNode );
+  Node: ( ApprovalProcessNode ) | ( AreaNode ) | ( AreaTypeNode ) | ( BankAccountInfoNode ) | ( BusinessAreaNode ) | ( CashPlanNode ) | ( CommunicationMessageNode ) | ( CommunicationMessageRecipientMapNode ) | ( DataCollectingTypeNode ) | ( DeliveryMechanismNode ) | ( DocumentNode ) | ( FeedbackMessageNode ) | ( FeedbackNode ) | ( FinancialServiceProviderNode ) | ( FinancialServiceProviderXlsxTemplateNode ) | ( GrievanceDocumentNode ) | ( GrievanceTicketNode ) | ( HouseholdNode ) | ( ImportDataNode ) | ( ImportedDocumentNode ) | ( ImportedHouseholdNode ) | ( ImportedIndividualIdentityNode ) | ( ImportedIndividualNode ) | ( IndividualIdentityNode ) | ( IndividualNode ) | ( KoboImportDataNode ) | ( LogEntryNode ) | ( PaymentHouseholdSnapshotNode ) | ( PaymentNode ) | ( PaymentPlanNode ) | ( PaymentRecordNode ) | ( PaymentVerificationLogEntryNode ) | ( PaymentVerificationNode ) | ( PaymentVerificationPlanNode ) | ( PaymentVerificationSummaryNode ) | ( ProgramNode ) | ( RecipientNode ) | ( RegistrationDataImportDatahubNode ) | ( RegistrationDataImportNode ) | ( ReportNode ) | ( RuleCommitNode ) | ( SanctionListIndividualAliasNameNode ) | ( SanctionListIndividualCountriesNode ) | ( SanctionListIndividualDateOfBirthNode ) | ( SanctionListIndividualDocumentNode ) | ( SanctionListIndividualNationalitiesNode ) | ( SanctionListIndividualNode ) | ( ServiceProviderNode ) | ( SteficonRuleNode ) | ( SurveyNode ) | ( TargetPopulationNode ) | ( TicketAddIndividualDetailsNode ) | ( TicketComplaintDetailsNode ) | ( TicketDeleteHouseholdDetailsNode ) | ( TicketDeleteIndividualDetailsNode ) | ( TicketHouseholdDataUpdateDetailsNode ) | ( TicketIndividualDataUpdateDetailsNode ) | ( TicketNeedsAdjudicationDetailsNode ) | ( TicketNegativeFeedbackDetailsNode ) | ( TicketNoteNode ) | ( TicketPaymentVerificationDetailsNode ) | ( TicketPositiveFeedbackDetailsNode ) | ( TicketReferralDetailsNode ) | ( TicketSensitiveDetailsNode ) | ( TicketSystemFlaggingDetailsNode ) | ( UserBusinessAreaNode ) | ( UserNode ) | ( VolumeByDeliveryMechanismNode );
 };
 
 /** Mapping between all available schema types and the resolvers types */
@@ -23720,6 +23708,8 @@ export type ResolversTypes = {
   DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput;
   DeleteTargetPopulationMutationPayload: ResolverTypeWrapper<DeleteTargetPopulationMutationPayload>;
   DeliveredQuantityNode: ResolverTypeWrapper<DeliveredQuantityNode>;
+  DeliveryMechanismDataObjectType: DeliveryMechanismDataObjectType;
+  DeliveryMechanismDataPayloadFieldObjectType: DeliveryMechanismDataPayloadFieldObjectType;
   DeliveryMechanismNode: ResolverTypeWrapper<DeliveryMechanismNode>;
   DeliveryMechanismNodeConnection: ResolverTypeWrapper<DeliveryMechanismNodeConnection>;
   DeliveryMechanismNodeEdge: ResolverTypeWrapper<DeliveryMechanismNodeEdge>;
@@ -23733,6 +23723,7 @@ export type ResolversTypes = {
   DocumentStatus: DocumentStatus;
   DocumentTypeNode: ResolverTypeWrapper<DocumentTypeNode>;
   EditBankTransferObjectType: EditBankTransferObjectType;
+  EditDeliveryMechanismDataObjectType: EditDeliveryMechanismDataObjectType;
   EditIndividualDocumentObjectType: EditIndividualDocumentObjectType;
   EditIndividualIdentityObjectType: EditIndividualIdentityObjectType;
   EditPaymentVerificationInput: EditPaymentVerificationInput;
@@ -23759,9 +23750,6 @@ export type ResolversTypes = {
   FinancialServiceProviderNode: ResolverTypeWrapper<FinancialServiceProviderNode>;
   FinancialServiceProviderNodeConnection: ResolverTypeWrapper<FinancialServiceProviderNodeConnection>;
   FinancialServiceProviderNodeEdge: ResolverTypeWrapper<FinancialServiceProviderNodeEdge>;
-  FinancialServiceProviderXlsxReportNode: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNode>;
-  FinancialServiceProviderXlsxReportNodeConnection: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNodeConnection>;
-  FinancialServiceProviderXlsxReportNodeEdge: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNodeEdge>;
   FinancialServiceProviderXlsxTemplateNode: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNode>;
   FinancialServiceProviderXlsxTemplateNodeConnection: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeConnection>;
   FinancialServiceProviderXlsxTemplateNodeEdge: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeEdge>;
@@ -24238,6 +24226,8 @@ export type ResolversParentTypes = {
   DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput;
   DeleteTargetPopulationMutationPayload: DeleteTargetPopulationMutationPayload;
   DeliveredQuantityNode: DeliveredQuantityNode;
+  DeliveryMechanismDataObjectType: DeliveryMechanismDataObjectType;
+  DeliveryMechanismDataPayloadFieldObjectType: DeliveryMechanismDataPayloadFieldObjectType;
   DeliveryMechanismNode: DeliveryMechanismNode;
   DeliveryMechanismNodeConnection: DeliveryMechanismNodeConnection;
   DeliveryMechanismNodeEdge: DeliveryMechanismNodeEdge;
@@ -24249,6 +24239,7 @@ export type ResolversParentTypes = {
   DocumentNodeEdge: DocumentNodeEdge;
   DocumentTypeNode: DocumentTypeNode;
   EditBankTransferObjectType: EditBankTransferObjectType;
+  EditDeliveryMechanismDataObjectType: EditDeliveryMechanismDataObjectType;
   EditIndividualDocumentObjectType: EditIndividualDocumentObjectType;
   EditIndividualIdentityObjectType: EditIndividualIdentityObjectType;
   EditPaymentVerificationInput: EditPaymentVerificationInput;
@@ -24273,9 +24264,6 @@ export type ResolversParentTypes = {
   FinancialServiceProviderNode: FinancialServiceProviderNode;
   FinancialServiceProviderNodeConnection: FinancialServiceProviderNodeConnection;
   FinancialServiceProviderNodeEdge: FinancialServiceProviderNodeEdge;
-  FinancialServiceProviderXlsxReportNode: FinancialServiceProviderXlsxReportNode;
-  FinancialServiceProviderXlsxReportNodeConnection: FinancialServiceProviderXlsxReportNodeConnection;
-  FinancialServiceProviderXlsxReportNodeEdge: FinancialServiceProviderXlsxReportNodeEdge;
   FinancialServiceProviderXlsxTemplateNode: FinancialServiceProviderXlsxTemplateNode;
   FinancialServiceProviderXlsxTemplateNodeConnection: FinancialServiceProviderXlsxTemplateNodeConnection;
   FinancialServiceProviderXlsxTemplateNodeEdge: FinancialServiceProviderXlsxTemplateNodeEdge;
@@ -25535,7 +25523,6 @@ export type FinancialServiceProviderNodeResolvers<ContextType = any, ParentType 
   deliveryMechanisms?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   deliveryMechanismsPerPaymentPlan?: Resolver<ResolversTypes['DeliveryMechanismNodeConnection'], ParentType, ContextType, Partial<FinancialServiceProviderNodeDeliveryMechanismsPerPaymentPlanArgs>>;
   distributionLimit?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  financialserviceproviderxlsxreportSet?: Resolver<ResolversTypes['FinancialServiceProviderXlsxReportNodeConnection'], ParentType, ContextType, Partial<FinancialServiceProviderNodeFinancialserviceproviderxlsxreportSetArgs>>;
   fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isPaymentGateway?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
@@ -25559,30 +25546,6 @@ export type FinancialServiceProviderNodeConnectionResolvers<ContextType = any, P
 export type FinancialServiceProviderNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderNodeEdge'] = ResolversParentTypes['FinancialServiceProviderNodeEdge']> = {
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   node?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type FinancialServiceProviderXlsxReportNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxReportNode'] = ResolversParentTypes['FinancialServiceProviderXlsxReportNode']> = {
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  financialServiceProvider?: Resolver<ResolversTypes['FinancialServiceProviderNode'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  reportUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  status?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type FinancialServiceProviderXlsxReportNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxReportNodeConnection'] = ResolversParentTypes['FinancialServiceProviderXlsxReportNodeConnection']> = {
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  edges?: Resolver<Array<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportNodeEdge']>>, ParentType, ContextType>;
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type FinancialServiceProviderXlsxReportNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxReportNodeEdge'] = ResolversParentTypes['FinancialServiceProviderXlsxReportNodeEdge']> = {
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  node?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -25961,6 +25924,7 @@ export type ImportDataNodeResolvers<ContextType = any, ParentType extends Resolv
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdById?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;
   dataType?: Resolver<ResolversTypes['ImportDataDataType'], ParentType, ContextType>;
+  deliveryMechanismsValidationErrors?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   error?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   file?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -26453,6 +26417,7 @@ export type KoboImportDataNodeResolvers<ContextType = any, ParentType extends Re
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdById?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;
   dataType?: Resolver<ResolversTypes['ImportDataDataType'], ParentType, ContextType>;
+  deliveryMechanismsValidationErrors?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   error?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   file?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -26631,7 +26596,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'ApprovalProcessNode' | 'AreaNode' | 'AreaTypeNode' | 'BankAccountInfoNode' | 'BusinessAreaNode' | 'CashPlanNode' | 'CommunicationMessageNode' | 'CommunicationMessageRecipientMapNode' | 'DataCollectingTypeNode' | 'DeliveryMechanismNode' | 'DocumentNode' | 'FeedbackMessageNode' | 'FeedbackNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxReportNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'GrievanceDocumentNode' | 'GrievanceTicketNode' | 'HouseholdNode' | 'ImportDataNode' | 'ImportedDocumentNode' | 'ImportedHouseholdNode' | 'ImportedIndividualIdentityNode' | 'ImportedIndividualNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'KoboImportDataNode' | 'LogEntryNode' | 'PaymentHouseholdSnapshotNode' | 'PaymentNode' | 'PaymentPlanNode' | 'PaymentRecordNode' | 'PaymentVerificationLogEntryNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'ProgramNode' | 'RecipientNode' | 'RegistrationDataImportDatahubNode' | 'RegistrationDataImportNode' | 'ReportNode' | 'RuleCommitNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualDateOfBirthNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualNode' | 'ServiceProviderNode' | 'SteficonRuleNode' | 'SurveyNode' | 'TargetPopulationNode' | 'TicketAddIndividualDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketNoteNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'UserBusinessAreaNode' | 'UserNode' | 'VolumeByDeliveryMechanismNode', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'ApprovalProcessNode' | 'AreaNode' | 'AreaTypeNode' | 'BankAccountInfoNode' | 'BusinessAreaNode' | 'CashPlanNode' | 'CommunicationMessageNode' | 'CommunicationMessageRecipientMapNode' | 'DataCollectingTypeNode' | 'DeliveryMechanismNode' | 'DocumentNode' | 'FeedbackMessageNode' | 'FeedbackNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'GrievanceDocumentNode' | 'GrievanceTicketNode' | 'HouseholdNode' | 'ImportDataNode' | 'ImportedDocumentNode' | 'ImportedHouseholdNode' | 'ImportedIndividualIdentityNode' | 'ImportedIndividualNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'KoboImportDataNode' | 'LogEntryNode' | 'PaymentHouseholdSnapshotNode' | 'PaymentNode' | 'PaymentPlanNode' | 'PaymentRecordNode' | 'PaymentVerificationLogEntryNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'ProgramNode' | 'RecipientNode' | 'RegistrationDataImportDatahubNode' | 'RegistrationDataImportNode' | 'ReportNode' | 'RuleCommitNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualDateOfBirthNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualNode' | 'ServiceProviderNode' | 'SteficonRuleNode' | 'SurveyNode' | 'TargetPopulationNode' | 'TicketAddIndividualDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketNoteNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'UserBusinessAreaNode' | 'UserNode' | 'VolumeByDeliveryMechanismNode', ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
 };
 
@@ -27205,7 +27170,6 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allEditHouseholdFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>;
   allFeedbacks?: Resolver<Maybe<ResolversTypes['FeedbackNodeConnection']>, ParentType, ContextType, Partial<QueryAllFeedbacksArgs>>;
   allFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, Partial<QueryAllFieldsAttributesArgs>>;
-  allFinancialServiceProviderXlsxReports?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportNodeConnection']>, ParentType, ContextType, Partial<QueryAllFinancialServiceProviderXlsxReportsArgs>>;
   allFinancialServiceProviderXlsxTemplates?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNodeConnection']>, ParentType, ContextType, Partial<QueryAllFinancialServiceProviderXlsxTemplatesArgs>>;
   allFinancialServiceProviders?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNodeConnection']>, ParentType, ContextType, Partial<QueryAllFinancialServiceProvidersArgs>>;
   allGrievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllGrievanceTicketArgs, 'businessArea'>>;
@@ -27273,7 +27237,6 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   feedback?: Resolver<Maybe<ResolversTypes['FeedbackNode']>, ParentType, ContextType, RequireFields<QueryFeedbackArgs, 'id'>>;
   feedbackIssueTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType, RequireFields<QueryFinancialServiceProviderArgs, 'id'>>;
-  financialServiceProviderXlsxReport?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportNode']>, ParentType, ContextType, RequireFields<QueryFinancialServiceProviderXlsxReportArgs, 'id'>>;
   financialServiceProviderXlsxTemplate?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNode']>, ParentType, ContextType, RequireFields<QueryFinancialServiceProviderXlsxTemplateArgs, 'id'>>;
   flagChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType, RequireFields<QueryGrievanceTicketArgs, 'id'>>;
@@ -27466,6 +27429,7 @@ export type RegistrationDataImportDatahubNodeEdgeResolvers<ContextType = any, Pa
 
 export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportNode'] = ResolversParentTypes['RegistrationDataImportNode']> = {
   adminUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  allowDeliveryMechanismsValidationErrors?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   batchDuplicates?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   batchDuplicatesCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>;
   batchPossibleDuplicates?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -28788,9 +28752,6 @@ export type Resolvers<ContextType = any> = {
   FinancialServiceProviderNode?: FinancialServiceProviderNodeResolvers<ContextType>;
   FinancialServiceProviderNodeConnection?: FinancialServiceProviderNodeConnectionResolvers<ContextType>;
   FinancialServiceProviderNodeEdge?: FinancialServiceProviderNodeEdgeResolvers<ContextType>;
-  FinancialServiceProviderXlsxReportNode?: FinancialServiceProviderXlsxReportNodeResolvers<ContextType>;
-  FinancialServiceProviderXlsxReportNodeConnection?: FinancialServiceProviderXlsxReportNodeConnectionResolvers<ContextType>;
-  FinancialServiceProviderXlsxReportNodeEdge?: FinancialServiceProviderXlsxReportNodeEdgeResolvers<ContextType>;
   FinancialServiceProviderXlsxTemplateNode?: FinancialServiceProviderXlsxTemplateNodeResolvers<ContextType>;
   FinancialServiceProviderXlsxTemplateNodeConnection?: FinancialServiceProviderXlsxTemplateNodeConnectionResolvers<ContextType>;
   FinancialServiceProviderXlsxTemplateNodeEdge?: FinancialServiceProviderXlsxTemplateNodeEdgeResolvers<ContextType>;

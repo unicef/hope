@@ -56,7 +56,13 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_create_payment_channel_fo
                             'previous_identities': {
                             },
                             'previous_payment_channels': {
-                            }
+                            },
+                            'delivery_mechanism_data': [
+                            ],
+                            'delivery_mechanism_data_to_edit': [
+                            ],
+                            'delivery_mechanism_data_to_remove': [
+                            ],
                         }
                     },
                     'issueType': 14,
@@ -147,7 +153,13 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_edit_payment_channel_for_
                             'previous_identities': {
                             },
                             'previous_payment_channels': {
-                            }
+                            },
+                            'delivery_mechanism_data': [
+                            ],
+                            'delivery_mechanism_data_to_edit': [
+                            ],
+                            'delivery_mechanism_data_to_remove': [
+                            ],
                         }
                     },
                     'issueType': 14,
@@ -554,7 +566,13 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                 'approve_status': False,
                                 'previous_value': 'FEMALE',
                                 'value': 'MALE'
-                            }
+                            },
+                            'delivery_mechanism_data': [
+                            ],
+                            'delivery_mechanism_data_to_edit': [
+                            ],
+                            'delivery_mechanism_data_to_remove': [
+                            ]
                         }
                     },
                     'issueType': 14,

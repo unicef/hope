@@ -44,6 +44,7 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.models import (
     CashPlan,
     PaymentPlan,
@@ -235,9 +236,9 @@ class GenerateReportContentHelpers:
         cash_or_voucher = ""
         if payment.delivery_type:
             if payment.delivery_type in [
-                PaymentRecord.DELIVERY_TYPE_CASH,
-                PaymentRecord.DELIVERY_TYPE_DEPOSIT_TO_CARD,
-                PaymentRecord.DELIVERY_TYPE_TRANSFER,
+                DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+                DeliveryMechanismChoices.DELIVERY_TYPE_DEPOSIT_TO_CARD,
+                DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
             ]:
                 cash_or_voucher = "cash"
             else:
