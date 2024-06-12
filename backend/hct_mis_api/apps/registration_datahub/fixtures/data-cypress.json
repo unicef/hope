@@ -58,9 +58,8 @@
     "currency": "",
     "unhcr_id": "",
     "kobo_submission_uuid": null,
-    "kobo_asset_id": "",
     "kobo_submission_time": null,
-    "row_id": 3,
+    "detail_id": "3",
     "flex_registrations_record": null,
     "mis_unicef_id": "HH-20-0000.0014"
   }
@@ -124,9 +123,8 @@
     "currency": "",
     "unhcr_id": "",
     "kobo_submission_uuid": null,
-    "kobo_asset_id": "",
     "kobo_submission_time": null,
-    "row_id": 4,
+    "detail_id": "4",
     "flex_registrations_record": null,
     "mis_unicef_id": "HH-20-0000.0013"
   }

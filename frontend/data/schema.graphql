@@ -1615,8 +1615,6 @@ type HouseholdNode implements Node {
   currency: String
   unhcrId: String!
   userFields: JSONString!
-  koboAssetId: String!
-  rowId: Int
   detailId: String
   registrationId: String
   programRegistrationId: String
@@ -2079,8 +2077,6 @@ type ImportedHouseholdNode implements Node {
   unhcrId: String!
   koboSubmissionUuid: UUID
   koboSubmissionTime: DateTime
-  koboAssetId: String!
-  rowId: Int
   detailId: String
   programRegistrationId: String
   enumeratorRecId: Int
@@ -2217,8 +2213,6 @@ type ImportedIndividualNode implements Node {
   commsDisability: String!
   whoAnswersPhone: String!
   whoAnswersAltPhone: String!
-  koboAssetId: String!
-  rowId: Int
   detailId: String
   disabilityCertificatePicture: String
   preferredLanguage: String
@@ -2397,8 +2391,6 @@ type IndividualNode implements Node {
   businessArea: UserBusinessAreaNode!
   fchildHoh: Boolean!
   childHoh: Boolean!
-  koboAssetId: String!
-  rowId: Int
   detailId: String
   registrationId: String
   programRegistrationId: String
