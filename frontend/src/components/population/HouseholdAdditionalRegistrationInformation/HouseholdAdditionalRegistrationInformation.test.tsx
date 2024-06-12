@@ -1,13 +1,12 @@
-import * as React from 'react';
 import { fakeAllHouseholdsFlexFieldsAttributes } from '../../../../fixtures/core/fakeAllHouseholdsFlexFieldsAttributes';
 import { fakeHousehold } from '../../../../fixtures/population/fakeHousehold';
 import { render } from '../../../testUtils/testUtils';
-import { HouseholdVulnerabilities } from './HouseholdVulnerabilities';
+import { HouseholdAdditionalRegistrationInformation } from './HouseholdAdditionalRegistrationInformation';
 
-describe('components/population/HouseholdVulnerabilities', () => {
+describe('components/population/HouseholdAdditionalRegistrationInformation', () => {
   it('should render', () => {
     const { container } = render(
-      <HouseholdVulnerabilities
+      <HouseholdAdditionalRegistrationInformation
         household={fakeHousehold}
         flexFieldsData={fakeAllHouseholdsFlexFieldsAttributes}
       />,

@@ -59,7 +59,7 @@ export const headCells: HeadCell<
     id: 'delivered_quantity',
     numeric: false,
   },
-    {
+  {
     disablePadding: false,
     label: 'FSP Auth Code',
     id: 'fsp_auth_code',

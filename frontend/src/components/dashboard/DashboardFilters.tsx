@@ -65,6 +65,7 @@ export const DashboardFilters = ({
         <Grid item xs={3}>
           <AdminAreaAutocomplete
             name="administrativeArea"
+            level={2}
             value={filter.administrativeArea}
             filter={filter}
             setFilter={setFilter}

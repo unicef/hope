@@ -15,6 +15,7 @@ from django.forms import model_to_dict
 from django_countries.fields import Country
 from PIL import Image
 
+from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
@@ -94,6 +95,9 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
         )
+
+        PartnerFactory(name="WFP")
+        PartnerFactory(name="UNHCR")
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
 

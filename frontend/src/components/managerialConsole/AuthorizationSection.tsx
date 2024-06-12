@@ -1,20 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BaseSection } from '@components/core/BaseSection';
 import {
   Table,
-  TableBody,
   TableCell,
   TableHead,
   TableRow,
   Checkbox,
   Box,
+  TableSortLabel,
+  TableBody,
+  InputAdornment,
+  TextField,
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 import { useTranslation } from 'react-i18next';
 import { AuthorizePaymentPlansModal } from '@components/managerialConsole/AuthorizePaymentPlansModal';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
 
 interface AuthorizationSectionProps {
   selectedAuthorized: any[];
@@ -34,6 +39,7 @@ interface AuthorizationSectionProps {
   ) => void;
   inAuthorizationData: any;
   bulkAction: any;
+  enableSearch?: boolean;
 }
 
 export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
@@ -43,14 +49,34 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
   handleSelectAll,
   inAuthorizationData,
   bulkAction,
+  enableSearch = false,
 }) => {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const { showMessage } = useSnackbar();
+  const [searchText, setSearchText] = useState('');
+
+  const {
+    sortField,
+    sortDirection,
+    selectedProgram,
+    setSelectedProgram,
+    handleSort,
+    sortRows,
+    filterRows,
+  } = useSortAndFilter({ initialSortField: null, initialSortDirection: 'asc' });
+
   const handleSelectAllAuthorized = () => {
     const ids = inAuthorizationData.results.map((plan) => plan.id);
-    return handleSelectAll(ids, selectedAuthorized, setSelectedAuthorized);
+    handleSelectAll(ids, selectedAuthorized, setSelectedAuthorized);
   };
+
+  const programs = inAuthorizationData?.results?.reduce((acc, row) => {
+    if (!acc.includes(row.program)) {
+      acc.push(row.program);
+    }
+    return acc;
+  }, []);
 
   const allSelected = inAuthorizationData?.results?.every((plan) =>
     selectedAuthorized.includes(plan.id),
@@ -60,29 +86,83 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
     .filter((plan) => selectedAuthorized.includes(plan.id))
     .map((plan) => plan.unicef_id);
 
-  return (
-    <BaseSection
-      title={t('Payment Plans pending for Authorization')}
-      buttons={
-        <AuthorizePaymentPlansModal
-          selectedPlansIds={selectedAuthorized}
-          selectedPlansUnicefIds={selectedPlansUnicefIds}
-          onAuthorize={async (_, comment) => {
-            try {
-              await bulkAction.mutateAsync({
-                ids: selectedAuthorized,
-                action: 'AUTHORIZE',
-                comment: comment,
-              });
-              showMessage(t('Payment Plan(s) Authorized'));
-              setSelectedAuthorized([]);
-            } catch (e) {
-              showMessage(e.message);
-            }
+  const columns = [
+    {
+      field: 'unicef_id',
+      headerName: t('Payment Plan ID'),
+      width: 200,
+      renderCell: (params) => (
+        <BlackLink
+          to={`/${businessArea}/programs/${params.row.program_id}/payment-module/${params.row.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${params.row.id}`}
+          newTab={true}
+        >
+          {params.value}
+        </BlackLink>
+      ),
+    },
+    { field: 'program', headerName: t('Programme Name'), width: 200 },
+    {
+      field: 'last_approval_process_date',
+      headerName: t('Last Modified Date'),
+      width: 200,
+      renderCell: (params) => <UniversalMoment>{params.value}</UniversalMoment>,
+    },
+    {
+      field: 'last_approval_process_by',
+      headerName: t('Approved by'),
+      width: 200,
+    },
+  ];
+
+  const filteredRows = filterRows(
+    inAuthorizationData?.results || [],
+    'last_approval_process_date',
+    searchText,
+    columns,
+  );
+  const sortedRows = sortRows(filteredRows);
+
+  const title = t('Payment Plans pending for Authorization');
+
+  const buttons = (
+    <>
+      {enableSearch && (
+        <TextField
+          label="Search"
+          value={searchText}
+          size="small"
+          onChange={(e) => setSearchText(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
           }}
         />
-      }
-    >
+      )}
+      <AuthorizePaymentPlansModal
+        selectedPlansIds={selectedAuthorized}
+        selectedPlansUnicefIds={selectedPlansUnicefIds}
+        onAuthorize={async (_, comment) => {
+          try {
+            await bulkAction.mutateAsync({
+              ids: selectedAuthorized,
+              action: 'AUTHORIZE',
+              comment: comment,
+            });
+            showMessage(t('Payment Plan(s) Authorized'));
+            setSelectedAuthorized([]);
+          } catch (e) {
+            showMessage(e.message);
+          }
+        }}
+      />
+    </>
+  );
+
+  return (
+    <BaseSection title={title} buttons={buttons}>
       <Table>
         <TableHead>
           <TableRow>
@@ -94,52 +174,49 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
                 />
               </Box>
             </TableCell>
-            <TableCell align="left" style={{ width: '22.5%' }}>
-              <Box sx={{ flex: 1 }}>{t('Payment Plan ID')}</Box>
-            </TableCell>
-            <TableCell align="left" style={{ width: '22.5%' }}>
-              <Box sx={{ flex: 1 }}>{t('Programme Name')}</Box>
-            </TableCell>
-            <TableCell align="left" style={{ width: '22.5%' }}>
-              <Box sx={{ flex: 1 }}>{t('Last Modified Date')}</Box>
-            </TableCell>
-            <TableCell align="left" style={{ width: '22.5%' }}>
-              <Box sx={{ flex: 1 }}>{t('Approved by')}</Box>
-            </TableCell>
+            {columns.map((column) => (
+              <TableCell key={column.field}>
+                {column.field === 'program' ? (
+                  <ProgramSelect
+                    selectedProgram={selectedProgram}
+                    setSelectedProgram={setSelectedProgram}
+                    programs={programs}
+                  />
+                ) : (
+                  <TableSortLabel
+                    active={sortField === column.field}
+                    direction={sortDirection}
+                    onClick={() => handleSort(column.field)}
+                  >
+                    {column.headerName}
+                  </TableSortLabel>
+                )}
+              </TableCell>
+            ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {inAuthorizationData?.results?.map((plan: any) => (
-            <TableRow key={plan.id}>
+          {sortedRows.map((row) => (
+            <TableRow key={row.id}>
               <TableCell padding="checkbox">
                 <Checkbox
-                  checked={selectedAuthorized.includes(plan.id)}
+                  checked={selectedAuthorized.includes(row.id)}
                   onChange={() =>
                     handleSelect(
                       selectedAuthorized,
                       setSelectedAuthorized,
-                      plan.id,
+                      row.id,
                     )
                   }
                 />
               </TableCell>
-              <TableCell align="left">
-                <BlackLink
-                  to={`/${businessArea}/programs/${plan.program_id}/payment-module/${plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${plan.id}`}
-                  newTab={true}
-                >
-                  {plan.unicef_id}
-                </BlackLink>
-              </TableCell>
-              <TableCell align="left">{plan.program}</TableCell>
-              <TableCell align="left">
-                <UniversalMoment>
-                  {plan.last_approval_process_date}
-                </UniversalMoment>
-              </TableCell>
-              <TableCell align="left">
-                {plan.last_approval_process_by}
-              </TableCell>
+              {columns.map((column) => (
+                <TableCell key={column.field} align="left">
+                  {column.renderCell
+                    ? column.renderCell({ value: row[column.field], row })
+                    : row[column.field]}
+                </TableCell>
+              ))}
             </TableRow>
           ))}
         </TableBody>

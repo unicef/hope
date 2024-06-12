@@ -21,7 +21,7 @@ import { Title } from '@components/core/Title';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { WarningTooltip } from '@components/core/WarningTooltip';
 import { HouseholdDetails } from '@components/population/HouseholdDetails';
-import { HouseholdVulnerabilities } from '@components/population/HouseholdVulnerabilities/HouseholdVulnerabilities';
+import { HouseholdAdditionalRegistrationInformation } from '@components/population/HouseholdAdditionalRegistrationInformation/HouseholdAdditionalRegistrationInformation';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -190,7 +190,7 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
             )}
           />
         )}
-        <HouseholdVulnerabilities
+        <HouseholdAdditionalRegistrationInformation
           household={household as HouseholdNode}
           flexFieldsData={flexFieldsData}
         />

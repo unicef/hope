@@ -60,6 +60,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
     documentType: householdChoicesData?.documentTypeChoices?.[0]?.value,
     documentNumber: '',
     residenceStatus: '',
+    admin1: '',
     admin2: '',
     householdSizeMin: '',
     householdSizeMax: '',

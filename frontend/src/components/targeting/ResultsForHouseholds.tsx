@@ -136,7 +136,7 @@ export function ResultsForHouseholds({
                               targetPopulation.childFemaleCount,
                               targetPopulation.adultFemaleCount,
                               targetPopulation.childMaleCount,
-                              targetPopulation.childFemaleCount,
+                              targetPopulation.adultMaleCount,
                             ],
                             backgroundColor: [
                               colors.femaleChildren,

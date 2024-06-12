@@ -112,6 +112,7 @@ export function VerificationPlanActions({
               <EditVerificationPlan
                 paymentVerificationPlanNode={verificationPlan}
                 cashOrPaymentPlanId={planNode.id}
+                isPaymentPlan={planNode.__typename === 'PaymentPlanNode'}
               />
             )}
             {canActivate && (
@@ -196,7 +197,7 @@ export function VerificationPlanActions({
                     <DiscardVerificationPlan
                       paymentVerificationPlanId={verificationPlan.id}
                     />
-                )}
+                  )}
                 {canMarkInvalid && (
                   <Box p={2}>
                     <LoadingButton

@@ -17,7 +17,7 @@ import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { IndividualFlags } from '@components/population/IndividualFlags';
 import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
-import { IndividualVulnerabilities } from '@components/population/IndividualVulnerabilities/IndividualVunerabilities';
+import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -144,7 +144,7 @@ export function PeopleDetailsPage(): React.ReactElement {
           choicesData={choicesData}
           grievancesChoices={grievancesChoices}
         />
-        <IndividualVulnerabilities
+        <IndividualAdditionalRegistrationInformation
           flexFieldsData={flexFieldsData}
           individual={individual as IndividualNode}
         />
