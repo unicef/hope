@@ -10,14 +10,18 @@ from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.models import (
     HEAD,
     BankAccountInfo,
+    Document,
+    DocumentType,
     Household,
     Individual,
+    IndividualIdentity,
     IndividualRoleInHousehold,
-    Document,
-    IndividualIdentity, DocumentType,
 )
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_data.models import Record, RegistrationDataImportDatahub
+from hct_mis_api.apps.registration_data.models import (
+    Record,
+    RegistrationDataImport,
+    RegistrationDataImportDatahub,
+)
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
 logger = logging.getLogger(__name__)
@@ -178,7 +182,7 @@ class CreateImportedObjectsFromObjectsTask:
                 program_id=import_to_program_id,
                 mis_unicef_id=household.unicef_id,
                 rdi_merge_status="MERGED",
-                business_area=rdi.business_area
+                business_area=rdi.business_area,
             )
             self.unmerge_admin_areas(household, imported_household)
             imported_households_dict[household.id] = imported_household
@@ -199,7 +203,7 @@ class CreateImportedObjectsFromObjectsTask:
                 photo=document.photo,
                 expiry_date=document.expiry_date,
                 issuance_date=document.issuance_date,
-                rdi_merge_status="MERGED"
+                rdi_merge_status="MERGED",
             )
             imported_documents_to_create.append(imported_document)
         imported_identities_to_create = []
@@ -210,7 +214,7 @@ class CreateImportedObjectsFromObjectsTask:
                 number=identity.number,
                 individual=imported_individual,
                 country=Country.objects.get(iso_code2=identity.country.iso_code2),
-                rdi_merge_status="MERGED"
+                rdi_merge_status="MERGED",
             )
             imported_identities_to_create.append(imported_identity)
 
@@ -246,7 +250,7 @@ class CreateImportedObjectsFromObjectsTask:
                 mis_unicef_id=individual.unicef_id,
                 payment_delivery_phone_no=individual.payment_delivery_phone_no or "",
                 rdi_merge_status="MERGED",
-                business_area=rdi.business_area
+                business_area=rdi.business_area,
             )
 
             if (
@@ -278,7 +282,7 @@ class CreateImportedObjectsFromObjectsTask:
                 household=households_dict.get(role.household.id),
                 individual=individuals_dict.get(role.individual.id),
                 role=role.role,
-                rdi_merge_status="MERGED"
+                rdi_merge_status="MERGED",
             )
             imported_roles_to_create.append(imported_role)
 
@@ -296,7 +300,7 @@ class CreateImportedObjectsFromObjectsTask:
                 debit_card_number=bank_account_info.debit_card_number.replace(" ", ""),
                 bank_branch_name=bank_account_info.bank_branch_name,
                 account_holder_name=bank_account_info.account_holder_name,
-                rdi_merge_status="MERGED"
+                rdi_merge_status="MERGED",
             )
             imported_bank_account_info_to_create.append(imported_role)
 
@@ -344,8 +348,7 @@ class CreateImportedObjectsFromObjectsTask:
                     bank_account_infos, individuals_dict
                 )
                 logger.info(
-                    f"RDI:{registration_data_import_id} "
-                    f"Creating {len(households_dict)} imported households"
+                    f"RDI:{registration_data_import_id} " f"Creating {len(households_dict)} imported households"
                 )
                 Household.objects.bulk_create(households_dict.values())
                 Individual.objects.bulk_create(individuals_dict.values())
@@ -353,9 +356,7 @@ class CreateImportedObjectsFromObjectsTask:
                 IndividualIdentity.objects.bulk_create(identities_to_create)
                 IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
                 BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
-                logger.info(
-                    f"RDI:{registration_data_import_id} " f"Created {len(households_dict)} imported households"
-                )
+                logger.info(f"RDI:{registration_data_import_id} " f"Created {len(households_dict)} imported households")
         except Exception as e:  # pragma: no cover
             logger.error(e)
             raise
