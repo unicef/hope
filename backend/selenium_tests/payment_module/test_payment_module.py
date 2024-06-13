@@ -20,11 +20,10 @@ pytestmark = pytest.mark.django_db(transaction=True)
 
 
 @pytest.fixture
-def create_payment_plan() -> PaymentPlan:
-    targeting_criteria = TargetingCriteriaFactory()
+def create_test_program() -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
-    program = ProgramFactory(
+    return ProgramFactory(
         name="Test Program",
         programme_code="1234",
         start_date=datetime.now() - relativedelta(months=1),
@@ -32,8 +31,12 @@ def create_payment_plan() -> PaymentPlan:
         data_collecting_type=dct,
         status=Program.ACTIVE,
     )
+
+@pytest.fixture
+def create_payment_plan(create_test_program) -> PaymentPlan:
+    targeting_criteria = TargetingCriteriaFactory()
     TargetPopulationFactory(
-        program=program,
+        program=create_test_program,
         status=TargetPopulation.STATUS_OPEN,
         targeting_criteria=targeting_criteria,
     )
@@ -86,3 +89,18 @@ class TestSmokePaymentModule:
         assert "Follow-up Payment Plans" in pagePaymentModule.getTableLabel()[10].text
         assert "ACCEPTED" in pagePaymentModule.getStatusContainer().text
         assert "Rows per page: 5 1–1 of 1" in pagePaymentModule.getTablePagination().text.replace("\n", " ")
+
+    def test_smoke_new_payment_plan(self, create_test_program: Program, pagePaymentModule: PaymentModule) -> None:
+        pagePaymentModule.selectGlobalProgramFilter("Test Program").click()
+        pagePaymentModule.getNavPaymentModule().click()
+        pagePaymentModule.getButtonNewPaymentPlan().click()
+        pagePaymentModule.screenshot("0")
+
+        from selenium_tests.tools.tag_name_finder import printing
+
+        printing("Mapping", pagePaymentModule.driver)
+        printing("Methods", pagePaymentModule.driver)
+        printing("Assert", pagePaymentModule.driver)
+
+    def test_smoke_details_payment_plan(self, create_test_program: Program, pagePaymentModule: PaymentModule) -> None:
+        pass
