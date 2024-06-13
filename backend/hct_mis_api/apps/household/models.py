@@ -952,7 +952,6 @@ class Individual(
         on_delete=models.CASCADE,
         null=True,
     )
-    disability = models.CharField(max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED)
     work_status = models.CharField(
         max_length=20,
         choices=WORK_STATUS_CHOICE,
@@ -983,13 +982,18 @@ class Individual(
     sanction_list_possible_match = models.BooleanField(default=False, db_index=True)
     sanction_list_confirmed_match = models.BooleanField(default=False, db_index=True)
     pregnant = models.BooleanField(null=True)
+
+    disability = models.CharField(max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED)
     observed_disability = MultiSelectField(choices=OBSERVED_DISABILITY_CHOICE, default=NONE)
+    disability_certificate_picture = models.ImageField(blank=True, null=True)
+
     seeing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     hearing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     physical_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     memory_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     selfcare_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     comms_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
+
     who_answers_phone = models.CharField(max_length=150, blank=True)
     who_answers_alt_phone = models.CharField(max_length=150, blank=True)
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
@@ -1007,7 +1011,6 @@ class Individual(
         null=True,
         verbose_name=_("Beneficiary Program Registration Id"),
     )
-    disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
     relationship_confirmed = models.BooleanField(default=False)
     age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True)
