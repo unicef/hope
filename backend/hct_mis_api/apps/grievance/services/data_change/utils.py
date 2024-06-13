@@ -132,6 +132,8 @@ def handle_add_document(document_data: Dict, individual: Individual) -> Document
     if photo:
         photo = photoraw
 
+    document_type = DocumentType.objects.get(key=document_key)
+
     if Document.objects.filter(
         document_number=number,
         type__key=document_key,
@@ -139,9 +141,7 @@ def handle_add_document(document_data: Dict, individual: Individual) -> Document
         program_id=individual.program_id,
         status=Document.STATUS_VALID,
     ).exists():
-        raise ValidationError(f"Document with number {number} of type {document_key} already exists")
-
-    document_type = DocumentType.objects.get(key=document_key)
+        raise ValidationError(f"Document with number {number} of type {document_type} already exists")
 
     if (
         document_type.unique_for_individual
@@ -153,7 +153,7 @@ def handle_add_document(document_data: Dict, individual: Individual) -> Document
             status=Document.STATUS_VALID,
         ).exists()
     ):
-        raise ValidationError(f"Document of type {document_type}  already exists for this individual")
+        raise ValidationError(f"Document of type {document_type} already exists for this individual")
 
     country = geo_models.Country.objects.get(iso_code3=country_code)
 
@@ -177,6 +177,8 @@ def handle_edit_document(document_data: Dict) -> Document:
         photo = photoraw
 
     document = get_object_or_404(Document.objects.select_for_update(), id=(decode_id_string(document_data.get("id"))))
+    document_type = DocumentType.objects.get(key=document_key)
+
     if (
         Document.objects.exclude(pk=document.id)
         .filter(
@@ -188,9 +190,7 @@ def handle_edit_document(document_data: Dict) -> Document:
         )
         .exists()
     ):
-        raise ValidationError(f"Document with number {number} of type {document_key} already exists")
-
-    document_type = DocumentType.objects.get(key=document_key)
+        raise ValidationError(f"Document with number {number} of type {document_type} already exists")
 
     if (
         document_type.unique_for_individual
@@ -204,7 +204,7 @@ def handle_edit_document(document_data: Dict) -> Document:
         )
         .exists()
     ):
-        raise ValidationError(f"Document of type {document_type}  already exists for this individual")
+        raise ValidationError(f"Document of type {document_type} already exists for this individual")
 
     document.document_number = number
     document.type = document_type

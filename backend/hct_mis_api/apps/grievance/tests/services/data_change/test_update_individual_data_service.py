@@ -24,16 +24,21 @@ class TestUpdateIndividualDataService(BaseElasticSearchTestCase, TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        business_area = BusinessAreaFactory()
+        cls.business_area = BusinessAreaFactory()
         cls.program = ProgramFactory()
         cls.country_afg = CountryFactory(iso_code3="AFG")
 
         household, _ = create_household({"program": cls.program})
 
-        cls.individual = IndividualFactory(household=household, business_area=business_area, program=cls.program)
+        cls.individual = IndividualFactory(household=household, business_area=cls.business_area, program=cls.program)
 
-        cls.document_type_unique_for_individual = DocumentTypeFactory(unique_for_individual=True, key="unique")
-        cls.document_type_not_unique_for_individual = DocumentTypeFactory(unique_for_individual=False, key="not_unique")
+        cls.document_type_unique_for_individual = DocumentTypeFactory(
+            unique_for_individual=True, key="unique", label="Unique"
+        )
+        cls.document_type_unique_for_individual.refresh_from_db()
+        cls.document_type_not_unique_for_individual = DocumentTypeFactory(
+            unique_for_individual=False, key="not_unique", label="Not unique"
+        )
 
         ticket_details = TicketIndividualDataUpdateDetailsFactory(
             individual=cls.individual,
@@ -130,8 +135,12 @@ class TestUpdateIndividualDataService(BaseElasticSearchTestCase, TestCase):
         self.ticket.individual_data_update_ticket_details.save()
 
         service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError) as e:
             service.close(UserFactory())
+        self.assertEqual(
+            f"Document of type {self.document_type_unique_for_individual} already exists for this individual",
+            e.exception.message,
+        )
 
         self.assertEqual(Document.objects.filter(document_number="111111").count(), 0)
 
@@ -204,13 +213,16 @@ class TestUpdateIndividualDataService(BaseElasticSearchTestCase, TestCase):
 
         service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
 
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError) as e:
             service.close(UserFactory())
-
-        # document was not updated
         self.assertEqual(
-            Document.objects.filter(document_number="111111").first().type, self.document_type_not_unique_for_individual
+            f"Document of type {self.document_type_unique_for_individual} already exists for this individual",
+            e.exception.message,
         )
+
+        document_to_edit.refresh_from_db()
+        # document was not updated
+        self.assertEqual(document_to_edit.type, self.document_type_not_unique_for_individual)
 
     def test_edit_document_unique_per_individual(self) -> None:
         document_to_edit = DocumentFactory(
@@ -247,5 +259,57 @@ class TestUpdateIndividualDataService(BaseElasticSearchTestCase, TestCase):
         except ValidationError:
             self.fail("ValidationError should not be raised")
 
+        document_to_edit.refresh_from_db()
         # document updated
-        self.assertIsNotNone(Document.objects.filter(document_number="22222").first())
+        self.assertEqual(document_to_edit.document_number, "22222")
+
+    def test_edit_document_with_data_already_existing_in_same_program(self) -> None:
+        household, _ = create_household({"program": self.program})
+        individual = IndividualFactory(household=household, business_area=self.business_area, program=self.program)
+
+        existing_document = DocumentFactory(
+            individual=individual,
+            type=self.document_type_unique_for_individual,
+            status=Document.STATUS_VALID,
+            program=self.program,
+            document_number="123456",
+            country=self.country_afg,
+        )
+        document_to_edit = DocumentFactory(
+            individual=self.individual,
+            type=self.document_type_not_unique_for_individual,
+            status=Document.STATUS_VALID,
+            program=self.program,
+            document_number="111111",
+            country=self.country_afg,
+        )
+
+        self.ticket.individual_data_update_ticket_details.individual_data["documents_to_edit"] = [
+            {
+                "value": {
+                    "id": encode_id_base64(document_to_edit.id, "DocumentNode"),
+                    "key": self.document_type_unique_for_individual.key,
+                    "country": "AFG",
+                    "number": "123456",
+                },
+                "previous_value": {
+                    "id": encode_id_base64(document_to_edit.id, "DocumentNode"),
+                    "key": self.document_type_not_unique_for_individual.key,
+                    "country": "AFG",
+                    "number": "111111",
+                },
+                "approve_status": True,
+            }
+        ]
+        self.ticket.individual_data_update_ticket_details.save()
+        service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
+        with self.assertRaises(ValidationError) as e:
+            service.close(UserFactory())
+        self.assertEqual(
+            f"Document with number {existing_document.document_number} of type {self.document_type_unique_for_individual} already exists",
+            e.exception.message,
+        )
+
+        document_to_edit.refresh_from_db()
+        # document was not updated
+        self.assertEqual(document_to_edit.document_number, "111111")
