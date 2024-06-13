@@ -133,6 +133,46 @@ class TestCreateTargetPopulationMutation(APITestCase):
             variables=variables,
         )
 
+    def test_targeting_in_draft_program(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_CREATE], self.program.business_area)
+        self.program.status = Program.DRAFT
+        self.program.save()
+
+        variables = {
+            "createTargetPopulationInput": {
+                "name": "Example name 5",
+                "businessAreaSlug": "afghanistan",
+                "programId": self.id_to_base64(self.program.id, "ProgramNode"),
+                "excludedIds": "",
+                "targetingCriteria": {
+                    "rules": [
+                        {
+                            "filters": [
+                                {
+                                    "comparisonMethod": "EQUALS",
+                                    "fieldName": "size",
+                                    "arguments": [3],
+                                    "isFlexField": False,
+                                }
+                            ]
+                        }
+                    ]
+                },
+            }
+        }
+
+        response_error = self.graphql_request(
+            request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
+            context={"user": self.user},
+            variables=variables,
+        )
+        self.assertEqual(TargetPopulation.objects.count(), 0)
+        assert "errors" in response_error
+        self.assertIn(
+            "Only Active program can be assigned to Targeting",
+            response_error["errors"][0]["message"],
+        )
+
     def test_targeting_unique_constraints(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_CREATE], self.program.business_area)
 

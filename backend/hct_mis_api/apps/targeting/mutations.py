@@ -500,7 +500,7 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
         except ValidationError as e:
             logger.warning(e)
             if hasattr(e, "error_dict"):
-                return cls(validation_errors=e.message_dict)
+                return cls(validation_errors=e.message_dict)  # pragma: no cover
             else:
                 raise
 

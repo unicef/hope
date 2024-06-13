@@ -278,3 +278,33 @@ class TestUpdateTargetPopulationMutation(APITestCase):
             f"Target population with name: {variables['updateTargetPopulationInput']['name']} and program: {self.program.name} already exists.",
             response_error["errors"][0]["message"],
         )
+
+    def test_fail_update_for_incorrect_status(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_UPDATE], self.business_area)
+        target_population_with_incorrect_status = TargetPopulation(
+            name="target_population_with_incorrect_status",
+            targeting_criteria=self.get_targeting_criteria_for_rule(
+                {"field_name": "size", "arguments": [2], "comparison_method": "EQUALS"}
+            ),
+            created_by=self.user,
+            business_area=self.business_area,
+            program=self.program,
+            status=TargetPopulation.STATUS_PROCESSING,
+        )
+        target_population_with_incorrect_status.save()
+
+        variables = copy.deepcopy(VARIABLES)
+        variables["updateTargetPopulationInput"]["id"] = self.id_to_base64(
+            target_population_with_incorrect_status.id, "TargetPopulationNode"
+        )
+
+        response_error = self.graphql_request(
+            request_string=MUTATION_QUERY,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            variables=variables,
+        )
+        assert "errors" in response_error
+        self.assertIn(
+            "Finalized Target Population can't be changed",
+            response_error["errors"][0]["message"],
+        )
