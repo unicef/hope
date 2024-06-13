@@ -1,10 +1,16 @@
-from typing import List, Optional, TypedDict
+from decimal import Decimal
+from typing import Dict, List, Optional, TypedDict
 
-from django.db.models import Count, Q
+from django.db.models import Count, DecimalField, F, Q, QuerySet, Sum
+from django.db.models.functions import Coalesce
 
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
-from hct_mis_api.apps.payment.utils import get_payment_items_sequence_qs
+from hct_mis_api.apps.payment.utils import (
+    get_payment_items_for_dashboard,
+    get_payment_items_sequence_qs,
+)
 
 
 class PaymentVerificationChartQueryResponse(TypedDict):
@@ -99,3 +105,33 @@ def payment_verification_chart_query(
         "number_of_records": households_number,
         "average_sample_size": average_sample_size,
     }
+
+
+def total_cash_transferred_by_administrative_area_table_query(
+    year: int, business_area_slug: str, filters: Dict, collect_type: str
+) -> QuerySet[Area]:
+    payment_items_ids = (
+        get_payment_items_for_dashboard(year, business_area_slug, filters, True)
+        .filter(household__collect_type=collect_type)
+        .values_list("id", flat=True)
+    )
+
+    return (
+        Area.objects.filter(
+            Q(household__paymentrecord__id__in=payment_items_ids) | Q(household__payment__id__in=payment_items_ids),
+            area_type__area_level=2,
+        )
+        .distinct()
+        .annotate(
+            total_transferred_payment_records=Coalesce(
+                Sum("household__paymentrecord__delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
+            ),
+            total_transferred_payments=Coalesce(
+                Sum("household__payment__delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
+            ),
+        )
+        .annotate(
+            num_households=Count("household", distinct=True),
+            total_transferred=F("total_transferred_payments") + F("total_transferred_payment_records"),
+        )
+    )

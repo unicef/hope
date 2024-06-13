@@ -8,7 +8,6 @@ from django.db.models import (
     Case,
     CharField,
     Count,
-    DecimalField,
     Exists,
     F,
     Func,
@@ -56,7 +55,6 @@ from hct_mis_api.apps.core.utils import (
     encode_id_base64,
     to_choice_object,
 )
-from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE, Household
 from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
@@ -99,6 +97,7 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.services.dashboard_service import (
     payment_verification_chart_query,
+    total_cash_transferred_by_administrative_area_table_query,
 )
 from hct_mis_api.apps.payment.services.sampling import Sampling
 from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
@@ -1310,30 +1309,8 @@ class Query(graphene.ObjectType):
             return None
         order = kwargs.pop("order", None)
         order_by = kwargs.pop("order_by", None)
-        payment_items_ids = (
-            get_payment_items_for_dashboard(year, business_area_slug, chart_filters_decoder(kwargs), True)
-            .filter(household__collect_type=Household.CollectType.STANDARD.value)
-            .values_list("id", flat=True)
-        )
-
-        admin_areas = (
-            Area.objects.filter(
-                Q(household__paymentrecord__id__in=payment_items_ids) | Q(household__payment__id__in=payment_items_ids),
-                area_type__area_level=2,
-            )
-            .distinct()
-            .annotate(
-                total_transferred_payment_records=Coalesce(
-                    Sum("household__paymentrecord__delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
-                ),
-                total_transferred_payments=Coalesce(
-                    Sum("household__payment__delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
-                ),
-            )
-            .annotate(
-                num_households=Count("household", distinct=True),
-                total_transferred=F("total_transferred_payments") + F("total_transferred_payment_records"),
-            )
+        admin_areas = total_cash_transferred_by_administrative_area_table_query(
+            year, business_area_slug, chart_filters_decoder(kwargs), Household.CollectType.STANDARD.value
         )
 
         if order_by:
@@ -1368,30 +1345,8 @@ class Query(graphene.ObjectType):
             return None
         order = kwargs.pop("order", None)
         order_by = kwargs.pop("order_by", None)
-        payment_items_ids = (
-            get_payment_items_for_dashboard(year, business_area_slug, chart_filters_decoder(kwargs), True)
-            .filter(household__collect_type=Household.CollectType.SINGLE.value)
-            .values_list("id", flat=True)
-        )
-
-        admin_areas = (
-            Area.objects.filter(
-                Q(household__paymentrecord__id__in=payment_items_ids) | Q(household__payment__id__in=payment_items_ids),
-                area_type__area_level=2,
-            )
-            .distinct()
-            .annotate(
-                total_transferred_payment_records=Coalesce(
-                    Sum("household__paymentrecord__delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
-                ),
-                total_transferred_payments=Coalesce(
-                    Sum("household__payment__delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
-                ),
-            )
-            .annotate(
-                num_households=Count("household", distinct=True),
-                total_transferred=F("total_transferred_payments") + F("total_transferred_payment_records"),
-            )
+        admin_areas = total_cash_transferred_by_administrative_area_table_query(
+            year, business_area_slug, chart_filters_decoder(kwargs), Household.CollectType.SINGLE.value
         )
 
         if order_by:
