@@ -458,7 +458,7 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
 
             cls.has_permission(info, Permissions.TARGETING_DUPLICATE, target_population.business_area)
 
-            if TargetPopulation.objects.filter(name=name, program=program, is_removed=False):
+            if TargetPopulation.objects.filter(name=name, program=program, is_removed=False).exists():
                 raise ValidationError(
                     f"Target population with name: {name} and program: {program.name} already exists."
                 )
