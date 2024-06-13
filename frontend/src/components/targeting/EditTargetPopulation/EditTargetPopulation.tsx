@@ -253,7 +253,7 @@ export const EditTargetPopulation = ({
                         <Field
                           name="flagExcludeIfOnSanctionList"
                           label={t(
-                            'Exclude People with an active sanction screen flag',
+                            'Exclude People with an Active Sanction Screen Flag',
                           )}
                           color="primary"
                           component={FormikCheckboxField}
@@ -266,7 +266,7 @@ export const EditTargetPopulation = ({
                         <Field
                           name="flagExcludeIfOnSanctionList"
                           label={t(
-                            'Exclude Households with an active sanction screen flag',
+                            'Exclude Households with an Active Sanction Screen Flag',
                           )}
                           color="primary"
                           component={FormikCheckboxField}
