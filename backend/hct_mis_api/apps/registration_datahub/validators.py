@@ -623,7 +623,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     if header.value in admin_columns_all:
                         if cell.value:
                             admin_area_code_tuples.append((row_number, header.value, cell.value))
-                        else:
+                        # admin3 is not required for now
+                        elif not cell.value and header.value not in ("admin3_h_c", "pp_admin3_i_c"):
                             invalid_rows.append(
                                 {
                                     "row_number": row_number,
@@ -688,7 +689,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         message = f"Sheet: Individuals, There are multiple head of households for household with id: {household_id}"
                         invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
 
-            if sheet.title in ["Households", "People"]:
+            if sheet.title in ("Households", "People"):
                 admin_area_invalid_rows = self.validate_admin_areas(admin_area_code_tuples, business_area_slug)
                 if admin_area_invalid_rows:
                     invalid_rows.extend(admin_area_invalid_rows)
