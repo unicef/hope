@@ -41,6 +41,7 @@ from hct_mis_api.apps.core.utils import (
     chart_permission_decorator,
     to_choice_object,
 )
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.filters import (
     CashPlanFilter,
     PaymentVerificationPlanFilter,
@@ -200,15 +201,14 @@ class Query(graphene.ObjectType):
     )
 
     def resolve_all_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
-        if not info.context.user.is_authenticated:
-            return Program.objects.none()
+        user = info.context.user
         filters = {
             "business_area__slug": info.context.headers.get("Business-Area").lower(),
             "data_collecting_type__deprecated": False,
             "data_collecting_type__isnull": False,
         }
-        if not info.context.user.partner.is_unicef:
-            filters.update({"id__in": info.context.user.partner.programs.values_list("id", flat=True)})
+        if not user.partner.is_unicef:
+            filters.update({"id__in": user.partner.programs.values_list("id", flat=True)})
         return (
             Program.objects.filter(**filters)
             .exclude(data_collecting_type__code="unknown")
@@ -329,12 +329,12 @@ class Query(graphene.ObjectType):
                 delivery_month=F("delivery_date__month"),
                 total_delivered_cash=Sum(
                     "delivered_quantity_usd",
-                    filter=Q(delivery_type__in=GenericPayment.DELIVERY_TYPES_IN_CASH),
+                    filter=Q(delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_CASH),
                     output_field=DecimalField(),
                 ),
                 total_delivered_voucher=Sum(
                     "delivered_quantity_usd",
-                    filter=Q(delivery_type__in=GenericPayment.DELIVERY_TYPES_IN_VOUCHER),
+                    filter=Q(delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_VOUCHER),
                     output_field=DecimalField(),
                 ),
             )

@@ -17,6 +17,7 @@ from hct_mis_api.apps.household.fixtures import (
     create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
@@ -24,11 +25,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentPlanFactory,
     RealProgramFactory,
 )
-from hct_mis_api.apps.payment.models import (
-    AcceptanceProcessThreshold,
-    GenericPayment,
-    PaymentPlan,
-)
+from hct_mis_api.apps.payment.models import AcceptanceProcessThreshold, PaymentPlan
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
@@ -105,11 +102,11 @@ class TestActionPaymentPlanMutation(APITestCase):
         IndividualRoleInHouseholdFactory(household=household, individual=individuals[0], role=ROLE_PRIMARY)
 
         cls.financial_service_provider = FinancialServiceProviderFactory(
-            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH]
+            delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH]
         )
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=cls.payment_plan,
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
             financial_service_provider=cls.financial_service_provider,
         )
         PaymentFactory(parent=cls.payment_plan, collector=individuals[0], currency="PLN")

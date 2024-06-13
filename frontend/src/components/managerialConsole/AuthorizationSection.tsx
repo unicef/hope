@@ -131,6 +131,7 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
           label="Search"
           value={searchText}
           size="small"
+          data-cy="search-authorization"
           onChange={(e) => setSearchText(e.target.value)}
           InputProps={{
             startAdornment: (
@@ -171,6 +172,7 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
                 <Checkbox
                   checked={allSelected && selectedAuthorized.length > 0}
                   onClick={handleSelectAllAuthorized}
+                  data-cy="select-all-authorization"
                 />
               </Box>
             </TableCell>
@@ -181,6 +183,7 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
                     selectedProgram={selectedProgram}
                     setSelectedProgram={setSelectedProgram}
                     programs={programs}
+                    dataCy="program-select-authorization"
                   />
                 ) : (
                   <TableSortLabel
@@ -208,10 +211,15 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
                       row.id,
                     )
                   }
+                  data-cy="select-authorization"
                 />
               </TableCell>
               {columns.map((column) => (
-                <TableCell key={column.field} align="left">
+                <TableCell
+                  key={column.field}
+                  align="left"
+                  data-cy="column-field-authorization"
+                >
                   {column.renderCell
                     ? column.renderCell({ value: row[column.field], row })
                     : row[column.field]}

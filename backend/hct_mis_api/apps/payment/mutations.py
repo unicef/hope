@@ -32,6 +32,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     payment_plan_apply_engine_rule,
     payment_plan_exclude_beneficiaries,
 )
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.inputs import (
     ActionPaymentPlanInput,
     AssignFspToDeliveryMechanismInput,
@@ -45,7 +46,6 @@ from hct_mis_api.apps.payment.models import (
     CashPlan,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
-    GenericPayment,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
@@ -915,11 +915,11 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
         for delivery_mechanism in delivery_mechanisms_in_order:
             if delivery_mechanism == "":
                 raise GraphQLError("Delivery mechanism cannot be empty.")
-            if delivery_mechanism not in [choice[0] for choice in GenericPayment.DELIVERY_TYPE_CHOICE]:
+            if delivery_mechanism not in [choice[0] for choice in DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES]:
                 raise GraphQLError(f"Delivery mechanism '{delivery_mechanism}' is not valid.")
             if (
                 payment_plan.currency == USDC
-                and delivery_mechanism != GenericPayment.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET
+                and delivery_mechanism != DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET
             ):
                 raise GraphQLError(
                     "For currency USDC can be assigned only delivery mechanism Transfer to Digital Wallet"
@@ -961,7 +961,7 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
 
         if payment_plan.currency == USDC:
             for mapping in mappings:
-                if mapping["delivery_mechanism"] != GenericPayment.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET:
+                if mapping["delivery_mechanism"] != DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET:
                     raise GraphQLError(
                         "For currency USDC can be assigned only delivery mechanism Transfer to Digital Wallet"
                     )
