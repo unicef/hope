@@ -55,7 +55,7 @@ export const PaymentPlanParameters = ({
               disabled={!data || loading || Boolean(paymentPlan?.isFollowUp)}
               fullWidth
               decoratorEnd={<CalendarTodayRounded color="disabled" />}
-              data-cy="input-start-date"
+              dataCy="input-start-date"
               tooltip={t(
                 'The first day of the period intended to be covered by the payment plan. Note that individuals/households cannot be paid twice from the same programme within this period.',
               )}
@@ -73,7 +73,7 @@ export const PaymentPlanParameters = ({
               initialFocusedDate={values.startDate}
               fullWidth
               decoratorEnd={<CalendarTodayRounded color="disabled" />}
-              data-cy="input-end-date"
+              dataCy="input-end-date"
               tooltip={t(
                 'The last day of the period intended to be covered by the payment plan. Note that individuals/households cannot be paid twice from the same programme within this period.',
               )}
@@ -96,7 +96,7 @@ export const PaymentPlanParameters = ({
               disabled={!data || loading}
               fullWidth
               decoratorEnd={<CalendarTodayRounded color="disabled" />}
-              data-cy="input-dispersion-start-date"
+              dataCy="input-dispersion-start-date"
               tooltip={t(
                 'The first day from which payments could be delivered.',
               )}
@@ -113,7 +113,7 @@ export const PaymentPlanParameters = ({
               initialFocusedDate={values.dispersionStartDate}
               fullWidth
               decoratorEnd={<CalendarTodayRounded color="disabled" />}
-              data-cy="input-dispersion-end-date"
+              dataCy="input-dispersion-end-date"
               tooltip={t('The last day on which payments could be delivered.')}
             />
           </Grid>
