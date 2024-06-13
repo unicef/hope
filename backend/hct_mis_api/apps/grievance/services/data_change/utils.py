@@ -132,16 +132,29 @@ def handle_add_document(document_data: Dict, individual: Individual) -> Document
     if photo:
         photo = photoraw
 
-    document_already_exists = Document.objects.filter(
+    if Document.objects.filter(
         document_number=number,
         type__key=document_key,
         country__iso_code3=country_code,
         program_id=individual.program_id,
-    ).exists()
-    if document_already_exists:
+        status=Document.STATUS_VALID,
+    ).exists():
         raise ValidationError(f"Document with number {number} of type {document_key} already exists")
 
     document_type = DocumentType.objects.get(key=document_key)
+
+    if (
+        document_type.unique_for_individual
+        and Document.objects.filter(
+            type__key=document_key,
+            individual=individual,
+            country__iso_code3=country_code,
+            program_id=individual.program_id,
+            status=Document.STATUS_VALID,
+        ).exists()
+    ):
+        raise ValidationError(f"Document of type {document_type}  already exists for this individual")
+
     country = geo_models.Country.objects.get(iso_code3=country_code)
 
     return Document(
@@ -164,21 +177,37 @@ def handle_edit_document(document_data: Dict) -> Document:
         photo = photoraw
 
     document = get_object_or_404(Document.objects.select_for_update(), id=(decode_id_string(document_data.get("id"))))
-    document_already_exists = (
+    if (
         Document.objects.exclude(pk=document.id)
         .filter(
             document_number=number,
             type__key=document_key,
             country__iso_code3=country_code,
             program_id=document.program_id,
+            status=Document.STATUS_VALID,
         )
         .exists()
-    )
-    if document_already_exists:
+    ):
         raise ValidationError(f"Document with number {number} of type {document_key} already exists")
 
+    document_type = DocumentType.objects.get(key=document_key)
+
+    if (
+        document_type.unique_for_individual
+        and Document.objects.exclude(pk=document.id)
+        .filter(
+            type__key=document_key,
+            individual=document.individual,
+            country__iso_code3=country_code,
+            program_id=document.program_id,
+            status=Document.STATUS_VALID,
+        )
+        .exists()
+    ):
+        raise ValidationError(f"Document of type {document_type}  already exists for this individual")
+
     document.document_number = number
-    document.type = DocumentType.objects.get(key=document_key)
+    document.type = document_type
     document.country = geo_models.Country.objects.get(iso_code3=country_code)
     document.photo = photo
 
