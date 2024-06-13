@@ -291,7 +291,7 @@ export const TargetingCriteria = ({
                                 ?.flagExcludeIfOnSanctionList,
                             )}
                             label={t(
-                              'Exclude People with an active sanction screen flag',
+                              'Exclude People with an Active Sanction Screen Flag',
                             )}
                           />
                         </Grid>
@@ -312,7 +312,7 @@ export const TargetingCriteria = ({
                                 ?.flagExcludeIfOnSanctionList,
                             )}
                             label={t(
-                              'Exclude Households with an active sanction screen flag',
+                              'Exclude Households with an Active Sanction Screen Flag',
                             )}
                           />
                         </Grid>
@@ -349,12 +349,25 @@ export const TargetingCriteria = ({
                         />
                       </Grid>
                     )}
-                    {screenBeneficiary && (
+                    {screenBeneficiary && isStandardDctType && (
                       <Grid item xs={6}>
                         <Field
                           name="flagExcludeIfOnSanctionList"
                           label={t(
-                            'Exclude Households with an active sanction screen flag',
+                            'Exclude Households with an Active Sanction Screen Flag',
+                          )}
+                          color="primary"
+                          component={FormikCheckboxField}
+                          data-cy="input-active-sanction-flag"
+                        />
+                      </Grid>
+                    )}
+                    {screenBeneficiary && isSocialDctType && (
+                      <Grid item xs={6}>
+                        <Field
+                          name="flagExcludeIfOnSanctionList"
+                          label={t(
+                            'Exclude People with an Active Sanction Screen Flag',
                           )}
                           color="primary"
                           component={FormikCheckboxField}
