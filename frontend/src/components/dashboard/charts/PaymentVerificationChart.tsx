@@ -4,7 +4,7 @@ import { Bar } from 'react-chartjs-2';
 import { AllChartsQuery } from '@generated/graphql';
 
 interface PaymentVerificationChartProps {
-  data: AllChartsQuery['chartPaymentVerification'];
+  data: AllChartsQuery['chartPaymentVerification']['datasets'];
 }
 
 type DatasetTypes =
@@ -20,9 +20,7 @@ type Dataset = {
 export function PaymentVerificationChart({
   data,
 }: PaymentVerificationChartProps): React.ReactElement {
-  if (!data) return null;
-
-  const datasets = data.datasets.reduce(
+  const datasets = data.reduce(
     (previousValue, currentValue) => ({
       ...previousValue,
       [currentValue.label]: currentValue.data,
