@@ -3,13 +3,17 @@ from selenium.webdriver.remote.webelement import WebElement
 
 
 class NewPaymentPlan(BaseComponents):
+
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
     buttonSavePaymentPlan = 'button[data-cy="button-save-payment-plan"]'
     inputTargetPopulation = 'div[data-cy="input-target-population"]'
-    selectTargetingID = 'div[data-cy="select-targetingId"]'
-    datePickerFilter = 'div[data-cy="date-picker-filter"]'
+    selectTargetingid = 'div[data-cy="select-targetingId"]'
+    inputStartDate = 'div[data-cy="input-start-date"]'
+    inputEndDate = 'div[data-cy="input-end-date"]'
     inputCurrency = 'div[data-cy="input-currency"]'
+    inputDispersionStartDate = 'div[data-cy="input-dispersion-start-date"]'
+    inputDispersionEndDate = 'div[data-cy="input-dispersion-end-date"]'
 
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
@@ -23,11 +27,20 @@ class NewPaymentPlan(BaseComponents):
     def getInputTargetPopulation(self) -> WebElement:
         return self.wait_for(self.inputTargetPopulation)
 
-    def getSelectTargetingID(self) -> WebElement:
-        return self.wait_for(self.selectTargetingID)
+    def getSelectTargetingid(self) -> WebElement:
+        return self.wait_for(self.selectTargetingid)
 
-    def getDatePickerFilter(self) -> WebElement:
-        return self.wait_for(self.datePickerFilter)
+    def getInputStartDate(self) -> WebElement:
+        return self.wait_for(self.inputStartDate)
+
+    def getInputEndDate(self) -> WebElement:
+        return self.wait_for(self.inputEndDate)
 
     def getInputCurrency(self) -> WebElement:
         return self.wait_for(self.inputCurrency)
+
+    def getInputDispersionStartDate(self) -> WebElement:
+        return self.wait_for(self.inputDispersionStartDate)
+
+    def getInputDispersionEndDate(self) -> WebElement:
+        return self.wait_for(self.inputDispersionEndDate)

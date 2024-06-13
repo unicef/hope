@@ -1,3 +1,5 @@
+from time import sleep
+
 from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -16,6 +18,7 @@ class PaymentModule(BaseComponents):
     tableLabel = 'span[data-cy="table-label"]'
     statusContainer = 'div[data-cy="status-container"]'
     tablePagination = 'div[data-cy="table-pagination"]'
+    rows = '[role="checkbox"]'
 
     def getBusinessAreaContainer(self) -> WebElement:
         return self.wait_for(self.businessAreaContainer)
@@ -145,3 +148,14 @@ class PaymentModule(BaseComponents):
 
     def getTablePagination(self) -> WebElement:
         return self.wait_for(self.tablePagination)
+
+    def getRows(self) -> [WebElement]:
+        return self.get_elements(self.rows)
+
+    def getRow(self, number: int) -> WebElement:
+        try:
+            sleep(0.5)
+            return self.get_elements(self.rows)[number]
+        except BaseException:
+            sleep(5)
+            return self.get_elements(self.rows)[number]

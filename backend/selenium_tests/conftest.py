@@ -10,6 +10,9 @@ from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from flags.models import FlagState
+
+from page_object.payment_module.new_payment_plan import NewPaymentPlan
+from page_object.payment_module.payment_module_details import PaymentModuleDetails
 from page_object.admin_panel.admin_panel import AdminPanel
 from page_object.filters import Filters
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
@@ -286,6 +289,16 @@ def pageGrievanceNewTicket(request: FixtureRequest, browser: Chrome) -> NewTicke
 @pytest.fixture
 def pageManagerialConsole(request: FixtureRequest, browser: Chrome) -> ManagerialConsole:
     yield ManagerialConsole(browser)
+
+
+@pytest.fixture
+def pagePaymentModuleDetails(request: FixtureRequest, browser: Chrome) -> PaymentModuleDetails:
+    yield PaymentModuleDetails(browser)
+
+
+@pytest.fixture
+def pageNewPaymentPlan(request: FixtureRequest, browser: Chrome) -> NewPaymentPlan:
+    yield NewPaymentPlan(browser)
 
 
 @pytest.fixture
