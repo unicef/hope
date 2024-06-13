@@ -8,6 +8,7 @@ from django.db.models import (
     Case,
     CharField,
     Count,
+    DecimalField,
     Exists,
     F,
     Func,
@@ -17,7 +18,7 @@ from django.db.models import (
     QuerySet,
     Sum,
     Value,
-    When, FloatField, DecimalField,
+    When,
 )
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
@@ -49,9 +50,7 @@ from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.core.utils import (
-    chart_create_filter_query_for_payment_verification_gfk,
     chart_filters_decoder,
-    chart_get_filtered_qs,
     chart_permission_decorator,
     decode_id_string,
     encode_id_base64,
@@ -98,13 +97,16 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationSummary,
     ServiceProvider,
 )
+from hct_mis_api.apps.payment.services.dashboard_service import (
+    payment_verification_chart_query,
+)
 from hct_mis_api.apps.payment.services.sampling import Sampling
 from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
     does_payment_record_have_right_hoh_phone_number,
 )
 from hct_mis_api.apps.payment.utils import (
     get_payment_items_for_dashboard,
-    get_payment_plan_object, get_payment_items_sequence_qs,
+    get_payment_plan_object,
 )
 from hct_mis_api.apps.targeting.graphql_types import TargetPopulationNode
 from hct_mis_api.apps.targeting.models import TargetPopulation
@@ -112,7 +114,8 @@ from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
     ChartDetailedDatasetsNode,
     SectionTotalNode,
-    TableTotalCashTransferred, TableTotalCashTransferredForPeople,
+    TableTotalCashTransferred,
+    TableTotalCashTransferredForPeople,
 )
 
 
@@ -1204,124 +1207,38 @@ class Query(graphene.ObjectType):
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, Any]:
         filters = chart_filters_decoder(kwargs)
-        status_choices_mapping = dict(PaymentVerification.STATUS_CHOICES)
-
-        params = Q()
-        params &= Q(Q(payment__delivery_date__year=year) | Q(payment_record__delivery_date__year=year))
-        params &= Q(Q(payment__business_area__slug=business_area_slug) | Q(payment_record__business_area__slug=business_area_slug))
-        params &= Q(Q(payment__household__collect_type=Household.CollectType.STANDARD.value) | Q(payment_record__household__collect_type=Household.CollectType.STANDARD.value))
-
-        if program := filters.get("program"):
-            params &= Q(Q(payment__parent__program__id=program) | Q(payment_record__parent__program__id=program))
-
-        if administrative_area := filters.get("administrative_area"):
-            inner_params = Q()
-            inner_params |= Q(Q(payment__household__admin_area__id=administrative_area) & Q(payment__household__admin_area__area_type__area_level=2))
-            inner_params |= Q(Q(payment_record__household__admin_area__id=administrative_area) & Q(payment_record__household__admin_area__area_type__area_level=2))
-            params &= inner_params
-
-        payment_verifications = PaymentVerification.objects.filter(params).distinct()
-
-        verifications_by_status = payment_verifications.values("status").annotate(count=Count("status")).values_list("status", "count")
-        verifications_by_status_dict = dict(verifications_by_status)
-        dataset: List[int] = [verifications_by_status_dict.get(status, 0) for status in status_choices_mapping.keys()]
-        try:
-            all_verifications = sum(dataset)
-            dataset_percentage = [data / all_verifications for data in dataset]
-        except ZeroDivisionError:
-            dataset_percentage = [0] * len(status_choices_mapping.values())
-        dataset_percentage_done = [
-            {"label": status, "data": [dataset_percentage_value]}
-            for (dataset_percentage_value, status) in zip(dataset_percentage, status_choices_mapping.values())
-        ]
-
-        samples_count = payment_verifications.aggregate(payments_count=Count("payment") + Count("payment_record"))["payments_count"]
-        all_payment_records_for_created_verifications = (
-            get_payment_items_sequence_qs().filter(
-                parent__in=payment_verifications.distinct("payment_verification_plan__payment_plan_object_id").values_list(
-                    "payment_verification_plan__payment_plan_object_id", flat=True
-                )
-            )
-            .filter(status=PaymentRecord.STATUS_SUCCESS, delivered_quantity__gt=0)
-            .filter(household__collect_type=Household.CollectType.STANDARD.value)
-            .count()
+        result = payment_verification_chart_query(
+            year,
+            business_area_slug,
+            Household.CollectType.STANDARD.value,
+            filters.get("program"),
+            filters.get("administrative_area"),
         )
-        average_sample_size: float = (
-            0.0
-            if all_payment_records_for_created_verifications == 0
-            else samples_count / all_payment_records_for_created_verifications
-        )
-
-        households_number = Household.objects.filter(Q(pk__in=payment_verifications.values("payment__household")) | Q(pk__in=payment_verifications.values("payment_record__household"))).distinct().count()
-
         return {
-            "labels": ["Payment Verification"],
-            "datasets": dataset_percentage_done,
-            "households": households_number,
-            "average_sample_size": average_sample_size,
+            "labels": result["labels"],
+            "datasets": result["datasets"],
+            "households": result["number_of_records"],
+            "average_sample_size": result["average_sample_size"],
         }
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
     def resolve_chart_payment_verification_for_people(
-            self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, Any]:
         filters = chart_filters_decoder(kwargs)
-        status_choices_mapping = dict(PaymentVerification.STATUS_CHOICES)
-
-        params = Q()
-        params &= Q(Q(payment__delivery_date__year=year) | Q(payment_record__delivery_date__year=year))
-        params &= Q(Q(payment__business_area__slug=business_area_slug) | Q(payment_record__business_area__slug=business_area_slug))
-        params &= Q(Q(payment__household__collect_type=Household.CollectType.SINGLE.value) | Q(payment_record__household__collect_type=Household.CollectType.SINGLE.value))
-
-        if program := filters.get("program"):
-            params &= Q(Q(payment__parent__program__id=program) | Q(payment_record__parent__program__id=program))
-
-        if administrative_area := filters.get("administrative_area"):
-            inner_params = Q()
-            inner_params |= Q(Q(payment__household__admin_area__id=administrative_area) & Q(payment__household__admin_area__area_type__area_level=2))
-            inner_params |= Q(Q(payment_record__household__admin_area__id=administrative_area) & Q(payment_record__household__admin_area__area_type__area_level=2))
-            params &= inner_params
-
-        payment_verifications = PaymentVerification.objects.filter(params).distinct()
-
-        verifications_by_status = payment_verifications.values("status").annotate(count=Count("status")).values_list("status", "count")
-        verifications_by_status_dict = dict(verifications_by_status)
-        dataset: List[int] = [verifications_by_status_dict.get(status, 0) for status in status_choices_mapping.keys()]
-        try:
-            all_verifications = sum(dataset)
-            dataset_percentage = [data / all_verifications for data in dataset]
-        except ZeroDivisionError:
-            dataset_percentage = [0] * len(status_choices_mapping.values())
-        dataset_percentage_done = [
-            {"label": status, "data": [dataset_percentage_value]}
-            for (dataset_percentage_value, status) in zip(dataset_percentage, status_choices_mapping.values())
-        ]
-
-        samples_count = payment_verifications.aggregate(payments_count=Count("payment") + Count("payment_record"))["payments_count"]
-        all_payment_records_for_created_verifications = (
-            get_payment_items_sequence_qs().filter(
-                parent__in=payment_verifications.distinct("payment_verification_plan__payment_plan_object_id").values_list(
-                    "payment_verification_plan__payment_plan_object_id", flat=True
-                )
-            )
-            .filter(status=PaymentRecord.STATUS_SUCCESS, delivered_quantity__gt=0)
-            .filter(household__collect_type=Household.CollectType.SINGLE.value)
-            .count()
+        result = payment_verification_chart_query(
+            year,
+            business_area_slug,
+            Household.CollectType.SINGLE.value,
+            filters.get("program"),
+            filters.get("administrative_area"),
         )
-        average_sample_size: float = (
-            0.0
-            if all_payment_records_for_created_verifications == 0
-            else samples_count / all_payment_records_for_created_verifications
-        )
-
-        households_number = Household.objects.filter(Q(pk__in=payment_verifications.values("payment__household")) | Q(pk__in=payment_verifications.values("payment_record__household"))).distinct().count()
-
         return {
-            "labels": ["Payment Verification"],
-            "datasets": dataset_percentage_done,
-            "households": households_number,
-            "average_sample_size": average_sample_size,
+            "labels": result["labels"],
+            "datasets": result["datasets"],
+            "households": result["number_of_records"],
+            "average_sample_size": result["average_sample_size"],
         }
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
@@ -1387,15 +1304,17 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
     def resolve_table_total_cash_transferred_by_administrative_area(
-            self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Optional[Dict[str, Any]]:
         if business_area_slug == "global":
             return None
         order = kwargs.pop("order", None)
         order_by = kwargs.pop("order_by", None)
-        payment_items_ids = get_payment_items_for_dashboard(
-            year, business_area_slug, chart_filters_decoder(kwargs), True
-        ).filter(household__collect_type=Household.CollectType.STANDARD.value).values_list("id", flat=True)
+        payment_items_ids = (
+            get_payment_items_for_dashboard(year, business_area_slug, chart_filters_decoder(kwargs), True)
+            .filter(household__collect_type=Household.CollectType.STANDARD.value)
+            .values_list("id", flat=True)
+        )
 
         admin_areas = (
             Area.objects.filter(
@@ -1404,8 +1323,12 @@ class Query(graphene.ObjectType):
             )
             .distinct()
             .annotate(
-                total_transferred_payment_records=Coalesce(Sum("household__paymentrecord__delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)),
-                total_transferred_payments=Coalesce(Sum("household__payment__delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)),
+                total_transferred_payment_records=Coalesce(
+                    Sum("household__paymentrecord__delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
+                ),
+                total_transferred_payments=Coalesce(
+                    Sum("household__payment__delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
+                ),
             )
             .annotate(
                 num_households=Count("household", distinct=True),
@@ -1439,25 +1362,31 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
     def resolve_table_total_cash_transferred_by_administrative_area_for_people(
-            self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Optional[Dict[str, Any]]:
         if business_area_slug == "global":
             return None
         order = kwargs.pop("order", None)
         order_by = kwargs.pop("order_by", None)
-        payment_items_ids = get_payment_items_for_dashboard(
-            year, business_area_slug, chart_filters_decoder(kwargs), True
-        ).filter(household__collect_type=Household.CollectType.SINGLE.value).values_list("id", flat=True)
+        payment_items_ids = (
+            get_payment_items_for_dashboard(year, business_area_slug, chart_filters_decoder(kwargs), True)
+            .filter(household__collect_type=Household.CollectType.SINGLE.value)
+            .values_list("id", flat=True)
+        )
 
         admin_areas = (
             Area.objects.filter(
                 Q(household__paymentrecord__id__in=payment_items_ids) | Q(household__payment__id__in=payment_items_ids),
                 area_type__area_level=2,
-                )
+            )
             .distinct()
             .annotate(
-                total_transferred_payment_records=Coalesce(Sum("household__paymentrecord__delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)),
-                total_transferred_payments=Coalesce(Sum("household__payment__delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)),
+                total_transferred_payment_records=Coalesce(
+                    Sum("household__paymentrecord__delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
+                ),
+                total_transferred_payments=Coalesce(
+                    Sum("household__payment__delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
+                ),
             )
             .annotate(
                 num_households=Count("household", distinct=True),
