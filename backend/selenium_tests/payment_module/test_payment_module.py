@@ -2,8 +2,8 @@ from datetime import datetime
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from page_object.payment_module.payment_module import PaymentModule
 from page_object.payment_module.new_payment_plan import NewPaymentPlan
+from page_object.payment_module.payment_module import PaymentModule
 from page_object.payment_module.payment_module_details import PaymentModuleDetails
 
 from hct_mis_api.apps.account.models import User
@@ -17,7 +17,6 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetPopulationFactory,
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
-
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -35,8 +34,9 @@ def create_test_program() -> Program:
         status=Program.ACTIVE,
     )
 
+
 @pytest.fixture
-def create_payment_plan(create_test_program) -> PaymentPlan:
+def create_payment_plan(create_test_program: Program) -> PaymentPlan:
     targeting_criteria = TargetingCriteriaFactory()
     TargetPopulationFactory(
         program=create_test_program,
@@ -93,7 +93,9 @@ class TestSmokePaymentModule:
         assert "ACCEPTED" in pagePaymentModule.getStatusContainer().text
         assert "Rows per page: 5 1–1 of 1" in pagePaymentModule.getTablePagination().text.replace("\n", " ")
 
-    def test_smoke_new_payment_plan(self, create_test_program: Program, pagePaymentModule: PaymentModule, pageNewPaymentPlan: NewPaymentPlan) -> None:
+    def test_smoke_new_payment_plan(
+        self, create_test_program: Program, pagePaymentModule: PaymentModule, pageNewPaymentPlan: NewPaymentPlan
+    ) -> None:
         pagePaymentModule.selectGlobalProgramFilter("Test Program").click()
         pagePaymentModule.getNavPaymentModule().click()
         pagePaymentModule.getButtonNewPaymentPlan().click()
@@ -107,7 +109,12 @@ class TestSmokePaymentModule:
         assert "Dispersion Start Date*" in pageNewPaymentPlan.getInputDispersionStartDate().text
         assert "Dispersion End Date*" in pageNewPaymentPlan.getInputDispersionEndDate().text
 
-    def test_smoke_details_payment_plan(self, create_payment_plan: PaymentPlan, pagePaymentModule: PaymentModule, pagePaymentModuleDetails: PaymentModuleDetails) -> None:
+    def test_smoke_details_payment_plan(
+        self,
+        create_payment_plan: PaymentPlan,
+        pagePaymentModule: PaymentModule,
+        pagePaymentModuleDetails: PaymentModuleDetails,
+    ) -> None:
         pagePaymentModule.selectGlobalProgramFilter("Test Program").click()
         pagePaymentModule.getNavPaymentModule().click()
         assert "NEW PAYMENT PLAN" in pagePaymentModule.getButtonNewPaymentPlan().text
@@ -115,17 +122,20 @@ class TestSmokePaymentModule:
         assert "ACCEPTED" in pagePaymentModuleDetails.getStatusContainer().text
         assert "EXPORT XLSX" in pagePaymentModuleDetails.getButtonExportXlsx().text
         assert "Test Program" in pagePaymentModuleDetails.getLabelProgramme().text
-        # assert "Weight environmental rather trade can note ready response." in pagePaymentModuleDetails.getLabelTargetPopulation().text
         assert "USD" in pagePaymentModuleDetails.getLabelCurrency().text
-        assert str(datetime.now()) in pagePaymentModuleDetails.getLabelStartDate().text
-        assert str(datetime.now() + relativedelta(days=30)) in pagePaymentModuleDetails.getLabelEndDate().text
-        assert str(datetime.now()) in pagePaymentModuleDetails.getLabelDispersionStartDate().text
-        assert str(datetime.now() + relativedelta(days=14)) in pagePaymentModuleDetails.getLabelDispersionEndDate().text
+        assert str((datetime.now()).strftime("%d %b %Y")) in pagePaymentModuleDetails.getLabelStartDate().text
+        assert (
+            str((datetime.now() + relativedelta(days=30)).strftime("%d %b %Y"))
+            in pagePaymentModuleDetails.getLabelEndDate().text
+        )
+        assert str((datetime.now()).strftime("%d %b %Y")) in pagePaymentModuleDetails.getLabelDispersionStartDate().text
+        assert (
+            str((datetime.now() + relativedelta(days=14)).strftime("%d %b %Y"))
+            in pagePaymentModuleDetails.getLabelDispersionEndDate().text
+        )
         assert "-" in pagePaymentModuleDetails.getLabelRelatedFollowUpPaymentPlans().text
         assert "SET UP FSP" in pagePaymentModuleDetails.getButtonSetUpFsp().text
         assert "CREATE" in pagePaymentModuleDetails.getButtonCreateExclusions().text
-        assert "" in pagePaymentModuleDetails.getInputExclusionreason().text
-        assert "" in pagePaymentModuleDetails.getButtonApplyExclusions().text
         assert "0" in pagePaymentModuleDetails.getLabelFemaleChildren().text
         assert "0" in pagePaymentModuleDetails.getLabelFemaleAdults().text
         assert "0" in pagePaymentModuleDetails.getLabelMaleChildren().text
@@ -135,14 +145,13 @@ class TestSmokePaymentModule:
         assert "0" in pagePaymentModuleDetails.getLabelTargetedIndividuals().text
         assert "Payee List" in pagePaymentModuleDetails.getTableTitle().text
         assert "UPLOAD RECONCILIATION INFO" in pagePaymentModuleDetails.getButtonImport().text
-        assert "" in pagePaymentModuleDetails.getTableLabel().text
-        assert "Payment ID" in pagePaymentModuleDetails.getTableLabel().text
-        assert "Household ID" in pagePaymentModuleDetails.getTableLabel().text
-        assert "Household Size" in pagePaymentModuleDetails.getTableLabel().text
-        assert "Administrative Level 2" in pagePaymentModuleDetails.getTableLabel().text
-        assert "Collector" in pagePaymentModuleDetails.getTableLabel().text
-        assert "FSP" in pagePaymentModuleDetails.getTableLabel().text
-        assert "Entitlement" in pagePaymentModuleDetails.getTableLabel().text
-        assert "Delivered Quantity" in pagePaymentModuleDetails.getTableLabel().text
-        assert "FSP Auth Code" in pagePaymentModuleDetails.getTableLabel().text
-        assert "Reconciliation" in pagePaymentModuleDetails.getTableLabel().text
+        assert "Payment ID" in pagePaymentModuleDetails.getTableLabel()[1].text
+        assert "Household ID" in pagePaymentModuleDetails.getTableLabel()[2].text
+        assert "Household Size" in pagePaymentModuleDetails.getTableLabel()[3].text
+        assert "Administrative Level 2" in pagePaymentModuleDetails.getTableLabel()[4].text
+        assert "Collector" in pagePaymentModuleDetails.getTableLabel()[5].text
+        assert "FSP" in pagePaymentModuleDetails.getTableLabel()[6].text
+        assert "Entitlement" in pagePaymentModuleDetails.getTableLabel()[7].text
+        assert "Delivered Quantity" in pagePaymentModuleDetails.getTableLabel()[8].text
+        assert "FSP Auth Code" in pagePaymentModuleDetails.getTableLabel()[9].text
+        assert "Reconciliation" in pagePaymentModuleDetails.getTableLabel()[10].text

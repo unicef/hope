@@ -3,7 +3,6 @@ from selenium.webdriver.remote.webelement import WebElement
 
 
 class NewPaymentPlan(BaseComponents):
-
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
     buttonSavePaymentPlan = 'button[data-cy="button-save-payment-plan"]'

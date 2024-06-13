@@ -122,8 +122,8 @@ class PaymentModuleDetails(BaseComponents):
     def getButtonImport(self) -> WebElement:
         return self.wait_for(self.buttonImport)
 
-    def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
+    def getTableLabel(self) -> [WebElement]:
+        return self.get_elements(self.tableLabel)
 
     def getTableRow(self) -> WebElement:
         return self.wait_for(self.tableRow)
@@ -151,4 +151,3 @@ class PaymentModuleDetails(BaseComponents):
 
     def getLabelReconciled(self) -> WebElement:
         return self.wait_for(self.labelReconciled)
-
