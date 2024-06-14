@@ -34,9 +34,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.registration_data.models import (
 from hct_mis_api.apps.payment.models import DeliveryMechanismData
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
 from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.models import (
@@ -48,8 +46,6 @@ from hct_mis_api.apps.registration_datahub.models import (
     RegistrationDataImport,
     RegistrationDataImportDatahub,
 )
-from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
-from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.signals import rdi_merged
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
@@ -468,6 +464,9 @@ class RdiMergeTask:
             )
             roles = IndividualRoleInHousehold.objects.filter(household__in=households, individual__in=individuals)
             bank_account_infos = BankAccountInfo.objects.filter(individual__in=individuals)
+            imported_delivery_mechanism_data = ImportedDeliveryMechanismData.objects.filter(
+                individual__in=individuals,
+            )
             household_ids = []
             try:
                 with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
@@ -476,9 +475,19 @@ class RdiMergeTask:
                     individual_ids = [str(individual.id) for individual in individuals]
                     household_ids = [str(household.id) for household in households]
 
+                    households_dict = self._prepare_households(households, obj_hct)
+                    (
+                        individuals_dict,
+                        documents_to_create,
+                        identities_to_create,
+                    ) = self._prepare_individuals(individuals, households_dict, obj_hct)
+
                     transaction.on_commit(lambda: recalculate_population_fields_task(household_ids, obj_hct.program_id))
                     logger.info(
                         f"RDI:{registration_data_import_id} Recalculated population fields for {len(household_ids)} households"
+                    )
+                    delivery_mechanisms_data_to_create = self._prepare_delivery_mechanisms_data(
+                        imported_delivery_mechanism_data, individuals_dict
                     )
                     kobo_submissions = []
                     for household in households:

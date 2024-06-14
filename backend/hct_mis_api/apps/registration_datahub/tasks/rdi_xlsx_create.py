@@ -41,20 +41,12 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.registration_data.models import (  # ImportedBankAccountInfo,; ImportedDocument,; ImportedDocumentType,; ImportedHousehold,; ImportedIndividual,; ImportedIndividualIdentity,; ImportedIndividualRoleInHousehold,
 from hct_mis_api.apps.payment.models import DeliveryMechanismData
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
-    RegistrationDataImport,
-    ImportedBankAccountInfo,
     ImportedDeliveryMechanismData,
-    ImportedDocument,
-    ImportedDocumentType,
-    ImportedHousehold,
     ImportedIndividual,
-    ImportedIndividualIdentity,
-    ImportedIndividualRoleInHousehold,
+    RegistrationDataImport,
     RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask

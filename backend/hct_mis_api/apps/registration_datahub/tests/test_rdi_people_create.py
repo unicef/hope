@@ -16,14 +16,13 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import (
     ImportData,
-    ImportedDeliveryMechanismData,
     ImportedHousehold,
     ImportedIndividual,
 )
 from hct_mis_api.apps.registration_datahub.fixtures import (
     RegistrationDataImportDatahubFactory,
 )
-from hct_mis_api.conftest import disabled_locally_test
+from hct_mis_api.apps.registration_datahub.models import ImportedDeliveryMechanismData
 
 
 class TestRdiXlsxPeople(BaseElasticSearchTestCase):
