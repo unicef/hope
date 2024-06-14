@@ -73,6 +73,10 @@ const AddCriteria = styled.div`
   }
 `;
 
+const NoWrapCheckbox = styled(FormControlLabel)`
+  white-space: nowrap;
+`;
+
 interface TargetingCriteriaProps {
   rules?;
   helpers?;
@@ -236,7 +240,7 @@ export const TargetingCriteria = ({
                   <Grid container spacing={3}>
                     <Grid item xs={6}>
                       {isStandardDctType && (
-                        <FormControlLabel
+                        <NoWrapCheckbox
                           disabled
                           control={
                             <Checkbox
@@ -255,7 +259,7 @@ export const TargetingCriteria = ({
                         />
                       )}
                       {isSocialDctType && (
-                        <FormControlLabel
+                        <NoWrapCheckbox
                           disabled
                           control={
                             <Checkbox
@@ -276,7 +280,7 @@ export const TargetingCriteria = ({
                     </Grid>
                     <Grid item xs={6}>
                       {screenBeneficiary && isSocialDctType && (
-                        <FormControlLabel
+                        <NoWrapCheckbox
                           disabled
                           control={
                             <Checkbox
@@ -295,7 +299,7 @@ export const TargetingCriteria = ({
                         />
                       )}
                       {screenBeneficiary && isStandardDctType && (
-                        <FormControlLabel
+                        <NoWrapCheckbox
                           disabled
                           control={
                             <Checkbox
