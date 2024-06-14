@@ -38,7 +38,25 @@ class TestSmokePeople:
     def test_smoke_page_people(self, social_worker_program: Program, pagePeople: People) -> None:
         pagePeople.selectGlobalProgramFilter("Worker Program").click()
         pagePeople.getNavPeople().click()
+        assert "People" in pagePeople.getTableTitle().text
+        assert "Individual ID" in pagePeople.getIndividualId().text
+        assert "Individual ID" in pagePeople.getTableLabel().text
+        assert "Individual" in pagePeople.getIndividualName().text
+        assert "Individual" in pagePeople.getTableLabel().text
+        assert "Type" in pagePeople.getIndividualAge().text
+        assert "Type" in pagePeople.getTableLabel().text
+        assert "Age" in pagePeople.getIndividualAge().text
+        assert "Age" in pagePeople.getTableLabel().text
+        assert "Gender" in pagePeople.getIndividualSex().text
+        assert "Gender" in pagePeople.getTableLabel().text
+        assert "Administrative Level 2" in pagePeople.getIndividualLocation().text
+        assert "Administrative Level 2" in pagePeople.getTableLabel().text
+        assert "Rows per page: 10 0–0 of 0 " in pagePeople.getTablePagination().text.replace("\n", " ")
+
+    def test_smoke_page_details_people(self, social_worker_program: Program, pagePeople: People) -> None:
+        pagePeople.selectGlobalProgramFilter("Worker Program").click()
+        pagePeople.getNavPeople().click()
         pagePeople.screenshot("1")
         from selenium_tests.tools.tag_name_finder import printing
 
-        printing("Mapping", pagePeople.driver)
+        printing("Assert", pagePeople.driver)
