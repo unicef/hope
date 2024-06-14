@@ -114,7 +114,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         else:
             self._add_payment_record_verification_row_for_household(payment_record_verification)
 
-    def _add_payment_record_verification_row_for_people(self, payment_record_verification):
+    def _add_payment_record_verification_row_for_people(self, payment_record_verification: PaymentVerification) -> None:
         household = payment_record_verification.payment_obj.household
         head_of_household = payment_record_verification.payment_obj.head_of_household
         payment_record_verification_row = (
@@ -135,7 +135,9 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         )
         self.ws_export_list.append(payment_record_verification_row)
 
-    def _add_payment_record_verification_row_for_household(self, payment_record_verification):
+    def _add_payment_record_verification_row_for_household(
+        self, payment_record_verification: PaymentVerification
+    ) -> None:
         household = payment_record_verification.payment_obj.household
         head_of_household = payment_record_verification.payment_obj.head_of_household
         payment_record_verification_row = (

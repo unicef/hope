@@ -44,27 +44,27 @@ from hct_mis_api.apps.targeting.fixtures import (
 
 
 class TestXlsxVerificationImport(APITestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
+    def setUp(self) -> None:
+        super().setUp()
         create_afghanistan()
         payment_record_amount = 10
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        self.business_area = BusinessArea.objects.get(slug="afghanistan")
 
-        cls.user = UserFactory()
+        self.user = UserFactory()
 
-        program = ProgramFactory(business_area=cls.business_area)
+        program = ProgramFactory(business_area=self.business_area)
         program.admin_areas.set(Area.objects.order_by("?")[:3])
         targeting_criteria = TargetingCriteriaFactory()
 
         target_population = TargetPopulationFactory(
-            created_by=cls.user, targeting_criteria=targeting_criteria, business_area=cls.business_area
+            created_by=self.user, targeting_criteria=targeting_criteria, business_area=self.business_area
         )
-        cash_plan = CashPlanFactory(program=program, business_area=cls.business_area)
+        cash_plan = CashPlanFactory(program=program, business_area=self.business_area)
         cash_plan.save()
         payment_verification_plan = PaymentVerificationPlanFactory(generic_fk_obj=cash_plan)
         for _ in range(payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
-                imported_by=cls.user, business_area=BusinessArea.objects.first()
+                imported_by=self.user, business_area=BusinessArea.objects.first()
             )
             household, individuals = create_household(
                 {
@@ -90,8 +90,8 @@ class TestXlsxVerificationImport(APITestCase):
                 status=PaymentVerification.STATUS_PENDING,
             )
             EntitlementCardFactory(household=household)
-        cls.cash_plan = cash_plan
-        cls.verification = cash_plan.payment_verification_plan.first()
+        self.cash_plan = cash_plan
+        self.verification = cash_plan.payment_verification_plan.first()
 
     @parameterized.expand(
         [
