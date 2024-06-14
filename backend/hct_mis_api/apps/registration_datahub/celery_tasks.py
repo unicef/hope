@@ -65,7 +65,11 @@ def locked_cache(key: Union[int, str], timeout: int = 60 * 60 * 24) -> Any:
 @log_start_and_end
 @sentry_tags
 def registration_xlsx_import_task(
-    self: Any, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: "UUID"
+    self: Any,
+    registration_data_import_id: str,
+    import_data_id: str,
+    business_area_id: str,
+    program_id: "UUID",
 ) -> bool:
     try:
         from hct_mis_api.apps.program.models import Program
@@ -110,7 +114,6 @@ def registration_xlsx_import_task(
         logger.info(str(e))
         return True
     except Exception as e:
-        logger.warning(e)
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
         )
@@ -361,7 +364,7 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID") -> Dict:
 def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> Dict:
     from hct_mis_api.apps.program.models import Program
     from hct_mis_api.apps.registration_datahub.models import ImportData
-    from hct_mis_api.apps.registration_datahub.tasks.validatate_xlsx_import import (
+    from hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import import (
         ValidateXlsxImport,
     )
 

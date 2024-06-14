@@ -22,6 +22,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.reporting.models import DashboardReport
@@ -113,7 +114,7 @@ class GenerateDashboardReportContentHelpers:
 
         def aggregate_by_delivery_type(payment_records: QuerySet[PaymentRecord]) -> Dict:
             result = dict()
-            for delivery_type in PaymentRecord.DELIVERY_TYPE_CHOICE:
+            for delivery_type in DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES:
                 value = delivery_type[0]
                 result[value] = (
                     payment_records.filter(delivery_type=value)
@@ -147,12 +148,12 @@ class GenerateDashboardReportContentHelpers:
         def get_filter_query(cash: bool, month: int) -> Q:
             if cash:
                 return Q(
-                    cashplan__payment_items__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH,
+                    cashplan__payment_items__delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_CASH,
                     cashplan__payment_items__delivery_date__month=month,
                 )
             else:
                 return Q(
-                    cashplan__payment_items__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER,
+                    cashplan__payment_items__delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_VOUCHER,
                     cashplan__payment_items__delivery_date__month=month,
                 )
 
@@ -351,14 +352,14 @@ class GenerateDashboardReportContentHelpers:
             .annotate(
                 total_cash=Sum(
                     "paymentrecord__delivered_quantity_usd",
-                    filter=Q(paymentrecord__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH),
+                    filter=Q(paymentrecord__delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_CASH),
                     output_field=DecimalField(),
                 )
             )
             .annotate(
                 total_voucher=Sum(
                     "paymentrecord__delivered_quantity_usd",
-                    filter=Q(paymentrecord__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER),
+                    filter=Q(paymentrecord__delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_VOUCHER),
                     output_field=DecimalField(),
                 )
             )
@@ -437,7 +438,7 @@ class GenerateDashboardReportContentHelpers:
             instance.get("business_area_code", "") if not is_totals else "",
             instance.get("name", "") if not is_totals else "Total",
         ]
-        for choice in PaymentRecord.DELIVERY_TYPE_CHOICE:
+        for choice in DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES:
             result.append(instance.get(choice[0]))
 
         return tuple(result)
@@ -784,7 +785,7 @@ class GenerateDashboardReportService:
                 "business area",
                 "programme",
             ),
-            SHARED: tuple(choice[1] for choice in PaymentRecord.DELIVERY_TYPE_CHOICE),
+            SHARED: tuple(choice[1] for choice in DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES),
         },
         DashboardReport.INDIVIDUALS_REACHED: {
             HQ: (
@@ -863,7 +864,7 @@ class GenerateDashboardReportService:
     REMOVE_EMPTY_COLUMNS = {
         DashboardReport.VOLUME_BY_DELIVERY_MECHANISM: (
             3,
-            len(PaymentRecord.DELIVERY_TYPE_CHOICE) + 3,
+            len(DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES) + 3,
         )
     }
     META_SHEET = "Meta data"

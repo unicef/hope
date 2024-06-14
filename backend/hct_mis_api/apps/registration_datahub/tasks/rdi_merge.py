@@ -11,6 +11,10 @@ from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.geo.models import Area, Country
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketIndividualDataUpdateDetails,
+)
 from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
 )
@@ -30,11 +34,13 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.models import DeliveryMechanismData
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
 from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
+    ImportedDeliveryMechanismData,
     ImportedHousehold,
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
@@ -347,8 +353,22 @@ class RdiMergeTask:
 
         return roles_to_create
 
+    def _prepare_delivery_mechanisms_data(
+        self, imported_delivery_mechanisms_data: List[ImportedDeliveryMechanismData], individuals_dict: Dict
+    ) -> List:
+        delivery_mechanisms_data_to_create = []
+        for imported_delivery_mechanism_data in imported_delivery_mechanisms_data:
+            delivery_mechanism_data = DeliveryMechanismData(
+                individual=individuals_dict.get(imported_delivery_mechanism_data.individual.id),
+                delivery_mechanism=imported_delivery_mechanism_data.delivery_mechanism,
+                data=imported_delivery_mechanism_data.data,
+            )
+            delivery_mechanisms_data_to_create.append(delivery_mechanism_data)
+
+        return delivery_mechanisms_data_to_create
+
     def _prepare_bank_account_info(
-        self, imported_bank_account_infos: List[BankAccountInfo], individuals_dict: Dict
+        self, imported_bank_account_infos: List[ImportedBankAccountInfo], individuals_dict: Dict
     ) -> List:
         roles_to_create = []
         for imported_bank_account_info in imported_bank_account_infos:
@@ -364,6 +384,76 @@ class RdiMergeTask:
 
         return roles_to_create
 
+    def _create_grievance_ticket_for_delivery_mechanisms_errors(
+        self, delivery_mechanism_data: DeliveryMechanismData, obj_hct: RegistrationDataImport, description: str
+    ) -> Tuple[GrievanceTicket, TicketIndividualDataUpdateDetails]:
+        comments = f"This is a system generated ticket for RDI {obj_hct}"
+        grievance_ticket = GrievanceTicket(
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+            admin2=delivery_mechanism_data.individual.household.admin2,
+            business_area=obj_hct.business_area,
+            registration_data_import=obj_hct,
+            description=description,
+            comments=comments,
+        )
+        individual_data_with_approve_status = delivery_mechanism_data.get_grievance_ticket_payload_for_errors()
+        individual_data_update_ticket = TicketIndividualDataUpdateDetails(
+            individual_data={"delivery_mechanism_data_to_edit": [individual_data_with_approve_status]},
+            individual=delivery_mechanism_data.individual,
+            ticket=grievance_ticket,
+        )
+
+        return grievance_ticket, individual_data_update_ticket
+
+    def _create_grievance_tickets_for_delivery_mechanisms_errors(
+        self, delivery_mechanisms_data: List[DeliveryMechanismData], obj_hct: RegistrationDataImport
+    ) -> None:
+        grievance_tickets_to_create = []
+        individual_data_update_tickets_to_create = []
+        for delivery_mechanism_data in delivery_mechanisms_data:
+            delivery_mechanism_data.validate()
+            if not delivery_mechanism_data.is_valid:
+                description = (
+                    f"Missing required fields {list(delivery_mechanism_data.validation_errors.keys())}"
+                    f" values for delivery mechanism {delivery_mechanism_data.delivery_mechanism}"
+                )
+                (
+                    grievance_ticket,
+                    individual_data_update_ticket,
+                ) = self._create_grievance_ticket_for_delivery_mechanisms_errors(
+                    delivery_mechanism_data, obj_hct, description
+                )
+                grievance_tickets_to_create.append(grievance_ticket)
+                individual_data_update_tickets_to_create.append(individual_data_update_ticket)
+
+            else:
+                delivery_mechanism_data.update_unique_field()
+                if not delivery_mechanism_data.is_valid:
+                    description = (
+                        f"Fields not unique {list(delivery_mechanism_data.validation_errors.keys())} across program"
+                        f" for delivery mechanism {delivery_mechanism_data.delivery_mechanism}, possible duplicate of {delivery_mechanism_data.possible_duplicate_of}"
+                    )
+                    (
+                        grievance_ticket,
+                        individual_data_update_ticket,
+                    ) = self._create_grievance_ticket_for_delivery_mechanisms_errors(
+                        delivery_mechanism_data, obj_hct, description
+                    )
+                    grievance_tickets_to_create.append(grievance_ticket)
+                    individual_data_update_tickets_to_create.append(individual_data_update_ticket)
+            delivery_mechanism_data.save()
+
+        if grievance_tickets_to_create:
+            GrievanceTicket.objects.bulk_create(grievance_tickets_to_create)
+            TicketIndividualDataUpdateDetails.objects.bulk_create(individual_data_update_tickets_to_create)
+            for grievance_ticket in grievance_tickets_to_create:
+                grievance_ticket.programs.add(obj_hct.program)
+
+            logger.info(
+                f"RDI:{obj_hct} Created {len(grievance_tickets_to_create)} delivery mechanisms error grievance tickets"
+            )
+
     def execute(self, registration_data_import_id: str) -> None:
         individual_ids, household_ids = [], []
         try:
@@ -377,6 +467,10 @@ class RdiMergeTask:
                 household__in=imported_households, individual__in=imported_individuals
             )
             imported_bank_account_infos = ImportedBankAccountInfo.objects.filter(individual__in=imported_individuals)
+
+            imported_delivery_mechanism_data = ImportedDeliveryMechanismData.objects.filter(
+                individual__in=imported_individuals,
+            )
             household_ids = []
             try:
                 with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
@@ -393,6 +487,9 @@ class RdiMergeTask:
                     bank_account_infos_to_create = self._prepare_bank_account_info(
                         imported_bank_account_infos, individuals_dict
                     )
+                    delivery_mechanisms_data_to_create = self._prepare_delivery_mechanisms_data(
+                        imported_delivery_mechanism_data, individuals_dict
+                    )
                     logger.info(f"RDI:{registration_data_import_id} Creating {len(households_dict)} households")
                     Household.objects.bulk_create(households_dict.values())
                     Individual.objects.bulk_create(individuals_dict.values())
@@ -400,6 +497,7 @@ class RdiMergeTask:
                     IndividualIdentity.objects.bulk_create(identities_to_create)
                     IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
                     BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
+                    DeliveryMechanismData.objects.bulk_create(delivery_mechanisms_data_to_create)
                     logger.info(f"RDI:{registration_data_import_id} Created {len(households_dict)} households")
                     individual_ids = [str(individual.id) for individual in individuals_dict.values()]
                     household_ids = [str(household.id) for household in households_dict.values()]
@@ -486,7 +584,7 @@ class RdiMergeTask:
                             registration_data_import=obj_hct,
                         )
                         logger.info(
-                            "RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)} needs adjudication"
+                            f"RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)} needs adjudication"
                         )
 
                     # SANCTION LIST CHECK
@@ -494,6 +592,10 @@ class RdiMergeTask:
                         logger.info(f"RDI:{registration_data_import_id} Checking against sanction list")
                         CheckAgainstSanctionListPreMergeTask.execute(registration_data_import=obj_hct)
                         logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")
+
+                    self._create_grievance_tickets_for_delivery_mechanisms_errors(
+                        delivery_mechanisms_data_to_create, obj_hct
+                    )
 
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()

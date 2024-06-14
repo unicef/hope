@@ -249,10 +249,14 @@ class ImportDataNode(DjangoObjectType):
         filter_fields = []
         interfaces = (relay.Node,)
 
-    def resolve_xlsx_validation_errors(parrent, info: Any) -> List[str]:
-        if not parrent.validation_errors:
-            return []
-        return json.loads(parrent.validation_errors)
+    @staticmethod
+    def resolve_xlsx_validation_errors(parent: ImportData, info: Any) -> List[str]:
+        errors = []
+        if parent.validation_errors:
+            errors.extend(json.loads(parent.validation_errors))
+        if parent.delivery_mechanisms_validation_errors:
+            errors.extend(json.loads(parent.delivery_mechanisms_validation_errors))
+        return errors
 
 
 class KoboImportDataNode(DjangoObjectType):

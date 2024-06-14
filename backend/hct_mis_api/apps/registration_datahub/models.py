@@ -47,6 +47,7 @@ from hct_mis_api.apps.household.models import (
     UNIQUE,
     WORK_STATUS_CHOICE,
 )
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.phone import (
@@ -373,6 +374,23 @@ class ImportedIndividualRoleInHousehold(TimeStampedUUIDModel):
         unique_together = ("role", "household")
 
 
+class ImportedDeliveryMechanismData(TimeStampedUUIDModel):
+    individual = models.OneToOneField(
+        "ImportedIndividual",
+        on_delete=models.CASCADE,
+        related_name="delivery_mechanisms_data",
+    )
+    data = JSONField(default=dict, blank=True)
+
+    delivery_mechanism = models.CharField(
+        max_length=255, verbose_name=_("Delivery Mechanism"), choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES
+    )
+
+    is_valid = models.BooleanField(default=False)
+    validation_errors = JSONField(default=dict)
+    unique_key = models.CharField(max_length=256, blank=True, null=True, unique=True, editable=False)  # type: ignore
+
+
 class RegistrationDataImportDatahub(TimeStampedUUIDModel):
     LOADING = "LOADING"
     NOT_STARTED = "NOT_STARTED"
@@ -429,6 +447,7 @@ class ImportData(TimeStampedUUIDModel):
     STATUS_FINISHED = "FINISHED"
     STATUS_ERROR = "ERROR"
     STATUS_VALIDATION_ERROR = "VALIDATION_ERROR"
+    STATUS_DELIVERY_MECHANISMS_VALIDATION_ERROR = "DELIVERY_MECHANISMS_VALIDATION_ERROR"
 
     STATUS_CHOICES = (
         (STATUS_PENDING, _("Pending")),
@@ -436,8 +455,9 @@ class ImportData(TimeStampedUUIDModel):
         (STATUS_FINISHED, _("Finished")),
         (STATUS_ERROR, _("Error")),
         (STATUS_VALIDATION_ERROR, _("Validation Error")),
+        (STATUS_DELIVERY_MECHANISMS_VALIDATION_ERROR, _("Delivery Mechanisms Validation Error")),
     )
-    status = models.CharField(max_length=20, default=STATUS_FINISHED, choices=STATUS_CHOICES)
+    status = models.CharField(max_length=40, default=STATUS_FINISHED, choices=STATUS_CHOICES)
     business_area_slug = models.CharField(max_length=200, blank=True)
     file = models.FileField(null=True)
     data_type = models.CharField(max_length=4, choices=DATA_TYPE_CHOICES, default=XLSX)
@@ -445,6 +465,7 @@ class ImportData(TimeStampedUUIDModel):
     number_of_individuals = models.PositiveIntegerField(null=True)
     error = models.TextField(blank=True)
     validation_errors = models.TextField(blank=True)
+    delivery_mechanisms_validation_errors = models.TextField(blank=True)
     created_by_id = models.UUIDField(null=True)
 
 

@@ -62,7 +62,10 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
       $approvedIdentitiesToRemove: [Int],
       $approvedPaymentChannelsToCreate: [Int],
       $approvedPaymentChannelsToEdit: [Int],
-      $approvedPaymentChannelsToRemove: [Int]
+      $approvedPaymentChannelsToRemove: [Int],
+      $approvedDeliveryMechanismDataToCreate: [Int],
+      $approvedDeliveryMechanismDataToEdit: [Int],
+      $approvedDeliveryMechanismDataToRemove: [Int]
     ) {
       approveIndividualDataChange(
         grievanceTicketId: $grievanceTicketId,
@@ -76,7 +79,10 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         approvedIdentitiesToRemove: $approvedIdentitiesToRemove,
         approvedPaymentChannelsToCreate: $approvedPaymentChannelsToCreate,
         approvedPaymentChannelsToEdit: $approvedPaymentChannelsToEdit,
-        approvedPaymentChannelsToRemove: $approvedPaymentChannelsToRemove
+        approvedPaymentChannelsToRemove: $approvedPaymentChannelsToRemove,
+        approvedDeliveryMechanismDataToCreate: $approvedDeliveryMechanismDataToCreate,
+        approvedDeliveryMechanismDataToEdit: $approvedDeliveryMechanismDataToEdit,
+        approvedDeliveryMechanismDataToRemove: $approvedDeliveryMechanismDataToRemove
       ) {
         grievanceTicket {
           id
@@ -339,6 +345,9 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                 "approvedPaymentChannelsToCreate": [],
                 "approvedPaymentChannelsToEdit": [],
                 "approvedPaymentChannelsToRemove": [],
+                "approvedDeliveryMechanismDataToCreate": [],
+                "approvedDeliveryMechanismDataToEdit": [],
+                "approvedDeliveryMechanismDataToRemove": [],
                 "flexFieldsApproveData": json.dumps({}),
             },
         )

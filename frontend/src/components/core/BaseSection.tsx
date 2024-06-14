@@ -45,7 +45,9 @@ export function BaseSection({
       <Box p={p}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           {typeof title === 'string' ? (
-            <Typography variant="h6">{t(title)}</Typography>
+            <Typography data-cy="title" variant="h6">
+              {t(title)}
+            </Typography>
           ) : (
             title
           )}
@@ -53,7 +55,7 @@ export function BaseSection({
         </Box>
         {description && (
           <Box mb={2}>
-            <GreyText>{description}</GreyText>
+            <GreyText data-cy="description">{description}</GreyText>
           </Box>
         )}
         {children}

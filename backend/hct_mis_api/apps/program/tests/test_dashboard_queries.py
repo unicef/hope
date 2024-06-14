@@ -8,13 +8,13 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentRecordFactory,
 )
-from hct_mis_api.apps.payment.models import GenericPayment
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -110,7 +110,7 @@ class TestDashboardQueries(APITestCase):
             parent=cash_plan1,
             delivery_date=delivery_date1,
             household=household,
-            delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
+            delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
             delivered_quantity_usd=133,
             currency="PLN",
         )
@@ -118,7 +118,7 @@ class TestDashboardQueries(APITestCase):
             parent=cash_plan1,
             delivery_date=delivery_date1,
             household=household,
-            delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
+            delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
             delivered_quantity_usd=25,
             currency="PLN",
         )
@@ -126,7 +126,7 @@ class TestDashboardQueries(APITestCase):
             parent=cash_plan1,
             delivery_date=delivery_date2,
             household=household,
-            delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
+            delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
             delivered_quantity_usd=133,
             currency="PLN",
         )
@@ -134,7 +134,7 @@ class TestDashboardQueries(APITestCase):
             parent=cash_plan1,
             delivery_date=delivery_date2,
             household=household,
-            delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
+            delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
             delivered_quantity_usd=25,
             currency="PLN",
         )
@@ -143,28 +143,28 @@ class TestDashboardQueries(APITestCase):
         PaymentFactory(
             parent=payment_plan1,
             delivery_date=delivery_date1,
-            delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
+            delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
             delivered_quantity_usd=133,
             currency="PLN",
         )
         PaymentFactory(
             parent=payment_plan1,
             delivery_date=delivery_date1,
-            delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
+            delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
             delivered_quantity_usd=25,
             currency="PLN",
         )
         PaymentFactory(
             parent=payment_plan1,
             delivery_date=delivery_date2,
-            delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
+            delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
             delivered_quantity_usd=133,
             currency="PLN",
         )
         PaymentFactory(
             parent=payment_plan1,
             delivery_date=delivery_date2,
-            delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
+            delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
             delivered_quantity_usd=25,
             currency="PLN",
         )

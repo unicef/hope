@@ -467,7 +467,7 @@
   "Number of Programmes by Sector": "Number of Programmes by Sector",
   "Total Transferred by Month": "Total Transferred by Month",
   "Volume by Delivery Mechanism in USD": "Volume by Delivery Mechanism in USD",
-  "Delivery type in CashAssist": "Delivery type in CashAssist",
+  "Delivery Type": "Delivery Type",
   "Login via Active Directory": "Login via Active Directory",
   "Sign in": "Sign in",
   "PROGRAMME NAME": "PROGRAMME NAME",
@@ -875,5 +875,6 @@
   "Approved by": "Approved by",
   "Authorized by": "Authorized by",
   "This individual is also included in other Payment Plans. Click this icon to view details.": "This individual is also included in other Payment Plans. Click this icon to view details.",
-  "AdditionalRegistrationInformation": "Additional Registration Information"
+  "AdditionalRegistrationInformation": "Additional Registration Information",
+  "Delivery Mechanism Data to be edited": "Delivery Mechanism Data to be edited"
 }
