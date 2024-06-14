@@ -147,7 +147,6 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         user = info.context.user
         input_data = kwargs.pop("input")
         program = get_object_or_404(Program, pk=decode_id_string(input_data.get("program_id")))
-        business_area = BusinessArea.objects.get(slug=input_data.get("business_area_slug"))
 
         cls.has_permission(info, Permissions.TARGETING_CREATE, program.business_area)
 
@@ -155,14 +154,8 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             raise ValidationError("Only Active program can be assigned to Targeting")
 
         tp_name = input_data.get("name", "").strip()
-        if TargetPopulation.objects.filter(
-            name=tp_name, program=program, business_area=business_area, is_removed=False
-        ).exists():
-            raise ValidationError(
-                f"Target population with name: {tp_name}, program: {program.name} "
-                f"and business_area: {business_area.slug} already exists."
-            )
-
+        if TargetPopulation.objects.filter(name=tp_name, program=program, is_removed=False).exists():
+            raise ValidationError(f"Target population with name: {tp_name} and program: {program.name} already exists.")
         targeting_criteria_input = input_data.get("targeting_criteria")
 
         business_area = BusinessArea.objects.get(slug=input_data.pop("business_area_slug"))
@@ -226,8 +219,14 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             msg = "Name can't be changed when Target Population is in Locked status"
             logger.error(msg)
             raise ValidationError(msg)
-        if TargetPopulation.objects.filter(name=name).exclude(id=decode_id_string(tp_id)).exists():
-            raise ValidationError(f"Target population with name {name} already exists")
+        if (
+            TargetPopulation.objects.filter(name=name, program=target_population.program, is_removed=False)
+            .exclude(id=decode_id_string(tp_id))
+            .exists()
+        ):
+            raise ValidationError(
+                f"Target population with name: {name} and program: {target_population.program.name} already exists."
+            )
         if target_population.is_finalized():
             msg = "Finalized Target Population can't be changed"
             logger.error(msg)
@@ -455,8 +454,14 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
             name = target_population_data.pop("name")
             target_id = utils.decode_id_string(target_population_data.pop("id"))
             target_population = TargetPopulation.objects.get(id=target_id)
+            program = target_population.program
 
             cls.has_permission(info, Permissions.TARGETING_DUPLICATE, target_population.business_area)
+
+            if TargetPopulation.objects.filter(name=name, program=program, is_removed=False).exists():
+                raise ValidationError(
+                    f"Target population with name: {name} and program: {program.name} already exists."
+                )
 
             target_population_copy = TargetPopulation(
                 name=name,
@@ -471,7 +476,7 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
                 total_individuals_count=target_population.total_individuals_count,
                 steficon_rule=target_population.steficon_rule,
                 steficon_applied_date=target_population.steficon_applied_date,
-                program=target_population.program,
+                program=program,
             )
             target_population_copy.full_clean()
             target_population_copy.save()
@@ -487,14 +492,17 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
                 TargetPopulation.ACTIVITY_LOG_MAPPING,
                 "business_area",
                 info.context.user,
-                getattr(target_population.program, "pk", None),
+                getattr(program, "pk", None),
                 None,
                 target_population,
             )
             return CopyTargetPopulationMutation(target_population_copy)
         except ValidationError as e:
-            logger.exception(e)
-            return cls(validation_errors=e.message_dict)
+            logger.warning(e)
+            if hasattr(e, "error_dict"):
+                return cls(validation_errors=e.message_dict)  # pragma: no cover
+            else:
+                raise
 
     @classmethod
     def copy_target_criteria(cls, targeting_criteria: TargetingCriteria) -> TargetingCriteria:

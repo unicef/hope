@@ -182,6 +182,7 @@ class GrievanceTicketFilter(FilterSet):
             .filter(
                 Q(full_name__icontains=search)
                 | Q(registration_id__icontains=search)
+                | Q(program_registration_id__icontains=search)
                 | Q(phone_no__icontains=search)
                 | Q(phone_no_alternative__icontains=search)
                 | Q(bank_account_info__bank_account_number__icontains=search)
