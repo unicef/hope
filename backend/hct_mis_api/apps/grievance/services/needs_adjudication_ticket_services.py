@@ -185,7 +185,7 @@ def create_needs_adjudication_tickets(
             else:
                 individuals_to_remove_from_es.add(individual.get("hit_id"))
 
-        if possible_duplicates:
+        if possible_duplicates and not (possible_duplicate in possible_duplicates and len(possible_duplicates) == 1):
             ticket, ticket_details = create_grievance_ticket_with_details(
                 main_individual=possible_duplicate,
                 possible_duplicate=possible_duplicate,  # for backward compatibility

@@ -1,5 +1,6 @@
+import dataclasses
 from datetime import date, datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from django.contrib.auth.models import AbstractUser
 from django.db import transaction
@@ -31,8 +32,10 @@ from hct_mis_api.apps.grievance.services.data_change.utils import (
     handle_edit_document,
     handle_edit_identity,
     handle_role,
+    handle_update_delivery_mechanism_data,
     handle_update_payment_channel,
     is_approved,
+    prepare_edit_delivery_mechanism_data,
     prepare_edit_documents,
     prepare_edit_identities,
     prepare_edit_payment_channel,
@@ -59,7 +62,23 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
+from hct_mis_api.apps.payment.models import DeliveryMechanismData
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
+
+
+@dataclasses.dataclass
+class DeliveryMechanismDataPayloadField:
+    name: str
+    value: Optional[str] = None
+    previous_value: Optional[str] = None
+
+
+@dataclasses.dataclass
+class DeliveryMechanismDataPayload:
+    id: str
+    label: str
+    approve_status: bool
+    data_fields: List[DeliveryMechanismDataPayloadField]
 
 
 class IndividualDataUpdateService(DataChangeService):
@@ -79,6 +98,9 @@ class IndividualDataUpdateService(DataChangeService):
         payment_channels = individual_data.pop("payment_channels", [])
         payment_channels_to_remove = individual_data.pop("payment_channels_to_remove", [])
         payment_channels_to_edit = individual_data.pop("payment_channels_to_edit", [])
+        delivery_mechanism_data = individual_data.pop("delivery_mechanism_data", {})
+        delivery_mechanism_data_to_remove = individual_data.pop("delivery_mechanism_data_to_remove", [])
+        delivery_mechanism_data_to_edit = individual_data.pop("delivery_mechanism_data_to_edit", [])
         to_phone_number_str(individual_data, "phone_no")
         to_phone_number_str(individual_data, "phone_no_alternative")
         to_phone_number_str(individual_data, "payment_delivery_phone_no")
@@ -112,6 +134,13 @@ class IndividualDataUpdateService(DataChangeService):
         payment_channels_to_remove_with_approve_status = [
             {"value": payment_channel_id, "approve_status": False} for payment_channel_id in payment_channels_to_remove
         ]
+        delivery_mechanism_data_with_approve_status = [
+            {"value": delivery_mechanism, "approve_status": False} for delivery_mechanism in delivery_mechanism_data
+        ]
+        delivery_mechanism_data_to_remove_with_approve_status = [
+            {"value": delivery_mechanism_data_id, "approve_status": False}
+            for delivery_mechanism_data_id in delivery_mechanism_data_to_remove
+        ]
         flex_fields_with_approve_status = {
             field: {"value": value, "approve_status": False, "previous_value": individual.flex_fields.get(field)}
             for field, value in flex_fields.items()
@@ -119,9 +148,15 @@ class IndividualDataUpdateService(DataChangeService):
         individual_data_with_approve_status["documents"] = documents_with_approve_status
         individual_data_with_approve_status["documents_to_remove"] = documents_to_remove_with_approve_status
         individual_data_with_approve_status["documents_to_edit"] = prepare_edit_documents(documents_to_edit)
+        individual_data_with_approve_status["previous_documents"] = prepare_previous_documents(
+            documents_to_remove_with_approve_status
+        )
         individual_data_with_approve_status["identities"] = identities_with_approve_status
         individual_data_with_approve_status["identities_to_remove"] = identities_to_remove_with_approve_status
         individual_data_with_approve_status["identities_to_edit"] = prepare_edit_identities(identities_to_edit)
+        individual_data_with_approve_status["previous_identities"] = prepare_previous_identities(
+            identities_to_remove_with_approve_status
+        )
         individual_data_with_approve_status["payment_channels"] = payment_channels_with_approve_status
         individual_data_with_approve_status[
             "payment_channels_to_remove"
@@ -129,16 +164,18 @@ class IndividualDataUpdateService(DataChangeService):
         individual_data_with_approve_status["payment_channels_to_edit"] = prepare_edit_payment_channel(
             payment_channels_to_edit
         )
-        individual_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
-        individual_data_with_approve_status["previous_documents"] = prepare_previous_documents(
-            documents_to_remove_with_approve_status
-        )
-        individual_data_with_approve_status["previous_identities"] = prepare_previous_identities(
-            identities_to_remove_with_approve_status
-        )
         individual_data_with_approve_status["previous_payment_channels"] = prepare_previous_payment_channels(
             payment_channels_to_remove_with_approve_status
         )
+        individual_data_with_approve_status["delivery_mechanism_data"] = delivery_mechanism_data_with_approve_status
+        individual_data_with_approve_status[
+            "delivery_mechanism_data_to_remove"
+        ] = delivery_mechanism_data_to_remove_with_approve_status
+        individual_data_with_approve_status["delivery_mechanism_data_to_edit"] = prepare_edit_delivery_mechanism_data(
+            delivery_mechanism_data_to_edit
+        )
+        individual_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
+
         ticket_individual_data_update_details = TicketIndividualDataUpdateDetails(
             individual_data=individual_data_with_approve_status,
             individual=individual,
@@ -162,6 +199,9 @@ class IndividualDataUpdateService(DataChangeService):
         payment_channels = new_individual_data.pop("payment_channels", [])
         payment_channels_to_remove = new_individual_data.pop("payment_channels_to_remove", [])
         payment_channels_to_edit = new_individual_data.pop("payment_channels_to_edit", [])
+        delivery_mechanism_data = new_individual_data.pop("delivery_mechanism_data", {})
+        delivery_mechanism_data_to_remove = new_individual_data.pop("delivery_mechanism_data_to_remove", [])
+        delivery_mechanism_data_to_edit = new_individual_data.pop("delivery_mechanism_data_to_edit", [])
         flex_fields = {
             to_snake_case(field): value for field, value in new_individual_data.pop("flex_fields", {}).items()
         }
@@ -198,6 +238,13 @@ class IndividualDataUpdateService(DataChangeService):
         payment_channels_to_remove_with_approve_status = [
             {"value": payment_channel_id, "approve_status": False} for payment_channel_id in payment_channels_to_remove
         ]
+        delivery_mechanism_data_with_approve_status = [
+            {"value": delivery_mechanism, "approve_status": False} for delivery_mechanism in delivery_mechanism_data
+        ]
+        delivery_mechanism_data_to_remove_with_approve_status = [
+            {"value": delivery_mechanism_data_id, "approve_status": False}
+            for delivery_mechanism_data_id in delivery_mechanism_data_to_remove
+        ]
         flex_fields_with_approve_status = {
             field: {"value": value, "approve_status": False, "previous_value": individual.flex_fields.get(field)}
             for field, value in flex_fields.items()
@@ -223,6 +270,13 @@ class IndividualDataUpdateService(DataChangeService):
         )
         individual_data_with_approve_status["previous_payment_channels"] = prepare_previous_payment_channels(
             payment_channels_to_remove_with_approve_status
+        )
+        individual_data_with_approve_status["delivery_mechanism_data"] = delivery_mechanism_data_with_approve_status
+        individual_data_with_approve_status[
+            "delivery_mechanism_data_to_remove"
+        ] = delivery_mechanism_data_to_remove_with_approve_status
+        individual_data_with_approve_status["delivery_mechanism_data_to_edit"] = prepare_edit_delivery_mechanism_data(
+            delivery_mechanism_data_to_edit
         )
         individual_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
         ticket_details.individual_data = individual_data_with_approve_status
@@ -274,6 +328,16 @@ class IndividualDataUpdateService(DataChangeService):
             for identity in individual_data.pop("payment_channels_to_edit", [])
             if is_approved(identity)
         ]
+        _ = [
+            dmd for dmd in individual_data.pop("delivery_mechanism_data", []) if is_approved(dmd)
+        ]  # missing implementation for delivery mechanism data create
+        delivery_mechanism_data_to_remove_encoded = individual_data.pop("delivery_mechanism_data_to_remove", [])
+        _ = [
+            decode_id_string(data["value"]) for data in delivery_mechanism_data_to_remove_encoded if is_approved(data)
+        ]  # missing implementation for delivery mechanism data remove
+        delivery_mechanism_data_to_edit = [
+            dmd for dmd in individual_data.pop("delivery_mechanism_data_to_edit", []) if is_approved(dmd)
+        ]
         only_approved_data = {
             field: convert_to_empty_string_if_null(value_and_approve_status.get("value"))
             for field, value_and_approve_status in individual_data.items()
@@ -324,6 +388,8 @@ class IndividualDataUpdateService(DataChangeService):
         payment_channels_to_update = [
             handle_update_payment_channel(payment_channel) for payment_channel in payment_channels_to_edit
         ]
+        delivery_mechanism_data_to_update = handle_update_delivery_mechanism_data(delivery_mechanism_data_to_edit)
+
         Document.objects.bulk_create(documents_to_create)
         Document.objects.bulk_update(documents_to_update, ["document_number", "type", "photo", "country"])
         Document.objects.filter(id__in=documents_to_remove).delete()
@@ -335,6 +401,12 @@ class IndividualDataUpdateService(DataChangeService):
             payment_channels_to_update, ["bank_name", "bank_account_number", "account_holder_name", "bank_branch_name"]
         )
         BankAccountInfo.objects.filter(id__in=payment_channels_to_remove).delete()
+
+        if delivery_mechanism_data_to_update:
+            DeliveryMechanismData.objects.bulk_update(delivery_mechanism_data_to_update, ["data"])
+            for delivery_mechanism_data in delivery_mechanism_data_to_update:
+                delivery_mechanism_data.revalidate_for_grievance_ticket(self.grievance_ticket)
+
         if new_individual.household:
             recalculate_data(new_individual.household)
         else:

@@ -32,6 +32,7 @@ from hct_mis_api.apps.core.tests.test_exchange_rates import (
     EXCHANGE_RATES_WITH_HISTORICAL_DATA,
 )
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.models import CashPlan, PaymentRecord, ServiceProvider
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
@@ -168,7 +169,7 @@ class TestPullDataFromDatahub(TestCase):
         dh_payment_record.entitlement_card_number = "ASH12345678"
         dh_payment_record.entitlement_card_status = PaymentRecord.ENTITLEMENT_CARD_STATUS_ACTIVE
         dh_payment_record.entitlement_card_issue_date = timezone.now() - timedelta(days=10)
-        dh_payment_record.delivery_type = PaymentRecord.DELIVERY_TYPE_CASH
+        dh_payment_record.delivery_type = DeliveryMechanismChoices.DELIVERY_TYPE_CASH
         dh_payment_record.currency = "USD"
         dh_payment_record.entitlement_quantity = 10
         dh_payment_record.delivered_quantity = 10

@@ -3,12 +3,13 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
 )
-from hct_mis_api.apps.payment.models import FinancialServiceProvider, GenericPayment
+from hct_mis_api.apps.payment.models import FinancialServiceProvider
 
 
 class TestAllFinancialServiceProviders(APITestCase):
@@ -58,7 +59,7 @@ class TestAllFinancialServiceProviders(APITestCase):
         fsps = FinancialServiceProviderFactory.create_batch(
             9,
             distribution_limit=9999,
-            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH],
+            delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH],
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
         )
         for fsp in fsps:
