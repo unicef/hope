@@ -3,7 +3,6 @@ from selenium.webdriver.remote.webelement import WebElement
 
 
 class People(BaseComponents):
-
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
     indFiltersSearch = 'div[data-cy="ind-filters-search"]'
