@@ -19,6 +19,7 @@ from page_object.grievance.grievance_tickets import GrievanceTickets
 from page_object.grievance.new_feedback import NewFeedback
 from page_object.grievance.new_ticket import NewTicket
 from page_object.people.people import People
+from page_object.managerial_console.managerial_console import ManagerialConsole
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
 from page_object.programme_population.households import Households
@@ -281,6 +282,11 @@ def pageGrievanceDetailsPage(request: FixtureRequest, browser: Chrome) -> Grieva
 @pytest.fixture
 def pageGrievanceNewTicket(request: FixtureRequest, browser: Chrome) -> NewTicket:
     yield NewTicket(browser)
+
+
+@pytest.fixture
+def pageManagerialConsole(request: FixtureRequest, browser: Chrome) -> ManagerialConsole:
+    yield ManagerialConsole(browser)
 
 
 @pytest.fixture

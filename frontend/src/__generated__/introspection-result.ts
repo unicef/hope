@@ -21,7 +21,6 @@
       "FeedbackMessageNode",
       "FeedbackNode",
       "FinancialServiceProviderNode",
-      "FinancialServiceProviderXlsxReportNode",
       "FinancialServiceProviderXlsxTemplateNode",
       "GrievanceDocumentNode",
       "GrievanceTicketNode",

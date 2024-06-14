@@ -310,6 +310,10 @@ class DataCollectingTypeNode(DjangoObjectType):
         model = DataCollectingType
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+        exclude = [
+            "compatible_types",
+            "limit_to",
+        ]
 
 
 class Query(graphene.ObjectType):

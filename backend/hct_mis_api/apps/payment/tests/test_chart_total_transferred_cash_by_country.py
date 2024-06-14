@@ -11,8 +11,8 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
-from hct_mis_api.apps.payment.models import PaymentRecord
 
 
 class TestChartTotalTransferredCashByCountry(APITestCase):
@@ -43,7 +43,7 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
                 3,
                 delivery_date=delivery_date,
                 business_area=business_area,
-                delivery_type=PaymentRecord.DELIVERY_TYPE_CASH,
+                delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
                 delivered_quantity_usd=200.20,
                 parent=cash_plan,
                 household=household,
@@ -53,7 +53,7 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
                 3,
                 delivery_date=delivery_date,
                 business_area=business_area,
-                delivery_type=PaymentRecord.DELIVERY_TYPE_VOUCHER,
+                delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
                 delivered_quantity_usd=100.00,
                 parent=cash_plan,
                 household=household,

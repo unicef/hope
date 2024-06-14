@@ -16,6 +16,7 @@ class BaseComponents(Common):
     navIndividuals = 'a[data-cy="nav-Individuals"]'
     navPeople = 'a[data-cy="nav-People"]'
     navProgrammeManagement = 'a[data-cy="nav-Programs"]'
+    navManagerialConsole = 'a[data-cy="nav-Managerial Console"]'
     navProgrammeDetails = 'a[data-cy="nav-Program Details"]'
     navTargeting = 'a[data-cy="nav-Targeting"]'
     navCashAssist = 'a[data-cy="nav-Cash Assist"]'
@@ -83,6 +84,9 @@ class BaseComponents(Common):
 
     def getNavProgrammeManagement(self) -> WebElement:
         return self.wait_for(self.navProgrammeManagement)
+
+    def getNavManagerialConsole(self) -> WebElement:
+        return self.wait_for(self.navManagerialConsole)
 
     def getNavProgrammeDetails(self) -> WebElement:
         return self.wait_for(self.navProgrammeDetails)

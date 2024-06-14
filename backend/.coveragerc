@@ -36,6 +36,7 @@ exclude_lines =
     if __name__ == .__main__.:
     if TYPE_CHECKING
     ^\s*(import\s.+|from\s+.+import\s+.+) # skip imports
+    logger.exception(e)
 
 fail_under = 15
 
