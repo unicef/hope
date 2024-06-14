@@ -215,7 +215,7 @@ class FinancialServiceProviderXlsxTemplateFilter(FilterSet):
     order_by = CustomOrderingFilter(
         fields=(
             Lower("name"),
-            "created_by",
+            ("created_by__first_name", "created_by"),
         )
     )
 
