@@ -180,3 +180,27 @@ class TestCopyTargetPopulationMutation(APITestCase):
                 }
             },
         )
+
+    def test_copy_with_unique_name_constraint(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_DUPLICATE], self.business_area)
+
+        response_error = self.graphql_request(
+            request_string=self.COPY_TARGET_MUTATION,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            variables={
+                "input": {
+                    "targetPopulationData": {
+                        "id": self.id_to_base64(
+                            self.empty_target_population_1.id,
+                            "TargetPopulationNode",
+                        ),
+                        "name": self.empty_target_population_1.name,
+                    }
+                }
+            },
+        )
+        assert "errors" in response_error
+        self.assertIn(
+            f"Target population with name: {self.empty_target_population_1.name} and program: {self.program.name} already exists.",
+            response_error["errors"][0]["message"],
+        )

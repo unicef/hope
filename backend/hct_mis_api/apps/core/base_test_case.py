@@ -19,6 +19,7 @@ from elasticsearch_dsl import connections
 from graphene.test import Client
 from snapshottest.django import TestCase as SnapshotTestTestCase
 
+from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.account.models import Role, UserRole
 from hct_mis_api.apps.core.models import BusinessAreaPartnerThrough
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -48,6 +49,8 @@ class APITestCase(SnapshotTestTestCase):
         self.maxDiff = None
 
         self.start_time = time.time()
+
+        PartnerFactory(name="UNICEF")
 
     def tearDown(self) -> None:
         with open(f"{settings.PROJECT_ROOT}/../test_times.txt", "a") as f:
