@@ -43,7 +43,7 @@ def create_payment_plan(create_test_program: Program) -> PaymentPlan:
         status=TargetPopulation.STATUS_OPEN,
         targeting_criteria=targeting_criteria,
     )
-    tp: TargetPopulation = TargetPopulation.objects.first()
+    tp = TargetPopulation.objects.first()
     payment_plan = PaymentPlan.objects.update_or_create(
         business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
         target_population=tp,
