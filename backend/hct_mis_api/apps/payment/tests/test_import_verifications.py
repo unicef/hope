@@ -104,62 +104,62 @@ class TestXlsxVerificationImport(APITestCase):
     def test_export_received_from_pending(self, _: Any, initial_status: str, result: Any) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PAYMENT_VERIFICATION_IMPORT], self.business_area)
 
-        TestXlsxVerificationImport.verification.payment_record_verifications.all().update(status=initial_status)
-        export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
+        self.verification.payment_record_verifications.all().update(status=initial_status)
+        export_service = XlsxVerificationExportService(self.verification)
 
         wb = export_service.generate_workbook()
         self.assertEqual(wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"].value, result)
 
     def test_validation_valid_not_changed_file(self) -> None:
-        export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
+        export_service = XlsxVerificationExportService(self.verification)
         wb = export_service.generate_workbook()
         with NamedTemporaryFile() as tmp:
             wb.save(tmp.name)
             file = io.BytesIO(tmp.read())
-        import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
+        import_service = XlsxVerificationImportService(self.verification, file)
         import_service.open_workbook()
         import_service.validate()
 
         self.assertEqual(import_service.errors, [])
 
     def test_validation_valid_status_changed_for_people(self) -> None:
-        dct = TestXlsxVerificationImport.verification.payment_plan_obj.program.data_collecting_type
+        dct = self.verification.payment_plan_obj.program.data_collecting_type
         dct.type = DataCollectingType.Type.SOCIAL
         dct.save()
-        export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
-        TestXlsxVerificationImport.verification.refresh_from_db()
+        export_service = XlsxVerificationExportService(self.verification)
+        self.verification.refresh_from_db()
         wb = export_service.generate_workbook()
         wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "YES"
         wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER_PEOPLE}2"] = 2
         with NamedTemporaryFile() as tmp:
             wb.save(tmp.name)
             file = io.BytesIO(tmp.read())
-        import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
+        import_service = XlsxVerificationImportService(self.verification, file)
         import_service.open_workbook()
         import_service.validate()
         self.assertEqual(import_service.errors, [])
 
     def test_validation_valid_status_changed(self) -> None:
-        export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
+        export_service = XlsxVerificationExportService(self.verification)
         wb = export_service.generate_workbook()
         wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "NO"
         wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"] = 0
         with NamedTemporaryFile() as tmp:
             wb.save(tmp.name)
             file = io.BytesIO(tmp.read())
-        import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
+        import_service = XlsxVerificationImportService(self.verification, file)
         import_service.open_workbook()
         import_service.validate()
         self.assertEqual(import_service.errors, [])
 
     def test_validation_invalid_received_changed(self) -> None:
-        export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
+        export_service = XlsxVerificationExportService(self.verification)
         wb = export_service.generate_workbook()
         wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "NOT_CORRECT_RECEIVED"
         with NamedTemporaryFile() as tmp:
             wb.save(tmp.name)
             file = io.BytesIO(tmp.read())
-        import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
+        import_service = XlsxVerificationImportService(self.verification, file)
         import_service.open_workbook()
         import_service.validate()
 
@@ -175,13 +175,13 @@ class TestXlsxVerificationImport(APITestCase):
         )
 
     def test_validation_invalid_version(self) -> None:
-        export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
+        export_service = XlsxVerificationExportService(self.verification)
         wb = export_service.generate_workbook()
         wb[XlsxVerificationExportService.META_SHEET][XlsxVerificationExportService.VERSION_CELL_COORDINATES] = "-1"
         with NamedTemporaryFile() as tmp:
             wb.save(tmp.name)
             file = io.BytesIO(tmp.read())
-        import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
+        import_service = XlsxVerificationImportService(self.verification, file)
         import_service.open_workbook()
         self.assertRaisesMessage(
             GraphQLError,
@@ -190,14 +190,14 @@ class TestXlsxVerificationImport(APITestCase):
         )
 
     def test_validation_payment_record_id(self) -> None:
-        export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
+        export_service = XlsxVerificationExportService(self.verification)
         wb = export_service.generate_workbook()
         wrong_uuid = str(uuid.uuid4())
         wb.active["A2"] = wrong_uuid
         with NamedTemporaryFile() as tmp:
             wb.save(tmp.name)
             file = io.BytesIO(tmp.read())
-        import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
+        import_service = XlsxVerificationImportService(self.verification, file)
         import_service.open_workbook()
         import_service.validate()
         error = import_service.errors[0]
@@ -211,13 +211,13 @@ class TestXlsxVerificationImport(APITestCase):
         )
 
     def test_validation_wrong_type(self) -> None:
-        export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
+        export_service = XlsxVerificationExportService(self.verification)
         wb = export_service.generate_workbook()
         wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}3"] = "A"
         with NamedTemporaryFile() as tmp:
             wb.save(tmp.name)
             file = io.BytesIO(tmp.read())
-        import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
+        import_service = XlsxVerificationImportService(self.verification, file)
         import_service.open_workbook()
         import_service.validate()
         error = import_service.errors[0]
@@ -232,14 +232,14 @@ class TestXlsxVerificationImport(APITestCase):
         )
 
     def test_validation_invalid_received_not_received_with_amount(self) -> None:
-        export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
+        export_service = XlsxVerificationExportService(self.verification)
         wb = export_service.generate_workbook()
         wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "NO"
         wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"] = 10
         with NamedTemporaryFile() as tmp:
             wb.save(tmp.name)
             file = io.BytesIO(tmp.read())
-        import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
+        import_service = XlsxVerificationImportService(self.verification, file)
         import_service.open_workbook()
         import_service.validate()
         error = import_service.errors[0]
@@ -253,14 +253,14 @@ class TestXlsxVerificationImport(APITestCase):
         )
 
     def test_validation_invalid_received_received_with_0_amount(self) -> None:
-        export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
+        export_service = XlsxVerificationExportService(self.verification)
         wb = export_service.generate_workbook()
         wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "YES"
         wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"] = 0
         with NamedTemporaryFile() as tmp:
             wb.save(tmp.name)
             file = io.BytesIO(tmp.read())
-        import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
+        import_service = XlsxVerificationImportService(self.verification, file)
         import_service.open_workbook()
         import_service.validate()
         error = import_service.errors[0]
@@ -274,7 +274,7 @@ class TestXlsxVerificationImport(APITestCase):
         )
 
     def test_import_valid_status_changed_received_no(self) -> None:
-        export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
+        export_service = XlsxVerificationExportService(self.verification)
         wb = export_service.generate_workbook()
         payment_record_id = wb.active["A2"].value
         payment_verification = PaymentVerification.objects.get(payment_object_id=payment_record_id)
@@ -283,7 +283,7 @@ class TestXlsxVerificationImport(APITestCase):
         with NamedTemporaryFile() as tmp:
             wb.save(tmp.name)
             file = io.BytesIO(tmp.read())
-        import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
+        import_service = XlsxVerificationImportService(self.verification, file)
         import_service.open_workbook()
         import_service.validate()
         import_service.import_verifications()
@@ -293,7 +293,7 @@ class TestXlsxVerificationImport(APITestCase):
         self.assertEqual(payment_verification.status, PaymentVerification.STATUS_NOT_RECEIVED)
 
     def test_import_valid_status_changed_received_yes_not_full(self) -> None:
-        export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
+        export_service = XlsxVerificationExportService(self.verification)
         wb = export_service.generate_workbook()
         payment_record_id = wb.active["A2"].value
         payment_verification = PaymentVerification.objects.get(payment_object_id=payment_record_id)
@@ -305,7 +305,7 @@ class TestXlsxVerificationImport(APITestCase):
         with NamedTemporaryFile() as tmp:
             wb.save(tmp.name)
             file = io.BytesIO(tmp.read())
-        import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
+        import_service = XlsxVerificationImportService(self.verification, file)
         import_service.open_workbook()
         import_service.validate()
         import_service.import_verifications()
@@ -322,7 +322,7 @@ class TestXlsxVerificationImport(APITestCase):
         )
 
     def test_import_valid_status_changed_received_yes_full(self) -> None:
-        export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
+        export_service = XlsxVerificationExportService(self.verification)
         wb = export_service.generate_workbook()
         payment_record_id = wb.active["A2"].value
         payment_verification = PaymentVerification.objects.get(payment_object_id=payment_record_id)
@@ -334,7 +334,7 @@ class TestXlsxVerificationImport(APITestCase):
         with NamedTemporaryFile() as tmp:
             wb.save(tmp.name)
             file = io.BytesIO(tmp.read())
-        import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
+        import_service = XlsxVerificationImportService(self.verification, file)
         import_service.open_workbook()
         import_service.validate()
         import_service.import_verifications()
