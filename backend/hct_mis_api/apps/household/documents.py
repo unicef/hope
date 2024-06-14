@@ -68,6 +68,7 @@ class IndividualDocument(Document):
     )
     program_id = fields.KeywordField(attr="program.id")
     registration_id = fields.TextField()
+    program_registration_id = fields.TextField()
     bank_account_info = fields.ObjectField(properties={"bank_account_number": fields.TextField()})
 
     def prepare_phone_no_text(self, instance: Individual) -> str:
@@ -187,6 +188,7 @@ class HouseholdDocument(Document):
     business_area = fields.KeywordField(similarity="boolean")
     program_id = fields.KeywordField(attr="program.id")
     registration_id = fields.TextField()
+    program_registration_id = fields.TextField()
 
     def prepare_admin1(self, household: Household) -> Optional[str]:
         if household:
