@@ -72,15 +72,37 @@ class TestDashboardQueries(APITestCase):
     query tableTotalCashTransferredByAdministrativeArea(
         $businessAreaSlug: String!
         $year: Int!
+        $orderBy: String
       ) {
         tableTotalCashTransferredByAdministrativeArea(
           businessAreaSlug: $businessAreaSlug
           year: $year
+          orderBy: $orderBy
         ) {
           data {
             admin2
             totalCashTransferred
             totalHouseholds
+          }
+        }
+      }
+    """
+
+    QUERY_TABLE_TOTAL_CASH_TRANSFERRED_BY_ADMINISTRATIVE_AREA_FOR_PEOPLE = """
+    query tableTotalCashTransferredByAdministrativeAreaForPeople(
+        $businessAreaSlug: String!
+        $year: Int!
+        $orderBy: String
+      ) {
+        tableTotalCashTransferredByAdministrativeAreaForPeople(
+          businessAreaSlug: $businessAreaSlug
+          year: $year
+          orderBy: $orderBy
+        ) {
+          data {
+            admin2
+            totalCashTransferred
+            totalPeople
           }
         }
       }
@@ -138,19 +160,19 @@ class TestDashboardQueries(APITestCase):
                 household_args={"size": 2, "business_area": business_area, "admin_area": admin_area1},
             )
             household2, individuals2 = create_household(
-                household_args={"size": 2, "business_area": business_area, "admin_area": admin_area2},
+                household_args={"size": 3, "business_area": business_area, "admin_area": admin_area2},
             )
             household3, individuals3 = create_household(
-                household_args={"size": 2, "business_area": business_area, "admin_area": admin_area3},
+                household_args={"size": 4, "business_area": business_area, "admin_area": admin_area3},
             )
             household4, individuals4 = create_household(
-                household_args={"size": 2, "business_area": business_area, "admin_area": admin_area1},
+                household_args={"size": 5, "business_area": business_area, "admin_area": admin_area1},
             )
             household5, individuals5 = create_household(
-                household_args={"size": 2, "business_area": business_area, "admin_area": admin_area2},
+                household_args={"size": 6, "business_area": business_area, "admin_area": admin_area2},
             )
             household6, individuals6 = create_household(
-                household_args={"size": 2, "business_area": business_area, "admin_area": admin_area3},
+                household_args={"size": 7, "business_area": business_area, "admin_area": admin_area3},
             )
 
             program1 = ProgramFactory(
@@ -297,9 +319,44 @@ class TestDashboardQueries(APITestCase):
             context={"user": self.user},
         )
 
-    def test_table_total_cash_transferred_by_administrative_area(self) -> None:
+    @parameterized.expand(
+        [
+            ("admin2",),
+            ("totalCashTransferred",),
+            ("totalHouseholds",),
+        ]
+    )
+    def test_table_total_cash_transferred_by_administrative_area(self, order_by: str) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_TABLE_TOTAL_CASH_TRANSFERRED_BY_ADMINISTRATIVE_AREA,
-            variables={"businessAreaSlug": "afghanistan", "year": 2021},
+            variables={"businessAreaSlug": "afghanistan", "year": 2021, "orderBy": order_by},
+            context={"user": self.user},
+        )
+
+    def test_table_total_cash_transferred_by_administrative_area_for_global_business_area(self) -> None:
+        self.snapshot_graphql_request(
+            request_string=self.QUERY_TABLE_TOTAL_CASH_TRANSFERRED_BY_ADMINISTRATIVE_AREA,
+            variables={"businessAreaSlug": "global", "year": 2021},
+            context={"user": self.user},
+        )
+
+    @parameterized.expand(
+        [
+            ("admin2",),
+            ("totalCashTransferred",),
+            ("totalHouseholds",),
+        ]
+    )
+    def test_table_total_cash_transferred_by_administrative_area_for_people(self, order_by: str) -> None:
+        self.snapshot_graphql_request(
+            request_string=self.QUERY_TABLE_TOTAL_CASH_TRANSFERRED_BY_ADMINISTRATIVE_AREA_FOR_PEOPLE,
+            variables={"businessAreaSlug": "afghanistan", "year": 2021, "orderBy": order_by},
+            context={"user": self.user},
+        )
+
+    def test_table_total_cash_transferred_by_administrative_area_for_people_for_global_business_area(self) -> None:
+        self.snapshot_graphql_request(
+            request_string=self.QUERY_TABLE_TOTAL_CASH_TRANSFERRED_BY_ADMINISTRATIVE_AREA_FOR_PEOPLE,
+            variables={"businessAreaSlug": "global", "year": 2021},
             context={"user": self.user},
         )

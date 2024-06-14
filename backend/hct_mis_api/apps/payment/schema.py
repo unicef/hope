@@ -1305,8 +1305,6 @@ class Query(graphene.ObjectType):
     def resolve_table_total_cash_transferred_by_administrative_area(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Optional[Dict[str, Any]]:
-        if business_area_slug == "global":
-            return None
         order = kwargs.pop("order", None)
         order_by = kwargs.pop("order_by", None)
         admin_areas = total_cash_transferred_by_administrative_area_table_query(
@@ -1341,8 +1339,6 @@ class Query(graphene.ObjectType):
     def resolve_table_total_cash_transferred_by_administrative_area_for_people(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Optional[Dict[str, Any]]:
-        if business_area_slug == "global":
-            return None
         order = kwargs.pop("order", None)
         order_by = kwargs.pop("order_by", None)
         admin_areas = total_cash_transferred_by_administrative_area_table_query(

@@ -590,15 +590,11 @@ def chart_get_filtered_qs(
     qs: Any,
     year: int,
     business_area_slug_filter: Optional[Dict] = None,
-    additional_filters: Union[Dict, Q, None] = None,
+    additional_filters: Optional[Dict] = None,
     year_filter_path: Optional[str] = None,
 ) -> "QuerySet":
-    # if payment_verification_gfk True will use Q() object for filtering by PaymentPlan and CashPlan
-    q_obj = Q()
     if additional_filters is None:
         additional_filters = {}
-    if isinstance(additional_filters, Q):
-        q_obj, additional_filters = additional_filters, {}
     if year_filter_path is None:
         year_filter = Q(created_at__year=year)
     else:
@@ -609,11 +605,7 @@ def chart_get_filtered_qs(
     if business_area_slug_filter is None or "global" in business_area_slug_filter.values():
         business_area_slug_filter = {}
 
-    if len(business_area_slug_filter) > 1:
-        for key, value in business_area_slug_filter.items():
-            q_obj |= Q(**{key: value})
-
-    return qs.filter(q_obj, year_filter, **business_area_slug_filter, **additional_filters)
+    return qs.filter(year_filter, **business_area_slug_filter, **additional_filters)
 
 
 def parse_list_values_to_int(list_to_parse: List) -> List[int]:

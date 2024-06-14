@@ -53,7 +53,7 @@ snapshots['TestDashboardQueries::test_sections_0_sectionTotalTransferred 1'] = {
     }
 }
 
-snapshots['TestDashboardQueries::test_table_total_cash_transferred_by_administrative_area 1'] = {
+snapshots['TestDashboardQueries::test_table_total_cash_transferred_by_administrative_area_0_admin2 1'] = {
     'data': {
         'tableTotalCashTransferredByAdministrativeArea': {
             'data': [
@@ -75,4 +75,128 @@ snapshots['TestDashboardQueries::test_table_total_cash_transferred_by_administra
             ]
         }
     }
+}
+
+snapshots['TestDashboardQueries::test_table_total_cash_transferred_by_administrative_area_1_totalCashTransferred 1'] = {
+    'data': {
+        'tableTotalCashTransferredByAdministrativeArea': {
+            'data': [
+                {
+                    'admin2': 'afghanistan city 1',
+                    'totalCashTransferred': 220.0,
+                    'totalHouseholds': 2
+                },
+                {
+                    'admin2': 'afghanistan city 2',
+                    'totalCashTransferred': 240.0,
+                    'totalHouseholds': 2
+                },
+                {
+                    'admin2': 'afghanistan city 3',
+                    'totalCashTransferred': 260.0,
+                    'totalHouseholds': 2
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestDashboardQueries::test_table_total_cash_transferred_by_administrative_area_2_totalHouseholds 1'] = {
+    'data': {
+        'tableTotalCashTransferredByAdministrativeArea': {
+            'data': [
+                {
+                    'admin2': 'afghanistan city 1',
+                    'totalCashTransferred': 220.0,
+                    'totalHouseholds': 2
+                },
+                {
+                    'admin2': 'afghanistan city 3',
+                    'totalCashTransferred': 260.0,
+                    'totalHouseholds': 2
+                },
+                {
+                    'admin2': 'afghanistan city 2',
+                    'totalCashTransferred': 240.0,
+                    'totalHouseholds': 2
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestDashboardQueries::test_table_total_cash_transferred_by_administrative_area_for_global_business_area 1'] = {
+    'data': {
+        'tableTotalCashTransferredByAdministrativeArea': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 9,
+                    'line': 7
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'tableTotalCashTransferredByAdministrativeArea'
+            ]
+        }
+    ]
+}
+
+snapshots['TestDashboardQueries::test_table_total_cash_transferred_by_administrative_area_for_people 1'] = {
+    'data': {
+        'tableTotalCashTransferredByAdministrativeAreaForPeople': {
+            'data': [
+            ]
+        }
+    }
+}
+
+snapshots['TestDashboardQueries::test_table_total_cash_transferred_by_administrative_area_for_people_0_admin2 1'] = {
+    'data': {
+        'tableTotalCashTransferredByAdministrativeAreaForPeople': {
+            'data': [
+            ]
+        }
+    }
+}
+
+snapshots['TestDashboardQueries::test_table_total_cash_transferred_by_administrative_area_for_people_1_totalCashTransferred 1'] = {
+    'data': {
+        'tableTotalCashTransferredByAdministrativeAreaForPeople': {
+            'data': [
+            ]
+        }
+    }
+}
+
+snapshots['TestDashboardQueries::test_table_total_cash_transferred_by_administrative_area_for_people_2_totalHouseholds 1'] = {
+    'data': {
+        'tableTotalCashTransferredByAdministrativeAreaForPeople': {
+            'data': [
+            ]
+        }
+    }
+}
+
+snapshots['TestDashboardQueries::test_table_total_cash_transferred_by_administrative_area_for_people_for_global_business_area 1'] = {
+    'data': {
+        'tableTotalCashTransferredByAdministrativeAreaForPeople': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 9,
+                    'line': 7
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'tableTotalCashTransferredByAdministrativeAreaForPeople'
+            ]
+        }
+    ]
 }
