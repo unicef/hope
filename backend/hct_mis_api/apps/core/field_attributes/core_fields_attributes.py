@@ -73,6 +73,7 @@ from hct_mis_api.apps.core.field_attributes.lookup_functions import (
 )
 from hct_mis_api.apps.core.field_attributes.payment_channel_fields_attributes import (
     PAYMENT_CHANNEL_FIELDS_ATTRIBUTES,
+    DeliveryMechanismChoices,
 )
 from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.geo.models import Area, Country
@@ -362,6 +363,9 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "full_name_i_c",
+        "required_for_payment": False,
+        "unique_for_payment": False,
+        "delivery_mechanisms": [dm[0] for dm in DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES],
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE, Scope.XLSX_PEOPLE],
     },
     {
@@ -1786,7 +1790,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "account_holder_name_i_c",
-        "scope": [Scope.XLSX, Scope.PAYMENT_CHANNEL, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE],
+        "scope": [Scope.XLSX, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE],
     },
     {
         "id": "e9d964b9-aa85-4a0f-b1eb-4755bdad7592",
@@ -1799,7 +1803,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "bank_branch_name_i_c",
-        "scope": [Scope.XLSX, Scope.PAYMENT_CHANNEL, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE],
+        "scope": [Scope.XLSX, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE],
     },
     {
         "id": "bec7a6b9-476d-48a8-8822-e24ae023df42",
@@ -1959,15 +1963,15 @@ class FieldFactory(list):
         return factory
 
     def associated_with_individual(self) -> "FieldFactory":
-        return self._associated_with(_INDIVIDUAL)
+        return self._associated_with([_INDIVIDUAL])
 
     def associated_with_household(self) -> "FieldFactory":
-        return self._associated_with(_HOUSEHOLD)
+        return self._associated_with([_HOUSEHOLD])
 
-    def _associated_with(self, associated_with: str) -> "FieldFactory":
+    def _associated_with(self, associated_with: List[str]) -> "FieldFactory":
         factory = FieldFactory(scopes=self.scopes)
         for item in self:
-            if item.get("associated_with") == associated_with:
+            if item.get("associated_with") in associated_with:
                 factory.append(item)
         return factory
 

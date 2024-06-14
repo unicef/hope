@@ -14,6 +14,7 @@ from rest_framework import serializers
 from urllib3 import Retry
 
 from hct_mis_api.apps.core.utils import chunks
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
@@ -363,8 +364,8 @@ class PaymentGatewayService:
                     "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
                     "data_transfer_configuration": fsp.configs,
                     "delivery_mechanisms": [
-                        Payment.DELIVERY_TYPE_CASH_OVER_THE_COUNTER,
-                        Payment.DELIVERY_TYPE_MOBILE_MONEY,
+                        DeliveryMechanismChoices.DELIVERY_TYPE_CASH_OVER_THE_COUNTER,
+                        DeliveryMechanismChoices.DELIVERY_TYPE_MOBILE_MONEY,
                     ],
                 },
             )

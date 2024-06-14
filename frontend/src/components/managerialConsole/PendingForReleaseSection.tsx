@@ -134,6 +134,7 @@ export const PendingForReleaseSection: React.FC<
           value={searchText}
           size="small"
           onChange={(e) => setSearchText(e.target.value)}
+          data-cy="search-release"
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -173,6 +174,7 @@ export const PendingForReleaseSection: React.FC<
                 <Checkbox
                   checked={allSelected && selectedInReview.length > 0}
                   onClick={handleSelectAllReviewed}
+                  data-cy="select-all-release"
                 />
               </Box>
             </TableCell>
@@ -183,6 +185,7 @@ export const PendingForReleaseSection: React.FC<
                     selectedProgram={selectedProgram}
                     setSelectedProgram={setSelectedProgram}
                     programs={programs}
+                    dataCy="program-select-release"
                   />
                 ) : (
                   <TableSortLabel
@@ -206,10 +209,15 @@ export const PendingForReleaseSection: React.FC<
                   onChange={() =>
                     handleSelect(selectedInReview, setSelectedInReview, row.id)
                   }
+                  data-cy="select-release"
                 />
               </TableCell>
               {columns.map((column) => (
-                <TableCell key={column.field} align="left">
+                <TableCell
+                  key={column.field}
+                  align="left"
+                  data-cy="column-field-release"
+                >
                   {column.renderCell
                     ? column.renderCell({ value: row[column.field], row })
                     : row[column.field]}

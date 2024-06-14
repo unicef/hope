@@ -89,6 +89,7 @@ export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
       value={searchText}
       size="small"
       onChange={(e) => setSearchText(e.target.value)}
+      data-cy="search-released"
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">
@@ -113,6 +114,7 @@ export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
                         selectedProgram={selectedProgram}
                         setSelectedProgram={setSelectedProgram}
                         programs={programs}
+                        dataCy="program-select-released"
                       />
                     ) : (
                       <TableSortLabel
@@ -131,7 +133,10 @@ export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
               {sortedRows.map((row) => (
                 <TableRow key={row.id}>
                   {columns.map((column) => (
-                    <TableCell key={column.field}>
+                    <TableCell
+                      key={column.field}
+                      data-cy="column-field-released"
+                    >
                       {column.renderCell
                         ? column.renderCell({ value: row[column.field], row })
                         : row[column.field]}

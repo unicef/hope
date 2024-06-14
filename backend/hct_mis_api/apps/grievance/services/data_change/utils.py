@@ -1,3 +1,4 @@
+import json
 import logging
 import random
 import string
@@ -13,7 +14,13 @@ from django.utils import timezone
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.activity_log.models import log_create
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+    CORE_FIELDS_ATTRIBUTES,
+    FieldFactory,
+)
 from hct_mis_api.apps.core.field_attributes.fields_types import (
+    _DELIVERY_MECHANISM_DATA,
+    _INDIVIDUAL,
     FIELD_TYPES_TO_INTERNAL_TYPE,
     TYPE_IMAGE,
     TYPE_SELECT_MANY,
@@ -41,6 +48,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.models import DeliveryMechanismData
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -213,6 +221,36 @@ def handle_update_payment_channel(payment_channel: Dict) -> Optional[BankAccount
         return bank_account_info
 
     return None
+
+
+def handle_update_delivery_mechanism_data(delivery_mechanism_datas: List[Dict]) -> List[DeliveryMechanismData]:
+    delivery_mechanism_datas_to_update = []
+    all_fields: dict = FieldFactory(CORE_FIELDS_ATTRIBUTES).to_dict_by("name")
+
+    for dmd_data in delivery_mechanism_datas:
+        dmd = get_object_or_404(DeliveryMechanismData, id=dmd_data.get("id"))
+        individual = dmd.individual
+        individual_updated = False
+        data = dmd.data if isinstance(dmd.data, dict) else json.loads(dmd.data)
+        for new_values in dmd_data.get("data_fields", []):
+            field_name = new_values.get("name")
+            field_value = new_values.get("value")
+            field_definition: dict = all_fields[field_name]
+
+            if field_definition["associated_with"] == _DELIVERY_MECHANISM_DATA:
+                data[field_name] = field_value
+            elif field_definition["associated_with"] == _INDIVIDUAL:
+                if hasattr(individual, field_name):
+                    setattr(individual, field_name, field_value)
+                    individual_updated = True
+
+        dmd.data = data
+        delivery_mechanism_datas_to_update.append(dmd)
+
+        if individual_updated:
+            individual.save()
+
+    return delivery_mechanism_datas_to_update
 
 
 def handle_add_identity(identity: Dict, individual: Individual) -> IndividualIdentity:
@@ -388,6 +426,29 @@ def prepare_edit_payment_channel(payment_channels: List[Dict]) -> List[Dict]:
         if type_ := pc.get("type"):
             if handler := handlers.get(type_):
                 items.append(handler(pc))
+    return items
+
+
+def prepare_edit_delivery_mechanism_data(delivery_mechanism_data: List[Dict]) -> List[Dict]:
+    items = []
+    for dmd in delivery_mechanism_data:
+        _id = dmd.get("id")
+        data_fields = dmd.get("data_fields", [])
+        delivery_mechanism_data = get_object_or_404(DeliveryMechanismData, id=_id)
+        data = {
+            "id": _id,
+            "label": dmd.get("label"),
+            "approve_status": False,
+            "data_fields": [
+                {
+                    "name": field.get("name"),
+                    "value": field.get("value"),
+                    "previous_value": delivery_mechanism_data.delivery_data.get(field.get("name")),
+                }
+                for field in data_fields
+            ],
+        }
+        items.append(data)
     return items
 
 

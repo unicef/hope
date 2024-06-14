@@ -853,8 +853,6 @@ type DataCollectingTypeNode implements Node {
   code: String!
   type: DataCollectingTypeType
   description: String!
-  compatibleTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
-  limitTo(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   active: Boolean!
   deprecated: Boolean!
   individualFiltersAvailable: Boolean!
