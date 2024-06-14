@@ -14,7 +14,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import (
     EntitlementCardFactory,
@@ -120,6 +120,23 @@ class TestXlsxVerificationImport(APITestCase):
         import_service.open_workbook()
         import_service.validate()
 
+        self.assertEqual(import_service.errors, [])
+
+    def test_validation_valid_status_changed_for_people(self) -> None:
+        dct = TestXlsxVerificationImport.verification.payment_plan_obj.program.data_collecting_type
+        dct.type = DataCollectingType.Type.SOCIAL
+        dct.save()
+        export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
+        TestXlsxVerificationImport.verification.refresh_from_db()
+        wb = export_service.generate_workbook()
+        wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "YES"
+        wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER_PEOPLE}2"] = 2
+        with NamedTemporaryFile() as tmp:
+            wb.save(tmp.name)
+            file = io.BytesIO(tmp.read())
+        import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
+        import_service.open_workbook()
+        import_service.validate()
         self.assertEqual(import_service.errors, [])
 
     def test_validation_valid_status_changed(self) -> None:

@@ -18,7 +18,6 @@ from hct_mis_api.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBas
 if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -26,7 +25,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
     text_template = "payment/verification_plan_xlsx_file_generated_email.txt"
     html_template = "payment/verification_plan_xlsx_file_generated_email.html"
 
-    HEADERS = (
+    _HEADERS = (
         "payment_record_id",
         "payment_record_ca_id",
         "received",
@@ -44,12 +43,29 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         "delivered_amount",
         "received_amount",
     )
+    _PEOPLE_HEADERS = (
+        "payment_record_id",
+        "payment_record_ca_id",
+        "received",
+        "full_name",
+        "phone_no",
+        "phone_no_alternative",
+        "admin1",
+        "admin2",
+        "admin3",
+        "admin4",
+        "village",
+        "address",
+        "delivered_amount",
+        "received_amount",
+    )
     PAYMENT_RECORD_ID_COLUMN_INDEX = 0
     PAYMENT_RECORD_ID_LETTER = "A"
     RECEIVED_COLUMN_INDEX = 2
     RECEIVED_COLUMN_LETTER = "C"
     RECEIVED_AMOUNT_COLUMN_INDEX = 15
     RECEIVED_AMOUNT_COLUMN_LETTER = "P"
+    RECEIVED_AMOUNT_COLUMN_LETTER_PEOPLE = "N"
     VERIFICATION_SHEET = "Payment Verifications"
     META_SHEET = "Meta"
     VERSION_CELL_NAME_COORDINATES = "A1"
@@ -58,9 +74,16 @@ class XlsxVerificationExportService(XlsxExportBaseService):
     VERSION = "1.2"
     TRUE_FALSE_MAPPING = {True: "YES", False: "NO"}
 
+    def _get_headers(self) -> tuple:
+        if self.is_social_worker_program:
+            return XlsxVerificationExportService._PEOPLE_HEADERS
+        return XlsxVerificationExportService._HEADERS
+
     def __init__(self, payment_verification_plan: PaymentVerificationPlan) -> None:
         self.payment_verification_plan = payment_verification_plan
+        self.is_social_worker_program = payment_verification_plan.payment_plan_obj.program.is_social_worker_program
         self.payment_record_verifications = payment_verification_plan.payment_record_verifications.all()
+        self.HEADERS = self._get_headers()
 
     def _create_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
@@ -86,9 +109,35 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         return XlsxVerificationExportService.TRUE_FALSE_MAPPING[True]
 
     def _add_payment_record_verification_row(self, payment_record_verification: PaymentVerification) -> None:
+        if self.is_social_worker_program:
+            self._add_payment_record_verification_row_for_people(payment_record_verification)
+        else:
+            self._add_payment_record_verification_row_for_household(payment_record_verification)
+
+    def _add_payment_record_verification_row_for_people(self, payment_record_verification):
         household = payment_record_verification.payment_obj.household
         head_of_household = payment_record_verification.payment_obj.head_of_household
+        payment_record_verification_row = (
+            str(payment_record_verification.payment_object_id),
+            str(payment_record_verification.payment_obj.unicef_id) if payment_record_verification.payment_obj else "",
+            self._to_received_column(payment_record_verification),
+            str(head_of_household.full_name) if head_of_household else "",
+            str(head_of_household.phone_no) if head_of_household else "",
+            str(head_of_household.phone_no_alternative) if head_of_household else "",
+            str(household.admin1.name) if household.admin1 else "",
+            str(household.admin2.name) if household.admin2 else "",
+            str(household.admin3.name) if household.admin3 else "",
+            str(household.admin4.name) if household.admin4 else "",
+            str(household.village),
+            str(household.address),
+            payment_record_verification.payment_obj.delivered_quantity,
+            payment_record_verification.received_amount,
+        )
+        self.ws_export_list.append(payment_record_verification_row)
 
+    def _add_payment_record_verification_row_for_household(self, payment_record_verification):
+        household = payment_record_verification.payment_obj.household
+        head_of_household = payment_record_verification.payment_obj.head_of_household
         payment_record_verification_row = (
             str(payment_record_verification.payment_object_id),
             str(payment_record_verification.payment_obj.unicef_id) if payment_record_verification.payment_obj else "",
