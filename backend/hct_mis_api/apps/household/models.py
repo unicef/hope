@@ -411,6 +411,7 @@ class Household(
             "row_id",
             "detail_id",
             "registration_id",
+            "program_registration_id",
         ]
     )
     household_collection = models.ForeignKey(
@@ -519,6 +520,14 @@ class Household(
         blank=True,
         null=True,
         db_index=True,
+        verbose_name=_("Aurora Registration Id"),
+    )
+    program_registration_id = CICharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        db_index=True,
+        unique=True,
         verbose_name=_("Beneficiary Program Registration Id"),
     )
     total_cash_received_usd = models.DecimalField(
@@ -921,6 +930,7 @@ class Individual(
             "who_answers_alt_phone",
             "detail_id",
             "registration_id",
+            "program_registration_id",
             "payment_delivery_phone_no",
         ]
     )
@@ -1033,7 +1043,10 @@ class Individual(
         max_length=100,
         blank=True,
         null=True,
-        verbose_name=_("Beneficiary Program Registration Id"),
+        verbose_name=_("Aurora Registration Id"),
+    )
+    program_registration_id = CICharField(
+        max_length=100, blank=True, null=True, verbose_name=_("Beneficiary Program Registration Id")
     )
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
     relationship_confirmed = models.BooleanField(default=False)
