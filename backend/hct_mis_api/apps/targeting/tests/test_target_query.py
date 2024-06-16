@@ -34,6 +34,26 @@ class TestTargetPopulationQuery(APITestCase):
                 }
             }
             """
+
+    ALL_TARGET_POPULATION_ORDER_BY_CREATED_BY_QUERY = """
+            query AllTargetPopulation($totalHouseholdsCountMin: Int) {
+                allTargetPopulation(totalHouseholdsCountMin:$totalHouseholdsCountMin, businessArea: "afghanistan", orderBy: "created_by") {
+                    edges {
+                        node {
+                             name
+                             status
+                             totalHouseholdsCount
+                             totalIndividualsCount
+                             createdBy {
+                                firstName
+                                lastName
+                            }
+                        }
+                    }
+                }
+            }
+            """
+
     TARGET_POPULATION_QUERY = """
        query TargetPopulation($id:ID!) {
           targetPopulation(id:$id){
@@ -82,7 +102,9 @@ class TestTargetPopulationQuery(APITestCase):
         cls.household_residence_status_refugee = household
         cls.household_size_2 = cls.household_residence_status_refugee
 
-        cls.user = UserFactory(partner=cls.partner)
+        cls.user = UserFactory(partner=cls.partner, first_name="Test", last_name="User")
+        user_first = UserFactory(partner=cls.partner, first_name="First", last_name="User")
+        user_second = UserFactory(partner=cls.partner, first_name="Second", last_name="User")
         targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "size", "arguments": [2], "comparison_method": "EQUALS"}
         )
@@ -101,7 +123,7 @@ class TestTargetPopulationQuery(APITestCase):
         )
         cls.target_population_residence_status = TargetPopulation(
             name="target_population_residence_status",
-            created_by=cls.user,
+            created_by=user_first,
             business_area=cls.business_area,
             targeting_criteria=targeting_criteria,
             program=cls.program,
@@ -115,7 +137,7 @@ class TestTargetPopulationQuery(APITestCase):
         )
         cls.target_population_size_1_approved = TargetPopulation(
             name="target_population_size_1_approved",
-            created_by=cls.user,
+            created_by=user_second,
             targeting_criteria=targeting_criteria,
             status=TargetPopulation.STATUS_LOCKED,
             business_area=cls.business_area,
@@ -157,6 +179,14 @@ class TestTargetPopulationQuery(APITestCase):
             request_string=TestTargetPopulationQuery.ALL_TARGET_POPULATION_QUERY,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=variables,
+        )
+
+    def test_all_targets_query_order_by_created_by(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_VIEW_LIST], self.business_area, self.program)
+
+        self.snapshot_graphql_request(
+            request_string=TestTargetPopulationQuery.ALL_TARGET_POPULATION_ORDER_BY_CREATED_BY_QUERY,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
         )
 
     @parameterized.expand(
