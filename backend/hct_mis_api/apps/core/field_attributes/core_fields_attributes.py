@@ -1,7 +1,7 @@
 import copy
 import logging
 from functools import reduce
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Set
 
 from hct_mis_api.apps.core.attributes_qet_queries import (
     age_to_birth_date_query,
@@ -1860,8 +1860,8 @@ CORE_FIELDS_ATTRIBUTES = [
     {
         "id": "8ef6fd85-032f-42cf-8f1f-3398f88316af",
         "type": TYPE_STRING,
-        "name": "registration_id",
-        "lookup": "registration_id",
+        "name": "program_registration_id",
+        "lookup": "program_registration_id",
         "label": {"English(EN)": "Program registration id"},
         "hint": "",
         "required": False,
@@ -1875,10 +1875,10 @@ CORE_FIELDS_ATTRIBUTES = [
 
 class FieldFactory(list):
     def __init__(
-        self, fields: Optional[Any] = None, scopes: Optional[Iterable[Scope]] = None, *args: Any, **kwargs: Any
+        self, fields: Optional[Any] = None, scopes: Optional[Set[Scope]] = None, *args: Any, **kwargs: Any
     ) -> None:
         super().__init__(*args, **kwargs)
-        self.scopes: Iterable = scopes or set()
+        self.scopes: Set = scopes or set()
         if fields:
             self.extend(copy.deepcopy(fields))
         self.all_fields = copy.deepcopy(CORE_FIELDS_ATTRIBUTES)

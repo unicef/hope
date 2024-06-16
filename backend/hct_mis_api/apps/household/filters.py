@@ -183,6 +183,7 @@ class HouseholdFilter(FilterSet):
                             }
                         },
                         {"match_phrase_prefix": {"registration_id": {"query": search}}},
+                        {"match_phrase_prefix": {"program_registration_id": {"query": search}}},
                     ],
                 }
             },
@@ -352,6 +353,7 @@ class IndividualFilter(FilterSet):
                         {"match_phrase_prefix": {"phone_no_text": {"query": search}}},
                         {"match_phrase_prefix": {"phone_no_alternative_text": {"query": search}}},
                         {"match_phrase_prefix": {"registration_id": {"query": search}}},
+                        {"match_phrase_prefix": {"program_registration_id": {"query": search}}},
                         {"match_phrase_prefix": {"bank_account_info.bank_account_number": {"query": search}}},
                     ],
                 }

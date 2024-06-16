@@ -6,7 +6,6 @@ from django.db import DEFAULT_DB_ALIAS, connections
 from django.forms import model_to_dict
 from django.test import TestCase
 
-import pytest
 from freezegun import freeze_time
 from parameterized import parameterized
 
@@ -467,7 +466,6 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         }
         self.assertEqual(household_data, expected)
 
-    @pytest.mark.skip("Bad migrations to fix")
     def test_registration_id_from_program_registration_id_should_be_unique(self) -> None:
         household = HouseholdFactory(
             registration_data_import=self.rdi,
@@ -489,7 +487,9 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             RdiMergeTask().execute(self.rdi.pk)
 
         registrations_ids = list(
-            Household.objects.all().order_by("registration_id").values_list("registration_id", flat=True)
+            Household.objects.all()
+            .order_by("program_registration_id")
+            .values_list("program_registration_id", flat=True)
         )
 
         expected_registrations_ids = ["ABCD-111111#0", "ABCD-123123#0", "ABCD-123123#1"]
