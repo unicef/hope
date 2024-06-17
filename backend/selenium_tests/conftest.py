@@ -20,6 +20,7 @@ from page_object.grievance.new_feedback import NewFeedback
 from page_object.grievance.new_ticket import NewTicket
 from page_object.managerial_console.managerial_console import ManagerialConsole
 from page_object.people.people import People
+from page_object.people.people_details import PeopleDetails
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
 from page_object.programme_population.households import Households
@@ -242,6 +243,11 @@ def pageHouseholds(request: FixtureRequest, browser: Chrome) -> Households:
 @pytest.fixture
 def pagePeople(request: FixtureRequest, browser: Chrome) -> People:
     yield People(browser)
+
+
+@pytest.fixture
+def pagePeopleDetails(request: FixtureRequest, browser: Chrome) -> PeopleDetails:
+    yield PeopleDetails(browser)
 
 
 @pytest.fixture
