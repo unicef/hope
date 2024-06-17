@@ -45,6 +45,7 @@ from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import (
@@ -437,8 +438,6 @@ def create_super_user(business_area: BusinessArea) -> User:
     doc_type_keys = (
         "birth_certificate",
         "drivers_license",
-        "national_id",
-        "national_passport",
         "electoral_card",
         "tax_id",
         "residence_permit_no",
@@ -449,7 +448,8 @@ def create_super_user(business_area: BusinessArea) -> User:
     )
     for key in doc_type_keys:
         DocumentTypeFactory(key=key)
-
+    DocumentType.objects.update_or_create(key="national_id", pk="227fcbc0-297a-4d85-8390-7de189278321")
+    DocumentType.objects.update_or_create(key="national_passport", pk="012a3ecb-0d6e-440f-9c68-83e5bf1ccddf")
     return user
 
 

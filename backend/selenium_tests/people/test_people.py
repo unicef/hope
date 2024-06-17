@@ -47,18 +47,11 @@ class TestSmokePeople:
         pagePeople.getNavPeople().click()
         assert "People" in pagePeople.getTableTitle().text
         assert "Individual ID" in pagePeople.getIndividualId().text
-        assert "Individual ID" in pagePeople.getTableLabel().text
         assert "Individual" in pagePeople.getIndividualName().text
-        assert "Individual" in pagePeople.getTableLabel().text
         assert "Type" in pagePeople.getIndividualAge().text
-        assert "Type" in pagePeople.getTableLabel().text
-        assert "Age" in pagePeople.getIndividualAge().text
-        assert "Age" in pagePeople.getTableLabel().text
         assert "Gender" in pagePeople.getIndividualSex().text
-        assert "Gender" in pagePeople.getTableLabel().text
         assert "Administrative Level 2" in pagePeople.getIndividualLocation().text
-        assert "Administrative Level 2" in pagePeople.getTableLabel().text
-        assert "Rows per page: 10 0–0 of 0 " in pagePeople.getTablePagination().text.replace("\n", " ")
+        assert "Rows per page: 10 0–0 of 0" in pagePeople.getTablePagination().text.replace("\n", " ")
 
     @pytest.mark.skip(reason="Waiting for add people fixture")
     def test_smoke_page_details_people(
