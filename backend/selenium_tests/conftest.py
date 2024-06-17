@@ -19,11 +19,11 @@ from page_object.grievance.grievance_tickets import GrievanceTickets
 from page_object.grievance.new_feedback import NewFeedback
 from page_object.grievance.new_ticket import NewTicket
 from page_object.managerial_console.managerial_console import ManagerialConsole
-from page_object.people.people import People
-from page_object.people.people_details import PeopleDetails
 from page_object.payment_module.new_payment_plan import NewPaymentPlan
 from page_object.payment_module.payment_module import PaymentModule
 from page_object.payment_module.payment_module_details import PaymentModuleDetails
+from page_object.people.people import People
+from page_object.people.people_details import PeopleDetails
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
 from page_object.programme_population.households import Households
@@ -45,7 +45,6 @@ from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import (
@@ -55,6 +54,7 @@ from hct_mis_api.apps.core.models import (
 )
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import DocumentTypeFactory
+from hct_mis_api.apps.household.models import DocumentType
 
 
 def pytest_addoption(parser) -> None:  # type: ignore
