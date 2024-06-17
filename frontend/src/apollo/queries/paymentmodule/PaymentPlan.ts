@@ -19,6 +19,11 @@ export const PAYMENT_PLAN_QUERY = gql`
         lastName
         email
       }
+      programCycle {
+        id
+        unicefId
+        name
+      }
       program {
         id
         name
@@ -245,9 +250,18 @@ export const PAYMENT_PLAN_QUERY = gql`
             id
             unicefId
             createdAt
+            programCycle {
+              id
+              unicefId
+              name
+            }
             paymentItems {
               totalCount
             }
+            startDate
+            endDate
+            dispersionEndDate
+            dispersionStartDate
           }
         }
       }

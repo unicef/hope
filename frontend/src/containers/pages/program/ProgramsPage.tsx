@@ -1,32 +1,31 @@
-import { Button } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation } from 'react-router-dom';
-import { useProgrammeChoiceDataQuery } from '@generated/graphql';
-import { PageHeader } from '@components/core/PageHeader';
-import { PermissionDenied } from '@components/core/PermissionDenied';
-import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePermissions } from '@hooks/usePermissions';
-import { getFilterFromQueryParams } from '@utils/utils';
-import { ProgrammesTable } from '../../tables/ProgrammesTable';
-import { ProgrammesFilters } from '../../tables/ProgrammesTable/ProgrammesFilter';
+import { useLocation } from 'react-router-dom';
+import { useProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { PageHeader } from '../../../components/core/PageHeader';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { getFilterFromQueryParams } from '../../../utils/utils';
+import { CreateProgram } from '../../dialogs/programs/CreateProgram';
+import { ProgrammesTable } from '../../tables/programs/ProgrammesTable';
+import { ProgrammesFilters } from '../../tables/programs/ProgrammesTable/ProgrammesFilter';
 
 const initialFilter = {
   search: '',
-  startDate: '',
-  endDate: '',
+  startDate: undefined,
+  endDate: undefined,
   status: '',
   sector: [],
   numberOfHouseholdsMin: '',
   numberOfHouseholdsMax: '',
   budgetMin: '',
   budgetMax: '',
-  dataCollectingType: '',
 };
 
-export function ProgramsPage(): React.ReactElement {
+export const ProgramsPage = (): React.ReactElement => {
   const location = useLocation();
 
   const [filter, setFilter] = useState(
@@ -35,13 +34,19 @@ export function ProgramsPage(): React.ReactElement {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
 
-  const { data: choicesData } = useProgrammeChoiceDataQuery();
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useProgrammeChoiceDataQuery();
   const { t } = useTranslation();
 
+  if (choicesLoading) return <LoadingComponent />;
+
   if (permissions === null || !choicesData) return null;
+
   if (
     !hasPermissions(
       [
@@ -55,15 +60,7 @@ export function ProgramsPage(): React.ReactElement {
 
   const toolbar = (
     <PageHeader title={t('Programme Management')}>
-      <Button
-        variant="contained"
-        color="primary"
-        component={Link}
-        to={`/${baseUrl}/create`}
-        data-cy="button-new-program"
-      >
-        {t('Create Programme')}
-      </Button>
+      <CreateProgram />
     </PageHeader>
   );
 
@@ -85,4 +82,4 @@ export function ProgramsPage(): React.ReactElement {
       />
     </div>
   );
-}
+};

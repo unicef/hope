@@ -44,7 +44,7 @@ export const ALL_USERS_QUERY = gql`
           lastLogin
           status
           partner {
-            name
+              name
           }
           userRoles {
             businessArea {

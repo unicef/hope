@@ -16,6 +16,7 @@ export const AllPaymentPlansForTable = gql`
     $dispersionEndDate: Date
     $isFollowUp: Boolean
     $program: String
+    $programCycle: String
   ) {
     allPaymentPlans(
       after: $after
@@ -32,6 +33,7 @@ export const AllPaymentPlansForTable = gql`
       dispersionEndDate: $dispersionEndDate
       isFollowUp: $isFollowUp
       program: $program
+      programCycle: $programCycle
     ) {
       pageInfo {
         hasNextPage
@@ -45,7 +47,6 @@ export const AllPaymentPlansForTable = gql`
         node {
           id
           unicefId
-          name
           isFollowUp
           followUps {
             totalCount
@@ -69,6 +70,11 @@ export const AllPaymentPlansForTable = gql`
           }
           targetPopulation {
             id
+            name
+          }
+          programCycle {
+            id
+            unicefId
             name
           }
           currency

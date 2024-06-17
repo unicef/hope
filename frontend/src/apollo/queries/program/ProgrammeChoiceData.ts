@@ -19,6 +19,7 @@ export const ProgrammeChoiceData = gql`
       value
     }
     dataCollectingTypeChoices {
+    programCycleStatusChoices {
       name
       value
     }
