@@ -223,10 +223,10 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
                 {household?.registrationDataImport?.importedBy?.email}
               </LabelizedField>
             </Grid>
-            {household?.registrationId && (
+            {household?.programRegistrationId && (
               <Grid item xs={3}>
-                <LabelizedField label={t('Registration id')}>
-                  {household.registrationId}
+                <LabelizedField label={t('Program registration id')}>
+                  {household.programRegistrationId}
                 </LabelizedField>
               </Grid>
             )}

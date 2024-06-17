@@ -21,6 +21,9 @@ from page_object.grievance.new_ticket import NewTicket
 from page_object.managerial_console.managerial_console import ManagerialConsole
 from page_object.people.people import People
 from page_object.people.people_details import PeopleDetails
+from page_object.payment_module.new_payment_plan import NewPaymentPlan
+from page_object.payment_module.payment_module import PaymentModule
+from page_object.payment_module.payment_module_details import PaymentModuleDetails
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
 from page_object.programme_population.households import Households
@@ -271,6 +274,11 @@ def pageTargeting(request: FixtureRequest, browser: Chrome) -> Targeting:
 
 
 @pytest.fixture
+def pagePaymentModule(request: FixtureRequest, browser: Chrome) -> PaymentModule:
+    yield PaymentModule(browser)
+
+
+@pytest.fixture
 def pageTargetingDetails(request: FixtureRequest, browser: Chrome) -> TargetingDetails:
     yield TargetingDetails(browser)
 
@@ -293,6 +301,16 @@ def pageGrievanceNewTicket(request: FixtureRequest, browser: Chrome) -> NewTicke
 @pytest.fixture
 def pageManagerialConsole(request: FixtureRequest, browser: Chrome) -> ManagerialConsole:
     yield ManagerialConsole(browser)
+
+
+@pytest.fixture
+def pagePaymentModuleDetails(request: FixtureRequest, browser: Chrome) -> PaymentModuleDetails:
+    yield PaymentModuleDetails(browser)
+
+
+@pytest.fixture
+def pageNewPaymentPlan(request: FixtureRequest, browser: Chrome) -> NewPaymentPlan:
+    yield NewPaymentPlan(browser)
 
 
 @pytest.fixture

@@ -1622,6 +1622,7 @@ type HouseholdNode implements Node {
   rowId: Int
   detailId: String
   registrationId: String
+  programRegistrationId: String
   totalCashReceivedUsd: Decimal
   totalCashReceived: Decimal
   familyId: String
@@ -2401,6 +2402,7 @@ type IndividualNode implements Node {
   rowId: Int
   detailId: String
   registrationId: String
+  programRegistrationId: String
   disabilityCertificatePicture: String
   preferredLanguage: String
   relationshipConfirmed: Boolean!
