@@ -182,7 +182,9 @@ class TestTargetPopulationQuery(APITestCase):
         )
 
     def test_all_targets_query_order_by_created_by(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_VIEW_LIST], self.business_area, self.program)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.TARGETING_VIEW_LIST], self.business_area, self.program
+        )
 
         self.snapshot_graphql_request(
             request_string=TestTargetPopulationQuery.ALL_TARGET_POPULATION_ORDER_BY_CREATED_BY_QUERY,
