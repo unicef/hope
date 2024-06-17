@@ -194,9 +194,6 @@ class PeopleDetails(BaseComponents):
     def getLabelUnhcrId(self) -> WebElement:
         return self.wait_for(self.labelUnhcrId)
 
-    def getLabelIssued(self) -> WebElement:
-        return self.wait_for(self.labelIssued)
-
     def getLabelWfpId(self) -> WebElement:
         return self.wait_for(self.labelWfpId)
 
