@@ -16,6 +16,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
     FinancialServiceProviderFactory,
@@ -162,7 +163,7 @@ class TestDashboardQueries(APITestCase):
                 parent=cash_plan1,
                 delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
                 household=household1,
-                delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
+                delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
                 delivered_quantity=10 + num,
                 delivered_quantity_usd=10 + num,
                 status=GenericPayment.STATUS_SUCCESS,
@@ -173,7 +174,7 @@ class TestDashboardQueries(APITestCase):
                 parent=cash_plan1,
                 delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
                 household=household2,
-                delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
+                delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
                 delivered_quantity=20 + num,
                 delivered_quantity_usd=20 + num,
                 status=GenericPayment.STATUS_SUCCESS,
@@ -184,7 +185,7 @@ class TestDashboardQueries(APITestCase):
                 parent=cash_plan1,
                 delivery_date=timezone.datetime(2021, 11, 10, tzinfo=utc),
                 household=household3,
-                delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
+                delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
                 delivered_quantity=30 + num,
                 delivered_quantity_usd=30 + num,
                 status=GenericPayment.STATUS_ERROR,
@@ -196,7 +197,7 @@ class TestDashboardQueries(APITestCase):
             PaymentFactory(
                 parent=payment_plan1,
                 delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
-                delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
+                delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
                 delivered_quantity=10 + num,
                 delivered_quantity_usd=10 + num,
                 status=GenericPayment.STATUS_SUCCESS,
@@ -208,7 +209,7 @@ class TestDashboardQueries(APITestCase):
             PaymentFactory(
                 parent=payment_plan1,
                 delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
-                delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
+                delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
                 delivered_quantity=20 + num,
                 delivered_quantity_usd=20 + num,
                 status=GenericPayment.STATUS_SUCCESS,
@@ -220,7 +221,7 @@ class TestDashboardQueries(APITestCase):
             PaymentFactory(
                 parent=payment_plan1,
                 delivery_date=timezone.datetime(2021, 11, 10, tzinfo=utc),
-                delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
+                delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
                 delivered_quantity=30 + num,
                 delivered_quantity_usd=30 + num,
                 status=GenericPayment.STATUS_ERROR,
@@ -259,12 +260,14 @@ class TestDashboardQueries(APITestCase):
             ba = BusinessArea.objects.get(slug=ba_name.lower())
             qs_success_payment_record = PaymentRecord.objects.filter(business_area=ba)
             qs_success_payment = Payment.objects.filter(business_area=ba)
-            payment_records_cash = qs_success_payment_record.filter(delivery_type=GenericPayment.DELIVERY_TYPE_CASH)
-            payment_records_voucher = qs_success_payment_record.filter(
-                delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER
+            payment_records_cash = qs_success_payment_record.filter(
+                delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_CASH
             )
-            payments_cash = qs_success_payment.filter(delivery_type=GenericPayment.DELIVERY_TYPE_CASH)
-            payments_voucher = qs_success_payment.filter(delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER)
+            payment_records_voucher = qs_success_payment_record.filter(
+                delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER
+            )
+            payments_cash = qs_success_payment.filter(delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_CASH)
+            payments_voucher = qs_success_payment.filter(delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER)
 
             for data_set in resp_data["datasets"]:
                 sum1 = sum2 = 0

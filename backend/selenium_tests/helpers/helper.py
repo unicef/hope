@@ -64,6 +64,11 @@ class Common:
                 break
         return self.driver.current_url
 
+    def element_clickable(
+        self, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
+    ) -> bool:
+        return self._wait(timeout).until(EC.element_to_be_clickable((element_type, locator)))
+
     def select_listbox_element(
         self, name: str, listbox: str = 'ul[role="listbox"]', tag_name: str = "li"
     ) -> WebElement:

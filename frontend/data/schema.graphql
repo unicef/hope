@@ -853,8 +853,6 @@ type DataCollectingTypeNode implements Node {
   code: String!
   type: DataCollectingTypeType
   description: String!
-  compatibleTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
-  limitTo(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   active: Boolean!
   deprecated: Boolean!
   individualFiltersAvailable: Boolean!
@@ -1624,6 +1622,7 @@ type HouseholdNode implements Node {
   rowId: Int
   detailId: String
   registrationId: String
+  programRegistrationId: String
   totalCashReceivedUsd: Decimal
   totalCashReceived: Decimal
   familyId: String
@@ -2403,6 +2402,7 @@ type IndividualNode implements Node {
   rowId: Int
   detailId: String
   registrationId: String
+  programRegistrationId: String
   disabilityCertificatePicture: String
   preferredLanguage: String
   relationshipConfirmed: Boolean!
