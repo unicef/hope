@@ -220,8 +220,6 @@ def update_household_representations(original: Household, representations: Query
         "currency",
         "unhcr_id",
         "user_fields",
-        "kobo_asset_id",
-        "row_id",
         "detail_id",
         "registration_id",
         "total_cash_received_usd",
