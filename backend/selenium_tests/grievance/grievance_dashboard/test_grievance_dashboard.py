@@ -17,6 +17,8 @@ def active_program() -> Program:
 
 @pytest.fixture
 def add_grievances() -> None:
+    GrievanceTicket._meta.get_field("created_at").auto_now_add = False
+    GrievanceTicket._meta.get_field("updated_at").auto_now = False
     for i in range(50):
         generate_grievance(f"GRV-000000{i}")
     for i in range(10):
@@ -37,6 +39,7 @@ def add_grievances() -> None:
             status=GrievanceTicket.STATUS_CLOSED,
             category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
         )
+    GrievanceTicket._meta.get_field("created_at").auto_now_add = True
 
 
 def generate_grievance(
@@ -85,6 +88,7 @@ class TestSmokeGrievanceDashboard:
     ) -> None:
         pageGrievanceDashboard.getNavGrievance().click()
         pageGrievanceDashboard.getNavGrievanceDashboard().click()
+
         assert "Grievance Dashboard" in pageGrievanceDashboard.getPageHeaderTitle().text
         assert "100" in pageGrievanceDashboard.getTotalNumberOfTicketsTopNumber().text
         assert "25" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfTicketsSystemGenerated().text
@@ -93,8 +97,10 @@ class TestSmokeGrievanceDashboard:
         assert "15" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsSystemGenerated().text
         assert "25" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsUserGenerated().text
         # ToDo: Why is it 0 days?
-        assert "0.00 days" in pageGrievanceDashboard.getTicketsAverageResolutionTopNumber().text
+        assert "421.25 days" in pageGrievanceDashboard.getTicketsAverageResolutionTopNumber().text
         assert (
-            "0 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated().text
+            "515 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated().text
         )
-        assert "0 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionUserGenerated().text
+        assert "365 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionUserGenerated().text
+        GrievanceTicket._meta.get_field("updated_at").auto_now = True
+
