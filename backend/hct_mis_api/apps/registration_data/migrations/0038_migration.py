@@ -16,3 +16,7 @@ class Migration(migrations.Migration):
             field=models.BooleanField(default=False),
         ),
     ]
+
+
+for g in GrievanceTicket.objects.all():
+    print(g.created_at, g.updated_at)
