@@ -3,7 +3,6 @@ from uuid import UUID
 
 from django.conf import settings
 from django.core.management import call_command
-from django.db import transaction
 
 import pytest
 from dateutil.relativedelta import relativedelta
@@ -47,19 +46,18 @@ def non_sw_program() -> Program:
 
 def create_custom_household(observed_disability: list[str], residence_status: str = HOST) -> Household:
     program = Program.objects.first()
-    with transaction.atomic():
-        household, individuals = create_household_and_individuals(
-            household_data={
-                "unicef_id": "HH-00-0000.0442",
-                "business_area": program.business_area,
-                "program": program,
-                "residence_status": residence_status,
-            },
-            individuals_data=[
-                {"business_area": program.business_area, "observed_disability": observed_disability},
-            ],
-        )
-        return household
+    household, _ = create_household_and_individuals(
+        household_data={
+            "unicef_id": "HH-00-0000.0442",
+            "business_area": program.business_area,
+            "program": program,
+            "residence_status": residence_status,
+        },
+        individuals_data=[
+            {"business_area": program.business_area, "observed_disability": observed_disability},
+        ],
+    )
+    return household
 
 
 @pytest.fixture

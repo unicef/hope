@@ -364,33 +364,38 @@ def create_household_and_individuals(
     if household_data.get("size") is None:
         household_data["size"] = len(individuals_data)
     if "program" not in household_data:
-        program = ProgramFactory()
-    else:
-        program = household_data["program"]
-    if "registration_data_import" not in household_data:
-        rdi = RegistrationDataImportFactory(program=program)
-        household_data["registration_data_import"] = rdi
+        household_data["program"] = ProgramFactory()
+
     household: Household = HouseholdFactory.build(**household_data)
     household.program.save()
     household.household_collection.save()
-    household.registration_data_import.imported_by.save()
+    household.registration_data_import.program = household.program
     household.registration_data_import.program.save()
+    household.registration_data_import.imported_by.save()
     household.registration_data_import.save()
-    household.program.save()
     for individual_data in individuals_data:
         if "program" not in individual_data:
-            individual_data["program"] = program
+            individual_data["program"] = household.program
         if "registration_data_import" not in individual_data:
-            individual_data["registration_data_import"] = household_data["registration_data_import"]
+            individual_data["registration_data_import"] = household.registration_data_import
     individuals: List[Individual] = [
         IndividualFactory(
-            household=household,
+            household=None,
             **individual_data,
         )
         for individual_data in individuals_data
     ]
     household.head_of_household = individuals[0]
     household.save()
+
+    individuals_to_update = []
+    for index, individual in enumerate(individuals):
+        if index == 0:
+            individual.relationship = "HEAD"
+        individual.household = household
+        individuals_to_update.append(individual)
+    Individual.objects.bulk_update(individuals_to_update, ("relationship", "household"))
+
     return household, individuals
 
 
