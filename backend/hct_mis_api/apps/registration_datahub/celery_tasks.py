@@ -116,7 +116,7 @@ def registration_xlsx_import_task(
         logger.info(str(e))
         return True
     except Exception as e:
-        from hct_mis_api.apps.registration_datahub.models import (
+        from hct_mis_api.apps.registration_data.models import (
             RegistrationDataImportDatahub,
         )
 
@@ -163,7 +163,7 @@ def registration_program_population_import_task(
         return True
     except Exception as e:
         logger.warning(e)
-        from hct_mis_api.apps.registration_datahub.models import (
+        from hct_mis_api.apps.registration_data.models import (
             RegistrationDataImportDatahub,
         )
 
@@ -365,7 +365,7 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID") -> Dict:
 @sentry_tags
 def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> Dict:
     from hct_mis_api.apps.program.models import Program
-    from hct_mis_api.apps.registration_datahub.models import ImportData
+    from hct_mis_api.apps.registration_data.models import ImportData
     from hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import import (
         ValidateXlsxImport,
     )
