@@ -1,15 +1,11 @@
 import pytest
-
 from page_object.grievance.grievance_dashboard import GrievanceDashboard
 
+from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.program.models import Program
 from selenium_tests.helpers.fixtures import get_program_with_dct_type_and_name
-
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-
-from hct_mis_api.apps.core.models import BusinessArea
-
-from hct_mis_api.apps.account.models import User
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -24,33 +20,38 @@ def add_grievances() -> None:
     for i in range(50):
         generate_grievance(f"GRV-000000{i}")
     for i in range(10):
-        generate_grievance(f"GRV-00000{i + 50}",
-                           category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-                           )
+        generate_grievance(
+            f"GRV-00000{i + 50}",
+            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        )
     for i in range(25):
-        generate_grievance(f"GRV-00000{i + 60}",
-                           created_at="2022-09-27T11:26:33.846Z",
-                           updated_at="2023-09-27T11:26:33.846Z",
-                           status=GrievanceTicket.STATUS_CLOSED)
+        generate_grievance(
+            f"GRV-00000{i + 60}",
+            created_at="2022-09-27T11:26:33.846Z",
+            updated_at="2023-09-27T11:26:33.846Z",
+            status=GrievanceTicket.STATUS_CLOSED,
+        )
     for i in range(15):
-        generate_grievance(f"GRV-0000{i + 100}",
-                           status=GrievanceTicket.STATUS_CLOSED,
-                           category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-                           )
+        generate_grievance(
+            f"GRV-0000{i + 100}",
+            status=GrievanceTicket.STATUS_CLOSED,
+            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        )
 
 
-def generate_grievance(unicef_id: str,
-                       status: str = GrievanceTicket.STATUS_NEW,
-                       category: str = GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-                       created_by: User = None,
-                       assigned_to: User = None,
-                       business_area: BusinessArea = None,
-                       priority: int = 1,
-                       urgency: int = 1,
-                       household_unicef_id: str = "HH-20-0000.0001",
-                       updated_at: str = "2023-09-27T11:26:33.846Z",
-                       created_at: str = "2022-04-30T09:54:07.827000"
-                       ):
+def generate_grievance(
+    unicef_id: str,
+    status: int = GrievanceTicket.STATUS_NEW,
+    category: int = GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+    created_by: User | None = None,
+    assigned_to: User | None = None,
+    business_area: BusinessArea | None = None,
+    priority: int = 1,
+    urgency: int = 1,
+    household_unicef_id: str = "HH-20-0000.0001",
+    updated_at: str = "2023-09-27T11:26:33.846Z",
+    created_at: str = "2022-04-30T09:54:07.827000",
+) -> None:
     created_by = User.objects.first() if created_by is None else created_by
     assigned_to = User.objects.first() if assigned_to is None else assigned_to
     business_area = BusinessArea.objects.filter(slug="afghanistan").first() if business_area is None else business_area
@@ -77,10 +78,10 @@ def generate_grievance(unicef_id: str,
 @pytest.mark.usefixtures("login")
 class TestSmokeGrievanceTickets:
     def test_check_grievance_dashboard(
-            self,
-            active_program: Program,
-            add_grievances: None,
-            pageGrievanceDashboard: GrievanceDashboard,
+        self,
+        active_program: Program,
+        add_grievances: None,
+        pageGrievanceDashboard: GrievanceDashboard,
     ) -> None:
         pageGrievanceDashboard.getNavGrievance().click()
         pageGrievanceDashboard.getNavGrievanceDashboard().click()
@@ -93,6 +94,7 @@ class TestSmokeGrievanceTickets:
         assert "25" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsUserGenerated().text
         # ToDo: Why is it 0 days?
         assert "0.00 days" in pageGrievanceDashboard.getTicketsAverageResolutionTopNumber().text
-        assert "0 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated().text
+        assert (
+            "0 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated().text
+        )
         assert "0 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionUserGenerated().text
-        pageGrievanceDashboard.screenshot("123")
