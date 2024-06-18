@@ -76,8 +76,8 @@ def generate_grievance(
 
 
 @pytest.mark.usefixtures("login")
-class TestSmokeGrievanceTickets:
-    def test_check_grievance_dashboard(
+class TestSmokeGrievanceDashboard:
+    def test_smoke_grievance_dashboard(
         self,
         active_program: Program,
         add_grievances: None,
