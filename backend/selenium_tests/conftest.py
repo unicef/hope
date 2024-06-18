@@ -10,6 +10,8 @@ from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from flags.models import FlagState
+
+from page_object.grievance.grievance_dashboard import GrievanceDashboard
 from page_object.admin_panel.admin_panel import AdminPanel
 from page_object.filters import Filters
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
@@ -283,6 +285,11 @@ def pageGrievanceDetailsPage(request: FixtureRequest, browser: Chrome) -> Grieva
 @pytest.fixture
 def pageGrievanceNewTicket(request: FixtureRequest, browser: Chrome) -> NewTicket:
     yield NewTicket(browser)
+
+
+@pytest.fixture
+def pageGrievanceDashboard(request: FixtureRequest, browser: Chrome) -> GrievanceDashboard:
+    yield GrievanceDashboard(browser)
 
 
 @pytest.fixture
