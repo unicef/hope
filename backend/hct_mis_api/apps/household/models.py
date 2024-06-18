@@ -407,8 +407,6 @@ class Household(
             "collect_individual_data",
             "currency",
             "unhcr_id",
-            "kobo_asset_id",
-            "row_id",
             "detail_id",
             "registration_id",
             "program_registration_id",
@@ -509,9 +507,6 @@ class Household(
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
     user_fields = JSONField(default=dict, blank=True)
-    # TODO: remove 'kobo_asset_id' and 'row_id' after migrate data
-    kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK, db_index=True)
-    row_id = models.PositiveIntegerField(blank=True, null=True)  # XLS row id
     detail_id = models.CharField(
         max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
     )
@@ -1033,9 +1028,6 @@ class Individual(
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     fchild_hoh = models.BooleanField(default=False)
     child_hoh = models.BooleanField(default=False)
-    # TODO: remove 'kobo_asset_id' and 'row_id' after migrate data
-    kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
-    row_id = models.PositiveIntegerField(blank=True, null=True)
     detail_id = models.CharField(
         max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
     )
