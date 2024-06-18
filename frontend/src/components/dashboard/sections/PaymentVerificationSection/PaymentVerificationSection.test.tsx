@@ -6,10 +6,7 @@ import { fakeChartPaymentVerification } from '../../../../../fixtures/dashboard/
 describe('components/dashboard/PaymentVerificationSection', () => {
   it('should render', () => {
     const { container } = render(
-      <PaymentVerificationSection
-        data={fakeChartPaymentVerification}
-        isSocialDctType={false}
-      />,
+      <PaymentVerificationSection data={fakeChartPaymentVerification} />,
     );
     expect(container).toMatchSnapshot();
   });

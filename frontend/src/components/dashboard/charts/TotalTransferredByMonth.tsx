@@ -60,12 +60,12 @@ export function TotalTransferredByMonth({
               // no percentage for previous transfers value
               return ` ${
                 tooltipData.datasets[context.datasetIndex].label
-              }: ${formatCurrencyWithSymbol(tooltipItem.y)}`;
+              }: ${formatCurrencyWithSymbol(tooltipItem)}`;
             }
             return ` ${
               tooltipData.datasets[context.datasetIndex].label
-            }: ${formatCurrencyWithSymbol(tooltipItem.y)} (${getPercentage(
-              tooltipItem.y,
+            }: ${formatCurrencyWithSymbol(tooltipItem)} (${getPercentage(
+              tooltipItem,
               tooltipData.datasets[1].data[context.dataIndex] +
                 tooltipData.datasets[2].data[context.dataIndex],
             )})`;

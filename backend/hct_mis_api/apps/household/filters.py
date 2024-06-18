@@ -154,7 +154,7 @@ class HouseholdFilter(FilterSet):
                 _value = _prepare_kobo_asset_id_value(search)
                 # if user put something like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
                 # will filter by '111222' like 111222 is ID
-                inner_query |= Q(kobo_asset_id__endswith=_value)
+                inner_query |= Q(detail_id__endswith=_value)
 
         query_dict = self._get_elasticsearch_query_for_households(search)
         es_response = (

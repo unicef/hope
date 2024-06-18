@@ -26,6 +26,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from '../../../programContext';
 import { TotalNumberOfPeopleReachedSection } from '@components/dashboard/sections/TotalNumberOfPeopleReachedSection';
 import { TotalAmountTransferredSectionByAdminAreaForPeopleSection } from '@components/dashboard/sections/TotalAmountTransferredByAdminAreaForPeopleSection';
+import { PaymentVerificationSectionForPeople } from '@components/dashboard/sections/PaymentVerificationSectionForPeople';
 
 const PaddingContainer = styled.div`
   padding: 20px;
@@ -167,12 +168,20 @@ export const DashboardYearPage = ({
               )}
             </>
           )}
-          <Box mb={6}>
-            <PaymentVerificationSection
-              data={data.chartPaymentVerification}
-              isSocialDctType={isSocialDctType}
-            />
-          </Box>
+          {(isAllPrograms || !isSocialDctType) && (
+            <Box mb={6}>
+              <PaymentVerificationSection
+                data={data.chartPaymentVerification}
+              />
+            </Box>
+          )}
+          {(isAllPrograms || isSocialDctType) && (
+            <Box mb={6}>
+              <PaymentVerificationSectionForPeople
+                data={data.chartPaymentVerificationForPeople}
+              />
+            </Box>
+          )}
         </Grid>
         <Grid item xs={4}>
           <PaddingLeftContainer>

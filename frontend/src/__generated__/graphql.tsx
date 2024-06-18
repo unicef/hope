@@ -2259,7 +2259,6 @@ export type HouseholdNode = Node & {
   isOriginal: Scalars['Boolean']['output'];
   isRecalculatedGroupAges: Scalars['Boolean']['output'];
   isRemoved: Scalars['Boolean']['output'];
-  koboAssetId: Scalars['String']['output'];
   lastRegistrationDate: Scalars['DateTime']['output'];
   lastSyncAt?: Maybe<Scalars['DateTime']['output']>;
   maleAgeGroup05Count?: Maybe<Scalars['Int']['output']>;
@@ -2296,7 +2295,6 @@ export type HouseholdNode = Node & {
   representatives: IndividualNodeConnection;
   residenceStatus?: Maybe<Scalars['String']['output']>;
   returnee?: Maybe<Scalars['Boolean']['output']>;
-  rowId?: Maybe<Scalars['Int']['output']>;
   sanctionListConfirmedMatch?: Maybe<Scalars['Boolean']['output']>;
   sanctionListPossibleMatch?: Maybe<Scalars['Boolean']['output']>;
   selection?: Maybe<HouseholdSelectionNode>;
@@ -2946,7 +2944,6 @@ export type ImportedHouseholdNode = Node & {
   id: Scalars['ID']['output'];
   importId?: Maybe<Scalars['String']['output']>;
   individuals: ImportedIndividualNodeConnection;
-  koboAssetId: Scalars['String']['output'];
   koboSubmissionTime?: Maybe<Scalars['DateTime']['output']>;
   koboSubmissionUuid?: Maybe<Scalars['UUID']['output']>;
   lastRegistrationDate: Scalars['DateTime']['output'];
@@ -2971,7 +2968,6 @@ export type ImportedHouseholdNode = Node & {
   registrationMethod: ImportedHouseholdRegistrationMethod;
   residenceStatus: ImportedHouseholdResidenceStatus;
   returnee?: Maybe<Scalars['Boolean']['output']>;
-  rowId?: Maybe<Scalars['Int']['output']>;
   size?: Maybe<Scalars['Int']['output']>;
   start?: Maybe<Scalars['DateTime']['output']>;
   unhcrId: Scalars['String']['output'];
@@ -3107,7 +3103,6 @@ export type ImportedIndividualNode = Node & {
   importId?: Maybe<Scalars['String']['output']>;
   importedhousehold?: Maybe<ImportedHouseholdNode>;
   individualId: Scalars['String']['output'];
-  koboAssetId: Scalars['String']['output'];
   lastRegistrationDate: Scalars['Date']['output'];
   maritalStatus: ImportedIndividualMaritalStatus;
   memoryDisability: Scalars['String']['output'];
@@ -3127,7 +3122,6 @@ export type ImportedIndividualNode = Node & {
   registrationDataImport: RegistrationDataImportDatahubNode;
   relationship?: Maybe<Scalars['String']['output']>;
   role?: Maybe<Scalars['String']['output']>;
-  rowId?: Maybe<Scalars['Int']['output']>;
   seeingDisability: Scalars['String']['output'];
   selfcareDisability: Scalars['String']['output'];
   sex: ImportedIndividualSex;
@@ -3323,7 +3317,6 @@ export type IndividualNode = Node & {
   isMigrationHandled: Scalars['Boolean']['output'];
   isOriginal: Scalars['Boolean']['output'];
   isRemoved: Scalars['Boolean']['output'];
-  koboAssetId: Scalars['String']['output'];
   lastRegistrationDate: Scalars['Date']['output'];
   lastSyncAt?: Maybe<Scalars['DateTime']['output']>;
   maritalStatus: IndividualMaritalStatus;
@@ -3356,7 +3349,6 @@ export type IndividualNode = Node & {
   removedDate?: Maybe<Scalars['DateTime']['output']>;
   representedHouseholds: HouseholdNodeConnection;
   role?: Maybe<Scalars['String']['output']>;
-  rowId?: Maybe<Scalars['Int']['output']>;
   sanctionListConfirmedMatch: Scalars['Boolean']['output'];
   sanctionListLastCheck?: Maybe<Scalars['DateTime']['output']>;
   sanctionListPossibleMatch: Scalars['Boolean']['output'];
@@ -5728,6 +5720,7 @@ export type Query = {
   chartIndividualsWithDisabilityReachedByAge?: Maybe<ChartDetailedDatasetsNode>;
   chartPayment?: Maybe<ChartDatasetNode>;
   chartPaymentVerification?: Maybe<ChartPaymentVerification>;
+  chartPaymentVerificationForPeople?: Maybe<ChartPaymentVerification>;
   chartPeopleReachedByAgeAndGender?: Maybe<ChartDatasetNode>;
   chartPeopleWithDisabilityReachedByAge?: Maybe<ChartDetailedDatasetsNode>;
   chartProgrammesBySector?: Maybe<ChartDetailedDatasetsNode>;
@@ -5812,6 +5805,7 @@ export type Query = {
   surveyAvailableFlows?: Maybe<Array<Maybe<RapidProFlowNode>>>;
   surveyCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   tableTotalCashTransferredByAdministrativeArea?: Maybe<TableTotalCashTransferred>;
+  tableTotalCashTransferredByAdministrativeAreaForPeople?: Maybe<TableTotalCashTransferredForPeople>;
   targetPopulation?: Maybe<TargetPopulationNode>;
   targetPopulationHouseholds?: Maybe<HouseholdNodeConnection>;
   targetPopulationStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
@@ -6587,6 +6581,14 @@ export type QueryChartPaymentVerificationArgs = {
 };
 
 
+export type QueryChartPaymentVerificationForPeopleArgs = {
+  administrativeArea?: InputMaybe<Scalars['String']['input']>;
+  businessAreaSlug: Scalars['String']['input'];
+  program?: InputMaybe<Scalars['String']['input']>;
+  year: Scalars['Int']['input'];
+};
+
+
 export type QueryChartPeopleReachedByAgeAndGenderArgs = {
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
   businessAreaSlug: Scalars['String']['input'];
@@ -6844,6 +6846,16 @@ export type QuerySurveyArgs = {
 
 
 export type QueryTableTotalCashTransferredByAdministrativeAreaArgs = {
+  administrativeArea?: InputMaybe<Scalars['String']['input']>;
+  businessAreaSlug: Scalars['String']['input'];
+  order?: InputMaybe<Scalars['String']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  program?: InputMaybe<Scalars['String']['input']>;
+  year: Scalars['Int']['input'];
+};
+
+
+export type QueryTableTotalCashTransferredByAdministrativeAreaForPeopleArgs = {
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
   businessAreaSlug: Scalars['String']['input'];
   order?: InputMaybe<Scalars['String']['input']>;
@@ -7830,6 +7842,11 @@ export enum SurveySamplingType {
 export type TableTotalCashTransferred = {
   __typename?: 'TableTotalCashTransferred';
   data?: Maybe<Array<Maybe<_TableTotalCashTransferredDataNode>>>;
+};
+
+export type TableTotalCashTransferredForPeople = {
+  __typename?: 'TableTotalCashTransferredForPeople';
+  data?: Maybe<Array<Maybe<_TableTotalCashTransferredDataForPeopleNode>>>;
 };
 
 export enum TargetPopulationBuildStatus {
@@ -9254,6 +9271,14 @@ export type _DetailedDatasetsNode = {
   label?: Maybe<Scalars['String']['output']>;
 };
 
+export type _TableTotalCashTransferredDataForPeopleNode = {
+  __typename?: '_TableTotalCashTransferredDataForPeopleNode';
+  admin2?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['String']['output']>;
+  totalCashTransferred?: Maybe<Scalars['Float']['output']>;
+  totalPeople?: Maybe<Scalars['Int']['output']>;
+};
+
 export type _TableTotalCashTransferredDataNode = {
   __typename?: '_TableTotalCashTransferredDataNode';
   admin2?: Maybe<Scalars['String']['output']>;
@@ -9284,9 +9309,9 @@ export type RegistrationMinimalFragment = { __typename?: 'RegistrationDataImport
 
 export type RegistrationDetailedFragment = { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, batchDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null };
 
-export type ImportedHouseholdMinimalFragment = { __typename?: 'ImportedHouseholdNode', id: string, importId?: string | null, size?: number | null, admin1: string, admin1Title: string, admin2: string, admin2Title: string, flexFields?: any | null, deviceid: string, start?: any | null, koboAssetId: string, rowId?: number | null, firstRegistrationDate: any, lastRegistrationDate: any, hasDuplicates?: boolean | null, fchildHoh?: boolean | null, childHoh?: boolean | null, collectIndividualData: ImportedHouseholdCollectIndividualData, headOfHousehold?: { __typename?: 'ImportedIndividualNode', id: string, fullName: string } | null };
+export type ImportedHouseholdMinimalFragment = { __typename?: 'ImportedHouseholdNode', id: string, importId?: string | null, size?: number | null, admin1: string, admin1Title: string, admin2: string, admin2Title: string, flexFields?: any | null, deviceid: string, start?: any | null, detailId?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, hasDuplicates?: boolean | null, fchildHoh?: boolean | null, childHoh?: boolean | null, collectIndividualData: ImportedHouseholdCollectIndividualData, headOfHousehold?: { __typename?: 'ImportedIndividualNode', id: string, fullName: string } | null };
 
-export type ImportedHouseholdDetailedFragment = { __typename?: 'ImportedHouseholdNode', residenceStatus: ImportedHouseholdResidenceStatus, country?: string | null, countryOrigin?: string | null, id: string, importId?: string | null, size?: number | null, admin1: string, admin1Title: string, admin2: string, admin2Title: string, flexFields?: any | null, deviceid: string, start?: any | null, koboAssetId: string, rowId?: number | null, firstRegistrationDate: any, lastRegistrationDate: any, hasDuplicates?: boolean | null, fchildHoh?: boolean | null, childHoh?: boolean | null, collectIndividualData: ImportedHouseholdCollectIndividualData, registrationDataImport: { __typename?: 'RegistrationDataImportDatahubNode', id: string, hctId?: any | null, name: string }, individuals: { __typename?: 'ImportedIndividualNodeConnection', edges: Array<{ __typename?: 'ImportedIndividualNodeEdge', node?: { __typename?: 'ImportedIndividualNode', id: string, importId?: string | null, age?: number | null, fullName: string, birthDate: any, sex: ImportedIndividualSex, role?: string | null, relationship?: string | null, deduplicationBatchStatus?: ImportedIndividualDeduplicationBatchStatus | null, deduplicationGoldenRecordStatus?: ImportedIndividualDeduplicationGoldenRecordStatus | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, deduplicationBatchResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, registrationDataImport: { __typename?: 'RegistrationDataImportDatahubNode', id: string, hctId?: any | null } } | null } | null> }, headOfHousehold?: { __typename?: 'ImportedIndividualNode', id: string, fullName: string } | null };
+export type ImportedHouseholdDetailedFragment = { __typename?: 'ImportedHouseholdNode', residenceStatus: ImportedHouseholdResidenceStatus, country?: string | null, countryOrigin?: string | null, id: string, importId?: string | null, size?: number | null, admin1: string, admin1Title: string, admin2: string, admin2Title: string, flexFields?: any | null, deviceid: string, start?: any | null, detailId?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, hasDuplicates?: boolean | null, fchildHoh?: boolean | null, childHoh?: boolean | null, collectIndividualData: ImportedHouseholdCollectIndividualData, registrationDataImport: { __typename?: 'RegistrationDataImportDatahubNode', id: string, hctId?: any | null, name: string }, individuals: { __typename?: 'ImportedIndividualNodeConnection', edges: Array<{ __typename?: 'ImportedIndividualNodeEdge', node?: { __typename?: 'ImportedIndividualNode', id: string, importId?: string | null, age?: number | null, fullName: string, birthDate: any, sex: ImportedIndividualSex, role?: string | null, relationship?: string | null, deduplicationBatchStatus?: ImportedIndividualDeduplicationBatchStatus | null, deduplicationGoldenRecordStatus?: ImportedIndividualDeduplicationGoldenRecordStatus | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, deduplicationBatchResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, registrationDataImport: { __typename?: 'RegistrationDataImportDatahubNode', id: string, hctId?: any | null } } | null } | null> }, headOfHousehold?: { __typename?: 'ImportedIndividualNode', id: string, fullName: string } | null };
 
 export type ImportedIndividualMinimalFragment = { __typename?: 'ImportedIndividualNode', id: string, importId?: string | null, age?: number | null, fullName: string, birthDate: any, sex: ImportedIndividualSex, role?: string | null, relationship?: string | null, deduplicationBatchStatus?: ImportedIndividualDeduplicationBatchStatus | null, deduplicationGoldenRecordStatus?: ImportedIndividualDeduplicationGoldenRecordStatus | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, deduplicationBatchResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, registrationDataImport: { __typename?: 'RegistrationDataImportDatahubNode', id: string, hctId?: any | null } };
 
@@ -10755,7 +10780,7 @@ export type AllImportedHouseholdsQueryVariables = Exact<{
 }>;
 
 
-export type AllImportedHouseholdsQuery = { __typename?: 'Query', allImportedHouseholds?: { __typename?: 'ImportedHouseholdNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'ImportedHouseholdNodeEdge', cursor: string, node?: { __typename?: 'ImportedHouseholdNode', id: string, importId?: string | null, size?: number | null, admin1: string, admin1Title: string, admin2: string, admin2Title: string, flexFields?: any | null, deviceid: string, start?: any | null, koboAssetId: string, rowId?: number | null, firstRegistrationDate: any, lastRegistrationDate: any, hasDuplicates?: boolean | null, fchildHoh?: boolean | null, childHoh?: boolean | null, collectIndividualData: ImportedHouseholdCollectIndividualData, headOfHousehold?: { __typename?: 'ImportedIndividualNode', id: string, fullName: string } | null } | null } | null> } | null };
+export type AllImportedHouseholdsQuery = { __typename?: 'Query', allImportedHouseholds?: { __typename?: 'ImportedHouseholdNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'ImportedHouseholdNodeEdge', cursor: string, node?: { __typename?: 'ImportedHouseholdNode', id: string, importId?: string | null, size?: number | null, admin1: string, admin1Title: string, admin2: string, admin2Title: string, flexFields?: any | null, deviceid: string, start?: any | null, detailId?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, hasDuplicates?: boolean | null, fchildHoh?: boolean | null, childHoh?: boolean | null, collectIndividualData: ImportedHouseholdCollectIndividualData, headOfHousehold?: { __typename?: 'ImportedIndividualNode', id: string, fullName: string } | null } | null } | null> } | null };
 
 export type AllImportedIndividualsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -10837,7 +10862,7 @@ export type ImportedHouseholdQueryVariables = Exact<{
 }>;
 
 
-export type ImportedHouseholdQuery = { __typename?: 'Query', importedHousehold?: { __typename?: 'ImportedHouseholdNode', residenceStatus: ImportedHouseholdResidenceStatus, country?: string | null, countryOrigin?: string | null, id: string, importId?: string | null, size?: number | null, admin1: string, admin1Title: string, admin2: string, admin2Title: string, flexFields?: any | null, deviceid: string, start?: any | null, koboAssetId: string, rowId?: number | null, firstRegistrationDate: any, lastRegistrationDate: any, hasDuplicates?: boolean | null, fchildHoh?: boolean | null, childHoh?: boolean | null, collectIndividualData: ImportedHouseholdCollectIndividualData, registrationDataImport: { __typename?: 'RegistrationDataImportDatahubNode', id: string, hctId?: any | null, name: string }, individuals: { __typename?: 'ImportedIndividualNodeConnection', edges: Array<{ __typename?: 'ImportedIndividualNodeEdge', node?: { __typename?: 'ImportedIndividualNode', id: string, importId?: string | null, age?: number | null, fullName: string, birthDate: any, sex: ImportedIndividualSex, role?: string | null, relationship?: string | null, deduplicationBatchStatus?: ImportedIndividualDeduplicationBatchStatus | null, deduplicationGoldenRecordStatus?: ImportedIndividualDeduplicationGoldenRecordStatus | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, deduplicationBatchResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, registrationDataImport: { __typename?: 'RegistrationDataImportDatahubNode', id: string, hctId?: any | null } } | null } | null> }, headOfHousehold?: { __typename?: 'ImportedIndividualNode', id: string, fullName: string } | null } | null };
+export type ImportedHouseholdQuery = { __typename?: 'Query', importedHousehold?: { __typename?: 'ImportedHouseholdNode', residenceStatus: ImportedHouseholdResidenceStatus, country?: string | null, countryOrigin?: string | null, id: string, importId?: string | null, size?: number | null, admin1: string, admin1Title: string, admin2: string, admin2Title: string, flexFields?: any | null, deviceid: string, start?: any | null, detailId?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, hasDuplicates?: boolean | null, fchildHoh?: boolean | null, childHoh?: boolean | null, collectIndividualData: ImportedHouseholdCollectIndividualData, registrationDataImport: { __typename?: 'RegistrationDataImportDatahubNode', id: string, hctId?: any | null, name: string }, individuals: { __typename?: 'ImportedIndividualNodeConnection', edges: Array<{ __typename?: 'ImportedIndividualNodeEdge', node?: { __typename?: 'ImportedIndividualNode', id: string, importId?: string | null, age?: number | null, fullName: string, birthDate: any, sex: ImportedIndividualSex, role?: string | null, relationship?: string | null, deduplicationBatchStatus?: ImportedIndividualDeduplicationBatchStatus | null, deduplicationGoldenRecordStatus?: ImportedIndividualDeduplicationGoldenRecordStatus | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, deduplicationBatchResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, registrationDataImport: { __typename?: 'RegistrationDataImportDatahubNode', id: string, hctId?: any | null } } | null } | null> }, headOfHousehold?: { __typename?: 'ImportedIndividualNode', id: string, fullName: string } | null } | null };
 
 export type ImportedIndividualQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -10916,7 +10941,7 @@ export type AllChartsQueryVariables = Exact<{
 }>;
 
 
-export type AllChartsQuery = { __typename?: 'Query', chartProgrammesBySector?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartPaymentVerification?: { __typename?: 'ChartPaymentVerification', labels?: Array<string | null> | null, households?: number | null, averageSampleSize?: number | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartVolumeByDeliveryMechanism?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartPayment?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartGrievances?: { __typename?: 'ChartGrievanceTicketsNode', labels?: Array<string | null> | null, totalNumberOfGrievances?: number | null, totalNumberOfFeedback?: number | null, totalNumberOfOpenSensitive?: number | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, sectionHouseholdsReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionIndividualsReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionPeopleReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionChildReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, chartIndividualsReachedByAgeAndGender?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartIndividualsWithDisabilityReachedByAge?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null, chartPeopleReachedByAgeAndGender?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartPeopleWithDisabilityReachedByAge?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null, sectionTotalTransferred?: { __typename?: 'SectionTotalNode', total?: number | null } | null, chartTotalTransferredByMonth?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null };
+export type AllChartsQuery = { __typename?: 'Query', chartProgrammesBySector?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartPaymentVerification?: { __typename?: 'ChartPaymentVerification', labels?: Array<string | null> | null, households?: number | null, averageSampleSize?: number | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartPaymentVerificationForPeople?: { __typename?: 'ChartPaymentVerification', labels?: Array<string | null> | null, households?: number | null, averageSampleSize?: number | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartVolumeByDeliveryMechanism?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartPayment?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartGrievances?: { __typename?: 'ChartGrievanceTicketsNode', labels?: Array<string | null> | null, totalNumberOfGrievances?: number | null, totalNumberOfFeedback?: number | null, totalNumberOfOpenSensitive?: number | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, sectionHouseholdsReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionIndividualsReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionPeopleReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionChildReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, chartIndividualsReachedByAgeAndGender?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartIndividualsWithDisabilityReachedByAge?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null, chartPeopleReachedByAgeAndGender?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartPeopleWithDisabilityReachedByAge?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null, sectionTotalTransferred?: { __typename?: 'SectionTotalNode', total?: number | null } | null, chartTotalTransferredByMonth?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null };
 
 export type CountryChartsQueryVariables = Exact<{
   businessAreaSlug: Scalars['String']['input'];
@@ -10928,7 +10953,7 @@ export type CountryChartsQueryVariables = Exact<{
 }>;
 
 
-export type CountryChartsQuery = { __typename?: 'Query', tableTotalCashTransferredByAdministrativeArea?: { __typename?: 'TableTotalCashTransferred', data?: Array<{ __typename?: '_TableTotalCashTransferredDataNode', id?: string | null, admin2?: string | null, totalCashTransferred?: number | null, totalHouseholds?: number | null } | null> | null } | null };
+export type CountryChartsQuery = { __typename?: 'Query', tableTotalCashTransferredByAdministrativeArea?: { __typename?: 'TableTotalCashTransferred', data?: Array<{ __typename?: '_TableTotalCashTransferredDataNode', id?: string | null, admin2?: string | null, totalCashTransferred?: number | null, totalHouseholds?: number | null } | null> | null } | null, tableTotalCashTransferredByAdministrativeAreaForPeople?: { __typename?: 'TableTotalCashTransferredForPeople', data?: Array<{ __typename?: '_TableTotalCashTransferredDataForPeopleNode', id?: string | null, admin2?: string | null, totalCashTransferred?: number | null, totalPeople?: number | null } | null> | null } | null };
 
 export type DashboardReportChoiceDataQueryVariables = Exact<{
   businessArea: Scalars['String']['input'];
@@ -12132,8 +12157,7 @@ export const ImportedHouseholdMinimalFragmentDoc = gql`
   flexFields
   deviceid
   start
-  koboAssetId
-  rowId
+  detailId
   firstRegistrationDate
   lastRegistrationDate
   hasDuplicates
@@ -22313,6 +22337,20 @@ export const AllChartsDocument = gql`
     households
     averageSampleSize
   }
+  chartPaymentVerificationForPeople(
+    businessAreaSlug: $businessAreaSlug
+    year: $year
+    program: $program
+    administrativeArea: $administrativeArea
+  ) {
+    datasets {
+      label
+      data
+    }
+    labels
+    households
+    averageSampleSize
+  }
   chartVolumeByDeliveryMechanism(
     businessAreaSlug: $businessAreaSlug
     year: $year
@@ -22499,6 +22537,21 @@ export const CountryChartsDocument = gql`
       admin2
       totalCashTransferred
       totalHouseholds
+    }
+  }
+  tableTotalCashTransferredByAdministrativeAreaForPeople(
+    businessAreaSlug: $businessAreaSlug
+    year: $year
+    program: $program
+    administrativeArea: $administrativeArea
+    order: $order
+    orderBy: $orderBy
+  ) {
+    data {
+      id
+      admin2
+      totalCashTransferred
+      totalPeople
     }
   }
 }
@@ -24016,6 +24069,7 @@ export type ResolversTypes = {
   SurveyNodeEdge: ResolverTypeWrapper<SurveyNodeEdge>;
   SurveySamplingType: SurveySamplingType;
   TableTotalCashTransferred: ResolverTypeWrapper<TableTotalCashTransferred>;
+  TableTotalCashTransferredForPeople: ResolverTypeWrapper<TableTotalCashTransferredForPeople>;
   TargetPopulationBuildStatus: TargetPopulationBuildStatus;
   TargetPopulationNode: ResolverTypeWrapper<TargetPopulationNode>;
   TargetPopulationNodeConnection: ResolverTypeWrapper<TargetPopulationNodeConnection>;
@@ -24112,6 +24166,7 @@ export type ResolversTypes = {
   XlsxRowErrorNode: ResolverTypeWrapper<XlsxRowErrorNode>;
   _DatasetsNode: ResolverTypeWrapper<_DatasetsNode>;
   _DetailedDatasetsNode: ResolverTypeWrapper<_DetailedDatasetsNode>;
+  _TableTotalCashTransferredDataForPeopleNode: ResolverTypeWrapper<_TableTotalCashTransferredDataForPeopleNode>;
   _TableTotalCashTransferredDataNode: ResolverTypeWrapper<_TableTotalCashTransferredDataNode>;
 };
 
@@ -24473,6 +24528,7 @@ export type ResolversParentTypes = {
   SurveyNodeConnection: SurveyNodeConnection;
   SurveyNodeEdge: SurveyNodeEdge;
   TableTotalCashTransferred: TableTotalCashTransferred;
+  TableTotalCashTransferredForPeople: TableTotalCashTransferredForPeople;
   TargetPopulationNode: TargetPopulationNode;
   TargetPopulationNodeConnection: TargetPopulationNodeConnection;
   TargetPopulationNodeEdge: TargetPopulationNodeEdge;
@@ -24562,6 +24618,7 @@ export type ResolversParentTypes = {
   XlsxRowErrorNode: XlsxRowErrorNode;
   _DatasetsNode: _DatasetsNode;
   _DetailedDatasetsNode: _DetailedDatasetsNode;
+  _TableTotalCashTransferredDataForPeopleNode: _TableTotalCashTransferredDataForPeopleNode;
   _TableTotalCashTransferredDataNode: _TableTotalCashTransferredDataNode;
 };
 
@@ -25833,7 +25890,6 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isRecalculatedGroupAges?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   lastRegistrationDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   maleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -25870,7 +25926,6 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   representatives?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, Partial<HouseholdNodeRepresentativesArgs>>;
   residenceStatus?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   returnee?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   sanctionListConfirmedMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   sanctionListPossibleMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   selection?: Resolver<Maybe<ResolversTypes['HouseholdSelectionNode']>, ParentType, ContextType>;
@@ -26044,7 +26099,6 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   importId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, Partial<ImportedHouseholdNodeIndividualsArgs>>;
-  koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   koboSubmissionTime?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   koboSubmissionUuid?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;
   lastRegistrationDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
@@ -26069,7 +26123,6 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   registrationMethod?: Resolver<ResolversTypes['ImportedHouseholdRegistrationMethod'], ParentType, ContextType>;
   residenceStatus?: Resolver<ResolversTypes['ImportedHouseholdResidenceStatus'], ParentType, ContextType>;
   returnee?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   size?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   start?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   unhcrId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -26145,7 +26198,6 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   importId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>;
   individualId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   maritalStatus?: Resolver<ResolversTypes['ImportedIndividualMaritalStatus'], ParentType, ContextType>;
   memoryDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -26165,7 +26217,6 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportDatahubNode'], ParentType, ContextType>;
   relationship?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   seeingDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   selfcareDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   sex?: Resolver<ResolversTypes['ImportedIndividualSex'], ParentType, ContextType>;
@@ -26277,7 +26328,6 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   maritalStatus?: Resolver<ResolversTypes['IndividualMaritalStatus'], ParentType, ContextType>;
@@ -26310,7 +26360,6 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   removedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, Partial<IndividualNodeRepresentedHouseholdsArgs>>;
   role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   sanctionListConfirmedMatch?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   sanctionListLastCheck?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   sanctionListPossibleMatch?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -27220,6 +27269,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   chartIndividualsWithDisabilityReachedByAge?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartIndividualsWithDisabilityReachedByAgeArgs, 'businessAreaSlug' | 'year'>>;
   chartPayment?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartPaymentArgs, 'businessAreaSlug' | 'year'>>;
   chartPaymentVerification?: Resolver<Maybe<ResolversTypes['ChartPaymentVerification']>, ParentType, ContextType, RequireFields<QueryChartPaymentVerificationArgs, 'businessAreaSlug' | 'year'>>;
+  chartPaymentVerificationForPeople?: Resolver<Maybe<ResolversTypes['ChartPaymentVerification']>, ParentType, ContextType, RequireFields<QueryChartPaymentVerificationForPeopleArgs, 'businessAreaSlug' | 'year'>>;
   chartPeopleReachedByAgeAndGender?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartPeopleReachedByAgeAndGenderArgs, 'businessAreaSlug' | 'year'>>;
   chartPeopleWithDisabilityReachedByAge?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartPeopleWithDisabilityReachedByAgeArgs, 'businessAreaSlug' | 'year'>>;
   chartProgrammesBySector?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartProgrammesBySectorArgs, 'businessAreaSlug' | 'year'>>;
@@ -27304,6 +27354,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   surveyAvailableFlows?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlowNode']>>>, ParentType, ContextType>;
   surveyCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   tableTotalCashTransferredByAdministrativeArea?: Resolver<Maybe<ResolversTypes['TableTotalCashTransferred']>, ParentType, ContextType, RequireFields<QueryTableTotalCashTransferredByAdministrativeAreaArgs, 'businessAreaSlug' | 'year'>>;
+  tableTotalCashTransferredByAdministrativeAreaForPeople?: Resolver<Maybe<ResolversTypes['TableTotalCashTransferredForPeople']>, ParentType, ContextType, RequireFields<QueryTableTotalCashTransferredByAdministrativeAreaForPeopleArgs, 'businessAreaSlug' | 'year'>>;
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType, RequireFields<QueryTargetPopulationArgs, 'id'>>;
   targetPopulationHouseholds?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryTargetPopulationHouseholdsArgs, 'targetPopulation'>>;
   targetPopulationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
@@ -27910,6 +27961,11 @@ export type SurveyNodeEdgeResolvers<ContextType = any, ParentType extends Resolv
 
 export type TableTotalCashTransferredResolvers<ContextType = any, ParentType extends ResolversParentTypes['TableTotalCashTransferred'] = ResolversParentTypes['TableTotalCashTransferred']> = {
   data?: Resolver<Maybe<Array<Maybe<ResolversTypes['_TableTotalCashTransferredDataNode']>>>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type TableTotalCashTransferredForPeopleResolvers<ContextType = any, ParentType extends ResolversParentTypes['TableTotalCashTransferredForPeople'] = ResolversParentTypes['TableTotalCashTransferredForPeople']> = {
+  data?: Resolver<Maybe<Array<Maybe<ResolversTypes['_TableTotalCashTransferredDataForPeopleNode']>>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -28637,6 +28693,14 @@ export type _DetailedDatasetsNodeResolvers<ContextType = any, ParentType extends
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type _TableTotalCashTransferredDataForPeopleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['_TableTotalCashTransferredDataForPeopleNode'] = ResolversParentTypes['_TableTotalCashTransferredDataForPeopleNode']> = {
+  admin2?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  totalCashTransferred?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  totalPeople?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type _TableTotalCashTransferredDataNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['_TableTotalCashTransferredDataNode'] = ResolversParentTypes['_TableTotalCashTransferredDataNode']> = {
   admin2?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -28932,6 +28996,7 @@ export type Resolvers<ContextType = any> = {
   SurveyNodeConnection?: SurveyNodeConnectionResolvers<ContextType>;
   SurveyNodeEdge?: SurveyNodeEdgeResolvers<ContextType>;
   TableTotalCashTransferred?: TableTotalCashTransferredResolvers<ContextType>;
+  TableTotalCashTransferredForPeople?: TableTotalCashTransferredForPeopleResolvers<ContextType>;
   TargetPopulationNode?: TargetPopulationNodeResolvers<ContextType>;
   TargetPopulationNodeConnection?: TargetPopulationNodeConnectionResolvers<ContextType>;
   TargetPopulationNodeEdge?: TargetPopulationNodeEdgeResolvers<ContextType>;
@@ -29007,6 +29072,7 @@ export type Resolvers<ContextType = any> = {
   XlsxRowErrorNode?: XlsxRowErrorNodeResolvers<ContextType>;
   _DatasetsNode?: _DatasetsNodeResolvers<ContextType>;
   _DetailedDatasetsNode?: _DetailedDatasetsNodeResolvers<ContextType>;
+  _TableTotalCashTransferredDataForPeopleNode?: _TableTotalCashTransferredDataForPeopleNodeResolvers<ContextType>;
   _TableTotalCashTransferredDataNode?: _TableTotalCashTransferredDataNodeResolvers<ContextType>;
 };
 
