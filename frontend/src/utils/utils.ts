@@ -12,6 +12,7 @@ import {
   PaymentPlanStatus,
   PaymentRecordStatus,
   PaymentStatus,
+  ProgramCycleStatus,
   ProgramStatus,
   TargetPopulationBuildStatus,
   TargetPopulationStatus,
@@ -70,6 +71,21 @@ export function programStatusToColor(
       return theme.hctPalette.orange;
   }
 }
+
+export function programCycleStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status.toUpperCase()) {
+    case ProgramCycleStatus.Draft:
+      return theme.hctPalette.gray;
+    case ProgramCycleStatus.Active:
+      return theme.hctPalette.green;
+    default:
+      return theme.hctPalette.orange;
+  }
+}
+
 export function maritalStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -269,11 +285,28 @@ export function paymentPlanStatusToColor(
     [PaymentPlanStatus.Open]: theme.hctPalette.gray,
     [PaymentPlanStatus.Locked]: theme.hctPalette.orange,
     [PaymentPlanStatus.LockedFsp]: theme.hctPalette.orange,
+    [PaymentPlanStatus.EntitlementSaved]: theme.hctPalette.orange,
     [PaymentPlanStatus.InApproval]: theme.hctPalette.darkerBlue,
     [PaymentPlanStatus.InAuthorization]: theme.hctPalette.darkerBlue,
     [PaymentPlanStatus.InReview]: theme.hctPalette.blue,
     [PaymentPlanStatus.Accepted]: theme.hctPalette.green,
     [PaymentPlanStatus.Finished]: theme.hctPalette.green,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
+
+export function paymentInstructionStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    PENDING: theme.hctPalette.gray,
+    REJECT: theme.palette.error.main,
+    AUTHORIZED: theme.hctPalette.darkerBlue,
+    RELEASED: theme.hctPalette.green,
   };
   if (status in colorsMap) {
     return colorsMap[status];
