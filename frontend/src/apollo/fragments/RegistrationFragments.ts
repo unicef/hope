@@ -79,8 +79,7 @@ export const importedHouseholdMinimal = gql`
     flexFields
     deviceid
     start
-    koboAssetId
-    rowId
+    detailId
     firstRegistrationDate
     lastRegistrationDate
     hasDuplicates
