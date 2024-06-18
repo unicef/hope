@@ -49,16 +49,12 @@ from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.core.utils import (
-    chart_create_filter_query_for_payment_verification_gfk,
     chart_filters_decoder,
-    chart_get_filtered_qs,
-    chart_map_choices,
     chart_permission_decorator,
     decode_id_string,
     encode_id_base64,
     to_choice_object,
 )
-from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE, Household
 from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
@@ -99,6 +95,10 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationSummary,
     ServiceProvider,
 )
+from hct_mis_api.apps.payment.services.dashboard_service import (
+    payment_verification_chart_query,
+    total_cash_transferred_by_administrative_area_table_query,
+)
 from hct_mis_api.apps.payment.services.sampling import Sampling
 from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
     does_payment_record_have_right_hoh_phone_number,
@@ -114,6 +114,7 @@ from hct_mis_api.apps.utils.schema import (
     ChartDetailedDatasetsNode,
     SectionTotalNode,
     TableTotalCashTransferred,
+    TableTotalCashTransferredForPeople,
 )
 
 
@@ -973,6 +974,13 @@ class Query(graphene.ObjectType):
         program=graphene.String(required=False),
         administrative_area=graphene.String(required=False),
     )
+    chart_payment_verification_for_people = graphene.Field(
+        ChartPaymentVerification,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True),
+        program=graphene.String(required=False),
+        administrative_area=graphene.String(required=False),
+    )
     chart_volume_by_delivery_mechanism = graphene.Field(
         ChartDatasetNode,
         business_area_slug=graphene.String(required=True),
@@ -996,6 +1004,15 @@ class Query(graphene.ObjectType):
     )
     table_total_cash_transferred_by_administrative_area = graphene.Field(
         TableTotalCashTransferred,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True),
+        program=graphene.String(required=False),
+        administrative_area=graphene.String(required=False),
+        order=graphene.String(required=False),
+        order_by=graphene.String(required=False),
+    )
+    table_total_cash_transferred_by_administrative_area_for_people = graphene.Field(
+        TableTotalCashTransferredForPeople,
         business_area_slug=graphene.String(required=True),
         year=graphene.Int(required=True),
         program=graphene.String(required=False),
@@ -1189,57 +1206,38 @@ class Query(graphene.ObjectType):
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, Any]:
         filters = chart_filters_decoder(kwargs)
-        status_choices_mapping = chart_map_choices(PaymentVerification.STATUS_CHOICES)
-        additional_filters: Q = chart_create_filter_query_for_payment_verification_gfk(
-            filters,
-            program_id_path="payment__parent__program__id,payment_record__parent__program__id",
-            administrative_area_path="payment__household__admin_area,payment_record__household__admin_area",
-        )
-        payment_verifications = chart_get_filtered_qs(
-            PaymentVerification.objects,
+        result = payment_verification_chart_query(
             year,
-            business_area_slug_filter={
-                "payment__business_area__slug": business_area_slug,
-                "payment_record__business_area__slug": business_area_slug,
-            },
-            additional_filters=additional_filters,
-            year_filter_path="payment__delivery_date,payment_record__delivery_date",
-            payment_verification_gfk=True,
-        )
-
-        verifications_by_status = payment_verifications.values("status").annotate(count=Count("status"))
-        verifications_by_status_dict = {x.get("status"): x.get("count") for x in verifications_by_status}
-        dataset: List[int] = [verifications_by_status_dict.get(status, 0) for status in status_choices_mapping.keys()]
-        try:
-            all_verifications = sum(dataset)
-            dataset_percentage = [data / all_verifications for data in dataset]
-        except ZeroDivisionError:
-            dataset_percentage = [0] * len(status_choices_mapping.values())
-        dataset_percentage_done = [
-            {"label": status, "data": [dataset_percentage_value]}
-            for (dataset_percentage_value, status) in zip(dataset_percentage, status_choices_mapping.values())
-        ]
-
-        samples_count = payment_verifications.distinct("payment").count()
-        all_payment_records_for_created_verifications = (
-            PaymentRecord.objects.filter(
-                parent__in=payment_verifications.distinct("payment_verification_plan__payment_plan").values_list(
-                    "payment_verification_plan__payment_plan", flat=True
-                )
-            )
-            .filter(status=PaymentRecord.STATUS_SUCCESS, delivered_quantity__gt=0)
-            .count()
-        )
-        average_sample_size: float = (
-            0.0
-            if all_payment_records_for_created_verifications == 0
-            else samples_count / all_payment_records_for_created_verifications
+            business_area_slug,
+            Household.CollectType.STANDARD.value,
+            filters.get("program"),
+            filters.get("administrative_area"),
         )
         return {
-            "labels": ["Payment Verification"],
-            "datasets": dataset_percentage_done,
-            "households": payment_verifications.distinct("payment__household").count(),
-            "average_sample_size": average_sample_size,
+            "labels": result["labels"],
+            "datasets": result["datasets"],
+            "households": result["number_of_records"],
+            "average_sample_size": result["average_sample_size"],
+        }
+
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
+    def resolve_chart_payment_verification_for_people(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict[str, Any]:
+        filters = chart_filters_decoder(kwargs)
+        result = payment_verification_chart_query(
+            year,
+            business_area_slug,
+            Household.CollectType.SINGLE.value,
+            filters.get("program"),
+            filters.get("administrative_area"),
+        )
+        return {
+            "labels": result["labels"],
+            "datasets": result["datasets"],
+            "households": result["number_of_records"],
+            "average_sample_size": result["average_sample_size"],
         }
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
@@ -1307,28 +1305,10 @@ class Query(graphene.ObjectType):
     def resolve_table_total_cash_transferred_by_administrative_area(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Optional[Dict[str, Any]]:
-        if business_area_slug == "global":
-            return None
         order = kwargs.pop("order", None)
         order_by = kwargs.pop("order_by", None)
-        payment_items_ids = get_payment_items_for_dashboard(
-            year, business_area_slug, chart_filters_decoder(kwargs), True
-        ).values_list("id", flat=True)
-
-        admin_areas = (
-            Area.objects.filter(
-                Q(household__paymentrecord__id__in=payment_items_ids) | Q(household__payment__id__in=payment_items_ids),
-                area_type__area_level=2,
-            )
-            .distinct()
-            .annotate(
-                total_transferred_payment_records=Sum("household__paymentrecord__delivered_quantity_usd"),
-                total_transferred_payments=Sum("household__payment__delivered_quantity_usd"),
-            )
-            .annotate(
-                num_households=Count("household", distinct=True),
-                total_transferred=F("total_transferred_payments") + F("total_transferred_payment_records"),
-            )
+        admin_areas = total_cash_transferred_by_administrative_area_table_query(
+            year, business_area_slug, chart_filters_decoder(kwargs), Household.CollectType.STANDARD.value
         )
 
         if order_by:
@@ -1348,6 +1328,40 @@ class Query(graphene.ObjectType):
                 "admin2": item.name,
                 "total_cash_transferred": item.total_transferred,
                 "total_households": item.num_households,
+            }
+            for item in admin_areas
+        ]
+
+        return {"data": data}
+
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
+    def resolve_table_total_cash_transferred_by_administrative_area_for_people(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Optional[Dict[str, Any]]:
+        order = kwargs.pop("order", None)
+        order_by = kwargs.pop("order_by", None)
+        admin_areas = total_cash_transferred_by_administrative_area_table_query(
+            year, business_area_slug, chart_filters_decoder(kwargs), Household.CollectType.SINGLE.value
+        )
+
+        if order_by:
+            order_by_arg = None
+            if order_by == "admin2":
+                order_by_arg = "name"
+            elif order_by == "totalCashTransferred":
+                order_by_arg = "total_transferred"
+            elif order_by == "totalHouseholds":
+                order_by_arg = "num_households"
+            if order_by_arg:
+                admin_areas = admin_areas.order_by(f"{'-' if order == 'desc' else ''}{order_by_arg}")
+
+        data = [
+            {
+                "id": item.id,
+                "admin2": item.name,
+                "total_cash_transferred": item.total_transferred,
+                "total_people": item.num_households,
             }
             for item in admin_areas
         ]

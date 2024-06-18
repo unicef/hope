@@ -234,7 +234,6 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             zip_code="00-123",
             enumerator_rec_id=1234567890,
             detail_id="123456123",
-            kobo_asset_id="Test_asset_id",
             kobo_submission_uuid="c09130af-6c9c-4dba-8c7f-1b2ff1970d19",
             kobo_submission_time="2022-02-22T12:22:22",
         )
@@ -354,7 +353,6 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             zip_code="00-123",
             enumerator_rec_id=1234567890,
             detail_id="123456123",
-            kobo_asset_id="Test_asset_id",
             kobo_submission_uuid="c09130af-6c9c-4dba-8c7f-1b2ff1970d19",
             kobo_submission_time="2022-02-22T12:22:22",
             mis_unicef_id="HH-9",

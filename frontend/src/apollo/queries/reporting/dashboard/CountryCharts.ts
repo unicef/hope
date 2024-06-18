@@ -24,5 +24,20 @@ export const CountryCharts = gql`
         totalHouseholds
       }
     }
+    tableTotalCashTransferredByAdministrativeAreaForPeople(
+      businessAreaSlug: $businessAreaSlug
+      year: $year
+      program: $program
+      administrativeArea: $administrativeArea
+      order: $order
+      orderBy: $orderBy
+    ) {
+      data {
+        id
+        admin2
+        totalCashTransferred
+        totalPeople
+      }
+    }
   }
 `;

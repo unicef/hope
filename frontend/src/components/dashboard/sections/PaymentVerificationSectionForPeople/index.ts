@@ -1,0 +1,1 @@
+export { PaymentVerificationSectionForPeople } from './PaymentVerificationSectionForPeople';
