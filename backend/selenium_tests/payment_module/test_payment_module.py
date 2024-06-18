@@ -130,7 +130,7 @@ class TestSmokePaymentModule:
         )
         assert str((datetime.now()).strftime("%d %b %Y")) in pagePaymentModuleDetails.getLabelDispersionStartDate().text
         assert (
-            str((datetime.now() + relativedelta(days=14)).strftime("%d %b %Y"))
+            str((datetime.now() + relativedelta(days=14)).strftime("%-d %b %Y"))
             in pagePaymentModuleDetails.getLabelDispersionEndDate().text
         )
         assert "-" in pagePaymentModuleDetails.getLabelRelatedFollowUpPaymentPlans().text
