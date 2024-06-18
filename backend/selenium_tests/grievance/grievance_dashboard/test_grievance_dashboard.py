@@ -21,19 +21,39 @@ def active_program() -> Program:
 
 @pytest.fixture
 def add_grievances() -> None:
-    generate_grievance("GRV-0000001")
+    for i in range(50):
+        generate_grievance(f"GRV-000000{i}")
+    for i in range(10):
+        generate_grievance(f"GRV-00000{i + 50}",
+                           category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+                           )
+    for i in range(25):
+        generate_grievance(f"GRV-00000{i + 60}",
+                           created_at="2022-09-27T11:26:33.846Z",
+                           updated_at="2023-09-27T11:26:33.846Z",
+                           status=GrievanceTicket.STATUS_CLOSED)
+    for i in range(15):
+        generate_grievance(f"GRV-0000{i + 100}",
+                           status=GrievanceTicket.STATUS_CLOSED,
+                           category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+                           )
 
 
 def generate_grievance(unicef_id: str,
                        status: str = GrievanceTicket.STATUS_NEW,
                        category: str = GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-                       created_by: User = User.objects.first(),
-                       assigned_to: User = User.objects.first(),
-                       business_area: BusinessArea = BusinessArea.objects.filter(slug="afghanistan").first(),
+                       created_by: User = None,
+                       assigned_to: User = None,
+                       business_area: BusinessArea = None,
                        priority: int = 1,
                        urgency: int = 1,
                        household_unicef_id: str = "HH-20-0000.0001",
+                       updated_at: str = "2023-09-27T11:26:33.846Z",
+                       created_at: str = "2022-04-30T09:54:07.827000"
                        ):
+    created_by = User.objects.first() if created_by is None else created_by
+    assigned_to = User.objects.first() if assigned_to is None else assigned_to
+    business_area = BusinessArea.objects.filter(slug="afghanistan").first() if business_area is None else business_area
     GrievanceTicket.objects.create(
         **{
             "business_area": business_area,
@@ -45,7 +65,8 @@ def generate_grievance(unicef_id: str,
             "status": status,
             "created_by": created_by,
             "assigned_to": assigned_to,
-            "created_at": "2022-04-30T09:54:07.827000",
+            "created_at": created_at,
+            "updated_at": updated_at,
             "household_unicef_id": household_unicef_id,
             "priority": priority,
             "urgency": urgency,
@@ -58,9 +79,20 @@ class TestSmokeGrievanceTickets:
     def test_check_grievance_dashboard(
             self,
             active_program: Program,
-            add_grievance: None,
+            add_grievances: None,
             pageGrievanceDashboard: GrievanceDashboard,
     ) -> None:
         pageGrievanceDashboard.getNavGrievance().click()
         pageGrievanceDashboard.getNavGrievanceDashboard().click()
+        assert "Grievance Dashboard" in pageGrievanceDashboard.getPageHeaderTitle().text
+        assert "100" in pageGrievanceDashboard.getTotalNumberOfTicketsTopNumber().text
+        assert "25" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfTicketsSystemGenerated().text
+        assert "75" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfTicketsUserGenerated().text
+        assert "40" in pageGrievanceDashboard.getTotalNumberOfClosedTicketsTopNumber().text
+        assert "15" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsSystemGenerated().text
+        assert "25" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsUserGenerated().text
+        # ToDo: Why is it 0 days?
+        assert "0.00 days" in pageGrievanceDashboard.getTicketsAverageResolutionTopNumber().text
+        assert "0 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated().text
+        assert "0 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionUserGenerated().text
         pageGrievanceDashboard.screenshot("123")
