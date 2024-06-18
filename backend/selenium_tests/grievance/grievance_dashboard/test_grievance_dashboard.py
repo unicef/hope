@@ -96,7 +96,6 @@ class TestSmokeGrievanceDashboard:
         assert "40" in pageGrievanceDashboard.getTotalNumberOfClosedTicketsTopNumber().text
         assert "15" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsSystemGenerated().text
         assert "25" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsUserGenerated().text
-        # ToDo: Why is it 0 days?
         assert "421.25 days" in pageGrievanceDashboard.getTicketsAverageResolutionTopNumber().text
         assert (
             "515 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated().text
