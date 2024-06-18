@@ -7,6 +7,7 @@ from django.test import TestCase
 from parameterized import parameterized
 
 import hct_mis_api.apps.mis_datahub.models as dh_models
+from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
@@ -44,6 +45,7 @@ class TestSendTpToDatahub(TestCase):
     @staticmethod
     def _pre_test_commands() -> None:
         create_afghanistan()
+        PartnerFactory(name="UNICEF")
         call_command("loadcountries")
         call_command("generatedocumenttypes")
         call_command("loadcountrycodes")

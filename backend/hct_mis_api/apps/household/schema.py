@@ -795,8 +795,8 @@ class Query(graphene.ObjectType):
         payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         ).filter(household__collect_type=Household.CollectType.SINGLE.value)
-        households_ids = payment_items_qs.values_list("household", flat=True).distinct()
-        return Household.objects.filter(pk__in=households_ids).aggregate(total=Sum(Coalesce("size", 0)))
+        people_count = payment_items_qs.values("household").distinct().count()
+        return {"total": people_count}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)

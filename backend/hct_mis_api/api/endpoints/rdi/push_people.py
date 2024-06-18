@@ -82,8 +82,6 @@ class PushPeopleSerializer(serializers.ModelSerializer):
             "updated_at",
             "mis_unicef_id",
             "household",
-            "kobo_asset_id",
-            "row_id",
             "detail_id",
         ]
 

@@ -33,6 +33,20 @@ export const Allcharts = gql`
       households
       averageSampleSize
     }
+    chartPaymentVerificationForPeople(
+      businessAreaSlug: $businessAreaSlug
+      year: $year
+      program: $program
+      administrativeArea: $administrativeArea
+    ) {
+      datasets {
+        label
+        data
+      }
+      labels
+      households
+      averageSampleSize
+    }
     chartVolumeByDeliveryMechanism(
       businessAreaSlug: $businessAreaSlug
       year: $year
