@@ -123,12 +123,14 @@ class TestSmokePaymentModule:
         assert "EXPORT XLSX" in pagePaymentModuleDetails.getButtonExportXlsx().text
         assert "Test Program" in pagePaymentModuleDetails.getLabelProgramme().text
         assert "USD" in pagePaymentModuleDetails.getLabelCurrency().text
-        assert str((datetime.now()).strftime("%d %b %Y")) in pagePaymentModuleDetails.getLabelStartDate().text
+        assert str((datetime.now()).strftime("%-d %b %Y")) in pagePaymentModuleDetails.getLabelStartDate().text
         assert (
-            str((datetime.now() + relativedelta(days=30)).strftime("%d %b %Y"))
+            str((datetime.now() + relativedelta(days=30)).strftime("%-d %b %Y"))
             in pagePaymentModuleDetails.getLabelEndDate().text
         )
-        assert str((datetime.now()).strftime("%d %b %Y")) in pagePaymentModuleDetails.getLabelDispersionStartDate().text
+        assert (
+            str((datetime.now()).strftime("%-d %b %Y")) in pagePaymentModuleDetails.getLabelDispersionStartDate().text
+        )
         assert (
             str((datetime.now() + relativedelta(days=14)).strftime("%-d %b %Y"))
             in pagePaymentModuleDetails.getLabelDispersionEndDate().text
