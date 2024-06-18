@@ -581,7 +581,6 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(household_obj_data, expected_hh)
 
         self.assertEqual(individual.household.detail_id, "aPkhoRMrkkDwgsvWuwi39s")
-        self.assertEqual(individual.household.kobo_asset_id, "aPkhoRMrkkDwgsvWuwi39s")
         self.assertEqual(str(individual.household.kobo_submission_uuid), "c09130af-6c9c-4dba-8c7f-1b2ff1970d19")
         self.assertEqual(individual.household.kobo_submission_time.isoformat(), "2020-06-03T13:05:10+00:00")
 
@@ -1018,6 +1017,5 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
 
         self.assertEqual(len(households_to_create), 1)
         self.assertEqual(hh.detail_id, "kobo_asset_id_string_OR_detail_id")
-        self.assertEqual(hh.kobo_asset_id, "kobo_asset_id_string_OR_detail_id")
         self.assertEqual(hh.kobo_submission_time.isoformat(), "2022-02-22T12:22:22")
         self.assertEqual(hh.kobo_submission_uuid, "123123-411d-85f1-123123")

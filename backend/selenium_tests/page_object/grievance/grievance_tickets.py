@@ -184,7 +184,7 @@ class GrievanceTickets(BaseComponents):
         self.wait_for(self.ticketListRow)
         return self.get_elements(self.ticketListRow)
 
-    def getTableLabel(self) -> WebElement:
+    def getTableLabel(self) -> [WebElement]:
         return self.get_elements(self.tableLabel)
 
     def getDateTitleFilterPopup(self) -> WebElement:

@@ -2,9 +2,10 @@ import { Box } from '@mui/material';
 import * as React from 'react';
 import { Bar } from 'react-chartjs-2';
 import { AllChartsQuery } from '@generated/graphql';
+import type { ChartData, ChartOptions } from 'chart.js';
 
 interface PaymentVerificationChartProps {
-  data: AllChartsQuery['chartPaymentVerification'];
+  data: AllChartsQuery['chartPaymentVerification']['datasets'];
 }
 
 type DatasetTypes =
@@ -20,9 +21,7 @@ type Dataset = {
 export function PaymentVerificationChart({
   data,
 }: PaymentVerificationChartProps): React.ReactElement {
-  if (!data) return null;
-
-  const datasets = data.datasets.reduce(
+  const datasets = data.reduce(
     (previousValue, currentValue) => ({
       ...previousValue,
       [currentValue.label]: currentValue.data,
@@ -33,21 +32,19 @@ export function PaymentVerificationChart({
   const convertToPercent = (dataset: Array<number>): string =>
     `${(dataset[0] * 100).toFixed(0)}%`;
 
-  const defaults = {
-    categoryPercentage: 0.5,
-    stack: 4,
-  };
-
-  const chartData = {
+  const chartData: ChartData<'bar'> = {
+    labels: [''],
     datasets: [
       {
-        ...defaults,
+        categoryPercentage: 0.5,
+        stack: '4',
         label: `Received - ${convertToPercent(datasets.RECEIVED)}`,
         backgroundColor: '#8BD241',
         data: [...datasets.RECEIVED],
       },
       {
-        ...defaults,
+        categoryPercentage: 0.5,
+        stack: '4',
         label: `Received with Issues - ${convertToPercent(
           datasets['RECEIVED WITH ISSUES'],
         )}`,
@@ -55,21 +52,23 @@ export function PaymentVerificationChart({
         data: [...datasets['RECEIVED WITH ISSUES']],
       },
       {
-        ...defaults,
+        categoryPercentage: 0.5,
+        stack: '4',
         label: `Not received - ${convertToPercent(datasets['NOT RECEIVED'])}`,
         backgroundColor: '#E02020',
         data: [...datasets['NOT RECEIVED']],
       },
       {
-        ...defaults,
+        categoryPercentage: 0.5,
+        stack: '4',
         label: `Not responded - ${convertToPercent(datasets.PENDING)}`,
         backgroundColor: '#C3D1D8',
         data: [...datasets.PENDING],
       },
     ],
-  } as any;
+  };
 
-  const options = {
+  const options: ChartOptions<'bar'> = {
     indexAxis: 'y',
     responsive: true,
     maintainAspectRatio: false,
@@ -104,10 +103,10 @@ export function PaymentVerificationChart({
         position: 'right',
       },
     },
-  } as any;
+  };
 
   return (
-    <Box height="150px">
+    <Box height="180px">
       <Bar data={chartData} options={options} />
     </Box>
   );
