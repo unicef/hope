@@ -5,19 +5,19 @@ import { AllChartsQuery } from '@generated/graphql';
 import { PaymentVerificationChart } from '../../charts/PaymentVerificationChart';
 import { DashboardPaper } from '../../DashboardPaper';
 
-interface PaymentVerificationSectionProps {
-  data: AllChartsQuery['chartPaymentVerification'];
+interface PaymentVerificationSectionForPeopleProps {
+  data: AllChartsQuery['chartPaymentVerificationForPeople'];
 }
-export function PaymentVerificationSection({
+export function PaymentVerificationSectionForPeople({
   data,
-}: PaymentVerificationSectionProps): React.ReactElement {
+}: PaymentVerificationSectionForPeopleProps): React.ReactElement {
   const { t } = useTranslation();
   if (!data) return null;
 
   const renderContacted = () => {
     return data.households === 1
-      ? t('Household contacted')
-      : t('Households contacted');
+      ? t('Person contacted')
+      : t('People contacted');
   };
 
   return (
