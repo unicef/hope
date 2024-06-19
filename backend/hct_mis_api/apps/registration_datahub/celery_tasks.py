@@ -10,14 +10,12 @@ from django.utils import timezone
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Document
-from hct_mis_api.apps.registration_data.models import (
-    ImportedHousehold,
-    RegistrationDataImport,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.exceptions import (
     AlreadyRunningException,
     WrongStatusException,
 )
+from hct_mis_api.apps.registration_datahub.models import ImportedHousehold
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
 )
