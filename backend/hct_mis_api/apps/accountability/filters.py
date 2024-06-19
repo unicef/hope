@@ -120,7 +120,7 @@ class FeedbackFilter(FilterSet):
             "unicef_id",
             "issue_type",
             "household_lookup",
-            "created_by",
+            ("created_by__first_name", "created_by"),
             "created_at",
             "linked_grievance",
         )
@@ -175,7 +175,7 @@ class SurveyFilter(FilterSet):
             "title",
             "category",
             "number_of_recipient",
-            "created_by",
+            ("created_by__first_name", "created_by"),
             "created_at",
         )
     )
