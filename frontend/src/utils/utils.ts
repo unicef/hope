@@ -534,7 +534,7 @@ export function getPercentage(
 }
 
 export function formatNumber(value: number): string {
-  if (!value && value !== 0) return '';
+  if (!value && value !== 0) return '0';
   return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
 }
 
