@@ -40,20 +40,19 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import (
-    ImportData,
-    ImportedBankAccountInfo,
-    ImportedDocument,
-    ImportedDocumentType,
-    ImportedHousehold,
-    ImportedIndividual,
-    RegistrationDataImport,
-)
+from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedIndividualFactory,
     RegistrationDataImportDatahubFactory,
 )
-from hct_mis_api.apps.registration_datahub.models import ImportedDeliveryMechanismData
+from hct_mis_api.apps.registration_datahub.models import (
+    ImportedBankAccountInfo,
+    ImportedDeliveryMechanismData,
+    ImportedDocument,
+    ImportedDocumentType,
+    ImportedHousehold,
+    ImportedIndividual,
+)
 
 
 def create_document_image() -> File:

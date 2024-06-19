@@ -26,17 +26,17 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_data.models import (
+    RegistrationDataImport,
+    RegistrationDataImportDatahub,
+)
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     registration_program_population_import_task,
 )
 from hct_mis_api.apps.registration_datahub.fixtures import (
     RegistrationDataImportDatahubFactory,
 )
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedDocument,
-    RegistrationDataImportDatahub,
-)
+from hct_mis_api.apps.registration_datahub.models import ImportedDocument
 
 
 class TestRegistrationProgramPopulationImportTask(BaseElasticSearchTestCase):

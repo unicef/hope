@@ -27,10 +27,7 @@ from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.forms import MassEnrollForm
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.registration_data.models import (
-    RegistrationDataImport,
-    RegistrationDataImportDatahub,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub import models as datahub_models
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
@@ -103,7 +100,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
 
                 celery_task = registration_kobo_import_task
 
-            rdi_datahub_obj = get_object_or_404(RegistrationDataImportDatahub, id=obj.datahub_id)
+            rdi_datahub_obj = get_object_or_404(datahub_models.RegistrationDataImportDatahub, id=obj.datahub_id)
             business_area = BusinessArea.objects.get(slug=rdi_datahub_obj.business_area_slug)
 
             celery_task.delay(
