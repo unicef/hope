@@ -98,8 +98,10 @@ class TestSmokeGrievanceDashboard:
         assert "25" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsUserGenerated().text
         assert "421.25 days" in pageGrievanceDashboard.getTicketsAverageResolutionTopNumber().text
         assert (
-            "515 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated().text
+            "515 days"
+            in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated().text
         )
-        assert "365 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionUserGenerated().text
+        assert (
+            "365 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionUserGenerated().text
+        )
         GrievanceTicket._meta.get_field("updated_at").auto_now = True
-
