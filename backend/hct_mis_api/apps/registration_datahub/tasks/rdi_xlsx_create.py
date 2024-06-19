@@ -46,7 +46,8 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedIndividual,
-    RegistrationDataImportDatahub, ImportedDeliveryMechanismData,
+    RegistrationDataImportDatahub,
+    ImportedDeliveryMechanismData,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
