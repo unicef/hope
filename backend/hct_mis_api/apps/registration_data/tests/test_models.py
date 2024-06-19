@@ -10,7 +10,6 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import Record
 from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedDocumentTypeFactory,
     ImportedHouseholdFactory,
@@ -19,6 +18,7 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
     RecordFactory,
     RegistrationDataImportDatahubFactory,
 )
+from hct_mis_api.apps.registration_datahub.models import Record
 
 
 class TestRegistrationDataModels(TestCase):

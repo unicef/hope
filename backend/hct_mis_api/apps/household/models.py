@@ -26,7 +26,6 @@ from sorl.thumbnail import ImageField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.languages import Languages
-from hct_mis_api.apps.core.mixins import RdiMergeStatusMixin
 from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.signals import (
@@ -40,8 +39,8 @@ from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
     ConcurrencyModel,
     RepresentationManager,
-    SoftDeletableIsOriginalModel,
-    SoftDeletableModelWithDate,
+    SoftDeletableRepresentationMergeStatusModel,
+    SoftDeletableRepresentationMergeStatusModelWithDate,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
@@ -336,13 +335,12 @@ class HouseholdCollection(UnicefIdentifiedModel):
 
 
 class Household(
-    SoftDeletableModelWithDate,
+    SoftDeletableRepresentationMergeStatusModelWithDate,
     TimeStampedUUIDModel,
     AbstractSyncable,
     ConcurrencyModel,
     UnicefIdentifiedModel,
     AdminUrlMixin,
-    RdiMergeStatusMixin
 ):
     class CollectType(models.TextChoices):
         STANDARD = "STANDARD", "Standard"
@@ -555,7 +553,6 @@ class Household(
         "this field will contain the household it was copied from.",
     )
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
-    is_original = models.BooleanField(db_index=True, default=False)
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
     is_recalculated_group_ages = models.BooleanField(default=False)  # TODO remove after migration
@@ -704,7 +701,7 @@ class DocumentType(TimeStampedUUIDModel):
         return f"{self.label}"
 
 
-class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDModel, RdiMergeStatusMixin):
+class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, TimeStampedUUIDModel):
     STATUS_PENDING = "PENDING"
     STATUS_VALID = "VALID"
     STATUS_NEED_INVESTIGATION = "NEED_INVESTIGATION"
@@ -790,7 +787,7 @@ class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDMo
         self.save()
 
 
-class IndividualIdentity(SoftDeletableIsOriginalModel, TimeStampedModel, RdiMergeStatusMixin):
+class IndividualIdentity(SoftDeletableRepresentationMergeStatusModel, TimeStampedModel):
     # notice that this model has `created` and `modified` fields
     individual = models.ForeignKey("Individual", related_name="identities", on_delete=models.CASCADE)
     number = models.CharField(
@@ -820,7 +817,7 @@ class IndividualIdentity(SoftDeletableIsOriginalModel, TimeStampedModel, RdiMerg
         return f"{self.partner} {self.individual} {self.number}"
 
 
-class IndividualRoleInHousehold(SoftDeletableIsOriginalModel, TimeStampedUUIDModel, AbstractSyncable, RdiMergeStatusMixin):
+class IndividualRoleInHousehold(SoftDeletableRepresentationMergeStatusModel, TimeStampedUUIDModel, AbstractSyncable):
     individual = models.ForeignKey(
         "household.Individual",
         on_delete=models.CASCADE,
@@ -868,13 +865,12 @@ class IndividualCollection(UnicefIdentifiedModel):
 
 
 class Individual(
-    SoftDeletableModelWithDate,
+    SoftDeletableRepresentationMergeStatusModelWithDate,
     TimeStampedUUIDModel,
     AbstractSyncable,
     ConcurrencyModel,
     UnicefIdentifiedModel,
     AdminUrlMixin,
-    RdiMergeStatusMixin
 ):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -1060,7 +1056,6 @@ class Individual(
         "this field will contain the individual it was copied from.",
     )
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
-    is_original = models.BooleanField(db_index=True, default=False)
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
     mis_unicef_id = models.CharField(max_length=255, null=True)
@@ -1302,7 +1297,7 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
     program = models.ForeignKey("program.Program", null=True, on_delete=models.CASCADE)
 
 
-class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, RdiMergeStatusMixin):
+class BankAccountInfo(SoftDeletableRepresentationMergeStatusModelWithDate, TimeStampedUUIDModel, AbstractSyncable):
     individual = models.ForeignKey(
         "household.Individual",
         related_name="bank_account_info",
@@ -1313,7 +1308,6 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
     bank_branch_name = models.CharField(max_length=255, blank=True, default="")
     account_holder_name = models.CharField(max_length=255, blank=True, default="")
-    is_original = models.BooleanField(db_index=True, default=False)
     is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
         "self",
