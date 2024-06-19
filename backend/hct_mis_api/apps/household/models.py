@@ -26,6 +26,7 @@ from sorl.thumbnail import ImageField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.languages import Languages
+from hct_mis_api.apps.core.mixins import RdiMergeStatusMixin
 from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.signals import (
@@ -341,6 +342,7 @@ class Household(
     ConcurrencyModel,
     UnicefIdentifiedModel,
     AdminUrlMixin,
+    RdiMergeStatusMixin
 ):
     class CollectType(models.TextChoices):
         STANDARD = "STANDARD", "Standard"
@@ -558,7 +560,6 @@ class Household(
     migrated_at = models.DateTimeField(null=True, blank=True)
     is_recalculated_group_ages = models.BooleanField(default=False)  # TODO remove after migration
     collect_type = models.CharField(choices=CollectType.choices, default=CollectType.STANDARD.value, max_length=8)
-    rdi_merge_status = models.CharField(choices=MERGE_CHOICES, default=PENDING, max_length=10)
 
     kobo_submission_uuid = models.UUIDField(null=True, default=None)
     kobo_submission_time = models.DateTimeField(max_length=150, blank=True, null=True)
@@ -703,7 +704,7 @@ class DocumentType(TimeStampedUUIDModel):
         return f"{self.label}"
 
 
-class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDModel):
+class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDModel, RdiMergeStatusMixin):
     STATUS_PENDING = "PENDING"
     STATUS_VALID = "VALID"
     STATUS_NEED_INVESTIGATION = "NEED_INVESTIGATION"
@@ -737,7 +738,6 @@ class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDMo
         related_name="copied_to",
         help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
-    rdi_merge_status = models.CharField(choices=MERGE_CHOICES, default=PENDING, max_length=10)
 
     def clean(self) -> None:
         from django.core.exceptions import ValidationError
@@ -790,7 +790,7 @@ class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDMo
         self.save()
 
 
-class IndividualIdentity(SoftDeletableIsOriginalModel, TimeStampedModel):
+class IndividualIdentity(SoftDeletableIsOriginalModel, TimeStampedModel, RdiMergeStatusMixin):
     # notice that this model has `created` and `modified` fields
     individual = models.ForeignKey("Individual", related_name="identities", on_delete=models.CASCADE)
     number = models.CharField(
@@ -812,7 +812,6 @@ class IndividualIdentity(SoftDeletableIsOriginalModel, TimeStampedModel):
         related_name="copied_to",
         help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
-    rdi_merge_status = models.CharField(choices=MERGE_CHOICES, default=PENDING, max_length=10)
 
     class Meta:
         verbose_name_plural = "Individual Identities"
@@ -821,7 +820,7 @@ class IndividualIdentity(SoftDeletableIsOriginalModel, TimeStampedModel):
         return f"{self.partner} {self.individual} {self.number}"
 
 
-class IndividualRoleInHousehold(SoftDeletableIsOriginalModel, TimeStampedUUIDModel, AbstractSyncable):
+class IndividualRoleInHousehold(SoftDeletableIsOriginalModel, TimeStampedUUIDModel, AbstractSyncable, RdiMergeStatusMixin):
     individual = models.ForeignKey(
         "household.Individual",
         on_delete=models.CASCADE,
@@ -847,7 +846,6 @@ class IndividualRoleInHousehold(SoftDeletableIsOriginalModel, TimeStampedUUIDMod
         related_name="copied_to",
         help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
-    rdi_merge_status = models.CharField(choices=MERGE_CHOICES, default=PENDING, max_length=10)
 
     class Meta:
         unique_together = [("role", "household"), ("household", "individual")]
@@ -876,6 +874,7 @@ class Individual(
     ConcurrencyModel,
     UnicefIdentifiedModel,
     AdminUrlMixin,
+    RdiMergeStatusMixin
 ):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -1064,7 +1063,6 @@ class Individual(
     is_original = models.BooleanField(db_index=True, default=False)
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
-    rdi_merge_status = models.CharField(choices=MERGE_CHOICES, default=PENDING, max_length=10)
     mis_unicef_id = models.CharField(max_length=255, null=True)
 
     vector_column = SearchVectorField(null=True)
@@ -1304,7 +1302,7 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
     program = models.ForeignKey("program.Program", null=True, on_delete=models.CASCADE)
 
 
-class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable):
+class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, RdiMergeStatusMixin):
     individual = models.ForeignKey(
         "household.Individual",
         related_name="bank_account_info",
@@ -1325,7 +1323,6 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
         related_name="copied_to",
         help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
-    rdi_merge_status = models.CharField(choices=MERGE_CHOICES, default=PENDING, max_length=10)
 
     def __str__(self) -> str:
         return f"{self.bank_account_number} ({self.bank_name})"
