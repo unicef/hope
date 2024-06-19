@@ -161,7 +161,7 @@ def driver() -> Chrome:
     yield webdriver.Chrome(options=chrome_options)
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def browser(driver: Chrome, request: FixtureRequest) -> Chrome:
     if request.node.get_closest_marker("mapping"):
         driver.live_server = LiveServer("0.0.0.0:8080")
@@ -176,7 +176,7 @@ def browser(driver: Chrome, request: FixtureRequest) -> Chrome:
 
 
 @pytest.fixture
-def login(browser: Chrome, create_super_user: User) -> Chrome:
+def login(browser: Chrome) -> Chrome:
     browser.get(f"{browser.live_server.url}/api/unicorn/")
     get_cookies = browser.get_cookies()  # type: ignore
     create_session(browser.live_server.url, "superuser", "testtest2", get_cookies[0]["value"])
@@ -338,7 +338,7 @@ def change_super_user(business_area: BusinessArea) -> None:
     user.save()
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def create_super_user(business_area: BusinessArea) -> User:
     Partner.objects.get_or_create(name="TEST")
     Partner.objects.get_or_create(name="UNICEF")
