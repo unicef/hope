@@ -509,7 +509,7 @@ class RdiMergeTask:
                     kobo_submissions = []
                     for imported_household in imported_households:
                         kobo_submission_uuid = imported_household.kobo_submission_uuid
-                        kobo_asset_id = imported_household.detail_id or imported_household.kobo_asset_id
+                        kobo_asset_id = imported_household.detail_id
                         kobo_submission_time = imported_household.kobo_submission_time
                         if kobo_submission_uuid and kobo_asset_id and kobo_submission_time:
                             submission = KoboImportedSubmission(
@@ -645,6 +645,8 @@ class RdiMergeTask:
     def _update_program_registration_id(self, household_id: UUID, program_registration_id: str, count: int = 0) -> None:
         try:
             with transaction.atomic():
-                Household.objects.filter(id=household_id).update(registration_id=f"{program_registration_id}#{count}")
+                Household.objects.filter(id=household_id).update(
+                    program_registration_id=f"{program_registration_id}#{count}"
+                )
         except IntegrityError:
             self._update_program_registration_id(household_id, program_registration_id, count=count + 1)

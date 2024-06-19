@@ -15,10 +15,14 @@ from page_object.filters import Filters
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from page_object.grievance.feedback import Feedback
+from page_object.grievance.grievance_dashboard import GrievanceDashboard
 from page_object.grievance.grievance_tickets import GrievanceTickets
 from page_object.grievance.new_feedback import NewFeedback
 from page_object.grievance.new_ticket import NewTicket
 from page_object.managerial_console.managerial_console import ManagerialConsole
+from page_object.payment_module.new_payment_plan import NewPaymentPlan
+from page_object.payment_module.payment_module import PaymentModule
+from page_object.payment_module.payment_module_details import PaymentModuleDetails
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
 from page_object.programme_population.households import Households
@@ -258,6 +262,11 @@ def pageTargeting(request: FixtureRequest, browser: Chrome) -> Targeting:
 
 
 @pytest.fixture
+def pagePaymentModule(request: FixtureRequest, browser: Chrome) -> PaymentModule:
+    yield PaymentModule(browser)
+
+
+@pytest.fixture
 def pageTargetingDetails(request: FixtureRequest, browser: Chrome) -> TargetingDetails:
     yield TargetingDetails(browser)
 
@@ -278,8 +287,23 @@ def pageGrievanceNewTicket(request: FixtureRequest, browser: Chrome) -> NewTicke
 
 
 @pytest.fixture
+def pageGrievanceDashboard(request: FixtureRequest, browser: Chrome) -> GrievanceDashboard:
+    yield GrievanceDashboard(browser)
+
+
+@pytest.fixture
 def pageManagerialConsole(request: FixtureRequest, browser: Chrome) -> ManagerialConsole:
     yield ManagerialConsole(browser)
+
+
+@pytest.fixture
+def pagePaymentModuleDetails(request: FixtureRequest, browser: Chrome) -> PaymentModuleDetails:
+    yield PaymentModuleDetails(browser)
+
+
+@pytest.fixture
+def pageNewPaymentPlan(request: FixtureRequest, browser: Chrome) -> NewPaymentPlan:
+    yield NewPaymentPlan(browser)
 
 
 @pytest.fixture

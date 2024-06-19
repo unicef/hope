@@ -140,7 +140,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
                 is_identity = document_name in identity_fields
 
-                country = Country(data["issuing_country"])
+                country_dict = {"country": Country(data["issuing_country"])} if "issuing_country" in data else {}
 
                 if is_identity:
                     partner = "WFP" if document_name == "scope_id" else "UNHCR"
@@ -148,8 +148,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         ImportedIndividualIdentity(
                             partner=partner,
                             individual=data["individual"],
-                            document_number=data["number"],
-                            country=country,
+                            document_number=data.get("number", ""),
+                            **country_dict,
                         )
                     )
                     continue
@@ -157,11 +157,11 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 file = self._handle_image_field(data.get("photo", ""), False)
                 documents.append(
                     ImportedDocument(
-                        document_number=data["number"],
-                        country=country,
+                        document_number=data.get("number", ""),
                         photo=file,
                         individual=data["individual"],
                         type=document_type,
+                        **country_dict,
                     )
                 )
         ImportedDocument.objects.bulk_create(documents)
@@ -288,8 +288,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     ) -> None:
         individuals_to_create_list = []
         documents_and_identities_to_create = []
-        # fix for support new field 'detail_id' in ImportedHousehold
-        submission_meta_data["detail_id"] = submission_meta_data.get("kobo_asset_id", "")
+        submission_meta_data["detail_id"] = submission_meta_data.pop("kobo_asset_id", "")
         household_obj = ImportedHousehold(**submission_meta_data)
         self.attachments = household.get("_attachments", [])
         registration_date = None

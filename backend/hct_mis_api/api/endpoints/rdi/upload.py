@@ -172,9 +172,9 @@ class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
             "mis_unicef_id",
             "flex_registrations_record",
             "kobo_submission_uuid",
-            "kobo_asset_id",
             "kobo_submission_time",
             "geopoint",
+            "detail_id",
         ]
         validators = [HouseholdValidator()]
 

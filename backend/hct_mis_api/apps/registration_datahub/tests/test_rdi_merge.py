@@ -6,7 +6,6 @@ from django.db import DEFAULT_DB_ALIAS, connections
 from django.forms import model_to_dict
 from django.test import TestCase
 
-import pytest
 from freezegun import freeze_time
 from parameterized import parameterized
 
@@ -235,7 +234,6 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             zip_code="00-123",
             enumerator_rec_id=1234567890,
             detail_id="123456123",
-            kobo_asset_id="Test_asset_id",
             kobo_submission_uuid="c09130af-6c9c-4dba-8c7f-1b2ff1970d19",
             kobo_submission_time="2022-02-22T12:22:22",
         )
@@ -355,7 +353,6 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             zip_code="00-123",
             enumerator_rec_id=1234567890,
             detail_id="123456123",
-            kobo_asset_id="Test_asset_id",
             kobo_submission_uuid="c09130af-6c9c-4dba-8c7f-1b2ff1970d19",
             kobo_submission_time="2022-02-22T12:22:22",
             mis_unicef_id="HH-9",
@@ -468,7 +465,6 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         }
         self.assertEqual(household_data, expected)
 
-    @pytest.mark.skip("Bad migrations to fix")
     def test_registration_id_from_program_registration_id_should_be_unique(self) -> None:
         imported_household = ImportedHouseholdFactory(
             registration_data_import=self.rdi_hub,
@@ -490,7 +486,9 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             RdiMergeTask().execute(self.rdi.pk)
 
         registrations_ids = list(
-            Household.objects.all().order_by("registration_id").values_list("registration_id", flat=True)
+            Household.objects.all()
+            .order_by("program_registration_id")
+            .values_list("program_registration_id", flat=True)
         )
 
         expected_registrations_ids = ["ABCD-111111#0", "ABCD-123123#0", "ABCD-123123#1"]
