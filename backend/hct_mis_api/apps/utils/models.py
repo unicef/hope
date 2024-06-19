@@ -131,10 +131,15 @@ class AdminUrlMixin:
         return reverse("admin:%s_%s_change" % (self._meta.app_label, self._meta.model_name), args=[self.id])
 
 
-class TimeStampedUUIDModel(UUIDModel):
+class TimeStampedModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
+    class Meta:
+        abstract = True
+
+
+class TimeStampedUUIDModel(TimeStampedModel, UUIDModel):
     class Meta:
         abstract = True
 
