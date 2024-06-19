@@ -33,7 +33,7 @@ export function GrievanceDashboardCard({
       <Grid container alignItems="center">
         <Grid xs={6} item>
           <LabelizedField
-            data-cy={`${dataCy}-system-generated`}
+            dataCy={`${dataCy}-system-generated`}
             label={t('SYSTEM-GENERATED')}
           >
             {systemGenerated}
@@ -41,7 +41,7 @@ export function GrievanceDashboardCard({
         </Grid>
         <Grid xs={6} item>
           <LabelizedField
-            data-cy={`${dataCy}-user-generated`}
+            dataCy={`${dataCy}-user-generated`}
             label={t('USER-GENERATED')}
           >
             {userGenerated}
