@@ -2,5 +2,7 @@ from django.apps import AppConfig
 
 
 class PeriodicDataUpdateConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'periodic_data_update'
+    name = "hct_mis_api.apps.periodic_data_update"
+
+    def ready(self) -> None:
+        import hct_mis_api.apps.periodic_data_update.signals  # noqa: F401
