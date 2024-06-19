@@ -43,7 +43,6 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 from hct_mis_api.apps.registration_data.models import (
     ImportData,
     ImportedBankAccountInfo,
-    ImportedDeliveryMechanismData,
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
@@ -54,6 +53,7 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedIndividualFactory,
     RegistrationDataImportDatahubFactory,
 )
+from hct_mis_api.apps.registration_datahub.models import ImportedDeliveryMechanismData
 
 
 def create_document_image() -> File:
