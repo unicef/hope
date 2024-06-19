@@ -18,10 +18,7 @@ from hct_mis_api.apps.household.models import (
     SEX_CHOICE,
     UNICEF,
 )
-from hct_mis_api.apps.registration_data.models import (
-    Record,
-    RegistrationDataImportDatahub,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImportDatahub
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
     ImportedDocument,
@@ -29,6 +26,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
     ImportedIndividualIdentity,
+    Record,
 )
 
 faker = Faker()
