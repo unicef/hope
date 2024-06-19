@@ -18,10 +18,10 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.registration_data.models import (
-    Record,
     RegistrationDataImport,
     RegistrationDataImportDatahub,
 )
+from hct_mis_api.apps.registration_datahub.models import Record
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
 logger = logging.getLogger(__name__)

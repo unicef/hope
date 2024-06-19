@@ -566,7 +566,7 @@ class Household(
     enumerator_rec_id = models.PositiveIntegerField(blank=True, null=True)
     mis_unicef_id = models.CharField(max_length=255, null=True)
     flex_registrations_record = models.ForeignKey(
-        "registration_data.Record",
+        "registration_datahub.Record",
         related_name="households",
         on_delete=models.SET_NULL,
         null=True,
