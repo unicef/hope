@@ -20,7 +20,7 @@ pytestmark = pytest.mark.django_db(transaction=True)
 
 @pytest.fixture()
 def afghanistan() -> BusinessAreaFactory:
-    return BusinessAreaFactory(
+    yield BusinessAreaFactory(
         **{
             "code": "0060",
             "name": "Afghanistan",

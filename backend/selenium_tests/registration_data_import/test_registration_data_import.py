@@ -26,13 +26,13 @@ def registration_datahub(db) -> None:  # type: ignore
 def create_programs() -> None:
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
-    return
+    yield
 
 
 @pytest.fixture
 def add_rdi() -> None:
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data-cypress.json")
-    return
+    yield
 
 
 @pytest.mark.usefixtures("login")

@@ -32,14 +32,14 @@ pytestmark = pytest.mark.django_db(transaction=True)
 
 @pytest.fixture
 def sw_program() -> Program:
-    return get_program_with_dct_type_and_name(
+    yield get_program_with_dct_type_and_name(
         "SW Program", dct_type=DataCollectingType.Type.SOCIAL, status=Program.ACTIVE
     )
 
 
 @pytest.fixture
 def non_sw_program() -> Program:
-    return get_program_with_dct_type_and_name(
+    yield get_program_with_dct_type_and_name(
         "Non SW Program", dct_type=DataCollectingType.Type.STANDARD, status=Program.ACTIVE
     )
 
@@ -62,17 +62,17 @@ def create_custom_household(observed_disability: list[str], residence_status: st
 
 @pytest.fixture
 def household_with_disability() -> Household:
-    return create_custom_household(observed_disability=[SEEING, HEARING])
+    yield create_custom_household(observed_disability=[SEEING, HEARING])
 
 
 @pytest.fixture
 def household_without_disabilities() -> Household:
-    return create_custom_household(observed_disability=[])
+    yield create_custom_household(observed_disability=[])
 
 
 @pytest.fixture
 def household_refugee() -> Household:
-    return create_custom_household(observed_disability=[], residence_status=REFUGEE)
+    yield create_custom_household(observed_disability=[], residence_status=REFUGEE)
 
 
 def get_program_with_dct_type_and_name(
@@ -112,14 +112,14 @@ def create_targeting(household_without_disabilities: Household) -> TargetPopulat
         },
     )
     target_population.households.set([household])
-    return target_population
+    yield target_population
 
 
 @pytest.fixture
 def create_programs() -> None:
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
-    return
+    yield
 
 
 @pytest.fixture
@@ -128,6 +128,7 @@ def add_targeting() -> None:
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data-cypress.json")
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data-cypress.json")
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/targeting/fixtures/data-cypress.json")
+    yield
 
 
 @pytest.mark.usefixtures("login")

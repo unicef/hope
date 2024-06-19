@@ -157,10 +157,10 @@ def driver() -> Chrome:
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--enable-logging")
     chrome_options.add_argument("--window-size=1920,1080")
-    return webdriver.Chrome(options=chrome_options)
+    yield webdriver.Chrome(options=chrome_options)
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def browser(driver: Chrome, request: FixtureRequest) -> Chrome:
     if request.node.get_closest_marker("mapping"):
         driver.live_server = LiveServer("0.0.0.0:8080")
@@ -175,14 +175,14 @@ def browser(driver: Chrome, request: FixtureRequest) -> Chrome:
 
 
 @pytest.fixture
-def login(browser: Chrome) -> Chrome:
+def login(browser: Chrome, create_super_user: User) -> Chrome:
     browser.get(f"{browser.live_server.url}/api/unicorn/")
     get_cookies = browser.get_cookies()  # type: ignore
     create_session(browser.live_server.url, "superuser", "testtest2", get_cookies[0]["value"])
     browser.add_cookie({"name": "csrftoken", "value": pytest.CSRF})
     browser.add_cookie({"name": "sessionid", "value": pytest.SESSION_ID})
     browser.get(f"{browser.live_server.url}")
-    return browser
+    yield browser
 
 
 @pytest.fixture
@@ -321,7 +321,7 @@ def business_area() -> BusinessArea:
     FlagState.objects.get_or_create(
         **{"name": "ALLOW_ACCOUNTABILITY_MODULE", "condition": "boolean", "value": "True", "required": False}
     )
-    return business_area
+    yield business_area
 
 
 @pytest.fixture
@@ -332,7 +332,7 @@ def change_super_user(business_area: BusinessArea) -> None:
     user.save()
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def create_super_user(business_area: BusinessArea) -> User:
     Partner.objects.get_or_create(name="TEST")
     Partner.objects.get_or_create(name="UNICEF")
@@ -391,7 +391,7 @@ def create_super_user(business_area: BusinessArea) -> User:
         business_area=business_area, partner=partner
     )
     ba_partner_through.roles.set([role])
-    return user
+    yield user
 
 
 # set up a hook to be able to check if a test has failed
