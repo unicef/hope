@@ -20,6 +20,7 @@ from django.db import models
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from concurrency.fields import IntegerVersionField
 from model_utils.managers import SoftDeletableManager, SoftDeletableQuerySet
@@ -54,6 +55,16 @@ class IsOriginalManager(models.Manager):
 class SoftDeletableIsVisibleManager(SoftDeletableManager):
     def get_queryset(self) -> "QuerySet":
         return super().get_queryset().filter(is_visible=True)
+
+
+class SoftDeletableRepresentationMergedManager(SoftDeletableRepresentationManager):
+    def get_queryset(self) -> "QuerySet":
+        return super().get_queryset().filter(rdi_merge_status="MERGED")
+
+
+class SoftDeletableRepresentationPendingManager(SoftDeletableRepresentationManager):
+    def get_queryset(self) -> "QuerySet":
+        return super().get_queryset().filter(rdi_merge_status="PENDING")
 
 
 class SoftDeletableIsOriginalManagerMixin:
@@ -94,7 +105,21 @@ class SoftDeletableIsOriginalManager(SoftDeletableIsOriginalManagerMixin, models
     pass
 
 
-class SoftDeletableIsOriginalModel(models.Model):
+class MergeStatusModel(models.Model):
+    PENDING = "PENDING"
+    MERGED = "MERGED"
+    STATUS_CHOICE = (
+        (PENDING, _("Pending")),
+        (MERGED, _("Merged")),
+    )
+
+    rdi_merge_status = models.CharField(max_length=10, choices=STATUS_CHOICE, default=PENDING, null=True)
+
+    class Meta:
+        abstract = True
+
+
+class SoftDeletableRepresentationMergeStatusModel(MergeStatusModel):
     """
     An abstract base class model with a ``is_removed`` field that
     marks entries that are not going to be used anymore, but are
@@ -108,10 +133,12 @@ class SoftDeletableIsOriginalModel(models.Model):
     class Meta:
         abstract = True
 
-    objects = SoftDeletableRepresentationManager(_emit_deprecation_warnings=True)
-    available_objects = SoftDeletableRepresentationManager()
+    objects = SoftDeletableRepresentationMergedManager(_emit_deprecation_warnings=True)
+    all_merge_status_objects = SoftDeletableRepresentationManager()
+    available_objects = SoftDeletableRepresentationMergedManager()
     all_objects = models.Manager()
     original_and_repr_objects = SoftDeletableManager(_emit_deprecation_warnings=True)
+    pending_objects = SoftDeletableRepresentationPendingManager()
 
     def delete(self, using: bool = None, soft: bool = True, *args: Any, **kwargs: Any) -> Any:  # type: ignore
         """
@@ -139,7 +166,7 @@ class TimeStampedUUIDModel(UUIDModel):
         abstract = True
 
 
-class SoftDeletableModelWithDate(models.Model):
+class SoftDeletableRepresentationMergeStatusModelWithDate(SoftDeletableRepresentationMergeStatusModel):
     """
     An abstract base class model with a ``is_removed`` field that
     marks entries that are not going to be used anymore, but are
@@ -153,11 +180,7 @@ class SoftDeletableModelWithDate(models.Model):
     class Meta:
         abstract = True
 
-    objects = SoftDeletableRepresentationManager()
-    all_objects = models.Manager()
-    original_and_repr_objects = SoftDeletableManager(_emit_deprecation_warnings=True)
-
-    def delete(
+    def delete(  # type: ignore
         self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
     ) -> Tuple[int, Dict[str, int]]:
         """
@@ -170,7 +193,7 @@ class SoftDeletableModelWithDate(models.Model):
             self.save(using=using)
             return 1, {self._meta.label: 1}
 
-        return super().delete(using=using, *args, **kwargs)
+        return models.Model.delete(using=using, *args, **kwargs)
 
 
 class SoftDeletionTreeManager(TreeManager):

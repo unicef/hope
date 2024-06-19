@@ -1,65 +1,25 @@
-import json
 import logging
-import re
-from datetime import date
 from typing import Any, Dict, List, Optional
 
 from django.conf import settings
-from django.contrib.gis.db.models import PointField
 from django.contrib.postgres.fields import CICharField
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
     ProhibitNullCharactersValidator,
-    validate_image_file_extension,
 )
 from django.db import models
-from django.db.models import JSONField, Q
+from django.db.models import Q
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
-from django_countries.fields import CountryField
-from multiselectfield import MultiSelectField
-from phonenumber_field.modelfields import PhoneNumberField
-from sorl.thumbnail import ImageField
-
-from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import (
-    BLANK,
-    DATA_SHARING_CHOICES,
-    DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
-    DISABILITY_CHOICES,
-    MARITAL_STATUS_CHOICE,
-    NOT_DISABLED,
-    NOT_PROVIDED,
-    OBSERVED_DISABILITY_CHOICE,
-    ORG_ENUMERATOR_CHOICES,
-    REGISTRATION_METHOD_CHOICES,
-    RELATIONSHIP_CHOICE,
-    RESIDENCE_STATUS_CHOICE,
-    ROLE_ALTERNATE,
-    ROLE_CHOICE,
-    ROLE_NO_ROLE,
-    ROLE_PRIMARY,
-    SEVERITY_OF_DISABILITY_CHOICES,
-    SEX_CHOICE,
-    UNIQUE,
-    WORK_STATUS_CHOICE,
-)
-from hct_mis_api.apps.registration_datahub.utils import combine_collections
+from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
     ConcurrencyModel,
     TimeStampedUUIDModel,
-)
-from hct_mis_api.apps.utils.phone import (
-    calculate_phone_numbers_validity,
-    recalculate_phone_numbers_validity,
 )
 from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
@@ -329,4 +289,3 @@ class KoboImportedSubmission(models.Model):
         blank=True,
         on_delete=models.CASCADE,
     )
-
