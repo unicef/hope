@@ -49,7 +49,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
 )
 from hct_mis_api.apps.payment.models import DeliveryMechanismData
-from hct_mis_api.apps.registration_datahub.models import KoboImportedSubmission
+from hct_mis_api.apps.registration_data.models import KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 from hct_mis_api.apps.registration_datahub.utils import (
     calculate_hash_for_kobo_submission,
