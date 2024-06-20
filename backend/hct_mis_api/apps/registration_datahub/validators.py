@@ -695,10 +695,14 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     if header.value == "relationship_i_c" and cell.value == "HEAD":
                         self.head_of_household_count[current_household_id] += 1
 
-                    if header.value in ("admin1_h_c", "admin2_h_c"):
+                    people_admin_columns = ("pp_admin1_i_c", "pp_admin2_i_c", "pp_admin3_i_c")
+                    hh_admin_columns = ("admin1_h_c", "admin2_h_c", "admin3_h_c")
+                    admin_columns_all = people_admin_columns + hh_admin_columns
+                    if header.value in admin_columns_all:
                         if cell.value:
                             admin_area_code_tuples.append((row_number, header.value, cell.value))
-                        else:
+                        # admin3 is not required for now
+                        elif not cell.value and header.value not in ("admin3_h_c", "pp_admin3_i_c"):
                             invalid_rows.append(
                                 {
                                     "row_number": row_number,
@@ -713,7 +717,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     if (
                         fn(value, header.value, cell) is False
                         and household_id_can_be_empty is False
-                        and header.value not in ("admin1_h_c", "admin2_h_c")
+                        and header.value not in admin_columns_all
                     ):
                         message = (
                             f"Sheet: {sheet.title!r}, Unexpected value: "
@@ -766,7 +770,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         message = f"Sheet: Individuals, There are multiple head of households for household with id: {household_id}"
                         invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
 
-            if sheet.title == "Households":
+            if sheet.title in ("Households", "People"):
                 admin_area_invalid_rows = self.validate_admin_areas(admin_area_code_tuples, business_area_slug)
                 if admin_area_invalid_rows:
                     invalid_rows.extend(admin_area_invalid_rows)
@@ -887,8 +891,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 self.validate_people_collectors(wb)
                 people_sheet = wb["People"]
                 self.image_loader = SheetImageLoader(people_sheet)
-                self.rows_validator(people_sheet)
-
+                self.rows_validator(people_sheet, business_area_slug)
             else:
                 self.validate_collectors(wb)
                 individuals_sheet = wb["Individuals"]

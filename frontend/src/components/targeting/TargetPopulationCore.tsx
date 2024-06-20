@@ -124,9 +124,11 @@ export const TargetPopulationCore = ({
       {targetPopulation?.excludedIds ? (
         <PaperContainer>
           <Typography data-cy="title-excluded-entries" variant="h6">
-            {t(
-              'Excluded Target Population Entries (Households or Individuals)',
-            )}
+            {isSocialDctType
+              ? t('Excluded Target Population Entries')
+              : t(
+                'Excluded Target Population Entries (Households or Individuals)',
+              )}
           </Typography>
           <Box mt={2}>
             <Grid container>
