@@ -129,7 +129,7 @@ export const CreateVerificationPlan = ({
   const { showMessage } = useSnackbar();
   const [mutate, { loading }] = useCreatePaymentVerificationPlanMutation();
   const { businessArea, baseUrl } = useBaseUrl();
-  const { isActiveProgram } = useProgramContext();
+  const { isActiveProgram, isSocialDctType } = useProgramContext();
   const [formValues, setFormValues] = useState(initialValues);
 
   const [loadRapidProFlows, { data: rapidProFlows }] =
@@ -396,12 +396,14 @@ export const CreateVerificationPlan = ({
                           />
                           <Field
                             name="ageCheckbox"
-                            label={t('Age of HoH')}
+                            label={t(isSocialDctType ? 'Age' : 'Age of HoH')}
                             component={FormikCheckboxField}
                           />
                           <Field
                             name="sexCheckbox"
-                            label={t('Gender of HoH')}
+                            label={t(
+                              isSocialDctType ? 'Gender' : 'Gender of HoH',
+                            )}
                             component={FormikCheckboxField}
                           />
                         </Box>

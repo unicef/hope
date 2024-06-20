@@ -47,6 +47,36 @@ snapshots['TestAllProgramsQuery::test_all_programs_query_1_without_permission 1'
     ]
 }
 
+snapshots['TestAllProgramsQuery::test_all_programs_query_filter_dct 1'] = {
+    'data': {
+        'allPrograms': {
+            'edges': [
+                {
+                    'node': {
+                        'name': 'Program with all partners access'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Program with none partner access'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Program with partner access'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Program without partner access'
+                    }
+                }
+            ],
+            'totalCount': 4
+        }
+    }
+}
+
 snapshots['TestAllProgramsQuery::test_all_programs_query_unicef_partner 1'] = {
     'data': {
         'allPrograms': {

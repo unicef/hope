@@ -349,6 +349,35 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertEqual(payment_row[bank_name_index], "JPMorgan")
         self.assertEqual(payment_row[bank_account_number_index], "362277220020615398848112903")
 
+    def test_export_per_fsp_if_no_fsp_assigned_to_payment_plan(self) -> None:
+        self.payment_plan.status = PaymentPlan.Status.ACCEPTED
+        self.payment_plan.save()
+        self.payment_plan.delivery_mechanisms.all().delete()
+
+        self.assertEqual(self.payment_plan.delivery_mechanisms.count(), 0)
+
+        export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
+        with self.assertRaises(GraphQLError) as e:
+            export_service.export_per_fsp(self.user)
+        self.assertEqual(
+            e.exception.message,
+            f"Not possible to generate export file. "
+            f"There aren't any FSP(s) assigned to Payment Plan {self.payment_plan.unicef_id}.",
+        )
+
+        DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=self.payment_plan,
+            financial_service_provider=self.fsp_1,
+            delivery_mechanism=Payment.DELIVERY_TYPE_CASH,
+            delivery_mechanism_order=1,
+        )
+        # set generate_token_and_order_numbers to False
+        export_service.payment_generate_token_and_order_numbers = False
+        export_service.export_per_fsp(self.user)
+        self.payment_plan.refresh_from_db()
+        self.assertTrue(self.payment_plan.has_export_file)
+        self.assertIsNotNone(self.payment_plan.payment_list_export_file_link)
+
     def test_export_payment_plan_per_fsp_with_people_program(self) -> None:
         # check with default program
         self.payment_plan.status = PaymentPlan.Status.ACCEPTED
@@ -363,7 +392,9 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism_per_payment_plan.delivery_mechanism)
         template_column_list = export_service.prepare_headers(fsp_xlsx_template)
         self.assertEqual(
-            len(template_column_list), len(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS) - 1
+            len(template_column_list),
+            len(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS) - 1,
+            template_column_list,
         )  # - ind_id
         self.assertIn("household_id", template_column_list)
         self.assertIn("household_size", template_column_list)
@@ -385,6 +416,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         fsp_xlsx_template.core_fields = ["age", "zip_code", "household_unicef_id", "individual_unicef_id"]
         fsp_xlsx_template.columns = fsp_xlsx_template.DEFAULT_COLUMNS
         fsp_xlsx_template.save()
+        fsp_xlsx_template.refresh_from_db()
 
         _, ws_fsp = export_service.open_workbook(fsp.name)
         fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism_per_payment_plan.delivery_mechanism)

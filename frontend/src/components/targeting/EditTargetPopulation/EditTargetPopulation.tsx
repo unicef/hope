@@ -248,7 +248,20 @@ export const EditTargetPopulation = ({
                         />
                       </Grid>
                     )}
-                    {screenBeneficiary && (
+                    {screenBeneficiary && isSocialDctType && (
+                      <Grid item xs={6}>
+                        <Field
+                          name="flagExcludeIfOnSanctionList"
+                          label={t(
+                            'Exclude People with an active sanction screen flag',
+                          )}
+                          color="primary"
+                          component={FormikCheckboxField}
+                          data-cy="input-active-people-sanction-flag"
+                        />
+                      </Grid>
+                    )}
+                    {screenBeneficiary && isStandardDctType && (
                       <Grid item xs={6}>
                         <Field
                           name="flagExcludeIfOnSanctionList"

@@ -31,13 +31,14 @@ logger = logging.getLogger(__name__)
 @app.task()
 @log_start_and_end
 @sentry_tags
-def recalculate_population_fields_chunk_task(households_ids: List[UUID]) -> None:
+def recalculate_population_fields_chunk_task(households_ids: List[UUID], program_id: Optional[str] = None) -> None:
     from hct_mis_api.apps.household.models import Household, Individual
 
     # memory optimization
     paginator = Paginator(households_ids, 200)
 
     with disable_concurrency(Household), disable_concurrency(Individual):
+        program = Program.objects.get(id=program_id) if program_id else None
         with transaction.atomic():
             for page in paginator.page_range:
                 logger.info(
@@ -53,6 +54,8 @@ def recalculate_population_fields_chunk_task(households_ids: List[UUID]) -> None
                     .select_for_update(of=("self",), skip_locked=True)
                     .order_by("pk")
                 ):
+                    if program:
+                        hh.program = program
                     set_sentry_business_area_tag(hh.business_area.name)
                     household, updated_fields = recalculate_data(hh, save=False)
                     households_to_update.append(household)
@@ -64,26 +67,31 @@ def recalculate_population_fields_chunk_task(households_ids: List[UUID]) -> None
 @app.task()
 @log_start_and_end
 @sentry_tags
-def recalculate_population_fields_task(household_ids: Optional[List[str]] = None) -> None:
+def recalculate_population_fields_task(
+    household_ids: Optional[List[str]] = None, program_id: Optional[str] = None
+) -> None:
     from hct_mis_api.apps.household.models import Household
 
     params = {}
     if household_ids:
         params["pk__in"] = household_ids
+    recalculate_composition = None
+    if program_id:
+        program = Program.objects.get(id=program_id)
+        recalculate_composition = program.data_collecting_type.recalculate_composition
+    queryset = Household.objects.filter(**params).only("pk").order_by("pk")
+    if recalculate_composition is None:
+        queryset = queryset.filter(collect_individual_data__in=(COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL))
+    elif not recalculate_composition:
+        queryset = queryset.none()
 
-    queryset = (
-        Household.objects.filter(**params)
-        .only("pk")
-        .filter(collect_individual_data__in=(COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL))
-        .order_by("pk")
-    )
     if queryset.exists():
         paginator = Paginator(queryset, config.RECALCULATE_POPULATION_FIELDS_CHUNK)
 
         for page_number in paginator.page_range:
             page = paginator.page(page_number)
             recalculate_population_fields_chunk_task.delay(
-                households_ids=list(page.object_list.values_list("pk", flat=True))
+                households_ids=list(page.object_list.values_list("pk", flat=True)), program_id=program_id
             )
 
 

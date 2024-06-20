@@ -40,7 +40,10 @@ def recalculate_data(
 ) -> Tuple[Household, List[str]]:
     household = Household.objects.select_for_update().get(id=household.id)
 
-    if not (household.collect_individual_data in (COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL)):
+    if (
+        household.collect_individual_data not in (COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL)
+        and not household.program.data_collecting_type.recalculate_composition
+    ):
         return household, []
 
     individuals_to_update = []
