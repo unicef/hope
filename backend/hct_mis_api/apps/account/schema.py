@@ -157,7 +157,7 @@ class PartnerNode(DjangoObjectType):
         model = Partner
 
     def resolve_areas(self, info: Any) -> "List[Area]":
-        return self.program_partner_through.get(program_id=self.partner_program).areas.all()
+        return self.program_partner_through.get(program_id=self.partner_program).areas.all().order_by("name")
 
     def resolve_area_access(self, info: Any, **kwargs: Any) -> str:
         if self.program_partner_through.get(program_id=self.partner_program).full_area_access:
