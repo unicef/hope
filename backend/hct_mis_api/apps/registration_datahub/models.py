@@ -369,7 +369,7 @@ class ImportedIndividualRoleInHousehold(TimeStampedUUIDModel):
 
 
 class ImportedDeliveryMechanismData(TimeStampedUUIDModel):
-    individual = models.OneToOneField(
+    individual = models.ForeignKey(
         "ImportedIndividual",
         on_delete=models.CASCADE,
         related_name="delivery_mechanisms_data",
