@@ -1,9 +1,12 @@
-import { TableCell } from '@mui/material';
-import React, { ReactElement } from 'react';
+import { Button, IconButton, TableCell } from '@mui/material';
+import { ReactElement } from 'react';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import UploadIcon from '@mui/icons-material/Upload';
+import GetAppIcon from '@mui/icons-material/GetApp';
+
 import { UniversalRestTable, HeadCell } from 'your-path-to-components'; // replace with the actual path
 import { Template, QueryVariables } from 'your-path-to-types'; // replace with the actual path
 
-// Define the columns for the Templates table
 const templatesHeadCells: HeadCell<Template>[] = [
   {
     id: 'templateId',
@@ -33,20 +36,32 @@ const templatesHeadCells: HeadCell<Template>[] = [
   { id: 'empty', numeric: false, disablePadding: false, label: '' },
 ];
 
-// Define the renderRow function for the Templates table
 const renderTemplateRow = (row: Template): ReactElement => (
   <>
     <TableCell>{row.templateId}</TableCell>
     <TableCell>{row.numberOfRecords}</TableCell>
     <TableCell>{row.creationDate}</TableCell>
     <TableCell>{row.createdBy}</TableCell>
-    <TableCell>{row.details}</TableCell>
-    <TableCell></TableCell>
+    <TableCell>
+      <IconButton color="primary">
+        <VisibilityIcon />
+      </IconButton>
+    </TableCell>
+    <TableCell>
+      {row.status === 'download' ? (
+        <Button variant="contained" color="primary" startIcon={<GetAppIcon />}>
+          Download
+        </Button>
+      ) : (
+        <Button variant="contained" color="primary" startIcon={<UploadIcon />}>
+          Export
+        </Button>
+      )}
+    </TableCell>
   </>
 );
 
-// Use the UniversalRestTable component to create the Templates table
-const PeriodicDataUpdatesTemplatesList = (): ReactElement => (
+export const PeriodicDataUpdatesTemplatesList = (): ReactElement => (
   <UniversalRestTable<Template, QueryVariables>
     initialVariables={
       {
@@ -62,5 +77,3 @@ const PeriodicDataUpdatesTemplatesList = (): ReactElement => (
     queryKey={['templates']} // replace with the actual query key
   />
 );
-
-export default PeriodicDataUpdatesTemplatesList;
