@@ -101,6 +101,7 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
                 program_partner_through__program=program,
             )
             .annotate(partner_program=Value(program.id))
+            .order_by("name")
             .distinct()
         )
 
