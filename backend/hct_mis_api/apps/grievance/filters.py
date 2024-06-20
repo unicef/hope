@@ -16,6 +16,7 @@ from django_filters import (
     TypedMultipleChoiceFilter,
     UUIDFilter,
 )
+from graphene_django.filter import GlobalIDFilter
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
@@ -119,6 +120,7 @@ class GrievanceTicketFilter(FilterSet):
     program = CharFilter(method="filter_by_program")
     is_active_program = BooleanFilter(method="filter_is_active_program")
     is_cross_area = BooleanFilter(method="filter_is_cross_area")
+    admin1 = GlobalIDFilter(field_name="admin2__parent")
 
     class Meta:
         fields = {

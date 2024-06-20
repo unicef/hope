@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { PaymentPlanQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { FieldBorder } from '@core/FieldBorder';
+import type { ChartData, ChartOptions } from 'chart.js';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(2)};
@@ -83,14 +84,12 @@ export const VolumeByDeliveryMechanismSection: React.FC<
   const chartData = volumeByDeliveryMechanism.map((el) => el.volumeUsd);
 
   const chartColors = (): string[] => {
-    const defaultColorsArray = volumeByDeliveryMechanism.map((el) =>
+    return volumeByDeliveryMechanism.map((el) =>
       getDeliveryMechanismColor(el.deliveryMechanism.name),
     );
-
-    return defaultColorsArray;
   };
 
-  const data = {
+  const data: ChartData<'pie'> = {
     labels: chartLabels,
     datasets: [
       {
@@ -98,13 +97,15 @@ export const VolumeByDeliveryMechanismSection: React.FC<
         backgroundColor: chartColors(),
       },
     ],
-  } as any;
+  };
 
-  const options = {
-    legend: {
-      display: false,
+  const options: ChartOptions<'pie'> = {
+    plugins: {
+      legend: {
+        display: false,
+      },
     },
-  } as any;
+  };
 
   return (
     <Box display="flex" flexDirection="column">

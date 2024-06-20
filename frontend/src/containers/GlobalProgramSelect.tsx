@@ -355,10 +355,14 @@ export const GlobalProgramSelect = () => {
                 variant="outlined"
                 size="small"
                 ref={params.InputProps.ref}
-                inputProps={params.inputProps}
+                inputProps={{
+                  ...params.inputProps,
+                  'data-cy': 'search-input-gpf',
+                }}
                 autoFocus
                 onChange={handleOnChangeInput}
                 onKeyDown={handleEnter}
+                onFocus={() => loadProgramsList()}
                 InputProps={{
                   ...params.InputProps,
                   endAdornment: (

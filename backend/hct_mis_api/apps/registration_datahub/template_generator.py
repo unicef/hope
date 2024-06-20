@@ -93,7 +93,6 @@ class TemplateFileGenerator:
         people_fields = {
             **FieldFactory.from_scopes([Scope.XLSX_PEOPLE])
             .apply_business_area(business_area_slug=business_area_slug)
-            .associated_with_individual()
             .to_dict_by("xlsx_field"),
             **flex_fields[individuals_sheet_title.lower()],
         }
