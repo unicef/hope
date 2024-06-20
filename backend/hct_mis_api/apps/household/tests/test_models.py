@@ -280,6 +280,64 @@ class TestDocument(TestCase):
                 program=self.program,
             )
 
+    def test_create_document_of_the_same_type_for_individual_not_unique_for_individual(self) -> None:
+        document_type, _ = DocumentType.objects.update_or_create(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
+            defaults=dict(
+                label="National Passport",
+                unique_for_individual=False,
+            ),
+        )
+
+        Document.objects.create(
+            document_number="213123",
+            individual=self.individual,
+            country=self.country,
+            type=document_type,
+            status=Document.STATUS_VALID,
+            program=self.program,
+        )
+
+        try:
+            Document.objects.create(
+                document_number="11111",
+                individual=self.individual,
+                country=self.country,
+                type=document_type,
+                status=Document.STATUS_VALID,
+                program=self.program,
+            )
+        except IntegrityError:
+            self.fail("Shouldn't raise any errors!")
+
+    def test_raise_error_on_creating_document_of_the_same_type_for_individual_unique_for_individual(self) -> None:
+        document_type, _ = DocumentType.objects.update_or_create(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
+            defaults=dict(
+                label="National Passport",
+                unique_for_individual=True,
+            ),
+        )
+
+        Document.objects.create(
+            document_number="213123",
+            individual=self.individual,
+            country=self.country,
+            type=document_type,
+            status=Document.STATUS_VALID,
+            program=self.program,
+        )
+
+        with self.assertRaises(IntegrityError):
+            Document.objects.create(
+                document_number="11111",
+                individual=self.individual,
+                country=self.country,
+                type=document_type,
+                status=Document.STATUS_VALID,
+                program=self.program,
+            )
+
     def test_raise_error_on_creating_duplicated_documents_with_different_numbers_and_unique_for_individual(
         self,
     ) -> None:

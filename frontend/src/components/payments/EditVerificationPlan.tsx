@@ -127,7 +127,7 @@ export const EditVerificationPlan = ({
   const { showMessage } = useSnackbar();
   const [mutate, { loading }] = useEditPaymentVerificationPlanMutation();
   const { baseUrl, businessArea } = useBaseUrl();
-  const { isActiveProgram } = useProgramContext();
+  const { isActiveProgram, isSocialDctType } = useProgramContext();
   const navigate = useNavigate();
   useEffect(() => {
     if (paymentVerificationPlanNode.sampling === 'FULL_LIST') {
@@ -409,12 +409,14 @@ export const EditVerificationPlan = ({
                           />
                           <Field
                             name="ageCheckbox"
-                            label={t('Age of HoH')}
+                            label={t(isSocialDctType ? 'Age' : 'Age of HoH')}
                             component={FormikCheckboxField}
                           />
                           <Field
                             name="sexCheckbox"
-                            label={t('Gender of HoH')}
+                            label={t(
+                              isSocialDctType ? 'Gender' : 'Gender of HoH',
+                            )}
                             component={FormikCheckboxField}
                           />
                         </Box>
