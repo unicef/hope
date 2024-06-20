@@ -2,6 +2,7 @@ from datetime import datetime
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from page_object.payment_verification.payment_verification import PaymentVerification
 from page_object.payment_verification.payment_verification_details import (
     PaymentVerificationDetails,
 )
@@ -17,7 +18,8 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hct_mis_api.apps.payment.models import PaymentVerification as PV
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -51,7 +53,7 @@ def get_program_with_dct_type_and_name(
 
 
 @pytest.fixture
-def add_payment_verification() -> PaymentVerification:
+def add_payment_verification() -> PV:
     registration_data_import = RegistrationDataImportFactory(
         imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
     )
@@ -94,14 +96,14 @@ def add_payment_verification() -> PaymentVerification:
     return PaymentVerificationFactory(
         generic_fk_obj=payment_record,
         payment_verification_plan=payment_verification_plan,
-        status=PaymentVerification.STATUS_PENDING,
+        status=PV.STATUS_PENDING,
     )
 
 
 @pytest.mark.usefixtures("login")
 class TestSmokePaymentVerification:
     def test_smoke_payment_verification(
-        self, active_program: Program, add_payment_verification: PaymentVerification, pagePaymentVerification: PaymentVerification
+        self, active_program: Program, add_payment_verification: PV, pagePaymentVerification: PaymentVerification
     ) -> None:
         pagePaymentVerification.selectGlobalProgramFilter("Active Program").click()
         pagePaymentVerification.getNavPaymentVerification().click()
@@ -119,7 +121,7 @@ class TestSmokePaymentVerification:
     def test_smoke_payment_verification_details(
         self,
         active_program: Program,
-        add_payment_verification: PaymentVerification,
+        add_payment_verification: PV,
         pagePaymentVerification: PaymentVerification,
         pagePaymentVerificationDetails: PaymentVerificationDetails,
     ) -> None:
@@ -134,12 +136,6 @@ class TestSmokePaymentVerification:
         pagePaymentVerificationDetails.getLabelStartDate()
         pagePaymentVerificationDetails.getLabelEndDate()
         pagePaymentVerificationDetails.getTableLabel()
-        # ToDo: Add it in happy path test
-        # assert "0" in pagePaymentVerificationDetails.getLabelPaymentRecords().text
-        # assert "23 Feb 2025" in pagePaymentVerificationDetails.getLabelStartDate().text
-        # assert "26 May 2025" in pagePaymentVerificationDetails.getLabelEndDate().text
-        # assert "Bank reconciliation" in pagePaymentVerificationDetails.getTableLabel().text
-        # assert "Full list" in pagePaymentVerificationDetails.getLabelSampling().text
         assert "0%" in pagePaymentVerificationDetails.getLabelSuccessful().text
         assert "0%" in pagePaymentVerificationDetails.getLabelErroneous().text
         assert "PENDING" in pagePaymentVerificationDetails.getLabelStatus().text
@@ -164,11 +160,28 @@ class TestSmokePaymentVerification:
         assert "ACTIVATE" in pagePaymentVerificationDetails.getButtonActivatePlan().text
         assert "PENDING" in pagePaymentVerificationDetails.getLabelStatus().text
         assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlanStatus().text
+        assert "MANUAL" in pagePaymentVerificationDetails.getLabelVerificationChannel().text
+        assert "-" in pagePaymentVerificationDetails.getLabelActivationDate().text
+        assert "-" in pagePaymentVerificationDetails.getLabelCompletionDate().text
+
+    @pytest.mark.skip(reason="Do during the task: 198121")
+    def test_smoke_payment_verification_happy_path(
+        self,
+        active_program: Program,
+        add_payment_verification: PV,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program").click()
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        assert "0" in pagePaymentVerificationDetails.getLabelPaymentRecords().text
+        assert "23 Feb 2025" in pagePaymentVerificationDetails.getLabelStartDate().text
+        assert "26 May 2025" in pagePaymentVerificationDetails.getLabelEndDate().text
+        assert "Bank reconciliation" in pagePaymentVerificationDetails.getTableLabel().text
+        assert "Full list" in pagePaymentVerificationDetails.getLabelSampling().text
         assert "55" in pagePaymentVerificationDetails.getLabelResponded().text
         assert "8" in pagePaymentVerificationDetails.getLabelReceivedWithIssues().text
-        assert "MANUAL" in pagePaymentVerificationDetails.getLabelVerificationChannel().text
         assert "29" in pagePaymentVerificationDetails.getLabelSampleSize().text
         assert "37" in pagePaymentVerificationDetails.getLabelReceived().text
         assert "3" in pagePaymentVerificationDetails.getLabelNotReceived().text
-        assert "-" in pagePaymentVerificationDetails.getLabelActivationDate().text
-        assert "-" in pagePaymentVerificationDetails.getLabelCompletionDate().text
