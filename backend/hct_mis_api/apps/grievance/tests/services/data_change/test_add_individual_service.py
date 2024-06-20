@@ -1,16 +1,23 @@
 from datetime import date
 
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.geo.fixtures import CountryFactory
 from hct_mis_api.apps.grievance.fixtures import TicketAddIndividualDetailsFactory
 from hct_mis_api.apps.grievance.services.data_change.add_individual_service import (
     AddIndividualService,
 )
-from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.household.models import SINGLE, Individual
+from hct_mis_api.apps.household.fixtures import (
+    DocumentFactory,
+    DocumentTypeFactory,
+    IndividualFactory,
+    create_household,
+)
+from hct_mis_api.apps.household.models import SINGLE, Document, Individual
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
@@ -20,9 +27,9 @@ class TestAddIndividualService(BaseElasticSearchTestCase, TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
-        program = ProgramFactory()
-        household, _ = create_household({"program": program})
-        ticket_details = TicketAddIndividualDetailsFactory(
+        cls.program = ProgramFactory()
+        household, _ = create_household({"program": cls.program})
+        cls.ticket_details = TicketAddIndividualDetailsFactory(
             household=household,
             individual_data={
                 "given_name": "Test",
@@ -35,7 +42,7 @@ class TestAddIndividualService(BaseElasticSearchTestCase, TestCase):
             },
             approve_status=True,
         )
-        ticket = ticket_details.ticket
+        ticket = cls.ticket_details.ticket
         ticket.save()
 
         cls.household = household
@@ -63,3 +70,56 @@ class TestAddIndividualService(BaseElasticSearchTestCase, TestCase):
         self.household.refresh_from_db()
         household_size = Individual.objects.filter(household=self.household).count()
         self.assertEqual(self.household.size, household_size)
+
+    def test_add_individual_with_document_that_already_exists(self) -> None:
+        individual = IndividualFactory(program=self.program, household=self.household)
+        CountryFactory(iso_code3="AFG")
+        document_type = DocumentTypeFactory()
+        DocumentFactory(
+            status=Document.STATUS_VALID,
+            program=self.program,
+            type=document_type,
+            document_number="123456",
+            individual=individual,
+        )
+        self.ticket_details.individual_data["documents"] = [
+            {
+                "key": document_type.key,
+                "country": "AFG",
+                "number": "123456",
+            }
+        ]
+        self.ticket_details.save()
+
+        service = AddIndividualService(self.ticket, {})
+        with self.assertRaises(ValidationError):
+            service.close(UserFactory())
+        self.assertEqual(Document.objects.filter(document_number="123456").count(), 1)
+
+    def test_add_individual_with_document_that_exists_in_pending_status(self) -> None:
+        individual = IndividualFactory(program=self.program, household=self.household)
+        CountryFactory(iso_code3="AFG")
+        document_type = DocumentTypeFactory()
+        DocumentFactory(
+            status=Document.STATUS_PENDING,
+            program=self.program,
+            type=document_type,
+            document_number="123456",
+            individual=individual,
+        )
+        self.ticket_details.individual_data["documents"] = [
+            {
+                "key": document_type.key,
+                "country": "AFG",
+                "number": "123456",
+            }
+        ]
+        self.ticket_details.save()
+
+        service = AddIndividualService(self.ticket, {})
+        try:
+            service.close(UserFactory())
+        except ValidationError:
+            self.fail("ValidationError should not be raised")
+        self.assertEqual(Document.objects.filter(document_number="123456", status=Document.STATUS_VALID).count(), 0)
+        self.assertEqual(Document.objects.filter(document_number="123456").count(), 2)
