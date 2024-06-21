@@ -379,6 +379,7 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
     )
     residence_status = graphene.String()
     program_registration_id = graphene.String()
+    import_id = graphene.String()
 
     @staticmethod
     def resolve_sanction_list_possible_match(parent: Household, info: Any) -> bool:
@@ -481,7 +482,17 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
                 any(user_ticket in user.assigned_tickets.all() for user_ticket in grievance_tickets),
                 Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER.value,
             )
+    def resolve_import_id(parent, info: Any) -> str:
+        row = ""
+        resp = str(parent.mis_unicef_id) if parent.mis_unicef_id else str(parent.id)
 
+        if parent.detail_id:
+            row = f" (Detail id {parent.detail_id})"
+        if parent.enumerator_rec_id:
+            row = f" (Enumerator ID {parent.enumerator_rec_id})"
+
+        return resp + row
+    
     @classmethod
     def get_queryset(cls, queryset: QuerySet[Household], info: Any) -> QuerySet[Household]:
         queryset = queryset.annotate(

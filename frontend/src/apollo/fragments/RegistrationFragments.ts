@@ -158,6 +158,7 @@ export const importedIndividualDetailed = gql`
     workStatus
     pregnant
     flexFields
+    importId
     observedDisability
     seeingDisability
     hearingDisability
@@ -194,6 +195,7 @@ export const importedIndividualDetailed = gql`
     relationship
     household {
       id
+      importId
       admin1{
         pCode
         name

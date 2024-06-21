@@ -1333,6 +1333,10 @@ class BankAccountInfo(SoftDeletableRepresentationMergeStatusModelWithDate, TimeS
 class PendingHousehold(Household):
     objects = SoftDeletableRepresentationPendingManager()
 
+    @property
+    def individuals(self) -> QuerySet:
+        return super().individuals(manager="pending_objects")
+
     class Meta:
         proxy = True
         verbose_name = "Imported Household"
