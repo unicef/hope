@@ -128,7 +128,7 @@ class TestSmokePaymentVerification:
         pagePaymentVerification.selectGlobalProgramFilter("Active Program").click()
         pagePaymentVerification.getNavPaymentVerification().click()
         pagePaymentVerification.getCashPlanTableRow().click()
-        assert "Payment Plan PP-0000-00-11223340" in pagePaymentVerificationDetails.getPageHeaderTitle().text
+        assert "Payment Plan PP-0000-00-1122334" in pagePaymentVerificationDetails.getPageHeaderTitle().text
         assert "CREATE VERIFICATION PLAN" in pagePaymentVerificationDetails.getButtonNewPlan().text
         assert "Payment Plan Details" in pagePaymentVerificationDetails.getDivPaymentPlanDetails().text
         assert "Active Program" in pagePaymentVerificationDetails.getLabelProgrammeName().text
