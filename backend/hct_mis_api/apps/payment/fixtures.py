@@ -746,7 +746,6 @@ def create_payment_verification_plan_with_status(
                         "delivered_quantity_usd": None,
                         "status": Payment.STATUS_ERROR,
                     }
-
             payment_record = PaymentFactory(
                 parent=cash_plan,
                 household=household,
