@@ -370,7 +370,7 @@ class ImportedIndividualRoleInHousehold(TimeStampedUUIDModel):
     )
 
     class Meta:
-        unique_together = ("role", "household")
+        unique_together = [("role", "household"), ("household", "individual")]
 
 
 class RegistrationDataImportDatahub(TimeStampedUUIDModel):

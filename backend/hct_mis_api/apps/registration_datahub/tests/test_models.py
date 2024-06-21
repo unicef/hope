@@ -1,9 +1,17 @@
+from django.db import IntegrityError
 from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.registration_datahub.fixtures import ImportedHouseholdFactory
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
+from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
+from hct_mis_api.apps.registration_datahub.fixtures import (
+    ImportedHouseholdFactory,
+    ImportedIndividualFactory,
+)
+from hct_mis_api.apps.registration_datahub.models import (
+    ImportedIndividualRoleInHousehold,
+)
 
 
 class TestImportedHousehold(TestCase):
@@ -67,3 +75,24 @@ class TestImportedHousehold(TestCase):
         self.assertEqual(imported_household.admin3_title, "")
         self.assertEqual(imported_household.admin4, self.area4.p_code)
         self.assertEqual(imported_household.admin4_title, self.area4.name)
+
+
+class TestImportedIndividualRoleInHousehold(TestCase):
+    databases = {"default", "registration_datahub"}
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        business_area = create_afghanistan()
+        country = CountryFactory()
+        business_area.countries.add(country)
+        cls.imported_household = ImportedHouseholdFactory()
+        cls.imported_individual = ImportedIndividualFactory(household=cls.imported_household)
+
+    def test_individual_can_only_have_one_role_in_household(self) -> None:
+        ImportedIndividualRoleInHousehold.objects.create(
+            household=self.imported_household, individual=self.imported_individual, role=ROLE_PRIMARY
+        )
+        with self.assertRaises(IntegrityError):
+            ImportedIndividualRoleInHousehold.objects.create(
+                household=self.imported_household, individual=self.imported_individual, role=ROLE_ALTERNATE
+            )
