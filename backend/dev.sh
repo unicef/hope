@@ -15,6 +15,7 @@ else
       wait_for_db db
       pytest \
         -n auto \
+        -svvv \
         --reruns 3 \
         --reruns-delay 1 \
         --cov-report xml:coverage.xml \

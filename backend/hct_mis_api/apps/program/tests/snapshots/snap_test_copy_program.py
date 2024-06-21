@@ -83,6 +83,18 @@ snapshots['TestCopyProgram::test_copy_program_with_partners_0_valid 1'] = {
                                 'name': 'Area in AFG 2'
                             }
                         ],
+                        'name': 'New Partner'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
                         'name': 'UNICEF'
                     },
                     {
@@ -96,18 +108,6 @@ snapshots['TestCopyProgram::test_copy_program_with_partners_0_valid 1'] = {
                             }
                         ],
                         'name': 'WFP'
-                    },
-                    {
-                        'areaAccess': 'BUSINESS_AREA',
-                        'areas': [
-                            {
-                                'name': 'Area in AFG 1'
-                            },
-                            {
-                                'name': 'Area in AFG 2'
-                            }
-                        ],
-                        'name': 'New Partner'
                     }
                 ],
                 'populationGoal': 150000,
@@ -182,7 +182,7 @@ snapshots['TestCopyProgram::test_copy_program_with_partners_all_partners_access 
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'UNICEF'
+                        'name': 'Other Partner'
                     },
                     {
                         'areaAccess': 'BUSINESS_AREA',
@@ -194,7 +194,7 @@ snapshots['TestCopyProgram::test_copy_program_with_partners_all_partners_access 
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'Other Partner'
+                        'name': 'UNICEF'
                     }
                 ],
                 'populationGoal': 150000,
