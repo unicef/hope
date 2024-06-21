@@ -41,9 +41,9 @@ from hct_mis_api.apps.utils.models import (
     RepresentationManager,
     SoftDeletableRepresentationMergeStatusModel,
     SoftDeletableRepresentationMergeStatusModelWithDate,
+    SoftDeletableRepresentationPendingManager,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
-    SoftDeletableRepresentationPendingManager,
 )
 from hct_mis_api.apps.utils.phone import recalculate_phone_numbers_validity
 

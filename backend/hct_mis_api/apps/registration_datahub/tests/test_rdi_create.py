@@ -30,6 +30,7 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,
     IDENTIFICATION_TYPE_TAX_ID,
+    PENDING,
     BankAccountInfo,
     Document,
     DocumentType,
@@ -37,6 +38,7 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualIdentity,
 )
+from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -47,7 +49,6 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
-    ImportedDeliveryMechanismData,
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
@@ -439,11 +440,14 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
     def test_create_delivery_mechanism_data(self) -> None:
         task = self.RdiXlsxCreateTask()
         task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
-        self.assertEqual(ImportedDeliveryMechanismData.objects.count(), 3)
+        self.assertEqual(PendingDeliveryMechanismData.objects.count(), 3)
 
-        dmd1 = ImportedDeliveryMechanismData.objects.get(individual__detail_id=3)
-        dmd2 = ImportedDeliveryMechanismData.objects.get(individual__detail_id=4)
-        dmd3 = ImportedDeliveryMechanismData.objects.get(individual__detail_id=5)
+        dmd1 = PendingDeliveryMechanismData.objects.get(individual__detail_id=3)
+        dmd2 = PendingDeliveryMechanismData.objects.get(individual__detail_id=4)
+        dmd3 = PendingDeliveryMechanismData.objects.get(individual__detail_id=5)
+        self.assertEqual(dmd1.rdi_merge_status, PENDING)
+        self.assertEqual(dmd2.rdi_merge_status, PENDING)
+        self.assertEqual(dmd3.rdi_merge_status, PENDING)
         self.assertEqual(
             json.loads(dmd1.data),
             {"card_number_atm_card": "164260858", "card_expiry_date_atm_card": "1995-06-03T00:00:00"},

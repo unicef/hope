@@ -31,6 +31,7 @@ from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_UNKNOWN,
     HEAD,
     NON_BENEFICIARY,
+    PENDING,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     BankAccountInfo,
@@ -41,15 +42,11 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanismData
+from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
 from hct_mis_api.apps.registration_data.models import (
     ImportData,
     RegistrationDataImport,
     RegistrationDataImportDatahub,
-)
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedDeliveryMechanismData,
-    ImportedIndividual,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
@@ -121,7 +118,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         value: Any,
         header: str,
         row_num: int,
-        individual: ImportedIndividual,
+        individual: Individual,
         field: Dict[str, Any],
         *args: Any,
         **kwargs: Any,
@@ -402,13 +399,14 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             individual = data.pop("individual")
             for delivery_type, values in data.items():
                 imported_delivery_mechanism_data.append(
-                    ImportedDeliveryMechanismData(
+                    PendingDeliveryMechanismData(
                         individual=individual,
                         delivery_mechanism=delivery_type,
                         data=json.dumps(values, cls=DjangoJSONEncoder),
+                        rdi_merge_status=PENDING,
                     )
                 )
-        ImportedDeliveryMechanismData.objects.bulk_create(imported_delivery_mechanism_data)
+        PendingDeliveryMechanismData.objects.bulk_create(imported_delivery_mechanism_data)
 
     def _create_documents(self) -> None:
         from hct_mis_api.apps.geo.models import Country as GeoCountry
@@ -469,7 +467,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         return obj_to_create
 
     def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
-        delivery_mechanism_xlsx_fields = DeliveryMechanismData.get_scope_delivery_mechanisms_fields(by="xlsx_field")
+        delivery_mechanism_xlsx_fields = PendingDeliveryMechanismData.get_scope_delivery_mechanisms_fields(
+            by="xlsx_field"
+        )
         complex_fields: Dict[str, Dict[str, Callable]] = {
             "individuals": {
                 "photo_i_c": self._handle_image_field,

@@ -34,6 +34,7 @@ from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
+    MERGED,
     ROLE_PRIMARY,
     SINGLE,
     BankAccountInfo,
@@ -198,6 +199,7 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
             role=ROLE_PRIMARY,
             individual=cls.individuals_household_two[0],
             household=household_two,
+            rdi_merge_status=MERGED,
         )
 
         cls.add_individual_grievance_ticket = GrievanceTicketFactory(

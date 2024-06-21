@@ -34,16 +34,14 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory
+from hct_mis_api.apps.payment.fixtures import PendingDeliveryMechanismDataFactory
+from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.fixtures import (
-    ImportedHouseholdFactory,
-    ImportedIndividualFactory,
     RegistrationDataImportDatahubFactory,
 )
-from hct_mis_api.apps.registration_datahub.models import ImportedDeliveryMechanismData
 from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 
 
@@ -548,7 +546,7 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
         ind3.save()
 
         # valid data
-        dmd = DeliveryMechanismDataFactory(
+        dmd = PendingDeliveryMechanismDataFactory(
             individual=ind,
             delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
             data={
@@ -558,7 +556,7 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
             },
         )
         # invalid data, ticket should be created
-        dmd2 = DeliveryMechanismDataFactory(
+        dmd2 = PendingDeliveryMechanismDataFactory(
             individual=ind2,
             delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
             data={
@@ -568,7 +566,7 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
             },
         )
         # not unique data, ticket should be created
-        dmd3 = DeliveryMechanismDataFactory(
+        dmd3 = PendingDeliveryMechanismDataFactory(
             individual=ind3,
             delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
             data={
@@ -579,7 +577,9 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
         )
 
         self.assertEqual(0, self.rdi.grievanceticket_set.count())
-        RdiMergeTask()._create_grievance_tickets_for_delivery_mechanisms_errors([dmd, dmd2, dmd3], self.rdi)
+        RdiMergeTask()._create_grievance_tickets_for_delivery_mechanisms_errors(
+            PendingDeliveryMechanismData.objects.all(), self.rdi
+        )
         self.assertEqual(2, self.rdi.grievanceticket_set.count())
         self.assertEqual(2, TicketIndividualDataUpdateDetails.objects.count())
 
@@ -644,24 +644,3 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
         )
         self.assertEqual(data_not_unique_ticket.ticket.category, GrievanceTicket.CATEGORY_DATA_CHANGE)
         self.assertEqual(data_not_unique_ticket.ticket.registration_data_import, self.rdi)
-
-    def test_prepare_delivery_mechanisms_data(self) -> None:
-        ind = ImportedIndividualFactory(household=None)
-        ind2 = ImportedIndividualFactory(household=None)
-        hh = ImportedHouseholdFactory(head_of_household=ind)
-        ind.household = hh
-        ind.save()
-        ind2.household = hh
-        ind2.save()
-
-        # valid data
-        dmd = ImportedDeliveryMechanismData(
-            individual=ind,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
-        )
-        dmd2 = ImportedDeliveryMechanismData(
-            individual=ind2,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
-        )
-        delivery_mechanisms_data_to_create = RdiMergeTask()._prepare_delivery_mechanisms_data([dmd, dmd2], {})
-        self.assertEqual(2, len(delivery_mechanisms_data_to_create))
