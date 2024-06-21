@@ -6,11 +6,11 @@ from django.db.models.functions import Lower
 from django_filters import BooleanFilter, CharFilter, FilterSet, OrderingFilter
 
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
-from hct_mis_api.apps.household.models import DUPLICATE
-from hct_mis_api.apps.registration_datahub.models import (
+from hct_mis_api.apps.household.models import (
+    DUPLICATE,
     DUPLICATE_IN_BATCH,
-    ImportedHousehold,
-    ImportedIndividual,
+    PendingHousehold,
+    PendingIndividual,
 )
 
 if TYPE_CHECKING:
@@ -23,7 +23,7 @@ class ImportedIndividualFilter(FilterSet):
     business_area = CharFilter(field_name="registration_data_import__business_area_slug")
 
     class Meta:
-        model = ImportedIndividual
+        model = PendingIndividual
         fields = ("household",)
 
     order_by = OrderingFilter(
@@ -54,7 +54,7 @@ class ImportedHouseholdFilter(FilterSet):
     business_area = CharFilter(field_name="registration_data_import__business_area_slug")
 
     class Meta:
-        model = ImportedHousehold
+        model = PendingHousehold
         fields = ()
 
     order_by = CustomOrderingFilter(

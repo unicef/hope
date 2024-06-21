@@ -44,13 +44,13 @@ from hct_mis_api.apps.registration_datahub.filters import (
     ImportedHouseholdFilter,
     ImportedIndividualFilter,
 )
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedDocument,
-    ImportedDocumentType,
-    ImportedHousehold,
-    ImportedIndividual,
-    ImportedIndividualIdentity,
-    ImportedIndividualRoleInHousehold,
+from hct_mis_api.apps.household.models import (
+    PendingDocument,
+    DocumentType,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualIdentity,
+    PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.utils.schema import Arg, FlexFieldsScalar
 
@@ -118,10 +118,10 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         )
         ids = list(set(imported_individuals_ids + collectors_ids))
 
-        return ImportedIndividual.objects.filter(id__in=ids).prefetch_related(
+        return PendingIndividual.objects.filter(id__in=ids).prefetch_related(
             Prefetch(
                 "households_and_roles",
-                queryset=ImportedIndividualRoleInHousehold.objects.filter(household=parent.id),
+                queryset=PendingIndividualRoleInHousehold.objects.filter(household=parent.id),
             )
         )
 
@@ -137,7 +137,7 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         return resp + row
 
     class Meta:
-        model = ImportedHousehold
+        model = PendingHousehold
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
@@ -164,7 +164,7 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     email = graphene.String(source="email")
 
     @staticmethod
-    def resolve_preferred_language(parent: ImportedIndividual, info: Any) -> Optional[str]:
+    def resolve_preferred_language(parent: PendingIndividual, info: Any) -> Optional[str]:
         return parent.preferred_language or None
 
     def resolve_role(parent, info: Any) -> str:
@@ -205,12 +205,13 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         return parent.phone_no_alternative_valid
 
     class Meta:
-        model = ImportedIndividual
+        model = PendingIndividual
+        exclude = ("vector_column",)
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
         convert_choices_to_enum = get_model_choices_fields(
-            ImportedIndividual,
+            PendingIndividual,
             excluded=[
                 "seeing_disability",
                 "hearing_disability",
@@ -277,7 +278,7 @@ class KoboImportDataNode(DjangoObjectType):
 
 class ImportedDocumentTypeNode(DjangoObjectType):
     class Meta:
-        model = ImportedDocumentType
+        model = DocumentType
 
 
 class ImportedDocumentNode(DjangoObjectType):
@@ -293,7 +294,7 @@ class ImportedDocumentNode(DjangoObjectType):
         return None
 
     class Meta:
-        model = ImportedDocument
+        model = PendingDocument
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
@@ -304,11 +305,11 @@ class ImportedIndividualIdentityNode(DjangoObjectType):
     country = graphene.String(description="Country")
 
     @staticmethod
-    def resolve_country(parent: ImportedIndividualIdentity, info: Any) -> "Country":
+    def resolve_country(parent: PendingIndividualIdentity, info: Any) -> "Country":
         return getattr(parent.country, "name", parent.country)
 
     class Meta:
-        model = ImportedIndividualIdentity
+        model = PendingIndividualIdentity
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
