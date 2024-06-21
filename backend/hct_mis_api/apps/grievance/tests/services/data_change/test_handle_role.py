@@ -4,6 +4,7 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.grievance.services.data_change.utils import handle_role
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import (
+    MERGED,
     ROLE_ALTERNATE,
     ROLE_NO_ROLE,
     IndividualRoleInHousehold,
@@ -29,7 +30,9 @@ class TestHandleRole(TestCase):
         individual = IndividualFactory(household=household, program=program)
         household.head_of_household = individual
         household.save()
-        IndividualRoleInHousehold.objects.create(household=household, individual=individual, role=ROLE_ALTERNATE)
+        IndividualRoleInHousehold.objects.create(
+            household=household, individual=individual, role=ROLE_ALTERNATE, rdi_merge_status=MERGED
+        )
 
         self.assertEqual(
             IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count(), 1

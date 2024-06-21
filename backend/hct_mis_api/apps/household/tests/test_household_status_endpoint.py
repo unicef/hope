@@ -16,6 +16,7 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_TAX_ID,
+    MERGED,
     ROLE_NO_ROLE,
 )
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
@@ -80,7 +81,10 @@ class TestDetails(TestCase):
         imported_household.detail_id = "HOPE-2022530111222"
         imported_household.save()
         ImportedIndividualRoleInHousehold.objects.create(
-            individual=imported_individual, role=ROLE_NO_ROLE, household=imported_household
+            individual=imported_individual,
+            role=ROLE_NO_ROLE,
+            household=imported_household,
+            rdi_merge_status=MERGED,
         )
 
         registration_id = imported_household.detail_id
@@ -106,7 +110,10 @@ class TestDetails(TestCase):
         imported_household.head_of_household = imported_individual
         imported_household.save()
         ImportedIndividualRoleInHousehold.objects.create(
-            individual=imported_individual, role=ROLE_NO_ROLE, household=imported_household
+            individual=imported_individual,
+            role=ROLE_NO_ROLE,
+            household=imported_household,
+            rdi_merge_status=MERGED,
         )
 
         imported_document_type = ImportedDocumentTypeFactory(
@@ -211,7 +218,10 @@ class TestDetails(TestCase):
         imported_household.detail_id = "HOPE-2022530111222"
         imported_household.save()
         ImportedIndividualRoleInHousehold.objects.create(
-            individual=imported_individual, role=ROLE_NO_ROLE, household=imported_household
+            individual=imported_individual,
+            role=ROLE_NO_ROLE,
+            household=imported_household,
+            rdi_merge_status=MERGED,
         )
 
         registration_id = imported_household.detail_id

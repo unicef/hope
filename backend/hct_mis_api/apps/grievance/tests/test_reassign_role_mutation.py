@@ -14,7 +14,11 @@ from hct_mis_api.apps.grievance.fixtures import (
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
+from hct_mis_api.apps.household.models import (
+    MERGED,
+    ROLE_PRIMARY,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
@@ -94,6 +98,7 @@ class TestRoleReassignMutation(APITestCase):
             household=cls.household,
             individual=cls.individual,
             role=ROLE_PRIMARY,
+            rdi_merge_status=MERGED,
         )
 
         cls.grievance_ticket = GrievanceTicketFactory(
@@ -244,6 +249,7 @@ class TestRoleReassignMutationNewTicket(APITestCase):
             household=cls.household,
             individual=cls.individual_1,
             role=ROLE_PRIMARY,
+            rdi_merge_status=MERGED,
         )
 
         cls.grievance_ticket = GrievanceTicketFactory(

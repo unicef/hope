@@ -67,6 +67,16 @@ class SoftDeletableRepresentationPendingManager(SoftDeletableRepresentationManag
         return super().get_queryset().filter(rdi_merge_status="PENDING")
 
 
+class MergedManager(models.Manager):
+    def get_queryset(self) -> "QuerySet":
+        return super().get_queryset().filter(rdi_merge_status="MERGED")
+
+
+class PendingManager(models.Manager):
+    def get_queryset(self) -> "QuerySet":
+        return super().get_queryset().filter(rdi_merge_status="PENDING")
+
+
 class SoftDeletableIsOriginalManagerMixin:
     """
     Manager that limits the queryset by default to show only not removed
@@ -113,7 +123,7 @@ class MergeStatusModel(models.Model):
         (MERGED, _("Merged")),
     )
 
-    rdi_merge_status = models.CharField(max_length=10, choices=STATUS_CHOICE, default=PENDING, null=True)
+    rdi_merge_status = models.CharField(max_length=10, choices=STATUS_CHOICE, default=PENDING)
 
     class Meta:
         abstract = True

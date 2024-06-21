@@ -14,6 +14,7 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import (
     HEAD,
+    MERGED,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     IndividualRoleInHousehold,
@@ -49,6 +50,7 @@ class TestReassignRolesOnUpdate(APITestCase):
             household=cls.household,
             individual=cls.primary_collector_individual,
             role=ROLE_PRIMARY,
+            rdi_merge_status=MERGED,
         )
 
         cls.alternate_collector_individual = IndividualFactory(household=None, program=cls.program_one)
@@ -59,6 +61,7 @@ class TestReassignRolesOnUpdate(APITestCase):
             household=cls.household,
             individual=cls.alternate_collector_individual,
             role=ROLE_ALTERNATE,
+            rdi_merge_status=MERGED,
         )
 
         cls.no_role_individual = IndividualFactory(household=cls.household, program=cls.program_one)
@@ -158,6 +161,7 @@ class TestReassignRolesOnUpdate(APITestCase):
             household=household,
             individual=self.no_role_individual,
             role=ROLE_PRIMARY,
+            rdi_merge_status=MERGED,
         )
 
         role_reassign_data = {

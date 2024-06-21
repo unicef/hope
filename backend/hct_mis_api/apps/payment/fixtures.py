@@ -30,6 +30,7 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import (
     MALE,
+    PENDING,
     REFUGEE,
     ROLE_PRIMARY,
     Household,
@@ -684,6 +685,13 @@ class DeliveryMechanismDataFactory(DjangoModelFactory):
         DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
         getter=lambda c: c[0],
     )
+
+    class Meta:
+        model = DeliveryMechanismData
+
+
+class PendingDeliveryMechanismDataFactory(DeliveryMechanismDataFactory):
+    rdi_merge_status = PENDING
 
     class Meta:
         model = DeliveryMechanismData

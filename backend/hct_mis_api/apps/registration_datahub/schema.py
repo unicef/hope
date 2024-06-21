@@ -34,6 +34,12 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
+    DocumentType,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualIdentity,
+    PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.registration_data.models import (
     ImportData,
@@ -43,14 +49,6 @@ from hct_mis_api.apps.registration_data.models import (
 from hct_mis_api.apps.registration_datahub.filters import (
     ImportedHouseholdFilter,
     ImportedIndividualFilter,
-)
-from hct_mis_api.apps.household.models import (
-    PendingDocument,
-    DocumentType,
-    PendingHousehold,
-    PendingIndividual,
-    PendingIndividualIdentity,
-    PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.utils.schema import Arg, FlexFieldsScalar
 
