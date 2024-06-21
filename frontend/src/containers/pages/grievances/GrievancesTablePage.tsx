@@ -40,7 +40,7 @@ export function GrievancesTablePage(): React.ReactElement {
     issueType: '',
     assignedTo: '',
     createdBy: '',
-    admin1: '',
+    admin1: [],
     admin2: '',
     registrationDataImport: id || '',
     cashPlan: cashPlanId,

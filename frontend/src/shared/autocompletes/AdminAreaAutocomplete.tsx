@@ -26,6 +26,7 @@ export function AdminAreaAutocomplete({
   setAppliedFilter,
   setFilter,
   dataCy,
+  multiple = false,
 }: {
   disabled?: boolean;
   name: string;
@@ -37,6 +38,7 @@ export function AdminAreaAutocomplete({
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
   dataCy?: string;
+  multiple?: boolean;
 }): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -97,6 +99,7 @@ export function AdminAreaAutocomplete({
 
   return (
     <BaseAutocomplete
+      multiple={multiple}
       value={value}
       disabled={disabled}
       label={t(`Admin Level ${level}`)}
@@ -108,11 +111,16 @@ export function AdminAreaAutocomplete({
         if (!selectedValue) {
           onInputTextChange('');
         }
-        handleAutocompleteChange(
-          name,
-          selectedValue?.node?.id,
-          handleFilterChange,
-        );
+        if (multiple) {
+          const selectedIds = selectedValue.map((value) => value?.node?.id);
+          handleAutocompleteChange(name, selectedIds, handleFilterChange);
+        } else {
+          handleAutocompleteChange(
+            name,
+            selectedValue?.node?.id,
+            handleFilterChange,
+          );
+        }
       }}
       handleOpen={() => setOpen(true)}
       open={open}
