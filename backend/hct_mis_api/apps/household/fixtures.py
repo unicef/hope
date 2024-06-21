@@ -34,6 +34,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 faker = Faker()
 
@@ -135,6 +136,7 @@ class HouseholdFactory(DjangoModelFactory):
     male_age_group_60_count = factory.fuzzy.FuzzyInteger(0, 3)
     household_collection = factory.SubFactory(HouseholdCollectionFactory)
     program = factory.SubFactory(ProgramFactory)
+    rdi_merge_status = MergeStatusModel.MERGED
 
     @classmethod
     def build(cls, **kwargs: Any) -> Household:
@@ -145,6 +147,8 @@ class HouseholdFactory(DjangoModelFactory):
 
 
 class IndividualIdentityFactory(DjangoModelFactory):
+    rdi_merge_status = MergeStatusModel.MERGED
+
     class Meta:
         model = IndividualIdentity
 
@@ -152,6 +156,8 @@ class IndividualIdentityFactory(DjangoModelFactory):
 
 
 class IndividualRoleInHouseholdFactory(DjangoModelFactory):
+    rdi_merge_status = MergeStatusModel.MERGED
+
     class Meta:
         model = IndividualRoleInHousehold
 
@@ -196,6 +202,7 @@ class IndividualFactory(DjangoModelFactory):
     unicef_id = factory.Sequence(lambda n: f"IND-{n}")
     individual_collection = factory.SubFactory(IndividualCollectionFactory)
     program = factory.SubFactory(ProgramFactory)
+    rdi_merge_status = MergeStatusModel.MERGED
 
 
 class BankAccountInfoFactory(DjangoModelFactory):
@@ -207,6 +214,7 @@ class BankAccountInfoFactory(DjangoModelFactory):
     bank_account_number = factory.LazyAttribute(lambda x: random.randint(10**26, 10**27 - 1))
     bank_branch_name = random.choice(["BranchCityBank", "BranchSantander", "BranchJPMorgan"])
     account_holder_name = factory.Faker("last_name")
+    rdi_merge_status = MergeStatusModel.MERGED
 
 
 class DocumentTypeFactory(DjangoModelFactory):
@@ -227,6 +235,7 @@ class DocumentFactory(DjangoModelFactory):
     individual = factory.SubFactory(IndividualFactory)
     country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
     program = factory.SubFactory(ProgramFactory)
+    rdi_merge_status = MergeStatusModel.MERGED
 
 
 class DocumentAllowDuplicatesFactory(DjangoModelFactory):
@@ -237,6 +246,7 @@ class DocumentAllowDuplicatesFactory(DjangoModelFactory):
     type = factory.SubFactory(DocumentTypeFactory)
     individual = factory.SubFactory(IndividualFactory)
     country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
+    rdi_merge_status = MergeStatusModel.MERGED
 
 
 class EntitlementCardFactory(DjangoModelFactory):
@@ -294,11 +304,14 @@ def create_household(
         2, household=None, program=household.program, relationship="NON_BENEFICIARY"
     )
     primary_collector_irh = IndividualRoleInHousehold(
-        individual=primary_collector, household=household, role=ROLE_PRIMARY
+        individual=primary_collector, household=household, role=ROLE_PRIMARY, rdi_merge_status=MergeStatusModel.MERGED
     )
     primary_collector_irh.save()
     alternate_collector_irh = IndividualRoleInHousehold(
-        individual=alternate_collector, household=household, role=ROLE_ALTERNATE
+        individual=alternate_collector,
+        household=household,
+        role=ROLE_ALTERNATE,
+        rdi_merge_status=MergeStatusModel.MERGED,
     )
     alternate_collector_irh.save()
 
@@ -336,8 +349,15 @@ def create_household_for_fixtures(
     Individual.objects.bulk_update(individuals_to_update, ("relationship", "household"))
 
     if random.choice([True, False]) and len(individuals) >= 2:
-        IndividualRoleInHousehold.objects.create(individual=individuals[0], household=household, role=ROLE_PRIMARY)
-        IndividualRoleInHousehold.objects.create(individual=individuals[1], household=household, role=ROLE_ALTERNATE)
+        IndividualRoleInHousehold.objects.create(
+            individual=individuals[0], household=household, role=ROLE_PRIMARY, rdi_merge_status=MergeStatusModel.MERGED
+        )
+        IndividualRoleInHousehold.objects.create(
+            individual=individuals[1],
+            household=household,
+            role=ROLE_ALTERNATE,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
     else:
         primary_collector, alternate_collector = IndividualFactory.create_batch(
             2, household=None, program=household.program, relationship="NON_BENEFICIARY"
