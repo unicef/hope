@@ -351,7 +351,7 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
     autocomplete_fields = ("financial_service_provider", "xlsx_template")
 
     def save_model(
-        self, request: HttpRequest, obj: FinancialServiceProviderXlsxTemplate, form: "Form", change: bool
+        self, request: HttpRequest, obj: FspXlsxTemplatePerDeliveryMechanism, form: "Form", change: bool
     ) -> None:
         if not change:
             obj.created_by = request.user
@@ -430,8 +430,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         ("data_transfer_configuration",),
         ("allowed_business_areas",),
     )
-
-    readonly_fields = ("fsp_xlsx_templates",)
+    readonly_fields = ("fsp_xlsx_templates", "data_transfer_configuration")
     inlines = (FspXlsxTemplatePerDeliveryMechanismAdminInline,)
 
     def fsp_xlsx_templates(self, obj: FinancialServiceProvider) -> str:

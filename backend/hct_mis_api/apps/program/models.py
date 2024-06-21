@@ -227,10 +227,10 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     @property
     def households_with_tp_in_program(self) -> QuerySet:
-        target_populations_in_program = TargetPopulation.objects.filter(program=self).exclude(
-            status=TargetPopulation.STATUS_OPEN
+        target_populations_in_program_ids = (
+            TargetPopulation.objects.filter(program=self).exclude(status=TargetPopulation.STATUS_OPEN).values("id")
         )
-        return Household.objects.filter(target_populations__in=target_populations_in_program).distinct()
+        return Household.objects.filter(target_populations__id__in=target_populations_in_program_ids).distinct()
 
     @property
     def admin_areas_log(self) -> str:

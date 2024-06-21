@@ -5,6 +5,7 @@ from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import DataCollectingType
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     ApprovalFactory,
     ApprovalProcessFactory,
@@ -12,7 +13,7 @@ from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     PaymentPlanFactory,
 )
-from hct_mis_api.apps.payment.models import Approval, GenericPayment
+from hct_mis_api.apps.payment.models import Approval
 from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
 )
@@ -30,12 +31,12 @@ class TestPaymentPlanPDFExportService(TestCase):
         self.pdf_export_service = PaymentPlanPDFExportService(self.payment_plan)
 
         financial_service_provider1 = FinancialServiceProviderFactory(
-            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH]
+            delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH]
         )
 
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
             financial_service_provider=financial_service_provider1,
             delivery_mechanism_order=1,
         )

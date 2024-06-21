@@ -14,6 +14,7 @@ from adminfilters.filters import ChoicesFieldComboFilter, MaxMinFilter, ValueFil
 from adminfilters.querystring import QueryStringFilter
 from smart_admin.mixins import LinkedObjectsMixin
 
+from hct_mis_api.apps.core.utils import AutoCompleteFilterTemp
 from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
 from hct_mis_api.apps.targeting.forms import TargetPopulationForm
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
@@ -113,7 +114,7 @@ class HouseholdSelectionAdmin(HOPEModelAdminBase, IsOriginalAdminMixin):
         DepotManager,
         QueryStringFilter,
         ("household__unicef_id", ValueFilter),
-        ("target_population", AutoCompleteFilter),
+        ("target_population", AutoCompleteFilterTemp),
         ("target_population__id", ValueFilter),
         ("vulnerability_score", MaxMinFilter),
     )

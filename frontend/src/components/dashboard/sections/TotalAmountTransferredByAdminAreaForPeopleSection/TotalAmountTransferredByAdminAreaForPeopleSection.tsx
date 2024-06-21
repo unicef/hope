@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCountryChartsLazyQuery } from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
@@ -25,21 +25,20 @@ export function TotalAmountTransferredSectionByAdminAreaForPeopleSection({
     program: programId,
     administrativeArea: filter.administrativeArea?.node?.id,
   };
-  const [loadCountry, { data: countryData, loading: countryLoading }] =
-    useCountryChartsLazyQuery({
-      variables: {
-        ...variables,
-        orderBy,
-        order,
-      },
-      fetchPolicy: 'cache-and-network',
-    });
+  const [loadData, { data, loading }] = useCountryChartsLazyQuery({
+    variables: {
+      ...variables,
+      orderBy,
+      order,
+    },
+    fetchPolicy: 'cache-and-network',
+  });
 
   useEffect(() => {
-    void loadCountry();
-  }, [loadCountry, orderBy, order]);
+    void loadData();
+  }, [loadData, orderBy, order]);
 
-  const handleSortAdminArea = (_, property): void => {
+  const handleSortAdminArea = (_: any, property: string): void => {
     if (property !== orderBy) {
       setOrderBy(property.toString());
       setOrder('desc');
@@ -48,8 +47,8 @@ export function TotalAmountTransferredSectionByAdminAreaForPeopleSection({
     }
   };
 
-  if (countryLoading) return <LoadingComponent />;
-  if (!countryData) return null;
+  if (loading) return <LoadingComponent />;
+  if (!data) return null;
 
   return (
     <DashboardPaper
@@ -58,7 +57,9 @@ export function TotalAmountTransferredSectionByAdminAreaForPeopleSection({
     >
       <CardTextLightLarge>{t('IN USD')}</CardTextLightLarge>
       <TotalAmountTransferredByAdminAreaTableForPeople
-        data={countryData?.tableTotalCashTransferredByAdministrativeArea?.data}
+        data={
+          data?.tableTotalCashTransferredByAdministrativeAreaForPeople?.data
+        }
         handleSort={handleSortAdminArea}
         order={order}
         orderBy={orderBy}

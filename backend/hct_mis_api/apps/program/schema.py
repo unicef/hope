@@ -37,10 +37,10 @@ from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.schema import ChoiceObject, DataCollectingTypeNode
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
-    chart_map_choices,
     chart_permission_decorator,
     to_choice_object,
 )
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.filters import (
     CashPlanFilter,
     PaymentVerificationPlanFilter,
@@ -201,15 +201,14 @@ class Query(graphene.ObjectType):
     )
 
     def resolve_all_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
-        if not info.context.user.is_authenticated:
-            return Program.objects.none()
+        user = info.context.user
         filters = {
             "business_area__slug": info.context.headers.get("Business-Area").lower(),
             "data_collecting_type__deprecated": False,
             "data_collecting_type__isnull": False,
         }
-        if not info.context.user.partner.is_unicef:
-            filters.update({"id__in": info.context.user.partner.programs.values_list("id", flat=True)})
+        if not user.partner.is_unicef:
+            filters.update({"id__in": user.partner.programs.values_list("id", flat=True)})
         return (
             Program.objects.filter(**filters)
             .exclude(data_collecting_type__code="unknown")
@@ -286,7 +285,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_chart_programmes_by_sector(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> Dict:
         filters = chart_filters_decoder(kwargs)
-        sector_choice_mapping = chart_map_choices(Program.SECTOR_CHOICE)
+        sector_choice_mapping = dict(Program.SECTOR_CHOICE)
         payment_items_qs: QuerySet = get_payment_items_for_dashboard(year, business_area_slug, filters, True)
 
         programs_ids = payment_items_qs.values_list("parent__program__id", flat=True)
@@ -330,12 +329,12 @@ class Query(graphene.ObjectType):
                 delivery_month=F("delivery_date__month"),
                 total_delivered_cash=Sum(
                     "delivered_quantity_usd",
-                    filter=Q(delivery_type__in=GenericPayment.DELIVERY_TYPES_IN_CASH),
+                    filter=Q(delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_CASH),
                     output_field=DecimalField(),
                 ),
                 total_delivered_voucher=Sum(
                     "delivered_quantity_usd",
-                    filter=Q(delivery_type__in=GenericPayment.DELIVERY_TYPES_IN_VOUCHER),
+                    filter=Q(delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_VOUCHER),
                     output_field=DecimalField(),
                 ),
             )
