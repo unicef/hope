@@ -84,18 +84,15 @@ class TestSmokeAccountabilityCommunication:
         pageAccountabilityCommunication.selectGlobalProgramFilter("Test Program").click()
         pageAccountabilityCommunication.getNavAccountability().click()
         pageAccountabilityCommunication.getRows()[0].click()
-        # pageAccountabilityCommunication.screenshot("123")
-        #
-        # from selenium_tests.tools.tag_name_finder import printing
-        # printing("Mapping", pageAccountabilityCommunication.driver)
-        # printing("Methods", pageAccountabilityCommunication.driver)
-        # printing("Assert", pageAccountabilityCommunication.driver)
         assert "MSG-24-0666" in pageAccountabilityCommunicationDetails.getPageHeaderTitle().text
         created_by = add_accountability_communication_message.created_by
         assert (
             f"{created_by.first_name} {created_by.last_name}"
             in pageAccountabilityCommunicationDetails.getLabelCreatedBy().text
         )
+
+        assert "You got credit of USD 100 Greetings, we have sent you USD 100 in your registered account on 2022-09-19 20:00:00 UTC" in pageAccountabilityCommunicationDetails.getCommunicationMessageDetails().text.replace("\n", " ")
+
         assert (
             add_accountability_communication_message.created_at.strftime("%-d %b %Y")
             in pageAccountabilityCommunicationDetails.getLabelDateCreated().text

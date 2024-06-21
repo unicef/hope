@@ -19,15 +19,7 @@ class AccountabilityCommunicationDetails(BaseComponents):
     householdRegistrationDate = 'th[data-cy="household-registration-date"]'
     tableRow = 'tr[data-cy="table-row"]'
     tablePagination = 'div[data-cy="table-pagination"]'
-
-    def getNavResourcesToolsAndMaterials(self) -> WebElement:
-        return self.wait_for(self.navResourcesToolsAndMaterials)
-
-    def getNavResourcesReleaseNote(self) -> WebElement:
-        return self.wait_for(self.navResourcesReleaseNote)
-
-    def getMainContent(self) -> WebElement:
-        return self.wait_for(self.mainContent)
+    communicationMessageDetails = 'div[data-cy="communication-message-details"]'
 
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
@@ -76,3 +68,6 @@ class AccountabilityCommunicationDetails(BaseComponents):
 
     def getTablePagination(self) -> WebElement:
         return self.wait_for(self.tablePagination)
+
+    def getCommunicationMessageDetails(self) -> WebElement:
+        return self.wait_for(self.communicationMessageDetails)
