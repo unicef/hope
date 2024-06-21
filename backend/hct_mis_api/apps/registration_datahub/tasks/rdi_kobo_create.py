@@ -168,13 +168,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         ImportedIndividualIdentity.objects.bulk_create(identities)
 
     @staticmethod
-    def _handle_collectors(collectors_dict: Dict, individuals_dict: Dict) -> None:
-        collectors_to_bulk_create = []
-        for hash_key, collectors_list in collectors_dict.items():
-            for collector in collectors_list:
-                collector.individual_id = individuals_dict.get(hash_key)
-                collectors_to_bulk_create.append(collector)
-        ImportedIndividualRoleInHousehold.objects.bulk_create(collectors_to_bulk_create)
+    def _handle_collectors(collectors_list: list) -> None:
+        ImportedIndividualRoleInHousehold.objects.bulk_create(collectors_list)
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
@@ -203,9 +198,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         self.reduced_submissions = rename_dict_keys(submissions, get_field_name)
         head_of_households_mapping = {}
         households_to_create = []
-        individuals_ids_hash_dict = {}
         bank_accounts_to_create = []
-        collectors_to_create = defaultdict(list)
+        collectors_to_create = []
         household_hash_list = []
         household_batch_size = 50
         for reduced_submission_chunk in chunks(self.reduced_submissions, household_batch_size):
@@ -231,7 +225,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     head_of_households_mapping,
                     household,
                     households_to_create,
-                    individuals_ids_hash_dict,
                     registration_data_import,
                     submission_meta_data,
                 )
@@ -239,7 +232,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             bank_accounts_to_create = []
             head_of_households_mapping = {}
             households_to_create = []
-        self._handle_collectors(collectors_to_create, individuals_ids_hash_dict)
+        self._handle_collectors(collectors_to_create)
         registration_data_import.import_done = RegistrationDataImportDatahub.DONE
         registration_data_import.save()
         rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
@@ -278,11 +271,11 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     def handle_household(
         self,
         bank_accounts_to_create: list[ImportedBankAccountInfo],
-        collectors_to_create: dict,
+        collectors_to_create: list,
         head_of_households_mapping: dict,
         household: dict,
         households_to_create: list[ImportedHousehold],
-        individuals_ids_hash_dict: dict,
+        # individuals_ids_hash_dict: dict,
         registration_data_import: RegistrationDataImportDatahub,
         submission_meta_data: dict,
     ) -> None:
@@ -349,7 +342,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
                     individual_obj.household = household_obj if only_collector_flag is False else None
 
-                    individuals_ids_hash_dict[individual_obj.get_hash_key] = individual_obj.id
                     individuals_to_create_list.append(individual_obj)
                     current_individuals.append(individual_obj)
                     documents_and_identities_to_create.append(current_individual_docs_and_identities)
@@ -361,7 +353,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                             household_id=household_obj.pk,
                             role=role,
                         )
-                        collectors_to_create[individual_obj.get_hash_key].append(role_obj)
+                        collectors_to_create.append(role_obj)
                     if individual_obj.household is None:
                         individual_obj.relationship = NON_BENEFICIARY
 

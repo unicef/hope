@@ -931,7 +931,8 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
 
     def test_handle_household_dict(self) -> None:
         bank_accounts_to_create, households_to_create = [], []
-        collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = dict(), dict(), dict()
+        head_of_households_mapping, individuals_ids_hash_dict = dict(), dict()
+        collectors_to_create = []
         household = {
             "_id": 1111,
             "uuid": "qweqweqweqwe",
@@ -969,7 +970,6 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
             head_of_households_mapping,
             household,
             households_to_create,
-            individuals_ids_hash_dict,
             self.registration_data_import,
             submission_meta_data,
         )
