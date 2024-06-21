@@ -3,7 +3,6 @@ from selenium.webdriver.remote.webelement import WebElement
 
 
 class AccountabilityCommunicationDetails(BaseComponents):
-
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
     labelCreatedBy = 'div[data-cy="label-Created By"]'
@@ -57,38 +56,20 @@ class AccountabilityCommunicationDetails(BaseComponents):
     def getStatus(self) -> WebElement:
         return self.wait_for(self.status)
 
-    def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
-
     def getHouseholdHeadName(self) -> WebElement:
         return self.wait_for(self.householdHeadName)
-
-    def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
 
     def getHouseholdSize(self) -> WebElement:
         return self.wait_for(self.householdSize)
 
-    def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
-
     def getHouseholdLocation(self) -> WebElement:
         return self.wait_for(self.householdLocation)
-
-    def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
 
     def getHouseholdResidenceStatus(self) -> WebElement:
         return self.wait_for(self.householdResidenceStatus)
 
-    def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
-
     def getHouseholdRegistrationDate(self) -> WebElement:
         return self.wait_for(self.householdRegistrationDate)
-
-    def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
 
     def getTableRow(self) -> WebElement:
         return self.wait_for(self.tableRow)
