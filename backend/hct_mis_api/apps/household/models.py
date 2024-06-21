@@ -72,7 +72,6 @@ SEX_CHOICE = (
     (FEMALE, _("Female")),
 )
 
-
 SINGLE = "SINGLE"
 MARRIED = "MARRIED"
 WIDOWED = "WIDOWED"
@@ -562,12 +561,7 @@ class Household(
     kobo_submission_time = models.DateTimeField(max_length=150, blank=True, null=True)
     enumerator_rec_id = models.PositiveIntegerField(blank=True, null=True)
     mis_unicef_id = models.CharField(max_length=255, null=True)
-    flex_registrations_record = models.ForeignKey(
-        "registration_datahub.Record",
-        related_name="households",
-        on_delete=models.SET_NULL,
-        null=True,
-    )
+    flex_registrations_record_id = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Household"
@@ -658,6 +652,11 @@ class Household(
     @cached_property
     def alternate_collector(self) -> Optional["Individual"]:
         return self.representatives.filter(households_and_roles__role=ROLE_ALTERNATE).first()
+
+    @property
+    def flex_registrations_record(self) -> Optional["Record"]:
+        from hct_mis_api.apps.registration_datahub.models import Record
+        return Record.objects.filter(id=self.flex_registrations_record_id).first()
 
     def __str__(self) -> str:
         return self.unicef_id or ""
