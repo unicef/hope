@@ -139,7 +139,7 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     identities = DjangoFilterConnectionField(
         ImportedIndividualIdentityNode,
     )
-    
+
     @staticmethod
     def resolve_preferred_language(parent: PendingIndividual, info: Any) -> Optional[str]:
         return parent.preferred_language or None
