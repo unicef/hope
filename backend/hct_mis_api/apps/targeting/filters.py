@@ -155,7 +155,7 @@ class TargetPopulationFilter(GlobalProgramFilterMixin, FilterSet):
         fields=(
             Lower("name"),
             "created_at",
-            "created_by",
+            ("created_by__first_name", "created_by"),
             "updated_at",
             "status",
             "total_family_size",

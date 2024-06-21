@@ -15,6 +15,7 @@ from page_object.filters import Filters
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from page_object.grievance.feedback import Feedback
+from page_object.grievance.grievance_dashboard import GrievanceDashboard
 from page_object.grievance.grievance_tickets import GrievanceTickets
 from page_object.grievance.new_feedback import NewFeedback
 from page_object.grievance.new_ticket import NewTicket
@@ -297,6 +298,11 @@ def pageGrievanceDetailsPage(request: FixtureRequest, browser: Chrome) -> Grieva
 @pytest.fixture
 def pageGrievanceNewTicket(request: FixtureRequest, browser: Chrome) -> NewTicket:
     yield NewTicket(browser)
+
+
+@pytest.fixture
+def pageGrievanceDashboard(request: FixtureRequest, browser: Chrome) -> GrievanceDashboard:
+    yield GrievanceDashboard(browser)
 
 
 @pytest.fixture
