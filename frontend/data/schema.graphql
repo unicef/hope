@@ -1848,6 +1848,7 @@ type HouseholdNode implements Node {
   status: String
   deliveredQuantities: [DeliveredQuantityNode]
   activeIndividualsCount: Int
+  importId: String
 }
 
 type HouseholdNodeConnection {
