@@ -135,7 +135,7 @@ export const FilterIndividuals: React.FC<FilterIndividualsProps> = ({
             onChange={(e) =>
               handleFilterChange('hasGrievanceTicket', e.target.value)
             }
-            label={t('Have a Grievance Ticket')}
+            label={t('Has a Grievance Ticket')}
             value={filter.hasGrievanceTicket}
             data-cy="ind-filters-grievance-ticket"
           >
@@ -164,7 +164,6 @@ export const FilterIndividuals: React.FC<FilterIndividualsProps> = ({
         <Grid item xs={3}>
           <AdminAreaAutocomplete
             name="administrativeArea2"
-            multiple
             level={2}
             value={filter.administrativeArea}
             filter={filter}

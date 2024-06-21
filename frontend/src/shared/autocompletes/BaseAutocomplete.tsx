@@ -1,6 +1,5 @@
 import * as React from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import Checkbox from '@mui/material/Checkbox';
 import { useEffect, useRef } from 'react';
 import { StyledAutocomplete, StyledTextField } from './StyledAutocomplete';
 
@@ -26,16 +25,15 @@ export function BaseAutocomplete({
   onInputTextChange,
   debouncedInputText,
   startAdornment = null,
-  multiple = false,
 }: {
-  value: string | string[];
+  value: string;
   disabled?: boolean;
   label: string;
   dataCy?: string;
   loadData;
   loading: boolean;
   allEdges;
-  handleChange: (event, newValue: string | string[]) => void;
+  handleChange: (event, newValue) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handleClose: (_: any, reason: string) => void;
   handleOptionSelected: (option: OptionType, value: OptionType) => boolean;
@@ -47,7 +45,6 @@ export function BaseAutocomplete({
   onInputTextChange: (value) => void;
   debouncedInputText: string;
   startAdornment?: React.ReactNode;
-  multiple?: boolean;
 }): React.ReactElement {
   const prevValueRef = useRef(value);
 
@@ -74,10 +71,10 @@ export function BaseAutocomplete({
 
   return (
     <StyledAutocomplete
-      key={`${label}-${dataCy}`}
-      multiple={multiple}
+      key={prevValueRef.current}
+      freeSolo={false}
       filterOptions={(x) => x}
-      value={multiple ? value : [value]}
+      value={value}
       data-cy={dataCy}
       open={open}
       options={allEdges}
@@ -91,12 +88,6 @@ export function BaseAutocomplete({
       getOptionLabel={handleOptionLabel}
       disabled={disabled}
       loading={loading}
-      renderOption={(props, option, { selected }) => (
-        <li {...props}>
-          {multiple && <Checkbox checked={selected} />}
-          {handleOptionLabel(option)}
-        </li>
-      )}
       renderInput={(params) => (
         <StyledTextField
           {...params}
