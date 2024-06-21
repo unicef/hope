@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
+from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate, PeriodicDataUpdateUpload
 
 
 class PeriodicDataUpdateTemplateListSerializer(serializers.ModelSerializer):
@@ -24,4 +24,16 @@ class PeriodicDataUpdateTemplateDetailSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "rounds_data",
+        )
+
+
+class PeriodicDataUpdateUploadListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PeriodicDataUpdateUpload
+        fields = (
+            "id",
+            "template",
+            "created_at",
+            "created_by",
+            "status",
         )
