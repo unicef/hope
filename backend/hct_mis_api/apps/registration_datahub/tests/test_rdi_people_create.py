@@ -1,3 +1,4 @@
+import json
 from datetime import date
 from io import BytesIO
 from pathlib import Path
@@ -9,6 +10,7 @@ from django.forms import model_to_dict
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import DataCollectingType
+from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -17,13 +19,12 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
+    ImportedDeliveryMechanismData,
     ImportedHousehold,
     ImportedIndividual,
 )
-from hct_mis_api.conftest import disabled_locally_test
 
 
-@disabled_locally_test
 class TestRdiXlsxPeople(BaseElasticSearchTestCase):
     databases = {
         "default",
@@ -96,22 +97,41 @@ class TestRdiXlsxPeople(BaseElasticSearchTestCase):
         }
         household = matching_individuals.first().household
         household_obj_data = model_to_dict(household, ("residence_status", "country", "zip_code", "flex_fields"))
-
-        roles = household.individuals_and_roles.all()
-        self.assertEqual(roles.count(), 1)
-        role = roles.first()
-        self.assertEqual(role.role, "ALTERNATE")
-        self.assertEqual(role.individual.full_name, "WorkerCollector ForDerekIndex_4")
         self.assertEqual(household_obj_data, household_data)
 
-        role_primary = (
-            ImportedIndividual.objects.filter(given_name="Jan", family_name="Index3")
-            .first()
-            .household.individuals_and_roles.all()
-            .first()
-        )
-        self.assertEqual(role_primary.role, "PRIMARY")
-        self.assertEqual(role_primary.individual.full_name, "Collector ForJanIndex_3")
+        roles = household.individuals_and_roles.all()
+        self.assertEqual(roles.count(), 2)
+        primary_role = roles.filter(role=ROLE_PRIMARY).first()
+        self.assertEqual(primary_role.role, "PRIMARY")
+        self.assertEqual(primary_role.individual.full_name, "Derek Index4")
+        alternate_role = roles.filter(role=ROLE_ALTERNATE).first()
+        self.assertEqual(alternate_role.role, "ALTERNATE")
+        self.assertEqual(alternate_role.individual.full_name, "Collector ForJanIndex_3")
 
         worker_individuals = ImportedIndividual.objects.filter(relationship="NON_BENEFICIARY")
         self.assertEqual(worker_individuals.count(), 2)
+
+        self.assertEqual(ImportedDeliveryMechanismData.objects.count(), 3)
+        dmd1 = ImportedDeliveryMechanismData.objects.get(individual__full_name="Collector ForJanIndex_3")
+        dmd2 = ImportedDeliveryMechanismData.objects.get(individual__full_name="WorkerCollector ForDerekIndex_4")
+        dmd3 = ImportedDeliveryMechanismData.objects.get(individual__full_name="Jan    Index3")
+        self.assertEqual(
+            json.loads(dmd1.data),
+            {"card_number_atm_card": "164260858", "card_expiry_date_atm_card": "1995-06-03T00:00:00"},
+        )
+        self.assertEqual(
+            json.loads(dmd2.data),
+            {
+                "card_number_atm_card": "1975549730",
+                "card_expiry_date_atm_card": "2022-02-17T00:00:00",
+                "name_of_cardholder_atm_card": "Name1",
+            },
+        )
+        self.assertEqual(
+            json.loads(dmd3.data),
+            {
+                "card_number_atm_card": "870567340",
+                "card_expiry_date_atm_card": "2016-06-27T00:00:00",
+                "name_of_cardholder_atm_card": "Name2",
+            },
+        )

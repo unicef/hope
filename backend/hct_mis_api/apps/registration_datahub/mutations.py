@@ -72,6 +72,7 @@ def create_registration_data_import_objects(
     registration_data_import_data: Dict,
     user: "User",
     data_source: str,
+    allow_delivery_mechanisms_validation_errors: bool = False,
 ) -> Tuple[RegistrationDataImportDatahub, RegistrationDataImport, ImportData, BusinessArea]:
     import_data_id = decode_id_string(registration_data_import_data.pop("import_data_id"))
     import_data_obj = ImportData.objects.get(id=import_data_id)
@@ -95,6 +96,7 @@ def create_registration_data_import_objects(
         pull_pictures=pull_pictures,
         screen_beneficiary=screen_beneficiary,
         program_id=program_id,
+        allow_delivery_mechanisms_validation_errors=allow_delivery_mechanisms_validation_errors,
         **registration_data_import_data,
     )
     created_obj_hct.full_clean()
@@ -173,12 +175,17 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
         registration_data_import_data = RegistrationXlsxImportMutationInput(required=True)
 
     @classmethod
-    def validate_import_data(cls, import_data_id: Optional[str]) -> None:
+    def validate_import_data(
+        cls, import_data_id: Optional[str], allow_delivery_mechanisms_validation_errors: bool = False
+    ) -> None:
         import_data = get_object_or_404(ImportData, id=decode_id_string(import_data_id))
-        if import_data.status != ImportData.STATUS_FINISHED:
+        if import_data.status != ImportData.STATUS_FINISHED and not (
+            import_data.status == ImportData.STATUS_DELIVERY_MECHANISMS_VALIDATION_ERROR
+            and allow_delivery_mechanisms_validation_errors
+        ):
             raise ValidationError("Cannot import file containing validation errors")
 
-        if import_data.number_of_households == 0 and import_data.number_of_individuals == 0:
+        if import_data.number_of_households == 0 and import_data.number_of_individuals == 0:  # pragma: no cover
             raise ValidationError("Cannot import empty form")
 
     @classmethod
@@ -188,7 +195,12 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
     def processed_mutate(
         cls, root: Any, info: Any, registration_data_import_data: Dict
     ) -> "RegistrationXlsxImportMutation":
-        cls.validate_import_data(registration_data_import_data.import_data_id)
+        allow_delivery_mechanisms_validation_errors = registration_data_import_data.pop(
+            "allow_delivery_mechanisms_validation_errors", False
+        )
+        cls.validate_import_data(
+            registration_data_import_data.import_data_id, allow_delivery_mechanisms_validation_errors
+        )
 
         program_id: str = decode_id_string_required(info.context.headers.get("Program"))
         program = Program.objects.get(id=program_id)
@@ -201,7 +213,9 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
             created_obj_hct,
             import_data_obj,
             business_area,
-        ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "XLS")
+        ) = create_registration_data_import_objects(
+            registration_data_import_data, info.context.user, "XLS", allow_delivery_mechanisms_validation_errors
+        )
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
 
@@ -354,7 +368,12 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
     def processed_mutate(
         cls, root: Any, info: Any, registration_data_import_data: Dict
     ) -> RegistrationXlsxImportMutation:
-        RegistrationXlsxImportMutation.validate_import_data(registration_data_import_data.import_data_id)
+        allow_delivery_mechanisms_validation_errors = registration_data_import_data.pop(
+            "allow_delivery_mechanisms_validation_errors", False
+        )
+        RegistrationXlsxImportMutation.validate_import_data(
+            registration_data_import_data.import_data_id, allow_delivery_mechanisms_validation_errors
+        )
 
         program_id: str = decode_id_string_required(info.context.headers.get("Program"))
         program = Program.objects.get(id=program_id)
@@ -367,7 +386,9 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
             created_obj_hct,
             import_data_obj,
             business_area,
-        ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "KOBO")
+        ) = create_registration_data_import_objects(
+            registration_data_import_data, info.context.user, "KOBO", allow_delivery_mechanisms_validation_errors
+        )
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
 

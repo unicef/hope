@@ -236,7 +236,7 @@ snapshots['TestDashboardQueries::test_sections_2_sectionChildReached 1'] = {
 snapshots['TestDashboardQueries::test_sections_3_sectionPeopleReached 1'] = {
     'data': {
         'sectionPeopleReached': {
-            'total': None
+            'total': 0.0
         }
     }
 }

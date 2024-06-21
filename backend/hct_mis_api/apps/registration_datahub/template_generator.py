@@ -86,13 +86,14 @@ class TemplateFileGenerator:
         }
 
         individuals_fields = {
-            **fields.associated_with_individual().to_dict_by("xlsx_field"),
+            **fields.associated_with_individual_with_delivery_mechanism_data().to_dict_by("xlsx_field"),
             **flex_fields[individuals_sheet_title.lower()],
         }
 
         people_fields = {
             **FieldFactory.from_scopes([Scope.XLSX_PEOPLE])
             .apply_business_area(business_area_slug=business_area_slug)
+            .associated_with_individual_with_delivery_mechanism_data()
             .to_dict_by("xlsx_field"),
             **flex_fields[individuals_sheet_title.lower()],
         }

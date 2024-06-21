@@ -7,6 +7,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
@@ -16,7 +17,6 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
-    Payment,
     PaymentPlan,
 )
 
@@ -52,14 +52,14 @@ class TestSplitPaymentPlan(APITestCase):
 
         fsp_1 = FinancialServiceProviderFactory(
             name="Test FSP 1",
-            delivery_mechanisms=[Payment.DELIVERY_TYPE_CASH],
+            delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH],
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             vision_vendor_number=333222111,
             payment_gateway_id="test_payment_gateway_id",
         )
         fsp_2 = FinancialServiceProviderFactory(
             name="Test FSP 2",
-            delivery_mechanisms=[Payment.DELIVERY_TYPE_CASH],
+            delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH],
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
             vision_vendor_number=111222333,
         )
@@ -67,14 +67,14 @@ class TestSplitPaymentPlan(APITestCase):
         delivery_mech_for_pp = DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=pp,
             financial_service_provider=fsp_1,
-            delivery_mechanism=Payment.DELIVERY_TYPE_CASH,
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
             delivery_mechanism_order=1,
             sent_to_payment_gateway=True,
         )
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=pp,
             financial_service_provider=fsp_2,
-            delivery_mechanism=Payment.DELIVERY_TYPE_CASH,
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
             delivery_mechanism_order=2,
         )
         # check delivery mechanisms count

@@ -378,7 +378,7 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
         filterset_class=IndividualFilter,
     )
     residence_status = graphene.String()
-    registration_id = graphene.String()
+    program_registration_id = graphene.String()
 
     @staticmethod
     def resolve_sanction_list_possible_match(parent: Household, info: Any) -> bool:
@@ -441,10 +441,10 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
         return parent.active_individuals.count()
 
     @staticmethod
-    def resolve_registration_id(parent: Household, info: Any) -> Optional[str]:
-        if not parent.registration_id:
+    def resolve_program_registration_id(parent: Household, info: Any) -> Optional[str]:
+        if not parent.program_registration_id:
             return None
-        return parent.registration_id.split("#")[0]
+        return parent.program_registration_id.split("#")[0]
 
     @classmethod
     def check_node_permission(cls, info: Any, object_instance: Household) -> None:
@@ -795,8 +795,8 @@ class Query(graphene.ObjectType):
         payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         ).filter(household__collect_type=Household.CollectType.SINGLE.value)
-        households_ids = payment_items_qs.values_list("household", flat=True).distinct()
-        return Household.objects.filter(pk__in=households_ids).aggregate(total=Sum(Coalesce("size", 0)))
+        people_count = payment_items_qs.values("household").distinct().count()
+        return {"total": people_count}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
