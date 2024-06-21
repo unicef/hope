@@ -34,8 +34,8 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.fixtures import PendingDeliveryMechanismDataFactory
-from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
+from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory
+from hct_mis_api.apps.payment.models import DeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import KoboImportedSubmission
@@ -546,7 +546,7 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
         ind3.save()
 
         # valid data
-        dmd = PendingDeliveryMechanismDataFactory(
+        dmd = DeliveryMechanismDataFactory(
             individual=ind,
             delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
             data={
@@ -556,7 +556,7 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
             },
         )
         # invalid data, ticket should be created
-        dmd2 = PendingDeliveryMechanismDataFactory(
+        dmd2 = DeliveryMechanismDataFactory(
             individual=ind2,
             delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
             data={
@@ -566,7 +566,7 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
             },
         )
         # not unique data, ticket should be created
-        dmd3 = PendingDeliveryMechanismDataFactory(
+        dmd3 = DeliveryMechanismDataFactory(
             individual=ind3,
             delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
             data={
@@ -578,7 +578,7 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
 
         self.assertEqual(0, self.rdi.grievanceticket_set.count())
         RdiMergeTask()._create_grievance_tickets_for_delivery_mechanisms_errors(
-            PendingDeliveryMechanismData.objects.all(), self.rdi
+            DeliveryMechanismData.objects.all(), self.rdi
         )
         self.assertEqual(2, self.rdi.grievanceticket_set.count())
         self.assertEqual(2, TicketIndividualDataUpdateDetails.objects.count())

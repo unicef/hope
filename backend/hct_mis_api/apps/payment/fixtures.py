@@ -35,6 +35,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     Household,
     Individual,
+    MERGED,
 )
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.models import (
@@ -685,6 +686,7 @@ class DeliveryMechanismDataFactory(DjangoModelFactory):
         DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
         getter=lambda c: c[0],
     )
+    rdi_merge_status = MERGED
 
     class Meta:
         model = DeliveryMechanismData
