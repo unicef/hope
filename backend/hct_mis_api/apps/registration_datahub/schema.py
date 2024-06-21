@@ -79,65 +79,35 @@ class DeduplicationResultNode(graphene.ObjectType):
         return self.get("location", "Not provided")
 
 
-class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (
-        hopePermissionClass(
-            Permissions.RDI_VIEW_DETAILS,
-        ),
-    )
-    flex_fields = Arg()
-    country_origin = graphene.String(description="Country origin name")
-    country = graphene.String(description="Country name")
-    has_duplicates = graphene.Boolean(
-        description="Mark household if any of individuals contains one of these statuses "
-        "‘Needs adjudication’, ‘Duplicate in batch’ and ‘Duplicate’"
-    )
-    import_id = graphene.String()
+class ImportedDocumentNode(DjangoObjectType):
+    country = graphene.String(description="Document country")
+    photo = graphene.String(description="Photo url")
 
     def resolve_country(parent, info: Any) -> str:
-        return parent.country.name
+        return getattr(parent.country, "name", parent.country)  # type: ignore # can't convert String to str
 
-    def resolve_country_origin(parent, info: Any) -> str:
-        return parent.country_origin.name
-
-    def resolve_has_duplicates(parent, info: Any) -> bool:
-        return parent.individuals.filter(
-            Q(deduplication_batch_status=DUPLICATE_IN_BATCH)
-            | Q(deduplication_golden_record_status__in=(DUPLICATE, NEEDS_ADJUDICATION))
-        ).exists()
-
-    def resolve_flex_fields(parent, info: Any) -> Dict:
-        return resolve_flex_fields_choices_to_string(parent)
-
-    def resolve_individuals(parent, info: Any) -> List[Set["UUID"]]:
-        imported_individuals_ids = list(parent.individuals.values_list("id", flat=True))
-        collectors_ids = list(
-            parent.individuals_and_roles.filter(role__in=[ROLE_PRIMARY, ROLE_ALTERNATE]).values_list(
-                "individual_id", flat=True
-            )
-        )
-        ids = list(set(imported_individuals_ids + collectors_ids))
-
-        return PendingIndividual.objects.filter(id__in=ids).prefetch_related(
-            Prefetch(
-                "households_and_roles",
-                queryset=PendingIndividualRoleInHousehold.objects.filter(household=parent.id),
-            )
-        )
-
-    def resolve_import_id(parent, info: Any) -> str:
-        row = ""
-        resp = str(parent.mis_unicef_id) if parent.mis_unicef_id else str(parent.id)
-
-        if parent.detail_id:
-            row = f" (Detail id {parent.detail_id})"
-        if parent.enumerator_rec_id:
-            row = f" (Enumerator ID {parent.enumerator_rec_id})"
-
-        return resp + row
+    def resolve_photo(parent, info: Any) -> Union[String, None]:
+        if parent.photo:
+            return parent.photo.url
+        return None
 
     class Meta:
-        model = PendingHousehold
+        model = PendingDocument
+        filter_fields = []
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class ImportedIndividualIdentityNode(DjangoObjectType):
+    partner = graphene.String(description="Partner")
+    country = graphene.String(description="Country")
+
+    @staticmethod
+    def resolve_country(parent: PendingIndividualIdentity, info: Any) -> "Country":
+        return getattr(parent.country, "name", parent.country)
+
+    class Meta:
+        model = PendingIndividualIdentity
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
@@ -163,6 +133,13 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     preferred_language = graphene.String()
     email = graphene.String(source="email")
 
+    documents = DjangoFilterConnectionField(
+        ImportedDocumentNode,
+    )
+    identities = DjangoFilterConnectionField(
+        ImportedIndividualIdentityNode,
+    )
+    
     @staticmethod
     def resolve_preferred_language(parent: PendingIndividual, info: Any) -> Optional[str]:
         return parent.preferred_language or None
@@ -225,6 +202,73 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         )
 
 
+class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (
+        hopePermissionClass(
+            Permissions.RDI_VIEW_DETAILS,
+        ),
+    )
+    individuals = DjangoFilterConnectionField(
+        ImportedIndividualNode,
+    )
+    flex_fields = Arg()
+    country_origin = graphene.String(description="Country origin name")
+    country = graphene.String(description="Country name")
+    has_duplicates = graphene.Boolean(
+        description="Mark household if any of individuals contains one of these statuses "
+        "‘Needs adjudication’, ‘Duplicate in batch’ and ‘Duplicate’"
+    )
+    import_id = graphene.String()
+
+    def resolve_country(parent, info: Any) -> str:
+        return parent.country.name
+
+    def resolve_country_origin(parent, info: Any) -> str:
+        return parent.country_origin.name
+
+    def resolve_has_duplicates(parent, info: Any) -> bool:
+        return parent.individuals.filter(
+            Q(deduplication_batch_status=DUPLICATE_IN_BATCH)
+            | Q(deduplication_golden_record_status__in=(DUPLICATE, NEEDS_ADJUDICATION))
+        ).exists()
+
+    def resolve_flex_fields(parent, info: Any) -> Dict:
+        return resolve_flex_fields_choices_to_string(parent)
+
+    def resolve_individuals(parent, info: Any) -> List[Set["UUID"]]:
+        imported_individuals_ids = list(parent.individuals.values_list("id", flat=True))
+        collectors_ids = list(
+            parent.individuals_and_roles.filter(role__in=[ROLE_PRIMARY, ROLE_ALTERNATE]).values_list(
+                "individual_id", flat=True
+            )
+        )
+        ids = list(set(imported_individuals_ids + collectors_ids))
+
+        return PendingIndividual.objects.filter(id__in=ids).prefetch_related(
+            Prefetch(
+                "households_and_roles",
+                queryset=PendingIndividualRoleInHousehold.objects.filter(household=parent.id),
+            )
+        )
+
+    def resolve_import_id(parent, info: Any) -> str:
+        row = ""
+        resp = str(parent.mis_unicef_id) if parent.mis_unicef_id else str(parent.id)
+
+        if parent.detail_id:
+            row = f" (Detail id {parent.detail_id})"
+        if parent.enumerator_rec_id:
+            row = f" (Enumerator ID {parent.enumerator_rec_id})"
+
+        return resp + row
+
+    class Meta:
+        model = PendingHousehold
+        filter_fields = []
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
 class RegistrationDataImportDatahubNode(DjangoObjectType):
     class Meta:
         model = RegistrationDataImportDatahub
@@ -279,40 +323,6 @@ class KoboImportDataNode(DjangoObjectType):
 class ImportedDocumentTypeNode(DjangoObjectType):
     class Meta:
         model = DocumentType
-
-
-class ImportedDocumentNode(DjangoObjectType):
-    country = graphene.String(description="Document country")
-    photo = graphene.String(description="Photo url")
-
-    def resolve_country(parent, info: Any) -> str:
-        return getattr(parent.country, "name", parent.country)  # type: ignore # can't convert String to str
-
-    def resolve_photo(parent, info: Any) -> Union[String, None]:
-        if parent.photo:
-            return parent.photo.url
-        return None
-
-    class Meta:
-        model = PendingDocument
-        filter_fields = []
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-
-class ImportedIndividualIdentityNode(DjangoObjectType):
-    partner = graphene.String(description="Partner")
-    country = graphene.String(description="Country")
-
-    @staticmethod
-    def resolve_country(parent: PendingIndividualIdentity, info: Any) -> "Country":
-        return getattr(parent.country, "name", parent.country)
-
-    class Meta:
-        model = PendingIndividualIdentity
-        filter_fields = []
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
 
 
 class Query(graphene.ObjectType):
