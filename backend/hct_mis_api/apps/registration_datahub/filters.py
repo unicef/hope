@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 class ImportedIndividualFilter(FilterSet):
     rdi_id = CharFilter(method="filter_rdi_id")
     duplicates_only = BooleanFilter(method="filter_duplicates_only")
-    business_area = CharFilter(field_name="registration_data_import__business_area_slug")
+    business_area = CharFilter(field_name="registration_data_import__business_area__slug")
 
     class Meta:
         model = PendingIndividual
@@ -39,7 +39,7 @@ class ImportedIndividualFilter(FilterSet):
     )
 
     def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
-        return queryset.filter(registration_data_import__hct_id=decode_id_string(value))
+        return queryset.filter(registration_data_import__pk=decode_id_string(value))
 
     def filter_duplicates_only(self, queryset: "QuerySet", model_field: Any, value: bool) -> "QuerySet":
         if value is True:
@@ -51,7 +51,7 @@ class ImportedIndividualFilter(FilterSet):
 
 class ImportedHouseholdFilter(FilterSet):
     rdi_id = CharFilter(method="filter_rdi_id")
-    business_area = CharFilter(field_name="registration_data_import__business_area_slug")
+    business_area = CharFilter(field_name="registration_data_import__business_area__slug")
 
     class Meta:
         model = PendingHousehold
@@ -69,4 +69,4 @@ class ImportedHouseholdFilter(FilterSet):
     )
 
     def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
-        return queryset.filter(registration_data_import__hct_id=decode_id_string(value))
+        return queryset.filter(registration_data_import__pk=decode_id_string(value))
