@@ -43,6 +43,7 @@ from hct_mis_api.apps.utils.models import (
     SoftDeletableRepresentationMergeStatusModelWithDate,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
+    SoftDeletableRepresentationPendingManager,
 )
 from hct_mis_api.apps.utils.phone import recalculate_phone_numbers_validity
 
@@ -656,6 +657,7 @@ class Household(
     @property
     def flex_registrations_record(self) -> Optional["Record"]:
         from hct_mis_api.apps.registration_datahub.models import Record
+
         return Record.objects.filter(id=self.flex_registrations_record_id).first()
 
     def __str__(self) -> str:
@@ -1326,3 +1328,48 @@ class BankAccountInfo(SoftDeletableRepresentationMergeStatusModelWithDate, TimeS
         if self.debit_card_number:
             self.debit_card_number = str(self.debit_card_number).replace(" ", "")
         super().save(*args, **kwargs)
+
+
+class PendingHousehold(Household):
+    objects = SoftDeletableRepresentationPendingManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Imported Household"
+        verbose_name_plural = "Imported Households"
+
+
+class PendingIndividual(Individual):
+    objects = SoftDeletableRepresentationPendingManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Imported Individual"
+        verbose_name_plural = "Imported Individuals"
+
+
+class PendingIndividualIdentity(IndividualIdentity):
+    objects = SoftDeletableRepresentationPendingManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Imported Individual Identity"
+        verbose_name_plural = "Imported Individual Identities"
+
+
+class PendingDocument(Document):
+    objects = SoftDeletableRepresentationPendingManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Imported Document"
+        verbose_name_plural = "Imported Documents"
+
+
+class PendingIndividualRoleInHousehold(IndividualRoleInHousehold):
+    objects = SoftDeletableRepresentationPendingManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Imported Individual Role In Household"
+        verbose_name_plural = "Imported Individual Roles In Household"
