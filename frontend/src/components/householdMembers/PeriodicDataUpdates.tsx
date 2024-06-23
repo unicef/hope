@@ -42,8 +42,16 @@ export const PeriodicDataUpdates = (): React.ReactElement => {
         </Button>
       }
     >
-      {value === 0 && <Box>Templates Content</Box>}
-      {value === 1 && <Box>Updates Content</Box>}
+      {value === 0 && (
+        <Box>
+          <PeriodicDataUpdatesTemplatesList />
+        </Box>
+      )}
+      {value === 1 && (
+        <Box>
+          <PeriodicDataUpdatesUpdatesList />
+        </Box>
+      )}
     </BaseSection>
   );
 };
