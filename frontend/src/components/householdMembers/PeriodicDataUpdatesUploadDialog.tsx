@@ -10,8 +10,6 @@ import { ImportErrors } from '@containers/tables/payments/VerificationRecordsTab
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
   ImportPeriodicDataUpdatesMutation,
-  PaymentPlanDocument,
-  PaymentPlanQuery,
   useImportPeriodicDataUpdatesMutation,
 } from '@generated/graphql';
 import { DropzoneField } from '@core/DropzoneField';
