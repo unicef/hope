@@ -46,11 +46,6 @@ from hct_mis_api.apps.registration_data.models import (
 )
 from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
 from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedBankAccountInfo,
-    ImportedHousehold,
-    ImportedIndividual,
-)
 from hct_mis_api.apps.registration_datahub.signals import rdi_merged
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
@@ -163,7 +158,7 @@ class RdiMergeTask:
 
     def merge_admin_areas(
         self,
-        imported_household: ImportedHousehold,
+        imported_household: Household,
         household: Household,
     ) -> None:
         admins = {
@@ -186,7 +181,7 @@ class RdiMergeTask:
             household.set_admin_areas(save=False)
 
     def _prepare_households(
-        self, imported_households: List[ImportedHousehold], obj_hct: RegistrationDataImport
+        self, imported_households: List[Household], obj_hct: RegistrationDataImport
     ) -> Dict[int, Household]:
         households_dict = {}
         countries = {}
@@ -239,7 +234,7 @@ class RdiMergeTask:
         return households_dict
 
     def _prepare_individual_documents_and_identities(
-        self, imported_individual: ImportedIndividual, individual: Individual
+        self, imported_individual: Individual, individual: Individual
     ) -> Tuple[List, List]:
         documents_to_create = []
         for imported_document in imported_individual.documents.all():
@@ -272,7 +267,7 @@ class RdiMergeTask:
 
     def _prepare_individuals(
         self,
-        imported_individuals: List[ImportedIndividual],
+        imported_individuals: List[Individual],
         households_dict: Dict[int, Household],
         obj_hct: RegistrationDataImport,
     ) -> None:
@@ -356,7 +351,7 @@ class RdiMergeTask:
         return roles_to_create
 
     def _prepare_bank_account_info(
-        self, imported_bank_account_infos: List[ImportedBankAccountInfo], individuals_dict: Dict
+        self, imported_bank_account_infos: List[BankAccountInfo], individuals_dict: Dict
     ) -> List:
         roles_to_create = []
         for imported_bank_account_info in imported_bank_account_infos:
