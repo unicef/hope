@@ -5,6 +5,7 @@ from uuid import UUID
 
 from django.core.cache import cache
 from django.db import transaction
+from django.db.models import QuerySet
 from django.forms import model_to_dict
 
 from hct_mis_api.apps.account.models import Partner
@@ -33,8 +34,12 @@ from hct_mis_api.apps.household.models import (
     IndividualCollection,
     IndividualIdentity,
     IndividualRoleInHousehold, PendingHousehold, PendingIndividual, PendingIndividualRoleInHousehold,
+    PendingBankAccountInfo,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanismData
+from hct_mis_api.apps.payment.models import (
+    DeliveryMechanismData,
+    PendingDeliveryMechanismData,
+)
 from hct_mis_api.apps.registration_data.models import (
     KoboImportedSubmission,
     RegistrationDataImport,
@@ -42,12 +47,6 @@ from hct_mis_api.apps.registration_data.models import (
 )
 from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
 from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedBankAccountInfo,
-    ImportedDeliveryMechanismData,
-    ImportedHousehold,
-    ImportedIndividual,
-)
 from hct_mis_api.apps.registration_datahub.signals import rdi_merged
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
@@ -160,7 +159,7 @@ class RdiMergeTask:
 
     def merge_admin_areas(
         self,
-        imported_household: ImportedHousehold,
+        imported_household: Household,
         household: Household,
     ) -> None:
         admins = {
@@ -183,7 +182,7 @@ class RdiMergeTask:
             household.set_admin_areas(save=False)
 
     def _prepare_households(
-        self, imported_households: List[ImportedHousehold], obj_hct: RegistrationDataImport
+        self, imported_households: List[Household], obj_hct: RegistrationDataImport
     ) -> Dict[int, Household]:
         households_dict = {}
         countries = {}
@@ -236,7 +235,7 @@ class RdiMergeTask:
         return households_dict
 
     def _prepare_individual_documents_and_identities(
-        self, imported_individual: ImportedIndividual, individual: Individual
+        self, imported_individual: Individual, individual: Individual
     ) -> Tuple[List, List]:
         documents_to_create = []
         for imported_document in imported_individual.documents.all():
@@ -269,10 +268,10 @@ class RdiMergeTask:
 
     def _prepare_individuals(
         self,
-        imported_individuals: List[ImportedIndividual],
+        imported_individuals: List[Individual],
         households_dict: Dict[int, Household],
         obj_hct: RegistrationDataImport,
-    ) -> Tuple[Dict, List, List]:
+    ) -> None:
         individuals_dict = {}
         documents_to_create = []
         identities_to_create = []
@@ -338,8 +337,6 @@ class RdiMergeTask:
             documents_to_create.extend(documents)
             identities_to_create.extend(identities)
 
-        return individuals_dict, documents_to_create, identities_to_create
-
     def _prepare_roles(
         self, imported_roles: List[IndividualRoleInHousehold], households_dict: Dict, individuals_dict: Dict
     ) -> List:
@@ -354,22 +351,8 @@ class RdiMergeTask:
 
         return roles_to_create
 
-    def _prepare_delivery_mechanisms_data(
-        self, imported_delivery_mechanisms_data: List[ImportedDeliveryMechanismData], individuals_dict: Dict
-    ) -> List:
-        delivery_mechanisms_data_to_create = []
-        for imported_delivery_mechanism_data in imported_delivery_mechanisms_data:
-            delivery_mechanism_data = DeliveryMechanismData(
-                individual=individuals_dict.get(imported_delivery_mechanism_data.individual.id),
-                delivery_mechanism=imported_delivery_mechanism_data.delivery_mechanism,
-                data=imported_delivery_mechanism_data.data,
-            )
-            delivery_mechanisms_data_to_create.append(delivery_mechanism_data)
-
-        return delivery_mechanisms_data_to_create
-
     def _prepare_bank_account_info(
-        self, imported_bank_account_infos: List[ImportedBankAccountInfo], individuals_dict: Dict
+        self, imported_bank_account_infos: List[BankAccountInfo], individuals_dict: Dict
     ) -> List:
         roles_to_create = []
         for imported_bank_account_info in imported_bank_account_infos:
@@ -408,7 +391,7 @@ class RdiMergeTask:
         return grievance_ticket, individual_data_update_ticket
 
     def _create_grievance_tickets_for_delivery_mechanisms_errors(
-        self, delivery_mechanisms_data: List[DeliveryMechanismData], obj_hct: RegistrationDataImport
+        self, delivery_mechanisms_data: QuerySet[PendingDeliveryMechanismData], obj_hct: RegistrationDataImport
     ) -> None:
         grievance_tickets_to_create = []
         individual_data_update_tickets_to_create = []
@@ -466,7 +449,7 @@ class RdiMergeTask:
             )
             roles = PendingIndividualRoleInHousehold.objects.filter(household__in=households, individual__in=individuals)
             bank_account_infos = PendingBankAccountInfo.objects.filter(individual__in=individuals)
-            delivery_mechanism_data = DeliveryMechanismData.objects.filter(
+            delivery_mechanism_data = PendingDeliveryMechanismData.objects.filter(
                 individual__in=individuals,
             )
             household_ids = []
@@ -478,18 +461,11 @@ class RdiMergeTask:
                     household_ids = [str(household.id) for household in households]
 
                     households_dict = self._prepare_households(households, obj_hct)
-                    (
-                        individuals_dict,
-                        documents_to_create,
-                        identities_to_create,
-                    ) = self._prepare_individuals(individuals, households_dict, obj_hct)
+                    self._prepare_individuals(individuals, households_dict, obj_hct)
 
                     transaction.on_commit(lambda: recalculate_population_fields_task(household_ids, obj_hct.program_id))
                     logger.info(
                         f"RDI:{registration_data_import_id} Recalculated population fields for {len(household_ids)} households"
-                    )
-                    delivery_mechanisms_data_to_create = self._prepare_delivery_mechanisms_data(
-                        delivery_mechanism_data, individuals_dict
                     )
                     kobo_submissions = []
                     for household in households:
@@ -578,15 +554,15 @@ class RdiMergeTask:
                         CheckAgainstSanctionListPreMergeTask.execute(registration_data_import=obj_hct)
                         logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")
 
-                    self._create_grievance_tickets_for_delivery_mechanisms_errors(
-                        delivery_mechanisms_data_to_create, obj_hct
-                    )
-
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
 
                     households.update(rdi_merge_status="MERGED")
                     individuals.update(rdi_merge_status="MERGED")
+                    delivery_mechanism_data.update(rdi_merge_status="MERGED")
+                    self._create_grievance_tickets_for_delivery_mechanisms_errors(
+                        delivery_mechanism_data, obj_hct
+                    )
                     roles.update(rdi_merge_status="MERGED")
                     bank_account_infos.update(rdi_merge_status="MERGED")
                     Document.objects.filter(individual_id__in=individual_ids).update(rdi_merge_status="MERGED")

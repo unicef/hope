@@ -11,6 +11,7 @@ from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
+from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -19,10 +20,10 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
     RegistrationDataImportDatahubFactory,
 )
 from hct_mis_api.apps.registration_datahub.models import (
-    ImportedDeliveryMechanismData,
     ImportedHousehold,
     ImportedIndividual,
 )
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class TestRdiXlsxPeople(BaseElasticSearchTestCase):
@@ -111,10 +112,13 @@ class TestRdiXlsxPeople(BaseElasticSearchTestCase):
         worker_individuals = ImportedIndividual.objects.filter(relationship="NON_BENEFICIARY")
         self.assertEqual(worker_individuals.count(), 2)
 
-        self.assertEqual(ImportedDeliveryMechanismData.objects.count(), 3)
-        dmd1 = ImportedDeliveryMechanismData.objects.get(individual__full_name="Collector ForJanIndex_3")
-        dmd2 = ImportedDeliveryMechanismData.objects.get(individual__full_name="WorkerCollector ForDerekIndex_4")
-        dmd3 = ImportedDeliveryMechanismData.objects.get(individual__full_name="Jan    Index3")
+        self.assertEqual(PendingDeliveryMechanismData.objects.count(), 3)
+        dmd1 = PendingDeliveryMechanismData.objects.get(individual__full_name="Collector ForJanIndex_3")
+        dmd2 = PendingDeliveryMechanismData.objects.get(individual__full_name="WorkerCollector ForDerekIndex_4")
+        dmd3 = PendingDeliveryMechanismData.objects.get(individual__full_name="Jan    Index3")
+        self.assertEqual(dmd1.rdi_merge_status, MergeStatusModel.PENDING)
+        self.assertEqual(dmd2.rdi_merge_status, MergeStatusModel.PENDING)
+        self.assertEqual(dmd3.rdi_merge_status, MergeStatusModel.PENDING)
         self.assertEqual(
             json.loads(dmd1.data),
             {"card_number_atm_card": "164260858", "card_expiry_date_atm_card": "1995-06-03T00:00:00"},

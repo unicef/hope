@@ -19,6 +19,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class TestChangeIndividualRole(BaseElasticSearchTestCase, TestCase):
@@ -42,6 +43,7 @@ class TestChangeIndividualRole(BaseElasticSearchTestCase, TestCase):
             role=ROLE_PRIMARY,
             individual=cls.individual_hoh,
             household=household,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
         cls.individual = IndividualFactory(household=household, business_area=business_area, program=program)
@@ -59,6 +61,7 @@ class TestChangeIndividualRole(BaseElasticSearchTestCase, TestCase):
             role=ROLE_NO_ROLE,
             individual=self.individual,
             household=self.individual.household,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         TicketIndividualDataUpdateDetailsFactory(
             ticket=self.ticket,
@@ -89,6 +92,7 @@ class TestChangeIndividualRole(BaseElasticSearchTestCase, TestCase):
             role=ROLE_ALTERNATE,
             individual=self.individual,
             household=self.individual.household,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         TicketIndividualDataUpdateDetailsFactory(
             ticket=self.ticket,
@@ -109,6 +113,7 @@ class TestChangeIndividualRole(BaseElasticSearchTestCase, TestCase):
             role=ROLE_NO_ROLE,
             individual=self.individual,
             household=self.individual.household,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         TicketIndividualDataUpdateDetailsFactory(
             ticket=self.ticket,
@@ -150,6 +155,7 @@ class TestChangeIndividualRole(BaseElasticSearchTestCase, TestCase):
             role=ROLE_ALTERNATE,
             individual=self.individual,
             household=self.individual.household,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         TicketIndividualDataUpdateDetailsFactory(
             ticket=self.ticket,

@@ -12,12 +12,12 @@ from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
-    BankAccountInfo,
-    Document,
     DocumentType,
-    Household,
-    Individual,
-    IndividualRoleInHousehold,
+    PendingBankAccountInfo,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.aurora.fixtures import (
@@ -159,17 +159,17 @@ class TestSriLankaRegistrationService(TestCase):
             Record.objects.filter(id__in=records_ids, ignored=False, status=Record.STATUS_IMPORTED).count(), 2
         )
 
-        self.assertEqual(Household.objects.count(), 1)
-        self.assertEqual(IndividualRoleInHousehold.objects.count(), 1)
-        self.assertEqual(BankAccountInfo.objects.count(), 1)
-        self.assertEqual(Document.objects.count(), 1)
+        self.assertEqual(PendingHousehold.objects.count(), 1)
+        self.assertEqual(PendingIndividualRoleInHousehold.objects.count(), 1)
+        self.assertEqual(PendingBankAccountInfo.objects.count(), 1)
+        self.assertEqual(PendingDocument.objects.count(), 1)
 
-        bank_acc_info = BankAccountInfo.objects.first()
+        bank_acc_info = PendingBankAccountInfo.objects.first()
         self.assertEqual(bank_acc_info.account_holder_name, "Test Holder Name 123")
         self.assertEqual(bank_acc_info.bank_branch_name, "Branch Name 123")
         self.assertEqual(bank_acc_info.rdi_merge_status, "PENDING")
 
-        household = Household.objects.first()
+        household = PendingHousehold.objects.first()
         self.assertEqual(household.admin1.p_code, "LK1")
         self.assertEqual(household.admin2.p_code, "LK11")
         self.assertEqual(household.admin3.p_code, "LK1163")
@@ -181,11 +181,11 @@ class TestSriLankaRegistrationService(TestCase):
         self.assertEqual(registration_data_import.program, self.program)
 
         self.assertEqual(
-            Individual.objects.filter(relationship="HEAD").first().flex_fields, {"has_nic_number_i_c": "n"}
+            PendingIndividual.objects.filter(relationship="HEAD").first().flex_fields, {"has_nic_number_i_c": "n"}
         )
 
         self.assertEqual(
-            Individual.objects.filter(full_name="Dome").first().flex_fields,
+            PendingIndividual.objects.filter(full_name="Dome").first().flex_fields,
             {
                 "confirm_nic_number": "123456789V",
                 "branch_or_branch_code": "7472_002",
@@ -194,8 +194,8 @@ class TestSriLankaRegistrationService(TestCase):
                 "does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi": "n",
             },
         )
-        self.assertEqual(Individual.objects.filter(full_name="Dome").first().email, "email999@mail.com")
-        self.assertEqual(Individual.objects.filter(full_name="Dome").first().age_at_registration, 43)
+        self.assertEqual(PendingIndividual.objects.filter(full_name="Dome").first().email, "email999@mail.com")
+        self.assertEqual(PendingIndividual.objects.filter(full_name="Dome").first().age_at_registration, 43)
 
     def test_import_record_twice(self) -> None:
         service = SriLankaRegistrationService(self.registration)
@@ -205,9 +205,9 @@ class TestSriLankaRegistrationService(TestCase):
         self.records[0].refresh_from_db()
 
         self.assertEqual(Record.objects.first().status, Record.STATUS_IMPORTED)
-        self.assertEqual(Household.objects.count(), 1)
+        self.assertEqual(PendingHousehold.objects.count(), 1)
 
         # Process again, but no new household created
         service.process_records(rdi.id, [self.records[0].id])
         self.records[0].refresh_from_db()
-        self.assertEqual(Household.objects.count(), 1)
+        self.assertEqual(PendingHousehold.objects.count(), 1)
