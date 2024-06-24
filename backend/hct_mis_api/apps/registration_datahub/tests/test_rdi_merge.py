@@ -37,11 +37,11 @@ from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoice
 from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory
 from hct_mis_api.apps.payment.models import DeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import KoboImportedSubmission
-from hct_mis_api.apps.registration_datahub.fixtures import (
+from hct_mis_api.apps.registration_data.fixtures import (
     RegistrationDataImportDatahubFactory,
+    RegistrationDataImportFactory,
 )
+from hct_mis_api.apps.registration_data.models import KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 
 
