@@ -129,6 +129,7 @@ def handle_role(role: str, household: Household, individual: Individual) -> None
             household=household,
             role=role,
             defaults={"individual": individual},
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
 
