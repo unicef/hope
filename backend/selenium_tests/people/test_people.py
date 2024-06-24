@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from django.db import transaction
+
 import pytest
 from dateutil.relativedelta import relativedelta
 from page_object.people.people import People
@@ -26,19 +28,20 @@ def social_worker_program() -> Program:
 @pytest.fixture
 def add_people(social_worker_program: Program) -> None:
     ba = social_worker_program.business_area
-    household, individuals = create_household(
-        household_args={"business_area": ba, "program": social_worker_program, "residence_status": HOST},
-        individual_args={
-            "full_name": "Stacey Freeman",
-            "given_name": "Stacey",
-            "middle_name": "",
-            "family_name": "Freeman",
-            "business_area": ba,
-            "observed_disability": [SEEING],
-        },
-    )
-    individual = individuals[0]
-    create_individual_document(individual)
+    with transaction.atomic():
+        household, individuals = create_household(
+            household_args={"business_area": ba, "program": social_worker_program, "residence_status": HOST},
+            individual_args={
+                "full_name": "Stacey Freeman",
+                "given_name": "Stacey",
+                "middle_name": "",
+                "family_name": "Freeman",
+                "business_area": ba,
+                "observed_disability": [SEEING],
+            },
+        )
+        individual = individuals[0]
+        create_individual_document(individual)
 
 
 def get_program_with_dct_type_and_name(
