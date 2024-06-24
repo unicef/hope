@@ -3,7 +3,6 @@ from selenium.webdriver.remote.webelement import WebElement
 
 
 class ProgrammeUsers(BaseComponents):
-
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     buttonTargetPopulationCreateNew = 'a[data-cy="button-target-population-create-new"]'
