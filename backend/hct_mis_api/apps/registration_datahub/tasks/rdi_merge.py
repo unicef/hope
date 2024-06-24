@@ -457,11 +457,6 @@ class RdiMergeTask:
                 with transaction.atomic(using="default"):
                     old_obj_hct = copy_model_object(obj_hct)
 
-                    individual_ids = [str(individual.id) for individual in individuals]
-                    household_ids = [str(household.id) for household in households]
-
-                    households_dict = self._prepare_households(households, obj_hct)
-                    self._prepare_individuals(individuals, households_dict, obj_hct)
 
                     transaction.on_commit(lambda: recalculate_population_fields_task(household_ids, obj_hct.program_id))
                     logger.info(
