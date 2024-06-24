@@ -10,7 +10,6 @@ from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from flags.models import FlagState
-
 from page_object.accountability.surveys import AccountabilitySurveys
 from page_object.accountability.surveys_details import AccountabilitySurveysDetails
 from page_object.admin_panel.admin_panel import AdminPanel
