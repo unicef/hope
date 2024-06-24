@@ -11,11 +11,11 @@ from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_TAX_ID,
-    BankAccountInfo,
-    Document,
     DocumentType,
-    Household,
-    Individual,
+    PendingBankAccountInfo,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.aurora.fixtures import (
@@ -207,20 +207,20 @@ class TestUkrainianRegistrationService(BaseTestUkrainianRegistrationService):
 
         self.records[2].refresh_from_db()
         self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 4)
-        self.assertEqual(Household.objects.count(), 4)
-        self.assertEqual(BankAccountInfo.objects.count(), 3)
-        bank_acc_info = BankAccountInfo.objects.get(bank_account_number="333123321321")
+        self.assertEqual(PendingHousehold.objects.count(), 4)
+        self.assertEqual(PendingBankAccountInfo.objects.count(), 3)
+        bank_acc_info = PendingBankAccountInfo.objects.get(bank_account_number="333123321321")
         self.assertEqual(bank_acc_info.account_holder_name, "Test Holder Name 333")
         self.assertEqual(bank_acc_info.bank_branch_name, "Branch Name 333")
         self.assertEqual(
-            Document.objects.filter(
+            PendingDocument.objects.filter(
                 document_number="TESTID", type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
             ).count(),
             1,
         )
 
         # Checking only first is enough, because they all in one RDI
-        registration_data_import = Household.objects.all()[0].registration_data_import
+        registration_data_import = PendingHousehold.objects.all()[0].registration_data_import
         self.assertEqual(registration_data_import.program, self.program)
 
     def test_import_data_to_datahub_retry(self) -> None:
@@ -230,13 +230,13 @@ class TestUkrainianRegistrationService(BaseTestUkrainianRegistrationService):
         service.process_records(rdi.id, records_ids_all)
         self.records[2].refresh_from_db()
         self.assertEqual(Record.objects.filter(id__in=records_ids_all, ignored=False).count(), 4)
-        self.assertEqual(Household.objects.count(), 4)
+        self.assertEqual(PendingHousehold.objects.count(), 4)
         service = UkraineBaseRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in self.records[:2]]
         service.process_records(rdi.id, records_ids)
         self.assertEqual(Record.objects.filter(id__in=records_ids_all, ignored=False).count(), 4)
-        self.assertEqual(Household.objects.count(), 4)
+        self.assertEqual(PendingHousehold.objects.count(), 4)
 
     def test_import_document_validation(self) -> None:
         service = UkraineBaseRegistrationService(self.registration)
@@ -245,7 +245,7 @@ class TestUkrainianRegistrationService(BaseTestUkrainianRegistrationService):
         service.process_records(rdi.id, [x.id for x in self.bad_records])
         self.bad_records[0].refresh_from_db()
         self.assertEqual(self.bad_records[0].status, Record.STATUS_ERROR)
-        self.assertEqual(Household.objects.count(), 0)
+        self.assertEqual(PendingHousehold.objects.count(), 0)
 
 
 class TestRegistration2024(BaseTestUkrainianRegistrationService):
@@ -276,9 +276,9 @@ class TestRegistration2024(BaseTestUkrainianRegistrationService):
         service.process_records(rdi.id, [self.record.id])
 
         self.assertEqual(Record.objects.filter(id__in=[self.record.id], ignored=False).count(), 1)
-        self.assertEqual(Household.objects.count(), 1)
-        self.assertEqual(Individual.objects.count(), 1)
+        self.assertEqual(PendingHousehold.objects.count(), 1)
+        self.assertEqual(PendingIndividual.objects.count(), 1)
         self.assertEqual(
-            Individual.objects.get(family_name="Romaniak").flex_fields,
+            PendingIndividual.objects.get(family_name="Romaniak").flex_fields,
             {"low_income_hh_h_f": True, "single_headed_hh_h_f": False},
         )

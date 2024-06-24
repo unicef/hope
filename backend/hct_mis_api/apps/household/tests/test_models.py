@@ -17,6 +17,7 @@ from hct_mis_api.apps.household.models import (
     Individual,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.utils.models import MergeStatusModel
 from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
     copy_individual_fast,
 )
@@ -128,6 +129,7 @@ class TestDocument(TestCase):
             type=document_type,
             status=Document.STATUS_VALID,
             program=self.program,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
         with self.assertRaises(IntegrityError):
@@ -138,6 +140,7 @@ class TestDocument(TestCase):
                 type=document_type,
                 status=Document.STATUS_VALID,
                 program=self.program,
+                rdi_merge_status=MergeStatusModel.MERGED,
             )
 
     def test_create_representation_with_the_same_number(self) -> None:
@@ -157,6 +160,7 @@ class TestDocument(TestCase):
             status=Document.STATUS_VALID,
             program=self.program,
             is_original=True,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
         # allow to create representations with the same document number within different programs
@@ -186,6 +190,7 @@ class TestDocument(TestCase):
                 program=created_individual_representation.program,
                 is_original=False,
                 copied_from=original_document,
+                rdi_merge_status=MergeStatusModel.MERGED,
             )
 
         # don't allow to create representations with the same document number and programs
@@ -205,6 +210,7 @@ class TestDocument(TestCase):
                             program=self.individual.program,
                             is_original=False,
                             copied_from=original_document,
+                            rdi_merge_status=MergeStatusModel.MERGED,
                         ),
                     ]
                 )
@@ -220,6 +226,7 @@ class TestDocument(TestCase):
                     program=self.individual.program,
                     is_original=False,
                     copied_from=original_document,
+                    rdi_merge_status=MergeStatusModel.MERGED,
                 ),
 
     def test_create_duplicated_documents_with_different_numbers_and_not_unique_for_individual(self) -> None:
@@ -238,6 +245,7 @@ class TestDocument(TestCase):
             type=document_type,
             status=Document.STATUS_VALID,
             program=self.program,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
         try:
@@ -248,6 +256,7 @@ class TestDocument(TestCase):
                 type=document_type,
                 status=Document.STATUS_VALID,
                 program=self.program,
+                rdi_merge_status=MergeStatusModel.MERGED,
             )
         except IntegrityError:
             self.fail("Shouldn't raise any errors!")
@@ -268,6 +277,7 @@ class TestDocument(TestCase):
             type=document_type,
             status=Document.STATUS_VALID,
             program=self.program,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
         with self.assertRaises(IntegrityError):
@@ -278,6 +288,7 @@ class TestDocument(TestCase):
                 type=document_type,
                 status=Document.STATUS_VALID,
                 program=self.program,
+                rdi_merge_status=MergeStatusModel.MERGED,
             )
 
     def test_raise_error_on_creating_duplicated_documents_with_different_numbers_and_unique_for_individual(
@@ -298,6 +309,7 @@ class TestDocument(TestCase):
             type=document_type,
             status=Document.STATUS_VALID,
             program=self.program,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
         with self.assertRaises(IntegrityError):
@@ -308,6 +320,7 @@ class TestDocument(TestCase):
                 type=document_type,
                 status=Document.STATUS_VALID,
                 program=self.program,
+                rdi_merge_status=MergeStatusModel.MERGED,
             )
 
     def test_create_representations_duplicated_documents_with_different_numbers_and_unique_for_individual(
@@ -329,6 +342,7 @@ class TestDocument(TestCase):
             status=Document.STATUS_VALID,
             program=self.program,
             is_original=True,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
         # allow to create representations with the same document number within different programs
@@ -359,6 +373,7 @@ class TestDocument(TestCase):
             program=program_3,
             is_original=False,
             copied_from=original_document,
+            rdi_merge_status=MergeStatusModel.MERGED,
         ),
 
         # don't allow to create more than 1 representation within the same program and individual
@@ -374,6 +389,7 @@ class TestDocument(TestCase):
                     program=program_3,
                     is_original=False,
                     copied_from=original_document,
+                    rdi_merge_status=MergeStatusModel.MERGED,
                 ),
 
     def test_create_duplicated_documents_with_different_numbers_and_types_and_unique_for_individual(self) -> None:
@@ -399,6 +415,7 @@ class TestDocument(TestCase):
             type=document_type,
             status=Document.STATUS_VALID,
             program=self.program,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
         try:
@@ -409,6 +426,7 @@ class TestDocument(TestCase):
                 type=document_type2,
                 status=Document.STATUS_VALID,
                 program=self.program,
+                rdi_merge_status=MergeStatusModel.MERGED,
             )
         except IntegrityError:
             self.fail("Shouldn't raise any errors!")
