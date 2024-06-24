@@ -2,7 +2,7 @@ from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
 
-class SurveysPage(BaseComponents):
+class AccountabilitySurveys(BaseComponents):
     # Locators
     titlePage = 'h5[data-cy="page-header-title"]'
     rows = 'tr[role="checkbox"]'

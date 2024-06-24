@@ -16,6 +16,9 @@ from hct_mis_api.apps.targeting.fixtures import (
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
+from page_object.accountability.surveys import AccountabilitySurveys
+from page_object.accountability.surveys_details import AccountabilitySurveysDetails
+
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
@@ -34,18 +37,21 @@ class TestSmokeAccountabilitySurveys:
     def test_smoke_accountability_surveys(
         self,
         test_program: Program,
-        add_accountability_communication_message: Message,
-        pageAccountabilityCommunication: AccountabilityCommunication,
+        add_accountability_surveys_message: Message,
+        pageAccountabilitySurveys: AccountabilitySurveys,
     ) -> None:
-        pageAccountabilityCommunication.selectGlobalProgramFilter("Test Program").click()
-        pageAccountabilityCommunication.getNavAccountability().click()
+        pageAccountabilitySurveys.selectGlobalProgramFilter("Test Program").click()
+        pageAccountabilitySurveys.getNavAccountability().click()
+        pageAccountabilitySurveys.getNavSurveys().click()
 
     def test_smoke_accountability_surveys_details(
         self,
         test_program: Program,
-        add_accountability_communication_message: Message,
-        pageAccountabilityCommunication: AccountabilityCommunication,
-        pageAccountabilityCommunicationDetails: AccountabilityCommunicationDetails,
+        add_accountability_surveys_message: Message,
+        pageAccountabilitySurveys: AccountabilitySurveys,
+        pageAccountabilitySurveysDetails: AccountabilitySurveysDetails,
     ) -> None:
-        pageAccountabilityCommunication.selectGlobalProgramFilter("Test Program").click()
-        pageAccountabilityCommunication.getNavAccountability().click()
+        pageAccountabilitySurveys.selectGlobalProgramFilter("Test Program").click()
+        pageAccountabilitySurveys.getNavAccountability().click()
+        pageAccountabilitySurveys.getNavSurveys().click()
+        pageAccountabilitySurveys.getRows()[0].click()
