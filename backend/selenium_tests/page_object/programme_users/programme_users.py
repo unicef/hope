@@ -18,6 +18,8 @@ class ProgrammeUsers(BaseComponents):
     statusContainer = 'div[data-cy="status-container"]'
     tablePagination = 'div[data-cy="table-pagination"]'
     arrowDown = 'button[data-cy="arrow-down"]'
+    countryRole = 'div[data-cy="country-role"]'
+    mappedCountryRole = 'div[data-cy="mapped-country-role"]'
 
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
@@ -61,3 +63,9 @@ class ProgrammeUsers(BaseComponents):
 
     def getArrowDown(self) -> WebElement:
         return self.wait_for(self.arrowDown)
+
+    def getCountryRole(self) -> WebElement:
+        return self.wait_for(self.countryRole)
+
+    def getMappedCountryRole(self) -> WebElement:
+        return self.wait_for(self.mappedCountryRole)
