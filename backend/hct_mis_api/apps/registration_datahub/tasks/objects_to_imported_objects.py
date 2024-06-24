@@ -181,7 +181,6 @@ class CreateImportedObjectsFromObjectsTask:
                 registration_data_import=rdi,
                 program_id=import_to_program_id,
                 mis_unicef_id=household.unicef_id,
-                rdi_merge_status="MERGED",
                 business_area=rdi.business_area,
             )
             self.unmerge_admin_areas(household, imported_household)
@@ -203,7 +202,6 @@ class CreateImportedObjectsFromObjectsTask:
                 photo=document.photo,
                 expiry_date=document.expiry_date,
                 issuance_date=document.issuance_date,
-                rdi_merge_status="MERGED",
             )
             imported_documents_to_create.append(imported_document)
         imported_identities_to_create = []
@@ -214,7 +212,6 @@ class CreateImportedObjectsFromObjectsTask:
                 number=identity.number,
                 individual=imported_individual,
                 country=Country.objects.get(iso_code2=identity.country.iso_code2),
-                rdi_merge_status="MERGED",
             )
             imported_identities_to_create.append(imported_identity)
 
@@ -249,7 +246,6 @@ class CreateImportedObjectsFromObjectsTask:
                 program_id=import_to_program_id,
                 mis_unicef_id=individual.unicef_id,
                 payment_delivery_phone_no=individual.payment_delivery_phone_no or "",
-                rdi_merge_status="MERGED",
                 business_area=rdi.business_area,
             )
 
@@ -282,7 +278,6 @@ class CreateImportedObjectsFromObjectsTask:
                 household=households_dict.get(role.household.id),
                 individual=individuals_dict.get(role.individual.id),
                 role=role.role,
-                rdi_merge_status="MERGED",
             )
             imported_roles_to_create.append(imported_role)
 
@@ -300,7 +295,6 @@ class CreateImportedObjectsFromObjectsTask:
                 debit_card_number=bank_account_info.debit_card_number.replace(" ", ""),
                 bank_branch_name=bank_account_info.bank_branch_name,
                 account_holder_name=bank_account_info.account_holder_name,
-                rdi_merge_status="MERGED",
             )
             imported_bank_account_info_to_create.append(imported_role)
 

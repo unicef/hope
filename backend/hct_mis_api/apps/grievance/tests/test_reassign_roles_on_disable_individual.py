@@ -14,12 +14,12 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import (
     HEAD,
-    MERGED,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class TestReassignRolesOnDisableIndividual(APITestCase):
@@ -49,7 +49,7 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
             household=cls.household,
             individual=cls.primary_collector_individual,
             role=ROLE_PRIMARY,
-            rdi_merge_status=MERGED,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
         cls.alternate_collector_individual = IndividualFactory(household=None, program=cls.program_one)
@@ -60,7 +60,7 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
             household=cls.household,
             individual=cls.alternate_collector_individual,
             role=ROLE_ALTERNATE,
-            rdi_merge_status=MERGED,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
         cls.no_role_individual = IndividualFactory(household=cls.household, program=cls.program_one)
@@ -169,7 +169,7 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
             household=household,
             individual=self.no_role_individual,
             role=ROLE_PRIMARY,
-            rdi_merge_status=MERGED,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
         role_reassign_data = {

@@ -30,7 +30,6 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,
     IDENTIFICATION_TYPE_TAX_ID,
-    PENDING,
     BankAccountInfo,
     Document,
     DocumentType,
@@ -54,6 +53,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
 )
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 def create_document_image() -> File:
@@ -445,9 +445,9 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         dmd1 = PendingDeliveryMechanismData.objects.get(individual__detail_id=3)
         dmd2 = PendingDeliveryMechanismData.objects.get(individual__detail_id=4)
         dmd3 = PendingDeliveryMechanismData.objects.get(individual__detail_id=5)
-        self.assertEqual(dmd1.rdi_merge_status, PENDING)
-        self.assertEqual(dmd2.rdi_merge_status, PENDING)
-        self.assertEqual(dmd3.rdi_merge_status, PENDING)
+        self.assertEqual(dmd1.rdi_merge_status, MergeStatusModel.PENDING)
+        self.assertEqual(dmd2.rdi_merge_status, MergeStatusModel.PENDING)
+        self.assertEqual(dmd3.rdi_merge_status, MergeStatusModel.PENDING)
         self.assertEqual(
             json.loads(dmd1.data),
             {"card_number_atm_card": "164260858", "card_expiry_date_atm_card": "1995-06-03T00:00:00"},

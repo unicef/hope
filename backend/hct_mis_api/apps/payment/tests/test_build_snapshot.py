@@ -20,6 +20,7 @@ from hct_mis_api.apps.payment.services import payment_household_snapshot_service
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class TestBuildSnapshot(TestCase):
@@ -51,6 +52,7 @@ class TestBuildSnapshot(TestCase):
                 household=cls.hh1,
                 individual=cls.hoh1,
                 role=ROLE_PRIMARY,
+                rdi_merge_status=MergeStatusModel.MERGED,
             )
             DeliveryMechanismDataFactory(
                 individual=cls.hoh1,

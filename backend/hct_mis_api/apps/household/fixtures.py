@@ -363,11 +363,17 @@ def create_household_for_fixtures(
             2, household=None, program=household.program, relationship="NON_BENEFICIARY"
         )
         primary_collector_irh = IndividualRoleInHousehold(
-            individual=primary_collector, household=household, role=ROLE_PRIMARY
+            individual=primary_collector,
+            household=household,
+            role=ROLE_PRIMARY,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         primary_collector_irh.save()
         alternate_collector_irh = IndividualRoleInHousehold(
-            individual=alternate_collector, household=household, role=ROLE_ALTERNATE
+            individual=alternate_collector,
+            household=household,
+            role=ROLE_ALTERNATE,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         alternate_collector_irh.save()
 

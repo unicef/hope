@@ -30,12 +30,10 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import (
     MALE,
-    PENDING,
     REFUGEE,
     ROLE_PRIMARY,
     Household,
     Individual,
-    MERGED,
 )
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.models import (
@@ -72,6 +70,7 @@ from hct_mis_api.apps.targeting.models import (
     TargetPopulation,
 )
 from hct_mis_api.apps.targeting.services.targeting_stats_refresher import full_rebuild
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 def update_kwargs_with_usd_currency(kwargs: Any) -> Any:
@@ -686,14 +685,14 @@ class DeliveryMechanismDataFactory(DjangoModelFactory):
         DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
         getter=lambda c: c[0],
     )
-    rdi_merge_status = MERGED
+    rdi_merge_status = MergeStatusModel.MERGED
 
     class Meta:
         model = DeliveryMechanismData
 
 
 class PendingDeliveryMechanismDataFactory(DeliveryMechanismDataFactory):
-    rdi_merge_status = PENDING
+    rdi_merge_status = MergeStatusModel.PENDING
 
     class Meta:
         model = DeliveryMechanismData

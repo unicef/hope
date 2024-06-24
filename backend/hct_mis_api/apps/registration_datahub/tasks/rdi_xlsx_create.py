@@ -31,7 +31,6 @@ from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_UNKNOWN,
     HEAD,
     NON_BENEFICIARY,
-    PENDING,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     BankAccountInfo,
@@ -54,6 +53,7 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
 )
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 logger = logging.getLogger(__name__)
 
@@ -403,7 +403,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                         individual=individual,
                         delivery_mechanism=delivery_type,
                         data=json.dumps(values, cls=DjangoJSONEncoder),
-                        rdi_merge_status=PENDING,
+                        rdi_merge_status=MergeStatusModel.PENDING,
                     )
                 )
         PendingDeliveryMechanismData.objects.bulk_create(imported_delivery_mechanism_data)
