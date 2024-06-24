@@ -6,6 +6,11 @@ from page_object.people.people import People
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.household.fixtures import (
+    create_household,
+    create_individual_document,
+)
+from hct_mis_api.apps.household.models import HOST, SEEING
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from selenium_tests.page_object.people.people_details import PeopleDetails
@@ -19,9 +24,21 @@ def social_worker_program() -> Program:
 
 
 @pytest.fixture
-def add_people() -> None:
-    # ToDo: Add people fixture
-    pass
+def add_people(social_worker_program: Program) -> None:
+    ba = social_worker_program.business_area
+    household, individuals = create_household(
+        household_args={"business_area": ba, "program": social_worker_program, "residence_status": HOST},
+        individual_args={
+            "full_name": "Stacey Freeman",
+            "given_name": "Stacey",
+            "middle_name": "",
+            "family_name": "Freeman",
+            "business_area": ba,
+            "observed_disability": [SEEING],
+        },
+    )
+    individual = individuals[0]
+    create_individual_document(individual)
 
 
 def get_program_with_dct_type_and_name(
