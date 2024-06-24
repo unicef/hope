@@ -22,7 +22,7 @@ pytestmark = pytest.mark.django_db(transaction=True)
 
 @pytest.fixture
 def social_worker_program() -> Program:
-    return get_program_with_dct_type_and_name("Worker Program", "WORK", DataCollectingType.Type.SOCIAL)
+    return get_program_with_dct_type_and_name("Worker Program", "WORK", DataCollectingType.Type.SOCIAL, Program.ACTIVE)
 
 
 @pytest.fixture
