@@ -34,7 +34,6 @@ from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
-    MERGED,
     ROLE_PRIMARY,
     SINGLE,
     BankAccountInfo,
@@ -47,6 +46,7 @@ from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoice
 from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 @flaky
@@ -199,7 +199,7 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
             role=ROLE_PRIMARY,
             individual=cls.individuals_household_two[0],
             household=household_two,
-            rdi_merge_status=MERGED,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
         cls.add_individual_grievance_ticket = GrievanceTicketFactory(

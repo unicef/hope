@@ -65,7 +65,6 @@ from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.household.models import (
     FEMALE,
     MALE,
-    MERGED,
     ROLE_ALTERNATE,
     Document,
     Individual,
@@ -2263,7 +2262,7 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
 
             unique_key = sha256.hexdigest()
             possible_duplicates = self.__class__.all_objects.filter(
-                rdi_merge_status=MERGED,
+                rdi_merge_status=MergeStatusModel.MERGED,
                 is_valid=True,
                 unique_key__isnull=False,
                 unique_key=unique_key,
@@ -2404,7 +2403,7 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
 
 
 class PendingDeliveryMechanismData(DeliveryMechanismData):
-    objects = PendingManager()
+    objects: PendingManager = PendingManager()  # type: ignore
 
     class Meta:
         proxy = True

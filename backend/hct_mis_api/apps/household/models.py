@@ -1,7 +1,7 @@
 import logging
 import re
 from datetime import date, datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from django.conf import settings
 from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
@@ -38,6 +38,7 @@ from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     AdminUrlMixin,
     ConcurrencyModel,
+    MergeStatusModel,
     RepresentationManager,
     SoftDeletableRepresentationMergeStatusModel,
     SoftDeletableRepresentationMergeStatusModelWithDate,
@@ -46,6 +47,9 @@ from hct_mis_api.apps.utils.models import (
     UnicefIdentifiedModel,
 )
 from hct_mis_api.apps.utils.phone import recalculate_phone_numbers_validity
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.registration_datahub.models import Record
 
 BLANK = ""
 IDP = "IDP"
@@ -309,13 +313,6 @@ INDIVIDUAL_FLAGS_CHOICES = (
     (NEEDS_ADJUDICATION, "Needs adjudication"),
     (SANCTION_LIST_CONFIRMED_MATCH, "Sanction list match"),
     (SANCTION_LIST_POSSIBLE_MATCH, "Sanction list possible match"),
-)
-
-PENDING = "PENDING"
-MERGED = "MERGED"
-MERGE_CHOICES = (
-    (PENDING, "Pending"),
-    (MERGED, "Merged"),
 )
 
 logger = logging.getLogger(__name__)
@@ -767,7 +764,7 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
             # document_number must be unique across all documents of the same type
             UniqueConstraint(
                 fields=["document_number", "type", "country", "program", "is_original"],
-                condition=Q(Q(is_removed=False) & Q(status="VALID")),
+                condition=Q(Q(is_removed=False) & Q(status="VALID") & Q(rdi_merge_status=MergeStatusModel.MERGED)),
                 name="unique_if_not_removed_and_valid_for_representations",
             ),
         ]
@@ -1337,6 +1334,14 @@ class PendingHousehold(Household):
     def individuals(self) -> QuerySet:
         return super().individuals(manager="pending_objects")
 
+    @property
+    def individuals_and_roles(self) -> QuerySet:
+        return super().individuals_and_roles(manager="pending_objects")
+
+    @property
+    def pending_representatives(self) -> QuerySet:
+        return super().representatives(manager="pending_objects")
+
     class Meta:
         proxy = True
         verbose_name = "Imported Household"
@@ -1345,6 +1350,22 @@ class PendingHousehold(Household):
 
 class PendingIndividual(Individual):
     objects = SoftDeletableRepresentationPendingManager()
+
+    @property
+    def households_and_roles(self) -> QuerySet:
+        return super().households_and_roles(manager="pending_objects")
+
+    @property
+    def documents(self) -> QuerySet:
+        return super().documents(manager="pending_objects")
+
+    @property
+    def identities(self) -> QuerySet:
+        return super().identities(manager="pending_objects")
+
+    @property
+    def bank_account_info(self) -> QuerySet:
+        return super().bank_account_info(manager="pending_objects")
 
     class Meta:
         proxy = True
@@ -1368,6 +1389,15 @@ class PendingDocument(Document):
         proxy = True
         verbose_name = "Imported Document"
         verbose_name_plural = "Imported Documents"
+
+
+class PendingBankAccountInfo(BankAccountInfo):
+    objects = SoftDeletableRepresentationPendingManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Imported Bank Account Info"
+        verbose_name_plural = "Imported Bank Account Infos"
 
 
 class PendingIndividualRoleInHousehold(IndividualRoleInHousehold):

@@ -53,6 +53,7 @@ from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoice
 from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class TestUpdateGrievanceTickets(APITestCase):
@@ -277,6 +278,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             individual=cls.individuals[0],
             number="1111",
             country=country_pl,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
         cls.identity_to_remove = IndividualIdentity.objects.create(
@@ -284,6 +286,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             individual=cls.individuals[0],
             number="3456",
             country=country_pl,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         cls.dmd = DeliveryMechanismDataFactory(
             individual=cls.individuals[0],
