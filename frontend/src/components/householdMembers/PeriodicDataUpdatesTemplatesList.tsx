@@ -3,31 +3,39 @@ import { ReactElement } from 'react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import UploadIcon from '@mui/icons-material/Upload';
 import GetAppIcon from '@mui/icons-material/GetApp';
+// Adjust the import path as necessary. Ensure the Template type matches the API response structure.
+import { QueryVariables } from 'your-path-to-types';
+import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { useQuery } from '@tanstack/react-query';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { fetchPeriodicDataUpdateTemplates } from '@api/periodicDataUpdate';
 
-import { UniversalRestTable, HeadCell } from 'your-path-to-components'; // replace with the actual path
-import { Template, QueryVariables } from 'your-path-to-types'; // replace with the actual path
+// Adjusted Template type to match the API response
+interface Template {
+  id: number;
+  number_of_records: number;
+  created_at: string;
+  created_by: string;
+  status: string;
+}
 
 const templatesHeadCells: HeadCell<Template>[] = [
+  { id: 'id', numeric: false, disablePadding: false, label: 'Template ID' },
   {
-    id: 'templateId',
-    numeric: false,
-    disablePadding: false,
-    label: 'Template ID',
-  },
-  {
-    id: 'numberOfRecords',
+    id: 'number_of_records',
     numeric: true,
     disablePadding: false,
     label: 'Number of Records',
   },
   {
-    id: 'creationDate',
+    id: 'created_at',
     numeric: false,
     disablePadding: false,
     label: 'Creation Date',
   },
   {
-    id: 'createdBy',
+    id: 'created_by',
     numeric: false,
     disablePadding: false,
     label: 'Created by',
@@ -38,10 +46,10 @@ const templatesHeadCells: HeadCell<Template>[] = [
 
 const renderTemplateRow = (row: Template): ReactElement => (
   <>
-    <TableCell>{row.templateId}</TableCell>
-    <TableCell>{row.numberOfRecords}</TableCell>
-    <TableCell>{row.creationDate}</TableCell>
-    <TableCell>{row.createdBy}</TableCell>
+    <TableCell>{row.id}</TableCell>
+    <TableCell>{row.number_of_records}</TableCell>
+    <TableCell>{row.created_at}</TableCell>
+    <TableCell>{row.created_by}</TableCell>
     <TableCell>
       <IconButton color="primary">
         <VisibilityIcon />
@@ -61,19 +69,29 @@ const renderTemplateRow = (row: Template): ReactElement => (
   </>
 );
 
-export const PeriodicDataUpdatesTemplatesList = (): ReactElement => (
-  <UniversalRestTable<Template, QueryVariables>
-    initialVariables={
-      {
-        /* initial query variables */
+export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
+  const { businessArea: businessAreaSlug, programId } = useBaseUrl();
+
+  const { data: templatesData, isLoading } = useQuery({
+    queryKey: ['periodicDataUpdateTemplates', businessAreaSlug, programId],
+    queryFn: () =>
+      fetchPeriodicDataUpdateTemplates(businessAreaSlug, programId),
+  });
+
+  return (
+    <UniversalRestTable<Template, QueryVariables>
+      initialVariables={{}}
+      endpoint={`/api/rest/${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/`}
+      queriedObjectName="templates"
+      renderRow={renderTemplateRow}
+      headCells={templatesHeadCells}
+      title="Templates"
+      queryFn={() =>
+        fetchPeriodicDataUpdateTemplates(businessAreaSlug, programId)
       }
-    }
-    endpoint="templates" // replace with the actual endpoint
-    queriedObjectName="templates" // replace with the actual object name
-    renderRow={renderTemplateRow}
-    headCells={templatesHeadCells}
-    title="Templates"
-    queryFn={/* query function */}
-    queryKey={['templates']} // replace with the actual query key
-  />
-);
+      queryKey={['templates', businessAreaSlug, programId]}
+      data={templatesData?.results} // Accessing the results array from the API response
+      isLoading={isLoading}
+    />
+  );
+};

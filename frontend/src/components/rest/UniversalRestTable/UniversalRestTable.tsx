@@ -48,7 +48,7 @@ export const UniversalRestTable = <T, K>({
   queryFn,
   queryKey: initialQueryKey,
 }: UniversalRestTableProps<T, K>): ReactElement => {
-  const [page, _setPage] = useState(0);
+  const [page, setPage] = useState(0);
   const [queryKey, setQueryKey] = useState(initialQueryKey);
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0]);
   const [orderBy, setOrderBy] = useState(defaultOrderBy);
@@ -56,27 +56,15 @@ export const UniversalRestTable = <T, K>({
     defaultOrderDirection,
   );
 
-  const setPage = (newPage: number): void => {
-    _setPage(newPage);
-    if (onPageChanged) {
-      onPageChanged(newPage);
-    }
+  const updateQueryKey = (offset: number) => {
+    const variables = {
+      ...initialVariables,
+      offset,
+      limit: rowsPerPage,
+      orderBy: orderBy ? columnToOrderBy(orderBy, orderDirection) : undefined,
+    };
+    setQueryKey([queryKey[0], JSON.stringify(variables)]);
   };
-
-  const initVariables = {
-    ...initialVariables,
-    first: rowsPerPage,
-    orderBy: null,
-  };
-
-  if (orderBy && !filterOrderBy && allowSort) {
-    initVariables.orderBy = columnToOrderBy(orderBy, orderDirection);
-  }
-  if (filterOrderBy) {
-    initVariables.orderBy = filterOrderBy;
-  }
-
-  setQueryKey([queryKey[1], JSON.stringify(initVariables)]);
 
   const {
     data,
@@ -86,15 +74,12 @@ export const UniversalRestTable = <T, K>({
   } = useQuery({ queryKey, queryFn });
 
   useDeepCompareEffect(() => {
-    if (initialVariables) {
-      setPage(0);
-    }
-  }, [initialVariables]);
+    updateQueryKey(page * rowsPerPage);
+  }, [page, rowsPerPage, orderBy, orderDirection]);
+
   if (error) {
-    //  eslint-disable-next-line no-console
     console.error(error);
     if (isPermissionDeniedError(error)) return <PermissionDenied />;
-
     return <div>Unexpected error</div>;
   }
 
@@ -102,14 +87,15 @@ export const UniversalRestTable = <T, K>({
   if (getTitle) {
     correctTitle = getTitle(data);
   }
-  const edges = data?.[queriedObjectName] || [];
-  const typedEdges = edges.map((edge) => edge as T);
+
+  const results = data?.results || [];
+  const typedResults = results.map((result) => result as T);
 
   return (
     <TableComponent<T>
       title={correctTitle}
       actions={actions}
-      data={typedEdges}
+      data={typedResults}
       loading={loading}
       renderRow={renderRow}
       isOnPaper={isOnPaper}
@@ -117,33 +103,8 @@ export const UniversalRestTable = <T, K>({
       rowsPerPageOptions={rowsPerPageOptions}
       rowsPerPage={rowsPerPage}
       page={page}
-      itemsCount={data?.[queriedObjectName]?.totalCount ?? 0}
+      itemsCount={data?.count ?? 0}
       handleChangePage={(_event, newPage) => {
-        if (!edges.length) return;
-        const variables = {
-          first: undefined,
-          last: undefined,
-          after: undefined,
-          before: undefined,
-          orderBy: undefined,
-        };
-        if (newPage < page) {
-          variables.last = rowsPerPage;
-          variables.before = edges[0].cursor;
-        } else {
-          variables.after = edges[edges.length - 1].cursor;
-          variables.first = rowsPerPage;
-        }
-
-        if (orderBy) {
-          variables.orderBy = columnToOrderBy(orderBy, orderDirection);
-        }
-        if (filterOrderBy) {
-          variables.orderBy = columnToOrderBy(filterOrderBy, orderDirection);
-        }
-
-        setQueryKey([queryKey[1], JSON.stringify(initVariables)]);
-
         setPage(newPage);
         refetch();
       }}
@@ -151,36 +112,14 @@ export const UniversalRestTable = <T, K>({
         const value = parseInt(event.target.value, 10);
         setRowsPerPage(value);
         setPage(0);
-        const variables = {
-          ...initialVariables,
-          first: value,
-          last: undefined,
-          before: undefined,
-          after: undefined,
-          orderBy: undefined,
-        };
-        if (orderBy) {
-          variables.orderBy = columnToOrderBy(orderBy, orderDirection);
-        }
-        setQueryKey([queryKey[1], JSON.stringify(variables)]);
         refetch();
       }}
       handleRequestSort={(_event, property) => {
-        let direction: Order = 'asc';
-        if (property === orderBy) {
-          direction = orderDirection === 'asc' ? 'desc' : 'asc';
-        }
+        const direction: Order =
+          orderBy === property && orderDirection === 'asc' ? 'desc' : 'asc';
         setOrderBy(property);
         setOrderDirection(direction);
         setPage(0);
-        const variables = {
-          last: undefined,
-          before: undefined,
-          after: undefined,
-          first: rowsPerPage,
-          orderBy: columnToOrderBy(property, direction),
-        };
-        setQueryKey([queryKey[1], JSON.stringify(variables)]);
         refetch();
       }}
       orderBy={orderBy}
