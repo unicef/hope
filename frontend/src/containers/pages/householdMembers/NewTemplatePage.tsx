@@ -97,6 +97,7 @@ export const NewTemplatePage = (): React.ReactElement => {
             setAppliedFilter={setAppliedFilter}
           />
         )}
+        {activeStep === 1 && <div>Fields to Update</div>}
         <div>
           <Button
             variant="outlined"
