@@ -12,12 +12,10 @@ from hct_mis_api.apps.household.fixtures import (
     create_household,
     create_individual_document,
 )
-from hct_mis_api.apps.household.models import HOST, SEEING
+from hct_mis_api.apps.household.models import HOST, SEEING, Individual
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from selenium_tests.page_object.people.people_details import PeopleDetails
-
-from hct_mis_api.apps.household.models import Individual
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -95,21 +93,65 @@ class TestSmokePeople:
         assert individual.birth_date.strftime("%-d %b %Y") in pagePeopleDetails.getLabelDateOfBirth().text
         assert pagePeopleDetails.getLabelEstimatedDateOfBirth().text
         assert individual.marital_status.lower() in pagePeopleDetails.getLabelMaritalStatus().text.lower()
-        assert 'Not provided' in pagePeopleDetails.getLabelWorkStatus().text
+        assert "Not provided" in pagePeopleDetails.getLabelWorkStatus().text
         assert pagePeopleDetails.getLabelPregnant().text
         assert pagePeopleDetails.getLabelRole().text
-        assert individual.preferred_language if individual.preferred_language else "-" in pagePeopleDetails.getLabelPreferredLanguage().text
-        assert 'Non-displaced | Host' in pagePeopleDetails.getLabelResidenceStatus().text
-        assert individual.household.country if individual.household.country else "-" in pagePeopleDetails.getLabelCountry().text
-        assert individual.household.country_origin if individual.household.country_origin else "-" in pagePeopleDetails.getLabelCountryOfOrigin().text
-        assert individual.household.address if individual.household.address else "-" in pagePeopleDetails.getLabelAddress().text
-        assert individual.household.village if individual.household.village else "-" in pagePeopleDetails.getLabelVilage().text
-        assert individual.household.zip_code if individual.household.zip_code else "-" in pagePeopleDetails.getLabelZipCode().text
-        assert individual.household.admin1 if individual.household.admin1 else "-" in pagePeopleDetails.getLabelAdministrativeLevel1().text
-        assert individual.household.admin2 if individual.household.admin2 else "-" in pagePeopleDetails.getLabelAdministrativeLevel2().text
-        assert individual.household.admin3 if individual.household.admin3 else "-" in pagePeopleDetails.getLabelAdministrativeLevel3().text
-        assert individual.household.admin4 if individual.household.admin4 else "-" in pagePeopleDetails.getLabelAdministrativeLevel4().text
-        assert individual.household.geopoint if individual.household.geopoint else "-" in pagePeopleDetails.getLabelGeolocation().text
+        assert (
+            individual.preferred_language
+            if individual.preferred_language
+            else "-" in pagePeopleDetails.getLabelPreferredLanguage().text
+        )
+        assert "Non-displaced | Host" in pagePeopleDetails.getLabelResidenceStatus().text
+        assert (
+            individual.household.country
+            if individual.household.country
+            else "-" in pagePeopleDetails.getLabelCountry().text
+        )
+        assert (
+            individual.household.country_origin
+            if individual.household.country_origin
+            else "-" in pagePeopleDetails.getLabelCountryOfOrigin().text
+        )
+        assert (
+            individual.household.address
+            if individual.household.address
+            else "-" in pagePeopleDetails.getLabelAddress().text
+        )
+        assert (
+            individual.household.village
+            if individual.household.village
+            else "-" in pagePeopleDetails.getLabelVilage().text
+        )
+        assert (
+            individual.household.zip_code
+            if individual.household.zip_code
+            else "-" in pagePeopleDetails.getLabelZipCode().text
+        )
+        assert (
+            individual.household.admin1
+            if individual.household.admin1
+            else "-" in pagePeopleDetails.getLabelAdministrativeLevel1().text
+        )
+        assert (
+            individual.household.admin2
+            if individual.household.admin2
+            else "-" in pagePeopleDetails.getLabelAdministrativeLevel2().text
+        )
+        assert (
+            individual.household.admin3
+            if individual.household.admin3
+            else "-" in pagePeopleDetails.getLabelAdministrativeLevel3().text
+        )
+        assert (
+            individual.household.admin4
+            if individual.household.admin4
+            else "-" in pagePeopleDetails.getLabelAdministrativeLevel4().text
+        )
+        assert (
+            individual.household.geopoint
+            if individual.household.geopoint
+            else "-" in pagePeopleDetails.getLabelGeolocation().text
+        )
         assert pagePeopleDetails.getLabelDataCollectingType().text
         assert pagePeopleDetails.getLabelObservedDisabilities().text
         assert pagePeopleDetails.getLabelSeeingDisabilitySeverity().text
