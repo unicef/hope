@@ -66,30 +66,41 @@ export function ActivityLogTable({
   const { t } = useTranslation();
 
   return (
-    <PaperContainer>
+    <PaperContainer data-cy="activity-log-container">
       <Toolbar>
-        <Typography variant="h6">{t('Activity Log')}</Typography>
+        <Typography variant="h6" data-cy="activity-log-title">
+          {t('Activity Log')}
+        </Typography>
         <Button
           variant="outlined"
           color="primary"
           endIcon={expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           onClick={() => setExpanded(!expanded)}
+          data-cy="expand-collapse-button"
         >
           {expanded ? 'HIDE' : 'SHOW'}
         </Button>
       </Toolbar>
       <Collapse in={expanded}>
-        <Table>
+        <Table data-cy="activity-log-table">
           <Row>
             {headCells.map((item) => (
-              <HeadingCell data-cy={item.label} key={item.id} style={{ flex: item.weight || 1 }}>
+              <HeadingCell
+                data-cy={`heading-cell-${item.id}`}
+                key={item.id}
+                style={{ flex: item.weight || 1 }}
+              >
                 {item.label}
               </HeadingCell>
             ))}
             <ButtonPlaceHolder />
           </Row>
           {logEntries.map((value) => (
-            <LogRow data-cy={value} key={value.id} logEntry={value} />
+            <LogRow
+              data-cy={`log-row-${value.id}`}
+              key={value.id}
+              logEntry={value}
+            />
           ))}
         </Table>
         <TablePagination
