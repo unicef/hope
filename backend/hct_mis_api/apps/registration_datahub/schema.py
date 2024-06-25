@@ -41,7 +41,7 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
     PendingIndividualIdentity,
-    PendingIndividualRoleInHousehold,
+    PendingIndividualRoleInHousehold, Document, IndividualIdentity,
 )
 from hct_mis_api.apps.registration_data.models import (
     ImportData,
@@ -166,6 +166,9 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     @staticmethod
     def resolve_age(parent: Any, info: Any) -> Int:
         return parent.age
+
+    def resolve_documents(parent, info: Any) -> List[Set["UUID"]]:
+        return parent.documents.all()
 
     def resolve_import_id(parent, info: Any) -> str:
         row = ""
