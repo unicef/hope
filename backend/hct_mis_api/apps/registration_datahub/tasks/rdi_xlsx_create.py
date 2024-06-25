@@ -628,6 +628,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                     GeoCountry.objects.get(iso_code3=value),
                                 )
                             elif header in ("admin1_h_c", "admin2_h_c"):
+                                print('*'*100)
+                                print(header)
+                                print(value)
+                                print(combined_fields[header]["name"])
                                 setattr(
                                     obj_to_create,
                                     combined_fields[header]["name"],
@@ -662,8 +666,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 obj_to_create.detail_id = row[0].row
                 obj_to_create.business_area = rdi.business_area
                 if sheet_title == "households":
-                    obj_to_create.set_admin_areas(save=False)
                     self.households[household_id] = obj_to_create
+                    print(obj_to_create.admin1)
+                    print(obj_to_create.admin2)
                 else:
                     if household_id is None:
                         obj_to_create.relationship = NON_BENEFICIARY
