@@ -130,4 +130,5 @@ class People(BaseComponents):
         return self.wait_for(self.tablePagination)
 
     def getIndividualTableRow(self, number: int) -> WebElement:
+        self.wait_for(self.individualTableRow)
         return self.get_elements(self.individualTableRow)[number]
