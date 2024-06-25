@@ -423,6 +423,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 photo=photo,
                 individual=individual,
                 type=doc_type,
+                program=individual.program,
             )
 
             docs_to_create.append(obj)
