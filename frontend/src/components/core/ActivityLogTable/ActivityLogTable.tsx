@@ -82,19 +82,20 @@ export function ActivityLogTable({
         <Table>
           <Row>
             {headCells.map((item) => (
-              <HeadingCell key={item.id} style={{ flex: item.weight || 1 }}>
+              <HeadingCell data-cy={item.label} key={item.id} style={{ flex: item.weight || 1 }}>
                 {item.label}
               </HeadingCell>
             ))}
             <ButtonPlaceHolder />
           </Row>
           {logEntries.map((value) => (
-            <LogRow key={value.id} logEntry={value} />
+            <LogRow data-cy={value} key={value.id} logEntry={value} />
           ))}
         </Table>
         <TablePagination
           rowsPerPageOptions={[5, 10, 15]}
           component="div"
+          data-cy="pagination"
           count={totalCount}
           rowsPerPage={rowsPerPage}
           page={page}

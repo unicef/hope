@@ -34,6 +34,7 @@ class BaseComponents(Common):
     navResourcesConversations = 'a[data-cy="nav-resources-Conversations"]'
     navResourcesToolsAndMaterials = 'a[data-cy="nav-resources-Tools and Materials"]'
     navResourcesReleaseNote = 'a[data-cy="nav-resources-Release Note"]'
+    navProgramLog = 'a[data-cy="nav-Program Log"]'
     mainContent = 'div[data-cy="main-content"]'
     drawerItems = 'div[data-cy="drawer-items"]'
     drawerInactiveSubheader = 'div[data-cy="program-inactive-subheader"]'
@@ -41,7 +42,6 @@ class BaseComponents(Common):
     globalProgramFilterSearchInput = 'input[data-cy="search-input-gpf"]'
     globalProgramFilterSearchButton = 'button[data-cy="search-icon"]'
     globalProgramFilterClearButton = 'button[data-cy="clear-icon"]'
-
     # Text
     globalProgramFilterText = "All Programmes"
 
@@ -165,3 +165,6 @@ class BaseComponents(Common):
 
     def getGlobalProgramFilterSearchInput(self) -> WebElement:
         return self.wait_for(self.globalProgramFilterSearchInput)
+
+    def getNavProgramLog(self) -> WebElement:
+        return self.wait_for(self.navProgramLog)
