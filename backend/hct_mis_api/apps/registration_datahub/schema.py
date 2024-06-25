@@ -34,7 +34,9 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
+    Document,
     DocumentType,
+    IndividualIdentity,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -90,7 +92,7 @@ class ImportedDocumentNode(DjangoObjectType):
         return None
 
     class Meta:
-        model = PendingDocument
+        model = Document
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
@@ -105,7 +107,7 @@ class ImportedIndividualIdentityNode(DjangoObjectType):
         return getattr(parent.country, "name", parent.country)
 
     class Meta:
-        model = PendingIndividualIdentity
+        model = IndividualIdentity
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
@@ -219,10 +221,10 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     import_id = graphene.String()
 
     def resolve_country(parent, info: Any) -> str:
-        return parent.country.name
+        return parent.country.name if parent.country else ""
 
     def resolve_country_origin(parent, info: Any) -> str:
-        return parent.country_origin.name
+        return parent.country_origin.name if parent.country_origin else ""
 
     def resolve_has_duplicates(parent, info: Any) -> bool:
         return parent.individuals.filter(
