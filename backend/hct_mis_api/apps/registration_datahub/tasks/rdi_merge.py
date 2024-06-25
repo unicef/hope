@@ -203,37 +203,7 @@ class RdiMergeTask:
     #
     #     return households_dict
     #
-    # def _prepare_individual_documents_and_identities(
-    #     self, imported_individual: Individual, individual: Individual
-    # ) -> Tuple[List, List]:
-    #     documents_to_create = []
-    #     for imported_document in imported_individual.documents.all():
-    #         document_type = DocumentType.objects.get(
-    #             key=imported_document.type.key,
-    #         )
-    #         document = Document(
-    #             document_number=imported_document.document_number,
-    #             country=Country.objects.get(iso_code2=str(imported_document.country)),
-    #             type=document_type,
-    #             individual=individual,
-    #             photo=imported_document.photo,
-    #             expiry_date=imported_document.expiry_date,
-    #             issuance_date=imported_document.issuance_date,
-    #             program=individual.program,
-    #         )
-    #         documents_to_create.append(document)
-    #     identities_to_create = []
-    #     for imported_identity in imported_individual.identities.all():
-    #         partner, _ = Partner.objects.get_or_create(name=imported_identity.partner, defaults={"is_un": True})
-    #         identity = IndividualIdentity(
-    #             partner=partner,
-    #             number=imported_identity.document_number,
-    #             individual=individual,
-    #             country=Country.objects.get(iso_code2=str(imported_identity.country)),
-    #         )
-    #         identities_to_create.append(identity)
-    #
-    #     return documents_to_create, identities_to_create
+
     #
     # def _prepare_individuals(
     #     self,
@@ -306,36 +276,7 @@ class RdiMergeTask:
     #         documents_to_create.extend(documents)
     #         identities_to_create.extend(identities)
     #
-    # def _prepare_roles(
-    #     self, imported_roles: List[IndividualRoleInHousehold], households_dict: Dict, individuals_dict: Dict
-    # ) -> List:
-    #     roles_to_create = []
-    #     for imported_role in imported_roles:
-    #         role = IndividualRoleInHousehold(
-    #             household=households_dict.get(imported_role.household.id),
-    #             individual=individuals_dict.get(imported_role.individual.id),
-    #             role=imported_role.role,
-    #         )
-    #         roles_to_create.append(role)
     #
-    #     return roles_to_create
-    #
-    # def _prepare_bank_account_info(
-    #     self, imported_bank_account_infos: List[BankAccountInfo], individuals_dict: Dict
-    # ) -> List:
-    #     roles_to_create = []
-    #     for imported_bank_account_info in imported_bank_account_infos:
-    #         role = BankAccountInfo(
-    #             individual=individuals_dict.get(imported_bank_account_info.individual.id),
-    #             bank_name=imported_bank_account_info.bank_name,
-    #             bank_account_number=imported_bank_account_info.bank_account_number.replace(" ", ""),
-    #             debit_card_number=imported_bank_account_info.debit_card_number.replace(" ", ""),
-    #             bank_branch_name=imported_bank_account_info.bank_branch_name,
-    #             account_holder_name=imported_bank_account_info.account_holder_name,
-    #         )
-    #         roles_to_create.append(role)
-    #
-    #     return roles_to_create
 
     def _create_grievance_ticket_for_delivery_mechanisms_errors(
         self, delivery_mechanism_data: DeliveryMechanismData, obj_hct: RegistrationDataImport, description: str
