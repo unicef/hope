@@ -2,24 +2,28 @@ import { ReactElement, useState } from 'react';
 import useDeepCompareEffect from 'use-deep-compare-effect';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { Order, TableComponent } from '@components/core/Table/TableComponent';
 import { columnToOrderBy, isPermissionDeniedError } from '@utils/utils';
 import { QueryFunction, useQuery } from '@tanstack/react-query';
+import {
+  Order,
+  TableRestComponent,
+} from '../TableRestComponent/TableRestComponent';
 
-interface UniversalRestTableProps<T, K> {
+// TODO MS: add correct types
+interface UniversalRestTableProps<T = any, K = any> {
   rowsPerPageOptions?: number[];
   initialVariables: K;
   endpoint: string;
   queriedObjectName: string;
   renderRow: (row: T) => ReactElement;
   headCells: HeadCell<T>[];
-  getTitle?: (data) => string;
+  getTitle?: (data: any) => string; // TODO MS: add correct type for data
   title?: string;
   isOnPaper?: boolean;
   defaultOrderBy?: string;
   defaultOrderDirection?: Order;
   actions?: Array<ReactElement>;
-  onSelectAllClick?: (event, rows) => void;
+  onSelectAllClick?: (event: any, rows: any) => void; // TODO MS: add correct types for event and rows
   numSelected?: number;
   allowSort?: boolean;
   filterOrderBy?: string;
@@ -31,7 +35,6 @@ interface UniversalRestTableProps<T, K> {
 export const UniversalRestTable = <T, K>({
   rowsPerPageOptions = [5, 10, 15],
   initialVariables,
-  queriedObjectName,
   renderRow,
   headCells,
   title,
@@ -43,8 +46,6 @@ export const UniversalRestTable = <T, K>({
   defaultOrderDirection = 'asc',
   numSelected = 0,
   allowSort = true,
-  filterOrderBy,
-  onPageChanged,
   queryFn,
   queryKey: initialQueryKey,
 }: UniversalRestTableProps<T, K>): ReactElement => {
@@ -92,7 +93,7 @@ export const UniversalRestTable = <T, K>({
   const typedResults = results.map((result) => result as T);
 
   return (
-    <TableComponent<T>
+    <TableRestComponent<T>
       title={correctTitle}
       actions={actions}
       data={typedResults}

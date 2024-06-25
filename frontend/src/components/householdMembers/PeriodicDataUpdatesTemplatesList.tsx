@@ -3,15 +3,12 @@ import { ReactElement } from 'react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import UploadIcon from '@mui/icons-material/Upload';
 import GetAppIcon from '@mui/icons-material/GetApp';
-// Adjust the import path as necessary. Ensure the Template type matches the API response structure.
-import { QueryVariables } from 'your-path-to-types';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { fetchPeriodicDataUpdateTemplates } from '@api/periodicDataUpdate';
 
-// Adjusted Template type to match the API response
 interface Template {
   id: number;
   number_of_records: number;
@@ -79,7 +76,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
   });
 
   return (
-    <UniversalRestTable<Template, QueryVariables>
+    <UniversalRestTable
       initialVariables={{}}
       endpoint={`/api/rest/${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/`}
       queriedObjectName="templates"
@@ -90,7 +87,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
         fetchPeriodicDataUpdateTemplates(businessAreaSlug, programId)
       }
       queryKey={['templates', businessAreaSlug, programId]}
-      data={templatesData?.results} // Accessing the results array from the API response
+      data={templatesData?.results}
       isLoading={isLoading}
     />
   );
