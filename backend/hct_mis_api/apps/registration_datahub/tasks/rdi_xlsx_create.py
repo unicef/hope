@@ -629,7 +629,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                     GeoCountry.objects.get(iso_code3=value),
                                 )
                             elif header in ("admin1_h_c", "admin2_h_c"):
-                                print('*'*100)
+                                print("*" * 100)
                                 print(header)
                                 print(value)
                                 print(combined_fields[header]["name"])

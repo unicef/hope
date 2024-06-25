@@ -41,7 +41,7 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
     PendingIndividualIdentity,
-    PendingIndividualRoleInHousehold, Document, IndividualIdentity,
+    PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.registration_data.models import (
     ImportData,
