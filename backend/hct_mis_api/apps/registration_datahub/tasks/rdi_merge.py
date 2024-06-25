@@ -23,11 +23,11 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     HouseholdCollection,
     IndividualCollection,
+    PendingBankAccountInfo,
+    PendingDocument,
     PendingHousehold,
     PendingIndividual,
     PendingIndividualRoleInHousehold,
-    PendingBankAccountInfo,
-    PendingDocument,
 )
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanismData,
@@ -147,7 +147,6 @@ class RdiMergeTask:
         "blockchain_name",
         "wallet_address",
     )
-
 
     #
     # def _prepare_households(
