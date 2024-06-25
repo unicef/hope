@@ -38,7 +38,7 @@ class PeriodicDataUpdateTemplate(TimeStampedModel):
     rounds_data = models.JSONField()
     """
     Example of rounds_data:
-        {
+        [
             {
                 "Vaccination Records Update": {
                 "round": 2,
@@ -55,7 +55,7 @@ class PeriodicDataUpdateTemplate(TimeStampedModel):
                 }
 
             },
-        }
+        ]
     """
     number_of_records = models.PositiveIntegerField(null=True, blank=True)
 

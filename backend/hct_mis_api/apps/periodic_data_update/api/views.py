@@ -89,7 +89,7 @@ class PeriodicDataUpdateTemplateViewSet(
             raise ValidationError("Template file is missing")
 
 
-class PeriodicDataUpdateTemplateViewSet(
+class PeriodicDataUpdateUploadViewSet(
     ActionMixin,
     BusinessAreaProgramMixin,
     mixins.CreateModelMixin,
