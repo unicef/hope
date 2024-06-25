@@ -16,29 +16,18 @@ from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketIndividualDataUpdateDetails,
 )
-from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
-    create_needs_adjudication_tickets,
-)
 from hct_mis_api.apps.household.celery_tasks import recalculate_population_fields_task
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
-    DUPLICATE,
     HEAD,
-    NEEDS_ADJUDICATION,
-    BankAccountInfo,
-    Document,
     DocumentType,
-    Household,
     HouseholdCollection,
-    Individual,
     IndividualCollection,
-    IndividualIdentity,
-    IndividualRoleInHousehold,
-    PendingBankAccountInfo,
-    PendingDocument,
     PendingHousehold,
     PendingIndividual,
     PendingIndividualRoleInHousehold,
+    PendingBankAccountInfo,
+    PendingDocument,
 )
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanismData,
@@ -52,7 +41,6 @@ from hct_mis_api.apps.registration_data.models import (
 from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
 from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.signals import rdi_merged
-from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     CheckAgainstSanctionListPreMergeTask,
 )
@@ -61,7 +49,6 @@ from hct_mis_api.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
-from hct_mis_api.apps.utils.querysets import evaluate_qs
 
 logger = logging.getLogger(__name__)
 
@@ -161,216 +148,135 @@ class RdiMergeTask:
         "wallet_address",
     )
 
-    def merge_admin_areas(
-        self,
-        imported_household: Household,
-        household: Household,
-    ) -> None:
-        admins = {
-            "admin_area": imported_household.admin_area,
-            "admin1": imported_household.admin1,
-            "admin2": imported_household.admin2,
-            "admin3": imported_household.admin3,
-            "admin4": imported_household.admin4,
-        }
 
-        for admin_key, admin_value in admins.items():
-            if admin_value:
-                admin_area = Area.objects.filter(p_code=admin_value).first()
-                if admin_area:
-                    setattr(household, admin_key, admin_area)
-                else:
-                    logger.exception(f"Provided {admin_key} {admin_value} does not exist")
+    #
+    # def _prepare_households(
+    #     self, imported_households: List[Household], obj_hct: RegistrationDataImport
+    # ) -> Dict[int, Household]:
+    #     households_dict = {}
+    #     countries = {}
+    #     for imported_household in imported_households:
+    #         household_data = {**model_to_dict(imported_household, fields=self.HOUSEHOLD_FIELDS)}
+    #         country = household_data.pop("country")
+    #         country_origin = household_data.pop("country_origin")
+    #
+    #         if country and country.code not in countries:
+    #             countries[country.code] = Country.objects.get(iso_code2=country.code)
+    #         if country_origin and country_origin.code not in countries:
+    #             countries[country_origin.code] = Country.objects.get(iso_code2=country_origin.code)
+    #
+    #         if country := countries.get(country.code):
+    #             household_data["country"] = country
+    #
+    #         if country_origin := countries.get(country_origin.code):
+    #             household_data["country_origin"] = country_origin
+    #
+    #         if record := imported_household.flex_registrations_record:
+    #             household_data["registration_id"] = str(record.registration)
+    #
+    #         if enumerator_rec_id := imported_household.enumerator_rec_id:
+    #             household_data["enumerator_rec_id"] = enumerator_rec_id
+    #
+    #         if unicef_id := imported_household.mis_unicef_id:
+    #             household_data["unicef_id"] = unicef_id
+    #             # find other household with same unicef_id and group them in the same collection
+    #             household_from_collection = Household.objects.filter(
+    #                 unicef_id=unicef_id, business_area=obj_hct.business_area
+    #             ).first()
+    #             if household_from_collection:
+    #                 if collection := household_from_collection.household_collection:
+    #                     household_data["household_collection"] = collection
+    #                 else:
+    #                     household_collection = HouseholdCollection.objects.create()
+    #                     household_data["household_collection"] = household_collection
+    #                     household_from_collection.household_collection = household_collection
+    #                     household_from_collection.save(update_fields=["household_collection"])
+    #
+    #         household = Household(
+    #             **household_data,
+    #             registration_data_import=obj_hct,
+    #             business_area=obj_hct.business_area,
+    #             program=obj_hct.program,
+    #         )
+    #         self.merge_admin_areas(imported_household, household)
+    #         households_dict[imported_household.id] = household
+    #
+    #     return households_dict
+    #
 
-        if household.admin_area:
-            household.set_admin_areas(save=False)
-
-    def _prepare_households(
-        self, imported_households: List[Household], obj_hct: RegistrationDataImport
-    ) -> Dict[int, Household]:
-        households_dict = {}
-        countries = {}
-        for imported_household in imported_households:
-            household_data = {**model_to_dict(imported_household, fields=self.HOUSEHOLD_FIELDS)}
-            country = household_data.pop("country")
-            country_origin = household_data.pop("country_origin")
-
-            if country and country.code not in countries:
-                countries[country.code] = Country.objects.get(iso_code2=country.code)
-            if country_origin and country_origin.code not in countries:
-                countries[country_origin.code] = Country.objects.get(iso_code2=country_origin.code)
-
-            if country := countries.get(country.code):
-                household_data["country"] = country
-
-            if country_origin := countries.get(country_origin.code):
-                household_data["country_origin"] = country_origin
-
-            if record := imported_household.flex_registrations_record:
-                household_data["registration_id"] = str(record.registration)
-
-            if enumerator_rec_id := imported_household.enumerator_rec_id:
-                household_data["enumerator_rec_id"] = enumerator_rec_id
-
-            if unicef_id := imported_household.mis_unicef_id:
-                household_data["unicef_id"] = unicef_id
-                # find other household with same unicef_id and group them in the same collection
-                household_from_collection = Household.objects.filter(
-                    unicef_id=unicef_id, business_area=obj_hct.business_area
-                ).first()
-                if household_from_collection:
-                    if collection := household_from_collection.household_collection:
-                        household_data["household_collection"] = collection
-                    else:
-                        household_collection = HouseholdCollection.objects.create()
-                        household_data["household_collection"] = household_collection
-                        household_from_collection.household_collection = household_collection
-                        household_from_collection.save(update_fields=["household_collection"])
-
-            household = Household(
-                **household_data,
-                registration_data_import=obj_hct,
-                business_area=obj_hct.business_area,
-                program=obj_hct.program,
-            )
-            self.merge_admin_areas(imported_household, household)
-            households_dict[imported_household.id] = household
-
-        return households_dict
-
-    def _prepare_individual_documents_and_identities(
-        self, imported_individual: Individual, individual: Individual
-    ) -> Tuple[List, List]:
-        documents_to_create = []
-        for imported_document in imported_individual.documents.all():
-            document_type = DocumentType.objects.get(
-                key=imported_document.type.key,
-            )
-            document = Document(
-                document_number=imported_document.document_number,
-                country=Country.objects.get(iso_code2=str(imported_document.country)),
-                type=document_type,
-                individual=individual,
-                photo=imported_document.photo,
-                expiry_date=imported_document.expiry_date,
-                issuance_date=imported_document.issuance_date,
-                program=individual.program,
-            )
-            documents_to_create.append(document)
-        identities_to_create = []
-        for imported_identity in imported_individual.identities.all():
-            partner, _ = Partner.objects.get_or_create(name=imported_identity.partner, defaults={"is_un": True})
-            identity = IndividualIdentity(
-                partner=partner,
-                number=imported_identity.document_number,
-                individual=individual,
-                country=Country.objects.get(iso_code2=str(imported_identity.country)),
-            )
-            identities_to_create.append(identity)
-
-        return documents_to_create, identities_to_create
-
-    def _prepare_individuals(
-        self,
-        imported_individuals: List[Individual],
-        households_dict: Dict[int, Household],
-        obj_hct: RegistrationDataImport,
-    ) -> None:
-        individuals_dict = {}
-        documents_to_create = []
-        identities_to_create = []
-        for imported_individual in imported_individuals:
-            values = model_to_dict(imported_individual, fields=self.INDIVIDUAL_FIELDS)
-
-            if not values.get("phone_no_valid"):
-                values["phone_no_valid"] = False
-            if not values.get("phone_no_alternative_valid"):
-                values["phone_no_alternative_valid"] = False
-
-            imported_individual_household = imported_individual.household
-            household = households_dict.get(imported_individual.household.id) if imported_individual_household else None
-
-            phone_no = values.get("phone_no")
-            phone_no_alternative = values.get("phone_no_alternative")
-
-            values["phone_no_valid"] = is_valid_phone_number(str(phone_no))
-            values["phone_no_alternative_valid"] = is_valid_phone_number(str(phone_no_alternative))
-
-            if unicef_id := imported_individual.mis_unicef_id:
-                values["unicef_id"] = unicef_id
-                # find other individual with same unicef_id and group them in the same collection
-                individual_from_collection = Individual.objects.filter(
-                    unicef_id=unicef_id, business_area=obj_hct.business_area
-                ).first()
-                if individual_from_collection:
-                    if collection := individual_from_collection.individual_collection:
-                        values["individual_collection"] = collection
-                    else:
-                        individual_collection = IndividualCollection.objects.create()
-                        values["individual_collection"] = individual_collection
-                        individual_from_collection.individual_collection = individual_collection
-                        individual_from_collection.save(update_fields=["individual_collection"])
-
-            individual = Individual(
-                **values,
-                household=household,
-                registration_id=getattr(household, "registration_id", None),
-                business_area=obj_hct.business_area,
-                registration_data_import=obj_hct,
-                imported_individual_id=imported_individual.id,
-                program=obj_hct.program,
-            )
-            if household:
-                individual.registration_id = household.registration_id
-            individuals_dict[imported_individual.id] = individual
-
-            is_social_worker_program = obj_hct.program.is_social_worker_program
-
-            if is_social_worker_program:
-                # every household for Social DCT type program has HoH
-                household.head_of_household = individual
-            else:
-                if imported_individual.relationship == HEAD and household:
-                    household.head_of_household = individual
-
-            (
-                documents,
-                identities,
-            ) = self._prepare_individual_documents_and_identities(imported_individual, individual)
-
-            documents_to_create.extend(documents)
-            identities_to_create.extend(identities)
-
-    def _prepare_roles(
-        self, imported_roles: List[IndividualRoleInHousehold], households_dict: Dict, individuals_dict: Dict
-    ) -> List:
-        roles_to_create = []
-        for imported_role in imported_roles:
-            role = IndividualRoleInHousehold(
-                household=households_dict.get(imported_role.household.id),
-                individual=individuals_dict.get(imported_role.individual.id),
-                role=imported_role.role,
-            )
-            roles_to_create.append(role)
-
-        return roles_to_create
-
-    def _prepare_bank_account_info(
-        self, imported_bank_account_infos: List[BankAccountInfo], individuals_dict: Dict
-    ) -> List:
-        roles_to_create = []
-        for imported_bank_account_info in imported_bank_account_infos:
-            role = BankAccountInfo(
-                individual=individuals_dict.get(imported_bank_account_info.individual.id),
-                bank_name=imported_bank_account_info.bank_name,
-                bank_account_number=imported_bank_account_info.bank_account_number.replace(" ", ""),
-                debit_card_number=imported_bank_account_info.debit_card_number.replace(" ", ""),
-                bank_branch_name=imported_bank_account_info.bank_branch_name,
-                account_holder_name=imported_bank_account_info.account_holder_name,
-            )
-            roles_to_create.append(role)
-
-        return roles_to_create
+    #
+    # def _prepare_individuals(
+    #     self,
+    #     imported_individuals: List[Individual],
+    #     households_dict: Dict[int, Household],
+    #     obj_hct: RegistrationDataImport,
+    # ) -> None:
+    #     individuals_dict = {}
+    #     documents_to_create = []
+    #     identities_to_create = []
+    #     for imported_individual in imported_individuals:
+    #         values = model_to_dict(imported_individual, fields=self.INDIVIDUAL_FIELDS)
+    #
+    #         if not values.get("phone_no_valid"):
+    #             values["phone_no_valid"] = False
+    #         if not values.get("phone_no_alternative_valid"):
+    #             values["phone_no_alternative_valid"] = False
+    #
+    #         imported_individual_household = imported_individual.household
+    #         household = households_dict.get(imported_individual.household.id) if imported_individual_household else None
+    #
+    #         phone_no = values.get("phone_no")
+    #         phone_no_alternative = values.get("phone_no_alternative")
+    #
+    #         values["phone_no_valid"] = is_valid_phone_number(str(phone_no))
+    #         values["phone_no_alternative_valid"] = is_valid_phone_number(str(phone_no_alternative))
+    #
+    #         if unicef_id := imported_individual.mis_unicef_id:
+    #             values["unicef_id"] = unicef_id
+    #             # find other individual with same unicef_id and group them in the same collection
+    #             individual_from_collection = Individual.objects.filter(
+    #                 unicef_id=unicef_id, business_area=obj_hct.business_area
+    #             ).first()
+    #             if individual_from_collection:
+    #                 if collection := individual_from_collection.individual_collection:
+    #                     values["individual_collection"] = collection
+    #                 else:
+    #                     individual_collection = IndividualCollection.objects.create()
+    #                     values["individual_collection"] = individual_collection
+    #                     individual_from_collection.individual_collection = individual_collection
+    #                     individual_from_collection.save(update_fields=["individual_collection"])
+    #
+    #         individual = Individual(
+    #             **values,
+    #             household=household,
+    #             registration_id=getattr(household, "registration_id", None),
+    #             business_area=obj_hct.business_area,
+    #             registration_data_import=obj_hct,
+    #             imported_individual_id=imported_individual.id,
+    #             program=obj_hct.program,
+    #         )
+    #         if household:
+    #             individual.registration_id = household.registration_id
+    #         individuals_dict[imported_individual.id] = individual
+    #
+    #         is_social_worker_program = obj_hct.program.is_social_worker_program
+    #
+    #         if is_social_worker_program:
+    #             # every household for Social DCT type program has HoH
+    #             household.head_of_household = individual
+    #         else:
+    #             if imported_individual.relationship == HEAD and household:
+    #                 household.head_of_household = individual
+    #
+    #         (
+    #             documents,
+    #             identities,
+    #         ) = self._prepare_individual_documents_and_identities(imported_individual, individual)
+    #
+    #         documents_to_create.extend(documents)
+    #         identities_to_create.extend(identities)
+    #
+    #
 
     def _create_grievance_ticket_for_delivery_mechanisms_errors(
         self, delivery_mechanism_data: DeliveryMechanismData, obj_hct: RegistrationDataImport, description: str
@@ -493,13 +399,13 @@ class RdiMergeTask:
                     # DEDUPLICATION
 
                     populate_index(
-                        Individual.objects.filter(registration_data_import=obj_hct),
+                        PendingIndividual.objects.filter(registration_data_import=obj_hct),
                         get_individual_doc(obj_hct.business_area.slug),
                     )
                     logger.info(
                         f"RDI:{registration_data_import_id} Populated index for {len(individual_ids)} individuals"
                     )
-                    populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
+                    populate_index(PendingHousehold.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
                     logger.info(
                         f"RDI:{registration_data_import_id} Populated index for {len(household_ids)} households"
                     )
@@ -567,6 +473,7 @@ class RdiMergeTask:
                     PendingIndividualRoleInHousehold.objects.filter(individual_id__in=individual_ids).update(
                         rdi_merge_status="MERGED"
                     )
+
                     logger.info(f"RDI:{registration_data_import_id} Saved registration data import")
                     transaction.on_commit(lambda: deduplicate_documents.delay())
                     rdi_merged.send(sender=obj_hct.__class__, instance=obj_hct)
@@ -611,6 +518,6 @@ class RdiMergeTask:
 
     def _update_program_registration_id(self, household_id: UUID, registration_id: str) -> None:
         count = 0
-        while Household.objects.filter(registration_id=f"{registration_id}#{count}").exists():
+        while PendingHousehold.objects.filter(registration_id=f"{registration_id}#{count}").exists():
             count += 1
-        Household.objects.filter(id=household_id).update(registration_id=f"{registration_id}#{count}")
+        PendingHousehold.objects.filter(id=household_id).update(registration_id=f"{registration_id}#{count}")

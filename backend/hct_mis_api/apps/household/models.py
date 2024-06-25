@@ -618,7 +618,8 @@ class Household(
             new_admin_area = self.admin_area
         else:
             self.admin_area = new_admin_area
-
+        if not new_admin_area:
+            return
         for admin in admins:
             setattr(self, admin, None)
 
