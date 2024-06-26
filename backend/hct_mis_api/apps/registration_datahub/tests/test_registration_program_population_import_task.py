@@ -25,8 +25,10 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory, \
-    RegistrationDataImportDatahubFactory
+from hct_mis_api.apps.registration_data.fixtures import (
+    RegistrationDataImportDatahubFactory,
+    RegistrationDataImportFactory,
+)
 from hct_mis_api.apps.registration_data.models import (
     RegistrationDataImport,
     RegistrationDataImportDatahub,

@@ -37,7 +37,6 @@ from hct_mis_api.apps.household.models import (
     Document,
     DocumentType,
     IndividualIdentity,
-    PendingDocument,
     PendingHousehold,
     PendingIndividual,
     PendingIndividualIdentity,

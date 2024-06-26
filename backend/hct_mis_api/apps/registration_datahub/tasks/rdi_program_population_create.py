@@ -9,7 +9,9 @@ from hct_mis_api.apps.registration_data.models import (
     RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hct_mis_api.apps.registration_datahub.tasks.import_program_population import import_program_population
+from hct_mis_api.apps.registration_datahub.tasks.import_program_population import (
+    import_program_population,
+)
 
 logger = logging.getLogger(__name__)
 
