@@ -46,7 +46,7 @@ from hct_mis_api.apps.utils.models import (
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
-from hct_mis_api.apps.utils.phone import recalculate_phone_numbers_validity
+from hct_mis_api.apps.utils.phone import recalculate_phone_numbers_validity, calculate_phone_numbers_validity
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.registration_datahub.models import Record
@@ -1251,6 +1251,9 @@ class Individual(
         self.flex_fields = {}
         self.save()
 
+    def validate_phone_numbers(self) -> None:
+        calculate_phone_numbers_validity(self)
+
     def save(self, *args: Any, **kwargs: Any) -> None:
         recalculate_phone_numbers_validity(self, Individual)
         super().save(*args, **kwargs)
@@ -1341,6 +1344,10 @@ class PendingHousehold(Household):
 
     @property
     def pending_representatives(self) -> QuerySet:
+        return super().representatives(manager="pending_objects")
+
+    @property
+    def representatives(self) -> QuerySet:
         return super().representatives(manager="pending_objects")
 
     class Meta:
