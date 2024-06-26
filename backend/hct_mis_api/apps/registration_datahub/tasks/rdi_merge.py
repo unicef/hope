@@ -21,13 +21,15 @@ from hct_mis_api.apps.household.documents import HouseholdDocument, get_individu
 from hct_mis_api.apps.household.models import (
     HEAD,
     DocumentType,
+    Household,
     HouseholdCollection,
+    Individual,
     IndividualCollection,
     PendingBankAccountInfo,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
-    PendingIndividualRoleInHousehold, Household, Individual,
+    PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanismData,

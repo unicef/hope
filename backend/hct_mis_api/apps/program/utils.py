@@ -117,11 +117,13 @@ class CopyProgramPopulation:
         household.copied_from_id = copy_from_household_id
         household.registration_data_import = self.rdi
         household.rdi_merge_status = self.rdi_merge_status
-        household.head_of_household = getattr(Individual, self.manager).filter(
-            id__in=[ind.pk for ind in new_individuals]
-        ).get(
-            program=self.program,
-            copied_from=household.head_of_household,
+        household.head_of_household = (
+            getattr(Individual, self.manager)
+            .filter(id__in=[ind.pk for ind in new_individuals])
+            .get(
+                program=self.program,
+                copied_from=household.head_of_household,
+            )
         )
 
         return household
@@ -143,7 +145,9 @@ class CopyProgramPopulation:
             households_to_create.append(self.copy_household(household, individuals))
         return Household.objects.bulk_create(households_to_create)
 
-    def copy_household_related_data(self, new_households: QuerySet[Household], new_individuals: QuerySet[Individual]) -> None:
+    def copy_household_related_data(
+        self, new_households: QuerySet[Household], new_individuals: QuerySet[Individual]
+    ) -> None:
         roles_to_create = []
         entitlement_cards_to_create = []
         for new_household in new_households:
@@ -163,9 +167,13 @@ class CopyProgramPopulation:
             role.pk = None
             role.household = new_household
             role.rdi_merge_status = self.rdi_merge_status
-            role.individual = getattr(Individual, self.manager).filter(id__in=[ind.pk for ind in new_individuals]).get(
-                program=self.program,
-                copied_from=role.individual,
+            role.individual = (
+                getattr(Individual, self.manager)
+                .filter(id__in=[ind.pk for ind in new_individuals])
+                .get(
+                    program=self.program,
+                    copied_from=role.individual,
+                )
             )
             roles_in_household.append(role)
         return roles_in_household
@@ -215,10 +223,14 @@ class CopyProgramPopulation:
         BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
 
     def set_household_per_individual(self, new_individual: Individual) -> Individual:
-        new_individual.household = getattr(Household, self.manager).filter(
-            program=self.program,
-            copied_from_id=new_individual.household_id,
-        ).first()
+        new_individual.household = (
+            getattr(Household, self.manager)
+            .filter(
+                program=self.program,
+                copied_from_id=new_individual.household_id,
+            )
+            .first()
+        )
         return new_individual
 
     @staticmethod
@@ -281,9 +293,7 @@ class CopyProgramPopulation:
 
 
 def copy_program_related_data(copy_from_program_id: str, new_program: Program) -> None:
-    copy_from_individuals = Individual.objects.filter(
-        program_id=copy_from_program_id, withdrawn=False, duplicate=False
-    )
+    copy_from_individuals = Individual.objects.filter(program_id=copy_from_program_id, withdrawn=False, duplicate=False)
     copy_from_households = Household.objects.filter(
         program_id=copy_from_program_id,
         withdrawn=False,
@@ -460,12 +470,14 @@ def copy_individual(individual: Individual, program: Program) -> tuple:
 
     documents_to_create = CopyProgramPopulation.copy_document_per_individual(documents, individual)
     identities_to_create = CopyProgramPopulation.copy_individual_identity_per_individual(identities, individual)
-    bank_account_info_to_create = CopyProgramPopulation.copy_bank_account_info_per_individual(bank_accounts_info, individual)
+    bank_account_info_to_create = CopyProgramPopulation.copy_bank_account_info_per_individual(
+        bank_accounts_info, individual
+    )
     return individual, documents_to_create, identities_to_create, bank_account_info_to_create
 
 
 def create_program_partner_access(
-        partners_data: List, program: Program, partner_access: Optional[str] = None
+    partners_data: List, program: Program, partner_access: Optional[str] = None
 ) -> List[Dict]:
     if partner_access == Program.ALL_PARTNERS_ACCESS:
         partners = Partner.objects.filter(allowed_business_areas=program.business_area).exclude(
