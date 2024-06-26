@@ -91,7 +91,7 @@ class CopyProgramPopulation:
         individual.rdi_merge_status = self.rdi_merge_status
         return individual
 
-    def copy_individuals_with_collections(self) -> QuerySet[Individual]:
+    def copy_individuals_with_collections(self) -> List[Individual]:
         individuals_to_create = []
         for individual in self.copy_from_individuals:
             if not individual.individual_collection:
@@ -100,7 +100,7 @@ class CopyProgramPopulation:
             individuals_to_create.append(self.copy_individual(individual))
         return Individual.objects.bulk_create(individuals_to_create)
 
-    def copy_individuals_without_collections(self) -> QuerySet[Individual]:
+    def copy_individuals_without_collections(self) -> List[Individual]:
         individuals_to_create = []
         for individual in self.copy_from_individuals:
             copied_individual = self.copy_individual(individual)
@@ -108,7 +108,7 @@ class CopyProgramPopulation:
             individuals_to_create.append(copied_individual)
         return Individual.objects.bulk_create(individuals_to_create)
 
-    def copy_household(self, household: Household, new_individuals: list[Individual]) -> Household:
+    def copy_household(self, household: Household, new_individuals: List[Individual]) -> Household:
         copy_from_household_id = household.pk
         household.pk = None
         household.program = self.program
@@ -128,7 +128,7 @@ class CopyProgramPopulation:
 
         return household
 
-    def copy_households_without_collections(self, individuals: list[Individual]) -> QuerySet[Household]:
+    def copy_households_without_collections(self, individuals: List[Individual]) -> List[Household]:
         households_to_create = []
         for household in self.copy_from_households:
             copied_household = self.copy_household(household, individuals)
@@ -136,7 +136,7 @@ class CopyProgramPopulation:
             households_to_create.append(copied_household)
         return Household.objects.bulk_create(households_to_create)
 
-    def copy_households_with_collections(self, individuals: list[Individual]) -> QuerySet[Household]:
+    def copy_households_with_collections(self, individuals: List[Individual]) -> List[Household]:
         households_to_create = []
         for household in self.copy_from_households:
             if not household.household_collection:
@@ -146,7 +146,7 @@ class CopyProgramPopulation:
         return Household.objects.bulk_create(households_to_create)
 
     def copy_household_related_data(
-        self, new_households: QuerySet[Household], new_individuals: QuerySet[Individual]
+        self, new_households: List[Household], new_individuals: List[Individual]
     ) -> None:
         roles_to_create = []
         entitlement_cards_to_create = []
@@ -159,7 +159,7 @@ class CopyProgramPopulation:
     def copy_roles_per_household(
         self,
         new_household: Household,
-        new_individuals: QuerySet[Individual],
+        new_individuals: List[Individual],
     ) -> List[IndividualRoleInHousehold]:
         roles_in_household = []
         copied_from_roles = IndividualRoleInHousehold.objects.filter(household=new_household.copied_from)
@@ -188,7 +188,7 @@ class CopyProgramPopulation:
             entitlement_cards_in_household.append(entitlement_card)
         return entitlement_cards_in_household
 
-    def copy_individual_related_data(self, new_individuals: QuerySet[Individual]) -> None:
+    def copy_individual_related_data(self, new_individuals: List[Individual]) -> None:
         individuals_to_update = []
         documents_to_create = []
         individual_identities_to_create = []
