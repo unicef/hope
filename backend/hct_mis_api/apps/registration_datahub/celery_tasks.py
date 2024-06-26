@@ -150,7 +150,7 @@ def registration_program_population_import_task(
             rdi.save()
 
             RdiProgramPopulationCreateTask().execute(
-                registration_data_import_id=registration_data_import_id,
+                registration_data_import_datahub_id=registration_data_import_id,
                 business_area_id=business_area_id,
                 import_from_program_id=str(import_from_program_id),
                 import_to_program_id=str(import_to_program_id),

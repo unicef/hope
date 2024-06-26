@@ -25,7 +25,8 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory, \
+    RegistrationDataImportDatahubFactory
 from hct_mis_api.apps.registration_data.models import (
     RegistrationDataImport,
     RegistrationDataImportDatahub,
@@ -33,10 +34,6 @@ from hct_mis_api.apps.registration_data.models import (
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     registration_program_population_import_task,
 )
-from hct_mis_api.apps.registration_datahub.fixtures import (
-    RegistrationDataImportDatahubFactory,
-)
-from hct_mis_api.apps.registration_datahub.models import ImportedDocument
 
 
 class TestRegistrationProgramPopulationImportTask(BaseElasticSearchTestCase):
@@ -127,53 +124,53 @@ class TestRegistrationProgramPopulationImportTask(BaseElasticSearchTestCase):
 
     def _imported_objects_count_before(self) -> None:
         self.assertEqual(
-            Household.objects.filter(rdi_merge_status="MERGED").count(),
+            Household.pending_objects.filter().count(),
             0,
         )
         self.assertEqual(
-            Individual.objects.count(),
+            Individual.pending_objects.count(),
             0,
         )
         self.assertEqual(
-            IndividualIdentity.objects.count(),
+            IndividualIdentity.pending_objects.count(),
             0,
         )
         self.assertEqual(
-            ImportedDocument.objects.count(),
+            Document.pending_objects.count(),
             0,
         )
         self.assertEqual(
-            BankAccountInfo.objects.count(),
+            BankAccountInfo.pending_objects.count(),
             0,
         )
         self.assertEqual(
-            IndividualRoleInHousehold.objects.count(),
+            IndividualRoleInHousehold.pending_objects.count(),
             0,
         )
 
     def _imported_objects_count_after(self, multiplier: int = 1) -> None:
         self.assertEqual(
-            Household.objects.count(),
+            Household.pending_objects.count(),
             1 * multiplier,
         )
         self.assertEqual(
-            Individual.objects.count(),
+            Individual.pending_objects.count(),
             2 * multiplier,
         )
         self.assertEqual(
-            IndividualIdentity.objects.count(),
+            IndividualIdentity.pending_objects.count(),
             1 * multiplier,
         )
         self.assertEqual(
-            Document.objects.count(),
+            Document.pending_objects.count(),
             1 * multiplier,
         )
         self.assertEqual(
-            BankAccountInfo.objects.count(),
+            BankAccountInfo.pending_objects.count(),
             1 * multiplier,
         )
         self.assertEqual(
-            IndividualRoleInHousehold.objects.count(),
+            IndividualRoleInHousehold.pending_objects.count(),
             1 * multiplier,
         )
 
