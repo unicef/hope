@@ -92,6 +92,7 @@ class ProgrammeDetails(BaseComponents):
     def getButtonFinishProgram(self) -> WebElement:
         return self.wait_for(self.buttonFinishProgram)
 
-    def getButtonFinishProgramPopup(self) -> WebElement:
+    def clickButtonFinishProgramPopup(self) -> None:
         self.wait_for('[data-cy="dialog-actions-container"]')
-        return self.get_elements(self.buttonFinishProgram)[1]
+        self.get_elements(self.buttonFinishProgram)[1].click()
+        self.wait_for_disappear('[data-cy="dialog-actions-container"]')
