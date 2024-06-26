@@ -8,6 +8,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute
 from hct_mis_api.apps.core.utils import get_attr_value
 from hct_mis_api.apps.core.validators import BaseValidator
+from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
@@ -135,7 +136,8 @@ class TargetingCriteriaRuleInputValidator:
 
 class TargetingCriteriaInputValidator:
     @staticmethod
-    def validate(targeting_criteria: Dict, program_dct: DataCollectingType) -> None:
+    def validate(targeting_criteria: Dict, program: Program) -> None:
+        program_dct = program.data_collecting_type
         rules = targeting_criteria.get("rules", [])
         household_ids = targeting_criteria.get("household_ids")
         individual_ids = targeting_criteria.get("individual_ids")
@@ -151,6 +153,22 @@ class TargetingCriteriaInputValidator:
         if individual_ids and not program_dct.individual_filters_available:
             logger.error("Target criteria can has only household ids")
             raise ValidationError("Target criteria can has only household ids")
+
+        if household_ids:
+            ids_list = household_ids.split(",")
+            ids_list = [i.strip() for i in ids_list]
+            ids_list = [i for i in ids_list if i.startswith("HH")]
+            if not Household.objects.filter(unicef_id__in=ids_list, program=program).exists():
+                logger.error("The given households do not exist in the current program")
+                raise ValidationError("The given households do not exist in the current program")
+
+        if individual_ids:
+            ids_list = individual_ids.split(",")
+            ids_list = [i.strip() for i in ids_list]
+            ids_list = [i for i in ids_list if i.startswith("IND")]
+            if not Individual.objects.filter(unicef_id__in=ids_list, program=program).exists():
+                logger.error("The given individuals do not exist in the current program")
+                raise ValidationError("The given individuals do not exist in the current program")
 
         if len(rules) < 1 and not household_ids and not individual_ids:
             logger.error("There should be at least 1 rule in target criteria")

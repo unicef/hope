@@ -159,7 +159,7 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         targeting_criteria_input = input_data.get("targeting_criteria")
 
         business_area = BusinessArea.objects.get(slug=input_data.pop("business_area_slug"))
-        TargetingCriteriaInputValidator.validate(targeting_criteria_input, program.data_collecting_type)
+        TargetingCriteriaInputValidator.validate(targeting_criteria_input, program)
         targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
         target_population = TargetPopulation(
             name=tp_name,
@@ -251,7 +251,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
 
         if targeting_criteria_input:
             should_rebuild_list = True
-            TargetingCriteriaInputValidator.validate(targeting_criteria_input, program.data_collecting_type)
+            TargetingCriteriaInputValidator.validate(targeting_criteria_input, program)
             targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
             if target_population.status == TargetPopulation.STATUS_OPEN:
                 if target_population.targeting_criteria:
