@@ -15,13 +15,15 @@ from hct_mis_api.apps.household.models import (
     FEMALE,
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    MALE, DocumentType, PendingHousehold, PendingIndividual, PendingDocument,
+    MALE,
+    DocumentType,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import (
-    RegistrationDataImport,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 class TestPushPeople(HOPEApiTestCase):

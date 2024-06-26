@@ -5,8 +5,8 @@ from django.db.transaction import atomic
 from django.http import Http404
 from django.utils import timezone
 from django.utils.functional import cached_property
-from django_countries import Countries
 
+from django_countries import Countries
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
 from rest_framework.request import Request
@@ -23,11 +23,13 @@ from hct_mis_api.apps.household.models import (
     HEAD,
     NON_BENEFICIARY,
     RESIDENCE_STATUS_CHOICE,
-    ROLE_PRIMARY, Household, Individual, Document, DocumentType,
+    ROLE_PRIMARY,
+    Document,
+    DocumentType,
+    Household,
+    Individual,
 )
-from hct_mis_api.apps.registration_data.models import (
-    RegistrationDataImport,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 PEOPLE_TYPE_CHOICES = (
     (BLANK, "None"),

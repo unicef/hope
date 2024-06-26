@@ -46,7 +46,10 @@ from hct_mis_api.apps.utils.models import (
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
-from hct_mis_api.apps.utils.phone import recalculate_phone_numbers_validity, calculate_phone_numbers_validity
+from hct_mis_api.apps.utils.phone import (
+    calculate_phone_numbers_validity,
+    recalculate_phone_numbers_validity,
+)
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.registration_datahub.models import Record

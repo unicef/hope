@@ -27,7 +27,8 @@ from hct_mis_api.apps.household.models import (
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_NO_ROLE,
-    ROLE_PRIMARY, Document,
+    ROLE_PRIMARY,
+    Document,
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import (
