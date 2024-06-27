@@ -104,3 +104,8 @@ class TestSmokeManagerialConsole:
         pageManagerialConsole.getSelectAllRelease().click()
         pageManagerialConsole.getReleaseButton().click()
         pageManagerialConsole.getButtonCancel().click()
+
+    def test_managerial_console_happy_path(
+        self, pageManagerialConsole: ManagerialConsole, create_active_test_program: Program
+    ) -> None:
+        pageManagerialConsole.getNavManagerialConsole().click()
