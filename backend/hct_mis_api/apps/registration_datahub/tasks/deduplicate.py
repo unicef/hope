@@ -4,10 +4,11 @@ from collections import defaultdict
 from dataclasses import dataclass, fields
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
-from constance import config
 from django.db import transaction
 from django.db.models import Case, CharField, F, Q, QuerySet, Value, When
 from django.db.models.functions import Concat
+
+from constance import config
 from psycopg2._psycopg import IntegrityError
 
 from hct_mis_api.apps.activity_log.models import log_create
@@ -23,12 +24,12 @@ from hct_mis_api.apps.household.models import (
     DUPLICATE_IN_BATCH,
     NEEDS_ADJUDICATION,
     NOT_PROCESSED,
+    SIMILAR_IN_BATCH,
     UNIQUE,
     UNIQUE_IN_BATCH,
     Document,
     Individual,
     PendingIndividual,
-    SIMILAR_IN_BATCH,
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
