@@ -1,8 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
+
+from django.utils import timezone
 
 import pytest
-from dateutil.relativedelta import relativedelta
-from django.utils import timezone
+from page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from page_object.grievance.grievance_dashboard import GrievanceDashboard
 from page_object.grievance.grievance_tickets import GrievanceTickets
 
@@ -10,7 +11,6 @@ from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.program.models import Program
-
 from selenium_tests.helpers.fixtures import get_program_with_dct_type_and_name
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -53,42 +53,48 @@ def grievances() -> [GrievanceTicket]:
     GrievanceTicket._meta.get_field("created_at").auto_now_add = False
     GrievanceTicket._meta.get_field("updated_at").auto_now = False
     grievances = list()
-    grievances.append(generate_grievance(
-        created_at=str(timezone.now() - timedelta(days=20)),
-        updated_at=str(timezone.now()),
-        status=GrievanceTicket.STATUS_FOR_APPROVAL,
-    ))
-    grievances.append(generate_grievance(
-        created_at=str(timezone.now() - timedelta(days=40)),
-        status=GrievanceTicket.STATUS_FOR_APPROVAL,
-    ))
-    grievances.append(generate_grievance(
-        created_at=str(timezone.now() - timedelta(days=60)),
-        status=GrievanceTicket.STATUS_FOR_APPROVAL,
-        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-    ))
+    grievances.append(
+        generate_grievance(
+            created_at=str(timezone.now() - timedelta(days=20)),
+            updated_at=str(timezone.now()),
+            status=GrievanceTicket.STATUS_NEW,
+        )
+    )
+    grievances.append(
+        generate_grievance(
+            created_at=str(timezone.now() - timedelta(days=40)),
+            status=GrievanceTicket.STATUS_NEW,
+        )
+    )
+    grievances.append(
+        generate_grievance(
+            created_at=str(timezone.now() - timedelta(days=60)),
+            status=GrievanceTicket.STATUS_NEW,
+            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        )
+    )
     GrievanceTicket._meta.get_field("created_at").auto_now_add = True
     GrievanceTicket._meta.get_field("updated_at").auto_now = True
     return grievances
 
 
 def generate_grievance(
-        unicef_id: str = "GRV-0000001",
-        status: int = GrievanceTicket.STATUS_NEW,
-        category: int = GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-        created_by: User | None = None,
-        assigned_to: User | None = None,
-        business_area: BusinessArea | None = None,
-        priority: int = 1,
-        urgency: int = 1,
-        household_unicef_id: str = "HH-20-0000.0001",
-        updated_at: str = "2023-09-27T11:26:33.846Z",
-        created_at: str = "2022-04-30T09:54:07.827000",
-) -> None:
+    unicef_id: str = "GRV-0000001",
+    status: int = GrievanceTicket.STATUS_NEW,
+    category: int = GrievanceTicket.CATEGORY_REFERRAL,
+    created_by: User | None = None,
+    assigned_to: User | None = None,
+    business_area: BusinessArea | None = None,
+    priority: int = 1,
+    urgency: int = 1,
+    household_unicef_id: str = "HH-20-0000.0001",
+    updated_at: str = "2023-09-27T11:26:33.846Z",
+    created_at: str = "2022-04-30T09:54:07.827000",
+) -> GrievanceTicket:
     created_by = User.objects.first() if created_by is None else created_by
     assigned_to = User.objects.first() if assigned_to is None else assigned_to
     business_area = BusinessArea.objects.filter(slug="afghanistan").first() if business_area is None else business_area
-    GrievanceTicket.objects.create(
+    return GrievanceTicket.objects.create(
         **{
             "business_area": business_area,
             "unicef_id": unicef_id,
@@ -111,10 +117,10 @@ def generate_grievance(
 @pytest.mark.usefixtures("login")
 class TestSmokeGrievanceDashboard:
     def test_smoke_grievance_dashboard(
-            self,
-            active_program: Program,
-            add_grievances: None,
-            pageGrievanceDashboard: GrievanceDashboard,
+        self,
+        active_program: Program,
+        add_grievances: None,
+        pageGrievanceDashboard: GrievanceDashboard,
     ) -> None:
         pageGrievanceDashboard.getNavGrievance().click()
         pageGrievanceDashboard.getNavGrievanceDashboard().click()
@@ -128,20 +134,21 @@ class TestSmokeGrievanceDashboard:
         assert "25" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsUserGenerated().text
         assert "421.25 days" in pageGrievanceDashboard.getTicketsAverageResolutionTopNumber().text
         assert (
-                "515 days"
-                in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated().text
+            "515 days"
+            in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated().text
         )
         assert (
-                "365 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionUserGenerated().text
+            "365 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionUserGenerated().text
         )
         GrievanceTicket._meta.get_field("updated_at").auto_now = True
 
     def test_grievance_dashboard_happy_path(
-            self,
-            active_program: Program,
-            grievances: [GrievanceTicket],
-            pageGrievanceDashboard: GrievanceDashboard,
-            pageGrievanceTickets: GrievanceTickets,
+        self,
+        active_program: Program,
+        grievances: [GrievanceTicket],
+        pageGrievanceDashboard: GrievanceDashboard,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         pageGrievanceDashboard.getNavGrievanceDashboard().click()
@@ -154,21 +161,18 @@ class TestSmokeGrievanceDashboard:
         assert "0" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsUserGenerated().text
         assert "0 days" in pageGrievanceDashboard.getTicketsAverageResolutionTopNumber().text
         assert (
-                "0 days"
-                in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated().text
+            "0 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated().text
         )
-        assert (
-                "0 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionUserGenerated().text
-        )
+        assert "0 days" in pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionUserGenerated().text
 
         pageGrievanceTickets.getNavGrievance().click()
         pageGrievanceTickets.getTicketListRow()[0].click()
-        pageGrievanceTickets.getButtonCloseTicket().click()
+        pageGrievanceDetailsPage.getButtonAssignToMe().click()
+        pageGrievanceDetailsPage.getButtonSetInProgress().click()
+        pageGrievanceDetailsPage.getButtonCloseTicket().click()
         pageGrievanceTickets.getButtonConfirm().click()
         pageGrievanceTickets.screenshot("1")
         pageGrievanceTickets.getNavGrievance().click()
-        # with pytest.raises(Exception):
-        #     pageGrievanceDashboard.getNavGrievanceDashboard().click()
         pageGrievanceTickets.getNavGrievance().click()
         pageGrievanceDashboard.getNavGrievanceDashboard().click()
         pageGrievanceTickets.screenshot("2")
@@ -180,9 +184,6 @@ class TestSmokeGrievanceDashboard:
         print(pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsSystemGenerated().text)
         print(pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfClosedTicketsUserGenerated().text)
         print(pageGrievanceDashboard.getTicketsAverageResolutionTopNumber().text)
-        print(
-            pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated().text
-        )
-        print(
-            pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionUserGenerated().text
-        )
+        print(pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionSystemGenerated().text)
+        print(pageGrievanceDashboard.getLabelizedFieldContainerTicketsAverageResolutionUserGenerated().text)
+        assert "1" in pageGrievanceDashboard.getTotalNumberOfClosedTicketsTopNumber().text
