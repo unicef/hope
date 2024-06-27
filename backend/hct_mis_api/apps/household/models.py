@@ -46,7 +46,10 @@ from hct_mis_api.apps.utils.models import (
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
-from hct_mis_api.apps.utils.phone import recalculate_phone_numbers_validity
+from hct_mis_api.apps.utils.phone import (
+    calculate_phone_numbers_validity,
+    recalculate_phone_numbers_validity,
+)
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.registration_datahub.models import Record
@@ -618,7 +621,8 @@ class Household(
             new_admin_area = self.admin_area
         else:
             self.admin_area = new_admin_area
-
+        if not new_admin_area:
+            return
         for admin in admins:
             setattr(self, admin, None)
 
@@ -1250,6 +1254,9 @@ class Individual(
         self.flex_fields = {}
         self.save()
 
+    def validate_phone_numbers(self) -> None:
+        calculate_phone_numbers_validity(self)
+
     def save(self, *args: Any, **kwargs: Any) -> None:
         recalculate_phone_numbers_validity(self, Individual)
         super().save(*args, **kwargs)
@@ -1342,6 +1349,14 @@ class PendingHousehold(Household):
     def pending_representatives(self) -> QuerySet:
         return super().representatives(manager="pending_objects")
 
+    @cached_property
+    def primary_collector(self) -> Optional["Individual"]:
+        return self.pending_representatives.get(households_and_roles__role=ROLE_PRIMARY)
+
+    @cached_property
+    def alternate_collector(self) -> Optional["Individual"]:
+        return self.pending_representatives.filter(households_and_roles__role=ROLE_ALTERNATE).first()
+
     class Meta:
         proxy = True
         verbose_name = "Imported Household"
@@ -1366,6 +1381,10 @@ class PendingIndividual(Individual):
     @property
     def bank_account_info(self) -> QuerySet:
         return super().bank_account_info(manager="pending_objects")
+
+    @property
+    def pending_household(self) -> QuerySet:
+        return PendingHousehold.objects.get(pk=self.household.pk)
 
     class Meta:
         proxy = True

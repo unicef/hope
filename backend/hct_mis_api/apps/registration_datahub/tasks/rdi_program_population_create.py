@@ -9,48 +9,51 @@ from hct_mis_api.apps.registration_data.models import (
     RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hct_mis_api.apps.registration_datahub.tasks.objects_to_imported_objects import (
-    CreateImportedObjectsFromObjectsTask,
+from hct_mis_api.apps.registration_datahub.tasks.import_program_population import (
+    import_program_population,
 )
 
 logger = logging.getLogger(__name__)
 
 
 class RdiProgramPopulationCreateTask:
-    @transaction.atomic(using="registration_datahub")
+    @transaction.atomic()
     def execute(
         self,
-        registration_data_import_id: str,
+        registration_data_import_datahub_id: str,
         business_area_id: str,
         import_from_program_id: str,
         import_to_program_id: str,
     ) -> None:
-        registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
-            id=registration_data_import_id,
+        registration_data_import_datahub = RegistrationDataImportDatahub.objects.select_for_update().get(
+            id=registration_data_import_datahub_id,
         )
-        registration_data_import.import_done = RegistrationDataImportDatahub.STARTED
-        registration_data_import.save()
+        registration_data_import_datahub.import_done = RegistrationDataImportDatahub.STARTED
+        registration_data_import_datahub.save()
 
-        self.business_area = BusinessArea.objects.get(id=business_area_id)
+        business_area = BusinessArea.objects.get(id=business_area_id)
 
-        CreateImportedObjectsFromObjectsTask().execute(
-            registration_data_import.hct_id,
+        old_rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
+        import_program_population(
             import_from_program_id,
+            import_to_program_id,
+            old_rdi_mis,
         )
-        registration_data_import.import_done = RegistrationDataImportDatahub.DONE
-        registration_data_import.save()
-        old_rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
-        if not self.business_area.postpone_deduplication:
-            logger.info("Starting deduplication of %s", registration_data_import.id)
-            rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
+
+        registration_data_import_datahub.import_done = RegistrationDataImportDatahub.DONE
+        registration_data_import_datahub.save()
+
+        if not business_area.postpone_deduplication:
+            logger.info("Starting deduplication of %s", registration_data_import_datahub.id)
+            rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
             rdi_mis.status = RegistrationDataImport.DEDUPLICATION
             rdi_mis.save()
-            DeduplicateTask(self.business_area.slug, str(import_to_program_id)).deduplicate_imported_individuals(
-                registration_data_import_datahub=registration_data_import
+            DeduplicateTask(business_area.slug, str(import_to_program_id)).deduplicate_pending_individuals(
+                registration_data_import_datahub=registration_data_import_datahub
             )
-            logger.info("Finished deduplication of %s", registration_data_import.id)
+            logger.info("Finished deduplication of %s", registration_data_import_datahub.id)
         else:
-            rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
+            rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
             rdi_mis.status = RegistrationDataImport.IN_REVIEW
             rdi_mis.save()
             log_create(

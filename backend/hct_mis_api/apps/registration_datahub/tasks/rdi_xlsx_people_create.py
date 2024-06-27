@@ -110,9 +110,14 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
 
                 if sheet_title == "individuals":
                     obj_to_create.household = self.households[self.index_id]
-
-                if header in complex_fields[sheet_title]:
-                    if header in ("country_h_c", "country_origin_h_c"):
+                else:
+                    if header in ("pp_admin1_i_c", "pp_admin2_i_c", "pp_admin3_i_c", "pp_admin4_i_c"):
+                        setattr(
+                            obj_to_create,
+                            combined_fields[header]["name"],
+                            Area.objects.get(p_code=cell.value),
+                        )
+                    elif header in ("pp_country_i_c", "pp_country_origin_i_c"):
                         from hct_mis_api.apps.geo.models import Country as GeoCountry
 
                         setattr(
@@ -120,30 +125,24 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                             combined_fields[header]["name"],
                             GeoCountry.objects.get(iso_code3=cell.value),
                         )
-                    elif header in ("admin1_h_c", "admin2_h_c"):
+
+                if header in complex_fields[sheet_title]:
+                    fn_complex: Callable = complex_fields[sheet_title][header]
+                    value = fn_complex(
+                        value=cell_value,
+                        cell=cell,
+                        header=header,
+                        row_num=cell.row,
+                        individual=obj_to_create if sheet_title == "individuals" else None,
+                        household=obj_to_create if sheet_title == "households" else None,
+                        is_field_required=current_field.get("required", False),
+                    )
+                    if value is not None:
                         setattr(
                             obj_to_create,
                             combined_fields[header]["name"],
-                            Area.objects.get(p_code=cell.value),
+                            value,
                         )
-                    else:
-                        fn_complex: Callable = complex_fields[sheet_title][header]
-                        value = fn_complex(
-                            value=cell_value,
-                            cell=cell,
-                            header=header,
-                            row_num=cell.row,
-                            individual=obj_to_create if sheet_title == "individuals" else None,
-                            household=obj_to_create if sheet_title == "households" else None,
-                            is_field_required=current_field.get("required", False),
-                        )
-
-                        if value is not None:
-                            setattr(
-                                obj_to_create,
-                                combined_fields[header]["name"],
-                                value,
-                            )
                 elif hasattr(
                     obj_to_create,
                     combined_fields[header]["name"],
@@ -289,10 +288,10 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
 
     @transaction.atomic()
     def execute(
-        self, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: str
+        self, registration_data_import_datahub_id: str, import_data_id: str, business_area_id: str, program_id: str
     ) -> None:
         registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
-            id=registration_data_import_id,
+            id=registration_data_import_datahub_id,
         )
         registration_data_import.import_done = RegistrationDataImportDatahub.STARTED
         registration_data_import.save()
@@ -318,7 +317,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
             rdi_mis.status = RegistrationDataImport.DEDUPLICATION
             rdi_mis.save()
-            DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_imported_individuals(
+            DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_pending_individuals(
                 registration_data_import_datahub=registration_data_import
             )
             logger.info("Finished deduplication of %s", registration_data_import.id)

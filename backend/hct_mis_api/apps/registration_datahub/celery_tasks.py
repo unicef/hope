@@ -38,9 +38,9 @@ def handle_rdi_exception(datahub_rdi_id: str, e: BaseException) -> None:
         from sentry_sdk import capture_exception
 
         err = capture_exception(e)
-    except Exception:
+    except Exception as e:
         err = "N/A"
-
+        logger.exception(e)
     RegistrationDataImport.objects.filter(
         datahub_id=datahub_rdi_id,
     ).update(status=RegistrationDataImport.IMPORT_ERROR, sentry_id=err, error_message=str(e))
@@ -97,14 +97,14 @@ def registration_xlsx_import_task(
 
             if is_social_worker_program:
                 RdiXlsxPeopleCreateTask().execute(
-                    registration_data_import_id=registration_data_import_id,
+                    registration_data_import_datahub_id=registration_data_import_id,
                     import_data_id=import_data_id,
                     business_area_id=business_area_id,
                     program_id=str(program_id),
                 )
             else:
                 RdiXlsxCreateTask().execute(
-                    registration_data_import_id=registration_data_import_id,
+                    registration_data_import_datahub_id=registration_data_import_id,
                     import_data_id=import_data_id,
                     business_area_id=business_area_id,
                     program_id=str(program_id),
@@ -150,7 +150,7 @@ def registration_program_population_import_task(
             rdi.save()
 
             RdiProgramPopulationCreateTask().execute(
-                registration_data_import_id=registration_data_import_id,
+                registration_data_import_datahub_id=registration_data_import_id,
                 business_area_id=business_area_id,
                 import_from_program_id=str(import_from_program_id),
                 import_to_program_id=str(import_to_program_id),
@@ -264,7 +264,7 @@ def registration_xlsx_import_hourly_task(self: Any) -> None:
         set_sentry_business_area_tag(business_area.name)
 
         RdiXlsxCreateTask().execute(
-            registration_data_import_id=str(not_started_rdi.id),
+            registration_data_import_datahub_id=str(not_started_rdi.id),
             import_data_id=str(not_started_rdi.import_data.id),
             business_area_id=str(business_area.id),
             program_id=str(program_id),
@@ -329,7 +329,7 @@ def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
         set_sentry_business_area_tag(rdi_obj.business_area_slug)
 
         with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
-            DeduplicateTask(rdi_obj.business_area_slug, program_id).deduplicate_imported_individuals(
+            DeduplicateTask(rdi_obj.business_area_slug, program_id).deduplicate_pending_individuals(
                 registration_data_import_datahub=rdi_obj
             )
     except Exception as e:

@@ -34,8 +34,9 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
+    Document,
     DocumentType,
-    PendingDocument,
+    IndividualIdentity,
     PendingHousehold,
     PendingIndividual,
     PendingIndividualIdentity,
@@ -90,7 +91,7 @@ class ImportedDocumentNode(DjangoObjectType):
         return None
 
     class Meta:
-        model = PendingDocument
+        model = Document
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
@@ -105,7 +106,7 @@ class ImportedIndividualIdentityNode(DjangoObjectType):
         return getattr(parent.country, "name", parent.country)
 
     class Meta:
-        model = PendingIndividualIdentity
+        model = IndividualIdentity
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
@@ -165,6 +166,9 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_age(parent: Any, info: Any) -> Int:
         return parent.age
 
+    def resolve_documents(parent, info: Any) -> List[Set["UUID"]]:
+        return parent.documents.all()
+
     def resolve_import_id(parent, info: Any) -> str:
         row = ""
         resp = str(parent.mis_unicef_id) if parent.mis_unicef_id else str(parent.id)
@@ -219,10 +223,10 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     import_id = graphene.String()
 
     def resolve_country(parent, info: Any) -> str:
-        return parent.country.name
+        return parent.country.name if parent.country else ""
 
     def resolve_country_origin(parent, info: Any) -> str:
-        return parent.country_origin.name
+        return parent.country_origin.name if parent.country_origin else ""
 
     def resolve_has_duplicates(parent, info: Any) -> bool:
         return parent.individuals.filter(

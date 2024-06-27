@@ -256,7 +256,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             rdi_mis,
         )
         if not self.business_area.postpone_deduplication:
-            DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_imported_individuals(
+            DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_pending_individuals(
                 registration_data_import_datahub=registration_data_import
             )
 
