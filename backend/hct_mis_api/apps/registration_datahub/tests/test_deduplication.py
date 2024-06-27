@@ -242,7 +242,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
         task = DeduplicateTask(self.business_area.slug, self.program.id)
 
         with self.assertNumQueries(11):
-            task.deduplicate_imported_individuals(self.registration_data_import_datahub)
+            task.deduplicate_pending_individuals(self.registration_data_import_datahub)
         duplicate_in_batch = ImportedIndividual.objects.order_by("full_name").filter(
             deduplication_batch_status=DUPLICATE_IN_BATCH
         )

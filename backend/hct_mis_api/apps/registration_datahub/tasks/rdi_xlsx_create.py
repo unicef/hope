@@ -1,5 +1,6 @@
 import json
 import logging
+import traceback
 import uuid
 from collections import defaultdict
 from datetime import datetime
@@ -423,6 +424,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 photo=photo,
                 individual=individual,
                 type=doc_type,
+                program=individual.program,
             )
 
             docs_to_create.append(obj)
@@ -627,7 +629,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                     combined_fields[header]["name"],
                                     GeoCountry.objects.get(iso_code3=value),
                                 )
-                            elif header in ("admin1_h_c", "admin2_h_c"):
+                            elif header in ("admin1_h_c", "admin2_h_c", "admin3_h_c", "admin4_h_c"):
                                 setattr(
                                     obj_to_create,
                                     combined_fields[header]["name"],
@@ -662,7 +664,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 obj_to_create.detail_id = row[0].row
                 obj_to_create.business_area = rdi.business_area
                 if sheet_title == "households":
-                    obj_to_create.set_admin_areas(save=False)
                     self.households[household_id] = obj_to_create
                 else:
                     if household_id is None:
@@ -692,48 +693,54 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
     @transaction.atomic
     def execute(
-        self, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: str
+        self, registration_data_import_datahub_id: str, import_data_id: str, business_area_id: str, program_id: str
     ) -> None:
-        registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
-            id=registration_data_import_id,
-        )
-        registration_data_import.import_done = RegistrationDataImportDatahub.STARTED
-        registration_data_import.save()
-
-        import_data = ImportData.objects.get(id=import_data_id)
-
-        self.business_area = BusinessArea.objects.get(id=business_area_id)
-
-        wb = openpyxl.load_workbook(import_data.file, data_only=True)
-
-        # households objects have to be created first
-        worksheets = (wb["Households"], wb["Individuals"])
-        logger.info("Starting import of %s", registration_data_import.id)
-        for sheet in worksheets:
-            self.image_loader = SheetImageLoader(sheet)
-            self._create_objects(sheet, registration_data_import)
-
-        registration_data_import.import_done = RegistrationDataImportDatahub.DONE
-        registration_data_import.save()
-        old_rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
-        if not self.business_area.postpone_deduplication:
-            logger.info("Starting deduplication of %s", registration_data_import.id)
-            rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
-            rdi_mis.status = RegistrationDataImport.DEDUPLICATION
-            rdi_mis.save()
-            DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_imported_individuals(
-                registration_data_import_datahub=registration_data_import
+        try:
+            registration_data_import_datahub = RegistrationDataImportDatahub.objects.select_for_update().get(
+                id=registration_data_import_datahub_id,
             )
-            logger.info("Finished deduplication of %s", registration_data_import.id)
-        else:
-            rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
-            rdi_mis.status = RegistrationDataImport.IN_REVIEW
-            rdi_mis.save()
-            log_create(
-                RegistrationDataImport.ACTIVITY_LOG_MAPPING,
-                "business_area",
-                None,
-                rdi_mis.program_id,
-                old_rdi_mis,
-                rdi_mis,
-            )
+            registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
+            registration_data_import_datahub.import_done = RegistrationDataImportDatahub.STARTED
+            registration_data_import_datahub.save()
+
+            import_data = ImportData.objects.get(id=import_data_id)
+
+            self.business_area = BusinessArea.objects.get(id=business_area_id)
+
+            wb = openpyxl.load_workbook(import_data.file, data_only=True)
+
+            # households objects have to be created first
+            worksheets = (wb["Households"], wb["Individuals"])
+            logger.info("Starting import of %s", registration_data_import_datahub.id)
+            for sheet in worksheets:
+                self.image_loader = SheetImageLoader(sheet)
+                self._create_objects(sheet, registration_data_import_datahub)
+
+            registration_data_import_datahub.import_done = RegistrationDataImportDatahub.DONE
+            registration_data_import_datahub.save()
+            old_rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
+            if not self.business_area.postpone_deduplication:
+                logger.info("Starting deduplication of %s", registration_data_import_datahub.id)
+                rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
+                rdi_mis.status = RegistrationDataImport.DEDUPLICATION
+                rdi_mis.save()
+                DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_pending_individuals(
+                    registration_data_import=registration_data_import
+                )
+                logger.info("Finished deduplication of %s", registration_data_import_datahub.id)
+            else:
+                rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
+                rdi_mis.status = RegistrationDataImport.IN_REVIEW
+                rdi_mis.save()
+                log_create(
+                    RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+                    "business_area",
+                    None,
+                    rdi_mis.program_id,
+                    old_rdi_mis,
+                    rdi_mis,
+                )
+        except Exception:
+            # print stack trace
+            print(traceback.format_exc())
+            raise

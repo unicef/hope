@@ -374,7 +374,7 @@ export type BankAccountInfoNode = Node & {
   isOriginal: Scalars['Boolean']['output'];
   isRemoved: Scalars['Boolean']['output'];
   lastSyncAt?: Maybe<Scalars['DateTime']['output']>;
-  rdiMergeStatus?: Maybe<BankAccountInfoRdiMergeStatus>;
+  rdiMergeStatus: BankAccountInfoRdiMergeStatus;
   removedDate?: Maybe<Scalars['DateTime']['output']>;
   type?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
@@ -1537,7 +1537,7 @@ export type DocumentNode = Node & {
   lastSyncAt?: Maybe<Scalars['DateTime']['output']>;
   photo?: Maybe<Scalars['String']['output']>;
   program?: Maybe<ProgramNode>;
-  rdiMergeStatus?: Maybe<DocumentRdiMergeStatus>;
+  rdiMergeStatus: DocumentRdiMergeStatus;
   status: DocumentStatus;
   type: DocumentTypeNode;
   updatedAt: Scalars['DateTime']['output'];
@@ -2479,7 +2479,7 @@ export type HouseholdNode = Node & {
   program?: Maybe<ProgramNode>;
   programRegistrationId?: Maybe<Scalars['String']['output']>;
   programs: ProgramNodeConnection;
-  rdiMergeStatus?: Maybe<HouseholdRdiMergeStatus>;
+  rdiMergeStatus: HouseholdRdiMergeStatus;
   referralTicketDetails: TicketReferralDetailsNodeConnection;
   registrationDataImport?: Maybe<RegistrationDataImportNode>;
   registrationId?: Maybe<Scalars['String']['output']>;
@@ -2878,6 +2878,7 @@ export type ImportedDocumentNode = Node & {
   clearedBy?: Maybe<UserNode>;
   clearedDate: Scalars['DateTime']['output'];
   copiedFrom?: Maybe<DocumentNode>;
+  copiedTo: DocumentNodeConnection;
   country?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   documentNumber: Scalars['String']['output'];
@@ -2891,10 +2892,19 @@ export type ImportedDocumentNode = Node & {
   lastSyncAt?: Maybe<Scalars['DateTime']['output']>;
   photo?: Maybe<Scalars['String']['output']>;
   program?: Maybe<ProgramNode>;
-  rdiMergeStatus?: Maybe<DocumentRdiMergeStatus>;
+  rdiMergeStatus: DocumentRdiMergeStatus;
   status: DocumentStatus;
   type: DocumentTypeNode;
   updatedAt: Scalars['DateTime']['output'];
+};
+
+
+export type ImportedDocumentNodeCopiedToArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type ImportedDocumentNodeConnection = {
@@ -2988,7 +2998,7 @@ export type ImportedHouseholdNode = Node & {
   pregnantCount?: Maybe<Scalars['Int']['output']>;
   program?: Maybe<ProgramNode>;
   programRegistrationId?: Maybe<Scalars['String']['output']>;
-  rdiMergeStatus?: Maybe<HouseholdRdiMergeStatus>;
+  rdiMergeStatus: HouseholdRdiMergeStatus;
   registrationDataImport?: Maybe<RegistrationDataImportNode>;
   registrationId?: Maybe<Scalars['String']['output']>;
   registrationMethod: HouseholdRegistrationMethod;
@@ -3036,6 +3046,7 @@ export type ImportedHouseholdNodeEdge = {
 export type ImportedIndividualIdentityNode = Node & {
   __typename?: 'ImportedIndividualIdentityNode';
   copiedFrom?: Maybe<IndividualIdentityNode>;
+  copiedTo: IndividualIdentityNodeConnection;
   country?: Maybe<Scalars['String']['output']>;
   created: Scalars['DateTime']['output'];
   id: Scalars['ID']['output'];
@@ -3046,7 +3057,16 @@ export type ImportedIndividualIdentityNode = Node & {
   modified: Scalars['DateTime']['output'];
   number: Scalars['String']['output'];
   partner?: Maybe<Scalars['String']['output']>;
-  rdiMergeStatus?: Maybe<IndividualIdentityRdiMergeStatus>;
+  rdiMergeStatus: IndividualIdentityRdiMergeStatus;
+};
+
+
+export type ImportedIndividualIdentityNodeCopiedToArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type ImportedIndividualIdentityNodeConnection = {
@@ -3124,7 +3144,7 @@ export type ImportedIndividualNode = Node & {
   pregnant?: Maybe<Scalars['Boolean']['output']>;
   program?: Maybe<ProgramNode>;
   programRegistrationId?: Maybe<Scalars['String']['output']>;
-  rdiMergeStatus?: Maybe<IndividualRdiMergeStatus>;
+  rdiMergeStatus: IndividualRdiMergeStatus;
   registrationDataImport?: Maybe<RegistrationDataImportNode>;
   registrationId?: Maybe<Scalars['String']['output']>;
   relationship?: Maybe<Scalars['String']['output']>;
@@ -3238,7 +3258,7 @@ export type IndividualIdentityNode = Node & {
   modified: Scalars['DateTime']['output'];
   number: Scalars['String']['output'];
   partner?: Maybe<Scalars['String']['output']>;
-  rdiMergeStatus?: Maybe<IndividualIdentityRdiMergeStatus>;
+  rdiMergeStatus: IndividualIdentityRdiMergeStatus;
 };
 
 
@@ -3359,7 +3379,7 @@ export type IndividualNode = Node & {
   pregnant?: Maybe<Scalars['Boolean']['output']>;
   program?: Maybe<ProgramNode>;
   programRegistrationId?: Maybe<Scalars['String']['output']>;
-  rdiMergeStatus?: Maybe<IndividualRdiMergeStatus>;
+  rdiMergeStatus: IndividualRdiMergeStatus;
   referralTicketDetails: TicketReferralDetailsNodeConnection;
   registrationDataImport?: Maybe<RegistrationDataImportNode>;
   registrationId?: Maybe<Scalars['String']['output']>;
@@ -3617,7 +3637,7 @@ export type IndividualRoleInHouseholdNode = {
   isRemoved: Scalars['Boolean']['output'];
   lastSyncAt?: Maybe<Scalars['DateTime']['output']>;
   migratedAt?: Maybe<Scalars['DateTime']['output']>;
-  rdiMergeStatus?: Maybe<IndividualRoleInHouseholdRdiMergeStatus>;
+  rdiMergeStatus: IndividualRoleInHouseholdRdiMergeStatus;
   role?: Maybe<IndividualRoleInHouseholdRole>;
   updatedAt: Scalars['DateTime']['output'];
 };
@@ -24804,7 +24824,7 @@ export type BankAccountInfoNodeResolvers<ContextType = any, ParentType extends R
   isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
-  rdiMergeStatus?: Resolver<Maybe<ResolversTypes['BankAccountInfoRdiMergeStatus']>, ParentType, ContextType>;
+  rdiMergeStatus?: Resolver<ResolversTypes['BankAccountInfoRdiMergeStatus'], ParentType, ContextType>;
   removedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
@@ -25422,7 +25442,7 @@ export type DocumentNodeResolvers<ContextType = any, ParentType extends Resolver
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
-  rdiMergeStatus?: Resolver<Maybe<ResolversTypes['DocumentRdiMergeStatus']>, ParentType, ContextType>;
+  rdiMergeStatus?: Resolver<ResolversTypes['DocumentRdiMergeStatus'], ParentType, ContextType>;
   status?: Resolver<ResolversTypes['DocumentStatus'], ParentType, ContextType>;
   type?: Resolver<ResolversTypes['DocumentTypeNode'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
@@ -25939,7 +25959,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
   programRegistrationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, Partial<HouseholdNodeProgramsArgs>>;
-  rdiMergeStatus?: Resolver<Maybe<ResolversTypes['HouseholdRdiMergeStatus']>, ParentType, ContextType>;
+  rdiMergeStatus?: Resolver<ResolversTypes['HouseholdRdiMergeStatus'], ParentType, ContextType>;
   referralTicketDetails?: Resolver<ResolversTypes['TicketReferralDetailsNodeConnection'], ParentType, ContextType, Partial<HouseholdNodeReferralTicketDetailsArgs>>;
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>;
   registrationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -26042,6 +26062,7 @@ export type ImportedDocumentNodeResolvers<ContextType = any, ParentType extends 
   clearedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
   clearedDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   copiedFrom?: Resolver<Maybe<ResolversTypes['DocumentNode']>, ParentType, ContextType>;
+  copiedTo?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, Partial<ImportedDocumentNodeCopiedToArgs>>;
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -26055,7 +26076,7 @@ export type ImportedDocumentNodeResolvers<ContextType = any, ParentType extends 
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
-  rdiMergeStatus?: Resolver<Maybe<ResolversTypes['DocumentRdiMergeStatus']>, ParentType, ContextType>;
+  rdiMergeStatus?: Resolver<ResolversTypes['DocumentRdiMergeStatus'], ParentType, ContextType>;
   status?: Resolver<ResolversTypes['DocumentStatus'], ParentType, ContextType>;
   type?: Resolver<ResolversTypes['DocumentTypeNode'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
@@ -26152,7 +26173,7 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   pregnantCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
   programRegistrationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  rdiMergeStatus?: Resolver<Maybe<ResolversTypes['HouseholdRdiMergeStatus']>, ParentType, ContextType>;
+  rdiMergeStatus?: Resolver<ResolversTypes['HouseholdRdiMergeStatus'], ParentType, ContextType>;
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>;
   registrationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   registrationMethod?: Resolver<ResolversTypes['HouseholdRegistrationMethod'], ParentType, ContextType>;
@@ -26191,6 +26212,7 @@ export type ImportedHouseholdNodeEdgeResolvers<ContextType = any, ParentType ext
 
 export type ImportedIndividualIdentityNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualIdentityNode'] = ResolversParentTypes['ImportedIndividualIdentityNode']> = {
   copiedFrom?: Resolver<Maybe<ResolversTypes['IndividualIdentityNode']>, ParentType, ContextType>;
+  copiedTo?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, Partial<ImportedIndividualIdentityNodeCopiedToArgs>>;
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   created?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -26201,7 +26223,7 @@ export type ImportedIndividualIdentityNodeResolvers<ContextType = any, ParentTyp
   modified?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   number?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   partner?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  rdiMergeStatus?: Resolver<Maybe<ResolversTypes['IndividualIdentityRdiMergeStatus']>, ParentType, ContextType>;
+  rdiMergeStatus?: Resolver<ResolversTypes['IndividualIdentityRdiMergeStatus'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -26279,7 +26301,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   pregnant?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
   programRegistrationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  rdiMergeStatus?: Resolver<Maybe<ResolversTypes['IndividualRdiMergeStatus']>, ParentType, ContextType>;
+  rdiMergeStatus?: Resolver<ResolversTypes['IndividualRdiMergeStatus'], ParentType, ContextType>;
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>;
   registrationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   relationship?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -26338,7 +26360,7 @@ export type IndividualIdentityNodeResolvers<ContextType = any, ParentType extend
   modified?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   number?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   partner?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  rdiMergeStatus?: Resolver<Maybe<ResolversTypes['IndividualIdentityRdiMergeStatus']>, ParentType, ContextType>;
+  rdiMergeStatus?: Resolver<ResolversTypes['IndividualIdentityRdiMergeStatus'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -26430,7 +26452,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   pregnant?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
   programRegistrationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  rdiMergeStatus?: Resolver<Maybe<ResolversTypes['IndividualRdiMergeStatus']>, ParentType, ContextType>;
+  rdiMergeStatus?: Resolver<ResolversTypes['IndividualRdiMergeStatus'], ParentType, ContextType>;
   referralTicketDetails?: Resolver<ResolversTypes['TicketReferralDetailsNodeConnection'], ParentType, ContextType, Partial<IndividualNodeReferralTicketDetailsArgs>>;
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>;
   registrationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -26491,7 +26513,7 @@ export type IndividualRoleInHouseholdNodeResolvers<ContextType = any, ParentType
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   migratedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
-  rdiMergeStatus?: Resolver<Maybe<ResolversTypes['IndividualRoleInHouseholdRdiMergeStatus']>, ParentType, ContextType>;
+  rdiMergeStatus?: Resolver<ResolversTypes['IndividualRoleInHouseholdRdiMergeStatus'], ParentType, ContextType>;
   role?: Resolver<Maybe<ResolversTypes['IndividualRoleInHouseholdRole']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
