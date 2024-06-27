@@ -450,7 +450,11 @@ class RdiMergeTask:
                     populate_index(
                         Individual.objects.filter(registration_data_import=obj_hct),
                         get_individual_doc(obj_hct.business_area.slug),
-                    )                    logger.info(f"RDI:{registration_data_import_id} Populated index for {len(individual_ids)} individuals")populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
+                    )
+                    logger.info(
+                        f"RDI:{registration_data_import_id} Populated index for {len(individual_ids)} individuals"
+                    )
+                    populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
                     logger.info(f"RDI:{registration_data_import_id} Saved registration data import")
                     transaction.on_commit(lambda: deduplicate_documents.delay())
                     rdi_merged.send(sender=obj_hct.__class__, instance=obj_hct)
