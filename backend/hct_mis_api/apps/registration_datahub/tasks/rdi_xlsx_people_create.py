@@ -287,10 +287,10 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
 
     @transaction.atomic()
     def execute(
-        self, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: str
+        self, registration_data_import_datahub_id: str, import_data_id: str, business_area_id: str, program_id: str
     ) -> None:
         registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
-            id=registration_data_import_id,
+            id=registration_data_import_datahub_id,
         )
         registration_data_import.import_done = RegistrationDataImportDatahub.STARTED
         registration_data_import.save()
@@ -316,7 +316,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
             rdi_mis.status = RegistrationDataImport.DEDUPLICATION
             rdi_mis.save()
-            DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_imported_individuals(
+            DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_pending_individuals(
                 registration_data_import_datahub=registration_data_import
             )
             logger.info("Finished deduplication of %s", registration_data_import.id)
