@@ -28,6 +28,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
+    Document,
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import (
@@ -95,13 +96,13 @@ class DocumentSerializer(serializers.ModelSerializer):
     country = serializers.ChoiceField(choices=Countries())
     image = serializers.CharField(allow_blank=True, required=False)
     document_number = serializers.CharField(required=True)
-    doc_date = serializers.DateField(required=True)
 
     class Meta:
-        model = ImportedDocument
+        model = Document
         exclude = [
             "individual",
             "photo",
+            "program",
         ]
 
 

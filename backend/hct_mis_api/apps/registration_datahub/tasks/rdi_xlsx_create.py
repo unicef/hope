@@ -630,7 +630,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                     combined_fields[header]["name"],
                                     GeoCountry.objects.get(iso_code3=value),
                                 )
-                            elif header in ("admin1_h_c", "admin2_h_c"):
+                            elif header in ("admin1_h_c", "admin2_h_c", "admin3_h_c", "admin4_h_c"):
                                 setattr(
                                     obj_to_create,
                                     combined_fields[header]["name"],
