@@ -13,10 +13,14 @@ from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketIndividualDataUpdateDetails,
 )
-from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import create_needs_adjudication_tickets
+from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
+    create_needs_adjudication_tickets,
+)
 from hct_mis_api.apps.household.celery_tasks import recalculate_population_fields_task
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
+    DUPLICATE,
+    NEEDS_ADJUDICATION,
     Household,
     HouseholdCollection,
     Individual,
@@ -25,7 +29,7 @@ from hct_mis_api.apps.household.models import (
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
-    PendingIndividualRoleInHousehold, NEEDS_ADJUDICATION, DUPLICATE,
+    PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanismData,
@@ -47,7 +51,6 @@ from hct_mis_api.apps.utils.elasticsearch_utils import (
     populate_index,
     remove_elasticsearch_documents_by_matching_ids,
 )
-from hct_mis_api.apps.utils.phone import is_valid_phone_number
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 
 logger = logging.getLogger(__name__)
