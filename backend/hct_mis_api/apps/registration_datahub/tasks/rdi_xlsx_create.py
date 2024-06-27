@@ -34,13 +34,13 @@ from hct_mis_api.apps.household.models import (
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    BankAccountInfo,
-    Document,
     DocumentType,
-    Household,
-    Individual,
-    IndividualIdentity,
-    IndividualRoleInHousehold,
+    PendingBankAccountInfo,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualIdentity,
+    PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
 from hct_mis_api.apps.registration_data.models import (
@@ -83,7 +83,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         value: Any,
         header: str,
         row_num: int,
-        individual: Individual,
+        individual: PendingIndividual,
         *args: Any,
         **kwargs: Any,
     ) -> str:
@@ -102,7 +102,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         value: Any,
         header: str,
         row_num: int,
-        individual: Individual,
+        individual: PendingIndividual,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -119,7 +119,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         value: Any,
         header: str,
         row_num: int,
-        individual: Individual,
+        individual: PendingIndividual,
         field: Dict[str, Any],
         *args: Any,
         **kwargs: Any,
@@ -141,7 +141,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         value: Any,
         header: str,
         row_num: int,
-        individual: Individual,
+        individual: PendingIndividual,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -166,7 +166,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self,
         cell: Any,
         row_num: int,
-        individual: Individual,
+        individual: PendingIndividual,
         header: str,
         *args: Any,
         **kwargs: Any,
@@ -193,7 +193,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         value: Any,
         header: str,
         row_num: int,
-        individual: Individual,
+        individual: PendingIndividual,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -290,7 +290,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         value: Any,
         header: str,
         row_num: int,
-        individual: Individual,
+        individual: PendingIndividual,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -316,7 +316,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         cell: Any,
         row_num: int,
         header: str,
-        individual: Individual,
+        individual: PendingIndividual,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -349,7 +349,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         value: Any,
         header: str,
         row_num: int,
-        individual: Individual,
+        individual: PendingIndividual,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -373,7 +373,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self,
         value: Any,
         header: str,
-        individual: Individual,
+        individual: PendingIndividual,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -385,14 +385,14 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             if not hh_id:
                 continue
             role = ROLE_PRIMARY if header == "primary_collector_id" else ROLE_ALTERNATE
-            self.collectors[hh_id].append(IndividualRoleInHousehold(individual=individual, role=role))
+            self.collectors[hh_id].append(PendingIndividualRoleInHousehold(individual=individual, role=role))
 
     def _create_bank_accounts_infos(self) -> None:
         bank_accounts_infos_to_create = [
-            BankAccountInfo(**bank_account_info) for bank_account_info in self.bank_accounts.values()
+            PendingBankAccountInfo(**bank_account_info) for bank_account_info in self.bank_accounts.values()
         ]
 
-        BankAccountInfo.objects.bulk_create(bank_accounts_infos_to_create)
+        PendingBankAccountInfo.objects.bulk_create(bank_accounts_infos_to_create)
 
     def _create_delivery_mechanisms_data(self) -> None:
         imported_delivery_mechanism_data = []
@@ -418,7 +418,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             doc_type = DocumentType.objects.get(key=document_data["key"])
             photo = document_data.get("photo")
             individual = document_data.get("individual")
-            obj = Document(
+            obj = PendingDocument(
                 country=GeoCountry.objects.get(iso_code2=issuing_country),
                 document_number=document_data.get("value"),
                 photo=photo,
@@ -429,23 +429,22 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
             docs_to_create.append(obj)
 
-        Document.objects.bulk_create(docs_to_create)
+        PendingDocument.objects.bulk_create(docs_to_create)
 
     def _create_identities(self) -> None:
         from hct_mis_api.apps.geo.models import Country as GeoCountry
 
         identities_to_create = [
-            IndividualIdentity(
+            PendingIndividualIdentity(
                 partner=Partner.objects.get(name=identity["partner"]),
                 individual=identity["individual"],
                 number=identity["number"],
                 country=GeoCountry.objects.get(iso_code2=identity["issuing_country"]),
-
             )
             for identity in self.identities.values()
         ]
 
-        IndividualIdentity.objects.bulk_create(identities_to_create)
+        PendingIndividualIdentity.objects.bulk_create(identities_to_create)
 
     def _create_collectors(self) -> None:
         collectors_to_create = []
@@ -453,7 +452,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             for collector in collectors_list:
                 collector.household_id = self.households.get(hh_id).pk
                 collectors_to_create.append(collector)
-        IndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
+        PendingIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
 
     @staticmethod
     def _validate_birth_date(obj_to_create: Any) -> Any:
@@ -525,9 +524,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         sheet_title = str(sheet.title.lower())
         if sheet_title == "households":
-            obj = partial(Household, registration_data_import=rdi, program_id=rdi.program.id)
+            obj = partial(PendingHousehold, registration_data_import=rdi, program_id=rdi.program.id)
         elif sheet_title == "individuals":
-            obj = partial(Individual, registration_data_import=rdi, program_id=rdi.program.id)
+            obj = partial(PendingIndividual, registration_data_import=rdi, program_id=rdi.program.id)
         else:
             raise ValueError(f"Unhandled sheet label '{sheet.title!r}'")  # pragma: no cover
 
@@ -678,10 +677,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 raise Exception(f"Error processing row {row[0].row}: {e.__class__.__name__}({e})") from e
 
         if sheet_title == "households":
-            Household.all_objects.bulk_create(self.households.values())
+            PendingHousehold.all_objects.bulk_create(self.households.values())
         else:
-            Individual.all_objects.bulk_create(self.individuals)
-            Household.all_objects.bulk_update(
+            PendingIndividual.all_objects.bulk_create(self.individuals)
+            PendingHousehold.all_objects.bulk_update(
                 households_to_update,
                 ["head_of_household"],
                 1000,
@@ -741,7 +740,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                     old_rdi_mis,
                     rdi_mis,
                 )
-        except Exception as e:
+        except Exception:
             # print stack trace
             print(traceback.format_exc())
             raise

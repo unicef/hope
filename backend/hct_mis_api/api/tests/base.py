@@ -45,7 +45,7 @@ class HOPEApiTestCase(APITestCase):
 
 
 class ConstanceSettingsAPITest(APITestCase):
-    databases = {"default", "registration_datahub"}
+    databases = {"default"}
     user_permissions = [
         Grant.API_READ_ONLY,
     ]
