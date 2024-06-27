@@ -342,7 +342,7 @@ class RdiMergeTask:
                     kobo_submissions = []
                     for household in households:
                         kobo_submission_uuid = household.kobo_submission_uuid
-                        kobo_asset_id = household.detail_id or household.kobo_asset_id
+                        kobo_asset_id = household.detail_id
                         kobo_submission_time = household.kobo_submission_time
                         if kobo_submission_uuid and kobo_asset_id and kobo_submission_time:
                             submission = KoboImportedSubmission(

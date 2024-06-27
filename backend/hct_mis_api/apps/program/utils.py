@@ -63,6 +63,14 @@ class CopyProgramPopulation:
         create_collection: bool = True,
         rdi: Optional[RegistrationDataImport] = None,
     ):
+        """
+        copy_from_individuals: QuerySet of Individuals to copy
+        copy_from_households: QuerySet of Households to copy
+        program: Program to which the data will be copied
+        rdi_merge_status: rdi_merge_status for new objects
+        create_collection: if True, new common collection will be created for original and copied object
+        rdi: RegistrationDataImport object to which new objects will be assigned
+        """
         self.copy_from_individuals = copy_from_individuals
         self.copy_from_households = copy_from_households
         self.program = program
@@ -193,7 +201,8 @@ class CopyProgramPopulation:
         bank_account_infos_to_create = []
 
         for new_individual in new_individuals:
-            individuals_to_update.append(self.set_household_per_individual(new_individual))
+            new_individual = self.set_household_per_individual(new_individual)
+            individuals_to_update.append(new_individual)
             documents_to_create.extend(
                 self.copy_document_per_individual(
                     list(new_individual.copied_from.documents.all()),
