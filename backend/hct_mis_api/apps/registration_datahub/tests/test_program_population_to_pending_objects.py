@@ -28,7 +28,9 @@ from hct_mis_api.apps.registration_data.fixtures import (
     RegistrationDataImportDatahubFactory,
     RegistrationDataImportFactory,
 )
-from hct_mis_api.apps.registration_datahub.tasks.import_program_population import import_program_population
+from hct_mis_api.apps.registration_datahub.tasks.import_program_population import (
+    import_program_population,
+)
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 HOUSEHOLD_FIELDS = (
@@ -326,11 +328,7 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         for field in INDIVIDUAL_FIELDS:
             imported_individual_field = getattr(head_of_household_pending_individual, field)
             individual_field = getattr(self.individuals[0], field)
-            self.assertEqual(
-                imported_individual_field,
-                individual_field,
-                field
-            )
+            self.assertEqual(imported_individual_field, individual_field, field)
         for pending_individual in pending_individuals:
             self.assertEqual(
                 pending_individual.program_id,

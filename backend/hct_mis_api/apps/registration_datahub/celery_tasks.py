@@ -327,12 +327,13 @@ def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
         )
 
         rdi_obj = RegistrationDataImportDatahub.objects.get(id=registration_data_import_id)
-        program_id = RegistrationDataImport.objects.get(id=rdi_obj.hct_id).program.id
+        registration_data_import = RegistrationDataImport.objects.get(id=rdi_obj.hct_id)
+        program_id = registration_data_import.program.id
         set_sentry_business_area_tag(rdi_obj.business_area_slug)
 
         with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
             DeduplicateTask(rdi_obj.business_area_slug, program_id).deduplicate_pending_individuals(
-                registration_data_import=rdi_obj
+                registration_data_import=registration_data_import
             )
     except Exception as e:
         handle_rdi_exception(registration_data_import_id, e)
