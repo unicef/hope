@@ -52,7 +52,6 @@ from hct_mis_api.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
 from hct_mis_api.apps.utils.models import MergeStatusModel
-from hct_mis_api.apps.utils.phone import is_valid_phone_number
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 
 logger = logging.getLogger(__name__)
@@ -332,9 +331,6 @@ class RdiMergeTask:
             )
             individual_ids = list(individuals.values_list("id", flat=True))
             household_ids = list(households.values_list("id", flat=True))
-            imported_delivery_mechanism_data = PendingDeliveryMechanismData.objects.filter(
-                individual__in=individuals,
-            )
             try:
                 with transaction.atomic(using="default"):
                     old_obj_hct = copy_model_object(obj_hct)
@@ -437,12 +433,13 @@ class RdiMergeTask:
                         self._update_household_collections(households, obj_hct)
                         self._update_individual_collections(individuals, obj_hct)
 
+                    imported_delivery_mechanism_data = PendingDeliveryMechanismData.objects.filter(
+                        individual_id__in=individual_ids,
+                    )
                     self._create_grievance_tickets_for_delivery_mechanisms_errors(
                         imported_delivery_mechanism_data, obj_hct
                     )
-                    PendingDeliveryMechanismData.objects.filter(individual_id__in=individual_ids).update(
-                        rdi_merge_status=MergeStatusModel.MERGED
-                    )
+                    imported_delivery_mechanism_data.update(rdi_merge_status=MergeStatusModel.MERGED)
                     PendingIndividualRoleInHousehold.objects.filter(
                         household_id__in=household_ids, individual_id__in=individual_ids
                     ).update(rdi_merge_status=MergeStatusModel.MERGED)
