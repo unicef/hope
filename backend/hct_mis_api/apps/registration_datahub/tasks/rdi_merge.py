@@ -33,8 +33,12 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualCollection,
     IndividualIdentity,
-    IndividualRoleInHousehold, PendingHousehold, PendingIndividual, PendingIndividualRoleInHousehold,
+    IndividualRoleInHousehold,
     PendingBankAccountInfo,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanismData,
@@ -56,6 +60,7 @@ from hct_mis_api.apps.utils.elasticsearch_utils import (
     populate_index,
     remove_elasticsearch_documents_by_matching_ids,
 )
+from hct_mis_api.apps.utils.models import MergeStatusModel
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 
@@ -439,7 +444,6 @@ class RdiMergeTask:
             )
 
     def execute(self, registration_data_import_id: str) -> None:
-        individual_ids, household_ids = [], []
         try:
             obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id)
             obj_hub = RegistrationDataImportDatahub.objects.get(hct_id=registration_data_import_id)
@@ -447,9 +451,9 @@ class RdiMergeTask:
             individuals = PendingIndividual.objects.filter(registration_data_import=obj_hct).order_by(
                 "first_registration_date"
             )
-            roles = PendingIndividualRoleInHousehold.objects.filter(household__in=households, individual__in=individuals)
-            bank_account_infos = PendingBankAccountInfo.objects.filter(individual__in=individuals)
-            delivery_mechanism_data = PendingDeliveryMechanismData.objects.filter(
+            individual_ids = list(individuals.values_list("id", flat=True))
+            household_ids = list(households.values_list("id", flat=True))
+            imported_delivery_mechanism_data = PendingDeliveryMechanismData.objects.filter(
                 individual__in=individuals,
             )
             household_ids = []
@@ -457,6 +461,7 @@ class RdiMergeTask:
                 with transaction.atomic(using="default"):
                     old_obj_hct = copy_model_object(obj_hct)
 
+                    # self._prepare_individuals(individuals, households_dict, obj_hct)
 
                     transaction.on_commit(lambda: recalculate_population_fields_task(household_ids, obj_hct.program_id))
                     logger.info(
@@ -499,49 +504,49 @@ class RdiMergeTask:
                         f"RDI:{registration_data_import_id} Populated index for {len(household_ids)} households"
                     )
                     # if not obj_hct.business_area.postpone_deduplication:
-                        #TODO: Deduplication to uncomment
-                        # individuals = evaluate_qs(
-                        #     Individual.objects.filter(registration_data_import=obj_hct)
-                        #     .select_for_update()
-                        #     .order_by("pk")
-                        # )
-                        # DeduplicateTask(
-                        #     obj_hct.business_area.slug, obj_hct.program.id
-                        # ).deduplicate_individuals_against_population(individuals)
-                        # logger.info(f"RDI:{registration_data_import_id} Deduplicated {len(individual_ids)} individuals")
-                        # golden_record_duplicates = Individual.objects.filter(
-                        #     registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
-                        # )
-                        # logger.info(
-                        #     f"RDI:{registration_data_import_id} Found {len(golden_record_duplicates)} duplicates"
-                        # )
-                        #
-                        # create_needs_adjudication_tickets(
-                        #     golden_record_duplicates,
-                        #     "duplicates",
-                        #     obj_hct.business_area,
-                        #     registration_data_import=obj_hct,
-                        # )
-                        # logger.info(
-                        #     f"RDI:{registration_data_import_id} Created tickets for {len(golden_record_duplicates)} duplicates"
-                        # )
-                        #
-                        # needs_adjudication = Individual.objects.filter(
-                        #     registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
-                        # )
-                        # logger.info(
-                        #     f"RDI:{registration_data_import_id} Found {len(needs_adjudication)} needs adjudication"
-                        # )
-                        #
-                        # create_needs_adjudication_tickets(
-                        #     needs_adjudication,
-                        #     "possible_duplicates",
-                        #     obj_hct.business_area,
-                        #     registration_data_import=obj_hct,
-                        # )
-                        # logger.info(
-                        #     f"RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)} needs adjudication"
-                        # )
+                    # TODO: Deduplication to uncomment
+                    # individuals = evaluate_qs(
+                    #     Individual.objects.filter(registration_data_import=obj_hct)
+                    #     .select_for_update()
+                    #     .order_by("pk")
+                    # )
+                    # DeduplicateTask(
+                    #     obj_hct.business_area.slug, obj_hct.program.id
+                    # ).deduplicate_individuals_against_population(individuals)
+                    # logger.info(f"RDI:{registration_data_import_id} Deduplicated {len(individual_ids)} individuals")
+                    # golden_record_duplicates = Individual.objects.filter(
+                    #     registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
+                    # )
+                    # logger.info(
+                    #     f"RDI:{registration_data_import_id} Found {len(golden_record_duplicates)} duplicates"
+                    # )
+                    #
+                    # create_needs_adjudication_tickets(
+                    #     golden_record_duplicates,
+                    #     "duplicates",
+                    #     obj_hct.business_area,
+                    #     registration_data_import=obj_hct,
+                    # )
+                    # logger.info(
+                    #     f"RDI:{registration_data_import_id} Created tickets for {len(golden_record_duplicates)} duplicates"
+                    # )
+                    #
+                    # needs_adjudication = Individual.objects.filter(
+                    #     registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
+                    # )
+                    # logger.info(
+                    #     f"RDI:{registration_data_import_id} Found {len(needs_adjudication)} needs adjudication"
+                    # )
+                    #
+                    # create_needs_adjudication_tickets(
+                    #     needs_adjudication,
+                    #     "possible_duplicates",
+                    #     obj_hct.business_area,
+                    #     registration_data_import=obj_hct,
+                    # )
+                    # logger.info(
+                    #     f"RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)} needs adjudication"
+                    # )
 
                     # SANCTION LIST CHECK
                     if obj_hct.should_check_against_sanction_list() and not obj_hct.business_area.screen_beneficiary:
@@ -552,18 +557,26 @@ class RdiMergeTask:
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
 
-                    households.update(rdi_merge_status="MERGED")
-                    individuals.update(rdi_merge_status="MERGED")
-                    delivery_mechanism_data.update(rdi_merge_status="MERGED")
                     self._create_grievance_tickets_for_delivery_mechanisms_errors(
-                        delivery_mechanism_data, obj_hct
+                        imported_delivery_mechanism_data, obj_hct
                     )
-                    roles.update(rdi_merge_status="MERGED")
-                    bank_account_infos.update(rdi_merge_status="MERGED")
-                    Document.objects.filter(individual_id__in=individual_ids).update(rdi_merge_status="MERGED")
-                    IndividualRoleInHousehold.objects.filter(individual_id__in=individual_ids).update(
-                        rdi_merge_status="MERGED"
+                    PendingDeliveryMechanismData.objects.filter(individual_id__in=individual_ids).update(
+                        rdi_merge_status=MergeStatusModel.MERGED
                     )
+                    PendingIndividualRoleInHousehold.objects.filter(
+                        household_id__in=household_ids, individual_id__in=individual_ids
+                    ).update(rdi_merge_status=MergeStatusModel.MERGED)
+                    PendingBankAccountInfo.objects.filter(individual_id__in=individual_ids).update(
+                        rdi_merge_status=MergeStatusModel.MERGED
+                    )
+                    PendingDocument.objects.filter(individual_id__in=individual_ids).update(
+                        rdi_merge_status=MergeStatusModel.MERGED
+                    )
+                    PendingIndividualRoleInHousehold.objects.filter(individual_id__in=individual_ids).update(
+                        rdi_merge_status=MergeStatusModel.MERGED
+                    )
+                    households.update(rdi_merge_status=MergeStatusModel.MERGED)
+                    individuals.update(rdi_merge_status=MergeStatusModel.MERGED)
 
                     logger.info(f"RDI:{registration_data_import_id} Saved registration data import")
                     transaction.on_commit(lambda: deduplicate_documents.delay())

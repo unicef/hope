@@ -21,6 +21,8 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
     IndividualRoleInHousehold,
+    PendingHousehold,
+    PendingIndividual,
 )
 from hct_mis_api.apps.payment.models import DeliveryMechanismData
 from hct_mis_api.apps.registration_data.models import (
@@ -250,12 +252,12 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         rdi = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
 
         hh_obj = partial(
-            Household,
+            PendingHousehold,
             registration_data_import=rdi,
             program_id=rdi.program.id,
             collect_type=Household.CollectType.SINGLE.value,
         )
-        ind_obj = partial(Individual, registration_data_import=rdi, program_id=rdi.program.id)
+        ind_obj = partial(PendingIndividual, registration_data_import=rdi, program_id=rdi.program.id)
 
         first_row = sheet[1]
 
@@ -273,8 +275,8 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 obj_to_create = hh_obj() if sheet_title == "households" else ind_obj()
                 self._create_hh_ind(obj_to_create, row, first_row, complex_fields, complex_types, sheet_title)
 
-        Individual.objects.bulk_create(self.individuals)
-        Household.objects.bulk_update(
+        PendingIndividual.objects.bulk_create(self.individuals)
+        PendingHousehold.objects.bulk_update(
             self.households_to_update,
             ["head_of_household"],
             1000,
