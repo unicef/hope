@@ -24,10 +24,10 @@ from hct_mis_api.apps.household.models import (
     NON_BENEFICIARY,
     RESIDENCE_STATUS_CHOICE,
     ROLE_PRIMARY,
-    Document,
     DocumentType,
-    Household,
-    Individual,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
@@ -69,7 +69,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
         self.fields["admin4"].choices = Area.objects.filter(area_type__area_level=4).values_list("p_code", "name")
 
     class Meta:
-        model = Individual
+        model = PendingIndividual
         exclude = [
             "id",
             "registration_data_import",
@@ -86,22 +86,20 @@ class PushPeopleSerializer(serializers.ModelSerializer):
 
 
 class PeopleUploadMixin:
-    def save_people(self, rdi: RegistrationDataImport, program_id: UUID, people_data: List[Dict]) -> List[int]:
+    def save_people(self, rdi: RegistrationDataImport, people_data: List[Dict]) -> List[int]:
         people_ids = []
         for person_data in people_data:
             documents = person_data.pop("documents", [])
 
-            hh = self._create_household(person_data, program_id, rdi)
+            hh = self._create_household(person_data, rdi)
             ind = self._create_individual(documents, hh, person_data, rdi)
             people_ids.append(ind.id)
         return people_ids
 
-    def _create_household(
-        self, person_data: Dict, program_id: UUID, rdi: RegistrationDataImport
-    ) -> Optional[Household]:
+    def _create_household(self, person_data: Dict, rdi: RegistrationDataImport) -> Optional[PendingHousehold]:
         if person_data.get("type") == NON_BENEFICIARY:
             return None
-        household_fields = [field.name for field in Household._meta.get_fields()]
+        household_fields = [field.name for field in PendingHousehold._meta.get_fields()]
         household_data = {field: value for field, value in person_data.items() if field in household_fields}
         household_data["village"] = household_data.get("village") or ""
         admin_areas = [
@@ -117,11 +115,11 @@ class PeopleUploadMixin:
         if country_origin := household_data.pop("country_origin", None):
             household_data["country_origin"] = Country.objects.get(iso_code2=country_origin)
 
-        household = Household.objects.create(
+        household = PendingHousehold.objects.create(
             business_area=rdi.business_area,
             registration_data_import=rdi,
-            program_id=program_id,
-            collect_type=Household.CollectType.SINGLE.value,
+            program_id=rdi.program_id,
+            collect_type=PendingHousehold.CollectType.SINGLE.value,
             **household_data,
         )
         the_lowest_p_code = next((admin_area for admin_area in admin_areas if admin_area), None)
@@ -134,11 +132,11 @@ class PeopleUploadMixin:
     def _create_individual(
         self,
         documents: List[Dict],
-        hh: Optional[Household],
+        hh: Optional[PendingHousehold],
         person_data: Dict,
         rdi: RegistrationDataImport,
-    ) -> Individual:
-        individual_fields = [field.name for field in Individual._meta.get_fields()]
+    ) -> PendingIndividual:
+        individual_fields = [field.name for field in PendingIndividual._meta.get_fields()]
         individual_data = {field: value for field, value in person_data.items() if field in individual_fields}
         person_type = person_data.get("type")
         individual_data.pop("relationship", None)
@@ -146,11 +144,11 @@ class PeopleUploadMixin:
         individual_data["phone_no"] = individual_data.get("phone_no") or ""
         individual_data["phone_no_alternative"] = individual_data.get("phone_no_alternative") or ""
 
-        ind = Individual.objects.create(
+        ind = PendingIndividual.objects.create(
             business_area=rdi.business_area,
             household=hh,
             registration_data_import=rdi,
-            program=hh.program,
+            program_id=rdi.program_id,
             relationship=relationship,
             **individual_data,
         )
@@ -166,8 +164,8 @@ class PeopleUploadMixin:
             self._create_document(ind, doc)
         return ind
 
-    def _create_document(self, member: Individual, doc: Dict) -> None:
-        Document.objects.create(
+    def _create_document(self, member: PendingIndividual, doc: Dict) -> None:
+        PendingDocument.objects.create(
             document_number=doc["document_number"],
             photo=get_photo_from_stream(doc.get("image", None)),
             individual=member,
@@ -192,13 +190,11 @@ class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIVie
             raise Http404
 
     @extend_schema(request=PushPeopleSerializer)
-    @atomic(using="registration_datahub")
+    @atomic()
     def post(self, request: "Request", business_area: str, rdi: UUID) -> Response:
         serializer = PushPeopleSerializer(data=request.data, many=True)
-        program_id = self.selected_rdi.program.id
-
         if serializer.is_valid():
-            people_ids = self.save_people(self.selected_rdi, program_id, serializer.validated_data)
+            people_ids = self.save_people(self.selected_rdi, serializer.validated_data)
 
             response = {
                 "id": self.selected_rdi.id,

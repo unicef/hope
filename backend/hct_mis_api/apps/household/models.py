@@ -1349,9 +1349,13 @@ class PendingHousehold(Household):
     def pending_representatives(self) -> QuerySet:
         return super().representatives(manager="pending_objects")
 
-    @property
-    def representatives(self) -> QuerySet:
-        return super().representatives(manager="pending_objects")
+    @cached_property
+    def primary_collector(self) -> Optional["Individual"]:
+        return self.pending_representatives.get(households_and_roles__role=ROLE_PRIMARY)
+
+    @cached_property
+    def alternate_collector(self) -> Optional["Individual"]:
+        return self.pending_representatives.filter(households_and_roles__role=ROLE_ALTERNATE).first()
 
     class Meta:
         proxy = True
@@ -1377,6 +1381,10 @@ class PendingIndividual(Individual):
     @property
     def bank_account_info(self) -> QuerySet:
         return super().bank_account_info(manager="pending_objects")
+
+    @property
+    def pending_household(self) -> QuerySet:
+        return PendingHousehold.objects.get(pk=self.household.pk)
 
     class Meta:
         proxy = True

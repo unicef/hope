@@ -1,6 +1,8 @@
 from typing import List
 from uuid import UUID
 
+from django.core.management import call_command
+
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -13,18 +15,13 @@ from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_FULL,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
+    DocumentType,
+    PendingHousehold,
+    PendingIndividual,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import (
-    RegistrationDataImport,
-    RegistrationDataImportDatahub,
-)
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedDocumentType,
-    ImportedHousehold,
-    ImportedIndividual,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 class TestDelegatePeople(HOPEApiTestCase):
@@ -33,7 +30,9 @@ class TestDelegatePeople(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        ImportedDocumentType.objects.create(
+        call_command("loadcountries")
+        call_command("loadcountrycodes")
+        DocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
         )
         data_collecting_type = DataCollectingTypeFactory(
@@ -46,14 +45,10 @@ class TestDelegatePeople(HOPEApiTestCase):
         cls.program = ProgramFactory.create(
             status=Program.DRAFT, business_area=cls.business_area, data_collecting_type=data_collecting_type
         )
-        cls.rdi = RegistrationDataImportDatahub.objects.create(
-            business_area_slug=cls.business_area.slug, import_done=RegistrationDataImportDatahub.LOADING
-        )
-        cls.rdi2: RegistrationDataImport = RegistrationDataImport.objects.create(
+        cls.rdi: RegistrationDataImport = RegistrationDataImport.objects.create(
             business_area=cls.business_area,
             number_of_individuals=0,
             number_of_households=0,
-            datahub_id=cls.rdi.pk,
             status=RegistrationDataImport.LOADING,
             program=cls.program,
         )
@@ -62,8 +57,8 @@ class TestDelegatePeople(HOPEApiTestCase):
 
     def test_external_collector(self) -> None:
         people_ids = self._create_people()
-        households_count = ImportedHousehold.objects.filter(registration_data_import=self.rdi).count()
-        individuals_count = ImportedIndividual.objects.filter(registration_data_import=self.rdi).count()
+        households_count = PendingHousehold.objects.filter(registration_data_import=self.rdi).count()
+        individuals_count = PendingIndividual.objects.filter(registration_data_import=self.rdi).count()
         self.assertEqual(households_count, 2)
         self.assertEqual(individuals_count, 3)
 
@@ -74,8 +69,8 @@ class TestDelegatePeople(HOPEApiTestCase):
         data = response.json()
         self.assertEqual(data["updated"], 1)
 
-        hh1 = ImportedHousehold.objects.get(registration_data_import=self.rdi, village="village1")
-        hh2 = ImportedHousehold.objects.get(registration_data_import=self.rdi, village="village2")
+        hh1 = PendingHousehold.objects.get(registration_data_import=self.rdi, village="village1")
+        hh2 = PendingHousehold.objects.get(registration_data_import=self.rdi, village="village2")
 
         self.assertEqual(hh1.primary_collector.full_name, "John Doe")
         self.assertEqual(hh2.primary_collector.full_name, "Jack Jones")
