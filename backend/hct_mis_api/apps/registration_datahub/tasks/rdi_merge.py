@@ -523,7 +523,7 @@ class RdiMergeTask:
                     households_to_update.append(household)
                     households_to_update.append(household_from_collection)
 
-        Household.objects.bulk_update(households_to_update, ["household_collection"])
+        Household.all_objects.bulk_update(households_to_update, ["household_collection"])
 
     def _update_individual_collections(self, individuals: list, rdi: RegistrationDataImport) -> None:
         individuals_to_update = []
@@ -543,4 +543,4 @@ class RdiMergeTask:
 
                     individuals_to_update.append(individual_from_collection)
                     individuals_to_update.append(individual)
-        Individual.objects.bulk_update(individuals_to_update, ["individual_collection"])
+        Individual.all_objects.bulk_update(individuals_to_update, ["individual_collection"])
