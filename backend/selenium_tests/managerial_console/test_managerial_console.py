@@ -165,6 +165,8 @@ class TestSmokeManagerialConsole:
         self, pageManagerialConsole: ManagerialConsole, create_payment_plan: PaymentPlan
     ) -> None:
         pageManagerialConsole.getNavManagerialConsole().click()
+        pageManagerialConsole.getMenuUserProfile().click()
+        pageManagerialConsole.getMenuItemClearCache().click()
         # Approve Payment Plan
         pageManagerialConsole.getProgramSelectApproval().click()
         pageManagerialConsole.select_listbox_element("Test Programm").click()
