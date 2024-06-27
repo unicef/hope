@@ -45,22 +45,22 @@ class RdiProgramPopulationCreateTask:
 
         if not business_area.postpone_deduplication:
             logger.info("Starting deduplication of %s", registration_data_import_datahub.id)
-            rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
-            rdi_mis.status = RegistrationDataImport.DEDUPLICATION
-            rdi_mis.save()
+            registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
+            registration_data_import.status = RegistrationDataImport.DEDUPLICATION
+            registration_data_import.save()
             DeduplicateTask(business_area.slug, str(import_to_program_id)).deduplicate_pending_individuals(
-                registration_data_import_datahub=registration_data_import_datahub
+                registration_data_import=registration_data_import
             )
             logger.info("Finished deduplication of %s", registration_data_import_datahub.id)
         else:
-            rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
-            rdi_mis.status = RegistrationDataImport.IN_REVIEW
-            rdi_mis.save()
+            registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
+            registration_data_import.status = RegistrationDataImport.IN_REVIEW
+            registration_data_import.save()
             log_create(
                 RegistrationDataImport.ACTIVITY_LOG_MAPPING,
                 "business_area",
                 None,
-                rdi_mis.program_id,
+                registration_data_import.program_id,
                 old_rdi_mis,
-                rdi_mis,
+                registration_data_import,
             )
