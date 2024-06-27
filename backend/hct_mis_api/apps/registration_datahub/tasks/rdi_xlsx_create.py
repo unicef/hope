@@ -440,7 +440,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 individual=identity["individual"],
                 number=identity["number"],
                 country=GeoCountry.objects.get(iso_code2=identity["issuing_country"]),
-
             )
             for identity in self.identities.values()
         ]
@@ -741,7 +740,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                     old_rdi_mis,
                     rdi_mis,
                 )
-        except Exception as e:
+        except Exception:
             # print stack trace
             print(traceback.format_exc())
             raise
