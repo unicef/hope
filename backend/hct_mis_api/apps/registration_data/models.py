@@ -160,6 +160,12 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     erased = models.BooleanField(default=False, help_text="Abort RDI")
     refuse_reason = models.CharField(max_length=100, blank=True, null=True)
     allow_delivery_mechanisms_validation_errors = models.BooleanField(default=False)
+    import_data = models.OneToOneField(
+        "ImportData",
+        related_name="registration_data_import_hope",
+        on_delete=models.CASCADE,
+        null=True,
+    )
 
     def __str__(self) -> str:
         return self.name
