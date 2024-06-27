@@ -1,6 +1,8 @@
 import base64
 from pathlib import Path
 
+from django.core.management import call_command
+
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -8,6 +10,7 @@ from hct_mis_api.api.models import Grant
 from hct_mis_api.api.tests.base import HOPEApiTestCase
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
+    COLLECT_TYPE_FULL,
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     MALE,
@@ -15,29 +18,25 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     SON_DAUGHTER,
+    DocumentType,
+    PendingHousehold,
+    PendingIndividual,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import (
-    RegistrationDataImport,
-    RegistrationDataImportDatahub,
-)
-from hct_mis_api.apps.registration_datahub.models import (
-    COLLECT_TYPE_FULL,
-    ImportedDocumentType,
-    ImportedHousehold,
-    ImportedIndividual,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 class UploadRDITests(HOPEApiTestCase):
-    databases = {"default", "registration_datahub"}
+    databases = {"default"}
     user_permissions = [Grant.API_RDI_UPLOAD]
 
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        ImportedDocumentType.objects.create(
+        call_command("loadcountries")
+        call_command("loadcountrycodes")
+        DocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
         )
         cls.url = reverse("api:rdi-upload", args=[cls.business_area.slug])
@@ -77,13 +76,11 @@ class UploadRDITests(HOPEApiTestCase):
         response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
         data = response.json()
-        hrdi = RegistrationDataImportDatahub.objects.filter(id=data["id"]).first()
-        self.assertIsNotNone(hrdi)
-        rdi = RegistrationDataImport.objects.filter(datahub_id=str(hrdi.pk)).first()
+        rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
         self.assertIsNotNone(rdi)
         self.assertEqual(rdi.program, self.program)
 
-        hh = ImportedHousehold.objects.filter(registration_data_import=hrdi).first()
+        hh = PendingHousehold.objects.filter(registration_data_import=rdi).first()
         self.assertIsNotNone(hh)
         self.assertIsNotNone(hh.head_of_household)
         self.assertIsNotNone(hh.primary_collector)
@@ -129,12 +126,10 @@ class UploadRDITests(HOPEApiTestCase):
         data = response.json()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, data)
 
-        hrdi = RegistrationDataImportDatahub.objects.filter(id=data["id"]).first()
-        self.assertIsNotNone(hrdi)
-        rdi = RegistrationDataImport.objects.filter(datahub_id=str(hrdi.pk)).first()
+        rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
         self.assertIsNotNone(rdi)
 
-        hh = ImportedHousehold.objects.filter(registration_data_import=hrdi).first()
+        hh = PendingHousehold.objects.filter(registration_data_import=rdi).first()
         self.assertIsNotNone(hh)
         self.assertIsNotNone(hh.head_of_household)
         self.assertIsNotNone(hh.primary_collector)
@@ -167,7 +162,6 @@ class UploadRDITests(HOPEApiTestCase):
                                 {
                                     "document_number": 10,
                                     "image": "",
-                                    "doc_date": "2010-01-01",
                                     "country": "AF",
                                     "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                                 }
@@ -187,16 +181,15 @@ class UploadRDITests(HOPEApiTestCase):
         }
         response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
-        hoh = ImportedIndividual.objects.filter(birth_date="2000-01-01", full_name="John Doe", sex=MALE).first()
+        hoh = PendingIndividual.objects.filter(birth_date="2000-01-01", full_name="John Doe", sex=MALE).first()
 
         self.assertTrue(hoh)
-        hh: ImportedHousehold = hoh.household
-        self.assertEqual(hoh.household.village, "village1")
+        hh = hoh.pending_household
+        self.assertEqual(hh.village, "village1")
 
         # check collectors
-        self.assertNotEqual(hoh.household.primary_collector, hoh)
-        self.assertIsInstance(hoh.household.primary_collector, ImportedIndividual)
-        self.assertIsNone(hoh.household.alternate_collector)
+        self.assertNotEqual(hh.primary_collector, hoh)
+        self.assertIsNone(hh.alternate_collector)
         members = hh.individuals.all()
         self.assertEqual(len(members), 1)
 
@@ -227,7 +220,6 @@ class UploadRDITests(HOPEApiTestCase):
                                 {
                                     "document_number": 10,
                                     "image": base64_encoded_data,
-                                    "doc_date": "2010-01-01",
                                     "country": "AF",
                                     "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                                 }
@@ -248,12 +240,10 @@ class UploadRDITests(HOPEApiTestCase):
         response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
         data = response.json()
-        hrdi = RegistrationDataImportDatahub.objects.filter(id=data["id"]).first()
-        self.assertIsNotNone(hrdi)
-        rdi = RegistrationDataImport.objects.filter(datahub_id=str(hrdi.pk)).first()
+        rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
         self.assertIsNotNone(rdi)
 
-        hh = ImportedHousehold.objects.filter(registration_data_import=hrdi).first()
+        hh = PendingHousehold.objects.filter(registration_data_import=rdi).first()
         self.assertIsNotNone(hh)
         self.assertIsNotNone(hh.head_of_household)
         self.assertIsNotNone(hh.primary_collector)
@@ -302,7 +292,6 @@ class UploadRDITests(HOPEApiTestCase):
                             "documents": [
                                 {
                                     "document_number": 10,
-                                    "doc_date": "2010-01-01",
                                     "country": "AF",
                                     "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                                 }
@@ -334,7 +323,6 @@ class UploadRDITests(HOPEApiTestCase):
                                 {
                                     "document_number": 10,
                                     "image": base64_encoded_data,
-                                    "doc_date": "2010-01-01",
                                     "country": "AF",
                                     "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                                 }
@@ -366,7 +354,6 @@ class UploadRDITests(HOPEApiTestCase):
                                 {
                                     "document_number": 10,
                                     "image": base64_encoded_data,
-                                    "doc_date": "2010-01-01",
                                     "country": "AF",
                                     "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                                 }
@@ -387,12 +374,10 @@ class UploadRDITests(HOPEApiTestCase):
         response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
         data = response.json()
-        hrdi = RegistrationDataImportDatahub.objects.filter(id=data["id"]).first()
-        self.assertIsNotNone(hrdi)
-        rdi = RegistrationDataImport.objects.filter(datahub_id=str(hrdi.pk)).first()
+        rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
         self.assertIsNotNone(rdi)
 
-        hh = ImportedHousehold.objects.filter(registration_data_import=hrdi, village="village1").first()
+        hh = PendingHousehold.objects.filter(registration_data_import=rdi, village="village1").first()
         self.assertIsNotNone(hh)
         self.assertIsNotNone(hh.head_of_household)
         self.assertIsNotNone(hh.primary_collector)
@@ -482,7 +467,6 @@ class UploadRDITests(HOPEApiTestCase):
                             "documents": [
                                 {
                                     "document_number": 10,
-                                    "doc_date": "2010-01-01",
                                     "country": "AF",
                                     "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                                 }
@@ -569,7 +553,6 @@ class UploadRDITests(HOPEApiTestCase):
                             "documents": [
                                 {
                                     "document_number": 10,
-                                    "doc_date": "2010-01-01",
                                     "country": "AF",
                                     "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                                 }
