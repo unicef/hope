@@ -4,11 +4,10 @@ from collections import defaultdict
 from dataclasses import dataclass, fields
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
+from constance import config
 from django.db import transaction
 from django.db.models import Case, CharField, F, Q, QuerySet, Value, When
 from django.db.models.functions import Concat
-
-from constance import config
 from psycopg2._psycopg import IntegrityError
 
 from hct_mis_api.apps.activity_log.models import log_create
@@ -29,17 +28,10 @@ from hct_mis_api.apps.household.models import (
     Document,
     Individual,
     PendingIndividual,
+    SIMILAR_IN_BATCH,
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.documents import (
-    ImportedIndividualDocument,
-    get_imported_individual_doc,
-)
-from hct_mis_api.apps.registration_datahub.models import (
-    SIMILAR_IN_BATCH,
-    ImportedIndividual,
-)
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 from hct_mis_api.apps.utils.elasticsearch_utils import (
     populate_index,
@@ -311,7 +303,7 @@ class DeduplicateTask:
             PendingIndividual.objects.filter(registration_data_import_id=registration_data_import.id).exclude(
                 id__in=duplicates_in_batch.union(possible_duplicates_in_batch)
             ).update(deduplication_batch_status=UNIQUE_IN_BATCH)
-            ImportedIndividual.objects.filter(registration_data_import_id=registration_data_import.id).exclude(
+            PendingIndividual.objects.filter(registration_data_import_id=registration_data_import.id).exclude(
                 id__in=duplicates_in_population.union(possible_duplicates_in_population)
             ).update(deduplication_golden_record_status=UNIQUE)
             old_rdi = RegistrationDataImport.objects.get(id=registration_data_import.id)
@@ -353,12 +345,12 @@ class DeduplicateTask:
 
         remove_elasticsearch_documents_by_matching_ids(
             list(pending_individuals.values_list("id", flat=True)),
-            get_imported_individual_doc(self.business_area.slug),
+            get_individual_doc(self.business_area.slug),
         )
 
     def _prepare_fields(
         self,
-        individual: Union[Individual, ImportedIndividual],
+        individual: Union[Individual, PendingIndividual],
         fields_names: Tuple[str, ...],
         dict_fields: Dict[str, Any],
     ) -> Dict[str, Any]:
@@ -506,8 +498,8 @@ class DeduplicateTask:
         self,
         query_dict: Dict,
         duplicate_score: float,
-        document: Union[Type[IndividualDocument], Type[ImportedIndividualDocument]],
-        individual: Union[Individual, ImportedIndividual],
+        document: Union[Type[IndividualDocument]],
+        individual: Union[Individual, PendingIndividual],
     ) -> DeduplicationResult:
         duplicates = []
         possible_duplicates = []
@@ -594,7 +586,7 @@ class DeduplicateTask:
             individual,
         )
 
-    def _deduplicate_single_individual(self, individual: Union[Individual, ImportedIndividual]) -> DeduplicationResult:
+    def _deduplicate_single_individual(self, individual: Union[Individual, PendingIndividual]) -> DeduplicationResult:
         fields_names = (
             "given_name",
             "full_name",

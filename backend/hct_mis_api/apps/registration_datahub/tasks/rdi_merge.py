@@ -364,14 +364,6 @@ class RdiMergeTask:
 
                     # DEDUPLICATION
 
-                    populate_index(
-                        PendingIndividual.objects.filter(registration_data_import=obj_hct),
-                        get_individual_doc(obj_hct.business_area.slug),
-                    )
-                    logger.info(
-                        f"RDI:{registration_data_import_id} Populated index for {len(individual_ids)} individuals"
-                    )
-                    populate_index(PendingHousehold.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
                     logger.info(
                         f"RDI:{registration_data_import_id} Populated index for {len(household_ids)} households"
                     )
@@ -455,6 +447,10 @@ class RdiMergeTask:
                     households.update(rdi_merge_status=MergeStatusModel.MERGED)
                     individuals.update(rdi_merge_status=MergeStatusModel.MERGED)
 
+                    populate_index(
+                        Individual.objects.filter(registration_data_import=obj_hct),
+                        get_individual_doc(obj_hct.business_area.slug),
+                    )                    logger.info(f"RDI:{registration_data_import_id} Populated index for {len(individual_ids)} individuals")populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
                     logger.info(f"RDI:{registration_data_import_id} Saved registration data import")
                     transaction.on_commit(lambda: deduplicate_documents.delay())
                     rdi_merged.send(sender=obj_hct.__class__, instance=obj_hct)
