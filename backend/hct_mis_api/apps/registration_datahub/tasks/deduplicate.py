@@ -27,13 +27,11 @@ from hct_mis_api.apps.household.models import (
     UNIQUE,
     UNIQUE_IN_BATCH,
     Document,
-    Individual, PendingIndividual,
+    Individual,
+    PendingIndividual,
 )
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import (
-    RegistrationDataImport,
-    RegistrationDataImportDatahub,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.documents import (
     ImportedIndividualDocument,
     get_imported_individual_doc,
@@ -201,9 +199,7 @@ class DeduplicateTask:
         )
 
     def deduplicate_pending_individuals(self, registration_data_import: RegistrationDataImport) -> None:
-        pending_individuals = PendingIndividual.objects.filter(
-            registration_data_import=registration_data_import
-        )
+        pending_individuals = PendingIndividual.objects.filter(registration_data_import=registration_data_import)
 
         wait_until_es_healthy()
         populate_index(pending_individuals, get_individual_doc(self.business_area.slug))
@@ -560,9 +556,7 @@ class DeduplicateTask:
             results_data,
         )
 
-    def _deduplicate_single_pending_individual(
-        self, individual: PendingIndividual, rdi_id: str
-    ) -> DeduplicationResult:
+    def _deduplicate_single_pending_individual(self, individual: PendingIndividual, rdi_id: str) -> DeduplicationResult:
         fields_names: Tuple[str, ...] = (
             "given_name",
             "full_name",
@@ -584,7 +578,6 @@ class DeduplicateTask:
             individual_fields,
             self.thresholds.DEDUPLICATION_DUPLICATE_SCORE,
         )
-
 
         query_dict["query"]["bool"]["filter"] = {
             "bool": {

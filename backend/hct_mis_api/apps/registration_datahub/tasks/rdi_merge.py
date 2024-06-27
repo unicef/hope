@@ -1,27 +1,26 @@
 import contextlib
 import logging
-from typing import Dict, List, Tuple
+from typing import Tuple
 from uuid import UUID
 
 from django.core.cache import cache
 from django.db import transaction
 from django.db.models import QuerySet
-from django.forms import model_to_dict
 
-from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
-from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketIndividualDataUpdateDetails,
 )
-from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import create_needs_adjudication_tickets
+from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
+    create_needs_adjudication_tickets,
+)
 from hct_mis_api.apps.household.celery_tasks import recalculate_population_fields_task
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
-    HEAD,
-    DocumentType,
+    DUPLICATE,
+    NEEDS_ADJUDICATION,
     Household,
     HouseholdCollection,
     Individual,
@@ -30,7 +29,7 @@ from hct_mis_api.apps.household.models import (
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
-    PendingIndividualRoleInHousehold, NEEDS_ADJUDICATION, DUPLICATE,
+    PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanismData,
@@ -52,7 +51,7 @@ from hct_mis_api.apps.utils.elasticsearch_utils import (
     populate_index,
     remove_elasticsearch_documents_by_matching_ids,
 )
-from hct_mis_api.apps.utils.phone import is_valid_phone_number
+from hct_mis_api.apps.utils.models import MergeStatusModel
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 
 logger = logging.getLogger(__name__)
@@ -330,13 +329,6 @@ class RdiMergeTask:
             individuals = PendingIndividual.objects.filter(registration_data_import=obj_hct).order_by(
                 "first_registration_date"
             )
-            roles = PendingIndividualRoleInHousehold.objects.filter(
-                household__in=households, individual__in=individuals
-            )
-            bank_account_infos = PendingBankAccountInfo.objects.filter(individual__in=individuals)
-            delivery_mechanism_data = PendingDeliveryMechanismData.objects.filter(
-                individual__in=individuals,
-            )
             individual_ids = list(individuals.values_list("id", flat=True))
             household_ids = list(households.values_list("id", flat=True))
             try:
@@ -441,16 +433,27 @@ class RdiMergeTask:
                         self._update_household_collections(households, obj_hct)
                         self._update_individual_collections(individuals, obj_hct)
 
-                    households.update(rdi_merge_status="MERGED")
-                    individuals.update(rdi_merge_status="MERGED")
-                    delivery_mechanism_data.update(rdi_merge_status="MERGED")
-                    self._create_grievance_tickets_for_delivery_mechanisms_errors(delivery_mechanism_data, obj_hct)
-                    roles.update(rdi_merge_status="MERGED")
-                    bank_account_infos.update(rdi_merge_status="MERGED")
-                    PendingDocument.objects.filter(individual_id__in=individual_ids).update(rdi_merge_status="MERGED")
-                    PendingIndividualRoleInHousehold.objects.filter(individual_id__in=individual_ids).update(
-                        rdi_merge_status="MERGED"
+                    imported_delivery_mechanism_data = PendingDeliveryMechanismData.objects.filter(
+                        individual_id__in=individual_ids,
                     )
+                    self._create_grievance_tickets_for_delivery_mechanisms_errors(
+                        imported_delivery_mechanism_data, obj_hct
+                    )
+                    imported_delivery_mechanism_data.update(rdi_merge_status=MergeStatusModel.MERGED)
+                    PendingIndividualRoleInHousehold.objects.filter(
+                        household_id__in=household_ids, individual_id__in=individual_ids
+                    ).update(rdi_merge_status=MergeStatusModel.MERGED)
+                    PendingBankAccountInfo.objects.filter(individual_id__in=individual_ids).update(
+                        rdi_merge_status=MergeStatusModel.MERGED
+                    )
+                    PendingDocument.objects.filter(individual_id__in=individual_ids).update(
+                        rdi_merge_status=MergeStatusModel.MERGED
+                    )
+                    PendingIndividualRoleInHousehold.objects.filter(individual_id__in=individual_ids).update(
+                        rdi_merge_status=MergeStatusModel.MERGED
+                    )
+                    households.update(rdi_merge_status=MergeStatusModel.MERGED)
+                    individuals.update(rdi_merge_status=MergeStatusModel.MERGED)
 
                     logger.info(f"RDI:{registration_data_import_id} Saved registration data import")
                     transaction.on_commit(lambda: deduplicate_documents.delay())
