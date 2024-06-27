@@ -292,7 +292,7 @@ class DeduplicateTask:
                 self._set_error_message_and_status(registration_data_import, message)
                 break
 
-        ImportedIndividual.objects.bulk_update(
+        PendingIndividual.objects.bulk_update(
             to_bulk_update_results,
             [
                 "deduplication_batch_results",
