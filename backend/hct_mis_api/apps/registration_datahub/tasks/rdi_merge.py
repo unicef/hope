@@ -16,6 +16,7 @@ from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketIndividualDataUpdateDetails,
 )
+from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import create_needs_adjudication_tickets
 from hct_mis_api.apps.household.celery_tasks import recalculate_population_fields_task
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
@@ -29,7 +30,7 @@ from hct_mis_api.apps.household.models import (
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
-    PendingIndividualRoleInHousehold,
+    PendingIndividualRoleInHousehold, NEEDS_ADJUDICATION, DUPLICATE,
 )
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanismData,
@@ -43,6 +44,7 @@ from hct_mis_api.apps.registration_data.models import (
 from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
 from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.signals import rdi_merged
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     CheckAgainstSanctionListPreMergeTask,
 )
@@ -51,6 +53,7 @@ from hct_mis_api.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
+from hct_mis_api.apps.utils.querysets import evaluate_qs
 
 logger = logging.getLogger(__name__)
 
@@ -380,50 +383,49 @@ class RdiMergeTask:
                     logger.info(
                         f"RDI:{registration_data_import_id} Populated index for {len(household_ids)} households"
                     )
-                    # if not obj_hct.business_area.postpone_deduplication:
-                    # TODO: Deduplication to uncomment
-                    # individuals = evaluate_qs(
-                    #     Individual.objects.filter(registration_data_import=obj_hct)
-                    #     .select_for_update()
-                    #     .order_by("pk")
-                    # )
-                    # DeduplicateTask(
-                    #     obj_hct.business_area.slug, obj_hct.program.id
-                    # ).deduplicate_individuals_against_population(individuals)
-                    # logger.info(f"RDI:{registration_data_import_id} Deduplicated {len(individual_ids)} individuals")
-                    # golden_record_duplicates = Individual.objects.filter(
-                    #     registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
-                    # )
-                    # logger.info(
-                    #     f"RDI:{registration_data_import_id} Found {len(golden_record_duplicates)} duplicates"
-                    # )
-                    #
-                    # create_needs_adjudication_tickets(
-                    #     golden_record_duplicates,
-                    #     "duplicates",
-                    #     obj_hct.business_area,
-                    #     registration_data_import=obj_hct,
-                    # )
-                    # logger.info(
-                    #     f"RDI:{registration_data_import_id} Created tickets for {len(golden_record_duplicates)} duplicates"
-                    # )
-                    #
-                    # needs_adjudication = Individual.objects.filter(
-                    #     registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
-                    # )
-                    # logger.info(
-                    #     f"RDI:{registration_data_import_id} Found {len(needs_adjudication)} needs adjudication"
-                    # )
-                    #
-                    # create_needs_adjudication_tickets(
-                    #     needs_adjudication,
-                    #     "possible_duplicates",
-                    #     obj_hct.business_area,
-                    #     registration_data_import=obj_hct,
-                    # )
-                    # logger.info(
-                    #     f"RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)} needs adjudication"
-                    # )
+                    if not obj_hct.business_area.postpone_deduplication:
+                        individuals = evaluate_qs(
+                            PendingIndividual.objects.filter(registration_data_import=obj_hct)
+                            .select_for_update()
+                            .order_by("pk")
+                        )
+                        DeduplicateTask(
+                            obj_hct.business_area.slug, obj_hct.program.id
+                        ).deduplicate_individuals_against_population(individuals)
+                        logger.info(f"RDI:{registration_data_import_id} Deduplicated {len(individual_ids)} individuals")
+                        golden_record_duplicates = Individual.objects.filter(
+                            registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
+                        )
+                        logger.info(
+                            f"RDI:{registration_data_import_id} Found {len(golden_record_duplicates)} duplicates"
+                        )
+
+                        create_needs_adjudication_tickets(
+                            golden_record_duplicates,
+                            "duplicates",
+                            obj_hct.business_area,
+                            registration_data_import=obj_hct,
+                        )
+                        logger.info(
+                            f"RDI:{registration_data_import_id} Created tickets for {len(golden_record_duplicates)} duplicates"
+                        )
+
+                        needs_adjudication = Individual.objects.filter(
+                            registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
+                        )
+                        logger.info(
+                            f"RDI:{registration_data_import_id} Found {len(needs_adjudication)} needs adjudication"
+                        )
+
+                        create_needs_adjudication_tickets(
+                            needs_adjudication,
+                            "possible_duplicates",
+                            obj_hct.business_area,
+                            registration_data_import=obj_hct,
+                        )
+                        logger.info(
+                            f"RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)} needs adjudication"
+                        )
 
                     # SANCTION LIST CHECK
                     if obj_hct.should_check_against_sanction_list() and not obj_hct.business_area.screen_beneficiary:

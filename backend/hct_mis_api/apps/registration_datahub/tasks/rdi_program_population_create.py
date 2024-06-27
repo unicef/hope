@@ -48,7 +48,7 @@ class RdiProgramPopulationCreateTask:
             rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
             rdi_mis.status = RegistrationDataImport.DEDUPLICATION
             rdi_mis.save()
-            DeduplicateTask(business_area.slug, str(import_to_program_id)).deduplicate_imported_individuals(
+            DeduplicateTask(business_area.slug, str(import_to_program_id)).deduplicate_pending_individuals(
                 registration_data_import_datahub=registration_data_import_datahub
             )
             logger.info("Finished deduplication of %s", registration_data_import_datahub.id)
