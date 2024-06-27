@@ -187,10 +187,11 @@ def registration_kobo_import_task(
 
         set_sentry_business_area_tag(BusinessArea.objects.get(pk=business_area_id).name)
 
-        RdiKoboCreateTask().execute(
+        RdiKoboCreateTask(
             registration_data_import_id=registration_data_import_id,
-            import_data_id=import_data_id,
             business_area_id=business_area_id,
+        ).execute(
+            import_data_id=import_data_id,
             program_id=str(program_id),
         )
     except Exception as e:
@@ -230,10 +231,11 @@ def registration_kobo_import_hourly_task(self: Any) -> None:
         program_id = RegistrationDataImport.objects.get(id=not_started_rdi.hct_id).program.id
         set_sentry_business_area_tag(business_area.name)
 
-        RdiKoboCreateTask().execute(
+        RdiKoboCreateTask(
             registration_data_import_id=str(not_started_rdi.id),
-            import_data_id=str(not_started_rdi.import_data.id),
             business_area_id=str(business_area.id),
+        ).execute(
+            import_data_id=str(not_started_rdi.import_data.id),
             program_id=str(program_id),
         )
     except Exception as e:
@@ -330,7 +332,7 @@ def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
 
         with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
             DeduplicateTask(rdi_obj.business_area_slug, program_id).deduplicate_pending_individuals(
-                registration_data_import_datahub=rdi_obj
+                registration_data_import=rdi_obj
             )
     except Exception as e:
         handle_rdi_exception(registration_data_import_id, e)
