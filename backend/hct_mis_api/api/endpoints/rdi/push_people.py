@@ -6,6 +6,7 @@ from django.http import Http404
 from django.utils import timezone
 from django.utils.functional import cached_property
 
+from django_countries import Countries
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
 from rest_framework.request import Request
@@ -15,7 +16,7 @@ from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hct_mis_api.api.endpoints.rdi.mixin import get_photo_from_stream
 from hct_mis_api.api.endpoints.rdi.upload import BirthDateValidator, DocumentSerializer
 from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import (
     BLANK,
     COLLECT_TYPES,
@@ -23,17 +24,12 @@ from hct_mis_api.apps.household.models import (
     NON_BENEFICIARY,
     RESIDENCE_STATUS_CHOICE,
     ROLE_PRIMARY,
+    Document,
+    DocumentType,
+    Household,
+    Individual,
 )
-from hct_mis_api.apps.registration_data.models import (
-    RegistrationDataImport,
-    RegistrationDataImportDatahub,
-)
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedDocument,
-    ImportedDocumentType,
-    ImportedHousehold,
-    ImportedIndividual,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 PEOPLE_TYPE_CHOICES = (
     (BLANK, "None"),
@@ -51,8 +47,8 @@ class PushPeopleSerializer(serializers.ModelSerializer):
 
     type = serializers.ChoiceField(choices=PEOPLE_TYPE_CHOICES, required=True)
 
-    country_origin = serializers.CharField(allow_blank=True, required=False)
-    country = serializers.CharField(allow_blank=True, required=True)
+    country_origin = serializers.ChoiceField(choices=Countries(), required=False)
+    country = serializers.ChoiceField(choices=Countries())
     collect_individual_data = serializers.ChoiceField(choices=COLLECT_TYPES)
     residence_status = serializers.ChoiceField(choices=RESIDENCE_STATUS_CHOICE)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
@@ -73,63 +69,76 @@ class PushPeopleSerializer(serializers.ModelSerializer):
         self.fields["admin4"].choices = Area.objects.filter(area_type__area_level=4).values_list("p_code", "name")
 
     class Meta:
-        model = ImportedIndividual
+        model = Individual
         exclude = [
             "id",
             "registration_data_import",
+            "business_area",
             "deduplication_batch_results",
             "deduplication_golden_record_results",
             "deduplication_batch_status",
             "created_at",
             "updated_at",
-            "mis_unicef_id",
+            "unicef_id",
             "household",
             "detail_id",
         ]
 
 
 class PeopleUploadMixin:
-    def save_people(self, rdi: RegistrationDataImportDatahub, program_id: UUID, people_data: List[Dict]) -> List[int]:
+    def save_people(self, rdi: RegistrationDataImport, program_id: UUID, people_data: List[Dict]) -> List[int]:
         people_ids = []
         for person_data in people_data:
             documents = person_data.pop("documents", [])
 
             hh = self._create_household(person_data, program_id, rdi)
-            ind = self._create_individual(documents, hh, person_data, program_id, rdi)
+            ind = self._create_individual(documents, hh, person_data, rdi)
             people_ids.append(ind.id)
         return people_ids
 
     def _create_household(
-        self, person_data: Dict, program_id: UUID, rdi: RegistrationDataImportDatahub
-    ) -> Optional[ImportedHousehold]:
+        self, person_data: Dict, program_id: UUID, rdi: RegistrationDataImport
+    ) -> Optional[Household]:
         if person_data.get("type") == NON_BENEFICIARY:
             return None
-        household_fields = [field.name for field in ImportedHousehold._meta.get_fields()]
+        household_fields = [field.name for field in Household._meta.get_fields()]
         household_data = {field: value for field, value in person_data.items() if field in household_fields}
         household_data["village"] = household_data.get("village") or ""
-        household_data["admin1"] = household_data.get("admin1") or ""
-        household_data["admin2"] = household_data.get("admin2") or ""
-        household_data["admin3"] = household_data.get("admin3") or ""
-        household_data["admin4"] = household_data.get("admin4") or ""
-        household = ImportedHousehold.objects.create(
+        admin_areas = [
+            household_data.pop("admin4"),
+            household_data.pop("admin3"),
+            household_data.pop("admin2"),
+            household_data.pop("admin1"),
+        ]
+
+        if country := household_data.pop("country"):
+            household_data["country"] = Country.objects.get(iso_code2=country)
+
+        if country_origin := household_data.pop("country_origin", None):
+            household_data["country_origin"] = Country.objects.get(iso_code2=country_origin)
+
+        household = Household.objects.create(
+            business_area=rdi.business_area,
             registration_data_import=rdi,
             program_id=program_id,
-            collect_type=ImportedHousehold.CollectType.SINGLE.value,
+            collect_type=Household.CollectType.SINGLE.value,
             **household_data,
         )
-        household.set_admin_areas()
+        the_lowest_p_code = next((admin_area for admin_area in admin_areas if admin_area), None)
+        if the_lowest_p_code:
+            admin_area_to_set = Area.objects.filter(p_code=the_lowest_p_code).first()
+            household.set_admin_areas(admin_area_to_set)
         household.save()
         return household
 
     def _create_individual(
         self,
         documents: List[Dict],
-        hh: Optional[ImportedHousehold],
+        hh: Optional[Household],
         person_data: Dict,
-        program_id: UUID,
-        rdi: RegistrationDataImportDatahub,
-    ) -> ImportedIndividual:
-        individual_fields = [field.name for field in ImportedIndividual._meta.get_fields()]
+        rdi: RegistrationDataImport,
+    ) -> Individual:
+        individual_fields = [field.name for field in Individual._meta.get_fields()]
         individual_data = {field: value for field, value in person_data.items() if field in individual_fields}
         person_type = person_data.get("type")
         individual_data.pop("relationship", None)
@@ -137,10 +146,11 @@ class PeopleUploadMixin:
         individual_data["phone_no"] = individual_data.get("phone_no") or ""
         individual_data["phone_no_alternative"] = individual_data.get("phone_no_alternative") or ""
 
-        ind = ImportedIndividual.objects.create(
+        ind = Individual.objects.create(
+            business_area=rdi.business_area,
             household=hh,
             registration_data_import=rdi,
-            program_id=program_id,
+            program=hh.program,
             relationship=relationship,
             **individual_data,
         )
@@ -156,14 +166,14 @@ class PeopleUploadMixin:
             self._create_document(ind, doc)
         return ind
 
-    def _create_document(self, member: ImportedIndividual, doc: Dict) -> None:
-        ImportedDocument.objects.create(
+    def _create_document(self, member: Individual, doc: Dict) -> None:
+        Document.objects.create(
             document_number=doc["document_number"],
             photo=get_photo_from_stream(doc.get("image", None)),
-            doc_date=doc["doc_date"],
             individual=member,
-            country=doc["country"],
-            type=ImportedDocumentType.objects.get(key=doc["type"]),
+            country=Country.objects.get(iso_code2=doc["country"]),
+            type=DocumentType.objects.get(key=doc["type"]),
+            program=member.program,
         )
 
 
@@ -171,21 +181,21 @@ class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIVie
     permission = Grant.API_RDI_UPLOAD
 
     @cached_property
-    def selected_rdi(self) -> RegistrationDataImportDatahub:
+    def selected_rdi(self) -> RegistrationDataImport:
         try:
-            return RegistrationDataImportDatahub.objects.get(
-                import_done=RegistrationDataImportDatahub.LOADING,
+            return RegistrationDataImport.objects.get(
+                status=RegistrationDataImport.LOADING,
                 id=self.kwargs["rdi"],
-                business_area_slug=self.kwargs["business_area"],
+                business_area__slug=self.kwargs["business_area"],
             )
-        except RegistrationDataImportDatahub.DoesNotExist:
+        except RegistrationDataImport.DoesNotExist:
             raise Http404
 
     @extend_schema(request=PushPeopleSerializer)
     @atomic(using="registration_datahub")
     def post(self, request: "Request", business_area: str, rdi: UUID) -> Response:
         serializer = PushPeopleSerializer(data=request.data, many=True)
-        program_id = RegistrationDataImport.objects.get(datahub_id=str(self.selected_rdi.id)).program_id
+        program_id = self.selected_rdi.program.id
 
         if serializer.is_valid():
             people_ids = self.save_people(self.selected_rdi, program_id, serializer.validated_data)

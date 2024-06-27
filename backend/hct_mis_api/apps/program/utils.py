@@ -145,9 +145,7 @@ class CopyProgramPopulation:
             households_to_create.append(self.copy_household(household, individuals))
         return Household.objects.bulk_create(households_to_create)
 
-    def copy_household_related_data(
-        self, new_households: List[Household], new_individuals: List[Individual]
-    ) -> None:
+    def copy_household_related_data(self, new_households: List[Household], new_individuals: List[Individual]) -> None:
         roles_to_create = []
         entitlement_cards_to_create = []
         for new_household in new_households:
