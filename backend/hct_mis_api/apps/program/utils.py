@@ -224,7 +224,7 @@ class CopyProgramPopulation:
                     self.rdi_merge_status,
                 )
             )
-        Individual.objects.bulk_update(individuals_to_update, ["household"])
+        getattr(Individual, self.manager).bulk_update(individuals_to_update, ["household"])
         Document.objects.bulk_create(documents_to_create)
         IndividualIdentity.objects.bulk_create(individual_identities_to_create)
         BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
