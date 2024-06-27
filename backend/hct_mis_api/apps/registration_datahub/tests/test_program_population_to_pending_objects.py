@@ -276,6 +276,8 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         self.assertIsNotNone(pending_household)
 
         self.household.refresh_from_db()
+        self.individuals[0].refresh_from_db()
+        self.individuals[1].refresh_from_db()
 
         for field in HOUSEHOLD_FIELDS:
             pending_household_field = getattr(pending_household, field)
@@ -302,7 +304,25 @@ class TestProgramPopulationToPendingObjects(APITestCase):
 
         pending_individuals = Individual.pending_objects.all()
         head_of_household_pending_individual = pending_individuals.get(relationship=HEAD)
-        self.individuals[0].refresh_from_db()
+
+        self.assertEqual(
+            pending_household.head_of_household,
+            head_of_household_pending_individual,
+        )
+
+        self.assertEqual(
+            self.household.head_of_household,
+            self.individuals[0],
+        )
+        self.assertEqual(
+            self.individuals[0].household,
+            self.household,
+        )
+        self.assertEqual(
+            self.individuals[1].household,
+            self.household,
+        )
+
         for field in INDIVIDUAL_FIELDS:
             imported_individual_field = getattr(head_of_household_pending_individual, field)
             individual_field = getattr(self.individuals[0], field)
@@ -326,6 +346,10 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             )
             self.assertIsNone(
                 pending_individual.individual_collection,
+            )
+            self.assertEqual(
+                pending_individual.household,
+                pending_household,
             )
 
         self.assertEqual(
@@ -355,6 +379,10 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             pending_document.rdi_merge_status,
             MergeStatusModel.PENDING,
         )
+        self.assertEqual(
+            pending_document.individual,
+            head_of_household_pending_individual,
+        )
 
         pending_identity = IndividualIdentity.pending_objects.first()
         self.assertEqual(
@@ -377,6 +405,11 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             MergeStatusModel.PENDING,
         )
 
+        self.assertEqual(
+            pending_identity.individual,
+            head_of_household_pending_individual,
+        )
+
         pending_bank_account_info = BankAccountInfo.pending_objects.first()
         for field in (
             "bank_name",
@@ -396,6 +429,10 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             pending_bank_account_info.rdi_merge_status,
             MergeStatusModel.PENDING,
         )
+        self.assertEqual(
+            pending_bank_account_info.individual,
+            head_of_household_pending_individual,
+        )
 
         pending_individual_role_in_household = IndividualRoleInHousehold.pending_objects.first()
         self.assertEqual(
@@ -413,6 +450,14 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         self.assertEqual(
             pending_individual_role_in_household.rdi_merge_status,
             MergeStatusModel.PENDING,
+        )
+        self.assertEqual(
+            pending_individual_role_in_household.household,
+            pending_household,
+        )
+        self.assertEqual(
+            pending_individual_role_in_household.individual,
+            pending_individuals.exclude(relationship=HEAD).first(),
         )
 
     def test_not_import_excluded_objects(self) -> None:
