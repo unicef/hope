@@ -10,16 +10,14 @@ from hct_mis_api.apps.household.models import (
     NOT_DISABLED,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-)
-from hct_mis_api.apps.registration_data.models import RegistrationDataImportDatahub
-from hct_mis_api.apps.household.models import (
+    DocumentType,
     PendingBankAccountInfo,
     PendingDocument,
-    DocumentType,
     PendingHousehold,
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
+from hct_mis_api.apps.registration_data.models import RegistrationDataImportDatahub
 from hct_mis_api.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
