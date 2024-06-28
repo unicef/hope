@@ -10,7 +10,6 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import IndividualFactory
-from hct_mis_api.apps.registration_datahub.fixtures import ImportedIndividualFactory
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 ALL_IMPORTED_INDIVIDUALS_QUERY = """
