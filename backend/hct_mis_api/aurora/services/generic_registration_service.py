@@ -12,13 +12,13 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImportDatahub
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedBankAccountInfo,
-    ImportedDocument,
-    ImportedDocumentType,
-    ImportedHousehold,
-    ImportedIndividual,
-    ImportedIndividualRoleInHousehold,
+from hct_mis_api.apps.household.models import (
+    PendingBankAccountInfo,
+    PendingDocument,
+    DocumentType,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
@@ -174,7 +174,7 @@ class GenericRegistrationService(BaseRegistrationService):
         record: Any,
         registration_data_import: RegistrationDataImportDatahub,
         mapping: Dict,
-    ) -> ImportedHousehold:
+    ) -> PendingHousehold:
         record_data_dict = record.get_data()
         household_payload = self._create_household_dict(record_data_dict, mapping)
         flex_fields = household_payload.pop("flex_fields", dict())
@@ -194,12 +194,12 @@ class GenericRegistrationService(BaseRegistrationService):
             "size": len(record_data_dict[individuals_key]),
             "flex_fields": flex_fields,
         }
-        return self._create_object_and_validate(household_data, ImportedHousehold)
+        return self._create_object_and_validate(household_data, PendingHousehold)
 
     def create_individuals(
         self,
         record: Any,
-        household: ImportedHousehold,
+        household: PendingHousehold,
         mapping: Dict,
     ) -> Tuple:
         base_individual_data_dict = dict(
@@ -227,7 +227,7 @@ class GenericRegistrationService(BaseRegistrationService):
                 **base_individual_data_dict,
                 **individual_data,
             )
-            individual = self._create_object_and_validate(individual_dict, ImportedIndividual)
+            individual = self._create_object_and_validate(individual_dict, PendingIndividual)
 
             if individual.relationship == HEAD:
                 if head:
@@ -236,19 +236,19 @@ class GenericRegistrationService(BaseRegistrationService):
 
             for _, bank_data in banks_data.items():
                 bank_data[INDIVIDUAL_FIELD] = individual
-                self._create_object_and_validate(bank_data, ImportedBankAccountInfo)
+                self._create_object_and_validate(bank_data, PendingBankAccountInfo)
 
             for _, document_data in documents_data.items():
                 key = document_data.pop("key", None)  # skip documents' without key
                 if key:
-                    document_data["type"] = ImportedDocumentType.objects.get(key=key)
+                    document_data["type"] = DocumentType.objects.get(key=key)
                     document_data[INDIVIDUAL_FIELD] = individual
                     document_data[COUNTRY] = Country(code=mapping["defaults"][COUNTRY])
                     if photo_base_64 := document_data.get("photo", None):
                         document_data["photo"] = self._prepare_picture_from_base64(
                             photo_base_64, document_data.get("document_number", key)
                         )
-                    self._create_object_and_validate(document_data, ImportedDocument)
+                    self._create_object_and_validate(document_data, PendingDocument)
 
             if self.get_boolean(extra_data.get(PRIMARY_COLLECTOR, False)):
                 if pr_collector:
@@ -333,11 +333,11 @@ class GenericRegistrationService(BaseRegistrationService):
             household.head_of_household = head
 
         if pr_collector:
-            ImportedIndividualRoleInHousehold.objects.create(
+            PendingIndividualRoleInHousehold.objects.create(
                 individual=pr_collector, household=household, role=ROLE_PRIMARY
             )
         if sec_collector:
-            ImportedIndividualRoleInHousehold.objects.create(
+            PendingIndividualRoleInHousehold.objects.create(
                 individual=sec_collector, household=household, role=ROLE_ALTERNATE
             )
 
