@@ -41,6 +41,7 @@ from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
     IsOriginalAdminMixin,
     LastSyncDateResetMixin,
+    RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
 )
 from hct_mis_api.apps.utils.security import is_root
@@ -57,6 +58,7 @@ class IndividualAdmin(
     CursorPaginatorAdmin,
     HOPEModelAdminBase,
     IsOriginalAdminMixin,
+    RdiMergeStatusAdminMixin,
 ):
     # Custom template to merge AdminAdvancedFiltersMixin and ExtraButtonsMixin
     advanced_change_list_template = "admin/household/advanced_filters_extra_buttons_change_list.html"
@@ -71,6 +73,7 @@ class IndividualAdmin(
         "relationship",
         "birth_date",
         "program",
+        "rdi_merge_status",
     )
     advanced_filter_fields = (
         "updated_at",
@@ -263,7 +266,7 @@ class BusinessAreaSlugFilter(InputFilter):
 
 
 @admin.register(IndividualRoleInHousehold)
-class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
+class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase, RdiMergeStatusAdminMixin):
     list_display = ("individual", "household", "role")
     list_filter = (DepotManager, QueryStringFilter, "role", BusinessAreaSlugFilter)
     raw_id_fields = ("individual", "household", "copied_from")
@@ -280,7 +283,7 @@ class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase)
 
 
 @admin.register(IndividualIdentity)
-class IndividualIdentityAdmin(HOPEModelAdminBase):
+class IndividualIdentityAdmin(HOPEModelAdminBase, RdiMergeStatusAdminMixin):
     list_display = ("partner", "individual", "number")
     list_filter = (("individual__unicef_id", ValueFilter.factory(label="Individual's UNICEF Id")),)
     raw_id_fields = ("individual", "partner", "copied_from")
