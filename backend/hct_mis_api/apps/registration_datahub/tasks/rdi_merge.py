@@ -152,104 +152,13 @@ class RdiMergeTask:
         "wallet_address",
     )
 
-    #
-    # def _prepare_households(
-    #     self, imported_households: List[Household], obj_hct: RegistrationDataImport
-    # ) -> Dict[int, Household]:
-    #     households_dict = {}
-    #     countries = {}
-    #     for imported_household in imported_households:
-    #         household_data = {**model_to_dict(imported_household, fields=self.HOUSEHOLD_FIELDS)}
-    #         country = household_data.pop("country")
-    #         country_origin = household_data.pop("country_origin")
-    #
-    #         if country and country.code not in countries:
-    #             countries[country.code] = Country.objects.get(iso_code2=country.code)
-    #         if country_origin and country_origin.code not in countries:
-    #             countries[country_origin.code] = Country.objects.get(iso_code2=country_origin.code)
-    #
-    #         if country := countries.get(country.code):
-    #             household_data["country"] = country
-    #
-    #         if country_origin := countries.get(country_origin.code):
-    #             household_data["country_origin"] = country_origin
-    #
+    # TODO DATAHUB DELETE Fix for flex registration
     #         if record := imported_household.flex_registrations_record:
     #             household_data["registration_id"] = str(record.registration)
-    #
+
+    # TODO DATAHUB DELETE Fix for flex registration
     #         if enumerator_rec_id := imported_household.enumerator_rec_id:
     #             household_data["enumerator_rec_id"] = enumerator_rec_id
-    #
-    #         household = Household(
-    #             **household_data,
-    #             registration_data_import=obj_hct,
-    #             business_area=obj_hct.business_area,
-    #             program=obj_hct.program,
-    #         )
-    #         self.merge_admin_areas(imported_household, household)
-    #         households_dict[imported_household.id] = household
-    #
-    #     return households_dict
-    #
-
-    #
-    # def _prepare_individuals(
-    #     self,
-    #     imported_individuals: List[Individual],
-    #     households_dict: Dict[int, Household],
-    #     obj_hct: RegistrationDataImport,
-    # ) -> None:
-    #     individuals_dict = {}
-    #     documents_to_create = []
-    #     identities_to_create = []
-    #     for imported_individual in imported_individuals:
-    #         values = model_to_dict(imported_individual, fields=self.INDIVIDUAL_FIELDS)
-    #
-    #         if not values.get("phone_no_valid"):
-    #             values["phone_no_valid"] = False
-    #         if not values.get("phone_no_alternative_valid"):
-    #             values["phone_no_alternative_valid"] = False
-    #
-    #         imported_individual_household = imported_individual.household
-    #         household = households_dict.get(imported_individual.household.id) if imported_individual_household else None
-    #
-    #         phone_no = values.get("phone_no")
-    #         phone_no_alternative = values.get("phone_no_alternative")
-    #
-    #         values["phone_no_valid"] = is_valid_phone_number(str(phone_no))
-    #         values["phone_no_alternative_valid"] = is_valid_phone_number(str(phone_no_alternative))
-    #
-    #         individual = Individual(
-    #             **values,
-    #             household=household,
-    #             registration_id=getattr(household, "registration_id", None),
-    #             business_area=obj_hct.business_area,
-    #             registration_data_import=obj_hct,
-    #             imported_individual_id=imported_individual.id,
-    #             program=obj_hct.program,
-    #         )
-    #         if household:
-    #             individual.registration_id = household.registration_id
-    #         individuals_dict[imported_individual.id] = individual
-    #
-    #         is_social_worker_program = obj_hct.program.is_social_worker_program
-    #
-    #         if is_social_worker_program:
-    #             # every household for Social DCT type program has HoH
-    #             household.head_of_household = individual
-    #         else:
-    #             if imported_individual.relationship == HEAD and household:
-    #                 household.head_of_household = individual
-    #
-    #         (
-    #             documents,
-    #             identities,
-    #         ) = self._prepare_individual_documents_and_identities(imported_individual, individual)
-    #
-    #         documents_to_create.extend(documents)
-    #         identities_to_create.extend(identities)
-    #
-    #
 
     def _create_grievance_ticket_for_delivery_mechanisms_errors(
         self, delivery_mechanism_data: DeliveryMechanismData, obj_hct: RegistrationDataImport, description: str
