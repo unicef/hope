@@ -11,13 +11,13 @@ from adminfilters.combo import RelatedFieldComboFilter
 
 from hct_mis_api.apps.core.utils import AutoCompleteFilterTemp
 from hct_mis_api.apps.household.models import FOSTER_CHILD, Document, DocumentType
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableAdminMixin
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableAdminMixin, RdiMergeStatusAdminMixin
 
 logger = logging.getLogger(__name__)
 
 
 @admin.register(Document)
-class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
+class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase, RdiMergeStatusAdminMixin):
     search_fields = ("document_number", "country__name")
     list_display = ("document_number", "type", "country", "status", "individual")
     raw_id_fields = ("individual", "copied_from", "program")
