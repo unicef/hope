@@ -23,9 +23,9 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     YES,
+    DocumentType,
     PendingBankAccountInfo,
     PendingDocument,
-    DocumentType,
     PendingHousehold,
     PendingIndividual,
     PendingIndividualRoleInHousehold,
@@ -274,7 +274,9 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
 
         return documents
 
-    def _prepare_bank_account_info(self, individual_dict: Dict, individual: PendingIndividual) -> Optional[Dict[str, Any]]:
+    def _prepare_bank_account_info(
+        self, individual_dict: Dict, individual: PendingIndividual
+    ) -> Optional[Dict[str, Any]]:
         if individual_dict.get("bank_account_h_f", "n") != "y":
             return None
         if not individual_dict.get("bank_account_number") or not individual_dict.get("bank_account"):

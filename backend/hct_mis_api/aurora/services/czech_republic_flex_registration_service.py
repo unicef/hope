@@ -20,9 +20,9 @@ from hct_mis_api.apps.household.models import (
     PRIVATE_PARTNER,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    DocumentType,
     PendingBankAccountInfo,
     PendingDocument,
-    DocumentType,
     PendingHousehold,
     PendingIndividual,
     PendingIndividualRoleInHousehold,
@@ -206,7 +206,9 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
 
         return individual_data
 
-    def _prepare_bank_account_info(self, individual_dict: Dict, imported_individual: PendingIndividual) -> Optional[Dict]:
+    def _prepare_bank_account_info(
+        self, individual_dict: Dict, imported_individual: PendingIndividual
+    ) -> Optional[Dict]:
         bank_account_number = individual_dict.get("bank_account_number_h_f")
         if not bank_account_number:
             return None
@@ -218,7 +220,9 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             "individual": imported_individual,
         }
 
-    def _prepare_documents(self, individual_dict: Dict, imported_individual: PendingIndividual) -> list[PendingDocument]:
+    def _prepare_documents(
+        self, individual_dict: Dict, imported_individual: PendingIndividual
+    ) -> list[PendingDocument]:
         documents = []
         document_keys = self._get_all_document_keys_from_individual_dict(individual_dict)
         for document_data_key in document_keys:

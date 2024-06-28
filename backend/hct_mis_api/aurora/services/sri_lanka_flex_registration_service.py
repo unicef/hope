@@ -13,9 +13,9 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     ROLE_PRIMARY,
     YES,
+    DocumentType,
     PendingBankAccountInfo,
     PendingDocument,
-    DocumentType,
     PendingHousehold,
     PendingIndividual,
     PendingIndividualRoleInHousehold,
@@ -113,7 +113,9 @@ class SriLankaRegistrationService(BaseRegistrationService):
         )
         return individual_data
 
-    def _prepare_national_id(self, individual_dict: Dict, imported_individual: PendingIndividual) -> Optional[PendingDocument]:
+    def _prepare_national_id(
+        self, individual_dict: Dict, imported_individual: PendingIndividual
+    ) -> Optional[PendingDocument]:
         national_id = individual_dict.get("national_id_no_i_c")
         if not national_id:
             return None
@@ -124,7 +126,9 @@ class SriLankaRegistrationService(BaseRegistrationService):
             country=Country.objects.get(iso_code2="LK"),
         )
 
-    def _prepare_birth_certificate(self, individual_dict: Dict, imported_individual: PendingIndividual) -> Optional[PendingDocument]:
+    def _prepare_birth_certificate(
+        self, individual_dict: Dict, imported_individual: PendingIndividual
+    ) -> Optional[PendingDocument]:
         national_id = individual_dict.get("chidlren_birth_certificate")
         if not national_id:
             return None
@@ -200,7 +204,9 @@ class SriLankaRegistrationService(BaseRegistrationService):
             self._prepare_national_id(collector_dict, primary_collector)
         self._prepare_bank_statement_document(collector_dict, primary_collector)
 
-        PendingIndividualRoleInHousehold.objects.create(household=household, individual=primary_collector, role=ROLE_PRIMARY)
+        PendingIndividualRoleInHousehold.objects.create(
+            household=household, individual=primary_collector, role=ROLE_PRIMARY
+        )
         if bank_name and bank_account_number:
             PendingBankAccountInfo.objects.create(
                 bank_name=bank_name,
