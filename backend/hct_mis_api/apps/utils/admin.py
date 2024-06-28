@@ -43,6 +43,11 @@ class IsOriginalAdminMixin(admin.ModelAdmin):
         return tuple(list(super().get_list_filter(request)) + ["is_original"])
 
 
+class RdiMergeStatusAdminMixin(admin.ModelAdmin):
+    def get_list_filter(self, request: HttpRequest) -> Tuple:
+        return tuple(list(super().get_list_filter(request)) + ["rdi_merge_status"])
+
+
 class JSONWidgetMixin:
     json_enabled = False
 
