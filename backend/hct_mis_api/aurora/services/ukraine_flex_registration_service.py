@@ -23,12 +23,12 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     YES,
-    BankAccountInfo,
-    Document,
+    PendingBankAccountInfo,
+    PendingDocument,
     DocumentType,
-    Household,
-    Individual,
-    IndividualRoleInHousehold,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.registration_data.models import (
     RegistrationDataImport,
@@ -93,8 +93,8 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
     def create_household_for_rdi_household(
         self, record: Any, registration_data_import: RegistrationDataImportDatahub
     ) -> None:
-        individuals: List[Individual] = []
-        documents: List[Document] = []
+        individuals: List[PendingIndividual] = []
+        documents: List[PendingDocument] = []
         record_data_dict = record.get_data()
         household_dict = record_data_dict.get("household", [])[0]
         individuals_array = record_data_dict.get("individuals", [])
@@ -110,7 +110,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
             household_data["size"] = len(individuals_array)
         if enumerator_rec_id:
             household_data["enumerator_rec_id"] = enumerator_rec_id
-        household = self._create_object_and_validate(household_data, Household)
+        household = self._create_object_and_validate(household_data, PendingHousehold)
         household.set_admin_areas()
 
         household.detail_id = record.source_id
@@ -122,7 +122,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
                 role = individual_data.pop("role")
                 phone_no = individual_data.pop("phone_no", "")
 
-                individual: Individual = self._create_object_and_validate(individual_data, Individual)
+                individual: PendingIndividual = self._create_object_and_validate(individual_data, PendingIndividual)
                 individual.disability_certificate_picture = individual_data.get("disability_certificate_picture")
                 individual.phone_no = phone_no
                 individual.detail_id = record.source_id
@@ -130,7 +130,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
 
                 bank_account_data = self._prepare_bank_account_info(individual_dict, individual)
                 if bank_account_data:
-                    self._create_object_and_validate(bank_account_data, BankAccountInfo)
+                    self._create_object_and_validate(bank_account_data, PendingBankAccountInfo)
                 self._create_role(role, individual, household)
                 individuals.append(individual)
 
@@ -141,7 +141,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
             except ValidationError as e:
                 raise ValidationError({f"individual nr {index + 1}": [str(e)]}) from e
 
-        Document.objects.bulk_create(documents)
+        PendingDocument.objects.bulk_create(documents)
 
     def _set_default_head_of_household(self, individuals_array: "QuerySet") -> None:
         for individual_data in individuals_array:
@@ -149,13 +149,13 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
                 individual_data["relationship_i_c"] = "head"
                 break
 
-    def _create_role(self, role: "Role", individual: Individual, household: Household) -> None:
+    def _create_role(self, role: "Role", individual: PendingIndividual, household: PendingHousehold) -> None:
         if role == "y":
             defaults = dict(individual=individual, household=household)
-            if IndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).count() == 0:
-                IndividualRoleInHousehold.objects.create(**defaults, role=ROLE_PRIMARY)
-            elif IndividualRoleInHousehold.objects.filter(household=household, role=ROLE_ALTERNATE).count() == 0:
-                IndividualRoleInHousehold.objects.create(**defaults, role=ROLE_ALTERNATE)
+            if PendingIndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).count() == 0:
+                PendingIndividualRoleInHousehold.objects.create(**defaults, role=ROLE_PRIMARY)
+            elif PendingIndividualRoleInHousehold.objects.filter(household=household, role=ROLE_ALTERNATE).count() == 0:
+                PendingIndividualRoleInHousehold.objects.create(**defaults, role=ROLE_ALTERNATE)
             else:
                 raise ValidationError("There should be only two collectors!")
 
@@ -194,7 +194,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
     def _prepare_individual_data(
         self,
         individual_dict: Dict,
-        household: Household,
+        household: PendingHousehold,
         registration_data_import: RegistrationDataImportDatahub,
     ) -> Dict:
         rdi = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
@@ -241,7 +241,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
 
         return individual_data
 
-    def _prepare_documents(self, individual_dict: Dict, individual: Individual) -> List[Document]:
+    def _prepare_documents(self, individual_dict: Dict, individual: PendingIndividual) -> List[PendingDocument]:
         documents = []
 
         for document_key_string, (
@@ -265,16 +265,16 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
                 "document_number": document_number,
                 "individual": individual,
             }
-            ModelClassForm = modelform_factory(Document, fields=list(document_kwargs.keys()))
+            ModelClassForm = modelform_factory(PendingDocument, fields=list(document_kwargs.keys()))
             form = ModelClassForm(document_kwargs)
             if not form.is_valid():
                 raise ValidationError(form.errors)
-            document = Document(photo=certificate_picture, **document_kwargs)
+            document = PendingDocument(photo=certificate_picture, **document_kwargs)
             documents.append(document)
 
         return documents
 
-    def _prepare_bank_account_info(self, individual_dict: Dict, individual: Individual) -> Optional[Dict[str, Any]]:
+    def _prepare_bank_account_info(self, individual_dict: Dict, individual: PendingIndividual) -> Optional[Dict[str, Any]]:
         if individual_dict.get("bank_account_h_f", "n") != "y":
             return None
         if not individual_dict.get("bank_account_number") or not individual_dict.get("bank_account"):
@@ -294,7 +294,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         }
         return bank_account_info_data
 
-    def validate_household(self, individuals_array: List[Individual]) -> None:
+    def validate_household(self, individuals_array: List[PendingIndividual]) -> None:
         if not individuals_array:
             raise ValidationError("Household should has at least one individual")
 
@@ -302,7 +302,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         if not has_head:
             raise ValidationError("Household should has at least one Head of Household")
 
-    def _has_head(self, individuals_array: List[Individual]) -> bool:
+    def _has_head(self, individuals_array: List[PendingIndividual]) -> bool:
         return any(
             individual_data.get(
                 "relationship_i_c",
@@ -327,7 +327,7 @@ class Registration2024(UkraineBaseRegistrationService):
     def _prepare_individual_data(
         self,
         individual_dict: Dict,
-        household: Household,
+        household: PendingHousehold,
         registration_data_import: RegistrationDataImportDatahub,
     ) -> Dict:
         individual_data = super()._prepare_individual_data(individual_dict, household, registration_data_import)
