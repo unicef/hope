@@ -11,7 +11,11 @@ from adminfilters.combo import RelatedFieldComboFilter
 
 from hct_mis_api.apps.core.utils import AutoCompleteFilterTemp
 from hct_mis_api.apps.household.models import FOSTER_CHILD, Document, DocumentType
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableAdminMixin, RdiMergeStatusAdminMixin
+from hct_mis_api.apps.utils.admin import (
+    HOPEModelAdminBase,
+    RdiMergeStatusAdminMixin,
+    SoftDeletableAdminMixin,
+)
 
 logger = logging.getLogger(__name__)
 

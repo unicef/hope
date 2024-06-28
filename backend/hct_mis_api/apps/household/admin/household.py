@@ -43,7 +43,8 @@ from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
     IsOriginalAdminMixin,
     LastSyncDateResetMixin,
-    SoftDeletableAdminMixin, RdiMergeStatusAdminMixin,
+    RdiMergeStatusAdminMixin,
+    SoftDeletableAdminMixin,
 )
 from hct_mis_api.apps.utils.security import is_root
 
