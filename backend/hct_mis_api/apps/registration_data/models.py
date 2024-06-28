@@ -163,6 +163,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         related_name="registration_data_import_hope",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
 
     def __str__(self) -> str:
