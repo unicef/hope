@@ -43,6 +43,7 @@ from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
     IsOriginalAdminMixin,
     LastSyncDateResetMixin,
+    RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
 )
 from hct_mis_api.apps.utils.security import is_root
@@ -82,6 +83,7 @@ class HouseholdAdmin(
     CustomTargetPopulationMixin,
     HOPEModelAdminBase,
     IsOriginalAdminMixin,
+    RdiMergeStatusAdminMixin,
 ):
     list_display = (
         "unicef_id",
@@ -91,6 +93,7 @@ class HouseholdAdmin(
         "size",
         "withdrawn",
         "program",
+        "rdi_merge_status",
     )
     list_filter = (
         DepotManager,
