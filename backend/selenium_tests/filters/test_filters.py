@@ -232,3 +232,6 @@ class TestSmokeFilters:
                     filters.wait_for(locator, timeout=20)
                 except BaseException:
                     raise Exception(f"Element {locator} not found on the {nav_menu} page.")
+
+    def test_filters_happy_path(self, create_programs: None, filters: Filters) -> None:
+        filters.selectGlobalProgramFilter("Test Programm").click()
