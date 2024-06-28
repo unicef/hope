@@ -3,6 +3,7 @@ from django.core.management import call_command
 
 import pytest
 from page_object.filters import Filters
+from selenium.webdriver.common.by import By
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -233,5 +234,26 @@ class TestSmokeFilters:
                 except BaseException:
                     raise Exception(f"Element {locator} not found on the {nav_menu} page.")
 
-    def test_filters_happy_path(self, create_programs: None, filters: Filters) -> None:
+    @pytest.mark.parametrize("module", [
+        "Registration Data Import",
+        "Program Population",
+        "Targeting",
+        "Payment Module",
+        "Payment Verification",
+        "Grievance",
+    ])
+    def test_filters_happy_path_search_filter(self,
+                                              module: None,
+                                              create_programs: None,
+                                              filters: Filters) -> None:
         filters.selectGlobalProgramFilter("Test Programm").click()
+        from time import sleep
+        sleep(1)
+        filters.wait_for(f'[data-cy="nav-{module}').click()
+
+        from selenium_tests.tools.tag_name_finder import printing
+        printing("Mapping", filters.driver)
+
+        filters.getFilterSearch()
+        filters.getFilterSearch().find_elements(By.TAG_NAME, "input")[0].send_keys(module)
+        filters.screenshot(module)
