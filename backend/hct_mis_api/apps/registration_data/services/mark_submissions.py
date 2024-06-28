@@ -29,7 +29,7 @@ class MarkSubmissions:
             return {"message": "No suitable (unmerged) Submissions found", "submissions": 0}
 
         # Mark as amended
-        with transaction.atomic(using="registration_datahub"):
+        with transaction.atomic():
             rows = submissions.update(amended=True)
             return {"message": f"{rows} submissions successfully amended", "submissions": rows}
 
