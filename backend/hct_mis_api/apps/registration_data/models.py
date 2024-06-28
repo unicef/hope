@@ -10,12 +10,10 @@ from django.core.validators import (
 )
 from django.db import models
 from django.db.models import Q
-from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
     ConcurrencyModel,
@@ -169,10 +167,6 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
 
     def __str__(self) -> str:
         return self.name
-
-    @cached_property
-    def all_imported_individuals(self) -> models.QuerySet["ImportedIndividual"]:
-        return ImportedIndividual.objects.filter(registration_data_import=self.datahub_id)
 
     class Meta:
         unique_together = ("name", "business_area")
