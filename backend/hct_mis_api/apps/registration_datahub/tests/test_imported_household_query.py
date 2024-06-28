@@ -9,7 +9,9 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.registration_datahub.fixtures import ImportedHouseholdFactory
+from hct_mis_api.apps.geo.models import Country
+from hct_mis_api.apps.household.fixtures import HouseholdFactory
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class TestImportedHouseholdQuery(APITestCase):
@@ -47,10 +49,11 @@ class TestImportedHouseholdQuery(APITestCase):
         cls.user = UserFactory.create(partner=cls.partner)
         sizes_list = (2, 4, 5, 1, 3, 11, 14)
         cls.households = [
-            ImportedHouseholdFactory(
+            HouseholdFactory(
                 size=size,
                 address="Lorem Ipsum",
-                country_origin="PL",
+                country_origin=Country.objects.get(iso_code2="PL"),
+                rdi_merge_status=MergeStatusModel.PENDING,
             )
             for size in sizes_list
         ]
