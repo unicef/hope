@@ -287,7 +287,7 @@ class KoboImportedSubmission(models.Model):
     amended = models.BooleanField(default=False, blank=True)
 
     registration_data_import = models.ForeignKey(
-        RegistrationDataImportDatahub,
+        RegistrationDataImport,
         null=True,
         blank=True,
         on_delete=models.CASCADE,
