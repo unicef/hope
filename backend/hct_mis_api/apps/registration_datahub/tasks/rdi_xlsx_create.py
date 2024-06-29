@@ -55,6 +55,7 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
 from hct_mis_api.apps.utils.models import MergeStatusModel
+from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
 logger = logging.getLogger(__name__)
 
@@ -690,6 +691,15 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             self._create_collectors()
             self._create_bank_accounts_infos()
             self._create_delivery_mechanisms_data()
+
+    def execute_individuals_additional_steps(self, individuals: list[PendingIndividual]) -> None:
+        for individual in individuals:
+            if individual.phone_no:
+                individual.phone_no_valid = is_valid_phone_number(str(individual.phone_no))
+            if individual.phone_no_alternative:
+                individual.phone_no_alternative_valid = is_valid_phone_number(str(individual.phone_no_alternative))
+            if individual.household:
+                individual.registration_id = individual.household.registration_id
 
     @transaction.atomic
     def execute(

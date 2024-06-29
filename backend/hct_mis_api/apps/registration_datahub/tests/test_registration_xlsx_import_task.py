@@ -7,16 +7,16 @@ from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import (
+    RegistrationDataImportDatahubFactory,
+    RegistrationDataImportFactory,
+)
 from hct_mis_api.apps.registration_data.models import (
     RegistrationDataImport,
     RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     registration_xlsx_import_task,
-)
-from hct_mis_api.apps.registration_datahub.fixtures import (
-    RegistrationDataImportDatahubFactory,
 )
 
 

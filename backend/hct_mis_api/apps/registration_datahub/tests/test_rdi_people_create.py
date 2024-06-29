@@ -14,11 +14,11 @@ from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
 from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import ImportData
-from hct_mis_api.apps.registration_datahub.fixtures import (
+from hct_mis_api.apps.registration_data.fixtures import (
     RegistrationDataImportDatahubFactory,
+    RegistrationDataImportFactory,
 )
+from hct_mis_api.apps.registration_data.models import ImportData
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
