@@ -13,13 +13,12 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     ROLE_PRIMARY,
     YES,
-    BankAccountInfo,
-    Document,
     DocumentType,
-    Individual,
-    IndividualRoleInHousehold,
+    PendingBankAccountInfo,
+    PendingDocument,
     PendingHousehold,
     PendingIndividual,
+    PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.registration_data.models import (
     RegistrationDataImport,
@@ -114,22 +113,26 @@ class SriLankaRegistrationService(BaseRegistrationService):
         )
         return individual_data
 
-    def _prepare_national_id(self, individual_dict: Dict, imported_individual: Individual) -> Optional[Document]:
+    def _prepare_national_id(
+        self, individual_dict: Dict, imported_individual: PendingIndividual
+    ) -> Optional[PendingDocument]:
         national_id = individual_dict.get("national_id_no_i_c")
         if not national_id:
             return None
-        return Document.objects.create(
+        return PendingDocument.objects.create(
             document_number=national_id,
             individual=imported_individual,
             type=DocumentType.objects.get(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]),
             country=Country.objects.get(iso_code2="LK"),
         )
 
-    def _prepare_birth_certificate(self, individual_dict: Dict, imported_individual: Individual) -> Optional[Document]:
+    def _prepare_birth_certificate(
+        self, individual_dict: Dict, imported_individual: PendingIndividual
+    ) -> Optional[PendingDocument]:
         national_id = individual_dict.get("chidlren_birth_certificate")
         if not national_id:
             return None
-        return Document.objects.create(
+        return PendingDocument.objects.create(
             document_number=national_id,
             individual=imported_individual,
             type=DocumentType.objects.get(
@@ -138,7 +141,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
             country=Country.objects.get(iso_code2="LK"),
         )
 
-    def _prepare_bank_statement_document(self, individual_dict: Dict, imported_individual: Individual) -> None:
+    def _prepare_bank_statement_document(self, individual_dict: Dict, imported_individual: PendingIndividual) -> None:
         bank_account = individual_dict.get("confirm_bank_account_number")
         if not bank_account:
             return None
@@ -146,7 +149,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
         if not photo_base_64:
             return None
         image = self._prepare_picture_from_base64(photo_base_64, bank_account)
-        return Document.objects.create(
+        return PendingDocument.objects.create(
             document_number=bank_account,
             individual=imported_individual,
             type=DocumentType.objects.get(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BANK_STATEMENT]),
@@ -182,7 +185,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
             business_area=rdi.business_area,
         )
 
-        head_of_household = Individual.objects.create(
+        head_of_household = PendingIndividual.objects.create(
             **base_individual_data_dict,
             **self._prepare_individual_data(head_of_household_dict, registration_data_import),
             relationship=HEAD,
@@ -195,15 +198,17 @@ class SriLankaRegistrationService(BaseRegistrationService):
         if should_use_hoh_as_collector:
             primary_collector = head_of_household
         else:
-            primary_collector = Individual.objects.create(
+            primary_collector = PendingIndividual.objects.create(
                 **base_individual_data_dict, **self._prepare_individual_data(collector_dict, registration_data_import)
             )
             self._prepare_national_id(collector_dict, primary_collector)
         self._prepare_bank_statement_document(collector_dict, primary_collector)
 
-        IndividualRoleInHousehold.objects.create(household=household, individual=primary_collector, role=ROLE_PRIMARY)
+        PendingIndividualRoleInHousehold.objects.create(
+            household=household, individual=primary_collector, role=ROLE_PRIMARY
+        )
         if bank_name and bank_account_number:
-            BankAccountInfo.objects.create(
+            PendingBankAccountInfo.objects.create(
                 bank_name=bank_name,
                 bank_account_number=bank_account_number,
                 account_holder_name=collector_dict.get("account_holder_name_i_c", ""),
@@ -224,7 +229,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
                 )
             )
 
-        Individual.objects.bulk_create(individuals_to_create)
+        PendingIndividual.objects.bulk_create(individuals_to_create)
         for individual_data_dict, imported_individual in zip(individuals_list, individuals_to_create):
             self._prepare_birth_certificate(individual_data_dict, imported_individual)
         household.size = len(individuals_to_create) + 1

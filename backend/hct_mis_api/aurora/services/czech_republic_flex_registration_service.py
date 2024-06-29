@@ -25,13 +25,12 @@ from hct_mis_api.apps.household.models import (
     PRIVATE_PARTNER,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    BankAccountInfo,
-    Document,
     DocumentType,
-    Household,
-    Individual,
-    IndividualRoleInHousehold,
+    PendingBankAccountInfo,
+    PendingDocument,
     PendingHousehold,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.registration_data.models import (
     RegistrationDataImport,
@@ -173,7 +172,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
     def _prepare_individual_data(
         self,
         individual_dict: Dict,
-        household: Household,
+        household: PendingHousehold,
         registration_data_import: RegistrationDataImportDatahub,
     ) -> Dict:
         rdi = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
@@ -212,7 +211,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
 
         return individual_data
 
-    def _prepare_bank_account_info(self, individual_dict: Dict, individual: Individual) -> Optional[Dict]:
+    def _prepare_bank_account_info(self, individual_dict: Dict, individual: PendingIndividual) -> Optional[Dict]:
         bank_account_number = individual_dict.get("bank_account_number_h_f")
         if not bank_account_number:
             return None
@@ -224,7 +223,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             "individual": str(individual.pk),
         }
 
-    def _prepare_documents(self, individual_dict: Dict, individual: Individual) -> list[Document]:
+    def _prepare_documents(self, individual_dict: Dict, individual: PendingIndividual) -> list[PendingDocument]:
         documents = []
         document_keys = self._get_all_document_keys_from_individual_dict(individual_dict)
         for document_data_key in document_keys:
@@ -246,12 +245,12 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
                 "expiry_date": expiry_date,
                 "photo": photo,
             }
-            ModelClassForm = modelform_factory(Document, form=DocumentForm, fields=list(document_kwargs.keys()))
+            ModelClassForm = modelform_factory(PendingDocument, form=DocumentForm, fields=list(document_kwargs.keys()))
             form = ModelClassForm(data=document_kwargs)
             if not form.is_valid():
                 raise ValidationError(form.errors)
             document_kwargs["individual"] = individual
-            document = Document(**document_kwargs)
+            document = PendingDocument(**document_kwargs)
             documents.append(document)
         return documents
 
@@ -263,7 +262,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
                 break
 
     @staticmethod
-    def _has_head(individuals_array: List[Individual]) -> bool:
+    def _has_head(individuals_array: List[PendingIndividual]) -> bool:
         return any(
             individual_data.get(
                 "relationship_i_c",
@@ -272,7 +271,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             for individual_data in individuals_array
         )
 
-    def validate_household(self, individuals_array: List[Individual]) -> None:
+    def validate_household(self, individuals_array: List[PendingIndividual]) -> None:
         if not individuals_array:
             raise ValidationError("Household should has at least one individual")
 
@@ -317,8 +316,8 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         household.detail_id = record.source_id
         household.save(update_fields=("detail_id", "admin_area", "admin1", "admin2", "admin3", "admin4"))
 
-        individuals: List[Individual] = []
-        documents: List[Document] = []
+        individuals: List[PendingIndividual] = []
+        documents: List[PendingDocument] = []
 
         for index, individual_dict in enumerate(individuals_array):
             try:
@@ -326,22 +325,24 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
                 role = individual_dict.pop("role_i_c", "")
                 phone_no = individual_data.pop("phone_no", "")
 
-                individual: Individual = self._create_object_and_validate(individual_data, Individual, IndividualForm)
+                individual: PendingIndividual = self._create_object_and_validate(
+                    individual_data, PendingIndividual, IndividualForm
+                )
                 individual.phone_no = phone_no
                 individual.detail_id = record.source_id
                 individual.save()
 
                 bank_account_data = self._prepare_bank_account_info(individual_dict, individual)
                 if bank_account_data:
-                    self._create_object_and_validate(bank_account_data, BankAccountInfo, BankAccountInfoForm)
+                    self._create_object_and_validate(bank_account_data, PendingBankAccountInfo, BankAccountInfoForm)
 
                 if role:
                     if role.upper() == ROLE_PRIMARY:
-                        IndividualRoleInHousehold.objects.create(
+                        PendingIndividualRoleInHousehold.objects.create(
                             individual=individual, household=household, role=ROLE_PRIMARY
                         )
                     else:
-                        IndividualRoleInHousehold.objects.create(
+                        PendingIndividualRoleInHousehold.objects.create(
                             individual=individual, household=household, role=ROLE_ALTERNATE
                         )
                 individuals.append(individual)
@@ -354,4 +355,4 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             except ValidationError as e:
                 raise ValidationError({f"individual nr {index + 1}": [str(e)]}) from e
 
-        Document.objects.bulk_create(documents)
+        PendingDocument.objects.bulk_create(documents)
