@@ -2,7 +2,7 @@ import abc
 import base64
 import hashlib
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional, Union
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -11,7 +11,7 @@ from django.db.transaction import atomic
 from django.forms import modelform_factory
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.household.models import PendingHousehold, PendingIndividual
 from hct_mis_api.apps.registration_data.models import (
     ImportData,
     RegistrationDataImport,
@@ -134,8 +134,8 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
                     transaction.set_rollback(True)
 
             if not records_with_error:
-                number_of_individuals = Individual.objects.filter(registration_data_import=rdi).count()
-                number_of_households = Household.objects.filter(registration_data_import=rdi).count()
+                number_of_individuals = PendingIndividual.objects.filter(registration_data_import=rdi).count()
+                number_of_households = PendingHousehold.objects.filter(registration_data_import=rdi).count()
 
                 import_data.number_of_individuals = number_of_individuals
                 rdi.number_of_individuals = number_of_individuals
@@ -194,9 +194,13 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             )
             raise
 
-    def _create_object_and_validate(self, data: Dict, model_class: Type) -> Any:
-        ModelClassForm = modelform_factory(model_class, fields=list(data.keys()))
-        form = ModelClassForm(data)
+    def _create_object_and_validate(self, data: Dict, model_class: Any, model_form: Optional[Any] = None) -> Any:
+        if model_form is None:
+            form = modelform_factory(model_class, fields=list(data.keys()))
+        else:
+            form = modelform_factory(model_class, form=model_form, fields=list(data.keys()))
+
+        form = form(data=data)
         if not form.is_valid():
             raise ValidationError(form.errors)
         return form.save()
