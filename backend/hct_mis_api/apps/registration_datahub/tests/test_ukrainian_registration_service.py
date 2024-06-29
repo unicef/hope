@@ -38,7 +38,7 @@ class BaseTestUkrainianRegistrationService(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def individual_wit_bank_account_and_tax_and_disability(cls) -> Dict:
+    def individual_with_bank_account_and_tax_and_disability(cls) -> Dict:
         return {
             "tax_id_no_i_c": "123123123",
             "bank_account_h_f": "y",
@@ -158,7 +158,7 @@ class BaseTestUkrainianRegistrationService(TestCase):
                 source_id=1,
                 fields={
                     "household": cls.household,
-                    "individuals": [cls.individual_wit_bank_account_and_tax_and_disability()],
+                    "individuals": [cls.individual_with_bank_account_and_tax_and_disability()],
                 },
                 files=json.dumps(files).encode(),
             ),
@@ -208,8 +208,8 @@ class TestUkrainianRegistrationService(BaseTestUkrainianRegistrationService):
         self.records[2].refresh_from_db()
         self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 4)
         self.assertEqual(PendingHousehold.objects.count(), 4)
-        self.assertEqual(PendingBankAccountInfo.objects.count(), 3)
-        bank_acc_info = PendingBankAccountInfo.objects.get(bank_account_number="333123321321")
+        self.assertEqual(PendingBankAccountInfo.pending_objects.count(), 3)
+        bank_acc_info = PendingBankAccountInfo.pending_objects.get(bank_account_number="333123321321")
         self.assertEqual(bank_acc_info.account_holder_name, "Test Holder Name 333")
         self.assertEqual(bank_acc_info.bank_branch_name, "Branch Name 333")
         self.assertEqual(
@@ -258,14 +258,14 @@ class TestRegistration2024(BaseTestUkrainianRegistrationService):
             source_id=5,
             fields={
                 "household": cls.household,
-                "individuals": [cls.individual_wit_bank_account_and_tax_and_disability()],
+                "individuals": [cls.individual_with_bank_account_and_tax_and_disability()],
             },
         )
 
     @classmethod
-    def individual_wit_bank_account_and_tax_and_disability(cls) -> Dict:
+    def individual_with_bank_account_and_tax_and_disability(cls) -> Dict:
         return {
-            **super().individual_wit_bank_account_and_tax_and_disability(),
+            **super().individual_with_bank_account_and_tax_and_disability(),
             "low_income_hh_h_f": True,
             "single_headed_hh_h_f": False,
         }

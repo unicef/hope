@@ -11,6 +11,11 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.models import Country as GeoCountry
+from hct_mis_api.apps.household.forms import (
+    BankAccountInfoForm,
+    DocumentForm,
+    IndividualForm,
+)
 from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_PARTIAL,
     GOVERNMENT_PARTNER,
@@ -26,8 +31,9 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
     IndividualRoleInHousehold,
+    PendingHousehold,
 )
-from hct_mis_api.apps.registration_data.models import (  # ImportedBankAccountInfo,; ImportedDocument,; ImportedDocumentType,; ImportedHousehold,; ImportedIndividual,; ImportedIndividualRoleInHousehold,
+from hct_mis_api.apps.registration_data.models import (
     RegistrationDataImport,
     RegistrationDataImportDatahub,
 )
@@ -206,7 +212,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
 
         return individual_data
 
-    def _prepare_bank_account_info(self, individual_dict: Dict, imported_individual: Individual) -> Optional[Dict]:
+    def _prepare_bank_account_info(self, individual_dict: Dict, individual: Individual) -> Optional[Dict]:
         bank_account_number = individual_dict.get("bank_account_number_h_f")
         if not bank_account_number:
             return None
@@ -215,10 +221,10 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             "bank_account_number": str(individual_dict.get("bank_account_number", "")).replace(" ", ""),
             "account_holder_name": individual_dict.get("account_holder_name_i_c", ""),
             "bank_branch_name": individual_dict.get("bank_branch_name_i_c", ""),
-            "individual": imported_individual,
+            "individual": str(individual.pk),
         }
 
-    def _prepare_documents(self, individual_dict: Dict, imported_individual: Individual) -> list[Document]:
+    def _prepare_documents(self, individual_dict: Dict, individual: Individual) -> list[Document]:
         documents = []
         document_keys = self._get_all_document_keys_from_individual_dict(individual_dict)
         for document_data_key in document_keys:
@@ -235,15 +241,16 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
                 "country": GeoCountry.objects.get(iso_code2="CZ"),
                 "type": document_type,
                 "document_number": document_number,
-                "individual": imported_individual,
+                "individual": individual.pk,
                 "issuance_date": issuance_date,
                 "expiry_date": expiry_date,
                 "photo": photo,
             }
-            ModelClassForm = modelform_factory(Document, fields=list(document_kwargs.keys()))
-            form = ModelClassForm(document_kwargs)
+            ModelClassForm = modelform_factory(Document, form=DocumentForm, fields=list(document_kwargs.keys()))
+            form = ModelClassForm(data=document_kwargs)
             if not form.is_valid():
                 raise ValidationError(form.errors)
+            document_kwargs["individual"] = individual
             document = Document(**document_kwargs)
             documents.append(document)
         return documents
@@ -304,11 +311,11 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
 
         if not household_data.get("size"):
             household_data["size"] = len(individuals_array)
-        household = self._create_object_and_validate(household_data, Household)
+        household = self._create_object_and_validate(household_data, PendingHousehold)
         household.set_admin_areas()
 
         household.detail_id = record.source_id
-        household.save(update_fields=("admin_area", "detail_id"))
+        household.save(update_fields=("detail_id", "admin_area", "admin1", "admin2", "admin3", "admin4"))
 
         individuals: List[Individual] = []
         documents: List[Document] = []
@@ -319,14 +326,14 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
                 role = individual_dict.pop("role_i_c", "")
                 phone_no = individual_data.pop("phone_no", "")
 
-                individual: Individual = self._create_object_and_validate(individual_data, Individual)
+                individual: Individual = self._create_object_and_validate(individual_data, Individual, IndividualForm)
                 individual.phone_no = phone_no
                 individual.detail_id = record.source_id
                 individual.save()
 
                 bank_account_data = self._prepare_bank_account_info(individual_dict, individual)
                 if bank_account_data:
-                    self._create_object_and_validate(bank_account_data, BankAccountInfo)
+                    self._create_object_and_validate(bank_account_data, BankAccountInfo, BankAccountInfoForm)
 
                 if role:
                     if role.upper() == ROLE_PRIMARY:

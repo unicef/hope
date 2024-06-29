@@ -10,6 +10,11 @@ from hct_mis_api.apps.core.utils import (
     build_flex_arg_dict_from_list_if_exists,
 )
 from hct_mis_api.apps.geo.models import Area, Country
+from hct_mis_api.apps.household.forms import (
+    BankAccountInfoForm,
+    DocumentForm,
+    IndividualForm,
+)
 from hct_mis_api.apps.household.models import (
     DISABLED,
     HEAD,
@@ -114,7 +119,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         household.set_admin_areas()
 
         household.detail_id = record.source_id
-        household.save(update_fields=("admin_area", "detail_id"))
+        household.save(update_fields=("detail_id", "admin_area", "admin1", "admin2", "admin3", "admin4"))
 
         for index, individual_dict in enumerate(individuals_array):
             try:
@@ -122,7 +127,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
                 role = individual_data.pop("role")
                 phone_no = individual_data.pop("phone_no", "")
 
-                individual: Individual = self._create_object_and_validate(individual_data, Individual)
+                individual: Individual = self._create_object_and_validate(individual_data, Individual, IndividualForm)
                 individual.disability_certificate_picture = individual_data.get("disability_certificate_picture")
                 individual.phone_no = phone_no
                 individual.detail_id = record.source_id
@@ -130,7 +135,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
 
                 bank_account_data = self._prepare_bank_account_info(individual_dict, individual)
                 if bank_account_data:
-                    self._create_object_and_validate(bank_account_data, BankAccountInfo)
+                    self._create_object_and_validate(bank_account_data, BankAccountInfo, BankAccountInfoForm)
                 self._create_role(role, individual, household)
                 individuals.append(individual)
 
@@ -200,7 +205,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         rdi = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
         individual_data = dict(
             **build_arg_dict_from_dict(individual_dict, self.INDIVIDUAL_MAPPING_DICT),
-            household=household,
+            household=str(household.pk),
             registration_data_import=rdi,
             first_registration_date=household.first_registration_date,
             last_registration_date=household.last_registration_date,
@@ -263,12 +268,13 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
                 "country": Country.objects.get(iso_code2="UA"),
                 "type": document_type,
                 "document_number": document_number,
-                "individual": individual,
+                "individual": individual.pk,
             }
-            ModelClassForm = modelform_factory(Document, fields=list(document_kwargs.keys()))
-            form = ModelClassForm(document_kwargs)
+            ModelClassForm = modelform_factory(Document, form=DocumentForm, fields=list(document_kwargs.keys()))
+            form = ModelClassForm(data=document_kwargs)
             if not form.is_valid():
                 raise ValidationError(form.errors)
+            document_kwargs["individual"] = individual
             document = Document(photo=certificate_picture, **document_kwargs)
             documents.append(document)
 
@@ -290,7 +296,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
             "debit_card_number": str(individual_dict.get("bank_account_number", "")).replace(" ", ""),
             "account_holder_name": individual_dict.get("account_holder_name_i_c", ""),
             "bank_branch_name": individual_dict.get("bank_branch_name_i_c", ""),
-            "individual": individual,
+            "individual": str(individual.pk),
         }
         return bank_account_info_data
 

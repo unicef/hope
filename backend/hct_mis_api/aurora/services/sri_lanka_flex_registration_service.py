@@ -16,9 +16,10 @@ from hct_mis_api.apps.household.models import (
     BankAccountInfo,
     Document,
     DocumentType,
-    Household,
     Individual,
     IndividualRoleInHousehold,
+    PendingHousehold,
+    PendingIndividual,
 )
 from hct_mis_api.apps.registration_data.models import (
     RegistrationDataImport,
@@ -84,9 +85,6 @@ class SriLankaRegistrationService(BaseRegistrationService):
             household_data["admin_area"] = str(Area.objects.get(p_code=admin3).id)
         elif admin2 and Area.objects.filter(p_code=admin2).exists():
             household_data["admin_area"] = str(Area.objects.get(p_code=admin2).id)
-
-        print("*******")
-        print(household_data)
 
         return household_data
 
@@ -170,7 +168,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
             collector_dict.get("does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi") == "y"
         )
         household_data = self._prepare_household_data(localization_dict, record, registration_data_import)
-        household = self._create_object_and_validate(household_data, Household)
+        household = self._create_object_and_validate(household_data, PendingHousehold)
         if id_enumerator:
             household.flex_fields["id_enumerator"] = id_enumerator
 
@@ -218,7 +216,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
                 continue
 
             individuals_to_create.append(
-                Individual(
+                PendingIndividual(
                     **{
                         **self._prepare_individual_data(individual_data_dict, registration_data_import),
                         **base_individual_data_dict,
