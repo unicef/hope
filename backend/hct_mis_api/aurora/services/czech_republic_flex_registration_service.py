@@ -110,23 +110,21 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         household_address: Dict,
         consent_data: Dict,
         needs_assessment: Dict,
-        registration_data_import: RegistrationDataImportDatahub,
+        registration_data_import: RegistrationDataImport,
     ) -> Dict:
         address = household_address.get("address_h_c", "")
         village = household_address.get("village_h_c", "")
         zip_code = household_address.get("zip_code_h_c", "")
 
-        rdi = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
-
         household_data = {
-            "registration_data_import": rdi,
+            "registration_data_import": registration_data_import,
             "first_registration_date": record.timestamp,
             "last_registration_date": record.timestamp,
             "country_origin": GeoCountry.objects.get(iso_code2="CZ"),
             "country": GeoCountry.objects.get(iso_code2="CZ"),
             "consent_sharing": [],
             "collect_individual_data": COLLECT_TYPE_PARTIAL,
-            "business_area": rdi.business_area,
+            "business_area": registration_data_import.business_area,
         }
         if needs_assessment:
             household_data["flex_fields"] = needs_assessment
@@ -173,15 +171,13 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         self,
         individual_dict: Dict,
         household: PendingHousehold,
-        registration_data_import: RegistrationDataImportDatahub,
+        registration_data_import: RegistrationDataImport,
     ) -> Dict:
-        rdi = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
-
         individual_data = dict(
             **build_arg_dict_from_dict_if_exists(individual_dict, self.INDIVIDUAL_MAPPING_DICT),
             flex_fields=build_flex_arg_dict_from_list_if_exists(individual_dict, self.INDIVIDUAL_FLEX_FIELDS),
             household=household,
-            registration_data_import=rdi,
+            registration_data_import=registration_data_import,
             first_registration_date=household.first_registration_date,
             last_registration_date=household.last_registration_date,
             business_area=rdi.business_area,

@@ -31,6 +31,7 @@ from hct_mis_api.apps.household.models import (
     IndividualCollection,
     IndividualIdentity,
     IndividualRoleInHousehold,
+    PendingBankAccountInfo,
     PendingHousehold,
     PendingIndividual,
 )
@@ -231,6 +232,13 @@ class BankAccountInfoFactory(DjangoModelFactory):
     bank_branch_name = random.choice(["BranchCityBank", "BranchSantander", "BranchJPMorgan"])
     account_holder_name = factory.Faker("last_name")
     rdi_merge_status = MergeStatusModel.MERGED
+
+
+class PendingBankAccountInfoFactory(BankAccountInfoFactory):
+    rdi_merge_status = PendingIndividual.PENDING
+
+    class Meta:
+        model = PendingBankAccountInfo
 
 
 class DocumentTypeFactory(DjangoModelFactory):

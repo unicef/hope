@@ -20,10 +20,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.registration_data.models import (
-    RegistrationDataImport,
-    RegistrationDataImportDatahub,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
 from hct_mis_api.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
@@ -51,11 +48,10 @@ class SriLankaRegistrationService(BaseRegistrationService):
     ]
 
     def _prepare_household_data(
-        self, localization_dict: Dict, record: Any, registration_data_import: RegistrationDataImportDatahub
+        self, localization_dict: Dict, record: Any, registration_data_import: RegistrationDataImport
     ) -> Dict:
-        rdi = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
         household_data = {
-            "registration_data_import": rdi,
+            "registration_data_import": registration_data_import,
             "first_registration_date": record.timestamp,
             "last_registration_date": record.timestamp,
             "country_origin": Country.objects.get(iso_code2="LK"),
@@ -64,7 +60,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
             "collect_individual_data": YES,
             "size": 0,
             "flex_fields": {"moh_center_of_reference": localization_dict.get("moh_center_of_reference")},
-            "business_area": rdi.business_area,
+            "business_area": registration_data_import.business_area,
             "address": localization_dict.get("address_h_c"),
         }
         admin2 = localization_dict.get("admin2_h_c")
@@ -90,7 +86,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
     def _prepare_individual_data(
         self,
         head_of_household_info: Dict,
-        registration_data_import: Optional[RegistrationDataImportDatahub] = None,
+        registration_data_import: Optional[RegistrationDataImport] = None,
         **kwargs: Any,
     ) -> Dict:
         individual_data = dict(
@@ -157,9 +153,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
             country=Country.objects.get(iso_code2="LK"),
         )
 
-    def create_household_for_rdi_household(
-        self, record: Any, registration_data_import: RegistrationDataImportDatahub
-    ) -> None:
+    def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
         record_data_dict = record.get_data()
         localization_dict = record_data_dict.get("localization-info", [])[0]
         head_of_household_dict = record_data_dict.get("caretaker-info", [])[0]
@@ -175,14 +169,13 @@ class SriLankaRegistrationService(BaseRegistrationService):
         if id_enumerator:
             household.flex_fields["id_enumerator"] = id_enumerator
 
-        rdi = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
         base_individual_data_dict = dict(
             household=household,
-            registration_data_import=rdi,
+            registration_data_import=registration_data_import,
             first_registration_date=record.timestamp,
             last_registration_date=record.timestamp,
             preferred_language=preferred_language_of_contact,
-            business_area=rdi.business_area,
+            business_area=registration_data_import.business_area,
         )
 
         head_of_household = PendingIndividual.objects.create(

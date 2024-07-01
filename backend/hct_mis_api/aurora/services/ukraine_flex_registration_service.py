@@ -35,10 +35,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.registration_data.models import (
-    RegistrationDataImport,
-    RegistrationDataImportDatahub,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
@@ -95,9 +92,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]: ("tax_id_no_i_c", "tax_id_picture"),
     }
 
-    def create_household_for_rdi_household(
-        self, record: Any, registration_data_import: RegistrationDataImportDatahub
-    ) -> None:
+    def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
         individuals: List[PendingIndividual] = []
         documents: List[PendingDocument] = []
         record_data_dict = record.get_data()
@@ -167,11 +162,10 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
                 raise ValidationError("There should be only two collectors!")
 
     def _prepare_household_data(
-        self, household_dict: Dict, record: Any, registration_data_import: RegistrationDataImportDatahub
+        self, household_dict: Dict, record: Any, registration_data_import: RegistrationDataImport
     ) -> Dict:
-        rdi = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
         household_data = dict(
-            registration_data_import=rdi,
+            registration_data_import=registration_data_import,
             first_registration_date=record.timestamp,
             last_registration_date=record.timestamp,
             country_origin=Country.objects.get(iso_code2="UA"),
@@ -179,7 +173,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
             consent=True,
             collect_individual_data=YES,
             size=household_dict.get("size_h_c"),
-            business_area=rdi.business_area,
+            business_area=registration_data_import.business_area,
             residence_status=household_dict.get("residence_status_h_c"),
         )
 
@@ -202,16 +196,15 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         self,
         individual_dict: Dict,
         household: PendingHousehold,
-        registration_data_import: RegistrationDataImportDatahub,
+        registration_data_import: RegistrationDataImport,
     ) -> Dict:
-        rdi = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
         individual_data = dict(
             **build_arg_dict_from_dict(individual_dict, self.INDIVIDUAL_MAPPING_DICT),
             household=str(household.pk),
-            registration_data_import=rdi,
+            registration_data_import=registration_data_import,
             first_registration_date=household.first_registration_date,
             last_registration_date=household.last_registration_date,
-            business_area=rdi.business_area,
+            business_area=registration_data_import.business_area,
         )
         disability = individual_data.get("disability", "n")
         disability_certificate_picture = individual_data.get("disability_certificate_picture")
@@ -338,7 +331,7 @@ class Registration2024(UkraineBaseRegistrationService):
         self,
         individual_dict: Dict,
         household: PendingHousehold,
-        registration_data_import: RegistrationDataImportDatahub,
+        registration_data_import: RegistrationDataImport,
     ) -> Dict:
         individual_data = super()._prepare_individual_data(individual_dict, household, registration_data_import)
         individual_data["flex_fields"] = build_flex_arg_dict_from_list_if_exists(

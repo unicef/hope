@@ -22,6 +22,7 @@ from hct_mis_api.apps.household.fixtures import (
     BankAccountInfoFactory,
     DocumentFactory,
     DocumentTypeFactory,
+    PendingBankAccountInfoFactory,
     PendingHouseholdFactory,
     PendingIndividualFactory,
 )
@@ -650,9 +651,9 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
         self.rdi_2.save()
         self.rdi_3.save()
 
-        imported_household_1 = PendingHouseholdFactory(registration_data_import=rdi_hub_1)
-        imported_household_2 = PendingHouseholdFactory(registration_data_import=rdi_hub_2)
-        imported_household_3 = PendingHouseholdFactory(registration_data_import=rdi_hub_3)
+        imported_household_1 = PendingHouseholdFactory(registration_data_import=self.rdi_1)
+        imported_household_2 = PendingHouseholdFactory(registration_data_import=self.rdi_2)
+        imported_household_3 = PendingHouseholdFactory(registration_data_import=self.rdi_3)
 
         imported_individual_1 = PendingIndividualFactory(household=imported_household_1)
         imported_individual_2 = PendingIndividualFactory(household=imported_household_2)
@@ -674,8 +675,8 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
             rdi_merge_status=MergeStatusModel.PENDING,
         )
 
-        BankAccountInfoFactory(individual=imported_individual_1, rdi_merge_status=MergeStatusModel.PENDING)
-        BankAccountInfoFactory(individual=imported_individual_2, rdi_merge_status=MergeStatusModel.PENDING)
+        PendingBankAccountInfoFactory(individual=imported_individual_1)
+        PendingBankAccountInfoFactory(individual=imported_individual_2)
 
         self.assertEqual(PendingHousehold.objects.count(), 3)
         self.assertEqual(PendingIndividual.objects.count(), 3)
