@@ -83,4 +83,6 @@ class TestRegistrationDataModels(TestCase):
         self.assertEqual(str(self.imported_document_type), self.imported_document_type.label)
 
     def test_imported_individual_identity_str(self) -> None:
-        self.assertEqual(str(self.imported_individual_identity), "UNICEF IND-3 123456789")
+        self.assertEqual(
+            str(self.imported_individual_identity), f"UNICEF {self.imported_individual_3.unicef_id} 123456789"
+        )
