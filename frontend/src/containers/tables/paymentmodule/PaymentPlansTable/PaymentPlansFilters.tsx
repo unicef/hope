@@ -79,6 +79,7 @@ export function PaymentPlansFilters({
             value={filter.search}
             fullWidth
             onChange={(e) => handleFilterChange('search', e.target.value)}
+            data-cy="filter-search"
           />
         </Grid>
         <Grid item xs={3}>

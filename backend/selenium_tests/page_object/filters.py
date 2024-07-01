@@ -1,4 +1,5 @@
 from page_object.base_components import BaseComponents
+from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
 
@@ -222,3 +223,6 @@ class Filters(BaseComponents):
 
     def getReportOnlyMyFilter(self) -> WebElement:
         return self.wait_for(self.reportOnlyMyFilter)
+
+    def getFilterByLocator(self, value: str, locator_type: str = "data-cy") -> WebElement:
+        return self.driver.find_elements(By.CSS_SELECTOR, f"[{locator_type}='{value}']")[0].find_elements(By.TAG_NAME, "input")[0]

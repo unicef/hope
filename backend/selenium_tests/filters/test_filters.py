@@ -3,9 +3,90 @@ from django.core.management import call_command
 
 import pytest
 from page_object.filters import Filters
-from selenium.webdriver.common.by import By
+from hct_mis_api.apps.registration_datahub.models import ImportedDocumentType
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.registration_datahub.models import ImportData
 
-pytestmark = pytest.mark.django_db(transaction=True)
+from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
+
+from selenium_tests.page_object.programme_details.programme_details import ProgrammeDetails
+
+pytestmark = pytest.mark.django_db(transaction=True, databases=["registration_datahub", "default"])
+
+
+@pytest.fixture
+def create_targeting() -> None:
+    user = User.objects.first()
+    business_area = BusinessArea.objects.get(slug="afghanistan")
+    TargetPopulationFactory(
+        name="Test",
+        created_by=user,
+        targeting_criteria=TargetingCriteriaFactory(),
+        business_area=business_area,
+    )
+    TargetPopulationFactory(
+        name="Targeting 2",
+        created_by=user,
+        targeting_criteria=TargetingCriteriaFactory(),
+        business_area=business_area,
+    )
+
+
+@pytest.fixture
+def create_rdi() -> None:
+    ImportedDocumentType.objects.create(key="tax_id", label="Tax ID")
+    business_area = BusinessArea.objects.get(slug="afghanistan")
+    programme = Program.objects.filter(name="Test Programm").first()
+    imported_by = User.objects.first()
+    number_of_individuals = 0
+    number_of_households = 0
+    status = RegistrationDataImport.IMPORTING
+
+    rdi = RegistrationDataImport.objects.create(
+        name="Test",
+        data_source=RegistrationDataImport.FLEX_REGISTRATION,
+        imported_by=imported_by,
+        number_of_individuals=number_of_individuals,
+        number_of_households=number_of_households,
+        business_area=business_area,
+        status=status,
+        program=programme,
+    )
+
+    RegistrationDataImport.objects.create(
+        name="RDI magic",
+        data_source=RegistrationDataImport.FLEX_REGISTRATION,
+        imported_by=imported_by,
+        number_of_individuals=number_of_individuals,
+        number_of_households=number_of_households,
+        business_area=business_area,
+        status=status,
+        program=programme,
+    )
+
+    import_data = ImportData.objects.create(
+        status=ImportData.STATUS_PENDING,
+        business_area_slug=business_area.slug,
+        data_type=ImportData.FLEX_REGISTRATION,
+        number_of_individuals=number_of_individuals,
+        number_of_households=number_of_households,
+        created_by_id=imported_by.id if imported_by else None,
+    )
+    rdi_datahub = RegistrationDataImportDatahub.objects.create(
+        name="Test",
+        hct_id=rdi.id,
+        import_data=import_data,
+        import_done=RegistrationDataImportDatahub.NOT_STARTED,
+        business_area_slug=business_area.slug,
+    )
+    rdi.datahub_id = rdi_datahub.id
+    rdi.save(update_fields=("datahub_id",))
 
 
 @pytest.fixture
@@ -235,25 +316,30 @@ class TestSmokeFilters:
                     raise Exception(f"Element {locator} not found on the {nav_menu} page.")
 
     @pytest.mark.parametrize("module", [
-        "Registration Data Import",
-        "Program Population",
-        "Targeting",
-        "Payment Module",
-        "Payment Verification",
-        "Grievance",
+        pytest.param(["Registration Data Import", "filter-search", "Test"], id="Registration Data Import"),
+        # pytest.param(["Program Population", "hh-filters-search", "search"], id="Program Population"),
+        pytest.param(["Targeting", "filters-search", "Test"], id="Targeting"),
+        # pytest.param(["Payment Module", "filter-search", "search"], id="Payment Module"),
+        # pytest.param(["Payment Verification", "filter-search", "search"], id="Payment Verification"),
+        # pytest.param(["Grievance", "filters-search", "search"], id="Grievance"),
     ])
     def test_filters_happy_path_search_filter(self,
-                                              module: None,
+                                              module: list,
                                               create_programs: None,
-                                              filters: Filters) -> None:
+                                              create_rdi: None,
+                                              create_targeting: None,
+                                              filters: Filters,
+                                              pageProgrammeDetails: ProgrammeDetails) -> None:
+
         filters.selectGlobalProgramFilter("Test Programm").click()
-        from time import sleep
-        sleep(1)
-        filters.wait_for(f'[data-cy="nav-{module}').click()
-
-        from selenium_tests.tools.tag_name_finder import printing
-        printing("Mapping", filters.driver)
-
-        filters.getFilterSearch()
-        filters.getFilterSearch().find_elements(By.TAG_NAME, "input")[0].send_keys(module)
-        filters.screenshot(module)
+        assert "Test Programm" in pageProgrammeDetails.getHeaderTitle().text
+        filters.wait_for(f'[data-cy="nav-{module[0]}').click()
+        assert filters.waitForNumberOfRows(2)
+        filters.getFilterByLocator(module[1]).send_keys("Wrong value")
+        filters.getButtonFiltersApply().click()
+        assert filters.waitForNumberOfRows(0)
+        filters.getButtonFiltersClear().click()
+        assert filters.waitForNumberOfRows(2)
+        filters.getFilterByLocator(module[1]).send_keys(module[2])
+        filters.getButtonFiltersApply().click()
+        assert filters.waitForNumberOfRows(1)
