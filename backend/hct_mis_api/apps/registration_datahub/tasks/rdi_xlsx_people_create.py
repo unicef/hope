@@ -136,6 +136,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                         individual=obj_to_create if sheet_title == "individuals" else None,
                         household=obj_to_create if sheet_title == "households" else None,
                         is_field_required=current_field.get("required", False),
+                        field=current_field,
                     )
                     if value is not None:
                         setattr(
