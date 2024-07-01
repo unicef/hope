@@ -124,6 +124,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "wallet_name": "Wallet Name 1",
                 "blockchain_name": "Blockchain Name 1",
                 "wallet_address": "Wallet Address 1",
+                "unicef_id": "IND-9",
             },
             {
                 "full_name": "Robin Ford",
@@ -135,6 +136,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "registration_data_import": cls.rdi,
                 "household": household,
                 "email": "fake_email_2@com",
+                "unicef_id": "IND-8",
             },
             {
                 "full_name": "Timothy Perry",
@@ -334,9 +336,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             None,
         ]
     )
-    def test_merge_rdi_create_collections(
-        self, household_representation_exists: bool, source_is_program_population: bool
-    ) -> None:
+    def test_merge_rdi_create_collections(self, household_representation_exists: bool) -> None:
         """
         household_representation_exists:
         if True, another household representation exists, and it has collection,
@@ -348,14 +348,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         imported_household = HouseholdFactory(
             collect_individual_data=COLLECT_TYPE_FULL,
             registration_data_import=self.rdi,
-            admin_area=self.area4,
-            admin4=self.area4,
-            zip_code="00-123",
-            enumerator_rec_id=1234567890,
-            detail_id="123456123",
-            kobo_submission_uuid="c09130af-6c9c-4dba-8c7f-1b2ff1970d19",
-            kobo_submission_time="2022-02-22T12:22:22",
-            mis_unicef_id="HH-9",
+            unicef_id="HH-9",
             rdi_merge_status=MergeStatusModel.PENDING,
         )
         self.set_imported_individuals(imported_household)
