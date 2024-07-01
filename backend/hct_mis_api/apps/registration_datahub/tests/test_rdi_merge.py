@@ -33,6 +33,7 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
     PendingHousehold,
+    PendingIndividual,
 )
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory
@@ -42,7 +43,10 @@ from hct_mis_api.apps.registration_data.fixtures import (
     RegistrationDataImportDatahubFactory,
     RegistrationDataImportFactory,
 )
-from hct_mis_api.apps.registration_data.models import KoboImportedSubmission
+from hct_mis_api.apps.registration_data.models import (
+    KoboImportedSubmission,
+    RegistrationDataImport,
+)
 from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
@@ -342,7 +346,17 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             None,
         ]
     )
-    def test_merge_rdi_existing_unicef_id(self, household_collection_exists: bool) -> None:
+    def test_merge_rdi_create_collections(
+        self, household_representation_exists: bool, source_is_program_population: bool
+    ) -> None:
+        """
+        household_representation_exists:
+        if True, another household representation exists, and it has collection,
+        if False, another household representation exists, but it does not have collection,
+        if None, household representation does not exist in another program
+        """
+        self.rdi.data_source = RegistrationDataImport.PROGRAM_POPULATION
+        self.rdi.save()
         imported_household = HouseholdFactory(
             collect_individual_data=COLLECT_TYPE_FULL,
             registration_data_import=self.rdi,
@@ -354,6 +368,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             kobo_submission_uuid="c09130af-6c9c-4dba-8c7f-1b2ff1970d19",
             kobo_submission_time="2022-02-22T12:22:22",
             mis_unicef_id="HH-9",
+            rdi_merge_status=MergeStatusModel.PENDING,
         )
         self.set_imported_individuals(imported_household)
         individual_without_collection = IndividualFactory(
@@ -373,7 +388,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         )
         household = None
         household_collection = None
-        if household_collection_exists is not None:
+        if household_representation_exists is not None:
             household = HouseholdFactory(
                 head_of_household=individual_without_collection,
                 business_area=self.rdi.business_area,
@@ -381,7 +396,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             )
             household.household_collection = None
             household.save()
-            if household_collection_exists:
+            if household_representation_exists:
                 household_collection = HouseholdCollectionFactory()
                 household.household_collection = household_collection
                 household.save()
@@ -399,8 +414,8 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             individual_collection.individuals.count(),
             2,
         )
-        if household_collection_exists is not None:
-            if household_collection_exists:
+        if household_representation_exists is not None:
+            if household_representation_exists:
                 household_collection.refresh_from_db()
                 self.assertEqual(household_collection.households.count(), 2)
             else:
@@ -413,6 +428,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         household = HouseholdFactory(
             collect_individual_data=COLLECT_TYPE_PARTIAL,
             registration_data_import=self.rdi,
+            rdi_merge_status=MergeStatusModel.PENDING,
         )
         dct = self.rdi.program.data_collecting_type
         dct.recalculate_composition = True
@@ -420,7 +436,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
 
         self.set_imported_individuals(household)
 
-        household.head_of_household = Individual.objects.first()
+        household.head_of_household = PendingIndividual.objects.first()
         household.save()
 
         with capture_on_commit_callbacks(execute=True):
