@@ -31,6 +31,8 @@ from hct_mis_api.apps.household.models import (
     IndividualCollection,
     IndividualIdentity,
     IndividualRoleInHousehold,
+    PendingHousehold,
+    PendingIndividual,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -146,6 +148,13 @@ class HouseholdFactory(DjangoModelFactory):
         return cls._generate(enums.BUILD_STRATEGY, kwargs)
 
 
+class PendingHouseholdFactory(HouseholdFactory):
+    rdi_merge_status = PendingHousehold.PENDING
+
+    class Meta:
+        model = PendingHousehold
+
+
 class IndividualIdentityFactory(DjangoModelFactory):
     rdi_merge_status = MergeStatusModel.MERGED
 
@@ -203,6 +212,13 @@ class IndividualFactory(DjangoModelFactory):
     individual_collection = factory.SubFactory(IndividualCollectionFactory)
     program = factory.SubFactory(ProgramFactory)
     rdi_merge_status = MergeStatusModel.MERGED
+
+
+class PendingIndividualFactory(IndividualFactory):
+    rdi_merge_status = PendingIndividual.PENDING
+
+    class Meta:
+        model = PendingIndividual
 
 
 class BankAccountInfoFactory(DjangoModelFactory):
