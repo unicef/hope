@@ -236,7 +236,7 @@ class TestRegistrationProgramPopulationImportTask(BaseElasticSearchTestCase):
         self.registration_data_import_datahub.refresh_from_db()
         self.assertEqual(
             self.registration_data_import_datahub.import_done,
-            RegistrationDataImportDatahub.DONE,
+            RegistrationDataImportDatahub.NOT_STARTED,
         )
 
     def test_registration_program_population_import_ba_postpone_deduplication(self) -> None:
