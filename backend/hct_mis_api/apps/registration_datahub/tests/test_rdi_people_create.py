@@ -10,7 +10,12 @@ from django.forms import model_to_dict
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY, PendingHousehold, PendingIndividual
+from hct_mis_api.apps.household.models import (
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    PendingHousehold,
+    PendingIndividual,
+)
 from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
