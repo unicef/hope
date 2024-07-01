@@ -152,13 +152,6 @@ def registration_program_population_import_task(
         return True
     except Exception as e:
         logger.warning(e)
-        from hct_mis_api.apps.registration_data.models import (
-            RegistrationDataImportDatahub,
-        )
-
-        RegistrationDataImportDatahub.objects.filter(
-            id=registration_data_import_id,
-        ).update(import_done=RegistrationDataImportDatahub.DONE)
 
         handle_rdi_exception(registration_data_import_id, e)
         raise self.retry(exc=e)
@@ -187,13 +180,6 @@ def registration_kobo_import_task(
         )
     except Exception as e:
         logger.warning(e)
-        from hct_mis_api.apps.registration_data.models import (
-            RegistrationDataImportDatahub,
-        )
-
-        RegistrationDataImportDatahub.objects.filter(
-            id=registration_data_import_id,
-        ).update(import_done=RegistrationDataImportDatahub.DONE)
 
         handle_rdi_exception(registration_data_import_id, e)
         raise self.retry(exc=e)
