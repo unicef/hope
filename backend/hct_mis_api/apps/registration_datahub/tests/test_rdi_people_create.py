@@ -10,7 +10,7 @@ from django.forms import model_to_dict
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
+from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY, PendingHousehold, PendingIndividual
 from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -19,10 +19,6 @@ from hct_mis_api.apps.registration_data.fixtures import (
     RegistrationDataImportFactory,
 )
 from hct_mis_api.apps.registration_data.models import ImportData
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedHousehold,
-    ImportedIndividual,
-)
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
@@ -70,8 +66,8 @@ class TestRdiXlsxPeople(BaseElasticSearchTestCase):
         self.RdiXlsxPeopleCreateTask().execute(
             self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id
         )
-        households_count = ImportedHousehold.objects.count()
-        individuals_count = ImportedIndividual.objects.count()
+        households_count = PendingHousehold.objects.count()
+        individuals_count = PendingIndividual.objects.count()
 
         self.assertEqual(4, households_count)
         self.assertEqual(4, individuals_count)
@@ -86,7 +82,7 @@ class TestRdiXlsxPeople(BaseElasticSearchTestCase):
             "birth_date": date(2000, 8, 22),
             "marital_status": "MARRIED",
         }
-        matching_individuals = ImportedIndividual.objects.filter(**individual_data)
+        matching_individuals = PendingIndividual.objects.filter(**individual_data)
 
         self.assertEqual(matching_individuals.count(), 1)
 
@@ -100,7 +96,7 @@ class TestRdiXlsxPeople(BaseElasticSearchTestCase):
         household_obj_data = model_to_dict(household, ("residence_status", "country", "zip_code", "flex_fields"))
         self.assertEqual(household_obj_data, household_data)
 
-        roles = household.individuals_and_roles.all()
+        roles = household.individuals_and_roles(manager="pending_objects").all()
         self.assertEqual(roles.count(), 2)
         primary_role = roles.filter(role=ROLE_PRIMARY).first()
         self.assertEqual(primary_role.role, "PRIMARY")
@@ -109,7 +105,7 @@ class TestRdiXlsxPeople(BaseElasticSearchTestCase):
         self.assertEqual(alternate_role.role, "ALTERNATE")
         self.assertEqual(alternate_role.individual.full_name, "Collector ForJanIndex_3")
 
-        worker_individuals = ImportedIndividual.objects.filter(relationship="NON_BENEFICIARY")
+        worker_individuals = PendingIndividual.objects.filter(relationship="NON_BENEFICIARY")
         self.assertEqual(worker_individuals.count(), 2)
 
         self.assertEqual(PendingDeliveryMechanismData.objects.count(), 3)
