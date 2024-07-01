@@ -32,6 +32,7 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
     IndividualRoleInHousehold,
+    PendingHousehold,
 )
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory
@@ -43,6 +44,7 @@ from hct_mis_api.apps.registration_data.fixtures import (
 )
 from hct_mis_api.apps.registration_data.models import KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 @contextmanager
@@ -214,7 +216,10 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             },
         ]
 
-        cls.individuals = [IndividualFactory(**individual) for individual in individuals_to_create]
+        cls.individuals = [
+            IndividualFactory(**individual, rdi_merge_status=MergeStatusModel.PENDING)
+            for individual in individuals_to_create
+        ]
 
     @freeze_time("2022-01-01")
     def test_merge_rdi_and_recalculation(self) -> None:
@@ -465,17 +470,20 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
     def test_registration_id_from_program_registration_id_should_be_unique(self) -> None:
         household = HouseholdFactory(
             registration_data_import=self.rdi,
-            registration_id="ABCD-123123",
+            program_registration_id="ABCD-123123",
+            rdi_merge_status=MergeStatusModel.PENDING,
         )
         self.set_imported_individuals(household)
         household = HouseholdFactory(
             registration_data_import=self.rdi,
-            registration_id="ABCD-123123",
+            program_registration_id="ABCD-123123",
+            rdi_merge_status=MergeStatusModel.PENDING,
         )
         self.set_imported_individuals(household)
         household = HouseholdFactory(
             registration_data_import=self.rdi,
-            registration_id="ABCD-111111",
+            program_registration_id="ABCD-111111",
+            rdi_merge_status=MergeStatusModel.PENDING,
         )
         self.set_imported_individuals(household)
 
@@ -483,7 +491,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             RdiMergeTask().execute(self.rdi.pk)
 
         registrations_ids = list(
-            Household.objects.all()
+            PendingHousehold.objects.all()
             .order_by("program_registration_id")
             .values_list("program_registration_id", flat=True)
         )

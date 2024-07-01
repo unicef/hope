@@ -12,16 +12,14 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_TAX_ID,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    DocumentType,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedDocument,
-    ImportedDocumentType,
-    ImportedHousehold,
-    ImportedIndividual,
-    ImportedIndividualRoleInHousehold,
-)
 from hct_mis_api.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,
@@ -42,8 +40,8 @@ class TestGenericRegistrationService(TestCase):
 
     @classmethod
     def setUp(cls) -> None:
-        ImportedDocumentType.objects.create(key="tax_id", label="Tax ID")
-        ImportedDocumentType.objects.create(key="disability_certificate", label="Disability Certificate")
+        DocumentType.objects.create(key="tax_id", label="Tax ID")
+        DocumentType.objects.create(key="disability_certificate", label="Disability Certificate")
         cls.business_area = BusinessAreaFactory(slug="generic-slug")
 
         cls.data_collecting_type = DataCollectingType.objects.create(label="SomeFull", code="some_full")
@@ -214,22 +212,22 @@ class TestGenericRegistrationService(TestCase):
         service.process_records(rdi.id, records_ids)
         records[2].refresh_from_db()
         self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 4)
-        self.assertEqual(ImportedHousehold.objects.count(), 4)
+        self.assertEqual(PendingHousehold.objects.count(), 4)
         self.assertEqual(
-            ImportedDocument.objects.filter(
+            PendingDocument.objects.filter(
                 document_number="TESTID", type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
             ).count(),
             1,
         )
 
         # Checking only first is enough, because they all in one RDI
-        registration_datahub_import = ImportedHousehold.objects.all()[0].registration_data_import
+        registration_datahub_import = PendingHousehold.objects.all()[0].registration_data_import
         registration_data_import = RegistrationDataImport.objects.get(id=registration_datahub_import.hct_id)
-        self.assertIn("ff", ImportedHousehold.objects.all()[0].flex_fields.keys())
+        self.assertIn("ff", PendingHousehold.objects.all()[0].flex_fields.keys())
         self.assertEqual(registration_data_import.program, self.program)
 
-        self.assertEqual(ImportedIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)
-        self.assertEqual(ImportedIndividualRoleInHousehold.objects.filter(role=ROLE_ALTERNATE).count(), 1)
+        self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)
+        self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_ALTERNATE).count(), 1)
 
     def test_import_data_to_datahub_household_individual(self) -> None:
         records = [
@@ -251,16 +249,16 @@ class TestGenericRegistrationService(TestCase):
         records_ids = [x.id for x in records]
         service.process_records(rdi.id, records_ids)
         self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 1)
-        self.assertEqual(ImportedHousehold.objects.count(), 1)
+        self.assertEqual(PendingHousehold.objects.count(), 1)
 
-        household = ImportedHousehold.objects.first()
+        household = PendingHousehold.objects.first()
         self.assertEqual(household.flex_fields["ff"], "random")
         self.assertEqual(household.flex_fields["enumerators"], "ABC")
         self.assertEqual(household.flex_fields["marketing_can_unicef_contact_you"], "YES")
 
-        assert ImportedDocument.objects.get(document_number="123123123", type__key="tax_id")
-        assert ImportedDocument.objects.get(document_number="xyz", type__key="disability_certificate")
-        assert ImportedIndividual.objects.get(
+        assert PendingDocument.objects.get(document_number="123123123", type__key="tax_id")
+        assert PendingDocument.objects.get(document_number="xyz", type__key="disability_certificate")
+        assert PendingIndividual.objects.get(
             **{
                 "given_name": "Jan",
                 "middle_name": "Roman",
@@ -271,4 +269,4 @@ class TestGenericRegistrationService(TestCase):
                 "phone_no": "+393892781511",
             }
         )
-        self.assertEqual(ImportedIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)
+        self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)
