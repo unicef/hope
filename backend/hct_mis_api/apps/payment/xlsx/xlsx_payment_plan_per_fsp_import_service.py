@@ -2,7 +2,7 @@ import datetime
 import io
 import logging
 from decimal import Decimal
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 from django.db.models import QuerySet
 from django.utils import timezone
@@ -242,26 +242,27 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         self.logger.info("Finished import payment list")
 
     def _get_delivered_quantity_status_and_value(
-        self, delivered_quantity: float, entitlement_quantity: Decimal, payment_id: str
+        self, delivered_quantity: Union[int, float, str], entitlement_quantity: Decimal, payment_id: str
     ) -> Tuple[str, Optional[Decimal]]:
         """
-        * Fully Delivered (entitled quantity = delivered quantity) [float]
-        * Partially Delivered (entitled quantity > delivered quantity > 0) [float]
-        * Not Delivered (0 = delivered quantity) [0.0]
+        * Fully Delivered (entitled quantity = delivered quantity) [int, float, str]
+        * Partially Delivered (entitled quantity > delivered quantity > 0) [int, float, str]
+        * Not Delivered (0 = delivered quantity) [int, float, str]
         * Unsuccessful (failed at the delivery processing level) [-1.0]
         """
+        delivered_quantity_decimal: Decimal = to_decimal(delivered_quantity)  # type: ignore
 
-        if delivered_quantity < 0:
+        if delivered_quantity_decimal < 0:
             return Payment.STATUS_ERROR, None
 
-        elif delivered_quantity == 0:
-            return Payment.STATUS_NOT_DISTRIBUTED, to_decimal(delivered_quantity)
+        elif delivered_quantity_decimal == 0:
+            return Payment.STATUS_NOT_DISTRIBUTED, delivered_quantity_decimal
 
-        elif delivered_quantity < entitlement_quantity:
-            return Payment.STATUS_DISTRIBUTION_PARTIAL, to_decimal(delivered_quantity)
+        elif delivered_quantity_decimal < entitlement_quantity:
+            return Payment.STATUS_DISTRIBUTION_PARTIAL, delivered_quantity_decimal
 
-        elif delivered_quantity == entitlement_quantity:
-            return Payment.STATUS_DISTRIBUTION_SUCCESS, to_decimal(delivered_quantity)
+        elif delivered_quantity_decimal == entitlement_quantity:
+            return Payment.STATUS_DISTRIBUTION_SUCCESS, delivered_quantity_decimal
 
         else:
             raise self.XlsxPaymentPlanImportPerFspServiceException(
