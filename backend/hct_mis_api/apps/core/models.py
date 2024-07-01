@@ -3,8 +3,9 @@ from typing import Any, Dict, List, Optional, Tuple
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
-from django.db.models import JSONField, UniqueConstraint
+from django.db.models import JSONField, Q, UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 
 from django_celery_beat.models import PeriodicTask
@@ -478,3 +479,19 @@ class DataCollectingType(TimeStampedModel):
             )
         ]
         ordering = ("-weight",)
+
+    def clean(self) -> None:
+        super().clean()
+        if (
+            self.pk
+            and self.type
+            and self.compatible_types.exists()
+            and not getattr(self, "skip_type_validation", False)
+        ):
+            incompatible_dcts = self.compatible_types.exclude(Q(type=self.type) | Q(pk=self.pk))
+            if incompatible_dcts.exists():
+                raise ValidationError("Type of DCT cannot be changed if it has compatible DCTs of different type.")
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        self.full_clean()
+        super().save(*args, **kwargs)

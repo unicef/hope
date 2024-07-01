@@ -9,7 +9,7 @@ def migrate_household_admin_area() -> None:
     paginator = Paginator(queryset, 10000)
     queryset_count = queryset.count()
     for page_number in paginator.page_range:
-        print(f"Processing page {page_number}/{queryset_count/10000}")
+        print(f"Processing page {page_number}/{queryset_count / 10000}")
         page = paginator.page(page_number)
         for household in page.object_list:
             if household.admin_area:
@@ -22,7 +22,7 @@ def migrate_imported_household_admin_area() -> None:
     queryset_count = queryset.count()
     for page_number in paginator.page_range:
         to_update = []
-        print(f"Processing page {page_number}/{queryset_count/10000}")
+        print(f"Processing page {page_number}/{queryset_count / 10000}")
         page = paginator.page(page_number)
         for imported_household in page.object_list:
             if imported_household.admin2:
