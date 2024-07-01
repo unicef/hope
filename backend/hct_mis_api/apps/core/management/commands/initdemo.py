@@ -145,4 +145,4 @@ class Command(BaseCommand):
             user.set_unusable_password()
             user.save()
 
-        print(f"Done in {timezone.now()- start_time}")
+        print(f"Done in {timezone.now() - start_time}")
