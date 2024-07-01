@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.models import Document, PendingHousehold
+from hct_mis_api.apps.household.models import Document, PendingHousehold, Household
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.exceptions import (
     AlreadyRunningException,
@@ -470,9 +470,9 @@ def remove_old_rdi_links_task(page_count: int = 100) -> None:
             logger.info(f"Page {i}/{count} processing...")
             rdi_ids_page = unmerged_rdi_ids[i * page_count : (i + 1) * page_count]
 
-            PendingHousehold.objects.filter(registration_data_import_id__in=rdi_ids_page).delete()
+            Household.all_objects.filter(registration_data_import_id__in=rdi_ids_page).delete()
 
-            RegistrationDataImport.objects.filter(datahub_id__in=rdi_ids_page).update(erased=True)
+            RegistrationDataImport.objects.filter(id__in=rdi_ids_page).update(erased=True)
             i += 1
 
         logger.info(f"Data links for RDI(s): {''.join([str(_id) for _id in unmerged_rdi_ids])} removed successfully")
