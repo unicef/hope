@@ -180,7 +180,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             registration_data_import=registration_data_import,
             first_registration_date=household.first_registration_date,
             last_registration_date=household.last_registration_date,
-            business_area=rdi.business_area,
+            business_area=registration_data_import.business_area,
         )
 
         individual_data["disability"] = individual_dict.get("disability_i_c", NOT_DISABLED)
