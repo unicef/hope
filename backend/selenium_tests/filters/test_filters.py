@@ -1,7 +1,10 @@
 from django.conf import settings
 from django.core.management import call_command
 
+from datetime import datetime
+
 import pytest
+from dateutil.relativedelta import relativedelta
 from page_object.filters import Filters
 
 from hct_mis_api.apps.account.models import User
@@ -29,8 +32,67 @@ from hct_mis_api.apps.targeting.fixtures import (
 from selenium_tests.page_object.programme_details.programme_details import (
     ProgrammeDetails,
 )
+from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.payment.models import PaymentPlan
+
 
 pytestmark = pytest.mark.django_db(transaction=True, databases=["registration_datahub", "default"])
+
+
+@pytest.fixture
+def create_payment_plan() -> None:
+    TargetPopulationFactory(
+        program=Program.objects.filter(name="Test Programm").first(),
+        status=TargetPopulation.STATUS_OPEN,
+        targeting_criteria=TargetingCriteriaFactory(),
+    )
+    TargetPopulationFactory(
+        program=Program.objects.filter(name="Test Programm").first(),
+        status=TargetPopulation.STATUS_OPEN,
+        targeting_criteria=TargetingCriteriaFactory(),
+    )
+
+    tp = TargetPopulation.objects.all()[0]
+    tp2 = TargetPopulation.objects.all()[1]
+
+    pp = PaymentPlan.objects.update_or_create(
+        unicef_id="PP-0060-22-11223344",
+        business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
+        target_population=tp,
+        start_date=datetime.now(),
+        end_date=datetime.now() + relativedelta(days=30),
+        currency="USD",
+        dispersion_start_date=datetime.now(),
+        dispersion_end_date=datetime.now() + relativedelta(days=14),
+        status_date=datetime.now(),
+        status=PaymentPlan.Status.ACCEPTED,
+        created_by=User.objects.first(),
+        program=tp.program,
+        total_delivered_quantity=999,
+        total_entitled_quantity=2999,
+        is_follow_up=False,
+        program_id=tp.program.id,
+    )
+    pp[0].unicef_id = "PP-0060-22-11223344"
+    pp[0].save()
+
+    PaymentPlan.objects.update_or_create(
+        business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
+        target_population=tp2,
+        start_date=datetime.now(),
+        end_date=datetime.now() + relativedelta(days=30),
+        currency="USD",
+        dispersion_start_date=datetime.now(),
+        dispersion_end_date=datetime.now() + relativedelta(days=14),
+        status_date=datetime.now(),
+        status=PaymentPlan.Status.ACCEPTED,
+        created_by=User.objects.first(),
+        program=tp2.program,
+        total_delivered_quantity=999,
+        total_entitled_quantity=2999,
+        is_follow_up=False,
+        program_id=tp2.program.id,
+    )
 
 
 @pytest.fixture
@@ -386,7 +448,7 @@ class TestSmokeFilters:
             pytest.param(["Registration Data Import", "filter-search", "Test"], id="Registration Data Import"),
             # pytest.param(["Program Population", "hh-filters-search", "search"], id="Program Population"),
             pytest.param(["Targeting", "filters-search", "Test"], id="Targeting"),
-            # pytest.param(["Payment Module", "filter-search", "search"], id="Payment Module"),
+            pytest.param(["Payment Module", "filter-search", "PP-0060-22-11223344"], id="Payment Module"),
             pytest.param(["Payment Verification", "filter-search", "PP-0000-00-11223344"], id="Payment Verification"),
             # pytest.param(["Grievance", "filters-search", "search"], id="Grievance"),
         ],
@@ -398,6 +460,7 @@ class TestSmokeFilters:
         create_rdi: None,
         create_targeting: None,
         add_payment_verification: None,
+        create_payment_plan: None,
         filters: Filters,
         pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
