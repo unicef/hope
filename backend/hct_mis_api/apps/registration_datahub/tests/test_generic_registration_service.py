@@ -19,7 +19,6 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,
@@ -32,10 +31,7 @@ from hct_mis_api.aurora.services.generic_registration_service import (
 
 
 class TestGenericRegistrationService(TestCase):
-    databases = {
-        "default",
-        "registration_datahub",
-    }
+    databases = {"default"}
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
@@ -77,7 +73,7 @@ class TestGenericRegistrationService(TestCase):
                 "where_are_you_now": "",
                 "admin1_h_c": "UA07",
                 "admin2_h_c": "UA0702",
-                "admin3_h_c": "UA0702001",
+                "admin3_h_c": "UA0114007",
                 "size_h_c": 5,
                 "ff": "random",
             }
@@ -221,8 +217,7 @@ class TestGenericRegistrationService(TestCase):
         )
 
         # Checking only first is enough, because they all in one RDI
-        registration_datahub_import = PendingHousehold.objects.all()[0].registration_data_import
-        registration_data_import = RegistrationDataImport.objects.get(id=registration_datahub_import.hct_id)
+        registration_data_import = PendingHousehold.objects.all()[0].registration_data_import
         self.assertIn("ff", PendingHousehold.objects.all()[0].flex_fields.keys())
         self.assertEqual(registration_data_import.program, self.program)
 

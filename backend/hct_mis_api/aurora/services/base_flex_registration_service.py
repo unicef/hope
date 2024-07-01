@@ -123,7 +123,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
                 for record_id in records_ids_to_import:
                     record = Record.objects.defer("data").get(id=record_id)
                     try:
-                        self.create_household_for_rdi_household(record, rdi_datahub)
+                        self.create_household_for_rdi_household(record, rdi)
                         imported_records_ids.append(record_id)
                     except ValidationError as e:
                         logger.exception(e)
