@@ -24,10 +24,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import (
-    RegistrationDataImportDatahubFactory,
-    RegistrationDataImportFactory,
-)
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.tasks.import_program_population import (
     import_program_population,
 )
@@ -153,13 +150,6 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             business_area=cls.afghanistan,
             program=cls.program_from,
         )
-        cls.registration_data_import_datahub = RegistrationDataImportDatahubFactory(
-            business_area_slug=cls.afghanistan.slug,
-            hct_id=cls.registration_data_import.id,
-        )
-        cls.registration_data_import.datahub_id = cls.registration_data_import_datahub.id
-        cls.registration_data_import.save()
-
         cls.household, cls.individuals = create_household_and_individuals(
             household_data={
                 "registration_data_import": cls.rdi_other,

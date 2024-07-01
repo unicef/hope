@@ -724,7 +724,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             old_rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.id)
             if not self.business_area.postpone_deduplication:
                 logger.info("Starting deduplication of %s", registration_data_import.id)
-                rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
+                rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.id)
                 rdi_mis.status = RegistrationDataImport.DEDUPLICATION
                 rdi_mis.save()
                 DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_pending_individuals(

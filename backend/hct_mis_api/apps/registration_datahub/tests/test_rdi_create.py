@@ -40,10 +40,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import (
-    RegistrationDataImportDatahubFactory,
-    RegistrationDataImportFactory,
-)
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import ImportData
 from hct_mis_api.apps.registration_datahub.fixtures import ImportedIndividualFactory
 from hct_mis_api.apps.registration_datahub.models import (
@@ -107,17 +104,11 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
         cls.program = ProgramFactory(status=Program.ACTIVE)
 
-        cls.registration_data_import = RegistrationDataImportDatahubFactory(
-            import_data=cls.import_data, business_area_slug=business_area.slug, hct_id=None
-        )
-        hct_rdi = RegistrationDataImportFactory(
-            datahub_id=cls.registration_data_import.id,
-            name=cls.registration_data_import.name,
+        cls.registration_data_import = RegistrationDataImportFactory(
             business_area=business_area,
             program=cls.program,
+            import_data=cls.import_data,
         )
-        cls.registration_data_import.hct_id = hct_rdi.id
-        cls.registration_data_import.save()
         cls.business_area = BusinessArea.objects.first()
         DocumentType.objects.create(
             label="Tax Number Identification",
