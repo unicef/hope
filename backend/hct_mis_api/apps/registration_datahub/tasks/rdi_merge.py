@@ -1,7 +1,6 @@
 import contextlib
 import logging
 from typing import Tuple
-from uuid import UUID
 
 from django.core.cache import cache
 from django.db import transaction
@@ -38,10 +37,8 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.registration_data.models import (
     KoboImportedSubmission,
     RegistrationDataImport,
-    RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
-from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.signals import rdi_merged
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
@@ -233,7 +230,6 @@ class RdiMergeTask:
     def execute(self, registration_data_import_id: str) -> None:
         try:
             obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id)
-            obj_hub = RegistrationDataImportDatahub.objects.get(hct_id=registration_data_import_id)
             households = PendingHousehold.objects.filter(registration_data_import=obj_hct)
             individuals = PendingIndividual.objects.filter(registration_data_import=obj_hct).order_by(
                 "first_registration_date"
@@ -258,18 +254,13 @@ class RdiMergeTask:
                                 kobo_submission_uuid=kobo_submission_uuid,
                                 kobo_asset_id=kobo_asset_id,
                                 kobo_submission_time=kobo_submission_time,
-                                registration_data_import=obj_hub,
+                                registration_data_import=obj_hct,
                                 imported_household=household,
                             )
                             kobo_submissions.append(submission)
                     if kobo_submissions:
                         KoboImportedSubmission.objects.bulk_create(kobo_submissions)
                     logger.info(f"RDI:{registration_data_import_id} Created {len(kobo_submissions)} kobo submissions")
-
-                    for household in households:
-                        registration_id = household.registration_id
-                        if registration_id:
-                            self._update_program_registration_id(household.id, registration_id)
 
                     # DEDUPLICATION
 
@@ -384,20 +375,14 @@ class RdiMergeTask:
 
                 # remove es households if exists
                 remove_elasticsearch_documents_by_matching_ids(household_ids, HouseholdDocument)
-
-                # proactively try to remove also es data for imported individuals
-                remove_elasticsearch_documents_by_matching_ids(
-                    individual_ids,
-                    get_imported_individual_doc(obj_hct.business_area.slug),
-                )
                 raise
 
             with contextlib.suppress(ConnectionError, AttributeError):
                 for key in cache.keys("*"):
                     if key.startswith(
                         (
-                            f"count_{obj_hub.business_area_slug}_HouseholdNodeConnection",
-                            f"count_{obj_hub.business_area_slug}_IndividualNodeConnection",
+                            f"count_{obj_hct.business_area.slug}_HouseholdNodeConnection",
+                            f"count_{obj_hct.business_area.slug}_IndividualNodeConnection",
                         )
                     ):
                         cache.delete(key)
@@ -405,12 +390,6 @@ class RdiMergeTask:
         except Exception as e:
             logger.error(e)
             raise
-
-    def _update_program_registration_id(self, household_id: UUID, registration_id: str) -> None:
-        count = 0
-        while PendingHousehold.objects.filter(registration_id=f"{registration_id}#{count}").exists():
-            count += 1
-        PendingHousehold.objects.filter(id=household_id).update(registration_id=f"{registration_id}#{count}")
 
     def _update_household_collections(self, households: list, rdi: RegistrationDataImport) -> None:
         households_to_update = []

@@ -20,6 +20,8 @@ from hct_mis_api.apps.household.fixtures import (
     HouseholdFactory,
     IndividualCollectionFactory,
     IndividualFactory,
+    PendingHouseholdFactory,
+    PendingIndividualFactory,
 )
 from hct_mis_api.apps.household.models import (
     BROTHER_SISTER,
@@ -31,18 +33,15 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     Household,
     Individual,
-    IndividualRoleInHousehold,
     PendingHousehold,
     PendingIndividual,
+    PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory
 from hct_mis_api.apps.payment.models import DeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import (
-    RegistrationDataImportDatahubFactory,
-    RegistrationDataImportFactory,
-)
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import (
     KoboImportedSubmission,
     RegistrationDataImport,
@@ -85,11 +84,6 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         cls.rdi = RegistrationDataImportFactory(program=program)
         cls.rdi.business_area.postpone_deduplication = True
         cls.rdi.business_area.save()
-        cls.rdi_hub = RegistrationDataImportDatahubFactory(
-            name=cls.rdi.name, hct_id=cls.rdi.id, business_area_slug=cls.rdi.business_area.slug
-        )
-        cls.rdi.datahub_id = cls.rdi_hub.id
-        cls.rdi.save()
 
         area_type_level_1 = AreaTypeFactory(
             name="State1",
@@ -115,7 +109,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         super().setUpTestData()
 
     @classmethod
-    def set_imported_individuals(cls, household: HouseholdFactory) -> None:
+    def set_imported_individuals(cls, household: PendingHousehold) -> None:
         individuals_to_create = [
             {
                 "full_name": "Benjamin Butler",
@@ -130,7 +124,6 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "wallet_name": "Wallet Name 1",
                 "blockchain_name": "Blockchain Name 1",
                 "wallet_address": "Wallet Address 1",
-                "mis_unicef_id": "IND-9",
             },
             {
                 "full_name": "Robin Ford",
@@ -142,7 +135,6 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "registration_data_import": cls.rdi,
                 "household": household,
                 "email": "fake_email_2@com",
-                "mis_unicef_id": "IND-8",
             },
             {
                 "full_name": "Timothy Perry",
@@ -220,14 +212,11 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             },
         ]
 
-        cls.individuals = [
-            IndividualFactory(**individual, rdi_merge_status=MergeStatusModel.PENDING)
-            for individual in individuals_to_create
-        ]
+        cls.individuals = [PendingIndividualFactory(**individual) for individual in individuals_to_create]
 
     @freeze_time("2022-01-01")
     def test_merge_rdi_and_recalculation(self) -> None:
-        household = HouseholdFactory(
+        household = PendingHouseholdFactory(
             collect_individual_data=COLLECT_TYPE_FULL,
             registration_data_import=self.rdi,
             admin_area=self.area4,
@@ -246,8 +235,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         dct.save()
 
         self.set_imported_individuals(household)
-        self.set_imported_individuals(household)
-        household.head_of_household = Individual.objects.first()
+        household.head_of_household = PendingIndividual.objects.first()
         household.save()
 
         with capture_on_commit_callbacks(execute=True):
@@ -425,10 +413,9 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
 
     @freeze_time("2022-01-01")
     def test_merge_rdi_and_recalculation_for_collect_data_partial(self) -> None:
-        household = HouseholdFactory(
+        household = PendingHouseholdFactory(
             collect_individual_data=COLLECT_TYPE_PARTIAL,
             registration_data_import=self.rdi,
-            rdi_merge_status=MergeStatusModel.PENDING,
         )
         dct = self.rdi.program.data_collecting_type
         dct.recalculate_composition = True
@@ -483,40 +470,8 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         }
         self.assertEqual(household_data, expected)
 
-    def test_registration_id_from_program_registration_id_should_be_unique(self) -> None:
-        household = HouseholdFactory(
-            registration_data_import=self.rdi,
-            program_registration_id="ABCD-123123",
-            rdi_merge_status=MergeStatusModel.PENDING,
-        )
-        self.set_imported_individuals(household)
-        household = HouseholdFactory(
-            registration_data_import=self.rdi,
-            program_registration_id="ABCD-123123",
-            rdi_merge_status=MergeStatusModel.PENDING,
-        )
-        self.set_imported_individuals(household)
-        household = HouseholdFactory(
-            registration_data_import=self.rdi,
-            program_registration_id="ABCD-111111",
-            rdi_merge_status=MergeStatusModel.PENDING,
-        )
-        self.set_imported_individuals(household)
-
-        with capture_on_commit_callbacks(execute=True):
-            RdiMergeTask().execute(self.rdi.pk)
-
-        registrations_ids = list(
-            PendingHousehold.objects.all()
-            .order_by("program_registration_id")
-            .values_list("program_registration_id", flat=True)
-        )
-
-        expected_registrations_ids = ["ABCD-111111#0", "ABCD-123123#0", "ABCD-123123#1"]
-        self.assertEqual(registrations_ids, expected_registrations_ids)
-
     def test_merging_external_collector(self) -> None:
-        household = HouseholdFactory(
+        household = PendingHouseholdFactory(
             collect_individual_data=COLLECT_TYPE_FULL,
             registration_data_import=self.rdi,
             admin_area=self.area4,
@@ -524,7 +479,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             zip_code="00-123",
         )
         self.set_imported_individuals(household)
-        external_collector = IndividualFactory(
+        external_collector = PendingIndividualFactory(
             **{
                 "full_name": "External Collector",
                 "given_name": "External",
@@ -536,7 +491,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "email": "xd@com",
             }
         )
-        role = IndividualRoleInHousehold(individual=external_collector, household=household, role=ROLE_ALTERNATE)
+        role = PendingIndividualRoleInHousehold(individual=external_collector, household=household, role=ROLE_ALTERNATE)
         role.save()
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
