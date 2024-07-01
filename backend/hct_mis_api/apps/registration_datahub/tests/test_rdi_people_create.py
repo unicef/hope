@@ -7,9 +7,13 @@ from django.conf import settings
 from django.core.files import File
 from django.forms import model_to_dict
 
+from django_countries.fields import Country
+
+from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import DataCollectingType
+from hct_mis_api.apps.geo.models import Country as GeoCountry
 from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
@@ -19,10 +23,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import (
-    RegistrationDataImportDatahubFactory,
-    RegistrationDataImportFactory,
-)
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import ImportData
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
@@ -36,6 +37,7 @@ class TestRdiXlsxPeople(BaseElasticSearchTestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        PartnerFactory(name="UNHCR")
         content = Path(
             f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/rdi_people_test.xlsx"
         ).read_bytes()
@@ -53,17 +55,9 @@ class TestRdiXlsxPeople(BaseElasticSearchTestCase):
             number_of_individuals=4,
         )
         cls.program = ProgramFactory(status=Program.ACTIVE, data_collecting_type__type=DataCollectingType.Type.SOCIAL)
-        cls.registration_data_import = RegistrationDataImportDatahubFactory(
-            import_data=cls.import_data, business_area_slug=cls.business_area.slug, hct_id=None
+        cls.registration_data_import = RegistrationDataImportFactory(
+            business_area=cls.business_area, program=cls.program, import_data=cls.import_data
         )
-        hct_rdi = RegistrationDataImportFactory(
-            datahub_id=cls.registration_data_import.id,
-            name=cls.registration_data_import.name,
-            business_area=cls.business_area,
-            program=cls.program,
-        )
-        cls.registration_data_import.hct_id = hct_rdi.id
-        cls.registration_data_import.save()
 
         super().setUpTestData()
 
@@ -93,11 +87,11 @@ class TestRdiXlsxPeople(BaseElasticSearchTestCase):
 
         household_data = {
             "residence_status": "REFUGEE",
-            "country": "IM",
+            "country": GeoCountry.objects.get(iso_code2=Country("IM").code).id,
             "zip_code": "002",
             "flex_fields": {},
         }
-        household = matching_individuals.first().household
+        household = matching_individuals.first().pending_household
         household_obj_data = model_to_dict(household, ("residence_status", "country", "zip_code", "flex_fields"))
         self.assertEqual(household_obj_data, household_data)
 
