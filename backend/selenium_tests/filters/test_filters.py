@@ -3,21 +3,86 @@ from django.core.management import call_command
 
 import pytest
 from page_object.filters import Filters
-from hct_mis_api.apps.registration_datahub.models import ImportedDocumentType
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.registration_datahub.models import ImportData
-
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
-
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
-
-from selenium_tests.page_object.programme_details.programme_details import ProgrammeDetails
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.payment.fixtures import (
+    CashPlanFactory,
+    PaymentRecordFactory,
+    PaymentVerificationPlanFactory,
+)
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_datahub.models import (
+    ImportData,
+    ImportedDocumentType,
+    RegistrationDataImportDatahub,
+)
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetPopulationFactory,
+)
+from selenium_tests.page_object.programme_details.programme_details import (
+    ProgrammeDetails,
+)
 
 pytestmark = pytest.mark.django_db(transaction=True, databases=["registration_datahub", "default"])
+
+
+@pytest.fixture
+def add_payment_verification() -> None:
+    registration_data_import = RegistrationDataImportFactory(
+        imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
+    )
+    program = Program.objects.filter(name="Test Programm").first()
+    household, individuals = create_household(
+        {
+            "registration_data_import": registration_data_import,
+            "admin_area": Area.objects.order_by("?").first(),
+            "program": program,
+        },
+        {"registration_data_import": registration_data_import},
+    )
+
+    cash_plan = CashPlanFactory(
+        ca_id="PP-0000-00-11223344",
+        name="TEST",
+        program=program,
+        business_area=BusinessArea.objects.first(),
+    )
+    cash_plan2 = CashPlanFactory(
+        ca_id="PP-0000-01-00000000",
+        name="TEST",
+        program=program,
+        business_area=BusinessArea.objects.first(),
+    )
+    targeting_criteria = TargetingCriteriaFactory()
+
+    target_population = TargetPopulationFactory(
+        created_by=User.objects.first(),
+        targeting_criteria=targeting_criteria,
+        business_area=BusinessArea.objects.first(),
+    )
+
+    PaymentRecordFactory(
+        parent=cash_plan,
+        household=household,
+        head_of_household=household.head_of_household,
+        target_population=target_population,
+        entitlement_quantity="21.36",
+        delivered_quantity="21.36",
+        currency="PLN",
+    )
+    PaymentVerificationPlanFactory(
+        generic_fk_obj=cash_plan, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
+    )
+    PaymentVerificationPlanFactory(
+        generic_fk_obj=cash_plan2, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
+    )
 
 
 @pytest.fixture
@@ -315,22 +380,27 @@ class TestSmokeFilters:
                 except BaseException:
                     raise Exception(f"Element {locator} not found on the {nav_menu} page.")
 
-    @pytest.mark.parametrize("module", [
-        pytest.param(["Registration Data Import", "filter-search", "Test"], id="Registration Data Import"),
-        # pytest.param(["Program Population", "hh-filters-search", "search"], id="Program Population"),
-        pytest.param(["Targeting", "filters-search", "Test"], id="Targeting"),
-        # pytest.param(["Payment Module", "filter-search", "search"], id="Payment Module"),
-        # pytest.param(["Payment Verification", "filter-search", "search"], id="Payment Verification"),
-        # pytest.param(["Grievance", "filters-search", "search"], id="Grievance"),
-    ])
-    def test_filters_happy_path_search_filter(self,
-                                              module: list,
-                                              create_programs: None,
-                                              create_rdi: None,
-                                              create_targeting: None,
-                                              filters: Filters,
-                                              pageProgrammeDetails: ProgrammeDetails) -> None:
-
+    @pytest.mark.parametrize(
+        "module",
+        [
+            pytest.param(["Registration Data Import", "filter-search", "Test"], id="Registration Data Import"),
+            # pytest.param(["Program Population", "hh-filters-search", "search"], id="Program Population"),
+            pytest.param(["Targeting", "filters-search", "Test"], id="Targeting"),
+            # pytest.param(["Payment Module", "filter-search", "search"], id="Payment Module"),
+            pytest.param(["Payment Verification", "filter-search", "PP-0000-00-11223344"], id="Payment Verification"),
+            # pytest.param(["Grievance", "filters-search", "search"], id="Grievance"),
+        ],
+    )
+    def test_filters_happy_path_search_filter(
+        self,
+        module: list,
+        create_programs: None,
+        create_rdi: None,
+        create_targeting: None,
+        add_payment_verification: None,
+        filters: Filters,
+        pageProgrammeDetails: ProgrammeDetails,
+    ) -> None:
         filters.selectGlobalProgramFilter("Test Programm").click()
         assert "Test Programm" in pageProgrammeDetails.getHeaderTitle().text
         filters.wait_for(f'[data-cy="nav-{module[0]}').click()
