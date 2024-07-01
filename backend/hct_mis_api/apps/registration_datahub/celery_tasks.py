@@ -85,7 +85,7 @@ def registration_xlsx_import_task(
                 raise AlreadyRunningException(
                     f"Task with key registration_xlsx_import_task {registration_data_import_id} is already running"
                 )
-            rdi = RegistrationDataImport.objects.get(datahub_id=registration_data_import_id)
+            rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
             set_sentry_business_area_tag(rdi.business_area.name)
             if rdi.status not in (RegistrationDataImport.IMPORT_SCHEDULED, RegistrationDataImport.IMPORT_ERROR):
                 raise WrongStatusException("Rdi is not in status IMPORT_SCHEDULED while trying to import")
@@ -97,14 +97,14 @@ def registration_xlsx_import_task(
 
             if is_social_worker_program:
                 RdiXlsxPeopleCreateTask().execute(
-                    registration_data_import_datahub_id=registration_data_import_id,
+                    registration_data_import_id=registration_data_import_id,
                     import_data_id=import_data_id,
                     business_area_id=business_area_id,
                     program_id=str(program_id),
                 )
             else:
                 RdiXlsxCreateTask().execute(
-                    registration_data_import_datahub_id=registration_data_import_id,
+                    registration_data_import_id=registration_data_import_id,
                     import_data_id=import_data_id,
                     business_area_id=business_area_id,
                     program_id=str(program_id),
@@ -114,14 +114,6 @@ def registration_xlsx_import_task(
         logger.info(str(e))
         return True
     except Exception as e:
-        from hct_mis_api.apps.registration_data.models import (
-            RegistrationDataImportDatahub,
-        )
-
-        RegistrationDataImportDatahub.objects.filter(
-            id=registration_data_import_id,
-        ).update(import_done=RegistrationDataImportDatahub.DONE)
-
         handle_rdi_exception(registration_data_import_id, e)
         raise self.retry(exc=e)
 
@@ -266,7 +258,7 @@ def registration_xlsx_import_hourly_task(self: Any) -> None:
         set_sentry_business_area_tag(business_area.name)
 
         RdiXlsxCreateTask().execute(
-            registration_data_import_datahub_id=str(not_started_rdi.id),
+            registration_data_import_id=str(not_started_rdi.id),
             import_data_id=str(not_started_rdi.import_data.id),
             business_area_id=str(business_area.id),
             program_id=str(program_id),
