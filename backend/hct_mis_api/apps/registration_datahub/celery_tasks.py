@@ -9,13 +9,12 @@ from django.utils import timezone
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.models import Document
+from hct_mis_api.apps.household.models import Document, PendingHousehold
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.exceptions import (
     AlreadyRunningException,
     WrongStatusException,
 )
-from hct_mis_api.apps.registration_datahub.models import ImportedHousehold
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
 )
@@ -459,7 +458,7 @@ def check_rdi_import_periodic_task(self: Any, business_area_slug: Optional[str] 
 @sentry_tags
 @log_start_and_end
 def remove_old_rdi_links_task(page_count: int = 100) -> None:
-    """This task removes linked RDI Datahub objects for households and related objects (individuals, documents etc.)"""
+    """This task removes linked RDI objects for households and related objects (individuals, documents etc.)"""
 
     from datetime import timedelta
 
@@ -468,7 +467,7 @@ def remove_old_rdi_links_task(page_count: int = 100) -> None:
     days = config.REMOVE_RDI_LINKS_TIMEDELTA
     try:
         # Get datahub_ids older than 3 months which have status other than MERGED
-        unmerged_rdi_datahub_ids = list(
+        unmerged_rdi_ids = list(
             RegistrationDataImport.objects.filter(
                 created_at__lte=timezone.now() - timedelta(days=days),
                 status__in=[
@@ -477,22 +476,20 @@ def remove_old_rdi_links_task(page_count: int = 100) -> None:
                     RegistrationDataImport.IMPORT_ERROR,
                     RegistrationDataImport.MERGE_ERROR,
                 ],
-            ).values_list("datahub_id", flat=True)
+            ).values_list("id", flat=True)
         )
 
-        i, count = 0, len(unmerged_rdi_datahub_ids) // page_count
+        i, count = 0, len(unmerged_rdi_ids) // page_count
         while i <= count:
             logger.info(f"Page {i}/{count} processing...")
-            rdi_datahub_ids_page = unmerged_rdi_datahub_ids[i * page_count : (i + 1) * page_count]
+            rdi_ids_page = unmerged_rdi_ids[i * page_count : (i + 1) * page_count]
 
-            ImportedHousehold.objects.filter(registration_data_import_id__in=rdi_datahub_ids_page).delete()
+            PendingHousehold.objects.filter(registration_data_import_id__in=rdi_ids_page).delete()
 
-            RegistrationDataImport.objects.filter(datahub_id__in=rdi_datahub_ids_page).update(erased=True)
+            RegistrationDataImport.objects.filter(datahub_id__in=rdi_ids_page).update(erased=True)
             i += 1
 
-        logger.info(
-            f"Data links for datahubs: {''.join([str(_id) for _id in unmerged_rdi_datahub_ids])} removed successfully"
-        )
+        logger.info(f"Data links for RDI(s): {''.join([str(_id) for _id in unmerged_rdi_ids])} removed successfully")
     except Exception:
         logger.error("Removing old RDI objects failed")
         raise
