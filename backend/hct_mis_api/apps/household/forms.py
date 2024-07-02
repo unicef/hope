@@ -263,7 +263,7 @@ class IndividualForm(forms.ModelForm):
 
         # override queryset for Individual
         if "individual" in self.Meta.fields:
-            data["individual"] = data["individual"].pk
+            data["individual"] = data["individual"].pk  # type: ignore
             self.fields["individual"].queryset = PendingIndividual.objects.all()
 
         if "household" in self.Meta.fields:
