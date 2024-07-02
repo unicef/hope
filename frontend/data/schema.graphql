@@ -1969,6 +1969,7 @@ type ImportDataNode implements Node {
   validationErrors: String!
   deliveryMechanismsValidationErrors: String!
   createdById: UUID
+  registrationDataImportHope: RegistrationDataImportNode
   koboimportdata: KoboImportDataNode
   registrationDataImport: RegistrationDataImportDatahubNode
   xlsxValidationErrors: [XlsxRowErrorNode]
@@ -3999,6 +4000,7 @@ type RegistrationDataImportNode implements Node {
   erased: Boolean!
   refuseReason: String
   allowDeliveryMechanismsValidationErrors: Boolean!
+  importData: ImportDataNode
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!

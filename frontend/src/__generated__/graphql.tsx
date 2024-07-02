@@ -2839,6 +2839,7 @@ export type ImportDataNode = Node & {
   numberOfHouseholds?: Maybe<Scalars['Int']['output']>;
   numberOfIndividuals?: Maybe<Scalars['Int']['output']>;
   registrationDataImport?: Maybe<RegistrationDataImportDatahubNode>;
+  registrationDataImportHope?: Maybe<RegistrationDataImportNode>;
   status: ImportDataStatus;
   updatedAt: Scalars['DateTime']['output'];
   validationErrors: Scalars['String']['output'];
@@ -7122,6 +7123,7 @@ export type RegistrationDataImportNode = Node & {
   grievanceticketSet: GrievanceTicketNodeConnection;
   households: HouseholdNodeConnection;
   id: Scalars['ID']['output'];
+  importData?: Maybe<ImportDataNode>;
   importDate: Scalars['DateTime']['output'];
   importedBy?: Maybe<UserNode>;
   individuals: IndividualNodeConnection;
@@ -26032,6 +26034,7 @@ export type ImportDataNodeResolvers<ContextType = any, ParentType extends Resolv
   numberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   numberOfIndividuals?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportDatahubNode']>, ParentType, ContextType>;
+  registrationDataImportHope?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['ImportDataStatus'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   validationErrors?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -27607,6 +27610,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, Partial<RegistrationDataImportNodeGrievanceticketSetArgs>>;
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, Partial<RegistrationDataImportNodeHouseholdsArgs>>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType>;
   importDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   importedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, Partial<RegistrationDataImportNodeIndividualsArgs>>;
