@@ -164,7 +164,6 @@ class TestSmokePaymentVerification:
         assert "-" in pagePaymentVerificationDetails.getLabelActivationDate().text
         assert "-" in pagePaymentVerificationDetails.getLabelCompletionDate().text
 
-    @pytest.mark.skip(reason="Do during the task: 198121")
     def test_smoke_payment_verification_happy_path(
         self,
         active_program: Program,
