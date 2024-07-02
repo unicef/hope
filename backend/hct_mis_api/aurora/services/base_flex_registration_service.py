@@ -196,11 +196,11 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
 
     def _create_object_and_validate(self, data: Dict, model_class: Any, model_form: Optional[Any] = None) -> Any:
         if model_form is None:
-            form = modelform_factory(model_class, fields=list(data.keys()))
+            ModelClassForm = modelform_factory(model_class, fields=list(data.keys()))
         else:
-            form = modelform_factory(model_class, form=model_form, fields=list(data.keys()))
+            ModelClassForm = modelform_factory(model_class, form=model_form, fields=list(data.keys()))
 
-        form = form(data=data)
+        form = ModelClassForm(data=data)
         if not form.is_valid():
             raise ValidationError(form.errors)
         return form.save()
