@@ -172,7 +172,7 @@ class IndividualAdmin(
 
     @button()
     def household_members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
-        obj = Individual.objects.get(pk=pk)
+        obj = Individual.all_objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
         flt = f"&qs=household_id={obj.household.id}&qs__negate=false"
         return HttpResponseRedirect(f"{url}?{flt}")
@@ -181,8 +181,8 @@ class IndividualAdmin(
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Sanity Check")
         obj = context["original"]
-        context["roles"] = obj.households_and_roles.all()
-        context["duplicates"] = Individual.objects.filter(unicef_id=obj.unicef_id)
+        context["roles"] = obj.households_and_roles(manager="all_objects").all()
+        context["duplicates"] = Individual.all_objects.filter(unicef_id=obj.unicef_id)
 
         return TemplateResponse(request, "admin/household/individual/sanity_check.html", context)
 
