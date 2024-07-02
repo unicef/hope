@@ -36,6 +36,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     Household,
     HouseholdCollection,
+    Individual,
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.utils.admin import (
@@ -171,6 +172,11 @@ class HouseholdAdmin(
         if ordering:
             qs = qs.order_by(*ordering)
         return qs
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "head_of_household":
+            kwargs["queryset"] = Individual.all_objects.all()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_ignored_linked_objects(self, request: HttpRequest) -> List:
         return []
