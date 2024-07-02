@@ -250,6 +250,10 @@ class GenericPayment(TimeStampedUUIDModel):
     STATUS_FORCE_FAILED = "Force failed"
     STATUS_DISTRIBUTION_PARTIAL = "Partially Distributed"
     STATUS_PENDING = "Pending"
+    # Payment Gateway statuses
+    STATUS_SENT_TO_PG = "Sent to Payment Gateway"
+    STATUS_SENT_TO_FSP = "Sent to FSP"
+    STATUS_MANUALLY_CANCELLED = "Manually Cancelled"
 
     STATUS_CHOICE = (
         (STATUS_DISTRIBUTION_SUCCESS, _("Distribution Successful")),  # Delivered Fully
@@ -259,6 +263,9 @@ class GenericPayment(TimeStampedUUIDModel):
         (STATUS_FORCE_FAILED, _("Force failed")),  # Force Failed
         (STATUS_DISTRIBUTION_PARTIAL, _("Partially Distributed")),  # Delivered Partially
         (STATUS_PENDING, _("Pending")),  # Pending
+        (STATUS_SENT_TO_PG, _("Sent to Payment Gateway")),
+        (STATUS_SENT_TO_FSP, _("Sent to FSP")),
+        (STATUS_MANUALLY_CANCELLED, _("Manually Cancelled")),
     )
 
     ALLOW_CREATE_VERIFICATION = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS, STATUS_DISTRIBUTION_PARTIAL)
@@ -909,7 +916,9 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
     def is_reconciled(self) -> bool:
         # TODO what in case of active grievance tickets?
         return (
-            self.eligible_payments.exclude(status=GenericPayment.STATUS_PENDING).count()
+            self.eligible_payments.exclude(
+                status__in=[GenericPayment.STATUS_PENDING, GenericPayment.STATUS_SENT_TO_PG]
+            ).count()
             == self.eligible_payments.count()
         )
 
