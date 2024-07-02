@@ -69,12 +69,16 @@ const renderTemplateRow = (row: Template): ReactElement => (
 export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
   const { businessArea: businessAreaSlug, programId } = useBaseUrl();
 
-  const { data: templatesData, isLoading } = useQuery({
+  const {
+    data: templatesData,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['periodicDataUpdateTemplates', businessAreaSlug, programId],
     queryFn: () =>
       fetchPeriodicDataUpdateTemplates(businessAreaSlug, programId),
   });
-
   return (
     <UniversalRestTable
       initialVariables={{}}
@@ -87,8 +91,10 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
         fetchPeriodicDataUpdateTemplates(businessAreaSlug, programId)
       }
       queryKey={['templates', businessAreaSlug, programId]}
-      data={templatesData?.results}
+      data={templatesData}
       isLoading={isLoading}
+      error={error}
+      refetch={refetch}
     />
   );
 };

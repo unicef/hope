@@ -63,7 +63,7 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => (
     renderRow={renderUpdateRow}
     headCells={updatesHeadCells}
     title="Updates"
-    queryFn={/* query function */}
+    queryFn={() => {}}
     queryKey={['updates']} // Adjust the query key
   />
 );

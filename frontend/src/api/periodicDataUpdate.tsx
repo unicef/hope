@@ -6,7 +6,7 @@ export const fetchPeriodicDataUpdateTemplates = async (
   params = {},
 ) => {
   const response = await api.get(
-    `/api/rest/${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/`,
+    `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/`,
     params,
   );
   return response;
@@ -18,7 +18,7 @@ export const fetchPeriodicDataUpdateTemplateDetails = async (
   templateId,
 ) => {
   const response = await api.get(
-    `/api/rest/${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${templateId}/`,
+    `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${templateId}/`,
   );
   return response;
 };
@@ -29,7 +29,7 @@ export const exportPeriodicDataUpdateTemplate = async (
   templateId,
 ) => {
   const response = await api.post(
-    `/api/rest/${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${templateId}/export/`,
+    `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${templateId}/export/`,
   );
   return response.data;
 };
@@ -40,7 +40,7 @@ export const downloadPeriodicDataUpdateTemplate = async (
   templateId,
 ) => {
   const response = await api.get(
-    `/api/rest/${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${templateId}/download/`,
+    `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${templateId}/download/`,
   );
   return response.data;
 };

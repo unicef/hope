@@ -83,6 +83,14 @@ export const menuItems: MenuItem[] = [
         permissionModule: 'INDIVIDUALS',
         scopes: [SCOPE_PROGRAM],
       },
+      {
+        name: 'Household Members',
+        href: '/population/household-members',
+        selectedRegexp: /^\/population\/household-members.*$/,
+        icon: <FaceIcon />,
+        permissionModule: 'INDIVIDUALS',
+        scopes: [SCOPE_PROGRAM],
+      },
     ],
   },
   {

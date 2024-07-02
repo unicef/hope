@@ -1,9 +1,9 @@
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import useDeepCompareEffect from 'use-deep-compare-effect';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { columnToOrderBy, isPermissionDeniedError } from '@utils/utils';
-import { QueryFunction, useQuery } from '@tanstack/react-query';
+import { QueryFunction } from '@tanstack/react-query';
 import {
   Order,
   TableRestComponent,
@@ -30,6 +30,10 @@ interface UniversalRestTableProps<T = any, K = any> {
   onPageChanged?: (page: number) => void;
   queryFn: QueryFunction<any, string[], never>;
   queryKey: string[];
+  data: T[];
+  refetch;
+  error;
+  isLoading: boolean;
 }
 
 export const UniversalRestTable = <T, K>({
@@ -46,8 +50,11 @@ export const UniversalRestTable = <T, K>({
   defaultOrderDirection = 'asc',
   numSelected = 0,
   allowSort = true,
-  queryFn,
   queryKey: initialQueryKey,
+  data,
+  refetch,
+  error,
+  isLoading,
 }: UniversalRestTableProps<T, K>): ReactElement => {
   const [page, setPage] = useState(0);
   const [queryKey, setQueryKey] = useState(initialQueryKey);
@@ -57,26 +64,18 @@ export const UniversalRestTable = <T, K>({
     defaultOrderDirection,
   );
 
-  const updateQueryKey = (offset: number) => {
-    const variables = {
-      ...initialVariables,
-      offset,
-      limit: rowsPerPage,
-      orderBy: orderBy ? columnToOrderBy(orderBy, orderDirection) : undefined,
+  useEffect(() => {
+    const updateQueryKey = (offset: number) => {
+      const variables = {
+        ...initialVariables,
+        offset,
+        limit: rowsPerPage,
+        orderBy: orderBy ? columnToOrderBy(orderBy, orderDirection) : undefined,
+      };
+      setQueryKey([queryKey[0], JSON.stringify(variables)]);
     };
-    setQueryKey([queryKey[0], JSON.stringify(variables)]);
-  };
-
-  const {
-    data,
-    refetch,
-    isLoading: loading,
-    error,
-  } = useQuery({ queryKey, queryFn });
-
-  useDeepCompareEffect(() => {
     updateQueryKey(page * rowsPerPage);
-  }, [page, rowsPerPage, orderBy, orderDirection]);
+  }, [page, rowsPerPage, orderBy, orderDirection, queryKey, initialVariables]);
 
   if (error) {
     console.error(error);
@@ -97,7 +96,7 @@ export const UniversalRestTable = <T, K>({
       title={correctTitle}
       actions={actions}
       data={typedResults}
-      loading={loading}
+      loading={isLoading}
       renderRow={renderRow}
       isOnPaper={isOnPaper}
       headCells={headCells}

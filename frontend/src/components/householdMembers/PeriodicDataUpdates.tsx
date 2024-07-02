@@ -63,7 +63,8 @@ export const PeriodicDataUpdates = (): React.ReactElement => {
       )}
       {value === 1 && (
         <Box>
-          <PeriodicDataUpdatesUpdatesList />
+          {/* //TODO MS: uncomment this line */}
+          {/* <PeriodicDataUpdatesUpdatesList /> */}
         </Box>
       )}
     </BaseSection>

@@ -6,6 +6,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { Tabs, Tab } from '@core/Tabs';
+import { PeriodicDataUpdates } from '@components/householdMembers/PeriodicDataUpdates';
 
 export const HouseholdMembersPage = (): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
@@ -44,8 +45,8 @@ export const HouseholdMembersPage = (): React.ReactElement => {
   );
 
   if (permissions === null) return null;
-  if (!hasPermissionInModule('HOUSEHOLD_MEMBERS_VIEW_LIST', permissions))
-    return <PermissionDenied />;
+  // if (!hasPermissionInModule('HOUSEHOLD_MEMBERS_VIEW_LIST', permissions))
+  //   return <PermissionDenied />;
 
   return (
     <>
@@ -53,7 +54,7 @@ export const HouseholdMembersPage = (): React.ReactElement => {
       {selectedTab === 0 ? (
         <div>Individuals Component</div>
       ) : (
-        <div>Periodic Data Updates Component</div>
+        <PeriodicDataUpdates />
       )}
     </>
   );
