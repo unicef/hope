@@ -1,19 +1,27 @@
 import { ImportedHouseholdNode } from '../../src/__generated__/graphql';
 
 export const fakeImportedHouseholdNode = {
-  id:
-    'SW1wb3J0ZWRIb3VzZWhvbGROb2RlOmEzY2I2NWFjLWRlMTMtNDQzYy04YThkLTJjZDJmYzM3ODkwYw==',
+  id: 'SW1wb3J0ZWRIb3VzZWhvbGROb2RlOmEzY2I2NWFjLWRlMTMtNDQzYy04YThkLTJjZDJmYzM3ODkwYw==',
   headOfHousehold: {
-    id:
-      'SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozZTE0OGVkYy0wMTY3LTQ0ZTYtOTliYi02ZDA3MmM4ZjA2NWI=',
+    id: 'SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozZTE0OGVkYy0wMTY3LTQ0ZTYtOTliYi02ZDA3MmM4ZjA2NWI=',
     fullName: 'Agata Kowalska',
     __typename: 'ImportedIndividualNode',
   },
+  address: 'Test address',
   size: 4,
-  admin1: 'AF06',
-  admin1Title: 'Nangarhar',
-  admin2: 'AF0617',
-  admin2Title: 'Achin',
+  admin1: {
+    pCode: 'AF06',
+    name: 'Nangarhar',
+  },
+  admin2: {
+    pCode: 'AF0617',
+    name: 'Achin',
+  },
+  businessArea: {
+    slug: 'afghanistan',
+  },
+  collectIndividualData: 'A_0',
+  collectType: 'STANDARD',
   flexFields: { months_displaced_h_f: 12 },
   deviceid: '',
   start: null,
@@ -27,8 +35,7 @@ export const fakeImportedHouseholdNode = {
   country: 'Isle of Man',
   countryOrigin: 'San Marino',
   registrationDataImport: {
-    id:
-      'UmVnaXN0cmF0aW9uRGF0YUltcG9ydERhdGFodWJOb2RlOjljNzU3MTM4LTZmMDEtNGQzMS05YTM5LTdkZjFjMDA5NzE5ZA==',
+    id: 'UmVnaXN0cmF0aW9uRGF0YUltcG9ydERhdGFodWJOb2RlOjljNzU3MTM4LTZmMDEtNGQzMS05YTM5LTdkZjFjMDA5NzE5ZA==',
     hctId: '30bb58c2-11ad-4208-8d5e-d435f0796e76',
     name: 'roamaniaks',
     __typename: 'RegistrationDataImportDatahubNode',
@@ -37,8 +44,7 @@ export const fakeImportedHouseholdNode = {
     edges: [
       {
         node: {
-          id:
-            'SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTo0YmY3NmE4ZC05MmFjLTQwZjAtOTE2YS04ZDcwMDIwNzFiYmI=',
+          id: 'SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTo0YmY3NmE4ZC05MmFjLTQwZjAtOTE2YS04ZDcwMDIwNzFiYmI=',
           age: 80,
           fullName: 'Alicja Kowalska',
           birthDate: '1941-08-26',
@@ -50,19 +56,16 @@ export const fakeImportedHouseholdNode = {
           deduplicationGoldenRecordResults: [],
           deduplicationBatchResults: [],
           registrationDataImport: {
-            id:
-              'UmVnaXN0cmF0aW9uRGF0YUltcG9ydERhdGFodWJOb2RlOjljNzU3MTM4LTZmMDEtNGQzMS05YTM5LTdkZjFjMDA5NzE5ZA==',
-            hctId: '30bb58c2-11ad-4208-8d5e-d435f0796e76',
-            __typename: 'RegistrationDataImportDatahubNode',
+            id: 'UmVnaXN0cmF0aW9uRGF0YUltcG9ydERhdGFodWJOb2RlOjljNzU3MTM4LTZmMDEtNGQzMS05YTM5LTdkZjFjMDA5NzE5ZA==',
+            __typename: 'RegistrationDataImportNode',
           },
-          __typename: 'ImportedIndividualNode',
+          __typename: 'IndividualNode',
         },
-        __typename: 'ImportedIndividualNodeEdge',
+        __typename: 'IndividualNodeEdge',
       },
       {
         node: {
-          id:
-            'SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpjMjZiNmQ2MS1mMTdjLTQ0NmYtYjQ1MC0wMWI0NmMyYmE4Yjk=',
+          id: 'SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpjMjZiNmQ2MS1mMTdjLTQ0NmYtYjQ1MC0wMWI0NmMyYmE4Yjk=',
           age: 22,
           fullName: 'Angela Kowalska',
           birthDate: '2000-01-10',
@@ -74,19 +77,16 @@ export const fakeImportedHouseholdNode = {
           deduplicationGoldenRecordResults: [],
           deduplicationBatchResults: [],
           registrationDataImport: {
-            id:
-              'UmVnaXN0cmF0aW9uRGF0YUltcG9ydERhdGFodWJOb2RlOjljNzU3MTM4LTZmMDEtNGQzMS05YTM5LTdkZjFjMDA5NzE5ZA==',
-            hctId: '30bb58c2-11ad-4208-8d5e-d435f0796e76',
-            __typename: 'RegistrationDataImportDatahubNode',
+            id: 'UmVnaXN0cmF0aW9uRGF0YUltcG9ydERhdGFodWJOb2RlOjljNzU3MTM4LTZmMDEtNGQzMS05YTM5LTdkZjFjMDA5NzE5ZA==',
+            __typename: 'RegistrationDataImportNode',
           },
-          __typename: 'ImportedIndividualNode',
+          __typename: 'IndividualNode',
         },
-        __typename: 'ImportedIndividualNodeEdge',
+        __typename: 'IndividualNodeEdge',
       },
       {
         node: {
-          id:
-            'SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozZTE0OGVkYy0wMTY3LTQ0ZTYtOTliYi02ZDA3MmM4ZjA2NWI=',
+          id: 'SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozZTE0OGVkYy0wMTY3LTQ0ZTYtOTliYi02ZDA3MmM4ZjA2NWI=',
           age: 58,
           fullName: 'Agata Kowalska',
           birthDate: '1964-01-10',
@@ -98,16 +98,14 @@ export const fakeImportedHouseholdNode = {
           deduplicationGoldenRecordResults: [],
           deduplicationBatchResults: [],
           registrationDataImport: {
-            id:
-              'UmVnaXN0cmF0aW9uRGF0YUltcG9ydERhdGFodWJOb2RlOjljNzU3MTM4LTZmMDEtNGQzMS05YTM5LTdkZjFjMDA5NzE5ZA==',
-            hctId: '30bb58c2-11ad-4208-8d5e-d435f0796e76',
-            __typename: 'RegistrationDataImportDatahubNode',
+            id: 'UmVnaXN0cmF0aW9uRGF0YUltcG9ydERhdGFodWJOb2RlOjljNzU3MTM4LTZmMDEtNGQzMS05YTM5LTdkZjFjMDA5NzE5ZA==',
+            __typename: 'RegistrationDataImportNode',
           },
-          __typename: 'ImportedIndividualNode',
+          __typename: 'IndividualNode',
         },
-        __typename: 'ImportedIndividualNodeEdge',
+        __typename: 'IndividualNodeEdge',
       },
     ],
-    __typename: 'ImportedIndividualNodeConnection',
+    __typename: 'IndividualNodeConnection',
   },
-} as ImportedHouseholdNode;
+} as unknown as ImportedHouseholdNode;
