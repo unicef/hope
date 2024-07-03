@@ -26,6 +26,11 @@ class PaymentRecord(BaseComponents):
     labelTransactionReferenceId = 'div[data-cy="label-TRANSACTION REFERENCE ID"]'
     labelEntitlementCardIssueDate = 'div[data-cy="label-ENTITLEMENT CARD ISSUE DATE"]'
     labelFsp = 'div[data-cy="label-FSP"]'
+    buttonSubmit = 'button[data-cy="button-submit"]'
+    inputReceivedamount = 'input[data-cy="input-receivedAmount"]'
+
+    def getInputReceivedamount(self) -> WebElement:
+        return self.wait_for(self.inputReceivedamount)
 
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
@@ -34,10 +39,17 @@ class PaymentRecord(BaseComponents):
         return self.wait_for(self.pageHeaderTitle)
 
     def getButtonEdPlan(self) -> WebElement:
+        # Workaround because elements overlapped even though Selenium saw that they were available:
+        self.driver.execute_script(
+            """
+            container = document.querySelector("div[data-cy='main-content']")
+            container.scrollBy(0,-200)
+            """
+        )
         return self.wait_for(self.buttonEdPlan)
 
-    def getLabelStatus(self) -> WebElement:
-        return self.wait_for(self.labelStatus)
+    def getLabelStatus(self) -> [WebElement]:
+        return self.get_elements(self.labelStatus)
 
     def getStatusContainer(self) -> WebElement:
         return self.wait_for(self.statusContainer)
@@ -95,3 +107,6 @@ class PaymentRecord(BaseComponents):
 
     def getLabelFsp(self) -> WebElement:
         return self.wait_for(self.labelFsp)
+
+    def getButtonSubmit(self) -> WebElement:
+        return self.wait_for(self.buttonSubmit)
