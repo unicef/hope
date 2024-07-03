@@ -30,7 +30,7 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
 from hct_mis_api.conftest import disabled_locally_test
 
 
-# @disabled_locally_test
+@disabled_locally_test
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     databases = "__all__"
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
