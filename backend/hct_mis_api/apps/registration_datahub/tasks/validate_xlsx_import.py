@@ -16,13 +16,18 @@ class ValidateXlsxImport:
     def execute(self, import_data: ImportData, is_social_worker_program: bool = False) -> Dict:
         import_data.status = ImportData.STATUS_RUNNING
         import_data.save()
-        errors = UploadXLSXInstanceValidator(is_social_worker_program).validate_everything(
-            import_data.file, import_data.business_area_slug
-        )
+        errors, delivery_mechanisms_validation_errors = UploadXLSXInstanceValidator(
+            is_social_worker_program
+        ).validate_everything(import_data.file, import_data.business_area_slug)
         if errors:
             errors.sort(key=operator.itemgetter("row_number", "header"))
             import_data.status = ImportData.STATUS_VALIDATION_ERROR
             import_data.validation_errors = json.dumps(errors)
+        if delivery_mechanisms_validation_errors:
+            delivery_mechanisms_validation_errors.sort(key=operator.itemgetter("row_number", "header"))
+            import_data.delivery_mechanisms_validation_errors = json.dumps(delivery_mechanisms_validation_errors)
+            if not errors:
+                import_data.status = ImportData.STATUS_DELIVERY_MECHANISMS_VALIDATION_ERROR
         else:
             import_data.status = ImportData.STATUS_FINISHED
 

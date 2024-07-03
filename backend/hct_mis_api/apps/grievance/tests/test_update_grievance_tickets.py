@@ -49,6 +49,8 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     IndividualIdentity,
 )
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
+from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -283,6 +285,10 @@ class TestUpdateGrievanceTickets(APITestCase):
             number="3456",
             country=country_pl,
         )
+        cls.dmd = DeliveryMechanismDataFactory(
+            individual=cls.individuals[0],
+            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
+        )
 
     @parameterized.expand(
         [
@@ -476,6 +482,16 @@ class TestUpdateGrievanceTickets(APITestCase):
                                     "number": "3333",
                                 }
                             ],
+                            "deliveryMechanismDataToEdit": [
+                                {
+                                    "id": str(self.dmd.id),
+                                    "label": DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
+                                    "approveStatus": False,
+                                    "dataFields": [
+                                        {"name": "phone_number", "value": "+1234567890"},
+                                    ],
+                                },
+                            ],
                         }
                     }
                 },
@@ -546,6 +562,22 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "documents_to_remove": [],
                 "previous_identities": {},
                 "identities_to_remove": [],
+                "delivery_mechanism_data": [],
+                "delivery_mechanism_data_to_edit": [
+                    {
+                        "id": str(self.dmd.id),
+                        "label": self.dmd.delivery_mechanism,
+                        "approve_status": False,
+                        "data_fields": [
+                            {
+                                "name": "phone_number",
+                                "value": "+1234567890",
+                                "previous_value": None,
+                            }
+                        ],
+                    }
+                ],
+                "delivery_mechanism_data_to_remove": [],
             }
 
         else:

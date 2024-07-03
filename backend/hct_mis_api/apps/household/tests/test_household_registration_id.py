@@ -19,7 +19,7 @@ class TestHouseholdRegistrationId(APITestCase):
     QUERY = """
     query Household($id: ID!) {
       household(id: $id) {
-        registrationId
+        programRegistrationId
       }
     }
     """
@@ -65,8 +65,8 @@ class TestHouseholdRegistrationId(APITestCase):
             self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS], self.business_area
         )
 
-        self.household.registration_id = registration_id
-        self.household.save(update_fields=["registration_id"])
+        self.household.program_registration_id = registration_id
+        self.household.save(update_fields=["program_registration_id"])
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,
