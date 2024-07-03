@@ -106,3 +106,23 @@ snapshots['TestAllProgramsQuery::test_all_programs_query_unicef_partner 1'] = {
         }
     }
 }
+
+snapshots['TestAllProgramsQuery::test_all_programs_query_user_not_authenticated 1'] = {
+    'data': {
+        'allPrograms': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 9,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied: User is not authenticated.',
+            'path': [
+                'allPrograms'
+            ]
+        }
+    ]
+}

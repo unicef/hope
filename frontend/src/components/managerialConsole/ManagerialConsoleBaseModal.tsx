@@ -113,6 +113,7 @@ export const ManagerialConsoleBaseModal = ({
                 multiline
                 inputProps={{ maxLength: 500 }}
                 fullWidth
+                data-cy={`comment-${buttonTitle.toLowerCase()}`}
               />
             </Box>
           </Box>

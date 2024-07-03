@@ -73,7 +73,7 @@ export function FlexFieldsTable({
             <StyledCell>{row.labelEn}</StyledCell>
             <TableCell>{row.associatedWith}</TableCell>
             <TableCell>
-              {row.isFlexField ? 'Flex field' : 'Core field'}
+              {row?.isFlexField ? 'Flex field' : 'Core field'}
             </TableCell>
           </TableRow>
         ))}

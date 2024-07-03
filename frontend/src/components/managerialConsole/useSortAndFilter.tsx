@@ -18,12 +18,14 @@ interface ProgramSelectProps {
   selectedProgram: string;
   setSelectedProgram: (value: string) => void;
   programs: string[];
+  dataCy: string;
 }
 
 export const ProgramSelect: React.FC<ProgramSelectProps> = ({
   selectedProgram,
   setSelectedProgram,
   programs,
+  dataCy,
 }) => {
   const handleProgramChange = (event: SelectChangeEvent<string>) => {
     setSelectedProgram(event.target.value);
@@ -39,6 +41,7 @@ export const ProgramSelect: React.FC<ProgramSelectProps> = ({
       onChange={handleProgramChange}
       displayEmpty
       fullWidth
+      data-cy={dataCy}
       size="small"
       renderValue={(selected) => selected || 'Programme'}
       endAdornment={
