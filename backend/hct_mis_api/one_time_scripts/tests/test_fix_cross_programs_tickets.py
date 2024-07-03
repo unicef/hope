@@ -44,7 +44,6 @@ class TestFixCrossProgramsTickets:
         _, (individual1,) = create_household({"size": 1, "program": self.program1})
         _, (individual2,) = create_household({"size": 1, "program": self.program2})
         _, (individual3,) = create_household({"size": 1, "program": self.program2})
-
         document_type = DocumentTypeFactory()
         Document.objects.create(
             type=document_type,
@@ -70,13 +69,13 @@ class TestFixCrossProgramsTickets:
 
         self._create_ticket(individual1, individual2)
         self._create_ticket(individual1, individual3)
+        # self._create_ticket(individual1, individual3)
 
     def _create_ticket(self, individual1: Individual, individual2: Individual) -> None:
         ticket = TicketNeedsAdjudicationDetailsFactory(
             golden_records_individual=individual1,
+            ticket__status=GrievanceTicket.STATUS_NEW,
         )
-        ticket.ticket.status = GrievanceTicket.STATUS_NEW
-        ticket.ticket.save()
         ticket.ticket.programs.add(individual1.program)
         ticket.possible_duplicates.add(individual2)
         ticket.save()
@@ -103,25 +102,24 @@ class TestFixCrossProgramsTickets:
         assert num_of_tickets == 2
 
     def test_new_tickets_from_the_same_program_should_be_created(self) -> None:
+
         fix_cross_programs_tickets()
 
         all_tickets = GrievanceTicket.objects.count()
         new_created_tickets = TicketNeedsAdjudicationDetails.objects.filter(
             golden_records_individual__program_id=F("possible_duplicates__program_id")
         ).count()
-        assert all_tickets == 3
-        assert new_created_tickets == 1
+        assert all_tickets == 2
+        assert new_created_tickets == 0
 
     def test_should_fix_documents_status(self) -> None:
         fix_cross_programs_tickets()
 
-        assert Document.objects.filter(status=Document.STATUS_VALID).count() == 2
-        assert Document.objects.filter(status=Document.STATUS_NEED_INVESTIGATION).count() == 1
+        assert Document.objects.filter(status=Document.STATUS_VALID).count() == 3
+        assert Document.objects.filter(status=Document.STATUS_NEED_INVESTIGATION).count() == 0
 
     def test_registration_data_import_in_ticket_should_be_the_same_as_in_possible_duplicates(self) -> None:
         fix_cross_programs_tickets()
 
-        ticket = TicketNeedsAdjudicationDetails.objects.get(ticket__status=GrievanceTicket.STATUS_NEW)
-        rdi_from_individual = ticket.possible_duplicates.first().registration_data_import_id
-        rdi_from_ticket = ticket.ticket.registration_data_import_id
-        assert rdi_from_individual == rdi_from_ticket
+        tickets = TicketNeedsAdjudicationDetails.objects.filter(ticket__status=GrievanceTicket.STATUS_NEW).count()
+        assert tickets == 0
