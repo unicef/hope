@@ -27,10 +27,8 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
 )
-from hct_mis_api.conftest import disabled_locally_test
 
 
-@disabled_locally_test
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     databases = "__all__"
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
@@ -130,72 +128,72 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                 },
             ],
         )
-        country = geo_models.Country.objects.get(iso_code2="PL")
-        dt = DocumentTypeFactory(label="national_id", key="national_id", valid_for_deduplication=False)
-        dt_tax_id = DocumentTypeFactory(label="tax_id", key="tax_id", valid_for_deduplication=False)
+        cls.country = geo_models.Country.objects.get(iso_code2="PL")
+        cls.dt = DocumentTypeFactory(label="national_id", key="national_id", valid_for_deduplication=False)
+        cls.dt_tax_id = DocumentTypeFactory(label="tax_id", key="tax_id", valid_for_deduplication=False)
 
         cls.document1 = Document.objects.create(
-            country=country,
-            type=dt,
+            country=cls.country,
+            type=cls.dt,
             document_number="ASD123",
             individual=cls.individuals[0],
             status=Document.STATUS_VALID,
             program=cls.individuals[0].program,
         )
         cls.document2 = Document.objects.create(
-            type=dt,
+            type=cls.dt,
             document_number="ASD123",
             individual=cls.individuals[1],
-            country=country,
+            country=cls.country,
             program=cls.individuals[1].program,
         )
         cls.document3 = Document.objects.create(
-            type=dt,
+            type=cls.dt,
             document_number="BBC999",
             individual=cls.individuals[2],
-            country=country,
+            country=cls.country,
             program=cls.individuals[2].program,
         )
         cls.document4 = Document.objects.create(
-            type=dt,
+            type=cls.dt,
             document_number="ASD123",
             individual=cls.individuals[3],
-            country=country,
+            country=cls.country,
             program=cls.individuals[3].program,
         )
         cls.document5 = Document.objects.create(
-            country=country,
-            type=dt,
+            country=cls.country,
+            type=cls.dt,
             document_number="TOTALY UNIQ",
             individual=cls.individuals[4],
             status=Document.STATUS_VALID,
             program=cls.individuals[4].program,
         )
         cls.document6 = Document.objects.create(
-            country=country,
-            type=dt_tax_id,
+            country=cls.country,
+            type=cls.dt_tax_id,
             document_number="ASD123",
             individual=cls.individuals[2],
             status=Document.STATUS_VALID,
             program=cls.individuals[2].program,
         )
         cls.document7 = Document.objects.create(
-            country=country,
-            type=dt,
+            country=cls.country,
+            type=cls.dt,
             document_number="ASD123",
             individual=cls.individuals[1],
             program=cls.individuals[1].program,
         )
         cls.document8 = Document.objects.create(
-            country=country,
-            type=dt,
+            country=cls.country,
+            type=cls.dt,
             document_number="ASD123",
             individual=cls.individuals[4],
             program=cls.individuals[4].program,
         )
         cls.document9 = Document.objects.create(
-            country=country,
-            type=dt,
+            country=cls.country,
+            type=cls.dt,
             document_number="UNIQ",
             individual=cls.individuals[5],
             program=cls.individuals[5].program,
@@ -315,11 +313,10 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         self.assertEqual(grievance_ticket.programs.first().id, self.program.id)
 
     def test_valid_for_deduplication_doc_type(self) -> None:
-        pl = geo_models.Country.objects.get(iso_code2="PL")
         dt_tax_id = DocumentType.objects.get(key="tax_id")
         dt_national_id = DocumentType.objects.get(key="national_id")
         Document.objects.create(
-            country=pl,
+            country=self.country,
             type=dt_tax_id,
             document_number="TAX_ID_DOC_123",
             individual=self.individuals[2],
@@ -327,14 +324,14 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             program=self.program,
         )
         doc_national_id_1 = Document.objects.create(
-            country=pl,
+            country=self.country,
             type=dt_national_id,
             document_number="TAX_ID_DOC_123",  # the same doc number
             individual=self.individuals[2],
             program=self.program,
         )
         doc_national_id_2 = Document.objects.create(
-            country=pl,
+            country=self.country,
             type=dt_national_id,
             document_number="TAX_ID_DOC_123",  # the same doc number
             individual=self.individuals[2],
@@ -413,3 +410,33 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         HardDocumentDeduplication().deduplicate(self.get_documents_query([new_document_from_other_program]))
         new_document_from_other_program.refresh_from_db()
         self.assertEqual(new_document_from_other_program.status, Document.STATUS_VALID)
+
+    def test_ticket_creation_for_the_same_ind_doc_numbers(self) -> None:
+        passport = Document.objects.create(
+            country=self.country,  # the same country
+            type=self.dt,
+            document_number="123444444",  # the same doc number
+            individual=self.individuals[2],  # the same Individual
+            program=self.program,
+        )
+        tax_id = Document.objects.create(
+            country=self.country,  # the same country
+            type=self.dt_tax_id,
+            document_number="123444444",  # the same doc number
+            individual=self.individuals[2],  # the same Individual
+            program=self.program,
+        )
+
+        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
+        HardDocumentDeduplication().deduplicate(
+            self.get_documents_query([passport, tax_id]),
+            self.registration_data_import,
+        )
+
+        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
+
+        passport.refresh_from_db()
+        self.assertEqual(passport.status, Document.STATUS_VALID)
+
+        tax_id.refresh_from_db()
+        self.assertEqual(tax_id.status, Document.STATUS_VALID)
