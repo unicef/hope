@@ -687,12 +687,10 @@ class HardDocumentDeduplication:
             ]
             # use this dict for skip tickets creation for the same Individual
             ind_and_new_document_signatures_duplicated_in_batch_dict = defaultdict(list)
-            print("==>> Before ", ind_and_new_document_signatures_duplicated_in_batch_dict)
             for d in documents_to_dedup:
                 ind_and_new_document_signatures_duplicated_in_batch_dict[str(d.individual_id)].append(
                     self._generate_signature(d)
                 )
-            print("==>> After ===", ind_and_new_document_signatures_duplicated_in_batch_dict)
 
             # added order_by because test was failed randomly
             all_matching_number_documents = (
