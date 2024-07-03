@@ -40,15 +40,22 @@ function BreadCrumbsElement({
   onClick = () => null,
 }: BreadCrumbsElementProps): React.ReactElement {
   return (
-    <BreadCrumbsElementContainer>
+    <BreadCrumbsElementContainer data-cy="breadcrumbs-element-container">
       {to ? (
-        <BreadCrumbsLink to={to}>{title}</BreadCrumbsLink>
+        <BreadCrumbsLink to={to} data-cy="breadcrumbs-link">
+          {title}
+        </BreadCrumbsLink>
       ) : (
-        <BreadCrumbsItemNotLink onClick={onClick}>
+        <BreadCrumbsItemNotLink
+          onClick={onClick}
+          data-cy="breadcrumbs-item-not-link"
+        >
           {title}
         </BreadCrumbsItemNotLink>
       )}
-      {!last ? <ChevronRightRoundedIcon /> : null}
+      {!last ? (
+        <ChevronRightRoundedIcon data-cy="breadcrumbs-chevron-icon" />
+      ) : null}
     </BreadCrumbsElementContainer>
   );
 }
@@ -74,8 +81,11 @@ export function BreadCrumbs({
         to={item.to}
         onClick={item.handleClick}
         last={last}
+        data-cy={`breadcrumbs-element-${index}`}
       />
     );
   });
-  return <Container>{breadCrumbsElements}</Container>;
+  return (
+    <Container data-cy="breadcrumbs-container">{breadCrumbsElements}</Container>
+  );
 }
