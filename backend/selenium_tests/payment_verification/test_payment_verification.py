@@ -210,7 +210,6 @@ class TestSmokePaymentVerification:
             "%-d %b %Y"
         ) in pagePaymentVerificationDetails.getLabelEndDate().text
         assert "Bank reconciliation" in pagePaymentVerificationDetails.getTableLabel().text
-        pagePaymentVerificationDetails.screenshot("pagePaymentVerificationDetails")
         payment_verification = add_payment_verification.payment_verification_plan
         assert (
             payment_verification.sampling.lower().replace("_", " ")
@@ -248,27 +247,13 @@ class TestSmokePaymentVerification:
         assert payment_record.verification.status in pagePaymentRecord.getLabelStatus()[1].text
         assert "PLN 0.00" in pagePaymentRecord.getLabelAmountReceived().text
         assert "HH-0" in pagePaymentRecord.getLabelHouseholdId().text
-        # assert payment_record.full_name in pagePaymentRecord.getLabelHeadOfHousehold().text
-        # assert "3" in pagePaymentRecord.getLabelTotalPersonCovered().text
-        # assert "+48609456000" in pagePaymentRecord.getLabelPhoneNumber().text
-        # assert "-" in pagePaymentRecord.getLabelAlt.PhoneNumber().text
         assert "21.36" in pagePaymentRecord.getLabelEntitlementQuantity().text
         assert "21.36" in pagePaymentRecord.getLabelDeliveredQuantity().text
         assert "PLN" in pagePaymentRecord.getLabelCurrency().text
         assert "-" in pagePaymentRecord.getLabelDeliveryType().text
-        # assert "13 May 2022" in pagePaymentRecord.getLabelDeliveryDate().text
-        # assert "151-41-7049" in pagePaymentRecord.getLabelEntitlementCardId().text
-        # assert "-" in pagePaymentRecord.getLabelTransactionReferenceId().text
-        # assert "25 Apr 2022" in pagePaymentRecord.getLabelEntitlementCardIssueDate().text
         assert payment_record.service_provider.full_name in pagePaymentRecord.getLabelFsp().text
 
         pagePaymentRecord.getButtonEdPlan().click()
-
-        from selenium_tests.tools.tag_name_finder import printing
-
-        printing("Mapping", pagePaymentVerificationDetails.driver)
-        printing("Methods", pagePaymentVerificationDetails.driver)
-        printing("Assert", pagePaymentVerificationDetails.driver)
 
         pagePaymentRecord.getInputReceivedamount().click()
         pagePaymentRecord.getInputReceivedamount().send_keys("100")
@@ -283,6 +268,13 @@ class TestSmokePaymentVerification:
 
         pagePaymentVerificationDetails.getButtonFinish().click()
         pagePaymentVerificationDetails.getButtonSubmit().click()
-        # activity date
-        # completion date
+
         pagePaymentVerificationDetails.screenshot("1")
+        assert "Payment Plan" in pagePaymentVerificationDetails.getPageHeaderTitle().text
+        assert "FINISHED" in pagePaymentVerificationDetails.getLabelStatus().text
+        assert "FINISHED" in pagePaymentVerificationDetails.getVerificationPlanStatus().text
+        assert "100%" in pagePaymentVerificationDetails.getLabelSuccessful().text
+
+        pagePaymentRecord.getArrowBack().click()
+
+        assert "FINISHED" in pagePaymentVerification.getCashPlanTableRow().text

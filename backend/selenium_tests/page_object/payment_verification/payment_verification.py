@@ -26,6 +26,9 @@ class PaymentVerification(BaseComponents):
     statusContainer = 'div[data-cy="status-container"]'
     tablePagination = 'div[data-cy="table-pagination"]'
 
+    def getFilterStatus(self) -> WebElement:
+        return self.wait_for(self.filterStatus)
+
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
 
@@ -37,9 +40,6 @@ class PaymentVerification(BaseComponents):
 
     def getSelectFilter(self) -> WebElement:
         return self.wait_for(self.selectFilter)
-
-    def getFilterStatus(self) -> WebElement:
-        return self.wait_for(self.filterStatus)
 
     def getFilterFsp(self) -> WebElement:
         return self.wait_for(self.filterFsp)
