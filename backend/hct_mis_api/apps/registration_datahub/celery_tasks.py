@@ -225,21 +225,16 @@ def registration_kobo_import_hourly_task(self: Any) -> None:
 def registration_xlsx_import_hourly_task(self: Any) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
-        from hct_mis_api.apps.registration_data.models import (
-            RegistrationDataImportDatahub,
-        )
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
         )
 
-        not_started_rdi = RegistrationDataImportDatahub.objects.filter(
-            import_done=RegistrationDataImportDatahub.NOT_STARTED
-        ).first()
+        not_started_rdi = RegistrationDataImport.objects.filter(status=RegistrationDataImport.LOADING).first()
         if not_started_rdi is None:
             return
 
-        business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area_slug)
-        program_id = RegistrationDataImport.objects.get(id=not_started_rdi.hct_id).program.id
+        business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area.slug)
+        program_id = not_started_rdi.program.id
         set_sentry_business_area_tag(business_area.name)
 
         RdiXlsxCreateTask().execute(
