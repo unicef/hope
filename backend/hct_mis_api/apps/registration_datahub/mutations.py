@@ -236,7 +236,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
 
         transaction.on_commit(
             lambda: registration_xlsx_import_task.delay(
-                registration_data_import_id=str(created_obj_datahub.id),
+                registration_data_import_id=str(created_obj_hct.id),
                 import_data_id=str(import_data_obj.id),
                 business_area_id=str(business_area.id),
                 program_id=str(program_id),

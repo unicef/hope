@@ -8,7 +8,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -20,7 +19,6 @@ from adminfilters.filters import ChoicesFieldComboFilter
 from adminfilters.mixin import AdminAutoCompleteSearchMixin
 from adminfilters.querystring import QueryStringFilter
 
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program_task
 from hct_mis_api.apps.household.documents import get_individual_doc
@@ -100,12 +98,11 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
 
                 celery_task = registration_kobo_import_task
 
-            rdi_datahub_obj = get_object_or_404(datahub_models.RegistrationDataImportDatahub, id=obj.datahub_id)
-            business_area = BusinessArea.objects.get(slug=rdi_datahub_obj.business_area_slug)
+            business_area = obj.business_area
 
             celery_task.delay(
-                registration_data_import_id=str(rdi_datahub_obj.id),
-                import_data_id=str(rdi_datahub_obj.import_data.id),
+                registration_data_import_id=str(obj.id),
+                import_data_id=str(obj.import_data.id),
                 business_area_id=str(business_area.id),
                 program_id=str(obj.program_id),
             )
