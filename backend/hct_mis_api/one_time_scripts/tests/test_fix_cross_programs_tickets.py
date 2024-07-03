@@ -102,7 +102,6 @@ class TestFixCrossProgramsTickets:
         assert num_of_tickets == 2
 
     def test_new_tickets_from_the_same_program_should_be_created(self) -> None:
-
         fix_cross_programs_tickets()
 
         all_tickets = GrievanceTicket.objects.count()
