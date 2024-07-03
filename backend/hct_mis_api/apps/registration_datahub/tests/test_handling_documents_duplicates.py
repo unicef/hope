@@ -426,6 +426,20 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             individual=self.individuals[2],  # the same Individual
             program=self.program,
         )
+        Document.objects.create(
+            country=self.country,
+            type=self.dt,
+            document_number="123321321",
+            individual=self.individuals[2],
+            program=self.program,
+        )
+        Document.objects.create(
+            country=self.country,
+            type=self.dt,
+            document_number="123321321",
+            individual=self.individuals[1],
+            program=self.program,
+        )
 
         self.assertEqual(GrievanceTicket.objects.all().count(), 0)
         HardDocumentDeduplication().deduplicate(
