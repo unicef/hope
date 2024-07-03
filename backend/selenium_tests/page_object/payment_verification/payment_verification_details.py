@@ -40,6 +40,9 @@ class PaymentVerificationDetails(BaseComponents):
     labelStatusDiv = 'div[data-cy="label-STATUS"]'
     labelActivationDateDiv = 'div[data-cy="label-ACTIVATION DATE"]'
     labelCompletionDateDiv = 'div[data-cy="label-COMPLETION DATE"]'
+    buttonSubmit = 'button[data-cy="button-submit"]'
+    buttonFinish = 'button[data-cy="button-ed-plan"]'
+    rows = 'tr[role="checkbox"]'
 
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
@@ -148,3 +151,13 @@ class PaymentVerificationDetails(BaseComponents):
 
     def getLabelStatusDiv(self) -> WebElement:
         return self.wait_for(self.labelStatusDiv)
+
+    def getButtonSubmit(self) -> WebElement:
+        return self.wait_for(self.buttonSubmit)
+
+    def getButtonFinish(self) -> WebElement:
+        return self.wait_for(self.buttonFinish)
+
+    def getRows(self) -> [WebElement]:
+        self.wait_for(self.rows)
+        return self.get_elements(self.rows)
