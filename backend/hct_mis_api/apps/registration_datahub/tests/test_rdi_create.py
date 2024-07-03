@@ -25,7 +25,10 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.models import Country as GeoCountry
-from hct_mis_api.apps.household.fixtures import IndividualFactory
+from hct_mis_api.apps.household.fixtures import (
+    IndividualFactory,
+    PendingIndividualFactory,
+)
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,
@@ -42,11 +45,6 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import ImportData
-from hct_mis_api.apps.registration_datahub.fixtures import ImportedIndividualFactory
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedHousehold,
-    ImportedIndividual,
-)
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
@@ -183,7 +181,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
     def test_handle_document_fields(self) -> None:
         task = self.RdiXlsxCreateTask()
         task.documents = {}
-        individual = ImportedIndividualFactory()
+        individual = PendingIndividualFactory()
 
         header = "birth_certificate_no_i_c"
         row_num = 14
@@ -246,7 +244,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         task = self.RdiXlsxCreateTask()
         task.image_loader = ImageLoaderMock()
         task.documents = {}
-        individual = ImportedIndividualFactory()
+        individual = PendingIndividualFactory()
         cell = CellMock("image.png", 12)
 
         task._handle_document_photo_fields(
@@ -366,11 +364,11 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         task = self.RdiXlsxCreateTask()
         task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
 
-        households = ImportedHousehold.objects.all()
+        households = PendingHousehold.objects.all()
         for household in households:
             self.assertTrue(int(household.detail_id) in [3, 4, 6])
 
-        individuals = ImportedIndividual.objects.all()
+        individuals = PendingIndividual.objects.all()
         for individual in individuals:
             self.assertTrue(int(individual.detail_id) in [3, 4, 5, 7, 8, 9])
 
