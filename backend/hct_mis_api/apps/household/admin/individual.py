@@ -20,7 +20,6 @@ from adminfilters.querystring import QueryStringFilter
 from adminfilters.value import ValueFilter
 from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
-from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.models import BusinessArea
@@ -42,6 +41,7 @@ from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
     IsOriginalAdminMixin,
     LastSyncDateResetMixin,
+    LinkedObjectsManagerMixin,
     RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
 )
@@ -54,7 +54,7 @@ logger = logging.getLogger(__name__)
 class IndividualAdmin(
     SoftDeletableAdminMixin,
     LastSyncDateResetMixin,
-    LinkedObjectsMixin,
+    LinkedObjectsManagerMixin,
     SmartFieldsetMixin,
     CursorPaginatorAdmin,
     HOPEModelAdminBase,
@@ -178,7 +178,7 @@ class IndividualAdmin(
 
     @button()
     def household_members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
-        obj = Individual.all_objects.get(pk=pk)
+        obj = Individual.all_merge_status_objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
         flt = f"&qs=household_id={obj.household.id}&qs__negate=false"
         return HttpResponseRedirect(f"{url}?{flt}")
@@ -272,7 +272,9 @@ class BusinessAreaSlugFilter(InputFilter):
 
 
 @admin.register(IndividualRoleInHousehold)
-class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase, RdiMergeStatusAdminMixin):
+class IndividualRoleInHouseholdAdmin(
+    SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdminBase, RdiMergeStatusAdminMixin
+):
     list_display = ("individual", "household", "role")
     list_filter = (DepotManager, QueryStringFilter, "role", BusinessAreaSlugFilter)
     raw_id_fields = ("individual", "household", "copied_from")

@@ -21,7 +21,6 @@ from adminfilters.depot.widget import DepotManager
 from adminfilters.querystring import QueryStringFilter
 from power_query.mixin import PowerQueryMixin
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
-from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.admin.mixins import (
@@ -44,6 +43,7 @@ from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
     IsOriginalAdminMixin,
     LastSyncDateResetMixin,
+    LinkedObjectsManagerMixin,
     RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
 )
@@ -76,7 +76,7 @@ class HouseholdRepresentationInline(admin.TabularInline):
 class HouseholdAdmin(
     SoftDeletableAdminMixin,
     LastSyncDateResetMixin,
-    LinkedObjectsMixin,
+    LinkedObjectsManagerMixin,
     PowerQueryMixin,
     SmartFieldsetMixin,
     CursorPaginatorAdmin,
@@ -199,7 +199,7 @@ class HouseholdAdmin(
 
     @button()
     def members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
-        obj = Household.all_objects.get(pk=pk)
+        obj = Household.all_merge_status_objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
         flt = f"&qs=household_id={obj.id}"
         return HttpResponseRedirect(f"{url}?{flt}")
