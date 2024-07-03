@@ -275,8 +275,8 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
     @button()
     def households(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         obj = self.get_object(request, str(pk))
-        url = reverse("admin:registration_datahub_importedhousehold_changelist")
-        return HttpResponseRedirect(f"{url}?&registration_data_import__exact={obj.datahub_id}")
+        url = reverse("admin:household_household_changelist")
+        return HttpResponseRedirect(f"{url}?&qs=registration_data_import__exact={obj.id}")
 
     @button()
     def hub_rdi(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
