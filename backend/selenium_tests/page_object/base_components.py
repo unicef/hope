@@ -41,6 +41,8 @@ class BaseComponents(Common):
     globalProgramFilterSearchInput = 'input[data-cy="search-input-gpf"]'
     globalProgramFilterSearchButton = 'button[data-cy="search-icon"]'
     globalProgramFilterClearButton = 'button[data-cy="clear-icon"]'
+    breadcrumbsChevronIcon = 'svg[data-cy="breadcrumbs-chevron-icon"]'
+    arrowBack = 'div[data-cy="arrow_back"]'
 
     # Text
     globalProgramFilterText = "All Programmes"
@@ -165,3 +167,9 @@ class BaseComponents(Common):
 
     def getGlobalProgramFilterSearchInput(self) -> WebElement:
         return self.wait_for(self.globalProgramFilterSearchInput)
+
+    def getBreadcrumbsChevronIcon(self) -> WebElement:
+        return self.wait_for(self.breadcrumbsChevronIcon)
+
+    def getArrowBack(self) -> WebElement:
+        return self.wait_for(self.arrowBack)
