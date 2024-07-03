@@ -1,13 +1,15 @@
 import uuid
-from typing import Any, Dict, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 from uuid import UUID
 
 from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin import ModelAdmin, SimpleListFilter
-from django.db.models import JSONField, QuerySet
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Field, JSONField, Model, OneToOneRel, QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
+from django.template.response import TemplateResponse
 from django.urls import reverse
 
 from admin_extra_buttons.buttons import Button
@@ -364,3 +366,94 @@ class PaymentPlanCeleryTasksMixin:
                 action=self.restart_importing_reconciliation_xlsx_file,
                 message="Do you confirm to restart importing entitlements xlsx file task?",
             )
+
+
+class LinkedObjectsManagerMixin:
+    """
+    Override 'LinkedObjectsMixin' from 'smart_admin', to call overridden method 'get_related'
+    """
+
+    linked_objects_template = None
+    linked_objects_hide_empty = True
+    linked_objects_max_records = 200
+    linked_objects_ignore = []
+    linked_objects_link_to_changelist = True
+
+    def get_ignored_linked_objects(self, request: HttpRequest) -> List[str]:
+        return self.linked_objects_ignore
+
+    @button()
+    def linked_objects(self, request: HttpRequest, pk: int) -> TemplateResponse:
+        ignored = self.get_ignored_linked_objects(request)
+        opts = self.model._meta
+        app_label = opts.app_label
+        context = self.get_common_context(request, pk, title="linked objects")
+        reverse = []
+        for f in self.model._meta.get_fields():
+            if f.auto_created and not f.concrete and f.name not in ignored:
+                reverse.append(f)
+        linked = []
+        empty = []
+        for f in reverse:
+            info = self.get_related(
+                context["original"], f, "all_merge_status_objects", max_records=self.linked_objects_max_records
+            )
+            if info["count"] == 0 and self.linked_objects_hide_empty:
+                empty.append(info)
+            else:
+                linked.append(info)
+
+        context["empty"] = sorted(empty, key=lambda x: x["related_name"].lower())
+        context["linked"] = sorted(linked, key=lambda x: x["related_name"].lower())
+        context["reverse"] = reverse
+
+        return TemplateResponse(
+            request,
+            self.linked_objects_template
+            or [
+                f"admin/{app_label}/{opts.model_name}/linked_objects.html",
+                "admin/%s/linked_objects.html" % app_label,
+                "smart_admin/linked_objects.html",
+            ],
+            context,
+        )
+
+    def get_related(self, user: Model, field: Field, manager: str, max_records: int = 200) -> Dict[str, Any]:
+        """
+        Override 'get_related' from 'smart_admin', to take related objects with a custom manager
+        """
+        info = {
+            "owner": user,
+            "to": field.model._meta.model_name,
+            "field_name": field.name,
+            "count": 0,
+            "link": self.admin_urlbasename(field.related_model._meta, "changelist"),
+            "filter": "",
+        }
+        try:
+            info["related_name"] = field.related_model._meta.verbose_name
+            if field.related_name:
+                related_attr = getattr(user, field.related_name)
+                if hasattr(field.related_model, manager):
+                    related_attr = getattr(field.related_model, manager).filter(**{field.field.name: user.pk})
+            elif isinstance(field, OneToOneRel):
+                related_attr = getattr(user, field.name)
+            else:
+                related_attr = getattr(user, f"{field.name}_set")
+            info["filter"] = f"{field.field.name}={user.pk}"
+            if hasattr(related_attr, "all") and callable(related_attr.all):
+                related = related_attr.all()[: max_records or 200]
+                count = related_attr.all().count()
+            else:
+                related = [related_attr]
+                count = 1
+            info["data"] = related
+            info["count"] = count
+        except ObjectDoesNotExist:
+            info["data"] = []  # type: ignore
+            info["related_name"] = field.related_model._meta.verbose_name
+
+        return info
+
+    def admin_urlbasename(self, value: Any, arg: str) -> str:
+        return "%s_%s_%s" % (value.app_label, value.model_name, arg)
