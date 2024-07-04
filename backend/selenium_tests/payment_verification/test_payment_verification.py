@@ -10,7 +10,6 @@ from page_object.payment_verification.payment_verification_details import (
 )
 from selenium.webdriver.common.by import By
 
-from hct_mis_api.apps.payment.models import GenericPayment
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
@@ -22,6 +21,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
 )
+from hct_mis_api.apps.payment.models import GenericPayment
 from hct_mis_api.apps.payment.models import PaymentRecord as PR
 from hct_mis_api.apps.payment.models import PaymentVerification as PV
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
