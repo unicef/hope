@@ -76,6 +76,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
         self.reduced_submissions: List[Any] = []
         self.attachments: List[Dict] = []
+        super().__init__()
 
     def _handle_image_field(self, value: Any, is_flex_field: bool) -> Optional[Union[str, File]]:
         if not self.registration_data_import.pull_pictures:
