@@ -10,6 +10,7 @@ from page_object.payment_verification.payment_verification_details import (
 )
 from selenium.webdriver.common.by import By
 
+from hct_mis_api.apps.payment.models import GenericPayment
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
@@ -86,9 +87,6 @@ def add_payment_verification() -> PV:
         targeting_criteria=targeting_criteria,
         business_area=BusinessArea.objects.first(),
     )
-
-    from hct_mis_api.apps.payment.models import GenericPayment
-
     payment_record = PaymentRecordFactory(
         parent=cash_plan,
         household=household,
@@ -106,15 +104,7 @@ def add_payment_verification() -> PV:
 
     pv_summary = cash_plan.get_payment_verification_summary
     pv_summary.activation_date = datetime.now() - relativedelta(months=1)
-    # pv_summary.completion_date = datetime.now() + relativedelta(months=1)
     pv_summary.save()
-
-    # from hct_mis_api.apps.payment.models import PaymentVerificationSummary
-    # PaymentVerificationSummary.objects.create(
-    #     payment_plan_obj=cash_plan,
-    #     activation_date=datetime.now(),
-    #     completion_date=datetime.now()
-    # )
 
     pv = PaymentVerificationFactory(
         generic_fk_obj=payment_record,
@@ -164,8 +154,9 @@ class TestSmokePaymentVerification:
         assert "0%" in pagePaymentVerificationDetails.getLabelErroneous().text
         assert "PENDING" in pagePaymentVerificationDetails.getLabelStatus().text
         assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlansSummaryStatus().text
+        activation_date = (datetime.now() - relativedelta(months=1)).strftime("%-d %b %Y")
         assert (
-            "ACTIVATION DATE -"
+            f"ACTIVATION DATE {activation_date}"
             in pagePaymentVerificationDetails.getLabelizedFieldContainerSummaryActivationDate().text.replace("\n", " ")
         )
         assert "-" in pagePaymentVerificationDetails.getLabelActivationDate().text
@@ -241,12 +232,12 @@ class TestSmokePaymentVerification:
         assert "VERIFY" in pagePaymentRecord.getButtonEdPlan().text
         assert "DELIVERED FULLY" in pagePaymentRecord.getLabelStatus()[0].text
         assert "DELIVERED FULLY" in pagePaymentRecord.getStatusContainer().text
-        assert "HH-0" in pagePaymentRecord.getLabelHousehold().text
+        assert payment_record.household.unicef_id in pagePaymentRecord.getLabelHousehold().text
         assert payment_record.target_population.name in pagePaymentRecord.getLabelTargetPopulation().text
         assert payment_record.distribution_modality in pagePaymentRecord.getLabelDistributionModality().text
         assert payment_record.verification.status in pagePaymentRecord.getLabelStatus()[1].text
         assert "PLN 0.00" in pagePaymentRecord.getLabelAmountReceived().text
-        assert "HH-0" in pagePaymentRecord.getLabelHouseholdId().text
+        assert payment_record.household.unicef_id in pagePaymentRecord.getLabelHouseholdId().text
         assert "21.36" in pagePaymentRecord.getLabelEntitlementQuantity().text
         assert "21.36" in pagePaymentRecord.getLabelDeliveredQuantity().text
         assert "PLN" in pagePaymentRecord.getLabelCurrency().text
