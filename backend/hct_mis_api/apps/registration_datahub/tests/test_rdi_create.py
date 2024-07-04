@@ -18,7 +18,7 @@ from PIL import Image
 from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, FlexibleAttribute
 from hct_mis_api.apps.core.utils import (
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     SheetImageLoader,
@@ -79,6 +79,11 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        FlexibleAttribute.objects.create(
+            type=FlexibleAttribute.INTEGER,
+            name="muac_i_f",
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        )
         content = Path(
             f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
         ).read_bytes()
@@ -155,6 +160,109 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(role.individual.full_name, "Some Full Name")
 
         self.assertEqual(household_obj_data, household_data)
+
+    def test_execute_with_postpone_deduplication(self) -> None:
+        task = self.RdiXlsxCreateTask()
+        self.business_area.postpone_deduplication = True
+        self.business_area.save()
+        task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
+
+        households_count = PendingHousehold.objects.count()
+        individuals_count = PendingIndividual.objects.count()
+
+        self.assertEqual(3, households_count)
+        self.assertEqual(6, individuals_count)
+
+        individual_data = {
+            "full_name": "Some Full Name",
+            "given_name": "Some",
+            "middle_name": "Full",
+            "family_name": "Name",
+            "sex": "MALE",
+            "relationship": "HEAD",
+            "birth_date": date(1963, 2, 3),
+            "marital_status": "MARRIED",
+            "email": "fake_email_123@mail.com",
+        }
+        matching_individuals = PendingIndividual.objects.filter(**individual_data)
+
+        self.assertEqual(matching_individuals.count(), 1)
+
+        household_data = {
+            "residence_status": "REFUGEE",
+            "country": GeoCountry.objects.get(iso_code2="AF").id,
+            "zip_code": "2153",
+            "flex_fields": {"enumerator_id": "UNICEF"},
+        }
+        household = matching_individuals.first().household
+        household_obj_data = model_to_dict(household, ("residence_status", "country", "zip_code", "flex_fields"))
+
+        roles = household.individuals_and_roles(manager="pending_objects").all()
+        self.assertEqual(roles.count(), 1)
+        role = roles.first()
+        self.assertEqual(role.role, "PRIMARY")
+        self.assertEqual(role.individual.full_name, "Some Full Name")
+
+        self.assertEqual(household_obj_data, household_data)
+
+    def test_execute_with_flex_field(self) -> None:
+        content = Path(
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import_flex_field.xlsx"
+        ).read_bytes()
+        file = File(BytesIO(content), name="new_reg_data_import_flex_field.xlsx")
+
+        import_data = ImportData.objects.create(
+            file=file,
+            number_of_households=3,
+            number_of_individuals=6,
+        )
+
+        registration_data_import = RegistrationDataImportFactory(
+            business_area=self.business_area,
+            program=self.program,
+            import_data=import_data,
+        )
+        task = self.RdiXlsxCreateTask()
+        task.execute(registration_data_import.id, import_data.id, self.business_area.id, self.program.id)
+
+        households_count = PendingHousehold.objects.count()
+        individuals_count = PendingIndividual.objects.count()
+
+        self.assertEqual(3, households_count)
+        self.assertEqual(6, individuals_count)
+
+        individual_data = {
+            "full_name": "Some Full Name",
+            "given_name": "Some",
+            "middle_name": "Full",
+            "family_name": "Name",
+            "sex": "MALE",
+            "relationship": "HEAD",
+            "birth_date": date(1963, 2, 3),
+            "marital_status": "MARRIED",
+            "email": "fake_email_123@mail.com",
+        }
+        matching_individuals = PendingIndividual.objects.filter(**individual_data)
+
+        self.assertEqual(matching_individuals.count(), 1)
+
+        household_data = {
+            "residence_status": "REFUGEE",
+            "country": GeoCountry.objects.get(iso_code2="AF").id,
+            "zip_code": "2153",
+            "flex_fields": {"enumerator_id": "UNICEF"},
+        }
+        household = matching_individuals.first().household
+        household_obj_data = model_to_dict(household, ("residence_status", "country", "zip_code", "flex_fields"))
+        individual = matching_individuals.first()
+        roles = household.individuals_and_roles(manager="pending_objects").all()
+        self.assertEqual(roles.count(), 1)
+        role = roles.first()
+        self.assertEqual(role.role, "PRIMARY")
+        self.assertEqual(role.individual.full_name, "Some Full Name")
+
+        self.assertEqual(household_obj_data, household_data)
+        self.assertEqual(individual.flex_fields, {"muac_i_f": 1})
 
     def test_execute_handle_identities(self) -> None:
         task = self.RdiXlsxCreateTask()
