@@ -157,3 +157,12 @@ class TestSmokePaymentModule:
         assert "Delivered Quantity" in pagePaymentModuleDetails.getTableLabel()[8].text
         assert "FSP Auth Code" in pagePaymentModuleDetails.getTableLabel()[9].text
         assert "Reconciliation" in pagePaymentModuleDetails.getTableLabel()[10].text
+
+    def test_payment_plan_happy_path(
+        self,
+        create_payment_plan: PaymentPlan,
+        pagePaymentModule: PaymentModule,
+        pagePaymentModuleDetails: PaymentModuleDetails,
+    ) -> None:
+        pagePaymentModule.selectGlobalProgramFilter("Test Program").click()
+        pagePaymentModule.getNavPaymentModule().click()
