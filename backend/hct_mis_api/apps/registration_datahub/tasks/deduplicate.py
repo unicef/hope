@@ -224,7 +224,6 @@ class DeduplicateTask:
             post_process_dedupe_results(pending_individual)
 
             if pending_deduplication_result.results_data["duplicates"]:
-                print(pending_deduplication_result.results_data["duplicates"])
                 pending_individual.deduplication_batch_status = DUPLICATE_IN_BATCH
             else:
                 pending_individual.deduplication_batch_status = UNIQUE_IN_BATCH
