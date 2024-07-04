@@ -84,6 +84,11 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             name="muac_i_f",
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
         )
+        FlexibleAttribute.objects.create(
+            type=FlexibleAttribute.DECIMAL,
+            name="jan_decimal_i_f",
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        )
         content = Path(
             f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
         ).read_bytes()
@@ -262,7 +267,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(role.individual.full_name, "Some Full Name")
 
         self.assertEqual(household_obj_data, household_data)
-        self.assertEqual(individual.flex_fields, {"muac_i_f": 1})
+        self.assertEqual(individual.flex_fields, {"muac_i_f": 1, "jan_decimal_i_f": 12.376})
 
     def test_execute_handle_identities(self) -> None:
         task = self.RdiXlsxCreateTask()
