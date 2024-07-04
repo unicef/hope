@@ -74,6 +74,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self.collectors = defaultdict(list)
         self.bank_accounts = defaultdict(dict)
         self.delivery_mechanisms_data = defaultdict(dict)
+        super().__init__()
 
     def _handle_collect_individual_data(
         self,
