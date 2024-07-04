@@ -36,13 +36,17 @@ def create_test_program() -> Program:
 
 
 @pytest.fixture
-def create_payment_plan(create_test_program: Program) -> PaymentPlan:
+def create_targeting(create_test_program: Program) -> None:
     targeting_criteria = TargetingCriteriaFactory()
     TargetPopulationFactory(
         program=create_test_program,
-        status=TargetPopulation.STATUS_OPEN,
+        status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
         targeting_criteria=targeting_criteria,
     )
+
+
+@pytest.fixture
+def create_payment_plan(create_targeting: None) -> PaymentPlan:
     tp = TargetPopulation.objects.first()
     payment_plan = PaymentPlan.objects.update_or_create(
         business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
@@ -160,9 +164,16 @@ class TestSmokePaymentModule:
 
     def test_payment_plan_happy_path(
         self,
-        create_payment_plan: PaymentPlan,
+        create_targeting: None,
         pagePaymentModule: PaymentModule,
         pagePaymentModuleDetails: PaymentModuleDetails,
+        pageNewPaymentPlan: NewPaymentPlan
     ) -> None:
         pagePaymentModule.selectGlobalProgramFilter("Test Program").click()
+        pagePaymentModule.getNavTargeting().click()
+        pagePaymentModule.screenshot("Targeting")
         pagePaymentModule.getNavPaymentModule().click()
+        pagePaymentModule.getButtonNewPaymentPlan().click()
+        pageNewPaymentPlan.getInputTargetPopulation().click()
+        pagePaymentModule.screenshot("PaymentModule")
+
