@@ -1108,33 +1108,3 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(hh.detail_id, "kobo_asset_id_string_OR_detail_id")
         self.assertEqual(hh.kobo_submission_time.isoformat(), "2022-02-22T12:22:22")
         self.assertEqual(hh.kobo_submission_uuid, "123123-411d-85f1-123123")
-
-    # TODO: Implement test and function to import program_registration_id with conflict resolution
-    # def test_registration_id_from_program_registration_id_should_be_unique(self) -> None:
-    #     household = HouseholdFactory(
-    #         registration_data_import=self.rdi,
-    #         program_registration_id="ABCD-123123",
-    #     )
-    #     self.set_imported_individuals(household)
-    #     household = HouseholdFactory(
-    #         registration_data_import=self.rdi,
-    #         program_registration_id="ABCD-123123",
-    #     )
-    #     self.set_imported_individuals(household)
-    #     household = HouseholdFactory(
-    #         registration_data_import=self.rdi,
-    #         program_registration_id="ABCD-111111",
-    #     )
-    #     self.set_imported_individuals(household)
-    #
-    #     with capture_on_commit_callbacks(execute=True):
-    #         RdiMergeTask().execute(self.rdi.pk)
-    #
-    #     registrations_ids = list(
-    #         PendingHousehold.objects.all()
-    #         .order_by("program_registration_id")
-    #         .values_list("program_registration_id", flat=True)
-    #     )
-    #
-    #     expected_registrations_ids = ["ABCD-111111#0", "ABCD-123123#0", "ABCD-123123#1"]
-    #     self.assertEqual(registrations_ids, expected_registrations_ids)
