@@ -159,7 +159,7 @@ class TestSmokePaymentVerification:
             f"ACTIVATION DATE {activation_date}"
             in pagePaymentVerificationDetails.getLabelizedFieldContainerSummaryActivationDate().text.replace("\n", " ")
         )
-        assert "-" in pagePaymentVerificationDetails.getLabelActivationDate().text
+        assert activation_date in pagePaymentVerificationDetails.getLabelActivationDate().text
         assert (
             "COMPLETION DATE -"
             in pagePaymentVerificationDetails.getLabelizedFieldContainerSummaryCompletionDate().text.replace("\n", " ")
