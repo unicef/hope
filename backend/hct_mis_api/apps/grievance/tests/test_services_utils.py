@@ -11,6 +11,7 @@ from hct_mis_api.apps.grievance.services.data_change.utils import (
     handle_add_payment_channel,
     handle_update_payment_channel,
     to_phone_number_str,
+    verify_flex_fields,
 )
 from hct_mis_api.apps.household.fixtures import (
     BankAccountInfoFactory,
@@ -85,3 +86,12 @@ class TestGrievanceUtils(TestCase):
         payment_channel_dict["type"] = "OTHER"
         resp_none = handle_update_payment_channel(payment_channel_dict)
         self.assertIsNone(resp_none)
+
+    def test_verify_flex_fields(self) -> None:
+        with pytest.raises(ValueError) as e:
+            verify_flex_fields({"key": "value"}, "associated_with")
+            assert str(e.value) == "associated_with argument must be one of ['household', 'individual']"
+
+        with pytest.raises(ValueError) as e:
+            verify_flex_fields({"key": "value"}, "individuals")
+            assert str(e.value) == "key is not a correct `flex field"
