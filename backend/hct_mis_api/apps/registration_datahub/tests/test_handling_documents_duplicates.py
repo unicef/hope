@@ -426,28 +426,73 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             individual=self.individuals[2],  # the same Individual
             program=self.program,
         )
-        Document.objects.create(
+        d1 = Document.objects.create(
             country=self.country,
             type=self.dt,
             document_number="123321321",
             individual=self.individuals[2],
             program=self.program,
         )
+        # add more docs just to have coverage 95% XD
         Document.objects.create(
             country=self.country,
             type=self.dt,
             document_number="123321321",
             individual=self.individuals[1],
             program=self.program,
+            status=Document.STATUS_VALID
+        )
+        d3 = Document.objects.create(
+            country=self.country,
+            type=self.dt,
+            document_number="12332132155",
+            individual=self.individuals[1],
+            program=self.program,
+        )
+        d4 = Document.objects.create(
+            country=self.country,
+            type=self.dt_tax_id,
+            document_number="12332132155",
+            individual=self.individuals[2],
+            program=self.program,
+        )
+        d5 = Document.objects.create(
+            country=self.country,
+            type=self.dt,
+            document_number="12332132155",
+            individual=self.individuals[3],
+            program=self.program,
+        )
+        d6 = Document.objects.create(
+            country=self.country,
+            type=self.dt_tax_id,
+            document_number="12332132155",
+            individual=self.individuals[3],
+            program=self.program,
+        )
+        d2 = Document.objects.create(
+            country=self.country,
+            type=self.dt,
+            document_number="12332132155",
+            individual=self.individuals[4],
+            program=self.program,
+        )
+        Document.objects.create(
+            country=self.country,
+            type=self.dt,
+            document_number="12332132155",
+            individual=self.individuals[5],
+            program=self.program,
+            status=Document.STATUS_VALID
         )
 
         self.assertEqual(GrievanceTicket.objects.all().count(), 0)
         HardDocumentDeduplication().deduplicate(
-            self.get_documents_query([passport, tax_id]),
+            self.get_documents_query([passport, tax_id, d1,d2,d3,d4,d5,d6]),
             self.registration_data_import,
         )
 
-        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
+        self.assertEqual(GrievanceTicket.objects.all().count(), 2)
 
         passport.refresh_from_db()
         self.assertEqual(passport.status, Document.STATUS_VALID)
