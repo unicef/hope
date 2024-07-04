@@ -676,6 +676,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if sheet_title == "households":
             PendingHousehold.all_objects.bulk_create(self.households.values())
         else:
+            self.execute_individuals_additional_steps(self.individuals)
             PendingIndividual.all_objects.bulk_create(self.individuals)
             PendingHousehold.all_objects.bulk_update(
                 households_to_update,
