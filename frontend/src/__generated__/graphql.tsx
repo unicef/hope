@@ -4343,7 +4343,7 @@ export type MutationsRegistrationXlsxImportArgs = {
 
 
 export type MutationsRerunDedupeArgs = {
-  registrationDataImportDatahubId: Scalars['ID']['input'];
+  registrationDataImportId: Scalars['ID']['input'];
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
@@ -9860,7 +9860,7 @@ export type RefuseRdiMutationVariables = Exact<{
 export type RefuseRdiMutation = { __typename?: 'Mutations', refuseRegistrationDataImport?: { __typename?: 'RefuseRegistrationDataImportMutation', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, status: RegistrationDataImportStatus, refuseReason?: string | null } | null } | null };
 
 export type RerunDedupeMutationVariables = Exact<{
-  registrationDataImportDatahubId: Scalars['ID']['input'];
+  registrationDataImportId: Scalars['ID']['input'];
 }>;
 
 
@@ -15147,8 +15147,8 @@ export type RefuseRdiMutationHookResult = ReturnType<typeof useRefuseRdiMutation
 export type RefuseRdiMutationResult = Apollo.MutationResult<RefuseRdiMutation>;
 export type RefuseRdiMutationOptions = Apollo.BaseMutationOptions<RefuseRdiMutation, RefuseRdiMutationVariables>;
 export const RerunDedupeDocument = gql`
-    mutation RerunDedupe($registrationDataImportDatahubId: ID!) {
-  rerunDedupe(registrationDataImportDatahubId: $registrationDataImportDatahubId) {
+    mutation RerunDedupe($registrationDataImportId: ID!) {
+  rerunDedupe(registrationDataImportId: $registrationDataImportId) {
     ok
   }
 }
@@ -15168,7 +15168,7 @@ export type RerunDedupeMutationFn = Apollo.MutationFunction<RerunDedupeMutation,
  * @example
  * const [rerunDedupeMutation, { data, loading, error }] = useRerunDedupeMutation({
  *   variables: {
- *      registrationDataImportDatahubId: // value for 'registrationDataImportDatahubId'
+ *      registrationDataImportId: // value for 'registrationDataImportId'
  *   },
  * });
  */
@@ -26728,7 +26728,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   registrationKoboImport?: Resolver<Maybe<ResolversTypes['RegistrationKoboImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationKoboImportArgs, 'registrationDataImportData'>>;
   registrationProgramPopulationImport?: Resolver<Maybe<ResolversTypes['RegistrationProgramPopulationImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationProgramPopulationImportArgs, 'registrationDataImportData'>>;
   registrationXlsxImport?: Resolver<Maybe<ResolversTypes['RegistrationXlsxImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationXlsxImportArgs, 'registrationDataImportData'>>;
-  rerunDedupe?: Resolver<Maybe<ResolversTypes['RegistrationDeduplicationMutation']>, ParentType, ContextType, RequireFields<MutationsRerunDedupeArgs, 'registrationDataImportDatahubId'>>;
+  rerunDedupe?: Resolver<Maybe<ResolversTypes['RegistrationDeduplicationMutation']>, ParentType, ContextType, RequireFields<MutationsRerunDedupeArgs, 'registrationDataImportId'>>;
   restartCreateReport?: Resolver<Maybe<ResolversTypes['RestartCreateReport']>, ParentType, ContextType, RequireFields<MutationsRestartCreateReportArgs, 'reportData'>>;
   revertMarkPaymentAsFailed?: Resolver<Maybe<ResolversTypes['RevertMarkPaymentAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsRevertMarkPaymentAsFailedArgs, 'deliveredQuantity' | 'deliveryDate' | 'paymentId'>>;
   revertMarkPaymentRecordAsFailed?: Resolver<Maybe<ResolversTypes['RevertMarkPaymentRecordAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsRevertMarkPaymentRecordAsFailedArgs, 'deliveredQuantity' | 'deliveryDate' | 'paymentRecordId'>>;

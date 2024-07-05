@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 from unittest.mock import patch
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
@@ -25,14 +25,8 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import (
-    RegistrationDataImportDatahubFactory,
-    RegistrationDataImportFactory,
-)
-from hct_mis_api.apps.registration_data.models import (
-    RegistrationDataImport,
-    RegistrationDataImportDatahub,
-)
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     registration_program_population_import_task,
 )
@@ -56,13 +50,6 @@ class TestRegistrationProgramPopulationImportTask(BaseElasticSearchTestCase):
             business_area=cls.afghanistan,
             program=cls.program_from,
         )
-        cls.registration_data_import_datahub = RegistrationDataImportDatahubFactory(
-            business_area_slug=cls.afghanistan.slug,
-            hct_id=cls.registration_data_import.id,
-        )
-        cls.registration_data_import.datahub_id = cls.registration_data_import_datahub.id
-        cls.registration_data_import.save()
-
         cls.household, cls.individuals = create_household_and_individuals(
             household_data={
                 "registration_data_import": cls.rdi_other,
@@ -116,9 +103,9 @@ class TestRegistrationProgramPopulationImportTask(BaseElasticSearchTestCase):
             individual=cls.individuals[0],
         )
 
-    def _run_task(self) -> None:
+    def _run_task(self, rdi_id: Optional[str] = None) -> None:
         registration_program_population_import_task(
-            str(self.registration_data_import_datahub.id),
+            rdi_id or str(self.registration_data_import.id),
             str(self.afghanistan.id),
             str(self.program_from.id),
             str(self.program_to.id),
@@ -198,11 +185,6 @@ class TestRegistrationProgramPopulationImportTask(BaseElasticSearchTestCase):
             self.registration_data_import.status,
             RegistrationDataImport.IN_REVIEW,
         )
-        self.registration_data_import_datahub.refresh_from_db()
-        self.assertEqual(
-            self.registration_data_import_datahub.import_done,
-            RegistrationDataImportDatahub.DONE,
-        )
 
         self._imported_objects_count_after()
 
@@ -213,15 +195,8 @@ class TestRegistrationProgramPopulationImportTask(BaseElasticSearchTestCase):
             program=self.program_to,
         )
 
-        registration_data_import_datahub2 = RegistrationDataImportDatahubFactory(
-            business_area_slug=self.afghanistan.slug,
-            hct_id=registration_data_import2.id,
-        )
-        registration_data_import2.datahub_id = registration_data_import_datahub2.id
-        registration_data_import2.save()
-
         registration_program_population_import_task(
-            str(registration_data_import_datahub2.id),
+            str(registration_data_import2.id),
             str(self.afghanistan.id),
             str(self.program_from.id),
             str(self.program_to.id),
@@ -229,15 +204,10 @@ class TestRegistrationProgramPopulationImportTask(BaseElasticSearchTestCase):
         self._imported_objects_count_after(2)
 
     def test_registration_program_population_import_task_error(self) -> None:
+        rdi_id = self.registration_data_import.id
         self.registration_data_import.delete()
         with self.assertRaises(RegistrationDataImport.DoesNotExist):
-            self._run_task()
-
-        self.registration_data_import_datahub.refresh_from_db()
-        self.assertEqual(
-            self.registration_data_import_datahub.import_done,
-            RegistrationDataImportDatahub.NOT_STARTED,
-        )
+            self._run_task(str(rdi_id))
 
     def test_registration_program_population_import_ba_postpone_deduplication(self) -> None:
         self.afghanistan.postpone_deduplication = True

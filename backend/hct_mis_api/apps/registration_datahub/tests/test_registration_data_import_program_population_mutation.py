@@ -9,10 +9,7 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import (
-    RegistrationDataImport,
-    RegistrationDataImportDatahub,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
@@ -101,13 +98,11 @@ class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
         )
         if permissions:
             rdi = RegistrationDataImport.objects.filter(imported_by=user).first()
-            rdi_datahub = RegistrationDataImportDatahub.objects.filter(hct_id=rdi.id).first()
             self.assertEqual(rdi.status, RegistrationDataImport.IMPORT_SCHEDULED)
             self.assertEqual(rdi.data_source, RegistrationDataImport.PROGRAM_POPULATION)
             self.assertEqual(rdi.number_of_individuals, 2)
             self.assertEqual(rdi.number_of_households, 1)
             self.assertEqual(rdi.program_id, self.import_to_program.id)
-            self.assertEqual(rdi.datahub_id, rdi_datahub.id)
 
     def test_registration_data_import_create_program_finished(self) -> None:
         user = self._create_user_with_permissions()
