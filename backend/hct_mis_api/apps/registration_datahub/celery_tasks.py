@@ -1,5 +1,4 @@
 import logging
-import traceback
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
@@ -11,10 +10,7 @@ from django.utils import timezone
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Document, Household
-from hct_mis_api.apps.registration_data.models import (
-    RegistrationDataImport,
-    RegistrationDataImportDatahub,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.exceptions import (
     AlreadyRunningException,
     WrongStatusException,
@@ -195,14 +191,11 @@ def registration_kobo_import_task(
 def registration_kobo_import_hourly_task(self: Any) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
-        from hct_mis_api.apps.registration_data.models import (
-            RegistrationDataImportDatahub,
-        )
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
 
-        not_started_rdi = RegistrationDataImport.objects.filter(status=RegistrationDataImportDatahub.LOADING).first()
+        not_started_rdi = RegistrationDataImport.objects.filter(status=RegistrationDataImport.LOADING).first()
 
         if not_started_rdi is None:
             return  # pragma: no cover
@@ -293,9 +286,6 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
 @sentry_tags
 def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
     try:
-        from hct_mis_api.apps.registration_data.models import (
-            RegistrationDataImportDatahub,
-        )
         from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
             DeduplicateTask,
         )
