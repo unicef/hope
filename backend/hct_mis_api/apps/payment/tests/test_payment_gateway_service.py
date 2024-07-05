@@ -1,4 +1,5 @@
 import os
+from decimal import Decimal
 from typing import Any
 from unittest import mock
 
@@ -123,10 +124,10 @@ class TestPaymentGatewayService(APITestCase):
                 modified="2023-10-11",
                 record_code="1",
                 parent="1",
-                status="1",
+                status="TRANSFERRED_TO_BENEFICIARY",
                 hope_status=Payment.STATUS_DISTRIBUTION_SUCCESS,
                 auth_code="1",
-                payout_amount=50.0,
+                payout_amount=self.payments[0].entitlement_quantity,
                 fsp_code="1",
             ),
         ]
@@ -139,7 +140,7 @@ class TestPaymentGatewayService(APITestCase):
         self.payments[0].refresh_from_db()
         assert self.payments[0].status == Payment.STATUS_DISTRIBUTION_SUCCESS
         assert self.payments[0].fsp_auth_code == "1"
-        assert self.payments[0].delivered_quantity == 50.0
+        assert self.payments[0].delivered_quantity == self.payments[0].entitlement_quantity
         assert self.payments[0].delivered_quantity_usd == 100.0
 
         get_records_for_payment_instruction_mock.return_value = [
@@ -150,7 +151,7 @@ class TestPaymentGatewayService(APITestCase):
                 modified="2023-10-11",
                 record_code="2",
                 parent="2",
-                status="2",
+                status="ERROR",
                 hope_status=Payment.STATUS_ERROR,
                 auth_code="2",
                 payout_amount=0.0,
@@ -189,10 +190,10 @@ class TestPaymentGatewayService(APITestCase):
                 modified="2023-10-11",
                 record_code="1",
                 parent="1",
-                status="1",
+                status="TRANSFERRED_TO_BENEFICIARY",
                 hope_status=Payment.STATUS_DISTRIBUTION_SUCCESS,
                 auth_code="1",
-                payout_amount=50.0,
+                payout_amount=self.payments[0].entitlement_quantity,
                 fsp_code="1",
             ),
             PaymentRecordData(
@@ -202,10 +203,10 @@ class TestPaymentGatewayService(APITestCase):
                 modified="2023-10-11",
                 record_code="2",
                 parent="2",
-                status="2",
+                status="TRANSFERRED_TO_BENEFICIARY",
                 hope_status=Payment.STATUS_DISTRIBUTION_SUCCESS,
                 auth_code="2",
-                payout_amount=60.0,
+                payout_amount=self.payments[0].entitlement_quantity - Decimal(10.00),
                 fsp_code="2",
             ),
         ]
@@ -222,10 +223,10 @@ class TestPaymentGatewayService(APITestCase):
         self.payments[1].refresh_from_db()
         assert self.payments[0].status == Payment.STATUS_DISTRIBUTION_SUCCESS
         assert self.payments[0].fsp_auth_code == "1"
-        assert self.payments[0].delivered_quantity == 50.0
-        assert self.payments[1].status == Payment.STATUS_DISTRIBUTION_SUCCESS
+        assert self.payments[0].delivered_quantity == self.payments[0].entitlement_quantity
+        assert self.payments[1].status == Payment.STATUS_DISTRIBUTION_PARTIAL
         assert self.payments[1].fsp_auth_code == "2"
-        assert self.payments[1].delivered_quantity == 60.0
+        assert self.payments[1].delivered_quantity == self.payments[0].entitlement_quantity - Decimal(10.00)
 
         # pp is reconciled at this point
         get_records_for_payment_instruction_mock.reset_mock()

@@ -178,6 +178,9 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
         }
 
         hope_status = mapping.get(status)
+        if not hope_status:
+            raise PaymentGatewayAPI.PaymentGatewayAPIException(f"Invalid Payment status: {status}")
+
         return hope_status() if callable(hope_status) else hope_status
 
 
