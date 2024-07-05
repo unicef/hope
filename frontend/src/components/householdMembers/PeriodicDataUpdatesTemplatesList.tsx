@@ -1,5 +1,5 @@
 import { Button, IconButton, TableCell } from '@mui/material';
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import UploadIcon from '@mui/icons-material/Upload';
 import GetAppIcon from '@mui/icons-material/GetApp';
@@ -8,6 +8,8 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { fetchPeriodicDataUpdateTemplates } from '@api/periodicDataUpdate';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 
 interface Template {
   id: number;
@@ -37,15 +39,29 @@ const templatesHeadCells: HeadCell<Template>[] = [
     disablePadding: false,
     label: 'Created by',
   },
-  { id: 'details', numeric: false, disablePadding: false, label: 'Details' },
-  { id: 'empty', numeric: false, disablePadding: false, label: '' },
+  {
+    id: 'details',
+    numeric: false,
+    disablePadding: false,
+    label: 'Details',
+    disableSort: true,
+  },
+  {
+    id: 'empty',
+    numeric: false,
+    disablePadding: false,
+    label: '',
+    disableSort: true,
+  },
 ];
 
 const renderTemplateRow = (row: Template): ReactElement => (
-  <>
+  <ClickableTableRow>
     <TableCell>{row.id}</TableCell>
     <TableCell>{row.number_of_records}</TableCell>
-    <TableCell>{row.created_at}</TableCell>
+    <TableCell>
+      <UniversalMoment>{row.created_at}</UniversalMoment>
+    </TableCell>
     <TableCell>{row.created_by}</TableCell>
     <TableCell>
       <IconButton color="primary">
@@ -63,38 +79,52 @@ const renderTemplateRow = (row: Template): ReactElement => (
         </Button>
       )}
     </TableCell>
-  </>
+  </ClickableTableRow>
 );
 
 export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
   const { businessArea: businessAreaSlug, programId } = useBaseUrl();
 
+  const initialQueryVariables = {
+    page: 1,
+    page_size: 10,
+    ordering: 'created_at',
+  };
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+
   const {
     data: templatesData,
     isLoading,
     error,
-    refetch,
   } = useQuery({
-    queryKey: ['periodicDataUpdateTemplates', businessAreaSlug, programId],
+    queryKey: [
+      'periodicDataUpdateTemplates',
+      businessAreaSlug,
+      programId,
+      queryVariables,
+    ],
     queryFn: () =>
-      fetchPeriodicDataUpdateTemplates(businessAreaSlug, programId),
+      fetchPeriodicDataUpdateTemplates(
+        businessAreaSlug,
+        programId,
+        queryVariables,
+      ),
   });
+
   return (
     <UniversalRestTable
-      initialVariables={{}}
-      endpoint={`/api/rest/${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/`}
-      queriedObjectName="templates"
       renderRow={renderTemplateRow}
       headCells={templatesHeadCells}
       title="Templates"
       queryFn={() =>
         fetchPeriodicDataUpdateTemplates(businessAreaSlug, programId)
       }
-      queryKey={['templates', businessAreaSlug, programId]}
       data={templatesData}
       isLoading={isLoading}
       error={error}
-      refetch={refetch}
+      queryVariables={queryVariables}
+      setQueryVariables={setQueryVariables}
     />
   );
 };

@@ -1,5 +1,4 @@
 import { ReactElement, useEffect, useState } from 'react';
-import useDeepCompareEffect from 'use-deep-compare-effect';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { columnToOrderBy, isPermissionDeniedError } from '@utils/utils';
@@ -12,9 +11,6 @@ import {
 // TODO MS: add correct types
 interface UniversalRestTableProps<T = any, K = any> {
   rowsPerPageOptions?: number[];
-  initialVariables: K;
-  endpoint: string;
-  queriedObjectName: string;
   renderRow: (row: T) => ReactElement;
   headCells: HeadCell<T>[];
   getTitle?: (data: any) => string; // TODO MS: add correct type for data
@@ -29,16 +25,20 @@ interface UniversalRestTableProps<T = any, K = any> {
   filterOrderBy?: string;
   onPageChanged?: (page: number) => void;
   queryFn: QueryFunction<any, string[], never>;
-  queryKey: string[];
   data: T[];
-  refetch;
   error;
   isLoading: boolean;
+  queryVariables: any;
+  setQueryVariables: (variables: K) => void;
 }
+type QueryVariables = {
+  offset: number;
+  limit: number;
+  ordering?: string;
+};
 
 export const UniversalRestTable = <T, K>({
   rowsPerPageOptions = [5, 10, 15],
-  initialVariables,
   renderRow,
   headCells,
   title,
@@ -50,14 +50,13 @@ export const UniversalRestTable = <T, K>({
   defaultOrderDirection = 'asc',
   numSelected = 0,
   allowSort = true,
-  queryKey: initialQueryKey,
   data,
-  refetch,
   error,
   isLoading,
+  queryVariables,
+  setQueryVariables,
 }: UniversalRestTableProps<T, K>): ReactElement => {
   const [page, setPage] = useState(0);
-  const [queryKey, setQueryKey] = useState(initialQueryKey);
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0]);
   const [orderBy, setOrderBy] = useState(defaultOrderBy);
   const [orderDirection, setOrderDirection] = useState<Order>(
@@ -65,17 +64,24 @@ export const UniversalRestTable = <T, K>({
   );
 
   useEffect(() => {
-    const updateQueryKey = (offset: number) => {
-      const variables = {
-        ...initialVariables,
-        offset,
-        limit: rowsPerPage,
-        orderBy: orderBy ? columnToOrderBy(orderBy, orderDirection) : undefined,
-      };
-      setQueryKey([queryKey[0], JSON.stringify(variables)]);
+    const newVariables: QueryVariables = {
+      ...queryVariables,
+      offset: page * rowsPerPage,
+      limit: rowsPerPage,
+      ordering: orderBy
+        ? columnToOrderBy(orderBy, orderDirection)
+        : queryVariables.ordering,
     };
-    updateQueryKey(page * rowsPerPage);
-  }, [page, rowsPerPage, orderBy, orderDirection, queryKey, initialVariables]);
+    const newState = newVariables as unknown as K;
+    setQueryVariables(newState);
+  }, [
+    page,
+    rowsPerPage,
+    orderBy,
+    orderDirection,
+    setQueryVariables,
+    queryVariables,
+  ]);
 
   if (error) {
     console.error(error);
@@ -106,13 +112,11 @@ export const UniversalRestTable = <T, K>({
       itemsCount={data?.count ?? 0}
       handleChangePage={(_event, newPage) => {
         setPage(newPage);
-        refetch();
       }}
       handleChangeRowsPerPage={(event) => {
         const value = parseInt(event.target.value, 10);
         setRowsPerPage(value);
         setPage(0);
-        refetch();
       }}
       handleRequestSort={(_event, property) => {
         const direction: Order =
@@ -120,7 +124,6 @@ export const UniversalRestTable = <T, K>({
         setOrderBy(property);
         setOrderDirection(direction);
         setPage(0);
-        refetch();
       }}
       orderBy={orderBy}
       order={orderDirection}

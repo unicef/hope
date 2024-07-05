@@ -34,26 +34,30 @@ export const PeriodicDataUpdates = (): React.ReactElement => {
         </Box>
       }
       buttons={
-        <>
-          <Button
-            variant="contained"
-            color="primary"
-            component={Link}
-            to="/new-template"
-            startIcon={<AddIcon />}
-          >
-            New Template
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            component={Link}
-            to="/upload-data"
-            endIcon={<UploadIcon />}
-          >
-            Upload Data
-          </Button>
-        </>
+        <Box display="flex" align-items="center">
+          <Box mr={2}>
+            <Button
+              variant="contained"
+              color="primary"
+              component={Link}
+              to="/new-template"
+              startIcon={<AddIcon />}
+            >
+              New Template
+            </Button>
+          </Box>
+          <Box>
+            <Button
+              variant="outlined"
+              color="primary"
+              component={Link}
+              to="/upload-data"
+              endIcon={<UploadIcon />}
+            >
+              Upload Data
+            </Button>
+          </Box>
+        </Box>
       }
     >
       {value === 0 && (

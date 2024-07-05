@@ -164,7 +164,7 @@ export function TableRestComponent<T>({
             <IconContainer>
               <Icon fontSize="inherit" />
             </IconContainer>
-            <MuiBox mt={2}>No results</MuiBox>
+            <MuiBox mt={2}>{t('No results')}</MuiBox>
             <SmallerText mt={2}>
               {t(
                 'Try adjusting your search or your filters to find what you are looking for.',

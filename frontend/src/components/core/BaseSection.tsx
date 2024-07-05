@@ -46,13 +46,15 @@ export const BaseSection = ({
     <Container>
       <Box p={p}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          {typeof title === 'string' ? (
-            <Typography data-cy="title" variant="h6">
-              {t(title)}
-            </Typography>
-          ) : (
-            title
-          )}
+          <Box>
+            {typeof title === 'string' ? (
+              <Typography data-cy="title" variant="h6">
+                {t(title)}
+              </Typography>
+            ) : (
+              title
+            )}
+          </Box>
           {buttons}
         </Box>
         {tabs && <Box mb={2}>{tabs}</Box>}
