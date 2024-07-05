@@ -18,9 +18,9 @@ class TestCoreUtils(TestCase):
         self.assertEqual(get_count_and_percentage(5, 25), {"count": 5, "percentage": 20.0})
 
     def test_get_payment_delivered_quantity_status_and_value(self):
-        with self.assertRaises(Exception):
+        with self.assertRaisesMessage(Exception, "Invalid delivered quantity"):
             get_payment_delivered_quantity_status_and_value(None, Decimal(10.00))  # type: ignore
-        with self.assertRaises(Exception):
+        with self.assertRaisesMessage(Exception, "Invalid delivered quantity"):
             get_payment_delivered_quantity_status_and_value("", Decimal(10.00))
         self.assertEqual(
             get_payment_delivered_quantity_status_and_value(-1, Decimal(10.00)), (Payment.STATUS_ERROR, None)
@@ -36,5 +36,5 @@ class TestCoreUtils(TestCase):
             get_payment_delivered_quantity_status_and_value(10.00, Decimal(10.00)),
             (Payment.STATUS_DISTRIBUTION_SUCCESS, Decimal(10.00)),
         )
-        with self.assertRaises(Exception):
+        with self.assertRaisesMessage(Exception, "Invalid delivered quantity"):
             get_payment_delivered_quantity_status_and_value(20.00, Decimal(10.00))
