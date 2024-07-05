@@ -252,7 +252,7 @@ class TestPaymentGatewayService(APITestCase):
         self.assertEqual(p.get_hope_status(Decimal(1000000.00)), Payment.STATUS_DISTRIBUTION_PARTIAL)
 
         with self.assertRaisesMessage(PaymentGatewayAPI.PaymentGatewayAPIException, "Invalid delivered_quantity"):
-            p.payout_amount = None # type: ignore
+            p.payout_amount = None  # type: ignore
             p.get_hope_status(Decimal(1000000.00))
 
         with self.assertRaisesMessage(PaymentGatewayAPI.PaymentGatewayAPIException, "Invalid Payment status"):
