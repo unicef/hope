@@ -206,7 +206,7 @@ class TestPaymentGatewayService(APITestCase):
                 status="TRANSFERRED_TO_BENEFICIARY",
                 hope_status=Payment.STATUS_DISTRIBUTION_SUCCESS,
                 auth_code="2",
-                payout_amount=float(self.payments[0].entitlement_quantity) - 10.00,
+                payout_amount=float(self.payments[1].entitlement_quantity) - 10.00,
                 fsp_code="2",
             ),
         ]
