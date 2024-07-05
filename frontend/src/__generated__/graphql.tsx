@@ -5145,9 +5145,12 @@ export type PaymentRecordNodeEdge = {
 export enum PaymentRecordStatus {
   DistributionSuccessful = 'DISTRIBUTION_SUCCESSFUL',
   ForceFailed = 'FORCE_FAILED',
+  ManuallyCancelled = 'MANUALLY_CANCELLED',
   NotDistributed = 'NOT_DISTRIBUTED',
   PartiallyDistributed = 'PARTIALLY_DISTRIBUTED',
   Pending = 'PENDING',
+  SentToFsp = 'SENT_TO_FSP',
+  SentToPaymentGateway = 'SENT_TO_PAYMENT_GATEWAY',
   TransactionErroneous = 'TRANSACTION_ERRONEOUS',
   TransactionSuccessful = 'TRANSACTION_SUCCESSFUL'
 }
@@ -5161,9 +5164,12 @@ export type PaymentRecordsAndPaymentsEdges = {
 export enum PaymentStatus {
   DistributionSuccessful = 'DISTRIBUTION_SUCCESSFUL',
   ForceFailed = 'FORCE_FAILED',
+  ManuallyCancelled = 'MANUALLY_CANCELLED',
   NotDistributed = 'NOT_DISTRIBUTED',
   PartiallyDistributed = 'PARTIALLY_DISTRIBUTED',
   Pending = 'PENDING',
+  SentToFsp = 'SENT_TO_FSP',
+  SentToPaymentGateway = 'SENT_TO_PAYMENT_GATEWAY',
   TransactionErroneous = 'TRANSACTION_ERRONEOUS',
   TransactionSuccessful = 'TRANSACTION_SUCCESSFUL'
 }

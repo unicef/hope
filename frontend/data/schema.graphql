@@ -2363,7 +2363,6 @@ type IndividualNode implements Node {
   relationship: IndividualRelationship
   household: HouseholdNode
   registrationDataImport: RegistrationDataImportNode
-  disability: IndividualDisability!
   workStatus: String!
   firstRegistrationDate: Date!
   lastRegistrationDate: Date!
@@ -2379,7 +2378,9 @@ type IndividualNode implements Node {
   sanctionListPossibleMatch: Boolean!
   sanctionListConfirmedMatch: Boolean!
   pregnant: Boolean
+  disability: IndividualDisability!
   observedDisability: [String]
+  disabilityCertificatePicture: String
   seeingDisability: String!
   hearingDisability: String!
   physicalDisability: String!
@@ -2394,7 +2395,6 @@ type IndividualNode implements Node {
   detailId: String
   registrationId: String
   programRegistrationId: String
-  disabilityCertificatePicture: String
   preferredLanguage: String
   relationshipConfirmed: Boolean!
   ageAtRegistration: Int
@@ -3340,6 +3340,9 @@ enum PaymentRecordStatus {
   FORCE_FAILED
   PARTIALLY_DISTRIBUTED
   PENDING
+  SENT_TO_PAYMENT_GATEWAY
+  SENT_TO_FSP
+  MANUALLY_CANCELLED
 }
 
 type PaymentRecordsAndPaymentsEdges {
@@ -3355,6 +3358,9 @@ enum PaymentStatus {
   FORCE_FAILED
   PARTIALLY_DISTRIBUTED
   PENDING
+  SENT_TO_PAYMENT_GATEWAY
+  SENT_TO_FSP
+  MANUALLY_CANCELLED
 }
 
 type PaymentVerificationLogEntryNode implements Node {
