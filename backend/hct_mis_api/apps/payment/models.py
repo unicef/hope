@@ -915,6 +915,9 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
     @property
     def is_reconciled(self) -> bool:
         # TODO what in case of active grievance tickets?
+        if not self.eligible_payments.exists():
+            return False
+
         return (
             self.eligible_payments.exclude(
                 status__in=[GenericPayment.STATUS_PENDING, GenericPayment.STATUS_SENT_TO_PG]
