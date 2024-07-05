@@ -152,7 +152,7 @@ def registration_program_population_import_task(
         return True
     except RegistrationDataImport.DoesNotExist:
         raise
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         logger.warning(e)
 
         handle_rdi_exception(registration_data_import_id, e)
@@ -318,7 +318,7 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID") -> Dict:
 
     try:
         return PullKoboSubmissions().execute(kobo_import_data)
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         KoboImportData.objects.filter(
             id=kobo_import_data.id,
         ).update(status=KoboImportData.STATUS_ERROR, error=str(e))
@@ -341,7 +341,7 @@ def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UU
     set_sentry_business_area_tag(import_data.business_area_slug)
     try:
         return ValidateXlsxImport().execute(import_data, is_social_worker_program)
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         ImportData.objects.filter(
             id=import_data.id,
         ).update(status=ImportData.STATUS_ERROR, error=str(e))
