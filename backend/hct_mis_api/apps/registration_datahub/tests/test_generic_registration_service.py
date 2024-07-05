@@ -1,9 +1,12 @@
 import datetime
 import json
+from typing import Union
 
 from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
+
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import DataCollectingType
@@ -53,6 +56,7 @@ class TestGenericRegistrationService(TestCase):
                 "admin1_h_c": "household.admin1",
                 "admin2_h_c": "household.admin2",
                 "admin3_h_c": "household.admin3",
+                "admin4_h_c": "household.admin4",
                 "ff": "household.flex_fields",
             },
             "individuals": {
@@ -161,7 +165,26 @@ class TestGenericRegistrationService(TestCase):
 
         cls.user = UserFactory.create()
 
-    def test_import_data_to_datahub(self) -> None:
+    @parameterized.expand(
+        [
+            ("UA07", "UA0702", "UA0114007", "UA0114007", "admin4_h_c"),
+            (None, None, None, "UA0114007", "admin4_h_c"),
+            (None, None, "UA0114007", None, "admin3_h_c"),
+            (None, "UA0702", None, None, "admin2_h_c"),
+        ]
+    )
+    def test_import_data_to_datahub(
+        self,
+        admin1_h_c: Union[str, None],
+        admin2_h_c: Union[str, None],
+        admin3_h_c: Union[str, None],
+        admin4_h_c: Union[str, None],
+        admin_area_field: str,
+    ) -> None:
+        self.household[0]["admin1_h_c"] = admin1_h_c
+        self.household[0]["admin2_h_c"] = admin2_h_c
+        self.household[0]["admin3_h_c"] = admin3_h_c
+        self.household[0]["admin4_h_c"] = admin4_h_c
         records = [
             Record(
                 **self.defaults,
@@ -217,12 +240,15 @@ class TestGenericRegistrationService(TestCase):
         )
 
         # Checking only first is enough, because they all in one RDI
-        registration_data_import = PendingHousehold.objects.all()[0].registration_data_import
-        self.assertIn("ff", PendingHousehold.objects.all()[0].flex_fields.keys())
+        pending_household = PendingHousehold.objects.all()[0]
+        registration_data_import = pending_household.registration_data_import
+        self.assertIn("ff", pending_household.flex_fields.keys())
         self.assertEqual(registration_data_import.program, self.program)
 
         self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)
         self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_ALTERNATE).count(), 1)
+
+        self.assertEqual(pending_household.admin_area.p_code, self.household[0][admin_area_field])
 
     def test_import_data_to_datahub_household_individual(self) -> None:
         records = [
