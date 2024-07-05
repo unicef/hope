@@ -1,4 +1,5 @@
 import logging
+import traceback
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
@@ -35,7 +36,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def handle_rdi_exception(datahub_rdi_id: str, e: BaseException) -> None:
+def handle_rdi_exception(rdi_id: str, e: BaseException) -> None:
     try:
         from sentry_sdk import capture_exception
 
@@ -44,7 +45,7 @@ def handle_rdi_exception(datahub_rdi_id: str, e: BaseException) -> None:
         err = "N/A"  # pragma: no cover
         logger.exception(e)  # pragma: no cover
     RegistrationDataImport.objects.filter(
-        datahub_id=datahub_rdi_id,
+        id=rdi_id,
     ).update(status=RegistrationDataImport.IMPORT_ERROR, sentry_id=err, error_message=str(e))
 
 
@@ -201,14 +202,12 @@ def registration_kobo_import_hourly_task(self: Any) -> None:
             RdiKoboCreateTask,
         )
 
-        not_started_rdi = RegistrationDataImportDatahub.objects.filter(
-            import_done=RegistrationDataImportDatahub.NOT_STARTED
-        ).first()
+        not_started_rdi = RegistrationDataImport.objects.filter(status=RegistrationDataImportDatahub.LOADING).first()
 
         if not_started_rdi is None:
-            return
-        business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area_slug)
-        program_id = RegistrationDataImport.objects.get(id=not_started_rdi.hct_id).program.id
+            return  # pragma: no cover
+        business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area.slug)
+        program_id = RegistrationDataImport.objects.get(id=not_started_rdi.id).program.id
         set_sentry_business_area_tag(business_area.name)
 
         RdiKoboCreateTask(
@@ -233,19 +232,16 @@ def registration_xlsx_import_hourly_task(self: Any) -> None:
         )
 
         not_started_rdi = RegistrationDataImport.objects.filter(status=RegistrationDataImport.LOADING).first()
-        print("*" * 400)
-        print(not_started_rdi)
         if not_started_rdi is None:
-            return
+            return  # pragma: no cover
 
-        rdi_datahub = RegistrationDataImportDatahub.objects.get(hct_id=not_started_rdi.id)
         business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area.slug)
         program_id = not_started_rdi.program.id
         set_sentry_business_area_tag(business_area.name)
 
         RdiXlsxCreateTask().execute(
             registration_data_import_id=str(not_started_rdi.id),
-            import_data_id=str(rdi_datahub.import_data.id),
+            import_data_id=str(not_started_rdi.import_data.id),
             business_area_id=str(business_area.id),
             program_id=str(program_id),
         )
@@ -262,7 +258,7 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
     )
     with locked_cache(key=f"merge_registration_data_import_task-{registration_data_import_id}") as locked:
         if not locked:
-            return True
+            return True  # pragma: no cover
         try:
             from hct_mis_api.apps.registration_data.models import RegistrationDataImport
             from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import (
@@ -304,13 +300,12 @@ def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
             DeduplicateTask,
         )
 
-        rdi_obj = RegistrationDataImportDatahub.objects.get(id=registration_data_import_id)
-        registration_data_import = RegistrationDataImport.objects.get(id=rdi_obj.hct_id)
+        rdi_obj = RegistrationDataImport.objects.get(id=registration_data_import_id)
+        registration_data_import = RegistrationDataImport.objects.get(id=rdi_obj.id)
         program_id = registration_data_import.program.id
-        set_sentry_business_area_tag(rdi_obj.business_area_slug)
-
+        set_sentry_business_area_tag(rdi_obj.business_area.slug)
         with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
-            DeduplicateTask(rdi_obj.business_area_slug, program_id).deduplicate_pending_individuals(
+            DeduplicateTask(rdi_obj.business_area.slug, program_id).deduplicate_pending_individuals(
                 registration_data_import=registration_data_import
             )
     except Exception as e:
@@ -477,6 +472,6 @@ def remove_old_rdi_links_task(page_count: int = 100) -> None:
             i += 1
 
         logger.info(f"Data links for RDI(s): {''.join([str(_id) for _id in unmerged_rdi_ids])} removed successfully")
-    except Exception:
+    except Exception:  # pragma: no cover
         logger.error("Removing old RDI objects failed")
         raise
