@@ -62,7 +62,7 @@ const renderUpdateRow = (row: Update): ReactElement => (
 );
 
 export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
-  const initialQueryVariables: QueryVariables = {
+  const initialQueryVariables = {
     page: 1,
     page_size: 10,
     ordering: 'importDate',
@@ -80,7 +80,7 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
   });
 
   return (
-    <UniversalRestTable<Update, QueryVariables>
+    <UniversalRestTable
       isOnPaper
       renderRow={renderUpdateRow}
       headCells={updatesHeadCells}

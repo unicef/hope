@@ -6,7 +6,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { Tabs, Tab } from '@core/Tabs';
-import { PeriodicDataUpdates } from '@components/householdMembers/PeriodicDataUpdates';
+import { PeriodicDataUpdates } from '@components/periodicDataUpdates/PeriodicDataUpdates';
 
 export const HouseholdMembersPage = (): React.ReactElement => {
   const { baseUrl } = useBaseUrl();

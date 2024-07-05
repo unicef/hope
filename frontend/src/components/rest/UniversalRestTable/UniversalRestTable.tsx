@@ -7,6 +7,7 @@ import {
   Order,
   TableRestComponent,
 } from '../TableRestComponent/TableRestComponent';
+import { isEqual } from 'lodash';
 
 // TODO MS: add correct types
 interface UniversalRestTableProps<T = any, K = any> {
@@ -73,7 +74,10 @@ export const UniversalRestTable = <T, K>({
         : queryVariables.ordering,
     };
     const newState = newVariables as unknown as K;
-    setQueryVariables(newState);
+
+    if (!isEqual(newState, queryVariables)) {
+      setQueryVariables(newState);
+    }
   }, [
     page,
     rowsPerPage,

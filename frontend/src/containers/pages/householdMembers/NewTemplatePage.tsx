@@ -10,7 +10,7 @@ import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { BaseSection } from '@components/core/BaseSection';
 import { Button, Stepper, Step, StepLabel } from '@mui/material';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { FilterIndividuals } from '@components/householdMembers/FilterIndividuals';
+import { FilterIndividuals } from '@components/periodicDataUpdates/FilterIndividuals';
 
 export const NewTemplatePage = (): React.ReactElement => {
   const { t } = useTranslation();

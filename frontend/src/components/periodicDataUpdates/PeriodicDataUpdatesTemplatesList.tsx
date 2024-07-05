@@ -10,8 +10,9 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { fetchPeriodicDataUpdateTemplates } from '@api/periodicDataUpdate';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
+import { PeriodicDataUpdatesTemplateDetailsDialog } from './PeriodicDataUpdatesTemplateDetailsDialog';
 
-interface Template {
+export interface Template {
   id: number;
   number_of_records: number;
   created_at: string;
@@ -55,35 +56,57 @@ const templatesHeadCells: HeadCell<Template>[] = [
   },
 ];
 
-const renderTemplateRow = (row: Template): ReactElement => (
-  <ClickableTableRow>
-    <TableCell>{row.id}</TableCell>
-    <TableCell>{row.number_of_records}</TableCell>
-    <TableCell>
-      <UniversalMoment>{row.created_at}</UniversalMoment>
-    </TableCell>
-    <TableCell>{row.created_by}</TableCell>
-    <TableCell>
-      <IconButton color="primary">
-        <VisibilityIcon />
-      </IconButton>
-    </TableCell>
-    <TableCell>
-      {row.status === 'download' ? (
-        <Button variant="contained" color="primary" startIcon={<GetAppIcon />}>
-          Download
-        </Button>
-      ) : (
-        <Button variant="contained" color="primary" startIcon={<UploadIcon />}>
-          Export
-        </Button>
-      )}
-    </TableCell>
-  </ClickableTableRow>
-);
-
 export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
   const { businessArea: businessAreaSlug, programId } = useBaseUrl();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(
+    null,
+  );
+
+  const handleDialogOpen = (template: Template) => {
+    setSelectedTemplateId(template.id);
+    setIsDialogOpen(true);
+  };
+
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+    setSelectedTemplateId(null);
+  };
+
+  const renderTemplateRow = (row: Template): ReactElement => (
+    <ClickableTableRow>
+      <TableCell>{row.id}</TableCell>
+      <TableCell>{row.number_of_records}</TableCell>
+      <TableCell>
+        <UniversalMoment>{row.created_at}</UniversalMoment>
+      </TableCell>
+      <TableCell>{row.created_by}</TableCell>
+      <TableCell>
+        <IconButton color="primary" onClick={() => handleDialogOpen(row)}>
+          <VisibilityIcon />
+        </IconButton>
+      </TableCell>
+      <TableCell>
+        {row.status === 'download' ? (
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<GetAppIcon />}
+          >
+            Download
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<UploadIcon />}
+          >
+            Export
+          </Button>
+        )}
+      </TableCell>
+    </ClickableTableRow>
+  );
 
   const initialQueryVariables = {
     page: 1,
@@ -112,19 +135,32 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
       ),
   });
 
+  const selectedTemplate = templatesData?.results?.find(
+    (template) => template.id === selectedTemplateId,
+  );
+
   return (
-    <UniversalRestTable
-      isOnPaper={false}
-      renderRow={renderTemplateRow}
-      headCells={templatesHeadCells}
-      queryFn={() =>
-        fetchPeriodicDataUpdateTemplates(businessAreaSlug, programId)
-      }
-      data={templatesData}
-      isLoading={isLoading}
-      error={error}
-      queryVariables={queryVariables}
-      setQueryVariables={setQueryVariables}
-    />
+    <>
+      <UniversalRestTable
+        isOnPaper={false}
+        renderRow={renderTemplateRow}
+        headCells={templatesHeadCells}
+        queryFn={() =>
+          fetchPeriodicDataUpdateTemplates(businessAreaSlug, programId)
+        }
+        data={templatesData}
+        isLoading={isLoading}
+        error={error}
+        queryVariables={queryVariables}
+        setQueryVariables={setQueryVariables}
+      />
+      {selectedTemplate && (
+        <PeriodicDataUpdatesTemplateDetailsDialog
+          open={isDialogOpen}
+          onClose={handleDialogClose}
+          template={selectedTemplate}
+        />
+      )}
+    </>
   );
 };
