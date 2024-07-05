@@ -209,7 +209,7 @@ class FspData(FlexibleArgumentsDataclassMixin):
 class AddRecordsResponseData(FlexibleArgumentsDataclassMixin):
     remote_id: str  # payment instruction id
     records: Optional[dict] = None  # {"record_code": "remote_id"}
-    errors: Optional[dict] = None  # {index: "error_message"}
+    errors: Optional[dict] = None  # {"index": "error_message"}
 
 
 class PaymentGatewayAPI:
@@ -344,7 +344,7 @@ class PaymentGatewayService:
     ) -> Optional[str]:
         if obj.financial_service_provider.is_payment_gateway:
             response_status = self.api.change_payment_instruction_status(new_status, obj.id)
-            assert new_status.value == response_status, f"{new_status} != {response_status}"
+            assert new_status.value == response_status, f"{new_status.value} != {response_status}"
             return response_status
         return None
 
