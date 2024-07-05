@@ -198,7 +198,7 @@ class PaymentModuleDetails(BaseComponents):
     def getButtonMarkAsReleased(self) -> WebElement:
         return self.wait_for(self.buttonMarkAsReleased)
 
-    def checkStatus(self, status: str):
+    def checkStatus(self, status: str) -> None:
         for _ in range(10):
             if status == self.getStatusContainer().text:
                 break

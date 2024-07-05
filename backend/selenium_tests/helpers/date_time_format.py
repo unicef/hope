@@ -2,7 +2,15 @@ from datetime import datetime
 
 
 class FormatTime:
-    def __init__(self, day: int = 0, month: int = 0, year: int = 0, hour: int = 0, minute: int = 0, time: datetime = datetime.now()):
+    def __init__(
+        self,
+        day: int = 0,
+        month: int = 0,
+        year: int = 0,
+        hour: int = 0,
+        minute: int = 0,
+        time: datetime | None = None,
+    ):
         self._datetime = time
         self.day = day
         self.month = month
