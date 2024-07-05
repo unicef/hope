@@ -745,7 +745,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                     old_rdi_mis,
                     rdi_mis,
                 )
-        except Exception:
+        except Exception:  # pragma: no cover
             # print stack trace
-            print(traceback.format_exc())
-            raise
+            print(traceback.format_exc())  # pragma: no cover
+            raise  # pragma: no cover
