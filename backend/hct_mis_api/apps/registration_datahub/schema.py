@@ -339,7 +339,6 @@ class Query(graphene.ObjectType):
         ),
     )
     registration_data_import_datahub = relay.Node.Field(RegistrationDataImportDatahubNode)
-    all_registration_data_imports_datahub = DjangoFilterConnectionField(RegistrationDataImportDatahubNode)
     imported_individual = relay.Node.Field(ImportedIndividualNode)
     all_imported_individuals = DjangoPermissionFilterConnectionField(
         ImportedIndividualNode,

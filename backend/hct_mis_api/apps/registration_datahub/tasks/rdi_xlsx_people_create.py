@@ -178,7 +178,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         else:
             obj_to_create = self._validate_birth_date(obj_to_create)
             obj_to_create.age_at_registration = calculate_age_at_registration(
-                registration_data_import, str(obj_to_create.birth_date)
+                registration_data_import.created_at, str(obj_to_create.birth_date)
             )
 
             household = self.households[self.index_id]

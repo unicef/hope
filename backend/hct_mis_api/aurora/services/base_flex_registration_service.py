@@ -12,11 +12,7 @@ from django.forms import modelform_factory
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import PendingHousehold, PendingIndividual
-from hct_mis_api.apps.registration_data.models import (
-    ImportData,
-    RegistrationDataImport,
-    RegistrationDataImportDatahub,
-)
+from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import rdi_deduplication_task
 from hct_mis_api.aurora.celery_tasks import process_flex_records_task
 from hct_mis_api.aurora.models import Record, Registration
@@ -49,6 +45,14 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
         number_of_households = 0
         status = RegistrationDataImport.LOADING if is_open else RegistrationDataImport.IMPORTING
 
+        import_data = ImportData.objects.create(
+            status=ImportData.STATUS_PENDING,
+            business_area_slug=business_area.slug,
+            data_type=ImportData.FLEX_REGISTRATION,
+            number_of_individuals=number_of_individuals,
+            number_of_households=number_of_households,
+            created_by_id=imported_by.id if imported_by else None,
+        )
         rdi = RegistrationDataImport.objects.create(
             name=rdi_name,
             data_source=RegistrationDataImport.FLEX_REGISTRATION,
@@ -58,29 +62,12 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             business_area=business_area,
             status=status,
             program=programme,
-        )
-
-        import_data = ImportData.objects.create(
-            status=ImportData.STATUS_PENDING,
-            business_area_slug=business_area.slug,
-            data_type=ImportData.FLEX_REGISTRATION,
-            number_of_individuals=number_of_individuals,
-            number_of_households=number_of_households,
-            created_by_id=imported_by.id if imported_by else None,
-        )
-        rdi_datahub = RegistrationDataImportDatahub.objects.create(
-            name=rdi_name,
-            hct_id=rdi.id,
             import_data=import_data,
-            import_done=RegistrationDataImportDatahub.NOT_STARTED,
-            business_area_slug=business_area.slug,
         )
-        rdi.datahub_id = rdi_datahub.id
-        rdi.save(update_fields=("datahub_id",))
         return rdi
 
     @abc.abstractmethod
-    def create_household_for_rdi_household(self, record: Any, rdi_datahub: RegistrationDataImportDatahub) -> None:
+    def create_household_for_rdi_household(self, record: Any, rdi_datahub: RegistrationDataImport) -> None:
         raise NotImplementedError
 
     def validate_data_collection_type(self) -> None:
@@ -106,8 +93,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
         records_ids: Iterable,
     ) -> None:
         rdi = RegistrationDataImport.objects.get(id=rdi_id)
-        rdi_datahub = RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
-        import_data = rdi_datahub.import_data
+        import_data = rdi.import_data
 
         records_ids_to_import = (
             Record.objects.filter(id__in=records_ids)
@@ -156,15 +142,10 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
                         "number_of_households",
                     )
                 )
-                if hasattr(Record, "registration_data_import"):
-                    Record.objects.filter(id__in=imported_records_ids).update(
-                        status=Record.STATUS_IMPORTED, registration_data_import=rdi_datahub
-                    )
-                else:
-                    Record.objects.filter(id__in=imported_records_ids).update(status=Record.STATUS_IMPORTED)
+                Record.objects.filter(id__in=imported_records_ids).update(status=Record.STATUS_IMPORTED)
 
                 if not rdi.business_area.postpone_deduplication:
-                    transaction.on_commit(lambda: rdi_deduplication_task.delay(rdi_datahub.id))
+                    transaction.on_commit(lambda: rdi_deduplication_task.delay(rdi.id))
                 else:
                     rdi.status = RegistrationDataImport.IN_REVIEW
                     rdi.save()
