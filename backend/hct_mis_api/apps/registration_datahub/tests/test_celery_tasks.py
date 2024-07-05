@@ -45,10 +45,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import (
-    RegistrationDataImportDatahubFactory,
-    RegistrationDataImportFactory,
-)
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
@@ -646,14 +643,6 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
         cls.rdi_3 = RegistrationDataImportFactory(status=RegistrationDataImport.MERGING)
 
     def test_remove_old_rdi_objects(self) -> None:
-        rdi_hub_1 = RegistrationDataImportDatahubFactory()
-        rdi_hub_2 = RegistrationDataImportDatahubFactory()
-        rdi_hub_3 = RegistrationDataImportDatahubFactory()
-
-        self.rdi_1.datahub_id = rdi_hub_1.id
-        self.rdi_2.datahub_id = rdi_hub_2.id
-        self.rdi_3.datahub_id = rdi_hub_3.id
-
         self.rdi_1.created_at = "2022-04-20 00:08:07.127325+00:00"  # older than 3 months
         self.rdi_2.created_at = "2023-01-10 20:07:07.127325+00:00"  # older than 3 months
         self.rdi_3.created_at = timezone.now()

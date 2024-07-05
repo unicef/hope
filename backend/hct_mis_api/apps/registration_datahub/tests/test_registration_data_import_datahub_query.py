@@ -8,18 +8,6 @@ from hct_mis_api.apps.registration_data.fixtures import (
 class TestRegistrationDataImportDatahubQuery(APITestCase):
     databases = "__all__"
 
-    ALL_REGISTRATION_DATA_IMPORT_DATAHUB_QUERY = """
-    query AllRegistrationDataImportsDatahub {
-      allRegistrationDataImportsDatahub {
-        edges {
-          node {
-            name
-            hctId
-          }
-        }
-      }
-    }
-    """
     REGISTRATION_DATA_IMPORT_DATAHUB_QUERY = """
     query RegistrationDataImportDatahub($id: ID!) {
       registrationDataImportDatahub(id: $id) {
@@ -39,12 +27,6 @@ class TestRegistrationDataImportDatahubQuery(APITestCase):
         ]
 
         cls.data = [RegistrationDataImportDatahubFactory(**item) for item in cls.to_create]
-
-    def test_registration_data_import_datahub_query_all(self) -> None:
-        self.snapshot_graphql_request(
-            request_string=self.ALL_REGISTRATION_DATA_IMPORT_DATAHUB_QUERY,
-            context={"user": self.user},
-        )
 
     def test_registration_data_import_datahub_query_single(self) -> None:
         self.snapshot_graphql_request(

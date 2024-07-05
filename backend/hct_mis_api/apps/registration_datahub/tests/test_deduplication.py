@@ -19,7 +19,6 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import ImportData
 from hct_mis_api.apps.registration_datahub.fixtures import (
-    RegistrationDataImportDatahubFactory,
     create_imported_household_and_individuals,
 )
 from hct_mis_api.apps.registration_datahub.models import (
@@ -60,17 +59,11 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             deduplication_golden_record_duplicates_allowed=10,
         )
         cls.program = ProgramFactory(status="ACTIVE")
-        cls.registration_data_import_datahub = RegistrationDataImportDatahubFactory(
+        cls.registration_data_import = RegistrationDataImportFactory(
             import_data=import_data,
-            business_area_slug=cls.business_area.slug,
-        )
-        rdi = RegistrationDataImportFactory(
-            datahub_id=cls.registration_data_import_datahub.id,
             business_area=cls.business_area,
             program=cls.program,
         )
-        cls.registration_data_import_datahub.hct_id = rdi.id
-        cls.registration_data_import_datahub.save()
 
         registration_data_import_second = RegistrationDataImportFactory(
             business_area=cls.business_area, program=cls.program
@@ -80,12 +73,12 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             cls.individuals,
         ) = create_imported_household_and_individuals(
             household_data={
-                "registration_data_import": cls.registration_data_import_datahub,
+                "registration_data_import": cls.registration_data_import,
                 "program_id": cls.program.id,
             },
             individuals_data=[
                 {
-                    "registration_data_import": cls.registration_data_import_datahub,
+                    "registration_data_import": cls.registration_data_import,
                     "given_name": "Test",
                     "full_name": "Test Testowski",
                     "middle_name": "",
@@ -98,7 +91,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "program_id": cls.program.id,
                 },
                 {
-                    "registration_data_import": cls.registration_data_import_datahub,
+                    "registration_data_import": cls.registration_data_import,
                     "given_name": "Tesa",
                     "full_name": "Tesa Testowski",
                     "middle_name": "",
@@ -111,7 +104,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "program_id": cls.program.id,
                 },
                 {
-                    "registration_data_import": cls.registration_data_import_datahub,
+                    "registration_data_import": cls.registration_data_import,
                     "given_name": "Tescik",
                     "full_name": "Tescik Testowski",
                     "middle_name": "",
@@ -124,7 +117,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "program_id": cls.program.id,
                 },
                 {
-                    "registration_data_import": cls.registration_data_import_datahub,
+                    "registration_data_import": cls.registration_data_import,
                     "given_name": "Tessta",
                     "full_name": "Tessta Testowski",
                     "middle_name": "",
@@ -137,7 +130,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "program_id": cls.program.id,
                 },
                 {
-                    "registration_data_import": cls.registration_data_import_datahub,
+                    "registration_data_import": cls.registration_data_import,
                     "given_name": "Test",
                     "full_name": "Test Testowski",
                     "middle_name": "",
@@ -150,7 +143,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "program_id": cls.program.id,
                 },
                 {
-                    "registration_data_import": cls.registration_data_import_datahub,
+                    "registration_data_import": cls.registration_data_import,
                     "given_name": "Test",
                     "full_name": "Test Example",
                     "middle_name": "",
@@ -163,7 +156,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "program_id": cls.program.id,
                 },
                 {
-                    "registration_data_import": cls.registration_data_import_datahub,
+                    "registration_data_import": cls.registration_data_import,
                     "given_name": "Tessta",
                     "full_name": "Tessta Testowski",
                     "middle_name": "",
@@ -242,7 +235,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
         task = DeduplicateTask(self.business_area.slug, self.program.id)
 
         with self.assertNumQueries(11):
-            task.deduplicate_pending_individuals(self.registration_data_import_datahub)
+            task.deduplicate_pending_individuals(self.registration_data_import)
         duplicate_in_batch = ImportedIndividual.objects.order_by("full_name").filter(
             deduplication_batch_status=DUPLICATE_IN_BATCH
         )
