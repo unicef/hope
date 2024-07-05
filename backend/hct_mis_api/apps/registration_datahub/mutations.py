@@ -308,6 +308,7 @@ class RegistrationProgramPopulationImportMutation(BaseValidator, PermissionMutat
         return RegistrationProgramPopulationImportMutation(registration_data_import=created_obj_hct)
 
 
+# TODO DATAHUB DELETE fix this muttation should use base registration data import
 class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
     ok = graphene.Boolean()
 

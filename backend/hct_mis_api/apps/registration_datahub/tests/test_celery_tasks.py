@@ -59,6 +59,8 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
     registration_kobo_import_task,
     registration_xlsx_import_hourly_task,
     remove_old_rdi_links_task,
+    merge_registration_data_import_task,
+    rdi_deduplication_task,
 )
 from hct_mis_api.apps.utils.models import MergeStatusModel
 from hct_mis_api.aurora.celery_tasks import (
@@ -733,15 +735,8 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         cls.registration_data_import = RegistrationDataImportFactory(
             business_area=cls.business_area,
             program=cls.program,
-        )
-        cls.registration_data_import_datahub = RegistrationDataImportDatahub.objects.create(
-            name=cls.registration_data_import.name,
-            hct_id=cls.registration_data_import.id,
             import_data=cls.import_data,
-            business_area_slug=cls.business_area.slug,
         )
-        cls.registration_data_import.datahub_id = cls.registration_data_import_datahub.id
-        cls.registration_data_import.save()
 
         super().setUpTestData()
 
@@ -767,6 +762,8 @@ class TestRegistrationImportCeleryTasks(APITestCase):
     def test_registration_kobo_import_hourly_task_execute_called_once(
         self, MockRdiKoboCreateTask: unittest.mock.Mock
     ) -> None:
+        self.registration_data_import.status = RegistrationDataImport.LOADING
+        self.registration_data_import.save()
         mock_task_instance = MockRdiKoboCreateTask.return_value
         registration_kobo_import_hourly_task.delay()
         mock_task_instance.execute.assert_called_once()
@@ -780,3 +777,27 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         mock_task_instance = MockRdiXlsxCreateTask.return_value
         registration_xlsx_import_hourly_task.delay()
         mock_task_instance.execute.assert_called_once()
+
+    @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_merge.RdiMergeTask")
+    def test_merge_registration_data_import_task_exception(
+        self,
+        MockRdiMergeTask: unittest.mock.Mock,
+    ) -> None:
+        mock_rdi_merge_task_instance = MockRdiMergeTask.return_value
+        mock_rdi_merge_task_instance.execute.side_effect = Exception("Test Exception")
+        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.IN_REVIEW)
+        merge_registration_data_import_task.delay(registration_data_import_id=self.registration_data_import.id)
+        self.registration_data_import.refresh_from_db()
+        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.MERGE_ERROR)
+
+    @patch("hct_mis_api.apps.registration_datahub.tasks.deduplicate.DeduplicateTask")
+    def test_rdi_deduplication_task_exception(
+        self,
+        MockDeduplicateTask: unittest.mock.Mock,
+    ) -> None:
+        mock_deduplicate_task_task_instance = MockDeduplicateTask.return_value
+        mock_deduplicate_task_task_instance.deduplicate_pending_individuals.side_effect = Exception("Test Exception")
+        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.IN_REVIEW)
+        rdi_deduplication_task.delay(registration_data_import_id=self.registration_data_import.id)
+        self.registration_data_import.refresh_from_db()
+        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.IMPORT_ERROR)
