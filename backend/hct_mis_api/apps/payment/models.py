@@ -77,6 +77,9 @@ from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
     ConcurrencyModel,
+    MergedManager,
+    MergeStatusModel,
+    PendingManager,
     SignatureMixin,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
@@ -2177,7 +2180,7 @@ class PaymentHouseholdSnapshot(TimeStampedUUIDModel):
     payment = models.OneToOneField(Payment, on_delete=models.CASCADE, related_name="household_snapshot")
 
 
-class DeliveryMechanismData(TimeStampedUUIDModel, SignatureMixin):
+class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
     VALIDATION_ERROR_DATA_NOT_UNIQUE = _("Payment data not unique across Program")
     VALIDATION_ERROR_MISSING_DATA = _("Missing required payment data")
 
@@ -2205,7 +2208,8 @@ class DeliveryMechanismData(TimeStampedUUIDModel, SignatureMixin):
         "delivery_mechanism",
     )
 
-    objects = models.Manager()
+    objects = MergedManager()
+    all_objects = models.Manager()
 
     def __str__(self) -> str:
         return f"[{self.id}] {self.individual} - {self.delivery_mechanism}"
@@ -2269,7 +2273,8 @@ class DeliveryMechanismData(TimeStampedUUIDModel, SignatureMixin):
                 sha256.update(str(value).encode("utf-8"))
 
             unique_key = sha256.hexdigest()
-            possible_duplicates = self.__class__.objects.filter(
+            possible_duplicates = self.__class__.all_objects.filter(
+                rdi_merge_status=MergeStatusModel.MERGED,
                 is_valid=True,
                 unique_key__isnull=False,
                 unique_key=unique_key,
@@ -2407,3 +2412,12 @@ class DeliveryMechanismData(TimeStampedUUIDModel, SignatureMixin):
                 }
                 grievance_ticket.individual_data_update_ticket_details.save()
                 grievance_ticket.save()
+
+
+class PendingDeliveryMechanismData(DeliveryMechanismData):
+    objects: PendingManager = PendingManager()  # type: ignore
+
+    class Meta:
+        proxy = True
+        verbose_name = "Imported Delivery Mechanism Data"
+        verbose_name_plural = "Imported Delivery Mechanism Datas"

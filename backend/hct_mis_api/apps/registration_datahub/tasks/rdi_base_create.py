@@ -21,8 +21,9 @@ logger = logging.getLogger(__name__)
 
 
 class RdiBaseCreateTask:
-    COMBINED_FIELDS = get_combined_attributes()
-    FLEX_FIELDS = serialize_flex_attributes()
+    def __init__(self) -> None:
+        self.COMBINED_FIELDS = get_combined_attributes()
+        self.FLEX_FIELDS = serialize_flex_attributes()
 
     def _cast_value(self, value: Any, header: str) -> Any:
         if isinstance(value, str):

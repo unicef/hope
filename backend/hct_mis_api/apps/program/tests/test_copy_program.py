@@ -111,6 +111,10 @@ class TestCopyProgram(APITestCase):
         cls.document1 = DocumentFactory(individual=individual, program=individual.program)
         cls.individual_identity1 = IndividualIdentityFactory(individual=individual)
         cls.bank_account_info1 = BankAccountInfoFactory(individual=individual)
+        individual.individual_collection = None
+        individual.save()
+        cls.household1.household_collection = None
+        cls.household1.save()
         cls.household2, individuals2 = create_household_and_individuals(
             household_data={
                 "business_area": cls.business_area,
@@ -196,7 +200,8 @@ class TestCopyProgram(APITestCase):
         self.assertEqual(Household.objects.count(), 3)
         self.assertEqual(Individual.objects.count(), 4)
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
-
+        self.assertIsNone(self.household1.household_collection)
+        self.assertIsNone(self.individuals1[0].individual_collection)
         self.snapshot_graphql_request(
             request_string=self.COPY_PROGRAM_MUTATION,
             context={"user": self.user},
@@ -278,6 +283,20 @@ class TestCopyProgram(APITestCase):
             self.individual_role_in_household1.individual,
         )
         self.assertEqual(ProgramPartnerThrough.objects.filter(program=copied_program).count(), 1)
+
+        self.individuals1[0].refresh_from_db()
+        self.household1.refresh_from_db()
+
+        self.assertIsNotNone(self.household1.household_collection)
+        self.assertIsNotNone(self.individuals1[0].individual_collection)
+        self.assertEqual(
+            copied_program.household_set.filter(copied_from=self.household1).first().household_collection,
+            self.household1.household_collection,
+        )
+        self.assertEqual(
+            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().individual_collection,
+            self.individuals1[0].individual_collection,
+        )
 
     def test_copy_program_incompatible_collecting_type(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)

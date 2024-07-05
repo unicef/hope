@@ -19,6 +19,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class TestExternalCollectorSendTpToDatahub(TestCase):
@@ -123,6 +124,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             individual=cls.household1_individual_primary_and_head,
             household=cls.household,
             role=ROLE_PRIMARY,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         cls.household1_individual_alternate = IndividualFactory(
             household=cls.household,
@@ -133,6 +135,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             individual=cls.household1_individual_alternate,
             household=cls.household,
             role=ROLE_ALTERNATE,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         cls.individual_no_role_first = IndividualFactory(
             household=cls.household,
@@ -185,11 +188,13 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             individual=cls.external_primary_collector,
             household=cls.household_second,
             role=ROLE_PRIMARY,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         IndividualRoleInHousehold.objects.create(
             individual=cls.external_alternate_collector,
             household=cls.household_second,
             role=ROLE_ALTERNATE,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         cls.household_second.head_of_household = cls.second_household_head
         cls.household_second.save()
@@ -233,11 +238,13 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             individual=external_primary_collector,
             household=household_third,
             role=ROLE_PRIMARY,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         IndividualRoleInHousehold.objects.create(
             individual=external_alternate_collector,
             household=household_third,
             role=ROLE_ALTERNATE,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         household_third.head_of_household = household_third_head
         household_third.save()
