@@ -3,9 +3,19 @@ import { StatusBox } from '@components/core/StatusBox';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { TableCell } from '@mui/material';
 import { periodicDataUpdatesUpdatesStatusToColor } from '@utils/utils';
-import { ReactElement } from 'react';
-import { UniversalRestTable, HeadCell } from 'your-path-to-components'; // Adjust the path
-import { Update, QueryVariables } from 'your-path-to-types'; // Adjust the path
+import { ReactElement, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+
+interface Update {
+  importId: string;
+  templateId: string;
+  importDate: string;
+  importedBy: string;
+  status: string;
+}
 
 const updatesHeadCells: HeadCell<Update>[] = [
   { id: 'importId', numeric: false, disablePadding: false, label: 'Import ID' },
@@ -31,7 +41,7 @@ const updatesHeadCells: HeadCell<Update>[] = [
 ];
 
 const renderUpdateRow = (row: Update): ReactElement => (
-  <>
+  <ClickableTableRow>
     <TableCell>
       <BlackLink>{row.importId}</BlackLink>
     </TableCell>
@@ -48,22 +58,38 @@ const renderUpdateRow = (row: Update): ReactElement => (
         statusToColor={periodicDataUpdatesUpdatesStatusToColor}
       />
     </TableCell>
-  </>
+  </ClickableTableRow>
 );
 
-export const PeriodicDataUpdatesUpdatesList = (): ReactElement => (
-  <UniversalRestTable<Update, QueryVariables>
-    initialVariables={
-      {
-        /* initial query variables */
-      }
-    }
-    endpoint="updates" // Adjust the endpoint
-    queriedObjectName="updates" // Adjust the object name
-    renderRow={renderUpdateRow}
-    headCells={updatesHeadCells}
-    title="Updates"
-    queryFn={() => {}}
-    queryKey={['updates']} // Adjust the query key
-  />
-);
+export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
+  const initialQueryVariables: QueryVariables = {
+    page: 1,
+    page_size: 10,
+    ordering: 'importDate',
+  };
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+
+  const {
+    data: updatesData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['updates', queryVariables],
+    queryFn: () => fetchPeriodicDataUpdateUpdates(queryVariables), // Implement fetchPeriodicDataUpdateUpdates function based on your API
+  });
+
+  return (
+    <UniversalRestTable<Update, QueryVariables>
+      isOnPaper
+      renderRow={renderUpdateRow}
+      headCells={updatesHeadCells}
+      queryFn={() => fetchPeriodicDataUpdateUpdates(queryVariables)}
+      data={updatesData}
+      isLoading={isLoading}
+      error={error}
+      queryVariables={queryVariables}
+      setQueryVariables={setQueryVariables}
+    />
+  );
+};

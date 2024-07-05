@@ -114,9 +114,9 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
 
   return (
     <UniversalRestTable
+      isOnPaper={false}
       renderRow={renderTemplateRow}
       headCells={templatesHeadCells}
-      title="Templates"
       queryFn={() =>
         fetchPeriodicDataUpdateTemplates(businessAreaSlug, programId)
       }
