@@ -10,7 +10,10 @@ from django.utils import timezone
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Document, Household
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_data.models import (
+    RegistrationDataImport,
+    RegistrationDataImportDatahub,
+)
 from hct_mis_api.apps.registration_datahub.exceptions import (
     AlreadyRunningException,
     WrongStatusException,
@@ -37,9 +40,9 @@ def handle_rdi_exception(datahub_rdi_id: str, e: BaseException) -> None:
         from sentry_sdk import capture_exception
 
         err = capture_exception(e)
-    except Exception as e:
-        err = "N/A"
-        logger.exception(e)
+    except Exception as e:  # pragma: no cover
+        err = "N/A"  # pragma: no cover
+        logger.exception(e)  # pragma: no cover
     RegistrationDataImport.objects.filter(
         datahub_id=datahub_rdi_id,
     ).update(status=RegistrationDataImport.IMPORT_ERROR, sentry_id=err, error_message=str(e))
@@ -178,11 +181,11 @@ def registration_kobo_import_task(
             import_data_id=import_data_id,
             program_id=str(program_id),
         )
-    except Exception as e:
-        logger.warning(e)
+    except Exception as e:  # pragma: no cover
+        logger.warning(e)  # pragma: no cover
 
-        handle_rdi_exception(registration_data_import_id, e)
-        raise self.retry(exc=e)
+        handle_rdi_exception(registration_data_import_id, e)  # pragma: no cover
+        raise self.retry(exc=e)  # pragma: no cover
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
@@ -215,8 +218,8 @@ def registration_kobo_import_hourly_task(self: Any) -> None:
             import_data_id=str(not_started_rdi.import_data.id),
             program_id=str(program_id),
         )
-    except Exception as e:
-        raise self.retry(exc=e)
+    except Exception as e:  # pragma: no cover
+        raise self.retry(exc=e)  # pragma: no cover
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
@@ -230,21 +233,24 @@ def registration_xlsx_import_hourly_task(self: Any) -> None:
         )
 
         not_started_rdi = RegistrationDataImport.objects.filter(status=RegistrationDataImport.LOADING).first()
+        print("*" * 400)
+        print(not_started_rdi)
         if not_started_rdi is None:
             return
 
+        rdi_datahub = RegistrationDataImportDatahub.objects.get(hct_id=not_started_rdi.id)
         business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area.slug)
         program_id = not_started_rdi.program.id
         set_sentry_business_area_tag(business_area.name)
 
         RdiXlsxCreateTask().execute(
             registration_data_import_id=str(not_started_rdi.id),
-            import_data_id=str(not_started_rdi.import_data.id),
+            import_data_id=str(rdi_datahub.import_data.id),
             business_area_id=str(business_area.id),
             program_id=str(program_id),
         )
-    except Exception as e:
-        raise self.retry(exc=e)
+    except Exception as e:  # pragma: no cover
+        raise self.retry(exc=e)  # pragma: no cover
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
