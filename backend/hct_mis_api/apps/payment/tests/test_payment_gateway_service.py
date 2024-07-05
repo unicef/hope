@@ -226,7 +226,7 @@ class TestPaymentGatewayService(APITestCase):
         assert self.payments[0].delivered_quantity == self.payments[0].entitlement_quantity
         assert self.payments[1].status == Payment.STATUS_DISTRIBUTION_PARTIAL
         assert self.payments[1].fsp_auth_code == "2"
-        assert self.payments[1].delivered_quantity == self.payments[0].entitlement_quantity - Decimal(10.00)
+        assert self.payments[1].delivered_quantity == self.payments[1].entitlement_quantity - Decimal(10.00)
 
         # pp is reconciled at this point
         get_records_for_payment_instruction_mock.reset_mock()
