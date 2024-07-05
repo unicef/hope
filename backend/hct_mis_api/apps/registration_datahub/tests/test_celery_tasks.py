@@ -1,6 +1,7 @@
 import base64
 import datetime
 import json
+import unittest
 import uuid
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
@@ -15,6 +16,8 @@ from django.utils import timezone
 
 import pytest
 
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
@@ -40,12 +43,23 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import (
     RegistrationDataImportDatahubFactory,
     RegistrationDataImportFactory,
 )
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.celery_tasks import remove_old_rdi_links_task
+from hct_mis_api.apps.registration_data.models import (
+    ImportData,
+    RegistrationDataImport,
+    RegistrationDataImportDatahub,
+)
+from hct_mis_api.apps.registration_datahub.celery_tasks import (
+    registration_kobo_import_hourly_task,
+    registration_kobo_import_task,
+    registration_xlsx_import_hourly_task,
+    remove_old_rdi_links_task,
+)
 from hct_mis_api.apps.utils.models import MergeStatusModel
 from hct_mis_api.aurora.celery_tasks import (
     automate_rdi_creation_task,
@@ -696,3 +710,73 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
         self.assertEqual(self.rdi_1.erased, True)
         self.assertEqual(self.rdi_2.erased, True)
         self.assertEqual(self.rdi_3.erased, False)
+
+
+class TestRegistrationImportCeleryTasks(APITestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.business_area = create_afghanistan()
+
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
+            RdiXlsxCreateTask,
+        )
+
+        cls.RdiXlsxCreateTask = RdiXlsxCreateTask
+
+        cls.import_data = ImportData.objects.create(
+            number_of_households=3,
+            number_of_individuals=6,
+        )
+
+        cls.program = ProgramFactory(status=Program.ACTIVE)
+
+        cls.registration_data_import = RegistrationDataImportFactory(
+            business_area=cls.business_area,
+            program=cls.program,
+        )
+        cls.registration_data_import_datahub = RegistrationDataImportDatahub.objects.create(
+            name=cls.registration_data_import.name,
+            hct_id=cls.registration_data_import.id,
+            import_data=cls.import_data,
+            business_area_slug=cls.business_area.slug,
+        )
+        cls.registration_data_import.datahub_id = cls.registration_data_import_datahub.id
+        cls.registration_data_import.save()
+
+        super().setUpTestData()
+
+    @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.RdiKoboCreateTask")
+    def test_registration_kobo_import_task_execute_called_once(self, MockRdiKoboCreateTask: unittest.mock.Mock) -> None:
+        mock_task_instance = MockRdiKoboCreateTask.return_value
+        registration_data_import_id = self.registration_data_import.id
+        import_data_id = self.import_data.id
+        business_area_id = self.business_area.id
+        program_id = self.program.id
+        registration_kobo_import_task.delay(
+            registration_data_import_id=registration_data_import_id,
+            import_data_id=import_data_id,
+            business_area_id=business_area_id,
+            program_id=program_id,
+        )
+        mock_task_instance.execute.assert_called_once_with(
+            import_data_id=import_data_id,
+            program_id=str(program_id),
+        )
+
+    @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.RdiKoboCreateTask")
+    def test_registration_kobo_import_hourly_task_execute_called_once(
+        self, MockRdiKoboCreateTask: unittest.mock.Mock
+    ) -> None:
+        mock_task_instance = MockRdiKoboCreateTask.return_value
+        registration_kobo_import_hourly_task.delay()
+        mock_task_instance.execute.assert_called_once()
+
+    @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create.RdiXlsxCreateTask")
+    def test_registration_xlsx_import_hourly_task_execute_called_once(
+        self, MockRdiXlsxCreateTask: unittest.mock.Mock
+    ) -> None:
+        self.registration_data_import.status = RegistrationDataImport.LOADING
+        self.registration_data_import.save()
+        mock_task_instance = MockRdiXlsxCreateTask.return_value
+        registration_xlsx_import_hourly_task.delay()
+        mock_task_instance.execute.assert_called_once()
