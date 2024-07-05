@@ -6,6 +6,12 @@ from page_object.payment_module.new_payment_plan import NewPaymentPlan
 from page_object.payment_module.payment_module import PaymentModule
 from page_object.payment_module.payment_module_details import PaymentModuleDetails
 
+from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
+from hct_mis_api.apps.payment.models import FinancialServiceProvider
+from hct_mis_api.apps.steficon.models import Rule
+from hct_mis_api.apps.steficon.fixtures import RuleFactory
+from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
@@ -17,6 +23,8 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetPopulationFactory,
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from selenium_tests.helpers.date_time_format import FormatTime
+from hct_mis_api.apps.household.fixtures import create_household
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -38,11 +46,35 @@ def create_test_program() -> Program:
 @pytest.fixture
 def create_targeting(create_test_program: Program) -> None:
     targeting_criteria = TargetingCriteriaFactory()
-    TargetPopulationFactory(
+
+    tp = TargetPopulationFactory(
         program=create_test_program,
         status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
         targeting_criteria=targeting_criteria,
     )
+    households = [create_household(
+        household_args={"size": 2, "business_area": tp.business_area, "program": tp.program},
+    )[0] for _ in range(14)]
+
+    tp.households.set(households)
+    business_area = BusinessArea.objects.get(slug="afghanistan")
+    rule = RuleFactory(
+        name="Test Rule",
+        type=Rule.TYPE_PAYMENT_PLAN,
+        deprecated=False,
+        enabled=True,
+    )
+    rule.allowed_business_areas.add(business_area)
+    RuleCommitFactory(rule=rule, version=2)
+
+    fsp_1 = FinancialServiceProviderFactory(
+        name="FSP_1",
+        vision_vendor_number="149-69-3686",
+        delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH],
+        distribution_limit=10_000,
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+    )
+    fsp_1.allowed_business_areas.add(business_area)
 
 
 @pytest.fixture
@@ -98,7 +130,7 @@ class TestSmokePaymentModule:
         assert "Rows per page: 5 1–1 of 1" in pagePaymentModule.getTablePagination().text.replace("\n", " ")
 
     def test_smoke_new_payment_plan(
-        self, create_test_program: Program, pagePaymentModule: PaymentModule, pageNewPaymentPlan: NewPaymentPlan
+            self, create_test_program: Program, pagePaymentModule: PaymentModule, pageNewPaymentPlan: NewPaymentPlan
     ) -> None:
         pagePaymentModule.selectGlobalProgramFilter("Test Program").click()
         pagePaymentModule.getNavPaymentModule().click()
@@ -114,10 +146,10 @@ class TestSmokePaymentModule:
         assert "Dispersion End Date*" in pageNewPaymentPlan.getInputDispersionEndDate().text
 
     def test_smoke_details_payment_plan(
-        self,
-        create_payment_plan: PaymentPlan,
-        pagePaymentModule: PaymentModule,
-        pagePaymentModuleDetails: PaymentModuleDetails,
+            self,
+            create_payment_plan: PaymentPlan,
+            pagePaymentModule: PaymentModule,
+            pagePaymentModuleDetails: PaymentModuleDetails,
     ) -> None:
         pagePaymentModule.selectGlobalProgramFilter("Test Program").click()
         pagePaymentModule.getNavPaymentModule().click()
@@ -129,15 +161,16 @@ class TestSmokePaymentModule:
         assert "USD" in pagePaymentModuleDetails.getLabelCurrency().text
         assert str((datetime.now()).strftime("%-d %b %Y")) in pagePaymentModuleDetails.getLabelStartDate().text
         assert (
-            str((datetime.now() + relativedelta(days=30)).strftime("%-d %b %Y"))
-            in pagePaymentModuleDetails.getLabelEndDate().text
+                str((datetime.now() + relativedelta(days=30)).strftime("%-d %b %Y"))
+                in pagePaymentModuleDetails.getLabelEndDate().text
         )
         assert (
-            str((datetime.now()).strftime("%-d %b %Y")) in pagePaymentModuleDetails.getLabelDispersionStartDate().text
+                str((datetime.now()).strftime(
+                    "%-d %b %Y")) in pagePaymentModuleDetails.getLabelDispersionStartDate().text
         )
         assert (
-            str((datetime.now() + relativedelta(days=14)).strftime("%-d %b %Y"))
-            in pagePaymentModuleDetails.getLabelDispersionEndDate().text
+                str((datetime.now() + relativedelta(days=14)).strftime("%-d %b %Y"))
+                in pagePaymentModuleDetails.getLabelDispersionEndDate().text
         )
         assert "-" in pagePaymentModuleDetails.getLabelRelatedFollowUpPaymentPlans().text
         assert "SET UP FSP" in pagePaymentModuleDetails.getButtonSetUpFsp().text
@@ -163,17 +196,77 @@ class TestSmokePaymentModule:
         assert "Reconciliation" in pagePaymentModuleDetails.getTableLabel()[10].text
 
     def test_payment_plan_happy_path(
-        self,
-        create_targeting: None,
-        pagePaymentModule: PaymentModule,
-        pagePaymentModuleDetails: PaymentModuleDetails,
-        pageNewPaymentPlan: NewPaymentPlan
+            self,
+            create_targeting: None,
+            pagePaymentModule: PaymentModule,
+            pagePaymentModuleDetails: PaymentModuleDetails,
+            pageNewPaymentPlan: NewPaymentPlan
     ) -> None:
+        targeting = TargetPopulation.objects.first()
+        program = Program.objects.get(name="Test Program")
         pagePaymentModule.selectGlobalProgramFilter("Test Program").click()
-        pagePaymentModule.getNavTargeting().click()
-        pagePaymentModule.screenshot("Targeting")
         pagePaymentModule.getNavPaymentModule().click()
         pagePaymentModule.getButtonNewPaymentPlan().click()
         pageNewPaymentPlan.getInputTargetPopulation().click()
+        pageNewPaymentPlan.select_listbox_element(targeting.name).click()
+        pageNewPaymentPlan.getInputStartDate().click()
+        pageNewPaymentPlan.getInputStartDate().send_keys(
+            FormatTime(time=program.start_date + relativedelta(day=12)).numerically_formatted_date)
+        pageNewPaymentPlan.getInputEndDate().click()
+        pageNewPaymentPlan.getInputEndDate().send_keys(FormatTime(time=program.end_date).numerically_formatted_date)
+        pageNewPaymentPlan.getInputCurrency().click()
+        pageNewPaymentPlan.select_listbox_element("Czech koruna").click()
+        pageNewPaymentPlan.getInputDispersionStartDate().click()
+        pageNewPaymentPlan.getInputDispersionStartDate().send_keys(FormatTime(22, 1, 2024).numerically_formatted_date)
+        pageNewPaymentPlan.getInputDispersionEndDate().click()
+        pageNewPaymentPlan.getInputDispersionEndDate().send_keys(FormatTime(30, 6, 2030).numerically_formatted_date)
+        pageNewPaymentPlan.getInputCurrency().click()
+        pageNewPaymentPlan.getButtonSavePaymentPlan().click()
+        assert "OPEN" in pagePaymentModuleDetails.getStatusContainer().text
+        assert "Test Program" in pagePaymentModuleDetails.getLabelProgramme().text
+        assert "CZK" in pagePaymentModuleDetails.getLabelCurrency().text
+        assert FormatTime(time=program.start_date + relativedelta(
+            day=12)).date_in_text_format in pagePaymentModuleDetails.getLabelStartDate().text
+        assert FormatTime(time=program.end_date).date_in_text_format in pagePaymentModuleDetails.getLabelEndDate().text
+        assert FormatTime(22, 1,
+                          2024).date_in_text_format in pagePaymentModuleDetails.getLabelDispersionStartDate().text
+        assert FormatTime(30, 6, 2030).date_in_text_format in pagePaymentModuleDetails.getLabelDispersionEndDate().text
+        pagePaymentModuleDetails.getButtonLockPlan().click()
+        pagePaymentModuleDetails.getButtonSubmit().click()
+        pagePaymentModuleDetails.getInputEntitlementFormula().click()
+        pagePaymentModuleDetails.select_listbox_element("Test Rule").click()
+        pagePaymentModuleDetails.getButtonApplySteficon().click()
+        from time import sleep
+        sleep(5)
+        pagePaymentModuleDetails.getButtonSetUpFsp().click()
+        pagePaymentModuleDetails.getSelectDeliveryMechanism().click()
+        pagePaymentModuleDetails.select_listbox_element("Cash").click()
+        pagePaymentModuleDetails.getButtonNextSave().click()
+        pagePaymentModuleDetails.getSelectDeliveryMechanismFSP().click()
+        pagePaymentModuleDetails.select_listbox_element("FSP_1").click()
+        pagePaymentModuleDetails.getButtonNextSave().click()
+        pagePaymentModuleDetails.checkStatus("LOCKED")
+        pagePaymentModuleDetails.getButtonLockPlan().click()
+        pagePaymentModuleDetails.getButtonSubmit().click()
+        pagePaymentModuleDetails.checkStatus("LOCKED FSP")
+        pagePaymentModuleDetails.getButtonSendForApproval().click()
+        pagePaymentModuleDetails.checkStatus("IN APPROVAL")
+        pagePaymentModuleDetails.getButtonApprove().click()
+        pagePaymentModuleDetails.getButtonSubmit().click()
+        pagePaymentModuleDetails.checkStatus("IN AUTHORIZATION")
+        pagePaymentModuleDetails.getButtonAuthorize().click()
+        pagePaymentModuleDetails.getButtonSubmit().click()
+        pagePaymentModuleDetails.checkStatus("IN REVIEW")
+        pagePaymentModuleDetails.getButtonMarkAsReleased().click()
+        pagePaymentModuleDetails.getButtonSubmit().click()
+        pagePaymentModuleDetails.checkStatus("ACCEPTED")
+        for i in range(20):
+            pagePaymentModuleDetails.screenshot(i)
+        pagePaymentModuleDetails.getButtonExportXlsx().click()
+
         pagePaymentModule.screenshot("PaymentModule")
 
+        from selenium_tests.tools.tag_name_finder import printing
+        printing("Mapping", pagePaymentModuleDetails.driver)
+        printing("Methods", pagePaymentModuleDetails.driver)
+        printing("Assert", pagePaymentModuleDetails.driver)
