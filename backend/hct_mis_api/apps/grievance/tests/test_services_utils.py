@@ -2,22 +2,40 @@ from typing import Any
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
+from django.core.exceptions import ValidationError
+
 import pytest
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64_required
+from hct_mis_api.apps.geo.fixtures import CountryFactory
 from hct_mis_api.apps.grievance.services.data_change.utils import (
     cast_flex_fields,
+    handle_add_document,
     handle_add_payment_channel,
+    handle_role,
     handle_update_payment_channel,
     to_phone_number_str,
     verify_flex_fields,
 )
 from hct_mis_api.apps.household.fixtures import (
     BankAccountInfoFactory,
+    DocumentFactory,
+    DocumentTypeFactory,
     IndividualFactory,
+    IndividualRoleInHouseholdFactory,
+    create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import BankAccountInfo
+from hct_mis_api.apps.household.models import (
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    BankAccountInfo,
+    Document,
+    IndividualRoleInHousehold,
+)
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class FlexibleAttribute:
@@ -95,3 +113,64 @@ class TestGrievanceUtils(TestCase):
         with pytest.raises(ValueError) as e:
             verify_flex_fields({"key": "value"}, "individuals")
             assert str(e.value) == "key is not a correct `flex field"
+
+    def test_handle_role(self) -> None:
+        create_afghanistan()
+        business_area = BusinessArea.objects.get(slug="afghanistan")
+        household, individuals = create_household_and_individuals(
+            household_data={"business_area": business_area},
+            individuals_data=[{}],
+        )
+
+        self.assertEqual(IndividualRoleInHousehold.objects.all().count(), 0)
+        with pytest.raises(ValidationError) as e:
+            IndividualRoleInHouseholdFactory(household=household, individual=individuals[0], role=ROLE_PRIMARY)
+            handle_role(ROLE_PRIMARY, household, individuals[0])
+            assert str(e.value) == "Ticket cannot be closed, primary collector role has to be reassigned"
+
+        # just remove exists roles
+        IndividualRoleInHousehold.objects.filter(household=household).update(role=ROLE_ALTERNATE)
+        handle_role("OTHER_ROLE_XD", household, individuals[0])
+        self.assertEqual(IndividualRoleInHousehold.objects.filter(household=household).count(), 0)
+
+        # create new role
+        handle_role(ROLE_ALTERNATE, household, individuals[0])
+        role = IndividualRoleInHousehold.objects.filter(household=household).first()
+        self.assertEqual(role.role, ROLE_ALTERNATE)
+        self.assertEqual(role.rdi_merge_status, MergeStatusModel.MERGED)
+
+    def test_handle_add_document(self) -> None:
+        create_afghanistan()
+        country = CountryFactory(name="Afghanistan")
+        document_type = DocumentTypeFactory(key="TAX", label="tax")
+        business_area = BusinessArea.objects.get(slug="afghanistan")
+        household, individuals = create_household_and_individuals(
+            household_data={"business_area": business_area},
+            individuals_data=[{}],
+        )
+        individual = individuals[0]
+        document_data = {"key": "TAX", "country": "AFG", "number": "111", "photo": "photo", "photoraw": "photo_raw"}
+
+        with pytest.raises(ValidationError) as e:
+            DocumentFactory(
+                document_number=111,
+                type=document_type,
+                country=country,
+                program_id=individual.program_id,
+                status=Document.STATUS_VALID,
+            )
+            handle_add_document(document_data, individual)
+            assert str(e.value) == "Document with number 111 of type tax already exists"
+
+        with pytest.raises(ValidationError) as e:
+            document_type.unique_for_individual = True
+            document_type.save()
+            handle_add_document(document_data, individual)
+            assert str(e.value) == "Document of type tax already exists for this individual"
+
+        Document.objects.all().delete()
+        self.assertEqual(Document.objects.all().count(), 0)
+
+        document = handle_add_document(document_data, individual)
+        self.assertIsInstance(document, Document)
+        self.assertEqual(document.rdi_merge_status, MergeStatusModel.MERGED)
