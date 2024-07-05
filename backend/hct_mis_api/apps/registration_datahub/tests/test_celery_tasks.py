@@ -46,14 +46,20 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
+from hct_mis_api.apps.registration_data.models import (
+    ImportData,
+    KoboImportData,
+    RegistrationDataImport,
+)
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
+    pull_kobo_submissions_task,
     rdi_deduplication_task,
     registration_kobo_import_hourly_task,
     registration_kobo_import_task,
     registration_xlsx_import_hourly_task,
     remove_old_rdi_links_task,
+    validate_xlsx_import_task,
 )
 from hct_mis_api.apps.utils.models import MergeStatusModel
 from hct_mis_api.aurora.celery_tasks import (
@@ -775,6 +781,16 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         self.registration_data_import.refresh_from_db()
         self.assertEqual(self.registration_data_import.status, RegistrationDataImport.MERGE_ERROR)
 
+    @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_merge.RdiMergeTask")
+    def test_merge_registration_data_import_task(
+        self,
+        MockRdiMergeTask: unittest.mock.Mock,
+    ) -> None:
+        mock_rdi_merge_task_instance = MockRdiMergeTask.return_value
+        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.IN_REVIEW)
+        merge_registration_data_import_task.delay(registration_data_import_id=self.registration_data_import.id)
+        mock_rdi_merge_task_instance.execute.assert_called_once()
+
     @patch("hct_mis_api.apps.registration_datahub.tasks.deduplicate.DeduplicateTask")
     def test_rdi_deduplication_task_exception(
         self,
@@ -786,3 +802,22 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         rdi_deduplication_task.delay(registration_data_import_id=self.registration_data_import.id)
         self.registration_data_import.refresh_from_db()
         self.assertEqual(self.registration_data_import.status, RegistrationDataImport.IMPORT_ERROR)
+
+    @patch("hct_mis_api.apps.registration_datahub.tasks.pull_kobo_submissions.PullKoboSubmissions")
+    def test_pull_kobo_submissions_task(
+        self,
+        PullKoboSubmissionsTask: unittest.mock.Mock,
+    ) -> None:
+        kobo_import_data = KoboImportData.objects.create(kobo_asset_id="1234")
+        mock_task_instance = PullKoboSubmissionsTask.return_value
+        pull_kobo_submissions_task.delay(kobo_import_data.id)
+        mock_task_instance.execute.assert_called_once()
+
+    @patch("hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import.ValidateXlsxImport")
+    def test_validate_xlsx_import_task(
+        self,
+        ValidateXlsxImportTask: unittest.mock.Mock,
+    ) -> None:
+        mock_task_instance = ValidateXlsxImportTask.return_value
+        validate_xlsx_import_task.delay(self.import_data.id, self.program.id)
+        mock_task_instance.execute.assert_called_once()
