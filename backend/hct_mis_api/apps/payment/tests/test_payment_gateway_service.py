@@ -32,6 +32,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlanSplit,
 )
 from hct_mis_api.apps.payment.services.payment_gateway import (
+    PaymentGatewayAPI,
     PaymentGatewayService,
     PaymentRecordData,
 )
@@ -232,3 +233,23 @@ class TestPaymentGatewayService(APITestCase):
         get_records_for_payment_instruction_mock.reset_mock()
         pg_service.sync_records()
         assert get_records_for_payment_instruction_mock.call_count == 0
+
+    def test_get_hope_status(self) -> None:
+        p = PaymentRecordData(
+            id=1,
+            remote_id=str(self.payments[0].id),
+            created="2023-10-10",
+            modified="2023-10-11",
+            record_code="1",
+            parent="1",
+            status="TRANSFERRED_TO_BENEFICIARY",
+            hope_status=Payment.STATUS_DISTRIBUTION_SUCCESS,
+            auth_code="1",
+            payout_amount=float(self.payments[0].entitlement_quantity),
+            fsp_code="1",
+        )
+        self.assertEqual(p.get_hope_status(self.payments[0].entitlement_quantity), Payment.STATUS_DISTRIBUTION_SUCCESS)
+        self.assertEqual(p.get_hope_status(Decimal(1000000.00)), Payment.STATUS_DISTRIBUTION_PARTIAL)
+        with self.assertRaises(PaymentGatewayAPI.PaymentGatewayAPIException):
+            p.status = "NOT EXISTING STATUS"
+            p.get_hope_status(Decimal(1000000.00))

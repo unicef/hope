@@ -155,7 +155,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
     fsp_code: str
     message: Optional[str] = None
 
-    def get_hope_status(self, status: str, entitlement_quantity: Decimal) -> str:
+    def get_hope_status(self, entitlement_quantity: Decimal) -> str:
         def get_transferred_status_based_on_delivery_amount() -> str:
             try:
                 _hope_status, _quantity = get_payment_delivered_quantity_status_and_value(
@@ -177,9 +177,9 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
             "CANCELLED": Payment.STATUS_MANUALLY_CANCELLED,
         }
 
-        hope_status = mapping.get(status)
+        hope_status = mapping.get(self.status)
         if not hope_status:
-            raise PaymentGatewayAPI.PaymentGatewayAPIException(f"Invalid Payment status: {status}")
+            raise PaymentGatewayAPI.PaymentGatewayAPIException(f"Invalid Payment status: {self.status}")
 
         return hope_status() if callable(hope_status) else hope_status
 
@@ -429,9 +429,7 @@ class PaymentGatewayService:
                 )
                 return
 
-            _payment.status = matching_pg_payment.get_hope_status(
-                matching_pg_payment.status, _payment.entitlement_quantity
-            )
+            _payment.status = matching_pg_payment.get_hope_status(_payment.entitlement_quantity)
             _payment.status_date = now()
             _payment.fsp_auth_code = matching_pg_payment.auth_code
             update_fields = ["status", "status_date", "fsp_auth_code"]
