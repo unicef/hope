@@ -483,16 +483,14 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
                 Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER.value,
             )
 
-    def resolve_import_id(parent, info: Any) -> str:
-        row = ""
-        resp = str(parent.mis_unicef_id) if parent.mis_unicef_id else str(parent.id)
-
+    @staticmethod
+    def resolve_import_id(parent: Household, info: Any) -> str:
         if parent.detail_id:
-            row = f" (Detail id {parent.detail_id})"
+            return f"{parent.unicef_id} (Detail id {parent.detail_id})"
         if parent.enumerator_rec_id:
-            row = f" (Enumerator ID {parent.enumerator_rec_id})"
+            return f"{parent.unicef_id} (Enumerator ID {parent.enumerator_rec_id})"
 
-        return resp + row
+        return parent.unicef_id
 
     @classmethod
     def get_queryset(cls, queryset: QuerySet[Household], info: Any) -> QuerySet[Household]:
