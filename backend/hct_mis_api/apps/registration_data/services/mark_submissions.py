@@ -5,10 +5,10 @@ from django.db import transaction
 from django.db.models import QuerySet
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedHousehold,
+from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.registration_data.models import (
     KoboImportedSubmission,
+    RegistrationDataImport,
 )
 
 
@@ -29,7 +29,7 @@ class MarkSubmissions:
             return {"message": "No suitable (unmerged) Submissions found", "submissions": 0}
 
         # Mark as amended
-        with transaction.atomic(using="registration_datahub"):
+        with transaction.atomic():
             rows = submissions.update(amended=True)
             return {"message": f"{rows} submissions successfully amended", "submissions": rows}
 
@@ -37,7 +37,7 @@ class MarkSubmissions:
         return KoboImportedSubmission.objects.exclude(kobo_submission_uuid__in=list(submission_ids))
 
     def _get_submissions_ids(self, datahub_ids: QuerySet) -> List:
-        return ImportedHousehold.objects.filter(
+        return Household.objects.filter(
             kobo_submission_uuid__isnull=False,
             registration_data_import__id__in=list(datahub_ids),
         ).values_list("kobo_submission_uuid", flat=True)
@@ -46,5 +46,5 @@ class MarkSubmissions:
         return (
             RegistrationDataImport.objects.filter(status=RegistrationDataImport.MERGED)
             .filter(business_area=self.business_area)
-            .values_list("datahub_id", flat=True)
+            .values_list("id", flat=True)
         )

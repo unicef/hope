@@ -49,7 +49,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
 )
 from hct_mis_api.apps.payment.models import DeliveryMechanismData
-from hct_mis_api.apps.registration_datahub.models import KoboImportedSubmission
+from hct_mis_api.apps.registration_data.models import KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 from hct_mis_api.apps.registration_datahub.utils import (
     calculate_hash_for_kobo_submission,
@@ -188,6 +188,7 @@ class ImportDataInstanceValidator:
         try:
             invalid_rows = []
             for key, values in documents_numbers_dict.items():
+                key_name = "pp_" + key if self.is_social_worker_program else key
                 if key == "other_id_no_i_c":
                     continue
                 issuing_countries = values.get("issuing_countries")
@@ -200,24 +201,24 @@ class ImportDataInstanceValidator:
                         row_number = validation_data.get("row_number")
                         if not name and value:
                             error = {
-                                "header": key,
-                                "message": f"Name for other_id_type is required, when number is provided: no: {value}",
+                                "header": key_name,
+                                "message": f"Name for {key_name} is required, when number is provided: no: {value}",
                             }
                             if is_xlsx is True:
                                 error["row_number"] = row_number
                             invalid_rows.append(error)
                         if name and not value:
                             error = {
-                                "header": key,
-                                "message": "Number for other_id_no_i_c is required, when name is provided",
+                                "header": key_name,
+                                "message": f"Number for {key_name} is required, when name is provided",
                             }
                             if is_xlsx is True:
                                 error["row_number"] = row_number
                             invalid_rows.append(error)
                         if (name or value) and not issuing_country:
                             error = {
-                                "header": key,
-                                "message": "Issuing country for other_id_no_i_c is required, "
+                                "header": key_name,
+                                "message": f"Issuing country for {key_name} is required, "
                                 "when any document data are provided",
                             }
                             if is_xlsx is True:
@@ -232,16 +233,16 @@ class ImportDataInstanceValidator:
                         )
                         if value and not issuing_country:
                             error = {
-                                "header": key,
-                                "message": f"Issuing country for {key} is required, when any document data are provided",
+                                "header": key_name,
+                                "message": f"Issuing country for {key_name} is required, when any document data are provided",
                             }
                             if is_xlsx is True:
                                 error["row_number"] = row_number
                             invalid_rows.append(error)
                         elif issuing_country and not value:
                             error = {
-                                "header": key,
-                                "message": f"Number for {key} is required, when issuing country is provided",
+                                "header": key_name,
+                                "message": f"Number for {key_name} is required, when issuing country is provided",
                             }
                             if is_xlsx is True:
                                 error["row_number"] = row_number
@@ -256,6 +257,7 @@ class ImportDataInstanceValidator:
         try:
             invalid_rows = []
             for key, values in identities_numbers_dict.items():
+                key_name = "pp_" + key if self.is_social_worker_program else key
                 issuing_countries = values.get("issuing_countries")
                 if not issuing_countries:
                     issuing_countries = [None] * len(values["validation_data"])
@@ -267,7 +269,7 @@ class ImportDataInstanceValidator:
                         continue
                     elif value and not issuing_country:
                         error = {
-                            "header": key,
+                            "header": key_name,
                             "message": f"Issuing country is required: partner: {values['partner']} no: {value}",
                         }
                         if is_xlsx is True:
@@ -275,8 +277,8 @@ class ImportDataInstanceValidator:
                         invalid_rows.append(error)
                     elif issuing_country and not value:
                         error = {
-                            "header": key,
-                            "message": f"Number for {key} is required, when issuing country is provided",
+                            "header": key_name,
+                            "message": f"Number for {key_name} is required, when issuing country is provided",
                         }
                         if is_xlsx is True:
                             error["row_number"] = row_number
@@ -727,24 +729,25 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         )
                         invalid_rows.append({"row_number": cell.row, "header": header.value, "message": message})
 
-                    if header.value in documents_numbers:
-                        if header.value == "other_id_type_i_c":
+                    header_value_doc = header.value[len("pp_") :] if header.value.startswith("pp_") else header.value
+                    if header_value_doc in documents_numbers:
+                        if header_value_doc == "other_id_type_i_c":
                             documents_numbers["other_id_type_i_c"]["names"].append(value)
-                        elif header.value == "other_id_no_i_c":
+                        elif header_value_doc == "other_id_no_i_c":
                             documents_numbers["other_id_type_i_c"]["numbers"].append(str(value) if value else None)
                         else:
-                            documents_numbers[header.value]["numbers"].append(str(value) if value else None)
+                            documents_numbers[header_value_doc]["numbers"].append(str(value) if value else None)
 
-                    if header.value in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.keys():
-                        document_key = self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.get(header.value)
+                    if header_value_doc in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.keys():
+                        document_key = self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.get(header_value_doc)
                         documents_dict = documents_numbers
                         if document_key in identities_numbers.keys():
                             documents_dict = identities_numbers
                         if document_key:
                             documents_dict[document_key]["issuing_countries"].append(value)
 
-                    if header.value in identities_numbers:
-                        identities_numbers[header.value]["numbers"].append(str(value) if value else None)
+                    if header_value_doc in identities_numbers:
+                        identities_numbers[header_value_doc]["numbers"].append(str(value) if value else None)
 
                     if header.value in self.delivery_mechanisms_xlsx_fields:
                         delivery_mechanisms_data[row_number][header.value] = value
@@ -753,11 +756,11 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     message = f"Sheet: Individuals, There is no household with provided id: {current_household_id}"
                     invalid_rows.append({"row_number": row_number, "header": "relationship_i_c", "message": message})
 
-                for header in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.values():
+                for header_value_doc in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.values():
                     documents_or_identity_dict = (
-                        identities_numbers if header in identities_numbers.keys() else documents_numbers
+                        identities_numbers if header_value_doc in identities_numbers.keys() else documents_numbers
                     )
-                    documents_or_identity_dict[header]["validation_data"].append({"row_number": row[0].row})
+                    documents_or_identity_dict[header_value_doc]["validation_data"].append({"row_number": row[0].row})
 
             if sheet.title == "Individuals":
                 for household_id, count in self.head_of_household_count.items():
@@ -778,11 +781,9 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             invalid_doc_rows = []
             invalid_ident_rows = []
             invalid_delivery_mechanisms = []
-            if sheet.title == "Individuals":
+            if sheet.title in ["Individuals", "People"]:
                 invalid_doc_rows = self.documents_validator(documents_numbers)
                 invalid_ident_rows = self.identity_validator(identities_numbers)
-
-            if sheet.title in ["Individuals", "People"]:
                 invalid_delivery_mechanisms = self.delivery_mechanisms_validator(delivery_mechanisms_data)
 
             self.errors.extend([*invalid_rows, *invalid_doc_rows, *invalid_ident_rows])
