@@ -1,13 +1,13 @@
 import json
 from datetime import date
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional
 
-from django.db.models import Prefetch, Q
+from django.db.models import Prefetch, Q, QuerySet
 
 import graphene
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
-from graphene import Boolean, Int, String, relay
+from graphene import Boolean, Int, relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
@@ -34,9 +34,9 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
-    Document,
     DocumentType,
     IndividualIdentity,
+    PendingDocument,
     PendingHousehold,
     PendingIndividual,
     PendingIndividualIdentity,
@@ -52,11 +52,6 @@ from hct_mis_api.apps.registration_datahub.filters import (
     ImportedIndividualFilter,
 )
 from hct_mis_api.apps.utils.schema import Arg, FlexFieldsScalar
-
-if TYPE_CHECKING:
-    from uuid import UUID
-
-    from hct_mis_api.apps.geo.models import Country
 
 
 class DeduplicationResultNode(graphene.ObjectType):
@@ -83,15 +78,15 @@ class ImportedDocumentNode(DjangoObjectType):
     photo = graphene.String(description="Photo url")
 
     def resolve_country(parent, info: Any) -> str:
-        return getattr(parent.country, "name", parent.country)  # type: ignore # can't convert String to str
+        return getattr(parent.country, "name", "")
 
-    def resolve_photo(parent, info: Any) -> Union[String, None]:
+    def resolve_photo(parent, info: Any) -> Optional[str]:
         if parent.photo:
             return parent.photo.url
         return None
 
     class Meta:
-        model = Document
+        model = PendingDocument
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
@@ -102,8 +97,8 @@ class ImportedIndividualIdentityNode(DjangoObjectType):
     country = graphene.String(description="Country")
 
     @staticmethod
-    def resolve_country(parent: PendingIndividualIdentity, info: Any) -> "Country":
-        return getattr(parent.country, "name", parent.country)
+    def resolve_country(parent: PendingIndividualIdentity, info: Any) -> str:
+        return getattr(parent.country, "name", "")
 
     class Meta:
         model = IndividualIdentity
@@ -166,16 +161,11 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_age(parent: Any, info: Any) -> Int:
         return parent.age
 
-    def resolve_documents(parent, info: Any) -> List[Set["UUID"]]:
-        return parent.documents.all()
+    def resolve_documents(parent, info: Any) -> QuerySet[PendingDocument]:
+        return PendingDocument.objects.filter(pk__in=parent.documents.values("id"))
 
     def resolve_import_id(parent, info: Any) -> str:
-        row = ""
-        resp = str(parent.mis_unicef_id) if parent.mis_unicef_id else str(parent.id)
-
-        if parent.detail_id:
-            row = f" (Detail ID {parent.detail_id})"
-        return resp + row
+        return f"{parent.unicef_id} (Detail ID {parent.detail_id})" if parent.unicef_id else parent.unicef_id
 
     def resolve_phone_no_valid(parent, info: Any) -> Boolean:
         return parent.phone_no_valid
@@ -223,7 +213,7 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     import_id = graphene.String()
 
     def resolve_country(parent, info: Any) -> str:
-        return parent.country.name if parent.country else ""
+        return getattr(parent.country, "name", "")
 
     def resolve_country_origin(parent, info: Any) -> str:
         return parent.country_origin.name if parent.country_origin else ""
@@ -237,7 +227,7 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_flex_fields(parent, info: Any) -> Dict:
         return resolve_flex_fields_choices_to_string(parent)
 
-    def resolve_individuals(parent, info: Any) -> List[Set["UUID"]]:
+    def resolve_individuals(parent, info: Any) -> QuerySet[PendingIndividual]:
         imported_individuals_ids = list(parent.individuals.values_list("id", flat=True))
         collectors_ids = list(
             parent.individuals_and_roles.filter(role__in=[ROLE_PRIMARY, ROLE_ALTERNATE]).values_list(
@@ -254,15 +244,11 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         )
 
     def resolve_import_id(parent, info: Any) -> str:
-        row = ""
-        resp = str(parent.mis_unicef_id) if parent.mis_unicef_id else str(parent.id)
-
         if parent.detail_id:
-            row = f" (Detail id {parent.detail_id})"
+            return f"{parent.unicef_id} (Detail id {parent.detail_id})"
         if parent.enumerator_rec_id:
-            row = f" (Enumerator ID {parent.enumerator_rec_id})"
-
-        return resp + row
+            return f"{parent.unicef_id} (Enumerator ID {parent.enumerator_rec_id})"
+        return parent.unicef_id
 
     class Meta:
         model = PendingHousehold
