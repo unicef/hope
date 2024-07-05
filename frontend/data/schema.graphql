@@ -2810,7 +2810,7 @@ type Mutations {
   saveKoboImportDataAsync(businessAreaSlug: String!, onlyActiveSubmissions: Boolean!, uid: Upload!): SaveKoboProjectImportDataAsync
   mergeRegistrationDataImport(id: ID!, version: BigInt): MergeRegistrationDataImportMutation
   refuseRegistrationDataImport(id: ID!, refuseReason: String, version: BigInt): RefuseRegistrationDataImportMutation
-  rerunDedupe(registrationDataImportDatahubId: ID!, version: BigInt): RegistrationDeduplicationMutation
+  rerunDedupe(registrationDataImportId: ID!, version: BigInt): RegistrationDeduplicationMutation
   eraseRegistrationDataImport(id: ID!, version: BigInt): EraseRegistrationDataImportMutation
   checkAgainstSanctionList(file: Upload!): CheckAgainstSanctionListMutation
 }

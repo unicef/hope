@@ -133,7 +133,7 @@ def registration_program_population_import_task(
             if not locked:
                 raise AlreadyRunningException(f"Task with key {cache_key} is already running")
 
-            rdi = RegistrationDataImport.objects.get(datahub_id=registration_data_import_id)
+            rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
             set_sentry_business_area_tag(rdi.business_area.name)
             if rdi.status not in (RegistrationDataImport.IMPORT_SCHEDULED, RegistrationDataImport.IMPORT_ERROR):
                 raise WrongStatusException("Rdi is not in status IMPORT_SCHEDULED while trying to import")
@@ -141,7 +141,7 @@ def registration_program_population_import_task(
             rdi.save()
 
             RdiProgramPopulationCreateTask().execute(
-                registration_data_import_datahub_id=registration_data_import_id,
+                registration_data_import_id=registration_data_import_id,
                 business_area_id=business_area_id,
                 import_from_program_id=str(import_from_program_id),
                 import_to_program_id=str(import_to_program_id),
@@ -150,6 +150,8 @@ def registration_program_population_import_task(
     except (WrongStatusException, AlreadyRunningException) as e:
         logger.info(str(e))
         return True
+    except RegistrationDataImport.DoesNotExist:
+        raise
     except Exception as e:
         logger.warning(e)
 
@@ -291,12 +293,11 @@ def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
         )
 
         rdi_obj = RegistrationDataImport.objects.get(id=registration_data_import_id)
-        registration_data_import = RegistrationDataImport.objects.get(id=rdi_obj.id)
-        program_id = registration_data_import.program.id
+        program_id = rdi_obj.program.id
         set_sentry_business_area_tag(rdi_obj.business_area.slug)
         with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
             DeduplicateTask(rdi_obj.business_area.slug, program_id).deduplicate_pending_individuals(
-                registration_data_import=registration_data_import
+                registration_data_import=rdi_obj
             )
     except Exception as e:
         handle_rdi_exception(registration_data_import_id, e)
