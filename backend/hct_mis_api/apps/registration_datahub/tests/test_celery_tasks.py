@@ -49,18 +49,14 @@ from hct_mis_api.apps.registration_data.fixtures import (
     RegistrationDataImportDatahubFactory,
     RegistrationDataImportFactory,
 )
-from hct_mis_api.apps.registration_data.models import (
-    ImportData,
-    RegistrationDataImport,
-    RegistrationDataImportDatahub,
-)
+from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
+    merge_registration_data_import_task,
+    rdi_deduplication_task,
     registration_kobo_import_hourly_task,
     registration_kobo_import_task,
     registration_xlsx_import_hourly_task,
     remove_old_rdi_links_task,
-    merge_registration_data_import_task,
-    rdi_deduplication_task,
 )
 from hct_mis_api.apps.utils.models import MergeStatusModel
 from hct_mis_api.aurora.celery_tasks import (
