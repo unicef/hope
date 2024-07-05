@@ -16,7 +16,10 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.models import Household, Individual, IndividualIdentity
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import (
+    RegistrationDataImportDatahubFactory,
+    RegistrationDataImportFactory,
+)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
@@ -85,4 +88,36 @@ class TestRegistrationDataModels(TestCase):
     def test_imported_individual_identity_str(self) -> None:
         self.assertEqual(
             str(self.imported_individual_identity), f"UNICEF {self.imported_individual_3.unicef_id} 123456789"
+        )
+
+
+class TestRegistrationDataImportDatahub(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        create_afghanistan()
+        cls.name = "RDI datahub name"
+        cls.business_area_slug = "RDI business_area slug"
+        cls.rdi_datahub = RegistrationDataImportDatahubFactory(
+            name=cls.name,
+            business_area_slug=cls.business_area_slug,
+        )
+        cls.program = ProgramFactory(status=Program.ACTIVE)
+        cls.rdi = RegistrationDataImportFactory(
+            datahub_id=cls.rdi_datahub.id,
+            program=cls.program,
+        )
+
+    def test_str(self) -> None:
+        self.assertEqual(str(self.rdi_datahub), self.rdi_datahub.name)
+
+    def test_business_area(self) -> None:
+        self.assertEqual(
+            self.rdi_datahub.business_area,
+            self.business_area_slug,
+        )
+
+    def test_linked_rdi(self) -> None:
+        self.assertEqual(
+            self.rdi_datahub.linked_rdi,
+            self.rdi,
         )
