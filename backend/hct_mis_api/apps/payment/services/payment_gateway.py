@@ -25,6 +25,7 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.utils import (
     get_payment_delivered_quantity_status_and_value,
     get_quantity_in_usd,
+    to_decimal,
 )
 
 logger = logging.getLogger(__name__)
@@ -446,7 +447,7 @@ class PaymentGatewayService:
             ]:
                 update_fields.extend(["delivered_quantity", "delivered_quantity_usd"])
                 try:
-                    _payment.delivered_quantity = delivered_quantity
+                    _payment.delivered_quantity = to_decimal(delivered_quantity)
                     _payment.delivered_quantity_usd = get_quantity_in_usd(
                         amount=Decimal(delivered_quantity),
                         currency=_payment_plan.currency,
