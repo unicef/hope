@@ -14,6 +14,7 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_TAX_ID,
     Document,
     DocumentType,
+    Household,
     Individual,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -99,6 +100,18 @@ class TestHousehold(TestCase):
         self.assertIsNone(household.admin2)
         self.assertIsNone(household.admin3)
         self.assertIsNone(household.admin4)
+
+    def test_remove_household(self) -> None:
+        household1, _ = create_household(
+            household_args={"size": 1, "business_area": self.business_area, "unicef_id": "HH-9090"}
+        )
+        household2, _ = create_household(
+            household_args={"size": 1, "business_area": self.business_area, "unicef_id": "HH-9191"}
+        )
+        household1.delete()
+        self.assertEqual(Household.all_objects.filter(unicef_id="HH-9090").first().is_removed, True)
+        household2.delete(soft=False)
+        self.assertIsNone(Household.all_objects.filter(unicef_id="HH-9191").first())
 
 
 class TestDocument(TestCase):

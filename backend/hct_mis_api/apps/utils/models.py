@@ -203,7 +203,7 @@ class SoftDeletableRepresentationMergeStatusModelWithDate(SoftDeletableRepresent
             self.save(using=using)
             return 1, {self._meta.label: 1}
 
-        return models.Model.delete(using=using, *args, **kwargs)
+        return models.Model.delete(self, using=using, *args, **kwargs)
 
 
 class SoftDeletionTreeManager(TreeManager):
