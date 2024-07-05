@@ -32,6 +32,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
     PendingBankAccountInfo,
+    PendingDocument,
     PendingHousehold,
     PendingIndividual,
 )
@@ -260,6 +261,14 @@ class DocumentFactory(DjangoModelFactory):
     country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
     program = factory.SubFactory(ProgramFactory)
     rdi_merge_status = MergeStatusModel.MERGED
+
+
+class PendingDocumentFactory(DocumentFactory):
+    rdi_merge_status = MergeStatusModel.PENDING
+
+    class Meta:
+        model = PendingDocument
+        django_get_or_create = ("document_number", "type", "country", "program")
 
 
 class DocumentAllowDuplicatesFactory(DjangoModelFactory):
