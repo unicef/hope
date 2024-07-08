@@ -45,13 +45,13 @@ class PeriodicDataUpdateTemplateViewSet(
         # 'create': PeriodicDataUpdateTemplateCreateSerializer,
     }
     permission_classes = []
-    permission_classes_by_action = {
-        'list': [PDUViewListAndDetailsPermission],
-        'retrieve': [PDUViewListAndDetailsPermission],
-        # 'create': [PDUTemplateCreatePermission],
-        'export': [PDUTemplateCreatePermission],
-        'download': [PDUTemplateDownloadPermission],
-    }
+    # permission_classes_by_action = {
+    #     'list': [PDUViewListAndDetailsPermission],
+    #     'retrieve': [PDUViewListAndDetailsPermission],
+    #     # 'create': [PDUTemplateCreatePermission],
+    #     'export': [PDUTemplateCreatePermission],
+    #     'download': [PDUTemplateDownloadPermission],
+    # }
     filter_backends = (OrderingFilter,)
 
     def get_queryset(self) -> QuerySet:
@@ -111,7 +111,7 @@ class PeriodicDataUpdateUploadViewSet(
     def get_queryset(self) -> QuerySet:
         business_area = self.get_business_area()
         program = self.get_program()
-        return PeriodicDataUpdateUpload.objects.filter(business_area=business_area, program=program)
+        return PeriodicDataUpdateUpload.objects.filter(template__business_area=business_area, template__program=program)
 
     @etag_decorator(PDUUpdateKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=PDUUpdateKeyConstructor())
