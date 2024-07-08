@@ -715,6 +715,10 @@ class HardDocumentDeduplication:
 
             for new_document in documents_to_dedup:
                 new_document_signature = self._generate_signature(new_document)
+                # using for skip creating a ticket for the same Ind with the same doc number
+                is_duplicated_document_number_for_individual: bool = ind_and_new_document_signatures_duplicated_in_batch_dict.get(
+                    str(new_document.individual_id), []
+                ).count(new_document_signature) > 1
 
                 if new_document_signature in all_matching_number_documents_signatures:
                     new_document.status = Document.STATUS_NEED_INVESTIGATION
@@ -733,10 +737,7 @@ class HardDocumentDeduplication:
                 if (
                     new_document_signature in new_document_signatures_duplicated_in_batch
                     and new_document_signature in already_processed_signatures
-                    and new_document_signature
-                    not in ind_and_new_document_signatures_duplicated_in_batch_dict.get(
-                        str(new_document.individual_id), []
-                    )
+                    and not is_duplicated_document_number_for_individual
                 ):
                     new_document.status = Document.STATUS_NEED_INVESTIGATION
                     ticket_data_dict[new_document_signature]["possible_duplicates"].append(new_document)
@@ -748,10 +749,7 @@ class HardDocumentDeduplication:
 
                 if (
                     new_document_signature in new_document_signatures_duplicated_in_batch
-                    and new_document_signature
-                    not in ind_and_new_document_signatures_duplicated_in_batch_dict.get(
-                        str(new_document.individual_id), []
-                    )
+                    and not is_duplicated_document_number_for_individual
                 ):
                     ticket_data_dict[new_document_signature] = {
                         "original": new_document,

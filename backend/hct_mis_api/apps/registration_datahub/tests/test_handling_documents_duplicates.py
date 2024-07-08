@@ -463,60 +463,51 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         d2 = Document.objects.create(
             country=self.country,
             type=self.dt,
-            document_number="111",
-            individual=self.individuals[1],
+            document_number="222",
+            individual=self.individuals[3],
             program=self.program,
             rdi_merge_status=MergeStatusModel.MERGED,
         )
         d3 = Document.objects.create(
             country=self.country,
             type=self.dt_tax_id,
-            document_number="111",
-            individual=self.individuals[2],
+            document_number="222",
+            individual=self.individuals[4],
             program=self.program,
             rdi_merge_status=MergeStatusModel.MERGED,
         )
         d4 = Document.objects.create(
             country=self.country,
             type=self.dt,
-            document_number="222",
-            individual=self.individuals[3],
+            document_number="111",
+            individual=self.individuals[0],
             program=self.program,
             rdi_merge_status=MergeStatusModel.MERGED,
         )
         d5 = Document.objects.create(
             country=self.country,
             type=self.dt_tax_id,
-            document_number="222",
-            individual=self.individuals[3],
+            document_number="111",
+            individual=self.individuals[1],
             program=self.program,
             rdi_merge_status=MergeStatusModel.MERGED,
         )
-        # d2 = Document.objects.create(
-        #     country=self.country,
-        #     type=self.dt,
-        #     document_number="12332132155",
-        #     individual=self.individuals[4],
-        #     program=self.program,
-        #     rdi_merge_status=MergeStatusModel.MERGED,
-        # )
-        # Document.objects.create(
-        #     country=self.country,
-        #     type=self.dt,
-        #     document_number="12332132155",
-        #     individual=self.individuals[5],
-        #     program=self.program,
-        #     status=Document.STATUS_VALID,
-        #     rdi_merge_status=MergeStatusModel.MERGED,
-        # )
+        d6 = Document.objects.create(
+            country=self.country,
+            type=DocumentTypeFactory(label="other_type", key="other_type"),
+            document_number="111",
+            individual=self.individuals[2],
+            program=self.program,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
 
         self.assertEqual(GrievanceTicket.objects.all().count(), 0)
         HardDocumentDeduplication().deduplicate(
-            self.get_documents_query([passport, tax_id, d1, d2, d3, d4, d5]),
+            self.get_documents_query([passport, tax_id, d1, d2, d3, d4, d5, d6]),
             self.registration_data_import,
         )
 
-        # self.assertEqual(GrievanceTicket.objects.all().count(), 2)
+        self.assertEqual(GrievanceTicket.objects.all().count(), 3)
 
         passport.refresh_from_db()
         self.assertEqual(passport.status, Document.STATUS_VALID)
