@@ -25,48 +25,19 @@ class PaymentVerification(BaseComponents):
     cashPlanTableRow = 'tr[data-cy="cash-plan-table-row"]'
     statusContainer = 'div[data-cy="status-container"]'
     tablePagination = 'div[data-cy="table-pagination"]'
-    pageHeaderContainer = 'div[data-cy="page-header-container"]'
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    filterSearch = 'div[data-cy="filter-search"]'
-    selectFilter = 'div[data-cy="select-filter"]'
-    filterStatus = 'div[data-cy="filter-status"]'
-    filterFsp = 'div[data-cy="filter-fsp"]'
-    filterModality = 'div[data-cy="filter-Modality"]'
-    filterStartDate = 'div[data-cy="filter-start-date"]'
-    filterEndDate = 'div[data-cy="filter-end-date"]'
-    buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
-    buttonFiltersApply = 'button[data-cy="button-filters-apply"]'
-    tableTitle = 'h6[data-cy="table-title"]'
-    unicefid = 'th[data-cy="unicefId"]'
-    tableLabel = 'span[data-cy="table-label"]'
-    verificationstatus = 'th[data-cy="verificationStatus"]'
-    totaldeliveredquantity = 'th[data-cy="totalDeliveredQuantity"]'
-    startdate = 'th[data-cy="startDate"]'
-    updatedat = 'th[data-cy="updatedAt"]'
-    cashPlanTableRow = 'tr[data-cy="cash-plan-table-row"]'
-    statusContainer = 'div[data-cy="status-container"]'
-    tablePagination = 'div[data-cy="table-pagination"]'
 
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
 
-    def getPageHeaderContainer(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
     def getPageHeaderTitle(self) -> WebElement:
         return self.wait_for(self.pageHeaderTitle)
 
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
     def getFilterSearch(self) -> WebElement:
         return self.wait_for(self.filterSearch)
 
-    def getFilterSearch(self) -> WebElement:
-        return self.wait_for(self.filterSearch)
     def getSelectFilter(self) -> WebElement:
         return self.wait_for(self.selectFilter)
 
-    def getSelectFilter(self) -> WebElement:
-        return self.wait_for(self.selectFilter)
     def getFilterStatus(self) -> WebElement:
         return self.wait_for(self.filterStatus)
 

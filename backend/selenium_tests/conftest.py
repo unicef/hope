@@ -32,10 +32,6 @@ from page_object.payment_verification.payment_verification import PaymentVerific
 from page_object.payment_verification.payment_verification_details import (
     PaymentVerificationDetails,
 )
-from page_object.payment_verification.payment_verification import PaymentVerification
-from page_object.payment_verification.payment_verification_details import (
-    PaymentVerificationDetails,
-)
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
 from page_object.programme_population.households import Households
@@ -280,11 +276,6 @@ def pagePaymentModule(request: FixtureRequest, browser: Chrome) -> PaymentModule
 
 
 @pytest.fixture
-def pagePaymentVerification(request: FixtureRequest, browser: Chrome) -> PaymentVerification:
-    yield PaymentVerification(browser)
-
-
-@pytest.fixture
 def pagePaymentRecord(request: FixtureRequest, browser: Chrome) -> PaymentRecord:
     yield PaymentRecord(browser)
 
@@ -297,11 +288,6 @@ def pagePaymentVerificationDetails(request: FixtureRequest, browser: Chrome) -> 
 @pytest.fixture
 def pagePaymentVerification(request: FixtureRequest, browser: Chrome) -> PaymentVerification:
     yield PaymentVerification(browser)
-
-
-@pytest.fixture
-def pagePaymentVerificationDetails(request: FixtureRequest, browser: Chrome) -> PaymentVerificationDetails:
-    yield PaymentVerificationDetails(browser)
 
 
 @pytest.fixture

@@ -4,9 +4,6 @@ from time import sleep
 import pytest
 from dateutil.relativedelta import relativedelta
 from page_object.payment_verification.payment_record import PaymentRecord
-
-import pytest
-from dateutil.relativedelta import relativedelta
 from page_object.payment_verification.payment_verification import PaymentVerification
 from page_object.payment_verification.payment_verification_details import (
     PaymentVerificationDetails,
