@@ -110,6 +110,7 @@ class CashPlanFactory(DjangoModelFactory):
     class Meta:
         model = CashPlan
 
+    ca_id = factory.Sequence(lambda n: f"PP-0000-00-1122334{n}")
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
     program = factory.SubFactory(ProgramFactory)
     status_date = factory.Faker(
