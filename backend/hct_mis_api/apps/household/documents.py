@@ -70,6 +70,8 @@ class IndividualDocument(Document):
     registration_id = fields.TextField()
     program_registration_id = fields.TextField()
     bank_account_info = fields.ObjectField(properties={"bank_account_number": fields.TextField()})
+    registration_data_import_id = fields.KeywordField(attr="registration_data_import.id")
+    rdi_merge_status = fields.KeywordField()
 
     def prepare_phone_no_text(self, instance: Individual) -> str:
         return str(instance.phone_no).replace(" ", "")

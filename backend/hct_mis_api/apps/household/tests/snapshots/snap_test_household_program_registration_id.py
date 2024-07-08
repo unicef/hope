@@ -7,7 +7,7 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestHouseholdRegistrationId::test_household_registration_id_0_ABCD_123123_0 1'] = {
+snapshots['TestHouseholdRegistrationId::test_household_program_registration_id_0_ABCD_123123 1'] = {
     'data': {
         'household': {
             'programRegistrationId': 'ABCD-123123'
@@ -15,15 +15,7 @@ snapshots['TestHouseholdRegistrationId::test_household_registration_id_0_ABCD_12
     }
 }
 
-snapshots['TestHouseholdRegistrationId::test_household_registration_id_1_ABCD_123123_1 1'] = {
-    'data': {
-        'household': {
-            'programRegistrationId': 'ABCD-123123'
-        }
-    }
-}
-
-snapshots['TestHouseholdRegistrationId::test_household_registration_id_2 1'] = {
+snapshots['TestHouseholdRegistrationId::test_household_program_registration_id_1 1'] = {
     'data': {
         'household': {
             'programRegistrationId': None
@@ -31,7 +23,7 @@ snapshots['TestHouseholdRegistrationId::test_household_registration_id_2 1'] = {
     }
 }
 
-snapshots['TestHouseholdRegistrationId::test_household_registration_id_3_ 1'] = {
+snapshots['TestHouseholdRegistrationId::test_household_program_registration_id_2_ 1'] = {
     'data': {
         'household': {
             'programRegistrationId': None

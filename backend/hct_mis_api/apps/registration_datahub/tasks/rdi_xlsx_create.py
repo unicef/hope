@@ -1,5 +1,7 @@
 import json
 import logging
+import traceback
+import uuid
 from collections import defaultdict
 from datetime import datetime
 from functools import partial
@@ -18,9 +20,11 @@ from django_countries.fields import Country
 from openpyxl.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
 
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import SheetImageLoader, timezone_datetime
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_FULL,
     COLLECT_TYPE_NONE,
@@ -30,27 +34,24 @@ from hct_mis_api.apps.household.models import (
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    DocumentType,
+    PendingBankAccountInfo,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualIdentity,
+    PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanismData
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportData,
-    ImportedBankAccountInfo,
-    ImportedDeliveryMechanismData,
-    ImportedDocument,
-    ImportedDocumentType,
-    ImportedHousehold,
-    ImportedIndividual,
-    ImportedIndividualIdentity,
-    ImportedIndividualRoleInHousehold,
-    RegistrationDataImportDatahub,
-)
+from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
+from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
     RdiBaseCreateTask,
 )
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
+from hct_mis_api.apps.utils.models import MergeStatusModel
+from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
 logger = logging.getLogger(__name__)
 
@@ -73,13 +74,14 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self.collectors = defaultdict(list)
         self.bank_accounts = defaultdict(dict)
         self.delivery_mechanisms_data = defaultdict(dict)
+        super().__init__()
 
     def _handle_collect_individual_data(
         self,
         value: Any,
         header: str,
         row_num: int,
-        individual: ImportedIndividual,
+        individual: PendingIndividual,
         *args: Any,
         **kwargs: Any,
     ) -> str:
@@ -98,7 +100,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         value: Any,
         header: str,
         row_num: int,
-        individual: ImportedIndividual,
+        individual: PendingIndividual,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -115,7 +117,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         value: Any,
         header: str,
         row_num: int,
-        individual: ImportedIndividual,
+        individual: PendingIndividual,
         field: Dict[str, Any],
         *args: Any,
         **kwargs: Any,
@@ -137,7 +139,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         value: Any,
         header: str,
         row_num: int,
-        individual: ImportedIndividual,
+        individual: PendingIndividual,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -162,7 +164,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self,
         cell: Any,
         row_num: int,
-        individual: ImportedIndividual,
+        individual: PendingIndividual,
         header: str,
         *args: Any,
         **kwargs: Any,
@@ -189,7 +191,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         value: Any,
         header: str,
         row_num: int,
-        individual: ImportedIndividual,
+        individual: PendingIndividual,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -286,7 +288,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         value: Any,
         header: str,
         row_num: int,
-        individual: ImportedIndividual,
+        individual: PendingIndividual,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -312,7 +314,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         cell: Any,
         row_num: int,
         header: str,
-        individual: ImportedIndividual,
+        individual: PendingIndividual,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -345,7 +347,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         value: Any,
         header: str,
         row_num: int,
-        individual: ImportedIndividual,
+        individual: PendingIndividual,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -369,7 +371,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self,
         value: Any,
         header: str,
-        individual: ImportedIndividual,
+        individual: PendingIndividual,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -381,14 +383,14 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             if not hh_id:
                 continue
             role = ROLE_PRIMARY if header == "primary_collector_id" else ROLE_ALTERNATE
-            self.collectors[hh_id].append(ImportedIndividualRoleInHousehold(individual=individual, role=role))
+            self.collectors[hh_id].append(PendingIndividualRoleInHousehold(individual=individual, role=role))
 
     def _create_bank_accounts_infos(self) -> None:
         bank_accounts_infos_to_create = [
-            ImportedBankAccountInfo(**bank_account_info) for bank_account_info in self.bank_accounts.values()
+            PendingBankAccountInfo(**bank_account_info) for bank_account_info in self.bank_accounts.values()
         ]
 
-        ImportedBankAccountInfo.objects.bulk_create(bank_accounts_infos_to_create)
+        PendingBankAccountInfo.objects.bulk_create(bank_accounts_infos_to_create)
 
     def _create_delivery_mechanisms_data(self) -> None:
         imported_delivery_mechanism_data = []
@@ -396,45 +398,51 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             individual = data.pop("individual")
             for delivery_type, values in data.items():
                 imported_delivery_mechanism_data.append(
-                    ImportedDeliveryMechanismData(
+                    PendingDeliveryMechanismData(
                         individual=individual,
                         delivery_mechanism=delivery_type,
                         data=json.dumps(values, cls=DjangoJSONEncoder),
+                        rdi_merge_status=MergeStatusModel.PENDING,
                     )
                 )
-        ImportedDeliveryMechanismData.objects.bulk_create(imported_delivery_mechanism_data)
+        PendingDeliveryMechanismData.objects.bulk_create(imported_delivery_mechanism_data)
 
     def _create_documents(self) -> None:
+        from hct_mis_api.apps.geo.models import Country as GeoCountry
+
         docs_to_create = []
         for document_data in self.documents.values():
             issuing_country = document_data.get("issuing_country")
-            doc_type = ImportedDocumentType.objects.get(key=document_data["key"])
+            doc_type = DocumentType.objects.get(key=document_data["key"])
             photo = document_data.get("photo")
             individual = document_data.get("individual")
-            obj = ImportedDocument(
-                country=issuing_country,
+            obj = PendingDocument(
+                country=GeoCountry.objects.get(iso_code2=issuing_country),
                 document_number=document_data.get("value"),
                 photo=photo,
                 individual=individual,
                 type=doc_type,
+                program=individual.program,
             )
 
             docs_to_create.append(obj)
 
-        ImportedDocument.objects.bulk_create(docs_to_create)
+        PendingDocument.objects.bulk_create(docs_to_create)
 
     def _create_identities(self) -> None:
+        from hct_mis_api.apps.geo.models import Country as GeoCountry
+
         identities_to_create = [
-            ImportedIndividualIdentity(
-                partner=identity["partner"],
+            PendingIndividualIdentity(
+                partner=Partner.objects.get(name=identity["partner"]),
                 individual=identity["individual"],
-                document_number=identity["number"],
-                country=identity["issuing_country"],
+                number=identity["number"],
+                country=GeoCountry.objects.get(iso_code2=identity["issuing_country"]),
             )
             for identity in self.identities.values()
         ]
 
-        ImportedIndividualIdentity.objects.bulk_create(identities_to_create)
+        PendingIndividualIdentity.objects.bulk_create(identities_to_create)
 
     def _create_collectors(self) -> None:
         collectors_to_create = []
@@ -442,7 +450,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             for collector in collectors_list:
                 collector.household_id = self.households.get(hh_id).pk
                 collectors_to_create.append(collector)
-        ImportedIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
+        PendingIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
 
     @staticmethod
     def _validate_birth_date(obj_to_create: Any) -> Any:
@@ -459,7 +467,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         return obj_to_create
 
     def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
-        delivery_mechanism_xlsx_fields = DeliveryMechanismData.get_scope_delivery_mechanisms_fields(by="xlsx_field")
+        delivery_mechanism_xlsx_fields = PendingDeliveryMechanismData.get_scope_delivery_mechanisms_fields(
+            by="xlsx_field"
+        )
         complex_fields: Dict[str, Dict[str, Callable]] = {
             "individuals": {
                 "photo_i_c": self._handle_image_field,
@@ -495,7 +505,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             {field["xlsx_field"]: self._handle_delivery_mechanism_fields for field in delivery_mechanism_xlsx_fields}
         )
         document_complex_types: Dict[str, Callable] = {}
-        for document_type in ImportedDocumentType.objects.all():
+        for document_type in DocumentType.objects.all():
             document_complex_types[f"{document_type.key}_i_c"] = self._handle_document_fields
             document_complex_types[f"{document_type.key}_no_i_c"] = self._handle_document_fields
             document_complex_types[f"{document_type.key}_photo_i_c"] = self._handle_document_photo_fields
@@ -508,13 +518,13 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             "BOOL": self._handle_bool_field,
         }
 
-        program_id = RegistrationDataImport.objects.get(id=registration_data_import.hct_id).program.id
+        rdi = RegistrationDataImport.objects.get(id=registration_data_import.id)
 
         sheet_title = str(sheet.title.lower())
         if sheet_title == "households":
-            obj = partial(ImportedHousehold, registration_data_import=registration_data_import, program_id=program_id)
+            obj = partial(PendingHousehold, registration_data_import=rdi, program_id=rdi.program.id)
         elif sheet_title == "individuals":
-            obj = partial(ImportedIndividual, registration_data_import=registration_data_import, program_id=program_id)
+            obj = partial(PendingIndividual, registration_data_import=rdi, program_id=rdi.program.id)
         else:
             raise ValueError(f"Unhandled sheet label '{sheet.title!r}'")  # pragma: no cover
 
@@ -533,6 +543,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 continue
             try:
                 obj_to_create = obj()
+                obj_to_create.id = str(uuid.uuid4())
 
                 household_id = None
 
@@ -603,11 +614,31 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                     household.head_of_household = obj_to_create
                                     households_to_update.append(household)
 
-                            setattr(
-                                obj_to_create,
-                                combined_fields[header]["name"],
-                                value,
-                            )
+                            if header == "org_enumerator_h_c":
+                                obj_to_create.flex_fields["enumerator_id"] = cell.value
+
+                            if header in ("country_h_c", "country_origin_h_c"):
+                                from hct_mis_api.apps.geo.models import (
+                                    Country as GeoCountry,
+                                )
+
+                                setattr(
+                                    obj_to_create,
+                                    combined_fields[header]["name"],
+                                    GeoCountry.objects.get(iso_code3=value),
+                                )
+                            elif header in ("admin1_h_c", "admin2_h_c", "admin3_h_c", "admin4_h_c"):
+                                setattr(
+                                    obj_to_create,
+                                    combined_fields[header]["name"],
+                                    Area.objects.get(p_code=value),
+                                )
+                            else:
+                                setattr(
+                                    obj_to_create,
+                                    combined_fields[header]["name"],
+                                    value,
+                                )
                         elif header in self.FLEX_FIELDS[sheet_title]:
                             value = self._cast_value(cell_value, header)
                             type_name = self.FLEX_FIELDS[sheet_title][header]["type"]
@@ -629,25 +660,26 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
                 obj_to_create.last_registration_date = obj_to_create.first_registration_date
                 obj_to_create.detail_id = row[0].row
+                obj_to_create.business_area = rdi.business_area
                 if sheet_title == "households":
-                    obj_to_create.set_admin_areas()
                     self.households[household_id] = obj_to_create
                 else:
                     if household_id is None:
                         obj_to_create.relationship = NON_BENEFICIARY
                     obj_to_create = self._validate_birth_date(obj_to_create)
                     obj_to_create.age_at_registration = calculate_age_at_registration(
-                        registration_data_import, str(obj_to_create.birth_date)
+                        registration_data_import.created_at, str(obj_to_create.birth_date)
                     )
                     self.individuals.append(obj_to_create)
             except Exception as e:  # pragma: no cover
                 raise Exception(f"Error processing row {row[0].row}: {e.__class__.__name__}({e})") from e
 
         if sheet_title == "households":
-            ImportedHousehold.objects.bulk_create(self.households.values())
+            PendingHousehold.all_objects.bulk_create(self.households.values())
         else:
-            ImportedIndividual.objects.bulk_create(self.individuals)
-            ImportedHousehold.objects.bulk_update(
+            self.execute_individuals_additional_steps(self.individuals)
+            PendingIndividual.all_objects.bulk_create(self.individuals)
+            PendingHousehold.all_objects.bulk_update(
                 households_to_update,
                 ["head_of_household"],
                 1000,
@@ -658,50 +690,62 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             self._create_bank_accounts_infos()
             self._create_delivery_mechanisms_data()
 
-    @transaction.atomic(using="registration_datahub")
+    def execute_individuals_additional_steps(self, individuals: list[PendingIndividual]) -> None:
+        for individual in individuals:
+            if individual.phone_no:
+                individual.phone_no_valid = is_valid_phone_number(str(individual.phone_no))
+            if individual.phone_no_alternative:
+                individual.phone_no_alternative_valid = is_valid_phone_number(str(individual.phone_no_alternative))
+            if individual.household:
+                individual.registration_id = individual.household.registration_id
+
+    @transaction.atomic
     def execute(
         self, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: str
     ) -> None:
-        registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
-            id=registration_data_import_id,
-        )
-        registration_data_import.import_done = RegistrationDataImportDatahub.STARTED
-        registration_data_import.save()
-
-        import_data = ImportData.objects.get(id=import_data_id)
-
-        self.business_area = BusinessArea.objects.get(id=business_area_id)
-
-        wb = openpyxl.load_workbook(import_data.file, data_only=True)
-
-        # households objects have to be created first
-        worksheets = (wb["Households"], wb["Individuals"])
-        logger.info("Starting import of %s", registration_data_import.id)
-        for sheet in worksheets:
-            self.image_loader = SheetImageLoader(sheet)
-            self._create_objects(sheet, registration_data_import)
-
-        registration_data_import.import_done = RegistrationDataImportDatahub.DONE
-        registration_data_import.save()
-        old_rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
-        if not self.business_area.postpone_deduplication:
-            logger.info("Starting deduplication of %s", registration_data_import.id)
-            rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
-            rdi_mis.status = RegistrationDataImport.DEDUPLICATION
-            rdi_mis.save()
-            DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_imported_individuals(
-                registration_data_import_datahub=registration_data_import
+        try:
+            registration_data_import = RegistrationDataImport.objects.select_for_update().get(
+                id=registration_data_import_id,
             )
-            logger.info("Finished deduplication of %s", registration_data_import.id)
-        else:
-            rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
-            rdi_mis.status = RegistrationDataImport.IN_REVIEW
-            rdi_mis.save()
-            log_create(
-                RegistrationDataImport.ACTIVITY_LOG_MAPPING,
-                "business_area",
-                None,
-                rdi_mis.program_id,
-                old_rdi_mis,
-                rdi_mis,
-            )
+            registration_data_import.status = RegistrationDataImport.IMPORTING
+            registration_data_import.save()
+
+            import_data = ImportData.objects.get(id=import_data_id)
+
+            self.business_area = BusinessArea.objects.get(id=business_area_id)
+
+            wb = openpyxl.load_workbook(import_data.file, data_only=True)
+
+            # households objects have to be created first
+            worksheets = (wb["Households"], wb["Individuals"])
+            logger.info("Starting import of %s", registration_data_import.id)
+            for sheet in worksheets:
+                self.image_loader = SheetImageLoader(sheet)
+                self._create_objects(sheet, registration_data_import)
+
+            old_rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.id)
+            if not self.business_area.postpone_deduplication:
+                logger.info("Starting deduplication of %s", registration_data_import.id)
+                rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.id)
+                rdi_mis.status = RegistrationDataImport.DEDUPLICATION
+                rdi_mis.save()
+                DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_pending_individuals(
+                    registration_data_import=registration_data_import
+                )
+                logger.info("Finished deduplication of %s", registration_data_import.id)
+            else:
+                rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.id)
+                rdi_mis.status = RegistrationDataImport.IN_REVIEW
+                rdi_mis.save()
+                log_create(
+                    RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+                    "business_area",
+                    None,
+                    rdi_mis.program_id,
+                    old_rdi_mis,
+                    rdi_mis,
+                )
+        except Exception:  # pragma: no cover
+            # print stack trace
+            print(traceback.format_exc())  # pragma: no cover
+            raise  # pragma: no cover

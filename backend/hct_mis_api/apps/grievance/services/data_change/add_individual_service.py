@@ -44,6 +44,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
+from hct_mis_api.apps.utils.models import MergeStatusModel
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 
 
@@ -114,6 +115,7 @@ class AddIndividualService(DataChangeService):
             last_registration_date=first_registration_date,
             business_area=self.grievance_ticket.business_area,
             program_id=household.program_id,
+            rdi_merge_status=MergeStatusModel.MERGED,
             **individual_data,
         )
         individual.refresh_from_db()

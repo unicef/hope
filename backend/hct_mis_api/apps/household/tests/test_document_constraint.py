@@ -7,6 +7,7 @@ from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import DocumentTypeFactory, create_household
 from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class TestDocumentConstraint(TestCase):
@@ -30,6 +31,7 @@ class TestDocumentConstraint(TestCase):
             "individual": individuals[0],
             "country": country,
             "status": Document.STATUS_VALID,
+            "rdi_merge_status": MergeStatusModel.MERGED,
         }
 
     def test_allow_create_the_same_document_for_different_program(self) -> None:
