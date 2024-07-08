@@ -32,6 +32,7 @@ from hct_mis_api.apps.targeting.models import (
     TargetPopulation,
 )
 from hct_mis_api.apps.targeting.services.targeting_stats_refresher import full_rebuild
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 faker = Faker()
 
@@ -57,6 +58,7 @@ def create_household_with_individual(address: str) -> Tuple[Household, Individua
         size=1,
         withdrawn=False,
         household_collection=HouseholdCollection.objects.create(),
+        rdi_merge_status=MergeStatusModel.MERGED,
     )
 
     hh.head_of_household = Individual.objects.create(
@@ -67,6 +69,7 @@ def create_household_with_individual(address: str) -> Tuple[Household, Individua
         sex=MALE,
         full_name=faker.name(),
         individual_collection=IndividualCollection.objects.create(),
+        rdi_merge_status=MergeStatusModel.MERGED,
     )
     hh.save()
 
@@ -82,6 +85,7 @@ def create_household_with_individual_for_payment_plan(address: str) -> None:
         role=ROLE_PRIMARY,
         household=hh,
         individual=ind,
+        rdi_merge_status=MergeStatusModel.MERGED,
     )
 
 
