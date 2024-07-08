@@ -9,10 +9,11 @@ from hct_mis_api.apps.core.fixtures import (
     generate_data_collecting_types,
 )
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, create_household
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
 class TestHouseholdRegistrationId(APITestCase):
@@ -54,19 +55,21 @@ class TestHouseholdRegistrationId(APITestCase):
 
     @parameterized.expand(
         [
-            ("ABCD-123123#0",),
-            ("ABCD-123123#1",),
+            ("ABCD-123123",),
             (None,),
             ("",),
         ]
     )
-    def test_household_registration_id(self, registration_id: str) -> None:
+    def test_household_program_registration_id(self, program_registration_id: str) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS], self.business_area
         )
 
-        self.household.program_registration_id = registration_id
+        self.household.program_registration_id = program_registration_id
         self.household.save(update_fields=["program_registration_id"])
+        self.household.refresh_from_db()
+        expected_program_registration_id = f"{program_registration_id}#0" if program_registration_id else None
+        self.assertEqual(self.household.program_registration_id, expected_program_registration_id)
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,
@@ -79,3 +82,29 @@ class TestHouseholdRegistrationId(APITestCase):
             },
             variables={"id": self.id_to_base64(self.household.id, "HouseholdNode")},
         )
+
+    def test_program_program_registration_id_trigger(self) -> None:
+        rdi = RegistrationDataImportFactory(business_area=self.business_area, program=self.program)
+        HouseholdFactory(
+            registration_data_import=rdi,
+            program_registration_id="ABCD-123123",
+        )
+        HouseholdFactory(
+            registration_data_import=rdi,
+            program_registration_id="ABCD-123123",
+        )
+        HouseholdFactory(
+            registration_data_import=rdi,
+            program_registration_id="ABCD-123123",
+        )
+        HouseholdFactory(
+            registration_data_import=rdi,
+            program_registration_id="ABCD-111222",
+        )
+        registrations_ids = list(
+            Household.objects.filter(registration_data_import=rdi)
+            .order_by("program_registration_id")
+            .values_list("program_registration_id", flat=True)
+        )
+        expected_program_registrations_ids = ["ABCD-111222#0", "ABCD-123123#0", "ABCD-123123#1", "ABCD-123123#2"]
+        self.assertEqual(registrations_ids, expected_program_registrations_ids)

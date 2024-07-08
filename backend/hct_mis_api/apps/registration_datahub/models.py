@@ -47,7 +47,6 @@ from hct_mis_api.apps.household.models import (
     UNIQUE,
     WORK_STATUS_CHOICE,
 )
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.phone import (
@@ -366,23 +365,6 @@ class ImportedIndividualRoleInHousehold(TimeStampedUUIDModel):
 
     class Meta:
         unique_together = ("role", "household")
-
-
-class ImportedDeliveryMechanismData(TimeStampedUUIDModel):
-    individual = models.ForeignKey(
-        "ImportedIndividual",
-        on_delete=models.CASCADE,
-        related_name="delivery_mechanisms_data",
-    )
-    data = JSONField(default=dict, blank=True)
-
-    delivery_mechanism = models.CharField(
-        max_length=255, verbose_name=_("Delivery Mechanism"), choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES
-    )
-
-    is_valid = models.BooleanField(default=False)
-    validation_errors = JSONField(default=dict)
-    unique_key = models.CharField(max_length=256, blank=True, null=True, unique=True, editable=False)  # type: ignore
 
 
 class RegistrationDataImportDatahub(TimeStampedUUIDModel):

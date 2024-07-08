@@ -5,13 +5,17 @@ from typing import Any, Dict, List, Optional
 from django.core.exceptions import ValidationError
 from django.forms import modelform_factory
 
-from django_countries.fields import Country
-
 from hct_mis_api.apps.core.utils import (
     build_arg_dict_from_dict_if_exists,
     build_flex_arg_dict_from_list_if_exists,
 )
 from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.geo.models import Country as GeoCountry
+from hct_mis_api.apps.household.forms import (
+    BankAccountInfoForm,
+    DocumentForm,
+    IndividualForm,
+)
 from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_PARTIAL,
     GOVERNMENT_PARTNER,
@@ -21,16 +25,14 @@ from hct_mis_api.apps.household.models import (
     PRIVATE_PARTNER,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    DocumentType,
+    PendingBankAccountInfo,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedBankAccountInfo,
-    ImportedDocument,
-    ImportedDocumentType,
-    ImportedHousehold,
-    ImportedIndividual,
-    ImportedIndividualRoleInHousehold,
-    RegistrationDataImportDatahub,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
@@ -105,21 +107,21 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         household_address: Dict,
         consent_data: Dict,
         needs_assessment: Dict,
-        registration_data_import: RegistrationDataImportDatahub,
+        registration_data_import: RegistrationDataImport,
     ) -> Dict:
         address = household_address.get("address_h_c", "")
         village = household_address.get("village_h_c", "")
         zip_code = household_address.get("zip_code_h_c", "")
 
         household_data = {
-            # "flex_registrations_record": record,
             "registration_data_import": registration_data_import,
             "first_registration_date": record.timestamp,
             "last_registration_date": record.timestamp,
-            "country_origin": Country(code="CZ"),
-            "country": Country(code="CZ"),
+            "country_origin": GeoCountry.objects.get(iso_code2="CZ"),
+            "country": GeoCountry.objects.get(iso_code2="CZ"),
             "consent_sharing": [],
             "collect_individual_data": COLLECT_TYPE_PARTIAL,
+            "business_area": registration_data_import.business_area,
         }
         if needs_assessment:
             household_data["flex_fields"] = needs_assessment
@@ -149,28 +151,24 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
 
         admin1 = household_address.get("admin1_h_c", "")
         if admin1 and Area.objects.filter(p_code=admin1).exists():
-            household_data["admin1_title"] = Area.objects.get(p_code=admin1).name
             household_data["admin1"] = Area.objects.get(p_code=admin1).p_code
 
         admin2 = household_address.get("admin2_h_c", "")
         if admin2 and Area.objects.filter(p_code=admin2).exists():
-            household_data["admin2_title"] = Area.objects.get(p_code=admin2).name
             household_data["admin2"] = Area.objects.get(p_code=admin2).p_code
 
         if admin2 and Area.objects.filter(p_code=admin2).exists():
             household_data["admin_area"] = Area.objects.get(p_code=admin2).p_code
-            household_data["admin_area_title"] = Area.objects.get(p_code=admin2).name
         elif admin1 and Area.objects.filter(p_code=admin1).exists():
             household_data["admin_area"] = Area.objects.get(p_code=admin1).p_code
-            household_data["admin_area_title"] = Area.objects.get(p_code=admin1).name
 
         return household_data
 
     def _prepare_individual_data(
         self,
         individual_dict: Dict,
-        household: ImportedHousehold,
-        registration_data_import: RegistrationDataImportDatahub,
+        household: PendingHousehold,
+        registration_data_import: RegistrationDataImport,
     ) -> Dict:
         individual_data = dict(
             **build_arg_dict_from_dict_if_exists(individual_dict, self.INDIVIDUAL_MAPPING_DICT),
@@ -179,6 +177,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             registration_data_import=registration_data_import,
             first_registration_date=household.first_registration_date,
             last_registration_date=household.last_registration_date,
+            business_area=registration_data_import.business_area,
         )
 
         individual_data["disability"] = individual_dict.get("disability_i_c", NOT_DISABLED)
@@ -205,9 +204,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
 
         return individual_data
 
-    def _prepare_bank_account_info(
-        self, individual_dict: Dict, imported_individual: ImportedIndividual
-    ) -> Optional[Dict]:
+    def _prepare_bank_account_info(self, individual_dict: Dict, individual: PendingIndividual) -> Optional[Dict]:
         bank_account_number = individual_dict.get("bank_account_number_h_f")
         if not bank_account_number:
             return None
@@ -216,12 +213,10 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             "bank_account_number": str(individual_dict.get("bank_account_number", "")).replace(" ", ""),
             "account_holder_name": individual_dict.get("account_holder_name_i_c", ""),
             "bank_branch_name": individual_dict.get("bank_branch_name_i_c", ""),
-            "individual": imported_individual,
+            "individual": str(individual.pk),
         }
 
-    def _prepare_documents(
-        self, individual_dict: Dict, imported_individual: ImportedIndividual
-    ) -> list[ImportedDocument]:
+    def _prepare_documents(self, individual_dict: Dict, individual: PendingIndividual) -> list[PendingDocument]:
         documents = []
         document_keys = self._get_all_document_keys_from_individual_dict(individual_dict)
         for document_data_key in document_keys:
@@ -229,25 +224,26 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             if not document_number:
                 continue
             real_document_key = self.DOCUMENT_MAPPING.get(document_data_key, document_data_key)
-            document_type = ImportedDocumentType.objects.get(key=real_document_key)
+            document_type = DocumentType.objects.get(key=real_document_key)
             issuance_date = individual_dict.get(f"{document_data_key}{self.DOCUMENT_ISSUANCE_DATE_SUFFIX}")
             expiry_date = individual_dict.get(f"{document_data_key}{self.DOCUMENT_EXPIRY_DATE_SUFFIX}")
             photo_base64 = individual_dict.get(f"{document_data_key}{self.DOCUMENT_PHOTO_SUFFIX}")
             photo = self._prepare_picture_from_base64(photo_base64, document_number)
             document_kwargs = {
-                "country": "CZ",
+                "country": GeoCountry.objects.get(iso_code2="CZ"),
                 "type": document_type,
                 "document_number": document_number,
-                "individual": imported_individual,
+                "individual": individual.pk,
                 "issuance_date": issuance_date,
                 "expiry_date": expiry_date,
                 "photo": photo,
             }
-            ModelClassForm = modelform_factory(ImportedDocument, fields=list(document_kwargs.keys()))
-            form = ModelClassForm(document_kwargs)
+            ModelClassForm = modelform_factory(PendingDocument, form=DocumentForm, fields=list(document_kwargs.keys()))
+            form = ModelClassForm(data=document_kwargs)
             if not form.is_valid():
                 raise ValidationError(form.errors)
-            document = ImportedDocument(**document_kwargs)
+            document_kwargs["individual"] = individual
+            document = PendingDocument(**document_kwargs)
             documents.append(document)
         return documents
 
@@ -259,7 +255,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
                 break
 
     @staticmethod
-    def _has_head(individuals_array: List[ImportedIndividual]) -> bool:
+    def _has_head(individuals_array: List[PendingIndividual]) -> bool:
         return any(
             individual_data.get(
                 "relationship_i_c",
@@ -268,7 +264,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             for individual_data in individuals_array
         )
 
-    def validate_household(self, individuals_array: List[ImportedIndividual]) -> None:
+    def validate_household(self, individuals_array: List[PendingIndividual]) -> None:
         if not individuals_array:
             raise ValidationError("Household should has at least one individual")
 
@@ -276,9 +272,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         if not has_head:
             raise ValidationError("Household should has at least one Head of Household")
 
-    def create_household_for_rdi_household(
-        self, record: Any, registration_data_import: RegistrationDataImportDatahub
-    ) -> None:
+    def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
         record_data_dict = record.get_data()
         if isinstance(record_data_dict, str):
             record_data_dict = json.loads(record_data_dict)
@@ -307,22 +301,14 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
 
         if not household_data.get("size"):
             household_data["size"] = len(individuals_array)
-        household = self._create_object_and_validate(household_data, ImportedHousehold)
+        household = self._create_object_and_validate(household_data, PendingHousehold)
         household.set_admin_areas()
 
         household.detail_id = record.source_id
-        household.save(
-            update_fields=(
-                "admin_area",
-                "admin_area_title",
-                "admin1_title",
-                "admin2_title",
-                "detail_id",
-            )
-        )
+        household.save(update_fields=("detail_id", "admin_area", "admin1", "admin2", "admin3", "admin4"))
 
-        individuals: List[ImportedIndividual] = []
-        documents: List[ImportedDocument] = []
+        individuals: List[PendingIndividual] = []
+        documents: List[PendingDocument] = []
 
         for index, individual_dict in enumerate(individuals_array):
             try:
@@ -330,22 +316,24 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
                 role = individual_dict.pop("role_i_c", "")
                 phone_no = individual_data.pop("phone_no", "")
 
-                individual: ImportedIndividual = self._create_object_and_validate(individual_data, ImportedIndividual)
+                individual: PendingIndividual = self._create_object_and_validate(
+                    individual_data, PendingIndividual, IndividualForm
+                )
                 individual.phone_no = phone_no
                 individual.detail_id = record.source_id
                 individual.save()
 
                 bank_account_data = self._prepare_bank_account_info(individual_dict, individual)
                 if bank_account_data:
-                    self._create_object_and_validate(bank_account_data, ImportedBankAccountInfo)
+                    self._create_object_and_validate(bank_account_data, PendingBankAccountInfo, BankAccountInfoForm)
 
                 if role:
                     if role.upper() == ROLE_PRIMARY:
-                        ImportedIndividualRoleInHousehold.objects.create(
+                        PendingIndividualRoleInHousehold.objects.create(
                             individual=individual, household=household, role=ROLE_PRIMARY
                         )
                     else:
-                        ImportedIndividualRoleInHousehold.objects.create(
+                        PendingIndividualRoleInHousehold.objects.create(
                             individual=individual, household=household, role=ROLE_ALTERNATE
                         )
                 individuals.append(individual)
@@ -358,4 +346,4 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             except ValidationError as e:
                 raise ValidationError({f"individual nr {index + 1}": [str(e)]}) from e
 
-        ImportedDocument.objects.bulk_create(documents)
+        PendingDocument.objects.bulk_create(documents)
