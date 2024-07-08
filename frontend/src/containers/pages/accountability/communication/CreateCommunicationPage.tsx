@@ -393,7 +393,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                 ) : (
                   <Box px={8}>
                     <Box display="flex" alignItems="center">
-                      <Box pr={5} fontWeight="500" fontSize="medium">
+                      <Box pl={5} pr={5} fontWeight="500" fontSize="medium">
                         {t('Sample Size')}:
                       </Box>
                       <RadioGroup

@@ -27,7 +27,7 @@ export function TotalAmountTransferredSection({
           <CardTitle>{t('TOTAL AMOUNT TRANSFERRED')}</CardTitle>
           <CardTextLight>{t('IN USD')}</CardTextLight>
         </Grid>
-        <Grid item>
+        <Grid item data-cy="total-amount-transferred">
           <Grid container spacing={3} alignItems="center">
             <Grid item>
               <CardAmount>{formatCurrencyWithSymbol(data?.total)}</CardAmount>
