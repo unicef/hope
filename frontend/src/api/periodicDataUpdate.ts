@@ -20,7 +20,6 @@ export const fetchPeriodicDataUpdateTemplateDetails = async (
   const response = await api.get(
     `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${templateId}/`,
   );
-  console.log(response);
   return response;
 };
 

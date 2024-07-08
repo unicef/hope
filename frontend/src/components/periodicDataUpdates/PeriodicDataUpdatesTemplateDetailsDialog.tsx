@@ -25,6 +25,15 @@ interface PeriodicDataUpdatesTemplateDetailsDialogProps {
   template: Template;
 }
 
+interface RoundDetails {
+  round: number;
+  round_name: string;
+  number_of_records: number;
+}
+interface RoundDataItem {
+  [key: string]: RoundDetails;
+}
+
 export const PeriodicDataUpdatesTemplateDetailsDialog: React.FC<
   PeriodicDataUpdatesTemplateDetailsDialogProps
 > = ({ open, onClose, template }) => {
@@ -63,14 +72,19 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: React.FC<
               </TableRow>
             </TableHead>
             <TableBody>
-              {templateDetailsData.rounds_data?.map((round) => (
-                <TableRow key={round.id}>
-                  <TableCell>{round.field}</TableCell>
-                  <TableCell>{round.id}</TableCell>
-                  <TableCell>{round.round_name}</TableCell>
-                  <TableCell>{round.number_of_records}</TableCell>
-                </TableRow>
-              ))}
+              {templateDetailsData.rounds_data?.map(
+                (roundData: RoundDataItem, index) => {
+                  const [field, details] = Object.entries(roundData)[0];
+                  return (
+                    <TableRow key={index}>
+                      <TableCell>{field}</TableCell>
+                      <TableCell>{details.round}</TableCell>
+                      <TableCell>{details.round_name}</TableCell>
+                      <TableCell>{details.number_of_records}</TableCell>
+                    </TableRow>
+                  );
+                },
+              )}
             </TableBody>
           </Table>
         )}
