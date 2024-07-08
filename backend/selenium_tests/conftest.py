@@ -15,6 +15,7 @@ from page_object.accountability.comunication_details import (
     AccountabilityCommunicationDetails,
 )
 from page_object.admin_panel.admin_panel import AdminPanel
+from page_object.country_dashboard.country_dashboard import CountryDashboard
 from page_object.filters import Filters
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from page_object.grievance.details_grievance_page import GrievanceDetailsPage
@@ -334,6 +335,11 @@ def pageAccountabilityCommunicationDetails(
     request: FixtureRequest, browser: Chrome
 ) -> AccountabilityCommunicationDetails:
     yield AccountabilityCommunicationDetails(browser)
+
+
+@pytest.fixture
+def pageCountryDashboard(request: FixtureRequest, browser: Chrome) -> CountryDashboard:
+    yield CountryDashboard(browser)
 
 
 @pytest.fixture
