@@ -7,6 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('household', '0177_migration'),
         ('registration_data', '0035_migration'),
     ]
 
@@ -15,5 +16,25 @@ class Migration(migrations.Migration):
             model_name='koboimportedsubmission',
             name='imported_household',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='household.household'),
+        ),
+        migrations.AddField(
+            model_name='importdata',
+            name='delivery_mechanisms_validation_errors',
+            field=models.TextField(blank=True),
+        ),
+        migrations.AlterField(
+            model_name='importdata',
+            name='status',
+            field=models.CharField(choices=[('PENDING', 'Pending'), ('RUNNING', 'Running'), ('FINISHED', 'Finished'), ('ERROR', 'Error'), ('VALIDATION_ERROR', 'Validation Error'), ('DELIVERY_MECHANISMS_VALIDATION_ERROR', 'Delivery Mechanisms Validation Error')], default='FINISHED', max_length=40),
+        ),
+        migrations.AddField(
+            model_name='registrationdataimport',
+            name='import_data',
+            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='registration_data_import_hope', to='registration_data.importdata'),
+        ),
+        migrations.AlterField(
+            model_name='koboimportedsubmission',
+            name='registration_data_import',
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='registration_data.registrationdataimport'),
         ),
     ]
