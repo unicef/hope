@@ -38,6 +38,7 @@ from page_object.programme_population.households import Households
 from page_object.programme_population.households_details import HouseholdsDetails
 from page_object.programme_population.individuals import Individuals
 from page_object.programme_population.individuals_details import IndividualsDetails
+from page_object.programme_users.programme_users import ProgrammeUsers
 from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
@@ -323,6 +324,11 @@ def pagePaymentModuleDetails(request: FixtureRequest, browser: Chrome) -> Paymen
 @pytest.fixture
 def pageNewPaymentPlan(request: FixtureRequest, browser: Chrome) -> NewPaymentPlan:
     yield NewPaymentPlan(browser)
+
+
+@pytest.fixture
+def pageProgrammeUsers(request: FixtureRequest, browser: Chrome) -> ProgrammeUsers:
+    yield ProgrammeUsers(browser)
 
 
 @pytest.fixture
