@@ -260,6 +260,21 @@ export function targetPopulationBuildStatusToColor(
   return theme.palette.error.main;
 }
 
+export function periodicDataUpdatesUpdatesStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    successful: theme.hctPalette.green,
+    failed: theme.hctPalette.red,
+    processing: theme.hctPalette.gray,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
+
 export function paymentPlanStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -534,7 +549,7 @@ export function getPercentage(
 }
 
 export function formatNumber(value: number): string {
-  if (!value && value !== 0) return '';
+  if (!value && value !== 0) return '0';
   return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
 }
 

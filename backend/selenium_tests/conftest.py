@@ -11,6 +11,7 @@ from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from flags.models import FlagState
 from page_object.admin_panel.admin_panel import AdminPanel
+from page_object.country_dashboard.country_dashboard import CountryDashboard
 from page_object.filters import Filters
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from page_object.grievance.details_grievance_page import GrievanceDetailsPage
@@ -298,6 +299,11 @@ def pagePaymentModuleDetails(request: FixtureRequest, browser: Chrome) -> Paymen
 @pytest.fixture
 def pageNewPaymentPlan(request: FixtureRequest, browser: Chrome) -> NewPaymentPlan:
     yield NewPaymentPlan(browser)
+
+
+@pytest.fixture
+def pageCountryDashboard(request: FixtureRequest, browser: Chrome) -> CountryDashboard:
+    yield CountryDashboard(browser)
 
 
 @pytest.fixture

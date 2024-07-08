@@ -17,3 +17,20 @@ class ProgramMixin:
 
 class BusinessAreaProgramMixin(BusinessAreaMixin, ProgramMixin):
     pass
+
+
+class ActionMixin:
+    permission_classes_by_action = {}
+    serializer_classes_by_action = {}
+
+    def get_permissions(self):
+        if self.action in self.permission_classes_by_action:
+            return [permission() for permission in self.permission_classes_by_action[self.action]]
+        else:
+            return super().get_permissions()
+
+    def get_serializer_class(self):
+        if self.action in self.serializer_classes_by_action:
+            return self.serializer_classes_by_action[self.action]
+        else:
+            return super().get_serializer_class()

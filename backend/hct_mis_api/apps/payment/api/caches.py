@@ -4,7 +4,7 @@ from rest_framework_extensions.key_constructor import bits
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 from rest_framework_extensions.key_constructor.constructors import KeyConstructor
 
-from hct_mis_api.api.caches import get_or_create_cache_key
+from hct_mis_api.api.caches import BusinessAreaVersionKeyBit, get_or_create_cache_key
 from hct_mis_api.apps.core.models import BusinessArea
 
 
@@ -28,15 +28,6 @@ class PaymentPlanProgramsPermissionsKeyBit(KeyBitBase):
         program_ids = request.user.partner.get_program_ids_for_business_area(str(business_area.id))
         program_ids.sort()
         return str(program_ids)
-
-
-class BusinessAreaVersionKeyBit(KeyBitBase):
-    def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
-    ) -> str:
-        business_area_slug = kwargs.get("business_area")
-        business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
-        return str(business_area_version)
 
 
 class PaymentPlanKeyConstructor(KeyConstructor):

@@ -46,7 +46,7 @@ export function TotalNumberOfIndividualsReachedSection({
       <DashboardCard color="#345DA0">
         <CardTitle>{t('TOTAL NUMBER OF INDIVIDUALS REACHED')}</CardTitle>
         <Grid container justifyContent="space-between" alignItems="center">
-          <Grid item>
+          <Grid item data-cy="total-number-of-individuals-reached">
             <CardAmountLink onClick={() => setDialogOpen(true)}>
               {formatNumber(data?.total)}
             </CardAmountLink>
