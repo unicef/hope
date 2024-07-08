@@ -717,7 +717,6 @@ class HardDocumentDeduplication:
                 new_document_signature = self._generate_signature(new_document)
 
                 if new_document_signature in all_matching_number_documents_signatures:
-                    print("==1")
                     new_document.status = Document.STATUS_NEED_INVESTIGATION
                     ticket_data = ticket_data_dict.get(
                         new_document_signature,
@@ -739,7 +738,6 @@ class HardDocumentDeduplication:
                         str(new_document.individual_id), []
                     )
                 ):
-                    print("==2")
                     new_document.status = Document.STATUS_NEED_INVESTIGATION
                     ticket_data_dict[new_document_signature]["possible_duplicates"].append(new_document)
                     possible_duplicates_individuals_id_set.add(str(new_document.individual_id))
@@ -755,7 +753,6 @@ class HardDocumentDeduplication:
                         str(new_document.individual_id), []
                     )
                 ):
-                    print("==3")
                     ticket_data_dict[new_document_signature] = {
                         "original": new_document,
                         "possible_duplicates": [],
