@@ -217,3 +217,38 @@ class TestEnrolHouseholdToProgram(TestCase):
                 role=ROLE_PRIMARY,
             ).first()
         )
+
+    def test_enroll_household_with_head_of_household_already_copied(self) -> None:
+        head_of_household_already_enrolled_program1 = IndividualFactory(household=None, program=self.program1)
+        head_of_household_already_enrolled_program1.refresh_from_db()
+
+        head_of_household_already_enrolled_program2 = IndividualFactory(
+            household=None, program=self.program2, unicef_id=head_of_household_already_enrolled_program1.unicef_id
+        )
+
+        household_already_with_head_already_enrolled = HouseholdFactory(
+            program=self.program1,
+            head_of_household=head_of_household_already_enrolled_program1,
+            copied_from=None,
+        )
+        head_of_household_already_enrolled_program1.household = household_already_with_head_already_enrolled
+        head_of_household_already_enrolled_program1.save()
+        hh_count = Household.objects.count()
+        ind_count = Individual.objects.count()
+
+        enroll_households_to_program(
+            Household.objects.filter(id=household_already_with_head_already_enrolled.id),
+            self.program2,
+        )
+        hh = Household.objects.order_by("created_at").last()
+        self.assertEqual(hh_count + 1, Household.objects.count())
+        self.assertEqual(ind_count, Individual.objects.count())
+
+        self.assertEqual(
+            hh.head_of_household,
+            head_of_household_already_enrolled_program2,
+        )
+        self.assertEqual(
+            hh.program,
+            self.program2,
+        )
