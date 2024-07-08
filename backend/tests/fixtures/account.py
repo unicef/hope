@@ -4,7 +4,7 @@ import pytest
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 
@@ -28,6 +28,24 @@ def update_partner_access_to_program() -> Callable:
             program_partner_through.save(update_fields=["full_area_access"])
 
     return _update_partner_access_to_program
+
+
+@pytest.fixture()
+def create_partner_role_with_permissions() -> Callable:
+    def _create_partner_role_with_permissions(
+        partner: Partner,
+        permissions: Iterable,
+        business_area: BusinessArea,
+        name: Optional[str] = "Partner Role with Permissions",
+    ) -> None:
+        business_area_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
+            business_area=business_area,
+            partner=partner,
+        )
+        permission_list = [perm.value for perm in permissions]
+        role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})
+        business_area_partner_through.roles.add(role)
+        return _create_partner_role_with_permissions
 
 
 @pytest.fixture()

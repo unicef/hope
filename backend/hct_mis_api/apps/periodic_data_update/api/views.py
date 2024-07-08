@@ -45,13 +45,13 @@ class PeriodicDataUpdateTemplateViewSet(
         # 'create': PeriodicDataUpdateTemplateCreateSerializer,
     }
     permission_classes = []
-    # permission_classes_by_action = {
-    #     'list': [PDUViewListAndDetailsPermission],
-    #     'retrieve': [PDUViewListAndDetailsPermission],
-    #     # 'create': [PDUTemplateCreatePermission],
-    #     'export': [PDUTemplateCreatePermission],
-    #     'download': [PDUTemplateDownloadPermission],
-    # }
+    permission_classes_by_action = {
+        'list': [PDUViewListAndDetailsPermission],
+        'retrieve': [PDUViewListAndDetailsPermission],
+        # 'create': [PDUTemplateCreatePermission],
+        'export': [PDUTemplateCreatePermission],
+        'download': [PDUTemplateDownloadPermission],
+    }
     filter_backends = (OrderingFilter,)
 
     def get_queryset(self) -> QuerySet:
