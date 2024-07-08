@@ -15,37 +15,37 @@ from django.forms import model_to_dict
 from django_countries.fields import Country
 from PIL import Image
 
+from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, FlexibleAttribute
 from hct_mis_api.apps.core.utils import (
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     SheetImageLoader,
 )
 from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.geo.models import Country as GeoCountry
+from hct_mis_api.apps.household.fixtures import (
+    IndividualFactory,
+    PendingIndividualFactory,
+)
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,
     IDENTIFICATION_TYPE_TAX_ID,
+    DocumentType,
+    PendingBankAccountInfo,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualIdentity,
 )
+from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.fixtures import (
-    ImportedIndividualFactory,
-    RegistrationDataImportDatahubFactory,
-)
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportData,
-    ImportedBankAccountInfo,
-    ImportedDeliveryMechanismData,
-    ImportedDocument,
-    ImportedDocumentType,
-    ImportedHousehold,
-    ImportedIndividual,
-    ImportedIndividualIdentity,
-)
+from hct_mis_api.apps.registration_data.models import ImportData
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 def create_document_image() -> File:
@@ -79,6 +79,16 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        FlexibleAttribute.objects.create(
+            type=FlexibleAttribute.INTEGER,
+            name="muac_i_f",
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        )
+        FlexibleAttribute.objects.create(
+            type=FlexibleAttribute.DECIMAL,
+            name="jan_decimal_i_f",
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        )
         content = Path(
             f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
         ).read_bytes()
@@ -88,6 +98,9 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
         )
+
+        PartnerFactory(name="WFP")
+        PartnerFactory(name="UNHCR")
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
 
@@ -99,30 +112,24 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
         cls.program = ProgramFactory(status=Program.ACTIVE)
 
-        cls.registration_data_import = RegistrationDataImportDatahubFactory(
-            import_data=cls.import_data, business_area_slug=business_area.slug, hct_id=None
-        )
-        hct_rdi = RegistrationDataImportFactory(
-            datahub_id=cls.registration_data_import.id,
-            name=cls.registration_data_import.name,
+        cls.registration_data_import = RegistrationDataImportFactory(
             business_area=business_area,
             program=cls.program,
+            import_data=cls.import_data,
         )
-        cls.registration_data_import.hct_id = hct_rdi.id
-        cls.registration_data_import.save()
         cls.business_area = BusinessArea.objects.first()
-        ImportedDocumentType.objects.create(
+        DocumentType.objects.create(
             label="Tax Number Identification",
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
         )
         super().setUpTestData()
 
-    def test_execute(self) -> None:
+    def test_execute_xd(self) -> None:
         task = self.RdiXlsxCreateTask()
         task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
 
-        households_count = ImportedHousehold.objects.count()
-        individuals_count = ImportedIndividual.objects.count()
+        households_count = PendingHousehold.objects.count()
+        individuals_count = PendingIndividual.objects.count()
 
         self.assertEqual(3, households_count)
         self.assertEqual(6, individuals_count)
@@ -137,28 +144,130 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             "birth_date": date(1963, 2, 3),
             "marital_status": "MARRIED",
             "email": "fake_email_123@mail.com",
-            # "preferred_language": "pl", # TODO: fix this? (rebase issue?)
         }
-        matching_individuals = ImportedIndividual.objects.filter(**individual_data)
+        matching_individuals = PendingIndividual.objects.filter(**individual_data)
 
         self.assertEqual(matching_individuals.count(), 1)
 
         household_data = {
             "residence_status": "REFUGEE",
-            "country": "AF",
+            "country": GeoCountry.objects.get(iso_code2="AF").id,
             "zip_code": "2153",
-            "flex_fields": {},
+            "flex_fields": {"enumerator_id": "UNICEF"},
         }
         household = matching_individuals.first().household
         household_obj_data = model_to_dict(household, ("residence_status", "country", "zip_code", "flex_fields"))
 
-        roles = household.individuals_and_roles.all()
+        roles = household.individuals_and_roles(manager="pending_objects").all()
         self.assertEqual(roles.count(), 1)
         role = roles.first()
         self.assertEqual(role.role, "PRIMARY")
         self.assertEqual(role.individual.full_name, "Some Full Name")
 
         self.assertEqual(household_obj_data, household_data)
+
+    def test_execute_with_postpone_deduplication(self) -> None:
+        task = self.RdiXlsxCreateTask()
+        self.business_area.postpone_deduplication = True
+        self.business_area.save()
+        task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
+
+        households_count = PendingHousehold.objects.count()
+        individuals_count = PendingIndividual.objects.count()
+
+        self.assertEqual(3, households_count)
+        self.assertEqual(6, individuals_count)
+
+        individual_data = {
+            "full_name": "Some Full Name",
+            "given_name": "Some",
+            "middle_name": "Full",
+            "family_name": "Name",
+            "sex": "MALE",
+            "relationship": "HEAD",
+            "birth_date": date(1963, 2, 3),
+            "marital_status": "MARRIED",
+            "email": "fake_email_123@mail.com",
+        }
+        matching_individuals = PendingIndividual.objects.filter(**individual_data)
+
+        self.assertEqual(matching_individuals.count(), 1)
+
+        household_data = {
+            "residence_status": "REFUGEE",
+            "country": GeoCountry.objects.get(iso_code2="AF").id,
+            "zip_code": "2153",
+            "flex_fields": {"enumerator_id": "UNICEF"},
+        }
+        household = matching_individuals.first().household
+        household_obj_data = model_to_dict(household, ("residence_status", "country", "zip_code", "flex_fields"))
+
+        roles = household.individuals_and_roles(manager="pending_objects").all()
+        self.assertEqual(roles.count(), 1)
+        role = roles.first()
+        self.assertEqual(role.role, "PRIMARY")
+        self.assertEqual(role.individual.full_name, "Some Full Name")
+
+        self.assertEqual(household_obj_data, household_data)
+
+    def test_execute_with_flex_field(self) -> None:
+        content = Path(
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import_flex_field.xlsx"
+        ).read_bytes()
+        file = File(BytesIO(content), name="new_reg_data_import_flex_field.xlsx")
+
+        import_data = ImportData.objects.create(
+            file=file,
+            number_of_households=3,
+            number_of_individuals=6,
+        )
+
+        registration_data_import = RegistrationDataImportFactory(
+            business_area=self.business_area,
+            program=self.program,
+            import_data=import_data,
+        )
+        task = self.RdiXlsxCreateTask()
+        task.execute(registration_data_import.id, import_data.id, self.business_area.id, self.program.id)
+
+        households_count = PendingHousehold.objects.count()
+        individuals_count = PendingIndividual.objects.count()
+
+        self.assertEqual(3, households_count)
+        self.assertEqual(6, individuals_count)
+
+        individual_data = {
+            "full_name": "Some Full Name",
+            "given_name": "Some",
+            "middle_name": "Full",
+            "family_name": "Name",
+            "sex": "MALE",
+            "relationship": "HEAD",
+            "birth_date": date(1963, 2, 3),
+            "marital_status": "MARRIED",
+            "email": "fake_email_123@mail.com",
+        }
+        matching_individuals = PendingIndividual.objects.filter(**individual_data)
+
+        self.assertEqual(matching_individuals.count(), 1)
+
+        household_data = {
+            "residence_status": "REFUGEE",
+            "country": GeoCountry.objects.get(iso_code2="AF").id,
+            "zip_code": "2153",
+            "flex_fields": {"enumerator_id": "UNICEF"},
+        }
+        household = matching_individuals.first().household
+        household_obj_data = model_to_dict(household, ("residence_status", "country", "zip_code", "flex_fields"))
+        individual = matching_individuals.first()
+        roles = household.individuals_and_roles(manager="pending_objects").all()
+        self.assertEqual(roles.count(), 1)
+        role = roles.first()
+        self.assertEqual(role.role, "PRIMARY")
+        self.assertEqual(role.individual.full_name, "Some Full Name")
+
+        self.assertEqual(household_obj_data, household_data)
+        self.assertEqual(individual.flex_fields, {"muac_i_f": 1, "jan_decimal_i_f": 12.376})
 
     def test_execute_handle_identities(self) -> None:
         task = self.RdiXlsxCreateTask()
@@ -168,16 +277,16 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             self.business_area.id,
             self.program.id,
         )
-        self.assertEqual(ImportedIndividualIdentity.objects.count(), 2)
+        self.assertEqual(PendingIndividualIdentity.objects.count(), 2)
         self.assertEqual(
-            ImportedIndividualIdentity.objects.filter(
-                document_number="TEST", country="PL", partner="WFP", individual__full_name="Some Full Name"
+            PendingIndividualIdentity.objects.filter(
+                number="TEST", country__iso_code2="PL", partner__name="WFP", individual__full_name="Some Full Name"
             ).count(),
             1,
         )
         self.assertEqual(
-            ImportedIndividualIdentity.objects.filter(
-                document_number="WTG", country="PL", individual__full_name="Some Full Name", partner="UNHCR"
+            PendingIndividualIdentity.objects.filter(
+                number="WTG", country__iso_code2="PL", partner__name="UNHCR", individual__full_name="Some Full Name"
             ).count(),
             1,
         )
@@ -185,7 +294,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
     def test_handle_document_fields(self) -> None:
         task = self.RdiXlsxCreateTask()
         task.documents = {}
-        individual = ImportedIndividualFactory()
+        individual = PendingIndividualFactory()
 
         header = "birth_certificate_no_i_c"
         row_num = 14
@@ -248,7 +357,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         task = self.RdiXlsxCreateTask()
         task.image_loader = ImageLoaderMock()
         task.documents = {}
-        individual = ImportedIndividualFactory()
+        individual = PendingIndividualFactory()
         cell = CellMock("image.png", 12)
 
         task._handle_document_photo_fields(
@@ -299,9 +408,9 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
     def test_create_documents(self) -> None:
         task = self.RdiXlsxCreateTask()
-        individual = ImportedIndividualFactory()
+        individual = IndividualFactory(rdi_merge_status=MergeStatusModel.PENDING)
         task.business_area = self.business_area
-        doc_type = ImportedDocumentType.objects.create(
+        doc_type = DocumentType.objects.create(
             label="Birth Certificate",
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
         )
@@ -317,15 +426,16 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         }
         task._create_documents()
 
-        documents = ImportedDocument.objects.values("document_number", "type_id")
+        documents = PendingDocument.objects.values("document_number", "type_id")
         self.assertEqual(documents.count(), 1)
 
         expected = [{"document_number": "CD1247246Q12W", "type_id": doc_type.id}]
         self.assertEqual(list(documents), expected)
 
-        document = ImportedDocument.objects.first()
+        document = PendingDocument.objects.first()
         photo = document.photo.name
-        self.assertTrue(photo.startswith("image") and photo.endswith(".png"))
+        self.assertTrue(photo.startswith("image"))
+        self.assertTrue(photo.endswith(".png"))
 
     def test_cast_value(self) -> None:
         task = self.RdiXlsxCreateTask()
@@ -367,11 +477,11 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         task = self.RdiXlsxCreateTask()
         task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
 
-        households = ImportedHousehold.objects.all()
+        households = PendingHousehold.objects.all()
         for household in households:
             self.assertTrue(int(household.detail_id) in [3, 4, 6])
 
-        individuals = ImportedIndividual.objects.all()
+        individuals = PendingIndividual.objects.all()
         for individual in individuals:
             self.assertTrue(int(individual.detail_id) in [3, 4, 5, 7, 8, 9])
 
@@ -379,7 +489,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         task = self.RdiXlsxCreateTask()
         task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
 
-        bank_account_info = ImportedBankAccountInfo.objects.get(individual__detail_id=7)
+        bank_account_info = PendingBankAccountInfo.objects.get(individual__detail_id=7)
         self.assertEqual(bank_account_info.bank_name, "Bank testowy")
         self.assertEqual(bank_account_info.bank_account_number, "PL70 1410 2006 0000 3200 0926 4671")
         self.assertEqual(bank_account_info.debit_card_number, "5241 6701 2345 6789")
@@ -388,7 +498,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         task = self.RdiXlsxCreateTask()
         task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
 
-        document = ImportedDocument.objects.filter(individual__detail_id=5).first()
+        document = PendingDocument.objects.filter(individual__detail_id=5).first()
         self.assertEqual(document.type.key, IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
         self.assertEqual(document.document_number, "CD1247246Q12W")
 
@@ -396,15 +506,15 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         task = self.RdiXlsxCreateTask()
         task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
 
-        individual = ImportedIndividual.objects.get(detail_id=3)
+        individual = PendingIndividual.objects.get(detail_id=3)
         self.assertEqual(individual.seeing_disability, "")
         self.assertEqual(individual.hearing_disability, "")
 
     def test_create_receiver_poi_document(self) -> None:
         task = self.RdiXlsxCreateTask()
-        individual = ImportedIndividualFactory()
+        individual = IndividualFactory(rdi_merge_status=MergeStatusModel.PENDING)
         task.business_area = self.business_area
-        doc_type = ImportedDocumentType.objects.get_or_create(
+        doc_type = DocumentType.objects.get_or_create(
             label="Receiver POI",
             key="receiver_poi",
         )[0]
@@ -420,7 +530,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         }
         task._create_documents()
 
-        documents = ImportedDocument.objects.values("document_number", "type_id")
+        documents = PendingDocument.objects.values("document_number", "type_id")
         self.assertEqual(documents.count(), 1)
 
         expected = [{"document_number": "TEST123_qwerty", "type_id": doc_type.id}]
@@ -429,11 +539,14 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
     def test_create_delivery_mechanism_data(self) -> None:
         task = self.RdiXlsxCreateTask()
         task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
-        self.assertEqual(ImportedDeliveryMechanismData.objects.count(), 3)
+        self.assertEqual(PendingDeliveryMechanismData.objects.count(), 3)
 
-        dmd1 = ImportedDeliveryMechanismData.objects.get(individual__detail_id=3)
-        dmd2 = ImportedDeliveryMechanismData.objects.get(individual__detail_id=4)
-        dmd3 = ImportedDeliveryMechanismData.objects.get(individual__detail_id=5)
+        dmd1 = PendingDeliveryMechanismData.objects.get(individual__detail_id=3)
+        dmd2 = PendingDeliveryMechanismData.objects.get(individual__detail_id=4)
+        dmd3 = PendingDeliveryMechanismData.objects.get(individual__detail_id=5)
+        self.assertEqual(dmd1.rdi_merge_status, MergeStatusModel.PENDING)
+        self.assertEqual(dmd2.rdi_merge_status, MergeStatusModel.PENDING)
+        self.assertEqual(dmd3.rdi_merge_status, MergeStatusModel.PENDING)
         self.assertEqual(
             json.loads(dmd1.data),
             {"card_number_atm_card": "164260858", "card_expiry_date_atm_card": "1995-06-03T00:00:00"},
@@ -481,8 +594,8 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
         document_types = []
         for doc_type, label in identification_type_choice:
-            document_types.append(ImportedDocumentType(label=label, key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[doc_type]))
-        ImportedDocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
+            document_types.append(DocumentType(label=label, key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[doc_type]))
+        DocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
 
         content = Path(
             f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/kobo_submissions.json"
@@ -516,18 +629,10 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         admin2_type = geo_models.AreaType.objects.create(name="Ceel Barde", area_level=2, country=country)
         geo_models.Area.objects.create(p_code="SO2502", name="SO2502", parent=admin1, area_type=admin2_type)
 
-        cls.registration_data_import = RegistrationDataImportDatahubFactory(
-            import_data=cls.import_data, business_area_slug=cls.business_area.slug
-        )
         cls.program = ProgramFactory(status="ACTIVE")
-        hct_rdi = RegistrationDataImportFactory(
-            datahub_id=cls.registration_data_import.id,
-            name=cls.registration_data_import.name,
-            business_area=cls.business_area,
-            program=cls.program,
+        cls.registration_data_import = RegistrationDataImportFactory(
+            business_area=cls.business_area, program=cls.program, import_data=cls.import_data
         )
-        cls.registration_data_import.hct_id = hct_rdi.id
-        cls.registration_data_import.save()
         super().setUpTestData()
 
     @mock.patch(
@@ -535,13 +640,13 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         _return_test_image,
     )
     def test_execute(self) -> None:
-        task = self.RdiKoboCreateTask()
-        task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
+        task = self.RdiKoboCreateTask(self.registration_data_import.id, self.business_area.id)
+        task.execute(self.import_data.id, self.program.id)
 
-        households = ImportedHousehold.objects.all()
-        individuals = ImportedIndividual.objects.all()
-        documents = ImportedDocument.objects.all()
-        bank_accounts = ImportedBankAccountInfo.objects.all()
+        households = PendingHousehold.objects.all()
+        individuals = PendingIndividual.objects.all()
+        documents = PendingDocument.objects.all()
+        bank_accounts = PendingBankAccountInfo.objects.all()
 
         self.assertEqual(1, households.count())
         self.assertEqual(2, individuals.count())
@@ -561,34 +666,37 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         }
         self.assertEqual(individuals_obj_data, expected_ind)
 
-        household_obj_data = model_to_dict(individual.household, ("residence_status", "country", "flex_fields"))
+        pending_household = individual.pending_household
+        household_obj_data = {
+            "residence_status": pending_household.residence_status,
+            "country": pending_household.country.iso_code2,
+            "flex_fields": pending_household.flex_fields,
+        }
         expected_hh: Dict = {
             "residence_status": "REFUGEE",
-            "country": Country(code="AF"),
+            "country": Country(code="AF").code,
             "flex_fields": {},
         }
         self.assertEqual(household_obj_data, expected_hh)
 
-        self.assertEqual(individual.household.detail_id, "aPkhoRMrkkDwgsvWuwi39s")
-        self.assertEqual(str(individual.household.kobo_submission_uuid), "c09130af-6c9c-4dba-8c7f-1b2ff1970d19")
-        self.assertEqual(individual.household.kobo_submission_time.isoformat(), "2020-06-03T13:05:10+00:00")
+        self.assertEqual(pending_household.detail_id, "aPkhoRMrkkDwgsvWuwi39s")
+        self.assertEqual(str(pending_household.kobo_submission_uuid), "c09130af-6c9c-4dba-8c7f-1b2ff1970d19")
+        self.assertEqual(pending_household.kobo_submission_time.isoformat(), "2020-06-03T13:05:10+00:00")
 
     @mock.patch(
         "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_execute_multiple_collectors(self) -> None:
-        task = self.RdiKoboCreateTask()
-        task.execute(
-            self.registration_data_import.id, self.import_data_collectors.id, self.business_area.id, self.program.id
-        )
-        households = ImportedHousehold.objects.all()
-        individuals = ImportedIndividual.objects.all()
+        task = self.RdiKoboCreateTask(self.registration_data_import.id, self.business_area.id)
+        task.execute(self.import_data_collectors.id, self.program.id)
+        households = PendingHousehold.objects.all()
+        individuals = PendingIndividual.objects.all()
 
         self.assertEqual(households.count(), 3)  # related to AB#171697
         self.assertEqual(individuals.count(), 7)  # related to AB#171697
 
-        documents = ImportedDocument.objects.values_list("individual__full_name", flat=True)
+        documents = PendingDocument.objects.values_list("individual__full_name", flat=True)
         self.assertEqual(
             sorted(list(documents)),
             [
@@ -626,9 +734,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         _return_test_image,
     )
     def test_handle_image_field(self) -> None:
-        task = self.RdiKoboCreateTask()
-        task.registration_data_import_mis = RegistrationDataImport()
-        task.business_area = self.business_area
+        task = self.RdiKoboCreateTask(self.registration_data_import.id, self.business_area.id)
         task.attachments = [
             {
                 "mimetype": "image/png",
@@ -685,17 +791,14 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
 
     def test_handle_geopoint_field(self) -> None:
         geopoint = "51.107883 17.038538"
-        task = self.RdiKoboCreateTask()
+        task = self.RdiKoboCreateTask(self.registration_data_import.id, self.business_area.id)
 
         expected = Point(x=51.107883, y=17.038538, srid=4326)
         result = task._handle_geopoint_field(geopoint, False)
         self.assertEqual(result, expected)
 
-    def test_cast_and_assign(self) -> None:
-        pass
-
     def test_cast_boolean_value(self) -> None:
-        task = self.RdiKoboCreateTask()
+        task = self.RdiKoboCreateTask(self.registration_data_import.id, self.business_area.id)
 
         result = task._cast_value("FALSE", "estimated_birth_date_i_c")
         self.assertEqual(result, False)
@@ -732,9 +835,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         _return_test_image,
     )
     def test_handle_documents_and_identities(self) -> None:
-        task = self.RdiKoboCreateTask()
-        task.registration_data_import_mis = RegistrationDataImport()
-        task.business_area = self.business_area
+        task = self.RdiKoboCreateTask(self.registration_data_import.id, self.business_area.id)
         task.attachments = [
             {
                 "mimetype": "image/png",
@@ -757,7 +858,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
                 "xform": 549831,
             }
         ]
-        individual = ImportedIndividualFactory()
+        individual = IndividualFactory(rdi_merge_status=MergeStatusModel.PENDING)
         documents_and_identities = [
             {
                 "birth_certificate": {
@@ -778,19 +879,19 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         ]
         task._handle_documents_and_identities(documents_and_identities)
 
-        result = list(ImportedDocument.objects.values("document_number", "individual_id"))
+        result = list(PendingDocument.objects.values("document_number", "individual_id"))
         expected = [
             {"document_number": "123123123", "individual_id": individual.id},
             {"document_number": "444111123", "individual_id": individual.id},
         ]
         self.assertEqual(result, expected)
 
-        photo = ImportedDocument.objects.first().photo
+        photo = PendingDocument.objects.first().photo
         self.assertIsInstance(photo, ImageFieldFile)
         self.assertTrue(photo.name.startswith("signature-14_59_24"))
 
-        birth_certificate = ImportedDocument.objects.get(document_number=123123123).type.key
-        national_passport = ImportedDocument.objects.get(document_number=444111123).type.key
+        birth_certificate = PendingDocument.objects.get(document_number=123123123).type.key
+        national_passport = PendingDocument.objects.get(document_number=444111123).type.key
 
         self.assertEqual(birth_certificate, "birth_certificate")
         self.assertEqual(national_passport, "national_passport")
@@ -971,8 +1072,8 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
             "enumertor_phone_num_h_f": "321123123321",
             "consent_h_c": "1",
             "country_h_c": "NGA",
-            "admin1_h_c": "NG037",
-            "admin2_h_c": "NG037011",
+            "admin1_h_c": "SO25",
+            "admin2_h_c": "SO2502",
             "village_h_c": "VillageName",
             "nearest_school_h_f": "next",
             "hh_geopoint_h_c": "46.123 6.312 0 0",
@@ -991,7 +1092,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
             "kobo_submission_time": "2022-02-22T12:22:22",
         }
 
-        task = self.RdiKoboCreateTask()
+        task = self.RdiKoboCreateTask(self.registration_data_import.id, self.business_area.id)
         task.handle_household(
             bank_accounts_to_create,
             collectors_to_create,
@@ -999,7 +1100,6 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
             household,
             households_to_create,
             individuals_ids_hash_dict,
-            self.registration_data_import,
             submission_meta_data,
         )
         hh = households_to_create[0]

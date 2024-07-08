@@ -8,7 +8,7 @@ from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_datahub.models import ImportData
+from hct_mis_api.apps.registration_data.models import ImportData
 from hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import import (
     ValidateXlsxImport,
 )

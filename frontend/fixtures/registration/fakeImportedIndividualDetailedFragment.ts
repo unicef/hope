@@ -1,8 +1,7 @@
 import { ImportedIndividualDetailedFragment } from '../../src/__generated__/graphql';
 
 export const fakeImportedIndividualDetailedFragment = {
-  id:
-    'SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTphODQ0OTY3OS0wNzcxLTQwODAtYjlhMy05ZTUxNDVjNGRiZmE=',
+  id: 'SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTphODQ0OTY3OS0wNzcxLTQwODAtYjlhMy05ZTUxNDVjNGRiZmE=',
   age: 80,
   fullName: 'Alicja Kowalska',
   birthDate: '1941-08-26',
@@ -14,10 +13,9 @@ export const fakeImportedIndividualDetailedFragment = {
   deduplicationGoldenRecordResults: [],
   deduplicationBatchResults: [],
   registrationDataImport: {
-    id:
-      'UmVnaXN0cmF0aW9uRGF0YUltcG9ydERhdGFodWJOb2RlOmE1YzAyNWU0LTAwMTAtNDA0Yy04YTIyLTUxNWUwNjA5ZDQ2OQ==',
+    id: 'UmVnaXN0cmF0aW9uRGF0YUltcG9ydERhdGFodWJOb2RlOmE1YzAyNWU0LTAwMTAtNDA0Yy04YTIyLTUxNWUwNjA5ZDQ2OQ==',
     hctId: '8cc865bb-c993-489d-a6b5-5ceb21c6a0c3',
-    __typename: 'RegistrationDataImportDatahubNode',
+    __typename: 'RegistrationDataImportNode',
     name: 'romaniaks',
   },
   __typename: 'ImportedIndividualNode',
@@ -46,15 +44,14 @@ export const fakeImportedIndividualDetailedFragment = {
     edges: [
       {
         node: {
-          id:
-            'RG9jdW1lbnROb2RlOjBlYjYwZmY5LWRhMDYtNGYwMC1iMzQwLTFhOTU5Y2NjMjQyMw==',
+          id: 'RG9jdW1lbnROb2RlOjBlYjYwZmY5LWRhMDYtNGYwMC1iMzQwLTFhOTU5Y2NjMjQyMw==',
           country: 'Poland',
           documentNumber: 'WSH221365',
           photo: null,
           type: {
             label: 'National ID',
             key: 'NATIONAL_ID',
-            __typename: 'ImportedDocumentTypeNode',
+            __typename: 'DocumentTypeNode',
           },
           __typename: 'ImportedDocumentNode',
         },
