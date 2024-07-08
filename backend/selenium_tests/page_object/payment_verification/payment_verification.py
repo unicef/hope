@@ -4,118 +4,87 @@ from selenium.webdriver.remote.webelement import WebElement
 
 class PaymentVerification(BaseComponents):
     # Locators
-    paymentVerificationTitle = "h5[data-cy='page-header-title']"
-    paymentPlanID = 'div[data-cy="filter-search"]'
-    status = 'div[data-cy="filter-status"]'
-    FSP = 'div[data-cy="filter-fsp"]'
-    modality = 'div[data-cy="filter-Modality"]'
-    startDate = 'div[data-cy="filter-start-date"]'
-    endDate = 'div[data-cy="filter-end-date"]'
-    statusOptions = 'li[role="option"]'
-    listOfPaymentPlansTitle = 'h6[data-cy="table-title"]'
-    buttonApply = 'button[data-cy="button-filters-apply"]'
-    tableTitle = 'table[data-cy="table-title"]'
-    tableColumn = 'span[data-cy="table-label"]'
-    rows = 'tr[data-cy="cash-plan-table-row"]'
+    pageHeaderContainer = 'div[data-cy="page-header-container"]'
+    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
+    filterSearch = 'div[data-cy="filter-search"]'
+    selectFilter = 'div[data-cy="select-filter"]'
+    filterStatus = 'div[data-cy="filter-status"]'
+    filterFsp = 'div[data-cy="filter-fsp"]'
+    filterModality = 'div[data-cy="filter-Modality"]'
+    filterStartDate = 'div[data-cy="filter-start-date"]'
+    filterEndDate = 'div[data-cy="filter-end-date"]'
+    buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
+    buttonFiltersApply = 'button[data-cy="button-filters-apply"]'
+    tableTitle = 'h6[data-cy="table-title"]'
+    unicefid = 'th[data-cy="unicefId"]'
+    tableLabel = 'span[data-cy="table-label"]'
+    verificationstatus = 'th[data-cy="verificationStatus"]'
+    totaldeliveredquantity = 'th[data-cy="totalDeliveredQuantity"]'
+    startdate = 'th[data-cy="startDate"]'
+    updatedat = 'th[data-cy="updatedAt"]'
+    cashPlanTableRow = 'tr[data-cy="cash-plan-table-row"]'
+    statusContainer = 'div[data-cy="status-container"]'
+    tablePagination = 'div[data-cy="table-pagination"]'
 
-    # Texts
-    textTitle = "Payment Verification"
-    textTabTitle = "List of Payment Plans"
-    textPaymentPlanID = "Payment Plan ID"
-    textStatus = "Status"
-    textFSP = "FSP"
-    textModality = "Delivery Mechanism"
-    textStartDate = "Start Date"
-    textEndDate = "End Date"
-    textProgramme = "Programme"
-    textPaymentPlanID = "Payment Plan ID"
-    textVerificationStatus = "Verification Status"
-    textCashAmount = "Cash Amount"
-    textTimeframe = "Timeframe"
-    textLastModifiedDate = "Last Modified Date"
+    def getPageHeaderContainer(self) -> WebElement:
+        return self.wait_for(self.pageHeaderContainer)
 
-    # Elements
-    def getPaymentVerificationTitle(self) -> WebElement:
-        return self.wait_for(self.paymentVerificationTitle)
+    def getPageHeaderTitle(self) -> WebElement:
+        return self.wait_for(self.pageHeaderTitle)
 
-    def getListOfPaymentPlansTitle(self) -> WebElement:
-        return self.wait_for(self.listOfPaymentPlansTitle)
+    def getFilterSearch(self) -> WebElement:
+        return self.wait_for(self.filterSearch)
 
-    def getPaymentPlanID(self) -> WebElement:
-        return self.wait_for(self.paymentPlanID).eq(0)
+    def getSelectFilter(self) -> WebElement:
+        return self.wait_for(self.selectFilter)
 
-    def getStatus(self) -> WebElement:
-        return self.wait_for(self.status)
+    def getFilterStatus(self) -> WebElement:
+        return self.wait_for(self.filterStatus)
 
-    def getFSP(self) -> WebElement:
-        return self.wait_for(self.FSP)
+    def getFilterFsp(self) -> WebElement:
+        return self.wait_for(self.filterFsp)
 
-    def getModality(self) -> WebElement:
-        return self.wait_for(self.modality)
+    def getFilterModality(self) -> WebElement:
+        return self.wait_for(self.filterModality)
 
-    def getStartDate(self) -> WebElement:
-        return self.wait_for(self.startDate)
+    def getFilterStartDate(self) -> WebElement:
+        return self.wait_for(self.filterStartDate)
 
-    def getEndDate(self) -> WebElement:
-        return self.wait_for(self.endDate)
+    def getFilterEndDate(self) -> WebElement:
+        return self.wait_for(self.filterEndDate)
 
-    def getTable(self) -> WebElement:
+    def getButtonFiltersClear(self) -> WebElement:
+        return self.wait_for(self.buttonFiltersClear)
+
+    def getButtonFiltersApply(self) -> WebElement:
+        return self.wait_for(self.buttonFiltersApply)
+
+    def getTableTitle(self) -> WebElement:
         return self.wait_for(self.tableTitle)
 
-    def getVerificationStatus(self) -> WebElement:
-        return self.wait_for(self.tableColumn).eq(1)
+    def getUnicefid(self) -> WebElement:
+        return self.wait_for(self.unicefid)
 
-    def getCashAmount(self) -> WebElement:
-        return self.wait_for(self.tableColumn).eq(2)
+    def getTableLabel(self) -> WebElement:
+        return self.wait_for(self.tableLabel)
 
-    def getTimeFrame(self) -> WebElement:
-        return self.wait_for(self.tableColumn).eq(3)
+    def getVerificationstatus(self) -> WebElement:
+        return self.wait_for(self.verificationstatus)
 
-    def getLastModifiedDate(self) -> WebElement:
-        return self.wait_for(self.tableColumn).eq(4)
+    def getTotaldeliveredquantity(self) -> WebElement:
+        return self.wait_for(self.totaldeliveredquantity)
 
-    def getPaymentPlanRows(self) -> WebElement:
-        return self.wait_for(self.rows)
+    def getStartdate(self) -> WebElement:
+        return self.wait_for(self.startdate)
 
-    def getStatusOption(self) -> WebElement:
-        return self.wait_for(self.statusOptions)
+    def getUpdatedat(self) -> WebElement:
+        return self.wait_for(self.updatedat)
 
-    def getApply(self) -> WebElement:
-        return self.wait_for(self.buttonApply)
+    def getCashPlanTableRow(self) -> WebElement:
+        return self.wait_for(self.cashPlanTableRow)
 
-    def checkPaymentVerificationTitle(self) -> WebElement:
-        return self.getPaymentVerificationTitle().contains(self.textTitle)
+    def getStatusContainer(self) -> WebElement:
+        return self.wait_for(self.statusContainer)
 
-    def checkListOfPaymentPlansTitle(self) -> WebElement:
-        return self.getListOfPaymentPlansTitle().contains(self.textTabTitle)
-
-    def checkAllSearchFieldsVisible(self) -> None:
-        self.getPaymentPlanID().should("be.visible")
-        self.getPaymentPlanID().get("span").contains(self.textPaymentPlanID)
-        self.getStatus().should("be.visible")
-        self.getStatus().get("span").contains(self.textStatus)
-        self.getFSP().should("be.visible")
-        self.getFSP().get("span").contains(self.textFSP)
-        self.getModality().should("be.visible")
-        self.getModality().get("span").contains(self.textModality)
-        self.getStartDate().should("be.visible")
-        self.getStartDate().get("span").contains(self.textStartDate)
-        self.getEndDate().should("be.visible")
-        self.getEndDate().get("span").contains(self.textEndDate)
-
-    def checkPaymentPlansTableVisible(self) -> None:
-        self.getTable().should("be.visible")
-        self.getPaymentPlanID()
-        self.getVerificationStatus()
-        self.getCashAmount().should("be.visible").contains(self.textCashAmount)
-        self.getTimeFrame().should("be.visible").contains(self.textTimeframe)
-        self.getLastModifiedDate()
-
-    def choosePaymentPlan(self, row: int) -> WebElement:
-        return self.getPaymentPlanRows().eq(row)
-
-    def selectStatus(self, status: str) -> None:
-        self.getStatus().click()
-        self.getStatusOption().contains(status).click()
-        self.pressEscapeFromElement(self.getStatusOption().contains(status))
-        self.getApply().click()
+    def getTablePagination(self) -> WebElement:
+        return self.wait_for(self.tablePagination)
