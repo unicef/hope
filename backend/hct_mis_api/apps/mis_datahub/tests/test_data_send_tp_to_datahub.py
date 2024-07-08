@@ -26,6 +26,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class TestDataSendTpToDatahub(TestCase):
@@ -118,11 +119,18 @@ class TestDataSendTpToDatahub(TestCase):
         cls.individual = IndividualFactory(
             household=cls.household, relationship="HEAD", registration_data_import=rdi, program=cls.program
         )
-        IndividualIdentity.objects.create(partner=unhcr, number="UN-TEST", individual=cls.individual, country=country)
+        IndividualIdentity.objects.create(
+            partner=unhcr,
+            number="UN-TEST",
+            individual=cls.individual,
+            country=country,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
         IndividualRoleInHousehold.objects.create(
             individual=cls.individual,
             household=cls.household,
             role=ROLE_PRIMARY,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
         cls.household.head_of_household = cls.individual

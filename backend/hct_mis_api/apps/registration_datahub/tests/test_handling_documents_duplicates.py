@@ -27,6 +27,8 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
 )
+from hct_mis_api.apps.utils.models import MergeStatusModel
+from hct_mis_api.conftest import disabled_locally_test
 
 
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
@@ -139,6 +141,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             individual=cls.individuals[0],
             status=Document.STATUS_VALID,
             program=cls.individuals[0].program,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         cls.document2 = Document.objects.create(
             type=cls.dt,
@@ -146,6 +149,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             individual=cls.individuals[1],
             country=cls.country,
             program=cls.individuals[1].program,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         cls.document3 = Document.objects.create(
             type=cls.dt,
@@ -153,6 +157,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             individual=cls.individuals[2],
             country=cls.country,
             program=cls.individuals[2].program,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         cls.document4 = Document.objects.create(
             type=cls.dt,
@@ -160,6 +165,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             individual=cls.individuals[3],
             country=cls.country,
             program=cls.individuals[3].program,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         cls.document5 = Document.objects.create(
             country=cls.country,
@@ -168,6 +174,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             individual=cls.individuals[4],
             status=Document.STATUS_VALID,
             program=cls.individuals[4].program,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         cls.document6 = Document.objects.create(
             country=cls.country,
@@ -176,6 +183,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             individual=cls.individuals[2],
             status=Document.STATUS_VALID,
             program=cls.individuals[2].program,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         cls.document7 = Document.objects.create(
             country=cls.country,
@@ -183,6 +191,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             document_number="ASD123",
             individual=cls.individuals[1],
             program=cls.individuals[1].program,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         cls.document8 = Document.objects.create(
             country=cls.country,
@@ -190,6 +199,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             document_number="ASD123",
             individual=cls.individuals[4],
             program=cls.individuals[4].program,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         cls.document9 = Document.objects.create(
             country=cls.country,
@@ -197,6 +207,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             document_number="UNIQ",
             individual=cls.individuals[5],
             program=cls.individuals[5].program,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         cls.all_documents = [
             cls.document1,
@@ -322,6 +333,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             individual=self.individuals[2],
             status=Document.STATUS_VALID,
             program=self.program,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         doc_national_id_1 = Document.objects.create(
             country=self.country,
@@ -329,6 +341,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             document_number="TAX_ID_DOC_123",  # the same doc number
             individual=self.individuals[2],
             program=self.program,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         doc_national_id_2 = Document.objects.create(
             country=self.country,
@@ -336,6 +349,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             document_number="TAX_ID_DOC_123",  # the same doc number
             individual=self.individuals[2],
             program=self.program,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
         HardDocumentDeduplication().deduplicate(
@@ -399,6 +413,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             document_number="ASD123",
             individual=individual,
             status=Document.STATUS_PENDING,
+            rdi_merge_status=MergeStatusModel.MERGED,
             # now filtering is by Individual.program
             # program=program_2,
         )
