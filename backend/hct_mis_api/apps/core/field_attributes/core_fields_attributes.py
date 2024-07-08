@@ -32,6 +32,7 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.field_attributes.fields_types import (
+    _DELIVERY_MECHANISM_DATA,
     _HOUSEHOLD,
     _INDIVIDUAL,
     TEMPLATE_HOH,
@@ -1964,6 +1965,9 @@ class FieldFactory(list):
 
     def associated_with_individual(self) -> "FieldFactory":
         return self._associated_with([_INDIVIDUAL])
+
+    def associated_with_individual_with_delivery_mechanism_data(self) -> "FieldFactory":
+        return self._associated_with([_INDIVIDUAL, _DELIVERY_MECHANISM_DATA])
 
     def associated_with_household(self) -> "FieldFactory":
         return self._associated_with([_HOUSEHOLD])

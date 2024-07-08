@@ -7,21 +7,14 @@ import { DashboardPaper } from '../../DashboardPaper';
 
 interface PaymentVerificationSectionProps {
   data: AllChartsQuery['chartPaymentVerification'];
-  isSocialDctType: boolean;
 }
 export function PaymentVerificationSection({
   data,
-  isSocialDctType,
 }: PaymentVerificationSectionProps): React.ReactElement {
   const { t } = useTranslation();
   if (!data) return null;
 
   const renderContacted = () => {
-    if (isSocialDctType) {
-      return data.households === 1
-        ? t('Person contacted')
-        : t('People contacted');
-    }
     return data.households === 1
       ? t('Household contacted')
       : t('Households contacted');
@@ -37,7 +30,7 @@ export function PaymentVerificationSection({
           {(data.averageSampleSize * 100).toFixed(0)}%{t('average sampling')}
         </Typography>
       </Box>
-      <PaymentVerificationChart data={data} />
+      {data.datasets && <PaymentVerificationChart data={data.datasets} />}
     </DashboardPaper>
   );
 }

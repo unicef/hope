@@ -6,7 +6,7 @@ import { CountryChartsQuery } from '@generated/graphql';
 import { EnhancedTableHead } from '@core/Table/EnhancedTableHead';
 
 interface TotalAmountTransferredByAdminAreaTableForPeopleProps {
-  data: CountryChartsQuery['tableTotalCashTransferredByAdministrativeArea']['data'];
+  data: CountryChartsQuery['tableTotalCashTransferredByAdministrativeAreaForPeople']['data'];
   handleSort;
   order;
   orderBy;
@@ -50,7 +50,7 @@ export function TotalAmountTransferredByAdminAreaTableForPeople({
         <TableCell align="right">
           {formatCurrency(el.totalCashTransferred, true)}
         </TableCell>
-        <TableCell align="right">{formatNumber(el.totalHouseholds)}</TableCell>
+        <TableCell align="right">{formatNumber(el.totalPeople)}</TableCell>
       </TableRow>
     ));
 

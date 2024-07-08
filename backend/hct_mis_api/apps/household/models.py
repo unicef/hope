@@ -1,7 +1,7 @@
 import logging
 import re
 from datetime import date, datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from django.conf import settings
 from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
@@ -38,13 +38,21 @@ from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     AdminUrlMixin,
     ConcurrencyModel,
+    MergeStatusModel,
     RepresentationManager,
-    SoftDeletableIsOriginalModel,
-    SoftDeletableModelWithDate,
+    SoftDeletableRepresentationMergeStatusModel,
+    SoftDeletableRepresentationMergeStatusModelWithDate,
+    SoftDeletableRepresentationPendingManager,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
-from hct_mis_api.apps.utils.phone import recalculate_phone_numbers_validity
+from hct_mis_api.apps.utils.phone import (
+    calculate_phone_numbers_validity,
+    recalculate_phone_numbers_validity,
+)
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.registration_datahub.models import Record
 
 BLANK = ""
 IDP = "IDP"
@@ -71,7 +79,6 @@ SEX_CHOICE = (
     (MALE, _("Male")),
     (FEMALE, _("Female")),
 )
-
 
 SINGLE = "SINGLE"
 MARRIED = "MARRIED"
@@ -328,7 +335,7 @@ class HouseholdCollection(UnicefIdentifiedModel):
 
 
 class Household(
-    SoftDeletableModelWithDate,
+    SoftDeletableRepresentationMergeStatusModelWithDate,
     TimeStampedUUIDModel,
     AbstractSyncable,
     ConcurrencyModel,
@@ -400,8 +407,6 @@ class Household(
             "collect_individual_data",
             "currency",
             "unhcr_id",
-            "kobo_asset_id",
-            "row_id",
             "detail_id",
             "registration_id",
             "program_registration_id",
@@ -485,7 +490,9 @@ class Household(
     flex_fields = JSONField(default=dict, blank=True)
     first_registration_date = models.DateTimeField()
     last_registration_date = models.DateTimeField()
-    head_of_household = models.OneToOneField("Individual", related_name="heading_household", on_delete=models.CASCADE)
+    head_of_household = models.OneToOneField(
+        "Individual", related_name="heading_household", on_delete=models.CASCADE, null=True
+    )
     fchild_hoh = models.BooleanField(null=True)
     child_hoh = models.BooleanField(null=True)
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
@@ -500,9 +507,6 @@ class Household(
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
     user_fields = JSONField(default=dict, blank=True)
-    # TODO: remove 'kobo_asset_id' and 'row_id' after migrate data
-    kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK, db_index=True)
-    row_id = models.PositiveIntegerField(blank=True, null=True)  # XLS row id
     detail_id = models.CharField(
         max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
     )
@@ -549,11 +553,16 @@ class Household(
         "this field will contain the household it was copied from.",
     )
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
-    is_original = models.BooleanField(db_index=True, default=False)
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
     is_recalculated_group_ages = models.BooleanField(default=False)  # TODO remove after migration
     collect_type = models.CharField(choices=CollectType.choices, default=CollectType.STANDARD.value, max_length=8)
+
+    kobo_submission_uuid = models.UUIDField(null=True, default=None)
+    kobo_submission_time = models.DateTimeField(max_length=150, blank=True, null=True)
+    enumerator_rec_id = models.PositiveIntegerField(blank=True, null=True)
+    mis_unicef_id = models.CharField(max_length=255, null=True)
+    flex_registrations_record_id = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Household"
@@ -612,7 +621,8 @@ class Household(
             new_admin_area = self.admin_area
         else:
             self.admin_area = new_admin_area
-
+        if not new_admin_area:
+            return
         for admin in admins:
             setattr(self, admin, None)
 
@@ -644,6 +654,12 @@ class Household(
     @cached_property
     def alternate_collector(self) -> Optional["Individual"]:
         return self.representatives.filter(households_and_roles__role=ROLE_ALTERNATE).first()
+
+    @property
+    def flex_registrations_record(self) -> Optional["Record"]:
+        from hct_mis_api.apps.registration_datahub.models import Record
+
+        return Record.objects.filter(id=self.flex_registrations_record_id).first()
 
     def __str__(self) -> str:
         return self.unicef_id or ""
@@ -687,7 +703,7 @@ class DocumentType(TimeStampedUUIDModel):
         return f"{self.label}"
 
 
-class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDModel):
+class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, TimeStampedUUIDModel):
     STATUS_PENDING = "PENDING"
     STATUS_VALID = "VALID"
     STATUS_NEED_INVESTIGATION = "NEED_INVESTIGATION"
@@ -752,7 +768,7 @@ class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDMo
             # document_number must be unique across all documents of the same type
             UniqueConstraint(
                 fields=["document_number", "type", "country", "program", "is_original"],
-                condition=Q(Q(is_removed=False) & Q(status="VALID")),
+                condition=Q(Q(is_removed=False) & Q(status="VALID") & Q(rdi_merge_status=MergeStatusModel.MERGED)),
                 name="unique_if_not_removed_and_valid_for_representations",
             ),
         ]
@@ -773,7 +789,7 @@ class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDMo
         self.save()
 
 
-class IndividualIdentity(SoftDeletableIsOriginalModel, TimeStampedModel):
+class IndividualIdentity(SoftDeletableRepresentationMergeStatusModel, TimeStampedModel):
     # notice that this model has `created` and `modified` fields
     individual = models.ForeignKey("Individual", related_name="identities", on_delete=models.CASCADE)
     number = models.CharField(
@@ -803,7 +819,7 @@ class IndividualIdentity(SoftDeletableIsOriginalModel, TimeStampedModel):
         return f"{self.partner} {self.individual} {self.number}"
 
 
-class IndividualRoleInHousehold(SoftDeletableIsOriginalModel, TimeStampedUUIDModel, AbstractSyncable):
+class IndividualRoleInHousehold(SoftDeletableRepresentationMergeStatusModel, TimeStampedUUIDModel, AbstractSyncable):
     individual = models.ForeignKey(
         "household.Individual",
         on_delete=models.CASCADE,
@@ -851,7 +867,7 @@ class IndividualCollection(UnicefIdentifiedModel):
 
 
 class Individual(
-    SoftDeletableModelWithDate,
+    SoftDeletableRepresentationMergeStatusModelWithDate,
     TimeStampedUUIDModel,
     AbstractSyncable,
     ConcurrencyModel,
@@ -1009,9 +1025,6 @@ class Individual(
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     fchild_hoh = models.BooleanField(default=False)
     child_hoh = models.BooleanField(default=False)
-    # TODO: remove 'kobo_asset_id' and 'row_id' after migrate data
-    kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
-    row_id = models.PositiveIntegerField(blank=True, null=True)
     detail_id = models.CharField(
         max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
     )
@@ -1045,9 +1058,9 @@ class Individual(
         "this field will contain the individual it was copied from.",
     )
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
-    is_original = models.BooleanField(db_index=True, default=False)
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
+    mis_unicef_id = models.CharField(max_length=255, null=True)
 
     vector_column = SearchVectorField(null=True)
 
@@ -1241,6 +1254,9 @@ class Individual(
         self.flex_fields = {}
         self.save()
 
+    def validate_phone_numbers(self) -> None:
+        calculate_phone_numbers_validity(self)
+
     def save(self, *args: Any, **kwargs: Any) -> None:
         recalculate_phone_numbers_validity(self, Individual)
         super().save(*args, **kwargs)
@@ -1286,7 +1302,7 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
     program = models.ForeignKey("program.Program", null=True, on_delete=models.CASCADE)
 
 
-class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable):
+class BankAccountInfo(SoftDeletableRepresentationMergeStatusModelWithDate, TimeStampedUUIDModel, AbstractSyncable):
     individual = models.ForeignKey(
         "household.Individual",
         related_name="bank_account_info",
@@ -1297,7 +1313,6 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
     bank_branch_name = models.CharField(max_length=255, blank=True, default="")
     account_holder_name = models.CharField(max_length=255, blank=True, default="")
-    is_original = models.BooleanField(db_index=True, default=False)
     is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
         "self",
@@ -1317,3 +1332,97 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
         if self.debit_card_number:
             self.debit_card_number = str(self.debit_card_number).replace(" ", "")
         super().save(*args, **kwargs)
+
+
+class PendingHousehold(Household):
+    objects = SoftDeletableRepresentationPendingManager()
+
+    @property
+    def individuals(self) -> QuerySet:
+        return super().individuals(manager="pending_objects")
+
+    @property
+    def individuals_and_roles(self) -> QuerySet:
+        return super().individuals_and_roles(manager="pending_objects")
+
+    @property
+    def pending_representatives(self) -> QuerySet:
+        return super().representatives(manager="pending_objects")
+
+    @cached_property
+    def primary_collector(self) -> Optional["Individual"]:
+        return self.pending_representatives.get(households_and_roles__role=ROLE_PRIMARY)
+
+    @cached_property
+    def alternate_collector(self) -> Optional["Individual"]:
+        return self.pending_representatives.filter(households_and_roles__role=ROLE_ALTERNATE).first()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Imported Household"
+        verbose_name_plural = "Imported Households"
+
+
+class PendingIndividual(Individual):
+    objects = SoftDeletableRepresentationPendingManager()
+
+    @property
+    def households_and_roles(self) -> QuerySet:
+        return super().households_and_roles(manager="pending_objects")
+
+    @property
+    def documents(self) -> QuerySet:
+        return super().documents(manager="pending_objects")
+
+    @property
+    def identities(self) -> QuerySet:
+        return super().identities(manager="pending_objects")
+
+    @property
+    def bank_account_info(self) -> QuerySet:
+        return super().bank_account_info(manager="pending_objects")
+
+    @property
+    def pending_household(self) -> QuerySet:
+        return PendingHousehold.objects.get(pk=self.household.pk)
+
+    class Meta:
+        proxy = True
+        verbose_name = "Imported Individual"
+        verbose_name_plural = "Imported Individuals"
+
+
+class PendingIndividualIdentity(IndividualIdentity):
+    objects = SoftDeletableRepresentationPendingManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Imported Individual Identity"
+        verbose_name_plural = "Imported Individual Identities"
+
+
+class PendingDocument(Document):
+    objects = SoftDeletableRepresentationPendingManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Imported Document"
+        verbose_name_plural = "Imported Documents"
+
+
+class PendingBankAccountInfo(BankAccountInfo):
+    objects = SoftDeletableRepresentationPendingManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Imported Bank Account Info"
+        verbose_name_plural = "Imported Bank Account Infos"
+
+
+class PendingIndividualRoleInHousehold(IndividualRoleInHousehold):
+    objects = SoftDeletableRepresentationPendingManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Imported Individual Role In Household"
+        verbose_name_plural = "Imported Individual Roles In Household"

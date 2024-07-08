@@ -37,7 +37,6 @@ from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.schema import ChoiceObject, DataCollectingTypeNode
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
-    chart_map_choices,
     chart_permission_decorator,
     to_choice_object,
 )
@@ -102,6 +101,7 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
                 program_partner_through__program=program,
             )
             .annotate(partner_program=Value(program.id))
+            .order_by("name")
             .distinct()
         )
 
@@ -285,7 +285,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_chart_programmes_by_sector(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> Dict:
         filters = chart_filters_decoder(kwargs)
-        sector_choice_mapping = chart_map_choices(Program.SECTOR_CHOICE)
+        sector_choice_mapping = dict(Program.SECTOR_CHOICE)
         payment_items_qs: QuerySet = get_payment_items_for_dashboard(year, business_area_slug, filters, True)
 
         programs_ids = payment_items_qs.values_list("parent__program__id", flat=True)
