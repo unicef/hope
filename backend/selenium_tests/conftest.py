@@ -10,6 +10,10 @@ from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from flags.models import FlagState
+from page_object.accountability.communication import AccountabilityCommunication
+from page_object.accountability.comunication_details import (
+    AccountabilityCommunicationDetails,
+)
 from page_object.admin_panel.admin_panel import AdminPanel
 from page_object.filters import Filters
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
@@ -318,6 +322,18 @@ def pagePaymentModuleDetails(request: FixtureRequest, browser: Chrome) -> Paymen
 @pytest.fixture
 def pageNewPaymentPlan(request: FixtureRequest, browser: Chrome) -> NewPaymentPlan:
     yield NewPaymentPlan(browser)
+
+
+@pytest.fixture
+def pageAccountabilityCommunication(request: FixtureRequest, browser: Chrome) -> AccountabilityCommunication:
+    yield AccountabilityCommunication(browser)
+
+
+@pytest.fixture
+def pageAccountabilityCommunicationDetails(
+    request: FixtureRequest, browser: Chrome
+) -> AccountabilityCommunicationDetails:
+    yield AccountabilityCommunicationDetails(browser)
 
 
 @pytest.fixture
