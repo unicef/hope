@@ -25,6 +25,7 @@ exports[`components/dashboard/TotalAmountTransferredSection should render 1`] = 
       </div>
       <div
         class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+        data-cy="total-amount-transferred"
       >
         <div
           class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-73i7jt-MuiGrid-root"

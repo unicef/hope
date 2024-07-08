@@ -1,3 +1,5 @@
+from time import sleep
+
 from helpers.helper import Common
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -43,6 +45,7 @@ class BaseComponents(Common):
     globalProgramFilterClearButton = 'button[data-cy="clear-icon"]'
     breadcrumbsChevronIcon = 'svg[data-cy="breadcrumbs-chevron-icon"]'
     arrowBack = 'div[data-cy="arrow_back"]'
+    rows = 'tr[role="checkbox"]'
 
     # Text
     globalProgramFilterText = "All Programmes"
@@ -173,3 +176,13 @@ class BaseComponents(Common):
 
     def getArrowBack(self) -> WebElement:
         return self.wait_for(self.arrowBack)
+
+    def getRows(self) -> [WebElement]:
+        return self.get_elements(self.rows)
+
+    def waitForNumberOfRows(self, number: int) -> bool:
+        for _ in range(5):
+            if len(self.getRows()) == number:
+                return True
+            sleep(1)
+        return False
