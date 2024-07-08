@@ -138,6 +138,30 @@ class TestPaymentPlanModel(TestCase):
         pp = PaymentPlanFactory(currency=USDC)
         self.assertEqual(pp.get_exchange_rate(), 1.0)
 
+    def test_is_reconciled(self) -> None:
+        pp = PaymentPlanFactory(currency=USDC)
+        self.assertEqual(pp.is_reconciled, False)
+
+        PaymentFactory(parent=pp, currency="PLN", excluded=True)
+        self.assertEqual(pp.is_reconciled, False)
+
+        PaymentFactory(parent=pp, currency="PLN", conflicted=True)
+        self.assertEqual(pp.is_reconciled, False)
+
+        p1 = PaymentFactory(parent=pp, currency="PLN", status=Payment.STATUS_PENDING)
+        self.assertEqual(pp.is_reconciled, False)
+
+        p2 = PaymentFactory(parent=pp, currency="PLN", status=Payment.STATUS_SENT_TO_PG)
+        self.assertEqual(pp.is_reconciled, False)
+
+        p1.status = Payment.STATUS_DISTRIBUTION_SUCCESS
+        p1.save()
+        self.assertEqual(pp.is_reconciled, False)
+
+        p2.status = Payment.STATUS_DISTRIBUTION_PARTIAL
+        p2.save()
+        self.assertEqual(pp.is_reconciled, True)
+
 
 class TestPaymentModel(TestCase):
     @classmethod

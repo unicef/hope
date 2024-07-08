@@ -8,7 +8,6 @@ from celery import Task
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
 from hct_mis_api.apps.utils.celery_utils import (
     get_all_celery_tasks,
     get_task_in_queue_or_running,
@@ -107,10 +106,9 @@ class RegistrationDataXlsxImportCeleryManager(BaseCeleryTaskManager):
         return registration_xlsx_import_task
 
     def get_task_kwargs(self, rdi: RegistrationDataImport) -> dict:
-        rdi_datahub = RegistrationDataImportDatahub.objects.get(hct_id=rdi.id)
         return {
-            "registration_data_import_id": str(rdi_datahub.id),
-            "import_data_id": str(rdi_datahub.import_data_id),
+            "registration_data_import_id": str(rdi.id),
+            "import_data_id": str(rdi.import_data_id),
             "business_area_id": str(rdi.business_area_id),
             "program_id": str(rdi.program_id),
         }
