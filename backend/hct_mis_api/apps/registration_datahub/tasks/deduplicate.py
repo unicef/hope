@@ -716,9 +716,12 @@ class HardDocumentDeduplication:
             for new_document in documents_to_dedup:
                 new_document_signature = self._generate_signature(new_document)
                 # use this dict for skip ticket creation for the same Individual with the same doc number
-                is_duplicated_document_number_for_individual: bool = ind_and_new_document_signatures_duplicated_in_batch_dict.get(
-                    str(new_document.individual_id), []
-                ).count(new_document_signature) > 1
+                is_duplicated_document_number_for_individual: bool = (
+                    ind_and_new_document_signatures_duplicated_in_batch_dict.get(
+                        str(new_document.individual_id), []
+                    ).count(new_document_signature)
+                    > 1
+                )
 
                 if new_document_signature in all_matching_number_documents_signatures:
                     new_document.status = Document.STATUS_NEED_INVESTIGATION
