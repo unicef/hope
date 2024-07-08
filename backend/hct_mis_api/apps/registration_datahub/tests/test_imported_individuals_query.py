@@ -9,7 +9,8 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.registration_datahub.fixtures import ImportedIndividualFactory
+from hct_mis_api.apps.household.fixtures import IndividualFactory
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 ALL_IMPORTED_INDIVIDUALS_QUERY = """
 query AllImportedIndividuals {
@@ -139,7 +140,10 @@ class TestImportedIndividualQuery(APITestCase):
             },
         ]
 
-        cls.individuals = [ImportedIndividualFactory(**individual) for individual in cls.individuals_to_create]
+        cls.individuals = [
+            IndividualFactory(**individual, rdi_merge_status=MergeStatusModel.PENDING)
+            for individual in cls.individuals_to_create
+        ]
         for individual in cls.individuals:
             individual.registration_data_import.business_area_slug = "afghanistan"
             individual.registration_data_import.save()
