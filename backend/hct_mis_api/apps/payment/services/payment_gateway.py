@@ -115,13 +115,6 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         return {}
 
     def get_payload(self, obj: Payment) -> Dict:
-        """
-        amount: int  # 120000
-        phone_no: str  # "78933211"
-        last_name: str  # "Arabic"
-        first_name: str  # "Angelina"
-        destination_currency: str  # "USD"
-        """
         return {
             "amount": obj.entitlement_quantity,
             "phone_no": str(obj.collector.phone_no),
@@ -129,6 +122,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
             "first_name": obj.collector.given_name,
             "full_name": obj.full_name,
             "destination_currency": obj.currency,
+            "service_provider_code": obj.collector.flex_fields.get("service_provider_code", ""),
         }
 
     class Meta:

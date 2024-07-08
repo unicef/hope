@@ -76,7 +76,12 @@ class TestPaymentGatewayService(APITestCase):
         )
         cls.payments = []
         for _ in range(2):
-            collector = IndividualFactory(household=None)
+            collector = IndividualFactory(
+                household=None,
+                flex_fields={
+                    "service_provider_code": "123456789",
+                },
+            )
             hoh = IndividualFactory(household=None)
             hh = HouseholdFactory(head_of_household=hoh)
             IndividualRoleInHouseholdFactory(household=hh, individual=hoh, role=ROLE_PRIMARY)
@@ -411,3 +416,34 @@ class TestPaymentGatewayService(APITestCase):
         self.assertEqual(self.payments[1].status, Payment.STATUS_ERROR)
         self.assertEqual(self.payments[0].reason_for_unsuccessful_payment, "Error")
         self.assertEqual(self.payments[1].reason_for_unsuccessful_payment, "Error")
+
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
+    def test_api_add_records_to_payment_instruction(self, post_mock: Any) -> None:
+        post_mock.return_value = {
+            "remote_id": "123",
+            "records": {
+                "1": self.payments[0].id,
+            },
+            "errors": None,
+        }
+        PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
+        post_mock.assert_called_once_with(
+            "payment_instructions/123/add_records/",
+            [
+                {
+                    "remote_id": str(self.payments[0].id),
+                    "record_code": self.payments[0].unicef_id,
+                    "payload": {
+                        "amount": self.payments[0].entitlement_quantity,
+                        "phone_no": str(self.payments[0].collector.phone_no),
+                        "last_name": self.payments[0].collector.family_name,
+                        "first_name": self.payments[0].collector.given_name,
+                        "full_name": self.payments[0].collector.full_name,
+                        "destination_currency": self.payments[0].currency,
+                        "service_provider_code": self.payments[0].collector.flex_fields["service_provider_code"],
+                    },
+                    "extra_data": {},
+                }
+            ],
+            validate_response=True,
+        )
