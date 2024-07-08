@@ -6,9 +6,11 @@ import AddIcon from '@mui/icons-material/Add';
 import UploadIcon from '@mui/icons-material/Upload';
 import { PeriodicDataUpdatesTemplatesList } from './PeriodicDataUpdatesTemplatesList';
 import { PeriodicDataUpdatesUpdatesList } from './PeriodicDataUpdatesUpdatesList';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export const PeriodicDataUpdates = (): React.ReactElement => {
   const [value, setValue] = useState(0);
+  const { baseUrl } = useBaseUrl();
 
   const handleChange = (
     _event: React.ChangeEvent<object>,
@@ -40,7 +42,7 @@ export const PeriodicDataUpdates = (): React.ReactElement => {
               variant="contained"
               color="primary"
               component={Link}
-              to="/new-template"
+              to={`/${baseUrl}/population/household-members/new-template`}
               startIcon={<AddIcon />}
             >
               New Template

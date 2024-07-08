@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Formik, Form, Field, FieldArray } from 'formik';
 import {
   Table,
   TableBody,
@@ -6,10 +7,10 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
   Checkbox,
   MenuItem,
   Select,
+  Box,
 } from '@mui/material';
 
 const initialFields = [
@@ -20,78 +21,97 @@ const initialFields = [
 ];
 
 export const FieldsToUpdate = () => {
-  const [selectedFields, setSelectedFields] = useState([]);
-
-  const handleSelectField = (fieldId, roundNumber) => {
-    const updatedSelection = selectedFields.find(
-      (field) => field.id === fieldId,
-    )
-      ? selectedFields.map((field) =>
-          field.id === fieldId ? { ...field, roundNumber } : field,
-        )
-      : [...selectedFields, { id: fieldId, roundNumber }];
-
-    setSelectedFields(updatedSelection);
-  };
-
-  const handleRoundChange = (event, fieldId) => {
-    handleSelectField(fieldId, event.target.value);
-  };
-
-  const handleCheckboxChange = (event, fieldId) => {
-    if (event.target.checked) {
-      handleSelectField(fieldId, 1); // Default to round 1 if not specified
-    } else {
-      setSelectedFields(selectedFields.filter((field) => field.id !== fieldId));
-    }
+  const initialValues = {
+    selectedFields: [],
   };
 
   return (
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Select</TableCell>
-            <TableCell>Field</TableCell>
-            <TableCell>Round Number</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {initialFields.map((field) => (
-            <TableRow key={field.id}>
-              <TableCell>
-                <Checkbox
-                  checked={selectedFields.some(
-                    (selectedField) => selectedField.id === field.id,
-                  )}
-                  onChange={(event) => handleCheckboxChange(event, field.id)}
-                />
-              </TableCell>
-              <TableCell>{field.name}</TableCell>
-              <TableCell>
-                <Select
-                  value={
-                    selectedFields.find(
-                      (selectedField) => selectedField.id === field.id,
-                    )?.roundNumber || ''
-                  }
-                  onChange={(event) => handleRoundChange(event, field.id)}
-                  displayEmpty
-                >
-                  <MenuItem value="" disabled>
-                    Select Round
-                  </MenuItem>
-                  {[...Array(10).keys()].map((num) => (
-                    <MenuItem key={num + 1} value={num + 1}>
-                      {num + 1}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <Formik
+      initialValues={initialValues}
+      onSubmit={(values) => {
+        console.log(values);
+      }}
+    >
+      {({ values, setFieldValue }) => (
+        <Form>
+          <FieldArray
+            name="selectedFields"
+            render={(arrayHelpers) => (
+              <TableContainer component={Box}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Select</TableCell>
+                      <TableCell>Field</TableCell>
+                      <TableCell>Round Number</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {initialFields.map((field, index) => (
+                      <TableRow key={field.id}>
+                        <TableCell>
+                          <Checkbox
+                            checked={values.selectedFields.some(
+                              (selectedField) => selectedField.id === field.id,
+                            )}
+                            onChange={(event) => {
+                              const selectedIndex =
+                                values.selectedFields.findIndex(
+                                  (selectedField) =>
+                                    selectedField.id === field.id,
+                                );
+                              if (event.target.checked) {
+                                arrayHelpers.push({
+                                  id: field.id,
+                                  roundNumber: 1,
+                                });
+                              } else if (selectedIndex > -1) {
+                                arrayHelpers.remove(selectedIndex);
+                              }
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell>{field.name}</TableCell>
+                        <TableCell>
+                          <Select
+                            value={
+                              values.selectedFields.find(
+                                (selectedField) =>
+                                  selectedField.id === field.id,
+                              )?.roundNumber || ''
+                            }
+                            onChange={(event) => {
+                              const selectedIndex =
+                                values.selectedFields.findIndex(
+                                  (selectedField) =>
+                                    selectedField.id === field.id,
+                                );
+                              setFieldValue(
+                                `selectedFields[${selectedIndex}].roundNumber`,
+                                event.target.value,
+                              );
+                            }}
+                            displayEmpty
+                          >
+                            <MenuItem value="" disabled>
+                              Select Round
+                            </MenuItem>
+                            {[...Array(10).keys()].map((num) => (
+                              <MenuItem key={num + 1} value={num + 1}>
+                                {num + 1}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          />
+        </Form>
+      )}
+    </Formik>
   );
 };
