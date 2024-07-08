@@ -21,6 +21,8 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
 )
+from hct_mis_api.apps.payment.fixtures import (FinancialServiceProviderXlsxTemplateFactory,
+                                               FspXlsxTemplatePerDeliveryMechanismFactory)
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from selenium_tests.helpers.date_time_format import FormatTime
 
@@ -68,6 +70,8 @@ def create_targeting(create_test_program: Program) -> None:
     rule.allowed_business_areas.add(business_area)
     RuleCommitFactory(rule=rule, version=2)
 
+    fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(name="TestName123")
+
     fsp_1 = FinancialServiceProviderFactory(
         name="FSP_1",
         vision_vendor_number="149-69-3686",
@@ -76,6 +80,11 @@ def create_targeting(create_test_program: Program) -> None:
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
     )
     fsp_1.allowed_business_areas.add(business_area)
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=fsp_1,
+        xlsx_template=fsp_xlsx_template,
+        delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH
+    )
 
 
 @pytest.fixture
@@ -249,6 +258,7 @@ class TestSmokePaymentModule:
         pagePaymentModuleDetails.getButtonNextSave().click()
         pagePaymentModuleDetails.getSelectDeliveryMechanismFSP().click()
         pagePaymentModuleDetails.select_listbox_element("FSP_1").click()
+        pagePaymentModuleDetails.screenshot("FSP")
         pagePaymentModuleDetails.getButtonNextSave().click()
         pagePaymentModuleDetails.checkStatus("LOCKED")
         pagePaymentModuleDetails.getButtonLockPlan().click()
@@ -265,14 +275,35 @@ class TestSmokePaymentModule:
         pagePaymentModuleDetails.getButtonMarkAsReleased().click()
         pagePaymentModuleDetails.getButtonSubmit().click()
         pagePaymentModuleDetails.checkStatus("ACCEPTED")
-        for i in range(20):
-            pagePaymentModuleDetails.screenshot(i)
-        pagePaymentModuleDetails.getButtonExportXlsx().click()
-
+        sleep(10)
         pagePaymentModule.screenshot("PaymentModule")
-
+        pagePaymentModuleDetails.getButtonExportXlsx().click()
+        pagePaymentModule.screenshot("PaymentModule1")
+        sleep(10)
+        pagePaymentModule.driver.refresh()
+        pagePaymentModule.screenshot("PaymentModule1")
+        sleep(1)
+        pagePaymentModuleDetails.getButtonDownloadXlsx().click()
+        sleep(5)
+        # import zipfile
+        # with zipfile.ZipFile("./report/downloads/*.zip", 'r') as zip_ref:
+        #     zip_ref.extractall("./report/downloads/")
+        pagePaymentModule.driver.get("chrome://downloads/")
+        import os
+        print(os.listdir("./report/"))
+        sleep(3)
+        pagePaymentModule.screenshot("clicked")
+        pagePaymentModuleDetails.getButtonUploadReconciliationInfo().click()
+        pagePaymentModuleDetails.upload_file(f"./report/payment_plan_payment_list_PP-0060-24-00000091_FSP_FSP_1_Cash.xlsx")
+        sleep(2)
+        from selenium.webdriver.common.by import By
+        pagePaymentModuleDetails.getButtonImportSubmit().click()
+        sleep(2)
         from selenium_tests.tools.tag_name_finder import printing
 
         printing("Mapping", pagePaymentModuleDetails.driver)
         printing("Methods", pagePaymentModuleDetails.driver)
         printing("Assert", pagePaymentModuleDetails.driver)
+        pagePaymentModuleDetails.getErrorsContainer().find_elements(By.TAG_NAME, "svg")[0].click()
+        pagePaymentModule.screenshot("Reconciliation")
+

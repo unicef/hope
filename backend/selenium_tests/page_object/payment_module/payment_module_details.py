@@ -10,6 +10,7 @@ class PaymentModuleDetails(BaseComponents):
     ppUnicefId = 'span[data-cy="pp-unicef-id"]'
     statusContainer = 'div[data-cy="status-container"]'
     buttonExportXlsx = 'button[data-cy="button-export-xlsx"]'
+    buttonDownloadXlsx = 'a[data-cy="button-download-xlsx"]'
     labelCreatedBy = 'div[data-cy="label-Created By"]'
     labelProgramme = 'div[data-cy="label-Programme"]'
     labelTargetPopulation = 'div[data-cy="label-Target Population"]'
@@ -53,6 +54,9 @@ class PaymentModuleDetails(BaseComponents):
     buttonApprove = 'button[data-cy="button-approve"]'
     buttonAuthorize = 'button[data-cy="button-authorize"]'
     buttonMarkAsReleased = 'button[data-cy="button-mark-as-released"]'
+    buttonUploadReconciliationInfo = 'button[data-cy="button-import"]'
+    buttonImportSubmit = 'button[data-cy="button-import-submit"]'
+    errorsContainer = 'div[data-cy="errors-container"]'
 
     def getButtonLockPlan(self) -> WebElement:
         return self.wait_for(self.buttonLockPlan)
@@ -74,6 +78,18 @@ class PaymentModuleDetails(BaseComponents):
 
     def getButtonExportXlsx(self) -> WebElement:
         return self.wait_for(self.buttonExportXlsx)
+
+    def getButtonDownloadXlsx(self) -> WebElement:
+        return self.wait_for(self.buttonDownloadXlsx)
+
+    def getButtonUploadReconciliationInfo(self) -> WebElement:
+        return self.wait_for(self.buttonUploadReconciliationInfo)
+
+    def getErrorsContainer(self) -> WebElement:
+        return self.wait_for(self.errorsContainer)
+
+    def getButtonImportSubmit(self) -> WebElement:
+        return self.wait_for(self.buttonImportSubmit)
 
     def getLabelCreatedBy(self) -> WebElement:
         return self.wait_for(self.labelCreatedBy)
