@@ -9,16 +9,15 @@ from django.utils import timezone
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedBankAccountInfo,
-    ImportedDocument,
-    ImportedDocumentType,
-    ImportedHousehold,
-    ImportedIndividual,
+from hct_mis_api.apps.household.models import (
+    IDENTIFICATION_TYPE_TAX_ID,
+    DocumentType,
+    PendingBankAccountInfo,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,
@@ -39,7 +38,7 @@ class BaseTestUkrainianRegistrationService(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def individual_wit_bank_account_and_tax_and_disability(cls) -> Dict:
+    def individual_with_bank_account_and_tax_and_disability(cls) -> Dict:
         return {
             "tax_id_no_i_c": "123123123",
             "bank_account_h_f": "y",
@@ -59,7 +58,7 @@ class BaseTestUkrainianRegistrationService(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        ImportedDocumentType.objects.create(
+        DocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
             label=IDENTIFICATION_TYPE_TAX_ID,
         )
@@ -159,7 +158,7 @@ class BaseTestUkrainianRegistrationService(TestCase):
                 source_id=1,
                 fields={
                     "household": cls.household,
-                    "individuals": [cls.individual_wit_bank_account_and_tax_and_disability()],
+                    "individuals": [cls.individual_with_bank_account_and_tax_and_disability()],
                 },
                 files=json.dumps(files).encode(),
             ),
@@ -205,23 +204,23 @@ class TestUkrainianRegistrationService(BaseTestUkrainianRegistrationService):
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in self.records]
         service.process_records(rdi.id, records_ids)
+
         self.records[2].refresh_from_db()
         self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 4)
-        self.assertEqual(ImportedHousehold.objects.count(), 4)
-        self.assertEqual(ImportedBankAccountInfo.objects.count(), 3)
-        bank_acc_info = ImportedBankAccountInfo.objects.get(bank_account_number="333123321321")
+        self.assertEqual(PendingHousehold.objects.count(), 4)
+        self.assertEqual(PendingBankAccountInfo.pending_objects.count(), 3)
+        bank_acc_info = PendingBankAccountInfo.pending_objects.get(bank_account_number="333123321321")
         self.assertEqual(bank_acc_info.account_holder_name, "Test Holder Name 333")
         self.assertEqual(bank_acc_info.bank_branch_name, "Branch Name 333")
         self.assertEqual(
-            ImportedDocument.objects.filter(
+            PendingDocument.objects.filter(
                 document_number="TESTID", type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
             ).count(),
             1,
         )
 
         # Checking only first is enough, because they all in one RDI
-        registration_datahub_import = ImportedHousehold.objects.all()[0].registration_data_import
-        registration_data_import = RegistrationDataImport.objects.get(id=registration_datahub_import.hct_id)
+        registration_data_import = PendingHousehold.objects.all()[0].registration_data_import
         self.assertEqual(registration_data_import.program, self.program)
 
     def test_import_data_to_datahub_retry(self) -> None:
@@ -231,13 +230,13 @@ class TestUkrainianRegistrationService(BaseTestUkrainianRegistrationService):
         service.process_records(rdi.id, records_ids_all)
         self.records[2].refresh_from_db()
         self.assertEqual(Record.objects.filter(id__in=records_ids_all, ignored=False).count(), 4)
-        self.assertEqual(ImportedHousehold.objects.count(), 4)
+        self.assertEqual(PendingHousehold.objects.count(), 4)
         service = UkraineBaseRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in self.records[:2]]
         service.process_records(rdi.id, records_ids)
         self.assertEqual(Record.objects.filter(id__in=records_ids_all, ignored=False).count(), 4)
-        self.assertEqual(ImportedHousehold.objects.count(), 4)
+        self.assertEqual(PendingHousehold.objects.count(), 4)
 
     def test_import_document_validation(self) -> None:
         service = UkraineBaseRegistrationService(self.registration)
@@ -246,7 +245,7 @@ class TestUkrainianRegistrationService(BaseTestUkrainianRegistrationService):
         service.process_records(rdi.id, [x.id for x in self.bad_records])
         self.bad_records[0].refresh_from_db()
         self.assertEqual(self.bad_records[0].status, Record.STATUS_ERROR)
-        self.assertEqual(ImportedHousehold.objects.count(), 0)
+        self.assertEqual(PendingHousehold.objects.count(), 0)
 
 
 class TestRegistration2024(BaseTestUkrainianRegistrationService):
@@ -259,14 +258,14 @@ class TestRegistration2024(BaseTestUkrainianRegistrationService):
             source_id=5,
             fields={
                 "household": cls.household,
-                "individuals": [cls.individual_wit_bank_account_and_tax_and_disability()],
+                "individuals": [cls.individual_with_bank_account_and_tax_and_disability()],
             },
         )
 
     @classmethod
-    def individual_wit_bank_account_and_tax_and_disability(cls) -> Dict:
+    def individual_with_bank_account_and_tax_and_disability(cls) -> Dict:
         return {
-            **super().individual_wit_bank_account_and_tax_and_disability(),
+            **super().individual_with_bank_account_and_tax_and_disability(),
             "low_income_hh_h_f": True,
             "single_headed_hh_h_f": False,
         }
@@ -277,9 +276,9 @@ class TestRegistration2024(BaseTestUkrainianRegistrationService):
         service.process_records(rdi.id, [self.record.id])
 
         self.assertEqual(Record.objects.filter(id__in=[self.record.id], ignored=False).count(), 1)
-        self.assertEqual(ImportedHousehold.objects.count(), 1)
-        self.assertEqual(ImportedIndividual.objects.count(), 1)
+        self.assertEqual(PendingHousehold.objects.count(), 1)
+        self.assertEqual(PendingIndividual.objects.count(), 1)
         self.assertEqual(
-            ImportedIndividual.objects.get(family_name="Romaniak").flex_fields,
+            PendingIndividual.objects.get(family_name="Romaniak").flex_fields,
             {"low_income_hh_h_f": True, "single_headed_hh_h_f": False},
         )

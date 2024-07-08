@@ -9,16 +9,10 @@ from django.utils import timezone
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import HouseholdFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_datahub.fixtures import (
-    ImportedHouseholdFactory,
-    RegistrationDataImportDatahubFactory,
-)
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportData,
-    KoboImportedSubmission,
-)
-from hct_mis_api.apps.registration_datahub.tasks.mark_submissions import MarkSubmissions
+from hct_mis_api.apps.registration_data.models import ImportData, KoboImportedSubmission
+from hct_mis_api.apps.registration_data.services.mark_submissions import MarkSubmissions
 
 
 class TestMarkSubmissions(TestCase):
@@ -60,23 +54,16 @@ class TestMarkSubmissions(TestCase):
             number_of_households=1,
             number_of_individuals=2,
         )
-        datahub_id = uuid.uuid4()
 
-        registration_data_import = RegistrationDataImportFactory(status=status, datahub_id=datahub_id)
-        registration_data_import_data_hub = RegistrationDataImportDatahubFactory(
-            id=datahub_id,
-            import_data=import_data,
-            business_area_slug=cls.business_area.slug,
-            hct_id=registration_data_import.pk,
-        )
+        registration_data_import = RegistrationDataImportFactory(status=status, import_data=import_data)
 
         submission_uuid = uuid.uuid4()
-        imported_household = ImportedHouseholdFactory(
-            registration_data_import=registration_data_import_data_hub,
+        imported_household = HouseholdFactory(
+            registration_data_import=registration_data_import,
             kobo_submission_uuid=submission_uuid,
         )
         KoboImportedSubmission.objects.create(
-            registration_data_import=registration_data_import_data_hub,
+            registration_data_import=registration_data_import,
             kobo_submission_uuid=submission_uuid,
             kobo_asset_id="test",
             kobo_submission_time=timezone.now(),
