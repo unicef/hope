@@ -64,7 +64,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='individualidentity',
             name='rdi_merge_status',
-            field=models.CharField(choices=[('PENDING', 'Pending'), ('MERGED', 'Merged')], default='PENDING', max_length=10, null=True),
+            field=models.CharField(choices=[('PENDING', 'Pending'), ('MERGED', 'Merged')], default='MERGED', max_length=10, null=True),
         ),
         migrations.AddField(
             model_name='individualroleinhousehold',
