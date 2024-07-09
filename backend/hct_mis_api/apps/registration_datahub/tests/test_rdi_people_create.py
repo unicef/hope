@@ -7,22 +7,25 @@ from django.conf import settings
 from django.core.files import File
 from django.forms import model_to_dict
 
+from django_countries.fields import Country
+
+from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
+from hct_mis_api.apps.geo.models import Country as GeoCountry
+from hct_mis_api.apps.household.models import (
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    PendingHousehold,
+    PendingIndividual,
+)
+from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_datahub.fixtures import (
-    RegistrationDataImportDatahubFactory,
-)
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportData,
-    ImportedDeliveryMechanismData,
-    ImportedHousehold,
-    ImportedIndividual,
-)
+from hct_mis_api.apps.registration_data.models import ImportData
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class TestRdiXlsxPeople(BaseElasticSearchTestCase):
@@ -34,6 +37,7 @@ class TestRdiXlsxPeople(BaseElasticSearchTestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        PartnerFactory(name="UNHCR")
         content = Path(
             f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/rdi_people_test.xlsx"
         ).read_bytes()
@@ -51,17 +55,9 @@ class TestRdiXlsxPeople(BaseElasticSearchTestCase):
             number_of_individuals=4,
         )
         cls.program = ProgramFactory(status=Program.ACTIVE, data_collecting_type__type=DataCollectingType.Type.SOCIAL)
-        cls.registration_data_import = RegistrationDataImportDatahubFactory(
-            import_data=cls.import_data, business_area_slug=cls.business_area.slug, hct_id=None
+        cls.registration_data_import = RegistrationDataImportFactory(
+            business_area=cls.business_area, program=cls.program, import_data=cls.import_data
         )
-        hct_rdi = RegistrationDataImportFactory(
-            datahub_id=cls.registration_data_import.id,
-            name=cls.registration_data_import.name,
-            business_area=cls.business_area,
-            program=cls.program,
-        )
-        cls.registration_data_import.hct_id = hct_rdi.id
-        cls.registration_data_import.save()
 
         super().setUpTestData()
 
@@ -69,8 +65,8 @@ class TestRdiXlsxPeople(BaseElasticSearchTestCase):
         self.RdiXlsxPeopleCreateTask().execute(
             self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id
         )
-        households_count = ImportedHousehold.objects.count()
-        individuals_count = ImportedIndividual.objects.count()
+        households_count = PendingHousehold.objects.count()
+        individuals_count = PendingIndividual.objects.count()
 
         self.assertEqual(4, households_count)
         self.assertEqual(4, individuals_count)
@@ -85,21 +81,21 @@ class TestRdiXlsxPeople(BaseElasticSearchTestCase):
             "birth_date": date(2000, 8, 22),
             "marital_status": "MARRIED",
         }
-        matching_individuals = ImportedIndividual.objects.filter(**individual_data)
+        matching_individuals = PendingIndividual.objects.filter(**individual_data)
 
         self.assertEqual(matching_individuals.count(), 1)
 
         household_data = {
             "residence_status": "REFUGEE",
-            "country": "IM",
+            "country": GeoCountry.objects.get(iso_code2=Country("IM").code).id,
             "zip_code": "002",
             "flex_fields": {},
         }
-        household = matching_individuals.first().household
+        household = matching_individuals.first().pending_household
         household_obj_data = model_to_dict(household, ("residence_status", "country", "zip_code", "flex_fields"))
         self.assertEqual(household_obj_data, household_data)
 
-        roles = household.individuals_and_roles.all()
+        roles = household.individuals_and_roles(manager="pending_objects").all()
         self.assertEqual(roles.count(), 2)
         primary_role = roles.filter(role=ROLE_PRIMARY).first()
         self.assertEqual(primary_role.role, "PRIMARY")
@@ -108,13 +104,16 @@ class TestRdiXlsxPeople(BaseElasticSearchTestCase):
         self.assertEqual(alternate_role.role, "ALTERNATE")
         self.assertEqual(alternate_role.individual.full_name, "Collector ForJanIndex_3")
 
-        worker_individuals = ImportedIndividual.objects.filter(relationship="NON_BENEFICIARY")
+        worker_individuals = PendingIndividual.objects.filter(relationship="NON_BENEFICIARY")
         self.assertEqual(worker_individuals.count(), 2)
 
-        self.assertEqual(ImportedDeliveryMechanismData.objects.count(), 3)
-        dmd1 = ImportedDeliveryMechanismData.objects.get(individual__full_name="Collector ForJanIndex_3")
-        dmd2 = ImportedDeliveryMechanismData.objects.get(individual__full_name="WorkerCollector ForDerekIndex_4")
-        dmd3 = ImportedDeliveryMechanismData.objects.get(individual__full_name="Jan    Index3")
+        self.assertEqual(PendingDeliveryMechanismData.objects.count(), 3)
+        dmd1 = PendingDeliveryMechanismData.objects.get(individual__full_name="Collector ForJanIndex_3")
+        dmd2 = PendingDeliveryMechanismData.objects.get(individual__full_name="WorkerCollector ForDerekIndex_4")
+        dmd3 = PendingDeliveryMechanismData.objects.get(individual__full_name="Jan    Index3")
+        self.assertEqual(dmd1.rdi_merge_status, MergeStatusModel.PENDING)
+        self.assertEqual(dmd2.rdi_merge_status, MergeStatusModel.PENDING)
+        self.assertEqual(dmd3.rdi_merge_status, MergeStatusModel.PENDING)
         self.assertEqual(
             json.loads(dmd1.data),
             {"card_number_atm_card": "164260858", "card_expiry_date_atm_card": "1995-06-03T00:00:00"},

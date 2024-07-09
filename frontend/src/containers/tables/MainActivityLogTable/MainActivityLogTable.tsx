@@ -74,11 +74,12 @@ export function MainActivityLogTable({
     };
 
     return (
-      <Box sx={{ flexShrink: 0, ml: 2.5 }}>
+      <Box sx={{ flexShrink: 0, ml: 2.5 }} data-cy="pagination-actions">
         <IconButton
           onClick={handleBackButtonClick}
           disabled={page === 0 || loading}
           aria-label="previous page"
+          data-cy="previous-page-button"
         >
           <KeyboardArrowLeft />
         </IconButton>
@@ -86,6 +87,7 @@ export function MainActivityLogTable({
           onClick={handleNextButtonClick}
           disabled={page >= Math.ceil(totalCount / rowsPerPage) - 1 || loading}
           aria-label="next page"
+          data-cy="next-page-button"
         >
           <KeyboardArrowRight />
         </IconButton>
@@ -94,12 +96,16 @@ export function MainActivityLogTable({
   };
 
   return (
-    <PaperContainer>
-      <Collapse in={expanded}>
-        <Table>
-          <Row>
+    <PaperContainer data-cy="main-activity-log-table">
+      <Collapse in={expanded} data-cy="table-collapse">
+        <Table data-cy="activity-log-table">
+          <Row data-cy="table-header-row">
             {headCells.map((item) => (
-              <HeadingCell key={item.id} style={{ flex: item.weight || 1 }}>
+              <HeadingCell
+                key={item.id}
+                style={{ flex: item.weight || 1 }}
+                data-cy={`header-cell-${item.id}`}
+              >
                 {item.label}
               </HeadingCell>
             ))}
@@ -112,6 +118,7 @@ export function MainActivityLogTable({
               logEntry={
                 value as AllLogEntriesQuery['allLogEntries']['edges'][number]['node']
               }
+              data-cy={`log-entry-row-${value.id}`}
             />
           ))}
         </Table>
@@ -124,6 +131,7 @@ export function MainActivityLogTable({
           onPageChange={onChangePage}
           onRowsPerPageChange={onChangeRowsPerPage}
           ActionsComponent={TablePaginationActions}
+          data-cy="table-pagination"
         />
       </Collapse>
     </PaperContainer>

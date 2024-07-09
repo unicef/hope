@@ -80,7 +80,7 @@ export function RegistrationIndividualBioData({
       <Box flexDirection="column">
         <Box mb={1}>
           <LabelizedField label={`${item.node.partner} ID`}>
-            {item.node.documentNumber}
+            {item.node.number}
           </LabelizedField>
         </Box>
         <LabelizedField label={t('issued')}>{item.node.country}</LabelizedField>

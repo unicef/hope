@@ -48,6 +48,12 @@ class FundsCommitment(models.Model):
     ca_sync_date = models.DateTimeField(blank=True, null=True)
     business_office_code = models.CharField(max_length=4, blank=True, null=True)
 
+    grant = models.CharField(max_length=10, null=True, blank=True, default="")
+    sponsor_code = models.CharField(max_length=10, null=True, blank=True, default="")
+    sponsor_name = models.CharField(max_length=100, null=True, blank=True, default="")
+    wbs = models.CharField(max_length=24, null=True, blank=True, default="")
+    percentage = models.DecimalField(decimal_places=2, max_digits=5, null=True, blank=True)
+
     def __str__(self) -> str:
         return self.funds_commitment_number
 

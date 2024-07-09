@@ -16,17 +16,14 @@ from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     MALE,
+    DocumentType,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedDocument,
-    ImportedDocumentType,
-    ImportedHousehold,
-    ImportedIndividual,
-    RegistrationDataImportDatahub,
-)
 
 
 class TestPushPeople(HOPEApiTestCase):
@@ -35,7 +32,7 @@ class TestPushPeople(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        ImportedDocumentType.objects.create(
+        DocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
         )
         data_collecting_type = DataCollectingTypeFactory(
@@ -48,14 +45,10 @@ class TestPushPeople(HOPEApiTestCase):
         cls.program = ProgramFactory.create(
             status=Program.DRAFT, business_area=cls.business_area, data_collecting_type=data_collecting_type
         )
-        cls.rdi = RegistrationDataImportDatahub.objects.create(
-            business_area_slug=cls.business_area.slug, import_done=RegistrationDataImportDatahub.LOADING
-        )
-        cls.rdi2: RegistrationDataImport = RegistrationDataImport.objects.create(
+        cls.rdi: RegistrationDataImport = RegistrationDataImport.objects.create(
             business_area=cls.business_area,
             number_of_individuals=0,
             number_of_households=0,
-            datahub_id=cls.rdi.pk,
             status=RegistrationDataImport.LOADING,
             program=cls.program,
         )
@@ -88,15 +81,13 @@ class TestPushPeople(HOPEApiTestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
         response_json = response.json()
 
-        rdi_datahub = RegistrationDataImportDatahub.objects.filter(id=response_json["id"]).first()
-        self.assertIsNotNone(rdi_datahub)
-        rdi = RegistrationDataImport.objects.filter(datahub_id=str(rdi_datahub.pk)).first()
+        rdi = RegistrationDataImport.objects.filter(id=response_json["id"]).first()
         self.assertIsNotNone(rdi)
 
         self.assertEqual(rdi.program, self.program)
 
-        hh = ImportedHousehold.objects.filter(registration_data_import=rdi_datahub).first()
-        ind = ImportedIndividual.objects.filter(registration_data_import=rdi_datahub).first()
+        hh = PendingHousehold.objects.filter(registration_data_import=rdi).first()
+        ind = PendingIndividual.objects.filter(registration_data_import=rdi).first()
         self.assertIsNotNone(hh)
         self.assertIsNotNone(ind)
         self.assertEqual(hh.head_of_household, ind)
@@ -136,15 +127,15 @@ class TestPushPeople(HOPEApiTestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
         response_json = response.json()
 
-        rdi_datahub = RegistrationDataImportDatahub.objects.filter(id=response_json["id"]).first()
-        self.assertIsNotNone(rdi_datahub)
+        rdi = RegistrationDataImport.objects.filter(id=response_json["id"]).first()
+        self.assertIsNotNone(rdi)
 
-        ind = ImportedIndividual.objects.filter(registration_data_import=rdi_datahub).first()
+        ind = PendingIndividual.objects.filter(registration_data_import=rdi).first()
         self.assertIsNotNone(ind)
         self.assertEqual(ind.full_name, "John Doe")
         self.assertEqual(ind.sex, MALE)
 
-        document = ImportedDocument.objects.filter(individual=ind).first()
+        document = PendingDocument.objects.filter(individual=ind).first()
         self.assertIsNotNone(document)
         self.assertEqual(document.document_number, "10")
 
@@ -184,30 +175,30 @@ class TestPushPeople(HOPEApiTestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
         response_json = response.json()
 
-        rdi_datahub = RegistrationDataImportDatahub.objects.filter(id=response_json["id"]).first()
-        self.assertIsNotNone(rdi_datahub)
+        rdi = RegistrationDataImport.objects.filter(id=response_json["id"]).first()
+        self.assertIsNotNone(rdi)
 
         self.assertEqual(len(response_json["people"]), 2)
 
-        households = ImportedHousehold.objects.filter(registration_data_import=rdi_datahub)
+        households = PendingHousehold.objects.filter(registration_data_import=rdi)
         self.assertEqual(len(households), 2)
 
-        individuals = ImportedIndividual.objects.filter(registration_data_import=rdi_datahub)
+        individuals = PendingIndividual.objects.filter(registration_data_import=rdi)
         self.assertEqual(len(individuals), 2)
 
-        john_doe = ImportedIndividual.objects.filter(full_name="John Doe").first()
+        john_doe = PendingIndividual.objects.filter(full_name="John Doe").first()
 
         self.assertIsNotNone(john_doe)
         self.assertEqual(john_doe.full_name, "John Doe")
         self.assertEqual(john_doe.sex, MALE)
 
-        mary_doe = ImportedIndividual.objects.filter(full_name="Mary Doe").first()
+        mary_doe = PendingIndividual.objects.filter(full_name="Mary Doe").first()
 
         self.assertIsNotNone(mary_doe)
         self.assertEqual(mary_doe.full_name, "Mary Doe")
         self.assertEqual(mary_doe.sex, FEMALE)
 
-        document = ImportedDocument.objects.filter(individual=john_doe).first()
+        document = PendingDocument.objects.filter(individual=john_doe).first()
         self.assertIsNotNone(document)
         self.assertEqual(document.document_number, "10")
 
@@ -244,7 +235,6 @@ class TestPushPeople(HOPEApiTestCase):
                     "collect_individual_data": ["This field is required."],
                     "documents": [
                         {
-                            "doc_date": ["This field is required."],
                             "document_number": ["This field is required."],
                             "type": ["This field is required."],
                         }
@@ -285,9 +275,9 @@ class TestPushPeople(HOPEApiTestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
         response_json = response.json()
 
-        rdi_datahub = RegistrationDataImportDatahub.objects.filter(id=response_json["id"]).first()
-        self.assertIsNotNone(rdi_datahub)
-        ind = ImportedIndividual.objects.filter(registration_data_import=rdi_datahub).first()
+        rdi = RegistrationDataImport.objects.filter(id=response_json["id"]).first()
+        self.assertIsNotNone(rdi)
+        ind = PendingIndividual.objects.filter(registration_data_import=rdi).first()
         self.assertIsNotNone(ind)
         self.assertEqual(ind.full_name, "John Doe")
         self.assertEqual(getattr(ind, f"{field_name}_valid"), expected_value)
@@ -316,9 +306,9 @@ class TestPushPeople(HOPEApiTestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
         response_json = response.json()
 
-        rdi_datahub = RegistrationDataImportDatahub.objects.filter(id=response_json["id"]).first()
-        self.assertIsNotNone(rdi_datahub)
-        ind = ImportedIndividual.objects.filter(registration_data_import=rdi_datahub).first()
+        rdi = RegistrationDataImport.objects.filter(id=response_json["id"]).first()
+        self.assertIsNotNone(rdi)
+        ind = PendingIndividual.objects.filter(registration_data_import=rdi).first()
         self.assertEqual(ind.household.village, expected_value)
 
     def test_push_single_person_with_admin_areas(self) -> None:
@@ -342,10 +332,10 @@ class TestPushPeople(HOPEApiTestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
         response_json = response.json()
 
-        rdi_datahub = RegistrationDataImportDatahub.objects.filter(id=response_json["id"]).first()
-        self.assertIsNotNone(rdi_datahub)
-        ind = ImportedIndividual.objects.filter(registration_data_import=rdi_datahub).first()
-        self.assertEqual(ind.household.admin1, "AF01")
-        self.assertEqual(ind.household.admin2, "AF0101")
-        self.assertEqual(ind.household.admin3, "")
-        self.assertEqual(ind.household.admin4, "")
+        rdi = RegistrationDataImport.objects.filter(id=response_json["id"]).first()
+        self.assertIsNotNone(rdi)
+        ind = PendingIndividual.objects.filter(registration_data_import=rdi).first()
+        self.assertEqual(ind.household.admin1.p_code, "AF01")
+        self.assertEqual(ind.household.admin2.p_code, "AF0101")
+        self.assertEqual(ind.household.admin3, None)
+        self.assertEqual(ind.household.admin4, None)
