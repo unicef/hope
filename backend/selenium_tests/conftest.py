@@ -14,6 +14,8 @@ from page_object.accountability.communication import AccountabilityCommunication
 from page_object.accountability.comunication_details import (
     AccountabilityCommunicationDetails,
 )
+from page_object.accountability.surveys import AccountabilitySurveys
+from page_object.accountability.surveys_details import AccountabilitySurveysDetails
 from page_object.admin_panel.admin_panel import AdminPanel
 from page_object.country_dashboard.country_dashboard import CountryDashboard
 from page_object.filters import Filters
@@ -345,6 +347,16 @@ def pagePaymentModuleDetails(request: FixtureRequest, browser: Chrome) -> Paymen
 @pytest.fixture
 def pageNewPaymentPlan(request: FixtureRequest, browser: Chrome) -> NewPaymentPlan:
     yield NewPaymentPlan(browser)
+
+
+@pytest.fixture
+def pageAccountabilitySurveys(request: FixtureRequest, browser: Chrome) -> AccountabilitySurveys:
+    yield AccountabilitySurveys(browser)
+
+
+@pytest.fixture
+def pageAccountabilitySurveysDetails(request: FixtureRequest, browser: Chrome) -> AccountabilitySurveysDetails:
+    yield AccountabilitySurveysDetails(browser)
 
 
 @pytest.fixture
