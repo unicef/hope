@@ -165,6 +165,7 @@ class TestRegistrationDataImport:
         pageDetailsRegistrationDataImport.getButtonMergeRdi().click()
         pageDetailsRegistrationDataImport.getButtonMerge().click()
         pageDetailsRegistrationDataImport.waitForStatus("MERGED")
+        assert "MERGED" == pageDetailsRegistrationDataImport.getStatusContainer().text
         assert "VIEW TICKETS" in pageDetailsRegistrationDataImport.getButtonViewTickets().text
         pageDetailsRegistrationDataImport.getButtonIndividuals().click()
         pageDetailsRegistrationDataImport.getButtonHouseholds().click()
