@@ -16,6 +16,7 @@ class BaseComponents(Common):
     navProgrammePopulation = 'a[data-cy="nav-Program Population"]'
     navHouseholds = 'a[data-cy="nav-Households"]'
     navIndividuals = 'a[data-cy="nav-Individuals"]'
+    navPeople = 'a[data-cy="nav-People"]'
     navProgrammeManagement = 'a[data-cy="nav-Programs"]'
     navManagerialConsole = 'a[data-cy="nav-Managerial Console"]'
     navProgrammeDetails = 'a[data-cy="nav-Program Details"]'
@@ -36,6 +37,7 @@ class BaseComponents(Common):
     navResourcesConversations = 'a[data-cy="nav-resources-Conversations"]'
     navResourcesToolsAndMaterials = 'a[data-cy="nav-resources-Tools and Materials"]'
     navResourcesReleaseNote = 'a[data-cy="nav-resources-Release Note"]'
+    navProgramLog = 'a[data-cy="nav-Program Log"]'
     mainContent = 'div[data-cy="main-content"]'
     drawerItems = 'div[data-cy="drawer-items"]'
     drawerInactiveSubheader = 'div[data-cy="program-inactive-subheader"]'
@@ -44,6 +46,8 @@ class BaseComponents(Common):
     globalProgramFilterSearchButton = 'button[data-cy="search-icon"]'
     globalProgramFilterClearButton = 'button[data-cy="clear-icon"]'
     rows = 'tr[role="checkbox"]'
+    breadcrumbsChevronIcon = 'svg[data-cy="breadcrumbs-chevron-icon"]'
+    arrowBack = 'div[data-cy="arrow_back"]'
 
     # Text
     globalProgramFilterText = "All Programmes"
@@ -80,6 +84,9 @@ class BaseComponents(Common):
 
     def getNavIndividuals(self) -> WebElement:
         return self.wait_for(self.navIndividuals)
+
+    def getNavPeople(self) -> WebElement:
+        return self.wait_for(self.navPeople)
 
     def getNavProgrammeManagement(self) -> WebElement:
         return self.wait_for(self.navProgrammeManagement)
@@ -168,6 +175,15 @@ class BaseComponents(Common):
 
     def getGlobalProgramFilterSearchInput(self) -> WebElement:
         return self.wait_for(self.globalProgramFilterSearchInput)
+
+    def getBreadcrumbsChevronIcon(self) -> WebElement:
+        return self.wait_for(self.breadcrumbsChevronIcon)
+
+    def getArrowBack(self) -> WebElement:
+        return self.wait_for(self.arrowBack)
+
+    def getNavProgramLog(self) -> WebElement:
+        return self.wait_for(self.navProgramLog)
 
     def getRows(self) -> [WebElement]:
         return self.get_elements(self.rows)

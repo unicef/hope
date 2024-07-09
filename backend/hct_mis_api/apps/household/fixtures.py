@@ -248,6 +248,7 @@ class DocumentTypeFactory(DjangoModelFactory):
         django_get_or_create = ("key",)
 
     key = factory.fuzzy.FuzzyChoice([value.lower() for value, _ in IDENTIFICATION_TYPE_CHOICE])
+    label = factory.LazyAttribute(lambda o: o.key.replace("_", " ").title())
 
 
 class DocumentFactory(DjangoModelFactory):
