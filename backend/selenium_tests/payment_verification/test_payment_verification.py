@@ -1,11 +1,14 @@
 from datetime import datetime
+from time import sleep
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from page_object.payment_verification.payment_record import PaymentRecord
 from page_object.payment_verification.payment_verification import PaymentVerification
 from page_object.payment_verification.payment_verification_details import (
     PaymentVerificationDetails,
 )
+from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
@@ -18,6 +21,8 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
 )
+from hct_mis_api.apps.payment.models import GenericPayment
+from hct_mis_api.apps.payment.models import PaymentRecord as PR
 from hct_mis_api.apps.payment.models import PaymentVerification as PV
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -71,7 +76,10 @@ def add_payment_verification() -> PV:
         name="TEST",
         program=program,
         business_area=BusinessArea.objects.first(),
+        start_date=datetime.now() - relativedelta(months=1),
+        end_date=datetime.now() + relativedelta(months=1),
     )
+
     targeting_criteria = TargetingCriteriaFactory()
 
     target_population = TargetPopulationFactory(
@@ -79,7 +87,6 @@ def add_payment_verification() -> PV:
         targeting_criteria=targeting_criteria,
         business_area=BusinessArea.objects.first(),
     )
-
     payment_record = PaymentRecordFactory(
         parent=cash_plan,
         household=household,
@@ -88,16 +95,23 @@ def add_payment_verification() -> PV:
         entitlement_quantity="21.36",
         delivered_quantity="21.36",
         currency="PLN",
+        status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
     )
     payment_verification_plan = PaymentVerificationPlanFactory(
-        generic_fk_obj=cash_plan, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
+        generic_fk_obj=cash_plan,
+        verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
     )
 
-    return PaymentVerificationFactory(
+    pv_summary = cash_plan.get_payment_verification_summary
+    pv_summary.activation_date = datetime.now() - relativedelta(months=1)
+    pv_summary.save()
+
+    pv = PaymentVerificationFactory(
         generic_fk_obj=payment_record,
         payment_verification_plan=payment_verification_plan,
         status=PV.STATUS_PENDING,
     )
+    return pv
 
 
 @pytest.mark.usefixtures("login")
@@ -140,11 +154,12 @@ class TestSmokePaymentVerification:
         assert "0%" in pagePaymentVerificationDetails.getLabelErroneous().text
         assert "PENDING" in pagePaymentVerificationDetails.getLabelStatus().text
         assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlansSummaryStatus().text
+        activation_date = (datetime.now() - relativedelta(months=1)).strftime("%-d %b %Y")
         assert (
-            "ACTIVATION DATE -"
+            f"ACTIVATION DATE {activation_date}"
             in pagePaymentVerificationDetails.getLabelizedFieldContainerSummaryActivationDate().text.replace("\n", " ")
         )
-        assert "-" in pagePaymentVerificationDetails.getLabelActivationDate().text
+        assert activation_date in pagePaymentVerificationDetails.getLabelActivationDate().text
         assert (
             "COMPLETION DATE -"
             in pagePaymentVerificationDetails.getLabelizedFieldContainerSummaryCompletionDate().text.replace("\n", " ")
@@ -161,27 +176,96 @@ class TestSmokePaymentVerification:
         assert "PENDING" in pagePaymentVerificationDetails.getLabelStatus().text
         assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlanStatus().text
         assert "MANUAL" in pagePaymentVerificationDetails.getLabelVerificationChannel().text
-        assert "-" in pagePaymentVerificationDetails.getLabelActivationDate().text
+        assert (
+            str((datetime.now() - relativedelta(months=1)).strftime("%-d %b %Y"))
+            in pagePaymentVerificationDetails.getLabelActivationDate().text
+        )
         assert "-" in pagePaymentVerificationDetails.getLabelCompletionDate().text
 
-    @pytest.mark.skip(reason="Do during the task: 198121")
-    def test_smoke_payment_verification_happy_path(
+    def test_happy_path_payment_verification(
         self,
         active_program: Program,
         add_payment_verification: PV,
         pagePaymentVerification: PaymentVerification,
         pagePaymentVerificationDetails: PaymentVerificationDetails,
+        pagePaymentRecord: PaymentRecord,
     ) -> None:
         pagePaymentVerification.selectGlobalProgramFilter("Active Program").click()
         pagePaymentVerification.getNavPaymentVerification().click()
         pagePaymentVerification.getCashPlanTableRow().click()
-        assert "0" in pagePaymentVerificationDetails.getLabelPaymentRecords().text
-        assert "23 Feb 2025" in pagePaymentVerificationDetails.getLabelStartDate().text
-        assert "26 May 2025" in pagePaymentVerificationDetails.getLabelEndDate().text
+        assert "1" in pagePaymentVerificationDetails.getLabelPaymentRecords().text
+        assert (datetime.now() - relativedelta(months=1)).strftime(
+            "%-d %b %Y"
+        ) in pagePaymentVerificationDetails.getLabelStartDate().text
+        assert (datetime.now() + relativedelta(months=1)).strftime(
+            "%-d %b %Y"
+        ) in pagePaymentVerificationDetails.getLabelEndDate().text
         assert "Bank reconciliation" in pagePaymentVerificationDetails.getTableLabel().text
-        assert "Full list" in pagePaymentVerificationDetails.getLabelSampling().text
-        assert "55" in pagePaymentVerificationDetails.getLabelResponded().text
-        assert "8" in pagePaymentVerificationDetails.getLabelReceivedWithIssues().text
-        assert "29" in pagePaymentVerificationDetails.getLabelSampleSize().text
-        assert "37" in pagePaymentVerificationDetails.getLabelReceived().text
-        assert "3" in pagePaymentVerificationDetails.getLabelNotReceived().text
+        payment_verification = add_payment_verification.payment_verification_plan
+        assert (
+            payment_verification.sampling.lower().replace("_", " ")
+            in pagePaymentVerificationDetails.getLabelSampling().text.lower()
+        )
+        assert str(payment_verification.responded_count) in pagePaymentVerificationDetails.getLabelResponded().text
+        assert (
+            str(payment_verification.received_with_problems_count)
+            in pagePaymentVerificationDetails.getLabelReceivedWithIssues().text
+        )
+        assert str(payment_verification.sample_size) in pagePaymentVerificationDetails.getLabelSampleSize().text
+        assert str(payment_verification.received_count) in pagePaymentVerificationDetails.getLabelReceived().text
+        assert str(payment_verification.not_received_count) in pagePaymentVerificationDetails.getLabelNotReceived().text
+        pagePaymentVerificationDetails.getButtonDeletePlan().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+        try:
+            pagePaymentVerificationDetails.getButtonNewPlan().click()
+        except BaseException:
+            sleep(3)
+            pagePaymentVerificationDetails.getButtonNewPlan().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        pagePaymentVerificationDetails.getButtonActivatePlan().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        pagePaymentVerificationDetails.getRows()[0].find_elements(By.TAG_NAME, "a")[0].click()
+        payment_record = PR.objects.first()
+        assert "Payment Record" in pagePaymentRecord.getPageHeaderTitle().text
+        assert "VERIFY" in pagePaymentRecord.getButtonEdPlan().text
+        assert "DELIVERED FULLY" in pagePaymentRecord.getLabelStatus()[0].text
+        assert "DELIVERED FULLY" in pagePaymentRecord.getStatusContainer().text
+        assert payment_record.household.unicef_id in pagePaymentRecord.getLabelHousehold().text
+        assert payment_record.target_population.name in pagePaymentRecord.getLabelTargetPopulation().text
+        assert payment_record.distribution_modality in pagePaymentRecord.getLabelDistributionModality().text
+        assert payment_record.verification.status in pagePaymentRecord.getLabelStatus()[1].text
+        assert "PLN 0.00" in pagePaymentRecord.getLabelAmountReceived().text
+        assert payment_record.household.unicef_id in pagePaymentRecord.getLabelHouseholdId().text
+        assert "21.36" in pagePaymentRecord.getLabelEntitlementQuantity().text
+        assert "21.36" in pagePaymentRecord.getLabelDeliveredQuantity().text
+        assert "PLN" in pagePaymentRecord.getLabelCurrency().text
+        assert "-" in pagePaymentRecord.getLabelDeliveryType().text
+        assert payment_record.service_provider.full_name in pagePaymentRecord.getLabelFsp().text
+
+        pagePaymentRecord.getButtonEdPlan().click()
+
+        pagePaymentRecord.getInputReceivedamount().click()
+        pagePaymentRecord.getInputReceivedamount().send_keys("100")
+        pagePaymentRecord.getButtonSubmit().click()
+
+        for _ in range(5):
+            if "RECEIVED WITH ISSUES" in pagePaymentRecord.getLabelStatus()[1].text:
+                break
+            sleep(1)
+        assert "RECEIVED WITH ISSUES" in pagePaymentRecord.getLabelStatus()[1].text
+        pagePaymentRecord.getArrowBack().click()
+
+        pagePaymentVerificationDetails.getButtonFinish().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        pagePaymentVerificationDetails.screenshot("1")
+        assert "Payment Plan" in pagePaymentVerificationDetails.getPageHeaderTitle().text
+        assert "FINISHED" in pagePaymentVerificationDetails.getLabelStatus().text
+        assert "FINISHED" in pagePaymentVerificationDetails.getVerificationPlanStatus().text
+        assert "100%" in pagePaymentVerificationDetails.getLabelSuccessful().text
+
+        pagePaymentRecord.getArrowBack().click()
+
+        assert "FINISHED" in pagePaymentVerification.getCashPlanTableRow().text
