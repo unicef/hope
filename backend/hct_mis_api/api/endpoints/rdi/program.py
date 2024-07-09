@@ -16,19 +16,26 @@ if TYPE_CHECKING:
 
 
 class ProgramSerializer(serializers.ModelSerializer):
+    business_area_code = serializers.CharField(source="business_area.code", read_only=True)
+
     class Meta:
         model = Program
         fields = (
             "id",
             "name",
+            "programme_code",
+            "status",
             "start_date",
             "end_date",
             "budget",
             "frequency_of_payments",
             "sector",
+            "scope",
             "cash_plus",
             "population_goal",
+            "business_area_code",
         )
+        read_only_fields = ("status",)
 
 
 class ProgramViewSet(CreateModelMixin, HOPEAPIBusinessAreaViewSet):
