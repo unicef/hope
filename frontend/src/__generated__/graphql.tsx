@@ -1376,6 +1376,8 @@ export enum DataCollectingTypeType {
 export type DeduplicationResultNode = {
   __typename?: 'DeduplicationResultNode';
   age?: Maybe<Scalars['Int']['output']>;
+  distinct?: Maybe<Scalars['Boolean']['output']>;
+  duplicate?: Maybe<Scalars['Boolean']['output']>;
   fullName?: Maybe<Scalars['String']['output']>;
   hitId?: Maybe<Scalars['ID']['output']>;
   location?: Maybe<Scalars['String']['output']>;
@@ -2879,7 +2881,6 @@ export type ImportedDocumentNode = Node & {
   clearedBy?: Maybe<UserNode>;
   clearedDate: Scalars['DateTime']['output'];
   copiedFrom?: Maybe<DocumentNode>;
-  copiedTo: DocumentNodeConnection;
   country?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   documentNumber: Scalars['String']['output'];
@@ -2897,15 +2898,6 @@ export type ImportedDocumentNode = Node & {
   status: DocumentStatus;
   type: DocumentTypeNode;
   updatedAt: Scalars['DateTime']['output'];
-};
-
-
-export type ImportedDocumentNodeCopiedToArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type ImportedDocumentNodeConnection = {
@@ -5756,7 +5748,6 @@ export type Query = {
   allPrograms?: Maybe<ProgramNodeConnection>;
   allRapidProFlows?: Maybe<Array<Maybe<RapidProFlow>>>;
   allRegistrationDataImports?: Maybe<RegistrationDataImportNodeConnection>;
-  allRegistrationDataImportsDatahub?: Maybe<RegistrationDataImportDatahubNodeConnection>;
   allReports?: Maybe<ReportNodeConnection>;
   allSanctionListIndividuals?: Maybe<SanctionListIndividualNodeConnection>;
   allSteficonRules?: Maybe<SteficonRuleNodeConnection>;
@@ -6455,15 +6446,6 @@ export type QueryAllRegistrationDataImportsArgs = {
 };
 
 
-export type QueryAllRegistrationDataImportsDatahubArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
 export type QueryAllReportsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -7087,20 +7069,6 @@ export type RegistrationDataImportDatahubNode = Node & {
   importDone: RegistrationDataImportDatahubImportDone;
   name: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
-};
-
-export type RegistrationDataImportDatahubNodeConnection = {
-  __typename?: 'RegistrationDataImportDatahubNodeConnection';
-  edgeCount?: Maybe<Scalars['Int']['output']>;
-  edges: Array<Maybe<RegistrationDataImportDatahubNodeEdge>>;
-  pageInfo: PageInfo;
-  totalCount?: Maybe<Scalars['Int']['output']>;
-};
-
-export type RegistrationDataImportDatahubNodeEdge = {
-  __typename?: 'RegistrationDataImportDatahubNodeEdge';
-  cursor: Scalars['String']['output'];
-  node?: Maybe<RegistrationDataImportDatahubNode>;
 };
 
 export type RegistrationDataImportNode = Node & {
@@ -24041,8 +24009,6 @@ export type ResolversTypes = {
   RegistrationDataImportDataSource: RegistrationDataImportDataSource;
   RegistrationDataImportDatahubImportDone: RegistrationDataImportDatahubImportDone;
   RegistrationDataImportDatahubNode: ResolverTypeWrapper<RegistrationDataImportDatahubNode>;
-  RegistrationDataImportDatahubNodeConnection: ResolverTypeWrapper<RegistrationDataImportDatahubNodeConnection>;
-  RegistrationDataImportDatahubNodeEdge: ResolverTypeWrapper<RegistrationDataImportDatahubNodeEdge>;
   RegistrationDataImportNode: ResolverTypeWrapper<RegistrationDataImportNode>;
   RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>;
   RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>;
@@ -24508,8 +24474,6 @@ export type ResolversParentTypes = {
   ReferralTicketExtras: ReferralTicketExtras;
   RefuseRegistrationDataImportMutation: RefuseRegistrationDataImportMutation;
   RegistrationDataImportDatahubNode: RegistrationDataImportDatahubNode;
-  RegistrationDataImportDatahubNodeConnection: RegistrationDataImportDatahubNodeConnection;
-  RegistrationDataImportDatahubNodeEdge: RegistrationDataImportDatahubNodeEdge;
   RegistrationDataImportNode: RegistrationDataImportNode;
   RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection;
   RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge;
@@ -25323,6 +25287,8 @@ export interface DecimalScalarConfig extends GraphQLScalarTypeConfig<ResolversTy
 
 export type DeduplicationResultNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeduplicationResultNode'] = ResolversParentTypes['DeduplicationResultNode']> = {
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  distinct?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  duplicate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   hitId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   location?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -26071,7 +26037,6 @@ export type ImportedDocumentNodeResolvers<ContextType = any, ParentType extends 
   clearedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
   clearedDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   copiedFrom?: Resolver<Maybe<ResolversTypes['DocumentNode']>, ParentType, ContextType>;
-  copiedTo?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, Partial<ImportedDocumentNodeCopiedToArgs>>;
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -27359,7 +27324,6 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allPrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllProgramsArgs, 'businessArea'>>;
   allRapidProFlows?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlow']>>>, ParentType, ContextType, RequireFields<QueryAllRapidProFlowsArgs, 'businessAreaSlug'>>;
   allRegistrationDataImports?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNodeConnection']>, ParentType, ContextType, Partial<QueryAllRegistrationDataImportsArgs>>;
-  allRegistrationDataImportsDatahub?: Resolver<Maybe<ResolversTypes['RegistrationDataImportDatahubNodeConnection']>, ParentType, ContextType, Partial<QueryAllRegistrationDataImportsDatahubArgs>>;
   allReports?: Resolver<Maybe<ResolversTypes['ReportNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllReportsArgs, 'businessArea'>>;
   allSanctionListIndividuals?: Resolver<Maybe<ResolversTypes['SanctionListIndividualNodeConnection']>, ParentType, ContextType, Partial<QueryAllSanctionListIndividualsArgs>>;
   allSteficonRules?: Resolver<Maybe<ResolversTypes['SteficonRuleNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllSteficonRulesArgs, 'type'>>;
@@ -27574,20 +27538,6 @@ export type RegistrationDataImportDatahubNodeResolvers<ContextType = any, Parent
   importDone?: Resolver<ResolversTypes['RegistrationDataImportDatahubImportDone'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type RegistrationDataImportDatahubNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportDatahubNodeConnection'] = ResolversParentTypes['RegistrationDataImportDatahubNodeConnection']> = {
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  edges?: Resolver<Array<Maybe<ResolversTypes['RegistrationDataImportDatahubNodeEdge']>>, ParentType, ContextType>;
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type RegistrationDataImportDatahubNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportDatahubNodeEdge'] = ResolversParentTypes['RegistrationDataImportDatahubNodeEdge']> = {
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  node?: Resolver<Maybe<ResolversTypes['RegistrationDataImportDatahubNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -29051,8 +29001,6 @@ export type Resolvers<ContextType = any> = {
   ReconciliationSummaryNode?: ReconciliationSummaryNodeResolvers<ContextType>;
   RefuseRegistrationDataImportMutation?: RefuseRegistrationDataImportMutationResolvers<ContextType>;
   RegistrationDataImportDatahubNode?: RegistrationDataImportDatahubNodeResolvers<ContextType>;
-  RegistrationDataImportDatahubNodeConnection?: RegistrationDataImportDatahubNodeConnectionResolvers<ContextType>;
-  RegistrationDataImportDatahubNodeEdge?: RegistrationDataImportDatahubNodeEdgeResolvers<ContextType>;
   RegistrationDataImportNode?: RegistrationDataImportNodeResolvers<ContextType>;
   RegistrationDataImportNodeConnection?: RegistrationDataImportNodeConnectionResolvers<ContextType>;
   RegistrationDataImportNodeEdge?: RegistrationDataImportNodeEdgeResolvers<ContextType>;

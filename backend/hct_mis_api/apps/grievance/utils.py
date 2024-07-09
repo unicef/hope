@@ -4,6 +4,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 
@@ -22,6 +23,7 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.grievance.validators import validate_file
 from hct_mis_api.apps.household.models import Individual
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 logger = logging.getLogger(__name__)
 
@@ -188,3 +190,34 @@ def filter_based_on_partner_areas_2(
         return queryset
     except (Partner.DoesNotExist, AssertionError):
         return queryset.model.objects.none()
+
+def validate_individual_for_need_adjudication(partner: Partner, individual: Individual, ticket_details: TicketNeedsAdjudicationDetails, operation: str) -> None:
+    # Validate partner's permission
+    if not partner.is_unicef:
+        if not partner.has_area_access(
+                area_id=individual.household.admin2.id, program_id=individual.program.id
+        ):
+            raise PermissionDenied("Permission Denied: User does not have access to select individual")
+
+    if individual not in (
+            ticket_details.golden_records_individual,
+            ticket_details.possible_duplicates,
+    ):
+        log_and_raise("The selected individual is not valid, must be one of those attached to the ticket")
+
+    # operation: duplication or
+
+    # A user can’t flag withdrawn individuals.
+
+
+    # The results of flagging individuals as duplicate or distinct are saved within the ticket.
+
+    # A user can resolve (close) a ticket when all active individuals are flagged
+    # A user can resolve (close) a ticket when at least one individual is flagged as distinct or one of the individuals is inactive (withdrawn or duplicate).
+    # A user can flag all active individuals as duplicates but won’t be able to resolve (close) the ticket.
+    #
+    # When an individual is flagged as a duplicate, they are set as a duplicate in the system upon ticket resolution.
+    # When an individual is flagged as distinct, they remain unchanged upon ticket resolution.
+    #
+    # The system has to validate upon ticket resolution whether the individuals from the ticket haven't already been withdrawn or set as duplicates in the system.
+
