@@ -84,7 +84,7 @@ export function PageHeader({
       <Container>
         {breadCrumbs && breadCrumbs.length !== 0 ? (
           // Leaving breadcrumbs for permissions, but BackButton goes back to the previous page
-          <BackButton
+          <BackButton data-cy="arrow_back"
             onClick={() => (handleBack ? handleBack() : window.history.back())}
           >
             <ArrowBackRoundedIcon fontSize="large" />
