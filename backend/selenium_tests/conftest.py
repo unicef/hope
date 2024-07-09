@@ -34,6 +34,7 @@ from page_object.payment_verification.payment_verification_details import (
 )
 from page_object.people.people import People
 from page_object.people.people_details import PeopleDetails
+from page_object.program_log.payment_log import ProgramLog
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
 from page_object.programme_population.households import Households
@@ -355,6 +356,11 @@ def pageAccountabilityCommunicationDetails(
     request: FixtureRequest, browser: Chrome
 ) -> AccountabilityCommunicationDetails:
     yield AccountabilityCommunicationDetails(browser)
+
+
+@pytest.fixture
+def pageProgramLog(request: FixtureRequest, browser: Chrome) -> ProgramLog:
+    yield ProgramLog(browser)
 
 
 @pytest.fixture
