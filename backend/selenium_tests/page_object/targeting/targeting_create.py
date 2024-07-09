@@ -59,8 +59,20 @@ class TargetingCreate(BaseComponents):
     def getPageHeaderTitle(self) -> WebElement:
         return self.wait_for(self.pageHeaderTitle)
 
-    def getButtonTargetPopulationCreate(self) -> WebElement:
+    def getButtonTargetPopulationCreate(self) -> bool:
         return self.wait_for(self.buttonTargetPopulationCreate)
+
+    def clickButtonTargetPopulationCreate(self) -> bool:
+        for _ in range(10):
+            self.wait_for(self.buttonTargetPopulationCreate).click()
+            try:
+                self.wait_for_disappear(self.buttonTargetPopulationCreate)
+                break
+            except BaseException:
+                print("Error: Try again to click Save button during Target Population creation")
+        else:
+            raise Exception(f"Element {self.buttonTargetPopulationCreate} not found")
+        return True
 
     def getInputName(self) -> WebElement:
         return self.wait_for(self.inputName)

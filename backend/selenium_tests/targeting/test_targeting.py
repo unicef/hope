@@ -33,28 +33,33 @@ pytestmark = pytest.mark.django_db(transaction=True)
 @pytest.fixture
 def sw_program() -> Program:
     yield get_program_with_dct_type_and_name(
-        "SW Program", dct_type=DataCollectingType.Type.SOCIAL, status=Program.ACTIVE
+        "Test Programm", dct_type=DataCollectingType.Type.SOCIAL, status=Program.ACTIVE
     )
 
 
 @pytest.fixture
 def non_sw_program() -> Program:
     yield get_program_with_dct_type_and_name(
-        "Non SW Program", dct_type=DataCollectingType.Type.STANDARD, status=Program.ACTIVE
+        "Test Programm", dct_type=DataCollectingType.Type.STANDARD, status=Program.ACTIVE
     )
 
 
 def create_custom_household(observed_disability: list[str], residence_status: str = HOST) -> Household:
-    program = Program.objects.first()
+    program = Program.objects.get(name="Test Programm")
     household, _ = create_household_and_individuals(
         household_data={
             "unicef_id": "HH-00-0000.0442",
+            "rdi_merge_status": "MERGED",
             "business_area": program.business_area,
             "program": program,
             "residence_status": residence_status,
         },
         individuals_data=[
-            {"business_area": program.business_area, "observed_disability": observed_disability},
+            {
+                "rdi_merge_status": "MERGED",
+                "business_area": program.business_area,
+                "observed_disability": observed_disability,
+            },
         ],
     )
     return household
@@ -319,13 +324,12 @@ class TestTargeting:
         assert "SAVE" in pageTargetingCreate.getButtonTargetPopulationCreate().text
         pageTargetingCreate.getInputHouseholdids().send_keys(household_with_disability.unicef_id)
         pageTargetingCreate.getInputName().send_keys(f"Target Population for {household_with_disability.unicef_id}")
-        pageTargetingCreate.getButtonTargetPopulationCreate().click()
-        pageTargetingDetails.getLabelStatus()
+        pageTargetingCreate.clickButtonTargetPopulationCreate()
         target_population = TargetPopulation.objects.get(
             name=f"Target Population for {household_with_disability.unicef_id}"
         )
         assert (
-            "8"
+            "1"
             == str(target_population.total_individuals_count)
             == pageTargetingDetails.getLabelTargetedIndividuals().text
         )
@@ -351,8 +355,7 @@ class TestTargeting:
         assert "SAVE" in pageTargetingCreate.getButtonTargetPopulationCreate().text
         pageTargetingCreate.getInputIndividualids().send_keys("IND-88-0000.0002")
         pageTargetingCreate.getInputName().send_keys("Target Population for IND-88-0000.0002")
-        pageTargetingCreate.getButtonTargetPopulationCreate().click()
-        pageTargetingDetails.getLabelStatus()
+        pageTargetingCreate.clickButtonTargetPopulationCreate()
         target_population = TargetPopulation.objects.get(name="Target Population for IND-88-0000.0002")
         assert (
             "4"
@@ -539,8 +542,7 @@ class TestTargeting:
         pageTargetingCreate.getInputHouseholdids().send_keys(household_with_disability.unicef_id)
         pageTargetingCreate.getInputName().send_keys(f"Test {household_with_disability.unicef_id}")
         pageTargetingCreate.getInputFlagexcludeifactiveadjudicationticket().click()
-        pageTargetingCreate.getButtonTargetPopulationCreate().click()
-        pageTargetingDetails.getLabelStatus()
+        pageTargetingCreate.clickButtonTargetPopulationCreate()
         with pytest.raises(NoSuchElementException):
             pageTargetingDetails.getCheckboxExcludeIfOnSanctionList().find_element(
                 By.CSS_SELECTOR, pageTargetingDetails.iconSelected
@@ -607,8 +609,7 @@ class TestTargeting:
         pageTargetingCreate.getInputHouseholdids().send_keys(household_with_disability.unicef_id)
         pageTargetingCreate.getInputName().send_keys(f"Test {household_with_disability.unicef_id}")
         pageTargetingCreate.getInputFlagexcludeifonsanctionlist().click()
-        pageTargetingCreate.getButtonTargetPopulationCreate().click()
-        pageTargetingDetails.getLabelStatus()
+        pageTargetingCreate.clickButtonTargetPopulationCreate()
         pageTargetingDetails.getCheckboxExcludeIfOnSanctionList()
         # ToDo: Add after merge to develop
         # assert (
@@ -691,7 +692,6 @@ class TestTargeting:
         assert "Test NEW TP" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnDateCreated().click()
         pageTargeting.disappearLoadingRows()
-        pageTargeting.screenshot("5")
         assert "Test NEW TP" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnDateCreated().click()
         pageTargeting.disappearLoadingRows()
@@ -730,8 +730,7 @@ class TestTargeting:
         pageTargetingCreate.getButtonTargetPopulationAddCriteria().click()
         pageTargetingCreate.getInputName().send_keys("Target Population for Females Age 0 - 5")
         pageTargetingCreate.getInputFlagexcludeifactiveadjudicationticket().click()
-        pageTargetingCreate.getButtonTargetPopulationCreate().click()
-        pageTargetingDetails.getLabelStatus()
+        pageTargetingCreate.clickButtonTargetPopulationCreate()
         assert "Females Age 0 - 5: 11" in pageTargetingCreate.getCriteriaContainer().text
 
     def test_targeting_parametrized_rules_filters_and_or(
