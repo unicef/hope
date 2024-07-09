@@ -246,6 +246,8 @@ input AvailableFspsForDeliveryMechanismsInput {
 
 type BankAccountInfoNode implements Node {
   id: ID!
+  rdiMergeStatus: BankAccountInfoRdiMergeStatus!
+  isOriginal: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
   isRemoved: Boolean!
@@ -256,7 +258,6 @@ type BankAccountInfoNode implements Node {
   bankAccountNumber: String!
   bankBranchName: String!
   accountHolderName: String!
-  isOriginal: Boolean!
   isMigrationHandled: Boolean!
   copiedFrom: BankAccountInfoNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): BankAccountInfoNodeConnection!
@@ -273,6 +274,11 @@ type BankAccountInfoNodeConnection {
 type BankAccountInfoNodeEdge {
   node: BankAccountInfoNode
   cursor: String!
+}
+
+enum BankAccountInfoRdiMergeStatus {
+  PENDING
+  MERGED
 }
 
 input BankTransferObjectType {
@@ -567,7 +573,7 @@ type CommunicationMessageNodeEdge {
 type CommunicationMessageRecipientMapNode implements Node {
   id: ID!
   size: Int
-  headOfHousehold: IndividualNode!
+  headOfHousehold: IndividualNode
 }
 
 type CommunicationMessageRecipientMapNodeConnection {
@@ -1017,6 +1023,7 @@ type DjangoDebugSQL {
 
 type DocumentNode implements Node {
   id: ID!
+  rdiMergeStatus: DocumentRdiMergeStatus!
   isRemoved: Boolean!
   isOriginal: Boolean!
   createdAt: DateTime!
@@ -1050,6 +1057,11 @@ type DocumentNodeConnection {
 type DocumentNodeEdge {
   node: DocumentNode
   cursor: String!
+}
+
+enum DocumentRdiMergeStatus {
+  PENDING
+  MERGED
 }
 
 enum DocumentStatus {
@@ -1527,318 +1539,7 @@ enum HouseholdCollectType {
   SINGLE
 }
 
-type HouseholdDataChangeApproveMutation {
-  grievanceTicket: GrievanceTicketNode
-}
-
-input HouseholdDataUpdateIssueTypeExtras {
-  household: ID!
-  householdData: HouseholdUpdateDataObjectType!
-}
-
-input HouseholdDeleteIssueTypeExtras {
-  household: ID!
-}
-
-type HouseholdNode implements Node {
-  id: ID!
-  size: Int
-  headOfHousehold: IndividualNode!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  isRemoved: Boolean!
-  removedDate: DateTime
-  lastSyncAt: DateTime
-  version: BigInt!
-  unicefId: String
-  withdrawn: Boolean!
-  withdrawnDate: DateTime
-  consentSign: String!
-  consent: Boolean
-  consentSharing: [String]
-  residenceStatus: String
-  countryOrigin: String
-  country: String
-  address: String!
-  zipCode: String
-  adminArea: AreaNode
-  admin1: AreaNode
-  admin2: AreaNode
-  admin3: AreaNode
-  admin4: AreaNode
-  geopoint: GeoJSON
-  representatives(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
-  femaleAgeGroup05Count: Int
-  femaleAgeGroup611Count: Int
-  femaleAgeGroup1217Count: Int
-  femaleAgeGroup1859Count: Int
-  femaleAgeGroup60Count: Int
-  pregnantCount: Int
-  maleAgeGroup05Count: Int
-  maleAgeGroup611Count: Int
-  maleAgeGroup1217Count: Int
-  maleAgeGroup1859Count: Int
-  maleAgeGroup60Count: Int
-  femaleAgeGroup05DisabledCount: Int
-  femaleAgeGroup611DisabledCount: Int
-  femaleAgeGroup1217DisabledCount: Int
-  femaleAgeGroup1859DisabledCount: Int
-  femaleAgeGroup60DisabledCount: Int
-  maleAgeGroup05DisabledCount: Int
-  maleAgeGroup611DisabledCount: Int
-  maleAgeGroup1217DisabledCount: Int
-  maleAgeGroup1859DisabledCount: Int
-  maleAgeGroup60DisabledCount: Int
-  childrenCount: Int
-  maleChildrenCount: Int
-  femaleChildrenCount: Int
-  childrenDisabledCount: Int
-  maleChildrenDisabledCount: Int
-  femaleChildrenDisabledCount: Int
-  registrationDataImport: RegistrationDataImportNode
-  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
-  returnee: Boolean
-  flexFields: FlexFieldsScalar
-  firstRegistrationDate: DateTime!
-  lastRegistrationDate: DateTime!
-  fchildHoh: Boolean
-  childHoh: Boolean
-  businessArea: UserBusinessAreaNode!
-  start: DateTime
-  deviceid: String!
-  nameEnumerator: String!
-  orgEnumerator: HouseholdOrgEnumerator!
-  orgNameEnumerator: String!
-  village: String!
-  registrationMethod: HouseholdRegistrationMethod!
-  collectIndividualData: HouseholdCollectIndividualData!
-  currency: String
-  unhcrId: String!
-  userFields: JSONString!
-  detailId: String
-  registrationId: String
-  programRegistrationId: String
-  totalCashReceivedUsd: Decimal
-  totalCashReceived: Decimal
-  familyId: String
-  program: ProgramNode
-  copiedFrom: HouseholdNode
-  originUnicefId: String
-  isOriginal: Boolean!
-  isMigrationHandled: Boolean!
-  migratedAt: DateTime
-  isRecalculatedGroupAges: Boolean!
-  collectType: HouseholdCollectType!
-  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
-  individualsAndRoles: [IndividualRoleInHouseholdNode!]!
-  individuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, program: ID, age: String, programs: [ID], search: String, documentType: String, documentNumber: String, lastRegistrationDate: String, admin1: [ID], admin2: [ID], status: [String], excludedId: String, flags: [String], isActiveProgram: Boolean, orderBy: String): IndividualNodeConnection
-  paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
-  paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
-  complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
-  sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
-  householdDataUpdateTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketHouseholdDataUpdateDetailsNodeConnection!
-  addIndividualTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketAddIndividualDetailsNodeConnection!
-  deleteHouseholdTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketDeleteHouseholdDetailsNodeConnection!
-  positiveFeedbackTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketPositiveFeedbackDetailsNodeConnection!
-  negativeFeedbackTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketNegativeFeedbackDetailsNodeConnection!
-  referralTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketReferralDetailsNodeConnection!
-  targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, totalHouseholdsCountWithValidPhoneNoMax: Int, totalHouseholdsCountWithValidPhoneNoMin: Int, orderBy: String): TargetPopulationNodeConnection!
-  selections: [HouseholdSelectionNode!]!
-  messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
-  feedbacks(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
-  surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
-  adminUrl: String
-  selection: HouseholdSelectionNode
-  sanctionListPossibleMatch: Boolean
-  sanctionListConfirmedMatch: Boolean
-  hasDuplicates: Boolean
-  adminAreaTitle: String
-  status: String
-  deliveredQuantities: [DeliveredQuantityNode]
-  activeIndividualsCount: Int
-}
-
-type HouseholdNodeConnection {
-  pageInfo: PageInfo!
-  edges: [HouseholdNodeEdge]!
-  totalCount: Int
-  individualsCount: Int
-  edgeCount: Int
-}
-
-type HouseholdNodeEdge {
-  node: HouseholdNode
-  cursor: String!
-}
-
-enum HouseholdOrgEnumerator {
-  A_
-  PARTNER
-  UNICEF
-}
-
-enum HouseholdRegistrationMethod {
-  A_
-  COMMUNITY
-  HH_REGISTRATION
-}
-
-type HouseholdSelectionNode {
-  id: UUID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  household: HouseholdNode!
-  targetPopulation: TargetPopulationNode!
-  vulnerabilityScore: Float
-  isOriginal: Boolean!
-  isMigrationHandled: Boolean!
-}
-
-input HouseholdUpdateDataObjectType {
-  adminAreaTitle: String
-  status: String
-  consent: Boolean
-  consentSharing: [String]
-  residenceStatus: String
-  countryOrigin: String
-  country: String
-  size: Int
-  address: String
-  femaleAgeGroup05Count: Int
-  femaleAgeGroup611Count: Int
-  femaleAgeGroup1217Count: Int
-  femaleAgeGroup1859Count: Int
-  femaleAgeGroup60Count: Int
-  pregnantCount: Int
-  maleAgeGroup05Count: Int
-  maleAgeGroup611Count: Int
-  maleAgeGroup1217Count: Int
-  maleAgeGroup1859Count: Int
-  maleAgeGroup60Count: Int
-  femaleAgeGroup05DisabledCount: Int
-  femaleAgeGroup611DisabledCount: Int
-  femaleAgeGroup1217DisabledCount: Int
-  femaleAgeGroup1859DisabledCount: Int
-  femaleAgeGroup60DisabledCount: Int
-  maleAgeGroup05DisabledCount: Int
-  maleAgeGroup611DisabledCount: Int
-  maleAgeGroup1217DisabledCount: Int
-  maleAgeGroup1859DisabledCount: Int
-  maleAgeGroup60DisabledCount: Int
-  returnee: Boolean
-  fchildHoh: Boolean
-  childHoh: Boolean
-  start: DateTime
-  end: DateTime
-  nameEnumerator: String
-  orgEnumerator: String
-  orgNameEnumerator: String
-  village: String
-  registrationMethod: String
-  collectIndividualData: String
-  currency: String
-  unhcrId: String
-  flexFields: Arg
-}
-
-enum ImportDataDataType {
-  XLSX
-  JSON
-  FLEX
-}
-
-type ImportDataNode implements Node {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  status: ImportDataStatus!
-  businessAreaSlug: String!
-  file: String
-  dataType: ImportDataDataType!
-  numberOfHouseholds: Int
-  numberOfIndividuals: Int
-  error: String!
-  validationErrors: String!
-  deliveryMechanismsValidationErrors: String!
-  createdById: UUID
-  registrationDataImport: RegistrationDataImportDatahubNode
-  koboimportdata: KoboImportDataNode
-  xlsxValidationErrors: [XlsxRowErrorNode]
-}
-
-enum ImportDataStatus {
-  PENDING
-  RUNNING
-  FINISHED
-  ERROR
-  VALIDATION_ERROR
-  DELIVERY_MECHANISMS_VALIDATION_ERROR
-}
-
-type ImportXLSXPaymentPlanPaymentListMutation {
-  paymentPlan: PaymentPlanNode
-  errors: [XlsxErrorNode]
-}
-
-type ImportXLSXPaymentPlanPaymentListPerFSPMutation {
-  paymentPlan: PaymentPlanNode
-  errors: [XlsxErrorNode]
-}
-
-type ImportXlsxPaymentVerificationPlanFile {
-  paymentPlan: GenericPaymentPlanNode
-  errors: [XlsxErrorNode]
-}
-
-type ImportedDocumentNode implements Node {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  documentNumber: String!
-  photo: String
-  individual: ImportedIndividualNode!
-  type: ImportedDocumentTypeNode!
-  country: String
-  docDate: Date
-  issuanceDate: Date
-  expiryDate: Date
-}
-
-type ImportedDocumentNodeConnection {
-  pageInfo: PageInfo!
-  edges: [ImportedDocumentNodeEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type ImportedDocumentNodeEdge {
-  node: ImportedDocumentNode
-  cursor: String!
-}
-
-type ImportedDocumentTypeNode {
-  id: UUID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  label: String!
-  key: String!
-  isIdentityDocument: Boolean!
-  documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
-}
-
-enum ImportedHouseholdCollectIndividualData {
-  A_
-  A_2
-  A_1
-  A_0
-}
-
-enum ImportedHouseholdCollectType {
-  STANDARD
-  SINGLE
-}
-
-enum ImportedHouseholdConsentSharing {
+enum HouseholdConsentSharing {
   A_
   GOVERNMENT_PARTNER
   HUMANITARIAN_PARTNER
@@ -1846,7 +1547,7 @@ enum ImportedHouseholdConsentSharing {
   UNICEF
 }
 
-enum ImportedHouseholdCurrency {
+enum HouseholdCurrency {
   A_
   AED
   AFN
@@ -2012,29 +1713,47 @@ enum ImportedHouseholdCurrency {
   USDC
 }
 
-type ImportedHouseholdNode implements Node {
+type HouseholdDataChangeApproveMutation {
+  grievanceTicket: GrievanceTicketNode
+}
+
+input HouseholdDataUpdateIssueTypeExtras {
+  household: ID!
+  householdData: HouseholdUpdateDataObjectType!
+}
+
+input HouseholdDeleteIssueTypeExtras {
+  household: ID!
+}
+
+type HouseholdNode implements Node {
   id: ID!
+  size: Int
+  headOfHousehold: IndividualNode
+  rdiMergeStatus: HouseholdRdiMergeStatus!
+  isOriginal: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
+  isRemoved: Boolean!
+  removedDate: DateTime
+  lastSyncAt: DateTime
+  version: BigInt!
+  unicefId: String
+  withdrawn: Boolean!
+  withdrawnDate: DateTime
   consentSign: String!
   consent: Boolean
-  consentSharing: ImportedHouseholdConsentSharing!
-  residenceStatus: ImportedHouseholdResidenceStatus!
+  consentSharing: [String]
+  residenceStatus: String
   countryOrigin: String
-  size: Int
-  address: String!
   country: String
+  address: String!
   zipCode: String
-  adminArea: String!
-  adminAreaTitle: String!
-  admin1: String!
-  admin1Title: String!
-  admin2: String!
-  admin2Title: String!
-  admin3: String!
-  admin3Title: String!
-  admin4: String!
-  admin4Title: String!
+  adminArea: AreaNode
+  admin1: AreaNode
+  admin2: AreaNode
+  admin3: AreaNode
+  admin4: AreaNode
   geopoint: GeoJSON
   femaleAgeGroup05Count: Int
   femaleAgeGroup611Count: Int
@@ -2057,33 +1776,360 @@ type ImportedHouseholdNode implements Node {
   maleAgeGroup1217DisabledCount: Int
   maleAgeGroup1859DisabledCount: Int
   maleAgeGroup60DisabledCount: Int
-  headOfHousehold: ImportedIndividualNode
-  fchildHoh: Boolean
-  childHoh: Boolean
-  registrationDataImport: RegistrationDataImportDatahubNode!
+  childrenCount: Int
+  maleChildrenCount: Int
+  femaleChildrenCount: Int
+  childrenDisabledCount: Int
+  maleChildrenDisabledCount: Int
+  femaleChildrenDisabledCount: Int
+  registrationDataImport: RegistrationDataImportNode
+  returnee: Boolean
+  flexFields: FlexFieldsScalar
   firstRegistrationDate: DateTime!
   lastRegistrationDate: DateTime!
-  returnee: Boolean
-  flexFields: Arg
+  fchildHoh: Boolean
+  childHoh: Boolean
+  businessArea: UserBusinessAreaNode!
   start: DateTime
   deviceid: String!
   nameEnumerator: String!
-  orgEnumerator: ImportedHouseholdOrgEnumerator
+  orgEnumerator: HouseholdOrgEnumerator!
   orgNameEnumerator: String!
   village: String!
-  registrationMethod: ImportedHouseholdRegistrationMethod!
-  collectIndividualData: ImportedHouseholdCollectIndividualData!
-  currency: ImportedHouseholdCurrency!
+  registrationMethod: HouseholdRegistrationMethod!
+  collectIndividualData: HouseholdCollectIndividualData!
+  currency: String
   unhcrId: String!
+  userFields: JSONString!
+  detailId: String
+  registrationId: String
+  programRegistrationId: String
+  totalCashReceivedUsd: Decimal
+  totalCashReceived: Decimal
+  familyId: String
+  program: ProgramNode
+  copiedFrom: HouseholdNode
+  originUnicefId: String
+  isMigrationHandled: Boolean!
+  migratedAt: DateTime
+  isRecalculatedGroupAges: Boolean!
+  collectType: HouseholdCollectType!
   koboSubmissionUuid: UUID
   koboSubmissionTime: DateTime
-  detailId: String
-  programRegistrationId: String
   enumeratorRecId: Int
   misUnicefId: String
-  programId: UUID
-  collectType: ImportedHouseholdCollectType!
-  individuals(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
+  flexRegistrationsRecordId: Int
+  representatives(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
+  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
+  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
+  individualsAndRoles: [IndividualRoleInHouseholdNode!]!
+  individuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, program: ID, age: String, programs: [ID], search: String, documentType: String, documentNumber: String, lastRegistrationDate: String, admin1: [ID], admin2: [ID], status: [String], excludedId: String, flags: [String], isActiveProgram: Boolean, orderBy: String): IndividualNodeConnection
+  paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
+  paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
+  complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
+  sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
+  householdDataUpdateTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketHouseholdDataUpdateDetailsNodeConnection!
+  addIndividualTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketAddIndividualDetailsNodeConnection!
+  deleteHouseholdTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketDeleteHouseholdDetailsNodeConnection!
+  positiveFeedbackTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketPositiveFeedbackDetailsNodeConnection!
+  negativeFeedbackTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketNegativeFeedbackDetailsNodeConnection!
+  referralTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketReferralDetailsNodeConnection!
+  targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, totalHouseholdsCountWithValidPhoneNoMax: Int, totalHouseholdsCountWithValidPhoneNoMin: Int, orderBy: String): TargetPopulationNodeConnection!
+  selections: [HouseholdSelectionNode!]!
+  messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
+  feedbacks(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
+  surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
+  adminUrl: String
+  selection: HouseholdSelectionNode
+  sanctionListPossibleMatch: Boolean
+  sanctionListConfirmedMatch: Boolean
+  hasDuplicates: Boolean
+  adminAreaTitle: String
+  status: String
+  deliveredQuantities: [DeliveredQuantityNode]
+  activeIndividualsCount: Int
+  importId: String
+}
+
+type HouseholdNodeConnection {
+  pageInfo: PageInfo!
+  edges: [HouseholdNodeEdge]!
+  totalCount: Int
+  individualsCount: Int
+  edgeCount: Int
+}
+
+type HouseholdNodeEdge {
+  node: HouseholdNode
+  cursor: String!
+}
+
+enum HouseholdOrgEnumerator {
+  A_
+  PARTNER
+  UNICEF
+}
+
+enum HouseholdRdiMergeStatus {
+  PENDING
+  MERGED
+}
+
+enum HouseholdRegistrationMethod {
+  A_
+  COMMUNITY
+  HH_REGISTRATION
+}
+
+enum HouseholdResidenceStatus {
+  A_
+  IDP
+  REFUGEE
+  OTHERS_OF_CONCERN
+  HOST
+  NON_HOST
+  RETURNEE
+}
+
+type HouseholdSelectionNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  household: HouseholdNode!
+  targetPopulation: TargetPopulationNode!
+  vulnerabilityScore: Float
+  isOriginal: Boolean!
+  isMigrationHandled: Boolean!
+}
+
+input HouseholdUpdateDataObjectType {
+  adminAreaTitle: String
+  status: String
+  consent: Boolean
+  consentSharing: [String]
+  residenceStatus: String
+  countryOrigin: String
+  country: String
+  size: Int
+  address: String
+  femaleAgeGroup05Count: Int
+  femaleAgeGroup611Count: Int
+  femaleAgeGroup1217Count: Int
+  femaleAgeGroup1859Count: Int
+  femaleAgeGroup60Count: Int
+  pregnantCount: Int
+  maleAgeGroup05Count: Int
+  maleAgeGroup611Count: Int
+  maleAgeGroup1217Count: Int
+  maleAgeGroup1859Count: Int
+  maleAgeGroup60Count: Int
+  femaleAgeGroup05DisabledCount: Int
+  femaleAgeGroup611DisabledCount: Int
+  femaleAgeGroup1217DisabledCount: Int
+  femaleAgeGroup1859DisabledCount: Int
+  femaleAgeGroup60DisabledCount: Int
+  maleAgeGroup05DisabledCount: Int
+  maleAgeGroup611DisabledCount: Int
+  maleAgeGroup1217DisabledCount: Int
+  maleAgeGroup1859DisabledCount: Int
+  maleAgeGroup60DisabledCount: Int
+  returnee: Boolean
+  fchildHoh: Boolean
+  childHoh: Boolean
+  start: DateTime
+  end: DateTime
+  nameEnumerator: String
+  orgEnumerator: String
+  orgNameEnumerator: String
+  village: String
+  registrationMethod: String
+  collectIndividualData: String
+  currency: String
+  unhcrId: String
+  flexFields: Arg
+}
+
+enum ImportDataDataType {
+  XLSX
+  JSON
+  FLEX
+}
+
+type ImportDataNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  status: ImportDataStatus!
+  businessAreaSlug: String!
+  file: String
+  dataType: ImportDataDataType!
+  numberOfHouseholds: Int
+  numberOfIndividuals: Int
+  error: String!
+  validationErrors: String!
+  deliveryMechanismsValidationErrors: String!
+  createdById: UUID
+  registrationDataImportHope: RegistrationDataImportNode
+  koboimportdata: KoboImportDataNode
+  registrationDataImport: RegistrationDataImportDatahubNode
+  xlsxValidationErrors: [XlsxRowErrorNode]
+}
+
+enum ImportDataStatus {
+  PENDING
+  RUNNING
+  FINISHED
+  ERROR
+  VALIDATION_ERROR
+  DELIVERY_MECHANISMS_VALIDATION_ERROR
+}
+
+type ImportXLSXPaymentPlanPaymentListMutation {
+  paymentPlan: PaymentPlanNode
+  errors: [XlsxErrorNode]
+}
+
+type ImportXLSXPaymentPlanPaymentListPerFSPMutation {
+  paymentPlan: PaymentPlanNode
+  errors: [XlsxErrorNode]
+}
+
+type ImportXlsxPaymentVerificationPlanFile {
+  paymentPlan: GenericPaymentPlanNode
+  errors: [XlsxErrorNode]
+}
+
+type ImportedDocumentNode implements Node {
+  id: ID!
+  rdiMergeStatus: DocumentRdiMergeStatus!
+  isRemoved: Boolean!
+  isOriginal: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  lastSyncAt: DateTime
+  documentNumber: String!
+  photo: String
+  individual: IndividualNode!
+  type: DocumentTypeNode!
+  country: String
+  status: DocumentStatus!
+  cleared: Boolean!
+  clearedDate: DateTime!
+  clearedBy: UserNode
+  issuanceDate: DateTime
+  expiryDate: DateTime
+  program: ProgramNode
+  isMigrationHandled: Boolean!
+  copiedFrom: DocumentNode
+  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
+}
+
+type ImportedDocumentNodeConnection {
+  pageInfo: PageInfo!
+  edges: [ImportedDocumentNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type ImportedDocumentNodeEdge {
+  node: ImportedDocumentNode
+  cursor: String!
+}
+
+type ImportedHouseholdNode implements Node {
+  id: ID!
+  size: Int
+  headOfHousehold: IndividualNode
+  rdiMergeStatus: HouseholdRdiMergeStatus!
+  isOriginal: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  isRemoved: Boolean!
+  removedDate: DateTime
+  lastSyncAt: DateTime
+  version: BigInt!
+  unicefId: String
+  withdrawn: Boolean!
+  withdrawnDate: DateTime
+  consentSign: String!
+  consent: Boolean
+  consentSharing: HouseholdConsentSharing!
+  residenceStatus: HouseholdResidenceStatus!
+  countryOrigin: String
+  country: String
+  address: String!
+  zipCode: String
+  adminArea: AreaNode
+  admin1: AreaNode
+  admin2: AreaNode
+  admin3: AreaNode
+  admin4: AreaNode
+  geopoint: GeoJSON
+  femaleAgeGroup05Count: Int
+  femaleAgeGroup611Count: Int
+  femaleAgeGroup1217Count: Int
+  femaleAgeGroup1859Count: Int
+  femaleAgeGroup60Count: Int
+  pregnantCount: Int
+  maleAgeGroup05Count: Int
+  maleAgeGroup611Count: Int
+  maleAgeGroup1217Count: Int
+  maleAgeGroup1859Count: Int
+  maleAgeGroup60Count: Int
+  femaleAgeGroup05DisabledCount: Int
+  femaleAgeGroup611DisabledCount: Int
+  femaleAgeGroup1217DisabledCount: Int
+  femaleAgeGroup1859DisabledCount: Int
+  femaleAgeGroup60DisabledCount: Int
+  maleAgeGroup05DisabledCount: Int
+  maleAgeGroup611DisabledCount: Int
+  maleAgeGroup1217DisabledCount: Int
+  maleAgeGroup1859DisabledCount: Int
+  maleAgeGroup60DisabledCount: Int
+  childrenCount: Int
+  maleChildrenCount: Int
+  femaleChildrenCount: Int
+  childrenDisabledCount: Int
+  maleChildrenDisabledCount: Int
+  femaleChildrenDisabledCount: Int
+  registrationDataImport: RegistrationDataImportNode
+  returnee: Boolean
+  flexFields: Arg
+  firstRegistrationDate: DateTime!
+  lastRegistrationDate: DateTime!
+  fchildHoh: Boolean
+  childHoh: Boolean
+  businessArea: UserBusinessAreaNode!
+  start: DateTime
+  deviceid: String!
+  nameEnumerator: String!
+  orgEnumerator: HouseholdOrgEnumerator!
+  orgNameEnumerator: String!
+  village: String!
+  registrationMethod: HouseholdRegistrationMethod!
+  collectIndividualData: HouseholdCollectIndividualData!
+  currency: HouseholdCurrency!
+  unhcrId: String!
+  userFields: JSONString!
+  detailId: String
+  registrationId: String
+  programRegistrationId: String
+  totalCashReceivedUsd: Float
+  totalCashReceived: Float
+  familyId: String
+  program: ProgramNode
+  copiedFrom: HouseholdNode
+  originUnicefId: String
+  isMigrationHandled: Boolean!
+  migratedAt: DateTime
+  isRecalculatedGroupAges: Boolean!
+  collectType: HouseholdCollectType!
+  koboSubmissionUuid: UUID
+  koboSubmissionTime: DateTime
+  enumeratorRecId: Int
+  misUnicefId: String
+  flexRegistrationsRecordId: Int
+  individuals(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection
   hasDuplicates: Boolean
   importId: String
 }
@@ -2100,54 +2146,20 @@ type ImportedHouseholdNodeEdge {
   cursor: String!
 }
 
-enum ImportedHouseholdOrgEnumerator {
-  A_
-  PARTNER
-  UNICEF
-}
-
-enum ImportedHouseholdRegistrationMethod {
-  A_
-  COMMUNITY
-  HH_REGISTRATION
-}
-
-enum ImportedHouseholdResidenceStatus {
-  A_
-  IDP
-  REFUGEE
-  OTHERS_OF_CONCERN
-  HOST
-  NON_HOST
-  RETURNEE
-}
-
-enum ImportedIndividualDeduplicationBatchStatus {
-  SIMILAR_IN_BATCH
-  DUPLICATE_IN_BATCH
-  UNIQUE_IN_BATCH
-  NOT_PROCESSED
-}
-
-enum ImportedIndividualDeduplicationGoldenRecordStatus {
-  DUPLICATE
-  NEEDS_ADJUDICATION
-  NOT_PROCESSED
-  POSTPONE
-  UNIQUE
-}
-
-enum ImportedIndividualDisability {
-  DISABLED
-  NOT_DISABLED
-}
-
 type ImportedIndividualIdentityNode implements Node {
   id: ID!
-  individual: ImportedIndividualNode!
-  documentNumber: String!
-  country: String
+  created: DateTime!
+  modified: DateTime!
+  rdiMergeStatus: IndividualIdentityRdiMergeStatus!
+  isRemoved: Boolean!
+  isOriginal: Boolean!
+  individual: IndividualNode!
+  number: String!
   partner: String
+  country: String
+  isMigrationHandled: Boolean!
+  copiedFrom: IndividualIdentityNode
+  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
 }
 
 type ImportedIndividualIdentityNodeConnection {
@@ -2162,49 +2174,58 @@ type ImportedIndividualIdentityNodeEdge {
   cursor: String!
 }
 
-enum ImportedIndividualMaritalStatus {
-  A_
-  DIVORCED
-  MARRIED
-  SEPARATED
-  SINGLE
-  WIDOWED
-}
-
 type ImportedIndividualNode implements Node {
   id: ID!
+  rdiMergeStatus: IndividualRdiMergeStatus!
+  isOriginal: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
+  isRemoved: Boolean!
+  removedDate: DateTime
+  lastSyncAt: DateTime
+  version: BigInt!
+  unicefId: String
+  duplicate: Boolean!
+  duplicateDate: DateTime
+  withdrawn: Boolean!
+  withdrawnDate: DateTime
   individualId: String!
   photo: String!
   fullName: String!
   givenName: String!
   middleName: String!
   familyName: String!
-  relationship: String
-  sex: ImportedIndividualSex!
+  sex: IndividualSex!
   birthDate: Date!
   estimatedBirthDate: Boolean
-  maritalStatus: ImportedIndividualMaritalStatus!
+  maritalStatus: IndividualMaritalStatus!
   phoneNo: String!
   phoneNoValid: Boolean
   phoneNoAlternative: String!
   phoneNoAlternativeValid: Boolean
   email: String
-  paymentDeliveryPhoneNo: String!
-  household: ImportedHouseholdNode
-  registrationDataImport: RegistrationDataImportDatahubNode!
-  disability: ImportedIndividualDisability!
+  paymentDeliveryPhoneNo: String
+  relationship: String
+  household: HouseholdNode
+  registrationDataImport: RegistrationDataImportNode
   workStatus: String!
   firstRegistrationDate: Date!
   lastRegistrationDate: Date!
-  deduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus
-  deduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus
-  deduplicationBatchResults: [DeduplicationResultNode]
-  deduplicationGoldenRecordResults: [DeduplicationResultNode]
   flexFields: FlexFieldsScalar
+  userFields: JSONString!
+  enrolledInNutritionProgramme: Boolean
+  administrationOfRutf: Boolean
+  deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus!
+  deduplicationBatchStatus: IndividualDeduplicationBatchStatus!
+  deduplicationGoldenRecordResults: [DeduplicationResultNode]
+  deduplicationBatchResults: [DeduplicationResultNode]
+  importedIndividualId: UUID
+  sanctionListPossibleMatch: Boolean!
+  sanctionListConfirmedMatch: Boolean!
   pregnant: Boolean
+  disability: IndividualDisability!
   observedDisability: [String]
+  disabilityCertificatePicture: String
   seeingDisability: String!
   hearingDisability: String!
   physicalDisability: String!
@@ -2213,21 +2234,29 @@ type ImportedIndividualNode implements Node {
   commsDisability: String!
   whoAnswersPhone: String!
   whoAnswersAltPhone: String!
+  businessArea: UserBusinessAreaNode!
+  fchildHoh: Boolean!
+  childHoh: Boolean!
   detailId: String
-  disabilityCertificatePicture: String
+  registrationId: String
+  programRegistrationId: String
   preferredLanguage: String
-  misUnicefId: String
-  programId: UUID
+  relationshipConfirmed: Boolean!
   ageAtRegistration: Int
   walletName: String!
   blockchainName: String!
   walletAddress: String!
-  importedhousehold: ImportedHouseholdNode
-  documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
-  identities(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualIdentityNodeConnection!
+  program: ProgramNode
+  copiedFrom: IndividualNode
+  originUnicefId: String
+  isMigrationHandled: Boolean!
+  migratedAt: DateTime
+  misUnicefId: String
   role: String
   age: Int
   importId: String
+  documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection
+  identities(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualIdentityNodeConnection
 }
 
 type ImportedIndividualNodeConnection {
@@ -2240,11 +2269,6 @@ type ImportedIndividualNodeConnection {
 type ImportedIndividualNodeEdge {
   node: ImportedIndividualNode
   cursor: String!
-}
-
-enum ImportedIndividualSex {
-  MALE
-  FEMALE
 }
 
 type IndividualDataChangeApproveMutation {
@@ -2292,6 +2316,7 @@ type IndividualIdentityNode implements Node {
   id: ID!
   created: DateTime!
   modified: DateTime!
+  rdiMergeStatus: IndividualIdentityRdiMergeStatus!
   isRemoved: Boolean!
   isOriginal: Boolean!
   individual: IndividualNode!
@@ -2322,6 +2347,11 @@ input IndividualIdentityObjectType {
   number: String!
 }
 
+enum IndividualIdentityRdiMergeStatus {
+  PENDING
+  MERGED
+}
+
 enum IndividualMaritalStatus {
   A_
   DIVORCED
@@ -2333,6 +2363,8 @@ enum IndividualMaritalStatus {
 
 type IndividualNode implements Node {
   id: ID!
+  rdiMergeStatus: IndividualRdiMergeStatus!
+  isOriginal: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
   isRemoved: Boolean!
@@ -2363,7 +2395,6 @@ type IndividualNode implements Node {
   relationship: IndividualRelationship
   household: HouseholdNode
   registrationDataImport: RegistrationDataImportNode
-  disability: IndividualDisability!
   workStatus: String!
   firstRegistrationDate: Date!
   lastRegistrationDate: Date!
@@ -2379,7 +2410,9 @@ type IndividualNode implements Node {
   sanctionListPossibleMatch: Boolean!
   sanctionListConfirmedMatch: Boolean!
   pregnant: Boolean
+  disability: IndividualDisability!
   observedDisability: [String]
+  disabilityCertificatePicture: String
   seeingDisability: String!
   hearingDisability: String!
   physicalDisability: String!
@@ -2394,7 +2427,6 @@ type IndividualNode implements Node {
   detailId: String
   registrationId: String
   programRegistrationId: String
-  disabilityCertificatePicture: String
   preferredLanguage: String
   relationshipConfirmed: Boolean!
   ageAtRegistration: Int
@@ -2404,9 +2436,9 @@ type IndividualNode implements Node {
   program: ProgramNode
   copiedFrom: IndividualNode
   originUnicefId: String
-  isOriginal: Boolean!
   isMigrationHandled: Boolean!
   migratedAt: DateTime
+  misUnicefId: String
   representedHouseholds(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
@@ -2449,6 +2481,11 @@ type IndividualNodeEdge {
   cursor: String!
 }
 
+enum IndividualRdiMergeStatus {
+  PENDING
+  MERGED
+}
+
 enum IndividualRelationship {
   UNKNOWN
   AUNT_UNCLE
@@ -2472,6 +2509,7 @@ enum IndividualRelationship {
 
 type IndividualRoleInHouseholdNode {
   id: UUID!
+  rdiMergeStatus: IndividualRoleInHouseholdRdiMergeStatus!
   isRemoved: Boolean!
   isOriginal: Boolean!
   createdAt: DateTime!
@@ -2484,6 +2522,11 @@ type IndividualRoleInHouseholdNode {
   migratedAt: DateTime
   copiedFrom: IndividualRoleInHouseholdNode
   copiedTo: [IndividualRoleInHouseholdNode!]!
+}
+
+enum IndividualRoleInHouseholdRdiMergeStatus {
+  PENDING
+  MERGED
 }
 
 enum IndividualRoleInHouseholdRole {
@@ -2767,7 +2810,7 @@ type Mutations {
   saveKoboImportDataAsync(businessAreaSlug: String!, onlyActiveSubmissions: Boolean!, uid: Upload!): SaveKoboProjectImportDataAsync
   mergeRegistrationDataImport(id: ID!, version: BigInt): MergeRegistrationDataImportMutation
   refuseRegistrationDataImport(id: ID!, refuseReason: String, version: BigInt): RefuseRegistrationDataImportMutation
-  rerunDedupe(registrationDataImportDatahubId: ID!, version: BigInt): RegistrationDeduplicationMutation
+  rerunDedupe(registrationDataImportId: ID!, version: BigInt): RegistrationDeduplicationMutation
   eraseRegistrationDataImport(id: ID!, version: BigInt): EraseRegistrationDataImportMutation
   checkAgainstSanctionList(file: Upload!): CheckAgainstSanctionListMutation
 }
@@ -3340,6 +3383,9 @@ enum PaymentRecordStatus {
   FORCE_FAILED
   PARTIALLY_DISTRIBUTED
   PENDING
+  SENT_TO_PAYMENT_GATEWAY
+  SENT_TO_FSP
+  MANUALLY_CANCELLED
 }
 
 type PaymentRecordsAndPaymentsEdges {
@@ -3355,6 +3401,9 @@ enum PaymentStatus {
   FORCE_FAILED
   PARTIALLY_DISTRIBUTED
   PENDING
+  SENT_TO_PAYMENT_GATEWAY
+  SENT_TO_FSP
+  MANUALLY_CANCELLED
 }
 
 type PaymentVerificationLogEntryNode implements Node {
@@ -3853,7 +3902,7 @@ type RebuildTargetPopulationMutation {
 type RecipientNode implements Node {
   id: ID!
   size: Int
-  headOfHousehold: IndividualNode!
+  headOfHousehold: IndividualNode
 }
 
 type RecipientNodeConnection {
@@ -3914,8 +3963,6 @@ type RegistrationDataImportDatahubNode implements Node {
   importData: ImportDataNode
   importDone: RegistrationDataImportDatahubImportDone!
   businessAreaSlug: String!
-  households(offset: Int, before: String, after: String, first: Int, last: Int): ImportedHouseholdNodeConnection!
-  individuals(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
 }
 
 type RegistrationDataImportDatahubNodeConnection {
@@ -3959,6 +4006,7 @@ type RegistrationDataImportNode implements Node {
   erased: Boolean!
   refuseReason: String
   allowDeliveryMechanismsValidationErrors: Boolean!
+  importData: ImportDataNode
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!

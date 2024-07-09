@@ -1,3 +1,5 @@
+from time import sleep
+
 from helpers.helper import Common
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -34,6 +36,7 @@ class BaseComponents(Common):
     navResourcesConversations = 'a[data-cy="nav-resources-Conversations"]'
     navResourcesToolsAndMaterials = 'a[data-cy="nav-resources-Tools and Materials"]'
     navResourcesReleaseNote = 'a[data-cy="nav-resources-Release Note"]'
+    navProgramLog = 'a[data-cy="nav-Program Log"]'
     mainContent = 'div[data-cy="main-content"]'
     drawerItems = 'div[data-cy="drawer-items"]'
     drawerInactiveSubheader = 'div[data-cy="program-inactive-subheader"]'
@@ -41,6 +44,7 @@ class BaseComponents(Common):
     globalProgramFilterSearchInput = 'input[data-cy="search-input-gpf"]'
     globalProgramFilterSearchButton = 'button[data-cy="search-icon"]'
     globalProgramFilterClearButton = 'button[data-cy="clear-icon"]'
+    rows = 'tr[role="checkbox"]'
 
     # Text
     globalProgramFilterText = "All Programmes"
@@ -165,3 +169,16 @@ class BaseComponents(Common):
 
     def getGlobalProgramFilterSearchInput(self) -> WebElement:
         return self.wait_for(self.globalProgramFilterSearchInput)
+
+    def getNavProgramLog(self) -> WebElement:
+        return self.wait_for(self.navProgramLog)
+
+    def getRows(self) -> [WebElement]:
+        return self.get_elements(self.rows)
+
+    def waitForNumberOfRows(self, number: int) -> bool:
+        for _ in range(5):
+            if len(self.getRows()) == number:
+                return True
+            sleep(1)
+        return False

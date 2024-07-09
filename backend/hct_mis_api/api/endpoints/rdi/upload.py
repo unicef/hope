@@ -28,15 +28,12 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedDocument,
-    ImportedHousehold,
-    ImportedIndividual,
-    RegistrationDataImportDatahub,
-)
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
@@ -93,13 +90,13 @@ class DocumentSerializer(serializers.ModelSerializer):
     country = serializers.ChoiceField(choices=Countries())
     image = serializers.CharField(allow_blank=True, required=False)
     document_number = serializers.CharField(required=True)
-    doc_date = serializers.DateField(required=True)
 
     class Meta:
-        model = ImportedDocument
+        model = PendingDocument
         exclude = [
             "individual",
             "photo",
+            "program",
         ]
 
 
@@ -131,16 +128,18 @@ class IndividualSerializer(serializers.ModelSerializer):
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
 
     class Meta:
-        model = ImportedIndividual
+        model = PendingIndividual
         exclude = [
             "id",
             "registration_data_import",
+            "business_area",
             "deduplication_batch_results",
             "deduplication_golden_record_results",
             "deduplication_batch_status",
             "created_at",
             "updated_at",
-            "mis_unicef_id",
+            "version",
+            "vector_column",
         ]
 
     def validate_role(self, value: str) -> Optional[str]:
@@ -159,26 +158,27 @@ class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     members = IndividualSerializer(many=True, required=True)
-    country_origin = serializers.CharField(allow_blank=True, required=False)
+    country = serializers.ChoiceField(choices=Countries())
+    country_origin = serializers.ChoiceField(choices=Countries(), required=False)
     size = serializers.IntegerField(required=False, allow_null=True)
 
     class Meta:
-        model = ImportedHousehold
+        model = PendingHousehold
         exclude = [
             "id",
             "head_of_household",
             "registration_data_import",
-            "program_id",
-            "mis_unicef_id",
-            "flex_registrations_record",
+            "business_area",
+            "program",
             "kobo_submission_uuid",
             "kobo_submission_time",
             "geopoint",
             "detail_id",
+            "version",
         ]
         validators = [HouseholdValidator()]
 
-    def to_representation(self, instance: ImportedHousehold) -> Dict:
+    def to_representation(self, instance: PendingHousehold) -> Dict:
         ret = super().to_representation(instance)
         ret.pop("members", None)
         return ret
@@ -207,8 +207,8 @@ class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
     )
 
     class Meta:
-        model = RegistrationDataImportDatahub
-        exclude = ("business_area_slug", "import_data", "hct_id")
+        model = RegistrationDataImport
+        fields = ("name", "households", "program")
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.business_area = kwargs.pop("business_area", None)
@@ -225,25 +225,21 @@ class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
         households = validated_data.pop("households")
         program = validated_data.pop("program")
 
-        rdi_datahub = RegistrationDataImportDatahub.objects.create(
-            **validated_data, business_area_slug=self.business_area.slug
-        )
-        info = self.save_households(rdi_datahub, program.id, households)
-        validated_data.pop("import_done", None)
-        rdi_mis = RegistrationDataImport.objects.create(
+        rdi = RegistrationDataImport.objects.create(
             **validated_data,
             imported_by=created_by,
             data_source=RegistrationDataImport.API,
-            number_of_individuals=info.individuals,
-            number_of_households=info.households,
-            datahub_id=str(rdi_datahub.pk),
+            number_of_individuals=0,
+            number_of_households=0,
             business_area=self.business_area,
             program=program,
         )
-        rdi_datahub.hct_id = rdi_mis.id
-        rdi_datahub.save()
+        info = self.save_households(rdi, households)
+        rdi.number_of_households = info.households
+        rdi.number_of_individuals = info.individuals
+        rdi.save()
 
-        return dict(id=rdi_datahub.pk, name=rdi_mis.name, public_id=rdi_mis.pk, **asdict(info))
+        return dict(id=rdi.pk, name=rdi.name, **asdict(info))
 
 
 class UploadRDIView(HOPEAPIBusinessAreaView):
@@ -251,7 +247,6 @@ class UploadRDIView(HOPEAPIBusinessAreaView):
 
     @extend_schema(request=RDINestedSerializer)
     @atomic()
-    @atomic(using="registration_datahub")
     def post(self, request: "Request", business_area: "BusinessArea") -> Response:
         serializer = RDINestedSerializer(data=request.data, business_area=self.selected_business_area)
         if serializer.is_valid():

@@ -21,7 +21,6 @@ from adminfilters.depot.widget import DepotManager
 from adminfilters.querystring import QueryStringFilter
 from power_query.mixin import PowerQueryMixin
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
-from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.admin.mixins import (
@@ -36,6 +35,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     Household,
     HouseholdCollection,
+    Individual,
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.utils.admin import (
@@ -43,6 +43,8 @@ from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
     IsOriginalAdminMixin,
     LastSyncDateResetMixin,
+    LinkedObjectsManagerMixin,
+    RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
 )
 from hct_mis_api.apps.utils.security import is_root
@@ -74,7 +76,7 @@ class HouseholdRepresentationInline(admin.TabularInline):
 class HouseholdAdmin(
     SoftDeletableAdminMixin,
     LastSyncDateResetMixin,
-    LinkedObjectsMixin,
+    LinkedObjectsManagerMixin,
     PowerQueryMixin,
     SmartFieldsetMixin,
     CursorPaginatorAdmin,
@@ -82,6 +84,7 @@ class HouseholdAdmin(
     CustomTargetPopulationMixin,
     HOPEModelAdminBase,
     IsOriginalAdminMixin,
+    RdiMergeStatusAdminMixin,
 ):
     list_display = (
         "unicef_id",
@@ -91,6 +94,7 @@ class HouseholdAdmin(
         "size",
         "withdrawn",
         "program",
+        "rdi_merge_status",
     )
     list_filter = (
         DepotManager,
@@ -169,6 +173,11 @@ class HouseholdAdmin(
             qs = qs.order_by(*ordering)
         return qs
 
+    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+        if db_field.name == "head_of_household":
+            kwargs["queryset"] = Individual.all_objects.all()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     def get_ignored_linked_objects(self, request: HttpRequest) -> List:
         return []
 
@@ -190,9 +199,10 @@ class HouseholdAdmin(
 
     @button()
     def members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
-        obj = Household.objects.get(pk=pk)
+        obj = Household.all_merge_status_objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
-        return HttpResponseRedirect(f"{url}?qs=unicef_id={obj.unicef_id}")
+        flt = f"&qs=household_id={obj.id}"
+        return HttpResponseRedirect(f"{url}?{flt}")
 
     @button()
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
@@ -203,13 +213,13 @@ class HouseholdAdmin(
         primary = None
         head = None
         try:
-            primary = IndividualRoleInHousehold.objects.get(household=hh, role=ROLE_PRIMARY)
+            primary = IndividualRoleInHousehold.all_objects.get(household=hh, role=ROLE_PRIMARY)
         except ObjectDoesNotExist:
             warnings.append([messages.ERROR, "Head of househould not found"])
 
-        alternate = IndividualRoleInHousehold.objects.filter(household=hh, role=ROLE_ALTERNATE).first()
+        alternate = IndividualRoleInHousehold.all_objects.filter(household=hh, role=ROLE_ALTERNATE).first()
         try:
-            head = hh.individuals.get(relationship=HEAD)
+            head = hh.individuals(manager="all_objects").get(relationship=HEAD)
         except ObjectDoesNotExist:
             warnings.append([messages.ERROR, "Head of househould not found"])
 
@@ -219,9 +229,9 @@ class HouseholdAdmin(
                 field = f"{gender}_age_group_{num_range}_count"
                 total_in_ranges += getattr(hh, field, 0) or 0
 
-        active_individuals = hh.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True))
-        ghosts_individuals = hh.individuals.filter(Q(duplicate=True) | Q(withdrawn=True))
-        all_individuals = hh.individuals.all()
+        active_individuals = hh.individuals(manager="all_objects").exclude(Q(duplicate=True) | Q(withdrawn=True))
+        ghosts_individuals = hh.individuals(manager="all_objects").filter(Q(duplicate=True) | Q(withdrawn=True))
+        all_individuals = hh.individuals(manager="all_objects").all()
         if hh.collect_individual_data:
             if active_individuals.count() != hh.size:
                 warnings.append([messages.WARNING, "HH size does not match"])
@@ -239,7 +249,7 @@ class HouseholdAdmin(
             )
 
         aaaa = active_individuals.values_list("unicef_id", flat=True)
-        bbb = Household.objects.filter(unicef_id__in=aaaa)
+        bbb = Household.all_objects.filter(unicef_id__in=aaaa)
         if bbb.count() > len(aaaa):
             warnings.append([messages.ERROR, "Unmarked duplicates found"])
 

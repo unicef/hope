@@ -10,6 +10,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class TestHandleRole(TestCase):
@@ -29,7 +30,12 @@ class TestHandleRole(TestCase):
         individual = IndividualFactory(household=household, program=program)
         household.head_of_household = individual
         household.save()
-        IndividualRoleInHousehold.objects.create(household=household, individual=individual, role=ROLE_ALTERNATE)
+        IndividualRoleInHousehold.objects.create(
+            household=household,
+            individual=individual,
+            role=ROLE_ALTERNATE,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
 
         self.assertEqual(
             IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count(), 1
