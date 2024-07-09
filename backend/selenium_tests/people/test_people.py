@@ -81,9 +81,9 @@ class TestSmokePeople:
     ) -> None:
         pagePeople.selectGlobalProgramFilter("Worker Program").click()
         pagePeople.getNavPeople().click()
+        unicef_id = pagePeople.getIndividualTableRow(0).text.split(" ")[0]
         pagePeople.getIndividualTableRow(0).click()
-        individual = Individual.objects.filter(unicef_id="IND-0").first()
-        pagePeople.screenshot("1")
+        individual = Individual.objects.filter(unicef_id=unicef_id).first()
         assert f"Individual ID: {individual.unicef_id}" in pagePeopleDetails.getPageHeaderTitle().text
         assert "Stacey Freeman" in pagePeopleDetails.getLabelFullName().text
         assert "Stacey" in pagePeopleDetails.getLabelGivenName().text
