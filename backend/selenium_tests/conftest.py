@@ -33,6 +33,8 @@ from page_object.payment_verification.payment_verification import PaymentVerific
 from page_object.payment_verification.payment_verification_details import (
     PaymentVerificationDetails,
 )
+from page_object.people.people import People
+from page_object.people.people_details import PeopleDetails
 from page_object.program_log.payment_log import ProgramLog
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
@@ -64,6 +66,8 @@ from hct_mis_api.apps.core.models import (
     DataCollectingType,
 )
 from hct_mis_api.apps.geo.models import Country
+from hct_mis_api.apps.household.fixtures import DocumentTypeFactory
+from hct_mis_api.apps.household.models import DocumentType
 
 
 def pytest_addoption(parser) -> None:  # type: ignore
@@ -254,6 +258,16 @@ def pageHouseholds(request: FixtureRequest, browser: Chrome) -> Households:
 
 
 @pytest.fixture
+def pagePeople(request: FixtureRequest, browser: Chrome) -> People:
+    yield People(browser)
+
+
+@pytest.fixture
+def pagePeopleDetails(request: FixtureRequest, browser: Chrome) -> PeopleDetails:
+    yield PeopleDetails(browser)
+
+
+@pytest.fixture
 def pageHouseholdsDetails(request: FixtureRequest, browser: Chrome) -> HouseholdsDetails:
     yield HouseholdsDetails(browser)
 
@@ -418,7 +432,7 @@ def create_super_user(business_area: BusinessArea) -> User:
     UserRole.objects.create(
         user=user,
         role=Role.objects.get(name="Role"),
-        business_area=BusinessArea.objects.get(name="Afghanistan"),
+        business_area=business_area,
     )
 
     for partner in Partner.objects.exclude(name="UNICEF"):
@@ -428,21 +442,50 @@ def create_super_user(business_area: BusinessArea) -> User:
     assert user.is_superuser
 
     dct_list = [
-        {"label": "Full", "code": "full", "description": "Full individual collected", "active": True},
-        {"label": "Size only", "code": "size_only", "description": "Size only collected", "active": True},
-        {"label": "WASH", "code": "wash", "description": "WASH", "active": True},
-        {"label": "Partial", "code": "partial", "description": "Partial individuals collected", "active": True},
+        {
+            "label": "Full",
+            "code": "full",
+            "description": "Full individual collected",
+            "active": True,
+            "type": DataCollectingType.Type.STANDARD,
+        },
+        {
+            "label": "Size only",
+            "code": "size_only",
+            "description": "Size only collected",
+            "active": True,
+            "type": DataCollectingType.Type.STANDARD,
+        },
+        {
+            "label": "WASH",
+            "code": "wash",
+            "description": "WASH",
+            "active": True,
+            "type": DataCollectingType.Type.STANDARD,
+        },
+        {
+            "label": "Partial",
+            "code": "partial",
+            "description": "Partial individuals collected",
+            "active": True,
+            "type": DataCollectingType.Type.STANDARD,
+        },
         {
             "label": "size/age/gender disaggregated",
             "code": "size_age_gender_disaggregated",
             "description": "No individual data",
             "active": True,
+            "type": DataCollectingType.Type.STANDARD,
         },
     ]
 
     for dct in dct_list:
         data_collecting_type = DataCollectingType.objects.create(
-            label=dct["label"], code=dct["code"], description=dct["description"], active=dct["active"]
+            label=dct["label"],
+            code=dct["code"],
+            description=dct["description"],
+            active=dct["active"],
+            type=dct["type"],
         )
         data_collecting_type.limit_to.add(business_area)
         data_collecting_type.save()
@@ -450,6 +493,23 @@ def create_super_user(business_area: BusinessArea) -> User:
         business_area=business_area, partner=partner
     )
     ba_partner_through.roles.set([role])
+
+    # add document types
+    doc_type_keys = (
+        "birth_certificate",
+        "drivers_license",
+        "electoral_card",
+        "tax_id",
+        "residence_permit_no",
+        "bank_statement",
+        "disability_certificate",
+        "other_id",
+        "foster_child",
+    )
+    for key in doc_type_keys:
+        DocumentTypeFactory(key=key)
+    DocumentType.objects.update_or_create(key="national_id", pk="227fcbc0-297a-4d85-8390-7de189278321")
+    DocumentType.objects.update_or_create(key="national_passport", pk="012a3ecb-0d6e-440f-9c68-83e5bf1ccddf")
     return user
 
 

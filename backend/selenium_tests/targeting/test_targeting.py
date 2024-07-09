@@ -18,7 +18,7 @@ from hct_mis_api.apps.household.models import HEARING, HOST, REFUGEE, SEEING, Ho
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db(transaction=True, databases=["registration_datahub", "default"])
 
 
 @pytest.fixture
@@ -98,7 +98,6 @@ def create_programs() -> None:
 
 @pytest.fixture
 def add_targeting() -> None:
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/documenttype.json")
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data-cypress.json")
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data-cypress.json")
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/targeting/fixtures/data-cypress.json")
