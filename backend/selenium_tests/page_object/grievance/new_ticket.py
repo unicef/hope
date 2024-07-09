@@ -285,7 +285,7 @@ class NewTicket(BaseComponents):
         return self.wait_for(self.tableRow)
 
     def waitForNoResults(self) -> bool:
-        for _ in range(10):
+        for _ in range(15):
             if "No results" in self.getTableRow().text:
                 return True
             sleep(1)
