@@ -102,6 +102,7 @@ class TestSmokeAccountabilitySurveys:
         pageAccountabilitySurveys.selectGlobalProgramFilter("Test Program").click()
         pageAccountabilitySurveys.getNavAccountability().click()
         pageAccountabilitySurveys.getNavSurveys().click()
+        hh_unicef_id = pageAccountabilitySurveys.getRows()[0].text
         pageAccountabilitySurveys.getRows()[0].click()
 
         assert "SUR-24-0005" in pageAccountabilitySurveysDetails.getPageHeaderTitle().text
@@ -128,4 +129,4 @@ class TestSmokeAccountabilitySurveys:
             "\n", " "
         )
         assert 1 == len(pageAccountabilitySurveys.getRows())
-        assert "HH-0" in pageAccountabilitySurveys.getRows()[0].text
+        assert hh_unicef_id in pageAccountabilitySurveys.getRows()[0].text
