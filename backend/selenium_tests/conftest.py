@@ -28,6 +28,7 @@ from page_object.managerial_console.managerial_console import ManagerialConsole
 from page_object.payment_module.new_payment_plan import NewPaymentPlan
 from page_object.payment_module.payment_module import PaymentModule
 from page_object.payment_module.payment_module_details import PaymentModuleDetails
+from page_object.payment_verification.payment_record import PaymentRecord
 from page_object.payment_verification.payment_verification import PaymentVerification
 from page_object.payment_verification.payment_verification_details import (
     PaymentVerificationDetails,
@@ -292,13 +293,18 @@ def pagePaymentModule(request: FixtureRequest, browser: Chrome) -> PaymentModule
 
 
 @pytest.fixture
-def pagePaymentVerification(request: FixtureRequest, browser: Chrome) -> PaymentVerification:
-    yield PaymentVerification(browser)
+def pagePaymentRecord(request: FixtureRequest, browser: Chrome) -> PaymentRecord:
+    yield PaymentRecord(browser)
 
 
 @pytest.fixture
 def pagePaymentVerificationDetails(request: FixtureRequest, browser: Chrome) -> PaymentVerificationDetails:
     yield PaymentVerificationDetails(browser)
+
+
+@pytest.fixture
+def pagePaymentVerification(request: FixtureRequest, browser: Chrome) -> PaymentVerification:
+    yield PaymentVerification(browser)
 
 
 @pytest.fixture
