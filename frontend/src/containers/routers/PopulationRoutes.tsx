@@ -28,13 +28,14 @@ export const PopulationRoutes = (): React.ReactElement => {
       element: <PopulationHouseholdPage />,
     },
     {
-      path: 'population/household-members',
-      element: <HouseholdMembersPage />,
-    },
-    {
       path: 'population/household-members/new-template',
       element: <NewTemplatePage />,
     },
+    {
+      path: 'population/household-members',
+      element: <HouseholdMembersPage />,
+    },
+
     {
       path: 'population/individuals',
       element: <PopulationIndividualsPage />,
