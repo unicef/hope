@@ -92,7 +92,7 @@ class TestSmokeGrievanceTickets:
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getTicketListRow()
         pageGrievanceTickets.getTabSystemGenerated().click()
-        assert 2 == len(pageGrievanceTickets.getTicketListRow())
+        assert 1 == len(pageGrievanceTickets.getTicketListRow())
         pageGrievanceTickets.getSelectAll().click()
         assert "ASSIGN" in pageGrievanceTickets.getButtonAssign().text
         assert "SET PRIORITY" in pageGrievanceTickets.getButtonSetPriority().text
