@@ -27,7 +27,7 @@ from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from selenium_tests.page_object.filters import Filters
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db(transaction=True, databases=["registration_datahub", "default"])
 
 
 @pytest.fixture
@@ -129,7 +129,6 @@ def create_programs() -> None:
 
 @pytest.fixture
 def add_targeting() -> None:
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/documenttype.json")
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data-cypress.json")
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data-cypress.json")
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/targeting/fixtures/data-cypress.json")
