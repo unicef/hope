@@ -14,12 +14,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='bankaccountinfo',
             name='rdi_merge_status',
-            field=models.CharField(choices=[('PENDING', 'Pending'), ('MERGED', 'Merged')], default='PENDING', max_length=10, null=True),
+            field=models.CharField(choices=[('PENDING', 'Pending'), ('MERGED', 'Merged')], default='MERGED', max_length=10, null=True),
         ),
         migrations.AddField(
             model_name='document',
             name='rdi_merge_status',
-            field=models.CharField(choices=[('PENDING', 'Pending'), ('MERGED', 'Merged')], default='PENDING', max_length=10, null=True),
+            field=models.CharField(choices=[('PENDING', 'Pending'), ('MERGED', 'Merged')], default='MERGED', max_length=10, null=True),
         ),
         migrations.AddField(
             model_name='household',
@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='household',
             name='rdi_merge_status',
-            field=models.CharField(choices=[('PENDING', 'Pending'), ('MERGED', 'Merged')], default='PENDING', max_length=10, null=True),
+            field=models.CharField(choices=[('PENDING', 'Pending'), ('MERGED', 'Merged')], default='MERGED', max_length=10, null=True),
         ),
         migrations.AddField(
             model_name='individual',
@@ -59,17 +59,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='individual',
             name='rdi_merge_status',
-            field=models.CharField(choices=[('PENDING', 'Pending'), ('MERGED', 'Merged')], default='PENDING', max_length=10, null=True),
+            field=models.CharField(choices=[('PENDING', 'Pending'), ('MERGED', 'Merged')], default='MERGED', max_length=10, null=True),
         ),
         migrations.AddField(
             model_name='individualidentity',
             name='rdi_merge_status',
-            field=models.CharField(choices=[('PENDING', 'Pending'), ('MERGED', 'Merged')], default='PENDING', max_length=10, null=True),
+            field=models.CharField(choices=[('PENDING', 'Pending'), ('MERGED', 'Merged')], default='MERGED', max_length=10, null=True),
         ),
         migrations.AddField(
             model_name='individualroleinhousehold',
             name='rdi_merge_status',
-            field=models.CharField(choices=[('PENDING', 'Pending'), ('MERGED', 'Merged')], default='PENDING', max_length=10, null=True),
+            field=models.CharField(choices=[('PENDING', 'Pending'), ('MERGED', 'Merged')], default='MERGED', max_length=10, null=True),
         ),
         migrations.AlterField(
             model_name='household',

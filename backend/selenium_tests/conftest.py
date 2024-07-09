@@ -17,6 +17,7 @@ from page_object.accountability.comunication_details import (
 from page_object.accountability.surveys import AccountabilitySurveys
 from page_object.accountability.surveys_details import AccountabilitySurveysDetails
 from page_object.admin_panel.admin_panel import AdminPanel
+from page_object.country_dashboard.country_dashboard import CountryDashboard
 from page_object.filters import Filters
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from page_object.grievance.details_grievance_page import GrievanceDetailsPage
@@ -33,12 +34,14 @@ from page_object.payment_verification.payment_verification import PaymentVerific
 from page_object.payment_verification.payment_verification_details import (
     PaymentVerificationDetails,
 )
+from page_object.program_log.payment_log import ProgramLog
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
 from page_object.programme_population.households import Households
 from page_object.programme_population.households_details import HouseholdsDetails
 from page_object.programme_population.individuals import Individuals
 from page_object.programme_population.individuals_details import IndividualsDetails
+from page_object.programme_users.programme_users import ProgrammeUsers
 from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
@@ -337,6 +340,11 @@ def pageAccountabilitySurveysDetails(request: FixtureRequest, browser: Chrome) -
 
 
 @pytest.fixture
+def pageProgrammeUsers(request: FixtureRequest, browser: Chrome) -> ProgrammeUsers:
+    yield ProgrammeUsers(browser)
+
+
+@pytest.fixture
 def pageAccountabilityCommunication(request: FixtureRequest, browser: Chrome) -> AccountabilityCommunication:
     yield AccountabilityCommunication(browser)
 
@@ -346,6 +354,16 @@ def pageAccountabilityCommunicationDetails(
     request: FixtureRequest, browser: Chrome
 ) -> AccountabilityCommunicationDetails:
     yield AccountabilityCommunicationDetails(browser)
+
+
+@pytest.fixture
+def pageProgramLog(request: FixtureRequest, browser: Chrome) -> ProgramLog:
+    yield ProgramLog(browser)
+
+
+@pytest.fixture
+def pageCountryDashboard(request: FixtureRequest, browser: Chrome) -> CountryDashboard:
+    yield CountryDashboard(browser)
 
 
 @pytest.fixture
