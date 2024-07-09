@@ -4,6 +4,9 @@ from hct_mis_api.api.endpoints.rdi.base import (  # noqa: F401
     PushLaxToRDIView,
     PushToRDIView,
 )
+from hct_mis_api.api.endpoints.rdi.business_area import (  # noqa: F401
+    BusinessAreaViewSet,
+)
 from hct_mis_api.api.endpoints.rdi.delegate_people import (  # noqa: F401
     DelegatePeopleRDIView,
 )

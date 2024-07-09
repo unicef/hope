@@ -35,6 +35,7 @@ urlpatterns = [
     ),
     path("lookups/role/", endpoints.lookups.Roles().as_view(), name="role-list"),
     path("lookups/sex/", endpoints.lookups.Sex().as_view(), name="sex-list"),
+    path("business_areas/", endpoints.rdi.BusinessAreaViewSet.as_view(), name="business-area-list"),
     path(
         "<slug:business_area>/",
         include(
