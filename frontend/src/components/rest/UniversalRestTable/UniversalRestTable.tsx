@@ -25,7 +25,6 @@ interface UniversalRestTableProps<T = any, K = any> {
   allowSort?: boolean;
   filterOrderBy?: string;
   onPageChanged?: (page: number) => void;
-  queryFn: QueryFunction<any, string[], never>;
   data: T[];
   error;
   isLoading: boolean;

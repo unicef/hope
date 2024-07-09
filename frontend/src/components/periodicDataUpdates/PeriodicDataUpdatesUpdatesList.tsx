@@ -8,31 +8,34 @@ import { useQuery } from '@tanstack/react-query';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { fetchPeriodicDataUpdateUpdates } from '@api/periodicDataUpdate';
+import { Missing } from '@components/core/Missing';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface Update {
-  importId: string;
-  templateId: string;
-  importDate: string;
-  importedBy: string;
+  id: string;
+  template: string;
+  created_at: string;
+  created_by: string;
   status: string;
 }
 
 const updatesHeadCells: HeadCell<Update>[] = [
-  { id: 'importId', numeric: false, disablePadding: false, label: 'Import ID' },
+  { id: 'id', numeric: false, disablePadding: false, label: 'Import ID' },
   {
-    id: 'templateId',
+    id: 'template',
     numeric: false,
     disablePadding: false,
     label: 'Template ID',
   },
   {
-    id: 'importDate',
+    id: 'created_at',
     numeric: false,
     disablePadding: false,
     label: 'Import Date',
   },
   {
-    id: 'importedBy',
+    id: 'created_by',
     numeric: false,
     disablePadding: false,
     label: 'Imported by',
@@ -43,29 +46,32 @@ const updatesHeadCells: HeadCell<Update>[] = [
 const renderUpdateRow = (row: Update): ReactElement => (
   <ClickableTableRow>
     <TableCell>
-      <BlackLink>{row.importId}</BlackLink>
+      <BlackLink>{row.id}</BlackLink>
     </TableCell>
     <TableCell>
-      <BlackLink>{row.templateId}</BlackLink>
+      <BlackLink>{row.template}</BlackLink>
     </TableCell>
     <TableCell>
-      <UniversalMoment>{row.importDate}</UniversalMoment>
+      <UniversalMoment>{row.created_at}</UniversalMoment>
     </TableCell>
-    <TableCell>{row.importedBy}</TableCell>
+    <TableCell>{row.created_by}</TableCell>
     <TableCell>
-      <StatusBox
+      <Missing />
+      {/* <StatusBox
         status={statusChoices[row.status]}
         statusToColor={periodicDataUpdatesUpdatesStatusToColor}
-      />
+      /> */}
     </TableCell>
   </ClickableTableRow>
 );
 
 export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
+  const { businessArea: businessAreaSlug, programId } = useBaseUrl();
+
   const initialQueryVariables = {
     page: 1,
     page_size: 10,
-    ordering: 'importDate',
+    ordering: 'created_at',
   };
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -75,16 +81,25 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['updates', queryVariables],
-    queryFn: () => fetchPeriodicDataUpdateUpdates(queryVariables), // Implement fetchPeriodicDataUpdateUpdates function based on your API
+    queryKey: [
+      'periodicDataUpdateUploads',
+      businessAreaSlug,
+      programId,
+      queryVariables,
+    ],
+    queryFn: () =>
+      fetchPeriodicDataUpdateUpdates(
+        businessAreaSlug,
+        programId,
+        queryVariables,
+      ),
   });
 
   return (
     <UniversalRestTable
-      isOnPaper
+      isOnPaper={false}
       renderRow={renderUpdateRow}
       headCells={updatesHeadCells}
-      queryFn={() => fetchPeriodicDataUpdateUpdates(queryVariables)}
       data={updatesData}
       isLoading={isLoading}
       error={error}

@@ -7,6 +7,7 @@ import UploadIcon from '@mui/icons-material/Upload';
 import { PeriodicDataUpdatesTemplatesList } from './PeriodicDataUpdatesTemplatesList';
 import { PeriodicDataUpdatesUpdatesList } from './PeriodicDataUpdatesUpdatesList';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { PeriodDataUpdatesUploadDialog } from './PeriodicDataUpdatesUploadDialog';
 
 export const PeriodicDataUpdates = (): React.ReactElement => {
   const [value, setValue] = useState(0);
@@ -49,15 +50,7 @@ export const PeriodicDataUpdates = (): React.ReactElement => {
             </Button>
           </Box>
           <Box>
-            <Button
-              variant="outlined"
-              color="primary"
-              component={Link}
-              to="/upload-data"
-              endIcon={<UploadIcon />}
-            >
-              Upload Data
-            </Button>
+            <PeriodDataUpdatesUploadDialog />
           </Box>
         </Box>
       }
@@ -69,8 +62,7 @@ export const PeriodicDataUpdates = (): React.ReactElement => {
       )}
       {value === 1 && (
         <Box>
-          {/* //TODO MS: uncomment this line */}
-          {/* <PeriodicDataUpdatesUpdatesList /> */}
+          <PeriodicDataUpdatesUpdatesList />
         </Box>
       )}
     </BaseSection>

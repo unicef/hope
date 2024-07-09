@@ -8,10 +8,7 @@ import styled from 'styled-components';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { ImportErrors } from '@containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  ImportPeriodicDataUpdatesMutation,
-  useImportPeriodicDataUpdatesMutation,
-} from '@generated/graphql';
+
 import { DropzoneField } from '@core/DropzoneField';
 import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from 'src/programContext';
@@ -36,40 +33,6 @@ export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
   const { isActiveProgram } = useProgramContext();
   const { t } = useTranslation();
 
-  const [mutate, { data: uploadData, loading: fileLoading, error }] =
-    useImportPeriodicDataUpdatesMutation();
-
-  const xlsxErrors: ImportPeriodicDataUpdatesMutation['importPeriodicDataUpdates']['errors'] =
-    get(uploadData, 'importPeriodicDataUpdates.errors');
-
-  const handleImport = async (): Promise<void> => {
-    //TODO MS: implement this function
-    if (fileToImport) {
-      try {
-        const { data, errors } = await mutate({
-          variables: {
-            paymentPlanId: paymentPlan.id,
-            file: fileToImport,
-          },
-          refetchQueries: () => [
-            {
-              query: PaymentPlanDocument,
-              variables: {
-                id: paymentPlan.id,
-              },
-            },
-          ],
-        });
-        if (!errors && !data?.importPeriodicDataUpdates.errors?.length) {
-          setOpenImport(false);
-          showMessage(t('Your import was successful!'));
-        }
-      } catch (e) {
-        e.graphQLErrors.map((x) => showMessage(x.message));
-      }
-    }
-  };
-
   return (
     <>
       <Box key="import">
@@ -79,7 +42,6 @@ export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
           data-cy="button-import"
           onClick={() => setOpenImport(true)}
           disabled={!isActiveProgram}
-          endIcon={<UploadIcon />}
         >
           {t('Upload Data')}
         </Button>
@@ -95,7 +57,8 @@ export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
           <>
             <DropzoneField
               dontShowFilename={false}
-              loading={fileLoading}
+              //TODO MS: uncomment
+              loading={false}
               onChange={(files) => {
                 if (files.length === 0) {
                   return;
@@ -112,18 +75,18 @@ export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
                 setFileToImport(file);
               }}
             />
-            {fileToImport &&
-            (error?.graphQLErrors?.length || xlsxErrors?.length) ? (
-              <Error>
-                <p>Errors</p>
-                {error
-                  ? error.graphQLErrors.map((x) => (
-                      <p key={x.message}>{x.message}</p>
-                    ))
-                  : null}
-                <ImportErrors errors={xlsxErrors} />
-              </Error>
-            ) : null}
+            {/* // {fileToImport &&
+            // (error?.graphQLErrors?.length || xlsxErrors?.length) ? (
+            //   <Error>
+            //     <p>Errors</p>
+            //     {error
+            //       ? error.graphQLErrors.map((x) => (
+            //           <p key={x.message}>{x.message}</p>
+            //         ))
+            //       : null}
+            //     <ImportErrors errors={xlsxErrors} />
+            //   </Error>
+            // ) : null} */}
           </>
           <DialogActions>
             <Button
@@ -136,12 +99,13 @@ export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
               CANCEL
             </Button>
             <LoadingButton
-              loading={fileLoading}
+              //TODO MS: uncomment
+              loading={false}
               disabled={!fileToImport}
               type="submit"
               color="primary"
               variant="contained"
-              onClick={() => handleImport()}
+              onClick={() => null}
               data-cy="button-import-submit"
             >
               {t('IMPORT')}

@@ -5,9 +5,13 @@ import UploadIcon from '@mui/icons-material/Upload';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { fetchPeriodicDataUpdateTemplates } from '@api/periodicDataUpdate';
+import {
+  downloadPeriodicDataUpdateTemplate,
+  exportPeriodicDataUpdateTemplate,
+  fetchPeriodicDataUpdateTemplates,
+} from '@api/periodicDataUpdate';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { PeriodicDataUpdatesTemplateDetailsDialog } from './PeriodicDataUpdatesTemplateDetailsDialog';
@@ -63,6 +67,65 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
     null,
   );
 
+  // Mutation for downloading a template
+  const { mutate: downloadTemplate } = useMutation(
+    async (templateId: string) => {
+      return downloadPeriodicDataUpdateTemplate(
+        businessAreaSlug,
+        programId,
+        templateId,
+      );
+    },
+    {
+      onSuccess: () => {
+        // Handle success, e.g., show a success message
+      },
+      onError: (error) => {
+        // Handle error, e.g., show an error message
+      },
+    },
+  );
+
+  // Mutation for exporting a template
+  const { mutate: exportTemplate } = useMutation(
+    async (templateId: string) => {
+      return exportPeriodicDataUpdateTemplate(
+        businessAreaSlug,
+        programId,
+        templateId,
+      );
+    },
+    {
+      onSuccess: () => {
+        // Handle success, e.g., show a success message
+      },
+      onError: (error) => {
+        // Handle error, e.g., show an error message
+      },
+    },
+  );
+  // Example of a direct download action, not using useQuery
+  const handleDownloadClick = async () => {
+    if (selectedTemplateId) {
+      await downloadPeriodicDataUpdateTemplate(
+        businessAreaSlug,
+        programId,
+        selectedTemplateId,
+      );
+    }
+  };
+
+  // Example of a direct export action, not using useQuery
+  const handleExportClick = async () => {
+    if (selectedTemplateId) {
+      await exportPeriodicDataUpdateTemplate(
+        businessAreaSlug,
+        programId,
+        selectedTemplateId,
+      );
+    }
+  };
+
   const handleDialogOpen = (template: Template) => {
     setSelectedTemplateId(template.id);
     setIsDialogOpen(true);
@@ -91,6 +154,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
           <Button
             variant="contained"
             color="primary"
+            onClick={handleDownloadClick}
             startIcon={<GetAppIcon />}
           >
             Download
@@ -99,6 +163,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
           <Button
             variant="contained"
             color="primary"
+            onClick={handleExportClick}
             startIcon={<UploadIcon />}
           >
             Export
@@ -145,9 +210,6 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
         isOnPaper={false}
         renderRow={renderTemplateRow}
         headCells={templatesHeadCells}
-        queryFn={() =>
-          fetchPeriodicDataUpdateTemplates(businessAreaSlug, programId)
-        }
         data={templatesData}
         isLoading={isLoading}
         error={error}
