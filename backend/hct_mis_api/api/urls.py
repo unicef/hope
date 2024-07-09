@@ -8,6 +8,7 @@ from drf_spectacular.views import (
 
 from hct_mis_api.api import endpoints
 from hct_mis_api.api.endpoints.base import ConstanceSettingsAPIView
+from hct_mis_api.api.endpoints.program.views import ProgramGlobalListView
 from hct_mis_api.api.router import APIRouter
 
 app_name = "api"
@@ -36,7 +37,7 @@ urlpatterns = [
     path("lookups/role/", endpoints.lookups.Roles().as_view(), name="role-list"),
     path("lookups/sex/", endpoints.lookups.Sex().as_view(), name="sex-list"),
     path("business_areas/", endpoints.core.BusinessAreaListView.as_view(), name="business-area-list"),
-    path("programs/", endpoints.program.ProgramGlobalListView.as_view(), name="program-global-list"),
+    path("programs/", ProgramGlobalListView.as_view(), name="program-global-list"),
     path(
         "<slug:business_area>/",
         include(
