@@ -20,6 +20,6 @@ class BusinessAreaSerializer(serializers.ModelSerializer):
         )
 
 
-class BusinessAreaViewSet(HOPEAPIView, ListAPIView):
+class BusinessAreaListView(HOPEAPIView, ListAPIView):
     serializer_class = BusinessAreaSerializer
     queryset = BusinessArea.objects.all()
