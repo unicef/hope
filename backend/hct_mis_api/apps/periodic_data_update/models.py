@@ -40,20 +40,16 @@ class PeriodicDataUpdateTemplate(TimeStampedModel):
     Example of rounds_data:
         [
             {
-                "Vaccination Records Update": {
+                "field": "Vaccination Records Update",
                 "round": 2,
                 "round_name": "February vaccination",
                 "number_of_records": 100,
-                }
-
             },
             {
-                "Health Records Update": {
+                "field": "Health Records Update",
                 "round": 4,
                 "round_name": "April",
                 "number_of_records": 58,
-                }
-
             },
         ]
     """

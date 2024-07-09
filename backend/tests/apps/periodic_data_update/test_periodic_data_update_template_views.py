@@ -43,7 +43,7 @@ class TestPeriodicDataUpdateTemplateViews:
             ([Permissions.PDU_VIEW_LIST_AND_DETAILS], [Permissions.PDU_VIEW_LIST_AND_DETAILS], status.HTTP_200_OK),
         ],
     )
-    def test_list_payment_plans_permissions(
+    def test_list_periodic_data_update_templates_permission(
         self,
         permissions: list,
         partner_permissions: list,
@@ -71,3 +71,11 @@ class TestPeriodicDataUpdateTemplateViews:
         assert response.status_code == expected_status
 
     # Nala: test also access to program
+
+    def test_list_periodic_data_update_templates(self, api_client: Callable, afghanistan: BusinessAreaFactory,
+                                                 create_user_role_with_permissions: Callable,
+                                                 update_partner_access_to_program: Callable,
+                                                 id_to_base64: Callable) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        response = self.client.get(self.url_list)
+        assert response.status_code == status.HTTP_200_OK
