@@ -70,7 +70,7 @@ export const menuItems: MenuItem[] = [
       {
         name: 'Households',
         href: '/population/household',
-        selectedRegexp: /^\/population\/household.*$/,
+        selectedRegexp: /^\/population\/household(?!-members).*$/,
         icon: <PeopleAltRoundedIcon />,
         permissionModule: 'HOUSEHOLDS',
         scopes: [SCOPE_PROGRAM],
@@ -79,6 +79,14 @@ export const menuItems: MenuItem[] = [
         name: 'Individuals',
         href: '/population/individuals',
         selectedRegexp: /^\/population\/individuals.*$/,
+        icon: <FaceIcon />,
+        permissionModule: 'INDIVIDUALS',
+        scopes: [SCOPE_PROGRAM],
+      },
+      {
+        name: 'Household Members',
+        href: '/population/household-members',
+        selectedRegexp: /^\/population\/household-members.*$/,
         icon: <FaceIcon />,
         permissionModule: 'INDIVIDUALS',
         scopes: [SCOPE_PROGRAM],

@@ -27,12 +27,10 @@ export const fakeApolloAllImportedHouseholds = [
             {
               cursor: 'YXJyYXljb25uZWN0aW9uOjA=',
               node: {
-                id:
-                  'SW1wb3J0ZWRIb3VzZWhvbGROb2RlOjNlYjE5Y2RiLTBjZTYtNDgwZS1iZTI5LTczYjY0ZWI1ZjI3Mg==',
+                id: 'SW1wb3J0ZWRIb3VzZWhvbGROb2RlOjNlYjE5Y2RiLTBjZTYtNDgwZS1iZTI5LTczYjY0ZWI1ZjI3Mg==',
                 importId: null,
                 headOfHousehold: {
-                  id:
-                    'SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTo0NTM0MzY3MS1hOTFiLTQyYTUtOTNmZC00MmUwMGQxZmE2NDg=',
+                  id: 'SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTo0NTM0MzY3MS1hOTFiLTQyYTUtOTNmZC00MmUwMGQxZmE2NDg=',
                   fullName: 'Noel Wyatt',
                   __typename: 'ImportedIndividualNode',
                 },
@@ -44,8 +42,7 @@ export const fakeApolloAllImportedHouseholds = [
                 flexFields: { RCSI_h_f: 14 },
                 deviceid: '',
                 start: null,
-                koboAssetId: '',
-                rowId: null,
+                detailId: null,
                 firstRegistrationDate: '2021-01-11T00:00:00',
                 lastRegistrationDate: '2021-01-11T00:00:00',
                 hasDuplicates: false,

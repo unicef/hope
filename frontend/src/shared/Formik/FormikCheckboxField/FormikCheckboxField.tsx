@@ -53,6 +53,7 @@ export function Check({
           />
         }
         label={displayValue ? '' : label}
+        style={{ whiteSpace: 'nowrap' }}
       />
       {displayValue && (
         <Grid item xs={9}>

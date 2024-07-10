@@ -21,22 +21,24 @@ const BoxContainer = styled(Box)`
 `;
 
 interface BaseSectionProps {
-  children?: ReactElement;
+  children?: ReactElement | ReactElement[];
   buttons?: ReactElement;
   title: string | ReactElement;
   description?: string;
   p?: number;
   noPaper?: boolean;
+  tabs?: ReactElement;
 }
 
-export function BaseSection({
+export const BaseSection = ({
   children = <></>,
   buttons,
   title,
   description,
   p = 3,
   noPaper = false,
-}: BaseSectionProps): React.ReactElement {
+  tabs = null,
+}: BaseSectionProps): React.ReactElement => {
   const { t } = useTranslation();
   const Container = noPaper ? BoxContainer : PaperContainer;
 
@@ -44,15 +46,18 @@ export function BaseSection({
     <Container>
       <Box p={p}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          {typeof title === 'string' ? (
-            <Typography data-cy="title" variant="h6">
-              {t(title)}
-            </Typography>
-          ) : (
-            title
-          )}
+          <Box>
+            {typeof title === 'string' ? (
+              <Typography data-cy="title" variant="h6">
+                {t(title)}
+              </Typography>
+            ) : (
+              title
+            )}
+          </Box>
           {buttons}
         </Box>
+        {tabs && <Box mb={2}>{tabs}</Box>}
         {description && (
           <Box mb={2}>
             <GreyText data-cy="description">{description}</GreyText>
@@ -62,4 +67,4 @@ export function BaseSection({
       </Box>
     </Container>
   );
-}
+};

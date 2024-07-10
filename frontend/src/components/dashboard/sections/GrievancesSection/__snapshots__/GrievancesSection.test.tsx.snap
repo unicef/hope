@@ -23,6 +23,7 @@ exports[`components/dashboard/GrievancesSection should render 1`] = `
         </div>
         <span
           class="MuiTypography-root MuiTypography-caption css-1sn4lm3-MuiTypography-root"
+          data-cy="total-number-of-grievances"
         >
           3
         </span>
@@ -37,6 +38,7 @@ exports[`components/dashboard/GrievancesSection should render 1`] = `
         </div>
         <span
           class="MuiTypography-root MuiTypography-caption css-1sn4lm3-MuiTypography-root"
+          data-cy="total-number-of-feedback"
         >
           0
         </span>

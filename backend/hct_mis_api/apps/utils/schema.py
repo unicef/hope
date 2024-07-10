@@ -66,6 +66,17 @@ class TableTotalCashTransferred(graphene.ObjectType):
     data = graphene.List(_TableTotalCashTransferredDataNode)
 
 
+class _TableTotalCashTransferredDataForPeopleNode(graphene.ObjectType):
+    id = graphene.String()
+    admin2 = graphene.String()
+    total_cash_transferred = graphene.Float()
+    total_people = graphene.Int()
+
+
+class TableTotalCashTransferredForPeople(graphene.ObjectType):
+    data = graphene.List(_TableTotalCashTransferredDataForPeopleNode)
+
+
 class FlexFieldsScalar(graphene.Scalar):
     """
     Allows use of a JSON String for input / output from the GraphQL schema.

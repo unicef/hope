@@ -24,7 +24,7 @@ export function TotalNumberOfHouseholdsReachedSection({
     <DashboardCard color="#00A9FB">
       <CardTitle>{t('TOTAL NUMBER OF HOUSEHOLDS REACHED')}</CardTitle>
       <Grid container justifyContent="space-between" alignItems="center">
-        <Grid item>
+        <Grid item data-cy="total-number-of-households-reached">
           <CardAmountSmaller>{formatNumber(data?.total)}</CardAmountSmaller>
         </Grid>
         <Grid item>
