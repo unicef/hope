@@ -31,6 +31,9 @@ class PeriodicDataUpdateTemplateDetailSerializer(serializers.ModelSerializer):
 
 
 class PeriodicDataUpdateUploadListSerializer(serializers.ModelSerializer):
+    status = serializers.CharField(source="get_status_display")
+    created_by = serializers.CharField(source="created_by.get_full_name", default="")
+
     class Meta:
         model = PeriodicDataUpdateUpload
         fields = (

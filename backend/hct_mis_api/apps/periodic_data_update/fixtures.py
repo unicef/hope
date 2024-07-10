@@ -43,3 +43,6 @@ class PeriodicDataUpdateTemplateFactory(DjangoModelFactory):
 class PeriodicDataUpdateUploadFactory(DjangoModelFactory):
     class Meta:
         model = PeriodicDataUpdateUpload
+    created_by = factory.SubFactory(UserFactory)
+    status = factory.fuzzy.FuzzyChoice(PeriodicDataUpdateTemplate.Status, getter=lambda c: c[0])
+    template = factory.SubFactory(PeriodicDataUpdateTemplateFactory)
