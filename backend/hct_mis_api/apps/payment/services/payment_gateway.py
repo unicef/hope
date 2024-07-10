@@ -22,7 +22,11 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     PaymentPlanSplit,
 )
-from hct_mis_api.apps.payment.utils import get_quantity_in_usd
+from hct_mis_api.apps.payment.utils import (
+    get_payment_delivered_quantity_status_and_value,
+    get_quantity_in_usd,
+    to_decimal,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -152,6 +156,34 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
     fsp_code: str
     message: Optional[str] = None
 
+    def get_hope_status(self, entitlement_quantity: Decimal) -> str:
+        def get_transferred_status_based_on_delivery_amount() -> str:
+            try:
+                _hope_status, _quantity = get_payment_delivered_quantity_status_and_value(
+                    self.payout_amount, entitlement_quantity
+                )
+            except Exception:
+                raise PaymentGatewayAPI.PaymentGatewayAPIException(
+                    f"Invalid delivered_quantity {self.payout_amount} for Payment {self.remote_id}"
+                )
+            return _hope_status
+
+        mapping = {
+            "PENDING": Payment.STATUS_SENT_TO_PG,
+            "TRANSFERRED_TO_FSP": Payment.STATUS_SENT_TO_FSP,
+            "TRANSFERRED_TO_BENEFICIARY": lambda: get_transferred_status_based_on_delivery_amount(),
+            "REFUND": Payment.STATUS_NOT_DISTRIBUTED,
+            "PURGED": Payment.STATUS_NOT_DISTRIBUTED,
+            "ERROR": Payment.STATUS_ERROR,
+            "CANCELLED": Payment.STATUS_MANUALLY_CANCELLED,
+        }
+
+        hope_status = mapping.get(self.status)
+        if not hope_status:
+            raise PaymentGatewayAPI.PaymentGatewayAPIException(f"Invalid Payment status: {self.status}")
+
+        return hope_status() if callable(hope_status) else hope_status
+
 
 @dataclasses.dataclass()
 class PaymentInstructionData(FlexibleArgumentsDataclassMixin):
@@ -178,7 +210,7 @@ class FspData(FlexibleArgumentsDataclassMixin):
 class AddRecordsResponseData(FlexibleArgumentsDataclassMixin):
     remote_id: str  # payment instruction id
     records: Optional[dict] = None  # {"record_code": "remote_id"}
-    errors: Optional[dict] = None  # {index: "error_message"}
+    errors: Optional[dict] = None  # {"index": "error_message"}
 
 
 class PaymentGatewayAPI:
@@ -271,6 +303,11 @@ class PaymentGatewayAPI:
 
 class PaymentGatewayService:
     ADD_RECORDS_CHUNK_SIZE = 500
+    PENDING_UPDATE_PAYMENT_STATUSES = [
+        Payment.STATUS_PENDING,
+        Payment.STATUS_SENT_TO_PG,
+        Payment.STATUS_SENT_TO_FSP,
+    ]
 
     def __init__(self) -> None:
         self.api = PaymentGatewayAPI()
@@ -308,7 +345,7 @@ class PaymentGatewayService:
     ) -> Optional[str]:
         if obj.financial_service_provider.is_payment_gateway:
             response_status = self.api.change_payment_instruction_status(new_status, obj.id)
-            assert new_status.value == response_status, f"{new_status} != {response_status}"
+            assert new_status.value == response_status, f"{new_status.value} != {response_status}"
             return response_status
         return None
 
@@ -317,7 +354,12 @@ class PaymentGatewayService:
             for _idx, _payment in enumerate(_payments):
                 _payment.status = Payment.STATUS_ERROR
                 _payment.reason_for_unsuccessful_payment = _response.errors.get(str(_idx), "")
-                _payment.save(update_fields=["status", "reason_for_unsuccessful_payment"])
+            Payment.objects.bulk_update(_payments, ["status", "reason_for_unsuccessful_payment"])
+
+        def _handle_success(_response: AddRecordsResponseData, _payments: List[Payment]) -> None:
+            for _payment in _payments:
+                _payment.status = Payment.STATUS_SENT_TO_PG
+            Payment.objects.bulk_update(_payments, ["status"])
 
         def _add_records(
             _payments: List[Payment], _container: Union[DeliveryMechanismPerPaymentPlan, PaymentPlanSplit]
@@ -330,6 +372,8 @@ class PaymentGatewayService:
                 if response.errors:
                     add_records_error = True
                     _handle_errors(response, payments_chunk)
+                else:
+                    _handle_success(response, payments_chunk)
 
             if not add_records_error:
                 _container.sent_to_payment_gateway = True
@@ -386,7 +430,7 @@ class PaymentGatewayService:
                 )
                 return
 
-            _payment.status = matching_pg_payment.hope_status
+            _payment.status = matching_pg_payment.get_hope_status(_payment.entitlement_quantity)
             _payment.status_date = now()
             _payment.fsp_auth_code = matching_pg_payment.auth_code
             update_fields = ["status", "status_date", "fsp_auth_code"]
@@ -403,7 +447,7 @@ class PaymentGatewayService:
             ]:
                 update_fields.extend(["delivered_quantity", "delivered_quantity_usd"])
                 try:
-                    _payment.delivered_quantity = delivered_quantity
+                    _payment.delivered_quantity = to_decimal(delivered_quantity)
                     _payment.delivered_quantity_usd = get_quantity_in_usd(
                         amount=Decimal(delivered_quantity),
                         currency=_payment_plan.currency,
@@ -430,7 +474,9 @@ class PaymentGatewayService:
             if not payment_plan.is_reconciled:
                 if payment_plan.splits.exists():
                     for split in payment_plan.splits.filter(sent_to_payment_gateway=True):
-                        pending_payments = split.payments.filter(status=Payment.STATUS_PENDING).order_by("unicef_id")
+                        pending_payments = split.payments.filter(
+                            status__in=self.PENDING_UPDATE_PAYMENT_STATUSES
+                        ).order_by("unicef_id")
                         if pending_payments.exists():
                             pg_payment_records = self.api.get_records_for_payment_instruction(split.id)
                             for payment in pending_payments:
@@ -443,7 +489,7 @@ class PaymentGatewayService:
                     ):
                         pending_payments = payment_plan.eligible_payments.filter(
                             financial_service_provider=delivery_mechanism.financial_service_provider,
-                            status=Payment.STATUS_PENDING,
+                            status__in=self.PENDING_UPDATE_PAYMENT_STATUSES,
                         ).order_by("unicef_id")
                         if pending_payments.exists():
                             pg_payment_records = self.api.get_records_for_payment_instruction(delivery_mechanism.id)

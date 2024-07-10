@@ -303,6 +303,30 @@ snapshots['TestHouseholdQuery::test_household_query_single_different_program_in_
     ]
 }
 
+snapshots['TestHouseholdQuery::test_household_query_single_import_id_0 1'] = {
+    'data': {
+        'household': {
+            'importId': 'HH-123123'
+        }
+    }
+}
+
+snapshots['TestHouseholdQuery::test_household_query_single_import_id_1_detail_id 1'] = {
+    'data': {
+        'household': {
+            'importId': 'HH-123123 (Detail id test1)'
+        }
+    }
+}
+
+snapshots['TestHouseholdQuery::test_household_query_single_import_id_2_enumerator_rec_id 1'] = {
+    'data': {
+        'household': {
+            'importId': 'HH-123123 (Enumerator ID 123)'
+        }
+    }
+}
+
 snapshots['TestHouseholdQuery::test_query_households_by_national_id_no_filter_0_with_permission 1'] = {
     'data': {
         'allHouseholds': {

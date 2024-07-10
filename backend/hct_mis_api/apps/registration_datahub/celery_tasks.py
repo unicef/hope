@@ -9,13 +9,12 @@ from django.utils import timezone
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.models import Document
+from hct_mis_api.apps.household.models import Document, Household
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.exceptions import (
     AlreadyRunningException,
     WrongStatusException,
 )
-from hct_mis_api.apps.registration_datahub.models import ImportedHousehold
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
 )
@@ -33,16 +32,16 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def handle_rdi_exception(datahub_rdi_id: str, e: BaseException) -> None:
+def handle_rdi_exception(rdi_id: str, e: BaseException) -> None:
     try:
         from sentry_sdk import capture_exception
 
         err = capture_exception(e)
-    except Exception:
-        err = "N/A"
-
+    except Exception as e:  # pragma: no cover
+        err = "N/A"  # pragma: no cover
+        logger.exception(e)  # pragma: no cover
     RegistrationDataImport.objects.filter(
-        datahub_id=datahub_rdi_id,
+        id=rdi_id,
     ).update(status=RegistrationDataImport.IMPORT_ERROR, sentry_id=err, error_message=str(e))
 
 
@@ -85,7 +84,7 @@ def registration_xlsx_import_task(
                 raise AlreadyRunningException(
                     f"Task with key registration_xlsx_import_task {registration_data_import_id} is already running"
                 )
-            rdi = RegistrationDataImport.objects.get(datahub_id=registration_data_import_id)
+            rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
             set_sentry_business_area_tag(rdi.business_area.name)
             if rdi.status not in (RegistrationDataImport.IMPORT_SCHEDULED, RegistrationDataImport.IMPORT_ERROR):
                 raise WrongStatusException("Rdi is not in status IMPORT_SCHEDULED while trying to import")
@@ -114,14 +113,6 @@ def registration_xlsx_import_task(
         logger.info(str(e))
         return True
     except Exception as e:
-        from hct_mis_api.apps.registration_datahub.models import (
-            RegistrationDataImportDatahub,
-        )
-
-        RegistrationDataImportDatahub.objects.filter(
-            id=registration_data_import_id,
-        ).update(import_done=RegistrationDataImportDatahub.DONE)
-
         handle_rdi_exception(registration_data_import_id, e)
         raise self.retry(exc=e)
 
@@ -142,7 +133,7 @@ def registration_program_population_import_task(
             if not locked:
                 raise AlreadyRunningException(f"Task with key {cache_key} is already running")
 
-            rdi = RegistrationDataImport.objects.get(datahub_id=registration_data_import_id)
+            rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
             set_sentry_business_area_tag(rdi.business_area.name)
             if rdi.status not in (RegistrationDataImport.IMPORT_SCHEDULED, RegistrationDataImport.IMPORT_ERROR):
                 raise WrongStatusException("Rdi is not in status IMPORT_SCHEDULED while trying to import")
@@ -159,15 +150,10 @@ def registration_program_population_import_task(
     except (WrongStatusException, AlreadyRunningException) as e:
         logger.info(str(e))
         return True
-    except Exception as e:
+    except RegistrationDataImport.DoesNotExist:
+        raise
+    except Exception as e:  # pragma: no cover
         logger.warning(e)
-        from hct_mis_api.apps.registration_datahub.models import (
-            RegistrationDataImportDatahub,
-        )
-
-        RegistrationDataImportDatahub.objects.filter(
-            id=registration_data_import_id,
-        ).update(import_done=RegistrationDataImportDatahub.DONE)
 
         handle_rdi_exception(registration_data_import_id, e)
         raise self.retry(exc=e)
@@ -187,24 +173,18 @@ def registration_kobo_import_task(
 
         set_sentry_business_area_tag(BusinessArea.objects.get(pk=business_area_id).name)
 
-        RdiKoboCreateTask().execute(
+        RdiKoboCreateTask(
             registration_data_import_id=registration_data_import_id,
-            import_data_id=import_data_id,
             business_area_id=business_area_id,
+        ).execute(
+            import_data_id=import_data_id,
             program_id=str(program_id),
         )
-    except Exception as e:
-        logger.warning(e)
-        from hct_mis_api.apps.registration_datahub.models import (
-            RegistrationDataImportDatahub,
-        )
+    except Exception as e:  # pragma: no cover
+        logger.warning(e)  # pragma: no cover
 
-        RegistrationDataImportDatahub.objects.filter(
-            id=registration_data_import_id,
-        ).update(import_done=RegistrationDataImportDatahub.DONE)
-
-        handle_rdi_exception(registration_data_import_id, e)
-        raise self.retry(exc=e)
+        handle_rdi_exception(registration_data_import_id, e)  # pragma: no cover
+        raise self.retry(exc=e)  # pragma: no cover
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
@@ -213,31 +193,27 @@ def registration_kobo_import_task(
 def registration_kobo_import_hourly_task(self: Any) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
-        from hct_mis_api.apps.registration_datahub.models import (
-            RegistrationDataImportDatahub,
-        )
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
 
-        not_started_rdi = RegistrationDataImportDatahub.objects.filter(
-            import_done=RegistrationDataImportDatahub.NOT_STARTED
-        ).first()
+        not_started_rdi = RegistrationDataImport.objects.filter(status=RegistrationDataImport.LOADING).first()
 
         if not_started_rdi is None:
-            return
-        business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area_slug)
-        program_id = RegistrationDataImport.objects.get(id=not_started_rdi.hct_id).program.id
+            return  # pragma: no cover
+        business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area.slug)
+        program_id = RegistrationDataImport.objects.get(id=not_started_rdi.id).program.id
         set_sentry_business_area_tag(business_area.name)
 
-        RdiKoboCreateTask().execute(
+        RdiKoboCreateTask(
             registration_data_import_id=str(not_started_rdi.id),
-            import_data_id=str(not_started_rdi.import_data.id),
             business_area_id=str(business_area.id),
+        ).execute(
+            import_data_id=str(not_started_rdi.import_data.id),
             program_id=str(program_id),
         )
-    except Exception as e:
-        raise self.retry(exc=e)
+    except Exception as e:  # pragma: no cover
+        raise self.retry(exc=e)  # pragma: no cover
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
@@ -246,21 +222,16 @@ def registration_kobo_import_hourly_task(self: Any) -> None:
 def registration_xlsx_import_hourly_task(self: Any) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
-        from hct_mis_api.apps.registration_datahub.models import (
-            RegistrationDataImportDatahub,
-        )
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
         )
 
-        not_started_rdi = RegistrationDataImportDatahub.objects.filter(
-            import_done=RegistrationDataImportDatahub.NOT_STARTED
-        ).first()
+        not_started_rdi = RegistrationDataImport.objects.filter(status=RegistrationDataImport.LOADING).first()
         if not_started_rdi is None:
-            return
+            return  # pragma: no cover
 
-        business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area_slug)
-        program_id = RegistrationDataImport.objects.get(id=not_started_rdi.hct_id).program.id
+        business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area.slug)
+        program_id = not_started_rdi.program.id
         set_sentry_business_area_tag(business_area.name)
 
         RdiXlsxCreateTask().execute(
@@ -269,8 +240,8 @@ def registration_xlsx_import_hourly_task(self: Any) -> None:
             business_area_id=str(business_area.id),
             program_id=str(program_id),
         )
-    except Exception as e:
-        raise self.retry(exc=e)
+    except Exception as e:  # pragma: no cover
+        raise self.retry(exc=e)  # pragma: no cover
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
@@ -282,7 +253,7 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
     )
     with locked_cache(key=f"merge_registration_data_import_task-{registration_data_import_id}") as locked:
         if not locked:
-            return True
+            return True  # pragma: no cover
         try:
             from hct_mis_api.apps.registration_data.models import RegistrationDataImport
             from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import (
@@ -317,20 +288,16 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
 @sentry_tags
 def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
     try:
-        from hct_mis_api.apps.registration_datahub.models import (
-            RegistrationDataImportDatahub,
-        )
         from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
             DeduplicateTask,
         )
 
-        rdi_obj = RegistrationDataImportDatahub.objects.get(id=registration_data_import_id)
-        program_id = RegistrationDataImport.objects.get(id=rdi_obj.hct_id).program.id
-        set_sentry_business_area_tag(rdi_obj.business_area_slug)
-
+        rdi_obj = RegistrationDataImport.objects.get(id=registration_data_import_id)
+        program_id = rdi_obj.program.id
+        set_sentry_business_area_tag(rdi_obj.business_area.slug)
         with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
-            DeduplicateTask(rdi_obj.business_area_slug, program_id).deduplicate_imported_individuals(
-                registration_data_import_datahub=rdi_obj
+            DeduplicateTask(rdi_obj.business_area.slug, program_id).deduplicate_pending_individuals(
+                registration_data_import=rdi_obj
             )
     except Exception as e:
         handle_rdi_exception(registration_data_import_id, e)
@@ -341,7 +308,7 @@ def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
 @log_start_and_end
 @sentry_tags
 def pull_kobo_submissions_task(self: Any, import_data_id: "UUID") -> Dict:
-    from hct_mis_api.apps.registration_datahub.models import KoboImportData
+    from hct_mis_api.apps.registration_data.models import KoboImportData
 
     kobo_import_data = KoboImportData.objects.get(id=import_data_id)
     set_sentry_business_area_tag(kobo_import_data.business_area_slug)
@@ -351,7 +318,7 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID") -> Dict:
 
     try:
         return PullKoboSubmissions().execute(kobo_import_data)
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         KoboImportData.objects.filter(
             id=kobo_import_data.id,
         ).update(status=KoboImportData.STATUS_ERROR, error=str(e))
@@ -363,7 +330,7 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID") -> Dict:
 @sentry_tags
 def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> Dict:
     from hct_mis_api.apps.program.models import Program
-    from hct_mis_api.apps.registration_datahub.models import ImportData
+    from hct_mis_api.apps.registration_data.models import ImportData
     from hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import import (
         ValidateXlsxImport,
     )
@@ -374,7 +341,7 @@ def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UU
     set_sentry_business_area_tag(import_data.business_area_slug)
     try:
         return ValidateXlsxImport().execute(import_data, is_social_worker_program)
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         ImportData.objects.filter(
             id=import_data.id,
         ).update(status=ImportData.STATUS_ERROR, error=str(e))
@@ -464,7 +431,7 @@ def check_rdi_import_periodic_task(self: Any, business_area_slug: Optional[str] 
 @sentry_tags
 @log_start_and_end
 def remove_old_rdi_links_task(page_count: int = 100) -> None:
-    """This task removes linked RDI Datahub objects for households and related objects (individuals, documents etc.)"""
+    """This task removes linked RDI objects for households and related objects (individuals, documents etc.)"""
 
     from datetime import timedelta
 
@@ -473,7 +440,7 @@ def remove_old_rdi_links_task(page_count: int = 100) -> None:
     days = config.REMOVE_RDI_LINKS_TIMEDELTA
     try:
         # Get datahub_ids older than 3 months which have status other than MERGED
-        unmerged_rdi_datahub_ids = list(
+        unmerged_rdi_ids = list(
             RegistrationDataImport.objects.filter(
                 created_at__lte=timezone.now() - timedelta(days=days),
                 status__in=[
@@ -482,22 +449,20 @@ def remove_old_rdi_links_task(page_count: int = 100) -> None:
                     RegistrationDataImport.IMPORT_ERROR,
                     RegistrationDataImport.MERGE_ERROR,
                 ],
-            ).values_list("datahub_id", flat=True)
+            ).values_list("id", flat=True)
         )
 
-        i, count = 0, len(unmerged_rdi_datahub_ids) // page_count
+        i, count = 0, len(unmerged_rdi_ids) // page_count
         while i <= count:
             logger.info(f"Page {i}/{count} processing...")
-            rdi_datahub_ids_page = unmerged_rdi_datahub_ids[i * page_count : (i + 1) * page_count]
+            rdi_ids_page = unmerged_rdi_ids[i * page_count : (i + 1) * page_count]
 
-            ImportedHousehold.objects.filter(registration_data_import_id__in=rdi_datahub_ids_page).delete()
+            Household.all_objects.filter(registration_data_import_id__in=rdi_ids_page).delete()
 
-            RegistrationDataImport.objects.filter(datahub_id__in=rdi_datahub_ids_page).update(erased=True)
+            RegistrationDataImport.objects.filter(id__in=rdi_ids_page).update(erased=True)
             i += 1
 
-        logger.info(
-            f"Data links for datahubs: {''.join([str(_id) for _id in unmerged_rdi_datahub_ids])} removed successfully"
-        )
-    except Exception:
+        logger.info(f"Data links for RDI(s): {''.join([str(_id) for _id in unmerged_rdi_ids])} removed successfully")
+    except Exception:  # pragma: no cover
         logger.error("Removing old RDI objects failed")
         raise

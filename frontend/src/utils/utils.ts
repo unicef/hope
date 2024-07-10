@@ -137,6 +137,8 @@ export function paymentStatusToColor(
 ): string {
   switch (status) {
     case PaymentStatus.Pending:
+    case PaymentStatus.SentToPaymentGateway:
+    case PaymentStatus.SentToFsp:
       return theme.hctPalette.orange;
     case PaymentStatus.DistributionSuccessful:
     case PaymentStatus.TransactionSuccessful:
@@ -166,6 +168,12 @@ export function paymentStatusDisplayMap(status: string): string {
     case PaymentRecordStatus.ForceFailed:
     case PaymentStatus.ForceFailed:
       return 'FORCE FAILED';
+    case PaymentStatus.ManuallyCancelled:
+      return 'MANUALLY CANCELLED';
+    case PaymentStatus.SentToPaymentGateway:
+      return 'SENT TO PAYMENT GATEWAY';
+    case PaymentStatus.SentToFsp:
+      return 'SENT TO FSP';
     default:
       return 'UNSUCCESSFUL';
   }
@@ -534,7 +542,7 @@ export function getPercentage(
 }
 
 export function formatNumber(value: number): string {
-  if (!value && value !== 0) return '';
+  if (!value && value !== 0) return '0';
   return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
 }
 

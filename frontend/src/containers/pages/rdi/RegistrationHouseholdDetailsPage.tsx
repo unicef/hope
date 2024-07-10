@@ -58,7 +58,7 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
     {
       title: importedHousehold.registrationDataImport.name,
       to: `/${baseUrl}/registration-data-import/${btoa(
-        `RegistrationDataImportNode:${importedHousehold.registrationDataImport.hctId}`,
+        `RegistrationDataImportNode:${importedHousehold.registrationDataImport.id}`,
       )}`,
     },
   ];
@@ -79,7 +79,7 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
           household={importedHousehold}
         />
         <RegistrationDetails
-          hctId={importedHousehold.registrationDataImport.hctId}
+          hctId={importedHousehold.registrationDataImport.id}
           registrationDate={importedHousehold.firstRegistrationDate}
           deviceid={importedHousehold.deviceid}
           start={importedHousehold.start}

@@ -4,7 +4,74 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
+
+snapshots['TestImportedHouseholdQuery::test_imported_household_query_0_detail_id 1'] = {
+    'data': {
+        'importedHousehold': {
+            'country': 'Afghanistan',
+            'importId': 'HH-123 (Detail id test123)',
+            'individuals': {
+                'edges': [
+                    {
+                        'node': {
+                            'documents': {
+                                'edges': [
+                                    {
+                                        'node': {
+                                            'country': 'Afghanistan',
+                                            'photo': None
+                                        }
+                                    }
+                                ]
+                            },
+                            'importId': 'IND-123 (Detail ID test123)',
+                            'phoneNo': '+48123123213',
+                            'phoneNoAlternative': '+48123123213',
+                            'phoneNoAlternativeValid': True,
+                            'phoneNoValid': True,
+                            'preferredLanguage': 'en'
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}
+
+snapshots['TestImportedHouseholdQuery::test_imported_household_query_1_enumerator_rec_id 1'] = {
+    'data': {
+        'importedHousehold': {
+            'country': 'Afghanistan',
+            'importId': 'HH-123 (Enumerator ID 123)',
+            'individuals': {
+                'edges': [
+                    {
+                        'node': {
+                            'documents': {
+                                'edges': [
+                                    {
+                                        'node': {
+                                            'country': 'Afghanistan',
+                                            'photo': None
+                                        }
+                                    }
+                                ]
+                            },
+                            'importId': 'IND-123 (Detail ID test123)',
+                            'phoneNo': '+48123123213',
+                            'phoneNoAlternative': '+48123123213',
+                            'phoneNoAlternativeValid': True,
+                            'phoneNoValid': True,
+                            'preferredLanguage': 'en'
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}
 
 snapshots['TestImportedHouseholdQuery::test_imported_household_query_all_0_with_permission 1'] = {
     'data': {
