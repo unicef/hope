@@ -67,27 +67,46 @@ def close_needs_adjudication_old_ticket(ticket_details: TicketNeedsAdjudicationD
 
 
 def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationDetails, user: AbstractUser) -> None:
-    individuals = (ticket_details.golden_records_individual, *ticket_details.possible_duplicates.all())
+    # TODO: add more validation here
+    # A user can resolve (close) a ticket when all active individuals are flagged
+    # A user can resolve (close) a ticket when at least one individual is flagged as distinct or one of the individuals is inactive (withdrawn or duplicate).
+    # A user can flag all active individuals as duplicates but won’t be able to resolve (close) the ticket.
+    unique_individuals = ticket_details.selected_distinct.all()
+    duplicate_individuals = (ticket_details.golden_records_individual, *ticket_details.possible_duplicates.all())
 
-    if selected_individuals := ticket_details.selected_individuals.all():
-        unique_individuals = [individual for individual in individuals if individual not in selected_individuals]
-        for individual_to_remove in selected_individuals:
+    distinct_individuals = (ticket_details.golden_records_individual, *ticket_details.selected_distinct.all())
+
+    if duplicate_individuals := ticket_details.selected_individuals.all():
+        # unique_individuals = [individual for individual in duplicate_individuals if individual not in duplicate_individuals]
+        for individual_to_remove in duplicate_individuals:
             mark_as_duplicate_individual_and_reassign_roles(
                 ticket_details, individual_to_remove, user, unique_individuals[0]
             )
-        _clear_deduplication_individuals_fields(unique_individuals)
+        # _clear_deduplication_individuals_fields(unique_individuals)
     else:
-        _clear_deduplication_individuals_fields(individuals)
+        _clear_deduplication_individuals_fields(duplicate_individuals)
+
+    if distinct_individuals := ticket_details.selected_distinct.all():
+        for individual_to_distinct in distinct_individuals:
+            mark_as_duplicate_distinct_and_reassign_roles(
+                ticket_details, individual_to_distinct, user, unique_individuals[0]
+            )
+        _clear_deduplication_individuals_fields(distinct_individuals)
 
 
 def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, user: AbstractUser) -> None:
+    # TODO: check this one
     ticket_details = grievance_ticket.ticket_details
     if not ticket_details:
         return
 
     if ticket_details.is_multiple_duplicates_version:
-        selected_individuals = ticket_details.selected_individuals.all()
-        traverse_sibling_tickets(grievance_ticket, selected_individuals)
+        # selected_individuals - will use in future maybe 'selected_duplicates'
+
+        selected_duplicates = ticket_details.selected_individuals.all()
+        # selected_distinct = ticket_details.selected_distinct.all()
+        traverse_sibling_tickets(grievance_ticket, selected_duplicates)
+        # traverse_sibling_tickets(grievance_ticket, selected_distinct)  # TODO: have to check it
         close_needs_adjudication_new_ticket(ticket_details, user)
     else:
         close_needs_adjudication_old_ticket(ticket_details, user)
@@ -218,6 +237,30 @@ def mark_as_duplicate_individual_and_reassign_roles(
     user: AbstractUser,
     unique_individual: Individual,
 ) -> None:
+    if ticket_details.is_multiple_duplicates_version:
+        household = reassign_roles_on_disable_individual_service(
+            individual_to_remove,
+            ticket_details.role_reassign_data,
+            user,
+            ticket_details.ticket.programs.all(),
+            "new_individual",
+        )
+    else:
+        household = reassign_roles_on_disable_individual_service(
+            individual_to_remove, ticket_details.role_reassign_data, user, ticket_details.ticket.programs.all()
+        )
+    mark_as_duplicate_individual(
+        individual_to_remove, unique_individual, household, user, ticket_details.ticket.programs.all()
+    )
+
+
+def mark_as_duplicate_distinct_and_reassign_roles(
+    ticket_details: TicketNeedsAdjudicationDetails,
+    individual_to_remove: Individual,
+    user: AbstractUser,
+    unique_individual: Individual,
+) -> None:
+    # TODO: HAVE to update this logic
     if ticket_details.is_multiple_duplicates_version:
         household = reassign_roles_on_disable_individual_service(
             individual_to_remove,

@@ -39,12 +39,12 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
     """
     APPROVE_NEEDS_ADJUDICATION_MUTATION = """
     mutation ApproveNeedsAdjudicationTicket(
-    $grievanceTicketId: ID!, $selectedIndividualId: ID, $selectedIndividualIds: [ID]
+    $grievanceTicketId: ID!, $selectedIndividualId: ID, $duplicateIndividualIds: [ID]
     ) {
       approveNeedsAdjudication(
       grievanceTicketId: $grievanceTicketId,
       selectedIndividualId: $selectedIndividualId,
-      selectedIndividualIds: $selectedIndividualIds
+      duplicateIndividualIds: $duplicateIndividualIds
       ) {
         grievanceTicket {
           id
@@ -59,12 +59,12 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
     """
     APPROVE_MULTIPLE_NEEDS_ADJUDICATION_MUTATION = """
     mutation ApproveNeedsAdjudicationTicket(
-    $grievanceTicketId: ID!, $selectedIndividualId: ID, $selectedIndividualIds: [ID]
+    $grievanceTicketId: ID!, $selectedIndividualId: ID, $duplicateIndividualIds: [ID]
     ) {
       approveNeedsAdjudication(
       grievanceTicketId: $grievanceTicketId,
       selectedIndividualId: $selectedIndividualId,
-      selectedIndividualIds: $selectedIndividualIds
+      duplicateIndividualIds: $duplicateIndividualIds
       ) {
         grievanceTicket {
           id
@@ -297,7 +297,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             context={"user": self.user},
             variables={
                 "grievanceTicketId": grievance_ticket_id,
-                "selectedIndividualIds": [
+                "duplicateIndividualIds": [
                     self.id_to_base64(self.individuals[0].id, "IndividualNode"),
                     self.id_to_base64(self.individuals[1].id, "IndividualNode"),
                 ],

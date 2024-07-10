@@ -347,7 +347,26 @@ export const grievanceTicketDetailed = gql`
           role
         }
       }
-      selectedIndividuals {
+      selectedDuplicates {
+        ...individualDetailed
+        household {
+          ...householdDetailed
+        }
+        householdsAndRoles {
+          individual {
+            id
+            unicefId
+            fullName
+          }
+          household {
+            id
+            unicefId
+          }
+          id
+          role
+        }
+      }
+      selectedDistinct {
         ...individualDetailed
         household {
           ...householdDetailed
