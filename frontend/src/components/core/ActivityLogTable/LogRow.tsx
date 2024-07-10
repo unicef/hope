@@ -26,6 +26,7 @@ const StyledIconButton = styled(IconButton)<{ expanded: boolean }>`
       transform: rotate(180deg);
     `}
 `;
+
 interface LogRowProps {
   logEntry: LogEntryNode;
 }
@@ -48,20 +49,22 @@ export const LogRow = ({ logEntry }: LogRowProps): ReactElement => {
   const { length } = keys;
   if (length === 1) {
     return (
-      <Row role="checkbox">
-        <Cell weight={headCells[0].weight}>
+      <Row role="checkbox" data-cy={`log-row-${logEntry.id}`}>
+        <Cell weight={headCells[0].weight} data-cy="timestamp-cell">
           {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
         </Cell>
-        <Cell weight={headCells[1].weight}>
+        <Cell weight={headCells[1].weight} data-cy="user-cell">
           {logEntry.user
             ? `${logEntry.user.firstName} ${logEntry.user.lastName}`
             : null}
         </Cell>
-        <Cell weight={headCells[2].weight}>{keys[0]}</Cell>
-        <Cell weight={headCells[3].weight}>
+        <Cell weight={headCells[2].weight} data-cy="change-key-cell">
+          {keys[0]}
+        </Cell>
+        <Cell weight={headCells[3].weight} data-cy="from-value-cell">
           {formatted(changes[keys[0]].from)}
         </Cell>
-        <Cell weight={headCells[4].weight}>
+        <Cell weight={headCells[4].weight} data-cy="to-value-cell">
           {formatted(changes[keys[0]].to)}
         </Cell>
         <ButtonPlaceHolder />
@@ -70,38 +73,47 @@ export const LogRow = ({ logEntry }: LogRowProps): ReactElement => {
   }
   return (
     <>
-      <Row onClick={() => setExpanded(!expanded)} hover>
-        <Cell weight={headCells[0].weight}>
+      <Row
+        onClick={() => setExpanded(!expanded)}
+        hover
+        data-cy={`log-row-${logEntry.id}`}
+      >
+        <Cell weight={headCells[0].weight} data-cy="timestamp-cell">
           {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
         </Cell>
-        <Cell weight={headCells[1].weight}>
+        <Cell weight={headCells[1].weight} data-cy="user-cell">
           {logEntry.user
             ? `${logEntry.user.firstName} ${logEntry.user.lastName}`
             : null}
         </Cell>
-        <Cell weight={headCells[2].weight}>Multiple</Cell>
+        <Cell weight={headCells[2].weight} data-cy="change-type-cell">
+          Multiple
+        </Cell>
         <Cell weight={headCells[3].weight} />
         <Cell weight={headCells[4].weight} />
         <ButtonContainer>
           <StyledIconButton
             expanded={expanded}
             onClick={() => setExpanded(!expanded)}
+            data-cy="expand-collapse-button"
           >
             <ExpandMoreIcon />
           </StyledIconButton>
         </ButtonContainer>
       </Row>
 
-      <CollapseContainer in={expanded}>
+      <CollapseContainer in={expanded} data-cy="collapse-container">
         {keys.map((key) => (
-          <Row key={`${logEntry.id}${key}`}>
+          <Row key={`${logEntry.id}${key}`} data-cy={`detail-row-${key}`}>
             <Cell weight={headCells[0].weight} />
             <Cell weight={headCells[1].weight} />
-            <Cell weight={headCells[2].weight}>{key}</Cell>
-            <Cell weight={headCells[3].weight}>
+            <Cell weight={headCells[2].weight} data-cy="detail-key-cell">
+              {key}
+            </Cell>
+            <Cell weight={headCells[3].weight} data-cy="detail-from-value-cell">
               {formatted(changes[key].from)}
             </Cell>
-            <Cell weight={headCells[4].weight}>
+            <Cell weight={headCells[4].weight} data-cy="detail-to-value-cell">
               {formatted(changes[key].to)}
             </Cell>
             <ButtonPlaceHolder />

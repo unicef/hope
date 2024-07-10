@@ -2,7 +2,7 @@ import datetime
 import io
 import logging
 from decimal import Decimal
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 from django.db.models import QuerySet
 from django.utils import timezone
@@ -243,7 +243,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         self.logger.info("Finished import payment list")
 
     def _get_delivered_quantity_status_and_value(
-        self, delivered_quantity: float, entitlement_quantity: Decimal, payment_id: str
+        self, delivered_quantity: Union[int, float, str], entitlement_quantity: Decimal, payment_id: str
     ) -> Tuple[str, Optional[Decimal]]:
         try:
             status, quantity = get_payment_delivered_quantity_status_and_value(delivered_quantity, entitlement_quantity)

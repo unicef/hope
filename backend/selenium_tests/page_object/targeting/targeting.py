@@ -1,6 +1,7 @@
 from time import sleep
 
 from page_object.base_components import BaseComponents
+from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
 from hct_mis_api.apps.core.utils import encode_id_base64
@@ -22,9 +23,23 @@ class Targeting(BaseComponents):
     rows = 'tr[role="checkbox"]'
     createUserFilters = 'div[data-cy="menu-item-filters-text"]'
     createUseIDs = 'div[data-cy="menu-item-ids-text"]'
+    buttonInactiveCreateNew = 'a[data-cy="button-target-population-create-new"]'
+    tooltip = 'div[role="tooltip"]'
+    statusContainer = 'div[data-cy="status-container"]'
+    loadingRows = 'tr[data-cy="table-row"]'
+    buttonTargetPopulation = 'button[data-cy="button-target-population-info"]'
+    buttonApply = 'button[data-cy="button-filters-apply"]'
+    buttonClear = 'button[data-cy="button-filters-clear"]'
+    tabFieldList = 'button[data-cy="tab-field-list"]'
+    tabTargetingDiagram = 'button[data-cy="tab-targeting-diagram"]'
+    name = 'th[data-cy="name"]'
+    status = 'th[data-cy="status"]'
+    numOfHouseholds = 'th[data-cy="num-of-households"]'
+    dateCreated = 'th[data-cy="date-created"]'
+    lastEdited = 'th[data-cy="last-edited"]'
+    createdBy = 'th[data-cy="created-by"]'
 
     # Texts
-
     textTitlePage = "Targeting"
     textCreateNew = "Create new"
     textTabTitle = "Target Populations"
@@ -35,8 +50,6 @@ class Targeting(BaseComponents):
     textTabDateCreated = "Date Created"
     textTabLastEdited = "Last Edited"
     textTabCreatedBy = "Created by"
-    buttonApply = 'button[data-cy="button-filters-apply"]'
-    buttonClear = 'button[data-cy="button-filters-clear"]'
 
     def navigate_to_page(self, business_area_slug: str, program_id: str) -> None:
         self.driver.get(self.get_page_url(business_area_slug, program_id))
@@ -49,6 +62,9 @@ class Targeting(BaseComponents):
 
     def getTitlePage(self) -> WebElement:
         return self.wait_for(self.titlePage)
+
+    def waitForTextTitlePage(self, text: str) -> bool:
+        return self.wait_for_text(text, self.titlePage)
 
     def getSearchFilter(self) -> WebElement:
         return self.wait_for(self.searchFilter)
@@ -97,8 +113,61 @@ class Targeting(BaseComponents):
             sleep(1)
             return self.get_elements(self.rows)[number]
 
+    def countTargetPopulations(self, number: int) -> None:
+        for _ in range(5):
+            if len(self.getTargetPopulationsRows()) == number:
+                break
+        else:
+            raise TimeoutError(f"{len(self.getTargetPopulationsRows())} target populations instead of {number}")
+
     def getCreateUseFilters(self) -> WebElement:
         return self.wait_for(self.createUserFilters)
 
     def getCreateUseIDs(self) -> WebElement:
         return self.wait_for(self.createUseIDs)
+
+    def getButtonInactiveCreateNew(self) -> WebElement:
+        return self.wait_for(self.buttonInactiveCreateNew)
+
+    def geTooltip(self) -> WebElement:
+        return self.wait_for(self.tooltip)
+
+    def getStatusContainer(self) -> WebElement:
+        return self.wait_for(self.statusContainer)
+
+    def getTabFieldList(self) -> WebElement:
+        return self.wait_for(self.tabFieldList)
+
+    def getTabTargetingDiagram(self) -> WebElement:
+        return self.wait_for(self.tabTargetingDiagram)
+
+    def getButtonTargetPopulation(self) -> WebElement:
+        return self.wait_for(self.buttonTargetPopulation)
+
+    def getLoadingRows(self) -> WebElement:
+        return self.wait_for(self.loadingRows)
+
+    def getColumnName(self) -> WebElement:
+        return self.wait_for(self.name).find_element(By.CSS_SELECTOR, self.tabColumnLabel)
+
+    def getColumnStatus(self) -> WebElement:
+        return self.wait_for(self.status).find_element(By.CSS_SELECTOR, self.tabColumnLabel)
+
+    def getColumnNumOfHouseholds(self) -> WebElement:
+        return self.wait_for(self.numOfHouseholds).find_element(By.CSS_SELECTOR, self.tabColumnLabel)
+
+    def getColumnDateCreated(self) -> WebElement:
+        return self.wait_for(self.dateCreated).find_element(By.CSS_SELECTOR, self.tabColumnLabel)
+
+    def getColumnLastEdited(self) -> WebElement:
+        return self.wait_for(self.lastEdited).find_element(By.CSS_SELECTOR, self.tabColumnLabel)
+
+    def getColumnCreatedBy(self) -> WebElement:
+        return self.wait_for(self.createdBy).find_element(By.CSS_SELECTOR, self.tabColumnLabel)
+
+    def disappearLoadingRows(self) -> WebElement:
+        try:
+            self.getLoadingRows()
+        except BaseException:
+            self.getStatusContainer()
+        return self.wait_for_disappear(self.loadingRows)
