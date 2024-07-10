@@ -2,7 +2,7 @@ import dataclasses
 import logging
 import os
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, TypedDict, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from django.db.models import Q
 from django.utils.timezone import now
