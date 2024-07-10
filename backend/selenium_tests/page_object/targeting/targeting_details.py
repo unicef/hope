@@ -1,3 +1,5 @@
+from time import sleep
+
 from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -8,20 +10,24 @@ class TargetingDetails(BaseComponents):
     status = 'div[data-cy="target-population-status"]'
     criteria_container = 'div[data-cy="criteria-container"]'
     lock_button = 'button[data-cy="button-target-population-lock"]'
+    lockPopupButton = 'button[data-cy="button-target-population-modal-lock"]'
     household_table_cell = "table tr:nth-of-type({}) td:nth-of-type({})"
     people_table_rows = '[data-cy="target-population-people-row"]'
     household_table_rows = '[data-cy="target-population-household-row"]'
-
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
     buttonTargetPopulationDuplicate = 'button[data-cy="button-target-population-duplicate"]'
+    inputName = 'input[data-cy="input-name"]'
     buttonDelete = 'button[data-cy="button-delete"]'
     buttonEdit = 'a[data-cy="button-edit"]'
+    buttonIconEdit = 'button[data-cy="button-edit"]'
     buttonRebuild = 'button[data-cy="button-rebuild"]'
     buttonTargetPopulationLock = 'button[data-cy="button-target-population-lock"]'
     detailsTitle = 'div[data-cy="details-title"]'
     detailsGrid = 'div[data-cy="details-grid"]'
     labelStatus = 'div[data-cy="label-Status"]'
+    buttonMarkReady = 'button[data-cy="button-target-population-send-to-hope"]'
+    buttonPopupMarkReady = 'button[data-cy="button-target-population-modal-send-to-hope"]'
     targetPopulationStatus = 'div[data-cy="target-population-status"]'
     labelizedFieldContainerCreatedBy = 'div[data-cy="labelized-field-container-created-by"]'
     labelCreatedBy = 'div[data-cy="label-created by"]'
@@ -35,6 +41,11 @@ class TargetingDetails(BaseComponents):
     labelSendDate = 'div[data-cy="label-Send date"]'
     criteriaContainer = 'div[data-cy="criteria-container"]'
     checkboxExcludeIfActiveAdjudicationTicket = 'span[data-cy="checkbox-exclude-if-active-adjudication-ticket"]'
+    checkboxExcludePeopleIfActiveAdjudicationTicket = (
+        'span[data-cy="checkbox-exclude-people-if-active-adjudication-ticket"]'
+    )
+    checkboxExcludeIfOnSanctionList = 'span[data-cy="checkbox-exclude-if-on-sanction-list"]'
+    iconSelected = '[data-testid="CheckBoxIcon"]'
     labelFemaleChildren = 'div[data-cy="label-Female Children"]'
     labelFemaleAdults = 'div[data-cy="label-Female Adults"]'
     labelMaleChildren = 'div[data-cy="label-Male Children"]'
@@ -44,6 +55,10 @@ class TargetingDetails(BaseComponents):
     tableTitle = 'h6[data-cy="table-title"]'
     tableLabel = 'span[data-cy="table-label"]'
     tablePagination = 'div[data-cy="table-pagination"]'
+    statusContainer = 'div[data-cy="status-container"]'
+    householdSizeFrom = 'input[data-cy="input-filters[0].value.from"]'
+    householdSizeTo = 'input[data-cy="input-filters[0].value.to"]'
+    dialogBox = 'div[role="dialog"]'
 
     # Texts
     # Elements
@@ -51,14 +66,26 @@ class TargetingDetails(BaseComponents):
     def getPageHeaderTitle(self) -> WebElement:
         return self.wait_for(self.pageHeaderTitle)
 
+    def waitForTextTitlePage(self, text: str) -> bool:
+        return self.wait_for_text(text, self.titlePage)
+
     def getButtonTargetPopulationDuplicate(self) -> WebElement:
         return self.wait_for(self.buttonTargetPopulationDuplicate)
+
+    def getInputName(self) -> WebElement:
+        return self.wait_for(self.inputName)
+
+    def disappearInputName(self) -> WebElement:
+        return self.wait_for_disappear(self.inputName)
 
     def getButtonDelete(self) -> WebElement:
         return self.wait_for(self.buttonDelete)
 
     def getButtonEdit(self) -> WebElement:
         return self.wait_for(self.buttonEdit)
+
+    def getButtonIconEdit(self) -> WebElement:
+        return self.wait_for(self.buttonIconEdit)
 
     def getButtonRebuild(self) -> WebElement:
         return self.wait_for(self.buttonRebuild)
@@ -75,8 +102,22 @@ class TargetingDetails(BaseComponents):
     def getLabelStatus(self) -> WebElement:
         return self.wait_for(self.labelStatus)
 
+    def waitForLabelStatus(self, status: str) -> WebElement:
+        for _ in range(10):
+            sleep(1)
+            if status.upper() in self.getLabelStatus().text:
+                return self.wait_for(self.labelStatus)
+        else:
+            raise Exception(f"Status: {status.capitalize()} does not occur.")
+
     def getTargetPopulationStatus(self) -> WebElement:
         return self.wait_for(self.targetPopulationStatus)
+
+    def getButtonMarkReady(self) -> WebElement:
+        return self.wait_for(self.buttonMarkReady)
+
+    def getButtonPopupMarkReady(self) -> WebElement:
+        return self.wait_for(self.buttonPopupMarkReady)
 
     def getLabelizedFieldContainerCreatedBy(self) -> WebElement:
         return self.wait_for(self.labelizedFieldContainerCreatedBy)
@@ -112,7 +153,16 @@ class TargetingDetails(BaseComponents):
         return self.wait_for(self.criteriaContainer)
 
     def getCheckboxExcludeIfActiveAdjudicationTicket(self) -> WebElement:
-        return self.wait_for(self.checkboxExcludeIfActiveAdjudicationTicket)
+        return self.get(self.checkboxExcludeIfActiveAdjudicationTicket)
+
+    def getCheckboxExcludePeopleIfActiveAdjudicationTicket(self) -> WebElement:
+        return self.get(self.checkboxExcludePeopleIfActiveAdjudicationTicket)
+
+    def getCheckboxExcludeIfOnSanctionList(self) -> WebElement:
+        return self.wait_for(self.checkboxExcludeIfOnSanctionList)
+
+    def getIconSelected(self) -> WebElement:
+        return self.wait_for(self.iconSelected)
 
     def getLabelFemaleChildren(self) -> WebElement:
         return self.wait_for(self.labelFemaleChildren)
@@ -150,6 +200,9 @@ class TargetingDetails(BaseComponents):
     def getLockButton(self) -> WebElement:
         return self.wait_for(self.lock_button)
 
+    def getLockPopupButton(self) -> WebElement:
+        return self.wait_for(self.lockPopupButton)
+
     def getHouseholdTableCell(self, row: int, column: int) -> WebElement:
         return self.wait_for(self.household_table_cell.format(row, column))
 
@@ -158,3 +211,18 @@ class TargetingDetails(BaseComponents):
 
     def getHouseholdTableRows(self) -> list[WebElement]:
         return self.get_elements(self.household_table_rows)
+
+    def getStatusContainer(self) -> WebElement:
+        return self.wait_for(self.statusContainer)
+
+    def disappearStatusContainer(self) -> bool:
+        return self.wait_for_disappear(self.statusContainer)
+
+    def getHouseholdSizeFrom(self) -> WebElement:
+        return self.wait_for(self.householdSizeFrom)
+
+    def getHouseholdSizeTo(self) -> WebElement:
+        return self.wait_for(self.householdSizeTo)
+
+    def getDialogBox(self) -> WebElement:
+        return self.wait_for(self.dialogBox)
