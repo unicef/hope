@@ -38,7 +38,6 @@ from hct_mis_api.apps.utils.models import (
 if TYPE_CHECKING:
     from hct_mis_api.apps.household.models import Household, Individual
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -798,24 +797,22 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     possible_duplicates = models.ManyToManyField("household.Individual", related_name="ticket_duplicates")
     # list of unique Individuals
     selected_distinct = models.ManyToManyField("household.Individual", related_name="selected_distinct")
-    # list of duplicates Individuals
-    selected_duplicates = models.ManyToManyField("household.Individual", related_name="selected_duplicates")
-    # TODO: add script to migrate all data to new field selected_individuals >>> selected_duplicates
+    # list of duplicate Individuals
+    # maybe rename to 'selected_duplicates'
+    selected_individuals = models.ManyToManyField("household.Individual", related_name="ticket_selected")
     role_reassign_data = JSONField(default=dict)
     extra_data = JSONField(default=dict)
     score_min = models.FloatField(default=0.0)
     score_max = models.FloatField(default=0.0)
     is_cross_area = models.BooleanField(default=False)
 
-    ### deprecated and will remove soon ###
+    # deprecated and will remove soon
     selected_individual = models.ForeignKey(
         "household.Individual", null=True, related_name="+", on_delete=models.CASCADE
     )  # this field will be deprecated
     possible_duplicate = models.ForeignKey(
         "household.Individual", related_name="+", on_delete=models.CASCADE, null=True
     )  # this field will be deprecated
-    # this field will be deprecated, use new 'selected_duplicates'
-    selected_individuals = models.ManyToManyField("household.Individual", related_name="ticket_selected")
 
     @property
     def has_duplicated_document(self) -> bool:

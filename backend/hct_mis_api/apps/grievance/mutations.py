@@ -60,7 +60,8 @@ from hct_mis_api.apps.grievance.utils import (
     create_grievance_documents,
     delete_grievance_documents,
     get_individual,
-    update_grievance_documents, validate_individual_for_need_adjudication,
+    update_grievance_documents,
+    validate_individual_for_need_adjudication,
 )
 from hct_mis_api.apps.grievance.validators import (
     DataChangeValidator,
@@ -1166,8 +1167,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
 
     class Arguments:
         grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
-        selected_individual_id = graphene.Argument(graphene.ID, required=False)  # TODO: remove in future
-        selected_individual_ids = graphene.List(graphene.ID, required=False)  # TODO: remove in future
+        selected_individual_id = graphene.Argument(graphene.ID, required=False)
         duplicate_individual_ids = graphene.List(graphene.ID, required=False)
         distinct_individual_ids = graphene.List(graphene.ID, required=False)
         version = BigInt(required=False)
@@ -1191,10 +1191,16 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
             Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
         )
 
-        duplicate_individual_ids = kwargs.get("duplicate_individual_ids", None)
-        distinct_individual_ids = kwargs.get("distinct_individual_ids", None)
+        duplicate_individual_ids = kwargs.get("duplicate_individual_ids", [])
+        distinct_individual_ids = kwargs.get("distinct_individual_ids", [])
+        selected_individual_id = kwargs.get("selected_individual_id")
 
-        if duplicate_individual_ids or distinct_individual_ids and grievance_ticket.status != GrievanceTicket.STATUS_FOR_APPROVAL:
+        if selected_individual_id and duplicate_individual_ids:
+            log_and_raise("Only one option for duplicate individuals is available")
+
+        if (
+            duplicate_individual_ids or distinct_individual_ids or selected_individual_id
+        ) and grievance_ticket.status != GrievanceTicket.STATUS_FOR_APPROVAL:
             raise ValidationError("A user can not flag individuals when a ticket is not in the 'For Approval' status")
 
         user = info.context.user
@@ -1202,25 +1208,30 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
 
         ticket_details: TicketNeedsAdjudicationDetails = grievance_ticket.ticket_details
 
+        if selected_individual_id:
+            selected_individual = get_individual(selected_individual_id)
+            validate_individual_for_need_adjudication(partner, selected_individual, ticket_details)
+
+            ticket_details.selected_individual = selected_individual
+            ticket_details.role_reassign_data = {}
+
         if distinct_individual_ids:
             distinct_individuals = [get_individual(_id) for _id in distinct_individual_ids]
 
             for individual in distinct_individuals:
-                validate_individual_for_need_adjudication(partner, individual, ticket_details, "distinct")
+                validate_individual_for_need_adjudication(partner, individual, ticket_details)
 
-            print("===>>> Possible Distinct list: ", distinct_individual_ids)
             ticket_details.selected_distinct.remove(*ticket_details.selected_distinct.all())
-            ticket_details.selected_distinct.add(*distinct_individual_ids)
-            # ticket_details.role_reassign_data = {}  # TODO: have to check this field
+            ticket_details.selected_distinct.add(*distinct_individuals)
 
         if duplicate_individual_ids:
             duplicate_individuals = [get_individual(_id) for _id in duplicate_individual_ids]
 
             for individual in duplicate_individuals:
-                validate_individual_for_need_adjudication(partner, individual, ticket_details, "duplicate")
+                validate_individual_for_need_adjudication(partner, individual, ticket_details)
 
-            ticket_details.selected_duplicates.remove(*ticket_details.selected_duplicates.all())
-            ticket_details.selected_duplicates.add(*duplicate_individual_ids)
+            ticket_details.selected_individuals.remove(*ticket_details.selected_individuals.all())
+            ticket_details.selected_individuals.add(*duplicate_individuals)
 
         ticket_details.save()
         grievance_ticket.refresh_from_db()

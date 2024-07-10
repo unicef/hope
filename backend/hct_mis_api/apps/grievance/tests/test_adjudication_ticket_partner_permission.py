@@ -22,12 +22,12 @@ APPROVE_NEEDS_ADJUDICATION_MUTATION = """
     mutation ApproveNeedsAdjudication(
       $grievanceTicketId: ID!
       $selectedIndividualId: ID
-      $selectedIndividualIds: [ID]
+      $duplicateIndividualIds: [ID]
     ) {
       approveNeedsAdjudication(
         grievanceTicketId: $grievanceTicketId
         selectedIndividualId: $selectedIndividualId
-        selectedIndividualIds: $selectedIndividualIds
+        duplicateIndividualIds: $duplicateIndividualIds
       ) {
         grievanceTicket {
           description
@@ -128,7 +128,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
             },
             variables={
                 "grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"),
-                "selectedIndividualIds": [
+                "duplicateIndividualIds": [
                     encode_id_base64(self.individuals_1[0].id, "IndividualNode")  # guy from doshi admin2
                 ],
             },
@@ -197,7 +197,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
             },
             variables={
                 "grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"),
-                "selectedIndividualIds": [
+                "duplicateIndividualIds": [
                     encode_id_base64(self.individuals_1[0].id, "IndividualNode")  # guy from doshi admin2
                 ],
             },
@@ -321,7 +321,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
             },
             variables={
                 "grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"),
-                "selectedIndividualIds": [
+                "duplicateIndividualIds": [
                     encode_id_base64(self.individuals_1[0].id, "IndividualNode")  # guy from doshi admin2
                 ],
                 "selectedIndividualId": encode_id_base64(self.individuals_1[0].id, "IndividualNode"),
@@ -361,7 +361,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
             },
             variables={
                 "grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"),
-                "selectedIndividualIds": [
+                "duplicateIndividualIds": [
                     encode_id_base64(self.individuals_1[0].id, "IndividualNode")  # guy from doshi admin2
                 ],
             },
@@ -453,7 +453,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
             },
             variables={
                 "grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"),
-                "selectedIndividualIds": [
+                "duplicateIndividualIds": [
                     encode_id_base64(self.individuals_2[0].id, "IndividualNode")  # guy from burka admin2
                 ],
             },

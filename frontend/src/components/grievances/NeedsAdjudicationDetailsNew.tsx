@@ -53,7 +53,7 @@ export const NeedsAdjudicationDetailsNew = ({
     ],
   });
   const details = ticket.needsAdjudicationTicketDetails;
-  const initialIds = details.selectedIndividuals.map((el) => el.id);
+  const initialIds = details.selectedDuplicates.map((el) => el.id);
 
   const [selectedDuplicates, setSelectedDuplicates] = useState(initialIds);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -253,7 +253,7 @@ export const NeedsAdjudicationDetailsNew = ({
                       await approve({
                         variables: {
                           grievanceTicketId: ticket.id,
-                          selectedIndividualIds: selectedDuplicates,
+                          duplicateIndividualIds: selectedDuplicates,
                         },
                       });
                     } catch (e) {

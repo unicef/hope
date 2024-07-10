@@ -189,7 +189,7 @@ export const GrievanceDetailsToolbar = ({
     const noDuplicatesFoundMultiple =
       isDeduplicationCategory &&
       ticket.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion &&
-      !ticket.needsAdjudicationTicketDetails?.selectedIndividuals.length;
+      !ticket.needsAdjudicationTicketDetails?.selectedDuplicates.length;
 
     let confirmationMessage = '';
     if (notApprovedDeleteIndividualChanges) {
@@ -288,7 +288,7 @@ export const GrievanceDetailsToolbar = ({
   const selectedIndividual =
     ticket?.needsAdjudicationTicketDetails?.selectedIndividual;
   const selectedIndividualsLength =
-    ticket?.needsAdjudicationTicketDetails?.selectedIndividuals.length;
+    ticket?.needsAdjudicationTicketDetails?.selectedDuplicates.length;
 
   const shouldShowButtonDialog =
     isDeduplicationCategory &&
