@@ -434,7 +434,7 @@ class TestPaymentGatewayService(APITestCase):
                     "remote_id": str(self.payments[0].id),
                     "record_code": self.payments[0].unicef_id,
                     "payload": {
-                        "amount": self.payments[0].entitlement_quantity,
+                        "amount": str(self.payments[0].entitlement_quantity),
                         "phone_no": str(self.payments[0].collector.phone_no),
                         "last_name": self.payments[0].collector.family_name,
                         "first_name": self.payments[0].collector.given_name,

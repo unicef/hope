@@ -2,7 +2,7 @@ import dataclasses
 import logging
 import os
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, TypedDict, Union
 
 from django.db.models import Q
 from django.utils.timezone import now
@@ -105,6 +105,16 @@ class PaymentInstructionFromSplitSerializer(PaymentInstructionFromDeliveryMechan
         ]
 
 
+class PaymentPayloadSerializer(serializers.Serializer):
+    amount = serializers.DecimalField(max_digits=12, decimal_places=2, required=True)
+    phone_no = serializers.CharField(required=False)
+    last_name = serializers.CharField(required=False)
+    first_name = serializers.CharField(required=False)
+    full_name = serializers.CharField(required=False)
+    destination_currency = serializers.CharField(required=True)
+    service_provider_code = serializers.CharField(required=False)
+
+
 class PaymentSerializer(ReadOnlyModelSerializer):
     remote_id = serializers.CharField(source="id")
     record_code = serializers.CharField(source="unicef_id")
@@ -115,15 +125,20 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         return {}
 
     def get_payload(self, obj: Payment) -> Dict:
-        return {
-            "amount": obj.entitlement_quantity,
-            "phone_no": str(obj.collector.phone_no),
-            "last_name": obj.collector.family_name,
-            "first_name": obj.collector.given_name,
-            "full_name": obj.full_name,
-            "destination_currency": obj.currency,
-            "service_provider_code": obj.collector.flex_fields.get("service_provider_code", ""),
-        }
+        payload = PaymentPayloadSerializer(
+            data={
+                "amount": obj.entitlement_quantity,
+                "phone_no": str(obj.collector.phone_no),
+                "last_name": obj.collector.family_name,
+                "first_name": obj.collector.given_name,
+                "full_name": obj.full_name,
+                "destination_currency": obj.currency,
+                "service_provider_code": obj.collector.flex_fields.get("service_provider_code", ""),
+            }
+        )
+        if not payload.is_valid():
+            raise serializers.ValidationError(payload.errors)
+        return payload.data
 
     class Meta:
         model = Payment
