@@ -1195,8 +1195,8 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
         distinct_individual_ids = kwargs.get("distinct_individual_ids", [])
         selected_individual_id = kwargs.get("selected_individual_id")
 
-        if selected_individual_id and duplicate_individual_ids:
-            log_and_raise("Only one option for duplicate individuals is available")
+        if (selected_individual_id and duplicate_individual_ids) or (duplicate_individual_ids and distinct_individual_ids):
+            log_and_raise("Only one option for duplicate or distinct individuals is available")
 
         if (
             duplicate_individual_ids or distinct_individual_ids or selected_individual_id
@@ -1210,7 +1210,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
 
         if selected_individual_id:
             selected_individual = get_individual(selected_individual_id)
-            validate_individual_for_need_adjudication(partner, selected_individual, ticket_details)
+            validate_individual_for_need_adjudication(partner, selected_individual, ticket_details, "duplicate")
 
             ticket_details.selected_individual = selected_individual
             ticket_details.role_reassign_data = {}
@@ -1219,7 +1219,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
             distinct_individuals = [get_individual(_id) for _id in distinct_individual_ids]
 
             for individual in distinct_individuals:
-                validate_individual_for_need_adjudication(partner, individual, ticket_details)
+                validate_individual_for_need_adjudication(partner, individual, ticket_details, "distinct")
 
             ticket_details.selected_distinct.remove(*ticket_details.selected_distinct.all())
             ticket_details.selected_distinct.add(*distinct_individuals)
@@ -1228,7 +1228,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
             duplicate_individuals = [get_individual(_id) for _id in duplicate_individual_ids]
 
             for individual in duplicate_individuals:
-                validate_individual_for_need_adjudication(partner, individual, ticket_details)
+                validate_individual_for_need_adjudication(partner, individual, ticket_details, "duplicate")
 
             ticket_details.selected_individuals.remove(*ticket_details.selected_individuals.all())
             ticket_details.selected_individuals.add(*duplicate_individuals)
