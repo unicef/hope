@@ -298,6 +298,45 @@ class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
             variables={"id": self.id_to_base64(self.households[0].id, "HouseholdNode")},
         )
 
+    @parameterized.expand(
+        [
+            (None, None),
+            ("detail_id", "test1"),
+            ("enumerator_rec_id", 123),
+        ]
+    )
+    def test_household_query_single_import_id(self, field_name: str, field_value: str) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS], self.business_area
+        )
+        household = self.households[0]
+
+        query = """
+        query Household($id: ID!) {
+          household(id: $id) {
+            importId
+          }
+        }
+        """
+
+        if field_name is not None:
+            setattr(household, field_name, field_value)
+
+        household.unicef_id = "HH-123123"
+        household.save()
+
+        self.snapshot_graphql_request(
+            request_string=query,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_two.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"id": self.id_to_base64(household.id, "HouseholdNode")},
+        )
+
     def test_household_query_single_different_program_in_header(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS], self.business_area

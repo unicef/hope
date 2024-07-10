@@ -49,6 +49,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.models import DeliveryMechanismData
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -128,6 +129,7 @@ def handle_role(role: str, household: Household, individual: Individual) -> None
             household=household,
             role=role,
             defaults={"individual": individual},
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
 
@@ -172,6 +174,7 @@ def handle_add_document(document_data: Dict, individual: Individual) -> Document
         photo=photo,
         country=country,
         program_id=individual.program_id,
+        rdi_merge_status=MergeStatusModel.MERGED,
     )
 
 
@@ -233,6 +236,7 @@ def handle_add_payment_channel(payment_channel: Dict, individual: Individual) ->
             bank_account_number=bank_account_number,
             account_holder_name=payment_channel.get("account_holder_name", ""),
             bank_branch_name=payment_channel.get("bank_branch_name", ""),
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
     return None
 
@@ -293,7 +297,9 @@ def handle_add_identity(identity: Dict, individual: Individual) -> IndividualIde
     if identity_already_exists:
         raise ValidationError(f"Identity with number {number}, partner: {partner_name} already exists")
 
-    return IndividualIdentity(number=number, individual=individual, partner=partner, country=country)
+    return IndividualIdentity(
+        number=number, individual=individual, partner=partner, country=country, rdi_merge_status=MergeStatusModel.MERGED
+    )
 
 
 def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:

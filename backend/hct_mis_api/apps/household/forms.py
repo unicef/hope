@@ -7,7 +7,14 @@ from django.forms import HiddenInput
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.models import Household, XlsxUpdateFile
+from hct_mis_api.apps.household.models import (
+    BankAccountInfo,
+    Household,
+    Individual,
+    PendingHousehold,
+    PendingIndividual,
+    XlsxUpdateFile,
+)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.models import TargetingCriteria, TargetPopulation
@@ -240,3 +247,56 @@ class MassEnrollForm(forms.Form):
                 self.add_error(None, warning_message)
 
         return cleaned_data
+
+
+# used in UkraineBaseRegistrationService
+class IndividualForm(forms.ModelForm):
+    class Meta:
+        model = Individual
+        fields = []  # dynamically set in __init__
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        data = kwargs.get("data")
+        self.Meta.fields = list(data.keys()) if data else "__all__"  # type: ignore
+
+        super().__init__(*args, **kwargs)
+
+        # override queryset for Individual
+        if "individual" in self.Meta.fields:
+            data["individual"] = data["individual"].pk  # type: ignore
+            self.fields["individual"].queryset = PendingIndividual.objects.all()
+
+        if "household" in self.Meta.fields:
+            self.fields["household"].queryset = PendingHousehold.objects.all()
+
+
+# used in UkraineBaseRegistrationService
+class BankAccountInfoForm(forms.ModelForm):
+    class Meta:
+        model = BankAccountInfo
+        fields = []  # dynamically set in __init__
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        data = kwargs.get("data")
+        self.Meta.fields = list(data.keys()) if data else "__all__"  # type: ignore
+        super().__init__(*args, **kwargs)
+
+        # override queryset for Individual
+        if "individual" in self.Meta.fields:
+            self.fields["individual"].queryset = PendingIndividual.objects.all()
+
+
+# used in UkraineBaseRegistrationService
+class DocumentForm(forms.ModelForm):
+    class Meta:
+        model = BankAccountInfo
+        fields = []  # dynamically set in __init__
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        data = kwargs.get("data")
+        self.Meta.fields = list(data.keys()) if data else "__all__"  # type: ignore
+        super().__init__(*args, **kwargs)
+
+        # override queryset for Individual
+        if "individual" in self.Meta.fields:
+            self.fields["individual"].queryset = PendingIndividual.objects.all()
