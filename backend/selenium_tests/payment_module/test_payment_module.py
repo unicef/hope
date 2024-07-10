@@ -49,7 +49,7 @@ def find_file(file_name: str, search_in_dir: str = "./report/downloads/", number
 def create_test_program() -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
-    return ProgramFactory(
+    yield ProgramFactory(
         name="Test Program",
         programme_code="1234",
         start_date=datetime.now() - relativedelta(months=1),
@@ -130,7 +130,7 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
         is_follow_up=False,
         program_id=tp.program.id,
     )
-    return payment_plan[0]
+    yield payment_plan[0]
 
 
 @pytest.mark.usefixtures("login")
