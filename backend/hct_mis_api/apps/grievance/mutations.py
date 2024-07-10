@@ -1195,7 +1195,9 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
         distinct_individual_ids = kwargs.get("distinct_individual_ids", [])
         selected_individual_id = kwargs.get("selected_individual_id")
 
-        if (selected_individual_id and duplicate_individual_ids) or (duplicate_individual_ids and distinct_individual_ids):
+        if (selected_individual_id and duplicate_individual_ids) or (
+            duplicate_individual_ids and distinct_individual_ids
+        ):
             log_and_raise("Only one option for duplicate or distinct individuals is available")
 
         if (
