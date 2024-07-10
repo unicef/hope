@@ -1,20 +1,20 @@
-import { Button, IconButton, TableCell } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import UploadIcon from '@mui/icons-material/Upload';
-import GetAppIcon from '@mui/icons-material/GetApp';
-import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import {
-  downloadPeriodicDataUpdateTemplate,
-  exportPeriodicDataUpdateTemplate,
-  fetchPeriodicDataUpdateTemplates,
-} from '@api/periodicDataUpdate';
+import { fetchPeriodicDataUpdateTemplates } from '@api/periodicDataUpdate';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { UniversalMoment } from '@components/core/UniversalMoment';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import GetAppIcon from '@mui/icons-material/GetApp';
+import UploadIcon from '@mui/icons-material/Upload';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import { Button, IconButton, TableCell } from '@mui/material';
+import { useQuery } from '@tanstack/react-query';
+import { ReactElement, useState } from 'react';
 import { PeriodicDataUpdatesTemplateDetailsDialog } from './PeriodicDataUpdatesTemplateDetailsDialog';
+import {
+  useDownloadPeriodicDataUpdateTemplate,
+  useExportPeriodicDataUpdateTemplate,
+} from './PeriodicDataUpdatesTemplatesListActions';
 
 export interface Template {
   id: number;
@@ -66,66 +66,28 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(
     null,
   );
+  const { mutate: downloadTemplate } = useDownloadPeriodicDataUpdateTemplate();
+  const { mutate: exportTemplate } = useExportPeriodicDataUpdateTemplate();
 
-  // Mutation for downloading a template
-  const { mutate: downloadTemplate } = useMutation(
-    async (templateId: string) => {
-      return downloadPeriodicDataUpdateTemplate(
+  const handleDownloadClick = () => {
+    if (selectedTemplateId !== null) {
+      downloadTemplate({
         businessAreaSlug,
         programId,
-        templateId,
-      );
-    },
-    {
-      onSuccess: () => {
-        // Handle success, e.g., show a success message
-      },
-      onError: (error) => {
-        // Handle error, e.g., show an error message
-      },
-    },
-  );
-
-  // Mutation for exporting a template
-  const { mutate: exportTemplate } = useMutation(
-    async (templateId: string) => {
-      return exportPeriodicDataUpdateTemplate(
-        businessAreaSlug,
-        programId,
-        templateId,
-      );
-    },
-    {
-      onSuccess: () => {
-        // Handle success, e.g., show a success message
-      },
-      onError: (error) => {
-        // Handle error, e.g., show an error message
-      },
-    },
-  );
-  // Example of a direct download action, not using useQuery
-  const handleDownloadClick = async () => {
-    if (selectedTemplateId) {
-      await downloadPeriodicDataUpdateTemplate(
-        businessAreaSlug,
-        programId,
-        selectedTemplateId,
-      );
+        templateId: selectedTemplateId.toString(),
+      });
     }
   };
 
-  // Example of a direct export action, not using useQuery
-  const handleExportClick = async () => {
-    if (selectedTemplateId) {
-      await exportPeriodicDataUpdateTemplate(
+  const handleExportClick = () => {
+    if (selectedTemplateId !== null) {
+      exportTemplate({
         businessAreaSlug,
         programId,
-        selectedTemplateId,
-      );
+        templateId: selectedTemplateId.toString(),
+      });
     }
   };
-
   const handleDialogOpen = (template: Template) => {
     setSelectedTemplateId(template.id);
     setIsDialogOpen(true);

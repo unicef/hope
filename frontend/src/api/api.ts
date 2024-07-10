@@ -52,14 +52,11 @@ export const api = {
       throw new Error(`Error posting data to ${url}`);
     }
 
-    // Check if the response is empty
     const text = await response.text();
     if (!text) {
-      // If the response is empty, return an object with a data property set to null
       return { data: null };
     }
 
-    // If the response is not empty, parse it as JSON and return it
     return { data: JSON.parse(text) };
   },
 };

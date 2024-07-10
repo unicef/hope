@@ -72,19 +72,14 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: React.FC<
               </TableRow>
             </TableHead>
             <TableBody>
-              {templateDetailsData.rounds_data?.map(
-                (roundData: RoundDataItem, index) => {
-                  const [field, details] = Object.entries(roundData)[0];
-                  return (
-                    <TableRow key={index}>
-                      <TableCell>{field}</TableCell>
-                      <TableCell>{details.round}</TableCell>
-                      <TableCell>{details.round_name}</TableCell>
-                      <TableCell>{details.number_of_records}</TableCell>
-                    </TableRow>
-                  );
-                },
-              )}
+              {templateDetailsData?.rounds_data?.map((roundData, index) => (
+                <TableRow key={index}>
+                  <TableCell>{roundData.field}</TableCell>
+                  <TableCell>{roundData.round}</TableCell>
+                  <TableCell>{roundData.round_name}</TableCell>
+                  <TableCell>{roundData.number_of_records}</TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         )}
