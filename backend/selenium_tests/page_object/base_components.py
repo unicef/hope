@@ -46,6 +46,7 @@ class BaseComponents(Common):
     globalProgramFilterSearchButton = 'button[data-cy="search-icon"]'
     globalProgramFilterClearButton = 'button[data-cy="clear-icon"]'
     rows = 'tr[role="checkbox"]'
+    alert = '[role="alert"]'
     breadcrumbsChevronIcon = 'svg[data-cy="breadcrumbs-chevron-icon"]'
     arrowBack = 'div[data-cy="arrow_back"]'
 
@@ -187,6 +188,18 @@ class BaseComponents(Common):
 
     def getRows(self) -> [WebElement]:
         return self.get_elements(self.rows)
+
+    def getAlert(self) -> WebElement:
+        self.wait_for(self.alert)
+        return self.wait_for(self.alert)
+
+    def checkAlert(self, text: str) -> None:
+        self.getAlert()
+        for _ in range(10):
+            if text in self.getAlert().text:
+                break
+            sleep(1)
+        assert text in self.getAlert().text
 
     def waitForNumberOfRows(self, number: int) -> bool:
         for _ in range(5):

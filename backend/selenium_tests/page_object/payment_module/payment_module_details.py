@@ -43,6 +43,7 @@ class PaymentModuleDetails(BaseComponents):
     labelPending = 'div[data-cy="label-Pending"]'
     labelNumberOfPayments = 'div[data-cy="label-Number of payments"]'
     labelReconciled = 'div[data-cy="label-Reconciled"]'
+    labelTotalEntitledQuantity = 'div[data-cy="label-Total Entitled Quantity"]'
     buttonLockPlan = 'button[data-cy="button-lock-plan"'
     buttonSubmit = 'button[data-cy="button-submit"]'
     inputEntitlementFormula = 'div[data-cy="input-entitlement-formula"]'
@@ -186,6 +187,9 @@ class PaymentModuleDetails(BaseComponents):
 
     def getLabelReconciled(self) -> WebElement:
         return self.wait_for(self.labelReconciled)
+
+    def getLabelTotalEntitledQuantity(self) -> WebElement:
+        return self.wait_for(self.labelTotalEntitledQuantity)
 
     def getInputEntitlementFormula(self) -> WebElement:
         return self.wait_for(self.inputEntitlementFormula)

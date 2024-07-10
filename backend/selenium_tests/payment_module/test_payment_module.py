@@ -1,5 +1,9 @@
+import os
+import zipfile
 from datetime import datetime
+from time import sleep
 
+import openpyxl
 import pytest
 from dateutil.relativedelta import relativedelta
 from page_object.payment_module.new_payment_plan import NewPaymentPlan
@@ -11,7 +15,11 @@ from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory
+from hct_mis_api.apps.payment.fixtures import (
+    FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
+)
 from hct_mis_api.apps.payment.models import FinancialServiceProvider, PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -21,12 +29,20 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
 )
-from hct_mis_api.apps.payment.fixtures import (FinancialServiceProviderXlsxTemplateFactory,
-                                               FspXlsxTemplatePerDeliveryMechanismFactory)
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from selenium_tests.helpers.date_time_format import FormatTime
 
 pytestmark = pytest.mark.django_db(transaction=True)
+
+
+def find_file(file_name: str, search_in_dir: str = "./report/downloads/", number_of_ties: int = 1) -> str:
+    for _ in range(number_of_ties):
+        for file in os.listdir(search_in_dir):
+            if file_name in file:
+                return file
+        sleep(1)
+    else:
+        raise Exception(f"{file_name} file did not found in {search_in_dir}")
 
 
 @pytest.fixture
@@ -83,8 +99,15 @@ def create_targeting(create_test_program: Program) -> None:
     FspXlsxTemplatePerDeliveryMechanismFactory(
         financial_service_provider=fsp_1,
         xlsx_template=fsp_xlsx_template,
-        delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH
+        delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
     )
+
+
+@pytest.fixture
+def clear_downloaded_files() -> None:
+    yield
+    for file in os.listdir("./report/downloads/"):
+        os.remove(os.path.join("./report/downloads", file))
 
 
 @pytest.fixture
@@ -206,6 +229,7 @@ class TestSmokePaymentModule:
 
     def test_payment_plan_happy_path(
         self,
+        clear_downloaded_files: None,
         create_targeting: None,
         pagePaymentModule: PaymentModule,
         pagePaymentModuleDetails: PaymentModuleDetails,
@@ -249,16 +273,21 @@ class TestSmokePaymentModule:
         pagePaymentModuleDetails.getInputEntitlementFormula().click()
         pagePaymentModuleDetails.select_listbox_element("Test Rule").click()
         pagePaymentModuleDetails.getButtonApplySteficon().click()
-        from time import sleep
 
-        sleep(5)
-        pagePaymentModuleDetails.getButtonSetUpFsp().click()
+        for _ in range(10):
+            try:
+                pagePaymentModuleDetails.getButtonSetUpFsp().click()
+                break
+            except BaseException:
+                sleep(1)
+        else:
+            pagePaymentModuleDetails.getButtonSetUpFsp().click()
+
         pagePaymentModuleDetails.getSelectDeliveryMechanism().click()
         pagePaymentModuleDetails.select_listbox_element("Cash").click()
         pagePaymentModuleDetails.getButtonNextSave().click()
         pagePaymentModuleDetails.getSelectDeliveryMechanismFSP().click()
         pagePaymentModuleDetails.select_listbox_element("FSP_1").click()
-        pagePaymentModuleDetails.screenshot("FSP")
         pagePaymentModuleDetails.getButtonNextSave().click()
         pagePaymentModuleDetails.checkStatus("LOCKED")
         pagePaymentModuleDetails.getButtonLockPlan().click()
@@ -275,35 +304,31 @@ class TestSmokePaymentModule:
         pagePaymentModuleDetails.getButtonMarkAsReleased().click()
         pagePaymentModuleDetails.getButtonSubmit().click()
         pagePaymentModuleDetails.checkStatus("ACCEPTED")
-        sleep(10)
-        pagePaymentModule.screenshot("PaymentModule")
         pagePaymentModuleDetails.getButtonExportXlsx().click()
-        pagePaymentModule.screenshot("PaymentModule1")
-        sleep(10)
+        pagePaymentModuleDetails.checkAlert("Exporting XLSX started")
+
+        # ToDo: Refresh is workaround. Works on dev properly.
         pagePaymentModule.driver.refresh()
-        pagePaymentModule.screenshot("PaymentModule1")
-        sleep(1)
         pagePaymentModuleDetails.getButtonDownloadXlsx().click()
-        sleep(5)
-        # import zipfile
-        # with zipfile.ZipFile("./report/downloads/*.zip", 'r') as zip_ref:
-        #     zip_ref.extractall("./report/downloads/")
-        pagePaymentModule.driver.get("chrome://downloads/")
-        import os
-        print(os.listdir("./report/"))
-        sleep(3)
-        pagePaymentModule.screenshot("clicked")
+
+        zip_file = find_file(".zip", number_of_ties=5)
+        with zipfile.ZipFile(f"./report/downloads/{zip_file}", "r") as zip_ref:
+            zip_ref.extractall("./report/downloads/")
+
+        xlsx_file = find_file(".xlsx")
+        wb1 = openpyxl.load_workbook(f"./report/downloads/{xlsx_file}")
+        ws1 = wb1.active
+        for cell in ws1["N:N"]:
+            if cell.row >= 2:
+                ws1.cell(row=cell.row, column=16, value=cell.value)
+
+        wb1.save(f"./report/downloads/{xlsx_file}")
+
         pagePaymentModuleDetails.getButtonUploadReconciliationInfo().click()
-        pagePaymentModuleDetails.upload_file(f"./report/payment_plan_payment_list_PP-0060-24-00000091_FSP_FSP_1_Cash.xlsx")
-        sleep(2)
-        from selenium.webdriver.common.by import By
+        pagePaymentModuleDetails.upload_file(
+            os.path.abspath(os.path.join("./report/downloads", xlsx_file)), timeout=120
+        )
         pagePaymentModuleDetails.getButtonImportSubmit().click()
-        sleep(2)
-        from selenium_tests.tools.tag_name_finder import printing
-
-        printing("Mapping", pagePaymentModuleDetails.driver)
-        printing("Methods", pagePaymentModuleDetails.driver)
-        printing("Assert", pagePaymentModuleDetails.driver)
-        pagePaymentModuleDetails.getErrorsContainer().find_elements(By.TAG_NAME, "svg")[0].click()
-        pagePaymentModule.screenshot("Reconciliation")
-
+        pagePaymentModuleDetails.checkStatus("FINISHED")
+        assert "14 (100%)" in pagePaymentModuleDetails.getLabelReconciled().text
+        assert "18.2 CZK (0.7 USD)" in pagePaymentModuleDetails.getLabelTotalEntitledQuantity().text
