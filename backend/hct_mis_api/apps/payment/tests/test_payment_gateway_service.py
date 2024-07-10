@@ -7,6 +7,7 @@ from django.utils import timezone
 
 import pytest
 from pytz import utc
+from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -447,3 +448,13 @@ class TestPaymentGatewayService(APITestCase):
             ],
             validate_response=True,
         )
+
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
+    def test_api_add_records_to_payment_instruction_validation_error(self, post_mock: Any) -> None:
+        payment = self.payments[0]
+        payment.entitlement_quantity = None
+        payment.save()
+        with self.assertRaisesMessage(
+            ValidationError, "{'amount': [ErrorDetail(string='This field may not be null.', code='null')]}"
+        ):
+            PaymentGatewayAPI().add_records_to_payment_instruction([payment], "123")
