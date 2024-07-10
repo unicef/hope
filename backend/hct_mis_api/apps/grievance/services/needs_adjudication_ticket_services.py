@@ -14,7 +14,10 @@ from hct_mis_api.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_disable_individual_service,
 )
 from hct_mis_api.apps.grievance.signals import individual_marked_as_duplicated
-from hct_mis_api.apps.grievance.utils import traverse_sibling_tickets
+from hct_mis_api.apps.grievance.utils import (
+    traverse_sibling_tickets,
+    validate_all_individuals_before_close_needs_adjudication,
+)
 from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.models import (
     UNIQUE,
@@ -67,30 +70,20 @@ def close_needs_adjudication_old_ticket(ticket_details: TicketNeedsAdjudicationD
 
 
 def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationDetails, user: AbstractUser) -> None:
-    # TODO: add more validation here
-    # A user can resolve (close) a ticket when all active individuals are flagged
-    # A user can resolve (close) a ticket when at least one individual is flagged as distinct or one of the individuals is inactive (withdrawn or duplicate).
-    # A user can flag all active individuals as duplicates but won’t be able to resolve (close) the ticket.
-    unique_individuals = ticket_details.selected_distinct.all()
-    duplicate_individuals = (ticket_details.golden_records_individual, *ticket_details.possible_duplicates.all())
+    # TODO: need to double check all this logic
+    validate_all_individuals_before_close_needs_adjudication(ticket_details)
 
-    distinct_individuals = (ticket_details.golden_records_individual, *ticket_details.selected_distinct.all())
+    distinct_individuals = ticket_details.selected_distinct.all()
+    duplicate_individuals = ticket_details.possible_duplicates.all()
 
-    if duplicate_individuals := ticket_details.selected_individuals.all():
-        # unique_individuals = [individual for individual in duplicate_individuals if individual not in duplicate_individuals]
+    if duplicate_individuals:
         for individual_to_remove in duplicate_individuals:
-            mark_as_duplicate_individual_and_reassign_roles(
-                ticket_details, individual_to_remove, user, unique_individuals[0]
-            )
-        # _clear_deduplication_individuals_fields(unique_individuals)
-    else:
+            mark_as_duplicate_individual_and_reassign_roles(ticket_details, individual_to_remove, user)
         _clear_deduplication_individuals_fields(duplicate_individuals)
 
-    if distinct_individuals := ticket_details.selected_distinct.all():
+    if distinct_individuals:
         for individual_to_distinct in distinct_individuals:
-            mark_as_duplicate_distinct_and_reassign_roles(
-                ticket_details, individual_to_distinct, user, unique_individuals[0]
-            )
+            mark_as_distinct_and_reassign_roles(ticket_details, individual_to_distinct, user)
         _clear_deduplication_individuals_fields(distinct_individuals)
 
 
@@ -235,7 +228,7 @@ def mark_as_duplicate_individual_and_reassign_roles(
     ticket_details: TicketNeedsAdjudicationDetails,
     individual_to_remove: Individual,
     user: AbstractUser,
-    unique_individual: Individual,
+    unique_individual: Optional[Individual] = None,
 ) -> None:
     if ticket_details.is_multiple_duplicates_version:
         household = reassign_roles_on_disable_individual_service(
@@ -254,16 +247,15 @@ def mark_as_duplicate_individual_and_reassign_roles(
     )
 
 
-def mark_as_duplicate_distinct_and_reassign_roles(
+def mark_as_distinct_and_reassign_roles(
     ticket_details: TicketNeedsAdjudicationDetails,
-    individual_to_remove: Individual,
+    individual_to_distinct: Individual,
     user: AbstractUser,
-    unique_individual: Individual,
 ) -> None:
     # TODO: HAVE to update this logic
     if ticket_details.is_multiple_duplicates_version:
         household = reassign_roles_on_disable_individual_service(
-            individual_to_remove,
+            individual_to_distinct,
             ticket_details.role_reassign_data,
             user,
             ticket_details.ticket.programs.all(),
@@ -271,22 +263,20 @@ def mark_as_duplicate_distinct_and_reassign_roles(
         )
     else:
         household = reassign_roles_on_disable_individual_service(
-            individual_to_remove, ticket_details.role_reassign_data, user, ticket_details.ticket.programs.all()
+            individual_to_distinct, ticket_details.role_reassign_data, user, ticket_details.ticket.programs.all()
         )
-    mark_as_duplicate_individual(
-        individual_to_remove, unique_individual, household, user, ticket_details.ticket.programs.all()
-    )
+    mark_as_distinct_individual(individual_to_distinct, household, user, ticket_details.ticket.programs.all())
 
 
 def mark_as_duplicate_individual(
     individual_to_remove: Individual,
-    unique_individual: Individual,
+    unique_individual: Optional[Individual],
     household: Optional[Household],
     user: AbstractUser,
     program: "Program",
 ) -> None:
     old_individual = Individual.objects.get(id=individual_to_remove.id)
-
+    # TODO: who is unique_individual is more then 1 was selected.. or none just
     individual_to_remove.mark_as_duplicate(unique_individual)
     log_create(
         Individual.ACTIVITY_LOG_MAPPING,
@@ -301,3 +291,27 @@ def mark_as_duplicate_individual(
         household.refresh_from_db()
         if household.active_individuals.count() == 0:
             household.withdraw()
+
+
+def mark_as_distinct_individual(
+    individual_to_distinct: Individual,
+    household: Optional[Household],
+    user: AbstractUser,
+    program: "Program",
+) -> None:
+    old_individual = Individual.objects.get(id=individual_to_distinct.id)
+    # TODO: who is unique_individual is more then 1 was selected.. or none just
+    individual_to_distinct.mark_as_duplicate()  # unmark_as_duplicate
+    log_create(
+        Individual.ACTIVITY_LOG_MAPPING,
+        "business_area",
+        user,
+        getattr(program, "pk", None),
+        old_individual,
+        individual_to_distinct,
+    )
+    # individual_marked_as_distinct.send(sender=Individual, instance=individual_to_distinct)
+    if household:
+        household.refresh_from_db()
+        if household.active_individuals.count() > 0:
+            household.unwithdraw()

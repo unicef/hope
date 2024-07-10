@@ -208,15 +208,30 @@ def validate_individual_for_need_adjudication(
     # not possible to add the same Individual as a duplicate and distinct
     if operation_type == "duplicate":
         if individual in ticket_details.selected_distinct.all():
-            raise ValidationError(
-                f"The selected individual {individual.unicef_id} is already selected as distinct"
-            )
+            raise ValidationError(f"The selected individual {individual.unicef_id} is already selected as distinct")
     if operation_type == "distinct":
         if individual in ticket_details.selected_individuals.all():
-            raise ValidationError(
-                f"The selected individual {individual.unicef_id} is already selected as duplicate"
-            )
+            raise ValidationError(f"The selected individual {individual.unicef_id} is already selected as duplicate")
 
     # validation for withdrawn Individual
     if individual.withdrawn:
         raise ValidationError(f"The selected individual {individual.unicef_id} is not valid, must be not withdrawn")
+
+
+def validate_all_individuals_before_close_needs_adjudication(ticket_details: TicketNeedsAdjudicationDetails) -> None:
+    duplicates_qs = ticket_details.selected_individuals.all()
+    distinct_qs = ticket_details.selected_distinct.all()
+
+    # A user can flag all active individuals as duplicates but won’t be able to resolve (close) the ticket
+    if distinct_qs.count() == 0:
+        raise ValidationError("Close ticket is not possible when all Individuals are flagged as duplicates")
+
+    if not [individual for individual in distinct_qs if not individual.withdrawn] or duplicates_qs.count() == 0:
+        raise ValidationError(
+            "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is inactive (withdrawn or duplicate)"
+        )
+
+    # all active individuals are flagged # TODO: have to check this requirement??????????
+    for individual in ticket_details.possible_duplicates.all():
+        if not individual.withdrawn and individual not in duplicates_qs or individual not in distinct_qs:
+            raise ValidationError("Close ticket is possible when all active Individuals are flagged")
