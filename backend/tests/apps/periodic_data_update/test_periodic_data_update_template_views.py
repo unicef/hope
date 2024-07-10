@@ -130,31 +130,30 @@ class TestPeriodicDataUpdateTemplateViews:
 
         response_json = response.json()["results"]
         assert len(response_json) == 3
-
         assert {
             "id": self.pdu_template1.id,
-            "status": self.pdu_template1.status,
+            "status": self.pdu_template1.get_status_display(),
             "number_of_records": self.pdu_template1.number_of_records,
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_template1.created_by.get_full_name(),
         } in response_json
         assert {
             "id": self.pdu_template2.id,
-            "status": self.pdu_template2.status,
+            "status": self.pdu_template2.get_status_display(),
             "number_of_records": self.pdu_template2.number_of_records,
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_template2.created_by.get_full_name(),
         } in response_json
         assert {
             "id": self.pdu_template3.id,
-            "status": self.pdu_template3.status,
+            "status": self.pdu_template3.get_status_display(),
             "number_of_records": self.pdu_template3.number_of_records,
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_template3.created_by.get_full_name(),
         } in response_json
         assert {
             "id": self.pdu_template_program2.id,
-            "status": self.pdu_template_program2.status,
+            "status": self.pdu_template_program2.get_status_display(),
             "number_of_records": self.pdu_template_program2.number_of_records,
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_template_program2.created_by.get_full_name(),
