@@ -15,18 +15,25 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.api.permissions import (
-    PDUViewListAndDetailsPermission,
     PDUTemplateCreatePermission,
     PDUTemplateDownloadPermission,
     PDUUploadPermission,
+    PDUViewListAndDetailsPermission,
 )
 from hct_mis_api.apps.core.api.mixins import ActionMixin, BusinessAreaProgramMixin
-from hct_mis_api.apps.periodic_data_update.api.caches import PDUTemplateKeyConstructor, PDUUpdateKeyConstructor
+from hct_mis_api.apps.periodic_data_update.api.caches import (
+    PDUTemplateKeyConstructor,
+    PDUUpdateKeyConstructor,
+)
 from hct_mis_api.apps.periodic_data_update.api.serializers import (
     PeriodicDataUpdateTemplateDetailSerializer,
-    PeriodicDataUpdateTemplateListSerializer, PeriodicDataUpdateUploadListSerializer,
+    PeriodicDataUpdateTemplateListSerializer,
+    PeriodicDataUpdateUploadListSerializer,
 )
-from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate, PeriodicDataUpdateUpload
+from hct_mis_api.apps.periodic_data_update.models import (
+    PeriodicDataUpdateTemplate,
+    PeriodicDataUpdateUpload,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -44,14 +51,13 @@ class PeriodicDataUpdateTemplateViewSet(
         "retrieve": PeriodicDataUpdateTemplateDetailSerializer,
         # 'create': PeriodicDataUpdateTemplateCreateSerializer,
     }
-    permission_classes = []
-    # permission_classes_by_action = {
-    #     'list': [PDUViewListAndDetailsPermission],
-    #     'retrieve': [PDUViewListAndDetailsPermission],
-    #     # 'create': [PDUTemplateCreatePermission],
-    #     'export': [PDUTemplateCreatePermission],
-    #     'download': [PDUTemplateDownloadPermission],
-    # }
+    permission_classes_by_action = {
+        "list": [PDUViewListAndDetailsPermission],
+        "retrieve": [PDUViewListAndDetailsPermission],
+        # 'create': [PDUTemplateCreatePermission],
+        # 'export': [PDUTemplateCreatePermission],
+        # 'download': [PDUTemplateDownloadPermission],
+    }
     filter_backends = (OrderingFilter,)
 
     def get_queryset(self) -> QuerySet:
@@ -92,7 +98,6 @@ class PeriodicDataUpdateTemplateViewSet(
 class PeriodicDataUpdateUploadViewSet(
     ActionMixin,
     BusinessAreaProgramMixin,
-    mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     GenericViewSet,
@@ -101,11 +106,10 @@ class PeriodicDataUpdateUploadViewSet(
         "list": PeriodicDataUpdateUploadListSerializer,
         # 'upload': PeriodicDataUpdateUploadSerializer,
     }
-    permission_classes = []
-    # permission_classes_by_action = {
-    #     'list': [PDUViewListAndDetailsPermission],
-    #     'upload': [PDUUploadPermission],
-    # }
+    permission_classes_by_action = {
+        "list": [PDUViewListAndDetailsPermission],
+        # 'upload': [PDUUploadPermission],
+    }
     filter_backends = (OrderingFilter,)
 
     def get_queryset(self) -> QuerySet:

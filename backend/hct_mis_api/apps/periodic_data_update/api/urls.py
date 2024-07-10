@@ -3,7 +3,8 @@ from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 
 from hct_mis_api.apps.periodic_data_update.api.views import (
-    PeriodicDataUpdateTemplateViewSet, PeriodicDataUpdateUploadViewSet,
+    PeriodicDataUpdateTemplateViewSet,
+    PeriodicDataUpdateUploadViewSet,
 )
 
 app_name = "periodic_data_update"

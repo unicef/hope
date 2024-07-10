@@ -1,4 +1,4 @@
-from hct_mis_api.api.caches import KeyConstructorMixin, BusinessAreaAndProgramKeyBit
+from hct_mis_api.api.caches import BusinessAreaAndProgramKeyBit, KeyConstructorMixin
 
 
 class PDUTemplateListVersionsKeyBit(BusinessAreaAndProgramKeyBit):

@@ -1,6 +1,9 @@
 from rest_framework import serializers
 
-from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate, PeriodicDataUpdateUpload
+from hct_mis_api.apps.periodic_data_update.models import (
+    PeriodicDataUpdateTemplate,
+    PeriodicDataUpdateUpload,
+)
 
 
 class PeriodicDataUpdateTemplateListSerializer(serializers.ModelSerializer):

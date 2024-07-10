@@ -45,7 +45,8 @@ def create_partner_role_with_permissions() -> Callable:
         permission_list = [perm.value for perm in permissions]
         role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})
         business_area_partner_through.roles.add(role)
-        return _create_partner_role_with_permissions
+
+    return _create_partner_role_with_permissions
 
 
 @pytest.fixture()

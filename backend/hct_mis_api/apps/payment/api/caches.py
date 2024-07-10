@@ -2,8 +2,7 @@ from typing import Any
 
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 
-from hct_mis_api.api.caches import BusinessAreaVersionKeyBit, get_or_create_cache_key, KeyConstructorMixin, \
-    BusinessAreaKeyBit
+from hct_mis_api.api.caches import BusinessAreaKeyBit, KeyConstructorMixin
 from hct_mis_api.apps.core.models import BusinessArea
 
 
