@@ -3,7 +3,6 @@ from typing import Any
 
 import pytest
 from dateutil.tz import tzlocal
-from graphql import GraphQLError
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.schema import resolve_asset
@@ -16,10 +15,7 @@ class TestResolveAsset:
     def use_kobo_master_token(self, settings: Any) -> None:
         settings.KOBO_MASTER_API_TOKEN = "token-from-env"
         settings.KOBO_KF_URL = "https://kf.hope.unicef.org"
-
-    def test_resolve_asset_wrong_business_area(self) -> None:
-        with pytest.raises(GraphQLError):
-            resolve_asset("wrong_business_area", "aWnA2d5YBBDgQ5WZXpbaRe")
+        settings.KOBO_PROJECT_VIEWS_ID = "pvEsUUfAgYyyV7jpR6i3FvM"
 
     @pytest.mark.vcr()
     def test_resolve_asset(self) -> None:

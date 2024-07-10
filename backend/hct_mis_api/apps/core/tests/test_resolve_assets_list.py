@@ -15,8 +15,9 @@ pytestmark = pytest.mark.django_db(transaction=True)
 class TestResolveAssetsList:
     @pytest.fixture(autouse=True)
     def use_kobo_master_token(self, settings: Any) -> None:
-        settings.KOBO_MASTER_API_TOKEN = "token-from-env"
+        settings.KOBO_MASTER_API_TOKEN = "test-token"
         settings.KOBO_KF_URL = "https://kf.hope.unicef.org"
+        settings.KOBO_PROJECT_VIEWS_ID = "pvEsUUfAgYyyV7jpR6i3FvM"
 
     def test_resolve_assets_list_wrong_business_area(self) -> None:
         with pytest.raises(GraphQLError):

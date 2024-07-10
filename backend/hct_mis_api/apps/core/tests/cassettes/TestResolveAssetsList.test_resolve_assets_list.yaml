@@ -13,49 +13,7 @@ interactions:
       User-Agent:
       - python-requests/2.31.0
     method: GET
-    uri: https://kf.hope.unicef.org/api/v2/assets?format=json&limit=30000&q=settings__country_codes__icontains:AFG
-  response:
-    body:
-      string: ''
-    headers:
-      Connection:
-      - keep-alive
-      Content-Language:
-      - en
-      Content-Length:
-      - '0'
-      Content-Type:
-      - text/html; charset=utf-8
-      Date:
-      - Thu, 16 May 2024 13:21:20 GMT
-      Location:
-      - /api/v2/assets/?format=json&limit=30000&q=settings__country_codes__icontains:AFG
-      Referrer-Policy:
-      - same-origin
-      Server:
-      - nginx/1.23.0
-      Vary:
-      - Accept-Language, Origin
-      X-Content-Type-Options:
-      - nosniff
-    status:
-      code: 301
-      message: Moved Permanently
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate, br
-      Authorization:
-      - token 7a07f2b7ce09178429d91de291b0f06878c05da5
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.31.0
-    method: GET
-    uri: https://kf.hope.unicef.org/api/v2/assets/?format=json&limit=30000&q=settings__country_codes__icontains:AFG
+    uri: https://kf.hope.unicef.org/api/v2/project-views/pvEsUUfAgYyyV7jpR6i3FvM/assets/?format=json&limit=30000&q=settings__country_codes__icontains:AFG
   response:
     body:
       string: "{\"count\":117,\"next\":null,\"previous\":null,\"results\":[{\"url\":\"https://kf.hope.unicef.org/api/v2/assets/aWnA2d5YBBDgQ5WZXpbaRe/?format=json\",\"date_created\":\"2022-12-05T11:03:08.754929Z\",\"date_modified\":\"2023-10-04T10:38:23.610534Z\",\"date_deployed\":\"2022-12-05T11:03:20.533209Z\",\"owner\":\"https://kf.hope.unicef.org/api/v2/users/afg_admin/?format=json\",\"summary\":{\"geo\":false,\"labels\":[\"Enumerator
