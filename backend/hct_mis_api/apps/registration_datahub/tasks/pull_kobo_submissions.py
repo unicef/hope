@@ -23,7 +23,7 @@ class PullKoboSubmissions:
         kobo_import_data.status = KoboImportData.STATUS_RUNNING
         kobo_import_data.save()
         business_area = BusinessArea.objects.get(slug=kobo_import_data.business_area_slug)
-        kobo_api = KoboAPI(token=business_area.get_kobo_token())
+        kobo_api = KoboAPI()
         submissions = kobo_api.get_project_submissions(
             kobo_import_data.kobo_asset_id, kobo_import_data.only_active_submissions
         )

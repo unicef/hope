@@ -99,6 +99,7 @@ EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
 KOBO_KF_URL = env("KOBO_KF_URL")
 KOBO_KC_URL = env("KOBO_KC_URL")
 KOBO_MASTER_API_TOKEN = env("KOBO_MASTER_API_TOKEN")
+KOBO_PROJECT_VIEWS_ID = env("KOBO_PROJECT_VIEWS_ID")
 
 # Get the ENV setting. Needs to be set in .bashrc or similar.
 ENV = env("ENV")

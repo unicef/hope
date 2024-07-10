@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - python-requests/2.31.0
     method: GET
-    uri: https://kf.hope.unicef.org/api/v2/assets?format=json&limit=30000&q=settings__country_codes__icontains:AFG
+    uri: https://kf.hope.unicef.org/api/v2/project-views/pvEsUUfAgYyyV7jpR6i3FvM/assets/?format=json&limit=30000&q=settings__country_codes__icontains:AFG
   response:
     body:
       string: ''

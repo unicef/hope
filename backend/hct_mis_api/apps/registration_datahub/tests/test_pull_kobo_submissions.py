@@ -22,7 +22,6 @@ class TestPullKoboSubmissions:
         settings.KOBO_MASTER_API_TOKEN = "token-from-env"
         settings.KOBO_KF_URL = "https://kf.hope.unicef.org"
 
-    @pytest.mark.override_config(KOBO_ENABLE_SINGLE_USER_ACCESS=False)
     def test_pull_kobo_submissions(self) -> None:
         create_afghanistan()
         kobo_import_data = KoboImportData(

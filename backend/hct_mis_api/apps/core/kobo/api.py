@@ -8,7 +8,6 @@ from urllib.parse import urlparse
 from django.conf import settings
 
 import requests
-from constance import config
 from requests import Response
 from requests.adapters import HTTPAdapter
 from requests.exceptions import RetryError
@@ -38,9 +37,12 @@ class KoboAPI:
     LIMIT = 30_000
     FORMAT = "json"
 
-    def __init__(self, kpi_url: Optional[str] = None, token: Optional[str] = None) -> None:
+    def __init__(
+        self, kpi_url: Optional[str] = None, token: Optional[str] = None, project_views_id: Optional[str] = None
+    ) -> None:
         self._kpi_url = kpi_url or settings.KOBO_KF_URL
         self._token = token or settings.KOBO_MASTER_API_TOKEN
+        self._project_views_id = project_views_id or settings.KOBO_PROJECT_VIEWS_ID
 
         self._client = KoboRequestsSession()
         self._set_token()
@@ -133,22 +135,21 @@ class KoboAPI:
     def get_all_projects_data(self, country_code: str) -> List:
         if not country_code:
             raise CountryCodeNotProvided("No country code provided")
-        endpoint = "api/v2/assets"
+        endpoint = f"api/v2/project-views/{self._project_views_id}/assets/"
         query_params = f"format={self.FORMAT}&limit={self.LIMIT}"
-        if config.KOBO_ENABLE_SINGLE_USER_ACCESS:
-            query_params += f"&q=settings__country_codes__icontains:{country_code.upper()}"
+        query_params += f"&q=settings__country_codes__icontains:{country_code.upper()}"
         url = f"{self._kpi_url}/{endpoint}?{query_params}"
         return self._get_paginated_request(url)
 
     def get_single_project_data(self, uid: str) -> Dict:
-        endpoint = f"api/v2/assets/{uid}"
+        endpoint = f"api/v2/assets/{uid}/"
         query_params = f"format={self.FORMAT}&limit={self.LIMIT}"
         url = f"{self._kpi_url}/{endpoint}?{query_params}"
         response = self._get_request(url)
         return response.json()
 
     def get_project_submissions(self, uid: str, only_active_submissions: bool) -> List[Dict]:
-        endpoint = f"api/v2/assets/{uid}/data"
+        endpoint = f"api/v2/assets/{uid}/data/"
         query_params = f"format={self.FORMAT}&limit={self.LIMIT}"
         if only_active_submissions:
             additional_query_params = 'query={"_validation_status.uid":"validation_status_approved"}'

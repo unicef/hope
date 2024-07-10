@@ -9,7 +9,6 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import JSONField, Q, UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 
-from constance import config
 from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from model_utils import Choices
@@ -167,11 +166,6 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
 
     def __str__(self) -> str:
         return self.name
-
-    def get_kobo_token(self) -> str:
-        if config.KOBO_ENABLE_SINGLE_USER_ACCESS:
-            return settings.KOBO_MASTER_API_TOKEN
-        return self.kobo_token
 
     def natural_key(self) -> Tuple[str]:
         return (self.code,)

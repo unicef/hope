@@ -25,6 +25,7 @@ DEFAULTS = {
     "KOBO_KF_URL": (str, "https://kf-hope.unitst.org"),
     "KOBO_KC_URL": (str, "https://kc-hope.unitst.org"),
     "KOBO_MASTER_API_TOKEN": (str, "KOBO_TOKEN"),
+    "KOBO_PROJECT_VIEWS_ID": (str, ""),
     "AZURE_CLIENT_ID": (str, ""),
     "AZURE_CLIENT_SECRET": (str, ""),
     "AZURE_TENANT_KEY": (str, ""),

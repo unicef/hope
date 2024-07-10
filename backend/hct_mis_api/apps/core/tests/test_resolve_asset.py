@@ -11,7 +11,6 @@ from hct_mis_api.apps.core.schema import resolve_asset
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
-@pytest.mark.override_config(KOBO_ENABLE_SINGLE_USER_ACCESS=True)
 class TestResolveAsset:
     @pytest.fixture(autouse=True)
     def use_kobo_master_token(self, settings: Any) -> None:

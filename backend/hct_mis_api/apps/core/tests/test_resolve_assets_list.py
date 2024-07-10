@@ -12,7 +12,6 @@ from hct_mis_api.apps.geo.fixtures import CountryFactory
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
-@pytest.mark.override_config(KOBO_ENABLE_SINGLE_USER_ACCESS=True)
 class TestResolveAssetsList:
     @pytest.fixture(autouse=True)
     def use_kobo_master_token(self, settings: Any) -> None:
