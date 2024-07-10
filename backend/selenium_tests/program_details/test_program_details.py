@@ -20,7 +20,7 @@ pytestmark = pytest.mark.django_db(transaction=True)
 
 @pytest.fixture
 def standard_program() -> Program:
-    return get_program_with_dct_type_and_name("Test For Edit", "TEST")
+    yield get_program_with_dct_type_and_name("Test For Edit", "TEST")
 
 
 def get_program_with_dct_type_and_name(
@@ -43,7 +43,7 @@ def get_program_with_dct_type_and_name(
 def create_programs() -> None:
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
-    return
+    yield
 
 
 @pytest.mark.usefixtures("login")
@@ -54,12 +54,10 @@ class TestProgrammeDetails:
         pageProgrammeDetails.selectGlobalProgramFilter("Test For Edit").click()
         # Check Details page
         assert "Test For Edit" in pageProgrammeDetails.getHeaderTitle().text
-        pageProgrammeDetails.screenshot("0")
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
         assert "Test For Edit" in pageProgrammeDetails.getHeaderTitle().text
         assert "REMOVE" in pageProgrammeDetails.getButtonRemoveProgram().text
         assert "EDIT PROGRAMME" in pageProgrammeDetails.getButtonEditProgram().text
-        pageProgrammeDetails.screenshot("1")
         assert "ACTIVATE" in pageProgrammeDetails.getButtonActivateProgram().text
         assert "" in pageProgrammeDetails.getCopyProgram().text
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text

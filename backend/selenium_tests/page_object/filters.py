@@ -1,3 +1,5 @@
+from time import sleep
+
 from page_object.base_components import BaseComponents
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
@@ -87,7 +89,7 @@ class Filters(BaseComponents):
     importedByInput = 'div[data-cy="Imported By-input"]'
 
     def getFiltersSearch(self) -> WebElement:
-        return self.wait_for(self.filtersSearch)
+        return self.wait_for(self.filtersSearch).find_element(By.XPATH, "./div/input")
 
     def getFiltersDocumentType(self) -> WebElement:
         return self.wait_for(self.filtersDocumentType)
@@ -100,6 +102,17 @@ class Filters(BaseComponents):
 
     def getFiltersStatus(self) -> WebElement:
         return self.wait_for(self.filtersStatus)
+
+    def selectFiltersSatus(self, status: str) -> None:
+        self.getFiltersStatus().click()
+        self.wait_for(f'li[data-value="{status.upper()}"]').click()
+        for _ in range(10):
+            sleep(1)
+            if status.capitalize() in self.getFiltersStatus().text:
+                self.getButtonFiltersApply().click()
+                break
+        else:
+            raise Exception(f"Status: {status.capitalize()} does not occur.")
 
     def getFiltersFsp(self) -> WebElement:
         return self.wait_for(self.filtersFsp)
@@ -138,10 +151,10 @@ class Filters(BaseComponents):
         return self.wait_for(self.filtersSector)
 
     def getFiltersNumberOfHouseholdsMin(self) -> WebElement:
-        return self.wait_for(self.filtersNumberOfHouseholdsMin)
+        return self.wait_for(self.filtersNumberOfHouseholdsMin).find_element(By.XPATH, "./div/input")
 
     def getFiltersNumberOfHouseholdsMax(self) -> WebElement:
-        return self.wait_for(self.filtersNumberOfHouseholdsMax)
+        return self.wait_for(self.filtersNumberOfHouseholdsMax).find_element(By.XPATH, "./div/input")
 
     def getFiltersBudgetMin(self) -> WebElement:
         return self.wait_for(self.filtersBudgetMin)
@@ -186,10 +199,10 @@ class Filters(BaseComponents):
         return self.wait_for(self.menuItemFiltersText)
 
     def getFiltersTotalHouseholdsCountMin(self) -> WebElement:
-        return self.wait_for(self.filtersTotalHouseholdsCountMin)
+        return self.wait_for(self.filtersTotalHouseholdsCountMin).find_element(By.XPATH, "./div/input")
 
     def getFiltersTotalHouseholdsCountMax(self) -> WebElement:
-        return self.wait_for(self.filtersTotalHouseholdsCountMax)
+        return self.wait_for(self.filtersTotalHouseholdsCountMax).find_element(By.XPATH, "./div/input")
 
     def getGlobalProgramFilterContainer(self) -> WebElement:
         return self.wait_for(self.globalProgramFilterContainer)

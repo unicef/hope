@@ -66,12 +66,12 @@
       "vulnerability_score_max": null,
       "excluded_ids": "",
       "exclusion_reason": "",
-      "total_households_count": 2,
-      "total_individuals_count": 8,
-      "child_male_count": 0,
-      "child_female_count": 0,
-      "adult_male_count": 0,
-      "adult_female_count": 0,
+      "total_households_count": 3,
+      "total_individuals_count": 7,
+      "child_male_count": 1,
+      "child_female_count": 6,
+      "adult_male_count": 1,
+      "adult_female_count": 2,
       "storage_file": null
     }
   },
