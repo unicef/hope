@@ -1,10 +1,12 @@
 import json
 from typing import Callable
+
 from django.core.cache import cache
+from django.db import connection
 from django.test.utils import CaptureQueriesContext
+
 import freezegun
 import pytest
-from django.db import connection
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -15,7 +17,8 @@ from hct_mis_api.apps.account.fixtures import (
 )
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.periodic_data_update.fixtures import (
-    PeriodicDataUpdateUploadFactory, PeriodicDataUpdateTemplateFactory,
+    PeriodicDataUpdateTemplateFactory,
+    PeriodicDataUpdateUploadFactory,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
@@ -36,8 +39,12 @@ class TestPeriodicDataUpdateUploadViews:
         pdu_template2_program1 = PeriodicDataUpdateTemplateFactory(program=self.program1)
         pdu_template_program2 = PeriodicDataUpdateTemplateFactory(program=self.program2)
 
-        self.pdu_upload1_program1 = PeriodicDataUpdateUploadFactory(template=pdu_template1_program1, created_by=self.user)
-        self.pdu_upload2_program1 = PeriodicDataUpdateUploadFactory(template=pdu_template2_program1, created_by=self.user)
+        self.pdu_upload1_program1 = PeriodicDataUpdateUploadFactory(
+            template=pdu_template1_program1, created_by=self.user
+        )
+        self.pdu_upload2_program1 = PeriodicDataUpdateUploadFactory(
+            template=pdu_template2_program1, created_by=self.user
+        )
         self.pdu_upload_program2 = PeriodicDataUpdateUploadFactory(template=pdu_template_program2, created_by=self.user)
         self.url_list = reverse(
             "api:periodic-data-update:periodic-data-update-uploads-list",
@@ -138,7 +145,6 @@ class TestPeriodicDataUpdateUploadViews:
             "created_by": self.pdu_upload_program2.created_by.get_full_name(),
         } not in response_json
 
-
     def test_list_periodic_data_update_templates_caching(
         self,
         api_client: Callable,
@@ -171,4 +177,3 @@ class TestPeriodicDataUpdateUploadViews:
             assert len(ctx.captured_queries) == 5
 
             assert etag_second_call == etag
-

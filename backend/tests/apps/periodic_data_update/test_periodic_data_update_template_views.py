@@ -1,4 +1,9 @@
+import json
 from typing import Callable
+
+from django.core.cache import cache
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 
 import freezegun
 import pytest
@@ -231,3 +236,36 @@ class TestPeriodicDataUpdateTemplateViews:
             "id": self.pdu_template_program2.id,
             "rounds_data": self.pdu_template_program2.rounds_data,
         } == response_json
+
+    def test_list_periodic_data_update_templates_caching(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PDU_VIEW_LIST_AND_DETAILS],
+            self.afghanistan,
+            self.program1,
+        )
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.client.get(self.url_list)
+            assert response.status_code == status.HTTP_200_OK
+
+            etag = response.headers["etag"]
+            assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
+            assert len(ctx.captured_queries) == 12
+
+        # Test that reoccurring requests use cached data
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.client.get(self.url_list)
+            assert response.status_code == status.HTTP_200_OK
+
+            etag_second_call = response.headers["etag"]
+            assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
+            assert len(ctx.captured_queries) == 5
+
+            assert etag_second_call == etag
