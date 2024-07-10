@@ -199,7 +199,7 @@ class BaseElasticSearchTestCase(TestCase):
     @pytest.fixture(autouse=True)
     def _setup_elasticsearch(self, django_elasticsearch_setup: None) -> None:
         # Setup elasticsearch to work in parallel
-        pass
+        yield
 
 
 class UploadDocumentsBase(APITestCase):
