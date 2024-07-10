@@ -1,12 +1,16 @@
 import { useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useGrievancesChoiceDataQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { GrievancesFilters } from '@components/grievances/GrievancesTable/GrievancesFilters';
 import { GrievancesTable } from '@components/grievances/GrievancesTable/GrievancesTable';
-import { hasPermissionInModule } from '../../../config/permissions';
+import {
+  PERMISSIONS,
+  hasPermissionInModule,
+  hasPermissions,
+} from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import {
@@ -16,9 +20,13 @@ import {
 } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { Tabs, Tab } from '@core/Tabs';
+import { ButtonTooltip } from '@components/core/ButtonTooltip';
+import { t } from 'i18next';
+import { useProgramContext } from 'src/programContext';
 
-export function GrievancesTablePage(): React.ReactElement {
+export const GrievancesTablePage = (): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
+  const { isActiveProgram } = useProgramContext();
   const permissions = usePermissions();
   const { id, cashPlanId } = useParams();
   const location = useLocation();
@@ -113,7 +121,23 @@ export function GrievancesTablePage(): React.ReactElement {
 
   return (
     <>
-      <PageHeader tabs={tabs} title="Grievance Tickets" />
+      <PageHeader tabs={tabs} title="Grievance Tickets">
+        {hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
+          <ButtonTooltip
+            variant="contained"
+            color="primary"
+            component={Link}
+            title={t(
+              'Program has to be active to create a new Grievance Ticket',
+            )}
+            to={`/${baseUrl}/grievance/new-ticket`}
+            data-cy="button-new-ticket"
+            disabled={!isActiveProgram}
+          >
+            {t('NEW TICKET')}
+          </ButtonTooltip>
+        )}
+      </PageHeader>
       <GrievancesFilters
         choicesData={choicesData}
         filter={filter}
@@ -126,4 +150,4 @@ export function GrievancesTablePage(): React.ReactElement {
       <GrievancesTable filter={appliedFilter} selectedTab={selectedTab} />
     </>
   );
-}
+};
