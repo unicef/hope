@@ -16,27 +16,27 @@ pytestmark = pytest.mark.django_db(transaction=True)
 
 @pytest.fixture
 def social_worker_program() -> Program:
-    return get_program_with_dct_type_and_name("Worker Program", "WORK", DataCollectingType.Type.SOCIAL)
+    yield get_program_with_dct_type_and_name("Worker Program", "WORK", DataCollectingType.Type.SOCIAL)
 
 
 @pytest.fixture
 def normal_program() -> Program:
-    return get_program_with_dct_type_and_name("Normal Program", "NORM", DataCollectingType.Type.STANDARD)
+    yield get_program_with_dct_type_and_name("Normal Program", "NORM", DataCollectingType.Type.STANDARD)
 
 
 @pytest.fixture
 def active_program() -> Program:
-    return get_program_with_dct_type_and_name("Active Program", "ACTI", status=Program.ACTIVE)
+    yield get_program_with_dct_type_and_name("Active Program", "ACTI", status=Program.ACTIVE)
 
 
 @pytest.fixture
 def draft_program() -> Program:
-    return get_program_with_dct_type_and_name("Draft Program", "DRAF", status=Program.DRAFT)
+    yield get_program_with_dct_type_and_name("Draft Program", "DRAF", status=Program.DRAFT)
 
 
 @pytest.fixture
 def finished_program() -> Program:
-    return get_program_with_dct_type_and_name("Finished Program", "FINI", status=Program.FINISHED)
+    yield get_program_with_dct_type_and_name("Finished Program", "FINI", status=Program.FINISHED)
 
 
 def get_program_with_dct_type_and_name(

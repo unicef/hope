@@ -7,6 +7,51 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots['TestTargetPopulationQuery::test_all_targets_query_order_by_created_by 1'] = {
+    'data': {
+        'allTargetPopulation': {
+            'edges': [
+                {
+                    'node': {
+                        'createdBy': {
+                            'firstName': 'First',
+                            'lastName': 'User'
+                        },
+                        'name': 'target_population_residence_status',
+                        'status': 'OPEN',
+                        'totalHouseholdsCount': 1,
+                        'totalIndividualsCount': 2
+                    }
+                },
+                {
+                    'node': {
+                        'createdBy': {
+                            'firstName': 'Second',
+                            'lastName': 'User'
+                        },
+                        'name': 'target_population_size_1_approved',
+                        'status': 'LOCKED',
+                        'totalHouseholdsCount': 2,
+                        'totalIndividualsCount': 2
+                    }
+                },
+                {
+                    'node': {
+                        'createdBy': {
+                            'firstName': 'Test',
+                            'lastName': 'User'
+                        },
+                        'name': 'target_population_size_2',
+                        'status': 'OPEN',
+                        'totalHouseholdsCount': 1,
+                        'totalIndividualsCount': 2
+                    }
+                }
+            ]
+        }
+    }
+}
+
 snapshots['TestTargetPopulationQuery::test_simple_all_targets_query_0_with_permission 1'] = {
     'data': {
         'allTargetPopulation': {

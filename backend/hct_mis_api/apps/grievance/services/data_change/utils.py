@@ -49,6 +49,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.models import DeliveryMechanismData
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -128,6 +129,7 @@ def handle_role(role: str, household: Household, individual: Individual) -> None
             household=household,
             role=role,
             defaults={"individual": individual},
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
 
@@ -140,16 +142,29 @@ def handle_add_document(document_data: Dict, individual: Individual) -> Document
     if photo:
         photo = photoraw
 
-    document_already_exists = Document.objects.filter(
+    document_type = DocumentType.objects.get(key=document_key)
+
+    if Document.objects.filter(
         document_number=number,
         type__key=document_key,
         country__iso_code3=country_code,
         program_id=individual.program_id,
-    ).exists()
-    if document_already_exists:
-        raise ValidationError(f"Document with number {number} of type {document_key} already exists")
+        status=Document.STATUS_VALID,
+    ).exists():
+        raise ValidationError(f"Document with number {number} of type {document_type} already exists")
 
-    document_type = DocumentType.objects.get(key=document_key)
+    if (
+        document_type.unique_for_individual
+        and Document.objects.filter(
+            type__key=document_key,
+            individual=individual,
+            country__iso_code3=country_code,
+            program_id=individual.program_id,
+            status=Document.STATUS_VALID,
+        ).exists()
+    ):
+        raise ValidationError(f"Document of type {document_type} already exists for this individual")
+
     country = geo_models.Country.objects.get(iso_code3=country_code)
 
     return Document(
@@ -159,6 +174,7 @@ def handle_add_document(document_data: Dict, individual: Individual) -> Document
         photo=photo,
         country=country,
         program_id=individual.program_id,
+        rdi_merge_status=MergeStatusModel.MERGED,
     )
 
 
@@ -172,21 +188,37 @@ def handle_edit_document(document_data: Dict) -> Document:
         photo = photoraw
 
     document = get_object_or_404(Document.objects.select_for_update(), id=(decode_id_string(document_data.get("id"))))
-    document_already_exists = (
+    document_type = DocumentType.objects.get(key=document_key)
+
+    if (
         Document.objects.exclude(pk=document.id)
         .filter(
             document_number=number,
             type__key=document_key,
             country__iso_code3=country_code,
             program_id=document.program_id,
+            status=Document.STATUS_VALID,
         )
         .exists()
-    )
-    if document_already_exists:
-        raise ValidationError(f"Document with number {number} of type {document_key} already exists")
+    ):
+        raise ValidationError(f"Document with number {number} of type {document_type} already exists")
+
+    if (
+        document_type.unique_for_individual
+        and Document.objects.exclude(pk=document.id)
+        .filter(
+            type__key=document_key,
+            individual=document.individual,
+            country__iso_code3=country_code,
+            program_id=document.program_id,
+            status=Document.STATUS_VALID,
+        )
+        .exists()
+    ):
+        raise ValidationError(f"Document of type {document_type} already exists for this individual")
 
     document.document_number = number
-    document.type = DocumentType.objects.get(key=document_key)
+    document.type = document_type
     document.country = geo_models.Country.objects.get(iso_code3=country_code)
     document.photo = photo
 
@@ -204,6 +236,7 @@ def handle_add_payment_channel(payment_channel: Dict, individual: Individual) ->
             bank_account_number=bank_account_number,
             account_holder_name=payment_channel.get("account_holder_name", ""),
             bank_branch_name=payment_channel.get("bank_branch_name", ""),
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
     return None
 
@@ -264,7 +297,9 @@ def handle_add_identity(identity: Dict, individual: Individual) -> IndividualIde
     if identity_already_exists:
         raise ValidationError(f"Identity with number {number}, partner: {partner_name} already exists")
 
-    return IndividualIdentity(number=number, individual=individual, partner=partner, country=country)
+    return IndividualIdentity(
+        number=number, individual=individual, partner=partner, country=country, rdi_merge_status=MergeStatusModel.MERGED
+    )
 
 
 def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
