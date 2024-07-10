@@ -193,7 +193,7 @@ def filter_based_on_partner_areas_2(
 
 
 def validate_individual_for_need_adjudication(
-    partner: Partner, individual: Individual, ticket_details: TicketNeedsAdjudicationDetails
+    partner: Partner, individual: Individual, ticket_details: TicketNeedsAdjudicationDetails, operation_type: str
 ) -> None:
     # Validate partner's permission
     if not partner.is_unicef:
@@ -205,6 +205,18 @@ def validate_individual_for_need_adjudication(
         raise ValidationError(
             f"The selected individual {individual.unicef_id} is not valid, must be one of those attached to the ticket"
         )
+    # not possible to add the same Individual as a duplicate and distinct
+    if operation_type == "duplicate":
+        if individual in ticket_details.selected_distinct.all():
+            raise ValidationError(
+                f"The selected individual {individual.unicef_id} is already selected as distinct"
+            )
+    if operation_type == "distinct":
+        if individual in ticket_details.selected_individuals.all():
+            raise ValidationError(
+                f"The selected individual {individual.unicef_id} is already selected as duplicate"
+            )
 
+    # validation for withdrawn Individual
     if individual.withdrawn:
         raise ValidationError(f"The selected individual {individual.unicef_id} is not valid, must be not withdrawn")
