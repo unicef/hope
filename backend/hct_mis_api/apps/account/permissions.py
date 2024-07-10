@@ -193,10 +193,10 @@ class Permissions(Enum):
     REPORTING_EXPORT = auto()
 
     # Periodic Data Update
-    PDU_TEMPLATE_VIEW_LIST = auto()
-    PDU_TEMPLATE_VIEW_DETAILS = auto()
+    PDU_VIEW_LIST_AND_DETAILS = auto()
     PDU_TEMPLATE_CREATE = auto()
     PDU_TEMPLATE_DOWNLOAD = auto()
+    PDU_UPLOAD = auto()
 
     # All
     ALL_VIEW_PII_DATA_ON_LISTS = auto()

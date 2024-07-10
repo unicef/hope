@@ -15,20 +15,25 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.api.permissions import (
-    PaymentViewListManagerialPermission,
     PDUTemplateCreatePermission,
     PDUTemplateDownloadPermission,
-    PDUTemplateViewDetailsPermission,
-    PDUTemplateViewListPermission,
-    PMViewListPermission,
+    PDUUploadPermission,
+    PDUViewListAndDetailsPermission,
 )
 from hct_mis_api.apps.core.api.mixins import ActionMixin, BusinessAreaProgramMixin
-from hct_mis_api.apps.periodic_data_update.api.caches import PDUTemplateKeyConstructor
+from hct_mis_api.apps.periodic_data_update.api.caches import (
+    PDUTemplateKeyConstructor,
+    PDUUpdateKeyConstructor,
+)
 from hct_mis_api.apps.periodic_data_update.api.serializers import (
     PeriodicDataUpdateTemplateDetailSerializer,
     PeriodicDataUpdateTemplateListSerializer,
+    PeriodicDataUpdateUploadListSerializer,
 )
-from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
+from hct_mis_api.apps.periodic_data_update.models import (
+    PeriodicDataUpdateTemplate,
+    PeriodicDataUpdateUpload,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -46,15 +51,13 @@ class PeriodicDataUpdateTemplateViewSet(
         "retrieve": PeriodicDataUpdateTemplateDetailSerializer,
         # 'create': PeriodicDataUpdateTemplateCreateSerializer,
     }
-    permission_classes = []
-    # permission_classes_by_action = {
-    #     'list': [PDUTemplateViewListPermission],
-    #     'retrieve': [PDUTemplateViewDetailsPermission],
-    #     # 'create': [PDUTemplateCreatePermission],
-    #     'export': [PDUTemplateCreatePermission],
-    #     'download': [PDUTemplateDownloadPermission],
-    # }
-    cache_list_key_contructor = PDUTemplateKeyConstructor
+    permission_classes_by_action = {
+        "list": [PDUViewListAndDetailsPermission],
+        "retrieve": [PDUViewListAndDetailsPermission],
+        # 'create': [PDUTemplateCreatePermission],
+        # 'export': [PDUTemplateCreatePermission],
+        # 'download': [PDUTemplateDownloadPermission],
+    }
     filter_backends = (OrderingFilter,)
 
     def get_queryset(self) -> QuerySet:
@@ -90,3 +93,36 @@ class PeriodicDataUpdateTemplateViewSet(
         else:
             logger.error(f"XLSX File not found. PeriodicDataUpdateTemplate ID: {pdu_template.id}")
             raise ValidationError("Template file is missing")
+
+
+class PeriodicDataUpdateUploadViewSet(
+    ActionMixin,
+    BusinessAreaProgramMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet,
+):
+    serializer_classes_by_action = {
+        "list": PeriodicDataUpdateUploadListSerializer,
+        # 'upload': PeriodicDataUpdateUploadSerializer,
+    }
+    permission_classes_by_action = {
+        "list": [PDUViewListAndDetailsPermission],
+        # 'upload': [PDUUploadPermission],
+    }
+    filter_backends = (OrderingFilter,)
+
+    def get_queryset(self) -> QuerySet:
+        business_area = self.get_business_area()
+        program = self.get_program()
+        return PeriodicDataUpdateUpload.objects.filter(template__business_area=business_area, template__program=program)
+
+    @etag_decorator(PDUUpdateKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=PDUUpdateKeyConstructor())
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
+
+    @action(detail=True, methods=["get"])
+    def upload(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        pass  # celery task to upload the file
+

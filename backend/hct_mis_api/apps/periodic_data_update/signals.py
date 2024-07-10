@@ -18,7 +18,5 @@ def increment_payment_plan_version_cache(
 
     version_key = f"{business_area_slug}:{business_area_version}:{program_id}:periodic_data_update_template_list"
     get_or_create_cache_key(version_key, 0)
-    print(version_key)
-    print(get_or_create_cache_key(version_key, 0))
 
     cache.incr(version_key)

@@ -35,12 +35,8 @@ class PaymentViewListManagerialPermission(BaseRestPermission):
     PERMISSIONS = [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL]
 
 
-class PDUTemplateViewListPermission(BaseRestPermission):
-    PERMISSIONS = [Permissions.PDU_TEMPLATE_VIEW_LIST]
-
-
-class PDUTemplateViewDetailsPermission(BaseRestPermission):
-    PERMISSIONS = [Permissions.PDU_TEMPLATE_VIEW_DETAILS]
+class PDUViewListAndDetailsPermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PDU_VIEW_LIST_AND_DETAILS]
 
 
 class PDUTemplateCreatePermission(BaseRestPermission):
@@ -49,3 +45,7 @@ class PDUTemplateCreatePermission(BaseRestPermission):
 
 class PDUTemplateDownloadPermission(BaseRestPermission):
     PERMISSIONS = [Permissions.PDU_TEMPLATE_DOWNLOAD]
+
+
+class PDUUploadPermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PDU_UPLOAD]
