@@ -34,6 +34,54 @@ class PeriodicDataUpdateExportTemplateService:
         self.admin2_filter = periodic_data_update_template.filters.get("admin2")
         self.received_assistance_filter = periodic_data_update_template.filters.get("received_assistance")
 
+    """
+    one with data
+    one with metadata
+    id of template
+    id of template saved also in xlsx metadata https://stackoverflow.com/questions/72888685/add-custom-properties-to-excel-workbook-with-openpyxl
+    individual__uuid
+    individual_unicef_id
+    first_name
+    last_name
+    {pdu_field_name}__round_number
+    {pdu_field_name}__round_name
+    {pdu_field_name}__value
+    {pdu_field_name}__collection_date
+    
+     {
+                "field": "Vaccination Records Update",
+                "round": 2,
+                "round_name": "February vaccination",
+                "number_of_records": 100,
+            },
+    """
+    def generate_row(self, individual: Individual):
+
+        individual__uuid = individual.pk
+        individual_unicef_id = individual.unicef_id
+        first_name = individual.given_name
+        last_name = individual.family_name
+        row =[individual__uuid, individual_unicef_id, first_name, last_name]
+        is_individual_not_allowed = True
+        used_in_rounds = dict()
+        for round_info_data in self.periodic_data_update_template.rounds_data:
+            pdu_field_name = round_info_data["field"]
+            round_number = round_info_data["round"]
+            round_name = round_info_data["round_name"]
+            round_value = self._get_round_value(individual, pdu_field_name, round_number)
+            used_in_rounds[pdu_field_name] = used_in_rounds.get(pdu_field_name, 0) + 1
+            is_individual_not_allowed = is_individual_not_allowed or (round_value is None)
+            row.extend([round_number, round_name])
+
+
+    def _get_round_value(self, individual, pdu_field_name, round_number):
+        flex_fields_data = individual.flex_fields
+        field_data = flex_fields_data.get(pdu_field_name)
+        if field_data:
+            round_data = field_data.get(str(round_number))
+            if round_data:
+                return round_data.get("value")
+        return None
     def _get_individuals_queryset(self):
         queryset = Individual.objects
         queryset = queryset.filter(program=self.program)
