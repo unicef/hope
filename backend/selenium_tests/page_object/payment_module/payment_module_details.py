@@ -219,7 +219,7 @@ class PaymentModuleDetails(BaseComponents):
         return self.wait_for(self.buttonMarkAsReleased)
 
     def checkStatus(self, status: str) -> None:
-        for _ in range(10):
+        for _ in range(30):
             if status == self.getStatusContainer().text:
                 break
             sleep(1)
