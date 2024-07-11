@@ -63,7 +63,7 @@ jobs:
           fi
       - name: DockerHub login
         uses: docker/login-action@v1
-        if: env.DOCKERHUB_USERNAME && env.DOCKERHUB_TOKEN
+        if: ${{ env.DOCKERHUB_USERNAME && env.DOCKERHUB_TOKEN }}
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -89,12 +89,12 @@ jobs:
             ./
 
       - name: Save image to tar
-        if: ! ( env.DOCKERHUB_USERNAME && env.DOCKERHUB_TOKEN )
+        if: ${{ !( env.DOCKERHUB_USERNAME && env.DOCKERHUB_TOKEN ) }}
         run: |
           docker save ${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev | gzip > dev-image.tar.gz
 
       - name: Upload Artifact
-        if: ! ( env.DOCKERHUB_USERNAME && env.DOCKERHUB_TOKEN )
+        if: ${{ !( env.DOCKERHUB_USERNAME && env.DOCKERHUB_TOKEN ) }}
         uses: actions/upload-artifact@v4
         with:
           name: dev-image
@@ -117,14 +117,14 @@ jobs:
           fi
 
       - name: Download Artifact
-        if: ! ( env.DOCKERHUB_USERNAME && env.DOCKERHUB_TOKEN )
+        if: ${{ !( env.DOCKERHUB_USERNAME && env.DOCKERHUB_TOKEN ) }}
         uses: actions/download-artifact@v4
         with:
           name: dev-image
           path: /tmp/dev-image.tar.gz
 
       - name: Load image from tar
-        if: ! ( env.DOCKERHUB_USERNAME && env.DOCKERHUB_TOKEN )
+        if: ${{ !( env.DOCKERHUB_USERNAME && env.DOCKERHUB_TOKEN ) }}
         run: |
           gunzip -c /tmp/dev-image.tar.gz | docker load
 
