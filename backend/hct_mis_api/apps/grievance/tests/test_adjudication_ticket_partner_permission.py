@@ -141,6 +141,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
         self.user.save()
 
         self.ticket_details.selected_individuals.add(self.individuals_2[0])  # burka guy, but can be anyone
+        self.ticket_details.selected_distinct.add(self.individuals_1[0])
 
         self.create_user_role_with_permissions(
             self.user,
@@ -252,8 +253,6 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
         self.individuals_1[0].program = self.program
         self.individuals_1[0].save()
 
-        self.ticket_details.selected_individuals.add(self.individuals_1[0])  # doshi guy
-
         self.create_user_role_with_permissions(
             self.user,
             [
@@ -268,6 +267,10 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
             {"size": 1, "business_area": self.business_area, "admin2": self.doshi, "program": self.program},
             {"given_name": "Tester", "family_name": "Test", "middle_name": "", "full_name": "Tester Test"},
         )
+        individuals[0].unicef_id = "IND-111"
+        individuals[0].save()
+
+        self.ticket_details.selected_individuals.add(self.individuals_1[0], individuals[0])  # doshi guy
 
         self.snapshot_graphql_request(
             request_string=APPROVE_NEEDS_ADJUDICATION_MUTATION,
@@ -370,6 +373,8 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
     def test_close_ticket_when_partner_with_permission(self) -> None:
         partner = PartnerFactory()
         self.update_partner_access_to_program(partner, self.program, [self.doshi])
+        self.ticket_details.selected_distinct.add(self.individuals_1[0])
+        self.ticket_details.selected_individuals.add(self.individuals_2[0])
 
         self.user.partner = partner
         self.user.save()
@@ -399,6 +404,8 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
     def test_close_ticket_when_partner_with_permission_and_no_selected_program(self) -> None:
         partner = PartnerFactory()
         self.update_partner_access_to_program(partner, self.program, [self.doshi])
+        self.ticket_details.selected_distinct.add(self.individuals_1[0])
+        self.ticket_details.selected_individuals.add(self.individuals_2[0])
 
         self.user.partner = partner
         self.user.save()
@@ -467,6 +474,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
         self.update_partner_access_to_program(partner, self.program, [self.burka])
 
         self.ticket_details.selected_individuals.add(self.individuals_1[0])  # doshi guy, should fail
+        self.ticket_details.selected_distinct.add(self.individuals_2[0])
 
         self.user.partner = partner
         self.user.save()

@@ -69,7 +69,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         grievanceTicket {
           id
           needsAdjudicationTicketDetails {
-            selectedIndividuals {
+            possibleDuplicates {
               id
             }
           }
@@ -189,14 +189,16 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             issue_type=None,
             admin2=cls.admin_area_1,
             business_area=cls.business_area,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
 
-        TicketNeedsAdjudicationDetailsFactory(
+        ticket_details = TicketNeedsAdjudicationDetailsFactory(
             ticket=cls.needs_adjudication_grievance_ticket,
             golden_records_individual=first_individual,
             possible_duplicate=second_individual,
             selected_individual=None,
         )
+        ticket_details.possible_duplicates.add(cls.individuals[0], cls.individuals[1])
 
     @parameterized.expand(
         [
@@ -284,7 +286,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         response = self.approve_multiple_needs_adjudication_ticket(grievance_ticket_id)
 
         response_data = response["data"]["approveNeedsAdjudication"]["grievanceTicket"]
-        selected_individuals = response_data["needsAdjudicationTicketDetails"]["selectedIndividuals"]
+        selected_individuals = response_data["needsAdjudicationTicketDetails"]["possibleDuplicates"]
         selected_individuals_ids = list(map(lambda d: d["id"], selected_individuals))
 
         self.assertEqual(grievance_ticket_id, response_data["id"])
