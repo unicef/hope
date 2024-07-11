@@ -163,9 +163,8 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
                     self.payout_amount, entitlement_quantity
                 )
             except Exception:
-                raise PaymentGatewayAPI.PaymentGatewayAPIException(
-                    f"Invalid delivered_quantity {self.payout_amount} for Payment {self.remote_id}"
-                )
+                logger.error(f"Invalid delivered_quantity {self.payout_amount} for Payment {self.remote_id}")
+                _hope_status = Payment.STATUS_ERROR
             return _hope_status
 
         mapping = {
@@ -180,7 +179,8 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
 
         hope_status = mapping.get(self.status)
         if not hope_status:
-            raise PaymentGatewayAPI.PaymentGatewayAPIException(f"Invalid Payment status: {self.status}")
+            logger.error(f"Invalid Payment status: {self.status}")
+            hope_status = Payment.STATUS_ERROR
 
         return hope_status() if callable(hope_status) else hope_status
 
@@ -435,8 +435,16 @@ class PaymentGatewayService:
             _payment.fsp_auth_code = matching_pg_payment.auth_code
             update_fields = ["status", "status_date", "fsp_auth_code"]
 
-            if _payment.status not in Payment.ALLOW_CREATE_VERIFICATION and matching_pg_payment.message:
-                _payment.reason_for_unsuccessful_payment = matching_pg_payment.message
+            if _payment.status in [
+                Payment.STATUS_ERROR,
+                Payment.STATUS_MANUALLY_CANCELLED,
+            ]:
+                if matching_pg_payment.message:
+                    _payment.reason_for_unsuccessful_payment = matching_pg_payment.message
+                elif matching_pg_payment.payout_amount:
+                    _payment.reason_for_unsuccessful_payment = f"Delivered amount: {matching_pg_payment.payout_amount}"
+                else:
+                    _payment.reason_for_unsuccessful_payment = "Unknown error"
                 update_fields.append("reason_for_unsuccessful_payment")
 
             delivered_quantity = matching_pg_payment.payout_amount
