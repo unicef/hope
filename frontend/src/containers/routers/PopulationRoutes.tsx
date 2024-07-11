@@ -7,6 +7,7 @@ import { PeoplePage } from '@containers/pages/people/PeoplePage';
 import { PeopleDetailsPage } from '@containers/pages/people/PeopleDetailsPage';
 import { NewTemplatePage } from '@containers/pages/householdMembers/NewTemplatePage';
 import { HouseholdMembersPage } from '@containers/pages/population/HouseholdMembersPage';
+import { NewTemplatePeoplePage } from '@containers/pages/householdMembers/NewTemplatePeoplePage';
 
 export const PopulationRoutes = (): React.ReactElement => {
   const populationRoutes = [
@@ -35,8 +36,12 @@ export const PopulationRoutes = (): React.ReactElement => {
       element: <PopulationHouseholdPage />,
     },
     {
-      path: 'population/household-members/new-template',
+      path: 'population/individuals/new-template',
       element: <NewTemplatePage />,
+    },
+    {
+      path: 'population/people/new-template',
+      element: <NewTemplatePeoplePage />,
     },
   ];
 

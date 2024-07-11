@@ -13,7 +13,7 @@ import { FilterIndividuals } from '@components/periodicDataUpdates/FilterIndivid
 import { FieldsToUpdate } from '@components/periodicDataUpdates/FieldsToUpdate';
 import { Formik } from 'formik';
 
-export const NewTemplatePage = (): React.ReactElement => {
+export const NewTemplatePeoplePage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
@@ -44,8 +44,8 @@ export const NewTemplatePage = (): React.ReactElement => {
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: t('Household Members'),
-      to: `/${baseUrl}/population/individuals`,
+      title: t('People'),
+      to: `/${baseUrl}/population/people`,
     },
   ];
 
@@ -107,7 +107,7 @@ export const NewTemplatePage = (): React.ReactElement => {
                   variant="outlined"
                   color="secondary"
                   component={Link}
-                  to={`/${baseUrl}/population/individuals`}
+                  to={`/${baseUrl}/population/people`}
                   style={{ marginRight: '10px' }}
                 >
                   Cancel

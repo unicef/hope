@@ -7,10 +7,12 @@ import { PeriodicDataUpdatesTemplatesList } from './PeriodicDataUpdatesTemplates
 import { PeriodicDataUpdatesUpdatesList } from './PeriodicDataUpdatesUpdatesList';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PeriodDataUpdatesUploadDialog } from './PeriodicDataUpdatesUploadDialog';
+import { useProgramContext } from 'src/programContext';
 
 export const PeriodicDataUpdates = (): React.ReactElement => {
   const [value, setValue] = useState(0);
   const { baseUrl } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
 
   const handleChange = (
     _event: React.ChangeEvent<object>,
@@ -18,6 +20,10 @@ export const PeriodicDataUpdates = (): React.ReactElement => {
   ) => {
     setValue(newValue);
   };
+
+  const newTemplatePath = isSocialDctType
+    ? `/${baseUrl}/population/people/new-template`
+    : `/${baseUrl}/population/individuals/new-template`;
 
   return (
     <BaseSection
@@ -41,7 +47,7 @@ export const PeriodicDataUpdates = (): React.ReactElement => {
               variant="contained"
               color="primary"
               component={Link}
-              to={`/${baseUrl}/population/household-members/new-template`}
+              to={newTemplatePath}
               startIcon={<AddIcon />}
             >
               New Template
