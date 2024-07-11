@@ -13,7 +13,7 @@ from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_disable_individual_service,
 )
-from hct_mis_api.apps.grievance.signals import individual_marked_as_duplicated
+from hct_mis_api.apps.grievance.signals import individual_marked_as_duplicated, individual_marked_as_distinct
 from hct_mis_api.apps.grievance.utils import (
     traverse_sibling_tickets,
     validate_all_individuals_before_close_needs_adjudication,
@@ -70,7 +70,7 @@ def close_needs_adjudication_old_ticket(ticket_details: TicketNeedsAdjudicationD
 
 
 def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationDetails, user: AbstractUser) -> None:
-    # TODO: need to double check all this logic
+    # TODO: need to double check all this logic here
     validate_all_individuals_before_close_needs_adjudication(ticket_details)
 
     distinct_individuals = ticket_details.selected_distinct.all()
@@ -300,8 +300,8 @@ def mark_as_distinct_individual(
     program: "Program",
 ) -> None:
     old_individual = Individual.objects.get(id=individual_to_distinct.id)
-    # TODO: who is unique_individual is more then 1 was selected.. or none just
-    individual_to_distinct.mark_as_duplicate()  # unmark_as_duplicate
+    # TODO: who is unique_individual is more then 1 was selected.. or just None
+    individual_to_distinct.mark_as_distinct()
     log_create(
         Individual.ACTIVITY_LOG_MAPPING,
         "business_area",
@@ -310,7 +310,7 @@ def mark_as_distinct_individual(
         old_individual,
         individual_to_distinct,
     )
-    # individual_marked_as_distinct.send(sender=Individual, instance=individual_to_distinct)
+    individual_marked_as_distinct.send(sender=Individual, instance=individual_to_distinct)
     if household:
         household.refresh_from_db()
         if household.active_individuals.count() > 0:
