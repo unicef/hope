@@ -88,6 +88,18 @@ jobs:
             --$option \
             ./
 
+      - name: Save image to tar
+        if: !( env.DOCKERHUB_USERNAME && env.DOCKERHUB_TOKEN )
+        run: |
+          docker save ${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev | gzip > dev-image.tar.gz
+
+      - name: Upload Artifact
+        if: !( env.DOCKERHUB_USERNAME && env.DOCKERHUB_TOKEN )
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-image
+          path: dev-image.tar.gz
+
   isort:
     runs-on: ubuntu-latest
     needs: [build_dev]
@@ -103,6 +115,18 @@ jobs:
           else
             echo "DOCKERHUB_ORGANIZATION=unicef" >> $GITHUB_ENV
           fi
+
+      - name: Download Artifact
+        if: !( env.DOCKERHUB_USERNAME && env.DOCKERHUB_TOKEN )
+        uses: actions/download-artifact@v4
+        with:
+          name: dev-image
+          path: /tmp/dev-image.tar.gz
+
+      - name: Load image from tar
+        if: !( env.DOCKERHUB_USERNAME && env.DOCKERHUB_TOKEN )
+        run: |
+          gunzip -c /tmp/dev-image.tar.gz | docker load
 
       - name: Check
         run: |
