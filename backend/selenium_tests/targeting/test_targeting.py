@@ -367,6 +367,7 @@ class TestTargeting:
         assert str(target_population.status) in pageTargetingDetails.getLabelStatus().text
         pageTargetingDetails.getButtonRebuild().click()
 
+    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_targeting_rebuild(
         self,
         create_programs: None,
@@ -478,6 +479,7 @@ class TestTargeting:
         assert 1 == len(new_list)
         assert "Test NEW TP" in new_list[0].text
 
+    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_targeting_different_program_statuses(
         self,
         create_programs: None,
@@ -732,6 +734,7 @@ class TestTargeting:
         pageTargetingCreate.clickButtonTargetPopulationCreate()
         assert "Females Age 0 - 5: 11" in pageTargetingCreate.getCriteriaContainer().text
 
+    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_targeting_parametrized_rules_filters_and_or(
         self,
         create_programs: None,
