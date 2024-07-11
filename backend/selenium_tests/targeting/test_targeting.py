@@ -732,6 +732,7 @@ class TestTargeting:
         pageTargetingCreate.clickButtonTargetPopulationCreate()
         assert "Females Age 0 - 5: 11" in pageTargetingCreate.getCriteriaContainer().text
 
+    @pytest.mark.skip("Problem with deadlock during test - 202318")
     def test_targeting_parametrized_rules_filters_and_or(
         self,
         create_programs: None,
