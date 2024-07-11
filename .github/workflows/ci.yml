@@ -97,8 +97,8 @@ jobs:
         if: ${{ !( env.DOCKERHUB_USERNAME && env.DOCKERHUB_TOKEN ) }}
         uses: actions/upload-artifact@v4
         with:
-          name: dev-image
-          path: dev-image.tar.gz
+          name: dev-artifact
+          path: /tmp/dev-image.tar.gz
 
   isort:
     runs-on: ubuntu-latest
@@ -120,8 +120,8 @@ jobs:
         if: ${{ !( env.DOCKERHUB_USERNAME && env.DOCKERHUB_TOKEN ) }}
         uses: actions/download-artifact@v4
         with:
-          name: dev-image
-          path: /tmp/dev-image.tar.gz
+          name: dev-artifact
+          path: /tmp
 
       - name: Load image from tar
         if: ${{ !( env.DOCKERHUB_USERNAME && env.DOCKERHUB_TOKEN ) }}
