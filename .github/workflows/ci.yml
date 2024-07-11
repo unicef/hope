@@ -45,7 +45,7 @@ jobs:
       - run: yarn test --watchAll=false
         working-directory: frontend
 
-  build_and_push_dev:
+  build_dev:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Docker Buildx
@@ -56,6 +56,11 @@ jobs:
         run: |
           echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
           echo "DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }}" >> $GITHUB_ENV
+          if [ -n "${{ vars.DOCKERHUB_ORGANIZATION }}" ]; then
+            echo "DOCKERHUB_ORGANIZATION=${{ vars.DOCKERHUB_ORGANIZATION }}" >> $GITHUB_ENV
+          else
+            echo "DOCKERHUB_ORGANIZATION=unicef" >> $GITHUB_ENV
+          fi
       - name: DockerHub login
         uses: docker/login-action@v1
         if: env.DOCKERHUB_USERNAME && env.DOCKERHUB_TOKEN
@@ -76,8 +81,8 @@ jobs:
             --progress=plain \
             --cache-from type=gha, \
             --cache-to type=gha,mode=max \
-            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
-            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-latest-dev \
+            -t ${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
+            -t ${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-latest-dev \
             -f ./docker/Dockerfile \
             --target dev \
             --$option \
@@ -85,7 +90,7 @@ jobs:
 
   isort:
     runs-on: ubuntu-latest
-    needs: [build_and_push_dev]
+    needs: [build_dev]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -103,7 +108,7 @@ jobs:
 
   black:
     runs-on: ubuntu-latest
-    needs: [build_and_push_dev]
+    needs: [build_dev]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -121,7 +126,7 @@ jobs:
 
   flake8:
     runs-on: ubuntu-latest
-    needs: [build_and_push_dev]
+    needs: [build_dev]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -139,7 +144,7 @@ jobs:
 
   mypy:
     runs-on: ubuntu-latest
-    needs: [build_and_push_dev]
+    needs: [build_dev]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -155,8 +160,8 @@ jobs:
             ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
             mypy .
 
-  build_and_push_dist:
-    needs: [build_and_push_dev]
+  build_dist:
+    needs: [build_dev]
     runs-on: ubuntu-latest
     steps:
       - name: Set up Docker Buildx
@@ -198,7 +203,7 @@ jobs:
 
   unit_tests:
     runs-on: ubuntu-latest
-    needs: [build_and_push_dev]
+    needs: [build_dev]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -223,7 +228,7 @@ jobs:
 
   e2e_tests:
     runs-on: ubuntu-latest
-    needs: [build_and_push_dist]
+    needs: [build_dist]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -258,7 +263,7 @@ jobs:
 
   trivy:
     runs-on: ubuntu-latest
-    needs: [build_and_push_dist]
+    needs: [build_dist]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
