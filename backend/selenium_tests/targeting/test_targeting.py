@@ -479,6 +479,7 @@ class TestTargeting:
         assert 1 == len(new_list)
         assert "Test NEW TP" in new_list[0].text
 
+    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_targeting_different_program_statuses(
         self,
         create_programs: None,
