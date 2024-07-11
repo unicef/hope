@@ -172,11 +172,11 @@ class TestSmokePaymentModule:
         assert "New Payment Plan" in pageNewPaymentPlan.getPageHeaderTitle().text
         assert "SAVE" in pageNewPaymentPlan.getButtonSavePaymentPlan().text
         assert "Target Population" in pageNewPaymentPlan.getInputTargetPopulation().text
-        assert "Start Date*" in pageNewPaymentPlan.getInputStartDate().text
-        assert "End Date*" in pageNewPaymentPlan.getInputEndDate().text
+        assert "Start Date*" in pageNewPaymentPlan.wait_for(pageNewPaymentPlan.inputStartDate).text
+        assert "End Date*" in pageNewPaymentPlan.wait_for(pageNewPaymentPlan.inputEndDate).text
         assert "Currency" in pageNewPaymentPlan.getInputCurrency().text
-        assert "Dispersion Start Date*" in pageNewPaymentPlan.getInputDispersionStartDate().text
-        assert "Dispersion End Date*" in pageNewPaymentPlan.getInputDispersionEndDate().text
+        assert "Dispersion Start Date*" in pageNewPaymentPlan.wait_for(pageNewPaymentPlan.inputDispersionStartDate).text
+        assert "Dispersion End Date*" in pageNewPaymentPlan.wait_for(pageNewPaymentPlan.inputDispersionEndDate).text
 
     def test_smoke_details_payment_plan(
         self,
