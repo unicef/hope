@@ -17,7 +17,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { IndividualsListTable } from '../../tables/population/IndividualsListTable';
 
-export function PopulationIndividualsPage(): React.ReactElement {
+export const HouseholdMembersPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const { businessArea } = useBaseUrl();
@@ -42,7 +42,6 @@ export function PopulationIndividualsPage(): React.ReactElement {
     lastRegistrationDateMin: '',
     lastRegistrationDateMax: '',
   };
-
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -90,4 +89,4 @@ export function PopulationIndividualsPage(): React.ReactElement {
       </Box>
     </>
   );
-}
+};

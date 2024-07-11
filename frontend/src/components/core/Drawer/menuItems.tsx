@@ -76,17 +76,9 @@ export const menuItems: MenuItem[] = [
         scopes: [SCOPE_PROGRAM],
       },
       {
-        name: 'Individuals',
+        name: 'Household Members',
         href: '/population/individuals',
         selectedRegexp: /^\/population\/individuals.*$/,
-        icon: <FaceIcon />,
-        permissionModule: 'INDIVIDUALS',
-        scopes: [SCOPE_PROGRAM],
-      },
-      {
-        name: 'Household Members',
-        href: '/population/household-members',
-        selectedRegexp: /^\/population\/household-members.*$/,
         icon: <FaceIcon />,
         permissionModule: 'INDIVIDUALS',
         scopes: [SCOPE_PROGRAM],

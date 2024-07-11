@@ -3,7 +3,6 @@ import { Box, Tab, Tabs, Button } from '@mui/material';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
-import UploadIcon from '@mui/icons-material/Upload';
 import { PeriodicDataUpdatesTemplatesList } from './PeriodicDataUpdatesTemplatesList';
 import { PeriodicDataUpdatesUpdatesList } from './PeriodicDataUpdatesUpdatesList';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -29,7 +28,7 @@ export const PeriodicDataUpdates = (): React.ReactElement => {
           <Tabs
             value={value}
             onChange={handleChange}
-            aria-label="basic tabs example"
+            aria-label="periodic data updates tabs"
           >
             <Tab label="Templates" />
             <Tab label="Updates" />

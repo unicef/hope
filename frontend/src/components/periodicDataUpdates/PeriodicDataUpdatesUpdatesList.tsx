@@ -56,7 +56,6 @@ const renderUpdateRow = (row: Update): ReactElement => (
     </TableCell>
     <TableCell>{row.created_by}</TableCell>
     <TableCell>
-      <Missing />
       {/* <StatusBox
         status={statusChoices[row.status]}
         statusToColor={periodicDataUpdatesUpdatesStatusToColor}

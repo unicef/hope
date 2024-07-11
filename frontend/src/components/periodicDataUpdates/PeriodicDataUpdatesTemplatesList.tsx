@@ -80,13 +80,11 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
   };
 
   const handleExportClick = () => {
-    if (selectedTemplateId !== null) {
-      exportTemplate({
-        businessAreaSlug,
-        programId,
-        templateId: selectedTemplateId.toString(),
-      });
-    }
+    exportTemplate({
+      businessAreaSlug,
+      programId,
+      templateId: selectedTemplateId.toString(),
+    });
   };
   const handleDialogOpen = (template: Template) => {
     setSelectedTemplateId(template.id);
