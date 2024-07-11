@@ -91,7 +91,7 @@ jobs:
       - name: Save image to tar
         if: ${{ !( env.DOCKERHUB_USERNAME && env.DOCKERHUB_TOKEN ) }}
         run: |
-          docker save ${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev | gzip > dev-image.tar.gz
+          docker save ${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev | gzip > /tmp/dev-image.tar.gz
 
       - name: Upload Artifact
         if: ${{ !( env.DOCKERHUB_USERNAME && env.DOCKERHUB_TOKEN ) }}
