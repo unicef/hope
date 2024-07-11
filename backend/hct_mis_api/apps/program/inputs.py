@@ -7,6 +7,18 @@ class ProgramPartnerThroughInput(graphene.InputObjectType):
     area_access = graphene.String(description="'ADMIN_AREA' or 'BUSINESS_AREA'")
 
 
+class PeriodicFieldDataInput(graphene.InputObjectType):
+    subtype = graphene.String()
+    number_of_runs = graphene.Int()
+    rounds_names = graphene.List(graphene.String)
+
+
+class PDUFieldInput(graphene.InputObjectType):
+    id = graphene.String(required=False)
+    name = graphene.String()
+    pdu_data = PeriodicFieldDataInput()
+
+
 class CreateProgramInput(graphene.InputObjectType):
     name = graphene.String()
     start_date = graphene.Date()
@@ -23,6 +35,7 @@ class CreateProgramInput(graphene.InputObjectType):
     partners = graphene.List(ProgramPartnerThroughInput)
     partner_access = graphene.String()
     programme_code = graphene.String()
+    pdu_fields = graphene.List(PDUFieldInput)
 
 
 class UpdateProgramInput(graphene.InputObjectType):
@@ -61,3 +74,4 @@ class CopyProgramInput(graphene.InputObjectType):
     partners = graphene.List(ProgramPartnerThroughInput)
     partner_access = graphene.String()
     programme_code = graphene.String()
+    pdu_fields = graphene.List(PDUFieldInput)
