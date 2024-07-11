@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -8,6 +8,7 @@ import graphene
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
+from hct_mis_api.apps.core.flexible_attribute_service import FlexibleAttributeForPDUService
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt
@@ -68,6 +69,7 @@ class CreateProgram(
         data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
         partner_access = program_data.get("partner_access", [])
         partners_data = program_data.pop("partners", [])
+        pdu_fields = program_data.pop("pdu_fields", [])
         programme_code = program_data.get("programme_code", "")
         if programme_code:
             programme_code = programme_code.upper()
@@ -101,6 +103,8 @@ class CreateProgram(
         if partner_access == Program.SELECTED_PARTNERS_ACCESS:
             create_program_partner_access(partners_data, program, partner_access)
 
+        FlexibleAttributeForPDUService(program, pdu_fields).create_pdu_flex_attributes()
+
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
         return CreateProgram(program=program)
 
@@ -131,6 +135,7 @@ class UpdateProgram(
         partners_data = program_data.pop("partners", [])
         partner = info.context.user.partner
         partner_access = program_data.get("partner_access", program.partner_access)
+        pdu_fields = program_data.pop("pdu_fields", [])
         programme_code = program_data.get("programme_code", "")
         if programme_code:
             programme_code = programme_code.upper()
@@ -189,6 +194,9 @@ class UpdateProgram(
             partners_data = create_program_partner_access(partners_data, program, partner_access)
             remove_program_partner_access(partners_data, program)
         program.save()
+
+        FlexibleAttributeForPDUService(program, pdu_fields).update_pdu_flex_attributes()
+
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return UpdateProgram(program=program)
 
@@ -232,6 +240,7 @@ class CopyProgram(
         partner_access = program_data.get("partner_access", [])
         business_area = Program.objects.get(id=program_id).business_area
         programme_code = program_data.get("programme_code", "")
+        pdu_fields = program_data.pop("pdu_fields", [])
         partner = info.context.user.partner
         if programme_code:
             programme_code = programme_code.upper()
@@ -253,6 +262,9 @@ class CopyProgram(
         if partner_access == Program.SELECTED_PARTNERS_ACCESS:
             create_program_partner_access(partners_data, program, partner_access)
         copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
+
+        FlexibleAttributeForPDUService(program, pdu_fields).create_pdu_flex_attributes()
+
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
 
         return CopyProgram(program=program)
