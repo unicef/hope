@@ -79,8 +79,8 @@ jobs:
 
           docker buildx build \
             --progress=plain \
-            --cache-from type=gha \
-            --cache-to type=gha,mode=max \
+            --cache-from type=gha,scope=${{ github.ref_name }} \
+            --cache-to type=gha,mode=max,scope=${{ github.ref_name }} \
             -t ${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
             -t ${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-latest-dev \
             -f ./docker/Dockerfile \
