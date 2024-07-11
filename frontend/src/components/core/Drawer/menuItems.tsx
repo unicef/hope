@@ -70,7 +70,7 @@ export const menuItems: MenuItem[] = [
       {
         name: 'Households',
         href: '/population/household',
-        selectedRegexp: /^\/population\/household(?!-members).*$/,
+        selectedRegexp: /^\/population\/household.*$/,
         icon: <PeopleAltRoundedIcon />,
         permissionModule: 'HOUSEHOLDS',
         scopes: [SCOPE_PROGRAM],

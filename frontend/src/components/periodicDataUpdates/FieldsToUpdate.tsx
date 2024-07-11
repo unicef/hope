@@ -1,5 +1,5 @@
 import React from 'react';
-import { FieldArray, FormikProps } from 'formik';
+import { FieldArray } from 'formik';
 import {
   Table,
   TableBody,

@@ -55,6 +55,22 @@ export function opacityToHex(opacity: number): string {
   return Math.floor(opacity * 0xff).toString(16);
 }
 
+export function periodicDataUpdatesStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'Processing':
+      return theme.hctPalette.orange;
+    case 'Successful':
+      return theme.hctPalette.green;
+    case 'Failed':
+      return theme.hctPalette.red;
+    default:
+      return theme.hctPalette.gray;
+  }
+}
+
 export function programStatusToColor(
   theme: typeof themeObj,
   status: string,

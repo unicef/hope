@@ -40,7 +40,7 @@ export const exportPeriodicDataUpdateTemplate = async (
   programId: string,
   templateId: string,
 ): Promise<any> => {
-  const response = await api.post(
+  const response = await api.get(
     `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${templateId}/export/`,
   );
   return response.data;
@@ -55,4 +55,25 @@ export const fetchPeriodicDataUpdateTemplate = async (
     `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${templateId}/download/`,
   );
   return response.data;
+};
+
+export const uploadPeriodicDataUpdateTemplate = async (
+  businessAreaSlug: string,
+  programId: string,
+  file: File,
+  additionalParams: Record<string, any> = {},
+) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  Object.keys(additionalParams).forEach((key) => {
+    formData.append(key, additionalParams[key]);
+  });
+
+  const response = await api.post(
+    `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/`,
+    formData,
+  );
+
+  return response;
 };

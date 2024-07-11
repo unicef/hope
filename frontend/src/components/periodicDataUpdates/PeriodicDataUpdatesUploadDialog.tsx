@@ -1,17 +1,19 @@
 import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
 import { Publish } from '@mui/icons-material';
-import get from 'lodash/get';
 import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { ImportErrors } from '@containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
+//TODO MS: display errors
+// import { ImportErrors } from '@containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
 import { useSnackbar } from '@hooks/useSnackBar';
 
 import { DropzoneField } from '@core/DropzoneField';
 import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from 'src/programContext';
+import { useUploadPeriodicDataUpdateTemplate } from './PeriodicDataUpdatesTemplatesListActions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -28,10 +30,40 @@ const DisabledUploadIcon = styled(Publish)`
 
 export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
   const { showMessage } = useSnackbar();
+  const { businessArea, programId } = useBaseUrl();
   const [open, setOpenImport] = useState(false);
-  const [fileToImport, setFileToImport] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [fileToImport, setFileToImport] = useState<File | null>(null);
   const { isActiveProgram } = useProgramContext();
   const { t } = useTranslation();
+  const { mutate, error } = useUploadPeriodicDataUpdateTemplate();
+
+  const handleFileUpload = (): void => {
+    if (fileToImport) {
+      setIsLoading(true);
+      const uploadData = {
+        businessAreaSlug: businessArea,
+        programId: programId,
+        file: fileToImport,
+        additionalParams: {},
+      };
+
+      mutate(uploadData, {
+        onSuccess: () => {
+          showMessage(t('File uploaded successfully'));
+          setOpenImport(false);
+          setFileToImport(null);
+          setIsLoading(false);
+        },
+        onError: (uploadError) => {
+          showMessage(
+            uploadError ? uploadError.toString() : t('Error uploading file'),
+          );
+          setIsLoading(false);
+        },
+      });
+    }
+  };
 
   return (
     <>
@@ -57,8 +89,7 @@ export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
           <>
             <DropzoneField
               dontShowFilename={false}
-              //TODO MS: uncomment
-              loading={false}
+              loading={isLoading}
               onChange={(files) => {
                 if (files.length === 0) {
                   return;
@@ -75,18 +106,11 @@ export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
                 setFileToImport(file);
               }}
             />
-            {/* // {fileToImport &&
-            // (error?.graphQLErrors?.length || xlsxErrors?.length) ? (
-            //   <Error>
-            //     <p>Errors</p>
-            //     {error
-            //       ? error.graphQLErrors.map((x) => (
-            //           <p key={x.message}>{x.message}</p>
-            //         ))
-            //       : null}
-            //     <ImportErrors errors={xlsxErrors} />
-            //   </Error>
-            // ) : null} */}
+            {error && (
+              <Error>
+                {t('Error uploading file:')} {error.message}
+              </Error>
+            )}
           </>
           <DialogActions>
             <Button
@@ -96,16 +120,15 @@ export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
                 setFileToImport(null);
               }}
             >
-              CANCEL
+              {t('CANCEL')}
             </Button>
             <LoadingButton
-              //TODO MS: uncomment
-              loading={false}
+              loading={isLoading}
               disabled={!fileToImport}
               type="submit"
               color="primary"
               variant="contained"
-              onClick={() => null}
+              onClick={handleFileUpload}
               data-cy="button-import-submit"
             >
               {t('IMPORT')}

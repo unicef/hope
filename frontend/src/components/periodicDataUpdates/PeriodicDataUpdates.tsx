@@ -1,5 +1,5 @@
 import { BaseSection } from '@components/core/BaseSection';
-import { Box, Tab, Tabs, Button } from '@mui/material';
+import { Box, Tab, Tabs, Button, Fade } from '@mui/material';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
@@ -19,7 +19,6 @@ export const PeriodicDataUpdates = (): React.ReactElement => {
     setValue(newValue);
   };
 
-  //TODO MS: add correct paths for the tabs and button
   return (
     <BaseSection
       title="Periodic Data Updates"
@@ -54,16 +53,17 @@ export const PeriodicDataUpdates = (): React.ReactElement => {
         </Box>
       }
     >
-      {value === 0 && (
-        <Box>
-          <PeriodicDataUpdatesTemplatesList />
-        </Box>
-      )}
-      {value === 1 && (
-        <Box>
-          <PeriodicDataUpdatesUpdatesList />
-        </Box>
-      )}
+      <Fade in={true} timeout={500} key={value}>
+        {value === 0 ? (
+          <Box>
+            <PeriodicDataUpdatesTemplatesList />
+          </Box>
+        ) : (
+          <Box>
+            <PeriodicDataUpdatesUpdatesList />
+          </Box>
+        )}
+      </Fade>
     </BaseSection>
   );
 };

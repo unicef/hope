@@ -2,7 +2,6 @@ import { ReactElement, useEffect, useState } from 'react';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { columnToOrderBy, isPermissionDeniedError } from '@utils/utils';
-import { QueryFunction } from '@tanstack/react-query';
 import {
   Order,
   TableRestComponent,

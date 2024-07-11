@@ -14,7 +14,7 @@ import {
   Button,
 } from '@mui/material';
 import { LabelizedField } from '@components/core/LabelizedField';
-import { fetchPeriodicDataUpdateTemplateDetails } from '@api/periodicDataUpdate';
+import { fetchPeriodicDataUpdateTemplateDetails } from '@api/periodicDataUpdateApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery } from '@tanstack/react-query';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -23,15 +23,6 @@ interface PeriodicDataUpdatesTemplateDetailsDialogProps {
   open: boolean;
   onClose: () => void;
   template: Template;
-}
-
-interface RoundDetails {
-  round: number;
-  round_name: string;
-  number_of_records: number;
-}
-interface RoundDataItem {
-  [key: string]: RoundDetails;
 }
 
 export const PeriodicDataUpdatesTemplateDetailsDialog: React.FC<

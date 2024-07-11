@@ -1,7 +1,8 @@
 import {
   fetchPeriodicDataUpdateTemplate,
   exportPeriodicDataUpdateTemplate,
-} from '@api/periodicDataUpdate';
+  uploadPeriodicDataUpdateTemplate,
+} from '@api/periodicDataUpdateApi';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export const useDownloadPeriodicDataUpdateTemplate = () => {
@@ -23,7 +24,7 @@ export const useDownloadPeriodicDataUpdateTemplate = () => {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['fetchPeriodicDataUpdateTemplates'],
+        queryKey: ['periodicDataUpdateTemplates'],
       });
     },
   });
@@ -48,7 +49,36 @@ export const useExportPeriodicDataUpdateTemplate = () => {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['fetchPeriodicDataUpdateTemplates'],
+        queryKey: ['periodicDataUpdateTemplates'],
+      });
+    },
+  });
+};
+
+export const useUploadPeriodicDataUpdateTemplate = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      programId,
+      file,
+      additionalParams,
+    }: {
+      businessAreaSlug: string;
+      programId: string;
+      file: File;
+      additionalParams?: Record<string, any>;
+    }) =>
+      uploadPeriodicDataUpdateTemplate(
+        businessAreaSlug,
+        programId,
+        file,
+        additionalParams,
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['periodicDataUpdateTemplates'],
       });
     },
   });

@@ -1,4 +1,4 @@
-import { fetchPeriodicDataUpdateTemplates } from '@api/periodicDataUpdate';
+import { fetchPeriodicDataUpdateTemplates } from '@api/periodicDataUpdateApi';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { UniversalMoment } from '@components/core/UniversalMoment';
@@ -66,26 +66,26 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(
     null,
   );
+
   const { mutate: downloadTemplate } = useDownloadPeriodicDataUpdateTemplate();
   const { mutate: exportTemplate } = useExportPeriodicDataUpdateTemplate();
 
-  const handleDownloadClick = () => {
-    if (selectedTemplateId !== null) {
-      downloadTemplate({
-        businessAreaSlug,
-        programId,
-        templateId: selectedTemplateId.toString(),
-      });
-    }
+  const handleDownloadClick = (templateId: number) => {
+    downloadTemplate({
+      businessAreaSlug,
+      programId,
+      templateId: templateId.toString(),
+    });
   };
 
-  const handleExportClick = () => {
+  const handleExportClick = (templateId: number) => {
     exportTemplate({
       businessAreaSlug,
       programId,
-      templateId: selectedTemplateId.toString(),
+      templateId: templateId.toString(),
     });
   };
+
   const handleDialogOpen = (template: Template) => {
     setSelectedTemplateId(template.id);
     setIsDialogOpen(true);
@@ -97,7 +97,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
   };
 
   const renderTemplateRow = (row: Template): ReactElement => (
-    <ClickableTableRow>
+    <ClickableTableRow key={row.id}>
       <TableCell>{row.id}</TableCell>
       <TableCell>{row.number_of_records}</TableCell>
       <TableCell>
@@ -114,7 +114,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
           <Button
             variant="contained"
             color="primary"
-            onClick={handleDownloadClick}
+            onClick={() => handleDownloadClick(row.id)}
             startIcon={<GetAppIcon />}
           >
             Download
@@ -123,7 +123,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
           <Button
             variant="contained"
             color="primary"
-            onClick={handleExportClick}
+            onClick={() => handleExportClick(row.id)}
             startIcon={<UploadIcon />}
           >
             Export

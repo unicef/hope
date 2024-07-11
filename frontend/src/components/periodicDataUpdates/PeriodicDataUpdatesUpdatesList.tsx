@@ -8,8 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { fetchPeriodicDataUpdateUpdates } from '@api/periodicDataUpdate';
-import { Missing } from '@components/core/Missing';
+import { fetchPeriodicDataUpdateUpdates } from '@api/periodicDataUpdateApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface Update {
@@ -44,7 +43,7 @@ const updatesHeadCells: HeadCell<Update>[] = [
 ];
 
 const renderUpdateRow = (row: Update): ReactElement => (
-  <ClickableTableRow>
+  <ClickableTableRow key={row.id}>
     <TableCell>
       <BlackLink>{row.id}</BlackLink>
     </TableCell>
@@ -56,10 +55,10 @@ const renderUpdateRow = (row: Update): ReactElement => (
     </TableCell>
     <TableCell>{row.created_by}</TableCell>
     <TableCell>
-      {/* <StatusBox
-        status={statusChoices[row.status]}
+      <StatusBox
+        status={row.status}
         statusToColor={periodicDataUpdatesUpdatesStatusToColor}
-      /> */}
+      />
     </TableCell>
   </ClickableTableRow>
 );
