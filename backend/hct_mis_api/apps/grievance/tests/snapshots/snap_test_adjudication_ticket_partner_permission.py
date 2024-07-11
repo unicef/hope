@@ -150,7 +150,7 @@ snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_
                     'line': 7
                 }
             ],
-            'message': 'The selected individual is not valid, must be one of those attached to the ticket',
+            'message': "['The selected individual IND-111 is not valid, must be one of those attached to the ticket']",
             'path': [
                 'approveNeedsAdjudication'
             ]
@@ -170,7 +170,7 @@ snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_
                     'line': 7
                 }
             ],
-            'message': 'Only one option for selected individuals is available',
+            'message': 'Only one option for duplicate or distinct individuals is available',
             'path': [
                 'approveNeedsAdjudication'
             ]

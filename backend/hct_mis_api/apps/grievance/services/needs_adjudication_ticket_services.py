@@ -13,7 +13,10 @@ from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_disable_individual_service,
 )
-from hct_mis_api.apps.grievance.signals import individual_marked_as_duplicated, individual_marked_as_distinct
+from hct_mis_api.apps.grievance.signals import (
+    individual_marked_as_distinct,
+    individual_marked_as_duplicated,
+)
 from hct_mis_api.apps.grievance.utils import (
     traverse_sibling_tickets,
     validate_all_individuals_before_close_needs_adjudication,
