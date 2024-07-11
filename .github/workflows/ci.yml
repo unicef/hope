@@ -80,7 +80,7 @@ jobs:
           docker buildx build \
             --progress=plain \
             --cache-from type=gha \
-            --cache-to type=gha \
+            --cache-to type=gha,mode=max \
             -t ${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
             -t ${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-latest-dev \
             -f ./docker/Dockerfile \
@@ -165,7 +165,7 @@ jobs:
       - name: Check
         run: |
           docker run --rm -i \
-            ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
+            ${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
             black . --check
 
   flake8:
@@ -199,7 +199,7 @@ jobs:
       - name: Check
         run: |
           docker run --rm -i \
-            ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
+            ${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
             flake8 .
 
   mypy:
@@ -233,7 +233,7 @@ jobs:
       - name: Check
         run: |
           docker run --rm -i \
-            ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
+            ${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
             mypy .
 
   build_dist:
@@ -308,7 +308,7 @@ jobs:
 
       - name: Unit tests
         run: |
-          backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
+          backend_image=${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
             -f ./deployment/docker-compose.tst.yml \
             run backend ./dev.sh test
       - name: Upload coverage to Codecov
