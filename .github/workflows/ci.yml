@@ -272,12 +272,8 @@ jobs:
           # Base part of the command
           build_command="docker buildx build \
             --progress=plain \
-            --cache-from ${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dev \
-            --cache-from ${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dev \
-            --cache-from ${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dist \
-            --cache-from ${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dist \
-            --cache-to ${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dist \
-            --cache-to ${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dist \
+            --cache-from type=gha,scope=${{ github.ref_name }} \
+            --cache-to type=gha,mode=max,scope=${{ github.ref_name }} \
             -t ${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist \
             -t ${{ env.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }} \
             -f ./docker/Dockerfile \
