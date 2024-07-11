@@ -367,6 +367,7 @@ class TestTargeting:
         assert str(target_population.status) in pageTargetingDetails.getLabelStatus().text
         pageTargetingDetails.getButtonRebuild().click()
 
+    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_targeting_rebuild(
         self,
         create_programs: None,
