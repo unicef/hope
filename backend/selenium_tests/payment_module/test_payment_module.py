@@ -311,7 +311,7 @@ class TestSmokePaymentModule:
         pagePaymentModule.driver.refresh()
         pagePaymentModuleDetails.getButtonDownloadXlsx().click()
 
-        zip_file = find_file(".zip", number_of_ties=5)
+        zip_file = find_file(".zip", number_of_ties=15)
         with zipfile.ZipFile(f"./report/downloads/{zip_file}", "r") as zip_ref:
             zip_ref.extractall("./report/downloads/")
 

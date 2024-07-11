@@ -176,6 +176,8 @@ def driver() -> Chrome:
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--enable-logging")
     chrome_options.add_argument("--window-size=1920,1080")
+    if not os.path.exists("./report/downloads/"):
+        os.makedirs("./report/downloads/")
     prefs = {"download.default_directory": "./report/downloads/"}
     chrome_options.add_experimental_option("prefs", prefs)
     yield webdriver.Chrome(options=chrome_options)
