@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import AddIcon from '@mui/icons-material/Add';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { PageHeader } from '@components/core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -8,9 +7,11 @@ import { usePermissions } from '@hooks/usePermissions';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { BaseSection } from '@components/core/BaseSection';
-import { Button, Stepper, Step, StepLabel } from '@mui/material';
+import { Button, Stepper, Step, StepLabel, Box } from '@mui/material';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { FilterIndividuals } from '@components/periodicDataUpdates/FilterIndividuals';
+import { FieldsToUpdate } from '@components/periodicDataUpdates/FieldsToUpdate';
+import { Formik } from 'formik';
 
 export const NewTemplatePage = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -36,6 +37,11 @@ export const NewTemplatePage = (): React.ReactElement => {
     getFilterFromQueryParams(location, initialFilter),
   );
 
+  const initialValues = {
+    ...appliedFilter,
+    selectedFields: [],
+  };
+
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Household Members'),
@@ -55,72 +61,78 @@ export const NewTemplatePage = (): React.ReactElement => {
   };
 
   return (
-    <>
-      <PageHeader
-        title={t('New Template Page')}
-        breadCrumbs={
-          hasPermissions(
-            PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST,
-            permissions,
-          )
-            ? breadCrumbsItems
-            : null
-        }
-      />
-      <BaseSection
-        title="New Template"
-        buttons={
-          <Button
-            variant="contained"
-            color="primary"
-            component={Link}
-            to="/new-template"
-            startIcon={<AddIcon />}
-          >
-            New Template
-          </Button>
-        }
-      >
-        <Stepper activeStep={activeStep} alternativeLabel>
-          {steps.map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-        {activeStep === 0 && (
-          <FilterIndividuals
-            filter={filter}
-            setFilter={setFilter}
-            initialFilter={initialFilter}
-            appliedFilter={appliedFilter}
-            setAppliedFilter={setAppliedFilter}
+    <Formik
+      initialValues={initialValues}
+      onSubmit={(values) => {
+        console.log('values', values);
+      }}
+    >
+      {({ values, setFieldValue, submitForm }) => (
+        <>
+          <PageHeader
+            title={t('New Template Page')}
+            breadCrumbs={
+              hasPermissions(
+                PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST,
+                permissions,
+              )
+                ? breadCrumbsItems
+                : null
+            }
           />
-        )}
-        {activeStep === 1 && <div>Fields to Update</div>}
-        <div>
-          <Button
-            variant="outlined"
-            color="secondary"
-            component={Link}
-            to="/household-members/periodic-data-updates"
-            style={{ marginRight: '10px' }}
-          >
-            Cancel
-          </Button>
-          {activeStep === steps.length ? (
-            <div>
-              <Button onClick={handleBack}>Back</Button>
-            </div>
-          ) : (
-            <div>
-              <Button variant="contained" color="primary" onClick={handleNext}>
-                {activeStep === steps.length - 1 ? 'Generate Template' : 'Next'}
-              </Button>
-            </div>
-          )}
-        </div>
-      </BaseSection>
-    </>
+          <BaseSection>
+            <Stepper activeStep={activeStep} alternativeLabel>
+              {steps.map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+            {activeStep === 0 && (
+              <FilterIndividuals
+                isOnPaper={false}
+                filter={filter}
+                setFilter={setFilter}
+                initialFilter={initialFilter}
+                appliedFilter={appliedFilter}
+                setAppliedFilter={setAppliedFilter}
+              />
+            )}
+            {activeStep === 1 && (
+              <FieldsToUpdate values={values} setFieldValue={setFieldValue} />
+            )}
+            <Box display="flex" mt={4} justifyContent="flex-start" width="100%">
+              <Box mr={1}>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  component={Link}
+                  to={`/${baseUrl}/population/household-members`}
+                  style={{ marginRight: '10px' }}
+                >
+                  Cancel
+                </Button>
+              </Box>
+              {activeStep === 1 && (
+                <Box mr={1}>
+                  <Button variant="outlined" onClick={handleBack}>
+                    Back
+                  </Button>
+                </Box>
+              )}
+              <Box>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={activeStep === 1 ? submitForm : handleNext}
+                >
+                  {activeStep === 1 ? 'Generate Template' : 'Next'}
+                </Button>
+              </Box>
+            </Box>
+          </BaseSection>
+        </>
+      )}
+    </Formik>
   );
 };

@@ -1,14 +1,16 @@
 import { BaseSection } from '@components/core/BaseSection';
-import { Box, Tab, Tabs, Button } from '@mui/material';
+import { Box, Tab, Tabs, Button, Fade } from '@mui/material';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
-import UploadIcon from '@mui/icons-material/Upload';
 import { PeriodicDataUpdatesTemplatesList } from './PeriodicDataUpdatesTemplatesList';
 import { PeriodicDataUpdatesUpdatesList } from './PeriodicDataUpdatesUpdatesList';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { PeriodDataUpdatesUploadDialog } from './PeriodicDataUpdatesUploadDialog';
 
 export const PeriodicDataUpdates = (): React.ReactElement => {
   const [value, setValue] = useState(0);
+  const { baseUrl } = useBaseUrl();
 
   const handleChange = (
     _event: React.ChangeEvent<object>,
@@ -17,7 +19,6 @@ export const PeriodicDataUpdates = (): React.ReactElement => {
     setValue(newValue);
   };
 
-  //TODO MS: add correct paths for the tabs and button
   return (
     <BaseSection
       title="Periodic Data Updates"
@@ -26,7 +27,7 @@ export const PeriodicDataUpdates = (): React.ReactElement => {
           <Tabs
             value={value}
             onChange={handleChange}
-            aria-label="basic tabs example"
+            aria-label="periodic data updates tabs"
           >
             <Tab label="Templates" />
             <Tab label="Updates" />
@@ -40,37 +41,29 @@ export const PeriodicDataUpdates = (): React.ReactElement => {
               variant="contained"
               color="primary"
               component={Link}
-              to="/new-template"
+              to={`/${baseUrl}/population/household-members/new-template`}
               startIcon={<AddIcon />}
             >
               New Template
             </Button>
           </Box>
           <Box>
-            <Button
-              variant="outlined"
-              color="primary"
-              component={Link}
-              to="/upload-data"
-              endIcon={<UploadIcon />}
-            >
-              Upload Data
-            </Button>
+            <PeriodDataUpdatesUploadDialog />
           </Box>
         </Box>
       }
     >
-      {value === 0 && (
-        <Box>
-          <PeriodicDataUpdatesTemplatesList />
-        </Box>
-      )}
-      {value === 1 && (
-        <Box>
-          {/* //TODO MS: uncomment this line */}
-          {/* <PeriodicDataUpdatesUpdatesList /> */}
-        </Box>
-      )}
+      <Fade in={true} timeout={500} key={value}>
+        {value === 0 ? (
+          <Box>
+            <PeriodicDataUpdatesTemplatesList />
+          </Box>
+        ) : (
+          <Box>
+            <PeriodicDataUpdatesUpdatesList />
+          </Box>
+        )}
+      </Fade>
     </BaseSection>
   );
 };

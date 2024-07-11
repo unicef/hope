@@ -17,6 +17,7 @@ interface FilterIndividualsProps {
   initialFilter;
   appliedFilter;
   setAppliedFilter: (filter) => void;
+  isOnPaper: boolean;
 }
 
 export const FilterIndividuals: React.FC<FilterIndividualsProps> = ({
@@ -25,6 +26,7 @@ export const FilterIndividuals: React.FC<FilterIndividualsProps> = ({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
+  isOnPaper = true,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -51,6 +53,7 @@ export const FilterIndividuals: React.FC<FilterIndividualsProps> = ({
     <FiltersSection
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
+      isOnPaper={isOnPaper}
     >
       <Grid container alignItems="flex-end" spacing={3}>
         <Grid item xs={3}>
@@ -174,23 +177,23 @@ export const FilterIndividuals: React.FC<FilterIndividualsProps> = ({
             dataCy="filter-administrative-area"
           />
         </Grid>
-      </Grid>
-      <Grid item xs={2}>
-        <SelectFilter
-          onChange={(e) =>
-            handleFilterChange('receivedAssistance', e.target.value)
-          }
-          label={t('Received Assistance')}
-          value={filter.receivedAssistance}
-          data-cy="ind-filters-received-assistance"
-        >
-          <MenuItem key="yes" value="YES">
-            {t('Yes')}
-          </MenuItem>
-          <MenuItem key="no" value="NO">
-            {t('No')}
-          </MenuItem>
-        </SelectFilter>
+        <Grid item xs={2}>
+          <SelectFilter
+            onChange={(e) =>
+              handleFilterChange('receivedAssistance', e.target.value)
+            }
+            label={t('Received Assistance')}
+            value={filter.receivedAssistance}
+            data-cy="ind-filters-received-assistance"
+          >
+            <MenuItem key="yes" value="YES">
+              {t('Yes')}
+            </MenuItem>
+            <MenuItem key="no" value="NO">
+              {t('No')}
+            </MenuItem>
+          </SelectFilter>
+        </Grid>
       </Grid>
     </FiltersSection>
   );

@@ -1,16 +1,20 @@
-import { Button, IconButton, TableCell } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import UploadIcon from '@mui/icons-material/Upload';
-import GetAppIcon from '@mui/icons-material/GetApp';
-import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { useQuery } from '@tanstack/react-query';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { fetchPeriodicDataUpdateTemplates } from '@api/periodicDataUpdate';
+import { fetchPeriodicDataUpdateTemplates } from '@api/periodicDataUpdateApi';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { UniversalMoment } from '@components/core/UniversalMoment';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import GetAppIcon from '@mui/icons-material/GetApp';
+import UploadIcon from '@mui/icons-material/Upload';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import { Button, IconButton, TableCell } from '@mui/material';
+import { useQuery } from '@tanstack/react-query';
+import { ReactElement, useState } from 'react';
 import { PeriodicDataUpdatesTemplateDetailsDialog } from './PeriodicDataUpdatesTemplateDetailsDialog';
+import {
+  useDownloadPeriodicDataUpdateTemplate,
+  useExportPeriodicDataUpdateTemplate,
+} from './PeriodicDataUpdatesTemplatesListActions';
 
 export interface Template {
   id: number;
@@ -63,6 +67,25 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
     null,
   );
 
+  const { mutate: downloadTemplate } = useDownloadPeriodicDataUpdateTemplate();
+  const { mutate: exportTemplate } = useExportPeriodicDataUpdateTemplate();
+
+  const handleDownloadClick = (templateId: number) => {
+    downloadTemplate({
+      businessAreaSlug,
+      programId,
+      templateId: templateId.toString(),
+    });
+  };
+
+  const handleExportClick = (templateId: number) => {
+    exportTemplate({
+      businessAreaSlug,
+      programId,
+      templateId: templateId.toString(),
+    });
+  };
+
   const handleDialogOpen = (template: Template) => {
     setSelectedTemplateId(template.id);
     setIsDialogOpen(true);
@@ -74,7 +97,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
   };
 
   const renderTemplateRow = (row: Template): ReactElement => (
-    <ClickableTableRow>
+    <ClickableTableRow key={row.id}>
       <TableCell>{row.id}</TableCell>
       <TableCell>{row.number_of_records}</TableCell>
       <TableCell>
@@ -91,6 +114,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
           <Button
             variant="contained"
             color="primary"
+            onClick={() => handleDownloadClick(row.id)}
             startIcon={<GetAppIcon />}
           >
             Download
@@ -99,6 +123,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
           <Button
             variant="contained"
             color="primary"
+            onClick={() => handleExportClick(row.id)}
             startIcon={<UploadIcon />}
           >
             Export
@@ -145,9 +170,6 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
         isOnPaper={false}
         renderRow={renderTemplateRow}
         headCells={templatesHeadCells}
-        queryFn={() =>
-          fetchPeriodicDataUpdateTemplates(businessAreaSlug, programId)
-        }
         data={templatesData}
         isLoading={isLoading}
         error={error}

@@ -1,20 +1,19 @@
 import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
 import { Publish } from '@mui/icons-material';
-import get from 'lodash/get';
 import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { ImportErrors } from '@containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
+//TODO MS: display errors
+// import { ImportErrors } from '@containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  ImportPeriodicDataUpdatesMutation,
-  useImportPeriodicDataUpdatesMutation,
-} from '@generated/graphql';
+
 import { DropzoneField } from '@core/DropzoneField';
 import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from 'src/programContext';
+import { useUploadPeriodicDataUpdateTemplate } from './PeriodicDataUpdatesTemplatesListActions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -31,42 +30,38 @@ const DisabledUploadIcon = styled(Publish)`
 
 export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
   const { showMessage } = useSnackbar();
+  const { businessArea, programId } = useBaseUrl();
   const [open, setOpenImport] = useState(false);
-  const [fileToImport, setFileToImport] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [fileToImport, setFileToImport] = useState<File | null>(null);
   const { isActiveProgram } = useProgramContext();
   const { t } = useTranslation();
+  const { mutate, error } = useUploadPeriodicDataUpdateTemplate();
 
-  const [mutate, { data: uploadData, loading: fileLoading, error }] =
-    useImportPeriodicDataUpdatesMutation();
-
-  const xlsxErrors: ImportPeriodicDataUpdatesMutation['importPeriodicDataUpdates']['errors'] =
-    get(uploadData, 'importPeriodicDataUpdates.errors');
-
-  const handleImport = async (): Promise<void> => {
-    //TODO MS: implement this function
+  const handleFileUpload = (): void => {
     if (fileToImport) {
-      try {
-        const { data, errors } = await mutate({
-          variables: {
-            paymentPlanId: paymentPlan.id,
-            file: fileToImport,
-          },
-          refetchQueries: () => [
-            {
-              query: PaymentPlanDocument,
-              variables: {
-                id: paymentPlan.id,
-              },
-            },
-          ],
-        });
-        if (!errors && !data?.importPeriodicDataUpdates.errors?.length) {
+      setIsLoading(true);
+      const uploadData = {
+        businessAreaSlug: businessArea,
+        programId: programId,
+        file: fileToImport,
+        additionalParams: {},
+      };
+
+      mutate(uploadData, {
+        onSuccess: () => {
+          showMessage(t('File uploaded successfully'));
           setOpenImport(false);
-          showMessage(t('Your import was successful!'));
-        }
-      } catch (e) {
-        e.graphQLErrors.map((x) => showMessage(x.message));
-      }
+          setFileToImport(null);
+          setIsLoading(false);
+        },
+        onError: (uploadError) => {
+          showMessage(
+            uploadError ? uploadError.toString() : t('Error uploading file'),
+          );
+          setIsLoading(false);
+        },
+      });
     }
   };
 
@@ -79,7 +74,6 @@ export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
           data-cy="button-import"
           onClick={() => setOpenImport(true)}
           disabled={!isActiveProgram}
-          endIcon={<UploadIcon />}
         >
           {t('Upload Data')}
         </Button>
@@ -95,7 +89,7 @@ export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
           <>
             <DropzoneField
               dontShowFilename={false}
-              loading={fileLoading}
+              loading={isLoading}
               onChange={(files) => {
                 if (files.length === 0) {
                   return;
@@ -112,18 +106,11 @@ export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
                 setFileToImport(file);
               }}
             />
-            {fileToImport &&
-            (error?.graphQLErrors?.length || xlsxErrors?.length) ? (
+            {error && (
               <Error>
-                <p>Errors</p>
-                {error
-                  ? error.graphQLErrors.map((x) => (
-                      <p key={x.message}>{x.message}</p>
-                    ))
-                  : null}
-                <ImportErrors errors={xlsxErrors} />
+                {t('Error uploading file:')} {error.message}
               </Error>
-            ) : null}
+            )}
           </>
           <DialogActions>
             <Button
@@ -133,15 +120,15 @@ export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
                 setFileToImport(null);
               }}
             >
-              CANCEL
+              {t('CANCEL')}
             </Button>
             <LoadingButton
-              loading={fileLoading}
+              loading={isLoading}
               disabled={!fileToImport}
               type="submit"
               color="primary"
               variant="contained"
-              onClick={() => handleImport()}
+              onClick={handleFileUpload}
               data-cy="button-import-submit"
             >
               {t('IMPORT')}
