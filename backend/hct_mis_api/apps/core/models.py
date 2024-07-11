@@ -318,6 +318,28 @@ class FlexibleAttributeChoice(SoftDeletableModel, NaturalKeyModel, TimeStampedUU
 mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
 
 
+class PeriodicFieldData(models.Model):
+    """
+    Additional data for PDU
+    """
+    STRING = "STRING"
+    DECIMAL = "DECIMAL"
+    DATE = "DATE"
+    TYPE_CHOICE = Choices(
+        (DATE, _("Date")),
+        (DECIMAL, _("Decimal")),
+        (STRING, _("String")),
+    )
+
+    subtype = models.CharField(max_length=16, choices=TYPE_CHOICE)
+    number_of_runs = models.IntegerField()
+    rounds_names = ArrayField(models.CharField(max_length=255), default=list)
+
+    class Meta:
+        verbose_name = "Periodic Field Data"
+        verbose_name_plural = "Periodic Fields Data"
+
+
 class XLSXKoboTemplateManager(models.Manager):
     def latest_valid(self) -> Optional["XLSXKoboTemplate"]:
         return (
