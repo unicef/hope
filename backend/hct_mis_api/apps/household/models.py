@@ -1164,6 +1164,14 @@ class Individual(
         self.duplicate_date = timezone.now()
         self.save()
 
+    def mark_as_distinct(self, original_individual: Optional["Individual"] = None) -> None:
+        if original_individual is not None:
+            self.unicef_id = str(original_individual.unicef_id)
+        self.documents.update(status=Document.STATUS_VALID)
+        self.duplicate = False
+        self.duplicate_date = timezone.now()
+        self.save()
+
     def set_relationship_confirmed_flag(self, confirmed: bool) -> None:
         self.relationship_confirmed = confirmed
         self.save(update_fields=["relationship_confirmed"])
