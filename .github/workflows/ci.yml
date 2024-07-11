@@ -52,8 +52,11 @@ jobs:
         uses: docker/setup-buildx-action@v1
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Call Docker Setup Workflow
-        uses: ./.github/workflows/docker-setup.yml
+      - name: Setup Docker Environment
+        uses: ./.github/actions/setup-docker-env
+        with:
+          dockerhub_organization: ${{ vars.DOCKERHUB_ORGANIZATION || 'unicef' }}
+
 
       - name: Push dev
         run: |
@@ -93,8 +96,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Call Docker Setup Workflow
-        uses: ./.github/workflows/docker-setup.yml
+      - name: Setup Docker Environment
+        uses: ./.github/actions/setup-docker-env
+        with:
+          dockerhub_organization: ${{ vars.DOCKERHUB_ORGANIZATION || 'unicef' }}
         
       - name: Download Artifact
         if: ${{ !( env.DOCKERHUB_USERNAME && env.DOCKERHUB_TOKEN ) }}
