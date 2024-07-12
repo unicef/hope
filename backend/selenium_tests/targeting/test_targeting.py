@@ -134,6 +134,7 @@ def add_targeting() -> None:
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/targeting/fixtures/data-cypress.json")
     yield
 
+
 @pytest.mark.usefixtures("login")
 class TestSmokeTargeting:
     def test_smoke_targeting_page(self, create_programs: None, add_targeting: None, pageTargeting: Targeting) -> None:
