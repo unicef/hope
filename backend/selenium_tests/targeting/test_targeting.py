@@ -134,7 +134,6 @@ def add_targeting() -> None:
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/targeting/fixtures/data-cypress.json")
     yield
 
-
 @pytest.mark.usefixtures("login")
 class TestSmokeTargeting:
     def test_smoke_targeting_page(self, create_programs: None, add_targeting: None, pageTargeting: Targeting) -> None:
@@ -407,6 +406,7 @@ class TestTargeting:
         pageTargetingDetails.getButtonPopupMarkReady().click()
         pageTargetingDetails.waitForLabelStatus("READY")
 
+    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_copy_targeting(
         self,
         create_programs: None,
