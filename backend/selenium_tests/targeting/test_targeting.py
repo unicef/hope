@@ -337,6 +337,7 @@ class TestTargeting:
         )
         assert str(target_population.status) in pageTargetingDetails.getLabelStatus().text
 
+    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_targeting_create_use_ids_individual(
         self,
         create_programs: None,
