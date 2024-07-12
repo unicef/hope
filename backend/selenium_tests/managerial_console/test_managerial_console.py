@@ -25,8 +25,8 @@ pytestmark = pytest.mark.django_db(transaction=True)
 
 
 @pytest.fixture
-def create_test_program() -> Program:
-    return create_program("Test Programm")
+def create_active_test_program() -> Program:
+    yield create_program("Test Programm")
 
 
 @pytest.fixture

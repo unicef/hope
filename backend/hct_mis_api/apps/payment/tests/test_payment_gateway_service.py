@@ -1,4 +1,5 @@
 import os
+from decimal import Decimal
 from typing import Any
 from unittest import mock
 
@@ -6,6 +7,7 @@ from django.utils import timezone
 
 import pytest
 from pytz import utc
+from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -31,7 +33,10 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlanSplit,
 )
 from hct_mis_api.apps.payment.services.payment_gateway import (
+    AddRecordsResponseData,
+    PaymentGatewayAPI,
     PaymentGatewayService,
+    PaymentInstructionStatus,
     PaymentRecordData,
 )
 
@@ -68,11 +73,16 @@ class TestPaymentGatewayService(APITestCase):
             payment_plan=cls.pp,
             financial_service_provider=cls.pg_fsp,
             delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH_OVER_THE_COUNTER,
-            sent_to_payment_gateway=True,
+            sent_to_payment_gateway=False,
         )
         cls.payments = []
         for _ in range(2):
-            collector = IndividualFactory(household=None)
+            collector = IndividualFactory(
+                household=None,
+                flex_fields={
+                    "service_provider_code": "123456789",
+                },
+            )
             hoh = IndividualFactory(household=None)
             hh = HouseholdFactory(head_of_household=hoh)
             IndividualRoleInHouseholdFactory(household=hh, individual=hoh, role=ROLE_PRIMARY)
@@ -98,6 +108,9 @@ class TestPaymentGatewayService(APITestCase):
     def test_sync_records_for_split(
         self, get_quantity_in_usd_mock: Any, get_records_for_payment_instruction_mock: Any, get_exchange_rate_mock: Any
     ) -> None:
+        self.dm.sent_to_payment_gateway = True
+        self.dm.save()
+
         pp_split_1 = PaymentPlanSplit.objects.create(
             payment_plan=self.pp,
             split_type=PaymentPlanSplit.SplitType.BY_COLLECTOR,
@@ -123,10 +136,10 @@ class TestPaymentGatewayService(APITestCase):
                 modified="2023-10-11",
                 record_code="1",
                 parent="1",
-                status="1",
+                status="TRANSFERRED_TO_BENEFICIARY",
                 hope_status=Payment.STATUS_DISTRIBUTION_SUCCESS,
                 auth_code="1",
-                payout_amount=50.0,
+                payout_amount=float(self.payments[0].entitlement_quantity),
                 fsp_code="1",
             ),
         ]
@@ -139,7 +152,7 @@ class TestPaymentGatewayService(APITestCase):
         self.payments[0].refresh_from_db()
         assert self.payments[0].status == Payment.STATUS_DISTRIBUTION_SUCCESS
         assert self.payments[0].fsp_auth_code == "1"
-        assert self.payments[0].delivered_quantity == 50.0
+        assert self.payments[0].delivered_quantity == self.payments[0].entitlement_quantity
         assert self.payments[0].delivered_quantity_usd == 100.0
 
         get_records_for_payment_instruction_mock.return_value = [
@@ -150,7 +163,7 @@ class TestPaymentGatewayService(APITestCase):
                 modified="2023-10-11",
                 record_code="2",
                 parent="2",
-                status="2",
+                status="ERROR",
                 hope_status=Payment.STATUS_ERROR,
                 auth_code="2",
                 payout_amount=0.0,
@@ -181,6 +194,9 @@ class TestPaymentGatewayService(APITestCase):
     def test_sync_records(
         self, get_quantity_in_usd_mock: Any, get_records_for_payment_instruction_mock: Any, get_exchange_rate_mock: Any
     ) -> None:
+        self.dm.sent_to_payment_gateway = True
+        self.dm.save()
+
         get_records_for_payment_instruction_mock.return_value = [
             PaymentRecordData(
                 id=1,
@@ -189,10 +205,10 @@ class TestPaymentGatewayService(APITestCase):
                 modified="2023-10-11",
                 record_code="1",
                 parent="1",
-                status="1",
+                status="TRANSFERRED_TO_BENEFICIARY",
                 hope_status=Payment.STATUS_DISTRIBUTION_SUCCESS,
                 auth_code="1",
-                payout_amount=50.0,
+                payout_amount=float(self.payments[0].entitlement_quantity),
                 fsp_code="1",
             ),
             PaymentRecordData(
@@ -202,10 +218,10 @@ class TestPaymentGatewayService(APITestCase):
                 modified="2023-10-11",
                 record_code="2",
                 parent="2",
-                status="2",
+                status="TRANSFERRED_TO_BENEFICIARY",
                 hope_status=Payment.STATUS_DISTRIBUTION_SUCCESS,
                 auth_code="2",
-                payout_amount=60.0,
+                payout_amount=float(self.payments[1].entitlement_quantity) - 10.00,
                 fsp_code="2",
             ),
         ]
@@ -222,12 +238,223 @@ class TestPaymentGatewayService(APITestCase):
         self.payments[1].refresh_from_db()
         assert self.payments[0].status == Payment.STATUS_DISTRIBUTION_SUCCESS
         assert self.payments[0].fsp_auth_code == "1"
-        assert self.payments[0].delivered_quantity == 50.0
-        assert self.payments[1].status == Payment.STATUS_DISTRIBUTION_SUCCESS
+        assert self.payments[0].delivered_quantity == self.payments[0].entitlement_quantity
+        assert self.payments[1].status == Payment.STATUS_DISTRIBUTION_PARTIAL
         assert self.payments[1].fsp_auth_code == "2"
-        assert self.payments[1].delivered_quantity == 60.0
+        assert self.payments[1].delivered_quantity == self.payments[1].entitlement_quantity - Decimal(10.00)
 
         # pp is reconciled at this point
         get_records_for_payment_instruction_mock.reset_mock()
         pg_service.sync_records()
         assert get_records_for_payment_instruction_mock.call_count == 0
+
+    def test_get_hope_status(self) -> None:
+        p = PaymentRecordData(
+            id=1,
+            remote_id=str(self.payments[0].id),
+            created="2023-10-10",
+            modified="2023-10-11",
+            record_code="1",
+            parent="1",
+            status="TRANSFERRED_TO_BENEFICIARY",
+            hope_status=Payment.STATUS_DISTRIBUTION_SUCCESS,
+            auth_code="1",
+            payout_amount=float(self.payments[0].entitlement_quantity),
+            fsp_code="1",
+        )
+        self.assertEqual(p.get_hope_status(self.payments[0].entitlement_quantity), Payment.STATUS_DISTRIBUTION_SUCCESS)
+        self.assertEqual(p.get_hope_status(Decimal(1000000.00)), Payment.STATUS_DISTRIBUTION_PARTIAL)
+
+        with self.assertRaisesMessage(PaymentGatewayAPI.PaymentGatewayAPIException, "Invalid delivered_quantity"):
+            p.payout_amount = None  # type: ignore
+            p.get_hope_status(Decimal(1000000.00))
+
+        with self.assertRaisesMessage(PaymentGatewayAPI.PaymentGatewayAPIException, "Invalid Payment status"):
+            p.payout_amount = float(self.payments[0].entitlement_quantity)
+            p.status = "NOT EXISTING STATUS"
+            p.get_hope_status(Decimal(1000000.00))
+
+    @mock.patch(
+        "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction"
+    )
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status")
+    def test_add_records_to_payment_instructions_for_split(
+        self, change_payment_instruction_status_mock: Any, add_records_to_payment_instruction_mock: Any
+    ) -> None:
+        pp_split_1 = PaymentPlanSplit.objects.create(
+            payment_plan=self.pp,
+            split_type=PaymentPlanSplit.SplitType.BY_COLLECTOR,
+            chunks_no=1,
+            order=0,
+            sent_to_payment_gateway=False,
+        )
+        pp_split_2 = PaymentPlanSplit.objects.create(
+            payment_plan=self.pp,
+            split_type=PaymentPlanSplit.SplitType.BY_COLLECTOR,
+            chunks_no=1,
+            order=1,
+            sent_to_payment_gateway=False,
+        )
+        pp_split_1.payments.add(self.payments[0])
+        pp_split_2.payments.add(self.payments[1])
+        add_records_to_payment_instruction_mock.return_value = AddRecordsResponseData(
+            remote_id="1",
+            records={"1": self.payments[0].id, "2": self.payments[1].id},
+            errors=None,
+        )
+
+        change_payment_instruction_status_mock.side_effect = [
+            PaymentInstructionStatus.CLOSED.value,
+            PaymentInstructionStatus.READY.value,
+            PaymentInstructionStatus.CLOSED.value,
+            PaymentInstructionStatus.READY.value,
+        ]
+        pg_service = PaymentGatewayService()
+        pg_service.api.add_records_to_payment_instruction_mock = add_records_to_payment_instruction_mock
+        pg_service.add_records_to_payment_instructions(self.pp)
+
+        pp_split_1.refresh_from_db()
+        pp_split_2.refresh_from_db()
+        self.payments[0].refresh_from_db()
+        self.payments[1].refresh_from_db()
+
+        self.assertEqual(pp_split_1.sent_to_payment_gateway, True)
+        self.assertEqual(pp_split_2.sent_to_payment_gateway, True)
+        self.assertEqual(change_payment_instruction_status_mock.call_count, 4)
+        self.assertEqual(self.payments[0].status, Payment.STATUS_SENT_TO_PG)
+        self.assertEqual(self.payments[1].status, Payment.STATUS_SENT_TO_PG)
+
+    @mock.patch(
+        "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction"
+    )
+    def test_add_records_to_payment_instructions_for_split_error(
+        self, add_records_to_payment_instruction_mock: Any
+    ) -> None:
+        pp_split_1 = PaymentPlanSplit.objects.create(
+            payment_plan=self.pp,
+            split_type=PaymentPlanSplit.SplitType.BY_COLLECTOR,
+            chunks_no=1,
+            order=0,
+            sent_to_payment_gateway=False,
+        )
+        pp_split_2 = PaymentPlanSplit.objects.create(
+            payment_plan=self.pp,
+            split_type=PaymentPlanSplit.SplitType.BY_COLLECTOR,
+            chunks_no=1,
+            order=1,
+            sent_to_payment_gateway=False,
+        )
+        pp_split_1.payments.add(self.payments[0])
+        pp_split_2.payments.add(self.payments[1])
+        add_records_to_payment_instruction_mock.return_value = AddRecordsResponseData(
+            remote_id="1",
+            records=None,
+            errors={"0": "Error", "1": "Error"},
+        )
+        pg_service = PaymentGatewayService()
+        pg_service.api.add_records_to_payment_instruction_mock = add_records_to_payment_instruction_mock
+        pg_service.add_records_to_payment_instructions(self.pp)
+
+        pp_split_1.refresh_from_db()
+        pp_split_2.refresh_from_db()
+        self.payments[0].refresh_from_db()
+        self.payments[1].refresh_from_db()
+
+        self.assertEqual(pp_split_1.sent_to_payment_gateway, False)
+        self.assertEqual(pp_split_2.sent_to_payment_gateway, False)
+        self.assertEqual(self.payments[0].status, Payment.STATUS_ERROR)
+        self.assertEqual(self.payments[1].status, Payment.STATUS_ERROR)
+        self.assertEqual(self.payments[0].reason_for_unsuccessful_payment, "Error")
+        self.assertEqual(self.payments[1].reason_for_unsuccessful_payment, "Error")
+
+    @mock.patch(
+        "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction"
+    )
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status")
+    def test_add_records_to_payment_instructions(
+        self, change_payment_instruction_status_mock: Any, add_records_to_payment_instruction_mock: Any
+    ) -> None:
+        add_records_to_payment_instruction_mock.return_value = AddRecordsResponseData(
+            remote_id="1",
+            records={"1": self.payments[0].id, "2": self.payments[1].id},
+            errors=None,
+        )
+        change_payment_instruction_status_mock.side_effect = [
+            PaymentInstructionStatus.CLOSED.value,
+            PaymentInstructionStatus.READY.value,
+        ]
+        pg_service = PaymentGatewayService()
+        pg_service.api.add_records_to_payment_instruction_mock = add_records_to_payment_instruction_mock
+        pg_service.add_records_to_payment_instructions(self.pp)
+
+        self.pp.refresh_from_db()
+        self.payments[0].refresh_from_db()
+        self.payments[1].refresh_from_db()
+
+        self.assertEqual(self.pp.delivery_mechanisms.first().sent_to_payment_gateway, True)
+        self.assertEqual(change_payment_instruction_status_mock.call_count, 2)
+        self.assertEqual(self.payments[0].status, Payment.STATUS_SENT_TO_PG)
+        self.assertEqual(self.payments[1].status, Payment.STATUS_SENT_TO_PG)
+
+    @mock.patch(
+        "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction"
+    )
+    def test_add_records_to_payment_instructions_error(self, add_records_to_payment_instruction_mock: Any) -> None:
+        add_records_to_payment_instruction_mock.return_value = AddRecordsResponseData(
+            remote_id="1",
+            records=None,
+            errors={"0": "Error", "1": "Error"},
+        )
+        pg_service = PaymentGatewayService()
+        pg_service.api.add_records_to_payment_instruction_mock = add_records_to_payment_instruction_mock
+        pg_service.add_records_to_payment_instructions(self.pp)
+
+        self.payments[0].refresh_from_db()
+        self.payments[1].refresh_from_db()
+
+        self.assertEqual(self.pp.delivery_mechanisms.first().sent_to_payment_gateway, False)
+        self.assertEqual(self.payments[0].status, Payment.STATUS_ERROR)
+        self.assertEqual(self.payments[1].status, Payment.STATUS_ERROR)
+        self.assertEqual(self.payments[0].reason_for_unsuccessful_payment, "Error")
+        self.assertEqual(self.payments[1].reason_for_unsuccessful_payment, "Error")
+
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
+    def test_api_add_records_to_payment_instruction(self, post_mock: Any) -> None:
+        post_mock.return_value = {
+            "remote_id": "123",
+            "records": {
+                "1": self.payments[0].id,
+            },
+            "errors": None,
+        }
+        PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
+        post_mock.assert_called_once_with(
+            "payment_instructions/123/add_records/",
+            [
+                {
+                    "remote_id": str(self.payments[0].id),
+                    "record_code": self.payments[0].unicef_id,
+                    "payload": {
+                        "amount": str(self.payments[0].entitlement_quantity),
+                        "phone_no": str(self.payments[0].collector.phone_no),
+                        "last_name": self.payments[0].collector.family_name,
+                        "first_name": self.payments[0].collector.given_name,
+                        "full_name": self.payments[0].collector.full_name,
+                        "destination_currency": self.payments[0].currency,
+                        "service_provider_code": self.payments[0].collector.flex_fields["service_provider_code"],
+                    },
+                    "extra_data": {},
+                }
+            ],
+            validate_response=True,
+        )
+
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
+    def test_api_add_records_to_payment_instruction_validation_error(self, post_mock: Any) -> None:
+        payment = self.payments[0]
+        payment.entitlement_quantity = None
+        payment.save()
+        with self.assertRaisesMessage(
+            ValidationError, "{'amount': [ErrorDetail(string='This field may not be null.', code='null')]}"
+        ):
+            PaymentGatewayAPI().add_records_to_payment_instruction([payment], "123")
