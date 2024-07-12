@@ -100,11 +100,14 @@ class GrievanceDetailsPage(BaseComponents):
     def getTitle(self) -> WebElement:
         return self.wait_for(self.title)
 
+    def getButtonCloseTicket(self) -> WebElement:
+        return self.wait_for(self.buttonCloseTicket)
+
     def getButtonAssignToMe(self) -> WebElement:
         return self.wait_for(self.buttonAssignToMe)
 
-    def getButtonCloseTicket(self) -> WebElement:
-        return self.wait_for(self.buttonCloseTicket)
+    def getButtonSetInProgress(self) -> WebElement:
+        return self.wait_for(self.buttonSetInProgress)
 
     def getButtonSendBack(self) -> WebElement:
         return self.wait_for(self.buttonSendBack)

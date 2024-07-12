@@ -1,4 +1,5 @@
 from page_object.base_components import BaseComponents
+from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
 
@@ -30,16 +31,18 @@ class NewPaymentPlan(BaseComponents):
         return self.wait_for(self.selectTargetingid)
 
     def getInputStartDate(self) -> WebElement:
-        return self.wait_for(self.inputStartDate)
+        self.wait_for(self.inputStartDate)
+        return self.wait_for(self.inputStartDate).find_elements(By.TAG_NAME, "input")[0]
 
     def getInputEndDate(self) -> WebElement:
-        return self.wait_for(self.inputEndDate)
+        self.wait_for(self.inputEndDate)
+        return self.wait_for(self.inputEndDate).find_elements(By.TAG_NAME, "input")[0]
 
     def getInputCurrency(self) -> WebElement:
         return self.wait_for(self.inputCurrency)
 
     def getInputDispersionStartDate(self) -> WebElement:
-        return self.wait_for(self.inputDispersionStartDate)
+        return self.wait_for(self.inputDispersionStartDate).find_elements(By.TAG_NAME, "input")[0]
 
     def getInputDispersionEndDate(self) -> WebElement:
-        return self.wait_for(self.inputDispersionEndDate)
+        return self.wait_for(self.inputDispersionEndDate).find_elements(By.TAG_NAME, "input")[0]
