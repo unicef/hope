@@ -14,7 +14,7 @@ import {
   Button,
 } from '@mui/material';
 import { LabelizedField } from '@components/core/LabelizedField';
-import { fetchPeriodicDataUpdateTemplateDetails } from '@api/periodicDataUpdate';
+import { fetchPeriodicDataUpdateTemplateDetails } from '@api/periodicDataUpdateApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery } from '@tanstack/react-query';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -23,15 +23,6 @@ interface PeriodicDataUpdatesTemplateDetailsDialogProps {
   open: boolean;
   onClose: () => void;
   template: Template;
-}
-
-interface RoundDetails {
-  round: number;
-  round_name: string;
-  number_of_records: number;
-}
-interface RoundDataItem {
-  [key: string]: RoundDetails;
 }
 
 export const PeriodicDataUpdatesTemplateDetailsDialog: React.FC<
@@ -72,19 +63,14 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: React.FC<
               </TableRow>
             </TableHead>
             <TableBody>
-              {templateDetailsData.rounds_data?.map(
-                (roundData: RoundDataItem, index) => {
-                  const [field, details] = Object.entries(roundData)[0];
-                  return (
-                    <TableRow key={index}>
-                      <TableCell>{field}</TableCell>
-                      <TableCell>{details.round}</TableCell>
-                      <TableCell>{details.round_name}</TableCell>
-                      <TableCell>{details.number_of_records}</TableCell>
-                    </TableRow>
-                  );
-                },
-              )}
+              {templateDetailsData?.rounds_data?.map((roundData, index) => (
+                <TableRow key={index}>
+                  <TableCell>{roundData.field}</TableCell>
+                  <TableCell>{roundData.round}</TableCell>
+                  <TableCell>{roundData.round_name}</TableCell>
+                  <TableCell>{roundData.number_of_records}</TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         )}

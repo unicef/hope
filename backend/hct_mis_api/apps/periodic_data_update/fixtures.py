@@ -20,22 +20,20 @@ class PeriodicDataUpdateTemplateFactory(DjangoModelFactory):
         model = PeriodicDataUpdateTemplate
 
     created_by = factory.SubFactory(UserFactory)
-    status = factory.fuzzy.FuzzyChoice(PeriodicDataUpdateTemplate.Status, getter=lambda c: c[0])
+    status = factory.fuzzy.FuzzyChoice([choice[0] for choice in PeriodicDataUpdateTemplate.Status.choices])
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
     program = factory.SubFactory(ProgramFactory)
     number_of_records = fake.random_int(min=1, max=100)
     rounds_data = factory.LazyAttribute(
-        lambda o: json.dumps(
-            [
-                {
-                    "field": fake.sentence(nb_words=3),
-                    "round": fake.random_int(min=1, max=10),
-                    "round_name": fake.sentence(nb_words=3),
-                    "number_of_records": fake.random_int(min=1, max=100),
-                }
-                for _ in range(2)
-            ]
-        )
+        lambda _: [
+            {
+                "field": fake.sentence(nb_words=3),
+                "round": fake.random_int(min=1, max=10),
+                "round_name": fake.sentence(nb_words=3),
+                "number_of_records": fake.random_int(min=1, max=100),
+            }
+            for _ in range(2)
+        ]
     )
     filters = {}
 
@@ -45,5 +43,5 @@ class PeriodicDataUpdateUploadFactory(DjangoModelFactory):
         model = PeriodicDataUpdateUpload
 
     created_by = factory.SubFactory(UserFactory)
-    status = factory.fuzzy.FuzzyChoice(PeriodicDataUpdateTemplate.Status, getter=lambda c: c[0])
+    status = factory.fuzzy.FuzzyChoice([choice[0] for choice in PeriodicDataUpdateUpload.Status.choices])
     template = factory.SubFactory(PeriodicDataUpdateTemplateFactory)

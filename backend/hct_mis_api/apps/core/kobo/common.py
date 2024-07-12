@@ -70,7 +70,7 @@ def count_population(results: list, business_area: BusinessArea) -> tuple[int, i
     from hashlib import sha256
 
     from hct_mis_api.apps.core.utils import rename_dict_keys
-    from hct_mis_api.apps.registration_datahub.models import KoboImportedSubmission
+    from hct_mis_api.apps.registration_data.models import KoboImportedSubmission
     from hct_mis_api.apps.registration_datahub.tasks.utils import (
         get_submission_metadata,
     )

@@ -55,6 +55,22 @@ export function opacityToHex(opacity: number): string {
   return Math.floor(opacity * 0xff).toString(16);
 }
 
+export function periodicDataUpdatesStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'Processing':
+      return theme.hctPalette.orange;
+    case 'Successful':
+      return theme.hctPalette.green;
+    case 'Failed':
+      return theme.hctPalette.red;
+    default:
+      return theme.hctPalette.gray;
+  }
+}
+
 export function programStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -137,6 +153,8 @@ export function paymentStatusToColor(
 ): string {
   switch (status) {
     case PaymentStatus.Pending:
+    case PaymentStatus.SentToPaymentGateway:
+    case PaymentStatus.SentToFsp:
       return theme.hctPalette.orange;
     case PaymentStatus.DistributionSuccessful:
     case PaymentStatus.TransactionSuccessful:
@@ -166,6 +184,12 @@ export function paymentStatusDisplayMap(status: string): string {
     case PaymentRecordStatus.ForceFailed:
     case PaymentStatus.ForceFailed:
       return 'FORCE FAILED';
+    case PaymentStatus.ManuallyCancelled:
+      return 'MANUALLY CANCELLED';
+    case PaymentStatus.SentToPaymentGateway:
+      return 'SENT TO PAYMENT GATEWAY';
+    case PaymentStatus.SentToFsp:
+      return 'SENT TO FSP';
     default:
       return 'UNSUCCESSFUL';
   }

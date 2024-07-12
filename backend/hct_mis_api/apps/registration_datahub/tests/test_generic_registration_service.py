@@ -1,9 +1,12 @@
 import datetime
 import json
+from typing import Union
 
 from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
+
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import DataCollectingType
@@ -12,16 +15,13 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_TAX_ID,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    DocumentType,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedDocument,
-    ImportedDocumentType,
-    ImportedHousehold,
-    ImportedIndividual,
-    ImportedIndividualRoleInHousehold,
-)
 from hct_mis_api.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,
@@ -34,16 +34,13 @@ from hct_mis_api.aurora.services.generic_registration_service import (
 
 
 class TestGenericRegistrationService(TestCase):
-    databases = {
-        "default",
-        "registration_datahub",
-    }
+    databases = {"default"}
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUp(cls) -> None:
-        ImportedDocumentType.objects.create(key="tax_id", label="Tax ID")
-        ImportedDocumentType.objects.create(key="disability_certificate", label="Disability Certificate")
+        DocumentType.objects.create(key="tax_id", label="Tax ID")
+        DocumentType.objects.create(key="disability_certificate", label="Disability Certificate")
         cls.business_area = BusinessAreaFactory(slug="generic-slug")
 
         cls.data_collecting_type = DataCollectingType.objects.create(label="SomeFull", code="some_full")
@@ -59,6 +56,7 @@ class TestGenericRegistrationService(TestCase):
                 "admin1_h_c": "household.admin1",
                 "admin2_h_c": "household.admin2",
                 "admin3_h_c": "household.admin3",
+                "admin4_h_c": "household.admin4",
                 "ff": "household.flex_fields",
             },
             "individuals": {
@@ -79,7 +77,7 @@ class TestGenericRegistrationService(TestCase):
                 "where_are_you_now": "",
                 "admin1_h_c": "UA07",
                 "admin2_h_c": "UA0702",
-                "admin3_h_c": "UA0702001",
+                "admin3_h_c": "UA0114007",
                 "size_h_c": 5,
                 "ff": "random",
             }
@@ -167,7 +165,26 @@ class TestGenericRegistrationService(TestCase):
 
         cls.user = UserFactory.create()
 
-    def test_import_data_to_datahub(self) -> None:
+    @parameterized.expand(
+        [
+            ("UA07", "UA0702", "UA0114007", "UA0114007", "admin4_h_c"),
+            (None, None, None, "UA0114007", "admin4_h_c"),
+            (None, None, "UA0114007", None, "admin3_h_c"),
+            (None, "UA0702", None, None, "admin2_h_c"),
+        ]
+    )
+    def test_import_data_to_datahub(
+        self,
+        admin1_h_c: Union[str, None],
+        admin2_h_c: Union[str, None],
+        admin3_h_c: Union[str, None],
+        admin4_h_c: Union[str, None],
+        admin_area_field: str,
+    ) -> None:
+        self.household[0]["admin1_h_c"] = admin1_h_c
+        self.household[0]["admin2_h_c"] = admin2_h_c
+        self.household[0]["admin3_h_c"] = admin3_h_c
+        self.household[0]["admin4_h_c"] = admin4_h_c
         records = [
             Record(
                 **self.defaults,
@@ -214,22 +231,24 @@ class TestGenericRegistrationService(TestCase):
         service.process_records(rdi.id, records_ids)
         records[2].refresh_from_db()
         self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 4)
-        self.assertEqual(ImportedHousehold.objects.count(), 4)
+        self.assertEqual(PendingHousehold.objects.count(), 4)
         self.assertEqual(
-            ImportedDocument.objects.filter(
+            PendingDocument.objects.filter(
                 document_number="TESTID", type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
             ).count(),
             1,
         )
 
         # Checking only first is enough, because they all in one RDI
-        registration_datahub_import = ImportedHousehold.objects.all()[0].registration_data_import
-        registration_data_import = RegistrationDataImport.objects.get(id=registration_datahub_import.hct_id)
-        self.assertIn("ff", ImportedHousehold.objects.all()[0].flex_fields.keys())
+        pending_household = PendingHousehold.objects.all()[0]
+        registration_data_import = pending_household.registration_data_import
+        self.assertIn("ff", pending_household.flex_fields.keys())
         self.assertEqual(registration_data_import.program, self.program)
 
-        self.assertEqual(ImportedIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)
-        self.assertEqual(ImportedIndividualRoleInHousehold.objects.filter(role=ROLE_ALTERNATE).count(), 1)
+        self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)
+        self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_ALTERNATE).count(), 1)
+
+        self.assertEqual(pending_household.admin_area.p_code, self.household[0][admin_area_field])
 
     def test_import_data_to_datahub_household_individual(self) -> None:
         records = [
@@ -251,16 +270,16 @@ class TestGenericRegistrationService(TestCase):
         records_ids = [x.id for x in records]
         service.process_records(rdi.id, records_ids)
         self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 1)
-        self.assertEqual(ImportedHousehold.objects.count(), 1)
+        self.assertEqual(PendingHousehold.objects.count(), 1)
 
-        household = ImportedHousehold.objects.first()
+        household = PendingHousehold.objects.first()
         self.assertEqual(household.flex_fields["ff"], "random")
         self.assertEqual(household.flex_fields["enumerators"], "ABC")
         self.assertEqual(household.flex_fields["marketing_can_unicef_contact_you"], "YES")
 
-        assert ImportedDocument.objects.get(document_number="123123123", type__key="tax_id")
-        assert ImportedDocument.objects.get(document_number="xyz", type__key="disability_certificate")
-        assert ImportedIndividual.objects.get(
+        assert PendingDocument.objects.get(document_number="123123123", type__key="tax_id")
+        assert PendingDocument.objects.get(document_number="xyz", type__key="disability_certificate")
+        assert PendingIndividual.objects.get(
             **{
                 "given_name": "Jan",
                 "middle_name": "Roman",
@@ -271,4 +290,4 @@ class TestGenericRegistrationService(TestCase):
                 "phone_no": "+393892781511",
             }
         )
-        self.assertEqual(ImportedIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)
+        self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)

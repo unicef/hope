@@ -23,8 +23,7 @@ class TestSmokeCountryDashboard:
         assert "Total Transferred sorted descending" in pageCountryDashboard.getTableLabel()[4].text.replace("\n", " ")
         assert "People Reached" in pageCountryDashboard.getTableLabel()[5].text
         assert "0" in pageCountryDashboard.getTotalNumberOfHouseholdsReached().text
-        # ToDo: Uncomment after fix: 0 value does not appear
-        # assert "0" in pageCountryDashboard.getTotalNumberOfIndividualsReached().text
+        assert "0" in pageCountryDashboard.getTotalNumberOfIndividualsReached().text
         assert "0" in pageCountryDashboard.getTotalNumberOfPeopleReached().text
         assert "0" in pageCountryDashboard.getTotalNumberOfChildrenReached().text
         assert "0" in pageCountryDashboard.getTotalNumberOfGrievances().text

@@ -256,6 +256,11 @@ class TestCreateTargetPopulationMutation(APITestCase):
             {"householdIds": "HH-1, HH-2, HH-3, ", "individualIds": "IND-33, IND-33, ", "rules": []},
             {"householdIds": "HH-1", "individualIds": "IND-33", "rules": []},
             {"householdIds": "", "individualIds": "IND-33", "rules": []},
+            {"householdIds": "", "individualIds": "IND-33, IND-666", "rules": []},
+            {"householdIds": "", "individualIds": "IND-666", "rules": []},
+            {"householdIds": "HH-1, HH-666", "individualIds": "", "rules": []},
+            {"householdIds": "HH-666", "individualIds": "", "rules": []},
+            {"householdIds": "", "individualIds": "", "rules": []},
         ]
 
         for num, targeting_criteria in enumerate(targeting_criteria_list, 1):

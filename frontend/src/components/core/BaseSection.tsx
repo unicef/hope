@@ -23,7 +23,7 @@ const BoxContainer = styled(Box)`
 interface BaseSectionProps {
   children?: ReactElement | ReactElement[];
   buttons?: ReactElement;
-  title: string | ReactElement;
+  title?: string | ReactElement;
   description?: string;
   p?: number;
   noPaper?: boolean;
@@ -33,7 +33,7 @@ interface BaseSectionProps {
 export const BaseSection = ({
   children = <></>,
   buttons,
-  title,
+  title = '',
   description,
   p = 3,
   noPaper = false,

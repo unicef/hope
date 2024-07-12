@@ -100,7 +100,7 @@ export function LookUpSelectionSurveys({
         alignItems="center"
         bgcolor="#F5F5F5"
       >
-        <Box pr={5} fontWeight="500" fontSize="medium">
+        <Box pl={5} pr={5} fontWeight="500" fontSize="medium">
           {t('Look up for')}
         </Box>
         <RadioGroup

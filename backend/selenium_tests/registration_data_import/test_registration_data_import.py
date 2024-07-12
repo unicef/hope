@@ -9,6 +9,8 @@ from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
 )
 
+from hct_mis_api.apps.account.fixtures import PartnerFactory
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.django_db(transaction=True, databases=["registration_datahub", "default"])
@@ -26,13 +28,28 @@ def registration_datahub(db) -> None:  # type: ignore
 def create_programs() -> None:
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
-    return
+    yield
 
 
 @pytest.fixture
 def add_rdi() -> None:
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data-cypress.json")
-    return
+    yield
+
+
+@pytest.fixture
+def unicef_partner() -> Partner:
+    yield PartnerFactory(name="UNICEF")
+
+
+@pytest.fixture
+def unhcr_partner() -> Partner:
+    yield PartnerFactory(name="UNHCR")
+
+
+@pytest.fixture
+def wfp_partner() -> Partner:
+    yield PartnerFactory(name="WFP")
 
 
 @pytest.mark.usefixtures("login")
@@ -122,6 +139,8 @@ class TestRegistrationDataImport:
         login: None,
         create_programs: None,
         add_rdi: None,
+        unhcr_partner: Partner,
+        wfp_partner: Partner,
         pageRegistrationDataImport: RegistrationDataImport,
         pageDetailsRegistrationDataImport: RDIDetailsPage,
         pageHouseholdsDetails: HouseholdsDetails,
@@ -146,6 +165,7 @@ class TestRegistrationDataImport:
         pageDetailsRegistrationDataImport.getButtonMergeRdi().click()
         pageDetailsRegistrationDataImport.getButtonMerge().click()
         pageDetailsRegistrationDataImport.waitForStatus("MERGED")
+        assert "MERGED" == pageDetailsRegistrationDataImport.getStatusContainer().text
         assert "VIEW TICKETS" in pageDetailsRegistrationDataImport.getButtonViewTickets().text
         pageDetailsRegistrationDataImport.getButtonIndividuals().click()
         pageDetailsRegistrationDataImport.getButtonHouseholds().click()

@@ -37,6 +37,7 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
+    PeriodicFieldData,
 )
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.program.models import Program
@@ -159,6 +160,17 @@ def sort_by_attr(options: Iterable, attrs: str) -> List:
     return list(sorted(options, key=key_extractor))
 
 
+class PeriodicFieldDataNode(DjangoObjectType):
+    class Meta:
+        model = PeriodicFieldData
+        fields = (
+            "id",
+            "subtype",
+            "number_of_runs",
+            "rounds_names",
+        )
+
+
 class FieldAttributeNode(graphene.ObjectType):
     class Meta:
         default_resolver = _custom_dict_or_attr_resolver
@@ -173,6 +185,13 @@ class FieldAttributeNode(graphene.ObjectType):
     choices = graphene.List(CoreFieldChoiceObject)
     associated_with = graphene.String()
     is_flex_field = graphene.Boolean()
+    pdu_data = graphene.Field(PeriodicFieldDataNode, required=False)
+
+    @staticmethod
+    def resolve_pdu_data(parent: Union[Dict, FlexibleAttribute], info: Any) -> Optional[PeriodicFieldData]:
+        if isinstance(parent, FlexibleAttribute):
+            return parent.pdu_data
+        return None
 
     def resolve_choices(parent, info: Any) -> List:
         choices = _custom_dict_or_attr_resolver("choices", None, parent, info)

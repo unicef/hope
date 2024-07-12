@@ -777,27 +777,81 @@ class TestPaymentPlanReconciliation(APITestCase):
 
     @parameterized.expand(
         [
-            (-1, None, Payment.STATUS_ERROR),
-            (0, Decimal(0), Payment.STATUS_NOT_DISTRIBUTED),
-            (400, Decimal(400), Payment.STATUS_DISTRIBUTION_PARTIAL),
-            (500, Decimal(500), Payment.STATUS_DISTRIBUTION_SUCCESS),
-            (600, None, None),
+            (-1, Decimal(f"{round(100.00, 2):.2f}"), None, Payment.STATUS_ERROR),
+            (0, Decimal(0), Decimal(0), Payment.STATUS_NOT_DISTRIBUTED),
+            (
+                400.10,
+                Decimal(f"{round(400.23, 2):.2f}"),
+                Decimal(f"{round(400.10, 2):.2f}"),
+                Payment.STATUS_DISTRIBUTION_PARTIAL,
+            ),
+            (
+                400.23,
+                Decimal(f"{round(400.23, 2):.2f}"),
+                Decimal(f"{round(400.23, 2):.2f}"),
+                Payment.STATUS_DISTRIBUTION_SUCCESS,
+            ),
+            (
+                500.00,
+                Decimal(f"{round(500.00, 2):.2f}"),
+                Decimal(f"{round(500.00, 2):.2f}"),
+                Payment.STATUS_DISTRIBUTION_SUCCESS,
+            ),
+            (
+                500,
+                Decimal(f"{round(500.00, 2):.2f}"),
+                Decimal(f"{round(500.00, 2):.2f}"),
+                Payment.STATUS_DISTRIBUTION_SUCCESS,
+            ),
+            (600.00, Decimal(f"{round(100.00, 2):.2f}"), None, None),
+            ("-1", Decimal(f"{round(100.00, 2):.2f}"), None, Payment.STATUS_ERROR),
+            ("0", Decimal(0), Decimal(0), Payment.STATUS_NOT_DISTRIBUTED),
+            (
+                "400.10",
+                Decimal(f"{round(400.23, 2):.2f}"),
+                Decimal(f"{round(400.10, 2):.2f}"),
+                Payment.STATUS_DISTRIBUTION_PARTIAL,
+            ),
+            (
+                "400.23",
+                Decimal(f"{round(400.23, 2):.2f}"),
+                Decimal(f"{round(400.23, 2):.2f}"),
+                Payment.STATUS_DISTRIBUTION_SUCCESS,
+            ),
+            (
+                "500",
+                Decimal(f"{round(500.00, 2):.2f}"),
+                Decimal(f"{round(500.00, 2):.2f}"),
+                Payment.STATUS_DISTRIBUTION_SUCCESS,
+            ),
+            (
+                "500.00",
+                Decimal(f"{round(500.00, 2):.2f}"),
+                Decimal(f"{round(500.00, 2):.2f}"),
+                Payment.STATUS_DISTRIBUTION_SUCCESS,
+            ),
         ]
     )
     def test_receiving_payment_reconciliations_status(
-        self, delivered_quantity: float, expected_delivered_quantity: Decimal, expected_status: str
+        self,
+        delivered_quantity: float,
+        entitlement_quantity: Decimal,
+        expected_delivered_quantity: Decimal,
+        expected_status: str,
     ) -> None:
         service = XlsxPaymentPlanImportPerFspService(PaymentPlanFactory(), None)  # type: ignore
 
         if not expected_status:
             with self.assertRaisesMessage(
                 service.XlsxPaymentPlanImportPerFspServiceException,
-                "Invalid delivered_quantity 600 provided for payment_id xx",
+                f"Invalid delivered_quantity {delivered_quantity} provided for payment_id xx",
             ):
-                service._get_delivered_quantity_status_and_value(delivered_quantity, Decimal(500), "xx")
+                service._get_delivered_quantity_status_and_value(delivered_quantity, entitlement_quantity, "xx")
 
         else:
-            status, value = service._get_delivered_quantity_status_and_value(delivered_quantity, Decimal(500), "xx")
+            status, value = service._get_delivered_quantity_status_and_value(
+                delivered_quantity, entitlement_quantity, "xx"
+            )
             self.assertEqual(status, expected_status)
             self.assertEqual(value, expected_delivered_quantity)
 

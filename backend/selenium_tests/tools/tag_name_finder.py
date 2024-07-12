@@ -50,6 +50,8 @@ if __name__ == "__main__":
     exit_loop = ""
     while exit_loop != "exit":
         exit_loop = input("Open the page and press Enter or write exit")
-        printing("Labels", driver)
+        printing("Mapping", driver)
         print("\n")
         printing("Methods", driver)
+        print("\n")
+        printing("Assert", driver)
