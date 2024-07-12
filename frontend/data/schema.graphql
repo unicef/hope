@@ -1239,6 +1239,7 @@ type FieldAttributeNode {
   choices: [CoreFieldChoiceObject]
   associatedWith: String
   isFlexField: Boolean
+  pduData: PeriodicFieldDataNode
 }
 
 type FilteredActionsListNode {
@@ -1318,6 +1319,41 @@ type FinishPaymentVerificationPlan {
 }
 
 scalar FlexFieldsScalar
+
+type FlexibleAttributeChoiceNode implements Node {
+  isRemoved: Boolean!
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  listName: String!
+  name: String
+  label: JSONString!
+  flexAttributes: [FlexibleAttributeNode!]!
+  value: String
+}
+
+type FlexibleAttributeNode {
+  id: UUID!
+  type: FlexibleAttributeType!
+  name: String!
+  required: Boolean!
+  label: JSONString!
+  hint: JSONString!
+  choices: [FlexibleAttributeChoiceNode]
+  associatedWith: Int
+}
+
+enum FlexibleAttributeType {
+  DATE
+  DECIMAL
+  IMAGE
+  INTEGER
+  GEOPOINT
+  SELECT_ONE
+  SELECT_MANY
+  STRING
+  PDU
+}
 
 type FspChoice {
   id: String
@@ -2021,7 +2057,6 @@ type ImportedDocumentNode implements Node {
   program: ProgramNode
   isMigrationHandled: Boolean!
   copiedFrom: DocumentNode
-  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
 }
 
 type ImportedDocumentNodeConnection {
@@ -3573,6 +3608,19 @@ enum PaymentVerificationSummaryStatus {
   PENDING
 }
 
+type PeriodicFieldDataNode {
+  id: ID!
+  subtype: PeriodicFieldDataSubtype!
+  numberOfRuns: Int!
+  roundsNames: [String!]!
+}
+
+enum PeriodicFieldDataSubtype {
+  DATE
+  DECIMAL
+  STRING
+}
+
 input PositiveFeedbackTicketExtras {
   household: ID
   individual: ID
@@ -3613,6 +3661,7 @@ type ProgramNode implements Node {
   programmeCode: String
   partnerAccess: ProgramPartnerAccess!
   partners: [PartnerNode]
+  pduFields: [FlexibleAttributeNode!]!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -3833,7 +3882,6 @@ type Query {
   importedHousehold(id: ID!): ImportedHouseholdNode
   allImportedHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, rdiId: String, businessArea: String, orderBy: String): ImportedHouseholdNodeConnection
   registrationDataImportDatahub(id: ID!): RegistrationDataImportDatahubNode
-  allRegistrationDataImportsDatahub(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportDatahubNodeConnection
   importedIndividual(id: ID!): ImportedIndividualNode
   allImportedIndividuals(offset: Int, before: String, after: String, first: Int, last: Int, household: ID, rdiId: String, duplicatesOnly: Boolean, businessArea: String, orderBy: String): ImportedIndividualNodeConnection
   importData(id: ID!): ImportDataNode
@@ -3963,18 +4011,6 @@ type RegistrationDataImportDatahubNode implements Node {
   importData: ImportDataNode
   importDone: RegistrationDataImportDatahubImportDone!
   businessAreaSlug: String!
-}
-
-type RegistrationDataImportDatahubNodeConnection {
-  pageInfo: PageInfo!
-  edges: [RegistrationDataImportDatahubNodeEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type RegistrationDataImportDatahubNodeEdge {
-  node: RegistrationDataImportDatahubNode
-  cursor: String!
 }
 
 type RegistrationDataImportNode implements Node {

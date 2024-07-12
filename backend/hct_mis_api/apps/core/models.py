@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
+from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db.models import JSONField, Q, UniqueConstraint
@@ -186,8 +187,6 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
 
 
 class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDModel):
-    ASSOCIATED_WITH_HOUSEHOLD = 0
-    ASSOCIATED_WITH_INDIVIDUAL = 1
     STRING = "STRING"
     IMAGE = "IMAGE"
     INTEGER = "INTEGER"
@@ -196,6 +195,7 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
     SELECT_MANY = "SELECT_MANY"
     DATE = "DATE"
     GEOPOINT = "GEOPOINT"
+    PDU = "PDU"
     TYPE_CHOICE = Choices(
         (DATE, _("Date")),
         (DECIMAL, _("Decimal")),
@@ -205,7 +205,11 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
         (SELECT_ONE, _("Select One")),
         (SELECT_MANY, _("Select Many")),
         (STRING, _("String")),
+        (PDU, _("PDU")),
     )
+
+    ASSOCIATED_WITH_HOUSEHOLD = 0
+    ASSOCIATED_WITH_INDIVIDUAL = 1
     ASSOCIATED_WITH_CHOICES: Any = (
         (0, _("Household")),
         (1, _("Individual")),
@@ -214,6 +218,20 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
     type = models.CharField(max_length=16, choices=TYPE_CHOICE)
     name = models.CharField(max_length=255, unique=True)
     required = models.BooleanField(default=False)
+    program = models.ForeignKey(
+        "program.Program",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="pdu_fields",
+    )
+    pdu_data = models.OneToOneField(
+        "core.PeriodicFieldData",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="flex_field",
+    )
     label = JSONField(default=dict)
     hint = JSONField(default=dict)
     group = models.ForeignKey(
@@ -230,6 +248,29 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
 
     def __str__(self) -> str:
         return f"type: {self.type}, name: {self.name}"
+
+
+class PeriodicFieldData(models.Model):
+    """
+    Additional data for PDU
+    """
+
+    STRING = "STRING"
+    DECIMAL = "DECIMAL"
+    DATE = "DATE"
+    TYPE_CHOICE = Choices(
+        (DATE, _("Date")),
+        (DECIMAL, _("Decimal")),
+        (STRING, _("String")),
+    )
+
+    subtype = models.CharField(max_length=16, choices=TYPE_CHOICE)
+    number_of_runs = models.IntegerField()
+    rounds_names = ArrayField(models.CharField(max_length=255), default=list)
+
+    class Meta:
+        verbose_name = "Periodic Field Data"
+        verbose_name_plural = "Periodic Fields Data"
 
 
 class FlexibleAttributeGroupManager(SoftDeletionTreeManager):
