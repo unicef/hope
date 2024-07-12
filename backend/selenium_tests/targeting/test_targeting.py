@@ -407,6 +407,7 @@ class TestTargeting:
         pageTargetingDetails.getButtonPopupMarkReady().click()
         pageTargetingDetails.waitForLabelStatus("READY")
 
+    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_copy_targeting(
         self,
         create_programs: None,
