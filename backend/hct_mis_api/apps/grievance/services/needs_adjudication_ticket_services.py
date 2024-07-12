@@ -73,7 +73,6 @@ def close_needs_adjudication_old_ticket(ticket_details: TicketNeedsAdjudicationD
 
 
 def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationDetails, user: AbstractUser) -> None:
-    # TODO: need to double check all this logic here
     validate_all_individuals_before_close_needs_adjudication(ticket_details)
 
     distinct_individuals = ticket_details.selected_distinct.all()
@@ -86,7 +85,7 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
 
     if distinct_individuals:
         for individual_to_distinct in distinct_individuals:
-            mark_as_distinct_and_reassign_roles(ticket_details, individual_to_distinct, user)
+            mark_as_distinct_individual(individual_to_distinct, user, ticket_details.ticket.programs.all())
         _clear_deduplication_individuals_fields(distinct_individuals)
 
 
@@ -250,27 +249,6 @@ def mark_as_duplicate_individual_and_reassign_roles(
     )
 
 
-def mark_as_distinct_and_reassign_roles(
-    ticket_details: TicketNeedsAdjudicationDetails,
-    individual_to_distinct: Individual,
-    user: AbstractUser,
-) -> None:
-    # TODO: HAVE to update this logic
-    if ticket_details.is_multiple_duplicates_version:
-        household = reassign_roles_on_disable_individual_service(
-            individual_to_distinct,
-            ticket_details.role_reassign_data,
-            user,
-            ticket_details.ticket.programs.all(),
-            "new_individual",
-        )
-    else:
-        household = reassign_roles_on_disable_individual_service(
-            individual_to_distinct, ticket_details.role_reassign_data, user, ticket_details.ticket.programs.all()
-        )
-    mark_as_distinct_individual(individual_to_distinct, household, user, ticket_details.ticket.programs.all())
-
-
 def mark_as_duplicate_individual(
     individual_to_remove: Individual,
     unique_individual: Optional[Individual],
@@ -279,7 +257,6 @@ def mark_as_duplicate_individual(
     program: "Program",
 ) -> None:
     old_individual = Individual.objects.get(id=individual_to_remove.id)
-    # TODO: who is unique_individual is more then 1 was selected.. or none just
     individual_to_remove.mark_as_duplicate(unique_individual)
     log_create(
         Individual.ACTIVITY_LOG_MAPPING,
@@ -298,12 +275,10 @@ def mark_as_duplicate_individual(
 
 def mark_as_distinct_individual(
     individual_to_distinct: Individual,
-    household: Optional[Household],
     user: AbstractUser,
     program: "Program",
 ) -> None:
     old_individual = Individual.objects.get(id=individual_to_distinct.id)
-    # TODO: who is unique_individual is more then 1 was selected.. or just None
     individual_to_distinct.mark_as_distinct()
     log_create(
         Individual.ACTIVITY_LOG_MAPPING,
@@ -314,7 +289,7 @@ def mark_as_distinct_individual(
         individual_to_distinct,
     )
     individual_marked_as_distinct.send(sender=Individual, instance=individual_to_distinct)
-    if household:
-        household.refresh_from_db()
-        if household.active_individuals.count() > 0:
-            household.unwithdraw()
+    household = individual_to_distinct.household
+    household.refresh_from_db()
+    if household.active_individuals.count() > 0:
+        household.unwithdraw()
