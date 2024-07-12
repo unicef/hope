@@ -10,13 +10,9 @@ const fs = require("fs");
 const axios = require("axios");
 const FormData = require("form-data");
 
-// const SLACK_BOT_USER_TOKEN =
-//   "xoxb-5509997426931-5523162721089-IlVaqxdRKRyKftvRAZojd7yZ";
-// const CHANNEL = "C05EKHETMT9";
-
 function sendMessage(
   data,
-  url = "https://hooks.slack.com/services/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"
+  url = URL.secret
 ) {
   request(
     {
@@ -25,7 +21,6 @@ function sendMessage(
       json: data,
       headers: {
         "Content-Type": "application/json; charset=utf-8",
-        // Authorization: `Bearer ${SLACK_BOT_USER_TOKEN}`,
       },
     },
     function (error, response, body) {
@@ -43,14 +38,12 @@ function sendMessage(
 async function sendFile(file_name) {
   const form = new FormData();
   form.append("file", fs.readFileSync(file_name), file_name);
-  // form.append("channels", CHANNEL);
   await axios.post(
     "https://hooks.slack.com/services/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",
     form,
     {
       headers: {
         "Content-Type": "multipart/form-data",
-        // Authorization: `Bearer ${SLACK_BOT_USER_TOKEN}`,
       },
     }
   );
