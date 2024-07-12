@@ -1,3 +1,5 @@
+from time import sleep
+
 from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -8,6 +10,7 @@ class PaymentModuleDetails(BaseComponents):
     ppUnicefId = 'span[data-cy="pp-unicef-id"]'
     statusContainer = 'div[data-cy="status-container"]'
     buttonExportXlsx = 'button[data-cy="button-export-xlsx"]'
+    buttonDownloadXlsx = 'a[data-cy="button-download-xlsx"]'
     labelCreatedBy = 'div[data-cy="label-Created By"]'
     labelProgramme = 'div[data-cy="label-Programme"]'
     labelTargetPopulation = 'div[data-cy="label-Target Population"]'
@@ -40,6 +43,27 @@ class PaymentModuleDetails(BaseComponents):
     labelPending = 'div[data-cy="label-Pending"]'
     labelNumberOfPayments = 'div[data-cy="label-Number of payments"]'
     labelReconciled = 'div[data-cy="label-Reconciled"]'
+    labelTotalEntitledQuantity = 'div[data-cy="label-Total Entitled Quantity"]'
+    buttonLockPlan = 'button[data-cy="button-lock-plan"'
+    buttonSubmit = 'button[data-cy="button-submit"]'
+    inputEntitlementFormula = 'div[data-cy="input-entitlement-formula"]'
+    buttonApplySteficon = 'button[data-cy="button-apply-steficon"]'
+    selectDeliveryMechanism = 'div[data-cy="select-deliveryMechanisms[0].deliveryMechanism"]'
+    selectDeliveryMechanismsFSP = 'div[data-cy="select-deliveryMechanisms[0].fsp"]'
+    buttonNextSave = 'button[data-cy="button-next-save"]'
+    buttonSendForApproval = 'button[data-cy="button-send-for-approval"]'
+    buttonApprove = 'button[data-cy="button-approve"]'
+    buttonAuthorize = 'button[data-cy="button-authorize"]'
+    buttonMarkAsReleased = 'button[data-cy="button-mark-as-released"]'
+    buttonUploadReconciliationInfo = 'button[data-cy="button-import"]'
+    buttonImportSubmit = 'button[data-cy="button-import-submit"]'
+    errorsContainer = 'div[data-cy="errors-container"]'
+
+    def getButtonLockPlan(self) -> WebElement:
+        return self.wait_for(self.buttonLockPlan)
+
+    def getButtonSubmit(self) -> WebElement:
+        return self.wait_for(self.buttonSubmit)
 
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
@@ -55,6 +79,18 @@ class PaymentModuleDetails(BaseComponents):
 
     def getButtonExportXlsx(self) -> WebElement:
         return self.wait_for(self.buttonExportXlsx)
+
+    def getButtonDownloadXlsx(self) -> WebElement:
+        return self.wait_for(self.buttonDownloadXlsx)
+
+    def getButtonUploadReconciliationInfo(self) -> WebElement:
+        return self.wait_for(self.buttonUploadReconciliationInfo)
+
+    def getErrorsContainer(self) -> WebElement:
+        return self.wait_for(self.errorsContainer)
+
+    def getButtonImportSubmit(self) -> WebElement:
+        return self.wait_for(self.buttonImportSubmit)
 
     def getLabelCreatedBy(self) -> WebElement:
         return self.wait_for(self.labelCreatedBy)
@@ -151,3 +187,40 @@ class PaymentModuleDetails(BaseComponents):
 
     def getLabelReconciled(self) -> WebElement:
         return self.wait_for(self.labelReconciled)
+
+    def getLabelTotalEntitledQuantity(self) -> WebElement:
+        return self.wait_for(self.labelTotalEntitledQuantity)
+
+    def getInputEntitlementFormula(self) -> WebElement:
+        return self.wait_for(self.inputEntitlementFormula)
+
+    def getButtonApplySteficon(self) -> WebElement:
+        return self.wait_for(self.buttonApplySteficon)
+
+    def getSelectDeliveryMechanism(self) -> WebElement:
+        return self.wait_for(self.selectDeliveryMechanism)
+
+    def getSelectDeliveryMechanismFSP(self) -> WebElement:
+        return self.wait_for(self.selectDeliveryMechanismsFSP)
+
+    def getButtonNextSave(self) -> WebElement:
+        return self.wait_for(self.buttonNextSave)
+
+    def getButtonSendForApproval(self) -> WebElement:
+        return self.wait_for(self.buttonSendForApproval)
+
+    def getButtonApprove(self) -> WebElement:
+        return self.wait_for(self.buttonApprove)
+
+    def getButtonAuthorize(self) -> WebElement:
+        return self.wait_for(self.buttonAuthorize)
+
+    def getButtonMarkAsReleased(self) -> WebElement:
+        return self.wait_for(self.buttonMarkAsReleased)
+
+    def checkStatus(self, status: str) -> None:
+        for _ in range(30):
+            if status == self.getStatusContainer().text:
+                break
+            sleep(1)
+        assert status in self.getStatusContainer().text
