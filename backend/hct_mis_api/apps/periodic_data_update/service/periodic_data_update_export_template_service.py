@@ -1,7 +1,12 @@
+from tempfile import NamedTemporaryFile
+
 import openpyxl
+from django.contrib.admin.options import get_content_type_for_model
+from django.core.files import File
 from django.db.models import Q
 
 from hct_mis_api.apps.core.attributes_qet_queries import age_to_birth_date_query
+from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketReferralDetails,
@@ -17,15 +22,24 @@ from hct_mis_api.apps.grievance.models import (
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
+from openpyxl.packaging.custom import (
+    BoolProperty,
+    DateTimeProperty,
+    FloatProperty,
+    IntProperty,
+    LinkProperty,
+    StringProperty,
+    CustomPropertyList,
+)
 
 
 class PeriodicDataUpdateExportTemplateService:
-    PDU_SHEET = "Timeseries Export List"
+    PDU_SHEET = "Periodic Data Update"
     META_SHEET = "Meta"
 
     def __init__(self, periodic_data_update_template: PeriodicDataUpdateTemplate):
         self.periodic_data_update_template = periodic_data_update_template
-        self.round_data = periodic_data_update_template.rounds_data
+        self.rounds_data = periodic_data_update_template.rounds_data
         self.program = periodic_data_update_template.program
         self.registration_data_import_id_filter = periodic_data_update_template.filters.get(
             "registration_data_import_id"
@@ -42,28 +56,42 @@ class PeriodicDataUpdateExportTemplateService:
     def generate_workbook(self) -> openpyxl.Workbook:
         self._create_workbook()
         self._add_meta()
-        self._generate_header()
+        self.ws_pdu.append(self._generate_header())
         for individual in self._get_individuals_queryset():
             row = self._generate_row(individual)
             if row:
-                self.ws_export_list.append(row)
+                self.ws_pdu.append(row)
         return self.wb
 
+    def save_xlsx_file(self) -> None:
+        filename = f"Periodic Data Update Template {self.periodic_data_update_template.pk}.xlsx"
+        with NamedTemporaryFile() as tmp:
+            xlsx_obj = FileTemp(
+                object_id=self.periodic_data_update_template.pk,
+                content_type=get_content_type_for_model(self.periodic_data_update_template),
+                created_by=self.periodic_data_update_template.created_by,
+            )
+            self.wb.save(tmp.name)
+            tmp.seek(0)
+            xlsx_obj.file.save(filename, File(tmp))
+            self.periodic_data_update_template.file = xlsx_obj
+            self.periodic_data_update_template.save()
 
     def _create_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
         ws_pdu = wb.active
         ws_pdu.title = PeriodicDataUpdateExportTemplateService.PDU_SHEET
         self.wb = wb
-        self.ws_export_list = ws_pdu
+        self.ws_pdu = ws_pdu
         self.ws_meta = wb.create_sheet(PeriodicDataUpdateExportTemplateService.META_SHEET)
         return wb
 
     def _add_meta(self) -> None:
         self.ws_meta["A1"] = "Periodic Data Update Template ID"
         self.ws_meta["B1"] = self.periodic_data_update_template.pk
-        self.wb.set_custom_property("pdu_template_id", self.periodic_data_update_template.pk)
-        self.wb.close()
+        self.wb.custom_doc_props.append(
+            StringProperty(name="pdu_template_id", value=str(self.periodic_data_update_template.pk))
+        )
 
     def _generate_header(self):
         header = [
@@ -72,17 +100,24 @@ class PeriodicDataUpdateExportTemplateService:
             "first_name",
             "last_name",
         ]
-        for round_info_data in self.round_data:
-            header.extend([f"{round_info_data['field']}__round_number", f"{round_info_data['field']}__round_name"])
+        for round_info_data in self.rounds_data:
+            header.extend(
+                [
+                    f"{round_info_data['field']}__round_number",
+                    f"{round_info_data['field']}__round_name",
+                    f"{round_info_data['field']}__round_value",
+                    f"{round_info_data['field']}__collection_date",
+                ]
+            )
         return header
 
     def _generate_row(self, individual: Individual):
-        individual__uuid = individual.pk
+        individual_uuid = individual.pk
         individual_unicef_id = individual.unicef_id
         first_name = individual.given_name
         last_name = individual.family_name
-        row = [individual__uuid, individual_unicef_id, first_name, last_name]
-        is_individual_not_allowed = True
+        row = [str(individual_uuid), individual_unicef_id, first_name, last_name]
+        is_individual_allowed = False
         for round_info_data in self.rounds_data:
             pdu_field_name = round_info_data["field"]
             round_number = round_info_data["round"]
@@ -93,9 +128,10 @@ class PeriodicDataUpdateExportTemplateService:
                 row.extend([round_number, round_name, "", ""])
             else:
                 row.extend([round_number, round_name, "-", "-"])
-            is_individual_not_allowed = is_individual_not_allowed or (round_value is None)
-        if is_individual_not_allowed:
+            is_individual_allowed = is_individual_allowed or round_value is None
+        if not is_individual_allowed:
             return None
+        return row
 
     def _get_round_value(self, individual, pdu_field_name, round_number):
         flex_fields_data = individual.flex_fields
@@ -112,7 +148,7 @@ class PeriodicDataUpdateExportTemplateService:
         if self.registration_data_import_id_filter:
             queryset = queryset.filter(registration_data_import_id=self.registration_data_import_id_filter)
         if self.target_population_id_filter:
-            queryset = queryset.filter(target_population_id=self.target_population_id_filter)
+            queryset = queryset.filter(household__target_populations=self.target_population_id_filter)
         if self.gender_filter:
             queryset = queryset.filter(sex=self.gender_filter)
         if self.age_filter:
@@ -126,15 +162,20 @@ class PeriodicDataUpdateExportTemplateService:
             queryset = queryset.filter(first_registration_date__range=[registration_date_from, registration_date_to])
 
         if self.admin1_filter:
-            queryset = queryset.filter(admin1__in=self.admin1_filter)
+            queryset = queryset.filter(household__admin1__in=self.admin1_filter)
         if self.admin2_filter:
-            queryset = queryset.filter(admin2__in=self.admin2_filter)
+            queryset = queryset.filter(household__admin2__in=self.admin2_filter)
         if self.has_grievance_ticket_filter:
             queryset = self._get_grievance_ticket_filter(queryset)
+        elif self.has_grievance_ticket_filter is False:
+            queryset = self._get_grievance_ticket_filter(queryset, exclude=True)
+        if self.received_assistance_filter:
+            queryset = self._get_received_assistance_filter(queryset)
+        elif self.received_assistance_filter is False:
+            queryset = self._get_received_assistance_filter(queryset, exclude=True)
+        return queryset.distinct()
 
-        return queryset
-
-    def _get_grievance_ticket_filter(self, queryset):
+    def _get_grievance_ticket_filter(self, queryset, exclude=False):
         ticket_details_individual_field = [
             (TicketReferralDetails, "individual_id"),
             (TicketNegativeFeedbackDetails, "individual_id"),
@@ -147,26 +188,33 @@ class PeriodicDataUpdateExportTemplateService:
             (TicketComplaintDetails, "individual_id"),
         ]
         individuals_ids = queryset.values_list("id", flat=True)
-        ticket_individual_ids = {}
+        ticket_individual_ids = set()
         for ticket_model, individual_field_name in ticket_details_individual_field:
-            ticket_individual_ids.update(
-                ticket_model.objects.filter({f"{individual_field_name}__in": individuals_ids})
+            ids = [
+                str(x)
+                for x in ticket_model.objects.filter(**{f"{individual_field_name}__in": individuals_ids})
                 .exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
                 .values_list(individual_field_name, flat=True)
-            )
+            ]
+            ticket_individual_ids.update(ids)
         PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through
-        ticket_individual_ids.update(
-            PossibleDuplicateThrough.objects.filter(individual__in=individuals_ids)
-            .exclude(ticket_needs_adjudication_details__ticket__status=GrievanceTicket.STATUS_CLOSED)
+        ids = [
+            str(x)
+            for x in PossibleDuplicateThrough.objects.filter(individual__in=individuals_ids)
+            .exclude(ticketneedsadjudicationdetails__ticket__status=GrievanceTicket.STATUS_CLOSED)
             .values_list("individual_id", flat=True)
-        )
-
+        ]
+        ticket_individual_ids.update(ids)
+        if exclude:
+            return queryset.exclude(id__in=ticket_individual_ids)
         return queryset.filter(id__in=ticket_individual_ids)
 
-    def _get_received_assistance_filter(self, queryset):
+    def _get_received_assistance_filter(self, queryset, exclude=False):
         individuals_ids = (
-            Payment.objects.filter(individual__in=queryset)
+            Payment.objects.filter(household__in=queryset.values_list("household", flat=True))
             .filter(Q(status=Payment.STATUS_DISTRIBUTION_PARTIAL) | Q(status=Payment.STATUS_DISTRIBUTION_SUCCESS))
-            .values_list("individual_id", flat=True)
+            .values_list("household_id", flat=True)
         )
-        return queryset.filter(id__in=individuals_ids)
+        if exclude:
+            return queryset.exclude(household_id__in=individuals_ids)
+        return queryset.filter(household_id__in=individuals_ids)

@@ -55,6 +55,8 @@ services:
       - ./backend:/code/
       - backend-data:/data
       - ipython_data_local:/root/.ipython
+      - ./backend/pyproject.toml:/packages/pyproject.toml
+      - ./backend/pdm.lock:/packages/pdm.lock
     command: "dev"
     depends_on:
       db:
