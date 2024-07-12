@@ -21,6 +21,8 @@ import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { useNavigate } from 'react-router-dom';
+import { BaseSection } from '@components/core/BaseSection';
+import { ProgramFieldSeriesStep } from '@components/programs/CreateProgram/ProgramFieldSeriesStep';
 
 export const CreateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -102,6 +104,13 @@ export const CreateProgramPage = (): ReactElement => {
     frequencyOfPayments: 'REGULAR',
     partners: [],
     partnerAccess: ProgramPartnerAccess.AllPartnersAccess,
+    timeSeriesFields: [
+      {
+        fieldName: '',
+        dataType: '',
+        numberOfExpectedRounds: '',
+      },
+    ],
   };
 
   const stepFields = [
@@ -172,6 +181,48 @@ export const CreateProgramPage = (): ReactElement => {
           }
         };
 
+        const stepsData = [
+          {
+            title: t('Details'),
+            description: t(
+              'To create a new Programme, please complete all required fields on the form below and save.',
+            ),
+            dataCy: 'step-button-details',
+          },
+          {
+            title: t('Programme Time Series Fields'),
+            description: t(
+              'The Time Series Fields feature allows serial updating of individual data through an XLSX file.',
+            ),
+            dataCy: 'step-button-time-series-fields',
+          },
+          {
+            title: t('Programme Partners'),
+            description: '',
+            dataCy: 'step-button-partners',
+          },
+        ];
+
+        const title = stepsData[step].title;
+        const description = stepsData[step].description
+          ? stepsData[step].description
+          : undefined;
+
+        const stepper = (
+          <Stepper activeStep={step}>
+            {stepsData.map((item, index) => (
+              <Step key={item.title}>
+                <StepButton
+                  data-cy={item.dataCy}
+                  onClick={() => setStep(index)}
+                >
+                  {item.title}
+                </StepButton>
+              </Step>
+            ))}
+          </Stepper>
+        );
+
         return (
           <>
             <PageHeader
@@ -185,42 +236,29 @@ export const CreateProgramPage = (): ReactElement => {
                   : null
               }
             />
-            <Box p={6}>
-              <Box mb={2}>
-                <Stepper activeStep={step}>
-                  <Step>
-                    <StepButton
-                      data-cy="step-button-details"
-                      onClick={() => setStep(0)}
-                    >
-                      {t('Details')}
-                    </StepButton>
-                  </Step>
-                  <Step>
-                    <StepButton
-                      data-cy="step-button-partners"
-                      onClick={() => setStep(1)}
-                    >
-                      {t('Programme Partners')}
-                    </StepButton>
-                  </Step>
-                </Stepper>
+            <BaseSection
+              title={title}
+              description={description}
+              stepper={stepper}
+            >
+              <Box p={3}>
+                {step === 0 && (
+                  <DetailsStep values={values} handleNext={handleNext} />
+                )}
+                {step === 1 && <ProgramFieldSeriesStep values={values} />}
+                {step === 2 && (
+                  <PartnersStep
+                    values={values}
+                    allAreasTreeData={allAreasTree}
+                    partnerChoices={mappedPartnerChoices}
+                    step={step}
+                    setStep={setStep}
+                    submitForm={submitForm}
+                    setFieldValue={setFieldValue}
+                  />
+                )}
               </Box>
-              {step === 0 && (
-                <DetailsStep values={values} handleNext={handleNext} />
-              )}
-              {step === 1 && (
-                <PartnersStep
-                  values={values}
-                  allAreasTreeData={allAreasTree}
-                  partnerChoices={mappedPartnerChoices}
-                  step={step}
-                  setStep={setStep}
-                  submitForm={submitForm}
-                  setFieldValue={setFieldValue}
-                />
-              )}
-            </Box>
+            </BaseSection>
           </>
         );
       }}
