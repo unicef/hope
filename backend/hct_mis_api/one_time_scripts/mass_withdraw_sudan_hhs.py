@@ -8,8 +8,8 @@ from hct_mis_api.apps.household.services.household_withdraw import HouseholdWith
 
 
 def mass_withdraw_sudan_hhs() -> None:
-    # get the file path to mass_withdrawn_sudan_hhs.xlsx
-    file_path = Path(__file__).resolve().parent / "files" / "mass_withdrawn_sudan_hhs.xlsx"
+    # get the file path to mass_withdraw_sudan_hhs.xlsx
+    file_path = Path(__file__).resolve().parent / "files" / "mass_withdraw_sudan_hhs.xlsx"
     workbook = openpyxl.load_workbook(file_path)
     sheet = workbook.active
     for row in sheet.iter_rows(min_row=2, values_only=True):
