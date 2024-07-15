@@ -22,7 +22,6 @@
       "FeedbackNode",
       "FinancialServiceProviderNode",
       "FinancialServiceProviderXlsxTemplateNode",
-      "FlexibleAttributeChoiceNode",
       "GrievanceDocumentNode",
       "GrievanceTicketNode",
       "HouseholdNode",

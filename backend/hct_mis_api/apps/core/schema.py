@@ -171,7 +171,7 @@ class PeriodicFieldDataNode(DjangoObjectType):
         fields = (
             "id",
             "subtype",
-            "number_of_runs",
+            "number_of_rounds",
             "rounds_names",
         )
 
@@ -464,12 +464,6 @@ class Query(graphene.ObjectType):
 
     def resolve_pdu_subtype_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return [{"value": choice[0], "display_name": choice[1]} for choice in PeriodicFieldData.TYPE_CHOICE]
-
-
-class PeriodicFieldDataNode(DjangoObjectType):
-    class Meta:
-        model = PeriodicFieldData
-        fields = ["id", "subtype", "number_of_rounds", "rounds_names"]
 
 
 class PeriodicFieldNode(DjangoObjectType):
