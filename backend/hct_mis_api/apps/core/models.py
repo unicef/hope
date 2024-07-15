@@ -250,29 +250,6 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
         return f"type: {self.type}, name: {self.name}"
 
 
-class PeriodicFieldData(models.Model):
-    """
-    Additional data for PDU
-    """
-
-    STRING = "STRING"
-    DECIMAL = "DECIMAL"
-    DATE = "DATE"
-    TYPE_CHOICE = Choices(
-        (DATE, _("Date")),
-        (DECIMAL, _("Decimal")),
-        (STRING, _("String")),
-    )
-
-    subtype = models.CharField(max_length=16, choices=TYPE_CHOICE)
-    number_of_runs = models.IntegerField()
-    rounds_names = ArrayField(models.CharField(max_length=255), default=list)
-
-    class Meta:
-        verbose_name = "Periodic Field Data"
-        verbose_name_plural = "Periodic Fields Data"
-
-
 class FlexibleAttributeGroupManager(SoftDeletionTreeManager):
     def get_by_natural_key(self, name: str) -> "FlexibleAttributeGroup":
         return self.get(name=name)

@@ -59,6 +59,7 @@ class CreateProgram(
         program_data = CreateProgramInput(required=True)
 
     @classmethod
+    @transaction.atomic
     @is_authenticated
     def processed_mutate(cls, root: Any, info: Any, program_data: Dict) -> "CreateProgram":
         business_area_slug = program_data.pop("business_area_slug", None)

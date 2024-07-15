@@ -13,7 +13,7 @@ class FlexibleAttributeForPDUService:
 
     @staticmethod
     def _validate_pdu_data(pdu_data: Dict) -> None:
-        if pdu_data and pdu_data["number_of_rounds"] != len(pdu_data["rounds_names"]):
+        if pdu_data["number_of_rounds"] != len(pdu_data["rounds_names"]):
             raise GraphQLError("Number of rounds does not match the number of round names")
 
     def create_pdu_flex_attribute(self, pdu_field: dict) -> FlexibleAttribute:
@@ -25,6 +25,7 @@ class FlexibleAttributeForPDUService:
             type=FlexibleAttribute.PDU,
             program=self.program,
             pdu_data=pdu_data_object,
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
         )
 
     def create_pdu_flex_attributes(self) -> None:
@@ -32,7 +33,7 @@ class FlexibleAttributeForPDUService:
             self.create_pdu_flex_attribute(pdu_field)
 
     def update_pdu_flex_attribute(self, pdu_field: dict, flexible_attribute_id: Any) -> None:
-        pdu_data = pdu_field.pop("pdu_data", {})
+        pdu_data = pdu_field.pop("pdu_data")
         self._validate_pdu_data(pdu_data)
         flexible_attribute_object = FlexibleAttribute.objects.get(id=flexible_attribute_id)
         pdu_data_object = flexible_attribute_object.pdu_data

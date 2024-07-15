@@ -623,6 +623,7 @@ input CopyProgramInput {
   partners: [ProgramPartnerThroughInput]
   partnerAccess: String
   programmeCode: String
+  pduFields: [PDUFieldInput]
 }
 
 input CopyTargetPopulationInput {
@@ -786,6 +787,7 @@ input CreateProgramInput {
   partners: [ProgramPartnerThroughInput]
   partnerAccess: String
   programmeCode: String
+  pduFields: [PDUFieldInput]
 }
 
 type CreateReport {
@@ -1319,41 +1321,6 @@ type FinishPaymentVerificationPlan {
 }
 
 scalar FlexFieldsScalar
-
-type FlexibleAttributeChoiceNode implements Node {
-  isRemoved: Boolean!
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  listName: String!
-  name: String
-  label: JSONString!
-  flexAttributes: [FlexibleAttributeNode!]!
-  value: String
-}
-
-type FlexibleAttributeNode {
-  id: UUID!
-  type: FlexibleAttributeType!
-  name: String!
-  required: Boolean!
-  label: JSONString!
-  hint: JSONString!
-  choices: [FlexibleAttributeChoiceNode]
-  associatedWith: Int
-}
-
-enum FlexibleAttributeType {
-  DATE
-  DECIMAL
-  IMAGE
-  INTEGER
-  GEOPOINT
-  SELECT_ONE
-  SELECT_MANY
-  STRING
-  PDU
-}
 
 type FspChoice {
   id: String
@@ -2863,6 +2830,17 @@ interface Node {
   id: ID!
 }
 
+input PDUFieldInput {
+  id: String
+  name: String
+  pduData: PeriodicFieldDataInput
+}
+
+type PDUSubtypeChoiceObject {
+  value: String
+  displayName: String
+}
+
 type PageInfo {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
@@ -3608,10 +3586,16 @@ enum PaymentVerificationSummaryStatus {
   PENDING
 }
 
+input PeriodicFieldDataInput {
+  subtype: String
+  numberOfRounds: Int
+  roundsNames: [String]
+}
+
 type PeriodicFieldDataNode {
   id: ID!
   subtype: PeriodicFieldDataSubtype!
-  numberOfRuns: Int!
+  numberOfRounds: Int!
   roundsNames: [String!]!
 }
 
@@ -3619,6 +3603,12 @@ enum PeriodicFieldDataSubtype {
   DATE
   DECIMAL
   STRING
+}
+
+type PeriodicFieldNode {
+  id: UUID!
+  name: String!
+  pduData: PeriodicFieldDataNode
 }
 
 input PositiveFeedbackTicketExtras {
@@ -3661,7 +3651,7 @@ type ProgramNode implements Node {
   programmeCode: String
   partnerAccess: ProgramPartnerAccess!
   partners: [PartnerNode]
-  pduFields: [FlexibleAttributeNode!]!
+  pduFields: [PeriodicFieldNode]
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -3826,6 +3816,7 @@ type Query {
   allLanguages(code: String, before: String, after: String, first: Int, last: Int): LanguageObjectConnection
   dataCollectingType(id: ID!): DataCollectingTypeNode
   dataCollectionTypeChoices: [DataCollectingTypeChoiceObject]
+  pduSubtypeChoices: [PDUSubtypeChoiceObject]
   program(id: ID!): ProgramNode
   allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, name: String, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, compatibleDct: Boolean, orderBy: String): ProgramNodeConnection
   chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
