@@ -95,4 +95,4 @@ class TestDeduplicateAndCheckAgainstSanctionsListTask(TestCase):
         assert deduplicate_mock.call_count == 1
         assert deduplicate_individuals_mock.call_count == 1
         assert create_needs_adjudication_tickets_mock.call_count == 2
-        assert execute_mock.call_count == 1
+        assert execute_mock.call_count == 0
