@@ -69,7 +69,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         self.DOCS_AND_IDENTITIES_FIELDS = [
             f"{key}_{suffix}" for key in document_keys for suffix in ["no_i_c", "photo_i_c", "issuer_i_c"]
         ]
-        self.registration_data_import = RegistrationDataImport.objects.select_for_update().get(
+        self.registration_data_import = RegistrationDataImport.objects.get(
             id=registration_data_import_id,
         )
         self.business_area = BusinessArea.objects.get(id=business_area_id)
