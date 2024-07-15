@@ -42,6 +42,52 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
     ]
 }
 
+snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_new_input_fields 1'] = {
+    'data': {
+        'approveNeedsAdjudication': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 5
+                }
+            ],
+            'message': 'Only one option for duplicate or distinct individuals is available',
+            'path': [
+                'approveNeedsAdjudication'
+            ]
+        }
+    ]
+}
+
+snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_new_input_fields 2'] = {
+    'data': {
+        'approveNeedsAdjudication': {
+            'grievanceTicket': {
+                'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
+                'needsAdjudicationTicketDetails': {
+                    'selectedIndividual': None
+                }
+            }
+        }
+    }
+}
+
+snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_new_input_fields 3'] = {
+    'data': {
+        'approveNeedsAdjudication': {
+            'grievanceTicket': {
+                'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
+                'needsAdjudicationTicketDetails': {
+                    'selectedIndividual': None
+                }
+            }
+        }
+    }
+}
+
 snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_should_allow_uncheck_selected_individual_0_with_permission 1'] = {
     'data': {
         'approveNeedsAdjudication': {

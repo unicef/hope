@@ -173,6 +173,14 @@ class TestGrievanceQuery(APITestCase):
             needsAdjudicationTicketDetails {
               scoreMin
               scoreMax
+              extraData{
+                goldenRecords {
+                  fullName
+                  score
+                  duplicate
+                  distinct
+                }
+              }
             }
             status
             category
@@ -339,6 +347,32 @@ class TestGrievanceQuery(APITestCase):
             possible_duplicate=cls.individual_2,
             score_min=100,
             score_max=150,
+            extra_data={
+                "golden_records": [
+                    {
+                        "dob": "date_of_birth",
+                        "full_name": "full_name",
+                        "hit_id": str(cls.individual_1.pk),
+                        "location": "location",
+                        "proximity_to_score": "proximity_to_score",
+                        "score": 1.2,
+                        "duplicate": False,
+                        "distinct": True,
+                    }
+                ],
+                "possible_duplicate": [
+                    {
+                        "dob": "date_of_birth",
+                        "full_name": "full_name",
+                        "hit_id": str(cls.individual_2.pk),
+                        "location": "location",
+                        "proximity_to_score": "proximity_to_score",
+                        "score": 2.0,
+                        "duplicate": True,
+                        "distinct": False,
+                    }
+                ],
+            },
         )
 
         cls.grievance_tickets[0].programs.add(cls.program)

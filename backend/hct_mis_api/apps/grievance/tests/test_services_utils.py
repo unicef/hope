@@ -6,7 +6,11 @@ from django.core.exceptions import PermissionDenied, ValidationError
 
 import pytest
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, PartnerFactory
+from hct_mis_api.apps.account.fixtures import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64_required
@@ -24,6 +28,9 @@ from hct_mis_api.apps.grievance.services.data_change.utils import (
     handle_update_payment_channel,
     to_phone_number_str,
     verify_flex_fields,
+)
+from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
+    close_needs_adjudication_ticket_service,
 )
 from hct_mis_api.apps.grievance.utils import (
     validate_all_individuals_before_close_needs_adjudication,
@@ -258,6 +265,11 @@ class TestGrievanceUtils(TestCase):
             validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details, "distinct")
             assert str(e.value) == "The selected individual IND-333 is not valid, must be not withdrawn"
 
+        ticket_details.selected_distinct.remove(individuals[0])
+        individuals[0].withdrawn = False
+        individuals[0].save()
+        validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details, "duplicate")
+
     def test_validate_all_individuals_before_close_needs_adjudication(self) -> None:
         BusinessAreaFactory(slug="afghanistan")
         _, individuals_1 = create_household(
@@ -293,3 +305,49 @@ class TestGrievanceUtils(TestCase):
             ticket_details.save()
             validate_all_individuals_before_close_needs_adjudication(ticket_details)
             assert str(e.value) == "Close ticket is possible when all active Individuals are flagged"
+
+        ticket_details.selected_individuals.add(individuals_1[0])
+        validate_all_individuals_before_close_needs_adjudication(ticket_details)
+
+    def test_close_needs_adjudication_ticket_service(self) -> None:
+        user = UserFactory()
+        ba = BusinessAreaFactory(slug="afghanistan")
+        program = ProgramFactory(business_area=ba)
+
+        grievance = GrievanceTicketFactory(
+            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+            business_area=ba,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
+            description="GrievanceTicket",
+        )
+        grievance.programs.add(program)
+        _, individuals_1 = create_household(
+            {"size": 1, "business_area": ba, "program": program},
+            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+        )
+        _, individuals_2 = create_household(
+            {"size": 1, "business_area": ba, "program": program},
+            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+        )
+        ind_1 = individuals_1[0]
+        ind_2 = individuals_2[0]
+
+        ticket_details = TicketNeedsAdjudicationDetailsFactory(
+            ticket=grievance,
+            golden_records_individual=ind_1,
+            is_multiple_duplicates_version=True,
+            selected_individual=None,
+        )
+        ticket_details.selected_individuals.add(ind_2)
+        ticket_details.possible_duplicates.add(ind_2)
+        ticket_details.selected_distinct.add(ind_1)
+        ticket_details.ticket = grievance
+        ticket_details.save()
+
+        close_needs_adjudication_ticket_service(grievance, user)
+
+        ind_1.refresh_from_db()
+        ind_2.refresh_from_db()
+
+        assert ind_1.duplicate is False
+        assert ind_2.duplicate is True

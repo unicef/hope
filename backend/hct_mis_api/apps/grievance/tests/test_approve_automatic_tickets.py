@@ -39,12 +39,13 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
     """
     APPROVE_NEEDS_ADJUDICATION_MUTATION = """
     mutation ApproveNeedsAdjudicationTicket(
-    $grievanceTicketId: ID!, $selectedIndividualId: ID, $duplicateIndividualIds: [ID]
+    $grievanceTicketId: ID!, $selectedIndividualId: ID, $duplicateIndividualIds: [ID], $distinctIndividualIds: [ID],
     ) {
       approveNeedsAdjudication(
       grievanceTicketId: $grievanceTicketId,
       selectedIndividualId: $selectedIndividualId,
-      duplicateIndividualIds: $duplicateIndividualIds
+      duplicateIndividualIds: $duplicateIndividualIds,
+      distinctIndividualIds: $distinctIndividualIds,
       ) {
         grievanceTicket {
           id
@@ -305,3 +306,48 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
                 ],
             },
         )
+
+    def test_approve_needs_adjudication_new_input_fields(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE], self.business_area
+        )
+
+        self.needs_adjudication_grievance_ticket.refresh_from_db()
+        self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_distinct.count(), 0)
+        self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_individuals.count(), 0)
+
+        self.snapshot_graphql_request(
+            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": self.id_to_base64(
+                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
+                ),
+                "duplicateIndividualIds": self.id_to_base64(self.individuals[1].id, "IndividualNode"),
+                "distinctIndividualIds": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+            },
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": self.id_to_base64(
+                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
+                ),
+                "duplicateIndividualIds": self.id_to_base64(self.individuals[1].id, "IndividualNode"),
+            },
+        )
+        self.snapshot_graphql_request(
+            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": self.id_to_base64(
+                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
+                ),
+                "distinctIndividualIds": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+            },
+        )
+
+        self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_distinct.count(), 1)
+        self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_individuals.count(), 1)
