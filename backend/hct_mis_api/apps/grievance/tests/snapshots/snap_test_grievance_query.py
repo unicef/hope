@@ -214,10 +214,20 @@ snapshots['TestGrievanceQuery::test_grievance_list_filtered_by_score 1'] = {
                                         'fullName': 'full_name',
                                         'score': 1.2
                                     }
+                                ],
+                                'possibleDuplicate': [
+                                    {
+                                        'distinct': False,
+                                        'duplicate': True,
+                                        'fullName': 'full_name',
+                                        'score': 2.0
+                                    }
                                 ]
                             },
                             'scoreMax': 150.0,
-                            'scoreMin': 100.0
+                            'scoreMin': 100.0,
+                            'selectedDistinct': [
+                            ]
                         },
                         'status': 1
                     }
