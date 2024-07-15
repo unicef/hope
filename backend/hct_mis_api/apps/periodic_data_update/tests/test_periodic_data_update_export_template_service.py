@@ -1,24 +1,25 @@
-import openpyxl
 from django.test import TestCase
+
+import openpyxl
 from freezegun import freeze_time
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.geo.fixtures import AreaTypeFactory, AreaFactory
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
-    TicketReferralDetails,
-    TicketNegativeFeedbackDetails,
-    TicketPositiveFeedbackDetails,
-    TicketNeedsAdjudicationDetails,
-    TicketSystemFlaggingDetails,
-    TicketIndividualDataUpdateDetails,
-    TicketSensitiveDetails,
     TicketComplaintDetails,
     TicketDeleteIndividualDetails,
+    TicketIndividualDataUpdateDetails,
+    TicketNeedsAdjudicationDetails,
+    TicketNegativeFeedbackDetails,
+    TicketPositiveFeedbackDetails,
+    TicketReferralDetails,
+    TicketSensitiveDetails,
+    TicketSystemFlaggingDetails,
 )
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.household.models import MALE, FEMALE
+from hct_mis_api.apps.household.models import FEMALE, MALE
 from hct_mis_api.apps.payment.fixtures import PaymentFactory
 from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
@@ -202,35 +203,6 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         queryset = service._get_individuals_queryset()
         self.assertEqual(queryset.count(), 1)
         self.assertEqual(queryset.first(), individual)
-
-    def test_get_individuals_queryset_registration_data_import_id_filter(self) -> None:
-        create_household_and_individuals(
-            household_data={
-                "business_area": self.business_area,
-                "program_id": self.program.pk,
-                "registration_data_import": self.rdi,
-            },
-            individuals_data=[
-                {
-                    "business_area": self.business_area,
-                    "program_id": self.program.pk,
-                    "registration_data_import": self.rdi,
-                },
-                {
-                    "business_area": self.business_area,
-                    "program_id": self.program.pk,
-                    "registration_data_import": self.rdi,
-                },
-            ],
-        )
-        tp = TargetPopulationFactory()
-        self.periodic_data_update_template.filters = {"target_population_id": str(tp.pk)}
-        tp.households.add(self.household)
-        self.periodic_data_update_template.save()
-        service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
-        queryset = service._get_individuals_queryset()
-        self.assertEqual(queryset.count(), 2)
-        self.assertEqual(set(queryset), set(self.individuals))
 
     def test_get_individuals_queryset_target_population_id_filter(self) -> None:
         create_household_and_individuals(

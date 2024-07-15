@@ -1,36 +1,30 @@
 from tempfile import NamedTemporaryFile
+from typing import Optional, Union
 
-import openpyxl
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
-from django.db.models import Q
+from django.db.models import Q, QuerySet
+
+import openpyxl
+from openpyxl.packaging.custom import StringProperty
 
 from hct_mis_api.apps.core.attributes_qet_queries import age_to_birth_date_query
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
-    TicketReferralDetails,
-    TicketNegativeFeedbackDetails,
-    TicketPositiveFeedbackDetails,
-    TicketNeedsAdjudicationDetails,
-    TicketSystemFlaggingDetails,
-    TicketIndividualDataUpdateDetails,
-    TicketSensitiveDetails,
     TicketComplaintDetails,
     TicketDeleteIndividualDetails,
+    TicketIndividualDataUpdateDetails,
+    TicketNeedsAdjudicationDetails,
+    TicketNegativeFeedbackDetails,
+    TicketPositiveFeedbackDetails,
+    TicketReferralDetails,
+    TicketSensitiveDetails,
+    TicketSystemFlaggingDetails,
 )
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
-from openpyxl.packaging.custom import (
-    BoolProperty,
-    DateTimeProperty,
-    FloatProperty,
-    IntProperty,
-    LinkProperty,
-    StringProperty,
-    CustomPropertyList,
-)
 
 
 class PeriodicDataUpdateExportTemplateService:
@@ -93,7 +87,7 @@ class PeriodicDataUpdateExportTemplateService:
             StringProperty(name="pdu_template_id", value=str(self.periodic_data_update_template.pk))
         )
 
-    def _generate_header(self):
+    def _generate_header(self) -> list[str]:
         header = [
             "individual__uuid",
             "individual_unicef_id",
@@ -111,7 +105,7 @@ class PeriodicDataUpdateExportTemplateService:
             )
         return header
 
-    def _generate_row(self, individual: Individual):
+    def _generate_row(self, individual: Individual) -> Optional[list[str]]:
         individual_uuid = individual.pk
         individual_unicef_id = individual.unicef_id
         first_name = individual.given_name
@@ -133,7 +127,9 @@ class PeriodicDataUpdateExportTemplateService:
             return None
         return row
 
-    def _get_round_value(self, individual, pdu_field_name, round_number):
+    def _get_round_value(
+        self, individual: Individual, pdu_field_name: str, round_number: int
+    ) -> Optional[Union[str, int, float, bool]]:
         flex_fields_data = individual.flex_fields
         field_data = flex_fields_data.get(pdu_field_name)
         if field_data:
@@ -142,8 +138,8 @@ class PeriodicDataUpdateExportTemplateService:
                 return round_data.get("value")
         return None
 
-    def _get_individuals_queryset(self):
-        queryset = Individual.objects
+    def _get_individuals_queryset(self) -> QuerySet[Individual]:
+        queryset = Individual.objects.all()
         queryset = queryset.filter(program=self.program)
         if self.registration_data_import_id_filter:
             queryset = queryset.filter(registration_data_import_id=self.registration_data_import_id_filter)
@@ -175,7 +171,9 @@ class PeriodicDataUpdateExportTemplateService:
             queryset = self._get_received_assistance_filter(queryset, exclude=True)
         return queryset.distinct()
 
-    def _get_grievance_ticket_filter(self, queryset, exclude=False):
+    def _get_grievance_ticket_filter(
+        self, queryset: QuerySet[Individual], exclude: bool = False
+    ) -> QuerySet[Individual]:
         ticket_details_individual_field = [
             (TicketReferralDetails, "individual_id"),
             (TicketNegativeFeedbackDetails, "individual_id"),
@@ -209,7 +207,9 @@ class PeriodicDataUpdateExportTemplateService:
             return queryset.exclude(id__in=ticket_individual_ids)
         return queryset.filter(id__in=ticket_individual_ids)
 
-    def _get_received_assistance_filter(self, queryset, exclude=False):
+    def _get_received_assistance_filter(
+        self, queryset: QuerySet[Individual], exclude: bool = False
+    ) -> QuerySet[Individual]:
         individuals_ids = (
             Payment.objects.filter(household__in=queryset.values_list("household", flat=True))
             .filter(Q(status=Payment.STATUS_DISTRIBUTION_PARTIAL) | Q(status=Payment.STATUS_DISTRIBUTION_SUCCESS))

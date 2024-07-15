@@ -1,5 +1,3 @@
-import json
-
 import factory
 from factory.django import DjangoModelFactory
 from faker import Faker
