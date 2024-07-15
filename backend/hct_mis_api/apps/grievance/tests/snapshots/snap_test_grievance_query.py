@@ -206,6 +206,16 @@ snapshots['TestGrievanceQuery::test_grievance_list_filtered_by_score 1'] = {
                         'description': 'Ticket with program, in admin area 1, new',
                         'language': 'Polish',
                         'needsAdjudicationTicketDetails': {
+                            'extraData': {
+                                'goldenRecords': [
+                                    {
+                                        'distinct': True,
+                                        'duplicate': False,
+                                        'fullName': 'full_name',
+                                        'score': 1.2
+                                    }
+                                ]
+                            },
                             'scoreMax': 150.0,
                             'scoreMin': 100.0
                         },
@@ -1375,59 +1385,6 @@ snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_list_p
     }
 }
 
-snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_list_partner_unicef_for_program 1'] = {
-    'data': {
-        'allGrievanceTicket': {
-            'edges': [
-                {
-                    'node': {
-                        'admin': 'City Test',
-                        'category': 7,
-                        'consent': True,
-                        'createdAt': '2020-03-12T00:00:00+00:00',
-                        'description': 'Ticket with program, in admin area 1, new',
-                        'language': 'Polish',
-                        'status': 1
-                    }
-                },
-                {
-                    'node': {
-                        'admin': 'City Example',
-                        'category': 5,
-                        'consent': True,
-                        'createdAt': '2020-07-12T00:00:00+00:00',
-                        'description': 'Ticket with program, in admin area 2, on hold',
-                        'language': 'English',
-                        'status': 4
-                    }
-                },
-                {
-                    'node': {
-                        'admin': 'City Example',
-                        'category': 7,
-                        'consent': True,
-                        'createdAt': '2020-08-22T00:00:00+00:00',
-                        'description': 'Ticket with program, in admin area 2, in progress',
-                        'language': 'Polish, English',
-                        'status': 3
-                    }
-                },
-                {
-                    'node': {
-                        'admin': None,
-                        'category': 7,
-                        'consent': True,
-                        'createdAt': '2020-08-23T00:00:00+00:00',
-                        'description': 'Ticket with program, without admin area',
-                        'language': 'Polish, English',
-                        'status': 3
-                    }
-                }
-            ]
-        }
-    }
-}
-
 snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_list_partner_with_admin_area_1_access_for_all_programs 1'] = {
     'data': {
         'allGrievanceTicket': {
@@ -1576,48 +1533,6 @@ snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_list_p
     }
 }
 
-snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_list_partner_with_admin_area_2_access_for_program 1'] = {
-    'data': {
-        'allGrievanceTicket': {
-            'edges': [
-                {
-                    'node': {
-                        'admin': 'City Example',
-                        'category': 5,
-                        'consent': True,
-                        'createdAt': '2020-07-12T00:00:00+00:00',
-                        'description': 'Ticket with program, in admin area 2, on hold',
-                        'language': 'English',
-                        'status': 4
-                    }
-                },
-                {
-                    'node': {
-                        'admin': 'City Example',
-                        'category': 7,
-                        'consent': True,
-                        'createdAt': '2020-08-22T00:00:00+00:00',
-                        'description': 'Ticket with program, in admin area 2, in progress',
-                        'language': 'Polish, English',
-                        'status': 3
-                    }
-                },
-                {
-                    'node': {
-                        'admin': None,
-                        'category': 7,
-                        'consent': True,
-                        'createdAt': '2020-08-23T00:00:00+00:00',
-                        'description': 'Ticket with program, without admin area',
-                        'language': 'Polish, English',
-                        'status': 3
-                    }
-                }
-            ]
-        }
-    }
-}
-
 snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_list_partner_with_full_area_access_for_all_programs 1'] = {
     'data': {
         'allGrievanceTicket': {
@@ -1684,59 +1599,6 @@ snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_list_p
                         'consent': True,
                         'createdAt': '2020-08-25T00:00:00+00:00',
                         'description': 'Ticket without program, in admin area 1',
-                        'language': 'Polish, English',
-                        'status': 3
-                    }
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_list_partner_with_full_area_access_for_program 1'] = {
-    'data': {
-        'allGrievanceTicket': {
-            'edges': [
-                {
-                    'node': {
-                        'admin': 'City Test',
-                        'category': 7,
-                        'consent': True,
-                        'createdAt': '2020-03-12T00:00:00+00:00',
-                        'description': 'Ticket with program, in admin area 1, new',
-                        'language': 'Polish',
-                        'status': 1
-                    }
-                },
-                {
-                    'node': {
-                        'admin': 'City Example',
-                        'category': 5,
-                        'consent': True,
-                        'createdAt': '2020-07-12T00:00:00+00:00',
-                        'description': 'Ticket with program, in admin area 2, on hold',
-                        'language': 'English',
-                        'status': 4
-                    }
-                },
-                {
-                    'node': {
-                        'admin': 'City Example',
-                        'category': 7,
-                        'consent': True,
-                        'createdAt': '2020-08-22T00:00:00+00:00',
-                        'description': 'Ticket with program, in admin area 2, in progress',
-                        'language': 'Polish, English',
-                        'status': 3
-                    }
-                },
-                {
-                    'node': {
-                        'admin': None,
-                        'category': 7,
-                        'consent': True,
-                        'createdAt': '2020-08-23T00:00:00+00:00',
-                        'description': 'Ticket with program, without admin area',
                         'language': 'Polish, English',
                         'status': 3
                     }
