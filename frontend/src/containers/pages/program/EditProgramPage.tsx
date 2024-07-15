@@ -99,6 +99,7 @@ export const EditProgramPage = (): ReactElement => {
             areaAccess,
           }))
         : [];
+
     const { editMode, ...requestValues } = values;
 
     try {
@@ -146,9 +147,22 @@ export const EditProgramPage = (): ReactElement => {
     //TODO MS: add pduFields
     pduFields: [
       {
-        fieldName: '',
-        dataType: '',
-        numberOfExpectedRounds: '',
+        id: 1,
+        name: 'Fake Name 1',
+        pduData: {
+          subtype: 'Fake Subtype 1',
+          numberOfRounds: 5,
+          roundsNames: ['Round 1', 'Round 2'],
+        },
+      },
+      {
+        id: 2,
+        name: 'Fake Name 2',
+        pduData: {
+          subtype: 'Fake Subtype 2',
+          numberOfRounds: 3,
+          roundsNames: ['Round 1', 'Round 2', 'Round 3'],
+        },
       },
     ],
   };

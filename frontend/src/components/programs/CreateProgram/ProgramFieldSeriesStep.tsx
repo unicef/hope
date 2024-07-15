@@ -1,28 +1,18 @@
-import { Grid, Button, Box, IconButton } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { DividerLine } from '@components/core/DividerLine';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { Box, Button, Grid, IconButton } from '@mui/material';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { Field, FieldArray } from 'formik';
 import { useTranslation } from 'react-i18next';
-import { DividerLine } from '@components/core/DividerLine';
-import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Link } from 'react-router-dom';
 
 interface ProgramFieldSeriesStepProps {
   values: {
-    pduFields: Array<{
-      fieldName: string;
-      dataType: string;
-      numberOfRounds: string | number;
-      pduData: {
-        dataType: string;
-        numberOfRounds: string | number;
-        rounds: Array<{
-          roundValue: string;
-        }>;
-      };
-    }>;
+    //TODO: Define the type of pduFields
+    pduFields: Array<any>;
   };
   handleNext?: () => Promise<void>;
   setStep: (step: number) => void;

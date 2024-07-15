@@ -131,12 +131,14 @@ export const DuplicateProgramPage = (): ReactElement => {
         areaAccess: partner.areaAccess,
       })),
     partnerAccess,
-    //TODO MS: add pduFields
     pduFields: [
       {
-        fieldName: '',
-        dataType: '',
-        numberOfExpectedRounds: '',
+        name: '',
+        pduData: {
+          subtype: '',
+          numberOfRounds: null,
+          roundsNames: [],
+        },
       },
     ],
   };
