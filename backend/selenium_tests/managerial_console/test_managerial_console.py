@@ -50,19 +50,20 @@ def create_program(
 
 
 @pytest.fixture
-def create_payment_plan(create_test_program: Program, second_test_program: Program) -> PaymentPlan:
+def create_payment_plan(create_active_test_program: Program, second_test_program: Program) -> PaymentPlan:
     PaymentPlanFactory(
+        target_population=TargetPopulationFactory(program=second_test_program),
         program=second_test_program,
         status=PaymentPlan.Status.IN_APPROVAL,
         business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
     )
     targeting_criteria = TargetingCriteriaFactory()
     TargetPopulationFactory(
-        program=create_test_program,
+        program=create_active_test_program,
         status=TargetPopulation.STATUS_OPEN,
         targeting_criteria=targeting_criteria,
     )
-    tp = TargetPopulation.objects.first()
+    tp = TargetPopulation.objects.get(program__name="Test Programm")
     payment_plan = PaymentPlan.objects.update_or_create(
         business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
         target_population=tp,
@@ -93,7 +94,7 @@ def create_payment_plan(create_test_program: Program, second_test_program: Progr
 @pytest.mark.usefixtures("login")
 class TestSmokeManagerialConsole:
     def test_managerial_console_smoke_test(
-        self, pageManagerialConsole: ManagerialConsole, create_test_program: Program
+        self, pageManagerialConsole: ManagerialConsole, create_active_test_program: Program
     ) -> None:
         pageManagerialConsole.getNavManagerialConsole().click()
         pageManagerialConsole.getSelectAllApproval()
@@ -165,11 +166,10 @@ class TestSmokeManagerialConsole:
         self, pageManagerialConsole: ManagerialConsole, create_payment_plan: PaymentPlan
     ) -> None:
         pageManagerialConsole.getNavManagerialConsole().click()
-        pageManagerialConsole.getMenuUserProfile().click()
-        pageManagerialConsole.getMenuItemClearCache().click()
         # Approve Payment Plan
         pageManagerialConsole.getProgramSelectApproval().click()
         pageManagerialConsole.select_listbox_element("Test Programm").click()
+
         pageManagerialConsole.getColumnField()
         pageManagerialConsole.getSelectApproval().click()
         pageManagerialConsole.getApproveButton().click()
