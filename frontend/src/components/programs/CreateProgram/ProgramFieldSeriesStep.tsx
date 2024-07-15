@@ -17,6 +17,7 @@ interface ProgramFieldSeriesStepProps {
   handleNext?: () => Promise<void>;
   setStep: (step: number) => void;
   step: number;
+  programHasRdi?: boolean;
 }
 
 export const ProgramFieldSeriesStep = ({
@@ -24,6 +25,7 @@ export const ProgramFieldSeriesStep = ({
   handleNext,
   setStep,
   step,
+  programHasRdi,
 }: ProgramFieldSeriesStepProps) => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
@@ -51,6 +53,7 @@ export const ProgramFieldSeriesStep = ({
                           variant="outlined"
                           label={t('Time Series Field Name')}
                           component={FormikTextField}
+                          disabled={programHasRdi}
                         />
                       </Grid>
                       <Grid item xs={3}>
@@ -64,6 +67,7 @@ export const ProgramFieldSeriesStep = ({
                             { value: 'number', label: t('Number') },
                             { value: 'text', label: t('Text') },
                           ]}
+                          disabled={programHasRdi}
                         />
                       </Grid>
                       <Grid item xs={3}>
@@ -77,6 +81,7 @@ export const ProgramFieldSeriesStep = ({
                             value: n + 1,
                             label: `${n + 1}`,
                           }))}
+                          disabled={programHasRdi}
                         />
                       </Grid>
                       {_field.pduData.numberOfRounds &&
@@ -92,6 +97,7 @@ export const ProgramFieldSeriesStep = ({
                               variant="outlined"
                               label={`${t('Round')} ${round + 1} ${t('Name')}`}
                               component={FormikTextField}
+                              disabled={programHasRdi}
                             />
                           </Grid>
                         ))}
@@ -104,6 +110,7 @@ export const ProgramFieldSeriesStep = ({
                         <Grid item xs={1}>
                           <IconButton
                             onClick={() => arrayHelpers.remove(index)}
+                            disabled={programHasRdi}
                           >
                             <DeleteIcon />
                           </IconButton>
@@ -130,6 +137,7 @@ export const ProgramFieldSeriesStep = ({
                   })
                 }
                 endIcon={<AddIcon />}
+                disabled={programHasRdi}
               >
                 {t('Add Time Series Fields')}
               </Button>

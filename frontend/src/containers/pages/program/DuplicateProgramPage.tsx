@@ -63,6 +63,8 @@ export const DuplicateProgramPage = (): ReactElement => {
           }))
         : [];
     const { editMode, ...requestValues } = values;
+    const pduFieldsToSend =
+      values.pduFields.length > 0 ? values.pduFields : null;
 
     try {
       const response = await mutate({
@@ -73,6 +75,7 @@ export const DuplicateProgramPage = (): ReactElement => {
             budget: budgetToFixed,
             businessAreaSlug: businessArea,
             partners: partnersToSet,
+            pduFields: pduFieldsToSend,
           },
         },
         refetchQueries: () => [

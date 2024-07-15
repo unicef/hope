@@ -80,6 +80,7 @@ export const EditProgramPage = (): ReactElement => {
     version,
     partners,
     partnerAccess = ProgramPartnerAccess.AllPartnersAccess,
+    registrationImports,
   } = data.program;
 
   const handleSubmit = async (values): Promise<void> => {
@@ -101,6 +102,8 @@ export const EditProgramPage = (): ReactElement => {
         : [];
 
     const { editMode, ...requestValues } = values;
+    const pduFieldsToSend =
+      values.pduFields.length > 0 ? values.pduFields : null;
 
     try {
       const response = await mutate({
@@ -111,6 +114,7 @@ export const EditProgramPage = (): ReactElement => {
             budget: budgetToFixed,
             populationGoal: populationGoalParsed,
             partners: partnersToSet,
+            pduFields: pduFieldsToSend,
           },
           version,
         },
@@ -259,6 +263,7 @@ export const EditProgramPage = (): ReactElement => {
           ? stepsData[step].description
           : undefined;
 
+        const programHasRdi = registrationImports.totalCount > 0;
         return (
           <>
             <PageHeader
@@ -293,6 +298,7 @@ export const EditProgramPage = (): ReactElement => {
                     handleNext={handleNextStep}
                     step={step}
                     setStep={setStep}
+                    programHasRdi={programHasRdi}
                   />
                 )}
                 {step === 2 && (
