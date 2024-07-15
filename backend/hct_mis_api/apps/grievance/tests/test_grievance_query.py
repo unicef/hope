@@ -173,8 +173,17 @@ class TestGrievanceQuery(APITestCase):
             needsAdjudicationTicketDetails {
               scoreMin
               scoreMax
+              selectedDistinct {
+                duplicate
+              }
               extraData{
                 goldenRecords {
+                  fullName
+                  score
+                  duplicate
+                  distinct
+                }
+                possibleDuplicate {
                   fullName
                   score
                   duplicate
