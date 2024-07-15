@@ -351,3 +351,47 @@ class TestGrievanceUtils(TestCase):
 
         assert ind_1.duplicate is False
         assert ind_2.duplicate is True
+
+    def test_close_needs_adjudication_ticket_service_when_just_duplicates(self) -> None:
+        user = UserFactory()
+        ba = BusinessAreaFactory(slug="afghanistan")
+        program = ProgramFactory(business_area=ba)
+
+        grievance = GrievanceTicketFactory(
+            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+            business_area=ba,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
+            description="GrievanceTicket",
+        )
+        grievance.programs.add(program)
+        _, individuals_1 = create_household(
+            {"size": 1, "business_area": ba, "program": program},
+            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+        )
+        _, individuals_2 = create_household(
+            {"size": 1, "business_area": ba, "program": program},
+            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+        )
+        ind_1 = individuals_1[0]
+        ind_2 = individuals_2[0]
+
+        ticket_details = TicketNeedsAdjudicationDetailsFactory(
+            ticket=grievance,
+            golden_records_individual=ind_1,
+            is_multiple_duplicates_version=True,
+            selected_individual=None,
+        )
+        ticket_details.selected_individuals.add(ind_1)  # duplicate
+        ticket_details.possible_duplicates.add(ind_2)  # all possible duplicates
+        ticket_details.ticket = grievance
+        ticket_details.save()
+
+        ind_2.withdraw()  # make withdraw
+
+        close_needs_adjudication_ticket_service(grievance, user)
+
+        ind_1.refresh_from_db()
+        ind_2.refresh_from_db()
+
+        assert ind_1.duplicate is True
+        assert ind_2.duplicate is True
