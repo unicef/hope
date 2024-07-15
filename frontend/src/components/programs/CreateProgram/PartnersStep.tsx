@@ -132,17 +132,17 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
           />
         </>
       )}
-      <Box display="flex" justifyContent="flex-end">
+      <Box display="flex" justifyContent="space-between">
+        <Box mr={2}>
+          <Button
+            data-cy="button-cancel"
+            component={Link}
+            to={`/${baseUrl}/list`}
+          >
+            {t('Cancel')}
+          </Button>
+        </Box>
         <Box display="flex">
-          <Box mr={2}>
-            <Button
-              data-cy="button-cancel"
-              component={Link}
-              to={`/${baseUrl}/list`}
-            >
-              {t('Cancel')}
-            </Button>
-          </Box>
           <Box mr={2}>
             <Button
               data-cy="button-back"

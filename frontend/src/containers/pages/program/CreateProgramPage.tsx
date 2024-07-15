@@ -108,11 +108,14 @@ export const CreateProgramPage = (): ReactElement => {
     frequencyOfPayments: 'REGULAR',
     partners: [],
     partnerAccess: ProgramPartnerAccess.AllPartnersAccess,
-    timeSeriesFields: [
+    pduFields: [
       {
-        fieldName: '',
-        dataType: '',
-        numberOfExpectedRounds: '',
+        name: '',
+        pduData: {
+          subtype: '',
+          numberOfRounds: null,
+          roundsNames: [],
+        },
       },
     ],
   };
@@ -152,12 +155,14 @@ export const CreateProgramPage = (): ReactElement => {
     <Formik
       initialValues={initialValues}
       onSubmit={(values) => {
+        console.log('values', values);
         handleSubmit(values);
       }}
       initialTouched={{
         programmeCode: true,
       }}
-      validationSchema={programValidationSchema(t)}
+      //TODO MS: Uncomment when validation is ready
+      // validationSchema={programValidationSchema(t)}
     >
       {({
         submitForm,
@@ -243,6 +248,8 @@ export const CreateProgramPage = (): ReactElement => {
                   <ProgramFieldSeriesStep
                     values={values}
                     handleNext={handleNextStep}
+                    step={step}
+                    setStep={setStep}
                   />
                 )}
                 {step === 2 && (

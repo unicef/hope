@@ -143,8 +143,8 @@ export const EditProgramPage = (): ReactElement => {
         areaAccess: partner.areaAccess,
       })),
     partnerAccess,
-    //TODO MS: add timeSeriesFields
-    timeSeriesFields: [
+    //TODO MS: add pduFields
+    pduFields: [
       {
         fieldName: '',
         dataType: '',
@@ -277,6 +277,8 @@ export const EditProgramPage = (): ReactElement => {
                   <ProgramFieldSeriesStep
                     values={values}
                     handleNext={handleNextStep}
+                    step={step}
+                    setStep={setStep}
                   />
                 )}
                 {step === 2 && (

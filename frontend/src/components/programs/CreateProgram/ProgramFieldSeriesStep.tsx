@@ -11,18 +11,29 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface ProgramFieldSeriesStepProps {
   values: {
-    timeSeriesFields: Array<{
+    pduFields: Array<{
       fieldName: string;
       dataType: string;
-      numberOfExpectedRounds: string | number;
+      numberOfRounds: string | number;
+      pduData: {
+        dataType: string;
+        numberOfRounds: string | number;
+        rounds: Array<{
+          roundValue: string;
+        }>;
+      };
     }>;
   };
   handleNext?: () => Promise<void>;
+  setStep: (step: number) => void;
+  step: number;
 }
 
 export const ProgramFieldSeriesStep = ({
   values,
   handleNext,
+  setStep,
+  step,
 }: ProgramFieldSeriesStepProps) => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
@@ -36,16 +47,16 @@ export const ProgramFieldSeriesStep = ({
   return (
     <>
       <FieldArray
-        name="timeSeriesFields"
+        name="pduFields"
         render={(arrayHelpers) => (
           <div>
-            {values.timeSeriesFields && values.timeSeriesFields.length > 0
-              ? values.timeSeriesFields.map((_field, index) => (
+            {values.pduFields && values.pduFields.length > 0
+              ? values.pduFields.map((_field, index) => (
                   <Box key={index} pt={3} pb={3}>
                     <Grid container spacing={3} alignItems="center">
                       <Grid item xs={3}>
                         <Field
-                          name={`timeSeriesFields.${index}.fieldName`}
+                          name={`pduFields.${index}.name`}
                           fullWidth
                           variant="outlined"
                           label={t('Time Series Field Name')}
@@ -54,7 +65,7 @@ export const ProgramFieldSeriesStep = ({
                       </Grid>
                       <Grid item xs={3}>
                         <Field
-                          name={`timeSeriesFields.${index}.dataType`}
+                          name={`pduFields.${index}.pduData.subtype`}
                           fullWidth
                           variant="outlined"
                           label={t('Data Type')}
@@ -67,7 +78,7 @@ export const ProgramFieldSeriesStep = ({
                       </Grid>
                       <Grid item xs={3}>
                         <Field
-                          name={`timeSeriesFields.${index}.numberOfExpectedRounds`}
+                          name={`pduFields.${index}.pduData.numberOfRounds`}
                           fullWidth
                           variant="outlined"
                           label={t('Number of Expected Rounds')}
@@ -78,11 +89,27 @@ export const ProgramFieldSeriesStep = ({
                           }))}
                         />
                       </Grid>
+                      {_field.pduData.numberOfRounds &&
+                        [
+                          ...Array(
+                            Number(_field.pduData.numberOfRounds),
+                          ).keys(),
+                        ].map((round) => (
+                          <Grid item xs={12} key={round}>
+                            <Field
+                              name={`pduFields.${index}.pduData.roundsNames.${round}`}
+                              fullWidth
+                              variant="outlined"
+                              label={`${t('Round')} ${round + 1} ${t('Name')}`}
+                              component={FormikTextField}
+                            />
+                          </Grid>
+                        ))}
                       {!(
-                        values.timeSeriesFields.length === 1 ||
+                        values.pduFields.length === 1 ||
                         (!_field.fieldName &&
                           !_field.dataType &&
-                          !_field.numberOfExpectedRounds)
+                          !_field.numberOfRounds)
                       ) && (
                         <Grid item xs={1}>
                           <IconButton
@@ -93,10 +120,8 @@ export const ProgramFieldSeriesStep = ({
                         </Grid>
                       )}
                     </Grid>
-                    {values.timeSeriesFields.length > 1 &&
-                      index < values.timeSeriesFields.length - 1 && (
-                        <DividerLine />
-                      )}
+                    {values.pduFields.length > 1 &&
+                      index < values.pduFields.length - 1 && <DividerLine />}
                   </Box>
                 ))
               : null}
@@ -106,9 +131,12 @@ export const ProgramFieldSeriesStep = ({
                 color="primary"
                 onClick={() =>
                   arrayHelpers.push({
-                    fieldName: '',
-                    dataType: '',
-                    numberOfExpectedRounds: '',
+                    name: '',
+                    pduData: {
+                      subtype: '',
+                      numberOfRounds: null,
+                      roundsNames: [],
+                    },
                   })
                 }
                 endIcon={<AddIcon />}
@@ -127,14 +155,25 @@ export const ProgramFieldSeriesStep = ({
         >
           {t('Cancel')}
         </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          data-cy="button-next"
-          onClick={handleNextClick}
-        >
-          {t('Next')}
-        </Button>
+        <Box display="flex">
+          <Box mr={2}>
+            <Button
+              data-cy="button-back"
+              variant="outlined"
+              onClick={() => setStep(step - 1)}
+            >
+              {t('Back')}
+            </Button>
+          </Box>
+          <Button
+            variant="contained"
+            color="primary"
+            data-cy="button-next"
+            onClick={handleNextClick}
+          >
+            {t('Next')}
+          </Button>
+        </Box>
       </Box>
     </>
   );

@@ -131,8 +131,8 @@ export const DuplicateProgramPage = (): ReactElement => {
         areaAccess: partner.areaAccess,
       })),
     partnerAccess,
-    //TODO MS: add timeSeriesFields
-    timeSeriesFields: [
+    //TODO MS: add pduFields
+    pduFields: [
       {
         fieldName: '',
         dataType: '',
@@ -263,6 +263,8 @@ export const DuplicateProgramPage = (): ReactElement => {
                   <ProgramFieldSeriesStep
                     values={values}
                     handleNext={handleNextStep}
+                    step={step}
+                    setStep={setStep}
                   />
                 )}
                 {step === 2 && (
