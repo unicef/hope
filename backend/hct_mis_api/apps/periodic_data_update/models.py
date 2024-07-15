@@ -35,6 +35,25 @@ class PeriodicDataUpdateTemplate(TimeStampedModel):
         related_name="periodic_data_update_templates",
     )
     filters = models.JSONField()
+    """
+    {
+    "registration_data_import_id": "id",
+    "target_population_id": "id",
+    "gender": "MALE/FEMALE",
+    "age": {
+        "from": 0,
+        "to": 100
+    },
+    "registration_date": {
+        "from": "2021-01-01",
+        "to": "2021-12-31"
+    },
+    "has_grievance_ticket: true/false,
+    "admin1": [id],
+    "admin2": [id],
+    "received_assistance": "true/false/null",
+    }
+    """
     rounds_data = models.JSONField()
     """
     Example of rounds_data:
