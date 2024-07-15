@@ -1,6 +1,6 @@
 import os
 import zipfile
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import sleep
 
 import openpyxl
@@ -112,7 +112,7 @@ def clear_downloaded_files() -> None:
 
 @pytest.fixture
 def create_payment_plan(create_targeting: None) -> PaymentPlan:
-    tp = TargetPopulation.objects.first()
+    tp = TargetPopulation.objects.get(program__name="Test Program")
     payment_plan = PaymentPlan.objects.update_or_create(
         business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
         target_population=tp,
@@ -244,7 +244,7 @@ class TestSmokePaymentModule:
         pageNewPaymentPlan.select_listbox_element(targeting.name).click()
         pageNewPaymentPlan.getInputStartDate().click()
         pageNewPaymentPlan.getInputStartDate().send_keys(
-            FormatTime(time=program.start_date + relativedelta(day=12)).numerically_formatted_date
+            FormatTime(time=program.start_date + timedelta(days=12)).numerically_formatted_date
         )
         pageNewPaymentPlan.getInputEndDate().click()
         pageNewPaymentPlan.getInputEndDate().send_keys(FormatTime(time=program.end_date).numerically_formatted_date)
@@ -260,7 +260,7 @@ class TestSmokePaymentModule:
         assert "Test Program" in pagePaymentModuleDetails.getLabelProgramme().text
         assert "CZK" in pagePaymentModuleDetails.getLabelCurrency().text
         assert (
-            FormatTime(time=program.start_date + relativedelta(day=12)).date_in_text_format
+            FormatTime(time=program.start_date + timedelta(days=12)).date_in_text_format
             in pagePaymentModuleDetails.getLabelStartDate().text
         )
         assert FormatTime(time=program.end_date).date_in_text_format in pagePaymentModuleDetails.getLabelEndDate().text
