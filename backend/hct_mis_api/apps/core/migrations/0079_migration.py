@@ -17,8 +17,8 @@ class Migration(migrations.Migration):
             name='PeriodicFieldData',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('subtype', models.CharField(choices=[('DATE', 'Date'), ('DECIMAL', 'Decimal'), ('STRING', 'String')], max_length=16)),
-                ('number_of_runs', models.IntegerField()),
+                ('subtype', models.CharField(choices=[('DATE', 'Date'), ('DECIMAL', 'Number'), ('STRING', 'Text')], max_length=16)),
+                ('number_of_rounds', models.IntegerField()),
                 ('rounds_names', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=255), default=list, size=None)),
             ],
             options={
