@@ -298,17 +298,19 @@ class PeriodicFieldData(models.Model):
     """
     Additional data for PDU
     """
+
     STRING = "STRING"
     DECIMAL = "DECIMAL"
     DATE = "DATE"
+
     TYPE_CHOICE = Choices(
         (DATE, _("Date")),
-        (DECIMAL, _("Decimal")),
-        (STRING, _("String")),
+        (DECIMAL, _("Number")),
+        (STRING, _("Text")),
     )
 
     subtype = models.CharField(max_length=16, choices=TYPE_CHOICE)
-    number_of_runs = models.IntegerField()
+    number_of_rounds = models.IntegerField()
     rounds_names = ArrayField(models.CharField(max_length=255), default=list)
 
     class Meta:

@@ -9,7 +9,7 @@ class ProgramPartnerThroughInput(graphene.InputObjectType):
 
 class PeriodicFieldDataInput(graphene.InputObjectType):
     subtype = graphene.String()
-    number_of_runs = graphene.Int()
+    number_of_rounds = graphene.Int()
     rounds_names = graphene.List(graphene.String)
 
 

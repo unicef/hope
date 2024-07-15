@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -8,7 +8,9 @@ import graphene
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.flexible_attribute_service import FlexibleAttributeForPDUService
+from hct_mis_api.apps.core.flexible_attribute_service import (
+    FlexibleAttributeForPDUService,
+)
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt

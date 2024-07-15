@@ -125,4 +125,3 @@ class PeriodicDataUpdateUploadViewSet(
     @action(detail=True, methods=["get"])
     def upload(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         pass  # celery task to upload the file
-

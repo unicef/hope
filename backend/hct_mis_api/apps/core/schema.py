@@ -37,6 +37,7 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
+    PeriodicFieldData,
 )
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.program.models import Program
@@ -61,6 +62,11 @@ class DataCollectingTypeChoiceObject(graphene.ObjectType):
     name = String()
     value = String()
     description = String()
+
+
+class PDUSubtypeChoiceObject(graphene.ObjectType):
+    value = String()
+    display_name = String()
 
 
 class BusinessAreaNode(DjangoObjectType):
@@ -352,6 +358,7 @@ class Query(graphene.ObjectType):
     )
     data_collecting_type = relay.Node.Field(DataCollectingTypeNode)
     data_collection_type_choices = graphene.List(DataCollectingTypeChoiceObject)
+    pdu_subtype_choices = graphene.List(PDUSubtypeChoiceObject)
 
     def resolve_business_area(parent, info: Any, business_area_slug: str) -> BusinessArea:
         return BusinessArea.objects.get(slug=business_area_slug)
@@ -436,3 +443,18 @@ class Query(graphene.ObjectType):
                 }
             )
         return result
+
+    def resolve_pdu_subtype_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return [{"value": choice[0], "display_name": choice[1]} for choice in PeriodicFieldData.TYPE_CHOICE]
+
+
+class PeriodicFieldDataNode(DjangoObjectType):
+    class Meta:
+        model = PeriodicFieldData
+        fields = ["id", "subtype", "number_of_rounds", "rounds_names"]
+
+
+class PeriodicFieldNode(DjangoObjectType):
+    class Meta:
+        model = FlexibleAttribute
+        fields = ["id", "name", "pdu_data"]
