@@ -25,7 +25,10 @@ from hct_mis_api.apps.grievance.services.data_change.utils import (
     to_phone_number_str,
     verify_flex_fields,
 )
-from hct_mis_api.apps.grievance.utils import validate_individual_for_need_adjudication
+from hct_mis_api.apps.grievance.utils import (
+    validate_all_individuals_before_close_needs_adjudication,
+    validate_individual_for_need_adjudication,
+)
 from hct_mis_api.apps.household.fixtures import (
     BankAccountInfoFactory,
     DocumentFactory,
@@ -254,3 +257,39 @@ class TestGrievanceUtils(TestCase):
             individuals[0].save()
             validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details, "distinct")
             assert str(e.value) == "The selected individual IND-333 is not valid, must be not withdrawn"
+
+    def test_validate_all_individuals_before_close_needs_adjudication(self) -> None:
+        BusinessAreaFactory(slug="afghanistan")
+        _, individuals_1 = create_household(
+            {"size": 1},
+            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+        )
+
+        _, individuals_2 = create_household(
+            {"size": 1},
+            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+        )
+        ticket_details = TicketNeedsAdjudicationDetailsFactory(
+            golden_records_individual=individuals_1[0],
+            is_multiple_duplicates_version=True,
+            selected_individual=None,
+        )
+        ticket_details.possible_duplicates.add(individuals_2[0])
+        ticket_details.save()
+
+        with pytest.raises(ValidationError) as e:
+            validate_all_individuals_before_close_needs_adjudication(ticket_details)
+            assert str(e.value) == "Close ticket is not possible when all Individuals are flagged as duplicates"
+
+        with pytest.raises(ValidationError) as e:
+            validate_all_individuals_before_close_needs_adjudication(ticket_details)
+            assert (
+                str(e.value)
+                == "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is withdrawn or duplicate"
+            )
+
+        with pytest.raises(ValidationError) as e:
+            ticket_details.selected_distinct.add(individuals_2[0])
+            ticket_details.save()
+            validate_all_individuals_before_close_needs_adjudication(ticket_details)
+            assert str(e.value) == "Close ticket is possible when all active Individuals are flagged"
