@@ -1,4 +1,4 @@
-import { Box, Step, StepButton, Stepper } from '@mui/material';
+import { Box } from '@mui/material';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +23,10 @@ import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { useNavigate } from 'react-router-dom';
 import { BaseSection } from '@components/core/BaseSection';
 import { ProgramFieldSeriesStep } from '@components/programs/CreateProgram/ProgramFieldSeriesStep';
+import {
+  handleNext,
+  ProgramStepper,
+} from '@components/programs/CreateProgram/ProgramStepper';
 
 export const CreateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -170,15 +174,14 @@ export const CreateProgramPage = (): ReactElement => {
             disabled: values.partners.some((p) => p.id === partner.value),
           }));
 
-        const handleNext = async (): Promise<void> => {
-          const errors = await validateForm();
-          const step0Errors = stepFields[0].some((field) => errors[field]);
-
-          if (step === 0 && !step0Errors) {
-            setStep(1);
-          } else {
-            stepFields[step].forEach((field) => setFieldTouched(field));
-          }
+        const handleNextStep = async () => {
+          await handleNext({
+            validateForm,
+            stepFields,
+            step,
+            setStep,
+            setFieldTouched,
+          });
         };
 
         const stepsData = [
@@ -208,21 +211,6 @@ export const CreateProgramPage = (): ReactElement => {
           ? stepsData[step].description
           : undefined;
 
-        const stepper = (
-          <Stepper activeStep={step}>
-            {stepsData.map((item, index) => (
-              <Step key={item.title}>
-                <StepButton
-                  data-cy={item.dataCy}
-                  onClick={() => setStep(index)}
-                >
-                  {item.title}
-                </StepButton>
-              </Step>
-            ))}
-          </Stepper>
-        );
-
         return (
           <>
             <PageHeader
@@ -239,13 +227,24 @@ export const CreateProgramPage = (): ReactElement => {
             <BaseSection
               title={title}
               description={description}
-              stepper={stepper}
+              stepper={
+                <ProgramStepper
+                  step={step}
+                  setStep={setStep}
+                  stepsData={stepsData}
+                />
+              }
             >
               <Box p={3}>
                 {step === 0 && (
-                  <DetailsStep values={values} handleNext={handleNext} />
+                  <DetailsStep values={values} handleNext={handleNextStep} />
                 )}
-                {step === 1 && <ProgramFieldSeriesStep values={values} />}
+                {step === 1 && (
+                  <ProgramFieldSeriesStep
+                    values={values}
+                    handleNext={handleNextStep}
+                  />
+                )}
                 {step === 2 && (
                   <PartnersStep
                     values={values}
