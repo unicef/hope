@@ -80,6 +80,7 @@ export const EditProgramPage = (): ReactElement => {
     version,
     partners,
     partnerAccess = ProgramPartnerAccess.AllPartnersAccess,
+    registrationImports,
   } = data.program;
 
   const handleSubmit = async (values): Promise<void> => {
@@ -99,7 +100,10 @@ export const EditProgramPage = (): ReactElement => {
             areaAccess,
           }))
         : [];
+
     const { editMode, ...requestValues } = values;
+    const pduFieldsToSend =
+      values.pduFields.length > 0 ? values.pduFields : null;
 
     try {
       const response = await mutate({
@@ -110,6 +114,7 @@ export const EditProgramPage = (): ReactElement => {
             budget: budgetToFixed,
             populationGoal: populationGoalParsed,
             partners: partnersToSet,
+            pduFields: pduFieldsToSend,
           },
           version,
         },
@@ -146,9 +151,22 @@ export const EditProgramPage = (): ReactElement => {
     //TODO MS: add pduFields
     pduFields: [
       {
-        fieldName: '',
-        dataType: '',
-        numberOfExpectedRounds: '',
+        id: 1,
+        name: 'Fake Name 1',
+        pduData: {
+          subtype: 'Fake Subtype 1',
+          numberOfRounds: 5,
+          roundsNames: ['Round 1', 'Round 2'],
+        },
+      },
+      {
+        id: 2,
+        name: 'Fake Name 2',
+        pduData: {
+          subtype: 'Fake Subtype 2',
+          numberOfRounds: 3,
+          roundsNames: ['Round 1', 'Round 2', 'Round 3'],
+        },
       },
     ],
   };
@@ -245,6 +263,7 @@ export const EditProgramPage = (): ReactElement => {
           ? stepsData[step].description
           : undefined;
 
+        const programHasRdi = registrationImports.totalCount > 0;
         return (
           <>
             <PageHeader
@@ -279,6 +298,7 @@ export const EditProgramPage = (): ReactElement => {
                     handleNext={handleNextStep}
                     step={step}
                     setStep={setStep}
+                    programHasRdi={programHasRdi}
                   />
                 )}
                 {step === 2 && (

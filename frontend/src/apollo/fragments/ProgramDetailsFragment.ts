@@ -43,5 +43,8 @@ export const programDetails = gql`
         level
       }
     }
+    registrationImports {
+      totalCount
+    }
   }
 `;

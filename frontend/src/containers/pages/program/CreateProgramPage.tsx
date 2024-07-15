@@ -66,6 +66,8 @@ export const CreateProgramPage = (): ReactElement => {
           }))
         : [];
     const { editMode, ...requestValues } = values;
+    const pduFieldsToSend =
+      values.pduFields.length > 0 ? values.pduFields : null;
 
     try {
       const response = await mutate({
@@ -76,6 +78,7 @@ export const CreateProgramPage = (): ReactElement => {
             populationGoal: populationGoalParsed,
             businessAreaSlug: businessArea,
             partners: partnersToSet,
+            pduFields: pduFieldsToSend,
           },
         },
         refetchQueries: () => [
