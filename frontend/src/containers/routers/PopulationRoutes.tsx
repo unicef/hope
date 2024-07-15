@@ -3,10 +3,11 @@ import { useRoutes } from 'react-router-dom';
 import { PopulationHouseholdDetailsPage } from '../pages/population/PopulationHouseholdDetailsPage';
 import { PopulationHouseholdPage } from '../pages/population/PopulationHouseholdPage';
 import { PopulationIndividualsDetailsPage } from '../pages/population/PopulationIndividualsDetailsPage';
-import { PopulationIndividualsPage } from '../pages/population/PopulationIndividualsPage';
 import { PeoplePage } from '@containers/pages/people/PeoplePage';
 import { PeopleDetailsPage } from '@containers/pages/people/PeopleDetailsPage';
-import { HouseholdMembersPage } from '@containers/pages/householdMembers/HouseholdMembersPage';
+import { NewTemplatePage } from '@containers/pages/householdMembers/NewTemplatePage';
+import { HouseholdMembersPage } from '@containers/pages/population/HouseholdMembersPage';
+import { NewTemplatePeoplePage } from '@containers/pages/householdMembers/NewTemplatePeoplePage';
 
 export const PopulationRoutes = (): React.ReactElement => {
   const populationRoutes = [
@@ -15,8 +16,16 @@ export const PopulationRoutes = (): React.ReactElement => {
       element: <PopulationHouseholdDetailsPage />,
     },
     {
+      path: 'population/individuals',
+      element: <HouseholdMembersPage />,
+    },
+    {
       path: 'population/individuals/:id',
       element: <PopulationIndividualsDetailsPage />,
+    },
+    {
+      path: 'population/people',
+      element: <PeoplePage />,
     },
     {
       path: 'population/people/:id',
@@ -27,16 +36,12 @@ export const PopulationRoutes = (): React.ReactElement => {
       element: <PopulationHouseholdPage />,
     },
     {
-      path: 'population/household-members',
-      element: <HouseholdMembersPage />,
+      path: 'population/individuals/new-template',
+      element: <NewTemplatePage />,
     },
     {
-      path: 'population/individuals',
-      element: <PopulationIndividualsPage />,
-    },
-    {
-      path: 'population/people',
-      element: <PeoplePage />,
+      path: 'population/people/new-template',
+      element: <NewTemplatePeoplePage />,
     },
   ];
 

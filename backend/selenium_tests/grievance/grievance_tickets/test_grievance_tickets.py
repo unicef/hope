@@ -91,16 +91,13 @@ class TestSmokeGrievanceTickets:
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getTicketListRow()
         pageGrievanceTickets.getTabSystemGenerated().click()
-        # ToDo: Uncomment after fix: 199575
-        # assert user_generated_row != pageGrievanceTickets.getTicketListRow()[0].text
-        # assert 2 == len(pageGrievanceTickets.getTicketListRow())
+        assert 1 == len(pageGrievanceTickets.getTicketListRow())
         pageGrievanceTickets.getSelectAll().click()
         assert "ASSIGN" in pageGrievanceTickets.getButtonAssign().text
         assert "SET PRIORITY" in pageGrievanceTickets.getButtonSetPriority().text
         assert "SET URGENCY" in pageGrievanceTickets.getButtonSetUrgency().text
         assert "ADD NOTE" in pageGrievanceTickets.getButtonAddNote().text
-        with pytest.raises(Exception):
-            assert "NEW TICKET" in pageGrievanceTickets.getButtonNewTicket().text
+        assert "NEW TICKET" in pageGrievanceTickets.getButtonNewTicket().text
 
     def test_check_grievance_tickets_details_page(
         self,

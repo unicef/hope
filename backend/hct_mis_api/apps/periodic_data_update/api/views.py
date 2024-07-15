@@ -14,12 +14,7 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.api.permissions import (
-    PDUTemplateCreatePermission,
-    PDUTemplateDownloadPermission,
-    PDUUploadPermission,
-    PDUViewListAndDetailsPermission,
-)
+from hct_mis_api.apps.account.api.permissions import PDUViewListAndDetailsPermission
 from hct_mis_api.apps.core.api.mixins import ActionMixin, BusinessAreaProgramMixin
 from hct_mis_api.apps.periodic_data_update.api.caches import (
     PDUTemplateKeyConstructor,

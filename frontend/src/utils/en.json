@@ -876,5 +876,14 @@
   "Authorized by": "Authorized by",
   "This individual is also included in other Payment Plans. Click this icon to view details.": "This individual is also included in other Payment Plans. Click this icon to view details.",
   "AdditionalRegistrationInformation": "Additional Registration Information",
-  "Delivery Mechanism Data to be edited": "Delivery Mechanism Data to be edited"
+  "Delivery Mechanism Data to be edited": "Delivery Mechanism Data to be edited",
+  "Household Members": "Household Members",
+  "Programme Time Series Fields": "Programme Time Series Fields",
+  "Round Number": "Round Number",
+  "Round Name": "Round Name",
+  "Date of Collection": "Date of Collection",
+  "The Time Series Fields feature allows serial updating of individual data through an XLSX file.": "The Time Series Fields feature allows serial updating of individual data through an XLSX file.",
+  "Time Series Field Name": "Time Series Field Name",
+  "Data Type": "Data Type",
+  "Number of Expected Rounds": "Number of Expected Rounds"
 }

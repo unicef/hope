@@ -187,8 +187,6 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
 
 
 class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDModel):
-    ASSOCIATED_WITH_HOUSEHOLD = 0
-    ASSOCIATED_WITH_INDIVIDUAL = 1
     STRING = "STRING"
     IMAGE = "IMAGE"
     INTEGER = "INTEGER"
@@ -209,6 +207,9 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
         (STRING, _("String")),
         (PDU, _("PDU")),
     )
+
+    ASSOCIATED_WITH_HOUSEHOLD = 0
+    ASSOCIATED_WITH_INDIVIDUAL = 1
     ASSOCIATED_WITH_CHOICES: Any = (
         (0, _("Household")),
         (1, _("Individual")),
@@ -247,6 +248,29 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
 
     def __str__(self) -> str:
         return f"type: {self.type}, name: {self.name}"
+
+
+class PeriodicFieldData(models.Model):
+    """
+    Additional data for PDU
+    """
+
+    STRING = "STRING"
+    DECIMAL = "DECIMAL"
+    DATE = "DATE"
+    TYPE_CHOICE = Choices(
+        (DATE, _("Date")),
+        (DECIMAL, _("Decimal")),
+        (STRING, _("String")),
+    )
+
+    subtype = models.CharField(max_length=16, choices=TYPE_CHOICE)
+    number_of_runs = models.IntegerField()
+    rounds_names = ArrayField(models.CharField(max_length=255), default=list)
+
+    class Meta:
+        verbose_name = "Periodic Field Data"
+        verbose_name_plural = "Periodic Fields Data"
 
 
 class FlexibleAttributeGroupManager(SoftDeletionTreeManager):

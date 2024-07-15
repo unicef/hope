@@ -38,28 +38,27 @@ export const api = {
     return data;
   },
 
-  async post(url: string, data: Record<string, any> = {}) {
-    const response = await fetch(`${this.baseURL}${url}`, {
+  async post(url: string, data: Record<string, any> | FormData) {
+    const isFormData = data instanceof FormData;
+    const fetchOptions: RequestInit = {
       method: 'POST',
       headers: {
-        ...this.headers,
-        'Content-Type': 'application/json',
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       },
-      body: JSON.stringify(data),
-    });
+      body: isFormData ? data : JSON.stringify(data),
+    };
+
+    const response = await fetch(`${this.baseURL}${url}`, fetchOptions);
 
     if (!response.ok) {
       throw new Error(`Error posting data to ${url}`);
     }
 
-    // Check if the response is empty
     const text = await response.text();
     if (!text) {
-      // If the response is empty, return an object with a data property set to null
       return { data: null };
     }
 
-    // If the response is not empty, parse it as JSON and return it
     return { data: JSON.parse(text) };
   },
 };
