@@ -24,6 +24,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { AdminButton } from '@core/AdminButton';
+import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
 
 const Container = styled.div`
   padding: 20px;
@@ -122,6 +123,7 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
           flexFieldsData={flexFieldsData}
           individual={individual as IndividualNode}
         />
+        <ProgrammeTimeSeriesFields  />
         {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTable objectId={individual?.id} />
         )}

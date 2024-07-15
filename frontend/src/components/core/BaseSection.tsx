@@ -28,6 +28,7 @@ interface BaseSectionProps {
   p?: number;
   noPaper?: boolean;
   tabs?: ReactElement;
+  stepper: ReactElement;
 }
 
 export const BaseSection = ({
@@ -38,6 +39,7 @@ export const BaseSection = ({
   p = 3,
   noPaper = false,
   tabs = null,
+  stepper = null,
 }: BaseSectionProps): React.ReactElement => {
   const { t } = useTranslation();
   const Container = noPaper ? BoxContainer : PaperContainer;
@@ -45,7 +47,13 @@ export const BaseSection = ({
   return (
     <Container>
       <Box p={p}>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
+        {stepper && <Box mb={2}>{stepper}</Box>}
+        <Box
+          p={p}
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+        >
           <Box>
             {typeof title === 'string' ? (
               <Typography data-cy="title" variant="h6">
@@ -59,7 +67,7 @@ export const BaseSection = ({
         </Box>
         {tabs && <Box mb={2}>{tabs}</Box>}
         {description && (
-          <Box mb={2}>
+          <Box pl={p} mb={2}>
             <GreyText data-cy="description">{description}</GreyText>
           </Box>
         )}
