@@ -150,10 +150,9 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
     record_code: str
     parent: str
     status: str
-    hope_status: str
     auth_code: str
-    payout_amount: float
     fsp_code: str
+    payout_amount: Optional[float] = None
     message: Optional[str] = None
 
     def get_hope_status(self, entitlement_quantity: Decimal) -> str:
@@ -457,7 +456,7 @@ class PaymentGatewayService:
                 try:
                     _payment.delivered_quantity = to_decimal(delivered_quantity)
                     _payment.delivered_quantity_usd = get_quantity_in_usd(
-                        amount=Decimal(delivered_quantity),
+                        amount=Decimal(delivered_quantity),  # type: ignore
                         currency=_payment_plan.currency,
                         exchange_rate=Decimal(_exchange_rate),
                         currency_exchange_date=_payment_plan.currency_exchange_date,
