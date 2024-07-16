@@ -180,7 +180,6 @@ class TestSmokeGrievanceDashboard:
         pageGrievanceDetailsPage.getButtonCloseTicket().click()
         pageGrievanceTickets.getButtonConfirm().click()
         pageGrievanceTickets.getNavGrievance().click()
-        pageGrievanceTickets.getNavGrievance().click()
         pageGrievanceDashboard.getNavGrievanceDashboard().click()
         assert "3" in pageGrievanceDashboard.getTotalNumberOfTicketsTopNumber().text
         assert "1" in pageGrievanceDashboard.getLabelizedFieldContainerTotalNumberOfTicketsSystemGenerated().text
