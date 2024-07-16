@@ -53,7 +53,7 @@ def _delete_rdi(rdi: RegistrationDataImport) -> None:
             "id", flat=True
         )
     )
-    individuals__ids = list(Individual.objects.filter(registration_data_import=rdi).values_list("id", flat=True))
+    individuals_ids = list(Individual.objects.filter(registration_data_import=rdi).values_list("id", flat=True))
     rdi_datahub.delete()
     GrievanceTicket.objects.filter(RegistrationDataImportAdmin.generate_query_for_all_grievances_tickets(rdi)).delete()
     rdi.delete()
@@ -62,5 +62,5 @@ def _delete_rdi(rdi: RegistrationDataImport) -> None:
     remove_elasticsearch_documents_by_matching_ids(
         datahub_individuals_ids, get_imported_individual_doc(business_area_slug)
     )
-    remove_elasticsearch_documents_by_matching_ids(individuals__ids, get_individual_doc(business_area_slug))
+    remove_elasticsearch_documents_by_matching_ids(individuals_ids, get_individual_doc(business_area_slug))
     logger.info(f"Deleted RDI and related data for {rdi.name}")
