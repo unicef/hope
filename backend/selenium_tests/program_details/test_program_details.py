@@ -128,3 +128,8 @@ class TestProgrammeDetails:
         self, standard_program: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
         pass
+
+    def test_program_details_happy_path(
+        self, standard_program: Program, pageProgrammeDetails: ProgrammeDetails
+    ) -> None:
+        pass
