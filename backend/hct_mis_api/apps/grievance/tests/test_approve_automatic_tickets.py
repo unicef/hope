@@ -328,6 +328,22 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             },
         )
 
+        # wrong grievance ticket status
+        self.needs_adjudication_grievance_ticket.status = GrievanceTicket.STATUS_ASSIGNED
+        self.needs_adjudication_grievance_ticket.save()
+        self.snapshot_graphql_request(
+            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": self.id_to_base64(
+                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
+                ),
+                "duplicateIndividualIds": self.id_to_base64(self.individuals[1].id, "IndividualNode"),
+            },
+        )
+        self.needs_adjudication_grievance_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
+        self.needs_adjudication_grievance_ticket.save()
+
         self.snapshot_graphql_request(
             request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION,
             context={"user": self.user},
