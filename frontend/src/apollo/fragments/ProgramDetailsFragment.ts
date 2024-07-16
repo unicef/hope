@@ -46,5 +46,15 @@ export const programDetails = gql`
     registrationImports {
       totalCount
     }
+    pduFields {
+      id
+      name
+      pduData {
+        id
+        subtype
+        numberOfRounds
+        roundsNames
+      }
+    }
   }
 `;

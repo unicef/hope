@@ -27,6 +27,7 @@ import {
   handleNext,
   ProgramStepper,
 } from '@components/programs/CreateProgram/ProgramStepper';
+import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
 
 export const CreateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -170,8 +171,7 @@ export const CreateProgramPage = (): ReactElement => {
       initialTouched={{
         programmeCode: true,
       }}
-      //TODO MS: Uncomment when validation is ready
-      // validationSchema={programValidationSchema(t)}
+      validationSchema={programValidationSchema(t)}
     >
       {({
         submitForm,

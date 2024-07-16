@@ -92,6 +92,7 @@ export const EditProgramPage = (): ReactElement => {
     partners,
     partnerAccess = ProgramPartnerAccess.AllPartnersAccess,
     registrationImports,
+    pduFields,
   } = data.program;
 
   const handleSubmit = async (values): Promise<void> => {
@@ -159,27 +160,7 @@ export const EditProgramPage = (): ReactElement => {
         areaAccess: partner.areaAccess,
       })),
     partnerAccess,
-    //TODO MS: add pduFields
-    pduFields: [
-      {
-        id: 1,
-        name: 'Fake Name 1',
-        pduData: {
-          subtype: 'Fake Subtype 1',
-          numberOfRounds: 5,
-          roundsNames: ['Round 1', 'Round 2'],
-        },
-      },
-      {
-        id: 2,
-        name: 'Fake Name 2',
-        pduData: {
-          subtype: 'Fake Subtype 2',
-          numberOfRounds: 3,
-          roundsNames: ['Round 1', 'Round 2', 'Round 3'],
-        },
-      },
-    ],
+    pduFields,
   };
   initialValues.budget =
     data.program.budget === '0.00' ? '' : data.program.budget;
