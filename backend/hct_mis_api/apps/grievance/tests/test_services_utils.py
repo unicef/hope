@@ -260,14 +260,15 @@ class TestGrievanceUtils(TestCase):
             assert str(e.value) == "The selected individual IND-333 is already selected as duplicate"
 
         with pytest.raises(ValidationError) as e:
-            individuals[0].withdrawn = True
-            individuals[0].save()
+            individuals[0].withdraw()
             validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details, "distinct")
             assert str(e.value) == "The selected individual IND-333 is not valid, must be not withdrawn"
 
+            individuals[0].unwithdraw()
+            validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details, "distinct")
+
         ticket_details.selected_distinct.remove(individuals[0])
-        individuals[0].withdrawn = False
-        individuals[0].save()
+        individuals[0].unwithdraw()
         validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details, "duplicate")
 
     def test_validate_all_individuals_before_close_needs_adjudication(self) -> None:
@@ -322,7 +323,7 @@ class TestGrievanceUtils(TestCase):
         )
         grievance.programs.add(program)
         _, individuals_1 = create_household(
-            {"size": 1, "business_area": ba, "program": program},
+            {"size": 2, "business_area": ba, "program": program},
             {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
         )
         _, individuals_2 = create_household(
@@ -365,7 +366,7 @@ class TestGrievanceUtils(TestCase):
         )
         grievance.programs.add(program)
         _, individuals_1 = create_household(
-            {"size": 1, "business_area": ba, "program": program},
+            {"size": 2, "business_area": ba, "program": program},
             {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
         )
         _, individuals_2 = create_household(
@@ -391,3 +392,22 @@ class TestGrievanceUtils(TestCase):
         with pytest.raises(ValidationError) as e:
             close_needs_adjudication_ticket_service(grievance, user)
             assert str(e.value) == "Close ticket is not possible when all Individuals are flagged as duplicates"
+
+        gr = GrievanceTicketFactory(
+            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+            business_area=ba,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
+            description="GrievanceTicket",
+        )
+        gr.programs.add(program)
+        ticket_details_2 = TicketNeedsAdjudicationDetailsFactory(
+            ticket=gr,
+            golden_records_individual=ind_1,
+            is_multiple_duplicates_version=False,
+            selected_individual=ind_2,
+            possible_duplicate=ind_1,
+        )
+        ticket_details_2.ticket = gr
+        ticket_details_2.save()
+
+        close_needs_adjudication_ticket_service(gr, user)
