@@ -2021,7 +2021,6 @@ type ImportedDocumentNode implements Node {
   program: ProgramNode
   isMigrationHandled: Boolean!
   copiedFrom: DocumentNode
-  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
 }
 
 type ImportedDocumentNodeConnection {
@@ -3833,7 +3832,6 @@ type Query {
   importedHousehold(id: ID!): ImportedHouseholdNode
   allImportedHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, rdiId: String, businessArea: String, orderBy: String): ImportedHouseholdNodeConnection
   registrationDataImportDatahub(id: ID!): RegistrationDataImportDatahubNode
-  allRegistrationDataImportsDatahub(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportDatahubNodeConnection
   importedIndividual(id: ID!): ImportedIndividualNode
   allImportedIndividuals(offset: Int, before: String, after: String, first: Int, last: Int, household: ID, rdiId: String, duplicatesOnly: Boolean, businessArea: String, orderBy: String): ImportedIndividualNodeConnection
   importData(id: ID!): ImportDataNode
@@ -3963,18 +3961,6 @@ type RegistrationDataImportDatahubNode implements Node {
   importData: ImportDataNode
   importDone: RegistrationDataImportDatahubImportDone!
   businessAreaSlug: String!
-}
-
-type RegistrationDataImportDatahubNodeConnection {
-  pageInfo: PageInfo!
-  edges: [RegistrationDataImportDatahubNodeEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type RegistrationDataImportDatahubNodeEdge {
-  node: RegistrationDataImportDatahubNode
-  cursor: String!
 }
 
 type RegistrationDataImportNode implements Node {

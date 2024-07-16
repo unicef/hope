@@ -679,6 +679,13 @@ class HardDocumentDeduplication:
             new_document_signatures_duplicated_in_batch = [
                 d for d in new_document_signatures if new_document_signatures.count(d) > 1
             ]
+            # use this dict for skip ticket creation for the same Individual with the same doc number
+            ind_and_new_document_signatures_duplicated_in_batch_dict = defaultdict(list)
+            for d in documents_to_dedup:
+                ind_and_new_document_signatures_duplicated_in_batch_dict[str(d.individual_id)].append(
+                    self._generate_signature(d)
+                )
+
             # added order_by because test was failed randomly
             all_matching_number_documents = (
                 Document.objects.select_related("individual", "individual__household", "individual__business_area")
@@ -708,6 +715,13 @@ class HardDocumentDeduplication:
 
             for new_document in documents_to_dedup:
                 new_document_signature = self._generate_signature(new_document)
+                # use this dict for skip ticket creation for the same Individual with the same doc number
+                is_duplicated_document_number_for_individual: bool = (
+                    ind_and_new_document_signatures_duplicated_in_batch_dict.get(
+                        str(new_document.individual_id), []
+                    ).count(new_document_signature)
+                    > 1
+                )
 
                 if new_document_signature in all_matching_number_documents_signatures:
                     new_document.status = Document.STATUS_NEED_INVESTIGATION
@@ -726,6 +740,7 @@ class HardDocumentDeduplication:
                 if (
                     new_document_signature in new_document_signatures_duplicated_in_batch
                     and new_document_signature in already_processed_signatures
+                    and not is_duplicated_document_number_for_individual
                 ):
                     new_document.status = Document.STATUS_NEED_INVESTIGATION
                     ticket_data_dict[new_document_signature]["possible_duplicates"].append(new_document)
@@ -735,7 +750,10 @@ class HardDocumentDeduplication:
                 new_document.status = Document.STATUS_VALID
                 already_processed_signatures.append(new_document_signature)
 
-                if new_document_signature in new_document_signatures_duplicated_in_batch:
+                if (
+                    new_document_signature in new_document_signatures_duplicated_in_batch
+                    and not is_duplicated_document_number_for_individual
+                ):
                     ticket_data_dict[new_document_signature] = {
                         "original": new_document,
                         "possible_duplicates": [],
