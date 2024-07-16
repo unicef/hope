@@ -1,10 +1,18 @@
+import random
 from typing import Any, List
 
 import factory
+from factory import fuzzy
 from factory.django import DjangoModelFactory
 from faker import Faker
 
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, StorageFile
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    DataCollectingType,
+    FlexibleAttribute,
+    PeriodicFieldData,
+    StorageFile,
+)
 
 faker = Faker()
 
@@ -107,3 +115,30 @@ class DataCollectingTypeFactory(DjangoModelFactory):
         if extracted:
             for business_area in extracted:
                 self.limit_to.add(business_area)
+
+
+class PeriodicFieldDataFactory(DjangoModelFactory):
+    subtype = fuzzy.FuzzyChoice([choice[0] for choice in PeriodicFieldData.TYPE_CHOICES])
+    rounds_names = factory.LazyAttribute(
+        lambda _: [factory.Faker("word").evaluate(None, None, {"locale": None}) for _ in range(random.randint(1, 10))]
+    )
+    number_of_rounds = factory.LazyAttribute(lambda o: len(o.rounds_names))
+
+    class Meta:
+        model = PeriodicFieldData
+
+
+class FlexibleAttributeForPDUFactory(DjangoModelFactory):
+    name = factory.Faker("word")
+    associated_with = FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
+    type = FlexibleAttribute.PDU
+    pdu_data = factory.SubFactory(PeriodicFieldDataFactory)
+
+    @factory.lazy_attribute
+    def program(self) -> Any:
+        from hct_mis_api.apps.program.fixtures import ProgramFactory
+
+        return ProgramFactory()
+
+    class Meta:
+        model = FlexibleAttribute

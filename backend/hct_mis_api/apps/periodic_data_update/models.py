@@ -74,7 +74,7 @@ class PeriodicDataUpdateTemplate(TimeStampedModel):
     """
     number_of_records = models.PositiveIntegerField(null=True, blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.pk} - {self.status}"
 
 

@@ -303,14 +303,16 @@ class PeriodicFieldData(models.Model):
     STRING = "STRING"
     DECIMAL = "DECIMAL"
     DATE = "DATE"
+    BOOLEAN = "BOOLEAN"
 
-    TYPE_CHOICE = Choices(
+    TYPE_CHOICES = Choices(
         (DATE, _("Date")),
         (DECIMAL, _("Number")),
         (STRING, _("Text")),
+        (BOOLEAN, _("Yes/No")),
     )
 
-    subtype = models.CharField(max_length=16, choices=TYPE_CHOICE)
+    subtype = models.CharField(max_length=16, choices=TYPE_CHOICES)
     number_of_rounds = models.IntegerField()
     rounds_names = ArrayField(models.CharField(max_length=255), default=list)
 
