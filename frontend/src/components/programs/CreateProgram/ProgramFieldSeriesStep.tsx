@@ -1,3 +1,4 @@
+import { useConfirmation } from '@components/core/ConfirmationDialog';
 import { DividerLine } from '@components/core/DividerLine';
 import { PduSubtypeChoicesDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -41,6 +42,7 @@ export const ProgramFieldSeriesStep = ({
 }: ProgramFieldSeriesStepProps) => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
+  const confirm = useConfirmation();
 
   const handleNextClick = async (): Promise<void> => {
     if (handleNext) {
@@ -53,6 +55,11 @@ export const ProgramFieldSeriesStep = ({
       value: el.value,
       name: el.displayName,
     }),
+  );
+
+  const confirmationModalTitle = t('Deleting Time Series Field');
+  const confirmationText = t(
+    'Are you sure you want to delete this field? This action cannot be reversed.',
   );
 
   return (
@@ -102,7 +109,13 @@ export const ProgramFieldSeriesStep = ({
                       </Grid>
                       <Grid item xs={1}>
                         <IconButton
-                          onClick={() => arrayHelpers.remove(index)}
+                          onClick={() =>
+                            confirm({
+                              title: confirmationModalTitle,
+                              content: confirmationText,
+                              type: 'error',
+                            }).then(() => arrayHelpers.remove(index))
+                          }
                           disabled={programHasRdi}
                         >
                           <DeleteIcon />
