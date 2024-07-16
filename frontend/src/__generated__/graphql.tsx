@@ -8655,6 +8655,7 @@ export type UpdateProgramInput = {
   name?: InputMaybe<Scalars['String']['input']>;
   partnerAccess?: InputMaybe<Scalars['String']['input']>;
   partners?: InputMaybe<Array<InputMaybe<ProgramPartnerThroughInput>>>;
+  pduFields?: InputMaybe<Array<InputMaybe<PduFieldInput>>>;
   populationGoal?: InputMaybe<Scalars['Int']['input']>;
   programmeCode?: InputMaybe<Scalars['String']['input']>;
   sector?: InputMaybe<Scalars['String']['input']>;

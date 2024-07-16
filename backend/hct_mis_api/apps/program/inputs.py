@@ -55,6 +55,7 @@ class UpdateProgramInput(graphene.InputObjectType):
     partners = graphene.List(ProgramPartnerThroughInput)
     partner_access = graphene.String()
     programme_code = graphene.String()
+    pdu_fields = graphene.List(PDUFieldInput)
 
 
 class CopyProgramInput(graphene.InputObjectType):
