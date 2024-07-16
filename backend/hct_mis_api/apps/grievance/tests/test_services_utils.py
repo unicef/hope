@@ -388,10 +388,6 @@ class TestGrievanceUtils(TestCase):
 
         ind_2.withdraw()  # make withdraw
 
-        close_needs_adjudication_ticket_service(grievance, user)
-
-        ind_1.refresh_from_db()
-        ind_2.refresh_from_db()
-
-        assert ind_1.duplicate is True
-        assert ind_2.duplicate is True
+        with pytest.raises(ValidationError) as e:
+            close_needs_adjudication_ticket_service(grievance, user)
+            assert str(e.value) == "Close ticket is not possible when all Individuals are flagged as duplicates"
