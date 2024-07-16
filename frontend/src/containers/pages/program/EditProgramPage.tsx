@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   ProgramPartnerAccess,
   useAllAreasTreeQuery,
+  usePduSubtypeChoicesDataQuery,
   useProgramQuery,
   useUpdateProgramMutation,
   useUserPartnerChoicesQuery,

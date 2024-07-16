@@ -24,7 +24,8 @@ interface UniversalRestTableProps<T = any, K = any> {
   allowSort?: boolean;
   filterOrderBy?: string;
   onPageChanged?: (page: number) => void;
-  data: T[];
+  //TODO MS: add correct types
+  data: any;
   error;
   isLoading: boolean;
   queryVariables: any;

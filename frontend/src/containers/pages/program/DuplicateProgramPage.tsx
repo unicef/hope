@@ -9,6 +9,7 @@ import {
   ProgramPartnerAccess,
   useAllAreasTreeQuery,
   useCopyProgramMutation,
+  usePduSubtypeChoicesDataQuery,
   useProgramQuery,
   useUserPartnerChoicesQuery,
 } from '@generated/graphql';
