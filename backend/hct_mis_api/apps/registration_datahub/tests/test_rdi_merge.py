@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 from typing import Callable, Generator
+from unittest import mock
 from unittest.mock import patch
 
 from django.conf import settings
@@ -342,7 +343,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
     @patch(
         "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.CheckAgainstSanctionListPreMergeTask.execute"
     )
-    def test_merge_rdi_sanction_list_check(self, sanction_execute_mock) -> None:
+    def test_merge_rdi_sanction_list_check(self, sanction_execute_mock: mock.MagicMock) -> None:
         imported_household = ImportedHouseholdFactory(
             collect_individual_data=COLLECT_TYPE_FULL,
             registration_data_import=self.rdi_hub,
@@ -373,7 +374,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
     @patch(
         "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.CheckAgainstSanctionListPreMergeTask.execute"
     )
-    def test_merge_rdi_sanction_list_check_business_area_false(self, sanction_execute_mock) -> None:
+    def test_merge_rdi_sanction_list_check_business_area_false(self, sanction_execute_mock: mock.MagicMock) -> None:
         imported_household = ImportedHouseholdFactory(
             collect_individual_data=COLLECT_TYPE_FULL,
             registration_data_import=self.rdi_hub,
@@ -400,11 +401,12 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
         sanction_execute_mock.assert_not_called()
+
     @freeze_time("2022-01-01")
     @patch(
         "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.CheckAgainstSanctionListPreMergeTask.execute"
     )
-    def test_merge_rdi_sanction_list_check_rdi_false(self, sanction_execute_mock) -> None:
+    def test_merge_rdi_sanction_list_check_rdi_false(self, sanction_execute_mock: mock.MagicMock) -> None:
         imported_household = ImportedHouseholdFactory(
             collect_individual_data=COLLECT_TYPE_FULL,
             registration_data_import=self.rdi_hub,
@@ -428,6 +430,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
         sanction_execute_mock.assert_not_called()
+
     @parameterized.expand(
         [
             True,
