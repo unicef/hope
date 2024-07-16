@@ -1,7 +1,7 @@
-import pytest
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
+import pytest
 from power_query.fixtures import (
     FormatterFactory,
     ParametrizerFactory,

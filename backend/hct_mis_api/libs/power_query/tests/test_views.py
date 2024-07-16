@@ -1,8 +1,9 @@
 import base64
 
-import pytest
 from django.test import TestCase, override_settings
 from django.urls import reverse
+
+import pytest
 from power_query.defaults import create_defaults
 from power_query.fixtures import (
     FormatterFactory,
