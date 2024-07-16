@@ -149,7 +149,9 @@ class IndividualDocumentOthers(IndividualDocument):
         settings = index_settings
 
     def get_queryset(self) -> QuerySet[Individual]:
-        return Individual.all_merge_status_objects.exclude(Q(business_area__slug="ukraine") | Q(business_area__slug="afghanistan"))
+        return Individual.all_merge_status_objects.exclude(
+            Q(business_area__slug="ukraine") | Q(business_area__slug="afghanistan")
+        )
 
 
 def get_individual_doc(
