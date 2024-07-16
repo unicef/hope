@@ -10211,6 +10211,11 @@ export type ImportedIndividualFieldsQueryVariables = Exact<{
 
 export type ImportedIndividualFieldsQuery = { __typename?: 'Query', allFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', isFlexField?: boolean | null, id?: string | null, type?: string | null, name?: string | null, associatedWith?: string | null, labelEn?: string | null, hint?: string | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null };
 
+export type PduSubtypeChoicesDataQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PduSubtypeChoicesDataQuery = { __typename?: 'Query', pduSubtypeChoices?: Array<{ __typename?: 'PDUSubtypeChoiceObject', value?: string | null, displayName?: string | null } | null> | null };
+
 export type AllFeedbacksQueryVariables = Exact<{
   offset?: InputMaybe<Scalars['Int']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -17296,6 +17301,46 @@ export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImpor
 export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
 export type ImportedIndividualFieldsSuspenseQueryHookResult = ReturnType<typeof useImportedIndividualFieldsSuspenseQuery>;
 export type ImportedIndividualFieldsQueryResult = Apollo.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
+export const PduSubtypeChoicesDataDocument = gql`
+    query pduSubtypeChoicesData {
+  pduSubtypeChoices {
+    value
+    displayName
+  }
+}
+    `;
+
+/**
+ * __usePduSubtypeChoicesDataQuery__
+ *
+ * To run a query within a React component, call `usePduSubtypeChoicesDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePduSubtypeChoicesDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePduSubtypeChoicesDataQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function usePduSubtypeChoicesDataQuery(baseOptions?: Apollo.QueryHookOptions<PduSubtypeChoicesDataQuery, PduSubtypeChoicesDataQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PduSubtypeChoicesDataQuery, PduSubtypeChoicesDataQueryVariables>(PduSubtypeChoicesDataDocument, options);
+      }
+export function usePduSubtypeChoicesDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PduSubtypeChoicesDataQuery, PduSubtypeChoicesDataQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PduSubtypeChoicesDataQuery, PduSubtypeChoicesDataQueryVariables>(PduSubtypeChoicesDataDocument, options);
+        }
+export function usePduSubtypeChoicesDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PduSubtypeChoicesDataQuery, PduSubtypeChoicesDataQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PduSubtypeChoicesDataQuery, PduSubtypeChoicesDataQueryVariables>(PduSubtypeChoicesDataDocument, options);
+        }
+export type PduSubtypeChoicesDataQueryHookResult = ReturnType<typeof usePduSubtypeChoicesDataQuery>;
+export type PduSubtypeChoicesDataLazyQueryHookResult = ReturnType<typeof usePduSubtypeChoicesDataLazyQuery>;
+export type PduSubtypeChoicesDataSuspenseQueryHookResult = ReturnType<typeof usePduSubtypeChoicesDataSuspenseQuery>;
+export type PduSubtypeChoicesDataQueryResult = Apollo.QueryResult<PduSubtypeChoicesDataQuery, PduSubtypeChoicesDataQueryVariables>;
 export const AllFeedbacksDocument = gql`
     query AllFeedbacks($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $issueType: String, $createdAtRange: String, $createdBy: String, $feedbackId: String, $orderBy: String, $program: String, $isActiveProgram: String) {
   allFeedbacks(

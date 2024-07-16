@@ -49,6 +49,9 @@ export const DuplicateProgramPage = (): ReactElement => {
   const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
     useUserPartnerChoicesQuery();
 
+  const { data: pdusubtypeChoicesData, loading: pdusubtypeChoicesLoading } =
+    usePduSubtypeChoicesDataQuery();
+
   const handleSubmit = async (values): Promise<void> => {
     const budgetValue = parseFloat(values.budget) ?? 0;
     const budgetToFixed = !Number.isNaN(budgetValue)
@@ -92,9 +95,15 @@ export const DuplicateProgramPage = (): ReactElement => {
     }
   };
 
-  if (loadingProgram || treeLoading || userPartnerChoicesLoading)
+  if (
+    loadingProgram ||
+    treeLoading ||
+    userPartnerChoicesLoading ||
+    pdusubtypeChoicesLoading
+  )
     return <LoadingComponent />;
-  if (!data || !treeData || !userPartnerChoicesData) return null;
+  if (!data || !treeData || !userPartnerChoicesData || !pdusubtypeChoicesData)
+    return null;
 
   const {
     name,
@@ -270,6 +279,7 @@ export const DuplicateProgramPage = (): ReactElement => {
                     handleNext={handleNextStep}
                     step={step}
                     setStep={setStep}
+                    pdusubtypeChoicesData={pdusubtypeChoicesData}
                   />
                 )}
                 {step === 2 && (

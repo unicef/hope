@@ -1,4 +1,5 @@
 import { DividerLine } from '@components/core/DividerLine';
+import { PduSubtypeChoicesDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -18,6 +19,7 @@ interface ProgramFieldSeriesStepProps {
   setStep: (step: number) => void;
   step: number;
   programHasRdi?: boolean;
+  pdusubtypeChoicesData?: PduSubtypeChoicesDataQuery;
 }
 
 export const ProgramFieldSeriesStep = ({
@@ -26,6 +28,7 @@ export const ProgramFieldSeriesStep = ({
   setStep,
   step,
   programHasRdi,
+  pdusubtypeChoicesData,
 }: ProgramFieldSeriesStepProps) => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
@@ -35,6 +38,13 @@ export const ProgramFieldSeriesStep = ({
       await handleNext();
     }
   };
+
+  const mappedPduSubtypeChoices = pdusubtypeChoicesData?.pduSubtypeChoices.map(
+    (el) => ({
+      value: el.value,
+      name: el.displayName,
+    }),
+  );
 
   return (
     <>
@@ -63,10 +73,7 @@ export const ProgramFieldSeriesStep = ({
                           variant="outlined"
                           label={t('Data Type')}
                           component={FormikSelectField}
-                          choices={[
-                            { value: 'number', label: t('Number') },
-                            { value: 'text', label: t('Text') },
-                          ]}
+                          choices={mappedPduSubtypeChoices}
                           disabled={programHasRdi}
                         />
                       </Grid>

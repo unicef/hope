@@ -48,6 +48,9 @@ export const EditProgramPage = (): ReactElement => {
   const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
     useUserPartnerChoicesQuery();
 
+  const { data: pdusubtypeChoicesData, loading: pdusubtypeChoicesLoading } =
+    usePduSubtypeChoicesDataQuery();
+
   const [mutate] = useUpdateProgramMutation({
     refetchQueries: [
       {
@@ -61,9 +64,17 @@ export const EditProgramPage = (): ReactElement => {
     ],
   });
 
-  if (loadingProgram || treeLoading || userPartnerChoicesLoading)
+  if (
+    loadingProgram ||
+    treeLoading ||
+    userPartnerChoicesLoading ||
+    pdusubtypeChoicesLoading
+  )
     return <LoadingComponent />;
-  if (!data || !treeData || !userPartnerChoicesData) return null;
+
+  if (!data || !treeData || !userPartnerChoicesData || !pdusubtypeChoicesData)
+    return null;
+
   const {
     name,
     programmeCode,
@@ -299,6 +310,7 @@ export const EditProgramPage = (): ReactElement => {
                     step={step}
                     setStep={setStep}
                     programHasRdi={programHasRdi}
+                    pdusubtypeChoicesData={pdusubtypeChoicesData}
                   />
                 )}
                 {step === 2 && (
