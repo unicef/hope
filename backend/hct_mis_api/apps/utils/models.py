@@ -159,7 +159,7 @@ class SoftDeletableRepresentationMergeStatusModel(MergeStatusModel):
             self.is_removed = True
             self.save(using=using)  # type: ignore
         else:
-            return super().delete(using=using, *args, **kwargs)  # type: ignore
+            return super().delete(using=using, *args, **kwargs)
 
 
 class AdminUrlMixin:
@@ -176,7 +176,10 @@ class TimeStampedModel(models.Model):
         abstract = True
 
 
-class TimeStampedUUIDModel(TimeStampedModel, UUIDModel):
+class TimeStampedUUIDModel(UUIDModel):
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True, db_index=True)
+
     class Meta:
         abstract = True
 
