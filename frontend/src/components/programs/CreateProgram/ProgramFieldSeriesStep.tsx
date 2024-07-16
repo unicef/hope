@@ -3,7 +3,14 @@ import { PduSubtypeChoicesDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Box, Button, Grid, IconButton } from '@mui/material';
+import {
+  Box,
+  Button,
+  FormControl,
+  FormHelperText,
+  Grid,
+  IconButton,
+} from '@mui/material';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { Field, FieldArray } from 'formik';
@@ -20,6 +27,7 @@ interface ProgramFieldSeriesStepProps {
   step: number;
   programHasRdi?: boolean;
   pdusubtypeChoicesData?: PduSubtypeChoicesDataQuery;
+  errors: any;
 }
 
 export const ProgramFieldSeriesStep = ({
@@ -29,6 +37,7 @@ export const ProgramFieldSeriesStep = ({
   step,
   programHasRdi,
   pdusubtypeChoicesData,
+  errors,
 }: ProgramFieldSeriesStepProps) => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
@@ -91,38 +100,51 @@ export const ProgramFieldSeriesStep = ({
                           disabled={programHasRdi}
                         />
                       </Grid>
+                      <Grid item xs={1}>
+                        <IconButton
+                          onClick={() => arrayHelpers.remove(index)}
+                          disabled={programHasRdi}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Grid>
                       {_field.pduData.numberOfRounds &&
                         [
                           ...Array(
                             Number(_field.pduData.numberOfRounds),
                           ).keys(),
-                        ].map((round) => (
+                        ].map((round, roundIndex, roundArray) => (
                           <Grid item xs={12} key={round}>
-                            <Field
-                              name={`pduFields.${index}.pduData.roundsNames.${round}`}
+                            <FormControl
                               fullWidth
+                              error={Boolean(
+                                errors.pduFields?.[index]?.pduData
+                                  ?.roundsNames?.[round],
+                              )}
                               variant="outlined"
-                              label={`${t('Round')} ${round + 1} ${t('Name')}`}
-                              component={FormikTextField}
-                              disabled={programHasRdi}
-                            />
+                            >
+                              <Field
+                                name={`pduFields.${index}.pduData.roundsNames.${round}`}
+                                fullWidth
+                                variant="outlined"
+                                label={`${t('Round')} ${round + 1} ${t('Name')}`}
+                                component={FormikTextField}
+                                disabled={programHasRdi}
+                              />
+
+                              {roundIndex === roundArray.length - 1 &&
+                                errors.pduFields?.[index]?.pduData
+                                  ?.roundsNames && (
+                                  <FormHelperText>
+                                    {
+                                      errors.pduFields[index].pduData
+                                        .roundsNames
+                                    }
+                                  </FormHelperText>
+                                )}
+                            </FormControl>
                           </Grid>
                         ))}
-                      {!(
-                        values.pduFields.length === 1 ||
-                        (!_field.fieldName &&
-                          !_field.dataType &&
-                          !_field.numberOfRounds)
-                      ) && (
-                        <Grid item xs={1}>
-                          <IconButton
-                            onClick={() => arrayHelpers.remove(index)}
-                            disabled={programHasRdi}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </Grid>
-                      )}
                     </Grid>
                     {values.pduFields.length > 1 &&
                       index < values.pduFields.length - 1 && <DividerLine />}

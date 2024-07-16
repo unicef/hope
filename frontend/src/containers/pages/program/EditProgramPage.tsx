@@ -115,8 +115,18 @@ export const EditProgramPage = (): ReactElement => {
         : [];
 
     const { editMode, ...requestValues } = values;
-    const pduFieldsToSend =
-      values.pduFields.length > 0 ? values.pduFields : null;
+    const pduFieldsToSend = values.pduFields.map(
+      ({ __typename, pduData, ...rest }) => ({
+        ...rest,
+        pduData: pduData
+          ? Object.fromEntries(
+              Object.entries(pduData).filter(
+                ([key]) => key !== '__typename' && key !== 'id',
+              ),
+            )
+          : pduData,
+      }),
+    );
 
     try {
       const response = await mutate({
@@ -210,6 +220,7 @@ export const EditProgramPage = (): ReactElement => {
         validateForm,
         setFieldTouched,
         setFieldValue,
+        errors,
       }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
@@ -293,6 +304,7 @@ export const EditProgramPage = (): ReactElement => {
                     setStep={setStep}
                     programHasRdi={programHasRdi}
                     pdusubtypeChoicesData={pdusubtypeChoicesData}
+                    errors={errors}
                   />
                 )}
                 {step === 2 && (
