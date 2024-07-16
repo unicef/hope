@@ -3603,6 +3603,7 @@ enum PeriodicFieldDataSubtype {
   DATE
   DECIMAL
   STRING
+  BOOLEAN
 }
 
 type PeriodicFieldNode {

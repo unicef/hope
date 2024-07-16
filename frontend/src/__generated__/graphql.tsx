@@ -5461,6 +5461,7 @@ export type PeriodicFieldDataNode = {
 };
 
 export enum PeriodicFieldDataSubtype {
+  Boolean = 'BOOLEAN',
   Date = 'DATE',
   Decimal = 'DECIMAL',
   String = 'STRING'

@@ -159,7 +159,7 @@ class SoftDeletableRepresentationMergeStatusModel(MergeStatusModel):
             self.is_removed = True
             self.save(using=using)  # type: ignore
         else:
-            return super().delete(using=using, *args, **kwargs)
+            return super().delete(using=using, *args, **kwargs)  # type: ignore
 
 
 class AdminUrlMixin:
