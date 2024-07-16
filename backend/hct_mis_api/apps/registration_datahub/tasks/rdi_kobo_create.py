@@ -69,6 +69,13 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         self.DOCS_AND_IDENTITIES_FIELDS = [
             f"{key}_{suffix}" for key in document_keys for suffix in ["no_i_c", "photo_i_c", "issuer_i_c"]
         ]
+        self.BANK_RELATED_FIELDS = (
+            "bank_name_i_c",
+            "bank_account_number_i_c",
+            "debit_card_number_i_c",
+            "bank_branch_name_i_c",
+            "account_holder_name_i_c",
+        )
         self.registration_data_import = RegistrationDataImport.objects.get(
             id=registration_data_import_id,
         )
@@ -325,7 +332,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                             only_collector_flag = True
                         elif i_field == "role_i_c":
                             role = i_value.upper()
-                        elif i_field in ("bank_name_i_c", "bank_account_number_i_c"):
+                        elif i_field in self.BANK_RELATED_FIELDS:
                             name = i_field.replace("_i_c", "")
                             current_individual_bank_account["individual"] = individual_obj
                             current_individual_bank_account[name] = i_value
