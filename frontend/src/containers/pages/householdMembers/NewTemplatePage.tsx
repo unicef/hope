@@ -83,7 +83,7 @@ export const NewTemplatePage = (): React.ReactElement => {
           <BaseSection>
             <Stepper activeStep={activeStep} alternativeLabel>
               {steps.map((label) => (
-                <Step key={label}>
+                <Step data-cy="label-key" key={label}>
                   <StepLabel>{label}</StepLabel>
                 </Step>
               ))}
@@ -109,25 +109,33 @@ export const NewTemplatePage = (): React.ReactElement => {
                   component={Link}
                   to={`/${baseUrl}/population/individuals`}
                   style={{ marginRight: '10px' }}
+                  data-cy="cancel-button"
                 >
                   Cancel
                 </Button>
               </Box>
-              {activeStep === 1 && (
-                <Box mr={1}>
-                  <Button variant="outlined" onClick={handleBack}>
-                    Back
+              <Box display="flex">
+                {activeStep === 1 && (
+                  <Box mr={1}>
+                    <Button
+                      data-cy="back-button"
+                      variant="outlined"
+                      onClick={handleBack}
+                    >
+                      Back
+                    </Button>
+                  </Box>
+                )}
+                <Box>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    data-cy="submit-button"
+                    onClick={activeStep === 1 ? submitForm : handleNext}
+                  >
+                    {activeStep === 1 ? 'Generate Template' : 'Next'}
                   </Button>
                 </Box>
-              )}
-              <Box>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={activeStep === 1 ? submitForm : handleNext}
-                >
-                  {activeStep === 1 ? 'Generate Template' : 'Next'}
-                </Button>
               </Box>
             </Box>
           </BaseSection>

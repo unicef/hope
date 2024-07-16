@@ -77,8 +77,11 @@ export const HouseholdMembersPage = (): React.ReactElement => {
               setCurrentTab(newValue);
             }}
           >
-            <Tab label="Individuals" />
-            <Tab label="Periodic Data Updates" />
+            <Tab data-cy="tab-individuals" label="Individuals" />
+            <Tab
+              data-cy="tab-periodic-data-updates"
+              label="Periodic Data Updates"
+            />
           </Tabs>
         }
       />

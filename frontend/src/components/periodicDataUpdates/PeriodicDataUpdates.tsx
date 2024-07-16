@@ -49,6 +49,7 @@ export const PeriodicDataUpdates = (): React.ReactElement => {
               component={Link}
               to={newTemplatePath}
               startIcon={<AddIcon />}
+              data-cy="new-template-button"
             >
               New Template
             </Button>

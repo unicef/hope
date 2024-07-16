@@ -25,24 +25,33 @@ export interface Template {
 }
 
 const templatesHeadCells: HeadCell<Template>[] = [
-  { id: 'id', numeric: false, disablePadding: false, label: 'Template ID' },
+  {
+    id: 'id',
+    numeric: false,
+    disablePadding: false,
+    label: 'Template ID',
+    dataCy: 'head-cell-template-id',
+  },
   {
     id: 'number_of_records',
     numeric: true,
     disablePadding: false,
     label: 'Number of Records',
+    dataCy: 'head-cell-number-of-records',
   },
   {
     id: 'created_at',
     numeric: false,
     disablePadding: false,
     label: 'Creation Date',
+    dataCy: 'head-cell-created-at',
   },
   {
     id: 'created_by',
     numeric: false,
     disablePadding: false,
     label: 'Created by',
+    dataCy: 'head-cell-created-by',
   },
   {
     id: 'details',
@@ -50,6 +59,7 @@ const templatesHeadCells: HeadCell<Template>[] = [
     disablePadding: false,
     label: 'Details',
     disableSort: true,
+    dataCy: 'head-cell-details',
   },
   {
     id: 'empty',
@@ -57,6 +67,7 @@ const templatesHeadCells: HeadCell<Template>[] = [
     disablePadding: false,
     label: '',
     disableSort: true,
+    dataCy: 'head-cell-empty',
   },
 ];
 
@@ -97,25 +108,30 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
   };
 
   const renderTemplateRow = (row: Template): ReactElement => (
-    <ClickableTableRow key={row.id}>
-      <TableCell>{row.id}</TableCell>
-      <TableCell>{row.number_of_records}</TableCell>
-      <TableCell>
+    <ClickableTableRow key={row.id} data-cy={`template-row-${row.id}`}>
+      <TableCell data-cy={`template-id-${row.id}`}>{row.id}</TableCell>
+      <TableCell data-cy={`template-records-${row.id}`}>
+        {row.number_of_records}
+      </TableCell>
+      <TableCell data-cy={`template-created-at-${row.id}`}>
         <UniversalMoment>{row.created_at}</UniversalMoment>
       </TableCell>
-      <TableCell>{row.created_by}</TableCell>
-      <TableCell>
+      <TableCell data-cy={`template-created-by-${row.id}`}>
+        {row.created_by}
+      </TableCell>
+      <TableCell data-cy={`template-details-btn-${row.id}`}>
         <IconButton color="primary" onClick={() => handleDialogOpen(row)}>
           <VisibilityIcon />
         </IconButton>
       </TableCell>
-      <TableCell>
+      <TableCell data-cy={`template-action-${row.id}`}>
         {row.status === 'download' ? (
           <Button
             variant="contained"
             color="primary"
             onClick={() => handleDownloadClick(row.id)}
             startIcon={<GetAppIcon />}
+            data-cy={`download-btn-${row.id}`}
           >
             Download
           </Button>
@@ -125,6 +141,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
             color="primary"
             onClick={() => handleExportClick(row.id)}
             startIcon={<UploadIcon />}
+            data-cy={`export-btn-${row.id}`}
           >
             Export
           </Button>

@@ -145,6 +145,7 @@ export const ProgramFieldSeriesStep = ({
                 }
                 endIcon={<AddIcon />}
                 disabled={programHasRdi}
+                data-cy="button-add-time-series-field"
               >
                 {t('Add Time Series Fields')}
               </Button>
