@@ -1,5 +1,7 @@
 from contextlib import contextmanager
 from typing import Callable, Generator
+from unittest import mock
+from unittest.mock import patch
 
 from django.conf import settings
 from django.db import DEFAULT_DB_ALIAS, connections
@@ -10,6 +12,7 @@ from freezegun import freeze_time
 from parameterized import parameterized
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
@@ -81,10 +84,11 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        cls.business_area = create_afghanistan()
         program = ProgramFactory()
         cls.rdi = RegistrationDataImportFactory(program=program)
-        cls.rdi.business_area.postpone_deduplication = True
-        cls.rdi.business_area.save()
+        cls.business_area.postpone_deduplication = True
+        cls.business_area.save()
         cls.rdi_hub = RegistrationDataImportDatahubFactory(
             name=cls.rdi.name, hct_id=cls.rdi.id, business_area_slug=cls.rdi.business_area.slug
         )
@@ -334,6 +338,98 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             "zip_code": "00-123",
         }
         self.assertEqual(household_data, expected)
+
+    @freeze_time("2022-01-01")
+    @patch(
+        "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.CheckAgainstSanctionListPreMergeTask.execute"
+    )
+    def test_merge_rdi_sanction_list_check(self, sanction_execute_mock: mock.MagicMock) -> None:
+        imported_household = ImportedHouseholdFactory(
+            collect_individual_data=COLLECT_TYPE_FULL,
+            registration_data_import=self.rdi_hub,
+            admin_area=self.area4.p_code,
+            admin_area_title=self.area4.name,
+            admin4=self.area4.p_code,
+            admin4_title=self.area4.name,
+            zip_code="00-123",
+            enumerator_rec_id=1234567890,
+            detail_id="123456123",
+            kobo_submission_uuid="c09130af-6c9c-4dba-8c7f-1b2ff1970d19",
+            kobo_submission_time="2022-02-22T12:22:22",
+        )
+        dct = self.rdi.program.data_collecting_type
+        dct.recalculate_composition = True
+        dct.save()
+        self.business_area.screen_beneficiary = True
+        self.business_area.save()
+        self.rdi.screen_beneficiary = True
+        self.rdi.save()
+        self.set_imported_individuals(imported_household)
+        with capture_on_commit_callbacks(execute=True):
+            RdiMergeTask().execute(self.rdi.pk)
+        sanction_execute_mock.assert_called_once()
+        sanction_execute_mock.reset_mock()
+
+    @freeze_time("2022-01-01")
+    @patch(
+        "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.CheckAgainstSanctionListPreMergeTask.execute"
+    )
+    def test_merge_rdi_sanction_list_check_business_area_false(self, sanction_execute_mock: mock.MagicMock) -> None:
+        imported_household = ImportedHouseholdFactory(
+            collect_individual_data=COLLECT_TYPE_FULL,
+            registration_data_import=self.rdi_hub,
+            admin_area=self.area4.p_code,
+            admin_area_title=self.area4.name,
+            admin4=self.area4.p_code,
+            admin4_title=self.area4.name,
+            zip_code="00-123",
+            enumerator_rec_id=1234567890,
+            detail_id="123456123",
+            kobo_submission_uuid="c09130af-6c9c-4dba-8c7f-1b2ff1970d19",
+            kobo_submission_time="2022-02-22T12:22:22",
+        )
+        dct = self.rdi.program.data_collecting_type
+        dct.recalculate_composition = True
+        dct.save()
+
+        # when business_area.screen_beneficiary is False
+        self.business_area.screen_beneficiary = False
+        self.business_area.save()
+        self.rdi.screen_beneficiary = True
+        self.rdi.save()
+        self.set_imported_individuals(imported_household)
+        with capture_on_commit_callbacks(execute=True):
+            RdiMergeTask().execute(self.rdi.pk)
+        sanction_execute_mock.assert_not_called()
+
+    @freeze_time("2022-01-01")
+    @patch(
+        "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.CheckAgainstSanctionListPreMergeTask.execute"
+    )
+    def test_merge_rdi_sanction_list_check_rdi_false(self, sanction_execute_mock: mock.MagicMock) -> None:
+        imported_household = ImportedHouseholdFactory(
+            collect_individual_data=COLLECT_TYPE_FULL,
+            registration_data_import=self.rdi_hub,
+            admin_area=self.area4.p_code,
+            admin_area_title=self.area4.name,
+            admin4=self.area4.p_code,
+            admin4_title=self.area4.name,
+            zip_code="00-123",
+            enumerator_rec_id=1234567890,
+            detail_id="123456123",
+            kobo_submission_uuid="c09130af-6c9c-4dba-8c7f-1b2ff1970d19",
+            kobo_submission_time="2022-02-22T12:22:22",
+        )
+
+        # when rdi.screen_beneficiary is False
+        self.business_area.screen_beneficiary = True
+        self.business_area.save()
+        self.rdi.screen_beneficiary = False
+        self.rdi.save()
+        self.set_imported_individuals(imported_household)
+        with capture_on_commit_callbacks(execute=True):
+            RdiMergeTask().execute(self.rdi.pk)
+        sanction_execute_mock.assert_not_called()
 
     @parameterized.expand(
         [
