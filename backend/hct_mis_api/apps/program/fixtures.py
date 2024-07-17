@@ -18,7 +18,7 @@ from hct_mis_api.apps.program.models import Program, ProgramCycle
 class ProgramCycleFactory(DjangoModelFactory):
     class Meta:
         model = ProgramCycle
-        django_get_or_create = ("iteration", "program")
+        django_get_or_create = ("program", "status")
 
     status = ProgramCycle.ACTIVE
     start_date = factory.Faker(
@@ -92,8 +92,8 @@ class ProgramFactory(DjangoModelFactory):
     )
 
     @factory.post_generation
-    def program_cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
+    def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
         if not create:
             return
 
-        ProgramCycleFactory(program=self)
+        ProgramCycleFactory(program=self, **kwargs)

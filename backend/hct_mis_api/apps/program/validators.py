@@ -4,8 +4,9 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from django.core.exceptions import ValidationError
 
-from hct_mis_api.apps.core.validators import BaseValidator
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.core.validators import BaseValidator, CommonValidator
+from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
@@ -33,6 +34,14 @@ class ProgramValidator(BaseValidator):
         elif current_status == Program.FINISHED and status_to_set != Program.ACTIVE:
             logger.error("Finished status can only be changed to Active")
             raise ValidationError("Finished status can only be changed to Active")
+
+        # Finish Program -> check all Payment Plans
+        if status_to_set == Program.FINISHED:
+            if PaymentPlan.objects.filter(
+                program_cycle__in=program.cycles.all(),
+                status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
+            ).exists():
+                raise ValidationError("All Payment Plans and Follow-Up Payment Plans have to be Reconciled.")
 
 
 class ProgramDeletionValidator(BaseValidator):
@@ -85,3 +94,81 @@ def validate_data_collecting_type(
         and data_collecting_type not in original_program_data_collecting_type.compatible_types.all()
     ):
         raise ValidationError("The Data Collection Type must be compatible with the original Programme.")
+
+
+class ProgramCycleValidator(CommonValidator):
+    @classmethod
+    def validate_program(cls, *args: Any, **kwargs: Any) -> None:
+        program = kwargs.get("program")
+        if program.status != Program.ACTIVE:
+            raise ValidationError("Create/Update Programme Cycle is possible only for Active Programme.")
+
+    @classmethod
+    def validate_program_start_end_dates(cls, *args: Any, **kwargs: Any) -> None:
+        program = kwargs.get("program")
+        if start_date := kwargs.get("start_date"):
+            if start_date < program.start_date:
+                raise ValidationError("Programme Cycle start date cannot be earlier than programme start date")
+        if end_date := kwargs.get("end_date"):
+            if end_date > program.end_date:
+                raise ValidationError("Programme Cycle end date cannot be earlier than programme end date")
+
+    @classmethod
+    def validate_cycles_has_end_date(cls, *args: Any, **kwargs: Any) -> None:
+        program = kwargs.get("program")
+        if kwargs.get("is_create_action") and program.cycles.filter(end_date__isnull=True).exists():
+            raise ValidationError("All Programme Cycles should have end date for creation new one.")
+
+    @classmethod
+    def validate_timeframes_overlapping(cls, *args: Any, **kwargs: Any) -> None:
+        program = kwargs.get("program")
+        program_cycle = kwargs.get("program_cycle")
+        start_date = kwargs.get("start_date")
+        end_date = kwargs.get("end_date")
+        raise_error = False
+
+        existing_cycles = program.cycles.exclude(id=program_cycle.pk) if program_cycle else program.cycles.all()
+
+        if start_date:
+            if existing_cycles.filter(start_date__lte=start_date, end_date__gte=start_date).exists():
+                raise_error = True
+        if end_date:
+            if existing_cycles.filter(start_date__lte=end_date, end_date__gte=end_date).exists():
+                raise_error = True
+
+        if raise_error:
+            raise ValidationError("Programme Cycles' timeframes must not overlap.")
+
+    @classmethod
+    def validate_program_cycle_name(cls, *args: Any, **kwargs: Any) -> None:
+        # A user can’t leave the Program Cycle name empty.
+        program = kwargs.get("program")
+        program_cycle = kwargs.get("program_cycle")
+        cycles = program.cycles.exclude(id=program_cycle.pk) if program_cycle else program.cycles.all()
+        if cycles.filter(name=kwargs["name"]).exists():
+            raise ValidationError("Programme Cycles' name should be unique.")
+
+    @classmethod
+    def validate_program_cycle_update_name_and_dates(cls, *args: Any, **kwargs: Any) -> None:
+        if (program_cycle := kwargs.get("program_cycle")) and not kwargs.get("is_create_action"):
+            if program_cycle.start_date and "start_date" in kwargs and kwargs.get("start_date") is None:
+                raise ValidationError("Not possible leave the Programme Cycle start date empty.")
+
+            if program_cycle.end_date and "end_date" in kwargs and kwargs.get("end_date") is None:
+                raise ValidationError(
+                    "Not possible leave the Programme Cycle end date empty if it was empty upon starting the edit."
+                )
+
+            if program_cycle.name and "name" in kwargs and kwargs.get("name") is None:
+                raise ValidationError("Not possible leave the Programme Cycle name empty.")
+
+
+class ProgramCycleDeletionValidator(BaseValidator):
+    @classmethod
+    def validate_is_deletable(cls, *args: Any, **kwargs: Any) -> None:
+        program_cycle = kwargs.get("program_cycle")
+        if program_cycle.program.status != Program.ACTIVE:
+            raise ValidationError("Only Programme Cycle for Active Programme can be deleted.")
+
+        if program_cycle.status != ProgramCycle.DRAFT:
+            raise ValidationError("Only Draft Programme Cycle can be deleted.")

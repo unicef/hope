@@ -61,3 +61,16 @@ class CopyProgramInput(graphene.InputObjectType):
     partners = graphene.List(ProgramPartnerThroughInput)
     partner_access = graphene.String()
     programme_code = graphene.String()
+
+
+class CreateProgramCycleInput(graphene.InputObjectType):
+    title = graphene.String(required=True)
+    start_date = graphene.Date(required=True)
+    end_date = graphene.Date()
+
+
+class UpdateProgramCycleInput(graphene.InputObjectType):
+    program_cycle_id = graphene.ID(required=True)
+    title = graphene.String()
+    start_date = graphene.Date()
+    end_date = graphene.Date()

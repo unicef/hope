@@ -323,10 +323,11 @@ def copy_program_related_data(copy_from_program_id: str, new_program: Program) -
 
 def create_program_cycle(program: Program) -> None:
     ProgramCycle.objects.create(
+        # TODO: set default title?
         program=program,
         start_date=program.start_date,
         end_date=program.end_date,
-        status=ProgramCycle.ACTIVE,
+        status=ProgramCycle.DRAFT,
     )
 
 

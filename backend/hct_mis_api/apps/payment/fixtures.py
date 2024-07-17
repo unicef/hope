@@ -391,11 +391,11 @@ class RealProgramFactory(DjangoModelFactory):
     )
 
     @factory.post_generation
-    def program_cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
+    def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
         if not create:
             return
 
-        ProgramCycleFactory(program=self)
+        ProgramCycleFactory(program=self, **kwargs)
 
 
 class RealCashPlanFactory(DjangoModelFactory):
@@ -539,13 +539,6 @@ class PaymentPlanFactory(DjangoModelFactory):
         after_now=False,
         tzinfo=utc,
     )
-    start_date = factory.Faker(
-        "date_time_this_decade",
-        before_now=True,
-        after_now=False,
-        tzinfo=utc,
-    )
-    end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
     exchange_rate = factory.fuzzy.FuzzyDecimal(0.1, 9.9)
 
     total_entitled_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)

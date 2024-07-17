@@ -56,9 +56,38 @@ from hct_mis_api.apps.payment.schema import (
     PaymentVerificationSummaryNode,
 )
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
-from hct_mis_api.apps.program.filters import ProgramFilter
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.filters import ProgramCycleFilter, ProgramFilter
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
+
+
+class ProgramCycleNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (
+        hopePermissionClass(
+            Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS,
+        ),
+    )
+    total_delivered_quantity_usd = graphene.Float()
+    total_entitled_quantity_usd = graphene.Float()
+    total_undelivered_quantity_usd = graphene.Float()
+
+    def resolve_total_delivered_quantity_usd(self, info: Any, **kwargs: Any) -> graphene.Float:
+        return self.total_delivered_quantity_usd
+
+    def resolve_total_entitled_quantity_usd(self, info: Any, **kwargs: Any) -> graphene.Float:
+        return self.total_entitled_quantity_usd
+
+    def resolve_total_undelivered_quantity_usd(self, info: Any, **kwargs: Any) -> graphene.Float:
+        return self.total_undelivered_quantity_usd
+
+    class Meta:
+        model = ProgramCycle
+        filter_fields = [
+            "name",
+            "status",
+        ]
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
@@ -77,6 +106,11 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     data_collecting_type = graphene.Field(DataCollectingTypeNode, source="data_collecting_type")
     partners = graphene.List(PartnerNode)
     is_social_worker_program = graphene.Boolean()
+    cycles = DjangoPermissionFilterConnectionField(
+        ProgramCycleNode,
+        filterset_class=ProgramCycleFilter,
+        permission_classes=(hopePermissionClass(Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST),),
+    )
 
     class Meta:
         model = Program
@@ -186,6 +220,7 @@ class Query(graphene.ObjectType):
         ),
     )
     program_status_choices = graphene.List(ChoiceObject)
+    program_cycle_status_choices = graphene.List(ChoiceObject)
     program_frequency_of_payments_choices = graphene.List(ChoiceObject)
     program_sector_choices = graphene.List(ChoiceObject)
     program_scope_choices = graphene.List(ChoiceObject)
@@ -198,6 +233,13 @@ class Query(graphene.ObjectType):
         permission_classes=(
             hopeOneOfPermissionClass(Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST, Permissions.RDI_IMPORT_DATA),
         ),
+    )
+    # ProgramCycle
+    program_cycle = relay.Node.Field(ProgramCycleNode)
+    all_program_cycles = DjangoPermissionFilterConnectionField(
+        ProgramCycleNode,
+        filterset_class=ProgramCycleFilter,
+        permission_classes=(hopePermissionClass(Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST),),
     )
 
     def resolve_all_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
@@ -222,6 +264,9 @@ class Query(graphene.ObjectType):
             )
             .order_by("custom_order", "start_date")
         )
+
+    def resolve_program_cycle_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(ProgramCycle.STATUS_CHOICE)
 
     def resolve_program_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Program.STATUS_CHOICE)
@@ -371,3 +416,13 @@ class Query(graphene.ObjectType):
             data_collecting_type__isnull=False,
             data_collecting_type__deprecated=False,
         ).exclude(data_collecting_type__code="unknown")
+
+    def resolve_all_program_cycles(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
+        # filter by Program added in ProgramCycleFilter > GlobalProgramFilter
+        # TODO: need to add filter by Total Entitled Quantity?
+        # ?? .annotate(
+        #     total_entitled_quantity=Coalesce(
+        #         Sum(F('paymentplan__total_entitled_quantity_usd')), Value(Decimal('0.0'))
+        #     )
+        # )
+        return ProgramCycle.objects.all()
