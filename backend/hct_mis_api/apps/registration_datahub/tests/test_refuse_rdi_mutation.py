@@ -9,17 +9,10 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.fixtures import (
-    ImportedHouseholdFactory,
-    ImportedIndividualFactory,
-    RegistrationDataImportDatahubFactory,
-)
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedHousehold,
-    ImportedIndividual,
-)
 
 
 class TestRefuseRdiMutation(BaseElasticSearchTestCase, APITestCase):
@@ -82,17 +75,14 @@ class TestRefuseRdiMutation(BaseElasticSearchTestCase, APITestCase):
         self.create_user_role_with_permissions(self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area)
 
         rdi = RegistrationDataImportFactory(status=RegistrationDataImport.IN_REVIEW)
-        rdi_hub = RegistrationDataImportDatahubFactory()
-        rdi.datahub_id = rdi_hub.id
-        rdi.save()
 
-        imported_household = ImportedHouseholdFactory(registration_data_import=rdi_hub)
-        ImportedIndividualFactory(household=imported_household)
-        ImportedIndividualFactory(household=imported_household)
-        ImportedIndividualFactory(household=imported_household)
+        household = HouseholdFactory(registration_data_import=rdi)
+        IndividualFactory(household=household)
+        IndividualFactory(household=household)
+        IndividualFactory(household=household)
 
-        self.assertEqual(ImportedHousehold.objects.all().count(), 1)
-        self.assertEqual(ImportedIndividual.objects.all().count(), 3)
+        self.assertEqual(Household.objects.all().count(), 1)
+        self.assertEqual(Individual.objects.all().count(), 3)
 
         self.graphql_request(
             request_string=self.REFUSE_IMPORT_QUERY,
@@ -100,19 +90,15 @@ class TestRefuseRdiMutation(BaseElasticSearchTestCase, APITestCase):
             variables={"id": self.id_to_base64(rdi.id, "RegistrationDataImportNode")},
         )
 
-        self.assertEqual(ImportedHousehold.objects.all().count(), 0)
-        self.assertEqual(ImportedIndividual.objects.all().count(), 0)
+        self.assertEqual(Household.objects.all().count(), 0)
+        self.assertEqual(Individual.objects.all().count(), 0)
 
     def test_refuse_registration_data_import_with_reason(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area)
 
         rdi = RegistrationDataImportFactory(status=RegistrationDataImport.IN_REVIEW)
-        rdi_hub = RegistrationDataImportDatahubFactory()
-        rdi.datahub_id = rdi_hub.id
-        rdi.save()
-
-        imported_household = ImportedHouseholdFactory(registration_data_import=rdi_hub)
-        ImportedIndividualFactory(household=imported_household)
+        imported_household = HouseholdFactory(registration_data_import=rdi)
+        IndividualFactory(household=imported_household)
 
         self.snapshot_graphql_request(
             request_string=self.REFUSE_IMPORT_QUERY,

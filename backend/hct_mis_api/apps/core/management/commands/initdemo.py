@@ -18,9 +18,6 @@ from hct_mis_api.apps.payment.fixtures import (
     generate_reconciled_payment_plan,
     update_fsps,
 )
-from hct_mis_api.apps.registration_datahub.management.commands.fix_unicef_id_imported_individuals_and_households import (
-    update_mis_unicef_id_individual_and_household,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +79,6 @@ class Command(BaseCommand):
         except elasticsearch.exceptions.RequestError:
             logger.error("Elasticsearch request error")
 
-        update_mis_unicef_id_individual_and_household()
         generate_payment_plan()
         generate_real_cash_plans()
         generate_reconciled_payment_plan()
@@ -145,4 +141,4 @@ class Command(BaseCommand):
             user.set_unusable_password()
             user.save()
 
-        print(f"Done in {timezone.now()- start_time}")
+        print(f"Done in {timezone.now() - start_time}")
