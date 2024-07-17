@@ -3,6 +3,7 @@ from typing import Any, Dict
 from graphql import GraphQLError
 
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
+from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.program.models import Program
 
 
@@ -54,10 +55,11 @@ class FlexibleAttributeForPDUService:
             raise GraphQLError("Cannot update PDU fields for a program with RDIs.")
         flexible_attribute_ids_to_preserve = []
         for pdu_field in self.pdu_fields:
-            if flexible_attribute_id := pdu_field.pop("id", None):
+            if flexible_attribute_id_encoded := pdu_field.pop("id", None):
+                flexible_attribute_id = decode_id_string(flexible_attribute_id_encoded)
                 self.update_pdu_flex_attribute(pdu_field, flexible_attribute_id)
                 flexible_attribute_ids_to_preserve.append(flexible_attribute_id)
             else:
                 flexible_attribute_ids_to_preserve.append(self.create_pdu_flex_attribute(pdu_field).id)
 
-        self.delete_pdu_flex_attributes(flexible_attribute_ids_to_preserve)
+        self.delete_pdu_flex_attributes(flexible_attribute_ids_to_preserve=flexible_attribute_ids_to_preserve)
