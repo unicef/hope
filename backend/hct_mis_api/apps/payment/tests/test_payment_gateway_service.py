@@ -34,6 +34,7 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.services.payment_gateway import (
     AddRecordsResponseData,
+    PaymentGatewayAPI,
     PaymentGatewayService,
     PaymentInstructionStatus,
     PaymentRecordData,
