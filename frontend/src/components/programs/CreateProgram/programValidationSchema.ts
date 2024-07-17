@@ -70,16 +70,9 @@ export const programValidationSchema = (
           numberOfRounds: Yup.number()
             .required(t('Number of Rounds is required'))
             .min(1, t('At least one round is required')),
-          roundsNames: Yup.array()
-            .of(Yup.string().required(t('Round name is required')))
-            .test(
-              'rounds-length-match',
-              t('Each round needs a name'),
-              function (roundsNames) {
-                const { numberOfRounds } = this.parent;
-                return roundsNames.length === numberOfRounds;
-              },
-            ),
+          roundsNames: Yup.array().of(
+            Yup.string().required(t('Round name is required')),
+          ),
         }),
       }),
     ),

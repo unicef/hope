@@ -4,14 +4,7 @@ import { PduSubtypeChoicesDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import {
-  Box,
-  Button,
-  FormControl,
-  FormHelperText,
-  Grid,
-  IconButton,
-} from '@mui/material';
+import { Box, Button, FormControl, Grid, IconButton } from '@mui/material';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { Field, FieldArray } from 'formik';
@@ -71,7 +64,7 @@ export const ProgramFieldSeriesStep = ({
             {values.pduFields && values.pduFields.length > 0
               ? values.pduFields.map((_field, index) => (
                   <Box key={index} pt={3} pb={3}>
-                    <Grid container spacing={3} alignItems="center">
+                    <Grid container spacing={3} alignItems="flex-start">
                       <Grid item xs={3}>
                         <Field
                           name={`pduFields.${index}.name`}
@@ -126,7 +119,7 @@ export const ProgramFieldSeriesStep = ({
                           ...Array(
                             Number(_field.pduData.numberOfRounds),
                           ).keys(),
-                        ].map((round, roundIndex, roundArray) => (
+                        ].map((round) => (
                           <Grid item xs={12} key={round}>
                             <FormControl
                               fullWidth
@@ -144,17 +137,6 @@ export const ProgramFieldSeriesStep = ({
                                 component={FormikTextField}
                                 disabled={programHasRdi}
                               />
-
-                              {roundIndex === roundArray.length - 1 &&
-                                errors.pduFields?.[index]?.pduData
-                                  ?.roundsNames && (
-                                  <FormHelperText>
-                                    {
-                                      errors.pduFields[index].pduData
-                                        .roundsNames
-                                    }
-                                  </FormHelperText>
-                                )}
                             </FormControl>
                           </Grid>
                         ))}
