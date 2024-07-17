@@ -19,7 +19,7 @@ class TestCoreUtils(TestCase):
 
     def test_get_payment_delivered_quantity_status_and_value(self) -> None:
         with self.assertRaisesMessage(Exception, "Invalid delivered quantity"):
-            get_payment_delivered_quantity_status_and_value(None, Decimal(10.00))  # type: ignore
+            get_payment_delivered_quantity_status_and_value(None, Decimal(10.00))
         with self.assertRaisesMessage(Exception, "Invalid delivered quantity"):
             get_payment_delivered_quantity_status_and_value("", Decimal(10.00))
         self.assertEqual(
