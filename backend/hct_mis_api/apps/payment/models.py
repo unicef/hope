@@ -923,7 +923,11 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
 
         return (
             self.eligible_payments.exclude(
-                status__in=[GenericPayment.STATUS_PENDING, GenericPayment.STATUS_SENT_TO_PG]
+                status__in=[
+                    GenericPayment.STATUS_PENDING,
+                    GenericPayment.STATUS_SENT_TO_PG,
+                    GenericPayment.STATUS_SENT_TO_FSP,
+                ]
             ).count()
             == self.eligible_payments.count()
         )

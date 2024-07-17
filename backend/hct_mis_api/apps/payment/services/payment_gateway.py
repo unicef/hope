@@ -105,6 +105,16 @@ class PaymentInstructionFromSplitSerializer(PaymentInstructionFromDeliveryMechan
         ]
 
 
+class PaymentPayloadSerializer(serializers.Serializer):
+    amount = serializers.DecimalField(max_digits=12, decimal_places=2, required=True)
+    phone_no = serializers.CharField(required=False)
+    last_name = serializers.CharField(required=False)
+    first_name = serializers.CharField(required=False)
+    full_name = serializers.CharField(required=False)
+    destination_currency = serializers.CharField(required=True)
+    service_provider_code = serializers.CharField(required=False)
+
+
 class PaymentSerializer(ReadOnlyModelSerializer):
     remote_id = serializers.CharField(source="id")
     record_code = serializers.CharField(source="unicef_id")
@@ -115,21 +125,20 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         return {}
 
     def get_payload(self, obj: Payment) -> Dict:
-        """
-        amount: int  # 120000
-        phone_no: str  # "78933211"
-        last_name: str  # "Arabic"
-        first_name: str  # "Angelina"
-        destination_currency: str  # "USD"
-        """
-        return {
-            "amount": obj.entitlement_quantity,
-            "phone_no": str(obj.collector.phone_no),
-            "last_name": obj.collector.family_name,
-            "first_name": obj.collector.given_name,
-            "full_name": obj.full_name,
-            "destination_currency": obj.currency,
-        }
+        payload = PaymentPayloadSerializer(
+            data={
+                "amount": obj.entitlement_quantity,
+                "phone_no": str(obj.collector.phone_no),
+                "last_name": obj.collector.family_name,
+                "first_name": obj.collector.given_name,
+                "full_name": obj.full_name,
+                "destination_currency": obj.currency,
+                "service_provider_code": obj.collector.flex_fields.get("service_provider_code", ""),
+            }
+        )
+        if not payload.is_valid():
+            raise serializers.ValidationError(payload.errors)
+        return payload.data
 
     class Meta:
         model = Payment
@@ -150,10 +159,9 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
     record_code: str
     parent: str
     status: str
-    hope_status: str
     auth_code: str
-    payout_amount: float
     fsp_code: str
+    payout_amount: Optional[float] = None
     message: Optional[str] = None
 
     def get_hope_status(self, entitlement_quantity: Decimal) -> str:
@@ -163,9 +171,8 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
                     self.payout_amount, entitlement_quantity
                 )
             except Exception:
-                raise PaymentGatewayAPI.PaymentGatewayAPIException(
-                    f"Invalid delivered_quantity {self.payout_amount} for Payment {self.remote_id}"
-                )
+                logger.error(f"Invalid delivered_quantity {self.payout_amount} for Payment {self.remote_id}")
+                _hope_status = Payment.STATUS_ERROR
             return _hope_status
 
         mapping = {
@@ -180,7 +187,8 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
 
         hope_status = mapping.get(self.status)
         if not hope_status:
-            raise PaymentGatewayAPI.PaymentGatewayAPIException(f"Invalid Payment status: {self.status}")
+            logger.error(f"Invalid Payment status: {self.status}")
+            hope_status = Payment.STATUS_ERROR
 
         return hope_status() if callable(hope_status) else hope_status
 
@@ -435,8 +443,16 @@ class PaymentGatewayService:
             _payment.fsp_auth_code = matching_pg_payment.auth_code
             update_fields = ["status", "status_date", "fsp_auth_code"]
 
-            if _payment.status not in Payment.ALLOW_CREATE_VERIFICATION and matching_pg_payment.message:
-                _payment.reason_for_unsuccessful_payment = matching_pg_payment.message
+            if _payment.status in [
+                Payment.STATUS_ERROR,
+                Payment.STATUS_MANUALLY_CANCELLED,
+            ]:
+                if matching_pg_payment.message:
+                    _payment.reason_for_unsuccessful_payment = matching_pg_payment.message
+                elif matching_pg_payment.payout_amount:
+                    _payment.reason_for_unsuccessful_payment = f"Delivered amount: {matching_pg_payment.payout_amount}"
+                else:
+                    _payment.reason_for_unsuccessful_payment = "Unknown error"
                 update_fields.append("reason_for_unsuccessful_payment")
 
             delivered_quantity = matching_pg_payment.payout_amount
@@ -449,7 +465,7 @@ class PaymentGatewayService:
                 try:
                     _payment.delivered_quantity = to_decimal(delivered_quantity)
                     _payment.delivered_quantity_usd = get_quantity_in_usd(
-                        amount=Decimal(delivered_quantity),
+                        amount=Decimal(delivered_quantity),  # type: ignore
                         currency=_payment_plan.currency,
                         exchange_rate=Decimal(_exchange_rate),
                         currency_exchange_date=_payment_plan.currency_exchange_date,
