@@ -42,6 +42,42 @@ def add_people(social_worker_program: Program) -> None:
         )
         individual = individuals[0]
         create_individual_document(individual)
+    return individual
+
+@pytest.fixture
+def add_people_with_payment_record(add_people: None) -> None:
+    from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+    from hct_mis_api.apps.account.models import User
+    from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
+    from hct_mis_api.apps.payment.fixtures import CashPlanFactory
+    from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
+    from hct_mis_api.apps.payment.models import GenericPayment
+    program = Program.objects.filter(name="Worker Program").first()
+
+    cash_plan = CashPlanFactory(
+        name="TEST",
+        program=program,
+        business_area=BusinessArea.objects.first(),
+        start_date=datetime.now() - relativedelta(months=1),
+        end_date=datetime.now() + relativedelta(months=1),
+    )
+
+    targeting_criteria = TargetingCriteriaFactory()
+    targeting_criteria.individual_ids = add_people
+
+    target_population = TargetPopulationFactory(
+        created_by=User.objects.first(),
+        targeting_criteria=targeting_criteria,
+        business_area=BusinessArea.objects.first(),
+    )
+    payment_record = PaymentRecordFactory(
+        parent=cash_plan,
+        target_population=target_population,
+        entitlement_quantity="21.36",
+        delivered_quantity="21.36",
+        currency="PLN",
+        status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
+    )
 
 
 def get_program_with_dct_type_and_name(
@@ -176,11 +212,16 @@ class TestSmokePeople:
         assert pagePeopleDetails.getLabelRegistrationDate().text
         assert pagePeopleDetails.getLabelUserName().text
 
-    def test__people_happy_path(
+    def test_people_happy_path(
         self,
-        add_people: None,
+        add_people_with_payment_record: None,
         pagePeople: People,
         pagePeopleDetails: PeopleDetails,
     ) -> None:
         pagePeople.selectGlobalProgramFilter("Worker Program").click()
         pagePeople.getNavPeople().click()
+        pagePeople.getIndividualTableRow(0).click()
+        pagePeopleDetails.getLabelTotalCashReceived()
+        pagePeople.screenshot("2", delay_sec=2)
+
+        pagePeopleDetails.getRows()[0].click()
