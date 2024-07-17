@@ -6,6 +6,7 @@ from unittest import mock
 from django.utils import timezone
 
 import pytest
+from backend.hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayAPI
 from pytz import utc
 from rest_framework.exceptions import ValidationError
 
