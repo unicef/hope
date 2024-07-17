@@ -338,18 +338,19 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.CheckAgainstSanctionListPreMergeTask.execute"
     )
     def test_merge_rdi_sanction_list_check(self, sanction_execute_mock: mock.MagicMock) -> None:
-        imported_household = ImportedHouseholdFactory(
+        household = PendingHouseholdFactory(
             collect_individual_data=COLLECT_TYPE_FULL,
-            registration_data_import=self.rdi_hub,
-            admin_area=self.area4.p_code,
-            admin_area_title=self.area4.name,
-            admin4=self.area4.p_code,
-            admin4_title=self.area4.name,
+            registration_data_import=self.rdi,
+            admin_area=self.area4,
+            admin4=self.area4,
+            admin3=self.area3,
+            admin2=self.area2,
+            admin1=self.area1,
             zip_code="00-123",
-            enumerator_rec_id=1234567890,
             detail_id="123456123",
             kobo_submission_uuid="c09130af-6c9c-4dba-8c7f-1b2ff1970d19",
             kobo_submission_time="2022-02-22T12:22:22",
+            flex_fields={"enumerator_id": 1234567890},
         )
         dct = self.rdi.program.data_collecting_type
         dct.recalculate_composition = True
@@ -358,7 +359,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         self.business_area.save()
         self.rdi.screen_beneficiary = True
         self.rdi.save()
-        self.set_imported_individuals(imported_household)
+        self.set_imported_individuals(household)
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
         sanction_execute_mock.assert_called_once()
@@ -369,18 +370,19 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.CheckAgainstSanctionListPreMergeTask.execute"
     )
     def test_merge_rdi_sanction_list_check_business_area_false(self, sanction_execute_mock: mock.MagicMock) -> None:
-        imported_household = ImportedHouseholdFactory(
+        household = PendingHouseholdFactory(
             collect_individual_data=COLLECT_TYPE_FULL,
-            registration_data_import=self.rdi_hub,
-            admin_area=self.area4.p_code,
-            admin_area_title=self.area4.name,
-            admin4=self.area4.p_code,
-            admin4_title=self.area4.name,
+            registration_data_import=self.rdi,
+            admin_area=self.area4,
+            admin4=self.area4,
+            admin3=self.area3,
+            admin2=self.area2,
+            admin1=self.area1,
             zip_code="00-123",
-            enumerator_rec_id=1234567890,
             detail_id="123456123",
             kobo_submission_uuid="c09130af-6c9c-4dba-8c7f-1b2ff1970d19",
             kobo_submission_time="2022-02-22T12:22:22",
+            flex_fields={"enumerator_id": 1234567890},
         )
         dct = self.rdi.program.data_collecting_type
         dct.recalculate_composition = True
@@ -391,7 +393,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         self.business_area.save()
         self.rdi.screen_beneficiary = True
         self.rdi.save()
-        self.set_imported_individuals(imported_household)
+        self.set_imported_individuals(household)
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
         sanction_execute_mock.assert_not_called()
@@ -401,18 +403,19 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.CheckAgainstSanctionListPreMergeTask.execute"
     )
     def test_merge_rdi_sanction_list_check_rdi_false(self, sanction_execute_mock: mock.MagicMock) -> None:
-        imported_household = ImportedHouseholdFactory(
+        household = PendingHouseholdFactory(
             collect_individual_data=COLLECT_TYPE_FULL,
-            registration_data_import=self.rdi_hub,
-            admin_area=self.area4.p_code,
-            admin_area_title=self.area4.name,
-            admin4=self.area4.p_code,
-            admin4_title=self.area4.name,
+            registration_data_import=self.rdi,
+            admin_area=self.area4,
+            admin4=self.area4,
+            admin3=self.area3,
+            admin2=self.area2,
+            admin1=self.area1,
             zip_code="00-123",
-            enumerator_rec_id=1234567890,
             detail_id="123456123",
             kobo_submission_uuid="c09130af-6c9c-4dba-8c7f-1b2ff1970d19",
             kobo_submission_time="2022-02-22T12:22:22",
+            flex_fields={"enumerator_id": 1234567890},
         )
 
         # when rdi.screen_beneficiary is False
@@ -420,7 +423,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         self.business_area.save()
         self.rdi.screen_beneficiary = False
         self.rdi.save()
-        self.set_imported_individuals(imported_household)
+        self.set_imported_individuals(household)
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
         sanction_execute_mock.assert_not_called()
