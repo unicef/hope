@@ -1,4 +1,3 @@
-import os
 from datetime import datetime
 
 from django.db import transaction
@@ -7,12 +6,7 @@ import pytest
 from dateutil.relativedelta import relativedelta
 from page_object.people.people import People
 
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
-from hct_mis_api.apps.payment.fixtures import CashPlanFactory
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
-from hct_mis_api.apps.payment.models import GenericPayment
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.household.fixtures import (
@@ -20,11 +14,15 @@ from hct_mis_api.apps.household.fixtures import (
     create_individual_document,
 )
 from hct_mis_api.apps.household.models import HOST, SEEING, Individual
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
+from hct_mis_api.apps.payment.models import GenericPayment, PaymentRecord
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetPopulationFactory,
+)
 from selenium_tests.page_object.people.people_details import PeopleDetails
-
-from hct_mis_api.apps.payment.models import PaymentRecord
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -52,6 +50,7 @@ def add_people(social_worker_program: Program) -> []:
         individual = individuals[0]
         create_individual_document(individual)
     return [individual, household]
+
 
 @pytest.fixture
 def add_people_with_payment_record(add_people: []) -> PaymentRecord:
