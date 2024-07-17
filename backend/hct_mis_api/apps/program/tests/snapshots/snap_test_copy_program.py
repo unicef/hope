@@ -110,6 +110,8 @@ snapshots['TestCopyProgram::test_copy_program_with_partners_0_valid 1'] = {
                         'name': 'WFP'
                     }
                 ],
+                'pduFields': [
+                ],
                 'populationGoal': 150000,
                 'sector': 'EDUCATION',
                 'startDate': '2019-12-20'
@@ -197,6 +199,8 @@ snapshots['TestCopyProgram::test_copy_program_with_partners_all_partners_access 
                         'name': 'UNICEF'
                     }
                 ],
+                'pduFields': [
+                ],
                 'populationGoal': 150000,
                 'sector': 'EDUCATION',
                 'startDate': '2019-12-20'
@@ -230,6 +234,91 @@ snapshots['TestCopyProgram::test_copy_program_with_partners_none_partners_access
                             }
                         ],
                         'name': 'UNICEF'
+                    }
+                ],
+                'pduFields': [
+                ],
+                'populationGoal': 150000,
+                'sector': 'EDUCATION',
+                'startDate': '2019-12-20'
+            },
+            'validationErrors': None
+        }
+    }
+}
+
+snapshots['TestCopyProgram::test_copy_program_with_pdu_fields 1'] = {
+    'data': {
+        'copyProgram': {
+            'program': {
+                'administrativeAreasOfImplementation': 'Lorem Ipsum',
+                'budget': '20000000.00',
+                'cashPlus': True,
+                'description': 'my description of program',
+                'endDate': '2021-12-20',
+                'frequencyOfPayments': 'REGULAR',
+                'name': 'copied name',
+                'partnerAccess': 'NONE_PARTNERS_ACCESS',
+                'partners': [
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF'
+                    }
+                ],
+                'pduFields': [
+                    {
+                        'name': 'PDU Field 1',
+                        'pduData': {
+                            'numberOfRounds': 3,
+                            'roundsNames': [
+                                'Round 1',
+                                'Round 2',
+                                'Round 3'
+                            ],
+                            'subtype': 'DECIMAL'
+                        }
+                    },
+                    {
+                        'name': 'PDU Field 2',
+                        'pduData': {
+                            'numberOfRounds': 1,
+                            'roundsNames': [
+                                'Round *'
+                            ],
+                            'subtype': 'STRING'
+                        }
+                    },
+                    {
+                        'name': 'PDU Field 3',
+                        'pduData': {
+                            'numberOfRounds': 2,
+                            'roundsNames': [
+                                'Round A',
+                                'Round B'
+                            ],
+                            'subtype': 'DATE'
+                        }
+                    },
+                    {
+                        'name': 'PDU Field 4',
+                        'pduData': {
+                            'numberOfRounds': 4,
+                            'roundsNames': [
+                                'Round 1A',
+                                'Round 2B',
+                                'Round 3C',
+                                'Round 4D'
+                            ],
+                            'subtype': 'BOOLEAN'
+                        }
                     }
                 ],
                 'populationGoal': 150000,
@@ -287,6 +376,8 @@ snapshots['TestCopyProgram::test_copy_with_permissions 1'] = {
                         'name': 'UNICEF'
                     }
                 ],
+                'pduFields': [
+                ],
                 'populationGoal': 150000,
                 'sector': 'EDUCATION',
                 'startDate': '2019-12-20'
@@ -294,4 +385,24 @@ snapshots['TestCopyProgram::test_copy_with_permissions 1'] = {
             'validationErrors': None
         }
     }
+}
+
+snapshots['TestCopyProgram::test_create_program_with_pdu_fields_invalid_data 1'] = {
+    'data': {
+        'copyProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Number of rounds does not match the number of round names',
+            'path': [
+                'copyProgram'
+            ]
+        }
+    ]
 }
