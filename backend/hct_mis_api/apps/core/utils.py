@@ -918,8 +918,9 @@ class AutoCompleteFilterTemp(AutoCompleteFilter):
 
         return []
 
+
 class FlexFieldsEncoder(json.JSONEncoder):
-    def default(self, obj):
+    def default(self, obj: Any) -> Any:
         if isinstance(obj, date):
             return obj.isoformat()
         if isinstance(obj, Decimal):

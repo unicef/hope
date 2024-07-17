@@ -1,33 +1,21 @@
-from tempfile import NamedTemporaryFile
+import datetime
+import uuid
+from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 from typing import Any
 
+from django.core.exceptions import ValidationError
+from django.core.files import File
 from django.test import TestCase
 
-from django.core.files import File
 import openpyxl
-from freezegun import freeze_time
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
-from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket,
-    TicketComplaintDetails,
-    TicketDeleteIndividualDetails,
-    TicketIndividualDataUpdateDetails,
-    TicketNeedsAdjudicationDetails,
-    TicketNegativeFeedbackDetails,
-    TicketPositiveFeedbackDetails,
-    TicketReferralDetails,
-    TicketSensitiveDetails,
-    TicketSystemFlaggingDetails,
-)
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.household.models import FEMALE, MALE
-from hct_mis_api.apps.payment.fixtures import PaymentFactory
-from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate, PeriodicDataUpdateUpload
+from hct_mis_api.apps.periodic_data_update.models import (
+    PeriodicDataUpdateTemplate,
+    PeriodicDataUpdateUpload,
+)
 from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PeriodicDataUpdateExportTemplateService,
 )
@@ -37,9 +25,6 @@ from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_s
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from openpyxl.packaging.custom import StringProperty
-from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
 
 def create_flexible_attribute(
@@ -55,7 +40,9 @@ def create_flexible_attribute(
     return flexible_attribute
 
 
-def add_pdu_data_to_xlsx(periodic_data_update_template, rows: list[list[Any]]):
+def add_pdu_data_to_xlsx(
+    periodic_data_update_template: PeriodicDataUpdateTemplate, rows: list[list[Any]]
+) -> _TemporaryFileWrapper:
     wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
     ws_pdu = wb[PeriodicDataUpdateExportTemplateService.PDU_SHEET]
     for row_index, row in enumerate(rows):
@@ -126,7 +113,91 @@ class TestPeriodicDataUpdateImportService(TestCase):
         tmp_file.close()
         return periodic_data_update_template, periodic_data_update_upload
 
-    def test_full_flow(self):
+    def test_import_data_string(self) -> None:
+        flexible_attribute = self.string_attribute
+        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+            [
+                {
+                    "field": flexible_attribute.name,
+                    "round": 1,
+                    "round_name": flexible_attribute.pdu_data.rounds_names[0],
+                    "number_of_records": 0,
+                }
+            ],
+            [["Test Value", "2021-05-02"]],
+        )
+        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service.import_data()
+        self.assertEqual(periodic_data_update_upload.status, PeriodicDataUpdateUpload.Status.SUCCESSFUL)
+        self.assertEqual(periodic_data_update_upload.error_message, None)
+        self.individual.refresh_from_db()
+        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], "Test Value")
+        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
+
+    def test_import_data_decimal(self) -> None:
+        flexible_attribute = self.decimal_attribute
+        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+            [
+                {
+                    "field": flexible_attribute.name,
+                    "round": 1,
+                    "round_name": flexible_attribute.pdu_data.rounds_names[0],
+                    "number_of_records": 0,
+                }
+            ],
+            [["20.456", "2021-05-02"]],
+        )
+        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service.import_data()
+        self.assertEqual(periodic_data_update_upload.status, PeriodicDataUpdateUpload.Status.SUCCESSFUL)
+        self.assertEqual(periodic_data_update_upload.error_message, None)
+        self.individual.refresh_from_db()
+        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], "20.456")
+        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
+
+    def test_import_data_boolean(self) -> None:
+        flexible_attribute = self.boolean_attribute
+        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+            [
+                {
+                    "field": flexible_attribute.name,
+                    "round": 1,
+                    "round_name": flexible_attribute.pdu_data.rounds_names[0],
+                    "number_of_records": 0,
+                }
+            ],
+            [[True, "2021-05-02"]],
+        )
+        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service.import_data()
+        self.assertEqual(periodic_data_update_upload.status, PeriodicDataUpdateUpload.Status.SUCCESSFUL)
+        self.assertEqual(periodic_data_update_upload.error_message, None)
+        self.individual.refresh_from_db()
+        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], True)
+        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
+
+    def test_import_data_date(self) -> None:
+        flexible_attribute = self.date_attribute
+        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+            [
+                {
+                    "field": flexible_attribute.name,
+                    "round": 1,
+                    "round_name": flexible_attribute.pdu_data.rounds_names[0],
+                    "number_of_records": 0,
+                }
+            ],
+            [["1996-06-21", "2021-05-02"]],
+        )
+        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service.import_data()
+        self.assertEqual(periodic_data_update_upload.status, PeriodicDataUpdateUpload.Status.SUCCESSFUL)
+        self.assertEqual(periodic_data_update_upload.error_message, None)
+        self.individual.refresh_from_db()
+        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], "1996-06-21")
+        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
+
+    def test_read_periodic_data_update_template_object(self) -> None:
         periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
             program=self.program,
             business_area=self.business_area,
@@ -149,71 +220,80 @@ class TestPeriodicDataUpdateImportService(TestCase):
             )
         )
         self.assertEqual(periodic_data_update_template_from_xlsx.pk, periodic_data_update_template.pk)
+        wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
+        del wb.custom_doc_props[PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME]
+        ws_meta = wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
+        with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
+            wb.save(tmp_file.name)
+            tmp_file.seek(0)
+            periodic_data_update_template_from_xlsx = (
+                PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
+            )
+            self.assertEqual(periodic_data_update_template_from_xlsx.pk, periodic_data_update_template.pk)
+        wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
+        del wb.custom_doc_props[PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME]
+        ws_meta = wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
+        ws_meta[PeriodicDataUpdateExportTemplateService.META_ID_ADDRESS] = ""
+        with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
+            wb.save(tmp_file.name)
+            tmp_file.seek(0)
+            with self.assertRaisesMessage(ValidationError, "Periodic Data Update Template ID is missing in the file"):
+                PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
 
-    def test_import_data_string(self):
-        flexible_attribute = self.string_attribute
+        wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
+        del wb.custom_doc_props[PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME]
+        ws_meta = wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
+        ws_meta[PeriodicDataUpdateExportTemplateService.META_ID_ADDRESS] = "abc"
+        with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
+            wb.save(tmp_file.name)
+            tmp_file.seek(0)
+            with self.assertRaisesMessage(ValidationError, "Periodic Data Update Template ID must be a number"):
+                PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
+
+        wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
+        del wb.custom_doc_props[PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME]
+        ws_meta = wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
+        ws_meta[PeriodicDataUpdateExportTemplateService.META_ID_ADDRESS] = True
+        with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
+            wb.save(tmp_file.name)
+            tmp_file.seek(0)
+            with self.assertRaisesMessage(ValidationError, "Periodic Data Update Template ID must be an integer"):
+                PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
+
+        wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
+        del wb.custom_doc_props[PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME]
+        ws_meta = wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
+        ws_meta[PeriodicDataUpdateExportTemplateService.META_ID_ADDRESS] = -1
+        with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
+            wb.save(tmp_file.name)
+            tmp_file.seek(0)
+            with self.assertRaisesMessage(ValidationError, "Periodic Data Update Template with ID -1 not found"):
+                PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
+
+    def test_read_flexible_attributes(self) -> None:
         periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
             [
                 {
-                    "field": flexible_attribute.name,
+                    "field": self.string_attribute.name,
                     "round": 1,
-                    "round_name": flexible_attribute.pdu_data.rounds_names[0],
+                    "round_name": self.string_attribute.pdu_data.rounds_names[0],
                     "number_of_records": 0,
-                }
-            ],
-            [["Test Value", "2021-05-02"]],
-        )
-        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
-        service.import_data()
-        self.assertEqual(periodic_data_update_upload.status, PeriodicDataUpdateUpload.Status.SUCCESSFUL)
-        self.assertEqual(periodic_data_update_upload.error_message, None)
-        self.individual.refresh_from_db()
-        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], "Test Value")
-        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
-
-    def test_import_data_decimal(self):
-        flexible_attribute = self.decimal_attribute
-        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
-            [
+                },
                 {
-                    "field": flexible_attribute.name,
+                    "field": "Not existing field",
                     "round": 1,
-                    "round_name": flexible_attribute.pdu_data.rounds_names[0],
+                    "round_name": self.string_attribute.pdu_data.rounds_names[0],
                     "number_of_records": 0,
-                }
+                },
             ],
-            [["20.456", "2021-05-02"]],
+            [["1996-06-21", "2021-05-02"]],
         )
         service = PeriodicDataUpdateImportService(periodic_data_update_upload)
-        service.import_data()
-        self.assertEqual(periodic_data_update_upload.status, PeriodicDataUpdateUpload.Status.SUCCESSFUL)
-        self.assertEqual(periodic_data_update_upload.error_message, None)
-        self.individual.refresh_from_db()
-        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], "20.456")
-        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
+        service._open_workbook()
+        with self.assertRaisesMessage(ValidationError, "Some fields are missing in the flexible attributes"):
+            service._read_flexible_attributes()
 
-    def test_import_data_boolean(self):
-        flexible_attribute = self.boolean_attribute
-        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
-            [
-                {
-                    "field": flexible_attribute.name,
-                    "round": 1,
-                    "round_name": flexible_attribute.pdu_data.rounds_names[0],
-                    "number_of_records": 0,
-                }
-            ],
-            [[True, "2021-05-02"]],
-        )
-        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
-        service.import_data()
-        self.assertEqual(periodic_data_update_upload.status, PeriodicDataUpdateUpload.Status.SUCCESSFUL)
-        self.assertEqual(periodic_data_update_upload.error_message, None)
-        self.individual.refresh_from_db()
-        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], True)
-        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
-
-    def test_import_data_date(self):
+    def test_read_row(self) -> None:
         flexible_attribute = self.date_attribute
         periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
             [
@@ -224,12 +304,120 @@ class TestPeriodicDataUpdateImportService(TestCase):
                     "number_of_records": 0,
                 }
             ],
-            [["1996-06-21", "2021-05-02"]],
+            [["-", "-"]],
         )
         service = PeriodicDataUpdateImportService(periodic_data_update_upload)
-        service.import_data()
-        self.assertEqual(periodic_data_update_upload.status, PeriodicDataUpdateUpload.Status.SUCCESSFUL)
-        self.assertEqual(periodic_data_update_upload.error_message, None)
-        self.individual.refresh_from_db()
+        service._open_workbook()
+        service._read_flexible_attributes()
+        service._read_rows()
+
+    def test_import_cleaned_data(self) -> None:
+        flexible_attribute = self.date_attribute
+        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+            [
+                {
+                    "field": flexible_attribute.name,
+                    "round": 1,
+                    "round_name": flexible_attribute.pdu_data.rounds_names[0],
+                    "number_of_records": 0,
+                }
+            ],
+            [["-", "-"]],
+        )
+        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service._open_workbook()
+        service._read_flexible_attributes()
+        cleaned_data = {
+            "individual__uuid": self.individual.id,
+            "individual_unicef_id": self.individual.unicef_id,
+            "first_name": "Debra",
+            "last_name": "Taylor",
+            "date_attribute__round_number": 2,
+            "date_attribute__round_name": "May",
+            "date_attribute__round_value": datetime.date(1996, 6, 21),
+            "date_attribute__collection_date": datetime.date(2021, 5, 2),
+        }
+        with self.assertRaisesMessage(
+            ValidationError,
+            f"Round number mismatch for field date_attribute and individual {self.individual.id} / {self.individual.unicef_id}",
+        ):
+            service._import_cleaned_data(cleaned_data)
+        not_existing_individual_id = uuid.uuid4()
+        cleaned_data = {
+            "individual__uuid": not_existing_individual_id,
+            "individual_unicef_id": self.individual.unicef_id,
+            "first_name": "Debra",
+            "last_name": "Taylor",
+            "date_attribute__round_number": 1,
+            "date_attribute__round_name": "May",
+            "date_attribute__round_value": datetime.date(1996, 6, 21),
+            "date_attribute__collection_date": datetime.date(2021, 5, 2),
+        }
+        with self.assertRaisesMessage(
+            ValidationError,
+            f"Individual with UUID {not_existing_individual_id} / {self.individual.unicef_id} not found",
+        ):
+            service._import_cleaned_data(cleaned_data)
+        self.individual.flex_fields = {
+            "date_attribute": {"1": {"value": "1996-06-21", "collection_date": "2021-05-02"}}
+        }
+        self.individual.save()
+        cleaned_data = {
+            "individual__uuid": self.individual.id,
+            "individual_unicef_id": self.individual.unicef_id,
+            "first_name": "Debra",
+            "last_name": "Taylor",
+            "date_attribute__round_number": 1,
+            "date_attribute__round_name": "May",
+            "date_attribute__round_value": datetime.date(1996, 6, 21),
+            "date_attribute__collection_date": datetime.date(2021, 5, 2),
+        }
+        with self.assertRaisesMessage(
+            ValidationError,
+            f"Value already exists for field date_attribute for round 1 and individual {self.individual.id} / {self.individual.unicef_id}",
+        ):
+            service._import_cleaned_data(cleaned_data)
+
+    def test_set_round_value(self) -> None:
+        flexible_attribute = self.date_attribute
+        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+            [
+                {
+                    "field": flexible_attribute.name,
+                    "round": 1,
+                    "round_name": flexible_attribute.pdu_data.rounds_names[0],
+                    "number_of_records": 0,
+                }
+            ],
+            [["-", "-"]],
+        )
+        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service._open_workbook()
+        service._read_flexible_attributes()
+        self.individual.flex_fields = {}
+        service._set_round_value(self.individual, flexible_attribute.name, 1, "1996-06-21", "2021-05-02")
         self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], "1996-06-21")
         self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
+
+    def test_get_form_field_for_value(self) -> None:
+        flexible_attribute = self.date_attribute
+        pdu_data = flexible_attribute.pdu_data
+        PeriodicFieldData.objects.filter(id=pdu_data.id).update(subtype="INVALID")
+        flexible_attribute.refresh_from_db()
+        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+            [
+                {
+                    "field": flexible_attribute.name,
+                    "round": 1,
+                    "round_name": flexible_attribute.pdu_data.rounds_names[0],
+                    "number_of_records": 0,
+                }
+            ],
+            [["-", "-"]],
+        )
+        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        with self.assertRaisesMessage(
+            ValidationError,
+            f"Invalid subtype for field {flexible_attribute.name}",
+        ):
+            service._get_form_field_for_value(flexible_attribute)

@@ -1,14 +1,18 @@
-from typing import Optional, Union, Any
+from typing import Any, Optional, Union
 
-import openpyxl
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import transaction
 
+import openpyxl
+
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate, PeriodicDataUpdateUpload
+from hct_mis_api.apps.periodic_data_update.models import (
+    PeriodicDataUpdateTemplate,
+    PeriodicDataUpdateUpload,
+)
 from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PeriodicDataUpdateExportTemplateService,
 )
@@ -27,7 +31,7 @@ class PeriodicDataUpdateImportService:
         self.periodic_data_update_template = self.periodic_data_update_upload.template
         self.file = self.periodic_data_update_upload.file
 
-    def import_data(self):
+    def import_data(self) -> None:
         try:
             with transaction.atomic():
                 self._open_workbook()
@@ -44,7 +48,7 @@ class PeriodicDataUpdateImportService:
             self.periodic_data_update_upload.save()
             return
 
-    def _open_workbook(self):
+    def _open_workbook(self) -> None:
         self.wb = openpyxl.load_workbook(self.file)
         self.ws_pdu = self.wb[PeriodicDataUpdateExportTemplateService.PDU_SHEET]
         self.ws_meta = self.wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
@@ -53,9 +57,14 @@ class PeriodicDataUpdateImportService:
 
     @classmethod
     def read_periodic_data_update_template_object(cls, file: File) -> PeriodicDataUpdateTemplate:
-        wb = openpyxl.load_workbook(file)
+        wb = openpyxl.load_workbook(file)  # type: ignore
         ws_meta = wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
-        periodic_data_update_template_id = wb.custom_doc_props[PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME]
+        try:
+            periodic_data_update_template_id = wb.custom_doc_props[
+                PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME
+            ]
+        except KeyError:
+            periodic_data_update_template_id = None
         if periodic_data_update_template_id:
             periodic_data_update_template_id = periodic_data_update_template_id.value
         if not periodic_data_update_template_id:
@@ -68,7 +77,7 @@ class PeriodicDataUpdateImportService:
                 periodic_data_update_template_id = int(periodic_data_update_template_id)
         except ValueError:
             raise ValidationError("Periodic Data Update Template ID must be a number")
-        if not isinstance(periodic_data_update_template_id, int):
+        if type(periodic_data_update_template_id) is not int:
             raise ValidationError("Periodic Data Update Template ID must be an integer")
 
         periodic_data_update_template = PeriodicDataUpdateTemplate.objects.filter(
@@ -78,26 +87,25 @@ class PeriodicDataUpdateImportService:
             raise ValidationError(f"Periodic Data Update Template with ID {periodic_data_update_template_id} not found")
         return periodic_data_update_template
 
-    def _read_flexible_attributes(self):
+    def _read_flexible_attributes(self) -> None:
         rounds_data = self.periodic_data_update_template.rounds_data
-        fields_name = [field["field"] for field in rounds_data]
-        fields_name = set(fields_name)
+        fields_name_list = [field["field"] for field in rounds_data]
+        fields_name = set(fields_name_list)
         flexible_attributes = FlexibleAttribute.objects.filter(name__in=fields_name, type=FlexibleAttribute.PDU)
         if len(flexible_attributes) != len(fields_name):
             raise ValidationError("Some fields are missing in the flexible attributes")
         self.flexible_attributes_dict = {field.name: field for field in flexible_attributes}
 
-    def _read_header(self):
+    def _read_header(self) -> list[str]:
         header = [cell.value for cell in self.ws_pdu[1]]
         return header
 
     def _read_rows(self) -> list[dict]:
         header = self._read_header()
         errors = []
-        fail_fast = False
         cleaned_data_list = []
         for row in self.ws_pdu.iter_rows(min_row=2, values_only=True):
-            cleaned_data = self._read_row(errors, fail_fast, header, row)
+            cleaned_data = self._read_row(errors, header, row)
             if not cleaned_data:
                 continue
             cleaned_data_list.append(cleaned_data)
@@ -105,21 +113,18 @@ class PeriodicDataUpdateImportService:
             raise ValidationError(errors)
         return cleaned_data_list
 
-    def _read_row(self, errors, fail_fast, header, row):
+    def _read_row(self, errors: list, header: list, row: list) -> Optional[dict]:
         row_empty_values = []
         for value in row:
             if value == "-":
                 row_empty_values.append(None)
             else:
                 row_empty_values.append(value)
-        data = dict(zip(header, row))
+        data = dict(zip(header, row_empty_values))
         form = self._build_form()(data=data)
         if not form.is_valid():
-            if fail_fast:
-                raise ValidationError(form.errors)
-            else:
-                errors.append(form.errors)
-                return None
+            errors.append(form.errors)
+            return None
         cleaned_data = form.cleaned_data
         return cleaned_data
 
@@ -130,12 +135,13 @@ class PeriodicDataUpdateImportService:
             individuals.append(individual)
         Individual.objects.bulk_update(individuals, ["flex_fields"])
 
-    def _import_cleaned_data(self, cleaned_data: dict):
+    def _import_cleaned_data(self, cleaned_data: dict) -> Individual:
+        individual_uuid = cleaned_data["individual__uuid"]
+        individual_unicef_id = cleaned_data["individual_unicef_id"]
+        individual = Individual.objects.filter(id=individual_uuid).first()
         for round in self.periodic_data_update_template.rounds_data:
             field_name = round["field"]
             round_number = round["round"]
-            individual_uuid = cleaned_data["individual__uuid"]
-            individual_unicef_id = cleaned_data["individual_unicef_id"]
             round_number_from_xlsx = cleaned_data[f"{field_name}__round_number"]
             value_from_xlsx = cleaned_data[f"{field_name}__round_value"]
             collection_date_from_xlsx = cleaned_data[f"{field_name}__collection_date"]
@@ -145,7 +151,6 @@ class PeriodicDataUpdateImportService:
                 raise ValidationError(
                     f"Round number mismatch for field {field_name} and individual {individual_uuid} / {individual_unicef_id}"
                 )
-            individual = Individual.objects.filter(id=individual_uuid).first()
             if not individual:
                 raise ValidationError(f"Individual with UUID {individual_uuid} / {individual_unicef_id} not found")
             current_value = self._get_round_value(individual, field_name, round_number)
@@ -154,7 +159,7 @@ class PeriodicDataUpdateImportService:
                     f"Value already exists for field {field_name} for round {round_number} and individual {individual_uuid} / {individual_unicef_id}"
                 )
             self._set_round_value(individual, field_name, round_number, value_from_xlsx, collection_date_from_xlsx)
-            return individual
+        return individual
 
     def _get_round_value(
         self, individual: Individual, pdu_field_name: str, round_number: int
@@ -180,7 +185,7 @@ class PeriodicDataUpdateImportService:
         round_data["value"] = value
         round_data["collection_date"] = collection_date
 
-    def _build_form(self):
+    def _build_form(self) -> type[forms.Form]:
         form_fields_dict: dict[str, forms.Field] = {}
         for round in self.periodic_data_update_template.rounds_data:
             flexible_attribute = self.flexible_attributes_dict.get(round["field"])
@@ -193,7 +198,7 @@ class PeriodicDataUpdateImportService:
 
         return type("PeriodicDataUpdateForm", (PeriodicDataUpdateBaseForm,), form_fields_dict)
 
-    def _get_form_field_for_value(self, flexible_attribute: FlexibleAttribute):
+    def _get_form_field_for_value(self, flexible_attribute: FlexibleAttribute) -> forms.Field:
         if flexible_attribute.pdu_data.subtype == PeriodicFieldData.STRING:
             return forms.CharField(required=False)
         elif flexible_attribute.pdu_data.subtype == PeriodicFieldData.DECIMAL:
@@ -202,3 +207,4 @@ class PeriodicDataUpdateImportService:
             return forms.BooleanField(required=False)
         elif flexible_attribute.pdu_data.subtype == PeriodicFieldData.DATE:
             return forms.DateField(required=False)
+        raise ValidationError(f"Invalid subtype for field {flexible_attribute.name}")
