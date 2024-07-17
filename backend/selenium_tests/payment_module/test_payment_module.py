@@ -116,8 +116,7 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
     payment_plan = PaymentPlan.objects.update_or_create(
         business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
         target_population=tp,
-        start_date=datetime.now(),
-        end_date=datetime.now() + relativedelta(days=30),
+        program_cycle=tp.program.cycles.first(),
         currency="USD",
         dispersion_start_date=datetime.now(),
         dispersion_end_date=datetime.now() + relativedelta(days=14),
