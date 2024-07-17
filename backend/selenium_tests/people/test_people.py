@@ -175,3 +175,12 @@ class TestSmokePeople:
         assert pagePeopleDetails.getLabelImportName().text
         assert pagePeopleDetails.getLabelRegistrationDate().text
         assert pagePeopleDetails.getLabelUserName().text
+
+    def test__people_happy_path(
+        self,
+        add_people: None,
+        pagePeople: People,
+        pagePeopleDetails: PeopleDetails,
+    ) -> None:
+        pagePeople.selectGlobalProgramFilter("Worker Program").click()
+        pagePeople.getNavPeople().click()
