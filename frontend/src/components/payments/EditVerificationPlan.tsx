@@ -276,7 +276,7 @@ export const EditVerificationPlan = ({
               color="primary"
               onClick={() => setOpen(true)}
               startIcon={<EditIcon />}
-              data-cy="button-new-plan"
+              data-cy="button-edit-plan"
               disabled={!isActiveProgram}
             >
               {t('Edit')}

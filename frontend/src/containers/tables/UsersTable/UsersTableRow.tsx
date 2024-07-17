@@ -41,6 +41,7 @@ export const UsersTableRow = ({
       <TableRow key={user.id}>
         <TableCell>
           <IconButton
+            data-cy="arrow-down"
             aria-label="expand row"
             size="medium"
             onClick={() => setOpen(!open)}
@@ -67,18 +68,18 @@ export const UsersTableRow = ({
         </TableCell>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={2}>
           <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box margin={1}>
+            <Box margin={1} data-cy="country-role">
               <GreyText>Country / Role</GreyText>
             </Box>
-            <Box margin={1}>
+            <Box margin={1} data-cy="mapped-country-role">
               {mappedRoles.length ? mappedRoles : 'No roles assigned.'}
             </Box>
             {mappedPartnerRoles.length > 0 && (
               <>
-                <Box margin={1}>
+                <Box margin={1} data-cy="partner-role">
                   <GreyText>Partner Roles</GreyText>
                 </Box>
-                <Box margin={1}>{mappedPartnerRoles}</Box>
+                <Box margin={1} data-cy="mapped-partner-role">{mappedPartnerRoles}</Box>
               </>
             )}
           </Collapse>

@@ -77,6 +77,9 @@ from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
     ConcurrencyModel,
+    MergedManager,
+    MergeStatusModel,
+    PendingManager,
     SignatureMixin,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
@@ -250,6 +253,10 @@ class GenericPayment(TimeStampedUUIDModel):
     STATUS_FORCE_FAILED = "Force failed"
     STATUS_DISTRIBUTION_PARTIAL = "Partially Distributed"
     STATUS_PENDING = "Pending"
+    # Payment Gateway statuses
+    STATUS_SENT_TO_PG = "Sent to Payment Gateway"
+    STATUS_SENT_TO_FSP = "Sent to FSP"
+    STATUS_MANUALLY_CANCELLED = "Manually Cancelled"
 
     STATUS_CHOICE = (
         (STATUS_DISTRIBUTION_SUCCESS, _("Distribution Successful")),  # Delivered Fully
@@ -259,6 +266,9 @@ class GenericPayment(TimeStampedUUIDModel):
         (STATUS_FORCE_FAILED, _("Force failed")),  # Force Failed
         (STATUS_DISTRIBUTION_PARTIAL, _("Partially Distributed")),  # Delivered Partially
         (STATUS_PENDING, _("Pending")),  # Pending
+        (STATUS_SENT_TO_PG, _("Sent to Payment Gateway")),
+        (STATUS_SENT_TO_FSP, _("Sent to FSP")),
+        (STATUS_MANUALLY_CANCELLED, _("Manually Cancelled")),
     )
 
     ALLOW_CREATE_VERIFICATION = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS, STATUS_DISTRIBUTION_PARTIAL)
@@ -908,8 +918,17 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
     @property
     def is_reconciled(self) -> bool:
         # TODO what in case of active grievance tickets?
+        if not self.eligible_payments.exists():
+            return False
+
         return (
-            self.eligible_payments.exclude(status=GenericPayment.STATUS_PENDING).count()
+            self.eligible_payments.exclude(
+                status__in=[
+                    GenericPayment.STATUS_PENDING,
+                    GenericPayment.STATUS_SENT_TO_PG,
+                    GenericPayment.STATUS_SENT_TO_FSP,
+                ]
+            ).count()
             == self.eligible_payments.count()
         )
 
@@ -2165,7 +2184,7 @@ class PaymentHouseholdSnapshot(TimeStampedUUIDModel):
     payment = models.OneToOneField(Payment, on_delete=models.CASCADE, related_name="household_snapshot")
 
 
-class DeliveryMechanismData(TimeStampedUUIDModel, SignatureMixin):
+class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
     VALIDATION_ERROR_DATA_NOT_UNIQUE = _("Payment data not unique across Program")
     VALIDATION_ERROR_MISSING_DATA = _("Missing required payment data")
 
@@ -2193,7 +2212,8 @@ class DeliveryMechanismData(TimeStampedUUIDModel, SignatureMixin):
         "delivery_mechanism",
     )
 
-    objects = models.Manager()
+    objects = MergedManager()
+    all_objects = models.Manager()
 
     def __str__(self) -> str:
         return f"[{self.id}] {self.individual} - {self.delivery_mechanism}"
@@ -2257,7 +2277,8 @@ class DeliveryMechanismData(TimeStampedUUIDModel, SignatureMixin):
                 sha256.update(str(value).encode("utf-8"))
 
             unique_key = sha256.hexdigest()
-            possible_duplicates = self.__class__.objects.filter(
+            possible_duplicates = self.__class__.all_objects.filter(
+                rdi_merge_status=MergeStatusModel.MERGED,
                 is_valid=True,
                 unique_key__isnull=False,
                 unique_key=unique_key,
@@ -2395,3 +2416,12 @@ class DeliveryMechanismData(TimeStampedUUIDModel, SignatureMixin):
                 }
                 grievance_ticket.individual_data_update_ticket_details.save()
                 grievance_ticket.save()
+
+
+class PendingDeliveryMechanismData(DeliveryMechanismData):
+    objects: PendingManager = PendingManager()  # type: ignore
+
+    class Meta:
+        proxy = True
+        verbose_name = "Imported Delivery Mechanism Data"
+        verbose_name_plural = "Imported Delivery Mechanism Datas"
