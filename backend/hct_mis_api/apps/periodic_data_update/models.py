@@ -102,3 +102,4 @@ class PeriodicDataUpdateUpload(TimeStampedModel):
         blank=True,
     )
     file = models.FileField()
+    error_message = models.TextField(null=True, blank=True)

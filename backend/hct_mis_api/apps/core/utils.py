@@ -1,11 +1,13 @@
 import functools
 import io
 import itertools
+import json
 import logging
 import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
+from decimal import Decimal
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -915,3 +917,11 @@ class AutoCompleteFilterTemp(AutoCompleteFilter):
             return [str(obj.first()) or ""]
 
         return []
+
+class FlexFieldsEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, date):
+            return obj.isoformat()
+        if isinstance(obj, Decimal):
+            return str(obj)
+        return super().default(obj)
