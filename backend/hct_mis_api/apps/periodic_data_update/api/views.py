@@ -14,7 +14,7 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.api.permissions import PDUViewListAndDetailsPermission
+from hct_mis_api.apps.account.api.permissions import PDUViewListAndDetailsPermission, PDUUploadPermission
 from hct_mis_api.apps.core.api.mixins import ActionMixin, BusinessAreaProgramMixin
 from hct_mis_api.apps.periodic_data_update.api.caches import (
     PDUTemplateKeyConstructor,
@@ -99,11 +99,11 @@ class PeriodicDataUpdateUploadViewSet(
 ):
     serializer_classes_by_action = {
         "list": PeriodicDataUpdateUploadListSerializer,
-        # 'upload': PeriodicDataUpdateUploadSerializer,
+        'upload': PeriodicDataUpdateUploadSerializer,
     }
     permission_classes_by_action = {
         "list": [PDUViewListAndDetailsPermission],
-        # 'upload': [PDUUploadPermission],
+        "upload": [PDUUploadPermission],
     }
     filter_backends = (OrderingFilter,)
 
@@ -117,6 +117,6 @@ class PeriodicDataUpdateUploadViewSet(
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
-    @action(detail=True, methods=["get"])
+    @action(detail=True, methods=["post"])
     def upload(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         pass  # celery task to upload the file

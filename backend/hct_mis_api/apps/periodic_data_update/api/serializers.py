@@ -43,3 +43,9 @@ class PeriodicDataUpdateUploadListSerializer(serializers.ModelSerializer):
             "created_by",
             "status",
         )
+
+
+class PeriodicDataUpdateUploadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PeriodicDataUpdateUpload
+        fields = ("file",)
