@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from django.db import transaction
@@ -6,6 +7,12 @@ import pytest
 from dateutil.relativedelta import relativedelta
 from page_object.people.people import People
 
+from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory
+from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
+from hct_mis_api.apps.payment.models import GenericPayment
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.household.fixtures import (
@@ -17,6 +24,8 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from selenium_tests.page_object.people.people_details import PeopleDetails
 
+from hct_mis_api.apps.payment.models import PaymentRecord
+
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
@@ -26,7 +35,7 @@ def social_worker_program() -> Program:
 
 
 @pytest.fixture
-def add_people(social_worker_program: Program) -> None:
+def add_people(social_worker_program: Program) -> []:
     ba = social_worker_program.business_area
     with transaction.atomic():
         household, individuals = create_household(
@@ -42,16 +51,10 @@ def add_people(social_worker_program: Program) -> None:
         )
         individual = individuals[0]
         create_individual_document(individual)
-    return individual
+    return [individual, household]
 
 @pytest.fixture
-def add_people_with_payment_record(add_people: None) -> None:
-    from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
-    from hct_mis_api.apps.account.models import User
-    from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
-    from hct_mis_api.apps.payment.fixtures import CashPlanFactory
-    from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
-    from hct_mis_api.apps.payment.models import GenericPayment
+def add_people_with_payment_record(add_people: []) -> PaymentRecord:
     program = Program.objects.filter(name="Worker Program").first()
 
     cash_plan = CashPlanFactory(
@@ -63,7 +66,6 @@ def add_people_with_payment_record(add_people: None) -> None:
     )
 
     targeting_criteria = TargetingCriteriaFactory()
-    targeting_criteria.individual_ids = add_people
 
     target_population = TargetPopulationFactory(
         created_by=User.objects.first(),
@@ -71,6 +73,7 @@ def add_people_with_payment_record(add_people: None) -> None:
         business_area=BusinessArea.objects.first(),
     )
     payment_record = PaymentRecordFactory(
+        household=add_people[1],
         parent=cash_plan,
         target_population=target_population,
         entitlement_quantity="21.36",
@@ -78,6 +81,9 @@ def add_people_with_payment_record(add_people: None) -> None:
         currency="PLN",
         status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
     )
+    add_people[1].total_cash_received_usd = "21.36"
+    add_people[1].save()
+    return payment_record
 
 
 def get_program_with_dct_type_and_name(
@@ -214,14 +220,15 @@ class TestSmokePeople:
 
     def test_people_happy_path(
         self,
-        add_people_with_payment_record: None,
+        add_people_with_payment_record: PaymentRecord,
         pagePeople: People,
         pagePeopleDetails: PeopleDetails,
     ) -> None:
         pagePeople.selectGlobalProgramFilter("Worker Program").click()
         pagePeople.getNavPeople().click()
         pagePeople.getIndividualTableRow(0).click()
-        pagePeopleDetails.getLabelTotalCashReceived()
-        pagePeople.screenshot("2", delay_sec=2)
-
-        pagePeopleDetails.getRows()[0].click()
+        assert "21.36" in pagePeopleDetails.getLabelTotalCashReceived().text
+        assert 1 == len(pagePeopleDetails.getRows())
+        assert "21.36" in pagePeopleDetails.getRows()[0].text
+        assert "DELIVERED FULLY" in pagePeopleDetails.getRows()[0].text
+        assert add_people_with_payment_record.unicef_id in pagePeopleDetails.getRows()[0].text
