@@ -34,7 +34,6 @@ from hct_mis_api.conftest import disabled_locally_test
 
 @disabled_locally_test
 class TestBatchDeduplication(BaseElasticSearchTestCase):
-    databases = {"default", "registration_datahub"}
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
@@ -302,7 +301,6 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
 
 @disabled_locally_test
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
-    databases = {"default", "registration_datahub"}
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod

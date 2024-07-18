@@ -41,7 +41,7 @@ from selenium_tests.page_object.programme_details.programme_details import (
     ProgrammeDetails,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True, databases=["registration_datahub", "default"])
+pytestmark = pytest.mark.django_db(transaction=True)
 
 
 @pytest.fixture

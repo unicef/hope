@@ -11,7 +11,6 @@ from hct_mis_api.conftest import disabled_locally_test
 
 @disabled_locally_test
 class TestLoadXML(BaseElasticSearchTestCase):
-    databases = {"default", "registration_datahub"}
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     def test_execute(self) -> None:

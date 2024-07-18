@@ -54,7 +54,6 @@ class Command(BaseCommand):
         call_command("flush", "--noinput", database="cash_assist_datahub_mis")
         call_command("flush", "--noinput", database="cash_assist_datahub_ca")
         call_command("flush", "--noinput", database="cash_assist_datahub_erp")
-        call_command("flush", "--noinput", database="registration_datahub")
 
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json")
@@ -65,12 +64,6 @@ class Command(BaseCommand):
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/documenttype.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/accountability/fixtures/data.json")
-
-        call_command(
-            "loaddata",
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/fixtures/data.json",
-            database="registration_datahub",
-        )
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/steficon/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/aurora/fixtures/data.json")
 

@@ -54,7 +54,6 @@ class TestAdminSite(WebTest):
         "cash_assist_datahub_ca",
         "cash_assist_datahub_erp",
         "cash_assist_datahub_mis",
-        "registration_datahub",
     ]
 
     @classmethod

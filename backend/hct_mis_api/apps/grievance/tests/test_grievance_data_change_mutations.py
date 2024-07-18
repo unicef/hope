@@ -40,8 +40,6 @@ from hct_mis_api.apps.program.models import Program
 
 
 class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCase):
-    databases = {"default", "registration_datahub"}
-
     CREATE_DATA_CHANGE_GRIEVANCE_MUTATION = """
     mutation createGrievanceTicket($input:CreateGrievanceTicketInput!){
       createGrievanceTicket(input:$input){

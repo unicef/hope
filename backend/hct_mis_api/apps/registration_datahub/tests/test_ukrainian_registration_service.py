@@ -31,10 +31,6 @@ from hct_mis_api.aurora.services.ukraine_flex_registration_service import (
 
 
 class BaseTestUkrainianRegistrationService(TestCase):
-    databases = {
-        "default",
-        "registration_datahub",
-    }
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod

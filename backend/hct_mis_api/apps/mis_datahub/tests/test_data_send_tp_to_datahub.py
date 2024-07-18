@@ -30,7 +30,7 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class TestDataSendTpToDatahub(TestCase):
-    databases = {"default", "registration_datahub", "cash_assist_datahub_mis"}
+    databases = {"default", "cash_assist_datahub_mis"}
 
     @staticmethod
     def _pre_test_commands() -> None:

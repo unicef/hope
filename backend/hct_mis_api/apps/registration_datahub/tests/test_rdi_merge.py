@@ -77,7 +77,6 @@ def capture_on_commit_callbacks(
 
 
 class TestRdiMergeTask(BaseElasticSearchTestCase):
-    databases = {"default", "registration_datahub"}
     fixtures = [
         f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
         f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json",
@@ -592,8 +591,6 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
 
 
 class TestRdiMergeTaskDeliveryMechanismData(TestCase):
-    databases = {"default", "registration_datahub"}
-
     fixtures = [
         f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
         f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json",

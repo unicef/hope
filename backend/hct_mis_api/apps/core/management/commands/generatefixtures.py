@@ -209,7 +209,6 @@ class Command(BaseCommand):
             call_command("flush", "--noinput", database="cash_assist_datahub_mis")
             call_command("flush", "--noinput", database="cash_assist_datahub_ca")
             call_command("flush", "--noinput", database="cash_assist_datahub_erp")
-            call_command("flush", "--noinput", database="registration_datahub")
             call_command(
                 "loaddata",
                 "hct_mis_api/apps/account/fixtures/superuser.json",
