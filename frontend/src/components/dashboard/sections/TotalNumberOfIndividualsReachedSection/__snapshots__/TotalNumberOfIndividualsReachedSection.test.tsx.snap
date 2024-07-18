@@ -16,6 +16,7 @@ exports[`components/dashboard/TotalNumberOfIndividualsReachedSection should rend
     >
       <div
         class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+        data-cy="total-number-of-individuals-reached"
       >
         <div
           class="sc-qZrbh iPyAyQ"

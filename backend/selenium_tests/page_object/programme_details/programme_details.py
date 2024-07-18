@@ -24,6 +24,7 @@ class ProgrammeDetails(BaseComponents):
     buttonEditProgram = 'a[data-cy="button-edit-program"]'
     buttonActivateProgram = 'button[data-cy="button-activate-program"]'
     labelProgrammeCode = 'div[data-cy="label-Programme Code"]'
+    buttonFinishProgram = 'button[data-cy="button-finish-program"]'
 
     def getLabelPartnerName(self) -> WebElement:
         return self.wait_for(self.labelPartnerName)
@@ -87,3 +88,11 @@ class ProgrammeDetails(BaseComponents):
 
     def getLabelProgrammeCode(self) -> WebElement:
         return self.wait_for(self.labelProgrammeCode)
+
+    def getButtonFinishProgram(self) -> WebElement:
+        return self.wait_for(self.buttonFinishProgram)
+
+    def clickButtonFinishProgramPopup(self) -> None:
+        self.wait_for('[data-cy="dialog-actions-container"]')
+        self.get_elements(self.buttonFinishProgram)[1].click()
+        self.wait_for_disappear('[data-cy="dialog-actions-container"]')

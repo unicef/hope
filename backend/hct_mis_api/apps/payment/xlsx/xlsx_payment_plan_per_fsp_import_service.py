@@ -18,6 +18,7 @@ from hct_mis_api.apps.payment.services.handle_total_cash_in_households import (
 )
 from hct_mis_api.apps.payment.utils import (
     calculate_counts,
+    get_payment_delivered_quantity_status_and_value,
     get_quantity_in_usd,
     to_decimal,
 )
@@ -244,30 +245,14 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
     def _get_delivered_quantity_status_and_value(
         self, delivered_quantity: Union[int, float, str], entitlement_quantity: Decimal, payment_id: str
     ) -> Tuple[str, Optional[Decimal]]:
-        """
-        * Fully Delivered (entitled quantity = delivered quantity) [int, float, str]
-        * Partially Delivered (entitled quantity > delivered quantity > 0) [int, float, str]
-        * Not Delivered (0 = delivered quantity) [int, float, str]
-        * Unsuccessful (failed at the delivery processing level) [-1.0]
-        """
-        delivered_quantity_decimal: Decimal = to_decimal(delivered_quantity)  # type: ignore
-
-        if delivered_quantity_decimal < 0:
-            return Payment.STATUS_ERROR, None
-
-        elif delivered_quantity_decimal == 0:
-            return Payment.STATUS_NOT_DISTRIBUTED, delivered_quantity_decimal
-
-        elif delivered_quantity_decimal < entitlement_quantity:
-            return Payment.STATUS_DISTRIBUTION_PARTIAL, delivered_quantity_decimal
-
-        elif delivered_quantity_decimal == entitlement_quantity:
-            return Payment.STATUS_DISTRIBUTION_SUCCESS, delivered_quantity_decimal
-
-        else:
+        try:
+            status, quantity = get_payment_delivered_quantity_status_and_value(delivered_quantity, entitlement_quantity)
+        except Exception:
             raise self.XlsxPaymentPlanImportPerFspServiceException(
                 f"Invalid delivered_quantity {delivered_quantity} provided for payment_id {payment_id}"
             )
+
+        return status, quantity
 
     def _import_row(self, row: Row, exchange_rate: float) -> None:
         payment_id = row[self.xlsx_headers.index("payment_id")].value

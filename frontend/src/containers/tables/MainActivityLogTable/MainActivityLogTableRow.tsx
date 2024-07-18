@@ -115,29 +115,31 @@ export function MainActivityLogTableRow({
   const { length } = keys;
   if (length <= 1) {
     return (
-      <Row role="checkbox">
-        <Cell weight={headCells[0].weight}>
+      <Row role="checkbox" data-cy="log-row-single-change">
+        <Cell weight={headCells[0].weight} data-cy="timestamp-cell">
           {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
         </Cell>
-        <Cell weight={headCells[1].weight}>
+        <Cell weight={headCells[1].weight} data-cy="user-cell">
           {logEntry.user
             ? `${logEntry.user.firstName} ${logEntry.user.lastName}`
             : 'System'}
         </Cell>
-        <Cell weight={headCells[2].weight}>{logEntry.contentType.name}</Cell>
-        <Cell weight={headCells[3].weight}>
+        <Cell weight={headCells[2].weight} data-cy="content-type-cell">
+          {logEntry.contentType.name}
+        </Cell>
+        <Cell weight={headCells[3].weight} data-cy="object-representation-cell">
           <ObjectRepresentations logEntry={logEntry} />
         </Cell>
-        <Cell weight={headCells[4].weight}>
+        <Cell weight={headCells[4].weight} data-cy="action-cell">
           {actionChoicesDict[logEntry.action]}
         </Cell>
-        <Cell weight={headCells[5].weight}>
+        <Cell weight={headCells[5].weight} data-cy="change-key-cell">
           <Dashable>{snakeToFieldReadable(keys[0])}</Dashable>
         </Cell>
-        <Cell weight={headCells[6].weight}>
+        <Cell weight={headCells[6].weight} data-cy="from-value-cell">
           <Dashable>{changes[keys[0]]?.from}</Dashable>
         </Cell>
-        <Cell weight={headCells[7].weight}>
+        <Cell weight={headCells[7].weight} data-cy="to-value-cell">
           <Dashable>{changes[keys[0]]?.to}</Dashable>
         </Cell>
         <ButtonPlaceHolder />
@@ -146,50 +148,59 @@ export function MainActivityLogTableRow({
   }
   return (
     <>
-      <Row onClick={() => setExpanded(!expanded)} hover>
-        <Cell weight={headCells[0].weight}>
+      <Row
+        onClick={() => setExpanded(!expanded)}
+        hover
+        data-cy="log-row-multiple-changes"
+      >
+        <Cell weight={headCells[0].weight} data-cy="timestamp-cell">
           {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
         </Cell>
-        <Cell weight={headCells[1].weight}>
+        <Cell weight={headCells[1].weight} data-cy="user-cell">
           {logEntry.user
             ? `${logEntry.user.firstName} ${logEntry.user.lastName}`
             : 'System'}
         </Cell>
-        <Cell weight={headCells[2].weight}>{logEntry.contentType.name}</Cell>
-        <Cell weight={headCells[3].weight}>
+        <Cell weight={headCells[2].weight} data-cy="content-type-cell">
+          {logEntry.contentType.name}
+        </Cell>
+        <Cell weight={headCells[3].weight} data-cy="object-representation-cell">
           <ObjectRepresentations logEntry={logEntry} />
         </Cell>
-        <Cell weight={headCells[4].weight}>
+        <Cell weight={headCells[4].weight} data-cy="action-cell">
           {actionChoicesDict[logEntry.action]}
         </Cell>
-        <Cell weight={headCells[5].weight}>Multiple</Cell>
+        <Cell weight={headCells[5].weight} data-cy="changes-cell">
+          Multiple
+        </Cell>
         <Cell />
         <Cell />
-        <ButtonContainer>
+        <ButtonContainer data-cy="expand-collapse-button-container">
           <StyledIconButton
             expanded={expanded}
             onClick={() => setExpanded(!expanded)}
+            data-cy="expand-collapse-button"
           >
             <ExpandMore />
           </StyledIconButton>
         </ButtonContainer>
       </Row>
 
-      <CollapseContainer in={expanded}>
+      <CollapseContainer in={expanded} data-cy="collapse-container">
         {keys.map((key) => (
-          <Row key={logEntry.timestamp}>
+          <Row key={logEntry.timestamp} data-cy={`detail-row-${key}`}>
             <Cell weight={headCells[0].weight} />
             <Cell weight={headCells[1].weight} />
             <Cell weight={headCells[2].weight} />
             <Cell weight={headCells[3].weight} />
             <Cell weight={headCells[4].weight} />
-            <Cell weight={headCells[5].weight}>
+            <Cell weight={headCells[5].weight} data-cy="change-key-cell">
               {snakeToFieldReadable(key)}
             </Cell>
-            <Cell weight={headCells[6].weight}>
+            <Cell weight={headCells[6].weight} data-cy="from-value-cell">
               <Dashable>{changes[key].from}</Dashable>
             </Cell>
-            <Cell weight={headCells[7].weight}>
+            <Cell weight={headCells[7].weight} data-cy="to-value-cell">
               <Dashable>{changes[key].to}</Dashable>
             </Cell>
             <ButtonPlaceHolder />
