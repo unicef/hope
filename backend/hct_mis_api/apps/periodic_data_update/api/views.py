@@ -23,7 +23,7 @@ from hct_mis_api.apps.periodic_data_update.api.caches import (
 from hct_mis_api.apps.periodic_data_update.api.serializers import (
     PeriodicDataUpdateTemplateDetailSerializer,
     PeriodicDataUpdateTemplateListSerializer,
-    PeriodicDataUpdateUploadListSerializer,
+    PeriodicDataUpdateUploadListSerializer, PeriodicDataUpdateUploadSerializer,
 )
 from hct_mis_api.apps.periodic_data_update.models import (
     PeriodicDataUpdateTemplate,
@@ -119,4 +119,24 @@ class PeriodicDataUpdateUploadViewSet(
 
     @action(detail=True, methods=["post"])
     def upload(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        pass  # celery task to upload the file
+        serializer = self.get_serializer(data=request.data, )
+        if serializer.is_valid():
+            # Saving the instance to get a record in the database
+            upload_instance = serializer.save()
+
+            # Assuming you have a Celery task set up to handle the file processing
+            # You can pass necessary parameters to it
+            task = process_upload.delay(upload_instance.id)
+
+            # Return a response with the upload instance details and task id
+            return Response(
+                data={
+                    'id': upload_instance.id,
+                    'task_id': task.id  # Celery task ID if you want to track the task
+                },
+                status=status.HTTP_202_ACCEPTED
+            )
+        else:
+            # If the data is not valid, return an error response
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
