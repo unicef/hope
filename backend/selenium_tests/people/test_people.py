@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 from django.db import transaction
 
@@ -33,7 +34,7 @@ def social_worker_program() -> Program:
 
 
 @pytest.fixture
-def add_people(social_worker_program: Program) -> []:
+def add_people(social_worker_program: Program) -> List:
     ba = social_worker_program.business_area
     with transaction.atomic():
         household, individuals = create_household(
@@ -49,11 +50,11 @@ def add_people(social_worker_program: Program) -> []:
         )
         individual = individuals[0]
         create_individual_document(individual)
-    return [individual, household]
+    yield [individual, household]
 
 
 @pytest.fixture
-def add_people_with_payment_record(add_people: []) -> PaymentRecord:
+def add_people_with_payment_record(add_people: List) -> PaymentRecord:
     program = Program.objects.filter(name="Worker Program").first()
 
     cash_plan = CashPlanFactory(
