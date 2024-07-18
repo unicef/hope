@@ -178,6 +178,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             candidate list frozen state (approved)""",
         on_delete=models.SET_NULL,
     )
+    program_cycle = models.ForeignKey("program.ProgramCycle", on_delete=models.CASCADE, related_name="target_populations")
     targeting_criteria = models.OneToOneField(
         "TargetingCriteria",
         blank=True,

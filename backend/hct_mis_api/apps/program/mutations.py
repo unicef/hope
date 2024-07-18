@@ -137,7 +137,6 @@ class UpdateProgram(
         partner = info.context.user.partner
         partner_access = program_data.get("partner_access", program.partner_access)
         programme_code = program_data.get("programme_code", "")
-        finish_all_program_cycles = False
 
         if programme_code:
             programme_code = programme_code.upper()
@@ -150,7 +149,10 @@ class UpdateProgram(
                 cls.has_permission(info, Permissions.PROGRAMME_ACTIVATE, business_area)
             elif status_to_set == Program.FINISHED:
                 cls.has_permission(info, Permissions.PROGRAMME_FINISH, business_area)
-                finish_all_program_cycles = True
+
+                # check if all cycles are finished
+                if program.cycles.exclude(status=ProgramCycle.FINISHED).count() > 0:
+                    raise ValidationError("You cannot finish program if program has not finished cycles")
 
         if status_to_set not in [Program.ACTIVE, Program.FINISHED]:
             cls.validate_partners_data(
@@ -197,9 +199,6 @@ class UpdateProgram(
             partners_data = create_program_partner_access(partners_data, program, partner_access)
             remove_program_partner_access(partners_data, program)
         program.save()
-
-        if finish_all_program_cycles:
-            program.cycles.update(status=ProgramCycle.FINISHED)
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return UpdateProgram(program=program)
@@ -293,7 +292,7 @@ class CreateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
         )
 
         ProgramCycle.objects.create(
-            name=program_cycle_data["name"],
+            title=program_cycle_data["title"],
             program=program,
             start_date=program_cycle_data["start_date"],
             end_date=program_cycle_data.get("end_date"),

@@ -139,14 +139,14 @@ class ProgramCycleValidator(CommonValidator):
         if raise_error:
             raise ValidationError("Programme Cycles' timeframes must not overlap.")
 
-    @classmethod
-    def validate_program_cycle_name(cls, *args: Any, **kwargs: Any) -> None:
-        # A user can’t leave the Program Cycle name empty.
-        program = kwargs.get("program")
-        program_cycle = kwargs.get("program_cycle")
-        cycles = program.cycles.exclude(id=program_cycle.pk) if program_cycle else program.cycles.all()
-        if cycles.filter(name=kwargs["name"]).exists():
-            raise ValidationError("Programme Cycles' name should be unique.")
+    # @classmethod
+    # def validate_program_cycle_name(cls, *args: Any, **kwargs: Any) -> None:
+    #     # A user can’t leave the Program Cycle name empty.
+    #     program = kwargs.get("program")
+    #     program_cycle = kwargs.get("program_cycle")
+    #     cycles = program.cycles.exclude(id=program_cycle.pk) if program_cycle else program.cycles.all()
+    #     if cycles.filter(name=kwargs["name"]).exists():
+    #         raise ValidationError("Programme Cycles' name should be unique.")
 
     @classmethod
     def validate_program_cycle_update_name_and_dates(cls, *args: Any, **kwargs: Any) -> None:
@@ -172,3 +172,6 @@ class ProgramCycleDeletionValidator(BaseValidator):
 
         if program_cycle.status != ProgramCycle.DRAFT:
             raise ValidationError("Only Draft Programme Cycle can be deleted.")
+
+        if program_cycle.program.cycles.count() == 1:
+            raise ValidationError("Don’t allow to delete last Cycle.")
