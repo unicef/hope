@@ -143,6 +143,36 @@ class TestSmokeGrievanceTickets:
 
 @pytest.mark.usefixtures("login")
 class TestGrievanceTicketsHappyPath:
+
+    def test_grievance_tickets_create_new_ticket_referral(
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+    ) -> None:
+        pageGrievanceTickets.getNavGrievance().click()
+        assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
+        pageGrievanceTickets.getButtonNewTicket().click()
+        pageGrievanceNewTicket.getSelectCategory().click()
+        pageGrievanceNewTicket.select_option_by_name("Referral")
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getHouseholdTab()
+        assert pageGrievanceNewTicket.waitForNoResults()
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getReceivedConsent().click()
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getDescription().send_keys("Happy path test 1234!")
+        pageGrievanceNewTicket.getButtonNext().click()
+        assert "Happy path test 1234!" in pageGrievanceDetailsPage.getTicketDescription().text
+        assert "Referral" in pageGrievanceDetailsPage.getTicketCategory().text
+        assert "New" in pageGrievanceDetailsPage.getTicketStatus().text
+        assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
+        assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
+
+
+@pytest.mark.usefixtures("login")
+class TestGrievanceTickets:
+
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -150,8 +180,7 @@ class TestGrievanceTicketsHappyPath:
             pytest.param({"category": "Grievance Complaint", "type": "Other Complaint"}, id="Grievance Complaint"),
         ],
     )
-    @pytest.mark.skip(reason="ToDo")
-    def test_grievance_tickets_create_new_ticket(
+    def test_grievance_tickets_create_new_tickets(
         self,
         pageGrievanceTickets: GrievanceTickets,
         pageGrievanceNewTicket: NewTicket,
@@ -176,31 +205,6 @@ class TestGrievanceTicketsHappyPath:
         assert "Happy path test 1234!" in pageGrievanceDetailsPage.getTicketDescription().text
         assert test_data["category"] in pageGrievanceDetailsPage.getTicketCategory().text
         assert test_data["type"] in pageGrievanceDetailsPage.getLabelIssueType().text
-        assert "New" in pageGrievanceDetailsPage.getTicketStatus().text
-        assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
-        assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
-
-    def test_grievance_tickets_create_new_ticket_referral(
-        self,
-        pageGrievanceTickets: GrievanceTickets,
-        pageGrievanceNewTicket: NewTicket,
-        pageGrievanceDetailsPage: GrievanceDetailsPage,
-    ) -> None:
-        pageGrievanceTickets.getNavGrievance().click()
-        assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
-        pageGrievanceTickets.getButtonNewTicket().click()
-        pageGrievanceNewTicket.getSelectCategory().click()
-        pageGrievanceNewTicket.select_option_by_name("Referral")
-        pageGrievanceNewTicket.getButtonNext().click()
-        pageGrievanceNewTicket.getHouseholdTab()
-        assert pageGrievanceNewTicket.waitForNoResults()
-        pageGrievanceNewTicket.getButtonNext().click()
-        pageGrievanceNewTicket.getReceivedConsent().click()
-        pageGrievanceNewTicket.getButtonNext().click()
-        pageGrievanceNewTicket.getDescription().send_keys("Happy path test 1234!")
-        pageGrievanceNewTicket.getButtonNext().click()
-        assert "Happy path test 1234!" in pageGrievanceDetailsPage.getTicketDescription().text
-        assert "Referral" in pageGrievanceDetailsPage.getTicketCategory().text
         assert "New" in pageGrievanceDetailsPage.getTicketStatus().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
