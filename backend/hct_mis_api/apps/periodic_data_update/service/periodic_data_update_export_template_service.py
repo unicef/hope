@@ -53,7 +53,9 @@ class PeriodicDataUpdateExportTemplateService:
         self._create_workbook()
         self._add_meta()
         self.ws_pdu.append(self._generate_header())
-        for individual in self._get_individuals_queryset():
+        queryset = self._get_individuals_queryset()
+        self.periodic_data_update_template.number_of_records = queryset.count()
+        for individual in queryset:
             row = self._generate_row(individual)
             if row:
                 self.ws_pdu.append(row)
@@ -71,6 +73,7 @@ class PeriodicDataUpdateExportTemplateService:
             tmp.seek(0)
             xlsx_obj.file.save(filename, File(tmp))
             self.periodic_data_update_template.file = xlsx_obj
+            self.periodic_data_update_template.status = PeriodicDataUpdateTemplate.Status.EXPORTED
             self.periodic_data_update_template.save()
 
     def _create_workbook(self) -> openpyxl.Workbook:

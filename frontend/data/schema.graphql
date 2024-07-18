@@ -3606,10 +3606,10 @@ enum PeriodicFieldDataSubtype {
   BOOLEAN
 }
 
-type PeriodicFieldNode {
-  id: UUID!
+type PeriodicFieldNode implements Node {
   name: String!
   pduData: PeriodicFieldDataNode
+  id: ID!
 }
 
 input PositiveFeedbackTicketExtras {

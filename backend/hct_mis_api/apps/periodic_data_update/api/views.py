@@ -14,7 +14,10 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.api.permissions import PDUViewListAndDetailsPermission, PDUUploadPermission
+from hct_mis_api.apps.account.api.permissions import (
+    PDUUploadPermission,
+    PDUViewListAndDetailsPermission,
+)
 from hct_mis_api.apps.core.api.mixins import ActionMixin, BusinessAreaProgramMixin
 from hct_mis_api.apps.periodic_data_update.api.caches import (
     PDUTemplateKeyConstructor,
@@ -23,11 +26,18 @@ from hct_mis_api.apps.periodic_data_update.api.caches import (
 from hct_mis_api.apps.periodic_data_update.api.serializers import (
     PeriodicDataUpdateTemplateDetailSerializer,
     PeriodicDataUpdateTemplateListSerializer,
-    PeriodicDataUpdateUploadListSerializer, PeriodicDataUpdateUploadSerializer,
+    PeriodicDataUpdateUploadListSerializer,
+    PeriodicDataUpdateUploadSerializer,
 )
 from hct_mis_api.apps.periodic_data_update.models import (
     PeriodicDataUpdateTemplate,
     PeriodicDataUpdateUpload,
+)
+from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
+    PeriodicDataUpdateExportTemplateService,
+)
+from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_service import (
+    PeriodicDataUpdateImportService,
 )
 
 logger = logging.getLogger(__name__)
@@ -72,7 +82,9 @@ class PeriodicDataUpdateTemplateViewSet(
             raise ValidationError("Template is already being exported")
         if pdu_template.file:
             raise ValidationError("Template is already exported")
-        # TODO: Call the task to export the template (export + change the status)
+        serivice = PeriodicDataUpdateExportTemplateService(pdu_template)
+        serivice.generate_workbook()
+        serivice.save_xlsx_file()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["get"])
@@ -84,7 +96,7 @@ class PeriodicDataUpdateTemplateViewSet(
         if not pdu_template.number_of_records:
             raise ValidationError("Template has no records")
         if template_file := pdu_template.file:
-            return Response({"url": template_file.url}, status=status.HTTP_200_OK)
+            return Response({"url": template_file.file.url}, status=status.HTTP_200_OK)
         else:
             logger.error(f"XLSX File not found. PeriodicDataUpdateTemplate ID: {pdu_template.id}")
             raise ValidationError("Template file is missing")
@@ -99,7 +111,7 @@ class PeriodicDataUpdateUploadViewSet(
 ):
     serializer_classes_by_action = {
         "list": PeriodicDataUpdateUploadListSerializer,
-        'upload': PeriodicDataUpdateUploadSerializer,
+        "upload": PeriodicDataUpdateUploadSerializer,
     }
     permission_classes_by_action = {
         "list": [PDUViewListAndDetailsPermission],
@@ -117,26 +129,25 @@ class PeriodicDataUpdateUploadViewSet(
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
-    @action(detail=True, methods=["post"])
+    @action(detail=False, methods=["post"])
     def upload(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        serializer = self.get_serializer(data=request.data, )
+        serializer = self.get_serializer(
+            data=request.data,
+        )
         if serializer.is_valid():
-            # Saving the instance to get a record in the database
+            serializer.validated_data["created_by"] = request.user
+            serializer.validated_data[
+                "template"
+            ] = PeriodicDataUpdateImportService.read_periodic_data_update_template_object(
+                serializer.validated_data["file"]
+            )
             upload_instance = serializer.save()
 
-            # Assuming you have a Celery task set up to handle the file processing
-            # You can pass necessary parameters to it
-            task = process_upload.delay(upload_instance.id)
+            upload_instance.queue()
 
-            # Return a response with the upload instance details and task id
             return Response(
-                data={
-                    'id': upload_instance.id,
-                    'task_id': task.id  # Celery task ID if you want to track the task
-                },
-                status=status.HTTP_202_ACCEPTED
+                data=serializer.data,
+                status=status.HTTP_202_ACCEPTED,
             )
         else:
-            # If the data is not valid, return an error response
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-

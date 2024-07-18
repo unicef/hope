@@ -118,6 +118,7 @@ class FlexibleAttributeNode(DjangoObjectType):
             "label",
             "hint",
             "required",
+            "pdu_data",
         ]
 
 

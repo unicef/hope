@@ -33,6 +33,8 @@ class PeriodicDataUpdateImportService:
 
     def import_data(self) -> None:
         try:
+            self.periodic_data_update_upload.status = PeriodicDataUpdateUpload.Status.PROCESSING
+            self.periodic_data_update_upload.save()
             with transaction.atomic():
                 self._open_workbook()
                 self._read_flexible_attributes()
@@ -42,7 +44,6 @@ class PeriodicDataUpdateImportService:
                 self.periodic_data_update_upload.status = PeriodicDataUpdateUpload.Status.SUCCESSFUL
                 self.periodic_data_update_upload.save()
         except ValidationError as e:
-            raise e
             self.periodic_data_update_upload.status = PeriodicDataUpdateUpload.Status.FAILED
             self.periodic_data_update_upload.error_message = str(e)
             self.periodic_data_update_upload.save()
@@ -146,6 +147,8 @@ class PeriodicDataUpdateImportService:
             value_from_xlsx = cleaned_data[f"{field_name}__round_value"]
             collection_date_from_xlsx = cleaned_data[f"{field_name}__collection_date"]
             if value_from_xlsx is None:
+                continue
+            if value_from_xlsx == "":
                 continue
             if round_number_from_xlsx != round_number:
                 raise ValidationError(

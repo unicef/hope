@@ -9,6 +9,7 @@ from functools import cached_property
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
     Dict,
     Iterable,
     List,
@@ -18,26 +19,25 @@ from typing import (
     Tuple,
 )
 
-from django.utils.functional import classproperty
-
-from hct_mis_api.apps.core.celery import app
 from django.conf import settings
 from django.db import models
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.functional import classproperty
 from django.utils.translation import gettext_lazy as _
 
+import celery
+from celery import states
+from celery.contrib.abortable import AbortableAsyncResult
 from concurrency.fields import IntegerVersionField
 from model_utils.managers import SoftDeletableManager, SoftDeletableQuerySet
 from model_utils.models import UUIDModel
 
+from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.utils import nested_getattr
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
-import celery
-from celery import states
-from celery.contrib.abortable import AbortableAsyncResult
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
@@ -453,7 +453,7 @@ class SignatureMixin(models.Model):
             raise ValueError("Define 'signature_fields' in class for SignatureMixin")
 
 
-class CeleryEnabled(models.Model):
+class CeleryEnabledModel(models.Model):  # pragma: no cover
     # QUEUED (task exists in Redis but unkonw to Celery)
     # CANCELED (task is canceled BEFORE worker fetch it)
     # PENDING (waiting for execution or unknown task id)
@@ -462,20 +462,19 @@ class CeleryEnabled(models.Model):
     # FAILURE (task execution resulted in exception)
     # RETRY (task is being retried)
     # REVOKED (task has been revoked)
-    SCHEDULED = frozenset({states.PENDING, states.RECEIVED, states.STARTED, states.RETRY, "QUEUED"})
-    QUEUED = "QUEUED"
-    CANCELED = "CANCELED"
-    NOT_SCHEDULED = "Not scheduled"
-
-    sentry_error_id = models.CharField(max_length=512, blank=True, null=True)
-    error_message = models.TextField(blank=True, null=True)
-    last_run = models.DateTimeField(null=True, blank=True)
+    CELERY_STATUS_SCHEDULED = frozenset({states.PENDING, states.RECEIVED, states.STARTED, states.RETRY, "QUEUED"})
+    CELERY_STATUS_QUEUED = "QUEUED"
+    CELERY_STATUS_CANCELED = "CANCELED"
+    CELERY_STATUS_RECEIVED = states.RECEIVED
+    CELERY_STATUS_NOT_SCHEDULED = "NOT_SCHEDULED"
+    CELERY_STATUS_STARTED = states.STARTED
+    CELERY_STATUS_SUCCESS = states.SUCCESS
+    CELERY_STATUS_FAILURE = states.FAILURE
+    CELERY_STATUS_RETRY = states.RETRY
+    CELERY_STATUS_REVOKED = states.REVOKED
 
     curr_async_result_id = models.CharField(
         max_length=36, blank=True, null=True, help_text="Current (active) AsyncResult is"
-    )
-    last_async_result_id = models.CharField(
-        max_length=36, blank=True, null=True, help_text="Latest executed AsyncResult is"
     )
 
     celery_task_name: str = "<define `celery_task_name`>"
@@ -531,23 +530,23 @@ class CeleryEnabled(models.Model):
         return {"id": "NotFound"}
 
     @property
-    def task_info(self) -> "Dict[str, Any]":
+    def task_info(self) -> Optional[Dict[str, Any]]:
         if self.async_result:
             info = self.async_result._get_task_meta()
             result, task_status = info["result"], info["status"]
-            if task_status == "STARTED":
+            if task_status == self.CELERY_STATUS_SUCCESS:
                 started_at = result.get("start_time", 0)
             else:
                 started_at = 0
             last_update = info["date_done"]
             if isinstance(result, Exception):
                 error = str(result)
-            elif task_status == "REVOKED":
+            elif task_status == self.CELERY_STATUS_CANCELED:
                 error = _("Query execution cancelled.")
             else:
                 error = ""
 
-            if task_status == "SUCCESS" and not error:
+            if task_status == self.CELERY_STATUS_SUCCESS and not error:
                 query_result_id = result
             else:
                 query_result_id = None
@@ -560,11 +559,13 @@ class CeleryEnabled(models.Model):
                 "error": error,
                 "query_result_id": query_result_id,
             }
+        return None
 
     @classproperty
-    def task_handler(cls) -> "Callable[Any, Any]":
+    def task_handler(cls) -> Callable[[Any], Any]:
         import importlib
-        module_path, func_name = cls.celery_task_name.rsplit('.', 1)
+
+        module_path, func_name = cls.celery_task_name.rsplit(".", 1)
         module = importlib.import_module(module_path)
         func = getattr(module, func_name)
         return func
@@ -589,22 +590,22 @@ class CeleryEnabled(models.Model):
         try:
             if self.curr_async_result_id:
                 if self.is_canceled():
-                    return "CANCELED"
+                    return self.CELERY_STATUS_CANCELED
 
                 result = self.async_result.state
-                if result == "PENDING":
+                if result == states.PENDING:
                     if self.is_queued():
-                        result = "QUEUED"
+                        result = self.CELERY_STATUS_QUEUED
                     else:
-                        result = "Not scheduled"
+                        result = self.CELERY_STATUS_NOT_SCHEDULED
             else:
-                result = "Not scheduled"
+                result = self.CELERY_STATUS_NOT_SCHEDULED
             return result
         except Exception as e:
             return str(e)
 
     def queue(self) -> str | None:
-        if self.celery_status not in self.SCHEDULED:
+        if self.celery_status not in self.CELERY_STATUS_SCHEDULED:
             res = self.task_handler.delay(self.pk)
             self.curr_async_result_id = res.id
             self.save(update_fields=["curr_async_result_id"])

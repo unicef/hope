@@ -4,7 +4,6 @@ from datetime import datetime
 from django.conf import settings
 from django.core.management import call_command
 
-from selenium_tests.tools.tag_name_finder import printing
 import pytest
 from dateutil.relativedelta import relativedelta
 from helpers.date_time_format import FormatTime

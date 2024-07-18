@@ -16,13 +16,18 @@ export const useDownloadPeriodicDataUpdateTemplate = () => {
       businessAreaSlug: string;
       programId: string;
       templateId: string;
-    }) =>
-      fetchPeriodicDataUpdateTemplate(
+    }) =>{
+      return fetchPeriodicDataUpdateTemplate(
         mutationBusinessAreaSlug,
         mutationProgramId,
         mutationTemplateId,
-      ),
-    onSuccess: () => {
+      )
+    },
+    onSuccess: (data) => {
+      console.log('data', data)
+      if (data.url) {
+        window.open(data.url);
+      }
       queryClient.invalidateQueries({
         queryKey: ['periodicDataUpdateTemplates'],
       });

@@ -9,7 +9,7 @@ import UploadIcon from '@mui/icons-material/Upload';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Button, IconButton, TableCell } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
-import { ReactElement, useState } from 'react';
+import {ReactElement, useEffect, useState} from 'react';
 import { PeriodicDataUpdatesTemplateDetailsDialog } from './PeriodicDataUpdatesTemplateDetailsDialog';
 import {
   useDownloadPeriodicDataUpdateTemplate,
@@ -80,13 +80,13 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
 
   const { mutate: downloadTemplate } = useDownloadPeriodicDataUpdateTemplate();
   const { mutate: exportTemplate } = useExportPeriodicDataUpdateTemplate();
-
   const handleDownloadClick = (templateId: number) => {
     downloadTemplate({
       businessAreaSlug,
       programId,
       templateId: templateId.toString(),
     });
+
   };
 
   const handleExportClick = (templateId: number) => {
@@ -110,7 +110,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
   const renderTemplateRow = (row: Template): ReactElement => (
     <ClickableTableRow key={row.id} data-cy={`template-row-${row.id}`}>
       <TableCell data-cy={`template-id-${row.id}`}>{row.id}</TableCell>
-      <TableCell data-cy={`template-records-${row.id}`}>
+      <TableCell data-cy={`template-records-${row.id}`} align="right">
         {row.number_of_records}
       </TableCell>
       <TableCell data-cy={`template-created-at-${row.id}`}>
@@ -125,7 +125,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
         </IconButton>
       </TableCell>
       <TableCell data-cy={`template-action-${row.id}`}>
-        {row.status === 'download' ? (
+        {row.status === 'Exported' ? (
           <Button
             variant="contained"
             color="primary"

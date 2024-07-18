@@ -37,6 +37,9 @@ export const IndividualAdditionalRegistrationInformation = ({
 
   const fields = Object.entries(individual?.flexFields || {}).map(
     ([key, value]: [string, string | string[]]) => {
+      if(flexAttributesDict[key]?.type ==='PDU'){
+        return null;
+      }
       if (flexAttributesDict[key]?.type === 'IMAGE') {
         return (
           <LabelizedField

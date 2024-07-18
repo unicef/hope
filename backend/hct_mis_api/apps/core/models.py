@@ -239,6 +239,7 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
         on_delete=models.CASCADE,
         related_name="flex_attributes",
         null=True,
+        blank=True,
     )
     associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
 
