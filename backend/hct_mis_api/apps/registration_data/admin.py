@@ -8,7 +8,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -20,7 +19,6 @@ from adminfilters.filters import ChoicesFieldComboFilter
 from adminfilters.mixin import AdminAutoCompleteSearchMixin
 from adminfilters.querystring import QueryStringFilter
 
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program_task
 from hct_mis_api.apps.household.documents import get_individual_doc
@@ -33,7 +31,6 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
 )
 from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
-from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
 from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.elasticsearch_utils import (
@@ -75,7 +72,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
     def hub(self, button: button) -> Optional[str]:
         obj = button.context.get("original")
         if obj:
-            return reverse("admin:registration_datahub_registrationdataimportdatahub_change", args=[obj.datahub_id])
+            return reverse("admin:registration_data_registrationdataimportdatahub_change", args=[obj.datahub_id])
 
         button.visible = False
         return None
@@ -101,12 +98,11 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
 
                 celery_task = registration_kobo_import_task
 
-            rdi_datahub_obj = get_object_or_404(RegistrationDataImportDatahub, id=obj.datahub_id)
-            business_area = BusinessArea.objects.get(slug=rdi_datahub_obj.business_area_slug)
+            business_area = obj.business_area
 
             celery_task.delay(
-                registration_data_import_id=str(rdi_datahub_obj.id),
-                import_data_id=str(rdi_datahub_obj.import_data.id),
+                registration_data_import_id=str(obj.id),
+                import_data_id=str(obj.import_data.id),
                 business_area_id=str(business_area.id),
                 program_id=str(obj.program_id),
             )
@@ -276,8 +272,8 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
     @button()
     def households(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         obj = self.get_object(request, str(pk))
-        url = reverse("admin:registration_datahub_importedhousehold_changelist")
-        return HttpResponseRedirect(f"{url}?&registration_data_import__exact={obj.datahub_id}")
+        url = reverse("admin:household_household_changelist")
+        return HttpResponseRedirect(f"{url}?&qs=registration_data_import__exact={obj.id}")
 
     @button()
     def hub_rdi(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:

@@ -15,6 +15,7 @@ from hct_mis_api.apps.household.models import (
     XlsxUpdateFile,
 )
 from hct_mis_api.apps.utils.mailjet import MailjetClient
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 logger = logging.getLogger(__name__)
 
@@ -122,7 +123,10 @@ class IndividualsIBANXlsxUpdate:
 
             if not individual.bank_account_info.exists():
                 BankAccountInfo.objects.create(
-                    individual=individual, bank_name=new_bank_name, bank_account_number=new_iban
+                    individual=individual,
+                    bank_name=new_bank_name,
+                    bank_account_number=new_iban,
+                    rdi_merge_status=MergeStatusModel.MERGED,
                 )
 
             else:

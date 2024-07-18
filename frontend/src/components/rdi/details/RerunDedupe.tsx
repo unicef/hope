@@ -31,7 +31,7 @@ export const RerunDedupe = ({
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
   const [mutate, { loading }] = useRerunDedupeMutation({
-    variables: { registrationDataImportDatahubId: registration.datahubId },
+    variables: { registrationDataImportId: registration.id },
   });
   const rerunDedupe = async (): Promise<void> => {
     try {

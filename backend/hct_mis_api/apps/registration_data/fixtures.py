@@ -9,7 +9,10 @@ from pytz import utc
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_data.models import (
+    RegistrationDataImport,
+    RegistrationDataImportDatahub,
+)
 
 faker = Faker()
 
@@ -48,3 +51,17 @@ class RegistrationDataImportFactory(DjangoModelFactory):
             obj.created_at = created_at
             obj.save()
         return obj
+
+
+class RegistrationDataImportDatahubFactory(DjangoModelFactory):
+    class Meta:
+        model = RegistrationDataImportDatahub
+
+    factory.LazyFunction(
+        lambda: f"{faker.sentence(nb_words=3, variable_nb_words=True, ext_word_list=None)} - {time.time_ns()}"
+    )
+    import_date = factory.Faker(
+        "date_time_this_decade",
+        before_now=True,
+        tzinfo=utc,
+    )

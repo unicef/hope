@@ -442,7 +442,7 @@ UNICEF HOPE""",
     def mark_submissions(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         business_area = self.get_queryset(request).get(pk=pk)
         if request.method == "POST":
-            from hct_mis_api.apps.registration_datahub.tasks.mark_submissions import (
+            from hct_mis_api.apps.registration_data.services.mark_submissions import (
                 MarkSubmissions,
             )
 
