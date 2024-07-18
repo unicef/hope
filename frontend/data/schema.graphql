@@ -5177,6 +5177,7 @@ input UpdateProgramInput {
   partners: [ProgramPartnerThroughInput]
   partnerAccess: String
   programmeCode: String
+  pduFields: [PDUFieldInput]
 }
 
 input UpdateTargetPopulationInput {

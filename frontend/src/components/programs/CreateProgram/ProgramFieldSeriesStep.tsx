@@ -1,8 +1,10 @@
+import { useConfirmation } from '@components/core/ConfirmationDialog';
 import { DividerLine } from '@components/core/DividerLine';
+import { PduSubtypeChoicesDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Box, Button, Grid, IconButton } from '@mui/material';
+import { Box, Button, FormControl, Grid, IconButton } from '@mui/material';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { Field, FieldArray } from 'formik';
@@ -18,6 +20,8 @@ interface ProgramFieldSeriesStepProps {
   setStep: (step: number) => void;
   step: number;
   programHasRdi?: boolean;
+  pdusubtypeChoicesData?: PduSubtypeChoicesDataQuery;
+  errors: any;
 }
 
 export const ProgramFieldSeriesStep = ({
@@ -26,15 +30,30 @@ export const ProgramFieldSeriesStep = ({
   setStep,
   step,
   programHasRdi,
+  pdusubtypeChoicesData,
+  errors,
 }: ProgramFieldSeriesStepProps) => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
+  const confirm = useConfirmation();
 
   const handleNextClick = async (): Promise<void> => {
     if (handleNext) {
       await handleNext();
     }
   };
+
+  const mappedPduSubtypeChoices = pdusubtypeChoicesData?.pduSubtypeChoices.map(
+    (el) => ({
+      value: el.value,
+      name: el.displayName,
+    }),
+  );
+
+  const confirmationModalTitle = t('Deleting Time Series Field');
+  const confirmationText = t(
+    'Are you sure you want to delete this field? This action cannot be reversed.',
+  );
 
   return (
     <>
@@ -45,7 +64,7 @@ export const ProgramFieldSeriesStep = ({
             {values.pduFields && values.pduFields.length > 0
               ? values.pduFields.map((_field, index) => (
                   <Box key={index} pt={3} pb={3}>
-                    <Grid container spacing={3} alignItems="center">
+                    <Grid container spacing={3} alignItems="flex-start">
                       <Grid item xs={3}>
                         <Field
                           name={`pduFields.${index}.name`}
@@ -63,10 +82,7 @@ export const ProgramFieldSeriesStep = ({
                           variant="outlined"
                           label={t('Data Type')}
                           component={FormikSelectField}
-                          choices={[
-                            { value: 'number', label: t('Number') },
-                            { value: 'text', label: t('Text') },
-                          ]}
+                          choices={mappedPduSubtypeChoices}
                           disabled={programHasRdi}
                         />
                       </Grid>
@@ -84,6 +100,20 @@ export const ProgramFieldSeriesStep = ({
                           disabled={programHasRdi}
                         />
                       </Grid>
+                      <Grid item xs={1}>
+                        <IconButton
+                          onClick={() =>
+                            confirm({
+                              title: confirmationModalTitle,
+                              content: confirmationText,
+                              type: 'error',
+                            }).then(() => arrayHelpers.remove(index))
+                          }
+                          disabled={programHasRdi}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Grid>
                       {_field.pduData.numberOfRounds &&
                         [
                           ...Array(
@@ -91,31 +121,25 @@ export const ProgramFieldSeriesStep = ({
                           ).keys(),
                         ].map((round) => (
                           <Grid item xs={12} key={round}>
-                            <Field
-                              name={`pduFields.${index}.pduData.roundsNames.${round}`}
+                            <FormControl
                               fullWidth
+                              error={Boolean(
+                                errors.pduFields?.[index]?.pduData
+                                  ?.roundsNames?.[round],
+                              )}
                               variant="outlined"
-                              label={`${t('Round')} ${round + 1} ${t('Name')}`}
-                              component={FormikTextField}
-                              disabled={programHasRdi}
-                            />
+                            >
+                              <Field
+                                name={`pduFields.${index}.pduData.roundsNames.${round}`}
+                                fullWidth
+                                variant="outlined"
+                                label={`${t('Round')} ${round + 1} ${t('Name')}`}
+                                component={FormikTextField}
+                                disabled={programHasRdi}
+                              />
+                            </FormControl>
                           </Grid>
                         ))}
-                      {!(
-                        values.pduFields.length === 1 ||
-                        (!_field.fieldName &&
-                          !_field.dataType &&
-                          !_field.numberOfRounds)
-                      ) && (
-                        <Grid item xs={1}>
-                          <IconButton
-                            onClick={() => arrayHelpers.remove(index)}
-                            disabled={programHasRdi}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </Grid>
-                      )}
                     </Grid>
                     {values.pduFields.length > 1 &&
                       index < values.pduFields.length - 1 && <DividerLine />}
@@ -138,6 +162,7 @@ export const ProgramFieldSeriesStep = ({
                 }
                 endIcon={<AddIcon />}
                 disabled={programHasRdi}
+                data-cy="button-add-time-series-field"
               >
                 {t('Add Time Series Fields')}
               </Button>

@@ -36,3 +36,25 @@ class TestDataCollectionTypeSchema(APITestCase):
             request_string=self.QUERY_DATA_COLLECTING_TYPE_CHOICES,
             context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
         )
+
+
+class TestPDUSubtypeChoices(APITestCase):
+    QUERY_PDU_SUBTYPE_CHOICES = """
+        query pduSubtypeChoicesData {
+            pduSubtypeChoices {
+              value
+              displayName
+            }
+        }
+    """
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.business_area = create_afghanistan()
+        cls.user = UserFactory()
+
+    def test_pdu_subtype_choices_data(self) -> None:
+        self.snapshot_graphql_request(
+            request_string=self.QUERY_PDU_SUBTYPE_CHOICES,
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+        )

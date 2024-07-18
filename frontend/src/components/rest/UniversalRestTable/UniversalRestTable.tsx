@@ -8,23 +8,24 @@ import {
 } from '../TableRestComponent/TableRestComponent';
 import { isEqual } from 'lodash';
 
-// TODO MS: add correct types
+//TODO MS: add correct types
 interface UniversalRestTableProps<T = any, K = any> {
   rowsPerPageOptions?: number[];
   renderRow: (row: T) => ReactElement;
   headCells: HeadCell<T>[];
-  getTitle?: (data: any) => string; // TODO MS: add correct type for data
+  getTitle?: (data: any) => string; //TODO MS: add correct type for data
   title?: string;
   isOnPaper?: boolean;
   defaultOrderBy?: string;
   defaultOrderDirection?: Order;
   actions?: Array<ReactElement>;
-  onSelectAllClick?: (event: any, rows: any) => void; // TODO MS: add correct types for event and rows
+  onSelectAllClick?: (event: any, rows: any) => void; //TODO MS: add correct types for event and rows
   numSelected?: number;
   allowSort?: boolean;
   filterOrderBy?: string;
   onPageChanged?: (page: number) => void;
-  data: T[];
+  //TODO MS: add correct types
+  data: any;
   error;
   isLoading: boolean;
   queryVariables: any;

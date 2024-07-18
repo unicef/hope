@@ -4,6 +4,7 @@ from datetime import datetime
 from django.conf import settings
 from django.core.management import call_command
 
+from selenium_tests.tools.tag_name_finder import printing
 import pytest
 from dateutil.relativedelta import relativedelta
 from helpers.date_time_format import FormatTime
@@ -54,6 +55,7 @@ class TestProgrammeManagement:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
+        # 1st step
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
         pageProgrammeManagement.getInputStartDate().click()
@@ -63,6 +65,15 @@ class TestProgrammeManagement:
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getButtonNext().click()
+        # 2nd step
+        pageProgrammeManagement.getInputPduFieldsObjectName(0).send_keys("test series field name")
+        pageProgrammeManagement.getSelectPduFieldsObjectPduDataSubtype(0).click()
+        pageProgrammeManagement.select_listbox_element("Text").click()
+        pageProgrammeManagement.getSelectPduFieldsObjectPduDataNumberOfRounds(0).click()
+        pageProgrammeManagement.select_listbox_element("1").click()
+        pageProgrammeManagement.getInputPduFieldsRoundsNames(0, 0).send_keys("Round 1")
+        pageProgrammeManagement.getButtonNext().click()
+        # 3rd step
         programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page

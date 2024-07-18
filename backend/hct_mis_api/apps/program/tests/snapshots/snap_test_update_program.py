@@ -83,6 +83,8 @@ snapshots['TestUpdateProgram::test_update_full_area_access_flag 1'] = {
                         'name': 'UNICEF'
                     }
                 ],
+                'pduFields': [
+                ],
                 'status': 'DRAFT'
             }
         }
@@ -134,6 +136,8 @@ snapshots['TestUpdateProgram::test_update_full_area_access_flag 2'] = {
                         'name': 'WFP'
                     }
                 ],
+                'pduFields': [
+                ],
                 'status': 'DRAFT'
             }
         }
@@ -163,6 +167,8 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_0_with_permissio
                         ],
                         'name': 'UNICEF'
                     }
+                ],
+                'pduFields': [
                 ],
                 'status': 'ACTIVE'
             }
@@ -298,6 +304,8 @@ snapshots['TestUpdateProgram::test_update_program_partners_0_valid 1'] = {
                         'name': 'WFP'
                     }
                 ],
+                'pduFields': [
+                ],
                 'status': 'DRAFT'
             }
         }
@@ -379,6 +387,8 @@ snapshots['TestUpdateProgram::test_update_program_partners_all_partners_access 1
                         ],
                         'name': 'UNICEF'
                     }
+                ],
+                'pduFields': [
                 ],
                 'status': 'DRAFT'
             }
@@ -499,6 +509,201 @@ snapshots['TestUpdateProgram::test_update_program_with_inactive_dct 1'] = {
                 }
             ],
             'message': 'Only active DataCollectingType can be used in Program',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 1'] = {
+    'data': {
+        'program': {
+            'name': 'initial name',
+            'pduFields': [
+                {
+                    'name': 'PDU Field To Be Removed',
+                    'pduData': {
+                        'numberOfRounds': 3,
+                        'roundsNames': [
+                            'Round 1 To Be Removed',
+                            'Round 2 To Be Removed',
+                            'Round 3 To Be Removed'
+                        ],
+                        'subtype': 'DECIMAL'
+                    }
+                },
+                {
+                    'name': 'PDU Field To Be Updated',
+                    'pduData': {
+                        'numberOfRounds': 2,
+                        'roundsNames': [
+                            'Round 1 To Be Updated',
+                            'Round 2 To Be Updated'
+                        ],
+                        'subtype': 'STRING'
+                    }
+                },
+                {
+                    'name': 'PDU Field To Be Preserved',
+                    'pduData': {
+                        'numberOfRounds': 1,
+                        'roundsNames': [
+                            'Round To Be Preserved'
+                        ],
+                        'subtype': 'DATE'
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 2'] = {
+    'data': {
+        'updateProgram': {
+            'program': {
+                'dataCollectingType': {
+                    'code': 'full_collection',
+                    'label': 'Full'
+                },
+                'name': 'Program with Updated PDU Fields',
+                'partnerAccess': 'NONE_PARTNERS_ACCESS',
+                'partners': [
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF'
+                    }
+                ],
+                'pduFields': [
+                    {
+                        'name': 'PDU Field To Be Preserved',
+                        'pduData': {
+                            'numberOfRounds': 1,
+                            'roundsNames': [
+                                'Round To Be Preserved'
+                            ],
+                            'subtype': 'DATE'
+                        }
+                    },
+                    {
+                        'name': 'PDU Field - Updated',
+                        'pduData': {
+                            'numberOfRounds': 3,
+                            'roundsNames': [
+                                'Round 1 Updated',
+                                'Round 2 Updated',
+                                'Round 3 Updated'
+                            ],
+                            'subtype': 'BOOLEAN'
+                        }
+                    },
+                    {
+                        'name': 'PDU Field - New',
+                        'pduData': {
+                            'numberOfRounds': 4,
+                            'roundsNames': [
+                                'Round 1A',
+                                'Round 2B',
+                                'Round 3C',
+                                'Round 4D'
+                            ],
+                            'subtype': 'BOOLEAN'
+                        }
+                    }
+                ],
+                'status': 'DRAFT'
+            }
+        }
+    }
+}
+
+snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 3'] = {
+    'data': {
+        'program': {
+            'name': 'Program with Updated PDU Fields',
+            'pduFields': [
+                {
+                    'name': 'PDU Field To Be Preserved',
+                    'pduData': {
+                        'numberOfRounds': 1,
+                        'roundsNames': [
+                            'Round To Be Preserved'
+                        ],
+                        'subtype': 'DATE'
+                    }
+                },
+                {
+                    'name': 'PDU Field - Updated',
+                    'pduData': {
+                        'numberOfRounds': 3,
+                        'roundsNames': [
+                            'Round 1 Updated',
+                            'Round 2 Updated',
+                            'Round 3 Updated'
+                        ],
+                        'subtype': 'BOOLEAN'
+                    }
+                },
+                {
+                    'name': 'PDU Field - New',
+                    'pduData': {
+                        'numberOfRounds': 4,
+                        'roundsNames': [
+                            'Round 1A',
+                            'Round 2B',
+                            'Round 3C',
+                            'Round 4D'
+                        ],
+                        'subtype': 'BOOLEAN'
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_invalid_data 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Number of rounds does not match the number of round names',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RDI 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Cannot update PDU fields for a program with RDIs.',
             'path': [
                 'updateProgram'
             ]

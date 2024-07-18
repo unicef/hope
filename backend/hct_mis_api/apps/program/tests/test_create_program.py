@@ -48,6 +48,14 @@ class TestCreateProgram(APITestCase):
             areaAccess
           }
           partnerAccess
+          pduFields {
+            name
+            pduData {
+              subtype
+              numberOfRounds
+              roundsNames
+            }
+          }
         }
         validationErrors
       }
@@ -360,6 +368,73 @@ class TestCreateProgram(APITestCase):
     def test_create_program_with_programme_code_greater_than_4_chars(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
         self.program_data["programData"]["programmeCode"] = "AbCd2"
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+        )
+
+    def test_create_program_with_pdu_fields(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+        self.program_data["programData"]["pduFields"] = [
+            {
+                "name": "PDU Field 1",
+                "pduData": {
+                    "subtype": "DECIMAL",
+                    "numberOfRounds": 3,
+                    "roundsNames": ["Round 1", "Round 2", "Round 3"],
+                },
+            },
+            {
+                "name": "PDU Field 2",
+                "pduData": {
+                    "subtype": "STRING",
+                    "numberOfRounds": 1,
+                    "roundsNames": ["Round *"],
+                },
+            },
+            {
+                "name": "PDU Field 3",
+                "pduData": {
+                    "subtype": "DATE",
+                    "numberOfRounds": 2,
+                    "roundsNames": ["Round A", "Round B"],
+                },
+            },
+            {
+                "name": "PDU Field 4",
+                "pduData": {
+                    "subtype": "BOOLEAN",
+                    "numberOfRounds": 4,
+                    "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
+                },
+            },
+        ]
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+        )
+
+    def test_create_program_with_pdu_fields_invalid_data(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+        # pdu data with mismatched number of rounds and rounds names
+        self.program_data["programData"]["pduFields"] = [
+            {
+                "name": "PDU Field 1",
+                "pduData": {
+                    "subtype": "DECIMAL",
+                    "numberOfRounds": 3,
+                    "roundsNames": ["Round 1", "Round 2", "Round 3"],
+                },
+            },
+            {
+                "name": "PDU Field 2 Invalid",
+                "pduData": {
+                    "subtype": "STRING",
+                    "numberOfRounds": 1,
+                    "roundsNames": ["Round *", "Round 2*"],
+                },
+            },
+        ]
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data

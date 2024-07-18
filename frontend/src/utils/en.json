@@ -885,5 +885,7 @@
   "The Time Series Fields feature allows serial updating of individual data through an XLSX file.": "The Time Series Fields feature allows serial updating of individual data through an XLSX file.",
   "Time Series Field Name": "Time Series Field Name",
   "Data Type": "Data Type",
-  "Number of Expected Rounds": "Number of Expected Rounds"
+  "Number of Expected Rounds": "Number of Expected Rounds",
+  "Are you sure you want to delete this field? This action cannot be reversed.": "Are you sure you want to delete this field? This action cannot be reversed.",
+  "Deleting Time Series Field": "Deleting Time Series Field"
 }

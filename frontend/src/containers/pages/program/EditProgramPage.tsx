@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   ProgramPartnerAccess,
   useAllAreasTreeQuery,
+  usePduSubtypeChoicesDataQuery,
   useProgramQuery,
   useUpdateProgramMutation,
   useUserPartnerChoicesQuery,
@@ -48,6 +49,9 @@ export const EditProgramPage = (): ReactElement => {
   const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
     useUserPartnerChoicesQuery();
 
+  const { data: pdusubtypeChoicesData, loading: pdusubtypeChoicesLoading } =
+    usePduSubtypeChoicesDataQuery();
+
   const [mutate] = useUpdateProgramMutation({
     refetchQueries: [
       {
@@ -61,9 +65,17 @@ export const EditProgramPage = (): ReactElement => {
     ],
   });
 
-  if (loadingProgram || treeLoading || userPartnerChoicesLoading)
+  if (
+    loadingProgram ||
+    treeLoading ||
+    userPartnerChoicesLoading ||
+    pdusubtypeChoicesLoading
+  )
     return <LoadingComponent />;
-  if (!data || !treeData || !userPartnerChoicesData) return null;
+
+  if (!data || !treeData || !userPartnerChoicesData || !pdusubtypeChoicesData)
+    return null;
+
   const {
     name,
     programmeCode,
@@ -81,6 +93,7 @@ export const EditProgramPage = (): ReactElement => {
     partners,
     partnerAccess = ProgramPartnerAccess.AllPartnersAccess,
     registrationImports,
+    pduFields,
   } = data.program;
 
   const handleSubmit = async (values): Promise<void> => {
@@ -102,8 +115,18 @@ export const EditProgramPage = (): ReactElement => {
         : [];
 
     const { editMode, ...requestValues } = values;
-    const pduFieldsToSend =
-      values.pduFields.length > 0 ? values.pduFields : null;
+    const pduFieldsToSend = values.pduFields.map(
+      ({ __typename, pduData, ...rest }) => ({
+        ...rest,
+        pduData: pduData
+          ? Object.fromEntries(
+              Object.entries(pduData).filter(
+                ([key]) => key !== '__typename' && key !== 'id',
+              ),
+            )
+          : pduData,
+      }),
+    );
 
     try {
       const response = await mutate({
@@ -148,27 +171,7 @@ export const EditProgramPage = (): ReactElement => {
         areaAccess: partner.areaAccess,
       })),
     partnerAccess,
-    //TODO MS: add pduFields
-    pduFields: [
-      {
-        id: 1,
-        name: 'Fake Name 1',
-        pduData: {
-          subtype: 'Fake Subtype 1',
-          numberOfRounds: 5,
-          roundsNames: ['Round 1', 'Round 2'],
-        },
-      },
-      {
-        id: 2,
-        name: 'Fake Name 2',
-        pduData: {
-          subtype: 'Fake Subtype 2',
-          numberOfRounds: 3,
-          roundsNames: ['Round 1', 'Round 2', 'Round 3'],
-        },
-      },
-    ],
+    pduFields,
   };
   initialValues.budget =
     data.program.budget === '0.00' ? '' : data.program.budget;
@@ -217,6 +220,7 @@ export const EditProgramPage = (): ReactElement => {
         validateForm,
         setFieldTouched,
         setFieldValue,
+        errors,
       }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
@@ -299,6 +303,8 @@ export const EditProgramPage = (): ReactElement => {
                     step={step}
                     setStep={setStep}
                     programHasRdi={programHasRdi}
+                    pdusubtypeChoicesData={pdusubtypeChoicesData}
+                    errors={errors}
                   />
                 )}
                 {step === 2 && (

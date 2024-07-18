@@ -85,6 +85,9 @@ export function PaymentsTableRow({
     if (status === PaymentStatus.TransactionErroneous) {
       return <RoutedBox>UNSUCCESSFUL</RoutedBox>;
     }
+    if (status === PaymentStatus.ManuallyCancelled) {
+      return <RoutedBox>CANCELLED</RoutedBox>;
+    }
     if (deliveredQuantity === null) {
       return <></>;
     }

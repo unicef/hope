@@ -7,6 +7,7 @@ import {
   ProgramPartnerAccess,
   useAllAreasTreeQuery,
   useCreateProgramMutation,
+  usePduSubtypeChoicesDataQuery,
   useUserPartnerChoicesQuery,
 } from '@generated/graphql';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
@@ -14,7 +15,6 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { DetailsStep } from '@components/programs/CreateProgram/DetailsStep';
 import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
-import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { hasPermissionInModule } from '../../../config/permissions';
@@ -27,6 +27,7 @@ import {
   handleNext,
   ProgramStepper,
 } from '@components/programs/CreateProgram/ProgramStepper';
+import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
 
 export const CreateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -41,6 +42,9 @@ export const CreateProgramPage = (): ReactElement => {
   });
   const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
     useUserPartnerChoicesQuery();
+
+  const { data: pdusubtypeChoicesData, loading: pdusubtypeChoicesLoading } =
+    usePduSubtypeChoicesDataQuery();
 
   const [mutate] = useCreateProgramMutation({
     refetchQueries: () => [
@@ -141,8 +145,11 @@ export const CreateProgramPage = (): ReactElement => {
     ['partnerAccess'],
   ];
 
-  if (treeLoading || userPartnerChoicesLoading) return <LoadingComponent />;
-  if (!treeData || !userPartnerChoicesData) return null;
+  if (treeLoading || userPartnerChoicesLoading || pdusubtypeChoicesLoading)
+    return <LoadingComponent />;
+
+  if (!treeData || !userPartnerChoicesData || !pdusubtypeChoicesData)
+    return null;
 
   const { allAreasTree } = treeData;
   const { userPartnerChoices } = userPartnerChoicesData;
@@ -164,8 +171,7 @@ export const CreateProgramPage = (): ReactElement => {
       initialTouched={{
         programmeCode: true,
       }}
-      //TODO MS: Uncomment when validation is ready
-      // validationSchema={programValidationSchema(t)}
+      validationSchema={programValidationSchema(t)}
     >
       {({
         submitForm,
@@ -173,6 +179,7 @@ export const CreateProgramPage = (): ReactElement => {
         validateForm,
         setFieldTouched,
         setFieldValue,
+        errors,
       }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
@@ -253,6 +260,8 @@ export const CreateProgramPage = (): ReactElement => {
                     handleNext={handleNextStep}
                     step={step}
                     setStep={setStep}
+                    pdusubtypeChoicesData={pdusubtypeChoicesData}
+                    errors={errors}
                   />
                 )}
                 {step === 2 && (

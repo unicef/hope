@@ -469,4 +469,5 @@ class Query(graphene.ObjectType):
 class PeriodicFieldNode(DjangoObjectType):
     class Meta:
         model = FlexibleAttribute
-        fields = ["id", "name", "pdu_data"]
+        fields = ["name", "pdu_data"]
+        interfaces = (relay.Node,)

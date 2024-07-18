@@ -26,7 +26,7 @@ export const ProgrammeTimeSeriesFields = ({
   program,
 }: ProgrammeTimeSeriesFieldsProps): React.ReactElement => {
   const { t } = useTranslation();
-  // TODO MS: remove
+  //TODO MS: remove
   console.log(program);
 
   // Example data structure for the table rows

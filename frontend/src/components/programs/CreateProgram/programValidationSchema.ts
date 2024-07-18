@@ -62,4 +62,18 @@ export const programValidationSchema = (
         areaAccess: Yup.string().required(t('Area Access is required')),
       }),
     ),
+    pduFields: Yup.array().of(
+      Yup.object().shape({
+        name: Yup.string().required(t('Field name is required')),
+        pduData: Yup.object().shape({
+          subtype: Yup.string().required(t('Subtype is required')),
+          numberOfRounds: Yup.number()
+            .required(t('Number of Rounds is required'))
+            .min(1, t('At least one round is required')),
+          roundsNames: Yup.array().of(
+            Yup.string().required(t('Round name is required')),
+          ),
+        }),
+      }),
+    ),
   });

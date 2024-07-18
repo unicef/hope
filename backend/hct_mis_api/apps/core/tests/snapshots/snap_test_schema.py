@@ -25,3 +25,26 @@ snapshots['TestDataCollectionTypeSchema::test_dct_with_unknown_code_is_not_in_li
         ]
     }
 }
+
+snapshots['TestPDUSubtypeChoices::test_pdu_subtype_choices_data 1'] = {
+    'data': {
+        'pduSubtypeChoices': [
+            {
+                'displayName': 'Date',
+                'value': 'DATE'
+            },
+            {
+                'displayName': 'Number',
+                'value': 'DECIMAL'
+            },
+            {
+                'displayName': 'Text',
+                'value': 'STRING'
+            },
+            {
+                'displayName': 'Yes/No',
+                'value': 'BOOLEAN'
+            }
+        ]
+    }
+}

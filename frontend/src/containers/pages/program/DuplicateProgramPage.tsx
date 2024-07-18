@@ -9,6 +9,7 @@ import {
   ProgramPartnerAccess,
   useAllAreasTreeQuery,
   useCopyProgramMutation,
+  usePduSubtypeChoicesDataQuery,
   useProgramQuery,
   useUserPartnerChoicesQuery,
 } from '@generated/graphql';
@@ -48,6 +49,9 @@ export const DuplicateProgramPage = (): ReactElement => {
   });
   const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
     useUserPartnerChoicesQuery();
+
+  const { data: pdusubtypeChoicesData, loading: pdusubtypeChoicesLoading } =
+    usePduSubtypeChoicesDataQuery();
 
   const handleSubmit = async (values): Promise<void> => {
     const budgetValue = parseFloat(values.budget) ?? 0;
@@ -92,9 +96,15 @@ export const DuplicateProgramPage = (): ReactElement => {
     }
   };
 
-  if (loadingProgram || treeLoading || userPartnerChoicesLoading)
+  if (
+    loadingProgram ||
+    treeLoading ||
+    userPartnerChoicesLoading ||
+    pdusubtypeChoicesLoading
+  )
     return <LoadingComponent />;
-  if (!data || !treeData || !userPartnerChoicesData) return null;
+  if (!data || !treeData || !userPartnerChoicesData || !pdusubtypeChoicesData)
+    return null;
 
   const {
     name,
@@ -217,6 +227,7 @@ export const DuplicateProgramPage = (): ReactElement => {
         validateForm,
         setFieldTouched,
         setFieldValue,
+        errors,
       }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
@@ -270,6 +281,8 @@ export const DuplicateProgramPage = (): ReactElement => {
                     handleNext={handleNextStep}
                     step={step}
                     setStep={setStep}
+                    pdusubtypeChoicesData={pdusubtypeChoicesData}
+                    errors={errors}
                   />
                 )}
                 {step === 2 && (

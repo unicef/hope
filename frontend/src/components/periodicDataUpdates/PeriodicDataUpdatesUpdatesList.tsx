@@ -20,41 +20,58 @@ interface Update {
 }
 
 const updatesHeadCells: HeadCell<Update>[] = [
-  { id: 'id', numeric: false, disablePadding: false, label: 'Import ID' },
+  {
+    id: 'id',
+    numeric: false,
+    disablePadding: false,
+    label: 'Import ID',
+    dataCy: 'head-cell-import-id',
+  },
   {
     id: 'template',
     numeric: false,
     disablePadding: false,
     label: 'Template ID',
+    dataCy: 'head-cell-template-id',
   },
   {
     id: 'created_at',
     numeric: false,
     disablePadding: false,
     label: 'Import Date',
+    dataCy: 'head-cell-import-date',
   },
   {
     id: 'created_by',
     numeric: false,
     disablePadding: false,
     label: 'Imported by',
+    dataCy: 'head-cell-imported-by',
   },
-  { id: 'status', numeric: false, disablePadding: false, label: 'Status' },
+  {
+    id: 'status',
+    numeric: false,
+    disablePadding: false,
+    label: 'Status',
+    dataCy: 'head-cell-status',
+  },
 ];
 
 const renderUpdateRow = (row: Update): ReactElement => (
-  <ClickableTableRow key={row.id}>
-    <TableCell>
+  <ClickableTableRow key={row.id} data-cy={`update-row-${row.id}`}>
+    <TableCell data-cy={`update-id-${row.id}`}>
       <BlackLink>{row.id}</BlackLink>
     </TableCell>
-    <TableCell>
+    <TableCell data-cy={`update-template-${row.id}`}>
       <BlackLink>{row.template}</BlackLink>
     </TableCell>
-    <TableCell>
+    <TableCell data-cy={`update-created-at-${row.id}`}>
       <UniversalMoment>{row.created_at}</UniversalMoment>
     </TableCell>
-    <TableCell>{row.created_by}</TableCell>
-    <TableCell>
+    <TableCell data-cy={`update-created-by-${row.id}`}>
+      {row.created_by}
+    </TableCell>
+    <TableCell data-cy={`update-status-${row.id}`}>
       <StatusBox
         status={row.status}
         statusToColor={periodicDataUpdatesUpdatesStatusToColor}

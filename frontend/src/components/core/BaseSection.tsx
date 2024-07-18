@@ -28,7 +28,7 @@ interface BaseSectionProps {
   p?: number;
   noPaper?: boolean;
   tabs?: ReactElement;
-  stepper: ReactElement;
+  stepper?: ReactElement;
 }
 
 export const BaseSection = ({
