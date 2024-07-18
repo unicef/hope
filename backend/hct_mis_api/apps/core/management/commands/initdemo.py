@@ -84,6 +84,7 @@ class Command(BaseCommand):
         generate_reconciled_payment_plan()
         update_fsps()
 
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/pdu.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/programpartnerthrough.json")
 
         email_list = [

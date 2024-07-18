@@ -57,6 +57,7 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
     MigrationStatus,
+    PeriodicFieldData,
     StorageFile,
     XLSXKoboTemplate,
 )
@@ -487,6 +488,11 @@ class FlexibleAttributeAdmin(GetManyFromRemoteMixin, SoftDeletableAdminMixin):
         JSONField: {"widget": JSONEditor},
     }
     raw_id_fields = ("group",)
+
+
+@admin.register(PeriodicFieldData)
+class PeriodicFieldDataAdmin(admin.ModelAdmin):
+    pass
 
 
 @admin.register(FlexibleAttributeGroup)

@@ -1,20 +1,23 @@
 import React from 'react';
 import { FieldArray } from 'formik';
 import {
+  Box,
+  Checkbox,
+  MenuItem,
+  Select,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Checkbox,
-  MenuItem,
-  Select,
-  Box,
 } from '@mui/material';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useAllPduFieldsQuery } from '@generated/graphql';
+import { LoadingComponent } from '@core/LoadingComponent';
 
 interface Field {
-  id: number;
+  id: string;
   name: string;
 }
 
@@ -29,17 +32,22 @@ interface FieldsToUpdateProps {
   setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void;
 }
 
-const initialFields: Field[] = [
-  { id: 1, name: 'Field 1' },
-  { id: 2, name: 'Field 2' },
-  { id: 3, name: 'Field 3' },
-  // Add more fields as needed
-];
-
 export const FieldsToUpdate: React.FC<FieldsToUpdateProps> = ({
   values,
   setFieldValue,
 }) => {
+  const { businessArea, programId } = useBaseUrl();
+  const { data, loading } = useAllPduFieldsQuery({
+    variables: {
+      businessAreaSlug: businessArea,
+      programId: programId,
+    },
+  });
+
+  if (loading) {
+    return <LoadingComponent />;
+  }
+
   return (
     <FieldArray
       name="selectedFields"
@@ -48,13 +56,13 @@ export const FieldsToUpdate: React.FC<FieldsToUpdateProps> = ({
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Select</TableCell>
+                <TableCell></TableCell>
                 <TableCell>Field</TableCell>
                 <TableCell>Round Number</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {initialFields.map((field) => (
+              {data.allPduFields.map((field) => (
                 <TableRow key={field.id}>
                   <TableCell>
                     <Checkbox
@@ -76,7 +84,7 @@ export const FieldsToUpdate: React.FC<FieldsToUpdateProps> = ({
                       }}
                     />
                   </TableCell>
-                  <TableCell>{field.name}</TableCell>
+                  <TableCell>{field.labelEn}</TableCell>
                   <TableCell>
                     <Select
                       value={
@@ -96,13 +104,15 @@ export const FieldsToUpdate: React.FC<FieldsToUpdateProps> = ({
                       displayEmpty
                     >
                       <MenuItem value="" disabled>
-                        Select Round
+                        -
                       </MenuItem>
-                      {[...Array(10).keys()].map((num) => (
-                        <MenuItem key={num + 1} value={num + 1}>
-                          {num + 1}
-                        </MenuItem>
-                      ))}
+                      {[...Array(field.pduData.numberOfRounds).keys()].map(
+                        (num) => (
+                          <MenuItem key={num + 1} value={num + 1}>
+                            {num + 1}
+                          </MenuItem>
+                        ),
+                      )}
                     </Select>
                   </TableCell>
                 </TableRow>

@@ -3606,10 +3606,10 @@ enum PeriodicFieldDataSubtype {
   BOOLEAN
 }
 
-type PeriodicFieldNode {
-  id: UUID!
+type PeriodicFieldNode implements Node {
   name: String!
   pduData: PeriodicFieldDataNode
+  id: ID!
 }
 
 input PositiveFeedbackTicketExtras {
@@ -3810,6 +3810,7 @@ type Query {
   businessArea(businessAreaSlug: String!): BusinessAreaNode
   allBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, slug: String): BusinessAreaNodeConnection
   allFieldsAttributes(flexField: Boolean, businessAreaSlug: String, programId: String): [FieldAttributeNode]
+  allPduFields(businessAreaSlug: String!, programId: String!): [FieldAttributeNode]
   allGroupsWithFields: [GroupAttributeNode]
   koboProject(uid: String!, businessAreaSlug: String!): KoboAssetObject
   allKoboProjects(businessAreaSlug: String!, onlyDeployed: Boolean, before: String, after: String, first: Int, last: Int): KoboAssetObjectConnection

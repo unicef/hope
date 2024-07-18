@@ -354,6 +354,12 @@ class Query(graphene.ObjectType):
         program_id=graphene.String(required=False, description="program id"),
         description="All field datatype meta.",
     )
+    all_pdu_fields = graphene.List(
+        FieldAttributeNode,
+        business_area_slug=graphene.String(required=True, description="The business area slug"),
+        program_id=graphene.String(required=True, description="program id"),
+        description="All pdu fields.",
+    )
     all_groups_with_fields = graphene.List(
         GroupAttributeNode,
         description="Get all groups that contains flex fields",
@@ -383,6 +389,13 @@ class Query(graphene.ObjectType):
 
     def resolve_cash_assist_url_prefix(parent, info: Any) -> str:
         return config.CASH_ASSIST_URL_PREFIX
+
+    def resolve_all_pdu_fields(parent, info: Any, business_area_slug: str, program_id: str) -> Dict:
+        return FlexibleAttribute.objects.filter(
+            program__business_area__slug=business_area_slug,
+            program_id=decode_id_string(program_id),
+            type=FlexibleAttribute.PDU,
+        )
 
     def resolve_all_fields_attributes(
         parent,
