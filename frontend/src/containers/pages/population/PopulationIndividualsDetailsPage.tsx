@@ -123,7 +123,9 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
           flexFieldsData={flexFieldsData}
           individual={individual as IndividualNode}
         />
-        <ProgrammeTimeSeriesFields  />
+        <ProgrammeTimeSeriesFields
+          flexFieldsData={flexFieldsData}
+          individual={individual as IndividualNode} />
         {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTable objectId={individual?.id} />
         )}

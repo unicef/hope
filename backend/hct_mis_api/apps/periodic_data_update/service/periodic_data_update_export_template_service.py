@@ -30,6 +30,8 @@ from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTempl
 class PeriodicDataUpdateExportTemplateService:
     PDU_SHEET = "Periodic Data Update"
     META_SHEET = "Meta"
+    META_ID_ADDRESS = "B1"
+    PROPERTY_ID_NAME = "pdu_template_id"
 
     def __init__(self, periodic_data_update_template: PeriodicDataUpdateTemplate):
         self.periodic_data_update_template = periodic_data_update_template
@@ -51,7 +53,9 @@ class PeriodicDataUpdateExportTemplateService:
         self._create_workbook()
         self._add_meta()
         self.ws_pdu.append(self._generate_header())
-        for individual in self._get_individuals_queryset():
+        queryset = self._get_individuals_queryset()
+        self.periodic_data_update_template.number_of_records = queryset.count()
+        for individual in queryset:
             row = self._generate_row(individual)
             if row:
                 self.ws_pdu.append(row)
@@ -69,6 +73,7 @@ class PeriodicDataUpdateExportTemplateService:
             tmp.seek(0)
             xlsx_obj.file.save(filename, File(tmp))
             self.periodic_data_update_template.file = xlsx_obj
+            self.periodic_data_update_template.status = PeriodicDataUpdateTemplate.Status.EXPORTED
             self.periodic_data_update_template.save()
 
     def _create_workbook(self) -> openpyxl.Workbook:
@@ -82,9 +87,9 @@ class PeriodicDataUpdateExportTemplateService:
 
     def _add_meta(self) -> None:
         self.ws_meta["A1"] = "Periodic Data Update Template ID"
-        self.ws_meta["B1"] = self.periodic_data_update_template.pk
+        self.ws_meta[self.META_ID_ADDRESS] = self.periodic_data_update_template.pk
         self.wb.custom_doc_props.append(
-            StringProperty(name="pdu_template_id", value=str(self.periodic_data_update_template.pk))
+            StringProperty(name=self.PROPERTY_ID_NAME, value=str(self.periodic_data_update_template.pk))
         )
 
     def _generate_header(self) -> list[str]:

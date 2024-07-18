@@ -43,7 +43,7 @@ export const exportPeriodicDataUpdateTemplate = async (
   const response = await api.get(
     `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${templateId}/export/`,
   );
-  return response.data;
+  return response;
 };
 
 export const fetchPeriodicDataUpdateTemplate = async (
@@ -54,7 +54,7 @@ export const fetchPeriodicDataUpdateTemplate = async (
   const response = await api.get(
     `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${templateId}/download/`,
   );
-  return response.data;
+  return response;
 };
 
 export const uploadPeriodicDataUpdateTemplate = async (
@@ -71,7 +71,7 @@ export const uploadPeriodicDataUpdateTemplate = async (
   });
 
   const response = await api.post(
-    `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/`,
+    `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-uploads/upload/`,
     formData,
   );
 

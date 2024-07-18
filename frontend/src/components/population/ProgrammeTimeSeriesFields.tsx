@@ -12,6 +12,9 @@ import {
 import styled from 'styled-components';
 import { Title } from '@core/Title';
 import { useTranslation } from 'react-i18next';
+import {useArrayToDict} from "@hooks/useArrayToDict";
+import {AllIndividualsFlexFieldsAttributesQuery, IndividualNode} from "@generated/graphql";
+import {UniversalMoment} from "@core/UniversalMoment";
 
 const StyledTableCell = styled(MuiTableCell)`
   color: #adadad !important;
@@ -19,35 +22,40 @@ const StyledTableCell = styled(MuiTableCell)`
 
 //TODO MS: add proper type
 interface ProgrammeTimeSeriesFieldsProps {
-  program?: any;
+  individual: IndividualNode;
+  flexFieldsData: AllIndividualsFlexFieldsAttributesQuery;
 }
 
 export const ProgrammeTimeSeriesFields = ({
-  program,
+                                            individual,
+                                            flexFieldsData
 }: ProgrammeTimeSeriesFieldsProps): React.ReactElement => {
   const { t } = useTranslation();
-  //TODO MS: remove
-  console.log(program);
+  const flexAttributesDict = useArrayToDict(
+    flexFieldsData?.allIndividualsFlexFieldsAttributes,
+    'name',
+    '*',
+  );
+  const rows = [];
+  for (let fieldName of Object.keys(individual.flexFields)) {
+    if(flexAttributesDict[fieldName]?.type !=='PDU'){
+      continue;
+    }
+    for (let roundNumber of Object.keys(individual.flexFields[fieldName])) {
+      const roundData = individual.flexFields[fieldName][roundNumber];
+      const roundName = flexAttributesDict[fieldName].pduData.roundsNames[parseInt(roundNumber) - 1];
+      const value = roundData.value;
+      const dateOfCollection = roundData.collection_date;
+      rows.push({
+        fieldName: flexAttributesDict[fieldName].labelEn,
+        roundNumber: roundNumber,
+        roundName: roundName,
+        value,
+        dateOfCollection,
+      })
+    }
+  }
 
-  // Example data structure for the table rows
-  // Replace or modify according to your actual data source
-  const rows = [
-    {
-      fieldName: 'Example Field 1',
-      roundNumber: 1,
-      roundName: 'Round 1',
-      value: 'Value 1',
-      dateOfCollection: '2023-01-01',
-    },
-    {
-      fieldName: 'Example Field 2',
-      roundNumber: 2,
-      roundName: 'Round 2',
-      value: 'Value 2',
-      dateOfCollection: '2023-02-01',
-    },
-    // Add more rows as needed
-  ];
 
   return (
     <ContainerColumnWithBorder>
@@ -80,7 +88,7 @@ export const ProgrammeTimeSeriesFields = ({
                 <TableCell align="right">{row.roundNumber}</TableCell>
                 <TableCell align="left">{row.roundName}</TableCell>
                 <TableCell align="left">{row.value}</TableCell>
-                <TableCell align="right">{row.dateOfCollection}</TableCell>
+                <TableCell align="right"><UniversalMoment>{row.dateOfCollection}</UniversalMoment></TableCell>
               </TableRow>
             ))}
           </TableBody>

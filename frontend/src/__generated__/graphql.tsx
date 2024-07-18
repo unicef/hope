@@ -10204,7 +10204,7 @@ export type AllHouseholdsFlexFieldsAttributesQuery = { __typename?: 'Query', all
 export type AllIndividualsFlexFieldsAttributesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AllIndividualsFlexFieldsAttributesQuery = { __typename?: 'Query', allIndividualsFlexFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', isFlexField?: boolean | null, id?: string | null, type?: string | null, name?: string | null, required?: boolean | null, associatedWith?: string | null, labelEn?: string | null, hint?: string | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null };
+export type AllIndividualsFlexFieldsAttributesQuery = { __typename?: 'Query', allIndividualsFlexFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', isFlexField?: boolean | null, id?: string | null, type?: string | null, name?: string | null, required?: boolean | null, associatedWith?: string | null, labelEn?: string | null, hint?: string | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, numberOfRounds: number, roundsNames: Array<string> } | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null };
 
 export type AllPduFieldsQueryVariables = Exact<{
   businessAreaSlug: Scalars['String']['input'];
@@ -17173,6 +17173,11 @@ export const AllIndividualsFlexFieldsAttributesDocument = gql`
     labels {
       language
       label
+    }
+    pduData {
+      id
+      numberOfRounds
+      roundsNames
     }
     labelEn
     hint
