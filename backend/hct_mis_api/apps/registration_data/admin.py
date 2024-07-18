@@ -29,6 +29,7 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
 )
+from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
@@ -123,6 +124,16 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             logger.exception(e)
             self.message_user(request, "An error occurred while processing RDI Merge task", messages.ERROR)
 
+    @staticmethod
+    def _delete_rdi(rdi: RegistrationDataImport) -> None:
+        pending_individuals_ids = list(
+            PendingIndividual.objects.filter(registration_data_import=rdi).values_list("id", flat=True)
+        )
+        rdi.delete()
+        # remove elastic search records linked to individuals
+        business_area_slug = rdi.business_area.slug
+        remove_elasticsearch_documents_by_matching_ids(pending_individuals_ids, get_individual_doc(business_area_slug))
+
     @button(
         permission=is_root,
         enabled=lambda btn: btn.original.status not in [RegistrationDataImport.MERGED, RegistrationDataImport.MERGING],
@@ -130,18 +141,10 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
     def delete_rdi(self, request: HttpRequest, pk: UUID) -> Any:  # TODO: typing
         try:
             if request.method == "POST":
-                with transaction.atomic:
+                with transaction.atomic():
                     rdi = RegistrationDataImport.objects.get(pk=pk)
                     rdi_name = rdi.name
-                    pending_individuals_ids = list(
-                        PendingIndividual.objects.filter(registration_data_import=rdi).values_list("id", flat=True)
-                    )
-                    rdi.delete()
-                    # remove elastic search records linked to individuals
-                    business_area_slug = rdi.business_area.slug
-                    remove_elasticsearch_documents_by_matching_ids(
-                        pending_individuals_ids, get_individual_doc(business_area_slug)
-                    )
+                    self._delete_rdi(rdi)
                     self.message_user(request, "RDI Deleted")
                     LogEntry.objects.log_action(
                         user_id=request.user.pk,
@@ -200,28 +203,28 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             query |= Q(**{f"{related_name}__registration_data_import": rdi})
         return query
 
+    @staticmethod
+    def _delete_merged_rdi(rdi: RegistrationDataImport) -> None:
+        individuals_ids = list(Individual.objects.filter(registration_data_import=rdi).values_list("id", flat=True))
+        GrievanceTicket.objects.filter(
+            RegistrationDataImportAdmin.generate_query_for_all_grievances_tickets(rdi)
+        ).filter(business_area=rdi.business_area).delete()
+        rdi.delete()
+        # remove elastic search records linked to individuals
+        business_area_slug = rdi.business_area.slug
+        remove_elasticsearch_documents_by_matching_ids(individuals_ids, get_individual_doc(business_area_slug))
+
     @button(
         permission=is_root,
         visible=lambda btn: RegistrationDataImportAdmin.delete_merged_rdi_visible(btn.original),
     )
     def delete_merged_rdi(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
         try:
+            rdi = RegistrationDataImport.objects.get(pk=pk)
             if request.method == "POST":
-                with transaction.atomic:
-                    rdi = RegistrationDataImport.objects.get(pk=pk)
+                with transaction.atomic():
                     rdi_name = rdi.name
-                    individuals_ids = list(
-                        Individual.objects.filter(registration_data_import=rdi).values_list("id", flat=True)
-                    )
-                    GrievanceTicket.objects.filter(
-                        RegistrationDataImportAdmin.generate_query_for_all_grievances_tickets(rdi)
-                    ).filter(business_area=rdi.business_area).delete()
-                    rdi.delete()
-                    # remove elastic search records linked to individuals
-                    business_area_slug = rdi.business_area.slug
-                    remove_elasticsearch_documents_by_matching_ids(
-                        individuals_ids, get_individual_doc(business_area_slug)
-                    )
+                    self._delete_merged_rdi(rdi)
                     self.message_user(request, "RDI Deleted")
                     LogEntry.objects.log_action(
                         user_id=request.user.pk,
@@ -233,13 +236,21 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                     )
                     return HttpResponseRedirect(reverse("admin:registration_data_registrationdataimport_changelist"))
             else:
+                number_of_households = rdi.households.count()
+                number_of_individuals = rdi.individuals.count()
+                number_of__household_selections = HouseholdSelection.objects.filter(
+                    household__registration_data_import=rdi,
+                ).count()
                 return confirm_action(
                     self,
                     request,
                     self.delete_rdi,
                     mark_safe(
-                        """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
-                    <h3>All households connected to this Registration data import will be deleted</h3>
+                        f"""<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                    <h3>Deleting the RDI will also result in the removal of related households, individuals, and their associated grievance tickets.</h3>
+                    <h3>Consequently, these households will no longer be part of any Target Population, if they were included previously.</h3>
+                    <br>
+                    <h4>This action will result in removing: {number_of_households} Households, {number_of_individuals} Individuals and {number_of__household_selections} HouseholdSelections</h4>
                     """
                     ),
                     "Successfully executed",
