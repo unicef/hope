@@ -63,17 +63,46 @@ export const programValidationSchema = (
       }),
     ),
     pduFields: Yup.array().of(
-      Yup.object().shape({
-        name: Yup.string().required(t('Field name is required')),
-        pduData: Yup.object().shape({
-          subtype: Yup.string().required(t('Subtype is required')),
-          numberOfRounds: Yup.number()
-            .required(t('Number of Rounds is required'))
-            .min(1, t('At least one round is required')),
-          roundsNames: Yup.array().of(
-            Yup.string().required(t('Round name is required')),
-          ),
-        }),
-      }),
+      Yup.object()
+        .shape({
+          name: Yup.string().nullable(),
+          pduData: Yup.object().shape({
+            subtype: Yup.string().nullable(),
+            numberOfRounds: Yup.number().nullable(),
+            roundsNames: Yup.array()
+              .of(Yup.string().required(t('Round name is required')))
+              .test(
+                'rounds-match-number',
+                t('Rounds names must match the number of rounds'),
+                function (value) {
+                  const { numberOfRounds } = this.parent;
+                  if (!numberOfRounds) return true;
+                  return value.length === numberOfRounds;
+                },
+              ),
+          }),
+        })
+        .test(
+          'pduFields-validation',
+          t('Please complete the PDU fields correctly.'),
+          function (value) {
+            const { name, pduData } = value;
+            const { subtype, numberOfRounds, roundsNames } = pduData;
+
+            const isInitialState =
+              !name &&
+              !subtype &&
+              numberOfRounds === null &&
+              roundsNames.length === 0;
+
+            const isValidState =
+              name &&
+              subtype &&
+              numberOfRounds &&
+              roundsNames.length === numberOfRounds;
+
+            return isInitialState || isValidState;
+          },
+        ),
     ),
   });

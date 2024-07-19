@@ -70,8 +70,28 @@ export const CreateProgramPage = (): ReactElement => {
           }))
         : [];
     const { editMode, ...requestValues } = values;
-    const pduFieldsToSend =
-      values.pduFields.length > 0 ? values.pduFields : null;
+    const initialPduFieldState = {
+      name: '',
+      pduData: {
+        subtype: '',
+        numberOfRounds: null,
+        roundsNames: [],
+      },
+    };
+
+    const pduFieldsToSend = values.pduFields.every(
+      (pduField) =>
+        pduField.name === initialPduFieldState.name &&
+        pduField.pduData.subtype === initialPduFieldState.pduData.subtype &&
+        pduField.pduData.numberOfRounds ===
+          initialPduFieldState.pduData.numberOfRounds &&
+        pduField.pduData.roundsNames.length ===
+          initialPduFieldState.pduData.roundsNames.length,
+    )
+      ? null
+      : values.pduFields.length > 0
+        ? values.pduFields
+        : null;
 
     try {
       const response = await mutate({
@@ -142,6 +162,7 @@ export const CreateProgramPage = (): ReactElement => {
       'cashPlus',
       'frequencyOfPayments',
     ],
+    ['pduField'],
     ['partnerAccess'],
   ];
 
@@ -165,7 +186,6 @@ export const CreateProgramPage = (): ReactElement => {
     <Formik
       initialValues={initialValues}
       onSubmit={(values) => {
-        console.log('values', values);
         handleSubmit(values);
       }}
       initialTouched={{
@@ -182,6 +202,7 @@ export const CreateProgramPage = (): ReactElement => {
         errors,
         setErrors,
       }) => {
+        console.log('errors', errors);
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
           .map((partner) => ({
@@ -197,6 +218,8 @@ export const CreateProgramPage = (): ReactElement => {
             step,
             setStep,
             setFieldTouched,
+            values,
+            setErrors,
           });
         };
 
@@ -263,8 +286,6 @@ export const CreateProgramPage = (): ReactElement => {
                     setStep={setStep}
                     pdusubtypeChoicesData={pdusubtypeChoicesData}
                     errors={errors}
-                    setErrors={setErrors}
-                    setFieldTouched={setFieldTouched}
                   />
                 )}
                 {step === 2 && (
