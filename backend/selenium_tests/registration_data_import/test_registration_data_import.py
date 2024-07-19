@@ -11,6 +11,8 @@ from page_object.registration_data_import.registration_data_import import (
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.account.models import Partner
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo.models import Area, AreaType, Country
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.django_db(transaction=True, databases=["registration_datahub", "default"])
@@ -50,6 +52,31 @@ def unhcr_partner() -> Partner:
 @pytest.fixture
 def wfp_partner() -> Partner:
     yield PartnerFactory(name="WFP")
+
+
+@pytest.fixture
+def country() -> Country:
+    yield Country.objects.get(name="Afghanistan")
+
+
+@pytest.fixture
+def kobo_setup(business_area: BusinessArea, country: Country) -> None:
+    business_area.kobo_token = "kobo_token"
+    business_area.kobo_username = "hope_kobo_admin_nga"
+    business_area.save()
+    business_area.countries.set([country])
+
+
+@pytest.fixture
+def areas(country: Country) -> None:
+    area_type_1 = AreaType.objects.create(name="State", area_level=1, country=country)
+    area_type_2 = AreaType.objects.create(
+        name="Local government area", area_level=2, country=country, parent=area_type_1
+    )
+    area_type_3 = AreaType.objects.create(name="Ward", area_level=3, country=country, parent=area_type_2)
+    area_1 = Area.objects.create(name="Borno", p_code="NG008", area_type=area_type_1)
+    area_2 = Area.objects.create(name="Bama", p_code="NG008003", area_type=area_type_2, parent=area_1)
+    Area.objects.create(name="Andara", p_code="NG008003001", area_type=area_type_3, parent=area_2)
 
 
 @pytest.mark.usefixtures("login")
@@ -133,7 +160,7 @@ class TestSmokeRegistrationDataImport:
 
 
 class TestRegistrationDataImport:
-    def test_smoke_registration_data_import_happy_path(
+    def test_registration_data_import_happy_path(
         self,
         registration_datahub: None,
         login: None,
@@ -174,3 +201,63 @@ class TestRegistrationDataImport:
         )
         pageDetailsRegistrationDataImport.getImportedHouseholdsRow(0).find_elements("tag name", "td")[1].click()
         assert hausehold_id in pageHouseholdsDetails.getPageHeaderTitle().text
+
+    @pytest.mark.vcr(ignore_localhost=True)
+    def test_import_empty_kobo_form(
+        self, login: None, create_programs: None, pageRegistrationDataImport: RegistrationDataImport, kobo_setup: None
+    ) -> None:
+        # Go to Registration Data Import
+        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm").click()
+        pageRegistrationDataImport.getNavRegistrationDataImport().click()
+        assert pageRegistrationDataImport.titleText in pageRegistrationDataImport.getPageHeaderTitle().text
+        pageRegistrationDataImport.getButtonImport().click()
+        # Check Elements on Page
+        assert pageRegistrationDataImport.getButtonImportFile().get_property("disabled")
+        pageRegistrationDataImport.getImportTypeSelect().click()
+        assert pageRegistrationDataImport.koboItemText in pageRegistrationDataImport.getKoboItem().text
+        pageRegistrationDataImport.getKoboItem().click()
+        pageRegistrationDataImport.getInputName().send_keys("Test 1234 !")
+
+        pageRegistrationDataImport.getKoboProjectSelect().click()
+        pageRegistrationDataImport.select_listbox_element("Education new programme").click()
+
+        assert pageRegistrationDataImport.buttonImportFileIsEnabled()
+        assert "0" in pageRegistrationDataImport.getNumberOfHouseholds().text
+        assert "0" in pageRegistrationDataImport.getNumberOfIndividuals().text
+        pageRegistrationDataImport.getButtonImportFile().click()
+        pageRegistrationDataImport.checkAlert("Cannot import empty form")
+
+    @pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["elasticsearch"])
+    def test_import_kobo_form(
+        self,
+        login: None,
+        create_programs: None,
+        pageRegistrationDataImport: RegistrationDataImport,
+        pageDetailsRegistrationDataImport: RDIDetailsPage,
+        kobo_setup: None,
+        areas: None,
+    ) -> None:
+        # Go to Registration Data Import
+        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm").click()
+        pageRegistrationDataImport.getNavRegistrationDataImport().click()
+        assert pageRegistrationDataImport.titleText in pageRegistrationDataImport.getPageHeaderTitle().text
+        pageRegistrationDataImport.getButtonImport().click()
+        # Check Elements on Page
+        assert pageRegistrationDataImport.getButtonImportFile().get_property("disabled")
+        pageRegistrationDataImport.getImportTypeSelect().click()
+        assert pageRegistrationDataImport.koboItemText in pageRegistrationDataImport.getKoboItem().text
+        pageRegistrationDataImport.getKoboItem().click()
+        pageRegistrationDataImport.getInputName().send_keys("Test 1234 !")
+
+        pageRegistrationDataImport.getKoboProjectSelect().click()
+        pageRegistrationDataImport.select_listbox_element("UNICEF NGA Education").click()
+
+        assert pageRegistrationDataImport.buttonImportFileIsEnabled()
+        assert "1" in pageRegistrationDataImport.getNumberOfHouseholds().text
+        assert "2" in pageRegistrationDataImport.getNumberOfIndividuals().text
+
+        pageRegistrationDataImport.getButtonImportFile().click()
+        pageRegistrationDataImport.disappearButtonImportFile()
+        pageDetailsRegistrationDataImport.waitForStatus("IN REVIEW")
+        assert "1" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfHouseholds().text
+        assert "2" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfIndividuals().text
