@@ -21,12 +21,19 @@ from hct_mis_api.apps.account.api.permissions import (
     PDUUploadPermission,
     PDUViewListAndDetailsPermission,
 )
-from hct_mis_api.apps.core.api.mixins import ActionMixin, BusinessAreaProgramMixin
+from hct_mis_api.apps.core.api.mixins import (
+    ActionMixin,
+    BusinessAreaProgramMixin,
+    ProgramMixin,
+)
+from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.periodic_data_update.api.caches import (
     PDUTemplateKeyConstructor,
     PDUUpdateKeyConstructor,
+    PeriodicDataFieldKeyConstructor,
 )
 from hct_mis_api.apps.periodic_data_update.api.serializers import (
+    PeriodicDataFieldSerializer,
     PeriodicDataUpdateTemplateCreateSerializer,
     PeriodicDataUpdateTemplateDetailSerializer,
     PeriodicDataUpdateTemplateListSerializer,
@@ -162,3 +169,21 @@ class PeriodicDataUpdateUploadViewSet(
             )
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PeriodicDataFieldViewSet(
+    ProgramMixin,
+    mixins.ListModelMixin,
+    GenericViewSet,
+):
+    serializer_class = PeriodicDataFieldSerializer
+    filter_backends = (OrderingFilter,)
+
+    def get_queryset(self) -> QuerySet:
+        program = self.get_program()
+        return FlexibleAttribute.objects.filter(program=program, type=FlexibleAttribute.PDU)
+
+    @etag_decorator(PeriodicDataFieldKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=PeriodicDataFieldKeyConstructor())
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)

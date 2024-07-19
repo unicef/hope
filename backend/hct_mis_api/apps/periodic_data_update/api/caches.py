@@ -9,9 +9,17 @@ class PDUUploadListVersionsKeyBit(BusinessAreaAndProgramKeyBit):
     specific_view_cache_key = "periodic_data_update_upload_list"
 
 
+class PeriodicDataFieldListVersionsKeyBit(BusinessAreaAndProgramKeyBit):
+    specific_view_cache_key = "periodic_data_field_list"
+
+
 class PDUTemplateKeyConstructor(KeyConstructorMixin):
     periodic_data_update_template_list_versions = PDUTemplateListVersionsKeyBit()
 
 
 class PDUUpdateKeyConstructor(KeyConstructorMixin):
     periodic_data_update_upload_list_versions = PDUUploadListVersionsKeyBit()
+
+
+class PeriodicDataFieldKeyConstructor(KeyConstructorMixin):
+    periodic_data_field_list_versions = PeriodicDataFieldListVersionsKeyBit()

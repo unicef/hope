@@ -4,7 +4,11 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
 
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    FlexibleAttribute,
+    PeriodicFieldData,
+)
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.periodic_data_update.models import (
     PeriodicDataUpdateTemplate,
@@ -43,7 +47,7 @@ class PeriodicDataUpdateTemplateCreateSerializer(serializers.ModelSerializer):
         field_names = [item["field"] for item in rounds_data]
         field_names_set = set(field_names)
         if len(field_names) != len(field_names_set):
-            raise serializers.ValidationError({"rounds_data": "Duplicate field names found."})
+            raise serializers.ValidationError({"rounds_data": "Each Field can only be used once in the template."})
         return data
 
     def create(self, validated_data: Dict[str, Any]) -> PeriodicDataUpdateTemplate:
@@ -83,3 +87,20 @@ class PeriodicDataUpdateUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = PeriodicDataUpdateUpload
         fields = ("file",)
+
+
+class PeriodicFieldDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PeriodicFieldData
+        fields = ("subtype", "number_of_rounds", "rounds_names")
+
+
+class PeriodicDataFieldSerializer(serializers.ModelSerializer):
+    pdu_data = PeriodicFieldDataSerializer()
+
+    class Meta:
+        model = FlexibleAttribute
+        fields = (
+            "name",
+            "pdu_data",
+        )
