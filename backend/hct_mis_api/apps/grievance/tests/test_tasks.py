@@ -62,7 +62,7 @@ class TestDeduplicateAndCheckAgainstSanctionsListTask(TestCase):
     )
     def test_execute(
         self,
-        execute_mock: Any,
+        sanction_execute_mock: Any,
         create_needs_adjudication_tickets_mock: Any,
         deduplicate_individuals_mock: Any,
         deduplicate_mock: Any,
@@ -95,4 +95,36 @@ class TestDeduplicateAndCheckAgainstSanctionsListTask(TestCase):
         assert deduplicate_mock.call_count == 1
         assert deduplicate_individuals_mock.call_count == 1
         assert create_needs_adjudication_tickets_mock.call_count == 2
-        assert execute_mock.call_count == 1
+        assert sanction_execute_mock.call_count == 0
+
+    @patch("hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.populate_index")
+    @patch("hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.HardDocumentDeduplication.deduplicate")
+    @patch(
+        "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.DeduplicateTask.deduplicate_individuals_from_other_source"
+    )
+    @patch("hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.create_needs_adjudication_tickets")
+    @patch(
+        "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.CheckAgainstSanctionListPreMergeTask.execute"
+    )
+    def test_execute_enabled_screening(
+        self,
+        sanction_execute_mock: Any,
+        create_needs_adjudication_tickets_mock: Any,
+        deduplicate_individuals_mock: Any,
+        deduplicate_mock: Any,
+        populate_index_mock: Any,
+    ) -> None:
+        self.business_area.postpone_deduplication = False
+        self.business_area.screen_beneficiary = True
+        self.business_area.save()
+
+        DeduplicateAndCheckAgainstSanctionsListTask().execute(
+            should_populate_index=False,
+            individuals_ids=[str(individual.id) for individual in self.individuals],
+        )
+
+        assert populate_index_mock.call_count == 0
+        assert deduplicate_mock.call_count == 1
+        assert deduplicate_individuals_mock.call_count == 1
+        assert create_needs_adjudication_tickets_mock.call_count == 2
+        assert sanction_execute_mock.call_count == 1
