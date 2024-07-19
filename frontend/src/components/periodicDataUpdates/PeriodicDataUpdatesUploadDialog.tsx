@@ -36,7 +36,7 @@ export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
   const [fileToImport, setFileToImport] = useState<File | null>(null);
   const { isActiveProgram } = useProgramContext();
   const { t } = useTranslation();
-  const { mutate, error } = useUploadPeriodicDataUpdateTemplate();
+  const { mutate, error, data } = useUploadPeriodicDataUpdateTemplate();
 
   const handleFileUpload = (): void => {
     if (fileToImport) {
@@ -64,6 +64,16 @@ export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
       });
     }
   };
+  let errorMessage = null;
+  if (error && error?.data?.error) {
+    errorMessage = <Error>{error?.data?.error}</Error>;
+  } else if (error) {
+    errorMessage = (
+      <Error>
+        {t('Error uploading file:')} {error.message}
+      </Error>
+    );
+  }
 
   return (
     <>
@@ -106,11 +116,7 @@ export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
                 setFileToImport(file);
               }}
             />
-            {error && (
-              <Error>
-                {t('Error uploading file:')} {error.message}
-              </Error>
-            )}
+            {errorMessage}
           </>
           <DialogActions>
             <Button

@@ -74,7 +74,7 @@ export const uploadPeriodicDataUpdateTemplate = async (
     `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-uploads/upload/`,
     formData,
   );
-
+  console.log('response', response)
   return response;
 };
 

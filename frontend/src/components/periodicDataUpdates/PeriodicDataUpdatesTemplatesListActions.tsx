@@ -24,7 +24,6 @@ export const useDownloadPeriodicDataUpdateTemplate = () => {
       )
     },
     onSuccess: (data) => {
-      console.log('data', data)
       if (data.url) {
         window.open(data.url);
       }

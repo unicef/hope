@@ -47,7 +47,7 @@ const FormErrorDisplay = ({ formErrors }) => {
                 <strong>{field}</strong>
                 {fieldErrors.map((err, errIdx) => (
                   <div key={errIdx} style={{ color: 'red' }}>
-                    {err.message} (Code: {err.code})
+                    {err.message}
                   </div>
                 ))}
               </li>
@@ -93,7 +93,6 @@ export const PeriodicDataUpdatesUploadDetailsDialog: React.FC<
   });
 
   if (isLoading) return <LoadingComponent />;
-  console.log('uploadDetailsData', uploadDetailsData);
   return (
     <Dialog open={open} onClose={onClose} scroll="paper">
       <DialogTitle>{t('Periodic Data Updates Errors')}</DialogTitle>

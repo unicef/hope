@@ -51,7 +51,13 @@ export const api = {
     const response = await fetch(`${this.baseURL}${url}`, fetchOptions);
 
     if (!response.ok) {
-      throw new Error(`Error posting data to ${url}`);
+      const error =Error(`Error posting data to ${url}`);
+      try {
+        error.data = await response.json();
+      }catch (e) {
+        error.data = null;
+      }
+      throw error;
     }
 
     const text = await response.text();

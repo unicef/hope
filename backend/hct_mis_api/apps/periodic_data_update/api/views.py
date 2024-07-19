@@ -7,6 +7,7 @@ from constance import config
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework.filters import OrderingFilter
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -154,11 +155,17 @@ class PeriodicDataUpdateUploadViewSet(
         )
         if serializer.is_valid():
             serializer.validated_data["created_by"] = request.user
-            serializer.validated_data[
-                "template"
-            ] = PeriodicDataUpdateImportService.read_periodic_data_update_template_object(
-                serializer.validated_data["file"]
-            )
+            try:
+                serializer.validated_data[
+                    "template"
+                ] = PeriodicDataUpdateImportService.read_periodic_data_update_template_object(
+                    serializer.validated_data["file"]
+                )
+            except DjangoValidationError as e:
+                return Response(
+                    data={"error": e.message},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             upload_instance = serializer.save()
 
             upload_instance.queue()
