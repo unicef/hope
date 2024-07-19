@@ -25,7 +25,7 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.core.validators import raise_program_status_is
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_task
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.steficon.schema import SteficonRuleNode
 from hct_mis_api.apps.targeting.celery_tasks import (
@@ -155,11 +155,14 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         user = info.context.user
         input_data = kwargs.pop("input")
         program = get_object_or_404(Program, pk=decode_id_string(input_data.get("program_id")))
+        program_cycle = get_object_or_404(ProgramCycle, pk=decode_id_string(input_data.get("program_cycle_id")))
 
         cls.has_permission(info, Permissions.TARGETING_CREATE, program.business_area)
 
         if program.status != Program.ACTIVE:
             raise ValidationError("Only Active program can be assigned to Targeting")
+        if program_cycle.status != ProgramCycle.FINISHED:
+            raise ValidationError("Not possible to assign Finished Program Cycle to Targeting")
 
         tp_name = input_data.get("name", "").strip()
         if TargetPopulation.objects.filter(name=tp_name, program=program, is_removed=False).exists():
@@ -175,6 +178,7 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             business_area=business_area,
             excluded_ids=input_data.get("excluded_ids", "").strip(),
             exclusion_reason=input_data.get("exclusion_reason", "").strip(),
+            program_cycle=program_cycle,
         )
         target_population.targeting_criteria = targeting_criteria
         target_population.program = program
@@ -219,6 +223,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         excluded_ids = input_data.get("excluded_ids")
         exclusion_reason = input_data.get("exclusion_reason")
         targeting_criteria_input = input_data.get("targeting_criteria")
+        program_cycle_id_encoded = input_data.get("program_cycle_id")
 
         should_rebuild_stats = False
         should_rebuild_list = False
@@ -256,6 +261,12 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             target_population.program = program
         else:
             program = target_population.program
+
+        if program_cycle_id_encoded:
+            program_cycle = get_object_or_404(ProgramCycle, pk=decode_id_string(program_cycle_id_encoded))
+            if program_cycle.status != ProgramCycle.FINISHED:
+                raise ValidationError("Not possible to assign Finished Program Cycle to Targeting")
+            target_population.program_cycle = program_cycle
 
         if targeting_criteria_input:
             should_rebuild_list = True

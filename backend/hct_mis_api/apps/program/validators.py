@@ -139,15 +139,6 @@ class ProgramCycleValidator(CommonValidator):
         if raise_error:
             raise ValidationError("Programme Cycles' timeframes must not overlap.")
 
-    # @classmethod
-    # def validate_program_cycle_name(cls, *args: Any, **kwargs: Any) -> None:
-    #     # A user can’t leave the Program Cycle name empty.
-    #     program = kwargs.get("program")
-    #     program_cycle = kwargs.get("program_cycle")
-    #     cycles = program.cycles.exclude(id=program_cycle.pk) if program_cycle else program.cycles.all()
-    #     if cycles.filter(name=kwargs["name"]).exists():
-    #         raise ValidationError("Programme Cycles' name should be unique.")
-
     @classmethod
     def validate_program_cycle_update_name_and_dates(cls, *args: Any, **kwargs: Any) -> None:
         if (program_cycle := kwargs.get("program_cycle")) and not kwargs.get("is_create_action"):
@@ -159,8 +150,8 @@ class ProgramCycleValidator(CommonValidator):
                     "Not possible leave the Programme Cycle end date empty if it was empty upon starting the edit."
                 )
 
-            if program_cycle.name and "name" in kwargs and kwargs.get("name") is None:
-                raise ValidationError("Not possible leave the Programme Cycle name empty.")
+            if program_cycle.title and "title" in kwargs and kwargs.get("title") is None:
+                raise ValidationError("Not possible leave the Programme Cycle title empty.")
 
 
 class ProgramCycleDeletionValidator(BaseValidator):
