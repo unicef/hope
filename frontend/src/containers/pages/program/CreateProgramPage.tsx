@@ -180,6 +180,7 @@ export const CreateProgramPage = (): ReactElement => {
         setFieldTouched,
         setFieldValue,
         errors,
+        setErrors,
       }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
@@ -262,6 +263,8 @@ export const CreateProgramPage = (): ReactElement => {
                     setStep={setStep}
                     pdusubtypeChoicesData={pdusubtypeChoicesData}
                     errors={errors}
+                    setErrors={setErrors}
+                    setFieldTouched={setFieldTouched}
                   />
                 )}
                 {step === 2 && (

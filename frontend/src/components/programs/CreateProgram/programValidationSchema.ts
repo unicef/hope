@@ -36,7 +36,7 @@ export const programValidationSchema = (
             )
           : schema,
       )
-      .when('editMode', ([editMode], schema) => {
+      .when('editMode', (editMode, schema) => {
         return editMode
           ? schema
           : schema.min(today, t('End Date cannot be in the past'));
