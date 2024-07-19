@@ -288,6 +288,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         payment_plan_managerial_viewset = PaymentPlanManagerialViewSet()
         assert payment_plan_managerial_viewset._get_action_permission(action_name) == result
 
+
 #  commented until we have payment plans used via API
 # class TestPaymentPlanList(PaymentPlanTestMixin):
 #     def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:

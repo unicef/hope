@@ -37,6 +37,15 @@ class PeriodicDataUpdateTemplateCreateSerializer(serializers.ModelSerializer):
             "filters",
         )
 
+    def validate(self, data):
+        rounds_data = data.get("rounds_data", [])
+        # Check for duplicate field names
+        field_names = [item["field"] for item in rounds_data]
+        field_names_set = set(field_names)
+        if len(field_names) != len(field_names_set):
+            raise serializers.ValidationError({"rounds_data": "Duplicate field names found."})
+        return data
+
     def create(self, validated_data: Dict[str, Any]) -> PeriodicDataUpdateTemplate:
         validated_data["created_by"] = self.context["request"].user
         business_area_slug = self.context["request"].parser_context["kwargs"]["business_area"]

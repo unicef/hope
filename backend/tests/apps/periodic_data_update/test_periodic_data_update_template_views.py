@@ -400,3 +400,42 @@ class TestPeriodicDataUpdateTemplateViews:
         assert template.rounds_data == data["rounds_data"]
         assert template.filters == data["filters"]
         assert PeriodicDataUpdateTemplate.objects.filter(id=response_json["id"]).first().file is not None
+
+    def test_create_periodic_data_update_template_duplicate_field(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PDU_TEMPLATE_CREATE],
+            self.afghanistan,
+            self.program1,
+        )
+        data = {
+            "rounds_data": [
+                {
+                    "field": "Vaccination Records Update",
+                    "round": 2,
+                    "round_name": "February vaccination",
+                },
+                {
+                    "field": "Vaccination Records Update",
+                    "round": 4,
+                    "round_name": "April",
+                },
+            ],
+            "filters": {
+                "registration_data_import_id": 1,
+                "target_population_id": 1,
+                "received_assistance": True,
+            },
+        }
+        response = self.client.post(self.url_create_pdu_template_program1, data=data)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+        response_json = response.json()
+        assert response_json == {"rounds_data": ["Duplicate field names found."]}
