@@ -562,7 +562,7 @@ class PaymentPlanFactory(DjangoModelFactory):
     unicef_id = factory.Faker("uuid4")
     target_population = factory.SubFactory(TargetPopulationFactory)
     program = factory.SubFactory(RealProgramFactory)
-    program_cycle = factory.SubFactory(ProgramCycleFactory, program=lambda o: o.program)
+    program_cycle = factory.LazyAttribute(lambda o: o.program.cycles.first())
     currency = factory.fuzzy.FuzzyChoice(CURRENCY_CHOICES, getter=lambda c: c[0])
 
     dispersion_start_date = factory.Faker(
