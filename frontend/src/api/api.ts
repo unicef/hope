@@ -53,8 +53,10 @@ export const api = {
     if (!response.ok) {
       const error =Error(`Error posting data to ${url}`);
       try {
+        // @ts-ignore
         error.data = await response.json();
       }catch (e) {
+        // @ts-ignore
         error.data = null;
       }
       throw error;

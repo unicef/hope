@@ -65,8 +65,11 @@ export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
     }
   };
   let errorMessage = null;
+  // @ts-ignore
   if (error && error?.data?.error) {
+    // @ts-ignore
     errorMessage = <Error>{error?.data?.error}</Error>;
+
   } else if (error) {
     errorMessage = (
       <Error>

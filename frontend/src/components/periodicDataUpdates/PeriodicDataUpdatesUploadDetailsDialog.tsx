@@ -45,6 +45,7 @@ const FormErrorDisplay = ({ formErrors }) => {
             {Object.entries(error.errors).map(([field, fieldErrors], idx) => (
               <li key={idx}>
                 <strong>{field}</strong>
+                {/*@ts-ignore*/}
                 {fieldErrors.map((err, errIdx) => (
                   <div key={errIdx} style={{ color: 'red' }}>
                     {err.message}
