@@ -41,7 +41,7 @@ class PeriodicDataUpdateTemplateCreateSerializer(serializers.ModelSerializer):
             "filters",
         )
 
-    def validate(self, data):
+    def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
         rounds_data = data.get("rounds_data", [])
         # Check for duplicate field names
         field_names = [item["field"] for item in rounds_data]
