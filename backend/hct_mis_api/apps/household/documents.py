@@ -129,7 +129,7 @@ class IndividualDocumentAfghanistan(IndividualDocument):
         settings = index_settings
 
     def get_queryset(self) -> QuerySet[Individual]:
-        return Individual.objects.filter(business_area__slug="afghanistan")
+        return Individual.all_merge_status_objects.filter(business_area__slug="afghanistan")
 
 
 @registry.register_document
@@ -139,7 +139,7 @@ class IndividualDocumentUkraine(IndividualDocument):
         settings = index_settings
 
     def get_queryset(self) -> QuerySet[Individual]:
-        return Individual.objects.filter(business_area__slug="ukraine")
+        return Individual.all_merge_status_objects.filter(business_area__slug="ukraine")
 
 
 @registry.register_document
@@ -149,7 +149,9 @@ class IndividualDocumentOthers(IndividualDocument):
         settings = index_settings
 
     def get_queryset(self) -> QuerySet[Individual]:
-        return Individual.objects.exclude(Q(business_area__slug="ukraine") | Q(business_area__slug="afghanistan"))
+        return Individual.all_merge_status_objects.exclude(
+            Q(business_area__slug="ukraine") | Q(business_area__slug="afghanistan")
+        )
 
 
 def get_individual_doc(
