@@ -23,8 +23,10 @@ class ProgrammeDetails(BaseComponents):
     buttonRemoveProgram = 'button[data-cy="button-remove-program"]'
     buttonEditProgram = 'a[data-cy="button-edit-program"]'
     buttonActivateProgram = 'button[data-cy="button-activate-program"]'
+    buttonActivateProgramModal = 'button[data-cy="button-activate-program-modal"]'
     labelProgrammeCode = 'div[data-cy="label-Programme Code"]'
     buttonFinishProgram = 'button[data-cy="button-finish-program"]'
+    cashPlanTableRow = 'tr[data-cy="cash-plan-table-row"]'
 
     def getLabelPartnerName(self) -> WebElement:
         return self.wait_for(self.labelPartnerName)
@@ -86,11 +88,18 @@ class ProgrammeDetails(BaseComponents):
     def getButtonActivateProgram(self) -> WebElement:
         return self.wait_for(self.buttonActivateProgram)
 
+    def getButtonActivateProgramModal(self) -> WebElement:
+        return self.wait_for(self.buttonActivateProgramModal)
+
     def getLabelProgrammeCode(self) -> WebElement:
         return self.wait_for(self.labelProgrammeCode)
 
     def getButtonFinishProgram(self) -> WebElement:
         return self.wait_for(self.buttonFinishProgram)
+
+    def getCashPlanTableRow(self) -> [WebElement]:
+        self.wait_for(self.cashPlanTableRow)
+        return self.get_elements(self.cashPlanTableRow)
 
     def clickButtonFinishProgramPopup(self) -> None:
         self.wait_for('[data-cy="dialog-actions-container"]')
