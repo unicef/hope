@@ -47,7 +47,6 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.program.signals import adjust_program_size
 from hct_mis_api.apps.utils.admin import (
     BusinessAreaForHouseholdCollectionListFilter,
     HOPEModelAdminBase,
@@ -93,29 +92,15 @@ class HouseholdWithdrawFromListMixin:
 
     @staticmethod
     def get_household_queryset_from_list(household_id_list: list, program: Program) -> QuerySet:
-        return (
-            Household.objects.filter(
-                unicef_id__in=household_id_list,
-                withdrawn=False,
-                program=program,
-            )
-            .prefetch_related("individuals")
-            .only(
-                "unicef_id",
-                "withdrawn",
-                "withdrawn_date",
-                "user_fields",
-            )
-        )
-
-    @staticmethod
-    @transaction.atomic
-    def mass_withdraw_households_from_list_bulk(household_id_list: list, tag: str, program: Program) -> None:
-        households = Household.objects.filter(
+        return Household.objects.filter(
             unicef_id__in=household_id_list,
             withdrawn=False,
             program=program,
         )
+
+    @transaction.atomic
+    def mass_withdraw_households_from_list_bulk(self, household_id_list: list, tag: str, program: Program) -> None:
+        households = self.get_household_queryset_from_list(household_id_list, program)
         individuals = Individual.objects.filter(household__in=households, withdrawn=False, duplicate=False)
 
         tickets = GrievanceTicket.objects.belong_households_individuals(households, individuals)
@@ -139,7 +124,6 @@ class HouseholdWithdrawFromListMixin:
             withdrawn_date=timezone.now(),
             user_fields=JSONBSet(F("user_fields"), Value("{withdrawn_tag}"), Value(f'"{tag}"')),
         )
-        adjust_program_size(program)
 
     @staticmethod
     def split_list_of_ids(household_list: str) -> list:
@@ -177,7 +161,7 @@ class HouseholdWithdrawFromListMixin:
                 if not program:
                     self.message_user(
                         request,
-                        f"Program with id '{context['program_id']}' not found.",
+                        f"Program with ID '{context['program_id']}' not found.",
                         level=messages.ERROR,
                     )
                     return HttpResponseRedirect(reverse("admin:household_household_changelist"))
@@ -488,7 +472,7 @@ class HouseholdAdmin(
 
     @button(
         label="Withdraw households from list",
-        # permission=is_root,
+        permission=is_root,
     )
     def withdraw_households_from_list_button(self, request: HttpRequest) -> Optional[HttpResponse]:
         return self.withdraw_households_from_list(request)

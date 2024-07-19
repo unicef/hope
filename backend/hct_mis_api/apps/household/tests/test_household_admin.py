@@ -28,6 +28,7 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         cls.program = ProgramFactory(business_area=business_area)
         cls.program_other = ProgramFactory(business_area=business_area)
         cls.household_unicef_id = "HH-20-0192.6628"
+        cls.household2_unicef_id = "HH-20-0192.6629"
         cls.household, cls.individuals = create_household_and_individuals(
             household_data={
                 "business_area": business_area,
@@ -35,6 +36,14 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
                 "unicef_id": cls.household_unicef_id,
             },
             individuals_data=[{}],
+        )
+        cls.household2, cls.individuals2 = create_household_and_individuals(
+            household_data={
+                "business_area": business_area,
+                "program": cls.program,
+                "unicef_id": cls.household2_unicef_id,
+            },
+            individuals_data=[{}, {}],
         )
 
         cls.household_other_program, cls.individuals_other_program = create_household_and_individuals(
@@ -61,6 +70,15 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
             ticket=cls.grievance_ticket2,
             individual=cls.individuals[0],
         )
+        cls.grievance_ticket_household2 = GrievanceTicketFactory(status=GrievanceTicket.STATUS_IN_PROGRESS)
+        cls.ticket_complaint_details_household2 = TicketComplaintDetails.objects.create(
+            ticket=cls.grievance_ticket_household2,
+            household=cls.household2,
+        )
+
+        cls.program.household_count = 2
+        cls.program.individual_count = 3
+        cls.program.save()
 
     def test_households_withdraw_from_list(self) -> None:
         def mock_get_common_context(*args: Any, **kwargs: Any) -> dict:
@@ -77,20 +95,25 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         tag = "Some tag reason"
         request.POST = {  # type: ignore
             "step": "3",
-            "household_list": f"{self.household.unicef_id}",
+            "household_list": f"{self.household.unicef_id}, {self.household2.unicef_id}",
             "tag": tag,
             "program_id": encode_id_base64_required(self.program.id, "Program"),
         }
-        with self.assertNumQueries(27):
+
+        with self.assertNumQueries(28):
             HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
 
         self.household.refresh_from_db()
         self.household_other_program.refresh_from_db()
+        self.household2.refresh_from_db()
         self.individuals_other_program[0].refresh_from_db()
         self.individuals[0].refresh_from_db()
+        self.individuals2[0].refresh_from_db()
+        self.individuals2[1].refresh_from_db()
         self.document.refresh_from_db()
         self.grievance_ticket.refresh_from_db()
         self.grievance_ticket2.refresh_from_db()
+        self.grievance_ticket_household2.refresh_from_db()
 
         self.assertEqual(
             self.household.withdrawn,
@@ -126,6 +149,34 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         )
 
         self.assertEqual(
+            self.household2.withdrawn,
+            True,
+        )
+        self.assertIsNotNone(self.household2.withdrawn_date)
+        self.assertEqual(
+            self.household2.user_fields["withdrawn_tag"],
+            tag,
+        )
+        self.assertEqual(
+            self.individuals2[0].withdrawn,
+            True,
+        )
+        self.assertIsNotNone(self.individuals2[0].withdrawn_date)
+        self.assertEqual(
+            self.individuals2[1].withdrawn,
+            True,
+        )
+        self.assertIsNotNone(self.individuals2[1].withdrawn_date)
+        self.assertEqual(
+            self.grievance_ticket_household2.status,
+            GrievanceTicket.STATUS_CLOSED,
+        )
+        self.assertEqual(
+            self.grievance_ticket_household2.extras["status_before_withdrawn"], str(GrievanceTicket.STATUS_IN_PROGRESS)
+        )
+
+        # household from another program is not withdrawn
+        self.assertEqual(
             self.household_other_program.withdrawn,
             False,
         )
@@ -134,7 +185,7 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
             False,
         )
 
-        # check ability to rever this action
+        # check ability to revert this action
         service = HouseholdWithdraw(self.household)
         service.unwithdraw()
         service.change_tickets_status([self.ticket_complaint_details, self.ticket_individual_data_update])

@@ -8,12 +8,12 @@
         <h1>Withdraw Households from List</h1>
         <form method="post">{% csrf_token %}
         <div>
-          <label for="program_id">Program id:</label>
+          <label for="program_id">Program ID (encoded):</label>
           <input type="text" id="program_id" name="program_id" required>
         </div>
         <br/>
         <div>
-          <label for="household_list">Household ids:</label><br/><br/>
+          <label for="household_list">Household IDs:</label><br/><br/>
           <textarea id="household_list" name="household_list" required rows="8" cols="100"></textarea>
         </div>
         <br/>
