@@ -21,6 +21,18 @@ export const handleNext = async ({
   setFieldTouched,
   values,
   setErrors,
+}: {
+  validateForm: () => Promise<any>;
+  stepFields: string[][];
+  step: number;
+  setStep: (step: number) => void;
+  setFieldTouched: (
+    field: string,
+    touched: boolean,
+    shouldValidate?: boolean,
+  ) => void;
+  values: any;
+  setErrors: (errors: any) => void;
 }): Promise<void> => {
   const errors = await validateForm();
   const currentStepErrors = stepFields[step].some((field) => errors[field]);
@@ -34,6 +46,7 @@ export const handleNext = async ({
     },
   };
 
+  // Check if all pduFields are either valid, empty, or match the initial state
   const isAllPduFieldsValidOrInitial = values.pduFields.every((pduField) => {
     const isInitialState =
       pduField.name === initialPduFieldState.name &&
@@ -52,7 +65,17 @@ export const handleNext = async ({
     return isInitialState || isValidState;
   });
 
-  if (!isAllPduFieldsValidOrInitial) {
+  // Check if the last pduField entry is empty when there are more than one
+  const lastPduFieldIsEmpty =
+    values.pduFields.length > 1 &&
+    values.pduFields[values.pduFields.length - 1].name === '' &&
+    values.pduFields[values.pduFields.length - 1].pduData.subtype === '' &&
+    values.pduFields[values.pduFields.length - 1].pduData.numberOfRounds ===
+      null &&
+    values.pduFields[values.pduFields.length - 1].pduData.roundsNames.length ===
+      0;
+
+  if (lastPduFieldIsEmpty || !isAllPduFieldsValidOrInitial) {
     setErrors({
       ...errors,
       pduFields: 'Please complete the PDU fields correctly.',

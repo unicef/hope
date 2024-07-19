@@ -70,7 +70,7 @@ export const programValidationSchema = (
             subtype: Yup.string().nullable(),
             numberOfRounds: Yup.number().nullable(),
             roundsNames: Yup.array()
-              .of(Yup.string().required(t('Round name is required')))
+              .of(Yup.string().required())
               .test(
                 'rounds-match-number',
                 t('Rounds names must match the number of rounds'),
