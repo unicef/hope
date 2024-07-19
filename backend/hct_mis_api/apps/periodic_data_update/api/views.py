@@ -10,20 +10,31 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.serializers import BaseSerializer
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.api.permissions import (
+    PDUTemplateCreatePermission,
+    PDUTemplateDownloadPermission,
     PDUUploadPermission,
     PDUViewListAndDetailsPermission,
 )
-from hct_mis_api.apps.core.api.mixins import ActionMixin, BusinessAreaProgramMixin
+from hct_mis_api.apps.core.api.mixins import (
+    ActionMixin,
+    BusinessAreaProgramMixin,
+    ProgramMixin,
+)
+from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.periodic_data_update.api.caches import (
     PDUTemplateKeyConstructor,
     PDUUpdateKeyConstructor,
+    PeriodicDataFieldKeyConstructor,
 )
 from hct_mis_api.apps.periodic_data_update.api.serializers import (
+    PeriodicDataFieldSerializer,
+    PeriodicDataUpdateTemplateCreateSerializer,
     PeriodicDataUpdateTemplateDetailSerializer,
     PeriodicDataUpdateTemplateListSerializer,
     PeriodicDataUpdateUploadListSerializer,
@@ -54,14 +65,14 @@ class PeriodicDataUpdateTemplateViewSet(
     serializer_classes_by_action = {
         "list": PeriodicDataUpdateTemplateListSerializer,
         "retrieve": PeriodicDataUpdateTemplateDetailSerializer,
-        # 'create': PeriodicDataUpdateTemplateCreateSerializer,
+        "create": PeriodicDataUpdateTemplateCreateSerializer,
     }
     permission_classes_by_action = {
         "list": [PDUViewListAndDetailsPermission],
         "retrieve": [PDUViewListAndDetailsPermission],
-        # 'create': [PDUTemplateCreatePermission],
-        # 'export': [PDUTemplateCreatePermission],
-        # 'download': [PDUTemplateDownloadPermission],
+        "create": [PDUTemplateCreatePermission],
+        "export": [PDUTemplateCreatePermission],
+        "download": [PDUTemplateDownloadPermission],
     }
     filter_backends = (OrderingFilter,)
 
@@ -74,6 +85,13 @@ class PeriodicDataUpdateTemplateViewSet(
     @cache_response(timeout=config.REST_API_TTL, key_func=PDUTemplateKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
+
+    # export the template during template creation
+    def perform_create(self, serializer: BaseSerializer) -> None:
+        pdu_template = serializer.save()
+        service = PeriodicDataUpdateExportTemplateService(pdu_template)
+        service.generate_workbook()
+        service.save_xlsx_file()
 
     @action(detail=True, methods=["get"])
     def export(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -151,3 +169,21 @@ class PeriodicDataUpdateUploadViewSet(
             )
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PeriodicDataFieldViewSet(
+    ProgramMixin,
+    mixins.ListModelMixin,
+    GenericViewSet,
+):
+    serializer_class = PeriodicDataFieldSerializer
+    filter_backends = (OrderingFilter,)
+
+    def get_queryset(self) -> QuerySet:
+        program = self.get_program()
+        return FlexibleAttribute.objects.filter(program=program, type=FlexibleAttribute.PDU)
+
+    @etag_decorator(PeriodicDataFieldKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=PeriodicDataFieldKeyConstructor())
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)

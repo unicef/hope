@@ -1,10 +1,12 @@
 from typing import Any
+from uuid import UUID
 
 from django.core.cache import cache
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
 from hct_mis_api.api.caches import get_or_create_cache_key
+from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.periodic_data_update.models import (
     PeriodicDataUpdateTemplate,
     PeriodicDataUpdateUpload,
@@ -34,6 +36,40 @@ def increment_periodic_data_update_upload_version_cache(
     program_id = instance.template.program.id
 
     version_key = f"{business_area_slug}:{business_area_version}:{program_id}:periodic_data_update_upload_list"
+    get_or_create_cache_key(version_key, 0)
+
+    cache.incr(version_key)
+
+
+@receiver(post_save, sender=FlexibleAttribute)
+@receiver(pre_delete, sender=FlexibleAttribute)
+def increment_periodic_data_field_version_cache_for_flexible_attribute(
+    sender: Any, instance: FlexibleAttribute, created: bool, **kwargs: dict
+) -> None:
+    if instance.type == FlexibleAttribute.PDU and instance.program:
+        business_area_slug = instance.program.business_area.slug
+        program_id = instance.program.id
+        increment_periodic_data_field_version_cache(business_area_slug, program_id)
+
+
+@receiver(post_save, sender=PeriodicFieldData)
+@receiver(pre_delete, sender=PeriodicFieldData)
+def increment_periodic_data_field_version_cache_for_periodic_data_field(
+    sender: Any, instance: PeriodicFieldData, created: bool, **kwargs: dict
+) -> None:
+    try:
+        flex_field = instance.flex_field
+        if flex_field:
+            business_area_slug = flex_field.program.business_area.slug
+            program_id = flex_field.program.id
+            increment_periodic_data_field_version_cache(business_area_slug, program_id)
+    except PeriodicFieldData.flex_field.RelatedObjectDoesNotExist:
+        pass
+
+
+def increment_periodic_data_field_version_cache(business_area_slug: str, program_id: UUID) -> None:
+    business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
+    version_key = f"{business_area_slug}:{business_area_version}:{program_id}:periodic_data_field_list"
     get_or_create_cache_key(version_key, 0)
 
     cache.incr(version_key)

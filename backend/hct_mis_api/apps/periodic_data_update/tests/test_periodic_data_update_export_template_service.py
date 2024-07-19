@@ -22,7 +22,9 @@ from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import FEMALE, MALE
 from hct_mis_api.apps.payment.fixtures import PaymentFactory
 from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
+from hct_mis_api.apps.periodic_data_update.fixtures import (
+    PeriodicDataUpdateTemplateFactory,
+)
 from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PeriodicDataUpdateExportTemplateService,
 )
@@ -62,10 +64,9 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
                 },
             ],
         )
-        cls.periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
+        cls.periodic_data_update_template = PeriodicDataUpdateTemplateFactory(
             program=cls.program,
             business_area=cls.business_area,
-            filters=dict(),
             rounds_data=[
                 {
                     "field": "muac",

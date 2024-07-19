@@ -3,6 +3,7 @@ from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 
 from hct_mis_api.apps.periodic_data_update.api.views import (
+    PeriodicDataFieldViewSet,
     PeriodicDataUpdateTemplateViewSet,
     PeriodicDataUpdateUploadViewSet,
 )
@@ -19,6 +20,11 @@ router.register(
     "periodic-data-update-uploads",
     PeriodicDataUpdateUploadViewSet,
     basename="periodic-data-update-uploads",
+)
+router.register(
+    "periodic-data-fields",
+    PeriodicDataFieldViewSet,
+    basename="periodic-data-fields",
 )
 
 urlpatterns = [

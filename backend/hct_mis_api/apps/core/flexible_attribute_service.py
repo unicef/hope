@@ -1,9 +1,14 @@
 from typing import Any, Dict
 
+from django.core.exceptions import ValidationError
+
 from graphql import GraphQLError
 
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.periodic_data_update.signals import (
+    increment_periodic_data_field_version_cache,
+)
 from hct_mis_api.apps.program.models import Program
 
 
@@ -18,6 +23,8 @@ class FlexibleAttributeForPDUService:
             raise GraphQLError("Number of rounds does not match the number of round names")
 
     def create_pdu_flex_attribute(self, pdu_field: dict) -> FlexibleAttribute:
+        if FlexibleAttribute.objects.filter(name=pdu_field["name"]).exists():
+            raise ValidationError(f"Time Series Field with name {pdu_field['name']} already exists.")
         pdu_data = pdu_field.pop("pdu_data")
         self._validate_pdu_data(pdu_data)
         pdu_data_object = PeriodicFieldData.objects.create(**pdu_data)
@@ -30,6 +37,7 @@ class FlexibleAttributeForPDUService:
         )
 
     def create_pdu_flex_attributes(self) -> None:
+        self._validate_pdu_names_in_batch()
         for pdu_field in self.pdu_fields:
             self.create_pdu_flex_attribute(pdu_field)
 
@@ -49,10 +57,15 @@ class FlexibleAttributeForPDUService:
         FlexibleAttribute.objects.filter(program=self.program, type=FlexibleAttribute.PDU).exclude(
             id__in=flexible_attribute_ids_to_preserve
         ).delete()
+        # incr cache key (since it's bulk action)
+        business_area_slug = self.program.business_area.slug
+        program_id = self.program.id
+        increment_periodic_data_field_version_cache(business_area_slug, program_id)
 
     def update_pdu_flex_attributes(self) -> None:
         if self.program.registration_imports.exists():
             raise GraphQLError("Cannot update PDU fields for a program with RDIs.")
+        self._validate_pdu_names_in_batch()
         flexible_attribute_ids_to_preserve = []
         for pdu_field in self.pdu_fields:
             if flexible_attribute_id_encoded := pdu_field.pop("id", None):
@@ -63,3 +76,8 @@ class FlexibleAttributeForPDUService:
                 flexible_attribute_ids_to_preserve.append(self.create_pdu_flex_attribute(pdu_field).id)
 
         self.delete_pdu_flex_attributes(flexible_attribute_ids_to_preserve=flexible_attribute_ids_to_preserve)
+
+    def _validate_pdu_names_in_batch(self) -> None:
+        pdu_names = [pdu_field["name"] for pdu_field in self.pdu_fields]
+        if len(pdu_names) != len(set(pdu_names)):
+            raise GraphQLError("Time Series Field names must be unique.")

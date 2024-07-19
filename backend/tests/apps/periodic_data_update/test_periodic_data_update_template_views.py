@@ -19,6 +19,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.periodic_data_update.fixtures import (
     PeriodicDataUpdateTemplateFactory,
 )
+from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 pytestmark = pytest.mark.django_db
@@ -59,6 +60,20 @@ class TestPeriodicDataUpdateTemplateViews:
                 "business_area": self.afghanistan.slug,
                 "program_id": id_to_base64(self.program1.id, "Program"),
                 "pk": self.pdu_template1.id,
+            },
+        )
+        self.url_create_pdu_template_program1 = reverse(
+            "api:periodic-data-update:periodic-data-update-templates-list",
+            kwargs={
+                "business_area": self.afghanistan.slug,
+                "program_id": id_to_base64(self.program1.id, "Program"),
+            },
+        )
+        self.url_create_pdu_template_program2 = reverse(
+            "api:periodic-data-update:periodic-data-update-templates-list",
+            kwargs={
+                "business_area": self.afghanistan.slug,
+                "program_id": id_to_base64(self.program2.id, "Program"),
             },
         )
 
@@ -268,3 +283,159 @@ class TestPeriodicDataUpdateTemplateViews:
             assert len(ctx.captured_queries) == 5
 
             assert etag_second_call == etag
+
+    @pytest.mark.parametrize(
+        "permissions, partner_permissions, access_to_program, expected_status",
+        [
+            ([], [], True, status.HTTP_403_FORBIDDEN),
+            ([Permissions.PDU_TEMPLATE_CREATE], [], True, status.HTTP_201_CREATED),
+            ([], [Permissions.PDU_TEMPLATE_CREATE], True, status.HTTP_201_CREATED),
+            (
+                [Permissions.PDU_TEMPLATE_CREATE],
+                [Permissions.PDU_TEMPLATE_CREATE],
+                True,
+                status.HTTP_201_CREATED,
+            ),
+            ([], [], False, status.HTTP_403_FORBIDDEN),
+            ([Permissions.PDU_TEMPLATE_CREATE], [], False, status.HTTP_403_FORBIDDEN),
+            ([], [Permissions.PDU_TEMPLATE_CREATE], False, status.HTTP_403_FORBIDDEN),
+            (
+                [Permissions.PDU_TEMPLATE_CREATE],
+                [Permissions.PDU_TEMPLATE_CREATE],
+                False,
+                status.HTTP_403_FORBIDDEN,
+            ),
+        ],
+    )
+    def test_create_periodic_data_update_template_permission(
+        self,
+        permissions: list,
+        partner_permissions: list,
+        access_to_program: bool,
+        expected_status: str,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        create_partner_role_with_permissions: Callable,
+        update_partner_access_to_program: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            permissions,
+            self.afghanistan,
+        )
+        create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
+        if access_to_program:
+            update_partner_access_to_program(self.partner, self.program1)
+
+        data = {
+            "rounds_data": [
+                {
+                    "field": "Vaccination Records Update",
+                    "round": 2,
+                    "round_name": "February vaccination",
+                },
+                {
+                    "field": "Health Records Update",
+                    "round": 4,
+                    "round_name": "April",
+                },
+            ],
+            "filters": {
+                "registration_data_import_id": 1,
+                "target_population_id": 1,
+                "received_assistance": True,
+            },
+        }
+        response = self.client.post(self.url_create_pdu_template_program1, data=data)
+        assert response.status_code == expected_status
+
+        # no access to Program2
+        response_forbidden = self.client.post(self.url_create_pdu_template_program2, data=data)
+        assert response_forbidden.status_code == 403
+
+    def test_create_periodic_data_update_template(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PDU_TEMPLATE_CREATE],
+            self.afghanistan,
+            self.program1,
+        )
+        data = {
+            "rounds_data": [
+                {
+                    "field": "Vaccination Records Update",
+                    "round": 2,
+                    "round_name": "February vaccination",
+                },
+                {
+                    "field": "Health Records Update",
+                    "round": 4,
+                    "round_name": "April",
+                },
+            ],
+            "filters": {
+                "registration_data_import_id": 1,
+                "target_population_id": 1,
+                "received_assistance": True,
+            },
+        }
+        response = self.client.post(self.url_create_pdu_template_program1, data=data)
+        assert response.status_code == status.HTTP_201_CREATED
+
+        response_json = response.json()
+        assert PeriodicDataUpdateTemplate.objects.filter(id=response_json["id"]).exists()
+        template = PeriodicDataUpdateTemplate.objects.get(id=response_json["id"])
+        assert template.program == self.program1
+        assert template.business_area == self.afghanistan
+        assert template.rounds_data == data["rounds_data"]
+        assert template.filters == data["filters"]
+        assert PeriodicDataUpdateTemplate.objects.filter(id=response_json["id"]).first().file is not None
+
+    def test_create_periodic_data_update_template_duplicate_field(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PDU_TEMPLATE_CREATE],
+            self.afghanistan,
+            self.program1,
+        )
+        data = {
+            "rounds_data": [
+                {
+                    "field": "Vaccination Records Update",
+                    "round": 2,
+                    "round_name": "February vaccination",
+                },
+                {
+                    "field": "Vaccination Records Update",
+                    "round": 4,
+                    "round_name": "April",
+                },
+            ],
+            "filters": {
+                "registration_data_import_id": 1,
+                "target_population_id": 1,
+                "received_assistance": True,
+            },
+        }
+        response = self.client.post(self.url_create_pdu_template_program1, data=data)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+        response_json = response.json()
+        assert response_json == {"rounds_data": ["Duplicate field names found."]}
