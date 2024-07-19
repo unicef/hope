@@ -1352,7 +1352,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
             complex_types: Dict[str, Callable] = {
                 "GEOPOINT": self.geopoint_validator,
-                "IMAGE": self.image_validator,
+                # "IMAGE": self.image_validator,  # comment for now as hotfix AB#209023 for skip image validation
                 "DATE": self.date_validator,
                 "SELECT_ONE": self.choice_validator,
                 "SELECT_MANY": self.choice_validator,
