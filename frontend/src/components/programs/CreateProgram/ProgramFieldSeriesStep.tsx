@@ -22,6 +22,12 @@ interface ProgramFieldSeriesStepProps {
   programHasRdi?: boolean;
   pdusubtypeChoicesData?: PduSubtypeChoicesDataQuery;
   errors: any;
+  setErrors: (errors: any) => void;
+  setFieldTouched: (
+    field: string,
+    isTouched?: boolean,
+    shouldValidate?: boolean,
+  ) => void;
 }
 
 export const ProgramFieldSeriesStep = ({
@@ -32,12 +38,42 @@ export const ProgramFieldSeriesStep = ({
   programHasRdi,
   pdusubtypeChoicesData,
   errors,
+  setErrors,
+  setFieldTouched,
 }: ProgramFieldSeriesStepProps) => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const confirm = useConfirmation();
 
   const handleNextClick = async (): Promise<void> => {
+    setFieldTouched('pduFields', true);
+
+    const isAllPduFieldsValidOrEmpty = values.pduFields.every((pduField) => {
+      const isPduFieldEmpty =
+        pduField.name === '' &&
+        pduField.pduData.subtype === '' &&
+        pduField.pduData.numberOfRounds === null &&
+        pduField.pduData.roundsNames.length === 0;
+
+      if (isPduFieldEmpty) {
+        return true;
+      }
+      const isPduDataValid =
+        pduField.pduData &&
+        pduField.pduData.roundsNames.length === pduField.pduData.numberOfRounds;
+
+      return isPduDataValid;
+    });
+
+    if (!isAllPduFieldsValidOrEmpty) {
+      setErrors({
+        ...errors,
+        pduFields:
+          'Please complete the PDU fields correctly or leave them in their initial state.',
+      });
+      return;
+    }
+
     if (handleNext) {
       await handleNext();
     }
