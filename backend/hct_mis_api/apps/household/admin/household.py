@@ -8,10 +8,11 @@ from django.contrib import admin, messages
 from django.contrib.messages import DEFAULT_TAGS
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from django.db.models import Q, QuerySet
+from django.db.models import F, Q, QuerySet, Value
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 from admin_cursor_paginator import CursorPaginatorAdmin
@@ -24,7 +25,7 @@ from power_query.mixin import PowerQueryMixin
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import decode_id_string_required
+from hct_mis_api.apps.core.utils import JSONBSet, decode_id_string_required
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.admin.mixins import (
     CustomTargetPopulationMixin,
@@ -39,13 +40,14 @@ from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    Document,
     Household,
     HouseholdCollection,
     Individual,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.signals import adjust_program_size
 from hct_mis_api.apps.utils.admin import (
     BusinessAreaForHouseholdCollectionListFilter,
     HOPEModelAdminBase,
@@ -106,14 +108,38 @@ class HouseholdWithdrawFromListMixin:
             )
         )
 
-    def mass_withdraw_households_from_list(self, household_id_list: list, tag: str, program: Program) -> None:
-        households = self.get_household_queryset_from_list(household_id_list, program)
-        for household in households:
-            tickets = GrievanceTicket.objects.belong_household(household)
-            tickets = filter(lambda t: t.ticket.status != GrievanceTicket.STATUS_CLOSED, tickets)
-            service = HouseholdWithdraw(household)
-            service.withdraw(tag=tag)
-            service.change_tickets_status(tickets)
+    @staticmethod
+    @transaction.atomic
+    def mass_withdraw_households_from_list_bulk(household_id_list: list, tag: str, program: Program) -> None:
+        households = Household.objects.filter(
+            unicef_id__in=household_id_list,
+            withdrawn=False,
+            program=program,
+        )
+        individuals = Individual.objects.filter(household__in=households, withdrawn=False, duplicate=False)
+
+        tickets = GrievanceTicket.objects.belong_households_individuals(households, individuals)
+        ticket_ids = [t.ticket.id for t in tickets]
+        for status, _ in GrievanceTicket.STATUS_CHOICES:
+            if status == GrievanceTicket.STATUS_CLOSED:
+                continue
+            GrievanceTicket.objects.filter(id__in=ticket_ids, status=status).update(
+                extras=JSONBSet(F("extras"), Value("{status_before_withdrawn}"), Value(f'"{status}"')),
+                status=GrievanceTicket.STATUS_CLOSED,
+            )
+
+        Document.objects.filter(individual__in=individuals).update(status=Document.STATUS_INVALID)
+
+        individuals.update(
+            withdrawn=True,
+            withdrawn_date=timezone.now(),
+        )
+        households.update(
+            withdrawn=True,
+            withdrawn_date=timezone.now(),
+            user_fields=JSONBSet(F("user_fields"), Value("{withdrawn_tag}"), Value(f'"{tag}"')),
+        )
+        adjust_program_size(program)
 
     @staticmethod
     def split_list_of_ids(household_list: str) -> list:
@@ -177,7 +203,7 @@ class HouseholdWithdrawFromListMixin:
                     program,  # type: ignore
                 ).count()
 
-                mass_withdraw_households_from_list_task(household_id_list, tag, program.id)  # type: ignore
+                mass_withdraw_households_from_list_task.delay(household_id_list, tag, program.id)  # type: ignore
                 self.message_user(request, f"{household_count} Households are being withdrawn.")
 
                 return HttpResponseRedirect(reverse("admin:household_household_changelist"))

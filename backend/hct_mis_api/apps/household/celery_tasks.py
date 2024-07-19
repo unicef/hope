@@ -216,4 +216,4 @@ def mass_withdraw_households_from_list_task(household_id_list: list, tag: str, p
     )
 
     program = Program.objects.get(id=program_id)
-    HouseholdWithdrawFromListMixin().mass_withdraw_households_from_list(household_id_list, tag, program)
+    HouseholdWithdrawFromListMixin().mass_withdraw_households_from_list_bulk(household_id_list, tag, program)

@@ -17,6 +17,7 @@ from hct_mis_api.apps.household.fixtures import (
     create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import Document
+from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
@@ -80,7 +81,8 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
             "tag": tag,
             "program_id": encode_id_base64_required(self.program.id, "Program"),
         }
-        HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
+        with self.assertNumQueries(27):
+            HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
 
         self.household.refresh_from_db()
         self.household_other_program.refresh_from_db()
@@ -94,6 +96,7 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
             self.household.withdrawn,
             True,
         )
+        self.assertIsNotNone(self.household.withdrawn_date)
         self.assertEqual(
             self.household.user_fields["withdrawn_tag"],
             tag,
@@ -102,6 +105,7 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
             self.individuals[0].withdrawn,
             True,
         )
+        self.assertIsNotNone(self.individuals[0].withdrawn_date)
         self.assertEqual(
             self.document.status,
             Document.STATUS_INVALID,
@@ -111,8 +115,14 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
             GrievanceTicket.STATUS_CLOSED,
         )
         self.assertEqual(
+            self.grievance_ticket.extras["status_before_withdrawn"], str(GrievanceTicket.STATUS_IN_PROGRESS)
+        )
+        self.assertEqual(
             self.grievance_ticket2.status,
             GrievanceTicket.STATUS_CLOSED,
+        )
+        self.assertEqual(
+            self.grievance_ticket2.extras["status_before_withdrawn"], str(GrievanceTicket.STATUS_IN_PROGRESS)
         )
 
         self.assertEqual(
@@ -122,6 +132,41 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         self.assertEqual(
             self.individuals_other_program[0].withdrawn,
             False,
+        )
+
+        # check ability to rever this action
+        service = HouseholdWithdraw(self.household)
+        service.unwithdraw()
+        service.change_tickets_status([self.ticket_complaint_details, self.ticket_individual_data_update])
+        self.household.refresh_from_db()
+        self.individuals[0].refresh_from_db()
+        self.grievance_ticket.refresh_from_db()
+        self.grievance_ticket2.refresh_from_db()
+        self.assertEqual(
+            self.household.withdrawn,
+            False,
+        )
+        self.assertIsNone(self.household.withdrawn_date)
+        self.assertEqual(
+            self.individuals[0].withdrawn,
+            False,
+        )
+        self.assertIsNone(self.individuals[0].withdrawn_date)
+        self.assertEqual(
+            self.grievance_ticket.status,
+            GrievanceTicket.STATUS_IN_PROGRESS,
+        )
+        self.assertEqual(
+            self.grievance_ticket.extras.get("status_before_withdrawn"),
+            "",
+        )
+        self.assertEqual(
+            self.grievance_ticket2.status,
+            GrievanceTicket.STATUS_IN_PROGRESS,
+        )
+        self.assertEqual(
+            self.grievance_ticket2.extras.get("status_before_withdrawn"),
+            "",
         )
 
     def test_get_program_from_encoded_id_wrong(self) -> None:
