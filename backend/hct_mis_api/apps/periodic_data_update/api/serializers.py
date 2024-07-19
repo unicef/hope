@@ -7,7 +7,8 @@ from hct_mis_api.apps.periodic_data_update.models import (
 
 
 class PeriodicDataUpdateTemplateListSerializer(serializers.ModelSerializer):
-    status = serializers.CharField(source="get_status_display")
+    status_display = serializers.CharField(source="get_status_display")
+    status = serializers.CharField(source="combined_status")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
 
     class Meta:
@@ -18,6 +19,7 @@ class PeriodicDataUpdateTemplateListSerializer(serializers.ModelSerializer):
             "created_at",
             "created_by",
             "status",
+            "status_display",
         )
 
 
@@ -31,7 +33,8 @@ class PeriodicDataUpdateTemplateDetailSerializer(serializers.ModelSerializer):
 
 
 class PeriodicDataUpdateUploadListSerializer(serializers.ModelSerializer):
-    status = serializers.CharField(source="get_status_display")
+    status_display = serializers.CharField(source="get_status_display")
+    status = serializers.CharField(source="combined_status")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
 
     class Meta:
@@ -42,6 +45,26 @@ class PeriodicDataUpdateUploadListSerializer(serializers.ModelSerializer):
             "created_at",
             "created_by",
             "status",
+            "status_display",
+        )
+
+
+class PeriodicDataUpdateUploadDetailSerializer(serializers.ModelSerializer):
+    status_display = serializers.CharField(source="get_status_display")
+    status = serializers.CharField(source="combined_status")
+    created_by = serializers.CharField(source="created_by.get_full_name", default="")
+    errors = serializers.JSONField()
+
+    class Meta:
+        model = PeriodicDataUpdateUpload
+        fields = (
+            "id",
+            "template",
+            "created_at",
+            "created_by",
+            "status",
+            "status_display",
+            "errors",
         )
 
 

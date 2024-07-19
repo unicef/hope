@@ -27,7 +27,7 @@ from hct_mis_api.apps.periodic_data_update.api.serializers import (
     PeriodicDataUpdateTemplateDetailSerializer,
     PeriodicDataUpdateTemplateListSerializer,
     PeriodicDataUpdateUploadListSerializer,
-    PeriodicDataUpdateUploadSerializer,
+    PeriodicDataUpdateUploadSerializer, PeriodicDataUpdateUploadDetailSerializer,
 )
 from hct_mis_api.apps.periodic_data_update.models import (
     PeriodicDataUpdateTemplate,
@@ -82,9 +82,7 @@ class PeriodicDataUpdateTemplateViewSet(
             raise ValidationError("Template is already being exported")
         if pdu_template.file:
             raise ValidationError("Template is already exported")
-        serivice = PeriodicDataUpdateExportTemplateService(pdu_template)
-        serivice.generate_workbook()
-        serivice.save_xlsx_file()
+        pdu_template.queue()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["get"])
@@ -112,9 +110,11 @@ class PeriodicDataUpdateUploadViewSet(
     serializer_classes_by_action = {
         "list": PeriodicDataUpdateUploadListSerializer,
         "upload": PeriodicDataUpdateUploadSerializer,
+        "retrieve": PeriodicDataUpdateUploadDetailSerializer,
     }
     permission_classes_by_action = {
         "list": [PDUViewListAndDetailsPermission],
+        "retrieve": [PDUViewListAndDetailsPermission],
         "upload": [PDUUploadPermission],
     }
     filter_backends = (OrderingFilter,)

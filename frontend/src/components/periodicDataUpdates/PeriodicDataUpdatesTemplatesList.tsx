@@ -15,6 +15,8 @@ import {
   useDownloadPeriodicDataUpdateTemplate,
   useExportPeriodicDataUpdateTemplate,
 } from './PeriodicDataUpdatesTemplatesListActions';
+import {StatusBox} from "@core/StatusBox";
+import {periodicDataUpdatesUpdatesStatusToColor, periodicDataUpdateTemplateStatusToColor} from "@utils/utils";
 
 export interface Template {
   id: number;
@@ -60,6 +62,13 @@ const templatesHeadCells: HeadCell<Template>[] = [
     label: 'Details',
     disableSort: true,
     dataCy: 'head-cell-details',
+  },
+  {
+    id: 'status',
+    numeric: false,
+    disablePadding: false,
+    label: 'Status',
+    dataCy: 'head-cell-status',
   },
   {
     id: 'empty',
@@ -124,8 +133,14 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
           <VisibilityIcon />
         </IconButton>
       </TableCell>
+      <TableCell data-cy={`update-status-${row.id}`}>
+        <StatusBox
+          status={row.status}
+          statusToColor={periodicDataUpdateTemplateStatusToColor}
+        />
+      </TableCell>
       <TableCell data-cy={`template-action-${row.id}`}>
-        {row.status === 'Exported' ? (
+        {row.status === 'EXPORTED' ? (
           <Button
             variant="contained"
             color="primary"

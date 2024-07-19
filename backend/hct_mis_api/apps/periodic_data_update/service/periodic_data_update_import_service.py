@@ -1,3 +1,4 @@
+import json
 from typing import Any, Optional, Union
 
 from django import forms
@@ -25,6 +26,43 @@ class PeriodicDataUpdateBaseForm(forms.Form):
     last_name = forms.CharField()
 
 
+class RowValidationError(ValidationError):
+    pass
+
+
+def validation_error_to_json(error, seen=None):
+    """
+    Recursively convert a Django ValidationError into a JSON-serializable format.
+    Handles nested ValidationError instances within dicts and lists, avoiding infinite recursion by tracking seen objects.
+
+    Args:
+        error (ValidationError): The ValidationError instance to convert.
+        seen (set): Set of id's of already processed ValidationError objects to avoid infinite recursion.
+
+    Returns:
+        dict or list: A JSON-serializable representation of the errors.
+    """
+    if seen is None:
+        seen = set()
+
+    # Check if this instance is already processed to prevent infinite recursion
+    if id(error) in seen:
+        return error.message
+
+    seen.add(id(error))
+    # if isinstance(error, RowValidationError):
+
+    if hasattr(error, "error_dict"):
+        # Handle ValidationError with error_dict (errors from ModelForms, for example)
+        return {key: validation_error_to_json(value, seen) for key, value in error.error_dict.items()}
+    elif hasattr(error, "error_list"):
+        # Handle ValidationError with error_list (non-field errors and formset errors)
+        return [validation_error_to_json(e, seen) for e in error.error_list]
+    else:
+        # Handle simple ValidationError instances
+        return error.messages if hasattr(error, "messages") else str(error)
+
+
 class PeriodicDataUpdateImportService:
     def __init__(self, periodic_data_update_upload: PeriodicDataUpdateUpload) -> None:
         self.periodic_data_update_upload = periodic_data_update_upload
@@ -38,14 +76,29 @@ class PeriodicDataUpdateImportService:
             with transaction.atomic():
                 self._open_workbook()
                 self._read_flexible_attributes()
-                cleaned_data_list = self._read_rows()
+                cleaned_data_list, form_errors = self._read_rows()
+                if form_errors:
+                    self.periodic_data_update_upload.status = PeriodicDataUpdateUpload.Status.FAILED
+                    self.periodic_data_update_upload.error_message = json.dumps(
+                        {
+                            "form_errors": form_errors,
+                            "non_form_errors": None,
+                        }
+                    )
+                    self.periodic_data_update_upload.save()
+                    return
                 self._update_individuals(cleaned_data_list)
                 self.file.close()
                 self.periodic_data_update_upload.status = PeriodicDataUpdateUpload.Status.SUCCESSFUL
                 self.periodic_data_update_upload.save()
         except ValidationError as e:
             self.periodic_data_update_upload.status = PeriodicDataUpdateUpload.Status.FAILED
-            self.periodic_data_update_upload.error_message = str(e)
+            self.periodic_data_update_upload.error_message = json.dumps(
+                {
+                    "non_form_errors": validation_error_to_json(e),
+                    "form_errors": [],
+                }
+            )
             self.periodic_data_update_upload.save()
             return
 
@@ -101,20 +154,19 @@ class PeriodicDataUpdateImportService:
         header = [cell.value for cell in self.ws_pdu[1]]
         return header
 
-    def _read_rows(self) -> list[dict]:
+    def _read_rows(self) -> tuple[list[dict], list]:
         header = self._read_header()
         errors = []
         cleaned_data_list = []
-        for row in self.ws_pdu.iter_rows(min_row=2, values_only=True):
-            cleaned_data = self._read_row(errors, header, row)
+        for index, row in enumerate(self.ws_pdu.iter_rows(min_row=2, values_only=True)):
+            row_number = index + 2
+            cleaned_data = self._read_row(errors, header, row, row_number)
             if not cleaned_data:
                 continue
             cleaned_data_list.append(cleaned_data)
-        if errors:
-            raise ValidationError(errors)
-        return cleaned_data_list
+        return cleaned_data_list, errors
 
-    def _read_row(self, errors: list, header: list, row: list) -> Optional[dict]:
+    def _read_row(self, errors: list, header: list, row: list, row_number: int) -> Optional[dict]:
         row_empty_values = []
         for value in row:
             if value == "-":
@@ -124,7 +176,13 @@ class PeriodicDataUpdateImportService:
         data = dict(zip(header, row_empty_values))
         form = self._build_form()(data=data)
         if not form.is_valid():
-            errors.append(form.errors)
+            form_errors = json.loads(form.errors.as_json())
+            errors.append(
+                {
+                    "row": row_number,
+                    "errors": form_errors,
+                }
+            )
             return None
         cleaned_data = form.cleaned_data
         return cleaned_data

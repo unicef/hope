@@ -53,11 +53,14 @@ class PeriodicDataUpdateExportTemplateService:
         self._create_workbook()
         self._add_meta()
         self.ws_pdu.append(self._generate_header())
+        for round_info_data in self.rounds_data:
+            round_info_data["number_of_records"] = 0
+        self.periodic_data_update_template.number_of_records = 0
         queryset = self._get_individuals_queryset()
-        self.periodic_data_update_template.number_of_records = queryset.count()
         for individual in queryset:
             row = self._generate_row(individual)
             if row:
+                self.periodic_data_update_template.number_of_records += 1
                 self.ws_pdu.append(row)
         return self.wb
 

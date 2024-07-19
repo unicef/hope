@@ -1,7 +1,7 @@
 import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { UniversalMoment } from '@components/core/UniversalMoment';
-import { TableCell } from '@mui/material';
+import { IconButton, TableCell } from '@mui/material';
 import { periodicDataUpdatesUpdatesStatusToColor } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -10,6 +10,10 @@ import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { fetchPeriodicDataUpdateUpdates } from '@api/periodicDataUpdateApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import { Template } from '@components/periodicDataUpdates/PeriodicDataUpdatesTemplatesList';
+import { PeriodicDataUpdatesTemplateDetailsDialog } from '@components/periodicDataUpdates/PeriodicDataUpdatesTemplateDetailsDialog';
+import { PeriodicDataUpdatesUploadDetailsDialog } from '@components/periodicDataUpdates/PeriodicDataUpdatesUploadDetailsDialog';
 
 interface Update {
   id: string;
@@ -49,6 +53,14 @@ const updatesHeadCells: HeadCell<Update>[] = [
     dataCy: 'head-cell-imported-by',
   },
   {
+    id: 'details',
+    numeric: false,
+    disablePadding: false,
+    label: 'Details',
+    disableSort: true,
+    dataCy: 'head-cell-details',
+  },
+  {
     id: 'status',
     numeric: false,
     disablePadding: false,
@@ -57,32 +69,11 @@ const updatesHeadCells: HeadCell<Update>[] = [
   },
 ];
 
-const renderUpdateRow = (row: Update): ReactElement => (
-  <ClickableTableRow key={row.id} data-cy={`update-row-${row.id}`}>
-    <TableCell data-cy={`update-id-${row.id}`}>
-      <BlackLink>{row.id}</BlackLink>
-    </TableCell>
-    <TableCell data-cy={`update-template-${row.id}`}>
-      <BlackLink>{row.template}</BlackLink>
-    </TableCell>
-    <TableCell data-cy={`update-created-at-${row.id}`}>
-      <UniversalMoment>{row.created_at}</UniversalMoment>
-    </TableCell>
-    <TableCell data-cy={`update-created-by-${row.id}`}>
-      {row.created_by}
-    </TableCell>
-    <TableCell data-cy={`update-status-${row.id}`}>
-      <StatusBox
-        status={row.status}
-        statusToColor={periodicDataUpdatesUpdatesStatusToColor}
-      />
-    </TableCell>
-  </ClickableTableRow>
-);
-
 export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
   const { businessArea: businessAreaSlug, programId } = useBaseUrl();
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedUploadId, setSelectedUploadId] = useState<number | null>(null);
   const initialQueryVariables = {
     page: 1,
     page_size: 10,
@@ -109,17 +100,66 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
         queryVariables,
       ),
   });
+  const handleDialogOpen = (uploadId) => {
+    console.log('xDDDDDDDDDDDD');
+    setSelectedUploadId(uploadId);
+    setIsDialogOpen(true);
+  };
+
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+    setSelectedUploadId(null);
+  };
+
+  const renderUpdateRow = (row: Update): ReactElement => (
+    <ClickableTableRow key={row.id} data-cy={`update-row-${row.id}`}>
+      <TableCell data-cy={`update-id-${row.id}`}>
+        <BlackLink>{row.id}</BlackLink>
+      </TableCell>
+      <TableCell data-cy={`update-template-${row.id}`}>
+        <BlackLink>{row.template}</BlackLink>
+      </TableCell>
+      <TableCell data-cy={`update-created-at-${row.id}`}>
+        <UniversalMoment>{row.created_at}</UniversalMoment>
+      </TableCell>
+      <TableCell data-cy={`update-created-by-${row.id}`}>
+        {row.created_by}
+      </TableCell>
+      <TableCell data-cy={`template-details-btn-${row.id}`}>
+        {row.status === 'FAILED' ? (
+          <IconButton color="primary" onClick={() => handleDialogOpen(row.id)}>
+            <VisibilityIcon />
+          </IconButton>
+        ) : null}
+      </TableCell>
+      <TableCell data-cy={`update-status-${row.id}`}>
+        <StatusBox
+          status={row.status}
+          statusToColor={periodicDataUpdatesUpdatesStatusToColor}
+        />
+      </TableCell>
+    </ClickableTableRow>
+  );
 
   return (
-    <UniversalRestTable
-      isOnPaper={false}
-      renderRow={renderUpdateRow}
-      headCells={updatesHeadCells}
-      data={updatesData}
-      isLoading={isLoading}
-      error={error}
-      queryVariables={queryVariables}
-      setQueryVariables={setQueryVariables}
-    />
+    <>
+      {selectedUploadId && (
+        <PeriodicDataUpdatesUploadDetailsDialog
+          open={isDialogOpen}
+          onClose={handleDialogClose}
+          uploadId={selectedUploadId}
+        />
+      )}
+      <UniversalRestTable
+        isOnPaper={false}
+        renderRow={renderUpdateRow}
+        headCells={updatesHeadCells}
+        data={updatesData}
+        isLoading={isLoading}
+        error={error}
+        queryVariables={queryVariables}
+        setQueryVariables={setQueryVariables}
+      />
+    </>
   );
 };

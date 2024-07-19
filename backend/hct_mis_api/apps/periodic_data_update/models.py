@@ -1,3 +1,5 @@
+import json
+
 from django.conf import settings
 from django.db import models
 
@@ -5,11 +7,14 @@ from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.utils.models import CeleryEnabledModel, TimeStampedModel
 
 
-class PeriodicDataUpdateTemplate(TimeStampedModel):
+class PeriodicDataUpdateTemplate(TimeStampedModel, CeleryEnabledModel):
     class Status(models.TextChoices):
         TO_EXPORT = "TO_EXPORT", "To export"
+        NOT_SCHEDULED = "NOT_SCHEDULED", "Not scheduled"
         EXPORTING = "EXPORTING", "Exporting"
-        EXPORTED = "EXPORTED", "Exported"
+        EXPORTED = "EXPORTED", "EXPORTED"
+        FAILED = "FAILED", "Failed"
+        CANCELED = "CANCELED", "Canceled"
 
     status = models.CharField(
         max_length=20,
@@ -35,6 +40,35 @@ class PeriodicDataUpdateTemplate(TimeStampedModel):
         related_name="periodic_data_update_templates",
     )
     filters = models.JSONField()
+    celery_task_name = (
+        "hct_mis_api.apps.periodic_data_update.celery_tasks.export_periodic_data_update_export_template_service"
+    )
+
+    @property
+    def combined_status(self) -> str:
+        if self.status == self.Status.EXPORTED or self.celery_status == self.CELERY_STATUS_SUCCESS:
+            return self.status
+        if self.status == self.Status.FAILED:
+            return self.status
+        if self.celery_status == self.CELERY_STATUS_STARTED:
+            return self.Status.EXPORTING
+        if self.celery_status == self.CELERY_STATUS_FAILURE:
+            return self.Status.FAILED
+        if self.celery_status == self.CELERY_STATUS_NOT_SCHEDULED:
+            return self.Status.NOT_SCHEDULED
+        if self.celery_status == self.CELERY_STATUS_RECEIVED:
+            return self.Status.TO_EXPORT
+        if self.celery_status == self.CELERY_STATUS_RETRY:
+            return self.Status.TO_EXPORT
+        if self.celery_status == self.CELERY_STATUS_REVOKED or self.celery_status == self.CELERY_STATUS_CANCELED:
+            return self.Status.CANCELED
+        return self.status
+
+    @property
+    def combined_status_display(self):
+        status_dict = {status.value: status.label for status in self.Status}
+        return status_dict[self.combined_status]
+
     """
     {
     "registration_data_import_id": "id",
@@ -108,9 +142,17 @@ class PeriodicDataUpdateUpload(TimeStampedModel, CeleryEnabledModel):
     error_message = models.TextField(null=True, blank=True)
     celery_task_name = "hct_mis_api.apps.periodic_data_update.celery_tasks.import_periodic_data_update"
 
+
+    @property
+    def errors(self):
+        if not self.error_message:
+            return None
+        return json.loads(self.error_message)
     @property
     def combined_status(self) -> str:
         if self.status == self.Status.SUCCESSFUL or self.celery_status == self.CELERY_STATUS_SUCCESS:
+            return self.status
+        if self.status == self.Status.FAILED:
             return self.status
         if self.celery_status == self.CELERY_STATUS_STARTED:
             return self.Status.PROCESSING
@@ -126,3 +168,8 @@ class PeriodicDataUpdateUpload(TimeStampedModel, CeleryEnabledModel):
             return self.Status.CANCELED
 
         return self.status
+
+    @property
+    def combined_status_display(self):
+        status_dict = {status.value: status.label for status in self.Status}
+        return status_dict[self.combined_status]

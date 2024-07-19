@@ -77,3 +77,14 @@ export const uploadPeriodicDataUpdateTemplate = async (
 
   return response;
 };
+
+export const fetchPeriodicDataUpdateUploadDetails = async (
+  businessAreaSlug,
+  programId,
+  uploadId,
+) => {
+  const response = await api.get(
+    `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-uploads/${uploadId}/`,
+  );
+  return response;
+}

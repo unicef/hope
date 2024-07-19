@@ -283,15 +283,34 @@ export function targetPopulationBuildStatusToColor(
   }
   return theme.palette.error.main;
 }
-
+export function periodicDataUpdateTemplateStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    EXPORTED: theme.hctPalette.green,
+    FAILED: theme.hctPalette.red,
+    TO_EXPORT: theme.hctPalette.gray,
+    ['NOT_SCHEDULED']: theme.hctPalette.gray,
+    ['CANCELED']: theme.hctPalette.gray,
+    EXPORTING: theme.hctPalette.orange,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
 export function periodicDataUpdatesUpdatesStatusToColor(
   theme: typeof themeObj,
   status: string,
 ): string {
   const colorsMap = {
-    successful: theme.hctPalette.green,
-    failed: theme.hctPalette.red,
-    processing: theme.hctPalette.gray,
+    SUCCESSFUL: theme.hctPalette.green,
+    FAILED: theme.hctPalette.red,
+    PENDING: theme.hctPalette.gray,
+    ['NOT_SCHEDULED']: theme.hctPalette.gray,
+    ['CANCELED']: theme.hctPalette.gray,
+    PROCESSING: theme.hctPalette.orange,
   };
   if (status in colorsMap) {
     return colorsMap[status];
