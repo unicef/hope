@@ -31,6 +31,8 @@ class Individuals(BaseComponents):
     tablePagination = 'div[data-cy="table-pagination"]'
     individualTableRow = 'tr[data-cy="individual-table-row"'
 
+    tabPeriodicDataUpdates = 'button[data-cy="tab-periodic-data-updates"]'
+
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
 
@@ -112,3 +114,6 @@ class Individuals(BaseComponents):
 
     def getTablePagination(self) -> WebElement:
         return self.wait_for(self.tablePagination)
+
+    def getTabPeriodicDataUpdates(self) -> WebElement:
+        return self.wait_for(self.tabPeriodicDataUpdates)
