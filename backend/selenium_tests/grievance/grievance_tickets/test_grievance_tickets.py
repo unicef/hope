@@ -178,6 +178,7 @@ class TestGrievanceTickets:
         [
             pytest.param({"category": "Sensitive Grievance", "type": "Miscellaneous"}, id="Sensitive Grievance"),
             pytest.param({"category": "Grievance Complaint", "type": "Other Complaint"}, id="Grievance Complaint"),
+            pytest.param({"category": "Data Change", "type": "Add Individual"}, id="Data Change Add Individual"),
         ],
     )
     def test_grievance_tickets_create_new_tickets(
