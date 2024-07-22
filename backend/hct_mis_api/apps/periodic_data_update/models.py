@@ -65,7 +65,7 @@ class PeriodicDataUpdateTemplate(TimeStampedModel, CeleryEnabledModel):
         return self.status
 
     @property
-    def combined_status_display(self):
+    def combined_status_display(self) -> str:
         status_dict = {status.value: status.label for status in self.Status}
         return status_dict[self.combined_status]
 
@@ -142,12 +142,12 @@ class PeriodicDataUpdateUpload(TimeStampedModel, CeleryEnabledModel):
     error_message = models.TextField(null=True, blank=True)
     celery_task_name = "hct_mis_api.apps.periodic_data_update.celery_tasks.import_periodic_data_update"
 
-
     @property
     def errors(self):
         if not self.error_message:
             return None
         return json.loads(self.error_message)
+
     @property
     def combined_status(self) -> str:
         if self.status == self.Status.SUCCESSFUL or self.celery_status == self.CELERY_STATUS_SUCCESS:
@@ -170,6 +170,6 @@ class PeriodicDataUpdateUpload(TimeStampedModel, CeleryEnabledModel):
         return self.status
 
     @property
-    def combined_status_display(self):
+    def combined_status_display(self) -> str:
         status_dict = {status.value: status.label for status in self.Status}
         return status_dict[self.combined_status]
