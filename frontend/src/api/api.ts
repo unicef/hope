@@ -51,11 +51,11 @@ export const api = {
     const response = await fetch(`${this.baseURL}${url}`, fetchOptions);
 
     if (!response.ok) {
-      const error =Error(`Error posting data to ${url}`);
+      const error = Error(`Error posting data to ${url}`);
       try {
         // @ts-ignore
         error.data = await response.json();
-      }catch (e) {
+      } catch (e) {
         // @ts-ignore
         error.data = null;
       }

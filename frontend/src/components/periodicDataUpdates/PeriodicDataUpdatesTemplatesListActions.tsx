@@ -21,7 +21,7 @@ export const useDownloadPeriodicDataUpdateTemplate = () => {
         mutationBusinessAreaSlug,
         mutationProgramId,
         mutationTemplateId,
-      )
+      );
     },
     onSuccess: (data) => {
       if (data.url) {

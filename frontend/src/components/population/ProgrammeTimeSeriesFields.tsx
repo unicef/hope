@@ -12,9 +12,9 @@ import {
 import styled from 'styled-components';
 import { Title } from '@core/Title';
 import { useTranslation } from 'react-i18next';
-import {useArrayToDict} from "@hooks/useArrayToDict";
-import {AllIndividualsFlexFieldsAttributesQuery, IndividualNode} from "@generated/graphql";
-import {UniversalMoment} from "@core/UniversalMoment";
+import { useArrayToDict } from '@hooks/useArrayToDict';
+import { AllIndividualsFlexFieldsAttributesQuery, IndividualNode } from '@generated/graphql';
+import { UniversalMoment } from '@core/UniversalMoment';
 
 const StyledTableCell = styled(MuiTableCell)`
   color: #adadad !important;
@@ -28,7 +28,7 @@ interface ProgrammeTimeSeriesFieldsProps {
 
 export const ProgrammeTimeSeriesFields = ({
                                             individual,
-                                            flexFieldsData
+                                            flexFieldsData,
 }: ProgrammeTimeSeriesFieldsProps): React.ReactElement => {
   const { t } = useTranslation();
   const flexAttributesDict = useArrayToDict(
@@ -37,11 +37,11 @@ export const ProgrammeTimeSeriesFields = ({
     '*',
   );
   const rows = [];
-  for (let fieldName of Object.keys(individual.flexFields)) {
-    if(flexAttributesDict[fieldName]?.type !=='PDU'){
+  for (const fieldName of Object.keys(individual.flexFields)) {
+    if (flexAttributesDict[fieldName]?.type !== 'PDU') {
       continue;
     }
-    for (let roundNumber of Object.keys(individual.flexFields[fieldName])) {
+    for (const roundNumber of Object.keys(individual.flexFields[fieldName])) {
       const roundData = individual.flexFields[fieldName][roundNumber];
       const roundName = flexAttributesDict[fieldName].pduData.roundsNames[parseInt(roundNumber) - 1];
       const value = roundData.value;
@@ -52,7 +52,7 @@ export const ProgrammeTimeSeriesFields = ({
         roundName: roundName,
         value,
         dateOfCollection,
-      })
+      });
     }
   }
 
