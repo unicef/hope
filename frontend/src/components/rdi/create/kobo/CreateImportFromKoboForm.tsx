@@ -99,7 +99,11 @@ export function CreateImportFromKoboForm({
   useEffect(() => stopPollingImportData, []);
   useEffect(() => {
     saveKoboInputData();
-  }, [formik.values.koboAssetId, formik.values.onlyActiveSubmissions]);
+  }, [
+    formik.values.koboAssetId,
+    formik.values.onlyActiveSubmissions,
+    formik.values.pullPictures,
+  ]);
   useEffect(() => {
     setSubmitForm(formik.submitForm);
   }, [formik.submitForm]);
