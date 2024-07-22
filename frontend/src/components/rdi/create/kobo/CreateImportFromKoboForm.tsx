@@ -60,6 +60,7 @@ export function CreateImportFromKoboForm({
             businessAreaSlug: businessArea,
             allowDeliveryMechanismsValidationErrors:
               values.allowDeliveryMechanismsValidationErrors,
+            pullPictures: values.pullPictures,
           },
         },
       });
@@ -77,6 +78,7 @@ export function CreateImportFromKoboForm({
       onlyActiveSubmissions: true,
       screenBeneficiary: false,
       allowDeliveryMechanismsValidationErrors: false,
+      pullPictures: false,
     },
     validationSchema,
     onSubmit,
