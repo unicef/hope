@@ -76,8 +76,8 @@ class Command(BaseCommand):
 
         try:
             call_command("search_index", "--rebuild", "-f")
-        except elasticsearch.exceptions.RequestError:
-            logger.error("Elasticsearch request error")
+        except elasticsearch.exceptions.RequestError as e:
+            logger.error(e)
 
         generate_payment_plan()
         generate_real_cash_plans()
