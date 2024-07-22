@@ -711,6 +711,9 @@ class TestKoboSaveValidatorsMethods(TestCase):
         result = validator.validate_everything(self.VALID_JSON, business_area, True)
         self.assertEqual(result, [])
 
+        result = validator.validate_everything(self.VALID_JSON, business_area, False)
+        self.assertEqual(result, [])
+
         result = validator.validate_everything(self.INVALID_JSON, business_area)
         result.sort(key=itemgetter("header"))
         expected = [

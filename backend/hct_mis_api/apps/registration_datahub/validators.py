@@ -1233,7 +1233,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         self, value: str, field: str, attachments: list[dict], *args: Any, **kwargs: Any
     ) -> Union[str, None]:
         try:
-            if kwargs and "skip_validate_pictures" in kwargs and kwargs["skip_validate_pictures"] is True:
+            if kwargs.get("skip_validate_pictures") is True:
                 # skip validation if skip_validate_pictures=True
                 return None
             allowed_extensions = django_core_validators.get_available_image_extensions()
