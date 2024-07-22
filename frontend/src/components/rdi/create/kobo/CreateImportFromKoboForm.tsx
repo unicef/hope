@@ -93,6 +93,7 @@ export function CreateImportFromKoboForm({
       businessAreaSlug: businessArea,
       onlyActiveSubmissions: formik.values.onlyActiveSubmissions,
       koboAssetId: formik.values.koboAssetId,
+      pullPictures: formik.values.pullPictures,
     });
   };
   useEffect(() => stopPollingImportData, []);
