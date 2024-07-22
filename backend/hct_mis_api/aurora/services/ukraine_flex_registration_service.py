@@ -16,6 +16,7 @@ from hct_mis_api.apps.household.forms import (
     IndividualForm,
 )
 from hct_mis_api.apps.household.models import (
+    BLANK,
     DISABLED,
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -174,7 +175,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
             collect_individual_data=YES,
             size=household_dict.get("size_h_c"),
             business_area=registration_data_import.business_area,
-            residence_status=household_dict.get("residence_status_h_c"),
+            residence_status=household_dict.get("residence_status_h_c", BLANK),
         )
 
         admin1 = household_dict.get("admin1_h_c")
