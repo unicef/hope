@@ -25,6 +25,8 @@ from hct_mis_api.apps.targeting.fixtures import (
 )
 from selenium_tests.page_object.people.people_details import PeopleDetails
 
+from selenium_tests.page_object.filters import Filters
+
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
@@ -120,17 +122,23 @@ class TestSmokePeople:
         add_people: None,
         pagePeople: People,
         pagePeopleDetails: PeopleDetails,
+        filters: Filters,
     ) -> None:
         pagePeople.selectGlobalProgramFilter("Worker Program").click()
         pagePeople.getNavPeople().click()
+        assert "People" in pagePeople.getTableTitle().text
         unicef_id = pagePeople.getIndividualTableRow(0).text.split(" ")[0]
         pagePeople.getIndividualTableRow(0).click()
         individual = Individual.objects.filter(unicef_id=unicef_id).first()
         assert f"Individual ID: {individual.unicef_id}" in pagePeopleDetails.getPageHeaderTitle().text
-        assert "Stacey Freeman" in pagePeopleDetails.getLabelFullName().text
-        assert "Stacey" in pagePeopleDetails.getLabelGivenName().text
-        assert "-" in pagePeopleDetails.getLabelMiddleName().text
-        assert "Freeman" in pagePeopleDetails.getLabelFamilyName().text
+        assert individual.full_name in pagePeopleDetails.getLabelFullName().text
+        assert individual.given_name in pagePeopleDetails.getLabelGivenName().text
+        assert (
+            individual.middle_name
+            if individual.middle_name
+            else "-" in pagePeopleDetails.getLabelMiddleName().text
+        )
+        assert individual.family_name in pagePeopleDetails.getLabelFamilyName().text
         assert individual.sex.lower() in pagePeopleDetails.getLabelGender().text.lower()
         assert pagePeopleDetails.getLabelAge().text
         assert individual.birth_date.strftime("%-d %b %Y") in pagePeopleDetails.getLabelDateOfBirth().text
