@@ -95,5 +95,4 @@ class ProgramFactory(DjangoModelFactory):
     def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
         if not create:
             return
-
         ProgramCycleFactory(program=self, **kwargs)

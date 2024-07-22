@@ -161,7 +161,7 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
 
         if program.status != Program.ACTIVE:
             raise ValidationError("Only Active program can be assigned to Targeting")
-        if program_cycle.status != ProgramCycle.FINISHED:
+        if program_cycle.status == ProgramCycle.FINISHED:
             raise ValidationError("Not possible to assign Finished Program Cycle to Targeting")
 
         tp_name = input_data.get("name", "").strip()
@@ -264,7 +264,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
 
         if program_cycle_id_encoded:
             program_cycle = get_object_or_404(ProgramCycle, pk=decode_id_string(program_cycle_id_encoded))
-            if program_cycle.status != ProgramCycle.FINISHED:
+            if program_cycle.status == ProgramCycle.FINISHED:
                 raise ValidationError("Not possible to assign Finished Program Cycle to Targeting")
             target_population.program_cycle = program_cycle
 

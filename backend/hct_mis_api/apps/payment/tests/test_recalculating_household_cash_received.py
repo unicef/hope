@@ -39,6 +39,13 @@ class TestRecalculatingCash(APITestCase):
           cashPlus
           populationGoal
           administrativeAreasOfImplementation
+          cycles {
+            edges {
+              node {
+                id
+              }
+            }
+          }
         }
         validationErrors
       }
@@ -117,13 +124,14 @@ class TestRecalculatingCash(APITestCase):
             }
         }
 
-        cls.create_target_population_mutation_variables = lambda program_id: {
+        cls.create_target_population_mutation_variables = lambda program_id, program_cycle_id: {
             "createTargetPopulationInput": {
                 "programId": program_id,
                 "name": "asdasd",
                 "excludedIds": "",
                 "exclusionReason": "",
                 "businessAreaSlug": "afghanistan",
+                "programCycleId": program_cycle_id,
                 "targetingCriteria": {
                     "rules": [
                         {
@@ -168,11 +176,11 @@ class TestRecalculatingCash(APITestCase):
             variables=self.update_program_mutation_variables(program_id),
         )
 
-    def create_target_population(self, program_id: str) -> Dict:
+    def create_target_population(self, program_id: str, program_cycle_id: str) -> Dict:
         return self.send_successful_graphql_request(
             request_string=self.CREATE_TARGET_POPULATION_MUTATION,
             context={"user": self.user},
-            variables=self.create_target_population_mutation_variables(program_id),
+            variables=self.create_target_population_mutation_variables(program_id, program_cycle_id),
         )
 
     def lock_target_population(self, target_population_id: str) -> Dict:
@@ -198,6 +206,7 @@ class TestRecalculatingCash(APITestCase):
                 Permissions.PROGRAMME_ACTIVATE,
                 Permissions.TARGETING_LOCK,
                 Permissions.TARGETING_SEND,
+                Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
             ],
             self.business_area,
         )
@@ -223,10 +232,12 @@ class TestRecalculatingCash(APITestCase):
 
         program_response = self.create_program()
         program_id = program_response["data"]["createProgram"]["program"]["id"]
+        print("==> ", program_response["data"]["createProgram"]["program"])
+        program_cycle_id = program_response["data"]["createProgram"]["program"]["cycles"]["edges"][0]["node"]["id"]
 
         self.activate_program(program_id)
 
-        target_population_response = self.create_target_population(program_id)
+        target_population_response = self.create_target_population(program_id, program_cycle_id)
         target_population_id = target_population_response["data"]["createTargetPopulation"]["targetPopulation"]["id"]
 
         self.lock_target_population(target_population_id)

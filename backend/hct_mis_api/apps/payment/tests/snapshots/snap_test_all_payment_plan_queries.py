@@ -28,7 +28,6 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                         'canCreateFollowUp': False,
                         'dispersionEndDate': '2020-12-10',
                         'dispersionStartDate': '2020-08-10',
-                        'endDate': '2020-11-10',
                         'exchangeRate': 2.0,
                         'femaleAdultsCount': 0,
                         'femaleChildrenCount': 1,
@@ -38,7 +37,10 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                             'totalCount': 2
                         },
                         'paymentsConflictsCount': 1,
-                        'startDate': '2020-09-10',
+                        'programCycle': {
+                            'endDate': '2020-11-10',
+                            'startDate': '2020-09-10'
+                        },
                         'status': 'OPEN',
                         'totalDeliveredQuantity': 50.0,
                         'totalDeliveredQuantityUsd': 100.0,
@@ -63,7 +65,6 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                         'canCreateFollowUp': False,
                         'dispersionEndDate': '2020-10-10',
                         'dispersionStartDate': '2020-10-10',
-                        'endDate': '2020-11-10',
                         'exchangeRate': 2.0,
                         'femaleAdultsCount': 1,
                         'femaleChildrenCount': 0,
@@ -73,7 +74,10 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                             'totalCount': 2
                         },
                         'paymentsConflictsCount': 0,
-                        'startDate': '2020-09-10',
+                        'programCycle': {
+                            'endDate': '2020-11-10',
+                            'startDate': '2020-09-10'
+                        },
                         'status': 'LOCKED',
                         'totalDeliveredQuantity': 50.0,
                         'totalDeliveredQuantityUsd': 100.0,

@@ -27,6 +27,7 @@ from hct_mis_api.apps.payment.services.payment_household_snapshot_service import
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
@@ -116,8 +117,11 @@ class TestPaymentSignature(APITestCase):
 
         targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
         targeting.program = ProgramFactory(
+            status=Program.ACTIVE,
             start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
             end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
+            cycle__start_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
+            cycle__end_date=timezone.datetime(2021, 12, 10, tzinfo=utc),
         )
 
         hoh1 = IndividualFactory(household=None)
@@ -134,8 +138,7 @@ class TestPaymentSignature(APITestCase):
         input_data = dict(
             business_area_slug="afghanistan",
             targeting_id=self.id_to_base64(targeting.id, "Targeting"),
-            start_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
-            end_date=timezone.datetime(2021, 12, 10, tzinfo=utc),
+            program_cycle_id=self.id_to_base64(targeting.program.cycles.first().id, "ProgramCycle"),
             dispersion_start_date=parse_date("2020-09-10"),
             dispersion_end_date=parse_date("2020-11-10"),
             currency="USD",

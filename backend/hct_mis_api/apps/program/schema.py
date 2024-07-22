@@ -106,11 +106,12 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     data_collecting_type = graphene.Field(DataCollectingTypeNode, source="data_collecting_type")
     partners = graphene.List(PartnerNode)
     is_social_worker_program = graphene.Boolean()
-    cycles = DjangoPermissionFilterConnectionField(
-        ProgramCycleNode,
-        filterset_class=ProgramCycleFilter,
-        permission_classes=(hopePermissionClass(Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST),),
-    )
+    # cycles = DjangoPermissionFilterConnectionField(
+    #     ProgramCycleNode,
+    #     filterset_class=ProgramCycleFilter,
+    #     permission_classes=(hopePermissionClass(Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST),),
+    # )
+    cycles = graphene.List(ProgramCycleNode)
 
     class Meta:
         model = Program

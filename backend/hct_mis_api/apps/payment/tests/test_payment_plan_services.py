@@ -58,10 +58,8 @@ class TestPaymentPlanServices(APITestCase):
         cls.create_user_role_with_permissions(cls.user, [Permissions.PM_CREATE], cls.business_area)
 
     def test_delete_open(self) -> None:
-        pp: PaymentPlan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+        pp: PaymentPlan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program__status=Program.ACTIVE)
         self.assertEqual(pp.target_population.status, TargetPopulation.STATUS_OPEN)
-        pp.program_cycle.program.status = "ACTIVE"
-        pp.program_cycle.program.save()
 
         pp = PaymentPlanService(payment_plan=pp).delete()
         self.assertEqual(pp.is_removed, True)
@@ -77,12 +75,16 @@ class TestPaymentPlanServices(APITestCase):
     @flaky(max_runs=5, min_passes=1)
     @freeze_time("2020-10-10")
     def test_create_validation_errors(self) -> None:
-        targeting = TargetPopulationFactory()
-        targeting.program = ProgramFactory(
-            status=Program.ACTIVE,
-            start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
-            end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
+        targeting = TargetPopulationFactory(
+            program=ProgramFactory(
+                status=Program.ACTIVE,
+                start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
+                end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
+                cycle__start_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
+                cycle__end_date=timezone.datetime(2021, 12, 10, tzinfo=utc),
+            )
         )
+
         cycle_id = self.id_to_base64(targeting.program.cycles.first().pk, "ProgramCycleNode")
 
         input_data = dict(
@@ -121,25 +123,22 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService.create(input_data=input_data, user=self.user)
         input_data["dispersion_end_date"] = parse_date("2020-11-11")
 
-        with self.assertRaisesMessage(GraphQLError, "Start date cannot be earlier than start date in the program"):
-            PaymentPlanService.create(input_data=input_data, user=self.user)
-        targeting.program.start_date = timezone.datetime(2021, 10, 1, tzinfo=utc)
-        targeting.program.save()
 
     @freeze_time("2020-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_create(self, get_exchange_rate_mock: Any) -> None:
-        targeting = TargetPopulationFactory()
+        targeting = TargetPopulationFactory(program=ProgramFactory(
+            status=Program.ACTIVE,
+            start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
+            end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
+        )
+
+        )
 
         self.business_area.is_payment_plan_applicable = True
         self.business_area.save()
 
         targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-        targeting.program = ProgramFactory(
-            status=Program.ACTIVE,
-            start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
-            end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
-        )
 
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
@@ -166,7 +165,7 @@ class TestPaymentPlanServices(APITestCase):
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
-            with self.assertNumQueries(7):
+            with self.assertNumQueries(8):
                 pp = PaymentPlanService.create(input_data=input_data, user=self.user)
             assert mock_prepare_payment_plan_task.on_commit.call_count == 1
 
@@ -238,10 +237,11 @@ class TestPaymentPlanServices(APITestCase):
         PaymentFactory(parent=pp, household=hh1, currency="PLN")
         self.assertEqual(pp.payment_items.count(), 1)
 
-        new_targeting = TargetPopulationFactory()
-        new_targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-        new_targeting.program = ProgramFactory(
-            start_date=timezone.datetime(2021, 11, 10, tzinfo=utc).date(),
+        new_targeting = TargetPopulationFactory(
+            status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
+            program=ProgramFactory(
+                start_date=timezone.datetime(2021, 11, 10, tzinfo=utc).date(),
+            )
         )
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
@@ -272,31 +272,22 @@ class TestPaymentPlanServices(APITestCase):
             self.assertEqual(updated_pp_1.program, updated_pp_1.target_population.program)
             self.assertEqual(old_pp_targeting.status, TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
 
-            # test start_date update
-            old_pp_start_date = pp.start_date
-            updated_pp_2 = PaymentPlanService(payment_plan=pp).update(
-                input_data=dict(start_date=timezone.datetime(2021, 12, 10, tzinfo=utc))
-            )
-            updated_pp_2.refresh_from_db()
-            self.assertNotEqual(old_pp_start_date, updated_pp_2.start_date)
-
     @freeze_time("2023-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_create_follow_up_pp(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(
             total_households_count=1,
-            start_date=timezone.datetime(2021, 6, 10, tzinfo=utc),
-            end_date=timezone.datetime(2021, 7, 10, tzinfo=utc),
+            program__cycle__start_date=timezone.datetime(2021, 6, 10, tzinfo=utc),
+            program__cycle__end_date=timezone.datetime(2021, 7, 10, tzinfo=utc),
         )
-
-        new_targeting = TargetPopulationFactory(status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
-        new_targeting.program = ProgramFactory(
-            start_date=timezone.datetime(2021, 5, 10, tzinfo=utc).date(),
-            end_date=timezone.datetime(2021, 8, 10, tzinfo=utc).date(),
+        new_targeting = TargetPopulationFactory(
+            status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
+            program=ProgramFactory(
+                start_date=timezone.datetime(2021, 5, 10, tzinfo=utc).date(),
+                end_date=timezone.datetime(2021, 8, 10, tzinfo=utc).date(),
+            )
         )
-
         payments = []
-
         for _ in range(4):
             hoh = IndividualFactory(household=None)
             hh = HouseholdFactory(head_of_household=hoh)
@@ -350,8 +341,8 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(follow_up_pp.currency, pp.currency)
         self.assertEqual(follow_up_pp.dispersion_start_date, dispersion_start_date)
         self.assertEqual(follow_up_pp.dispersion_end_date, dispersion_end_date)
-        self.assertEqual(follow_up_pp.start_date, pp.start_date)
-        self.assertEqual(follow_up_pp.end_date, pp.end_date)
+        self.assertEqual(follow_up_pp.program_cycle.start_date, pp.program_cycle.start_date)
+        self.assertEqual(follow_up_pp.program_cycle.end_date, pp.program_cycle.end_date)
         self.assertEqual(follow_up_pp.total_households_count, 0)
         self.assertEqual(follow_up_pp.total_individuals_count, 0)
         self.assertEqual(follow_up_pp.payment_items.count(), 0)
@@ -408,8 +399,8 @@ class TestPaymentPlanServices(APITestCase):
         min_no_of_payments_in_chunk_mock.__get__ = mock.Mock(return_value=2)
 
         pp = PaymentPlanFactory(
-            start_date=timezone.datetime(2021, 6, 10, tzinfo=utc),
-            end_date=timezone.datetime(2021, 7, 10, tzinfo=utc),
+            program__cycle__start_date=timezone.datetime(2021, 6, 10, tzinfo=utc),
+            program__cycle__end_date=timezone.datetime(2021, 7, 10, tzinfo=utc),
         )
 
         with self.assertRaisesMessage(GraphQLError, "No payments to split"):
@@ -516,8 +507,8 @@ class TestPaymentPlanServices(APITestCase):
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_send_to_payment_gateway(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(
-            start_date=timezone.datetime(2021, 6, 10, tzinfo=utc),
-            end_date=timezone.datetime(2021, 7, 10, tzinfo=utc),
+            program__cycle__start_date=timezone.datetime(2021, 6, 10, tzinfo=utc),
+            program__cycle__end_date=timezone.datetime(2021, 7, 10, tzinfo=utc),
             status=PaymentPlan.Status.ACCEPTED,
         )
         pp.background_action_status_send_to_payment_gateway()

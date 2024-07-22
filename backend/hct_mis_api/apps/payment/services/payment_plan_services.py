@@ -659,8 +659,6 @@ class PaymentPlanService:
             currency=source_pp.currency,
             dispersion_start_date=dispersion_start_date,
             dispersion_end_date=dispersion_end_date,
-            start_date=source_pp.start_date,
-            end_date=source_pp.end_date,
         )
 
         transaction.on_commit(lambda: prepare_follow_up_payment_plan_task.delay(follow_up_pp.id))

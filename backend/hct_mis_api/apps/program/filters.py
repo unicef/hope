@@ -146,7 +146,7 @@ class ProgramCycleFilter(FilterSet):  # TODO: check this model 'GlobalProgramFil
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(name__istartswith=value)
+            q_obj |= Q(title__istartswith=value)
         return qs.filter(q_obj)
 
     def total_delivered_quantity_filter(self, queryset: QuerySet, name: str, value: Any) -> QuerySet:
