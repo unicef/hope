@@ -29,7 +29,7 @@ const FormErrorDisplay = ({ formErrors }) => {
   return (
     <div>
       {formErrors.map((error, index) => (
-        <div key={index}>
+        <div key={index} data-cy="pdu-form-errors">
           <h3>Row: {error.row}</h3>
           <ul>
             {Object.entries(error.errors).map(([field, fieldErrors], idx) => (

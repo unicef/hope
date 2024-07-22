@@ -123,9 +123,9 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
       <TableCell data-cy={`update-created-by-${row.id}`}>
         {row.created_by}
       </TableCell>
-      <TableCell data-cy={`template-details-btn-${row.id}`}>
+      <TableCell data-cy={`update-details-${row.id}`}>
         {row.status === 'FAILED' ? (
-          <IconButton color="primary" onClick={() => handleDialogOpen(row.id)}>
+          <IconButton data-cy={`update-details-btn-${row.id}`} color="primary" onClick={() => handleDialogOpen(row.id)}>
             <VisibilityIcon />
           </IconButton>
         ) : null}

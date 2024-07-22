@@ -35,8 +35,8 @@ export const PeriodicDataUpdates = (): React.ReactElement => {
             onChange={handleChange}
             aria-label="periodic data updates tabs"
           >
-            <Tab label="Templates" />
-            <Tab label="Updates" />
+            <Tab label="Templates"  data-cy="pdu-templates"/>
+            <Tab label="Updates" data-cy="pdu-updates"/>
           </Tabs>
         </Box>
       }
