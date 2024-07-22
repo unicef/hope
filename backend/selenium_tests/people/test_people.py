@@ -231,6 +231,7 @@ class TestSmokePeople:
         pagePeople.getNavPeople().click()
         pagePeople.getIndividualTableRow(0).click()
         assert "21.36" in pagePeopleDetails.getLabelTotalCashReceived().text
+        pagePeopleDetails.waitForRows()
         assert 1 == len(pagePeopleDetails.getRows())
         assert "21.36" in pagePeopleDetails.getRows()[0].text
         assert "DELIVERED FULLY" in pagePeopleDetails.getRows()[0].text
