@@ -47,8 +47,7 @@ class PeriodicDataUpdateTemplateCreateSerializer(serializers.ModelSerializer):
         rounds_data = data.get("rounds_data", [])
         # Check for duplicate field names
         field_names = [item["field"] for item in rounds_data]
-        field_names_set = set(field_names)
-        if len(field_names) != len(field_names_set):
+        if len(field_names) != len(set(field_names)):
             raise serializers.ValidationError({"rounds_data": "Each Field can only be used once in the template."})
         return data
 

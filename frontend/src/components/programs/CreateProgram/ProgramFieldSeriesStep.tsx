@@ -4,7 +4,14 @@ import { PduSubtypeChoicesDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Box, Button, FormControl, Grid, IconButton } from '@mui/material';
+import {
+  Box,
+  Button,
+  FormControl,
+  FormHelperText,
+  Grid,
+  IconButton,
+} from '@mui/material';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { Field, FieldArray } from 'formik';
@@ -13,7 +20,6 @@ import { Link } from 'react-router-dom';
 
 interface ProgramFieldSeriesStepProps {
   values: {
-    //TODO: Define the type of pduFields
     pduFields: Array<any>;
   };
   handleNext?: () => Promise<void>;
@@ -36,12 +42,6 @@ export const ProgramFieldSeriesStep = ({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const confirm = useConfirmation();
-
-  const handleNextClick = async (): Promise<void> => {
-    if (handleNext) {
-      await handleNext();
-    }
-  };
 
   const mappedPduSubtypeChoices = pdusubtypeChoicesData?.pduSubtypeChoices.map(
     (el) => ({
@@ -87,18 +87,29 @@ export const ProgramFieldSeriesStep = ({
                         />
                       </Grid>
                       <Grid item xs={3}>
-                        <Field
-                          name={`pduFields.${index}.pduData.numberOfRounds`}
+                        <FormControl
                           fullWidth
+                          error={Boolean(
+                            errors.pduFields?.[index]?.pduData?.numberOfRounds,
+                          )}
                           variant="outlined"
-                          label={t('Number of Expected Rounds')}
-                          component={FormikSelectField}
-                          choices={[...Array(10).keys()].map((n) => ({
-                            value: n + 1,
-                            label: `${n + 1}`,
-                          }))}
-                          disabled={programHasRdi}
-                        />
+                        >
+                          <Field
+                            name={`pduFields.${index}.pduData.numberOfRounds`}
+                            fullWidth
+                            variant="outlined"
+                            label={t('Number of Expected Rounds')}
+                            component={FormikSelectField}
+                            choices={[...Array(10).keys()].map((n) => ({
+                              value: n + 1,
+                              label: `${n + 1}`,
+                            }))}
+                            disabled={programHasRdi}
+                          />
+                          <FormHelperText>
+                            {errors.pduFields?.[index]?.pduData?.numberOfRounds}
+                          </FormHelperText>
+                        </FormControl>
                       </Grid>
                       <Grid item xs={1}>
                         <IconButton
@@ -135,6 +146,7 @@ export const ProgramFieldSeriesStep = ({
                                 variant="outlined"
                                 label={`${t('Round')} ${round + 1} ${t('Name')}`}
                                 component={FormikTextField}
+                                type="text"
                                 disabled={programHasRdi}
                               />
                             </FormControl>
@@ -167,6 +179,9 @@ export const ProgramFieldSeriesStep = ({
                 {t('Add Time Series Fields')}
               </Button>
             </Box>
+            <FormHelperText error>
+              {typeof errors.pduFields === 'string' && errors.pduFields}
+            </FormHelperText>
           </div>
         )}
       />
@@ -192,7 +207,7 @@ export const ProgramFieldSeriesStep = ({
             variant="contained"
             color="primary"
             data-cy="button-next"
-            onClick={handleNextClick}
+            onClick={handleNext}
           >
             {t('Next')}
           </Button>

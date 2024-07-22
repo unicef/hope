@@ -228,6 +228,7 @@ export const DuplicateProgramPage = (): ReactElement => {
         setFieldTouched,
         setFieldValue,
         errors,
+        setErrors,
       }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
@@ -244,6 +245,8 @@ export const DuplicateProgramPage = (): ReactElement => {
             step,
             setStep,
             setFieldTouched,
+            values,
+            setErrors,
           });
         };
 
@@ -283,6 +286,8 @@ export const DuplicateProgramPage = (): ReactElement => {
                     setStep={setStep}
                     pdusubtypeChoicesData={pdusubtypeChoicesData}
                     errors={errors}
+                    setErrors={setErrors}
+                    setFieldTouched={setFieldTouched}
                   />
                 )}
                 {step === 2 && (

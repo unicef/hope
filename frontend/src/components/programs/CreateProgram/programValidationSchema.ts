@@ -36,7 +36,7 @@ export const programValidationSchema = (
             )
           : schema,
       )
-      .when('editMode', ([editMode], schema) => {
+      .when('editMode', (editMode, schema) => {
         return editMode
           ? schema
           : schema.min(today, t('End Date cannot be in the past'));
@@ -63,17 +63,54 @@ export const programValidationSchema = (
       }),
     ),
     pduFields: Yup.array().of(
-      Yup.object().shape({
-        name: Yup.string().required(t('Field name is required')),
-        pduData: Yup.object().shape({
-          subtype: Yup.string().required(t('Subtype is required')),
-          numberOfRounds: Yup.number()
-            .required(t('Number of Rounds is required'))
-            .min(1, t('At least one round is required')),
-          roundsNames: Yup.array().of(
-            Yup.string().required(t('Round name is required')),
-          ),
-        }),
-      }),
+      Yup.object()
+        .shape({
+          name: Yup.string()
+            .nullable()
+            .min(3, t('Too short'))
+            .max(150, t('Too long')),
+          pduData: Yup.object().shape({
+            subtype: Yup.string().nullable(),
+            numberOfRounds: Yup.number().nullable(),
+            roundsNames: Yup.array()
+              .of(
+                Yup.string()
+                  .required(t('Round Name is required'))
+                  .min(3, t('Too short'))
+                  .max(150, t('Too long')),
+              )
+              .test(
+                'rounds-match-number',
+                '', // Custom error message
+                function (value) {
+                  const { numberOfRounds } = this.parent;
+                  if (!numberOfRounds) return true;
+                  return value.length === numberOfRounds;
+                },
+              ),
+          }),
+        })
+        .test(
+          'pduFields-validation',
+          t('Please complete the PDU fields correctly.'), // Custom error message
+          function (value) {
+            const { name, pduData } = value;
+            const { subtype, numberOfRounds, roundsNames } = pduData;
+
+            const isInitialState =
+              !name &&
+              !subtype &&
+              numberOfRounds === null &&
+              roundsNames.length === 0;
+
+            const isValidState =
+              name &&
+              subtype &&
+              numberOfRounds &&
+              roundsNames.length === numberOfRounds;
+
+            return isInitialState || isValidState;
+          },
+        ),
     ),
   });

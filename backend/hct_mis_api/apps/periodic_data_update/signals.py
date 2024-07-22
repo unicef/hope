@@ -14,6 +14,7 @@ from hct_mis_api.apps.periodic_data_update.models import (
 
 
 @receiver(post_save, sender=PeriodicDataUpdateTemplate)
+@receiver(pre_delete, sender=PeriodicDataUpdateUpload)
 def increment_periodic_data_update_template_version_cache(
     sender: Any, instance: PeriodicDataUpdateTemplate, created: bool, **kwargs: dict
 ) -> None:
@@ -28,6 +29,7 @@ def increment_periodic_data_update_template_version_cache(
 
 
 @receiver(post_save, sender=PeriodicDataUpdateUpload)
+@receiver(pre_delete, sender=PeriodicDataUpdateUpload)
 def increment_periodic_data_update_upload_version_cache(
     sender: Any, instance: PeriodicDataUpdateTemplate, created: bool, **kwargs: dict
 ) -> None:
@@ -57,14 +59,11 @@ def increment_periodic_data_field_version_cache_for_flexible_attribute(
 def increment_periodic_data_field_version_cache_for_periodic_data_field(
     sender: Any, instance: PeriodicFieldData, created: bool, **kwargs: dict
 ) -> None:
-    try:
-        flex_field = instance.flex_field
-        if flex_field:
-            business_area_slug = flex_field.program.business_area.slug
-            program_id = flex_field.program.id
-            increment_periodic_data_field_version_cache(business_area_slug, program_id)
-    except PeriodicFieldData.flex_field.RelatedObjectDoesNotExist:
-        pass
+    flex_field = getattr(instance, "flex_field", None)
+    if flex_field:
+        business_area_slug = flex_field.program.business_area.slug
+        program_id = flex_field.program.id
+        increment_periodic_data_field_version_cache(business_area_slug, program_id)
 
 
 def increment_periodic_data_field_version_cache(business_area_slug: str, program_id: UUID) -> None:

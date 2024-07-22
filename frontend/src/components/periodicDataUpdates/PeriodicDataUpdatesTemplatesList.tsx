@@ -9,14 +9,14 @@ import UploadIcon from '@mui/icons-material/Upload';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Button, IconButton, TableCell } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
-import {ReactElement, useEffect, useState} from 'react';
+import { ReactElement, useState } from 'react';
 import { PeriodicDataUpdatesTemplateDetailsDialog } from './PeriodicDataUpdatesTemplateDetailsDialog';
 import {
   useDownloadPeriodicDataUpdateTemplate,
   useExportPeriodicDataUpdateTemplate,
 } from './PeriodicDataUpdatesTemplatesListActions';
-import {StatusBox} from "@core/StatusBox";
-import {periodicDataUpdatesUpdatesStatusToColor, periodicDataUpdateTemplateStatusToColor} from "@utils/utils";
+import { StatusBox } from '@core/StatusBox';
+import { periodicDataUpdateTemplateStatusToColor } from '@utils/utils';
 
 export interface Template {
   id: number;
@@ -95,7 +95,6 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
       programId,
       templateId: templateId.toString(),
     });
-
   };
 
   const handleExportClick = (templateId: number) => {

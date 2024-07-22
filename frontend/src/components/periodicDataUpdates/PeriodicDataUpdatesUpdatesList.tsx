@@ -11,8 +11,6 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { fetchPeriodicDataUpdateUpdates } from '@api/periodicDataUpdateApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { Template } from '@components/periodicDataUpdates/PeriodicDataUpdatesTemplatesList';
-import { PeriodicDataUpdatesTemplateDetailsDialog } from '@components/periodicDataUpdates/PeriodicDataUpdatesTemplateDetailsDialog';
 import { PeriodicDataUpdatesUploadDetailsDialog } from '@components/periodicDataUpdates/PeriodicDataUpdatesUploadDetailsDialog';
 
 interface Update {

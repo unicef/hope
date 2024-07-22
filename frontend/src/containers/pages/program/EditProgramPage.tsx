@@ -171,7 +171,19 @@ export const EditProgramPage = (): ReactElement => {
         areaAccess: partner.areaAccess,
       })),
     partnerAccess,
-    pduFields,
+    pduFields:
+      pduFields.length == 0
+        ? [
+            {
+              name: '',
+              pduData: {
+                subtype: '',
+                numberOfRounds: null,
+                roundsNames: [],
+              },
+            },
+          ]
+        : pduFields,
   };
   initialValues.budget =
     data.program.budget === '0.00' ? '' : data.program.budget;
@@ -221,6 +233,7 @@ export const EditProgramPage = (): ReactElement => {
         setFieldTouched,
         setFieldValue,
         errors,
+        setErrors,
       }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
@@ -237,6 +250,8 @@ export const EditProgramPage = (): ReactElement => {
             step,
             setStep,
             setFieldTouched,
+            values,
+            setErrors,
           });
         };
 
@@ -302,9 +317,11 @@ export const EditProgramPage = (): ReactElement => {
                     handleNext={handleNextStep}
                     step={step}
                     setStep={setStep}
-                    programHasRdi={programHasRdi}
                     pdusubtypeChoicesData={pdusubtypeChoicesData}
                     errors={errors}
+                    setErrors={setErrors}
+                    setFieldTouched={setFieldTouched}
+                    programHasRdi={programHasRdi}
                   />
                 )}
                 {step === 2 && (
