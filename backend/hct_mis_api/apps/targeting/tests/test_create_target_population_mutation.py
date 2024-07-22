@@ -50,7 +50,9 @@ class TestCreateTargetPopulationMutation(APITestCase):
         cls.user = UserFactory.create()
         create_afghanistan()
         business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.program = ProgramFactory.create(name="program1", status=Program.ACTIVE, business_area=business_area, cycle__status=ProgramCycle.ACTIVE)
+        cls.program = ProgramFactory.create(
+            name="program1", status=Program.ACTIVE, business_area=business_area, cycle__status=ProgramCycle.ACTIVE
+        )
         cls.program_cycle = cls.program.cycles.first()
         create_household(
             {"size": 2, "residence_status": "HOST", "program": cls.program},

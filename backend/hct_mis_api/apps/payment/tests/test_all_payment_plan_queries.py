@@ -37,7 +37,6 @@ def create_child_payment_plans(pp: PaymentPlan) -> None:
         source_payment_plan=pp,
         program__cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
         program__cycle__end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
-
     )
     fpp1.unicef_id = "PP-0060-20-00000003"
     fpp1.save()
@@ -218,8 +217,10 @@ class TestPaymentPlanQueries(APITestCase):
         )
 
         with freeze_time("2020-10-10"):
-            program = RealProgramFactory(cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
-                cycle__end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),)
+            program = RealProgramFactory(
+                cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
+                cycle__end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
+            )
             program_cycle = program.cycles.first()
             cls.pp = PaymentPlanFactory(
                 program=program,

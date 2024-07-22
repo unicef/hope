@@ -1,7 +1,4 @@
-from datetime import datetime
 from typing import List
-
-from django.utils import timezone
 
 from parameterized import parameterized
 

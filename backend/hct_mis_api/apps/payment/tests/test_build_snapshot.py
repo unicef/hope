@@ -1,10 +1,8 @@
 from datetime import datetime
 
 from django.test import TestCase
-from django.utils import timezone
 
 from freezegun import freeze_time
-from pytz import utc
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory

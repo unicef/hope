@@ -123,16 +123,15 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService.create(input_data=input_data, user=self.user)
         input_data["dispersion_end_date"] = parse_date("2020-11-11")
 
-
     @freeze_time("2020-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_create(self, get_exchange_rate_mock: Any) -> None:
-        targeting = TargetPopulationFactory(program=ProgramFactory(
-            status=Program.ACTIVE,
-            start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
-            end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
-        )
-
+        targeting = TargetPopulationFactory(
+            program=ProgramFactory(
+                status=Program.ACTIVE,
+                start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
+                end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
+            )
         )
 
         self.business_area.is_payment_plan_applicable = True
@@ -241,7 +240,7 @@ class TestPaymentPlanServices(APITestCase):
             status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
             program=ProgramFactory(
                 start_date=timezone.datetime(2021, 11, 10, tzinfo=utc).date(),
-            )
+            ),
         )
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
@@ -285,7 +284,7 @@ class TestPaymentPlanServices(APITestCase):
             program=ProgramFactory(
                 start_date=timezone.datetime(2021, 5, 10, tzinfo=utc).date(),
                 end_date=timezone.datetime(2021, 8, 10, tzinfo=utc).date(),
-            )
+            ),
         )
         payments = []
         for _ in range(4):
