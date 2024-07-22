@@ -65,13 +65,19 @@ export const programValidationSchema = (
     pduFields: Yup.array().of(
       Yup.object()
         .shape({
-          name: Yup.string().nullable(),
+          name: Yup.string()
+            .nullable()
+            .min(3, t('Too short'))
+            .max(150, t('Too long')),
           pduData: Yup.object().shape({
             subtype: Yup.string().nullable(),
             numberOfRounds: Yup.number().nullable(),
             roundsNames: Yup.array()
               .of(
-                Yup.string().required(t('Round Name is required')), // Custom error message
+                Yup.string()
+                  .required(t('Round Name is required'))
+                  .min(3, t('Too short'))
+                  .max(150, t('Too long')),
               )
               .test(
                 'rounds-match-number',
