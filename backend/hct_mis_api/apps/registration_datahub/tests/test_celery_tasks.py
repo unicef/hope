@@ -932,6 +932,11 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
 
 
 class TestRegistrationImportCeleryTasks(APITestCase):
+    databases = {
+        "default",
+        "registration_datahub",
+    }
+
     @classmethod
     def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
@@ -1057,7 +1062,7 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         )
         mock_get_project_submissions.return_value = VALID_JSON
         resp_1 = PullKoboSubmissions().execute(kobo_import_data_with_pics)
-        self.assertEqual(resp_1["kobo_import_data_id"], str(kobo_import_data_with_pics.id))
+        self.assertEqual(str(resp_1["kobo_import_data_id"]), str(kobo_import_data_with_pics.id))
 
         kobo_import_data_without_pics = KoboImportData.objects.create(
             kobo_asset_id="2222",
@@ -1066,4 +1071,4 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         )
         mock_get_project_submissions.return_value = VALID_JSON
         resp_2 = PullKoboSubmissions().execute(kobo_import_data_without_pics)
-        self.assertEqual(resp_2["kobo_import_data_id"], str(kobo_import_data_without_pics.id))
+        self.assertEqual(str(resp_2["kobo_import_data_id"]), str(kobo_import_data_without_pics.id))
