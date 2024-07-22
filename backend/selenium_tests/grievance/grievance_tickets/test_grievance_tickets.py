@@ -143,7 +143,6 @@ class TestSmokeGrievanceTickets:
 
 @pytest.mark.usefixtures("login")
 class TestGrievanceTicketsHappyPath:
-
     def test_grievance_tickets_create_new_ticket_referral(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -172,13 +171,31 @@ class TestGrievanceTicketsHappyPath:
 
 @pytest.mark.usefixtures("login")
 class TestGrievanceTickets:
-
     @pytest.mark.parametrize(
         "test_data",
         [
             pytest.param({"category": "Sensitive Grievance", "type": "Miscellaneous"}, id="Sensitive Grievance"),
-            pytest.param({"category": "Grievance Complaint", "type": "Other Complaint"}, id="Grievance Complaint"),
+            pytest.param({"category": "Sensitive Grievance", "type": "Personal disputes"}, id="Sensitive Grievance"),
+            pytest.param(
+                {"category": "Grievance Complaint", "type": "Other Complaint"}, id="Grievance Complaint Other Complaint"
+            ),
+            pytest.param(
+                {"category": "Grievance Complaint", "type": "Registration Related Complaint"},
+                id="Grievance Complaint Registration Related Complaint",
+            ),
             pytest.param({"category": "Data Change", "type": "Add Individual"}, id="Data Change Add Individual"),
+            pytest.param(
+                {"category": "Data Change", "type": "Household Data Update"}, id="Data Change Household Data Update"
+            ),
+            pytest.param(
+                {"category": "Data Change", "type": "Individual Data Update"}, id="Data Change Add Individual"
+            ),
+            pytest.param(
+                {"category": "Data Change", "type": "Withdraw Individual"}, id="Data Change Withdraw Individual"
+            ),
+            pytest.param(
+                {"category": "Data Change", "type": "Withdraw Household"}, id="Data Change Withdraw Household"
+            ),
         ],
     )
     def test_grievance_tickets_create_new_tickets(
