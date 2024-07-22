@@ -129,7 +129,7 @@ dev = [
 includes = []
 [project]
 name = "hope"
-version = "2.8.0"
+version = "2.9.0"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = [
     {name = "Tivix"},
