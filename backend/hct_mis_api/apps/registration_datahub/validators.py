@@ -1565,7 +1565,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                                 {"header": "role_i_c", "message": "Only one person can " "be a alternate collector"}
                             )
                     else:
-                        error = self._get_field_type_error(hh_field, hh_value, attachments)
+                        error = self._get_field_type_error(hh_field, hh_value, attachments, skip_validate_pictures)
                         if error:
                             errors.append(error)
                 hh_expected_field_errors = [
