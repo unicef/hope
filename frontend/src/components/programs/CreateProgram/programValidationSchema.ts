@@ -70,10 +70,12 @@ export const programValidationSchema = (
             subtype: Yup.string().nullable(),
             numberOfRounds: Yup.number().nullable(),
             roundsNames: Yup.array()
-              .of(Yup.string().required())
+              .of(
+                Yup.string().required(t('Round Name is required')), // Custom error message
+              )
               .test(
                 'rounds-match-number',
-                t('Rounds names must match the number of rounds'),
+                '', // Custom error message
                 function (value) {
                   const { numberOfRounds } = this.parent;
                   if (!numberOfRounds) return true;
@@ -84,7 +86,7 @@ export const programValidationSchema = (
         })
         .test(
           'pduFields-validation',
-          t('Please complete the PDU fields correctly.'),
+          t('Please complete the PDU fields correctly.'), // Custom error message
           function (value) {
             const { name, pduData } = value;
             const { subtype, numberOfRounds, roundsNames } = pduData;

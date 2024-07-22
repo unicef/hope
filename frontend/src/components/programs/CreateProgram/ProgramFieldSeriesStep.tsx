@@ -149,12 +149,6 @@ export const ProgramFieldSeriesStep = ({
                                 type="text"
                                 disabled={programHasRdi}
                               />
-                              <FormHelperText>
-                                {errors.pduFields?.[index]?.pduData
-                                  ?.roundsNames?.[round]
-                                  ? t('Round Name is required')
-                                  : ''}
-                              </FormHelperText>
                             </FormControl>
                           </Grid>
                         ))}

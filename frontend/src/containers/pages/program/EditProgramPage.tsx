@@ -171,7 +171,19 @@ export const EditProgramPage = (): ReactElement => {
         areaAccess: partner.areaAccess,
       })),
     partnerAccess,
-    pduFields,
+    pduFields:
+      pduFields.length == 0
+        ? [
+            {
+              name: '',
+              pduData: {
+                subtype: '',
+                numberOfRounds: null,
+                roundsNames: [],
+              },
+            },
+          ]
+        : pduFields,
   };
   initialValues.budget =
     data.program.budget === '0.00' ? '' : data.program.budget;
