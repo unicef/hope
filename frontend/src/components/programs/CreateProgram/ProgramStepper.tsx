@@ -36,8 +36,6 @@ export const handleNext = async ({
 }): Promise<void> => {
   const errors = await validateForm();
   const currentStepErrors = stepFields[step].some((field) => errors[field]);
-  //
-  if (currentStepErrors) return;
 
   const initialPduFieldState = {
     name: '',
