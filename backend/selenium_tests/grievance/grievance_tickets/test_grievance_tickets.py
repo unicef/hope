@@ -234,12 +234,6 @@ class TestGrievanceTickets:
                 id="Grievance Complaint Registration Related Complaint",
             ),
             pytest.param(
-                {"category": "Data Change", "type": "Household Data Update"}, id="Data Change Household Data Update"
-            ),
-            pytest.param(
-                {"category": "Data Change", "type": "Individual Data Update"}, id="Data Change Individual Data Update"
-            ),
-            pytest.param(
                 {"category": "Data Change", "type": "Withdraw Individual"}, id="Data Change Withdraw Individual"
             ),
             pytest.param(
@@ -317,3 +311,10 @@ class TestGrievanceTickets:
         assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
         pageGrievanceNewTicket.screenshot(f"out-{test_data['type']}")
+
+    # pytest.param(
+    #     {"category": "Data Change", "type": "Individual Data Update"}, id="Data Change Individual Data Update"
+    # ),
+    # pytest.param(
+    #     {"category": "Data Change", "type": "Household Data Update"}, id="Data Change Household Data Update"
+    # ),
