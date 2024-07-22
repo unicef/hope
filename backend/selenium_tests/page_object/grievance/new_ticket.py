@@ -11,7 +11,8 @@ class NewTicket(BaseComponents):
     issueType = 'div[data-cy="select-issueType"]'
     buttonNext = 'button[data-cy="button-submit"]'
     statusOptions = 'li[role="option"]'
-    lookUpTabs = 'button[role="tab"]'
+    lookUpIndividualTab = 'button[data-cy="look-up-individual"]'
+    lookUpHouseholdTab = 'button[data-cy="look-up-household"]'
     householdTableRow = 'tr[data-cy="household-table-row"]'
     individualTableRow = 'tr[data-cy="individual-table-row"]'
     tableRow = '[data-cy="table-row"]'
@@ -120,10 +121,10 @@ class NewTicket(BaseComponents):
         return self.wait_for(self.statusOptions)
 
     def getHouseholdTab(self) -> WebElement:
-        return self.wait_for(self.lookUpTabs)
+        return self.wait_for(self.lookUpHouseholdTab)
 
     def getIndividualTab(self) -> WebElement:
-        return self.wait_for(self.lookUpTabs)
+        return self.wait_for(self.lookUpIndividualTab)
 
     def getHouseholdTableRows(self, number: int) -> WebElement:
         return self.wait_for(self.householdTableRow)[number]

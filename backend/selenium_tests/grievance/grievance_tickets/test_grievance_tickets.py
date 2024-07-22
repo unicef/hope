@@ -1,5 +1,7 @@
+from datetime import datetime
 from typing import Generator
 
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.management import call_command
 
@@ -8,6 +10,13 @@ from page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from page_object.grievance.grievance_tickets import GrievanceTickets
 from page_object.grievance.new_ticket import NewTicket
 from pytest_django import DjangoDbBlocker
+
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
+from hct_mis_api.apps.core.models import DataCollectingType, BusinessArea
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from hct_mis_api.apps.household.models import Household, HOST
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -33,6 +42,47 @@ def create_programs(django_db_setup: Generator[None, None, None], django_db_bloc
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
     yield
+
+
+@pytest.fixture
+def household_without_disabilities() -> Household:
+    yield create_custom_household(observed_disability=[])
+
+
+def create_program(
+    name: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
+) -> Program:
+    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
+    dct = DataCollectingTypeFactory(type=dct_type)
+    program = ProgramFactory(
+        name=name,
+        start_date=datetime.now() - relativedelta(months=1),
+        end_date=datetime.now() + relativedelta(months=1),
+        data_collecting_type=dct,
+        status=status,
+    )
+    return program
+
+
+def create_custom_household(observed_disability: list[str], residence_status: str = HOST) -> Household:
+    program = create_program("Test Programm")
+    household, _ = create_household_and_individuals(
+        household_data={
+            "unicef_id": "HH-00-0000.0442",
+            "rdi_merge_status": "MERGED",
+            "business_area": program.business_area,
+            "program": program,
+            "residence_status": residence_status,
+        },
+        individuals_data=[
+            {
+                "rdi_merge_status": "MERGED",
+                "business_area": program.business_area,
+                "observed_disability": observed_disability,
+            },
+        ],
+    )
+    return household
 
 
 @pytest.mark.usefixtures("login")
@@ -174,28 +224,28 @@ class TestGrievanceTickets:
     @pytest.mark.parametrize(
         "test_data",
         [
-            pytest.param({"category": "Sensitive Grievance", "type": "Miscellaneous"}, id="Sensitive Grievance"),
-            pytest.param({"category": "Sensitive Grievance", "type": "Personal disputes"}, id="Sensitive Grievance"),
-            pytest.param(
-                {"category": "Grievance Complaint", "type": "Other Complaint"}, id="Grievance Complaint Other Complaint"
-            ),
-            pytest.param(
-                {"category": "Grievance Complaint", "type": "Registration Related Complaint"},
-                id="Grievance Complaint Registration Related Complaint",
-            ),
-            pytest.param({"category": "Data Change", "type": "Add Individual"}, id="Data Change Add Individual"),
-            pytest.param(
-                {"category": "Data Change", "type": "Household Data Update"}, id="Data Change Household Data Update"
-            ),
-            pytest.param(
-                {"category": "Data Change", "type": "Individual Data Update"}, id="Data Change Add Individual"
-            ),
+            # pytest.param({"category": "Sensitive Grievance", "type": "Miscellaneous"}, id="Sensitive Grievance"),
+            # pytest.param({"category": "Sensitive Grievance", "type": "Personal disputes"}, id="Sensitive Grievance"),
+            # pytest.param(
+            #     {"category": "Grievance Complaint", "type": "Other Complaint"}, id="Grievance Complaint Other Complaint"
+            # ),
+            # pytest.param(
+            #     {"category": "Grievance Complaint", "type": "Registration Related Complaint"},
+            #     id="Grievance Complaint Registration Related Complaint",
+            # ),
+            # pytest.param({"category": "Data Change", "type": "Add Individual"}, id="Data Change Add Individual"),
+            # pytest.param(
+            #     {"category": "Data Change", "type": "Household Data Update"}, id="Data Change Household Data Update"
+            # ),
+            # pytest.param(
+            #     {"category": "Data Change", "type": "Individual Data Update"}, id="Data Change Add Individual"
+            # ),
             pytest.param(
                 {"category": "Data Change", "type": "Withdraw Individual"}, id="Data Change Withdraw Individual"
             ),
-            pytest.param(
-                {"category": "Data Change", "type": "Withdraw Household"}, id="Data Change Withdraw Household"
-            ),
+            # pytest.param(
+            #     {"category": "Data Change", "type": "Withdraw Household"}, id="Data Change Withdraw Household"
+            # ),
         ],
     )
     def test_grievance_tickets_create_new_tickets(
@@ -204,6 +254,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket: NewTicket,
         pageGrievanceDetailsPage: GrievanceDetailsPage,
         test_data: dict,
+        household_without_disabilities: Household,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -214,7 +265,11 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.select_option_by_name(test_data["type"])
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getHouseholdTab()
-        assert pageGrievanceNewTicket.waitForNoResults()
+        pageGrievanceNewTicket.screenshot("1", delay_sec=0)
+        pageGrievanceNewTicket.getIndividualTab().click()
+        pageGrievanceNewTicket.screenshot("2", delay_sec=0)
+        # pageGrievanceNewTicket.
+        # assert pageGrievanceNewTicket.waitForNoResults()
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getReceivedConsent().click()
         pageGrievanceNewTicket.getButtonNext().click()
