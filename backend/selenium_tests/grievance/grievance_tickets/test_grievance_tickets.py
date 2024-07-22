@@ -1,20 +1,20 @@
 from datetime import datetime
 from typing import Generator
 
-from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.management import call_command
 
 import pytest
+from dateutil.relativedelta import relativedelta
 from page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from page_object.grievance.grievance_tickets import GrievanceTickets
 from page_object.grievance.new_ticket import NewTicket
 from pytest_django import DjangoDbBlocker
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
-from hct_mis_api.apps.core.models import DataCollectingType, BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.household.models import Household, HOST
+from hct_mis_api.apps.household.models import HOST, Household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -224,28 +224,27 @@ class TestGrievanceTickets:
     @pytest.mark.parametrize(
         "test_data",
         [
-            # pytest.param({"category": "Sensitive Grievance", "type": "Miscellaneous"}, id="Sensitive Grievance"),
-            # pytest.param({"category": "Sensitive Grievance", "type": "Personal disputes"}, id="Sensitive Grievance"),
-            # pytest.param(
-            #     {"category": "Grievance Complaint", "type": "Other Complaint"}, id="Grievance Complaint Other Complaint"
-            # ),
-            # pytest.param(
-            #     {"category": "Grievance Complaint", "type": "Registration Related Complaint"},
-            #     id="Grievance Complaint Registration Related Complaint",
-            # ),
-            # pytest.param({"category": "Data Change", "type": "Add Individual"}, id="Data Change Add Individual"),
-            # pytest.param(
-            #     {"category": "Data Change", "type": "Household Data Update"}, id="Data Change Household Data Update"
-            # ),
-            # pytest.param(
-            #     {"category": "Data Change", "type": "Individual Data Update"}, id="Data Change Add Individual"
-            # ),
+            pytest.param({"category": "Sensitive Grievance", "type": "Miscellaneous"}, id="Sensitive Grievance"),
+            pytest.param({"category": "Sensitive Grievance", "type": "Personal disputes"}, id="Sensitive Grievance"),
+            pytest.param(
+                {"category": "Grievance Complaint", "type": "Other Complaint"}, id="Grievance Complaint Other Complaint"
+            ),
+            pytest.param(
+                {"category": "Grievance Complaint", "type": "Registration Related Complaint"},
+                id="Grievance Complaint Registration Related Complaint",
+            ),
+            pytest.param(
+                {"category": "Data Change", "type": "Household Data Update"}, id="Data Change Household Data Update"
+            ),
+            pytest.param(
+                {"category": "Data Change", "type": "Individual Data Update"}, id="Data Change Individual Data Update"
+            ),
             pytest.param(
                 {"category": "Data Change", "type": "Withdraw Individual"}, id="Data Change Withdraw Individual"
             ),
-            # pytest.param(
-            #     {"category": "Data Change", "type": "Withdraw Household"}, id="Data Change Withdraw Household"
-            # ),
+            pytest.param(
+                {"category": "Data Change", "type": "Withdraw Household"}, id="Data Change Withdraw Household"
+            ),
         ],
     )
     def test_grievance_tickets_create_new_tickets(
@@ -265,11 +264,10 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.select_option_by_name(test_data["type"])
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getHouseholdTab()
-        pageGrievanceNewTicket.screenshot("1", delay_sec=0)
-        pageGrievanceNewTicket.getIndividualTab().click()
-        pageGrievanceNewTicket.screenshot("2", delay_sec=0)
-        # pageGrievanceNewTicket.
-        # assert pageGrievanceNewTicket.waitForNoResults()
+        pageGrievanceNewTicket.getHouseholdTableRows(0).click()
+        if test_data["type"] not in ["Withdraw Household", "Household Data Update", "Add Individual"]:
+            pageGrievanceNewTicket.getIndividualTab().click()
+            pageGrievanceNewTicket.getIndividualTableRows(0).click()
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getReceivedConsent().click()
         pageGrievanceNewTicket.getButtonNext().click()
@@ -281,3 +279,41 @@ class TestGrievanceTickets:
         assert "New" in pageGrievanceDetailsPage.getTicketStatus().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
+        pageGrievanceNewTicket.screenshot(f"out-{test_data['type']}")
+
+    @pytest.mark.parametrize(
+        "test_data",
+        [
+            pytest.param({"category": "Data Change", "type": "Add Individual"}, id="Data Change Add Individual"),
+        ],
+    )
+    def test_grievance_tickets_create_new_ticket(
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        test_data: dict,
+        household_without_disabilities: Household,
+    ) -> None:
+        pageGrievanceTickets.getNavGrievance().click()
+        assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
+        pageGrievanceTickets.getButtonNewTicket().click()
+        pageGrievanceNewTicket.getSelectCategory().click()
+        pageGrievanceNewTicket.select_option_by_name(test_data["category"])
+        pageGrievanceNewTicket.getIssueType().click()
+        pageGrievanceNewTicket.select_option_by_name(test_data["type"])
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getHouseholdTab()
+        pageGrievanceNewTicket.getHouseholdTableRows(0).click()
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getReceivedConsent().click()
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getDescription().send_keys("Add Individual - TEST")
+        pageGrievanceNewTicket.getButtonNext().click()
+        assert "Add Individual - TEST" in pageGrievanceDetailsPage.getTicketDescription().text
+        assert test_data["category"] in pageGrievanceDetailsPage.getTicketCategory().text
+        assert test_data["type"] in pageGrievanceDetailsPage.getLabelIssueType().text
+        assert "New" in pageGrievanceDetailsPage.getTicketStatus().text
+        assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
+        assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
+        pageGrievanceNewTicket.screenshot(f"out-{test_data['type']}")

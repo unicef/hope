@@ -127,10 +127,12 @@ class NewTicket(BaseComponents):
         return self.wait_for(self.lookUpIndividualTab)
 
     def getHouseholdTableRows(self, number: int) -> WebElement:
-        return self.wait_for(self.householdTableRow)[number]
+        self.wait_for(self.householdTableRow)
+        return self.get_elements(self.householdTableRow)[number]
 
     def getIndividualTableRows(self, number: int) -> WebElement:
-        return self.wait_for(self.individualTableRow)[number]
+        self.wait_for(self.individualTableRow)
+        return self.get_elements(self.individualTableRow)[number]
 
     def getReceivedConsent(self) -> WebElement:
         return self.wait_for(self.receivedConsent)
