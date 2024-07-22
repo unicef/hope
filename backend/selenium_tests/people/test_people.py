@@ -23,9 +23,8 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
 )
-from selenium_tests.page_object.people.people_details import PeopleDetails
-
 from selenium_tests.page_object.filters import Filters
+from selenium_tests.page_object.people.people_details import PeopleDetails
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -133,11 +132,7 @@ class TestSmokePeople:
         assert f"Individual ID: {individual.unicef_id}" in pagePeopleDetails.getPageHeaderTitle().text
         assert individual.full_name in pagePeopleDetails.getLabelFullName().text
         assert individual.given_name in pagePeopleDetails.getLabelGivenName().text
-        assert (
-            individual.middle_name
-            if individual.middle_name
-            else "-" in pagePeopleDetails.getLabelMiddleName().text
-        )
+        assert individual.middle_name if individual.middle_name else "-" in pagePeopleDetails.getLabelMiddleName().text
         assert individual.family_name in pagePeopleDetails.getLabelFamilyName().text
         assert individual.sex.lower() in pagePeopleDetails.getLabelGender().text.lower()
         assert pagePeopleDetails.getLabelAge().text
