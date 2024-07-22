@@ -28,7 +28,8 @@ class PullKoboSubmissions:
         )
         business_area = BusinessArea.objects.get(slug=kobo_import_data.business_area_slug)
         validator = KoboProjectImportDataInstanceValidator()
-        validation_errors = validator.validate_everything(submissions, business_area)
+        skip_validate_pictures = kobo_import_data.pull_pictures is False
+        validation_errors = validator.validate_everything(submissions, business_area, skip_validate_pictures)
 
         number_of_households, number_of_individuals = count_population(submissions, business_area)
 

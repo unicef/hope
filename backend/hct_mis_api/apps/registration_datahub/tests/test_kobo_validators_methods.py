@@ -559,6 +559,12 @@ class TestKoboSaveValidatorsMethods(TestCase):
         result = validator.image_validator("signature-17_10_32.png", "consent_sign_h_c", invalid_attachments)
         self.assertIsNone(result)
 
+        # skip image validation
+        result = validator.image_validator(
+            "signature-17_10_32.png", "consent_sign_h_c", invalid_attachments, skip_validate_pictures=True
+        )
+        self.assertIsNone(result)
+
     def test_geopoint_validator(self) -> None:
         valid_geolocations = (
             "33.937574 67.709401 100 100",
@@ -702,7 +708,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
         validator = KoboProjectImportDataInstanceValidator()
         business_area = BusinessArea.objects.first()
 
-        result = validator.validate_everything(self.VALID_JSON, business_area)
+        result = validator.validate_everything(self.VALID_JSON, business_area, True)
+        self.assertEqual(result, [])
+
+        result = validator.validate_everything(self.VALID_JSON, business_area, False)
         self.assertEqual(result, [])
 
         result = validator.validate_everything(self.INVALID_JSON, business_area)
