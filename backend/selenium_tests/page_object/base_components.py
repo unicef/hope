@@ -187,6 +187,7 @@ class BaseComponents(Common):
         return self.wait_for(self.navProgramLog)
 
     def getRows(self) -> [WebElement]:
+        self.wait_for(self.rows)
         return self.get_elements(self.rows)
 
     def getAlert(self) -> WebElement:
