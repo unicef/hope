@@ -185,6 +185,7 @@ class PeriodicDataFieldViewSet(
     GenericViewSet,
 ):
     serializer_class = PeriodicDataFieldSerializer
+    permission_classes = [PDUViewListAndDetailsPermission]
     filter_backends = (OrderingFilter,)
 
     def get_queryset(self) -> QuerySet:

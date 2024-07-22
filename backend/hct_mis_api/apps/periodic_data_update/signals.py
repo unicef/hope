@@ -16,7 +16,7 @@ from hct_mis_api.apps.periodic_data_update.models import (
 @receiver(post_save, sender=PeriodicDataUpdateTemplate)
 @receiver(pre_delete, sender=PeriodicDataUpdateUpload)
 def increment_periodic_data_update_template_version_cache(
-    sender: Any, instance: PeriodicDataUpdateTemplate, created: bool, **kwargs: dict
+    sender: Any, instance: PeriodicDataUpdateTemplate, **kwargs: dict
 ) -> None:
     business_area_slug = instance.business_area.slug
     business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
@@ -31,7 +31,7 @@ def increment_periodic_data_update_template_version_cache(
 @receiver(post_save, sender=PeriodicDataUpdateUpload)
 @receiver(pre_delete, sender=PeriodicDataUpdateUpload)
 def increment_periodic_data_update_upload_version_cache(
-    sender: Any, instance: PeriodicDataUpdateTemplate, created: bool, **kwargs: dict
+    sender: Any, instance: PeriodicDataUpdateTemplate, **kwargs: dict
 ) -> None:
     business_area_slug = instance.template.business_area.slug
     business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
@@ -46,7 +46,7 @@ def increment_periodic_data_update_upload_version_cache(
 @receiver(post_save, sender=FlexibleAttribute)
 @receiver(pre_delete, sender=FlexibleAttribute)
 def increment_periodic_data_field_version_cache_for_flexible_attribute(
-    sender: Any, instance: FlexibleAttribute, created: bool, **kwargs: dict
+    sender: Any, instance: FlexibleAttribute, **kwargs: dict
 ) -> None:
     if instance.type == FlexibleAttribute.PDU and instance.program:
         business_area_slug = instance.program.business_area.slug
@@ -57,7 +57,7 @@ def increment_periodic_data_field_version_cache_for_flexible_attribute(
 @receiver(post_save, sender=PeriodicFieldData)
 @receiver(pre_delete, sender=PeriodicFieldData)
 def increment_periodic_data_field_version_cache_for_periodic_data_field(
-    sender: Any, instance: PeriodicFieldData, created: bool, **kwargs: dict
+    sender: Any, instance: PeriodicFieldData, **kwargs: dict
 ) -> None:
     flex_field = getattr(instance, "flex_field", None)
     if flex_field:

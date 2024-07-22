@@ -917,8 +917,8 @@ class AutoCompleteFilterTemp(AutoCompleteFilter):
             return [str(obj.first()) or ""]
 
         return []
-      
-      
+
+
 class FlexFieldsEncoder(json.JSONEncoder):
     def default(self, obj: Any) -> Any:
         if isinstance(obj, date):
@@ -926,8 +926,8 @@ class FlexFieldsEncoder(json.JSONEncoder):
         if isinstance(obj, Decimal):
             return str(obj)
         return super().default(obj)
-      
-      
+
+
 class JSONBSet(Func):
     function = "jsonb_set"
     template = "%(function)s(%(expressions)s)"
