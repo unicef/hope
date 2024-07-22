@@ -205,8 +205,8 @@ class TestRegistrationDataImportViews:
             response = self.client.get(self.url_list)
             assert response.status_code == status.HTTP_200_OK
 
-            etag_second_call = response.headers["etag"]
+            etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
             assert len(ctx.captured_queries) == 12
 
-            assert etag_second_call != etag
+            assert etag_call_after_update != etag

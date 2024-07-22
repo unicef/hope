@@ -118,7 +118,7 @@ class PeriodicFieldDataSerializer(serializers.ModelSerializer):
         fields = ("subtype", "number_of_rounds", "rounds_names")
 
 
-class PeriodicDataFieldSerializer(EncodedIdSerializerMixin):
+class PeriodicFieldSerializer(EncodedIdSerializerMixin):
     pdu_data = PeriodicFieldDataSerializer()
 
     class Meta:

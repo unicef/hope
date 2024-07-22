@@ -31,16 +31,16 @@ from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.periodic_data_update.api.caches import (
     PDUTemplateKeyConstructor,
     PDUUpdateKeyConstructor,
-    PeriodicDataFieldKeyConstructor,
+    PeriodicFieldKeyConstructor,
 )
 from hct_mis_api.apps.periodic_data_update.api.serializers import (
-    PeriodicDataFieldSerializer,
     PeriodicDataUpdateTemplateCreateSerializer,
     PeriodicDataUpdateTemplateDetailSerializer,
     PeriodicDataUpdateTemplateListSerializer,
     PeriodicDataUpdateUploadDetailSerializer,
     PeriodicDataUpdateUploadListSerializer,
     PeriodicDataUpdateUploadSerializer,
+    PeriodicFieldSerializer,
 )
 from hct_mis_api.apps.periodic_data_update.models import (
     PeriodicDataUpdateTemplate,
@@ -179,12 +179,12 @@ class PeriodicDataUpdateUploadViewSet(
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class PeriodicDataFieldViewSet(
+class PeriodicFieldViewSet(
     ProgramMixin,
     mixins.ListModelMixin,
     GenericViewSet,
 ):
-    serializer_class = PeriodicDataFieldSerializer
+    serializer_class = PeriodicFieldSerializer
     permission_classes = [PDUViewListAndDetailsPermission]
     filter_backends = (OrderingFilter,)
 
@@ -192,7 +192,7 @@ class PeriodicDataFieldViewSet(
         program = self.get_program()
         return FlexibleAttribute.objects.filter(program=program, type=FlexibleAttribute.PDU)
 
-    @etag_decorator(PeriodicDataFieldKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=PeriodicDataFieldKeyConstructor())
+    @etag_decorator(PeriodicFieldKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=PeriodicFieldKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
