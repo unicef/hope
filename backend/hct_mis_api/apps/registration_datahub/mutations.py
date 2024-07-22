@@ -562,6 +562,7 @@ class SaveKoboProjectImportDataAsync(PermissionMutation):
         uid = Upload(required=True)
         business_area_slug = graphene.String(required=True)
         only_active_submissions = graphene.Boolean(required=True)
+        pull_pictures = graphene.Boolean(required=True)
 
     @classmethod
     @is_authenticated
