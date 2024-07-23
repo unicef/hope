@@ -5,7 +5,6 @@
     {% csrf_token %}
     {% if step == "1" %}
         <input type="hidden" name="step" value="2">
-        <h1>Withdraw Households from List</h1>
         <form method="post">{% csrf_token %}
         <div>
           <label for="program_id">Program ID (encoded):</label>
