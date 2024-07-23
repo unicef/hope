@@ -90,16 +90,13 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
 
 
 def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, user: AbstractUser) -> None:
-    # TODO: check this one
     ticket_details = grievance_ticket.ticket_details
     if not ticket_details:
         return
 
     if ticket_details.is_multiple_duplicates_version:
         selected_duplicates = ticket_details.selected_individuals.all()
-        # selected_distinct = ticket_details.selected_distinct.all()
         traverse_sibling_tickets(grievance_ticket, selected_duplicates)
-        # traverse_sibling_tickets(grievance_ticket, selected_distinct)  # TODO: have to check it??? ASK JAKUB
         close_needs_adjudication_new_ticket(ticket_details, user)
     else:
         close_needs_adjudication_old_ticket(ticket_details, user)
