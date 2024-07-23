@@ -200,9 +200,47 @@ class TestPeriodicDataUpdateUpload:
         assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.FAILED
         assert pageIndividuals.getUpdateStatus(periodic_data_update_upload.pk).text == "FAILED"
         pageIndividuals.getUpdateDetailsBtn(periodic_data_update_upload.pk).click()
-        error_text= "Row: 2\nTest String Attribute__round_value\nEnter a valid date."
-        assert  pageIndividuals.getPduFormErrors().text == error_text
-        # print(pageIndividuals.getPduFormErrors().text)
-        # sleep(2)
-        # printing("Mapping", pageIndividuals.driver)
-        # printing("Methods", pageIndividuals.driver)
+        error_text = "Row: 2\nTest String Attribute__round_value\nEnter a valid date."
+        assert pageIndividuals.getPduFormErrors().text == error_text
+
+    def test_periodic_data_update_upload_error(
+        self,
+        program: Program,
+        individual: Individual,
+        string_attribute: FlexibleAttribute,
+        pageIndividuals: Individuals,
+    ):
+        periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
+            program=program,
+            business_area=program.business_area,
+            filters=dict(),
+            rounds_data=[
+                {
+                    "field": string_attribute.name,
+                    "round": 1,
+                    "round_name": string_attribute.pdu_data.rounds_names[0],
+                    "number_of_records": 0,
+                }
+            ],
+        )
+        service = PeriodicDataUpdateExportTemplateService(periodic_data_update_template)
+        service.generate_workbook()
+        service.save_xlsx_file()
+        wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
+        del wb.custom_doc_props[PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME]
+        ws_meta = wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
+        ws_meta[PeriodicDataUpdateExportTemplateService.META_ID_ADDRESS] = "-1"
+        with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
+            wb.save(tmp_file.name)
+            tmp_file.seek(0)
+            pageIndividuals.selectGlobalProgramFilter(program.name).click()
+            pageIndividuals.getNavProgrammePopulation().click()
+            pageIndividuals.getNavIndividuals().click()
+            pageIndividuals.getTabPeriodicDataUpdates().click()
+            pageIndividuals.getButtonImport().click()
+            pageIndividuals.getDialogImport()
+            pageIndividuals.upload_file(tmp_file.name)
+            pageIndividuals.getButtonImportSubmit().click()
+            pageIndividuals.screenshot("upload_error")
+            error_text = pageIndividuals.getPduUploadError().text
+            assert error_text == "Periodic Data Update Template with ID -1 not found"

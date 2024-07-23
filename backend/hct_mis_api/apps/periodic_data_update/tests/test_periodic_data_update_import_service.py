@@ -253,7 +253,6 @@ class TestPeriodicDataUpdateImportService(TestCase):
         self.assertEqual(periodic_data_update_template_from_xlsx.pk, periodic_data_update_template.pk)
         wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
         del wb.custom_doc_props[PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME]
-        ws_meta = wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
         with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
             wb.save(tmp_file.name)
             tmp_file.seek(0)

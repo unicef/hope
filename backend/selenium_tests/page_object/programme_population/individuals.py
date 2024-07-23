@@ -30,8 +30,6 @@ class Individuals(BaseComponents):
     tableRow = 'tr[data-cy="table-row"]'
     tablePagination = 'div[data-cy="table-pagination"]'
     individualTableRow = 'tr[data-cy="individual-table-row"'
-    pduFormErrors = 'div[data-cy="pdu-form-errors"]'
-
 
     # PDU
     tabPeriodicDataUpdates = 'button[data-cy="tab-periodic-data-updates"]'
@@ -45,6 +43,8 @@ class Individuals(BaseComponents):
     updateDetailsBtn = 'button[data-cy="update-details-btn-{}"]'
     downloadBtn = 'button[data-cy="download-btn-{}"]'
     pduUpdates = 'button[data-cy="pdu-updates"]'
+    pduFormErrors = 'div[data-cy="pdu-form-errors"]'
+    pduUploadError = 'div[data-cy="pdu-upload-error"]'
 
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
@@ -161,3 +161,6 @@ class Individuals(BaseComponents):
 
     def getPduFormErrors(self) -> WebElement:
         return self.wait_for(self.pduFormErrors)
+
+    def getPduUploadError(self) -> WebElement:
+        return self.wait_for(self.pduUploadError)
