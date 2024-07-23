@@ -637,11 +637,19 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
             delivered_fully=Count("id", filter=Q(status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS)),
             delivered_partially=Count("id", filter=Q(status=GenericPayment.STATUS_DISTRIBUTION_PARTIAL)),
             not_delivered=Count("id", filter=Q(status=GenericPayment.STATUS_NOT_DISTRIBUTED)),
-            unsuccessful=Count("id", filter=Q(status=GenericPayment.STATUS_ERROR)),
-            force_failed=Count("id", filter=Q(status=GenericPayment.STATUS_FORCE_FAILED)),
-            pending=Count("id", filter=Q(status=GenericPayment.STATUS_PENDING)),
+            unsuccessful=Count(
+                "id",
+                filter=Q(
+                    status__in=[
+                        GenericPayment.STATUS_ERROR,
+                        GenericPayment.STATUS_FORCE_FAILED,
+                        GenericPayment.STATUS_MANUALLY_CANCELLED,
+                    ]
+                ),
+            ),
+            pending=Count("id", filter=Q(status__in=GenericPayment.PENDING_STATUSES)),
+            reconciled=Count("id", filter=~Q(status__in=GenericPayment.PENDING_STATUSES)),
             number_of_payments=Count("id"),
-            reconciled=Count("id", filter=~Q(status=GenericPayment.STATUS_PENDING)),
         )
 
     def resolve_excluded_households(self, info: Any) -> "QuerySet":

@@ -154,8 +154,16 @@ class TestPaymentPlanModel(TestCase):
         p2 = PaymentFactory(parent=pp, currency="PLN", status=Payment.STATUS_SENT_TO_PG)
         self.assertEqual(pp.is_reconciled, False)
 
+        p1.status = Payment.STATUS_SENT_TO_FSP
+        p1.save()
+        self.assertEqual(pp.is_reconciled, False)
+
         p1.status = Payment.STATUS_DISTRIBUTION_SUCCESS
         p1.save()
+        self.assertEqual(pp.is_reconciled, False)
+
+        p2.status = Payment.STATUS_SENT_TO_FSP
+        p2.save()
         self.assertEqual(pp.is_reconciled, False)
 
         p2.status = Payment.STATUS_DISTRIBUTION_PARTIAL
