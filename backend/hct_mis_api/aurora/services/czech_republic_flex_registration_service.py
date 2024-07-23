@@ -115,6 +115,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
 
         household_data = {
             "registration_data_import": registration_data_import,
+            "program": registration_data_import.program,
             "first_registration_date": record.timestamp,
             "last_registration_date": record.timestamp,
             "country_origin": GeoCountry.objects.get(iso_code2="CZ"),
