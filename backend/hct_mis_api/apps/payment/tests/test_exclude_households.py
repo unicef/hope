@@ -41,8 +41,8 @@ class TestExcludeHouseholds(APITestCase):
         cls.create_user_role_with_permissions(
             cls.user, [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP], cls.business_area
         )
-        program = RealProgramFactory()
-        cls.program_cycle = program.cycles.first()
+        cls.program = RealProgramFactory()
+        cls.program_cycle = cls.program.cycles.first()
 
         cls.source_payment_plan = PaymentPlanFactory(
             is_follow_up=False, status=PaymentPlan.Status.FINISHED, program_cycle=cls.program_cycle
@@ -195,8 +195,7 @@ class TestExcludeHouseholds(APITestCase):
     def test_exclude_payment_error_when_payment_has_hard_conflicts(self) -> None:
         finished_payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.FINISHED,
-            program__cycle__start_date=self.program_cycle.start_date,
-            program__cycle__end_date=self.program_cycle.end_date,
+            program=self.program,
             is_follow_up=False,
             program_cycle=self.program_cycle,
         )

@@ -39,14 +39,14 @@ class TestRecalculatingCash(APITestCase):
           cashPlus
           populationGoal
           administrativeAreasOfImplementation
-          cycles{
-          edges{
-            node{
-              id
-              status
+          cycles {
+            edges {
+              node {
+                id
+                status
+              }
             }
           }
-        }
         }
         validationErrors
       }

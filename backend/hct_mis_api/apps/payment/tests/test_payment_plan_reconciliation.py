@@ -72,6 +72,14 @@ mutation CreateProgram($programData: CreateProgramInput!) {
   createProgram(programData: $programData) {
     program {
       id
+      cycles {
+        edges {
+          node {
+            id
+            status
+          }
+        }
+      }
     }
   }
 }
@@ -253,7 +261,7 @@ mutation createProgramCycle($programCycleData: CreateProgramCycleInput!){
             id
             unicefId
             status
-            name
+            title
             startDate
             endDate
           }
@@ -275,7 +283,7 @@ mutation updateProgramCycle($programCycleData: UpdateProgramCycleInput!){
             id
             unicefId
             status
-            name
+            title
             startDate
             endDate
           }
@@ -384,6 +392,9 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
         program = Program.objects.get(id=decode_id_string_required(program_id))
+        program_cycle_id = create_programme_response["data"]["createProgram"]["program"]["cycles"]["edges"][0]["node"][
+            "id"
+        ]
         self.update_partner_access_to_program(self.user.partner, program)
 
         create_target_population_response = self.graphql_request(
@@ -392,6 +403,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             variables={
                 "input": {
                     "programId": program_id,
+                    "programCycleId": program_cycle_id,
                     "name": "TargP",
                     "excludedIds": "",
                     "exclusionReason": "",
@@ -448,14 +460,14 @@ class TestPaymentPlanReconciliation(APITestCase):
             context={"user": self.user, "headers": {"Program": program_id}},
             variables={
                 "programCycleData": {
-                    "name": "Test Name Program Cycle 001",
+                    "title": "Test Name Program Cycle 001",
                     "startDate": timezone.datetime(2022, 8, 26, tzinfo=utc).date(),
                 }
             },
         )
         cycles_data = create_program_cycle_response["data"]["createProgramCycle"]["program"]["cycles"]
         assert cycles_data["totalCount"] == 2
-        assert cycles_data["edges"][1]["node"]["name"] == "Test Name Program Cycle 001"
+        assert cycles_data["edges"][1]["node"]["title"] == "Test Name Program Cycle 001"
         assert cycles_data["edges"][1]["node"]["endDate"] is None
 
         encoded_cycle_id = cycles_data["edges"][1]["node"]["id"]
@@ -466,7 +478,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             variables={
                 "programCycleData": {
                     "programCycleId": encoded_cycle_id,
-                    "name": "NEW NEW NAME",
+                    "title": "NEW NEW NAME",
                     "endDate": timezone.datetime(2022, 8, 29, tzinfo=utc).date(),
                 }
             },
@@ -474,7 +486,7 @@ class TestPaymentPlanReconciliation(APITestCase):
 
         updated_cycles_data = update_program_cycle_response["data"]["updateProgramCycle"]["program"]["cycles"]
         assert updated_cycles_data["totalCount"] == 2
-        assert updated_cycles_data["edges"][1]["node"]["name"] == "NEW NEW NAME"
+        assert updated_cycles_data["edges"][1]["node"]["title"] == "NEW NEW NAME"
         assert updated_cycles_data["edges"][1]["node"]["endDate"] == "2022-08-29"
 
         assert updated_cycles_data["edges"][0]["node"]["status"] == "DRAFT"
@@ -505,7 +517,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         payment_plan_id = decode_id_string(encoded_payment_plan_id)
 
         # check if Cycle is active
-        assert ProgramCycle.objects.filter(end_date="2022-08-29").first().status == "ACTIVE"
+        assert ProgramCycle.objects.filter(title="NEW NEW NAME").first().status == "ACTIVE"
 
         santander_fsp = FinancialServiceProviderFactory(
             name="Santander",
