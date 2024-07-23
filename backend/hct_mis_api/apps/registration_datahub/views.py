@@ -8,7 +8,7 @@ from hct_mis_api.apps.registration_datahub.template_generator import (
 )
 
 
-def download_template(request: HttpRequest) -> HttpResponse:
+def download_template(request: HttpRequest, business_area_slug: str, program_id) -> HttpResponse:
     parse_result = urlparse(request.headers["Referer"])
     business_area_slug = parse_result.path[1:].split("/")[0]
 

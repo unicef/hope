@@ -128,3 +128,5 @@ class TemplateFileGenerator:
     @classmethod
     def get_template_file(cls, business_area_slug: Optional[str] = None) -> openpyxl.Workbook:
         return cls._add_template_columns(cls._create_workbook(), business_area_slug)
+
+    def get_
