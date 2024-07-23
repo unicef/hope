@@ -72,6 +72,10 @@ urlpatterns = [
                                     "hct_mis_api.apps.periodic_data_update.api.urls", namespace="periodic-data-update"
                                 ),
                             ),
+                            path(
+                                "registration-data/",
+                                include("hct_mis_api.apps.registration_data.api.urls", namespace="registration-data"),
+                            ),
                         ]
                     ),
                 ),

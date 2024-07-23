@@ -16,7 +16,7 @@ from hct_mis_api.apps.periodic_data_update.models import (
 @receiver(post_save, sender=PeriodicDataUpdateTemplate)
 @receiver(pre_delete, sender=PeriodicDataUpdateUpload)
 def increment_periodic_data_update_template_version_cache(
-    sender: Any, instance: PeriodicDataUpdateTemplate, created: bool, **kwargs: dict
+    sender: Any, instance: PeriodicDataUpdateTemplate, **kwargs: dict
 ) -> None:
     business_area_slug = instance.business_area.slug
     business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
@@ -31,7 +31,7 @@ def increment_periodic_data_update_template_version_cache(
 @receiver(post_save, sender=PeriodicDataUpdateUpload)
 @receiver(pre_delete, sender=PeriodicDataUpdateUpload)
 def increment_periodic_data_update_upload_version_cache(
-    sender: Any, instance: PeriodicDataUpdateTemplate, created: bool, **kwargs: dict
+    sender: Any, instance: PeriodicDataUpdateTemplate, **kwargs: dict
 ) -> None:
     business_area_slug = instance.template.business_area.slug
     business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
@@ -45,30 +45,30 @@ def increment_periodic_data_update_upload_version_cache(
 
 @receiver(post_save, sender=FlexibleAttribute)
 @receiver(pre_delete, sender=FlexibleAttribute)
-def increment_periodic_data_field_version_cache_for_flexible_attribute(
-    sender: Any, instance: FlexibleAttribute, created: bool, **kwargs: dict
+def increment_periodic_field_version_cache_for_flexible_attribute(
+    sender: Any, instance: FlexibleAttribute, **kwargs: dict
 ) -> None:
     if instance.type == FlexibleAttribute.PDU and instance.program:
         business_area_slug = instance.program.business_area.slug
         program_id = instance.program.id
-        increment_periodic_data_field_version_cache(business_area_slug, program_id)
+        increment_periodic_field_version_cache(business_area_slug, program_id)
 
 
 @receiver(post_save, sender=PeriodicFieldData)
 @receiver(pre_delete, sender=PeriodicFieldData)
-def increment_periodic_data_field_version_cache_for_periodic_data_field(
-    sender: Any, instance: PeriodicFieldData, created: bool, **kwargs: dict
+def increment_periodic_field_version_cache_for_periodic_field_data(
+    sender: Any, instance: PeriodicFieldData, **kwargs: dict
 ) -> None:
     flex_field = getattr(instance, "flex_field", None)
     if flex_field:
         business_area_slug = flex_field.program.business_area.slug
         program_id = flex_field.program.id
-        increment_periodic_data_field_version_cache(business_area_slug, program_id)
+        increment_periodic_field_version_cache(business_area_slug, program_id)
 
 
-def increment_periodic_data_field_version_cache(business_area_slug: str, program_id: UUID) -> None:
+def increment_periodic_field_version_cache(business_area_slug: str, program_id: UUID) -> None:
     business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
-    version_key = f"{business_area_slug}:{business_area_version}:{program_id}:periodic_data_field_list"
+    version_key = f"{business_area_slug}:{business_area_version}:{program_id}:periodic_field_list"
     get_or_create_cache_key(version_key, 0)
 
     cache.incr(version_key)

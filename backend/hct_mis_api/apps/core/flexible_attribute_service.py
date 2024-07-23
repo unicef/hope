@@ -7,7 +7,7 @@ from graphql import GraphQLError
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.periodic_data_update.signals import (
-    increment_periodic_data_field_version_cache,
+    increment_periodic_field_version_cache,
 )
 from hct_mis_api.apps.program.models import Program
 
@@ -60,7 +60,7 @@ class FlexibleAttributeForPDUService:
         # incr cache key (since it's bulk action)
         business_area_slug = self.program.business_area.slug
         program_id = self.program.id
-        increment_periodic_data_field_version_cache(business_area_slug, program_id)
+        increment_periodic_field_version_cache(business_area_slug, program_id)
 
     def update_pdu_flex_attributes(self) -> None:
         if self.program.registration_imports.exists():

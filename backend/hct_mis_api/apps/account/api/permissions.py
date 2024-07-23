@@ -49,3 +49,7 @@ class PDUTemplateDownloadPermission(BaseRestPermission):
 
 class PDUUploadPermission(BaseRestPermission):
     PERMISSIONS = [Permissions.PDU_UPLOAD]
+
+
+class RDIViewListPermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.RDI_VIEW_LIST]
