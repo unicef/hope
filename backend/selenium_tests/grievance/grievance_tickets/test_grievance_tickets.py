@@ -16,16 +16,15 @@ pytestmark = pytest.mark.django_db(transaction=True)
 def add_grievance(django_db_setup: Generator[None, None, None], django_db_blocker: DjangoDbBlocker) -> None:
     with django_db_blocker.unblock():
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/grievance/fixtures/data-cypress.json")
-    return
+    yield
 
 
 @pytest.fixture
 def add_households(django_db_setup: Generator[None, None, None], django_db_blocker: DjangoDbBlocker) -> None:
     with django_db_blocker.unblock():
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data-cypress.json")
-        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/documenttype.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data-cypress.json")
-    return
+    yield
 
 
 @pytest.fixture
@@ -33,7 +32,7 @@ def create_programs(django_db_setup: Generator[None, None, None], django_db_bloc
     with django_db_blocker.unblock():
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
-    return
+    yield
 
 
 @pytest.mark.usefixtures("login")
@@ -92,16 +91,13 @@ class TestSmokeGrievanceTickets:
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getTicketListRow()
         pageGrievanceTickets.getTabSystemGenerated().click()
-        # ToDo: Uncomment after fix: 199575
-        # assert user_generated_row != pageGrievanceTickets.getTicketListRow()[0].text
-        # assert 2 == len(pageGrievanceTickets.getTicketListRow())
+        assert 1 == len(pageGrievanceTickets.getTicketListRow())
         pageGrievanceTickets.getSelectAll().click()
         assert "ASSIGN" in pageGrievanceTickets.getButtonAssign().text
         assert "SET PRIORITY" in pageGrievanceTickets.getButtonSetPriority().text
         assert "SET URGENCY" in pageGrievanceTickets.getButtonSetUrgency().text
         assert "ADD NOTE" in pageGrievanceTickets.getButtonAddNote().text
-        with pytest.raises(Exception):
-            assert "NEW TICKET" in pageGrievanceTickets.getButtonNewTicket().text
+        assert "NEW TICKET" in pageGrievanceTickets.getButtonNewTicket().text
 
     def test_check_grievance_tickets_details_page(
         self,
