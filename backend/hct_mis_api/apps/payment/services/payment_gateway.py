@@ -457,7 +457,6 @@ class PaymentGatewayService:
 
             delivered_quantity = matching_pg_payment.payout_amount
             if _payment.status in [
-                Payment.STATUS_SUCCESS,
                 Payment.STATUS_DISTRIBUTION_SUCCESS,
                 Payment.STATUS_DISTRIBUTION_PARTIAL,
             ]:
