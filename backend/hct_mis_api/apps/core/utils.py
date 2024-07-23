@@ -23,7 +23,7 @@ from typing import (
 from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import Func, Q, Value
+from django.db.models import Q
 from django.http import Http404
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -915,12 +915,3 @@ class AutoCompleteFilterTemp(AutoCompleteFilter):
             return [str(obj.first()) or ""]
 
         return []
-
-
-class JSONBSet(Func):
-    function = "jsonb_set"
-    template = "%(function)s(%(expressions)s)"
-
-    def __init__(self, expression: Any, path: Any, new_value: Any, create_missing: bool = True, **extra: Any) -> None:
-        create_missing = Value("true") if create_missing else Value("false")  # type: ignore
-        super().__init__(expression, path, new_value, create_missing, **extra)

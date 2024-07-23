@@ -313,7 +313,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='household',
             name='residence_status',
-            field=models.CharField(choices=[('', 'None'), ('IDP', 'Displaced  |  Internally Displaced People'), ('REFUGEE', 'Displaced  |  Refugee / Asylum Seeker'), ('OTHERS_OF_CONCERN', 'Displaced  |  Others of Concern'), ('HOST', 'Non-displaced  |   Host'), ('NON_HOST', 'Non-displaced  |   Non-host'), ('RETURNEE', 'Displaced  |   Returnee')], max_length=254, blank=True),
+            field=models.CharField(choices=[('', 'None'), ('IDP', 'Displaced  |  Internally Displaced People'), ('REFUGEE', 'Displaced  |  Refugee / Asylum Seeker'), ('OTHERS_OF_CONCERN', 'Displaced  |  Others of Concern'), ('HOST', 'Non-displaced  |   Host'), ('NON_HOST', 'Non-displaced  |   Non-host'), ('RETURNEE', 'Displaced  |   Returnee')], max_length=254),
         ),
         migrations.AlterField(
             model_name='household',

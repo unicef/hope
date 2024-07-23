@@ -5,13 +5,11 @@ export const SAVE_KOBO_IMPORT_DATA_ASYNC = gql`
     $businessAreaSlug: String!
     $koboAssetId: Upload!
     $onlyActiveSubmissions: Boolean!
-    $pullPictures: Boolean!
   ) {
     saveKoboImportDataAsync(
       businessAreaSlug: $businessAreaSlug
       uid: $koboAssetId
       onlyActiveSubmissions: $onlyActiveSubmissions
-      pullPictures: $pullPictures
     ) {
       importData {
         id

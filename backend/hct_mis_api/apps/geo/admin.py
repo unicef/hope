@@ -167,7 +167,7 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBa
         ("area_type__country", AutoCompleteFilter),
         ("area_type", AreaTypeFilter),
     )
-    search_fields = ("name", "p_code")
+    search_fields = ("name",)
     raw_id_fields = ("area_type", "parent")
     fieldsets = (
         (

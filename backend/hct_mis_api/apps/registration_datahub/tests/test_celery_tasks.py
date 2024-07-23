@@ -61,9 +61,6 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
     remove_old_rdi_links_task,
     validate_xlsx_import_task,
 )
-from hct_mis_api.apps.registration_datahub.tasks.pull_kobo_submissions import (
-    PullKoboSubmissions,
-)
 from hct_mis_api.apps.utils.models import MergeStatusModel
 from hct_mis_api.aurora.celery_tasks import (
     automate_rdi_creation_task,
@@ -230,229 +227,6 @@ UKRAINE_NEW_FORM_FILES: Dict = {
         },
     ],
 }
-
-VALID_JSON = [
-    {
-        "_notes": [],
-        "wash_questions/score_num_items": "8",
-        "wash_questions/bed_hhsize": "NaN",
-        "monthly_income_questions/total_inc_h_f": "0",
-        "household_questions/m_0_5_age_group_h_c": "0",
-        "_xform_id_string": "aPkhoRMrkkDwgsvWuwi39s",
-        "_bamboo_dataset_id": "",
-        "_tags": [],
-        "health_questions/pregnant_member_h_c": "0",
-        "health_questions/start": "2020-04-28T17:34:22.979+02:00",
-        "health_questions/end": "2020-05-28T18:56:33.979+02:00",
-        "household_questions/first_registration_date_h_c": "2020-07-18",
-        "household_questions/f_0_5_disability_h_c": "0",
-        "household_questions/size_h_c": "1",
-        "household_questions/country_h_c": "AFG",
-        "monthly_expenditures_questions/total_expense_h_f": "0",
-        "individual_questions": [
-            {
-                "individual_questions/preferred_language_i_c": "pl-pl",
-                "individual_questions/role_i_c": "primary",
-                "individual_questions/age": "40",
-                "individual_questions/first_registration_date_i_c": "2020-07-18",
-                "individual_questions/more_information/marital_status_i_c": "married",
-                "individual_questions/individual_index": "1",
-                "individual_questions/birth_date_i_c": "1980-07-18",
-                "individual_questions/estimated_birth_date_i_c": "0",
-                "individual_questions/relationship_i_c": "head",
-                "individual_questions/gender_i_c": "male",
-                "individual_questions/individual_vulnerabilities/disability_i_c": "not disabled",
-                "individual_questions/full_name_i_c": "Test Testowy",
-                "individual_questions/is_only_collector": "NO",
-                "individual_questions/mas_treatment_i_f": "1",
-                "individual_questions/arm_picture_i_f": "signature-17_32_52.png",
-                "individual_questions/identification/tax_id_no_i_c": "45638193",
-                "individual_questions/identification/tax_id_issuer_i_c": "UKR",
-                "individual_questions/identification/bank_account_number_i_c": "UA3481939838393949",
-                "individual_questions/identification/bank_name_i_c": "Privat",
-                "individual_questions/identification/account_holder_name_i_c": "Name 123",
-            }
-        ],
-        "wash_questions/score_bed": "5",
-        "meta/instanceID": "uuid:512ca816-5cab-45a6-a676-1f47cfe7658e",
-        "wash_questions/blanket_hhsize": "NaN",
-        "household_questions/f_adults_disability_h_c": "0",
-        "wash_questions/score_childclothes": "5",
-        "household_questions/org_enumerator_h_c": "UNICEF",
-        "household_questions/specific_residence_h_f": "returnee",
-        "household_questions/org_name_enumerator_h_c": "Test",
-        "household_questions/name_enumerator_h_c": "Test",
-        "household_questions/consent_h_c": "0",
-        "household_questions/consent_sharing_h_c": "UNICEF",
-        "household_questions/m_12_17_age_group_h_c": "0",
-        "household_questions/f_adults_h_c": "0",
-        "household_questions/f_12_17_disability_h_c": "0",
-        "household_questions/f_0_5_age_group_h_c": "0",
-        "household_questions/m_6_11_age_group_h_c": "0",
-        "wash_questions/score_womencloth": "5",
-        "household_questions/f_12_17_age_group_h_c": "0",
-        "wash_questions/score_jerrycan": "5",
-        "start": "2020-05-28T17:32:43.054+02:00",
-        "_attachments": [
-            {
-                "mimetype": "image/png",
-                "download_small_url": "https://kc.humanitarianresponse.info/media/small?"
-                "media_file=wnosal%2Fattachments%"
-                "2Fb83407aca1d647a5bf65a3383ee761d4%2F512ca816-5cab-45a6-a676-1f47cfe7658e"
-                "%2Fsignature-17_32_52.png",
-                "download_large_url": "https://kc.humanitarianresponse.info/media/large?media_file=wnosal%"
-                "2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
-                "%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
-                "download_url": "https://kc.humanitarianresponse.info/media/original?media_file=wnosal"
-                "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
-                "%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
-                "filename": "wnosal/attachments/b83407aca1d647a5bf65a3383ee761d4/"
-                "512ca816-5cab-45a6-a676-1f47cfe7658e/signature-17_32_52.png",
-                "instance": 101804069,
-                "download_medium_url": "https://kc.humanitarianresponse.info/media/medium?media_file=wnosal"
-                "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
-                "%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
-                "id": 34814249,
-                "xform": 549831,
-            }
-        ],
-        "_status": "submitted_via_web",
-        "__version__": "vrBoKHPPCWpiRNvCbmnXCK",
-        "household_questions/m_12_17_disability_h_c": "0",
-        "wash_questions/score_tool": "5",
-        "wash_questions/total_liter_yesterday_h_f": "0",
-        "wash_questions/score_NFI_h_f": "5",
-        "food_security_questions/FCS_h_f": "NaN",
-        "wash_questions/jerrycan_hhsize": "NaN",
-        "enumerator/name_enumerator": "Test",
-        "wash_questions/score_bassin": "5",
-        "_validation_status": {},
-        "_uuid": "512ca816-5cab-45a6-a676-1f47cfe7658e",
-        "household_questions/m_adults_h_c": "1",
-        "consent/consent_sign_h_c": "signature-17_32_52.png",
-        "wash_questions/score_total": "40",
-        "_submitted_by": None,
-        "individual_questions_count": "1",
-        "end": "2020-05-28T17:34:22.979+02:00",
-        "household_questions/pregnant_h_c": "0",
-        "household_questions/m_6_11_disability_h_c": "0",
-        "household_questions/m_0_5_disability_h_c": "0",
-        "formhub/uuid": "b83407aca1d647a5bf65a3383ee761d4",
-        "enumerator/org_enumerator": "unicef",
-        "monthly_income_questions/round_total_income_h_f": "0",
-        "wash_questions/score_cookingpot": "5",
-        "household_questions/m_adults_disability_h_c": "0",
-        "_submission_time": "2020-05-28T15:34:37",
-        "household_questions/household_location/residence_status_h_c": "refugee",
-        "_geolocation": [None, None],
-        "monthly_expenditures_questions/round_total_expense_h_f": "0",
-        "deviceid": "ee.humanitarianresponse.info:AqAb03KLuEfWXes0",
-        "food_security_questions/cereals_tuber_score_h_f": "NaN",
-        "household_questions/f_6_11_disability_h_c": "0",
-        "wash_questions/score_blanket": "5",
-        "household_questions/f_6_11_age_group_h_c": "0",
-        "_id": 101804069,
-    },
-    {
-        "_notes": [],
-        "wash_questions/score_num_items": "8",
-        "wash_questions/bed_hhsize": "NaN",
-        "monthly_income_questions/total_inc_h_f": "0",
-        "household_questions/m_0_5_age_group_h_c": "0",
-        "_xform_id_string": "aPkhoRMrkkDwgsvWuwi39s",
-        "_bamboo_dataset_id": "",
-        "_tags": [],
-        "health_questions/pregnant_member_h_c": "0",
-        "health_questions/start": "2020-04-28T17:34:22.979+02:00",
-        "health_questions/end": "2020-05-28T18:56:33.979+02:00",
-        "household_questions/first_registration_date_h_c": "2020-07-18",
-        "household_questions/f_0_5_disability_h_c": "0",
-        "household_questions/size_h_c": "1",
-        "household_questions/country_h_c": "AFG",
-        "monthly_expenditures_questions/total_expense_h_f": "0",
-        "individual_questions": [
-            {
-                "individual_questions/preferred_language_i_c": "pl-pl",
-                "individual_questions/role_i_c": "primary",
-                "individual_questions/age": "40",
-                "individual_questions/first_registration_date_i_c": "2020-07-18",
-                "individual_questions/more_information/marital_status_i_c": "married",
-                "individual_questions/individual_index": "1",
-                "individual_questions/birth_date_i_c": "1980-07-18",
-                "individual_questions/estimated_birth_date_i_c": "0",
-                "individual_questions/relationship_i_c": "head",
-                "individual_questions/gender_i_c": "male",
-                "individual_questions/individual_vulnerabilities/disability_i_c": "not disabled",
-                "individual_questions/full_name_i_c": "Test Testowy",
-                "individual_questions/is_only_collector": "NO",
-                "individual_questions/mas_treatment_i_f": "1",
-                "individual_questions/arm_picture_i_f": "signature-17_32_52.png",
-                "individual_questions/identification/tax_id_no_i_c": "45638193",
-                "individual_questions/identification/tax_id_issuer_i_c": "UKR",
-                "individual_questions/identification/bank_account_number_i_c": "UA3481939838393949",
-                "individual_questions/identification/bank_name_i_c": "Privat",
-                "individual_questions/identification/account_holder_name_i_c": "Name 123",
-            }
-        ],
-        "wash_questions/score_bed": "5",
-        "meta/instanceID": "uuid:512ca816-5cab-45a6-a676-1f47cfe7658e",
-        "wash_questions/blanket_hhsize": "NaN",
-        "household_questions/f_adults_disability_h_c": "0",
-        "wash_questions/score_childclothes": "5",
-        "household_questions/org_enumerator_h_c": "UNICEF",
-        "household_questions/specific_residence_h_f": "returnee",
-        "household_questions/org_name_enumerator_h_c": "Test",
-        "household_questions/name_enumerator_h_c": "Test",
-        "household_questions/consent_h_c": "0",
-        "household_questions/consent_sharing_h_c": "UNICEF",
-        "household_questions/m_12_17_age_group_h_c": "0",
-        "household_questions/f_adults_h_c": "0",
-        "household_questions/f_12_17_disability_h_c": "0",
-        "household_questions/f_0_5_age_group_h_c": "0",
-        "household_questions/m_6_11_age_group_h_c": "0",
-        "wash_questions/score_womencloth": "5",
-        "household_questions/f_12_17_age_group_h_c": "0",
-        "wash_questions/score_jerrycan": "5",
-        "start": "2020-05-28T17:32:43.054+02:00",
-        "_attachments": [],
-        "_status": "submitted_via_web",
-        "__version__": "vrBoKHPPCWpiRNvCbmnXCK",
-        "household_questions/m_12_17_disability_h_c": "0",
-        "wash_questions/score_tool": "5",
-        "wash_questions/total_liter_yesterday_h_f": "0",
-        "wash_questions/score_NFI_h_f": "5",
-        "food_security_questions/FCS_h_f": "NaN",
-        "wash_questions/jerrycan_hhsize": "NaN",
-        "enumerator/name_enumerator": "Test",
-        "wash_questions/score_bassin": "5",
-        "_validation_status": {},
-        "_uuid": "512ca816-5cab-45a6-a676-1f47cfe7658e",
-        "household_questions/m_adults_h_c": "1",
-        "consent/consent_sign_h_c": "signature-17_32_52.png",
-        "wash_questions/score_total": "40",
-        "_submitted_by": None,
-        "individual_questions_count": "1",
-        "end": "2020-05-28T17:34:22.979+02:00",
-        "household_questions/pregnant_h_c": "0",
-        "household_questions/m_6_11_disability_h_c": "0",
-        "household_questions/m_0_5_disability_h_c": "0",
-        "formhub/uuid": "b83407aca1d647a5bf65a3383ee761d4",
-        "enumerator/org_enumerator": "unicef",
-        "monthly_income_questions/round_total_income_h_f": "0",
-        "wash_questions/score_cookingpot": "5",
-        "household_questions/m_adults_disability_h_c": "0",
-        "_submission_time": "2020-05-28T15:34:37",
-        "household_questions/household_location/residence_status_h_c": "refugee",
-        "_geolocation": [None, None],
-        "monthly_expenditures_questions/round_total_expense_h_f": "0",
-        "deviceid": "ee.humanitarianresponse.info:AqAb03KLuEfWXes0",
-        "food_security_questions/cereals_tuber_score_h_f": "NaN",
-        "household_questions/f_6_11_disability_h_c": "0",
-        "wash_questions/score_blanket": "5",
-        "household_questions/f_6_11_age_group_h_c": "0",
-        "_id": 23456,
-    },
-]
 
 
 def create_record(fields: Dict, registration: int, status: str, files: Optional[Dict] = None) -> Any:  # Record
@@ -932,11 +706,6 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
 
 
 class TestRegistrationImportCeleryTasks(APITestCase):
-    databases = {
-        "default",
-        "registration_datahub",
-    }
-
     @classmethod
     def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
@@ -1039,7 +808,7 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         self,
         PullKoboSubmissionsTask: unittest.mock.Mock,
     ) -> None:
-        kobo_import_data = KoboImportData.objects.create(kobo_asset_id="1234", pull_pictures=True)
+        kobo_import_data = KoboImportData.objects.create(kobo_asset_id="1234")
         mock_task_instance = PullKoboSubmissionsTask.return_value
         pull_kobo_submissions_task.delay(kobo_import_data.id)
         mock_task_instance.execute.assert_called_once()
@@ -1052,23 +821,3 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         mock_task_instance = ValidateXlsxImportTask.return_value
         validate_xlsx_import_task.delay(self.import_data.id, self.program.id)
         mock_task_instance.execute.assert_called_once()
-
-    @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.get_project_submissions")
-    def test_pull_kobo_submissions_execute(self, mock_get_project_submissions: unittest.mock.Mock) -> None:
-        kobo_import_data_with_pics = KoboImportData.objects.create(
-            kobo_asset_id="1111",
-            business_area_slug=self.business_area.slug,
-            pull_pictures=True,
-        )
-        mock_get_project_submissions.return_value = VALID_JSON
-        resp_1 = PullKoboSubmissions().execute(kobo_import_data_with_pics)
-        self.assertEqual(str(resp_1["kobo_import_data_id"]), str(kobo_import_data_with_pics.id))
-
-        kobo_import_data_without_pics = KoboImportData.objects.create(
-            kobo_asset_id="2222",
-            business_area_slug=self.business_area.slug,
-            pull_pictures=False,
-        )
-        mock_get_project_submissions.return_value = VALID_JSON
-        resp_2 = PullKoboSubmissions().execute(kobo_import_data_without_pics)
-        self.assertEqual(str(resp_2["kobo_import_data_id"]), str(kobo_import_data_without_pics.id))

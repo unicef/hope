@@ -60,7 +60,7 @@ class IndividualXlsxUpdate:
         self.get_matching_report()
 
         individuals = []
-        columns = [column.replace("individual__", "").replace("individual_", "") for column in self.columns_names]
+        columns = [column.replace("individual__", "") for column in self.columns_names]
         columns.append("detail_id")
         has_phone_number = "phone_no" in columns or "phone_no_alternative" in columns
         if has_phone_number:

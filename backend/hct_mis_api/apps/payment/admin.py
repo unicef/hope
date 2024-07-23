@@ -22,7 +22,6 @@ from smart_admin.mixins import LinkedObjectsMixin
 from hct_mis_api.apps.payment.forms import ImportPaymentRecordsForm
 from hct_mis_api.apps.payment.models import (
     CashPlan,
-    DeliveryMechanismData,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -458,10 +457,3 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return request.user.can_change_fsp()
-
-
-@admin.register(DeliveryMechanismData)
-class DeliveryMechanismDataAdmin(HOPEModelAdminBase):
-    list_display = ("individual", "delivery_mechanism", "is_valid")
-    raw_id_fields = ("individual", "possible_duplicate_of")
-    readonly_fields = ("possible_duplicate_of", "unique_key", "signature_hash", "validation_errors")

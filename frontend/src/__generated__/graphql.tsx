@@ -3766,7 +3766,6 @@ export type KoboImportDataNode = Node & {
   numberOfHouseholds?: Maybe<Scalars['Int']['output']>;
   numberOfIndividuals?: Maybe<Scalars['Int']['output']>;
   onlyActiveSubmissions: Scalars['Boolean']['output'];
-  pullPictures: Scalars['Boolean']['output'];
   status: ImportDataStatus;
   updatedAt: Scalars['DateTime']['output'];
   validationErrors: Scalars['String']['output'];
@@ -4361,7 +4360,6 @@ export type MutationsRevertMarkPaymentRecordAsFailedArgs = {
 export type MutationsSaveKoboImportDataAsyncArgs = {
   businessAreaSlug: Scalars['String']['input'];
   onlyActiveSubmissions: Scalars['Boolean']['input'];
-  pullPictures: Scalars['Boolean']['input'];
   uid: Scalars['Upload']['input'];
 };
 
@@ -9844,7 +9842,6 @@ export type SaveKoboImportDataMutationVariables = Exact<{
   businessAreaSlug: Scalars['String']['input'];
   projectId: Scalars['Upload']['input'];
   onlyActiveSubmissions: Scalars['Boolean']['input'];
-  pullPictures: Scalars['Boolean']['input'];
 }>;
 
 
@@ -9854,7 +9851,6 @@ export type SaveKoboImportDataAsyncMutationVariables = Exact<{
   businessAreaSlug: Scalars['String']['input'];
   koboAssetId: Scalars['Upload']['input'];
   onlyActiveSubmissions: Scalars['Boolean']['input'];
-  pullPictures: Scalars['Boolean']['input'];
 }>;
 
 
@@ -15156,12 +15152,11 @@ export type RerunDedupeMutationHookResult = ReturnType<typeof useRerunDedupeMuta
 export type RerunDedupeMutationResult = Apollo.MutationResult<RerunDedupeMutation>;
 export type RerunDedupeMutationOptions = Apollo.BaseMutationOptions<RerunDedupeMutation, RerunDedupeMutationVariables>;
 export const SaveKoboImportDataDocument = gql`
-    mutation SaveKoboImportData($businessAreaSlug: String!, $projectId: Upload!, $onlyActiveSubmissions: Boolean!, $pullPictures: Boolean!) {
+    mutation SaveKoboImportData($businessAreaSlug: String!, $projectId: Upload!, $onlyActiveSubmissions: Boolean!) {
   saveKoboImportDataAsync(
     businessAreaSlug: $businessAreaSlug
     uid: $projectId
     onlyActiveSubmissions: $onlyActiveSubmissions
-    pullPictures: $pullPictures
   ) {
     importData {
       id
@@ -15187,7 +15182,6 @@ export type SaveKoboImportDataMutationFn = Apollo.MutationFunction<SaveKoboImpor
  *      businessAreaSlug: // value for 'businessAreaSlug'
  *      projectId: // value for 'projectId'
  *      onlyActiveSubmissions: // value for 'onlyActiveSubmissions'
- *      pullPictures: // value for 'pullPictures'
  *   },
  * });
  */
@@ -15199,12 +15193,11 @@ export type SaveKoboImportDataMutationHookResult = ReturnType<typeof useSaveKobo
 export type SaveKoboImportDataMutationResult = Apollo.MutationResult<SaveKoboImportDataMutation>;
 export type SaveKoboImportDataMutationOptions = Apollo.BaseMutationOptions<SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables>;
 export const SaveKoboImportDataAsyncDocument = gql`
-    mutation SaveKoboImportDataAsync($businessAreaSlug: String!, $koboAssetId: Upload!, $onlyActiveSubmissions: Boolean!, $pullPictures: Boolean!) {
+    mutation SaveKoboImportDataAsync($businessAreaSlug: String!, $koboAssetId: Upload!, $onlyActiveSubmissions: Boolean!) {
   saveKoboImportDataAsync(
     businessAreaSlug: $businessAreaSlug
     uid: $koboAssetId
     onlyActiveSubmissions: $onlyActiveSubmissions
-    pullPictures: $pullPictures
   ) {
     importData {
       id
@@ -15231,7 +15224,6 @@ export type SaveKoboImportDataAsyncMutationFn = Apollo.MutationFunction<SaveKobo
  *      businessAreaSlug: // value for 'businessAreaSlug'
  *      koboAssetId: // value for 'koboAssetId'
  *      onlyActiveSubmissions: // value for 'onlyActiveSubmissions'
- *      pullPictures: // value for 'pullPictures'
  *   },
  * });
  */
@@ -26560,7 +26552,6 @@ export type KoboImportDataNodeResolvers<ContextType = any, ParentType extends Re
   numberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   numberOfIndividuals?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   onlyActiveSubmissions?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  pullPictures?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   status?: Resolver<ResolversTypes['ImportDataStatus'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   validationErrors?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -26708,7 +26699,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   restartCreateReport?: Resolver<Maybe<ResolversTypes['RestartCreateReport']>, ParentType, ContextType, RequireFields<MutationsRestartCreateReportArgs, 'reportData'>>;
   revertMarkPaymentAsFailed?: Resolver<Maybe<ResolversTypes['RevertMarkPaymentAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsRevertMarkPaymentAsFailedArgs, 'deliveredQuantity' | 'deliveryDate' | 'paymentId'>>;
   revertMarkPaymentRecordAsFailed?: Resolver<Maybe<ResolversTypes['RevertMarkPaymentRecordAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsRevertMarkPaymentRecordAsFailedArgs, 'deliveredQuantity' | 'deliveryDate' | 'paymentRecordId'>>;
-  saveKoboImportDataAsync?: Resolver<Maybe<ResolversTypes['SaveKoboProjectImportDataAsync']>, ParentType, ContextType, RequireFields<MutationsSaveKoboImportDataAsyncArgs, 'businessAreaSlug' | 'onlyActiveSubmissions' | 'pullPictures' | 'uid'>>;
+  saveKoboImportDataAsync?: Resolver<Maybe<ResolversTypes['SaveKoboProjectImportDataAsync']>, ParentType, ContextType, RequireFields<MutationsSaveKoboImportDataAsyncArgs, 'businessAreaSlug' | 'onlyActiveSubmissions' | 'uid'>>;
   setSteficonRuleOnPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs, 'paymentPlanId' | 'steficonRuleId'>>;
   setSteficonRuleOnTargetPopulation?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnTargetPopulationArgs, 'input'>>;
   splitPaymentPlan?: Resolver<Maybe<ResolversTypes['SplitPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsSplitPaymentPlanArgs, 'paymentPlanId' | 'splitType'>>;

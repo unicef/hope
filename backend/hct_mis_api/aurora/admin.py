@@ -120,7 +120,7 @@ class BaseRDIForm(forms.Form):
     registration = forms.ModelChoiceField(
         label="Registration",
         required=True,
-        queryset=Registration.objects.order_by("name"),
+        queryset=Registration.objects.all(),
         help_text="Registration to be used",
     )
     filters = forms.CharField(
@@ -161,7 +161,7 @@ class AmendRDIForm(BaseRDIForm):
     rdi = forms.ModelChoiceField(
         label="RDI",
         required=False,
-        queryset=RegistrationDataImport.objects.filter(status=RegistrationDataImport.LOADING).order_by("name"),
+        queryset=RegistrationDataImport.objects.filter(status=RegistrationDataImport.LOADING),
         help_text="can select and update existing RDI within status 'Loading'",
     )
 
