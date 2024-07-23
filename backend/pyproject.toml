@@ -137,7 +137,7 @@ authors = [
 dependencies = [
     "defusedxml==0.7.0rc1",
     "Django~=3.2.15",
-    "elasticsearch==8.13.0",
+    "elasticsearch~=8.14.0",
     "graphene-django~=2.14.0",
     "openpyxl~=3.0.10",
     "Jinja2<4.0.0,>=3.1.3",
@@ -161,7 +161,7 @@ dependencies = [
     "django-cors-headers<4.0.0,>=3.13.0",
     "django-countries<8.0.0,>=7.3.2",
     "django-csp<4.0,>=3.7",
-    "django-elasticsearch-dsl<8.1",
+    "django-elasticsearch-dsl<9.0,>=8.0",
     "django-environ<1.0.0,>=0.10.0",
     "django-extensions<4.0.0,>=3.1.5",
     "django-filter<23,>=22",
@@ -191,7 +191,7 @@ dependencies = [
     "drf-jwt<2.0.0,>=1.19.2",
     "drf-spectacular[sidecar]<1.0,>=0.27",
     "drf-extensions==0.7.1",
-    "elasticsearch-dsl<8.14.0",
+    "elasticsearch-dsl~=8.14.0",
     "factory-boy<4,>=3",
     "gevent<24.0,>=23.9",
     "graphene-file-upload<2.0.0,>=1.3.0",
@@ -230,7 +230,7 @@ dependencies = [
     "django-graphiql-debug-toolbar<1.0.0,>=0.2.0",
     "django-rest-extensions>=0.2.0",
     "pytest-html-reporter>=0.2.9",
-    "elasticsearch==7.13.4",
+    "elasticsearch~=8.14.0",
 ]
 requires-python = "==3.11.*"
 readme = "README.md"
