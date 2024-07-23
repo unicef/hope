@@ -73,7 +73,6 @@ class ValidatorTest(TestCase):
                                 "collect_individual_data": ["This field is required."],
                                 "country": ["This field is required."],
                                 "members": ["This field is required."],
-                                "residence_status": ["This field is required."],
                             }
                         ]
                     }
