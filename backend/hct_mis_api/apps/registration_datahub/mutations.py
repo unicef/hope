@@ -562,11 +562,18 @@ class SaveKoboProjectImportDataAsync(PermissionMutation):
         uid = Upload(required=True)
         business_area_slug = graphene.String(required=True)
         only_active_submissions = graphene.Boolean(required=True)
+        pull_pictures = graphene.Boolean(required=True)
 
     @classmethod
     @is_authenticated
     def mutate(
-        cls, root: Any, info: Any, uid: "UUID", business_area_slug: str, only_active_submissions: bool
+        cls,
+        root: Any,
+        info: Any,
+        uid: "UUID",
+        business_area_slug: str,
+        only_active_submissions: bool,
+        pull_pictures: bool,
     ) -> "SaveKoboProjectImportDataAsync":
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
 
@@ -577,6 +584,7 @@ class SaveKoboProjectImportDataAsync(PermissionMutation):
             status=ImportData.STATUS_PENDING,
             business_area_slug=business_area_slug,
             created_by_id=info.context.user.id,
+            pull_pictures=pull_pictures,
         )
         pull_kobo_submissions_task.delay(import_data.id)
         return SaveKoboProjectImportDataAsync(import_data=import_data)
