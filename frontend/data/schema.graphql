@@ -2065,7 +2065,7 @@ type ImportedHouseholdNode implements Node {
   consentSign: String!
   consent: Boolean
   consentSharing: HouseholdConsentSharing!
-  residenceStatus: HouseholdResidenceStatus!
+  residenceStatus: HouseholdResidenceStatus
   countryOrigin: String
   country: String
   address: String!
