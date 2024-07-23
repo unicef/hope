@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import Any, Dict, List, Tuple, Type
 
 from django.db.models import (
@@ -14,10 +15,12 @@ from django.db.models import (
     Value,
     When,
 )
+from django.db.models.functions import Coalesce
 
 import graphene
 from graphene import Int, relay
 from graphene_django import DjangoObjectType
+from graphene_django.filter import DjangoFilterConnectionField
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import (
@@ -106,12 +109,7 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     data_collecting_type = graphene.Field(DataCollectingTypeNode, source="data_collecting_type")
     partners = graphene.List(PartnerNode)
     is_social_worker_program = graphene.Boolean()
-    # cycles = DjangoPermissionFilterConnectionField(
-    #     ProgramCycleNode,
-    #     filterset_class=ProgramCycleFilter,
-    #     permission_classes=(hopePermissionClass(Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST),),
-    # )
-    cycles = graphene.List(ProgramCycleNode)
+    cycles = DjangoFilterConnectionField(ProgramCycleNode, filterset_class=ProgramCycleFilter)
 
     class Meta:
         model = Program
@@ -419,11 +417,14 @@ class Query(graphene.ObjectType):
         ).exclude(data_collecting_type__code="unknown")
 
     def resolve_all_program_cycles(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
-        # filter by Program added in ProgramCycleFilter > GlobalProgramFilter
-        # TODO: need to add filter by Total Entitled Quantity?
-        # ?? .annotate(
-        #     total_entitled_quantity=Coalesce(
-        #         Sum(F('paymentplan__total_entitled_quantity_usd')), Value(Decimal('0.0'))
-        #     )
-        # )
-        return ProgramCycle.objects.all()
+        business_area_slug = info.context.headers.get("Business-Area").lower()
+        qs = (
+            ProgramCycle.objects.filter(program__business_area__slug=business_area_slug)
+            .select_related("program__business_area")
+            .annotate(
+                total_entitled_quantity=Coalesce(
+                    Sum("payment_plans__total_entitled_quantity_usd"), Value(Decimal("0.0"))
+                )
+            )
+        )
+        return qs

@@ -39,13 +39,14 @@ class TestRecalculatingCash(APITestCase):
           cashPlus
           populationGoal
           administrativeAreasOfImplementation
-          cycles {
-            edges {
-              node {
-                id
-              }
+          cycles{
+          edges{
+            node{
+              id
+              status
             }
           }
+        }
         }
         validationErrors
       }
@@ -206,7 +207,6 @@ class TestRecalculatingCash(APITestCase):
                 Permissions.PROGRAMME_ACTIVATE,
                 Permissions.TARGETING_LOCK,
                 Permissions.TARGETING_SEND,
-                Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
             ],
             self.business_area,
         )
@@ -232,7 +232,6 @@ class TestRecalculatingCash(APITestCase):
 
         program_response = self.create_program()
         program_id = program_response["data"]["createProgram"]["program"]["id"]
-        print("==> ", program_response["data"]["createProgram"]["program"])
         program_cycle_id = program_response["data"]["createProgram"]["program"]["cycles"]["edges"][0]["node"]["id"]
 
         self.activate_program(program_id)
