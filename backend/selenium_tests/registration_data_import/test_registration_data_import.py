@@ -18,7 +18,7 @@ pytestmark = pytest.mark.django_db(transaction=True, databases=["registration_da
 
 @pytest.fixture
 def registration_datahub(db) -> None:  # type: ignore
-    connections.create_connection(alias="registration_datahub", hosts=["elasticsearch:9200"], timeout=20)
+    connections.create_connection(alias="registration_datahub", hosts=[settings.ELASTICSEARCH_HOST], timeout=20)
     rebuild_search_index()
     yield
     connections.remove_connection(alias="registration_datahub")
@@ -28,13 +28,13 @@ def registration_datahub(db) -> None:  # type: ignore
 def create_programs() -> None:
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
-    return
+    yield
 
 
 @pytest.fixture
 def add_rdi() -> None:
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data-cypress.json")
-    return
+    yield
 
 
 @pytest.fixture
@@ -165,6 +165,7 @@ class TestRegistrationDataImport:
         pageDetailsRegistrationDataImport.getButtonMergeRdi().click()
         pageDetailsRegistrationDataImport.getButtonMerge().click()
         pageDetailsRegistrationDataImport.waitForStatus("MERGED")
+        assert "MERGED" == pageDetailsRegistrationDataImport.getStatusContainer().text
         assert "VIEW TICKETS" in pageDetailsRegistrationDataImport.getButtonViewTickets().text
         pageDetailsRegistrationDataImport.getButtonIndividuals().click()
         pageDetailsRegistrationDataImport.getButtonHouseholds().click()

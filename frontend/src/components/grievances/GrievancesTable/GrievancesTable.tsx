@@ -1,9 +1,7 @@
-import { Box } from '@mui/material';
-import Paper from '@mui/material/Paper';
-import get from 'lodash/get';
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { UniversalTable } from '@containers/tables/UniversalTable';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { EnhancedTableToolbar } from '@core/Table/EnhancedTableToolbar';
+import { TableWrapper } from '@core/TableWrapper';
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
@@ -12,26 +10,23 @@ import {
   useGrievancesChoiceDataQuery,
   useMeQuery,
 } from '@generated/graphql';
-import {
-  PERMISSIONS,
-  hasCreatorOrOwnerPermissions,
-  hasPermissions,
-} from '../../../config/permissions';
-import { UniversalTable } from '@containers/tables/UniversalTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
 import { usePermissions } from '@hooks/usePermissions';
-import { useProgramContext } from '../../../programContext';
+import { Box } from '@mui/material';
+import Paper from '@mui/material/Paper';
 import {
   GRIEVANCE_CATEGORIES,
-  GRIEVANCE_TICKETS_TYPES,
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
 import { choicesToDict, dateToIsoString } from '@utils/utils';
-import { ButtonTooltip } from '@core/ButtonTooltip';
-import { LoadingComponent } from '@core/LoadingComponent';
-import { EnhancedTableToolbar } from '@core/Table/EnhancedTableToolbar';
-import { TableWrapper } from '@core/TableWrapper';
+import get from 'lodash/get';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  PERMISSIONS,
+  hasCreatorOrOwnerPermissions,
+} from '../../../config/permissions';
 import { headCells } from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
 import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
@@ -44,13 +39,11 @@ interface GrievancesTableProps {
   selectedTab;
 }
 
-export function GrievancesTable({
+export const GrievancesTable = ({
   filter,
-  selectedTab,
-}: GrievancesTableProps): React.ReactElement {
-  const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
+}: GrievancesTableProps): React.ReactElement => {
+  const { businessArea, programId, isAllPrograms } = useBaseUrl();
   const { t } = useTranslation();
-  const { isActiveProgram } = useProgramContext();
 
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
@@ -276,22 +269,6 @@ export function GrievancesTable({
               businessArea={businessArea}
               setSelected={setSelectedTickets}
             />
-            {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated &&
-              hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
-                <ButtonTooltip
-                  variant="contained"
-                  color="primary"
-                  component={Link}
-                  title={t(
-                    'Program has to be active to create a new Grievance Ticket',
-                  )}
-                  to={`/${baseUrl}/grievance/new-ticket`}
-                  data-cy="button-new-ticket"
-                  disabled={!isActiveProgram}
-                >
-                  {t('NEW TICKET')}
-                </ButtonTooltip>
-              )}
           </Box>
           <UniversalTable<
             AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
@@ -332,4 +309,4 @@ export function GrievancesTable({
       </TableWrapper>
     </Box>
   );
-}
+};

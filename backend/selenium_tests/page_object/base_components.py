@@ -16,6 +16,7 @@ class BaseComponents(Common):
     navProgrammePopulation = 'a[data-cy="nav-Program Population"]'
     navHouseholds = 'a[data-cy="nav-Households"]'
     navIndividuals = 'a[data-cy="nav-Individuals"]'
+    navPeople = 'a[data-cy="nav-People"]'
     navProgrammeManagement = 'a[data-cy="nav-Programs"]'
     navManagerialConsole = 'a[data-cy="nav-Managerial Console"]'
     navProgrammeDetails = 'a[data-cy="nav-Program Details"]'
@@ -45,6 +46,9 @@ class BaseComponents(Common):
     globalProgramFilterSearchButton = 'button[data-cy="search-icon"]'
     globalProgramFilterClearButton = 'button[data-cy="clear-icon"]'
     rows = 'tr[role="checkbox"]'
+    alert = '[role="alert"]'
+    breadcrumbsChevronIcon = 'svg[data-cy="breadcrumbs-chevron-icon"]'
+    arrowBack = 'div[data-cy="arrow_back"]'
 
     # Text
     globalProgramFilterText = "All Programmes"
@@ -81,6 +85,9 @@ class BaseComponents(Common):
 
     def getNavIndividuals(self) -> WebElement:
         return self.wait_for(self.navIndividuals)
+
+    def getNavPeople(self) -> WebElement:
+        return self.wait_for(self.navPeople)
 
     def getNavProgrammeManagement(self) -> WebElement:
         return self.wait_for(self.navProgrammeManagement)
@@ -170,11 +177,29 @@ class BaseComponents(Common):
     def getGlobalProgramFilterSearchInput(self) -> WebElement:
         return self.wait_for(self.globalProgramFilterSearchInput)
 
+    def getBreadcrumbsChevronIcon(self) -> WebElement:
+        return self.wait_for(self.breadcrumbsChevronIcon)
+
+    def getArrowBack(self) -> WebElement:
+        return self.wait_for(self.arrowBack)
+
     def getNavProgramLog(self) -> WebElement:
         return self.wait_for(self.navProgramLog)
 
     def getRows(self) -> [WebElement]:
         return self.get_elements(self.rows)
+
+    def getAlert(self) -> WebElement:
+        self.wait_for(self.alert)
+        return self.wait_for(self.alert)
+
+    def checkAlert(self, text: str) -> None:
+        self.getAlert()
+        for _ in range(10):
+            if text in self.getAlert().text:
+                break
+            sleep(1)
+        assert text in self.getAlert().text
 
     def waitForNumberOfRows(self, number: int) -> bool:
         for _ in range(5):

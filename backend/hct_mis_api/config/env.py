@@ -29,7 +29,7 @@ DEFAULTS = {
     "AZURE_CLIENT_SECRET": (str, ""),
     "AZURE_TENANT_KEY": (str, ""),
     "SANCTION_LIST_CC_MAIL": (str, "dfam-cashassistance@unicef.org"),
-    "ELASTICSEARCH_HOST": (str, "elasticsearch:9200"),
+    "ELASTICSEARCH_HOST": (str, "http://elasticsearch:9200"),
     "RAPID_PRO_URL": (str, "https://rapidpro.io"),
     "DATAMART_USER": (str, ""),
     "DATAMART_URL": (str, "https://datamart-dev.unicef.io"),

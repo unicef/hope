@@ -32,14 +32,14 @@ index_settings = {
 
 
 class IndividualDocument(Document):
-    id = fields.KeywordField(boost=0)
+    id = fields.KeywordField()  # The boost parameter on field mappings has been removed
     given_name = fields.TextField(
         analyzer=name_synonym_analyzer, fields={"phonetic": fields.TextField(analyzer=phonetic_analyzer)}
     )
     middle_name = fields.TextField(analyzer=phonetic_analyzer)
     family_name = fields.TextField(fields={"phonetic": fields.TextField(analyzer=phonetic_analyzer)})
     full_name = fields.TextField(analyzer=phonetic_analyzer)
-    birth_date = fields.DateField(similarity="boolean")
+    birth_date = fields.DateField()  # Before es 8, similarity parameter on DateField failed silently
     phone_no = fields.KeywordField("phone_no.__str__", similarity="boolean")
     phone_no_alternative = fields.KeywordField("phone_no_alternative.__str__", similarity="boolean")
     phone_no_text = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
@@ -129,7 +129,7 @@ class IndividualDocumentAfghanistan(IndividualDocument):
         settings = index_settings
 
     def get_queryset(self) -> QuerySet[Individual]:
-        return Individual.objects.filter(business_area__slug="afghanistan")
+        return Individual.all_merge_status_objects.filter(business_area__slug="afghanistan")
 
 
 @registry.register_document
@@ -139,7 +139,7 @@ class IndividualDocumentUkraine(IndividualDocument):
         settings = index_settings
 
     def get_queryset(self) -> QuerySet[Individual]:
-        return Individual.objects.filter(business_area__slug="ukraine")
+        return Individual.all_merge_status_objects.filter(business_area__slug="ukraine")
 
 
 @registry.register_document
@@ -149,7 +149,9 @@ class IndividualDocumentOthers(IndividualDocument):
         settings = index_settings
 
     def get_queryset(self) -> QuerySet[Individual]:
-        return Individual.objects.exclude(Q(business_area__slug="ukraine") | Q(business_area__slug="afghanistan"))
+        return Individual.all_merge_status_objects.exclude(
+            Q(business_area__slug="ukraine") | Q(business_area__slug="afghanistan")
+        )
 
 
 def get_individual_doc(

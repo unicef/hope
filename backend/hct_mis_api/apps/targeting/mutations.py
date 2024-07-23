@@ -98,10 +98,18 @@ def get_unicef_ids(ids_string: str, type_id: str, program: Program) -> str:
     ids_list = [i.strip() for i in ids_list]
     if type_id == "household":
         hh_ids = [hh_id for hh_id in ids_list if hh_id.startswith("HH")]
-        list_ids = Household.objects.filter(unicef_id__in=hh_ids, program=program).values_list("unicef_id", flat=True)
+        list_ids = (
+            Household.objects.filter(unicef_id__in=hh_ids, program=program)
+            .order_by("unicef_id")
+            .values_list("unicef_id", flat=True)
+        )
     if type_id == "individual":
         ind_ids = [ind_id for ind_id in ids_list if ind_id.startswith("IND")]
-        list_ids = Individual.objects.filter(unicef_id__in=ind_ids, program=program).values_list("unicef_id", flat=True)
+        list_ids = (
+            Individual.objects.filter(unicef_id__in=ind_ids, program=program)
+            .order_by("unicef_id")
+            .values_list("unicef_id", flat=True)
+        )
 
     return ", ".join(list_ids)
 
@@ -159,7 +167,7 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         targeting_criteria_input = input_data.get("targeting_criteria")
 
         business_area = BusinessArea.objects.get(slug=input_data.pop("business_area_slug"))
-        TargetingCriteriaInputValidator.validate(targeting_criteria_input, program.data_collecting_type)
+        TargetingCriteriaInputValidator.validate(targeting_criteria_input, program)
         targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
         target_population = TargetPopulation(
             name=tp_name,
@@ -251,7 +259,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
 
         if targeting_criteria_input:
             should_rebuild_list = True
-            TargetingCriteriaInputValidator.validate(targeting_criteria_input, program.data_collecting_type)
+            TargetingCriteriaInputValidator.validate(targeting_criteria_input, program)
             targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
             if target_population.status == TargetPopulation.STATUS_OPEN:
                 if target_population.targeting_criteria:
