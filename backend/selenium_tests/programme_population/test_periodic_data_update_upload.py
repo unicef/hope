@@ -152,9 +152,6 @@ class TestPeriodicDataUpdateUpload:
         pageIndividuals.getDialogImport()
         pageIndividuals.upload_file(tmp_file.name)
         pageIndividuals.getButtonImportSubmit().click()
-        # TODO workaround to refresh
-        pageIndividuals.driver.refresh()
-        pageIndividuals.getTabPeriodicDataUpdates().click()
         pageIndividuals.getPduUpdates().click()
         periodic_data_update_upload = PeriodicDataUpdateUpload.objects.first()
         assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL
@@ -192,9 +189,6 @@ class TestPeriodicDataUpdateUpload:
         pageIndividuals.getDialogImport()
         pageIndividuals.upload_file(tmp_file.name)
         pageIndividuals.getButtonImportSubmit().click()
-        # TODO workaround to refresh
-        pageIndividuals.driver.refresh()
-        pageIndividuals.getTabPeriodicDataUpdates().click()
         pageIndividuals.getPduUpdates().click()
         periodic_data_update_upload = PeriodicDataUpdateUpload.objects.first()
         assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.FAILED

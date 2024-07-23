@@ -82,7 +82,7 @@ export const useUploadPeriodicDataUpdateTemplate = () => {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['periodicDataUpdateTemplates'],
+        queryKey: ['periodicDataUpdateUploads'],
       });
     },
   });

@@ -434,7 +434,7 @@ def create_super_user(business_area: BusinessArea) -> User:
 
     role, _ = Role.objects.update_or_create(name="Role", defaults={"permissions": permission_list})
 
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json")
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json", verbosity=0)
     country = Country.objects.get(name="Afghanistan")
     business_area.countries.add(country)
     user = UserFactory.create(
