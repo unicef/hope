@@ -63,6 +63,26 @@ class GrievanceTicketManager(models.Manager):
             (TicketComplaintDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
         )
 
+    def belong_households_individuals(self, households: QuerySet, individuals: QuerySet) -> Iterable:
+        return chain(
+            (TicketReferralDetails.objects.filter(Q(individual__in=individuals) | Q(household__in=households))),
+            (TicketNegativeFeedbackDetails.objects.filter(Q(individual__in=individuals) | Q(household__in=households))),
+            (TicketPositiveFeedbackDetails.objects.filter(Q(individual__in=individuals) | Q(household__in=households))),
+            (
+                TicketNeedsAdjudicationDetails.objects.filter(
+                    Q(selected_individual__in=individuals) | Q(golden_records_individual__in=individuals)
+                )
+            ).distinct(),
+            (TicketSystemFlaggingDetails.objects.filter(golden_records_individual__in=individuals)),
+            (TicketDeleteIndividualDetails.objects.filter(individual__in=individuals)),
+            (TicketDeleteHouseholdDetails.objects.filter(household__in=households)),
+            (TicketAddIndividualDetails.objects.filter(household__in=households)),
+            (TicketIndividualDataUpdateDetails.objects.filter(individual__in=individuals)),
+            (TicketHouseholdDataUpdateDetails.objects.filter(household__in=households)),
+            (TicketSensitiveDetails.objects.filter(Q(individual__in=individuals) | Q(household__in=households))),
+            (TicketComplaintDetails.objects.filter(Q(individual__in=individuals) | Q(household__in=households))),
+        )
+
     # remove 'is_original' after data migration
     def get_queryset(self) -> "QuerySet":
         return super().get_queryset().filter(is_original=False)

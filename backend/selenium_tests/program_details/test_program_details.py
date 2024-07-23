@@ -1,4 +1,5 @@
 from datetime import datetime
+from time import sleep
 
 from django.conf import settings
 from django.core.management import call_command
@@ -10,10 +11,21 @@ from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
 from selenium.webdriver import Keys
 
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetPopulationFactory,
+)
+from hct_mis_api.apps.targeting.models import TargetPopulation
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -37,6 +49,58 @@ def get_program_with_dct_type_and_name(
         status=status,
     )
     return program
+
+
+def create_custom_household() -> Household:
+    program = Program.objects.get(name="Test For Edit")
+
+    registration_data_import = RegistrationDataImportFactory(
+        imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
+    )
+
+    household, _ = create_household(
+        {
+            "registration_data_import": registration_data_import,
+            "admin_area": Area.objects.order_by("?").first(),
+            "program": program,
+        },
+        {"registration_data_import": registration_data_import},
+    )
+
+    household.unicef_id = "HH-00-0000.1380"
+    household.save()
+    program.adjust_program_size()
+    program.save()
+    return household
+
+
+@pytest.fixture
+def create_payment_plan(standard_program: Program) -> PaymentPlan:
+    targeting_criteria = TargetingCriteriaFactory()
+    TargetPopulationFactory(
+        program=standard_program,
+        status=TargetPopulation.STATUS_OPEN,
+        targeting_criteria=targeting_criteria,
+    )
+    tp = TargetPopulation.objects.first()
+    payment_plan = PaymentPlan.objects.update_or_create(
+        business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
+        target_population=tp,
+        start_date=datetime.now(),
+        end_date=datetime.now() + relativedelta(days=30),
+        currency="USD",
+        dispersion_start_date=datetime.now(),
+        dispersion_end_date=datetime.now() + relativedelta(days=14),
+        status_date=datetime.now(),
+        status=PaymentPlan.Status.ACCEPTED,
+        created_by=User.objects.first(),
+        program=tp.program,
+        total_delivered_quantity=999,
+        total_entitled_quantity=2999,
+        is_follow_up=False,
+        program_id=tp.program.id,
+    )
+    yield payment_plan[0]
 
 
 @pytest.fixture
@@ -115,16 +179,30 @@ class TestProgrammeDetails:
         assert FormatTime(1, 1, 2022).date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
         assert FormatTime(1, 10, 2022).date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
 
-    @pytest.mark.skip("ToDo")
-    def test_program_details_activate(self, standard_program: Program, pageProgrammeDetails: ProgrammeDetails) -> None:
-        pass
-
-    @pytest.mark.skip("ToDo")
-    def test_program_details_finish(self, standard_program: Program, pageProgrammeDetails: ProgrammeDetails) -> None:
-        pass
-
-    @pytest.mark.skip("ToDo")
-    def test_program_details_reactivate(
-        self, standard_program: Program, pageProgrammeDetails: ProgrammeDetails
+    def test_program_details_happy_path(
+        self, create_payment_plan: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
-        pass
+        pageProgrammeDetails.selectGlobalProgramFilter("Test For Edit").click()
+        assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
+        assert "0" in pageProgrammeDetails.getLabelProgramSize().text
+        pageProgrammeDetails.getButtonActivateProgram().click()
+        pageProgrammeDetails.getButtonActivateProgramModal().click()
+        for _ in range(10):
+            if "ACTIVE" in pageProgrammeDetails.getProgramStatus().text:
+                break
+            sleep(1)
+        else:
+            assert "ACTIVE" in pageProgrammeDetails.getProgramStatus().text
+        create_custom_household()
+        pageProgrammeDetails.driver.refresh()
+        assert "1" in pageProgrammeDetails.getLabelProgramSize().text
+        assert 1 == len(pageProgrammeDetails.getCashPlanTableRow())
+        pageProgrammeDetails.getButtonFinishProgram().click()
+        pageProgrammeDetails.clickButtonFinishProgramPopup()
+        for _ in range(10):
+            if "FINISHED" in pageProgrammeDetails.getProgramStatus().text:
+                break
+            sleep(1)
+        else:
+            assert "FINISHED" in pageProgrammeDetails.getProgramStatus().text
+        assert "1" in pageProgrammeDetails.getLabelProgramSize().text
