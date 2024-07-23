@@ -95,7 +95,7 @@ class PeriodicDataUpdateTemplateViewSet(
         service.generate_workbook()
         service.save_xlsx_file()
 
-    @action(detail=True, methods=["get"])
+    @action(detail=True, methods=["post"])
     def export(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         pdu_template = self.get_object()
         if pdu_template.status == PeriodicDataUpdateTemplate.Status.EXPORTING:
@@ -103,7 +103,7 @@ class PeriodicDataUpdateTemplateViewSet(
         if pdu_template.file:
             raise ValidationError("Template is already exported")
         pdu_template.queue()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_200_OK, data={"message": "Exporting template"})
 
     @action(detail=True, methods=["get"])
     def download(self, request: Request, *args: Any, **kwargs: Any) -> Response:

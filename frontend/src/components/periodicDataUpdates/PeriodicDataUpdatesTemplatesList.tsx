@@ -24,6 +24,7 @@ export interface Template {
   created_at: string;
   created_by: string;
   status: string;
+  can_export: boolean;
 }
 
 const templatesHeadCells: HeadCell<Template>[] = [
@@ -132,7 +133,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
           <VisibilityIcon />
         </IconButton>
       </TableCell>
-      <TableCell data-cy={`update-status-${row.id}`}>
+      <TableCell data-cy={`template-status-${row.id}`}>
         <StatusBox
           status={row.status}
           statusToColor={periodicDataUpdateTemplateStatusToColor}
@@ -149,7 +150,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
           >
             Download
           </Button>
-        ) : (
+        ) : row.can_export ? (
           <Button
             variant="contained"
             color="primary"
@@ -159,7 +160,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
           >
             Export
           </Button>
-        )}
+        ) : null}
       </TableCell>
     </ClickableTableRow>
   );

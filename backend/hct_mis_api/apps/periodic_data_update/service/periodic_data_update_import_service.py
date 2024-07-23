@@ -30,7 +30,9 @@ class RowValidationError(ValidationError):
     pass
 
 
-def validation_error_to_json(error: ValidationError, seen: Optional[set[int]] = None) -> Any:
+def validation_error_to_json(
+    error: Union[ValidationError, list[ValidationError]], seen: Optional[set[int]] = None
+) -> Any:
     """
     Recursively convert a Django ValidationError into a JSON-serializable format.
     Handles nested ValidationError instances within dicts and lists, avoiding infinite recursion by tracking seen objects.

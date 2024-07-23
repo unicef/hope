@@ -1,34 +1,24 @@
-from tempfile import _TemporaryFileWrapper, NamedTemporaryFile
-from time import sleep
+from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 from typing import Any
 
 import openpyxl
-from django.conf import settings
-from django.core.management import call_command
-
 import pytest
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import PeriodicFieldData, FlexibleAttribute, BusinessArea
+from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate, PeriodicDataUpdateUpload
+from hct_mis_api.apps.periodic_data_update.models import (
+    PeriodicDataUpdateTemplate,
+    PeriodicDataUpdateUpload,
+)
 from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PeriodicDataUpdateExportTemplateService,
 )
-from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_service import (
-    PeriodicDataUpdateImportService,
-)
-from django.core.files import File
-
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from page_object.programme_population.households import Households
-from page_object.programme_population.households_details import HouseholdsDetails
-
 from selenium_tests.page_object.programme_population.individuals import Individuals
-from selenium_tests.tools.tag_name_finder import printing
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -155,7 +145,7 @@ class TestPeriodicDataUpdateUpload:
         pageIndividuals.getPduUpdates().click()
         periodic_data_update_upload = PeriodicDataUpdateUpload.objects.first()
         assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL
-        assert periodic_data_update_upload.error_message == None
+        assert periodic_data_update_upload.error_message is None
         individual.refresh_from_db()
         assert individual.flex_fields[flexible_attribute.name]["1"]["value"] == "Test Value"
         assert individual.flex_fields[flexible_attribute.name]["1"]["collection_date"] == "2021-05-02"
@@ -203,7 +193,7 @@ class TestPeriodicDataUpdateUpload:
         individual: Individual,
         string_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,
-    ):
+    ) -> None:
         periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
             program=program,
             business_area=program.business_area,

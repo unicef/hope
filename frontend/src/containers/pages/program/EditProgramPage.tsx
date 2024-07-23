@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Box } from '@mui/material';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';

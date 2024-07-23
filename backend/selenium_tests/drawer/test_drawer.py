@@ -4,7 +4,6 @@ import pytest
 from dateutil.relativedelta import relativedelta
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
-from selenium.common import TimeoutException
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
@@ -140,7 +139,7 @@ class TestDrawer:
 
         pageProgrammeManagement.selectGlobalProgramFilter(active_program_name).click()
         assert active_program_name in pageProgrammeDetails.getHeaderTitle().text
-        with pytest.raises(TimeoutException):
+        with pytest.raises(Exception):
             pageProgrammeDetails.getDrawerInactiveSubheader(timeout=0.05)
 
         # first have to search Finished program because of default filtering

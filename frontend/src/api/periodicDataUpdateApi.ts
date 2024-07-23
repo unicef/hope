@@ -40,8 +40,9 @@ export const exportPeriodicDataUpdateTemplate = async (
   programId: string,
   templateId: string,
 ): Promise<any> => {
-  const response = await api.get(
+  const response = await api.post(
     `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${templateId}/export/`,
+    {},
   );
   return response;
 };

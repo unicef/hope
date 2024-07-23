@@ -52,6 +52,7 @@ export const useExportPeriodicDataUpdateTemplate = () => {
         mutationTemplateId,
       ),
     onSuccess: () => {
+      console.log('Jan Lami')
       queryClient.invalidateQueries({
         queryKey: ['periodicDataUpdateTemplates'],
       });

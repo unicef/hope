@@ -22,6 +22,7 @@ class PeriodicDataUpdateTemplateListSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source="get_status_display")
     status = serializers.CharField(source="combined_status")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
+    can_export = serializers.BooleanField()
 
     class Meta:
         model = PeriodicDataUpdateTemplate
@@ -32,6 +33,7 @@ class PeriodicDataUpdateTemplateListSerializer(serializers.ModelSerializer):
             "created_by",
             "status",
             "status_display",
+            "can_export",
         )
 
 
@@ -91,7 +93,7 @@ class PeriodicDataUpdateUploadDetailSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source="get_status_display")
     status = serializers.CharField(source="combined_status")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
-    errors = serializers.JSONField()
+    errors_info = serializers.JSONField(source="errors")
 
     class Meta:
         model = PeriodicDataUpdateUpload
@@ -102,7 +104,7 @@ class PeriodicDataUpdateUploadDetailSerializer(serializers.ModelSerializer):
             "created_by",
             "status",
             "status_display",
-            "errors",
+            "errors_info",
         )
 
 

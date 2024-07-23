@@ -89,9 +89,9 @@ export const PeriodicDataUpdatesUploadDetailsDialog: React.FC<
       <DialogTitle>{t('Periodic Data Updates Errors')}</DialogTitle>
       <DialogContent>
         <NonFormErrorDisplay
-          nonFormErrors={uploadDetailsData?.errors?.non_form_errors}
+          nonFormErrors={uploadDetailsData?.errors_info?.non_form_errors}
         />
-        <FormErrorDisplay formErrors={uploadDetailsData?.errors?.form_errors} />
+        <FormErrorDisplay formErrors={uploadDetailsData?.errors_info?.form_errors} />
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{t('Close')}</Button>

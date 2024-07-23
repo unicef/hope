@@ -1,4 +1,5 @@
 import json
+from typing import Optional
 
 from django.conf import settings
 from django.db import models
@@ -63,6 +64,10 @@ class PeriodicDataUpdateTemplate(TimeStampedModel, CeleryEnabledModel):
         if self.celery_status == self.CELERY_STATUS_REVOKED or self.celery_status == self.CELERY_STATUS_CANCELED:
             return self.Status.CANCELED
         return self.status
+
+    @property
+    def can_export(self) -> bool:
+        return self.status == self.Status.TO_EXPORT and self.celery_status == self.CELERY_STATUS_NOT_SCHEDULED
 
     @property
     def combined_status_display(self) -> str:
@@ -143,7 +148,7 @@ class PeriodicDataUpdateUpload(TimeStampedModel, CeleryEnabledModel):
     celery_task_name = "hct_mis_api.apps.periodic_data_update.celery_tasks.import_periodic_data_update"
 
     @property
-    def errors(self):
+    def errors(self) -> Optional[dict]:
         if not self.error_message:
             return None
         return json.loads(self.error_message)
