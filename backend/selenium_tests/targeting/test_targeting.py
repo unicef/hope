@@ -592,6 +592,7 @@ class TestTargeting:
             ),
         ],
     )
+    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_exclude_households_with_sanction_screen_flag(
         self,
         test_data: dict,
