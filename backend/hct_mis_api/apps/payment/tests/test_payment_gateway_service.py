@@ -188,27 +188,25 @@ class TestPaymentGatewayService(APITestCase):
     @mock.patch(
         "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction"
     )
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.get_quantity_in_usd", return_value=100.00)
-    def test_sync_records(
-        self, get_quantity_in_usd_mock: Any, get_records_for_payment_instruction_mock: Any, get_exchange_rate_mock: Any
-    ) -> None:
-        collector = IndividualFactory(household=None)
-        hoh = IndividualFactory(household=None)
-        hh = HouseholdFactory(head_of_household=hoh)
-        IndividualRoleInHouseholdFactory(household=hh, individual=hoh, role=ROLE_PRIMARY)
-        IndividualFactory.create_batch(2, household=hh)
-        self.payments.append(
-            PaymentFactory(
-                parent=self.pp,
-                household=hh,
-                status=Payment.STATUS_PENDING,
-                currency="PLN",
-                collector=collector,
-                delivered_quantity=None,
-                delivered_quantity_usd=None,
-                financial_service_provider=self.pg_fsp,
+    def test_sync_records(self, get_records_for_payment_instruction_mock: Any, get_exchange_rate_mock: Any) -> None:
+        for _ in range(2):
+            collector = IndividualFactory(household=None)
+            hoh = IndividualFactory(household=None)
+            hh = HouseholdFactory(head_of_household=hoh)
+            IndividualRoleInHouseholdFactory(household=hh, individual=hoh, role=ROLE_PRIMARY)
+            IndividualFactory.create_batch(2, household=hh)
+            self.payments.append(
+                PaymentFactory(
+                    parent=self.pp,
+                    household=hh,
+                    status=Payment.STATUS_PENDING,
+                    currency="PLN",
+                    collector=collector,
+                    delivered_quantity=None,
+                    delivered_quantity_usd=None,
+                    financial_service_provider=self.pg_fsp,
+                )
             )
-        )
 
         self.dm.sent_to_payment_gateway = True
         self.dm.save()
@@ -249,6 +247,17 @@ class TestPaymentGatewayService(APITestCase):
                 auth_code="3",
                 fsp_code="3",
             ),
+            PaymentRecordData(
+                id=4,
+                remote_id=str(self.payments[3].id),
+                created="2023-10-10",
+                modified="2023-10-11",
+                record_code="4",
+                parent="4",
+                status="REFUND",
+                auth_code="4",
+                fsp_code="4",
+            ),
         ]
 
         pg_service = PaymentGatewayService()
@@ -260,9 +269,14 @@ class TestPaymentGatewayService(APITestCase):
         self.payments[0].refresh_from_db()
         self.payments[1].refresh_from_db()
         self.payments[2].refresh_from_db()
+        self.payments[3].refresh_from_db()
         assert self.payments[0].status == Payment.STATUS_ERROR
         assert self.payments[1].status == Payment.STATUS_ERROR
         assert self.payments[2].status == Payment.STATUS_MANUALLY_CANCELLED
+        assert self.payments[3].status == Payment.STATUS_NOT_DISTRIBUTED
+        assert self.payments[3].delivered_quantity == Decimal(0.0)
+        assert self.payments[3].delivered_quantity_usd == Decimal(0.0)
+        assert self.payments[3].status == Payment.STATUS_NOT_DISTRIBUTED
         assert self.payments[0].reason_for_unsuccessful_payment == "Error"
         assert self.payments[1].reason_for_unsuccessful_payment == "Delivered amount: 1.23"
         assert self.payments[2].reason_for_unsuccessful_payment == "Unknown error"
