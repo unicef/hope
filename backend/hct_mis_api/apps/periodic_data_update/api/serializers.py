@@ -20,7 +20,7 @@ from hct_mis_api.apps.program.models import Program
 
 class PeriodicDataUpdateTemplateListSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source="get_status_display")
-    status = serializers.CharField(source="combined_status")
+    status = serializers.CharField(source="combined_status_display")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
     can_export = serializers.BooleanField()
 
@@ -74,7 +74,7 @@ class PeriodicDataUpdateTemplateDetailSerializer(serializers.ModelSerializer):
 
 class PeriodicDataUpdateUploadListSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source="get_status_display")
-    status = serializers.CharField(source="combined_status")
+    status = serializers.CharField(source="combined_status_display")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
 
     class Meta:
@@ -91,7 +91,7 @@ class PeriodicDataUpdateUploadListSerializer(serializers.ModelSerializer):
 
 class PeriodicDataUpdateUploadDetailSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source="get_status_display")
-    status = serializers.CharField(source="combined_status")
+    status = serializers.CharField(source="combined_status_display")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
     errors_info = serializers.JSONField(source="errors")
 

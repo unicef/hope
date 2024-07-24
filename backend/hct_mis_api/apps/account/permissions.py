@@ -220,6 +220,9 @@ class Permissions(Enum):
     ACCOUNTABILITY_SURVEY_VIEW_LIST = auto()
     ACCOUNTABILITY_SURVEY_VIEW_DETAILS = auto()
 
+    # Geo
+    GEO_VIEW_LIST = auto()
+
     # Django Admin
     CAN_ADD_BUSINESS_AREA_TO_PARTNER = auto()
 

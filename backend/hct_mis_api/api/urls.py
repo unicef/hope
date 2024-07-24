@@ -63,6 +63,10 @@ urlpatterns = [
                 ),
                 path("rdi/<uuid:rdi>/push/lax/", endpoints.rdi.PushLaxToRDIView().as_view(), name="rdi-push-lax"),
                 path(
+                    "geo/",
+                    include("hct_mis_api.apps.geo.api.urls", namespace="geo"),
+                ),
+                path(
                     "programs/<str:program_id>/",
                     include(
                         [
@@ -75,6 +79,10 @@ urlpatterns = [
                             path(
                                 "registration-data/",
                                 include("hct_mis_api.apps.registration_data.api.urls", namespace="registration-data"),
+                            ),
+                            path(
+                                "targeting/",
+                                include("hct_mis_api.apps.targeting.api.urls", namespace="targeting"),
                             ),
                         ]
                     ),

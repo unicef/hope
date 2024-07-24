@@ -91,9 +91,7 @@ class PeriodicDataUpdateTemplateViewSet(
     # export the template during template creation
     def perform_create(self, serializer: BaseSerializer) -> None:
         pdu_template = serializer.save()
-        service = PeriodicDataUpdateExportTemplateService(pdu_template)
-        service.generate_workbook()
-        service.save_xlsx_file()
+        pdu_template.queue()
 
     @action(detail=True, methods=["post"])
     def export(self, request: Request, *args: Any, **kwargs: Any) -> Response:

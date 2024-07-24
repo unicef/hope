@@ -17,14 +17,14 @@ from hct_mis_api.apps.account.fixtures import (
 )
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+from hct_mis_api.apps.targeting.models import TargetPopulation
 
 pytestmark = pytest.mark.django_db
 
 
 @freezegun.freeze_time("2022-01-01")
-class TestRegistrationDataImportViews:
+class TestTargetPopulationViews:
     def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
@@ -33,29 +33,29 @@ class TestRegistrationDataImportViews:
         self.program1 = ProgramFactory(business_area=self.afghanistan, name="Program1")
         self.program2 = ProgramFactory(business_area=self.afghanistan, name="Program2")
 
-        self.rdi1 = RegistrationDataImportFactory(
+        self.tp1 = TargetPopulationFactory(
             business_area=self.afghanistan,
             program=self.program1,
-            status=RegistrationDataImport.IMPORTING,
+            status=TargetPopulation.STATUS_OPEN,
         )
-        self.rdi2 = RegistrationDataImportFactory(
+        self.tp2 = TargetPopulationFactory(
             business_area=self.afghanistan,
             program=self.program1,
-            status=RegistrationDataImport.IN_REVIEW,
+            status=TargetPopulation.STATUS_LOCKED,
         )
-        self.rdi3 = RegistrationDataImportFactory(
+        self.tp3 = TargetPopulationFactory(
             business_area=self.afghanistan,
             program=self.program1,
-            status=RegistrationDataImport.MERGED,
+            status=TargetPopulation.STATUS_ASSIGNED,
         )
-        self.rdi_program2 = RegistrationDataImportFactory(
+        self.tp_program2 = TargetPopulationFactory(
             business_area=self.afghanistan,
             program=self.program2,
-            status=RegistrationDataImport.MERGED,
+            status=TargetPopulation.STATUS_ASSIGNED,
         )
 
         self.url_list = reverse(
-            "api:registration-data:registration-data-imports-list",
+            "api:targeting:target-populations-list",
             kwargs={
                 "business_area": self.afghanistan.slug,
                 "program_id": id_to_base64(self.program1.id, "Program"),
@@ -66,26 +66,26 @@ class TestRegistrationDataImportViews:
         "permissions, partner_permissions, access_to_program, expected_status",
         [
             ([], [], True, status.HTTP_403_FORBIDDEN),
-            ([Permissions.RDI_VIEW_LIST], [], True, status.HTTP_200_OK),
-            ([], [Permissions.RDI_VIEW_LIST], True, status.HTTP_200_OK),
+            ([Permissions.TARGETING_VIEW_LIST], [], True, status.HTTP_200_OK),
+            ([], [Permissions.TARGETING_VIEW_LIST], True, status.HTTP_200_OK),
             (
-                [Permissions.RDI_VIEW_LIST],
-                [Permissions.RDI_VIEW_LIST],
+                [Permissions.TARGETING_VIEW_LIST],
+                [Permissions.TARGETING_VIEW_LIST],
                 True,
                 status.HTTP_200_OK,
             ),
             ([], [], False, status.HTTP_403_FORBIDDEN),
-            ([Permissions.RDI_VIEW_LIST], [], False, status.HTTP_403_FORBIDDEN),
-            ([], [Permissions.RDI_VIEW_LIST], False, status.HTTP_403_FORBIDDEN),
+            ([Permissions.TARGETING_VIEW_LIST], [], False, status.HTTP_403_FORBIDDEN),
+            ([], [Permissions.TARGETING_VIEW_LIST], False, status.HTTP_403_FORBIDDEN),
             (
-                [Permissions.RDI_VIEW_LIST],
-                [Permissions.RDI_VIEW_LIST],
+                [Permissions.TARGETING_VIEW_LIST],
+                [Permissions.TARGETING_VIEW_LIST],
                 False,
                 status.HTTP_403_FORBIDDEN,
             ),
         ],
     )
-    def test_list_registration_data_imports_permission(
+    def test_list_target_populations_permission(
         self,
         permissions: list,
         partner_permissions: list,
@@ -111,7 +111,7 @@ class TestRegistrationDataImportViews:
         response = self.client.get(self.url_list)
         assert response.status_code == expected_status
 
-    def test_list_registration_data_imports(
+    def test_list_target_populations(
         self,
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
@@ -121,7 +121,7 @@ class TestRegistrationDataImportViews:
         self.set_up(api_client, afghanistan, id_to_base64)
         create_user_role_with_permissions(
             self.user,
-            [Permissions.RDI_VIEW_LIST],
+            [Permissions.TARGETING_VIEW_LIST],
             self.afghanistan,
             self.program1,
         )
@@ -130,41 +130,36 @@ class TestRegistrationDataImportViews:
 
         response_json = response.json()["results"]
         assert len(response_json) == 3
-
         assert {
-            "id": id_to_base64(self.rdi1.id, "RegistrationDataImport"),
-            "name": self.rdi1.name,
-            "status": self.rdi1.get_status_display(),
-            "imported_by": self.rdi1.imported_by.get_full_name(),
-            "data_source": self.rdi1.get_data_source_display(),
+            "id": id_to_base64(self.tp1.id, "TargetPopulation"),
+            "name": self.tp1.name,
+            "status": self.tp1.get_status_display(),
+            "created_by": self.tp1.created_by.get_full_name(),
             "created_at": "2022-01-01T00:00:00Z",
         } in response_json
         assert {
-            "id": id_to_base64(self.rdi2.id, "RegistrationDataImport"),
-            "name": self.rdi2.name,
-            "status": self.rdi2.get_status_display(),
-            "imported_by": self.rdi2.imported_by.get_full_name(),
-            "data_source": self.rdi2.get_data_source_display(),
+            "id": id_to_base64(self.tp2.id, "TargetPopulation"),
+            "name": self.tp2.name,
+            "status": self.tp2.get_status_display(),
+            "created_by": self.tp2.created_by.get_full_name(),
             "created_at": "2022-01-01T00:00:00Z",
         } in response_json
         assert {
-            "id": id_to_base64(self.rdi3.id, "RegistrationDataImport"),
-            "name": self.rdi3.name,
-            "status": self.rdi3.get_status_display(),
-            "imported_by": self.rdi3.imported_by.get_full_name(),
-            "data_source": self.rdi3.get_data_source_display(),
+            "id": id_to_base64(self.tp3.id, "TargetPopulation"),
+            "name": self.tp3.name,
+            "status": self.tp3.get_status_display(),
+            "created_by": self.tp3.created_by.get_full_name(),
             "created_at": "2022-01-01T00:00:00Z",
         } in response_json
         assert {
-            "id": id_to_base64(self.rdi_program2.id, "RegistrationDataImport"),
-            "name": self.rdi_program2.name,
-            "status": self.rdi1.get_status_display(),
-            "imported_by": self.rdi1.imported_by.get_full_name(),
-            "data_source": self.rdi1.get_data_source_display(),
+            "id": id_to_base64(self.tp_program2.id, "TargetPopulation"),
+            "name": self.tp_program2.name,
+            "created_by": self.tp1.created_by.get_full_name(),
+            "status": self.tp1.get_status_display(),
             "created_at": "2022-01-01T00:00:00Z",
         } not in response_json
 
-    def test_list_registration_data_imports_caching(
+    def test_list_target_populations_caching(
         self,
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
@@ -174,7 +169,7 @@ class TestRegistrationDataImportViews:
         self.set_up(api_client, afghanistan, id_to_base64)
         create_user_role_with_permissions(
             self.user,
-            [Permissions.RDI_VIEW_LIST],
+            [Permissions.TARGETING_VIEW_LIST],
             self.afghanistan,
             self.program1,
         )
@@ -198,8 +193,8 @@ class TestRegistrationDataImportViews:
             assert etag_second_call == etag
 
         # After update, it does not use the cached data
-        self.rdi1.status = RegistrationDataImport.MERGE_ERROR
-        self.rdi1.save()
+        self.tp1.status = TargetPopulation.STATUS_PROCESSING
+        self.tp1.save()
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(self.url_list)
             assert response.status_code == status.HTTP_200_OK
