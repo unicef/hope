@@ -13,6 +13,7 @@ from hct_mis_api.apps.targeting.models import TargetPopulation
 def increment_target_population_version_cache(sender: Any, instance: TargetPopulation, **kwargs: dict) -> None:
     business_area_slug = instance.business_area.slug
     business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
+
     program_id = instance.program.id
 
     version_key = f"{business_area_slug}:{business_area_version}:{program_id}:target_population_list"

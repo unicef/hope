@@ -34,7 +34,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     PaymentPlanSplit,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory, get_program_with_dct_type_and_name
 
 
 class TestPaymentPlanModel(TestCase):

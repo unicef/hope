@@ -55,6 +55,7 @@ class PushLaxToRDITests(HOPEApiTestCase):
             number_of_individuals=0,
             number_of_households=0,
             status=RegistrationDataImport.IN_REVIEW,
+            program=self.program,
         )
         url = reverse("api:rdi-push-lax", args=[self.business_area.slug, str(rdi.id)])
         response = self.client.post(url, {}, format="json")
