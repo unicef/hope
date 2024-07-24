@@ -43,7 +43,7 @@ api_patterns = [
     path("logout", logout_view, name="logout"),
     path("sentry-debug/", trigger_error),
     path(
-        "business-area/<str:business_area_slug>/program/<str:program_id>/download-template",
+        "program/<str:program_id>/download-template",
         hct_mis_api.apps.registration_data.views.download_template,
     ),
     path(

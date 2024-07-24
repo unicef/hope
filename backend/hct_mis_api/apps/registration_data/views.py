@@ -9,7 +9,7 @@ from hct_mis_api.apps.registration_data.services.template_generator_service impo
 )
 
 
-def download_template(request: HttpRequest, business_area_slug: str, program_id) -> HttpResponse:
+def download_template(request: HttpRequest, program_id: str) -> HttpResponse:
     mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     filename = "registration_data_import_template.xlsx"
     response = HttpResponse(content_type=mimetype)

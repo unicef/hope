@@ -1,6 +1,7 @@
-from typing import Dict, List, Optional, Tuple, Iterable
+from typing import Dict, Iterable, List, Tuple
 
 import openpyxl
+from openpyxl.worksheet.worksheet import Worksheet
 
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
@@ -8,7 +9,6 @@ from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import serialize_flex_attributes
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.models import Program
-from openpyxl.worksheet.worksheet import Worksheet
 
 
 class TemplateFileGeneratorService:
@@ -65,9 +65,12 @@ class TemplateFileGeneratorService:
             **self.flex_fields["individuals"],
         }
         people_rows = self._handle_name_and_label_row(people_fields)
+        pdu_names, pdu_labels = self._get_pdu_columns()
+        people_rows[0].extend(pdu_names)
+        people_rows[1].extend(pdu_labels)
         self._append_rows(self.people_ws, people_rows)
 
-    def _add_import_helper(self) -> openpyxl.Workbook:
+    def _add_import_helper(self) -> None:
         default_helper_text = """
         Sheets and their purposes:
         - Households: Use this sheet to enter details about the households you want to import.
@@ -81,8 +84,8 @@ class TemplateFileGeneratorService:
         name_row = []
         label_row = []
         for flexible_attribute in self.pdu_attributes:
-            name_row.append(f"{flexible_attribute.pdu_data.name}_round_1_value")
-            name_row.append(f"{flexible_attribute.pdu_data.name}_round_1_collection_date")
+            name_row.append(f"{flexible_attribute.name}_round_1_value")
+            name_row.append(f"{flexible_attribute.name}_round_1_collection_date")
             label_row.append(f"{self._get_label(flexible_attribute)} - First round value")
             label_row.append(f"{self._get_label(flexible_attribute)} - First round collection date")
         return name_row, label_row

@@ -6,8 +6,9 @@ from django.conf import settings
 from django.core.files import File
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import DataCollectingType
+from hct_mis_api.apps.program.fixtures import get_program_with_dct_type_and_name
 from hct_mis_api.apps.registration_data.models import ImportData
 from hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import import (
     ValidateXlsxImport,
@@ -19,8 +20,9 @@ class TestValidateXlsxImportTask(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.business_area = BusinessAreaFactory()
-        cls.program = ProgramFactory()
+        cls.business_area = create_afghanistan()
+        cls.program = get_program_with_dct_type_and_name()
+        cls.program_with_social_worker = get_program_with_dct_type_and_name(dct_type=DataCollectingType.Type.SOCIAL)
 
     @patch(
         "hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import.UploadXLSXInstanceValidator.validate_everything"
@@ -35,7 +37,7 @@ class TestValidateXlsxImportTask(TestCase):
         )
 
         validate_everything_mock.return_value = [], []
-        ValidateXlsxImport().execute(import_data, True)
+        ValidateXlsxImport().execute(import_data, self.program_with_social_worker)
         assert validate_everything_mock.call_count == 1
 
         import_data.refresh_from_db()
@@ -56,7 +58,7 @@ class TestValidateXlsxImportTask(TestCase):
         )
 
         validate_everything_mock.return_value = [], []
-        ValidateXlsxImport().execute(import_data, False)
+        ValidateXlsxImport().execute(import_data, self.program)
         assert validate_everything_mock.call_count == 1
 
         import_data.refresh_from_db()
@@ -78,7 +80,7 @@ class TestValidateXlsxImportTask(TestCase):
                 "error": "Last Name is required",
             }
         ]
-        ValidateXlsxImport().execute(import_data, False)
+        ValidateXlsxImport().execute(import_data, self.program)
         assert validate_everything_mock.call_count == 1
         assert import_data.status == ImportData.STATUS_VALIDATION_ERROR
 
@@ -90,6 +92,6 @@ class TestValidateXlsxImportTask(TestCase):
                 "error": "Last Name is required",
             }
         ]
-        ValidateXlsxImport().execute(import_data, False)
+        ValidateXlsxImport().execute(import_data, self.program)
         assert validate_everything_mock.call_count == 1
         assert import_data.status == ImportData.STATUS_DELIVERY_MECHANISMS_VALIDATION_ERROR

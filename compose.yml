@@ -166,8 +166,6 @@ services:
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
       - xpack.security.enabled=false
-      - transport.host=localhost
-      - bootstrap.system_call_filter=false
     ulimits:
       memlock:
         soft: -1

@@ -147,7 +147,9 @@ class PeriodicDataUpdateImportService:
         rounds_data = self.periodic_data_update_template.rounds_data
         fields_name_list = [field["field"] for field in rounds_data]
         fields_name = set(fields_name_list)
-        flexible_attributes = FlexibleAttribute.objects.filter(name__in=fields_name, type=FlexibleAttribute.PDU)
+        flexible_attributes = FlexibleAttribute.objects.filter(
+            name__in=fields_name, type=FlexibleAttribute.PDU, program=self.periodic_data_update_template.program
+        )
         if len(flexible_attributes) != len(fields_name):
             raise ValidationError("Some fields are missing in the flexible attributes")
         self.flexible_attributes_dict = {field.name: field for field in flexible_attributes}

@@ -10,8 +10,11 @@ from django.test import TestCase
 
 import openpyxl
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
+from hct_mis_api.apps.core.fixtures import (
+    create_afghanistan,
+    create_pdu_flexible_attribute,
+)
+from hct_mis_api.apps.core.models import PeriodicFieldData
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.periodic_data_update.models import (
     PeriodicDataUpdateTemplate,
@@ -26,19 +29,6 @@ from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_s
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-
-
-def create_flexible_attribute(
-    name: str, subtype: str, number_of_rounds: int, rounds_names: list[str]
-) -> FlexibleAttribute:
-    flexible_attribute = FlexibleAttribute.objects.create(
-        name=name, type=FlexibleAttribute.PDU, associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
-    )
-    flexible_attribute.pdu_data = PeriodicFieldData.objects.create(
-        subtype=subtype, number_of_rounds=number_of_rounds, rounds_names=rounds_names
-    )
-    flexible_attribute.save()
-    return flexible_attribute
 
 
 def add_pdu_data_to_xlsx(
@@ -80,17 +70,33 @@ class TestPeriodicDataUpdateImportService(TestCase):
             ],
         )
         cls.individual = cls.individuals[0]
-        cls.string_attribute = create_flexible_attribute(
-            name="string_attribute", subtype=PeriodicFieldData.STRING, number_of_rounds=1, rounds_names=["May"]
+        cls.string_attribute = create_pdu_flexible_attribute(
+            name="string_attribute",
+            subtype=PeriodicFieldData.STRING,
+            number_of_rounds=1,
+            rounds_names=["May"],
+            program=cls.program,
         )
-        cls.decimal_attribute = create_flexible_attribute(
-            name="decimal_attribute", subtype=PeriodicFieldData.DECIMAL, number_of_rounds=1, rounds_names=["May"]
+        cls.decimal_attribute = create_pdu_flexible_attribute(
+            name="decimal_attribute",
+            subtype=PeriodicFieldData.DECIMAL,
+            number_of_rounds=1,
+            rounds_names=["May"],
+            program=cls.program,
         )
-        cls.boolean_attribute = create_flexible_attribute(
-            name="boolean_attribute", subtype=PeriodicFieldData.BOOLEAN, number_of_rounds=1, rounds_names=["May"]
+        cls.boolean_attribute = create_pdu_flexible_attribute(
+            name="boolean_attribute",
+            subtype=PeriodicFieldData.BOOLEAN,
+            number_of_rounds=1,
+            rounds_names=["May"],
+            program=cls.program,
         )
-        cls.date_attribute = create_flexible_attribute(
-            name="date_attribute", subtype=PeriodicFieldData.DATE, number_of_rounds=1, rounds_names=["May"]
+        cls.date_attribute = create_pdu_flexible_attribute(
+            name="date_attribute",
+            subtype=PeriodicFieldData.DATE,
+            number_of_rounds=1,
+            rounds_names=["May"],
+            program=cls.program,
         )
 
     def prepare_test_data(self, rounds_data: list, rows: list) -> tuple:
