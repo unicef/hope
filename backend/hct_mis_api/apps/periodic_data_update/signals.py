@@ -31,7 +31,7 @@ def increment_periodic_data_update_template_version_cache(
 @receiver(post_save, sender=PeriodicDataUpdateUpload)
 @receiver(pre_delete, sender=PeriodicDataUpdateUpload)
 def increment_periodic_data_update_upload_version_cache(
-    sender: Any, instance: PeriodicDataUpdateTemplate, **kwargs: dict
+    sender: Any, instance: PeriodicDataUpdateUpload, **kwargs: dict
 ) -> None:
     business_area_slug = instance.template.business_area.slug
     business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)

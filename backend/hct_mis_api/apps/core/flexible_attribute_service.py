@@ -34,6 +34,7 @@ class FlexibleAttributeForPDUService:
             program=self.program,
             pdu_data=pdu_data_object,
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            label={"English(EN)": "PDU field"},
         )
 
     def create_pdu_flex_attributes(self) -> None:
