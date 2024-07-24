@@ -12,7 +12,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Q, QuerySet
+from django.db.models import Q, QuerySet, Sum
 from django.db.models.constraints import UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 
@@ -311,27 +311,18 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedMod
 
     @property
     def total_entitled_quantity_usd(self) -> Decimal:
-        result = Decimal(0.0)
-        for payment_plan in self.payment_plans.all():
-            if payment_plan.total_entitled_quantity_usd:
-                result += payment_plan.total_entitled_quantity_usd
-        return result
+        total = self.payment_plans.aggregate(total=Sum("total_entitled_quantity_usd"))["total"]
+        return total or Decimal(0.0)
 
     @property
     def total_undelivered_quantity_usd(self) -> Decimal:
-        result = Decimal(0.0)
-        for payment_plan in self.payment_plans.all():
-            if payment_plan.total_undelivered_quantity_usd:
-                result += payment_plan.total_undelivered_quantity_usd
-        return result
+        total = self.payment_plans.aggregate(total=Sum("total_undelivered_quantity_usd"))["total"]
+        return total or Decimal(0.0)
 
     @property
     def total_delivered_quantity_usd(self) -> Decimal:
-        result = Decimal(0.0)
-        for payment_plan in self.payment_plans.all():
-            if payment_plan.total_delivered_quantity_usd:
-                result += payment_plan.total_delivered_quantity_usd
-        return result
+        total = self.payment_plans.aggregate(total=Sum("total_delivered_quantity_usd"))["total"]
+        return total or Decimal(0.0)
 
     def validate_program_active_status(self) -> None:
         # all changes with Program Cycle are possible within Active Program
@@ -352,5 +343,6 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedMod
 
     def set_finish(self) -> None:
         self.validate_program_active_status()
-        self.status = ProgramCycle.FINISHED
-        self.save()
+        if self.status == ProgramCycle.ACTIVE:
+            self.status = ProgramCycle.FINISHED
+            self.save()
