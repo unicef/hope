@@ -9,7 +9,7 @@ import UploadIcon from '@mui/icons-material/Upload';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Button, IconButton, TableCell } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { PeriodicDataUpdatesTemplateDetailsDialog } from './PeriodicDataUpdatesTemplateDetailsDialog';
 import {
   useDownloadPeriodicDataUpdateTemplate,
@@ -17,6 +17,8 @@ import {
 } from './PeriodicDataUpdatesTemplatesListActions';
 import { StatusBox } from '@core/StatusBox';
 import { periodicDataUpdateTemplateStatusToColor } from '@utils/utils';
+import { useSnackbar } from '@hooks/useSnackBar';
+import * as React from 'react';
 
 export interface Template {
   id: number;
@@ -89,7 +91,18 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
   );
 
   const { mutate: downloadTemplate } = useDownloadPeriodicDataUpdateTemplate();
-  const { mutate: exportTemplate } = useExportPeriodicDataUpdateTemplate();
+  const { mutate: exportTemplate, error: exportError } =
+    useExportPeriodicDataUpdateTemplate();
+  const { showMessage } = useSnackbar();
+
+  useEffect(() => {
+    if (exportError) {
+      // @ts-ignore
+      const message = exportError?.data?.error || exportError.message;
+      showMessage(message);
+    }
+  }, [exportError, showMessage]);
+
   const handleDownloadClick = (templateId: number) => {
     downloadTemplate({
       businessAreaSlug,
