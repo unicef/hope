@@ -52,7 +52,7 @@ def household_without_disabilities() -> Household:
 
 
 def create_program(
-    name: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
+        name: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
 ) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
@@ -90,11 +90,11 @@ def create_custom_household(observed_disability: list[str], residence_status: st
 @pytest.mark.usefixtures("login")
 class TestSmokeGrievanceTickets:
     def test_check_grievance_tickets_user_generated_page(
-        self,
-        create_programs: None,
-        add_households: None,
-        add_grievance: None,
-        pageGrievanceTickets: GrievanceTickets,
+            self,
+            create_programs: None,
+            add_households: None,
+            add_grievance: None,
+            pageGrievanceTickets: GrievanceTickets,
     ) -> None:
         """
         Go to Grievance tickets user generated page
@@ -128,11 +128,11 @@ class TestSmokeGrievanceTickets:
         assert expected_labels == [i.text for i in pageGrievanceTickets.getTableLabel()]
 
     def test_check_grievance_tickets_system_generated_page(
-        self,
-        create_programs: None,
-        add_households: None,
-        add_grievance: None,
-        pageGrievanceTickets: GrievanceTickets,
+            self,
+            create_programs: None,
+            add_households: None,
+            add_grievance: None,
+            pageGrievanceTickets: GrievanceTickets,
     ) -> None:
         """
         Go to Grievance tickets system generated page
@@ -152,12 +152,12 @@ class TestSmokeGrievanceTickets:
         assert "NEW TICKET" in pageGrievanceTickets.getButtonNewTicket().text
 
     def test_check_grievance_tickets_details_page(
-        self,
-        create_programs: None,
-        add_households: None,
-        add_grievance: None,
-        pageGrievanceTickets: GrievanceTickets,
-        pageGrievanceDetailsPage: GrievanceDetailsPage,
+            self,
+            create_programs: None,
+            add_households: None,
+            add_grievance: None,
+            pageGrievanceTickets: GrievanceTickets,
+            pageGrievanceDetailsPage: GrievanceDetailsPage,
     ) -> None:
         """
         Go to Grievance tickets details page
@@ -196,10 +196,10 @@ class TestSmokeGrievanceTickets:
 @pytest.mark.usefixtures("login")
 class TestGrievanceTicketsHappyPath:
     def test_grievance_tickets_create_new_ticket_referral(
-        self,
-        pageGrievanceTickets: GrievanceTickets,
-        pageGrievanceNewTicket: NewTicket,
-        pageGrievanceDetailsPage: GrievanceDetailsPage,
+            self,
+            pageGrievanceTickets: GrievanceTickets,
+            pageGrievanceNewTicket: NewTicket,
+            pageGrievanceDetailsPage: GrievanceDetailsPage,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -226,30 +226,42 @@ class TestGrievanceTickets:
     @pytest.mark.parametrize(
         "test_data",
         [
-            pytest.param({"category": "Sensitive Grievance", "type": "Miscellaneous"}, id="Sensitive Grievance"),
-            pytest.param({"category": "Sensitive Grievance", "type": "Personal disputes"}, id="Sensitive Grievance"),
+            # pytest.param({"category": "Sensitive Grievance", "type": "Miscellaneous"}, id="Sensitive Grievance"),
+            # pytest.param({"category": "Sensitive Grievance", "type": "Personal disputes"}, id="Sensitive Grievance"),
+            # pytest.param(
+            #     {"category": "Grievance Complaint", "type": "Other Complaint"}, id="Grievance Complaint Other Complaint"
+            # ),
+            # pytest.param(
+            #     {"category": "Grievance Complaint", "type": "Registration Related Complaint"},
+            #     id="Grievance Complaint Registration Related Complaint",
+            # ),
             pytest.param(
-                {"category": "Grievance Complaint", "type": "Other Complaint"}, id="Grievance Complaint Other Complaint"
+                {"category": "Grievance Complaint", "type": "FSP Related Complaint"},
+                id="Grievance Complaint FSP Related Complaint",
             ),
             pytest.param(
-                {"category": "Grievance Complaint", "type": "Registration Related Complaint"},
-                id="Grievance Complaint Registration Related Complaint",
+                {"category": "Grievance Complaint", "type": "Payment Related Complaint"},
+                id="Grievance Complaint Payment Related Complaint",
             ),
             pytest.param(
-                {"category": "Data Change", "type": "Withdraw Individual"}, id="Data Change Withdraw Individual"
+                {"category": "Grievance Complaint", "type": "Partner Related Complaint"},
+                id="Grievance Complaint Partner Related Complaint",
             ),
-            pytest.param(
-                {"category": "Data Change", "type": "Withdraw Household"}, id="Data Change Withdraw Household"
-            ),
+            # pytest.param(
+            #     {"category": "Data Change", "type": "Withdraw Individual"}, id="Data Change Withdraw Individual"
+            # ),
+            # pytest.param(
+            #     {"category": "Data Change", "type": "Withdraw Household"}, id="Data Change Withdraw Household"
+            # ),
         ],
     )
     def test_grievance_tickets_create_new_tickets(
-        self,
-        pageGrievanceTickets: GrievanceTickets,
-        pageGrievanceNewTicket: NewTicket,
-        pageGrievanceDetailsPage: GrievanceDetailsPage,
-        test_data: dict,
-        household_without_disabilities: Household,
+            self,
+            pageGrievanceTickets: GrievanceTickets,
+            pageGrievanceNewTicket: NewTicket,
+            pageGrievanceDetailsPage: GrievanceDetailsPage,
+            test_data: dict,
+            household_without_disabilities: Household,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -280,11 +292,11 @@ class TestGrievanceTickets:
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
 
     def test_grievance_tickets_create_new_ticket_Data_Change_Add_Individual_All_Fields(
-        self,
-        pageGrievanceTickets: GrievanceTickets,
-        pageGrievanceNewTicket: NewTicket,
-        pageGrievanceDetailsPage: GrievanceDetailsPage,
-        household_without_disabilities: Household,
+            self,
+            pageGrievanceTickets: GrievanceTickets,
+            pageGrievanceNewTicket: NewTicket,
+            pageGrievanceDetailsPage: GrievanceDetailsPage,
+            household_without_disabilities: Household,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -352,9 +364,52 @@ class TestGrievanceTickets:
         assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
 
-    # pytest.param(
-    #     {"category": "Data Change", "type": "Individual Data Update"}, id="Data Change Individual Data Update"
-    # ),
-    # pytest.param(
-    #     {"category": "Data Change", "type": "Household Data Update"}, id="Data Change Household Data Update"
-    # ),
+    @pytest.mark.parametrize(
+        "test_data",
+        [
+            pytest.param(
+                {"category": "Data Change", "type": "Individual Data Update"}, id="Data Change Individual Data Update"
+            ),
+            pytest.param(
+                {"category": "Data Change", "type": "Household Data Update"}, id="Data Change Household Data Update"
+            ),
+        ])
+    def test_grievance_tickets_create_new_ticket(self, test_data: None):
+        pass
+
+    def test_grievance_tickets_create_new_ticket_Data_Change_Add_Individual_Mandatory_Fields(self):
+        pass
+
+    def test_grievance_tickets_look_up_linked_ticket(self):
+        pass
+
+    def test_grievance_tickets_add_documentation(self):
+        pass
+
+    def test_grievance_tickets_add_document_and_identity(self):
+        pass
+
+    def test_grievance_tickets_check_Identity_Verification(self):
+        pass
+
+    def test_grievance_tickets_filters_of_households_and_individuals(self):
+        pass
+
+    def test_grievance_tickets_edit_tickets_from_main_grievance_page(self):
+        # Assign, Set priority, Set urgency, Add note
+        pass
+
+    def test_grievance_tickets_process_tickets(self):
+        pass
+
+    def test_grievance_tickets_add_note(self):
+        pass
+
+    def test_grievance_tickets_activity_log(self):
+        pass
+
+    def test_grievance_tickets_go_to_admin_panel_button(self):
+        pass
+
+    def test_grievance_tickets_system_generated_tickets(self):
+        pass
