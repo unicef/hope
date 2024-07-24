@@ -151,7 +151,7 @@ export const NeedsAdjudicationActions: React.FC<
               await approve({
                 variables: {
                   grievanceTicketId: ticket.id,
-                  duplicateIndividualIds: selectedIndividualIds,
+                  clearIndividualIds: selectedIndividualIds,
                 },
               });
             } catch (e) {

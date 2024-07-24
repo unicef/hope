@@ -17,7 +17,6 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import { GrievanceTicketQuery } from '@generated/graphql';
-import { d } from '@tanstack/react-query-devtools/build/legacy/devtools-9h89nHJX';
 
 interface NeedsAdjudicationTableProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -82,7 +81,7 @@ export const NeedsAdjudicationTable = ({
 
   const duplicateTooltip = (
     <Tooltip title="Marked as Duplicate">
-      <PersonIcon color="primary" />
+      <PeopleIcon color="primary" />
     </Tooltip>
   );
 
