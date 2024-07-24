@@ -1233,6 +1233,9 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         self, value: str, field: str, attachments: list[dict], *args: Any, **kwargs: Any
     ) -> Union[str, None]:
         try:
+            if kwargs.get("skip_validate_pictures") is True:
+                # skip validation if skip_validate_pictures=True
+                return None
             allowed_extensions = django_core_validators.get_available_image_extensions()
             file_extension = value.split(".")[-1]
 
@@ -1344,7 +1347,9 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def _get_field_type_error(self, field: str, value: Any, attachments: list) -> Union[dict, None]:
+    def _get_field_type_error(
+        self, field: str, value: Any, attachments: list, skip_validate_pictures: Optional[bool] = False
+    ) -> Union[dict, None]:
         try:
             field_dict = self.all_fields.get(field)
             if field_dict is None:
@@ -1361,7 +1366,9 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             complex_type_fn: Optional[Callable] = complex_types.get(field_type)
 
             if complex_type_fn:
-                message = complex_type_fn(field=field, value=value, attachments=attachments)
+                message = complex_type_fn(
+                    field=field, value=value, attachments=attachments, skip_validate_pictures=skip_validate_pictures
+                )
                 if message is not None:
                     return {
                         "header": field,
@@ -1380,7 +1387,9 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_everything(self, submissions: List, business_area: BusinessArea) -> List:
+    def validate_everything(
+        self, submissions: List, business_area: BusinessArea, skip_validate_pictures: Optional[bool] = False
+    ) -> List:
         try:
             reduced_submissions: Sequence = rename_dict_keys(submissions, get_field_name)
             docs_and_identities_to_validate = []
@@ -1515,7 +1524,9 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                                         alternate_collector_counter += 1
 
                                 expected_i_fields.discard(i_field)
-                                error = self._get_field_type_error(i_field, i_value, attachments)
+                                error = self._get_field_type_error(
+                                    i_field, i_value, attachments, skip_validate_pictures
+                                )
                                 if error:
                                     errors.append(error)
 
@@ -1554,7 +1565,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                                 {"header": "role_i_c", "message": "Only one person can " "be a alternate collector"}
                             )
                     else:
-                        error = self._get_field_type_error(hh_field, hh_value, attachments)
+                        error = self._get_field_type_error(hh_field, hh_value, attachments, skip_validate_pictures)
                         if error:
                             errors.append(error)
                 hh_expected_field_errors = [
