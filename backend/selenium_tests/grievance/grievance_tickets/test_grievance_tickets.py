@@ -226,33 +226,25 @@ class TestGrievanceTickets:
     @pytest.mark.parametrize(
         "test_data",
         [
-            # pytest.param({"category": "Sensitive Grievance", "type": "Miscellaneous"}, id="Sensitive Grievance"),
-            # pytest.param({"category": "Sensitive Grievance", "type": "Personal disputes"}, id="Sensitive Grievance"),
-            # pytest.param(
-            #     {"category": "Grievance Complaint", "type": "Other Complaint"}, id="Grievance Complaint Other Complaint"
-            # ),
-            # pytest.param(
-            #     {"category": "Grievance Complaint", "type": "Registration Related Complaint"},
-            #     id="Grievance Complaint Registration Related Complaint",
-            # ),
+            pytest.param({"category": "Sensitive Grievance", "type": "Miscellaneous"}, id="Sensitive Grievance"),
+            pytest.param({"category": "Sensitive Grievance", "type": "Personal disputes"}, id="Sensitive Grievance"),
+            pytest.param(
+                {"category": "Grievance Complaint", "type": "Other Complaint"}, id="Grievance Complaint Other Complaint"
+            ),
+            pytest.param(
+                {"category": "Grievance Complaint", "type": "Registration Related Complaint"},
+                id="Grievance Complaint Registration Related Complaint",
+            ),
             pytest.param(
                 {"category": "Grievance Complaint", "type": "FSP Related Complaint"},
                 id="Grievance Complaint FSP Related Complaint",
             ),
             pytest.param(
-                {"category": "Grievance Complaint", "type": "Payment Related Complaint"},
-                id="Grievance Complaint Payment Related Complaint",
+                {"category": "Data Change", "type": "Withdraw Individual"}, id="Data Change Withdraw Individual"
             ),
             pytest.param(
-                {"category": "Grievance Complaint", "type": "Partner Related Complaint"},
-                id="Grievance Complaint Partner Related Complaint",
+                {"category": "Data Change", "type": "Withdraw Household"}, id="Data Change Withdraw Household"
             ),
-            # pytest.param(
-            #     {"category": "Data Change", "type": "Withdraw Individual"}, id="Data Change Withdraw Individual"
-            # ),
-            # pytest.param(
-            #     {"category": "Data Change", "type": "Withdraw Household"}, id="Data Change Withdraw Household"
-            # ),
         ],
     )
     def test_grievance_tickets_create_new_tickets(
@@ -364,6 +356,28 @@ class TestGrievanceTickets:
         assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
 
+
+    def test_grievance_tickets_create_new_ticket_Data_Change_Add_Individual_Mandatory_Fields(
+            self,
+            pageGrievanceTickets: GrievanceTickets,
+            pageGrievanceNewTicket: NewTicket,
+            pageGrievanceDetailsPage: GrievanceDetailsPage,
+            household_without_disabilities: Household,
+    ) -> None:
+        pageGrievanceTickets.getNavGrievance().click()
+        assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
+        pageGrievanceTickets.getButtonNewTicket().click()
+        pageGrievanceNewTicket.getSelectCategory().click()
+        pageGrievanceNewTicket.select_option_by_name("Data Change")
+        pageGrievanceNewTicket.getIssueType().click()
+        pageGrievanceNewTicket.select_option_by_name("Add Individual")
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getHouseholdTab()
+        pageGrievanceNewTicket.getHouseholdTableRows(0).click()
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getReceivedConsent().click()
+        pageGrievanceNewTicket.getButtonNext().click()
+
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -377,7 +391,10 @@ class TestGrievanceTickets:
     def test_grievance_tickets_create_new_ticket(self, test_data: None):
         pass
 
-    def test_grievance_tickets_create_new_ticket_Data_Change_Add_Individual_Mandatory_Fields(self):
+    def test_grievance_tickets_create_new_tickets_Grievance_Complaint_Partner_Related_Complaint(self):
+        pass
+
+    def test_grievance_tickets_create_new_tickets_Grievance_Complaint_Payment_Related_Complaint(self):
         pass
 
     def test_grievance_tickets_look_up_linked_ticket(self):
