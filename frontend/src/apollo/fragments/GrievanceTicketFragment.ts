@@ -144,6 +144,7 @@ export const grievanceTicketDetailed = gql`
       roleReassignData
       goldenRecordsIndividual {
         id
+        duplicate
         fullName
         birthDate
         lastRegistrationDate

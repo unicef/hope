@@ -1,0 +1,169 @@
+import React from 'react';
+import { Box, Button } from '@mui/material';
+import RemoveIcon from '@mui/icons-material/Remove';
+import { useConfirmation } from '@components/core/ConfirmationDialog';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
+import {
+  GrievanceTicketDocument,
+  GrievanceTicketQuery,
+  useApproveNeedsAdjudicationMutation,
+} from '@generated/graphql';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
+import { useSnackbar } from '@hooks/useSnackBar';
+
+interface NeedsAdjudicationActionsProps {
+  ticket: GrievanceTicketQuery['grievanceTicket'];
+  isEditable: boolean;
+  canApprove: boolean;
+  isTicketForApproval: boolean;
+  selectedIndividualIds: string[];
+  setIsEditMode: (editMode: boolean) => void;
+}
+
+export const NeedsAdjudicationActions: React.FC<
+  NeedsAdjudicationActionsProps
+> = ({
+  ticket,
+  isEditable,
+  canApprove,
+  isTicketForApproval,
+  selectedIndividualIds,
+  setIsEditMode,
+}) => {
+  const { showMessage } = useSnackbar();
+  const [approve] = useApproveNeedsAdjudicationMutation({
+    refetchQueries: () => [
+      {
+        query: GrievanceTicketDocument,
+        variables: { id: ticket.id },
+      },
+    ],
+  });
+  const { t } = useTranslation();
+  const { baseUrl } = useBaseUrl();
+  const navigate = useNavigate();
+  const confirm = useConfirmation();
+  const { isActiveProgram } = useProgramContext();
+  return (
+    <Box
+      display="flex"
+      justifyContent="space-between"
+      alignItems="center"
+      mt={2}
+    >
+      <Box display="flex" gap={2}>
+        <Button
+          onClick={() =>
+            navigate(`/${baseUrl}/grievance/new-ticket`, {
+              state: { linkedTicketId: ticket.id },
+            })
+          }
+          variant="outlined"
+          color="primary"
+          data-cy="button-create-linked-ticket"
+          disabled={!isActiveProgram}
+        >
+          {t('Create Linked Ticket')}
+        </Button>
+        {!isEditable && (
+          <Button
+            variant="outlined"
+            color="primary"
+            data-cy="button-edit"
+            disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
+            onClick={() => setIsEditMode(true)}
+          >
+            {t('Edit')}
+          </Button>
+        )}
+        {isEditable && canApprove && (
+          <>
+            <Button
+              disabled={!isTicketForApproval || !isActiveProgram}
+              data-cy="button-mark-distinct"
+              onClick={() =>
+                confirm({
+                  content:
+                    'Are you sure you want to mark this record as distinct?',
+                }).then(async () => {
+                  try {
+                    await approve({
+                      variables: {
+                        grievanceTicketId: ticket.id,
+                        distinctIndividualIds: selectedIndividualIds,
+                      },
+                    });
+                  } catch (e) {
+                    e.graphQLErrors.map((x) => showMessage(x.message));
+                  }
+                  setIsEditMode(false);
+                })
+              }
+              variant="contained"
+              color="primary"
+            >
+              {t('Mark as Distinct')}
+            </Button>
+            <Button
+              disabled={!isTicketForApproval || !isActiveProgram}
+              data-cy="button-mark-duplicate"
+              onClick={() =>
+                confirm({
+                  content: t(
+                    'Are you sure you want to mark this record as a duplicate?',
+                  ),
+                }).then(async () => {
+                  try {
+                    await approve({
+                      variables: {
+                        grievanceTicketId: ticket.id,
+                        duplicateIndividualIds: selectedIndividualIds,
+                      },
+                    });
+                  } catch (e) {
+                    e.graphQLErrors.map((x) => showMessage(x.message));
+                  }
+                  setIsEditMode(false);
+                })
+              }
+              variant="contained"
+              color="primary"
+            >
+              {t('Mark as Duplicate')}
+            </Button>
+          </>
+        )}
+      </Box>
+      <Button
+        variant="outlined"
+        color="primary"
+        data-cy="button-clear"
+        onClick={() =>
+          confirm({
+            content: t(
+              "Are you sure you want to clear the selected ids? They won't be marked as a duplicate or distinct anymore.",
+            ),
+          }).then(async () => {
+            try {
+              await approve({
+                variables: {
+                  grievanceTicketId: ticket.id,
+                  duplicateIndividualIds: selectedIndividualIds,
+                },
+              });
+            } catch (e) {
+              e.graphQLErrors.map((x) => showMessage(x.message));
+            }
+            setIsEditMode(false);
+          })
+        }
+        endIcon={<RemoveIcon />}
+      >
+        {t('Clear')}
+      </Button>
+    </Box>
+  );
+};
