@@ -208,6 +208,7 @@ class TestUkrainianRegistrationService(BaseTestUkrainianRegistrationService):
         self.records[2].refresh_from_db()
         self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 4)
         self.assertEqual(PendingHousehold.objects.count(), 4)
+        self.assertEqual(PendingHousehold.objects.filter(program=rdi.program).count(), 4)
         self.assertEqual(PendingBankAccountInfo.pending_objects.count(), 3)
         bank_acc_info = PendingBankAccountInfo.pending_objects.get(bank_account_number="333123321321")
         self.assertEqual(bank_acc_info.account_holder_name, "Test Holder Name 333")
@@ -278,6 +279,7 @@ class TestRegistration2024(BaseTestUkrainianRegistrationService):
         self.assertEqual(Record.objects.filter(id__in=[self.record.id], ignored=False).count(), 1)
         self.assertEqual(PendingHousehold.objects.count(), 1)
         self.assertEqual(PendingIndividual.objects.count(), 1)
+        self.assertEqual(PendingIndividual.objects.filter(program=rdi.program).count(), 1)
         self.assertEqual(
             PendingIndividual.objects.get(family_name="Romaniak").flex_fields,
             {"low_income_hh_h_f": True, "single_headed_hh_h_f": False},
