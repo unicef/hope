@@ -143,7 +143,16 @@ class ProgramCycleValidator(CommonValidator):
             raise ValidationError("Programme Cycles' timeframes must not overlap.")
 
     @classmethod
-    def validate_program_cycle_update_name_and_dates(cls, *args: Any, **kwargs: Any) -> None:
+    def validate_program_cycle_title(cls, *args: Any, **kwargs: Any) -> None:
+        # A user can’t leave the Program Cycle title empty.
+        program = kwargs.get("program")
+        program_cycle = kwargs.get("program_cycle")
+        cycles = program.cycles.exclude(id=program_cycle.pk) if program_cycle else program.cycles.all()
+        if cycles.filter(title=kwargs["title"]).exists():
+            raise ValidationError("Programme Cycles' title should be unique.")
+
+    @classmethod
+    def validate_program_cycle_update_title_and_dates(cls, *args: Any, **kwargs: Any) -> None:
         if (program_cycle := kwargs.get("program_cycle")) and not kwargs.get("is_create_action"):
             if program_cycle.start_date and "start_date" in kwargs and kwargs.get("start_date") is None:
                 raise ValidationError("Not possible leave the Programme Cycle start date empty.")

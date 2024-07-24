@@ -219,9 +219,7 @@ snapshots['TestProgramCycle::test_create_program_cycle_with_the_same_name 1'] = 
                     'line': 3
                 }
             ],
-            'message': '''duplicate key value violates unique constraint "program_cycle_name_unique_if_not_removed"
-DETAIL:  Key (title, program_id, is_removed)=(TheSameName, 731cb8a7-d90c-4bc5-a17f-20645675ef7d, f) already exists.
-''',
+            'message': "Programme Cycles' title should be unique.",
             'path': [
                 'createProgramCycle'
             ]

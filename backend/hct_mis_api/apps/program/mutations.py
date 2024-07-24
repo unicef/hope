@@ -286,7 +286,7 @@ class CreateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
         cls.validate(
             start_date=program_cycle_data["start_date"],
             end_date=program_cycle_data.get("end_date"),
-            name=program_cycle_data["title"],
+            title=program_cycle_data["title"],
             program=program,
             is_create_action=True,
         )
