@@ -19,9 +19,12 @@ def increment_periodic_data_update_template_version_cache(
     sender: Any, instance: PeriodicDataUpdateTemplate, **kwargs: dict
 ) -> None:
     business_area_slug = instance.business_area.slug
-    business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
     program_id = instance.program.id
+    increment_periodic_data_update_template_version_cache_function(business_area_slug, program_id)
 
+
+def increment_periodic_data_update_template_version_cache_function(business_area_slug: str, program_id: UUID) -> None:
+    business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
     version_key = f"{business_area_slug}:{business_area_version}:{program_id}:periodic_data_update_template_list"
     get_or_create_cache_key(version_key, 0)
 
