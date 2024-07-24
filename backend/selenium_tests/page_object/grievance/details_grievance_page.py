@@ -76,6 +76,7 @@ class GrievanceDetailsPage(BaseComponents):
     labelTickets = 'div[data-cy="label-Tickets"]'
     checkbox = 'tr[role="checkbox"]'
     labelPartner = 'div[data-cy="label-Partner"]'
+    labelAdministrativeLevel2 = 'div[data-cy="label-Administrative Level 2"]'
 
     # Texts
     textTitle = "Ticket ID: "
@@ -93,7 +94,8 @@ class GrievanceDetailsPage(BaseComponents):
     textAssigmentRootRootkowski = "Root Rootkowski"
     textNoCategory = "Needs Adjudication"
 
-    # Elements
+    def getLabelAdministrativeLevel2(self) -> WebElement:
+        return self.wait_for(self.labelAdministrativeLevel2)
 
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
@@ -167,6 +169,9 @@ class GrievanceDetailsPage(BaseComponents):
     def getAdministrativeLevel(self) -> WebElement:
         return self.wait_for(self.administrativeLevel)
 
+    def getLabelLastModifiedDate(self) -> WebElement:
+        return self.wait_for(self.lastModifiedDate)
+
     def getAreaVillage(self) -> WebElement:
         return self.wait_for(self.areaVillage)
 
@@ -181,6 +186,9 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getLabelCreatedBy(self) -> WebElement:
         return self.wait_for(self.labelCreatedBy)
+
+    def getLabelDateCreation(self) -> WebElement:
+        return self.wait_for(self.dateCreation)
 
     def getLabelComments(self) -> WebElement:
         return self.wait_for(self.comments)

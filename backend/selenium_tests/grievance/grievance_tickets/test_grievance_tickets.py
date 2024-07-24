@@ -10,6 +10,8 @@ from page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from page_object.grievance.grievance_tickets import GrievanceTickets
 from page_object.grievance.new_ticket import NewTicket
 from pytest_django import DjangoDbBlocker
+from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
@@ -49,6 +51,10 @@ def create_programs(django_db_setup: Generator[None, None, None], django_db_bloc
 @pytest.fixture
 def household_without_disabilities() -> Household:
     yield create_custom_household(observed_disability=[])
+
+
+def find_text_of_label(element: WebElement) -> str:
+    return element.find_element(By.XPATH, "..").find_element(By.XPATH, "..").text
 
 
 def create_program(
@@ -345,17 +351,12 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getInputIndividualdataWhoanswersphone().send_keys("111 11 11")
 
         pageGrievanceNewTicket.getButtonNext().click()
-        pageGrievanceNewTicket.screenshot("1", delay_sec=0)
-        from selenium_tests.tools.tag_name_finder import printing
-        printing("Mapping", pageGrievanceNewTicket.driver)
-        printing("Methods", pageGrievanceNewTicket.driver)
         assert "Add Individual - TEST" in pageGrievanceDetailsPage.getTicketDescription().text
         assert "Data Change" in pageGrievanceDetailsPage.getTicketCategory().text
         assert "Add Individual" in pageGrievanceDetailsPage.getLabelIssueType().text
         assert "New" in pageGrievanceDetailsPage.getTicketStatus().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
-
 
     def test_grievance_tickets_create_new_ticket_Data_Change_Add_Individual_Mandatory_Fields(
             self,
@@ -377,6 +378,52 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getReceivedConsent().click()
         pageGrievanceNewTicket.getButtonNext().click()
+
+        pageGrievanceNewTicket.getDescription().send_keys("Add Individual - TEST")
+        pageGrievanceNewTicket.getDatePickerFilter().click()
+        pageGrievanceNewTicket.getDatePickerFilter().send_keys(FormatTime(1, 5, 1986).numerically_formatted_date)
+
+        pageGrievanceNewTicket.getInputIndividualdataFullname().send_keys("Krido")
+        pageGrievanceNewTicket.getSelectIndividualdataSex().click()
+        pageGrievanceNewTicket.select_listbox_element("Male").click()
+
+        pageGrievanceNewTicket.getEstimatedBirthDate().click()
+        pageGrievanceNewTicket.select_listbox_element("Yes").click()
+
+        pageGrievanceNewTicket.getSelectIndividualdataRelationship().click()
+        pageGrievanceNewTicket.select_listbox_element('Wife / Husband').click()
+        pageGrievanceNewTicket.getSelectIndividualdataRole().click()
+        pageGrievanceNewTicket.select_listbox_element("Alternate collector").click()
+
+        pageGrievanceNewTicket.getButtonNext().click()
+        # pageGrievanceNewTicket.screenshot("1")
+        # from selenium_tests.tools.tag_name_finder import printing
+        # printing("Mapping", pageGrievanceNewTicket.driver)
+        # printing("Methods", pageGrievanceNewTicket.driver)
+        # printing("Assert", pageGrievanceNewTicket.driver, page_object_str="pageGrievanceNewTicket")
+
+        assert "ASSIGN TO ME" in pageGrievanceDetailsPage.getButtonAssignToMe().text
+        assert "New" in pageGrievanceDetailsPage.getTicketStatus().text
+        assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
+        assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
+        assert "-" in pageGrievanceDetailsPage.getTicketAssigment().text
+        assert "Data Change" in pageGrievanceDetailsPage.getTicketCategory().text
+        assert "Add Individual" in pageGrievanceDetailsPage.getLabelIssueType().text
+        assert household_without_disabilities.unicef_id in pageGrievanceDetailsPage.getTicketHouseholdID().text
+        assert "Test Programm" in pageGrievanceDetailsPage.getLabelProgramme().text
+        assert datetime.now().strftime("%-d %b %Y") in pageGrievanceDetailsPage.getLabelDateCreation().text
+        assert datetime.now().strftime("%-d %b %Y") in pageGrievanceDetailsPage.getLabelLastModifiedDate().text
+        assert "-" in pageGrievanceDetailsPage.getLabelAdministrativeLevel2().text
+        assert "-" in pageGrievanceDetailsPage.getLabelLanguagesSpoken().text
+        assert "-" in pageGrievanceDetailsPage.getLabelDocumentation().text
+        assert "Add Individual - TEST" in pageGrievanceDetailsPage.getLabelDescription().text
+        assert "-" in pageGrievanceDetailsPage.getLabelComments().text
+        assert "Male" in pageGrievanceDetailsPage.getLabelGender().text
+        assert "Alternate collector" in pageGrievanceDetailsPage.getLabelRole().text
+        assert "Krido" in pageGrievanceDetailsPage.getLabelFullName().text
+        assert "1986-05-01" in pageGrievanceDetailsPage.getLabelBirthDate().text
+        assert "Wife / Husband" in pageGrievanceDetailsPage.getLabelRelationship().text
+        assert "Yes" in pageGrievanceDetailsPage.getLabelEstimatedBirthDate().text
 
     @pytest.mark.parametrize(
         "test_data",
