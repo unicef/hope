@@ -300,9 +300,17 @@ snapshots['TestProgramCycle::test_delete_program_cycle 4'] = {
                                 'status': 'ACTIVE',
                                 'title': 'Default Cycle 001'
                             }
+                        },
+                        {
+                            'node': {
+                                'endDate': '2022-01-01',
+                                'startDate': '2021-01-01',
+                                'status': 'ACTIVE',
+                                'title': 'Cycle 002'
+                            }
                         }
                     ],
-                    'totalCount': 1
+                    'totalCount': 2
                 }
             }
         }
@@ -345,6 +353,14 @@ snapshots['TestProgramCycle::test_update_program_cycle 2'] = {
                         },
                         {
                             'node': {
+                                'endDate': '2022-01-01',
+                                'startDate': '2021-01-01',
+                                'status': 'ACTIVE',
+                                'title': 'Cycle 002'
+                            }
+                        },
+                        {
+                            'node': {
                                 'endDate': None,
                                 'startDate': '2055-11-13',
                                 'status': 'DRAFT',
@@ -352,7 +368,7 @@ snapshots['TestProgramCycle::test_update_program_cycle 2'] = {
                             }
                         }
                     ],
-                    'totalCount': 2
+                    'totalCount': 3
                 }
             }
         }
@@ -375,6 +391,14 @@ snapshots['TestProgramCycle::test_update_program_cycle 3'] = {
                         },
                         {
                             'node': {
+                                'endDate': '2022-01-01',
+                                'startDate': '2021-01-01',
+                                'status': 'ACTIVE',
+                                'title': 'Cycle 002'
+                            }
+                        },
+                        {
+                            'node': {
                                 'endDate': '2055-11-22',
                                 'startDate': '2055-11-14',
                                 'status': 'DRAFT',
@@ -382,7 +406,7 @@ snapshots['TestProgramCycle::test_update_program_cycle 3'] = {
                             }
                         }
                     ],
-                    'totalCount': 2
+                    'totalCount': 3
                 }
             }
         }
