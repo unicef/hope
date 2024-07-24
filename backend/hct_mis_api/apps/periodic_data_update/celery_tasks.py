@@ -29,8 +29,8 @@ def import_periodic_data_update(self: Any, periodic_data_update_upload_id: str) 
 @log_start_and_end
 @sentry_tags
 def export_periodic_data_update_export_template_service(self: Any, periodic_data_update_template_id: str) -> bool:
-    periodic_data_update_upload = PeriodicDataUpdateTemplate.objects.get(id=periodic_data_update_template_id)
-    service = PeriodicDataUpdateExportTemplateService(periodic_data_update_upload)
+    periodic_data_update_template = PeriodicDataUpdateTemplate.objects.get(id=periodic_data_update_template_id)
+    service = PeriodicDataUpdateExportTemplateService(periodic_data_update_template)
     service.generate_workbook()
     service.save_xlsx_file()
     return True

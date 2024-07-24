@@ -147,31 +147,39 @@ class TestPeriodicDataUpdateTemplateViews:
         assert len(response_json) == 3
         assert {
             "id": self.pdu_template1.id,
-            "status": self.pdu_template1.get_status_display(),
+            "status_display": self.pdu_template1.get_status_display(),
+            "status": self.pdu_template1.combined_status_display,
             "number_of_records": self.pdu_template1.number_of_records,
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_template1.created_by.get_full_name(),
+            "can_export": self.pdu_template1.can_export,
         } in response_json
         assert {
             "id": self.pdu_template2.id,
-            "status": self.pdu_template2.get_status_display(),
+            "status_display": self.pdu_template2.get_status_display(),
+            "status": self.pdu_template2.combined_status_display,
             "number_of_records": self.pdu_template2.number_of_records,
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_template2.created_by.get_full_name(),
+            "can_export": self.pdu_template2.can_export,
         } in response_json
         assert {
             "id": self.pdu_template3.id,
-            "status": self.pdu_template3.get_status_display(),
+            "status_display": self.pdu_template3.get_status_display(),
+            "status": self.pdu_template3.combined_status_display,
             "number_of_records": self.pdu_template3.number_of_records,
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_template3.created_by.get_full_name(),
+            "can_export": self.pdu_template3.can_export,
         } in response_json
         assert {
             "id": self.pdu_template_program2.id,
-            "status": self.pdu_template_program2.get_status_display(),
+            "status_display": self.pdu_template_program2.get_status_display(),
+            "status": self.pdu_template_program2.combined_status_display,
             "number_of_records": self.pdu_template_program2.number_of_records,
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_template_program2.created_by.get_full_name(),
+            "can_export": self.pdu_template_program2.can_export,
         } not in response_json
 
     @pytest.mark.parametrize(
@@ -399,6 +407,7 @@ class TestPeriodicDataUpdateTemplateViews:
         assert template.business_area == self.afghanistan
         assert template.rounds_data == data["rounds_data"]
         assert template.filters == data["filters"]
+        assert template.status == PeriodicDataUpdateTemplate.Status.EXPORTED
         assert PeriodicDataUpdateTemplate.objects.filter(id=response_json["id"]).first().file is not None
 
     def test_create_periodic_data_update_template_duplicate_field(
@@ -438,4 +447,4 @@ class TestPeriodicDataUpdateTemplateViews:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
         response_json = response.json()
-        assert response_json == {"rounds_data": ["Duplicate field names found."]}
+        assert response_json == {"rounds_data": ["Each Field can only be used once in the template."]}

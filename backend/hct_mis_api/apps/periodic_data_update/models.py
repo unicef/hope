@@ -13,7 +13,7 @@ class PeriodicDataUpdateTemplate(TimeStampedModel, CeleryEnabledModel):
         TO_EXPORT = "TO_EXPORT", "To export"
         NOT_SCHEDULED = "NOT_SCHEDULED", "Not scheduled"
         EXPORTING = "EXPORTING", "Exporting"
-        EXPORTED = "EXPORTED", "EXPORTED"
+        EXPORTED = "EXPORTED", "Exported"
         FAILED = "FAILED", "Failed"
         CANCELED = "CANCELED", "Canceled"
 
