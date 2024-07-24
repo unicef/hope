@@ -39,13 +39,14 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
     """
     APPROVE_NEEDS_ADJUDICATION_MUTATION = """
     mutation ApproveNeedsAdjudicationTicket(
-    $grievanceTicketId: ID!, $selectedIndividualId: ID, $duplicateIndividualIds: [ID], $distinctIndividualIds: [ID],
+    $grievanceTicketId: ID!, $selectedIndividualId: ID, $duplicateIndividualIds: [ID], $distinctIndividualIds: [ID], $clearIndividualIds: [ID]
     ) {
       approveNeedsAdjudication(
       grievanceTicketId: $grievanceTicketId,
       selectedIndividualId: $selectedIndividualId,
       duplicateIndividualIds: $duplicateIndividualIds,
       distinctIndividualIds: $distinctIndividualIds,
+      clearIndividualIds: $clearIndividualIds,
       ) {
         grievanceTicket {
           id
@@ -366,4 +367,18 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         )
 
         self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_distinct.count(), 1)
+        self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_individuals.count(), 1)
+
+        self.snapshot_graphql_request(
+            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": self.id_to_base64(
+                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
+                ),
+                "$clearIndividualIds": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+            },
+        )
+
+        self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_distinct.count(), 0)
         self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_individuals.count(), 1)
