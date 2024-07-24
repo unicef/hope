@@ -170,7 +170,7 @@ snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_
                     'line': 7
                 }
             ],
-            'message': 'Only one option for duplicate or distinct individuals is available',
+            'message': 'Only one option for duplicate or distinct or clear individuals is available',
             'path': [
                 'approveNeedsAdjudication'
             ]

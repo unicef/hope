@@ -54,7 +54,7 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
                     'line': 5
                 }
             ],
-            'message': 'Only one option for duplicate or distinct individuals is available',
+            'message': 'Only one option for duplicate or distinct or clear individuals is available',
             'path': [
                 'approveNeedsAdjudication'
             ]

@@ -23,11 +23,13 @@ APPROVE_NEEDS_ADJUDICATION_MUTATION = """
       $grievanceTicketId: ID!
       $selectedIndividualId: ID
       $duplicateIndividualIds: [ID]
+      $clearIndividualIds: [ID]
     ) {
       approveNeedsAdjudication(
         grievanceTicketId: $grievanceTicketId
         selectedIndividualId: $selectedIndividualId
         duplicateIndividualIds: $duplicateIndividualIds
+        clearIndividualIds: $clearIndividualIds
       ) {
         grievanceTicket {
           description

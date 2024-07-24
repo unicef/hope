@@ -1170,6 +1170,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
         selected_individual_id = graphene.Argument(graphene.ID, required=False)
         duplicate_individual_ids = graphene.List(graphene.ID, required=False)
         distinct_individual_ids = graphene.List(graphene.ID, required=False)
+        clear_individual_ids = graphene.List(graphene.ID, required=False)
         version = BigInt(required=False)
 
     @classmethod
@@ -1193,12 +1194,18 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
 
         duplicate_individual_ids = kwargs.get("duplicate_individual_ids", [])
         distinct_individual_ids = kwargs.get("distinct_individual_ids", [])
+        clear_individual_ids = kwargs.get("clear_individual_ids", [])
         selected_individual_id = kwargs.get("selected_individual_id")
 
-        if (selected_individual_id and duplicate_individual_ids) or (
-            duplicate_individual_ids and distinct_individual_ids
+        if any(
+            [
+                duplicate_individual_ids
+                and (selected_individual_id or distinct_individual_ids or clear_individual_ids),
+                clear_individual_ids
+                and (duplicate_individual_ids or distinct_individual_ids or selected_individual_id),
+            ]
         ):
-            log_and_raise("Only one option for duplicate or distinct individuals is available")
+            log_and_raise("Only one option for duplicate or distinct or clear individuals is available")
 
         if (
             duplicate_individual_ids or distinct_individual_ids or selected_individual_id
@@ -1216,6 +1223,12 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
 
             ticket_details.selected_individual = selected_individual
             ticket_details.role_reassign_data = {}
+
+        if clear_individual_ids:
+            clear_individuals = [get_individual(_id) for _id in clear_individual_ids]
+            # remove Individual from selected_individuals and selected_distinct
+            ticket_details.selected_individuals.remove(clear_individuals)
+            ticket_details.selected_distinct.remove(clear_individuals)
 
         if distinct_individual_ids:
             distinct_individuals = [get_individual(_id) for _id in distinct_individual_ids]
