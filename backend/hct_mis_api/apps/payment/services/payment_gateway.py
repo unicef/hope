@@ -107,12 +107,12 @@ class PaymentInstructionFromSplitSerializer(PaymentInstructionFromDeliveryMechan
 
 class PaymentPayloadSerializer(serializers.Serializer):
     amount = serializers.DecimalField(max_digits=12, decimal_places=2, required=True)
-    phone_no = serializers.CharField(required=False)
-    last_name = serializers.CharField(required=False)
-    first_name = serializers.CharField(required=False)
-    full_name = serializers.CharField(required=False)
+    phone_no = serializers.CharField(required=False, allow_blank=True)
+    last_name = serializers.CharField(required=False, allow_blank=True)
+    first_name = serializers.CharField(required=False, allow_blank=True)
+    full_name = serializers.CharField(required=False, allow_blank=True)
     destination_currency = serializers.CharField(required=True)
-    service_provider_code = serializers.CharField(required=False)
+    service_provider_code = serializers.CharField(required=False, allow_blank=True)
 
 
 class PaymentSerializer(ReadOnlyModelSerializer):
@@ -137,7 +137,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
             }
         )
         if not payload.is_valid():
-            raise serializers.ValidationError(payload.errors)
+            raise PaymentGatewayAPI.PaymentGatewayAPIException(payload.errors)
         return payload.data
 
     class Meta:
