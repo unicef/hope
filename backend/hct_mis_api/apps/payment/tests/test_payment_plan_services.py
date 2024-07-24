@@ -41,8 +41,8 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlanSplit,
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
@@ -71,6 +71,20 @@ class TestPaymentPlanServices(APITestCase):
 
         with self.assertRaises(GraphQLError):
             PaymentPlanService(payment_plan=pp).delete()
+
+    def test_delete_when_its_one_pp_in_cycle(self) -> None:
+        pp = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program__status=Program.ACTIVE)
+        program_cycle = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=pp.program)
+        pp.program_cycle = program_cycle
+        pp.save()
+        pp.refresh_from_db()
+
+        self.assertEqual(pp.program_cycle.status, ProgramCycle.ACTIVE)
+
+        pp = PaymentPlanService(payment_plan=pp).delete()
+        self.assertEqual(pp.is_removed, True)
+        program_cycle.refresh_from_db()
+        self.assertEqual(program_cycle.status, ProgramCycle.DRAFT)
 
     @flaky(max_runs=5, min_passes=1)
     @freeze_time("2020-10-10")
@@ -545,3 +559,52 @@ class TestPaymentPlanServices(APITestCase):
             pps.user = mock.MagicMock(pk="123")
             pps.send_to_payment_gateway()
             assert mock_send_to_payment_gateway_task.call_count == 1
+
+    @freeze_time("2020-10-10")
+    def test_create_with_program_cycle_validation_error(self) -> None:
+        self.business_area.is_payment_plan_applicable = True
+        self.business_area.save()
+        targeting = TargetPopulationFactory(
+            status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
+            program=ProgramFactory(
+                status=Program.ACTIVE,
+                start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
+                end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
+                cycle__start_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
+                cycle__end_date=timezone.datetime(2021, 12, 10, tzinfo=utc),
+            ),
+        )
+        cycle = targeting.program.cycles.first()
+        cycle_id = self.id_to_base64(cycle.pk, "ProgramCycleNode")
+        input_data = dict(
+            business_area_slug="afghanistan",
+            targeting_id=self.id_to_base64(targeting.id, "TargetingNode"),
+            program_cycle_id=cycle_id,
+            dispersion_start_date=parse_date("2020-11-11"),
+            dispersion_end_date=parse_date("2020-11-20"),
+            currency="USD",
+        )
+
+        with self.assertRaisesMessage(
+            GraphQLError,
+            "Impossible to create Payment Plan for Program Cycle within Finished status",
+        ):
+            cycle.status = ProgramCycle.FINISHED
+            cycle.save()
+            PaymentPlanService.create(input_data=input_data, user=self.user)
+
+        with self.assertRaisesMessage(
+            GraphQLError,
+            "Impossible to create Payment Plan for Program Cycle without start and/or end dates",
+        ):
+            cycle.status = ProgramCycle.ACTIVE
+            cycle.end_date = None
+            cycle.save()
+            PaymentPlanService.create(input_data=input_data, user=self.user)
+
+        cycle.status = ProgramCycle.DRAFT
+        cycle.end_date = parse_date("2020-11-25")
+        cycle.save()
+        PaymentPlanService.create(input_data=input_data, user=self.user)
+        cycle.refresh_from_db()
+        assert cycle.status == ProgramCycle.ACTIVE

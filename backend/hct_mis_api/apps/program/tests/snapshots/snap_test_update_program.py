@@ -7,6 +7,56 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_program_cycle 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['You cannot finish program if program has not finished cycles']",
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_program_cycle 2'] = {
+    'data': {
+        'updateProgram': {
+            'program': {
+                'dataCollectingType': {
+                    'code': 'full_collection',
+                    'label': 'Full'
+                },
+                'name': 'initial name',
+                'partnerAccess': 'NONE_PARTNERS_ACCESS',
+                'partners': [
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF'
+                    }
+                ],
+                'status': 'FINISHED'
+            }
+        }
+    }
+}
+
 snapshots['TestUpdateProgram::test_update_active_program_with_dct 1'] = {
     'data': {
         'updateProgram': None

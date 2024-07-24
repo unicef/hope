@@ -1,4 +1,3 @@
-from decimal import Decimal
 from typing import Any, Dict, List, Tuple, Type
 
 from django.db.models import (
@@ -15,7 +14,6 @@ from django.db.models import (
     Value,
     When,
 )
-from django.db.models.functions import Coalesce
 
 import graphene
 from graphene import Int, relay
@@ -235,11 +233,6 @@ class Query(graphene.ObjectType):
     )
     # ProgramCycle
     program_cycle = relay.Node.Field(ProgramCycleNode)
-    all_program_cycles = DjangoPermissionFilterConnectionField(
-        ProgramCycleNode,
-        filterset_class=ProgramCycleFilter,
-        permission_classes=(hopePermissionClass(Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST),),
-    )
 
     def resolve_all_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
         user = info.context.user
@@ -415,17 +408,3 @@ class Query(graphene.ObjectType):
             data_collecting_type__isnull=False,
             data_collecting_type__deprecated=False,
         ).exclude(data_collecting_type__code="unknown")
-
-    def resolve_all_program_cycles(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
-        # TODO: remove this one will create DRF endpoint for list ProgramCycles
-        business_area_slug = info.context.headers.get("Business-Area").lower()
-        qs = (
-            ProgramCycle.objects.filter(program__business_area__slug=business_area_slug)
-            .select_related("program__business_area")
-            .annotate(
-                total_entitled_quantity=Coalesce(
-                    Sum("payment_plans__total_entitled_quantity_usd"), Value(Decimal("0.0"))
-                )
-            )
-        )
-        return qs
