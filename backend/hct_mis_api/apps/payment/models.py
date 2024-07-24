@@ -272,6 +272,7 @@ class GenericPayment(TimeStampedUUIDModel):
     )
 
     ALLOW_CREATE_VERIFICATION = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS, STATUS_DISTRIBUTION_PARTIAL)
+    PENDING_STATUSES = (STATUS_PENDING, STATUS_SENT_TO_PG, STATUS_SENT_TO_FSP)
 
     ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
     ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
@@ -922,13 +923,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
             return False
 
         return (
-            self.eligible_payments.exclude(
-                status__in=[
-                    GenericPayment.STATUS_PENDING,
-                    GenericPayment.STATUS_SENT_TO_PG,
-                    GenericPayment.STATUS_SENT_TO_FSP,
-                ]
-            ).count()
+            self.eligible_payments.exclude(status__in=GenericPayment.PENDING_STATUSES).count()
             == self.eligible_payments.count()
         )
 

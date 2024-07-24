@@ -457,10 +457,13 @@ class PaymentGatewayService:
 
             delivered_quantity = matching_pg_payment.payout_amount
             if _payment.status in [
-                Payment.STATUS_SUCCESS,
                 Payment.STATUS_DISTRIBUTION_SUCCESS,
                 Payment.STATUS_DISTRIBUTION_PARTIAL,
+                Payment.STATUS_NOT_DISTRIBUTED,
             ]:
+                if _payment.status == Payment.STATUS_NOT_DISTRIBUTED and delivered_quantity is None:
+                    delivered_quantity = 0
+
                 update_fields.extend(["delivered_quantity", "delivered_quantity_usd"])
                 try:
                     _payment.delivered_quantity = to_decimal(delivered_quantity)

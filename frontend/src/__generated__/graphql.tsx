@@ -2997,7 +2997,7 @@ export type ImportedHouseholdNode = Node & {
   registrationId?: Maybe<Scalars['String']['output']>;
   registrationMethod: HouseholdRegistrationMethod;
   removedDate?: Maybe<Scalars['DateTime']['output']>;
-  residenceStatus: HouseholdResidenceStatus;
+  residenceStatus?: Maybe<HouseholdResidenceStatus>;
   returnee?: Maybe<Scalars['Boolean']['output']>;
   size?: Maybe<Scalars['Int']['output']>;
   start?: Maybe<Scalars['DateTime']['output']>;
@@ -3769,6 +3769,7 @@ export type KoboImportDataNode = Node & {
   numberOfHouseholds?: Maybe<Scalars['Int']['output']>;
   numberOfIndividuals?: Maybe<Scalars['Int']['output']>;
   onlyActiveSubmissions: Scalars['Boolean']['output'];
+  pullPictures: Scalars['Boolean']['output'];
   status: ImportDataStatus;
   updatedAt: Scalars['DateTime']['output'];
   validationErrors: Scalars['String']['output'];
@@ -4363,6 +4364,7 @@ export type MutationsRevertMarkPaymentRecordAsFailedArgs = {
 export type MutationsSaveKoboImportDataAsyncArgs = {
   businessAreaSlug: Scalars['String']['input'];
   onlyActiveSubmissions: Scalars['Boolean']['input'];
+  pullPictures: Scalars['Boolean']['input'];
   uid: Scalars['Upload']['input'];
 };
 
@@ -9368,7 +9370,7 @@ export type RegistrationDetailedFragment = { __typename?: 'RegistrationDataImpor
 
 export type ImportedHouseholdMinimalFragment = { __typename?: 'ImportedHouseholdNode', id: string, importId?: string | null, size?: number | null, flexFields?: any | null, deviceid: string, start?: any | null, detailId?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, hasDuplicates?: boolean | null, fchildHoh?: boolean | null, childHoh?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string } | null, admin1?: { __typename?: 'AreaNode', pCode?: string | null, name: string } | null, admin2?: { __typename?: 'AreaNode', pCode?: string | null, name: string } | null };
 
-export type ImportedHouseholdDetailedFragment = { __typename?: 'ImportedHouseholdNode', residenceStatus: HouseholdResidenceStatus, country?: string | null, countryOrigin?: string | null, id: string, importId?: string | null, size?: number | null, flexFields?: any | null, deviceid: string, start?: any | null, detailId?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, hasDuplicates?: boolean | null, fchildHoh?: boolean | null, childHoh?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, name: string } | null, individuals?: { __typename?: 'ImportedIndividualNodeConnection', edges: Array<{ __typename?: 'ImportedIndividualNodeEdge', node?: { __typename?: 'ImportedIndividualNode', id: string, importId?: string | null, age?: number | null, fullName: string, birthDate: any, sex: IndividualSex, role?: string | null, relationship?: string | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, deduplicationBatchResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string } | null, admin1?: { __typename?: 'AreaNode', pCode?: string | null, name: string } | null, admin2?: { __typename?: 'AreaNode', pCode?: string | null, name: string } | null };
+export type ImportedHouseholdDetailedFragment = { __typename?: 'ImportedHouseholdNode', residenceStatus?: HouseholdResidenceStatus | null, country?: string | null, countryOrigin?: string | null, id: string, importId?: string | null, size?: number | null, flexFields?: any | null, deviceid: string, start?: any | null, detailId?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, hasDuplicates?: boolean | null, fchildHoh?: boolean | null, childHoh?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, name: string } | null, individuals?: { __typename?: 'ImportedIndividualNodeConnection', edges: Array<{ __typename?: 'ImportedIndividualNodeEdge', node?: { __typename?: 'ImportedIndividualNode', id: string, importId?: string | null, age?: number | null, fullName: string, birthDate: any, sex: IndividualSex, role?: string | null, relationship?: string | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, deduplicationBatchResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string } | null, admin1?: { __typename?: 'AreaNode', pCode?: string | null, name: string } | null, admin2?: { __typename?: 'AreaNode', pCode?: string | null, name: string } | null };
 
 export type ImportedIndividualMinimalFragment = { __typename?: 'ImportedIndividualNode', id: string, importId?: string | null, age?: number | null, fullName: string, birthDate: any, sex: IndividualSex, role?: string | null, relationship?: string | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, deduplicationBatchResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string } | null };
 
@@ -9895,6 +9897,7 @@ export type SaveKoboImportDataMutationVariables = Exact<{
   businessAreaSlug: Scalars['String']['input'];
   projectId: Scalars['Upload']['input'];
   onlyActiveSubmissions: Scalars['Boolean']['input'];
+  pullPictures: Scalars['Boolean']['input'];
 }>;
 
 
@@ -9904,6 +9907,7 @@ export type SaveKoboImportDataAsyncMutationVariables = Exact<{
   businessAreaSlug: Scalars['String']['input'];
   koboAssetId: Scalars['Upload']['input'];
   onlyActiveSubmissions: Scalars['Boolean']['input'];
+  pullPictures: Scalars['Boolean']['input'];
 }>;
 
 
@@ -10932,7 +10936,7 @@ export type ImportedHouseholdQueryVariables = Exact<{
 }>;
 
 
-export type ImportedHouseholdQuery = { __typename?: 'Query', importedHousehold?: { __typename?: 'ImportedHouseholdNode', residenceStatus: HouseholdResidenceStatus, country?: string | null, countryOrigin?: string | null, id: string, importId?: string | null, size?: number | null, flexFields?: any | null, deviceid: string, start?: any | null, detailId?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, hasDuplicates?: boolean | null, fchildHoh?: boolean | null, childHoh?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, name: string } | null, individuals?: { __typename?: 'ImportedIndividualNodeConnection', edges: Array<{ __typename?: 'ImportedIndividualNodeEdge', node?: { __typename?: 'ImportedIndividualNode', id: string, importId?: string | null, age?: number | null, fullName: string, birthDate: any, sex: IndividualSex, role?: string | null, relationship?: string | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, deduplicationBatchResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string } | null, admin1?: { __typename?: 'AreaNode', pCode?: string | null, name: string } | null, admin2?: { __typename?: 'AreaNode', pCode?: string | null, name: string } | null } | null };
+export type ImportedHouseholdQuery = { __typename?: 'Query', importedHousehold?: { __typename?: 'ImportedHouseholdNode', residenceStatus?: HouseholdResidenceStatus | null, country?: string | null, countryOrigin?: string | null, id: string, importId?: string | null, size?: number | null, flexFields?: any | null, deviceid: string, start?: any | null, detailId?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, hasDuplicates?: boolean | null, fchildHoh?: boolean | null, childHoh?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, name: string } | null, individuals?: { __typename?: 'ImportedIndividualNodeConnection', edges: Array<{ __typename?: 'ImportedIndividualNodeEdge', node?: { __typename?: 'ImportedIndividualNode', id: string, importId?: string | null, age?: number | null, fullName: string, birthDate: any, sex: IndividualSex, role?: string | null, relationship?: string | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, deduplicationBatchResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string } | null, admin1?: { __typename?: 'AreaNode', pCode?: string | null, name: string } | null, admin2?: { __typename?: 'AreaNode', pCode?: string | null, name: string } | null } | null };
 
 export type ImportedIndividualQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -15231,11 +15235,12 @@ export type RerunDedupeMutationHookResult = ReturnType<typeof useRerunDedupeMuta
 export type RerunDedupeMutationResult = Apollo.MutationResult<RerunDedupeMutation>;
 export type RerunDedupeMutationOptions = Apollo.BaseMutationOptions<RerunDedupeMutation, RerunDedupeMutationVariables>;
 export const SaveKoboImportDataDocument = gql`
-    mutation SaveKoboImportData($businessAreaSlug: String!, $projectId: Upload!, $onlyActiveSubmissions: Boolean!) {
+    mutation SaveKoboImportData($businessAreaSlug: String!, $projectId: Upload!, $onlyActiveSubmissions: Boolean!, $pullPictures: Boolean!) {
   saveKoboImportDataAsync(
     businessAreaSlug: $businessAreaSlug
     uid: $projectId
     onlyActiveSubmissions: $onlyActiveSubmissions
+    pullPictures: $pullPictures
   ) {
     importData {
       id
@@ -15261,6 +15266,7 @@ export type SaveKoboImportDataMutationFn = Apollo.MutationFunction<SaveKoboImpor
  *      businessAreaSlug: // value for 'businessAreaSlug'
  *      projectId: // value for 'projectId'
  *      onlyActiveSubmissions: // value for 'onlyActiveSubmissions'
+ *      pullPictures: // value for 'pullPictures'
  *   },
  * });
  */
@@ -15272,11 +15278,12 @@ export type SaveKoboImportDataMutationHookResult = ReturnType<typeof useSaveKobo
 export type SaveKoboImportDataMutationResult = Apollo.MutationResult<SaveKoboImportDataMutation>;
 export type SaveKoboImportDataMutationOptions = Apollo.BaseMutationOptions<SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables>;
 export const SaveKoboImportDataAsyncDocument = gql`
-    mutation SaveKoboImportDataAsync($businessAreaSlug: String!, $koboAssetId: Upload!, $onlyActiveSubmissions: Boolean!) {
+    mutation SaveKoboImportDataAsync($businessAreaSlug: String!, $koboAssetId: Upload!, $onlyActiveSubmissions: Boolean!, $pullPictures: Boolean!) {
   saveKoboImportDataAsync(
     businessAreaSlug: $businessAreaSlug
     uid: $koboAssetId
     onlyActiveSubmissions: $onlyActiveSubmissions
+    pullPictures: $pullPictures
   ) {
     importData {
       id
@@ -15303,6 +15310,7 @@ export type SaveKoboImportDataAsyncMutationFn = Apollo.MutationFunction<SaveKobo
  *      businessAreaSlug: // value for 'businessAreaSlug'
  *      koboAssetId: // value for 'koboAssetId'
  *      onlyActiveSubmissions: // value for 'onlyActiveSubmissions'
+ *      pullPictures: // value for 'pullPictures'
  *   },
  * });
  */
@@ -26331,7 +26339,7 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   registrationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   registrationMethod?: Resolver<ResolversTypes['HouseholdRegistrationMethod'], ParentType, ContextType>;
   removedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
-  residenceStatus?: Resolver<ResolversTypes['HouseholdResidenceStatus'], ParentType, ContextType>;
+  residenceStatus?: Resolver<Maybe<ResolversTypes['HouseholdResidenceStatus']>, ParentType, ContextType>;
   returnee?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   size?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   start?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
@@ -26735,6 +26743,7 @@ export type KoboImportDataNodeResolvers<ContextType = any, ParentType extends Re
   numberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   numberOfIndividuals?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   onlyActiveSubmissions?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  pullPictures?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   status?: Resolver<ResolversTypes['ImportDataStatus'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   validationErrors?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -26882,7 +26891,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   restartCreateReport?: Resolver<Maybe<ResolversTypes['RestartCreateReport']>, ParentType, ContextType, RequireFields<MutationsRestartCreateReportArgs, 'reportData'>>;
   revertMarkPaymentAsFailed?: Resolver<Maybe<ResolversTypes['RevertMarkPaymentAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsRevertMarkPaymentAsFailedArgs, 'deliveredQuantity' | 'deliveryDate' | 'paymentId'>>;
   revertMarkPaymentRecordAsFailed?: Resolver<Maybe<ResolversTypes['RevertMarkPaymentRecordAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsRevertMarkPaymentRecordAsFailedArgs, 'deliveredQuantity' | 'deliveryDate' | 'paymentRecordId'>>;
-  saveKoboImportDataAsync?: Resolver<Maybe<ResolversTypes['SaveKoboProjectImportDataAsync']>, ParentType, ContextType, RequireFields<MutationsSaveKoboImportDataAsyncArgs, 'businessAreaSlug' | 'onlyActiveSubmissions' | 'uid'>>;
+  saveKoboImportDataAsync?: Resolver<Maybe<ResolversTypes['SaveKoboProjectImportDataAsync']>, ParentType, ContextType, RequireFields<MutationsSaveKoboImportDataAsyncArgs, 'businessAreaSlug' | 'onlyActiveSubmissions' | 'pullPictures' | 'uid'>>;
   setSteficonRuleOnPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs, 'paymentPlanId' | 'steficonRuleId'>>;
   setSteficonRuleOnTargetPopulation?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnTargetPopulationArgs, 'input'>>;
   splitPaymentPlan?: Resolver<Maybe<ResolversTypes['SplitPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsSplitPaymentPlanArgs, 'paymentPlanId' | 'splitType'>>;

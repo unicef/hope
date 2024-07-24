@@ -424,7 +424,7 @@ class Household(
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
     consent = models.BooleanField(null=True)
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
-    residence_status = models.CharField(max_length=254, choices=RESIDENCE_STATUS_CHOICE)
+    residence_status = models.CharField(max_length=254, choices=RESIDENCE_STATUS_CHOICE, blank=True)
 
     country_origin = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
     country = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
