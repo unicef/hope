@@ -55,28 +55,21 @@ class TestProgramValidators(TestCase):
         ):
             ProgramCycleValidator.validate_program(**data)
 
-        # TODO add more
-        # ValidationError("Programme Cycle start date cannot be earlier than programme start date")
-        # ValidationError("Programme Cycle end date cannot be earlier than programme end date")
-        # ValidationError("All Programme Cycles should have end date for creation new one.")
-        # ValidationError("Programme Cycles' timeframes must not overlap.")
-        # ValidationError("Not possible leave the Programme Cycle start date empty.")
-        # ValidationError("Not possible leave the Programme Cycle end date empty if it was empty upon starting the edit.")
-        # ValidationError("Not possible leave the Programme Cycle title empty.")
-
     def test_program_cycle_delete_validator(self) -> None:
-        data = {"program_cycle": self.program_cycle}
+        self.program_cycle.delete()
+        program_cycle = ProgramCycle.objects.get(title="Default Cycle 001")
+
+        data = {"program_cycle": program_cycle}
         with self.assertRaisesMessage(ValidationError, "Only Programme Cycle for Active Programme can be deleted."):
             ProgramCycleDeletionValidator.validate_is_deletable(**data)
 
         with self.assertRaisesMessage(ValidationError, "Only Draft Programme Cycle can be deleted."):
             self.program.status = Program.ACTIVE
             self.program.save()
-            self.program_cycle.refresh_from_db()
+            program_cycle.refresh_from_db()
             ProgramCycleDeletionValidator.validate_is_deletable(**data)
 
         with self.assertRaisesMessage(ValidationError, "Don’t allow to delete last Cycle."):
-            last_program_cycle = ProgramCycle.objects.get(title="Default Cycle 001")
-            last_program_cycle.status = ProgramCycle.DRAFT
-            last_program_cycle.save()
-            ProgramCycleDeletionValidator.validate_is_deletable(**{"program_cycle": last_program_cycle})
+            program_cycle.status = ProgramCycle.DRAFT
+            program_cycle.save()
+            ProgramCycleDeletionValidator.validate_is_deletable(**{"program_cycle": program_cycle})
