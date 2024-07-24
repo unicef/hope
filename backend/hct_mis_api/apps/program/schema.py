@@ -417,6 +417,7 @@ class Query(graphene.ObjectType):
         ).exclude(data_collecting_type__code="unknown")
 
     def resolve_all_program_cycles(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
+        # TODO: remove this one will create DRF endpoint for list ProgramCycles
         business_area_slug = info.context.headers.get("Business-Area").lower()
         qs = (
             ProgramCycle.objects.filter(program__business_area__slug=business_area_slug)
