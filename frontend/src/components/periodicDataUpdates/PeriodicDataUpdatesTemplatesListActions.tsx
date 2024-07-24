@@ -16,7 +16,7 @@ export const useDownloadPeriodicDataUpdateTemplate = () => {
       businessAreaSlug: string;
       programId: string;
       templateId: string;
-    }) =>{
+    }) => {
       return fetchPeriodicDataUpdateTemplate(
         mutationBusinessAreaSlug,
         mutationProgramId,
@@ -52,7 +52,6 @@ export const useExportPeriodicDataUpdateTemplate = () => {
         mutationTemplateId,
       ),
     onSuccess: () => {
-      console.log('Jan Lami')
       queryClient.invalidateQueries({
         queryKey: ['periodicDataUpdateTemplates'],
       });
