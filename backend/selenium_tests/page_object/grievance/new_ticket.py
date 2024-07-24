@@ -1,6 +1,7 @@
 from time import sleep
 
 from page_object.base_components import BaseComponents
+from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
 
@@ -66,6 +67,40 @@ class NewTicket(BaseComponents):
     inputValue = 'input[data-cy="input-householdDataUpdateFields[0].fieldValue"]'
     partner = 'div[data-cy="select-partner"]'
     tablePagination = '[data-cy="table-pagination"]'
+    inputDescription = 'textarea[data-cy="input-description"]'
+    inputComments = 'textarea[data-cy="input-comments"]'
+    selectProgram = 'div[data-cy="select-program"]'
+    inputIndividualdataPhonenoalternative = 'input[data-cy="input-individualDataPhoneNoAlternative"]'
+    datePickerFilter = 'div[data-cy="date-picker-filter"]'
+    inputIndividualdataBlockchainname = 'input[data-cy="input-individualDataBlockchainName"]'
+    selectIndividualdataSelfcaredisability = 'div[data-cy="select-individualDataSelfcareDisability"]'
+    selectIndividualdataObserveddisability = 'div[data-cy="select-individualData.observedDisability"]'
+    selectIndividualdataWorkstatus = 'div[data-cy="select-individualData.workStatus"]'
+    selectIndividualdataEstimatedbirthdate = 'div[data-cy="select-individualData.estimatedBirthDate"]'
+    inputIndividualdataFamilyname = 'input[data-cy="input-individualData.familyName"]'
+    inputIndividualdataFullname = 'input[data-cy="input-individualData.fullName"]'
+    selectIndividualdataSex = 'div[data-cy="select-individualData.sex"]'
+    inputIndividualdataGivenname = 'input[data-cy="input-individualData.givenName"]'
+    selectIndividualdataCommsdisability = 'div[data-cy="select-individualData.commsDisability"]'
+    selectIndividualdataHearingdisability = 'div[data-cy="select-individualData.hearingDisability"]'
+    selectIndividualdataMemorydisability = 'div[data-cy="select-individualData.memoryDisability"]'
+    selectIndividualdataSeeingdisability = 'div[data-cy="select-individualData.seeingDisability"]'
+    selectIndividualdataPhysicaldisability = 'div[data-cy="select-individualData.physicalDisability"]'
+    inputIndividualdataEmail = 'input[data-cy="input-individualData.email"]'
+    selectIndividualdataDisability = 'div[data-cy="select-individualData.disability"]'
+    selectIndividualdataPregnant = 'div[data-cy="select-individualData.pregnant"]'
+    selectIndividualdataMaritalstatus = 'div[data-cy="select-individualData.maritalStatus"]'
+    inputIndividualdataMiddlename = 'input[data-cy="input-individualData.middleName"]'
+    inputIndividualdataPaymentdeliveryphoneno = 'input[data-cy="input-individualData.paymentDeliveryPhoneNo"]'
+    inputIndividualdataPhoneno = 'input[data-cy="input-individualData.phoneNo"]'
+    selectIndividualdataPreferredlanguage = 'div[data-cy="select-individualData.preferredLanguage"]'
+    selectIndividualdataRelationship = 'div[data-cy="select-individualData.relationship"]'
+    selectIndividualdataRole = 'div[data-cy="select-individualData.role"]'
+    inputIndividualdataWalletaddress = 'input[data-cy="input-individualData.walletAddress"]'
+    inputIndividualdataWalletname = 'input[data-cy="input-individualData.walletName"]'
+    inputIndividualdataWhoanswersaltphone = 'input[data-cy="input-individualData.whoAnswersAltPhone"]'
+    inputIndividualdataWhoanswersphone = 'input[data-cy="input-individualData.whoAnswersPhone"]'
+    inputIndividualdataBlockchainName = 'input[data-cy="input-individualData.blockchainName"]'
 
     # Texts
     textLookUpHousehold = "LOOK UP HOUSEHOLD"
@@ -293,3 +328,96 @@ class NewTicket(BaseComponents):
                 return True
             sleep(1)
         return False
+
+    def getSelectProgram(self) -> WebElement:
+        return self.wait_for(self.selectProgram)
+
+    def getInputIndividualdataPhonenoalternative(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataPhonenoalternative)
+
+    def getDatePickerFilter(self) -> WebElement:
+        return self.wait_for(self.datePickerFilter).find_element("tag name", "input")
+
+    def getInputIndividualdataBlockchainname(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataBlockchainname)
+
+    def getSelectIndividualdataSelfcaredisability(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataSelfcaredisability)
+
+    def getSelectIndividualdataObserveddisability(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataObserveddisability)
+
+    def getSelectIndividualdataWorkstatus(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataWorkstatus)
+
+    def getSelectIndividualdataEstimatedbirthdate(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataEstimatedbirthdate)
+
+    def getInputIndividualdataFamilyname(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataFamilyname)
+
+    def getInputIndividualdataFullname(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataFullname)
+
+    def getSelectIndividualdataSex(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataSex)
+
+    def getInputIndividualdataGivenname(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataGivenname)
+
+    def getSelectIndividualdataCommsdisability(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataCommsdisability)
+
+    def getSelectIndividualdataHearingdisability(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataHearingdisability)
+
+    def getSelectIndividualdataMemorydisability(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataMemorydisability)
+
+    def getSelectIndividualdataSeeingdisability(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataSeeingdisability)
+
+    def getSelectIndividualdataPhysicaldisability(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataPhysicaldisability)
+
+    def getInputIndividualdataEmail(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataEmail)
+
+    def getSelectIndividualdataDisability(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataDisability)
+
+    def getSelectIndividualdataPregnant(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataPregnant)
+
+    def getSelectIndividualdataMaritalstatus(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataMaritalstatus)
+
+    def getInputIndividualdataMiddlename(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataMiddlename)
+
+    def getInputIndividualdataPaymentdeliveryphoneno(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataPaymentdeliveryphoneno)
+
+    def getInputIndividualdataPhoneno(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataPhoneno)
+
+    def getSelectIndividualdataPreferredlanguage(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataPreferredlanguage)
+
+    def getSelectIndividualdataRelationship(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataRelationship)
+
+    def getSelectIndividualdataRole(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataRole)
+
+    def getInputIndividualdataWalletaddress(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataWalletaddress)
+
+    def getInputIndividualdataWalletname(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataWalletname)
+
+    def getInputIndividualdataWhoanswersaltphone(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataWhoanswersaltphone)
+
+    def getInputIndividualdataWhoanswersphone(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataWhoanswersphone)

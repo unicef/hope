@@ -32,6 +32,7 @@ class GrievanceDetailsPage(BaseComponents):
     languagesSpoken = 'div[data-cy="label-Languages Spoken"]'
     documentation = 'div[data-cy="label-Documentation"]'
     ticketDescription = 'div[data-cy="label-Description"]'
+    labelCreatedBy = 'div[data-cy="label-Created By"]'
     comments = 'div[data-cy="label-Comments"]'
     createLinkedTicket = 'button[data-cy="button-create-linked-ticket"]'
     markDuplicate = 'button[data-cy="button-mark-duplicate"]'
@@ -177,6 +178,9 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getTicketDescription(self) -> WebElement:
         return self.wait_for(self.ticketDescription)
+
+    def getLabelCreatedBy(self) -> WebElement:
+        return self.wait_for(self.labelCreatedBy)
 
     def getLabelComments(self) -> WebElement:
         return self.wait_for(self.comments)

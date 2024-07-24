@@ -20,7 +20,7 @@ def printing(what: str, web_driver: WebDriver, label: str = "data-cy", page_obje
     ids = web_driver.find_elements(By.XPATH, f"//*[@{label}]")
     for ii in ids:
         data_cy_attribute = ii.get_attribute(label)  # type: ignore
-        var_name = [i.capitalize() for i in data_cy_attribute.lower().replace("-", " ").split(" ")]
+        var_name = [i.capitalize() for i in data_cy_attribute.lower().replace(".", " ").replace("-", " ").split(" ")]
         method_name = "get" + "".join(var_name)
         var_name[0] = var_name[0].lower()
         var_name = "".join(var_name)  # type: ignore
@@ -32,6 +32,8 @@ def printing(what: str, web_driver: WebDriver, label: str = "data-cy", page_obje
             print(f"{ii.text}")
         if what == "Assert":
             print(f'assert "{ii.text}" in {page_object_str}.{method_name}().text')
+        if what == "Input":
+            print(f'{page_object_str}.{method_name}().send_keys("")')
 
 
 if __name__ == "__main__":

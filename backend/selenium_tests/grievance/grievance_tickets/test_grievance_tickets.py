@@ -11,12 +11,14 @@ from page_object.grievance.grievance_tickets import GrievanceTickets
 from page_object.grievance.new_ticket import NewTicket
 from pytest_django import DjangoDbBlocker
 
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import HOST, Household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from selenium_tests.helpers.date_time_format import FormatTime
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -268,34 +270,29 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getDescription().send_keys("Happy path test 1234!")
         pageGrievanceNewTicket.getButtonNext().click()
         assert "Happy path test 1234!" in pageGrievanceDetailsPage.getTicketDescription().text
+        assert "Test Programm" in pageGrievanceDetailsPage.getLabelProgramme().text
+        user = User.objects.first()
+        assert f"{user.first_name} {user.last_name}" in pageGrievanceDetailsPage.getLabelCreatedBy().text
         assert test_data["category"] in pageGrievanceDetailsPage.getTicketCategory().text
         assert test_data["type"] in pageGrievanceDetailsPage.getLabelIssueType().text
         assert "New" in pageGrievanceDetailsPage.getTicketStatus().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
-        pageGrievanceNewTicket.screenshot(f"out-{test_data['type']}")
 
-    @pytest.mark.parametrize(
-        "test_data",
-        [
-            pytest.param({"category": "Data Change", "type": "Add Individual"}, id="Data Change Add Individual"),
-        ],
-    )
-    def test_grievance_tickets_create_new_ticket(
+    def test_grievance_tickets_create_new_ticket_Data_Change_Add_Individual_All_Fields(
         self,
         pageGrievanceTickets: GrievanceTickets,
         pageGrievanceNewTicket: NewTicket,
         pageGrievanceDetailsPage: GrievanceDetailsPage,
-        test_data: dict,
         household_without_disabilities: Household,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getButtonNewTicket().click()
         pageGrievanceNewTicket.getSelectCategory().click()
-        pageGrievanceNewTicket.select_option_by_name(test_data["category"])
+        pageGrievanceNewTicket.select_option_by_name("Data Change")
         pageGrievanceNewTicket.getIssueType().click()
-        pageGrievanceNewTicket.select_option_by_name(test_data["type"])
+        pageGrievanceNewTicket.select_option_by_name("Add Individual")
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getHouseholdTab()
         pageGrievanceNewTicket.getHouseholdTableRows(0).click()
@@ -303,14 +300,57 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getReceivedConsent().click()
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getDescription().send_keys("Add Individual - TEST")
+        pageGrievanceNewTicket.getPhoneNoAlternative().send_keys("999 999 999")
+        pageGrievanceNewTicket.getDatePickerFilter().click()
+        pageGrievanceNewTicket.getDatePickerFilter().send_keys(FormatTime(1, 5, 1986).numerically_formatted_date)
+        pageGrievanceNewTicket.getInputIndividualdataBlockchainName().send_keys("TEST")
+        pageGrievanceNewTicket.getInputIndividualdataFamilyname().send_keys("Teria")
+        pageGrievanceNewTicket.getInputIndividualdataFullname().send_keys("Krido")
+        pageGrievanceNewTicket.getSelectIndividualdataSex().click()
+        pageGrievanceNewTicket.select_listbox_element("Male").click()
+        pageGrievanceNewTicket.getInputIndividualdataGivenname().send_keys("Krato")
+        pageGrievanceNewTicket.getSelectIndividualdataCommsdisability().click()
+        pageGrievanceNewTicket.select_listbox_element('A lot of difficulty').click()
+        pageGrievanceNewTicket.getSelectIndividualdataHearingdisability().click()
+        pageGrievanceNewTicket.select_listbox_element('A lot of difficulty').click()
+        pageGrievanceNewTicket.getSelectIndividualdataMemorydisability().click()
+        pageGrievanceNewTicket.select_listbox_element("Cannot do at all").click()
+        pageGrievanceNewTicket.getSelectIndividualdataSeeingdisability().click()
+        pageGrievanceNewTicket.select_listbox_element('Some difficulty').click()
+        pageGrievanceNewTicket.getSelectIndividualdataPhysicaldisability().click()
+        pageGrievanceNewTicket.select_listbox_element("None").click()
+        pageGrievanceNewTicket.getInputIndividualdataEmail().send_keys("kridoteria@bukare.cz")
+        pageGrievanceNewTicket.getSelectIndividualdataDisability().click()
+        pageGrievanceNewTicket.select_listbox_element("disabled").click()
+        pageGrievanceNewTicket.getSelectIndividualdataPregnant().click()
+        pageGrievanceNewTicket.select_listbox_element("No").click()
+        pageGrievanceNewTicket.getSelectIndividualdataMaritalstatus().click()
+        pageGrievanceNewTicket.select_listbox_element("Married").click()
+        pageGrievanceNewTicket.getInputIndividualdataMiddlename().send_keys("Batu")
+        pageGrievanceNewTicket.getInputIndividualdataPaymentdeliveryphoneno().send_keys("123 456 789")
+        pageGrievanceNewTicket.getInputIndividualdataPhoneno().send_keys("098 765 432")
+        pageGrievanceNewTicket.getSelectIndividualdataPreferredlanguage().click()
+        pageGrievanceNewTicket.select_listbox_element("English").click()
+        pageGrievanceNewTicket.getSelectIndividualdataRelationship().click()
+        pageGrievanceNewTicket.select_listbox_element('Wife / Husband').click()
+        pageGrievanceNewTicket.getSelectIndividualdataRole().click()
+        pageGrievanceNewTicket.select_listbox_element("Alternate collector").click()
+        pageGrievanceNewTicket.getInputIndividualdataWalletaddress().send_keys("Wordoki")
+        pageGrievanceNewTicket.getInputIndividualdataWalletname().send_keys("123")
+        pageGrievanceNewTicket.getInputIndividualdataWhoanswersaltphone().send_keys("000 000 000")
+        pageGrievanceNewTicket.getInputIndividualdataWhoanswersphone().send_keys("111 11 11")
+
         pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.screenshot("1", delay_sec=0)
+        from selenium_tests.tools.tag_name_finder import printing
+        printing("Mapping", pageGrievanceNewTicket.driver)
+        printing("Methods", pageGrievanceNewTicket.driver)
         assert "Add Individual - TEST" in pageGrievanceDetailsPage.getTicketDescription().text
-        assert test_data["category"] in pageGrievanceDetailsPage.getTicketCategory().text
-        assert test_data["type"] in pageGrievanceDetailsPage.getLabelIssueType().text
+        assert "Data Change" in pageGrievanceDetailsPage.getTicketCategory().text
+        assert "Add Individual" in pageGrievanceDetailsPage.getLabelIssueType().text
         assert "New" in pageGrievanceDetailsPage.getTicketStatus().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
-        pageGrievanceNewTicket.screenshot(f"out-{test_data['type']}")
 
     # pytest.param(
     #     {"category": "Data Change", "type": "Individual Data Update"}, id="Data Change Individual Data Update"
