@@ -1,13 +1,13 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.registration_datahub.template_generator import (
-    TemplateFileGenerator,
+from hct_mis_api.apps.registration_data.services.template_generator_service import (
+    TemplateFileGeneratorService,
 )
 
 
 class TestTemplateFileGenerator(TestCase):
     def test_create_workbook(self) -> None:
-        wb = TemplateFileGenerator._create_workbook()
+        wb = TemplateFileGeneratorService._create_workbook()
 
         expected_sheet_names = ["Households", "Individuals", "Import helper", "People"].sort()
         result_sheet_names = wb.sheetnames.sort()
@@ -25,7 +25,7 @@ class TestTemplateFileGenerator(TestCase):
             },
         }
 
-        result = TemplateFileGenerator._handle_name_and_label_row(fields)
+        result = TemplateFileGeneratorService._handle_name_and_label_row(fields)
         expected = (
             ["test", "test_h_f"],
             ["My Test Label - STRING - required", "Flex Test Label - STRING"],
@@ -33,8 +33,8 @@ class TestTemplateFileGenerator(TestCase):
         self.assertEqual(expected, result)
 
     def test_add_template_columns(self) -> None:
-        wb = TemplateFileGenerator._create_workbook()
-        result_wb = TemplateFileGenerator._add_template_columns(wb)
+        wb = TemplateFileGeneratorService._create_workbook()
+        result_wb = TemplateFileGeneratorService._add_template_columns(wb)
 
         households_rows = tuple(result_wb["Households"].iter_rows(values_only=True))
 

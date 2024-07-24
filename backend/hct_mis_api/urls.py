@@ -13,7 +13,7 @@ import hct_mis_api.apps.account.views
 import hct_mis_api.apps.accountability.views
 import hct_mis_api.apps.household.views
 import hct_mis_api.apps.payment.views
-import hct_mis_api.apps.registration_datahub.views
+import hct_mis_api.apps.registration_data.views
 import hct_mis_api.apps.sanction_list.views
 import hct_mis_api.apps.targeting.views
 from hct_mis_api.apps.core.rest_api import all_fields_attributes
@@ -44,7 +44,7 @@ api_patterns = [
     path("sentry-debug/", trigger_error),
     path(
         "business-area/<str:business_area_slug>/program/<str:program_id>/download-template",
-        hct_mis_api.apps.registration_datahub.views.download_template,
+        hct_mis_api.apps.registration_data.views.download_template,
     ),
     path(
         "download-exported-users/<str:business_area_slug>",
