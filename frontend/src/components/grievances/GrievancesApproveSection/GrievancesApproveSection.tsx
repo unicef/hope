@@ -6,8 +6,8 @@ import { AddIndividualGrievanceDetails } from '../AddIndividualGrievanceDetails'
 import { DeleteHouseholdGrievanceDetails } from '../DeleteHouseholdGrievanceDetails';
 import { DeleteIndividualGrievanceDetails } from '../DeleteIndividualGrievanceDetails';
 import { FlagDetails } from '../FlagDetails';
-import { NeedsAdjudicationDetailsNew } from '../NeedsAdjudicationDetailsNew';
-import { NeedsAdjudicationDetailsOld } from '../NeedsAdjudicationDetailsOld';
+import { NeedsAdjudicationDetailsNew } from '../NeedsAdjudication/NeedsAdjudicationDetailsNew';
+import { NeedsAdjudicationDetailsOld } from '../NeedsAdjudication/NeedsAdjudicationDetailsOld';
 import { PaymentGrievanceDetails } from '../PaymentGrievance/PaymentGrievanceDetails/PaymentGrievanceDetails';
 import { RequestedHouseholdDataChange } from '../RequestedHouseholdDataChange';
 import { RequestedIndividualDataChange } from '../RequestedIndividualDataChange';

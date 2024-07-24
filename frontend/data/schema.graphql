@@ -2055,7 +2055,7 @@ type ImportedHouseholdNode implements Node {
   consentSign: String!
   consent: Boolean
   consentSharing: HouseholdConsentSharing!
-  residenceStatus: HouseholdResidenceStatus!
+  residenceStatus: HouseholdResidenceStatus
   countryOrigin: String
   country: String
   address: String!
@@ -2755,7 +2755,7 @@ type Mutations {
   approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveDeleteHousehold(approveStatus: Boolean!, grievanceTicketId: ID!, reasonHhId: String, version: BigInt): DeleteHouseholdApproveMutation
   approveSystemFlagging(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
-  approveNeedsAdjudication(distinctIndividualIds: [ID], duplicateIndividualIds: [ID], grievanceTicketId: ID!, selectedIndividualId: ID, version: BigInt): NeedsAdjudicationApproveMutation
+  approveNeedsAdjudication(clearIndividualIds: [ID], distinctIndividualIds: [ID], duplicateIndividualIds: [ID], grievanceTicketId: ID!, selectedIndividualId: ID, version: BigInt): NeedsAdjudicationApproveMutation
   approvePaymentDetails(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): PaymentDetailsApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, newIndividualId: ID, role: String!, version: BigInt): ReassignRoleMutation
   bulkUpdateGrievanceAssignee(assignedTo: String!, businessAreaSlug: String!, grievanceTicketIds: [ID]!): BulkUpdateGrievanceTicketsAssigneesMutation
