@@ -12,6 +12,9 @@ from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from backend.hct_mis_api.apps.grievance.models import TicketNeedsAdjudicationDetails
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from hct_mis_api.apps.household.models import HOST, Household, Individual
+from hct_mis_api.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -39,13 +42,45 @@ def create_programs(django_db_setup: Generator[None, None, None], django_db_bloc
     yield
 
 
+def create_custom_household(observed_disability: list[str], residence_status: str = HOST) -> Household:
+    program = Program.objects.get(name="Test Programm")
+    household, _ = create_household_and_individuals(
+        household_data={
+            "unicef_id": "HH-00-0000.0442",
+            "rdi_merge_status": "MERGED",
+            "business_area": program.business_area,
+            "program": program,
+            "residence_status": residence_status,
+        },
+        individuals_data=[
+            {
+                "unicef_id": "IND-00-0000.0011",
+                "rdi_merge_status": "MERGED",
+                "business_area": program.business_area,
+                "observed_disability": observed_disability,
+            },
+            {
+                "unicef_id": "IND-00-0000.0022",
+                "rdi_merge_status": "MERGED",
+                "business_area": program.business_area,
+                "observed_disability": observed_disability,
+            },
+            {
+                "unicef_id": "IND-00-0000.0033",
+                "rdi_merge_status": "MERGED",
+                "business_area": program.business_area,
+                "observed_disability": observed_disability,
+            },
+        ],
+    )
+    return household
+
+
 @pytest.fixture
 def add_grievance_needs_adjudication() -> None:
     GrievanceTicket._meta.get_field("created_at").auto_now_add = False
     GrievanceTicket._meta.get_field("updated_at").auto_now = False
-    generate_grievance(
-            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-        )
+    generate_grievance(status=GrievanceTicket.STATUS_FOR_APPROVAL)
     GrievanceTicket._meta.get_field("created_at").auto_now_add = True
     GrievanceTicket._meta.get_field("updated_at").auto_now = True
     yield
@@ -54,7 +89,7 @@ def add_grievance_needs_adjudication() -> None:
 def generate_grievance(
     unicef_id: str = "GRV-0000001",
     status: int = GrievanceTicket.STATUS_NEW,
-    category: int = GrievanceTicket.CATEGORY_REFERRAL,
+    category: int = GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
     created_by: User | None = None,
     assigned_to: User | None = None,
     business_area: BusinessArea | None = None,
@@ -86,14 +121,28 @@ def generate_grievance(
         }
     )
 
-    from hct_mis_api.apps.grievance.models import TicketReferralDetails
+    hh = create_custom_household(observed_disability=[])
 
-    TicketNeedsAdjudicationDetails.objects.create(
+    individual_qs = Individual.objects.filter(household=hh)
+
+    # list of possible duplicates in the ticket
+    possible_duplicates = [individual_qs[1], individual_qs[2]]
+    # list of distinct Individuals
+    selected_distinct = [individual_qs[0]]
+    # list of duplicate Individuals
+    selected_individuals = [individual_qs[2]]
+
+    ticket_detail = TicketNeedsAdjudicationDetails.objects.create(
         ticket=grievance_ticket,
-        selected_individuals=[]
-        selected_distinct=[]
-
+        is_multiple_duplicates_version=True,
+        golden_records_individual=individual_qs[0],
     )
+    # list of possible duplicates in the ticket
+    ticket_detail.possible_duplicates.add(*possible_duplicates)
+    # list of distinct Individuals
+    ticket_detail.selected_distinct.add(*selected_distinct)
+    # list of duplicate Individuals
+    ticket_detail.selected_individuals.add(*selected_individuals)
 
     return grievance_ticket
 
