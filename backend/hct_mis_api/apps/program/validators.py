@@ -147,9 +147,11 @@ class ProgramCycleValidator(CommonValidator):
         # A user can’t leave the Program Cycle title empty.
         program = kwargs.get("program")
         program_cycle = kwargs.get("program_cycle")
-        cycles = program.cycles.exclude(id=program_cycle.pk) if program_cycle else program.cycles.all()
-        if cycles.filter(title=kwargs["title"]).exists():
-            raise ValidationError("Programme Cycles' title should be unique.")
+        title = kwargs.get("title")
+        if title:
+            cycles = program.cycles.exclude(id=program_cycle.pk) if program_cycle else program.cycles.all()
+            if cycles.filter(title=title).exists():
+                raise ValidationError("Programme Cycles' title should be unique.")
 
     @classmethod
     def validate_program_cycle_update_title_and_dates(cls, *args: Any, **kwargs: Any) -> None:

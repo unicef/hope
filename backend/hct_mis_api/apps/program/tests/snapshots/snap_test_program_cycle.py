@@ -348,7 +348,10 @@ snapshots['TestProgramCycle::test_update_program_cycle 2'] = {
                                 'endDate': '2020-01-02',
                                 'startDate': '2020-01-01',
                                 'status': 'ACTIVE',
-                                'title': 'Default Cycle 001'
+                                'title': 'Default Cycle 001',
+                                'totalDeliveredQuantityUsd': 0.0,
+                                'totalEntitledQuantityUsd': 0.0,
+                                'totalUndeliveredQuantityUsd': 0.0
                             }
                         },
                         {
@@ -356,7 +359,10 @@ snapshots['TestProgramCycle::test_update_program_cycle 2'] = {
                                 'endDate': '2022-01-01',
                                 'startDate': '2021-01-01',
                                 'status': 'ACTIVE',
-                                'title': 'Cycle 002'
+                                'title': 'Cycle 002',
+                                'totalDeliveredQuantityUsd': 0.0,
+                                'totalEntitledQuantityUsd': 0.0,
+                                'totalUndeliveredQuantityUsd': 0.0
                             }
                         },
                         {
@@ -364,7 +370,10 @@ snapshots['TestProgramCycle::test_update_program_cycle 2'] = {
                                 'endDate': None,
                                 'startDate': '2055-11-13',
                                 'status': 'DRAFT',
-                                'title': 'NEW NEW NAME 22'
+                                'title': 'NEW NEW NAME 22',
+                                'totalDeliveredQuantityUsd': 0.0,
+                                'totalEntitledQuantityUsd': 0.0,
+                                'totalUndeliveredQuantityUsd': 0.0
                             }
                         }
                     ],
@@ -386,7 +395,10 @@ snapshots['TestProgramCycle::test_update_program_cycle 3'] = {
                                 'endDate': '2020-01-02',
                                 'startDate': '2020-01-01',
                                 'status': 'ACTIVE',
-                                'title': 'Default Cycle 001'
+                                'title': 'Default Cycle 001',
+                                'totalDeliveredQuantityUsd': 0.0,
+                                'totalEntitledQuantityUsd': 0.0,
+                                'totalUndeliveredQuantityUsd': 0.0
                             }
                         },
                         {
@@ -394,7 +406,10 @@ snapshots['TestProgramCycle::test_update_program_cycle 3'] = {
                                 'endDate': '2022-01-01',
                                 'startDate': '2021-01-01',
                                 'status': 'ACTIVE',
-                                'title': 'Cycle 002'
+                                'title': 'Cycle 002',
+                                'totalDeliveredQuantityUsd': 0.0,
+                                'totalEntitledQuantityUsd': 0.0,
+                                'totalUndeliveredQuantityUsd': 0.0
                             }
                         },
                         {
@@ -402,7 +417,10 @@ snapshots['TestProgramCycle::test_update_program_cycle 3'] = {
                                 'endDate': '2055-11-22',
                                 'startDate': '2055-11-14',
                                 'status': 'DRAFT',
-                                'title': 'NEW NEW NAME 333'
+                                'title': 'NEW NEW NAME 22',
+                                'totalDeliveredQuantityUsd': 0.0,
+                                'totalEntitledQuantityUsd': 0.0,
+                                'totalUndeliveredQuantityUsd': 0.0
                             }
                         }
                     ],

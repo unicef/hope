@@ -27,6 +27,9 @@ mutation createProgramCycle($programCycleData: CreateProgramCycleInput!){
             title
             startDate
             endDate
+            totalDeliveredQuantityUsd
+            totalEntitledQuantityUsd
+            totalUndeliveredQuantityUsd
           }
         }
       }
@@ -48,6 +51,9 @@ mutation updateProgramCycle($programCycleData: UpdateProgramCycleInput!){
             title
             startDate
             endDate
+            totalDeliveredQuantityUsd
+            totalEntitledQuantityUsd
+            totalUndeliveredQuantityUsd
           }
         }
       }
@@ -282,7 +288,6 @@ class TestProgramCycle(APITestCase):
             variables={
                 "programCycleData": {
                     "programCycleId": encoded_cycle_id,
-                    "title": "NEW NEW NAME 333",
                     "startDate": "2055-11-14",
                     "endDate": "2055-11-22",
                 }
@@ -321,7 +326,6 @@ class TestProgramCycle(APITestCase):
             variables={
                 "programCycleData": {
                     "programCycleId": encoded_cycle_id,
-                    "title": "NEW NEW NAME3",
                     "startDate": "2055-11-11",
                     "endDate": None,
                 }

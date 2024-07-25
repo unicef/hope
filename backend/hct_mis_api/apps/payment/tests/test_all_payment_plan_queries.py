@@ -26,6 +26,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentHouseholdSnapshot,
     PaymentPlan,
 )
+from hct_mis_api.apps.program.fixtures import ProgramCycleFactory
 
 
 def create_child_payment_plans(pp: PaymentPlan) -> None:
@@ -114,8 +115,8 @@ class TestPaymentPlanQueries(APITestCase):
     """
 
     ALL_PAYMENT_PLANS_FILTER_QUERY = """
-    query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $program: String) {
-        allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, program: $program, orderBy: "unicef_id") {
+    query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $program: String, $programCycle: String) {
+        allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, program: $program, orderBy: "unicef_id", programCycle: $programCycle) {
         edges {
           node {
             dispersionEndDate
@@ -346,6 +347,7 @@ class TestPaymentPlanQueries(APITestCase):
 
     @freeze_time("2020-10-10")
     def test_fetch_all_payment_plans_filters(self) -> None:
+        just_random_program_cycle = ProgramCycleFactory(program=self.pp.program)
         for filter_data in [
             {"search": self.pp.unicef_id},
             {"status": self.pp.status},
@@ -357,6 +359,8 @@ class TestPaymentPlanQueries(APITestCase):
                 "dispersionStartDate": self.pp_conflicted.dispersion_start_date,
                 "dispersionEndDate": self.pp_conflicted.dispersion_end_date,
             },
+            {"programCycle": encode_id_base64(self.pp.program_cycle.pk, "ProgramCycleNode")},
+            {"programCycle": encode_id_base64(just_random_program_cycle.pk, "ProgramCycleNode")},
         ]:
             self.snapshot_graphql_request(
                 request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY,

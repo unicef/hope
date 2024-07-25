@@ -86,6 +86,23 @@ class TestPaymentPlanServices(APITestCase):
         program_cycle.refresh_from_db()
         self.assertEqual(program_cycle.status, ProgramCycle.DRAFT)
 
+    def test_delete_when_its_two_pp_in_cycle(self) -> None:
+        pp_1 = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program__status=Program.ACTIVE)
+        pp_2 = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program=pp_1.program)
+        program_cycle = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=pp_1.program)
+        pp_1.program_cycle = program_cycle
+        pp_1.save()
+        pp_1.refresh_from_db()
+        pp_2.program_cycle = program_cycle
+        pp_2.save()
+
+        self.assertEqual(pp_1.program_cycle.status, ProgramCycle.ACTIVE)
+
+        pp_1 = PaymentPlanService(payment_plan=pp_1).delete()
+        self.assertEqual(pp_1.is_removed, True)
+        program_cycle.refresh_from_db()
+        self.assertEqual(program_cycle.status, ProgramCycle.ACTIVE)
+
     @flaky(max_runs=5, min_passes=1)
     @freeze_time("2020-10-10")
     def test_create_validation_errors(self) -> None:

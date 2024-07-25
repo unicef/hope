@@ -430,10 +430,11 @@ def cash_plan_and_payment_plan_filter(queryset: ExtendedQuerySetSequence, **kwar
     if program:
         queryset = queryset.filter(program=decode_id_string(program))
 
+    # CashPlan does not has a ProgramCycle FK for now
     # if start_date_gte:
-    #     queryset = queryset.filter(start_date__gte=start_date_gte)
+    #     queryset = queryset.filter(program_cycle__start_date__gte=start_date_gte)
     # if end_date_lte:
-    #     queryset = queryset.filter(end_date__lte=end_date_lte)
+    #     queryset = queryset.filter(program_cycle__end_date__lte=end_date_lte)
 
     if verification_status:
         queryset = queryset.filter(payment_verification_summary__status__in=verification_status)
