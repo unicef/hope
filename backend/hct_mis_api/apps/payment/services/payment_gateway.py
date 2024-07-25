@@ -107,12 +107,12 @@ class PaymentInstructionFromSplitSerializer(PaymentInstructionFromDeliveryMechan
 
 class PaymentPayloadSerializer(serializers.Serializer):
     amount = serializers.DecimalField(max_digits=12, decimal_places=2, required=True)
-    phone_no = serializers.CharField(required=False)
-    last_name = serializers.CharField(required=False)
-    first_name = serializers.CharField(required=False)
-    full_name = serializers.CharField(required=False)
+    phone_no = serializers.CharField(required=False, allow_blank=True)
+    last_name = serializers.CharField(required=False, allow_blank=True)
+    first_name = serializers.CharField(required=False, allow_blank=True)
+    full_name = serializers.CharField(required=False, allow_blank=True)
     destination_currency = serializers.CharField(required=True)
-    service_provider_code = serializers.CharField(required=False)
+    service_provider_code = serializers.CharField(required=False, allow_blank=True)
 
 
 class PaymentSerializer(ReadOnlyModelSerializer):
@@ -137,7 +137,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
             }
         )
         if not payload.is_valid():
-            raise serializers.ValidationError(payload.errors)
+            raise PaymentGatewayAPI.PaymentGatewayAPIException(payload.errors)
         return payload.data
 
     class Meta:
@@ -457,10 +457,13 @@ class PaymentGatewayService:
 
             delivered_quantity = matching_pg_payment.payout_amount
             if _payment.status in [
-                Payment.STATUS_SUCCESS,
                 Payment.STATUS_DISTRIBUTION_SUCCESS,
                 Payment.STATUS_DISTRIBUTION_PARTIAL,
+                Payment.STATUS_NOT_DISTRIBUTED,
             ]:
+                if _payment.status == Payment.STATUS_NOT_DISTRIBUTED and delivered_quantity is None:
+                    delivered_quantity = 0
+
                 update_fields.extend(["delivered_quantity", "delivered_quantity_usd"])
                 try:
                     _payment.delivered_quantity = to_decimal(delivered_quantity)

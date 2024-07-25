@@ -160,9 +160,11 @@ class TestSriLankaRegistrationService(TestCase):
         )
 
         self.assertEqual(PendingHousehold.objects.count(), 1)
+        self.assertEqual(PendingHousehold.objects.filter(program=rdi.program).count(), 1)
         self.assertEqual(PendingIndividualRoleInHousehold.objects.count(), 1)
         self.assertEqual(PendingBankAccountInfo.objects.count(), 1)
         self.assertEqual(PendingDocument.objects.count(), 1)
+        self.assertEqual(PendingDocument.objects.filter(program=rdi.program).count(), 1)
 
         bank_acc_info = PendingBankAccountInfo.objects.first()
         self.assertEqual(bank_acc_info.account_holder_name, "Test Holder Name 123")
@@ -196,6 +198,9 @@ class TestSriLankaRegistrationService(TestCase):
         )
         self.assertEqual(PendingIndividual.objects.filter(full_name="Dome").first().email, "email999@mail.com")
         self.assertEqual(PendingIndividual.objects.filter(full_name="Dome").first().age_at_registration, 43)
+        self.assertEqual(
+            PendingIndividual.objects.filter(full_name="Dome", program=rdi.program).first().age_at_registration, 43
+        )
 
     def test_import_record_twice(self) -> None:
         service = SriLankaRegistrationService(self.registration)

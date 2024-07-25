@@ -115,6 +115,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
 
         household_data = {
             "registration_data_import": registration_data_import,
+            "program": registration_data_import.program,
             "first_registration_date": record.timestamp,
             "last_registration_date": record.timestamp,
             "country_origin": GeoCountry.objects.get(iso_code2="CZ"),
@@ -178,6 +179,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             first_registration_date=household.first_registration_date,
             last_registration_date=household.last_registration_date,
             business_area=registration_data_import.business_area,
+            program=registration_data_import.program,
         )
 
         individual_data["disability"] = individual_dict.get("disability_i_c", NOT_DISABLED)
@@ -237,6 +239,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
                 "issuance_date": issuance_date,
                 "expiry_date": expiry_date,
                 "photo": photo,
+                "program": individual.program,
             }
             ModelClassForm = modelform_factory(PendingDocument, form=DocumentForm, fields=list(document_kwargs.keys()))
             form = ModelClassForm(data=document_kwargs)
