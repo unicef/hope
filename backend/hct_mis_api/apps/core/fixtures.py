@@ -13,6 +13,7 @@ from hct_mis_api.apps.core.models import (
     PeriodicFieldData,
     StorageFile,
 )
+from hct_mis_api.apps.program.models import Program
 
 faker = Faker()
 
@@ -142,3 +143,19 @@ class FlexibleAttributeForPDUFactory(DjangoModelFactory):
 
     class Meta:
         model = FlexibleAttribute
+
+
+def create_pdu_flexible_attribute(
+    name: str, subtype: str, number_of_rounds: int, rounds_names: list[str], program: Program
+) -> FlexibleAttribute:
+    flexible_attribute = FlexibleAttribute.objects.create(
+        name=name,
+        type=FlexibleAttribute.PDU,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        program=program,
+    )
+    flexible_attribute.pdu_data = PeriodicFieldData.objects.create(
+        subtype=subtype, number_of_rounds=number_of_rounds, rounds_names=rounds_names
+    )
+    flexible_attribute.save()
+    return flexible_attribute
