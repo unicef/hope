@@ -394,14 +394,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.select_listbox_element('Wife / Husband').click()
         pageGrievanceNewTicket.getSelectIndividualdataRole().click()
         pageGrievanceNewTicket.select_listbox_element("Alternate collector").click()
-
         pageGrievanceNewTicket.getButtonNext().click()
-        # pageGrievanceNewTicket.screenshot("1")
-        # from selenium_tests.tools.tag_name_finder import printing
-        # printing("Mapping", pageGrievanceNewTicket.driver)
-        # printing("Methods", pageGrievanceNewTicket.driver)
-        # printing("Assert", pageGrievanceNewTicket.driver, page_object_str="pageGrievanceNewTicket")
-
         assert "ASSIGN TO ME" in pageGrievanceDetailsPage.getButtonAssignToMe().text
         assert "New" in pageGrievanceDetailsPage.getTicketStatus().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
@@ -435,8 +428,33 @@ class TestGrievanceTickets:
                 {"category": "Data Change", "type": "Household Data Update"}, id="Data Change Household Data Update"
             ),
         ])
-    def test_grievance_tickets_create_new_ticket(self, test_data: None):
-        pass
+    def test_grievance_tickets_create_new_ticket(self,
+                                                 pageGrievanceTickets: GrievanceTickets,
+                                                 pageGrievanceNewTicket: NewTicket,
+                                                 pageGrievanceDetailsPage: GrievanceDetailsPage,
+                                                 household_without_disabilities: Household,
+                                                 test_data: None):
+        pageGrievanceTickets.getNavGrievance().click()
+        assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
+        pageGrievanceTickets.getButtonNewTicket().click()
+        pageGrievanceNewTicket.getSelectCategory().click()
+        pageGrievanceNewTicket.select_option_by_name("Data Change")
+        pageGrievanceNewTicket.getIssueType().click()
+        pageGrievanceNewTicket.select_option_by_name("Add Individual")
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getHouseholdTab()
+        pageGrievanceNewTicket.getHouseholdTableRows(0).click()
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getReceivedConsent().click()
+        pageGrievanceNewTicket.getButtonNext().click()
+
+        pageGrievanceNewTicket.getDescription().send_keys("Add Individual - TEST")
+
+        pageGrievanceNewTicket.screenshot("1")
+        from selenium_tests.tools.tag_name_finder import printing
+        printing("Mapping", pageGrievanceNewTicket.driver)
+        printing("Methods", pageGrievanceNewTicket.driver)
+        printing("Assert", pageGrievanceNewTicket.driver, page_object_str="pageGrievanceNewTicket")
 
     def test_grievance_tickets_create_new_tickets_Grievance_Complaint_Partner_Related_Complaint(self):
         pass
