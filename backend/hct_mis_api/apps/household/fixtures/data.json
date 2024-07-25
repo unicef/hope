@@ -210,6 +210,7 @@
     "total_cash_received_usd": null,
     "total_cash_received": null,
     "programs": [],
+    "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718",
     "copied_from": null
   }
 },
@@ -453,6 +454,7 @@
     "enrolled_in_nutrition_programme": null,
     "administration_of_rutf": null,
     "unicef_id": "IND-74-0000.0001",
+    "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718",
     "deduplication_golden_record_status": "DUPLICATE",
     "deduplication_batch_status": "DUPLICATE_IN_BATCH",
     "deduplication_golden_record_results": {
@@ -861,6 +863,7 @@
     "enrolled_in_nutrition_programme": null,
     "administration_of_rutf": null,
     "unicef_id": "IND-88-0000.0006",
+    "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718",
     "deduplication_golden_record_status": "DUPLICATE",
     "deduplication_batch_status": "DUPLICATE_IN_BATCH",
     "deduplication_golden_record_results": {
@@ -957,6 +960,7 @@
     "enrolled_in_nutrition_programme": null,
     "administration_of_rutf": null,
     "unicef_id": "IND-88-0000.0999",
+    "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718",
     "deduplication_golden_record_status": "DUPLICATE",
     "deduplication_batch_status": "DUPLICATE_IN_BATCH",
     "deduplication_golden_record_results": {

@@ -24,7 +24,7 @@
     "extras": {},
     "ignored": false,
     "household_unicef_id": "HH-20-0000.0014",
-    "programs": ["00000000-0000-0000-0000-faceb00c0000"]
+    "programs": ["939ff91b-7f89-4e3c-9519-26ed62f51718"]
   }
 },
 {
@@ -82,7 +82,8 @@
       "efaad4e3-f8d9-481b-a902-f5f23deb52f9",
       "e92d41d0-202f-4138-b344-4c30a1751797"
     ],
-    "selected_individuals": []
+    "selected_individuals": ["e92d41d0-202f-4138-b344-4c30a1751797"],
+    "selected_distinct": ["bc5a5b20-74a4-4d48-ab63-99a0c913850d"]
   }
 }
 ]
