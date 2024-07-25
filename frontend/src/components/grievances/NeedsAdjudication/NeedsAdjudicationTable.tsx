@@ -80,14 +80,14 @@ export const NeedsAdjudicationTable = ({
   };
 
   const duplicateTooltip = (
-    <Tooltip title="Marked as Duplicate" data-cy="duplicate-tooltip">
-      <PeopleIcon color="primary" />
+    <Tooltip data-cy='people-icon-tooltip' title="Marked as Duplicate" >
+      <PeopleIcon data-cy="people-icon" color="primary" />
     </Tooltip>
   );
 
   const distinctTooltip = (
-    <Tooltip title="Marked as Distinct" data-cy="distinct-tooltip">
-      <PersonIcon color="primary" />
+    <Tooltip data-cy='person-icon-tooltip' title="Marked as Distinct" >
+      <PersonIcon data-cy="person-icon" color="primary" />
     </Tooltip>
   );
 
@@ -97,7 +97,7 @@ export const NeedsAdjudicationTable = ({
     !isActiveProgram;
 
   const renderPossibleDuplicateRow = (possibleDuplicate) => (
-    <TableRow key={possibleDuplicate?.id} data-cy="possible-duplicate-row">
+    <TableRow key={possibleDuplicate.id} data-cy={`possible-duplicate-row-${possibleDuplicate.id}`}>
       <TableCell align="left" data-cy="checkbox-cell">
         <Checkbox
           color="primary"
@@ -107,7 +107,7 @@ export const NeedsAdjudicationTable = ({
           data-cy="select-checkbox"
         />
       </TableCell>
-      <TableCell align="left" data-cy="status-cell">
+      <TableCell align="left" data-cy="distinct-duplicate-cell">
         {(() => {
           const { id } = possibleDuplicate;
 
@@ -232,7 +232,7 @@ export const NeedsAdjudicationTable = ({
         </TableRow>
       </TableHead>
       <TableBody>
-        <TableRow>
+        <TableRow data-cy="possible-duplicate-golden-row">
           <TableCell align="left">
             <Checkbox
               color="primary"
@@ -244,7 +244,7 @@ export const NeedsAdjudicationTable = ({
               onChange={() => handleSelect(details.goldenRecordsIndividual?.id)}
             />
           </TableCell>
-          <TableCell align="left" data-cy="uniqueness-cell">
+          <TableCell align="left" data-cy="distinct-duplicate-golden-cell">
             {details.goldenRecordsIndividual
               ? (() => {
                   const id = details.goldenRecordsIndividual.id;
