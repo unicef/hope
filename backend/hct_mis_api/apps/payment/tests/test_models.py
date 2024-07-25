@@ -330,6 +330,7 @@ class TestPaymentPlanSplitModel(TestCase):
         pp_split1.payments.set([p1, p2])
         self.assertEqual(pp_split1.financial_service_provider, dm.financial_service_provider)
         self.assertEqual(pp_split1.chosen_configuration, dm.chosen_configuration)
+        self.assertEqual(pp_split1.delivery_mechanism, dm.delivery_mechanism)
 
 
 class TestFinancialServiceProviderModel(TestCase):
