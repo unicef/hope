@@ -13,7 +13,8 @@ from hct_mis_api.apps.core.fixtures import (
     generate_data_collecting_types,
 )
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
+from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 
 
@@ -25,6 +26,29 @@ class TestAllProgramsQuery(APITestCase):
           edges {
             node {
               name
+            }
+          }
+        }
+      }
+    """
+
+    ALL_PROGRAMS_QUERY_WITH_PROGRAM_CYCLE_FILTERS = """
+    query AllPrograms($businessArea: String!, $orderBy: String, $name: String, $compatibleDct: Boolean, $cycleSearch: String, $cycleTotalDeliveredQuantityUsdFrom: Float, $cycleTotalDeliveredQuantityUsdTo: Float) {
+        allPrograms(businessArea: $businessArea, orderBy: $orderBy, name: $name, compatibleDct: $compatibleDct) {
+          totalCount
+          edges {
+            node {
+              name
+              cycles(search: $cycleSearch, totalDeliveredQuantityUsdFrom: $cycleTotalDeliveredQuantityUsdFrom, totalDeliveredQuantityUsdTo: $cycleTotalDeliveredQuantityUsdTo) {
+                totalCount
+                edges {
+                  node {
+                    status
+                    title
+                    totalDeliveredQuantityUsd
+                  }
+                }
+              }
             }
           }
         }
@@ -69,6 +93,7 @@ class TestAllProgramsQuery(APITestCase):
             business_area=cls.business_area,
             data_collecting_type=data_collecting_type,
             partner_access=Program.ALL_PARTNERS_ACCESS,
+            cycle__title="Default Cycle",
         )
 
         ProgramFactory.create(
@@ -167,4 +192,75 @@ class TestAllProgramsQuery(APITestCase):
                 },
             },
             variables={"businessArea": self.business_area.slug, "orderBy": "name"},
+        )
+
+    def test_all_programs_with_cycles_filter(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.business_area
+        )
+        self.snapshot_graphql_request(
+            request_string=self.ALL_PROGRAMS_QUERY_WITH_PROGRAM_CYCLE_FILTERS,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={
+                "businessArea": self.business_area.slug,
+                "orderBy": "name",
+                "name": "Program with all partners access",
+                "cycleSearch": "Default",
+            },
+        )
+        program = Program.objects.get(name="Program with all partners access")
+
+        cycle = ProgramCycleFactory(program=program, title="Second CYCLE with total_delivered_quantity_usd")
+        PaymentPlanFactory(program=program, program_cycle=cycle, total_delivered_quantity_usd=999)
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_PROGRAMS_QUERY_WITH_PROGRAM_CYCLE_FILTERS,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={
+                "businessArea": self.business_area.slug,
+                "orderBy": "name",
+                "name": "Program with all partners access",
+                "cycleTotalDeliveredQuantityUsdFrom": 100,
+            },
+        )
+        self.snapshot_graphql_request(
+            request_string=self.ALL_PROGRAMS_QUERY_WITH_PROGRAM_CYCLE_FILTERS,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={
+                "businessArea": self.business_area.slug,
+                "orderBy": "name",
+                "name": "Program with all partners access",
+                "cycleTotalDeliveredQuantityUsdTo": 1000,
+            },
+        )
+        self.snapshot_graphql_request(
+            request_string=self.ALL_PROGRAMS_QUERY_WITH_PROGRAM_CYCLE_FILTERS,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={
+                "businessArea": self.business_area.slug,
+                "orderBy": "name",
+                "name": "Program with all partners access",
+                "cycleTotalDeliveredQuantityUsdFrom": 555,
+                "cycleTotalDeliveredQuantityUsdTo": 1000,
+            },
         )

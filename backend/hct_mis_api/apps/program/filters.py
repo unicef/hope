@@ -150,7 +150,6 @@ class ProgramCycleFilter(FilterSet):
         return qs.filter(q_obj)
 
     def total_delivered_quantity_filter(self, queryset: QuerySet, name: str, value: Any) -> QuerySet:
-        # TODO: MB refactor this one in future using NumberFilter(field="total_delivered_quantity", lookup_expr="gte")
         filter_dict = {}
         if value:
             # annotate total_delivered_quantity_usd
