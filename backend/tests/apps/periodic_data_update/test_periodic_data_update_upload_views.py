@@ -124,24 +124,24 @@ class TestPeriodicDataUpdateUploadViews:
         assert len(response_json) == 2
         assert {
             "id": self.pdu_upload1_program1.id,
-            "status_display": self.pdu_upload1_program1.get_status_display(),
-            "status": self.pdu_upload1_program1.combined_status_display,
+            "status_display": self.pdu_upload1_program1.combined_status_display,
+            "status": self.pdu_upload1_program1.combined_status,
             "template": self.pdu_upload1_program1.template.id,
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_upload1_program1.created_by.get_full_name(),
         } in response_json
         assert {
             "id": self.pdu_upload2_program1.id,
-            "status_display": self.pdu_upload2_program1.get_status_display(),
-            "status": self.pdu_upload2_program1.combined_status_display,
+            "status_display": self.pdu_upload2_program1.combined_status_display,
+            "status": self.pdu_upload2_program1.combined_status,
             "template": self.pdu_upload2_program1.template.id,
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_upload2_program1.created_by.get_full_name(),
         } in response_json
         assert {
             "id": self.pdu_upload_program2.id,
-            "status_display": self.pdu_upload_program2.get_status_display(),
-            "status": self.pdu_upload_program2.combined_status_display,
+            "status_display": self.pdu_upload_program2.combined_status_display,
+            "status": self.pdu_upload_program2.combined_status,
             "template": self.pdu_upload_program2.template.id,
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_upload_program2.created_by.get_full_name(),

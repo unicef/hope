@@ -147,8 +147,8 @@ class TestPeriodicDataUpdateTemplateViews:
         assert len(response_json) == 3
         assert {
             "id": self.pdu_template1.id,
-            "status_display": self.pdu_template1.get_status_display(),
-            "status": self.pdu_template1.combined_status_display,
+            "status_display": self.pdu_template1.combined_status_display,
+            "status": self.pdu_template1.combined_status,
             "number_of_records": self.pdu_template1.number_of_records,
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_template1.created_by.get_full_name(),
@@ -156,8 +156,8 @@ class TestPeriodicDataUpdateTemplateViews:
         } in response_json
         assert {
             "id": self.pdu_template2.id,
-            "status_display": self.pdu_template2.get_status_display(),
-            "status": self.pdu_template2.combined_status_display,
+            "status_display": self.pdu_template2.combined_status_display,
+            "status": self.pdu_template2.combined_status,
             "number_of_records": self.pdu_template2.number_of_records,
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_template2.created_by.get_full_name(),
@@ -165,8 +165,8 @@ class TestPeriodicDataUpdateTemplateViews:
         } in response_json
         assert {
             "id": self.pdu_template3.id,
-            "status_display": self.pdu_template3.get_status_display(),
-            "status": self.pdu_template3.combined_status_display,
+            "status_display": self.pdu_template3.combined_status_display,
+            "status": self.pdu_template3.combined_status,
             "number_of_records": self.pdu_template3.number_of_records,
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_template3.created_by.get_full_name(),
@@ -174,8 +174,8 @@ class TestPeriodicDataUpdateTemplateViews:
         } in response_json
         assert {
             "id": self.pdu_template_program2.id,
-            "status_display": self.pdu_template_program2.get_status_display(),
-            "status": self.pdu_template_program2.combined_status_display,
+            "status_display": self.pdu_template_program2.combined_status_display,
+            "status": self.pdu_template_program2.combined_status,
             "number_of_records": self.pdu_template_program2.number_of_records,
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_template_program2.created_by.get_full_name(),
