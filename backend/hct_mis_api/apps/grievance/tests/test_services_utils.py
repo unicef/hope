@@ -232,7 +232,7 @@ class TestGrievanceUtils(TestCase):
         partner_unicef = PartnerFactory()
 
         with pytest.raises(PermissionDenied) as e:
-            validate_individual_for_need_adjudication(partner, individuals_1[0], ticket_details, "duplicate")
+            validate_individual_for_need_adjudication(partner, individuals_1[0], ticket_details)
             assert str(e.value) == "Permission Denied: User does not have access to select individual"
 
         with pytest.raises(ValidationError) as e:
@@ -242,34 +242,25 @@ class TestGrievanceUtils(TestCase):
             )
             individuals[0].unicef_id = "IND-333"
             individuals[0].save()
-            validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details, "duplicate")
+            validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
             assert (
                 str(e.value)
                 == "The selected individual IND-333 is not valid, must be one of those attached to the ticket"
             )
 
         ticket_details.possible_duplicates.add(individuals[0])
-        with pytest.raises(ValidationError) as e:
-            ticket_details.selected_distinct.add(individuals[0])
-            validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details, "duplicate")
-            assert str(e.value) == "The selected individual IND-333 is already selected as distinct"
-
-        with pytest.raises(ValidationError) as e:
-            ticket_details.selected_individuals.add(individuals[0])
-            validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details, "distinct")
-            assert str(e.value) == "The selected individual IND-333 is already selected as duplicate"
 
         with pytest.raises(ValidationError) as e:
             individuals[0].withdraw()
-            validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details, "distinct")
+            validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
             assert str(e.value) == "The selected individual IND-333 is not valid, must be not withdrawn"
 
             individuals[0].unwithdraw()
-            validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details, "distinct")
+            validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
 
         ticket_details.selected_distinct.remove(individuals[0])
         individuals[0].unwithdraw()
-        validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details, "duplicate")
+        validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
 
     def test_validate_all_individuals_before_close_needs_adjudication(self) -> None:
         BusinessAreaFactory(slug="afghanistan")

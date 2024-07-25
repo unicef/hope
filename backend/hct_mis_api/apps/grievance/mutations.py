@@ -1219,7 +1219,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
 
         if selected_individual_id:
             selected_individual = get_individual(selected_individual_id)
-            validate_individual_for_need_adjudication(partner, selected_individual, ticket_details, "duplicate")
+            validate_individual_for_need_adjudication(partner, selected_individual, ticket_details)
 
             ticket_details.selected_individual = selected_individual
             ticket_details.role_reassign_data = {}
@@ -1234,19 +1234,19 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
             distinct_individuals = [get_individual(_id) for _id in distinct_individual_ids]
 
             for individual in distinct_individuals:
-                validate_individual_for_need_adjudication(partner, individual, ticket_details, "distinct")
+                validate_individual_for_need_adjudication(partner, individual, ticket_details)
 
-            ticket_details.selected_distinct.remove(*ticket_details.selected_distinct.all())
             ticket_details.selected_distinct.add(*distinct_individuals)
+            ticket_details.selected_individuals.remove(*distinct_individuals)
 
         if duplicate_individual_ids:
             duplicate_individuals = [get_individual(_id) for _id in duplicate_individual_ids]
 
             for individual in duplicate_individuals:
-                validate_individual_for_need_adjudication(partner, individual, ticket_details, "duplicate")
+                validate_individual_for_need_adjudication(partner, individual, ticket_details)
 
-            ticket_details.selected_individuals.remove(*ticket_details.selected_individuals.all())
             ticket_details.selected_individuals.add(*duplicate_individuals)
+            ticket_details.selected_distinct.remove(*duplicate_individuals)
 
         ticket_details.save()
         grievance_ticket.refresh_from_db()
