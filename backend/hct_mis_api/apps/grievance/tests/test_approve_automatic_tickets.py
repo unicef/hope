@@ -79,6 +79,34 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
       }
     }
     """
+    APPROVE_NEEDS_ADJUDICATION_MUTATION_NEW_FIELDS = """
+        mutation ApproveNeedsAdjudicationTicket(
+        $grievanceTicketId: ID!, $selectedIndividualId: ID, $duplicateIndividualIds: [ID], $distinctIndividualIds: [ID], $clearIndividualIds: [ID]
+        ) {
+          approveNeedsAdjudication(
+          grievanceTicketId: $grievanceTicketId,
+          selectedIndividualId: $selectedIndividualId,
+          duplicateIndividualIds: $duplicateIndividualIds,
+          distinctIndividualIds: $distinctIndividualIds,
+          clearIndividualIds: $clearIndividualIds,
+          ) {
+            grievanceTicket {
+              id
+              needsAdjudicationTicketDetails {
+                selectedIndividual {
+                  id
+                }
+                selectedDistinct {
+                  unicefId
+                }
+                selectedDuplicates {
+                  unicefId
+                }
+              }
+            }
+          }
+        }
+        """
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -121,6 +149,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
                 "family_name": "Butler",
                 "phone_no": "(953)682-4596",
                 "birth_date": "1943-07-30",
+                "unicef_id": "IND-123-123",
             },
             {
                 "id": "94b09ff2-9e6d-4f34-a72c-c319e1db7115",
@@ -129,6 +158,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
                 "family_name": "Ford",
                 "phone_no": "+18663567905",
                 "birth_date": "1946-02-15",
+                "unicef_id": "IND-222-222",
             },
         ]
 
@@ -200,7 +230,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             possible_duplicate=second_individual,
             selected_individual=None,
         )
-        ticket_details.possible_duplicates.add(cls.individuals[0], cls.individuals[1])
+        ticket_details.possible_duplicates.add(first_individual, second_individual)
 
     @parameterized.expand(
         [
@@ -318,7 +348,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_individuals.count(), 0)
 
         self.snapshot_graphql_request(
-            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION,
+            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION_NEW_FIELDS,
             context={"user": self.user},
             variables={
                 "grievanceTicketId": self.id_to_base64(
@@ -333,7 +363,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         self.needs_adjudication_grievance_ticket.status = GrievanceTicket.STATUS_ASSIGNED
         self.needs_adjudication_grievance_ticket.save()
         self.snapshot_graphql_request(
-            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION,
+            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION_NEW_FIELDS,
             context={"user": self.user},
             variables={
                 "grievanceTicketId": self.id_to_base64(
@@ -346,7 +376,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         self.needs_adjudication_grievance_ticket.save()
 
         self.snapshot_graphql_request(
-            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION,
+            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION_NEW_FIELDS,
             context={"user": self.user},
             variables={
                 "grievanceTicketId": self.id_to_base64(
@@ -356,7 +386,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             },
         )
         self.snapshot_graphql_request(
-            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION,
+            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION_NEW_FIELDS,
             context={"user": self.user},
             variables={
                 "grievanceTicketId": self.id_to_base64(
@@ -370,13 +400,13 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_individuals.count(), 1)
 
         self.snapshot_graphql_request(
-            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION,
+            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION_NEW_FIELDS,
             context={"user": self.user},
             variables={
                 "grievanceTicketId": self.id_to_base64(
                     self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
                 ),
-                "$clearIndividualIds": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+                "clearIndividualIds": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
             },
         )
 
