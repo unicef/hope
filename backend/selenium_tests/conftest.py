@@ -438,7 +438,7 @@ def create_super_user(business_area: BusinessArea) -> User:
     country = Country.objects.get(name="Afghanistan")
     business_area.countries.add(country)
     user = UserFactory.create(
-        # pk="4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+        pk="4196c2c5-c2dd-48d2-887f-3a9d39e78916",
         is_superuser=True,
         is_staff=True,
         username="superuser",
