@@ -2,7 +2,6 @@ import { Title } from '@core/Title';
 import { GrievanceTicketQuery } from '@generated/graphql';
 import { Box, Typography } from '@mui/material';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import { arraysHaveSameContent } from '@utils/utils';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ApproveBox } from '../GrievancesApproveSection/ApproveSectionStyles';
@@ -67,19 +66,34 @@ export const NeedsAdjudicationDetailsNew = ({
   const { selectedDuplicates, selectedDistinct } =
     ticket.needsAdjudicationTicketDetails;
 
-  const markedDuplicateInPossibleDuplicates = selectedDuplicates
-    .map((el) => el.id)
-    .filter((id) => possibleDuplicates.map((el) => el.id).includes(id));
+  const markedDuplicateInPossibleDuplicates = [
+    ...selectedDuplicates
+      .map((el) => el.id)
+      .filter((id) =>
+        [...possibleDuplicates, goldenRecordsIndividual]
+          .map((el) => el.id)
+          .includes(id),
+      ),
+  ];
 
-  const markedDistinctInPossibleDuplicates = selectedDistinct
-    .map((el) => el.id)
-    .filter((id) => possibleDuplicates.map((el) => el.id).includes(id));
+  const markedDistinctInPossibleDuplicates = [
+    ...selectedDistinct
+      .map((el) => el.id)
+      .filter((id) =>
+        [...possibleDuplicates, goldenRecordsIndividual]
+          .map((el) => el.id)
+          .includes(id),
+      ),
+  ];
 
   return (
     <ApproveBox>
       <Title>
         <Box display="flex" justifyContent="space-between">
-          <Typography variant="h6">
+          <Typography
+            data-cy="approve-box-needs-adjudication-title"
+            variant="h6"
+          >
             {t('Needs Adjudication Details')}
           </Typography>
         </Box>
@@ -91,6 +105,7 @@ export const NeedsAdjudicationDetailsNew = ({
         isTicketForApproval={isTicketForApproval}
         selectedIndividualIds={selectedIndividualIds}
         setIsEditMode={setIsEditMode}
+        setSelectedIndividualIds={setSelectedIndividualIds}
       />
       <NeedsAdjudicationTable
         ticket={ticket}

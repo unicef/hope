@@ -21,6 +21,7 @@ interface NeedsAdjudicationActionsProps {
   isTicketForApproval: boolean;
   selectedIndividualIds: string[];
   setIsEditMode: (editMode: boolean) => void;
+  setSelectedIndividualIds: (individualIds: string[]) => void;
 }
 
 export const NeedsAdjudicationActions: React.FC<
@@ -32,6 +33,7 @@ export const NeedsAdjudicationActions: React.FC<
   isTicketForApproval,
   selectedIndividualIds,
   setIsEditMode,
+  setSelectedIndividualIds,
 }) => {
   const { showMessage } = useSnackbar();
   const [approve] = useApproveNeedsAdjudicationMutation({
@@ -47,6 +49,9 @@ export const NeedsAdjudicationActions: React.FC<
   const navigate = useNavigate();
   const confirm = useConfirmation();
   const { isActiveProgram } = useProgramContext();
+  const actionsDisabled =
+    !isTicketForApproval || !isActiveProgram || !selectedIndividualIds.length;
+
   return (
     <Box
       display="flex"
@@ -82,7 +87,7 @@ export const NeedsAdjudicationActions: React.FC<
         {isEditable && canApprove && (
           <>
             <Button
-              disabled={!isTicketForApproval || !isActiveProgram}
+              disabled={actionsDisabled}
               data-cy="button-mark-distinct"
               onClick={() =>
                 confirm({
@@ -96,6 +101,7 @@ export const NeedsAdjudicationActions: React.FC<
                         distinctIndividualIds: selectedIndividualIds,
                       },
                     });
+                    setSelectedIndividualIds([]);
                   } catch (e) {
                     e.graphQLErrors.map((x) => showMessage(x.message));
                   }
@@ -108,7 +114,7 @@ export const NeedsAdjudicationActions: React.FC<
               {t('Mark as Distinct')}
             </Button>
             <Button
-              disabled={!isTicketForApproval || !isActiveProgram}
+              disabled={actionsDisabled}
               data-cy="button-mark-duplicate"
               onClick={() =>
                 confirm({
@@ -123,6 +129,7 @@ export const NeedsAdjudicationActions: React.FC<
                         duplicateIndividualIds: selectedIndividualIds,
                       },
                     });
+                    setSelectedIndividualIds([]);
                   } catch (e) {
                     e.graphQLErrors.map((x) => showMessage(x.message));
                   }
@@ -139,8 +146,9 @@ export const NeedsAdjudicationActions: React.FC<
       </Box>
       <Button
         variant="outlined"
-        color="primary"
+        color="error"
         data-cy="button-clear"
+        disabled={actionsDisabled}
         onClick={() =>
           confirm({
             content: t(
@@ -154,6 +162,7 @@ export const NeedsAdjudicationActions: React.FC<
                   clearIndividualIds: selectedIndividualIds,
                 },
               });
+              setSelectedIndividualIds([]);
             } catch (e) {
               e.graphQLErrors.map((x) => showMessage(x.message));
             }

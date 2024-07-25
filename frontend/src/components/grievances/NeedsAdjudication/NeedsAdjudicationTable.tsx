@@ -80,19 +80,20 @@ export const NeedsAdjudicationTable = ({
   };
 
   const duplicateTooltip = (
-    <Tooltip title="Marked as Duplicate">
+    <Tooltip title="Marked as Duplicate" data-cy="duplicate-tooltip">
       <PeopleIcon color="primary" />
     </Tooltip>
   );
 
   const distinctTooltip = (
-    <Tooltip title="Marked as Distinct">
-      <PersonIcon color="secondary" />
+    <Tooltip title="Marked as Distinct" data-cy="distinct-tooltip">
+      <PersonIcon color="primary" />
     </Tooltip>
   );
+
   const renderPossibleDuplicateRow = (possibleDuplicate) => (
-    <TableRow key={possibleDuplicate?.id}>
-      <TableCell align="left">
+    <TableRow key={possibleDuplicate?.id} data-cy="possible-duplicate-row">
+      <TableCell align="left" data-cy="checkbox-cell">
         <Checkbox
           color="primary"
           disabled={
@@ -102,9 +103,10 @@ export const NeedsAdjudicationTable = ({
           }
           checked={selectedIndividualIds.includes(possibleDuplicate.id)}
           onChange={() => handleSelect(possibleDuplicate.id)}
+          data-cy="select-checkbox"
         />
       </TableCell>
-      <TableCell align="left">
+      <TableCell align="left" data-cy="status-cell">
         {(() => {
           const { id } = possibleDuplicate;
 
@@ -119,51 +121,59 @@ export const NeedsAdjudicationTable = ({
           return '-';
         })()}
       </TableCell>
-      <TableCell align="left">
+      <TableCell align="left" data-cy="individual-id-cell">
         {!isAllPrograms ? (
           <BlackLink
             to={`/${baseUrl}/population/individuals/${possibleDuplicate?.id}`}
+            data-cy="individual-link"
           >
             {possibleDuplicate?.unicefId}
           </BlackLink>
         ) : (
-          <span>{possibleDuplicate?.unicefId}</span>
+          <span data-cy="individual-id">{possibleDuplicate?.unicefId}</span>
         )}
       </TableCell>
-      <TableCell align="left">
+      <TableCell align="left" data-cy="household-id-cell">
         {!isAllPrograms ? (
           <BlackLink
             to={`/${baseUrl}/population/household/${possibleDuplicate?.household?.id}`}
+            data-cy="household-link"
           >
             {possibleDuplicate?.household?.unicefId || '-'}
           </BlackLink>
         ) : (
-          <span>{possibleDuplicate?.household?.unicefId || '-'}</span>
+          <span data-cy="household-id">
+            {possibleDuplicate?.household?.unicefId || '-'}
+          </span>
         )}
       </TableCell>
-      <TableCell align="left">{possibleDuplicate?.fullName}</TableCell>
-      <TableCell align="left">{possibleDuplicate?.sex}</TableCell>
-      <TableCell align="left">
+      <TableCell align="left" data-cy="full-name-cell">
+        {possibleDuplicate?.fullName}
+      </TableCell>
+      <TableCell align="left" data-cy="sex-cell">
+        {possibleDuplicate?.sex}
+      </TableCell>
+      <TableCell align="left" data-cy="birth-date-cell">
         <UniversalMoment>{possibleDuplicate?.birthDate}</UniversalMoment>
       </TableCell>
-      <TableCell align="left">
+      <TableCell align="left" data-cy="similarity-cell">
         {getPossibleDuplicateSimilarity(possibleDuplicate)}
       </TableCell>
-      <TableCell align="left">
+      <TableCell align="left" data-cy="last-registration-date-cell">
         <UniversalMoment>
           {possibleDuplicate?.lastRegistrationDate}
         </UniversalMoment>
       </TableCell>
-      <TableCell align="left">
+      <TableCell align="left" data-cy="document-type-cell">
         {possibleDuplicate?.documents?.edges[0]?.node.type.label}
       </TableCell>
-      <TableCell align="left">
+      <TableCell align="left" data-cy="document-number-cell">
         {possibleDuplicate?.documents?.edges[0]?.node.documentNumber}
       </TableCell>
-      <TableCell align="left">
+      <TableCell align="left" data-cy="admin2-name-cell">
         {possibleDuplicate?.household?.admin2?.name}
       </TableCell>
-      <TableCell align="left">
+      <TableCell align="left" data-cy="village-cell">
         {possibleDuplicate?.household?.village}
       </TableCell>
     </TableRow>
@@ -179,6 +189,7 @@ export const NeedsAdjudicationTable = ({
               checked={isAllSelected()}
               onChange={handleSelectAll}
               disabled={!isEditable}
+              data-cy="select-all-checkbox"
             />
           </TableCell>
           <TableCell data-cy="table-cell-uniqueness" align="left">
@@ -236,7 +247,7 @@ export const NeedsAdjudicationTable = ({
               onChange={() => handleSelect(details.goldenRecordsIndividual?.id)}
             />
           </TableCell>
-          <TableCell align="left">
+          <TableCell align="left" data-cy="uniqueness-cell">
             {details.goldenRecordsIndividual
               ? (() => {
                   const id = details.goldenRecordsIndividual.id;
@@ -253,63 +264,69 @@ export const NeedsAdjudicationTable = ({
                 })()
               : '-'}
           </TableCell>
-          <TableCell align="left">
+          <TableCell align="left" data-cy="individual-id-cell">
             {!isAllPrograms ? (
               <BlackLink
                 to={`/${baseUrl}/population/individuals/${details.goldenRecordsIndividual?.id}`}
+                data-cy="individual-link"
               >
                 {details.goldenRecordsIndividual?.unicefId}
               </BlackLink>
             ) : (
-              <span>{details.goldenRecordsIndividual?.unicefId}</span>
+              <span data-cy="individual-id">
+                {details.goldenRecordsIndividual?.unicefId}
+              </span>
             )}
           </TableCell>
-          <TableCell align="left">
+          <TableCell align="left" data-cy="household-id-cell">
             {!isAllPrograms ? (
               <BlackLink
                 to={`/${baseUrl}/population/household/${details.goldenRecordsIndividual?.household?.id}`}
+                data-cy="household-link"
               >
                 {details.goldenRecordsIndividual?.household?.unicefId || '-'}
               </BlackLink>
             ) : (
-              <span>
+              <span data-cy="household-id">
                 {details.goldenRecordsIndividual?.household?.unicefId || '-'}
               </span>
             )}
           </TableCell>
-          <TableCell align="left">
+          <TableCell align="left" data-cy="full-name-cell">
             {details.goldenRecordsIndividual?.fullName}
           </TableCell>
-          <TableCell align="left">
+          <TableCell align="left" data-cy="gender-cell">
             {details.goldenRecordsIndividual?.sex}
           </TableCell>
-          <TableCell align="left">
+          <TableCell align="left" data-cy="birth-date-cell">
             <UniversalMoment>
               {details.goldenRecordsIndividual?.birthDate}
             </UniversalMoment>
           </TableCell>
-          <TableCell align="left">{getGoldenRecordSimilarity()}</TableCell>
-          <TableCell align="left">
+          <TableCell align="left" data-cy="similarity-score-cell">
+            {getGoldenRecordSimilarity()}
+          </TableCell>
+          <TableCell align="left" data-cy="last-registration-date-cell">
             <UniversalMoment>
               {details.goldenRecordsIndividual?.lastRegistrationDate}
             </UniversalMoment>
           </TableCell>
-          <TableCell align="left">
+          <TableCell align="left" data-cy="doc-type-cell">
             {
               details.goldenRecordsIndividual?.documents?.edges[0]?.node.type
                 .label
             }
           </TableCell>
-          <TableCell align="left">
+          <TableCell align="left" data-cy="doc-number-cell">
             {
               details.goldenRecordsIndividual?.documents?.edges[0]?.node
                 .documentNumber
             }
           </TableCell>
-          <TableCell align="left">
+          <TableCell align="left" data-cy="admin-level2-cell">
             {details.goldenRecordsIndividual?.household?.admin2?.name}
           </TableCell>
-          <TableCell align="left">
+          <TableCell align="left" data-cy="village-cell">
             {details.goldenRecordsIndividual?.household?.village}
           </TableCell>
         </TableRow>
