@@ -133,7 +133,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
                 "first_name": obj.collector.given_name,
                 "full_name": obj.full_name,
                 "destination_currency": obj.currency,
-                "service_provider_code": obj.collector.flex_fields.get("service_provider_code", ""),
+                "service_provider_code": obj.collector.flex_fields.get("service_provider_code_i_f", ""),
             }
         )
         if not payload.is_valid():
