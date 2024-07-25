@@ -417,6 +417,10 @@ class PaymentPlanSplit(TimeStampedUUIDModel):
     def chosen_configuration(self) -> Optional[str]:
         return self.payment_plan.delivery_mechanisms.first().chosen_configuration
 
+    @property
+    def delivery_mechanism(self) -> Optional[str]:
+        return self.payment_plan.delivery_mechanisms.first().delivery_mechanism
+
 
 class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel, AdminUrlMixin):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
