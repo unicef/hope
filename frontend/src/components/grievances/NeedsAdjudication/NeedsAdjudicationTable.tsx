@@ -91,16 +91,17 @@ export const NeedsAdjudicationTable = ({
     </Tooltip>
   );
 
+  const checkboxDisabled =
+    !isEditable ||
+    ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
+    !isActiveProgram;
+
   const renderPossibleDuplicateRow = (possibleDuplicate) => (
     <TableRow key={possibleDuplicate?.id} data-cy="possible-duplicate-row">
       <TableCell align="left" data-cy="checkbox-cell">
         <Checkbox
           color="primary"
-          disabled={
-            !isEditable ||
-            ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
-            !isActiveProgram
-          }
+          disabled={checkboxDisabled}
           checked={selectedIndividualIds.includes(possibleDuplicate.id)}
           onChange={() => handleSelect(possibleDuplicate.id)}
           data-cy="select-checkbox"
@@ -188,7 +189,7 @@ export const NeedsAdjudicationTable = ({
               indeterminate={selectedIndividualIds.length > 0 && !isAllSelected}
               checked={isAllSelected()}
               onChange={handleSelectAll}
-              disabled={!isEditable}
+              disabled={checkboxDisabled}
               data-cy="select-all-checkbox"
             />
           </TableCell>
@@ -236,11 +237,7 @@ export const NeedsAdjudicationTable = ({
             <Checkbox
               color="primary"
               data-cy="checkbox-individual"
-              disabled={
-                !isEditable ||
-                ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
-                !isActiveProgram
-              }
+              disabled={checkboxDisabled}
               checked={selectedIndividualIds.includes(
                 details.goldenRecordsIndividual?.id,
               )}
