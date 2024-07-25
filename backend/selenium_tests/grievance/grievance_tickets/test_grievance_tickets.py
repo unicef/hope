@@ -1,13 +1,17 @@
 from typing import Generator
 
+import pytest
 from django.conf import settings
 from django.core.management import call_command
-
-import pytest
 from page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from page_object.grievance.grievance_tickets import GrievanceTickets
 from page_object.grievance.new_ticket import NewTicket
 from pytest_django import DjangoDbBlocker
+
+from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.grievance.models import GrievanceTicket
+from backend.hct_mis_api.apps.grievance.models import TicketNeedsAdjudicationDetails
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -33,6 +37,65 @@ def create_programs(django_db_setup: Generator[None, None, None], django_db_bloc
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
     yield
+
+
+@pytest.fixture
+def add_grievance_needs_adjudication() -> None:
+    GrievanceTicket._meta.get_field("created_at").auto_now_add = False
+    GrievanceTicket._meta.get_field("updated_at").auto_now = False
+    generate_grievance(
+            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        )
+    GrievanceTicket._meta.get_field("created_at").auto_now_add = True
+    GrievanceTicket._meta.get_field("updated_at").auto_now = True
+    yield
+
+
+def generate_grievance(
+    unicef_id: str = "GRV-0000001",
+    status: int = GrievanceTicket.STATUS_NEW,
+    category: int = GrievanceTicket.CATEGORY_REFERRAL,
+    created_by: User | None = None,
+    assigned_to: User | None = None,
+    business_area: BusinessArea | None = None,
+    priority: int = 1,
+    urgency: int = 1,
+    household_unicef_id: str = "HH-20-0000.0001",
+    updated_at: str = "2023-09-27T11:26:33.846Z",
+    created_at: str = "2022-04-30T09:54:07.827000",
+) -> GrievanceTicket:
+    created_by = User.objects.first() if created_by is None else created_by
+    assigned_to = User.objects.first() if assigned_to is None else assigned_to
+    business_area = BusinessArea.objects.filter(slug="afghanistan").first() if business_area is None else business_area
+    grievance_ticket = GrievanceTicket.objects.create(
+        **{
+            "business_area": business_area,
+            "unicef_id": unicef_id,
+            "language": "Polish",
+            "consent": True,
+            "description": "grievance_ticket_1",
+            "category": category,
+            "status": status,
+            "created_by": created_by,
+            "assigned_to": assigned_to,
+            "created_at": created_at,
+            "updated_at": updated_at,
+            "household_unicef_id": household_unicef_id,
+            "priority": priority,
+            "urgency": urgency,
+        }
+    )
+
+    from hct_mis_api.apps.grievance.models import TicketReferralDetails
+
+    TicketNeedsAdjudicationDetails.objects.create(
+        ticket=grievance_ticket,
+        selected_individuals=[]
+        selected_distinct=[]
+
+    )
+
+    return grievance_ticket
 
 
 @pytest.mark.usefixtures("login")
@@ -204,3 +267,12 @@ class TestGrievanceTicketsHappyPath:
         assert "New" in pageGrievanceDetailsPage.getTicketStatus().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
+
+    def test_grievance_tickets_needs_adjudication(
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+    ) -> None:
+        pageGrievanceTickets.getNavGrievance().click()
+        assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
+        pageGrievanceTickets.getTabSystemGenerated().click()
