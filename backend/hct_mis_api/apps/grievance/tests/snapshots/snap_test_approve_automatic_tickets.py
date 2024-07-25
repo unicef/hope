@@ -50,7 +50,7 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
         {
             'locations': [
                 {
-                    'column': 7,
+                    'column': 11,
                     'line': 5
                 }
             ],
@@ -70,7 +70,7 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
         {
             'locations': [
                 {
-                    'column': 7,
+                    'column': 11,
                     'line': 5
                 }
             ],
@@ -88,6 +88,13 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
             'grievanceTicket': {
                 'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
                 'needsAdjudicationTicketDetails': {
+                    'selectedDistinct': [
+                    ],
+                    'selectedDuplicates': [
+                        {
+                            'unicefId': 'IND-222-222'
+                        }
+                    ],
                     'selectedIndividual': None
                 }
             }
@@ -101,6 +108,16 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
             'grievanceTicket': {
                 'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
                 'needsAdjudicationTicketDetails': {
+                    'selectedDistinct': [
+                        {
+                            'unicefId': 'IND-123-123'
+                        }
+                    ],
+                    'selectedDuplicates': [
+                        {
+                            'unicefId': 'IND-222-222'
+                        }
+                    ],
                     'selectedIndividual': None
                 }
             }
@@ -114,6 +131,13 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
             'grievanceTicket': {
                 'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
                 'needsAdjudicationTicketDetails': {
+                    'selectedDistinct': [
+                    ],
+                    'selectedDuplicates': [
+                        {
+                            'unicefId': 'IND-222-222'
+                        }
+                    ],
                     'selectedIndividual': None
                 }
             }

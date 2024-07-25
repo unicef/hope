@@ -1,8 +1,9 @@
 from typing import Generator
 
-import pytest
 from django.conf import settings
 from django.core.management import call_command
+
+import pytest
 from page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from page_object.grievance.grievance_tickets import GrievanceTickets
 from page_object.grievance.new_ticket import NewTicket
@@ -10,11 +11,12 @@ from pytest_django import DjangoDbBlocker
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.grievance.models import TicketNeedsAdjudicationDetails
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketNeedsAdjudicationDetails,
+)
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import HOST, Household, Individual
-from hct_mis_api.apps.program.models import Program
 from selenium_tests.drawer.test_drawer import get_program_with_dct_type_and_name
 
 pytestmark = pytest.mark.django_db(transaction=True)
