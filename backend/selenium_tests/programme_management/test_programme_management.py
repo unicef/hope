@@ -9,6 +9,7 @@ from dateutil.relativedelta import relativedelta
 from helpers.date_time_format import FormatTime
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
+from selenium import webdriver
 from selenium.webdriver import Keys
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -598,16 +599,19 @@ class TestComeBackScenarios:
         pageProgrammeManagement.selectWhoAccessToProgram("Only selected partners within the business area")
         pageProgrammeManagement.choosePartnerOption("UNHCR")
         pageProgrammeManagement.getButtonBack().click()
+        pageProgrammeManagement.getButtonBack().click()
         assert "Test Name" in pageProgrammeManagement.getInputProgrammeName().get_attribute("value")
         pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.CONTROL, "a")
         pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.DELETE)
         assert "Programme Name is required" in pageProgrammeManagement.getLabelProgrammeName().text.split("\n")
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
         # 2nd step (Time Series Fields)
+        pageProgrammeManagement.getButtonNext().click()
         pageProgrammeManagement.getInputPduFieldsObjectName(0)
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
+        webdriver.ActionChains(pageProgrammeManagement.driver).send_keys(Keys.ESCAPE).perform()  # type: ignore
         programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page

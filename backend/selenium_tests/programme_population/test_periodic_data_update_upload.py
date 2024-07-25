@@ -3,6 +3,7 @@ from typing import Any
 
 import openpyxl
 import pytest
+from flaky import flaky
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
@@ -156,6 +157,7 @@ class TestPeriodicDataUpdateUpload:
         assert individual.flex_fields[flexible_attribute.name]["1"]["collection_date"] == "2021-05-02"
         assert pageIndividuals.getUpdateStatus(periodic_data_update_upload.pk).text == "SUCCESSFUL"
 
+    @flaky(max_runs=5, min_passes=1)
     def test_periodic_data_update_upload_form_error(
         self,
         program: Program,

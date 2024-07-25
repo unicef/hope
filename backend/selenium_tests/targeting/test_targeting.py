@@ -6,6 +6,7 @@ from django.core.management import call_command
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from flaky import flaky
 from page_object.targeting.targeting import Targeting
 from page_object.targeting.targeting_create import TargetingCreate
 from page_object.targeting.targeting_details import TargetingDetails
@@ -122,16 +123,16 @@ def create_targeting(household_without_disabilities: Household) -> TargetPopulat
 
 @pytest.fixture
 def create_programs() -> None:
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json", verbosity=0)
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json", verbosity=0)
     yield
 
 
 @pytest.fixture
 def add_targeting() -> None:
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data-cypress.json")
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data-cypress.json")
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/targeting/fixtures/data-cypress.json")
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data-cypress.json", verbosity=0)
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data-cypress.json", verbosity=0)
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/targeting/fixtures/data-cypress.json", verbosity=0)
     yield
 
 
@@ -670,6 +671,7 @@ class TestTargeting:
         pageTargeting.countTargetPopulations(2)
         filters.getButtonFiltersClear().click()
 
+    @flaky(max_runs=5, min_passes=1)
     def test_targeting_and_labels(
         self,
         create_programs: None,

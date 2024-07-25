@@ -116,8 +116,9 @@ export const EditProgramPage = (): ReactElement => {
         : [];
 
     const { editMode, ...requestValues } = values;
-    const pduFieldsToSend = values.pduFields.map(
-      ({ __typename, pduData, ...rest }) => ({
+    const pduFieldsToSend = values.pduFields
+      .filter((item) => item.name !== '')
+      .map(({ __typename, pduData, ...rest }) => ({
         ...rest,
         pduData: pduData
           ? Object.fromEntries(
@@ -126,8 +127,7 @@ export const EditProgramPage = (): ReactElement => {
               ),
             )
           : pduData,
-      }),
-    );
+      }));
 
     try {
       const response = await mutate({
