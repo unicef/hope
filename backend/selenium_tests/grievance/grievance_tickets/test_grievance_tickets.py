@@ -11,10 +11,11 @@ from pytest_django import DjangoDbBlocker
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from backend.hct_mis_api.apps.grievance.models import TicketNeedsAdjudicationDetails
+from hct_mis_api.apps.grievance.models import TicketNeedsAdjudicationDetails
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import HOST, Household, Individual
 from hct_mis_api.apps.program.models import Program
+from selenium_tests.drawer.test_drawer import get_program_with_dct_type_and_name
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -43,10 +44,10 @@ def create_programs(django_db_setup: Generator[None, None, None], django_db_bloc
 
 
 def create_custom_household(observed_disability: list[str], residence_status: str = HOST) -> Household:
-    program = Program.objects.get(name="Test Programm")
+    program = get_program_with_dct_type_and_name("Test Program", "1234")
     household, _ = create_household_and_individuals(
         household_data={
-            "unicef_id": "HH-00-0000.0442",
+            "unicef_id": "HH-20-0000.0001",
             "rdi_merge_status": "MERGED",
             "business_area": program.business_area,
             "program": program,
@@ -319,9 +320,12 @@ class TestGrievanceTicketsHappyPath:
 
     def test_grievance_tickets_needs_adjudication(
         self,
+        add_grievance_needs_adjudication: None,
         pageGrievanceTickets: GrievanceTickets,
         pageGrievanceDetailsPage: GrievanceDetailsPage,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getTabSystemGenerated().click()
+        pageGrievanceTickets.getTicketListRow()[0].click()
+        pageGrievanceDetailsPage.screenshot("needs_adjudication")
