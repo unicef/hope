@@ -79,7 +79,7 @@ class TestPaymentGatewayService(APITestCase):
             collector = IndividualFactory(
                 household=None,
                 flex_fields={
-                    "service_provider_code": "123456789",
+                    "service_provider_code_i_f": "123456789",
                 },
             )
             hoh = IndividualFactory(household=None)
@@ -555,7 +555,7 @@ class TestPaymentGatewayService(APITestCase):
                         "first_name": self.payments[0].collector.given_name,
                         "full_name": self.payments[0].collector.full_name,
                         "destination_currency": self.payments[0].currency,
-                        "service_provider_code": self.payments[0].collector.flex_fields["service_provider_code"],
+                        "service_provider_code": self.payments[0].collector.flex_fields["service_provider_code_i_f"],
                     },
                     "extra_data": {},
                 }
