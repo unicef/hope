@@ -232,9 +232,18 @@ class TestGenericRegistrationService(TestCase):
         records[2].refresh_from_db()
         self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 4)
         self.assertEqual(PendingHousehold.objects.count(), 4)
+        self.assertEqual(PendingHousehold.objects.filter(program=rdi.program).count(), 4)
         self.assertEqual(
             PendingDocument.objects.filter(
                 document_number="TESTID", type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
+            ).count(),
+            1,
+        )
+        self.assertEqual(
+            PendingDocument.objects.filter(
+                document_number="TESTID",
+                type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
+                program=rdi.program,
             ).count(),
             1,
         )
