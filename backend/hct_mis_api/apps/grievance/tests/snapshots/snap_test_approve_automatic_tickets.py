@@ -108,6 +108,19 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
     }
 }
 
+snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_new_input_fields 5'] = {
+    'data': {
+        'approveNeedsAdjudication': {
+            'grievanceTicket': {
+                'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
+                'needsAdjudicationTicketDetails': {
+                    'selectedIndividual': None
+                }
+            }
+        }
+    }
+}
+
 snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_should_allow_uncheck_selected_individual_0_with_permission 1'] = {
     'data': {
         'approveNeedsAdjudication': {
