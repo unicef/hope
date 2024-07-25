@@ -19,7 +19,10 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     PendingHousehold,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory, get_program_with_dct_type_and_name
+from hct_mis_api.apps.program.fixtures import (
+    ProgramFactory,
+    get_program_with_dct_type_and_name,
+)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
