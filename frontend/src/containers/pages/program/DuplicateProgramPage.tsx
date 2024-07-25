@@ -68,8 +68,28 @@ export const DuplicateProgramPage = (): ReactElement => {
           }))
         : [];
     const { editMode, ...requestValues } = values;
-    const pduFieldsToSend =
-      values.pduFields.length > 0 ? values.pduFields : null;
+    const initialPduFieldState = {
+      name: '',
+      pduData: {
+        subtype: '',
+        numberOfRounds: null,
+        roundsNames: [],
+      },
+    };
+
+    const pduFieldsToSend = values.pduFields.every(
+      (pduField) =>
+        pduField.name === initialPduFieldState.name &&
+        pduField.pduData.subtype === initialPduFieldState.pduData.subtype &&
+        pduField.pduData.numberOfRounds ===
+          initialPduFieldState.pduData.numberOfRounds &&
+        pduField.pduData.roundsNames.length ===
+          initialPduFieldState.pduData.roundsNames.length,
+    )
+      ? null
+      : values.pduFields.length > 0
+        ? values.pduFields
+        : null;
 
     try {
       const response = await mutate({
