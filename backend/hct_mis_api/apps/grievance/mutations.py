@@ -1227,8 +1227,8 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
         if clear_individual_ids:
             clear_individuals = [get_individual(_id) for _id in clear_individual_ids]
             # remove Individual from selected_individuals and selected_distinct
-            ticket_details.selected_individuals.remove(clear_individuals)
-            ticket_details.selected_distinct.remove(clear_individuals)
+            ticket_details.selected_individuals.remove(*clear_individuals)
+            ticket_details.selected_distinct.remove(*clear_individuals)
 
         if distinct_individual_ids:
             distinct_individuals = [get_individual(_id) for _id in distinct_individual_ids]
