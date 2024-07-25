@@ -51,30 +51,35 @@ def individual(program: Program) -> Individual:
 
 
 @pytest.fixture
-def string_attribute() -> FlexibleAttribute:
+def string_attribute(program: Program) -> FlexibleAttribute:
     return create_flexible_attribute(
         name="Test String Attribute",
         subtype=FlexibleAttribute.STRING,
         number_of_rounds=1,
         rounds_names=["Test Round"],
+        program=program,
     )
 
 
 @pytest.fixture
-def date_attribute() -> FlexibleAttribute:
+def date_attribute(program: Program) -> FlexibleAttribute:
     return create_flexible_attribute(
         name="Test String Attribute",
         subtype=FlexibleAttribute.DATE,
         number_of_rounds=1,
         rounds_names=["Test Round"],
+        program=program,
     )
 
 
 def create_flexible_attribute(
-    name: str, subtype: str, number_of_rounds: int, rounds_names: list[str]
+    name: str, subtype: str, number_of_rounds: int, rounds_names: list[str], program: Program
 ) -> FlexibleAttribute:
     flexible_attribute = FlexibleAttribute.objects.create(
-        name=name, type=FlexibleAttribute.PDU, associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
+        name=name,
+        type=FlexibleAttribute.PDU,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        program=program,
     )
     flexible_attribute.pdu_data = PeriodicFieldData.objects.create(
         subtype=subtype, number_of_rounds=number_of_rounds, rounds_names=rounds_names
