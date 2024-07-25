@@ -397,6 +397,15 @@ class TestPeriodicDataUpdateTemplateViews:
                 "received_assistance": True,
             },
         }
+        expected_result = [
+            {
+                "field": "Vaccination Records Update",
+                "round": 2,
+                "round_name": "February vaccination",
+                "number_of_records": 0,
+            },
+            {"field": "Health Records Update", "round": 4, "round_name": "April", "number_of_records": 0},
+        ]
         response = self.client.post(self.url_create_pdu_template_program1, data=data)
         assert response.status_code == status.HTTP_201_CREATED
 
@@ -405,7 +414,7 @@ class TestPeriodicDataUpdateTemplateViews:
         template = PeriodicDataUpdateTemplate.objects.get(id=response_json["id"])
         assert template.program == self.program1
         assert template.business_area == self.afghanistan
-        assert template.rounds_data == data["rounds_data"]
+        assert template.rounds_data == expected_result
         assert template.filters == data["filters"]
         assert template.status == PeriodicDataUpdateTemplate.Status.EXPORTED
         assert PeriodicDataUpdateTemplate.objects.filter(id=response_json["id"]).first().file is not None

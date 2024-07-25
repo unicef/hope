@@ -10,6 +10,7 @@ from hct_mis_api.apps.erp_datahub.tasks.pull_from_erp_datahub import (
 )
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
+from hct_mis_api.apps.program.fixtures import get_program_with_dct_type_and_name
 
 
 class TestPullDataFromErpDatahub(TestCase):
@@ -21,9 +22,9 @@ class TestPullDataFromErpDatahub(TestCase):
     funds_commitment_1 = None
     funds_commitment_2 = None
 
-    @staticmethod
-    def _pre_test_commands() -> None:
-        create_afghanistan()
+    @classmethod
+    def _pre_test_commands(cls) -> None:
+        cls.business_area = create_afghanistan()
 
     @classmethod
     def _setup_in_app_data(cls) -> None:

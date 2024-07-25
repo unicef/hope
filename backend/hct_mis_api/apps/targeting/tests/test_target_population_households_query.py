@@ -8,6 +8,7 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.program.fixtures import get_program_with_dct_type_and_name
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
     TargetingCriteria,
@@ -47,8 +48,7 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        create_afghanistan()
-        cls.business_area = BusinessArea.objects.first()
+        cls.business_area = create_afghanistan()
         _ = create_household(
             {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
         )
@@ -65,6 +65,7 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
         cls.household_size_2 = household
         cls.partner = PartnerFactory(name="TestPartner")
         cls.user = UserFactory(partner=cls.partner)
+        cls.program = get_program_with_dct_type_and_name()
         targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "size", "arguments": [2], "comparison_method": "EQUALS"}
         )
@@ -72,6 +73,8 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
             name="target_population_size_2",
             created_by=cls.user,
             targeting_criteria=targeting_criteria,
+            business_area=cls.business_area,
+            program=cls.program,
         )
         cls.target_population_size_2.save()
         targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -81,6 +84,8 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
             name="target_population_residence_status",
             created_by=cls.user,
             targeting_criteria=targeting_criteria,
+            business_area=cls.business_area,
+            program=cls.program,
         )
         cls.target_population_residence_status.save()
 
@@ -92,6 +97,8 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
             created_by=cls.user,
             targeting_criteria=targeting_criteria,
             status="LOCKED",
+            business_area=cls.business_area,
+            program=cls.program,
         )
         cls.target_population_size_1_approved.save()
         HouseholdSelection.objects.create(
