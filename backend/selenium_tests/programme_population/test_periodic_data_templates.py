@@ -1,8 +1,4 @@
-import re
-
 import pytest
-
-from page_object.base_components import BaseComponents
 from page_object.programme_population.periodic_data_update_templates import (
     PeriodicDatUpdateTemplates,
 )
@@ -214,4 +210,7 @@ class TestPeriodicDataTemplates:
         assert rounds_data[0]["field"] in pagePeriodicDataUpdateTemplates.getTemplateField(0).text
         assert str(rounds_data[0]["round"]) in pagePeriodicDataUpdateTemplates.getTemplateRoundNumber(0).text
         assert rounds_data[0]["round_name"] in pagePeriodicDataUpdateTemplates.getTemplateRoundName(0).text
-        assert str(rounds_data[0]["number_of_records"]) in pagePeriodicDataUpdateTemplates.getTemplateNumberOfIndividuals(0).text
+        assert (
+            str(rounds_data[0]["number_of_records"])
+            in pagePeriodicDataUpdateTemplates.getTemplateNumberOfIndividuals(0).text
+        )
