@@ -1217,6 +1217,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
 
         ticket_details: TicketNeedsAdjudicationDetails = grievance_ticket.ticket_details
 
+        # using for old tickets
         if selected_individual_id:
             selected_individual = get_individual(selected_individual_id)
             validate_individual_for_need_adjudication(partner, selected_individual, ticket_details)

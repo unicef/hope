@@ -76,7 +76,7 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
     validate_all_individuals_before_close_needs_adjudication(ticket_details)
 
     distinct_individuals = ticket_details.selected_distinct.all()
-    duplicate_individuals = ticket_details.possible_duplicates.all()
+    duplicate_individuals = ticket_details.selected_individuals.all()
 
     if duplicate_individuals:
         for individual_to_remove in duplicate_individuals:
