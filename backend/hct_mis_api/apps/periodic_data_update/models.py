@@ -40,7 +40,46 @@ class PeriodicDataUpdateTemplate(TimeStampedModel, CeleryEnabledModel):
         on_delete=models.CASCADE,
         related_name="periodic_data_update_templates",
     )
+    """
+    {
+    "registration_data_import_id": id,
+    "target_population_id": id,
+    "gender": "MALE"/"FEMALE",
+    "age": {
+        "from": 0,
+        "to": 100
+    },
+    "registration_date": {
+        "from": "2021-01-01",
+        "to": "2021-12-31"
+    },
+    "has_grievance_ticket: true/false,
+    "admin1": [id],
+    "admin2": [id],
+    "received_assistance": true/false,
+    }
+    """
     filters = models.JSONField()
+    """
+    Example of rounds_data:
+        [
+            {
+                "field": "Vaccination Records Update",
+                "round": 2,
+                "round_name": "February vaccination",
+                "number_of_records": 100,
+            },
+            {
+                "field": "Health Records Update",
+                "round": 4,
+                "round_name": "April",
+                "number_of_records": 58,
+            },
+        ]
+    """
+    rounds_data = models.JSONField()
+    number_of_records = models.PositiveIntegerField(null=True, blank=True)
+
     celery_task_name = (
         "hct_mis_api.apps.periodic_data_update.celery_tasks.export_periodic_data_update_export_template_service"
     )
@@ -73,45 +112,6 @@ class PeriodicDataUpdateTemplate(TimeStampedModel, CeleryEnabledModel):
     def combined_status_display(self) -> str:
         status_dict = {status.value: status.label for status in self.Status}
         return status_dict[self.combined_status]
-
-    """
-    {
-    "registration_data_import_id": id,
-    "target_population_id": id,
-    "gender": "MALE"/"FEMALE",
-    "age": {
-        "from": 0,
-        "to": 100
-    },
-    "registration_date": {
-        "from": "2021-01-01",
-        "to": "2021-12-31"
-    },
-    "has_grievance_ticket: true/false,
-    "admin1": [id],
-    "admin2": [id],
-    "received_assistance": true/false,
-    }
-    """
-    rounds_data = models.JSONField()
-    """
-    Example of rounds_data:
-        [
-            {
-                "field": "Vaccination Records Update",
-                "round": 2,
-                "round_name": "February vaccination",
-                "number_of_records": 100,
-            },
-            {
-                "field": "Health Records Update",
-                "round": 4,
-                "round_name": "April",
-                "number_of_records": 58,
-            },
-        ]
-    """
-    number_of_records = models.PositiveIntegerField(null=True, blank=True)
 
     def __str__(self) -> str:
         return f"{self.pk} - {self.status}"
