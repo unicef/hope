@@ -1,106 +1,20 @@
 import { ProgramQuery } from '@generated/graphql';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { HeadCell } from '@core/Table/EnhancedTableHead';
 import React, { ReactElement, useState } from 'react';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import TableCell from '@mui/material/TableCell';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { IconButton } from '@mui/material';
 import { StatusBox } from '@core/StatusBox';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import { programCycleStatusToColor } from '@utils/utils';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ProgramCycle from '@containers/tables/ProgramCycle/ProgramCycle';
+import headCells from '@containers/tables/ProgramCycle/HeadCells';
 
 interface ProgramCycleTableProps {
   program: ProgramQuery['program'];
 }
-
-interface ProgramCycle {
-  id: string;
-  unicef_id: string;
-  title: string;
-  status: string;
-  total_entitled_quantity?: number;
-  total_undelivered_quantity?: number;
-  total_delivered_quantity?: number;
-  start_date: string;
-  end_date?: string;
-}
-
-const headCells: HeadCell<ProgramCycle>[] = [
-  {
-    id: 'unicef_id',
-    numeric: false,
-    disablePadding: false,
-    label: 'Programme Cycles ID',
-    disableSort: true,
-    dataCy: 'head-cell-id',
-  },
-  {
-    id: 'title',
-    numeric: false,
-    disablePadding: false,
-    label: 'Programme Cycles Title',
-    disableSort: true,
-    dataCy: 'head-cell-programme-cycles-title',
-  },
-  {
-    id: 'status',
-    numeric: false,
-    disablePadding: false,
-    label: 'Status',
-    disableSort: true,
-    dataCy: 'head-cell-status',
-  },
-  {
-    id: 'total_entitled_quantity',
-    numeric: true,
-    disablePadding: false,
-    label: 'Total Entitled Quantity',
-    disableSort: true,
-    dataCy: 'head-cell-total-entitled-quantity',
-  },
-  {
-    id: 'total_undelivered_quantity',
-    numeric: true,
-    disablePadding: false,
-    label: 'Total Undelivered Quantity',
-    disableSort: true,
-    dataCy: 'head-cell-total-undelivered-quantity',
-  },
-  {
-    id: 'total_delivered_quantity',
-    numeric: true,
-    disablePadding: false,
-    label: 'Total Delivered Quantity',
-    disableSort: true,
-    dataCy: 'head-cell-total-delivered-quantity',
-  },
-  {
-    id: 'start_date',
-    numeric: false,
-    disablePadding: false,
-    label: 'Start Date',
-    dataCy: 'head-cell-start-date',
-  },
-  {
-    id: 'end_date',
-    numeric: false,
-    disablePadding: false,
-    label: 'End Date',
-    disableSort: true,
-    dataCy: 'head-cell-end-date',
-  },
-  {
-    id: 'empty',
-    numeric: false,
-    disablePadding: false,
-    label: '',
-    disableSort: true,
-    dataCy: 'head-cell-empty',
-  },
-];
 
 interface DataResponse {
   results: ProgramCycle[];
@@ -162,6 +76,10 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
     FINISHED: 'Finished',
   };
 
+  const editRow = (row: ProgramCycle): void => {
+    console.log(row);
+  };
+
   const renderRow = (row: ProgramCycle): ReactElement => (
     <ClickableTableRow key={row.id} data-cy={`program-cycle-row-${row.id}`}>
       <TableCell data-cy={`program-cycle-id-${row.id}`}>
@@ -194,7 +112,7 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
 
       <TableCell data-cy={`program-cycle-details-btn-${row.id}`}>
         {(row.status === 'DRAFT' || row.status === 'ACTIVE') && (
-          <IconButton color="primary" onClick={() => console.log(row)}>
+          <IconButton color="primary" onClick={() => editRow(row)}>
             <EditIcon />
           </IconButton>
         )}
