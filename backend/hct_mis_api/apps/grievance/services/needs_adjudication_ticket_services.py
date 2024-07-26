@@ -67,7 +67,7 @@ def close_needs_adjudication_old_ticket(ticket_details: TicketNeedsAdjudicationD
         individual_to_remove = ticket_details.selected_individual
         unique_individuals = [individual for individual in both_individuals if individual.id != individual_to_remove.id]
         mark_as_duplicate_individual_and_reassign_roles(
-            ticket_details, individual_to_remove, user, unique_individuals[0]
+            ticket_details, individual_to_remove, user, True, unique_individuals[0]
         )
         _clear_deduplication_individuals_fields(unique_individuals)
 
@@ -79,8 +79,14 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
     duplicate_individuals = ticket_details.selected_individuals.all()
 
     if duplicate_individuals:
+        # need this boolean just to run reassign roles once
+        # for multiple Individuals it will call each time and got 404 for IndividualRoleInHousehold
+        need_reassign_roles = True
         for individual_to_remove in duplicate_individuals:
-            mark_as_duplicate_individual_and_reassign_roles(ticket_details, individual_to_remove, user)
+            mark_as_duplicate_individual_and_reassign_roles(
+                ticket_details, individual_to_remove, user, need_reassign_roles
+            )
+            need_reassign_roles = False
         _clear_deduplication_individuals_fields(duplicate_individuals)
 
     if distinct_individuals:
@@ -225,20 +231,24 @@ def mark_as_duplicate_individual_and_reassign_roles(
     ticket_details: TicketNeedsAdjudicationDetails,
     individual_to_remove: Individual,
     user: AbstractUser,
+    need_reassign_roles: bool = True,
     unique_individual: Optional[Individual] = None,
 ) -> None:
+    household = individual_to_remove.household
     if ticket_details.is_multiple_duplicates_version:
-        household = reassign_roles_on_disable_individual_service(
-            individual_to_remove,
-            ticket_details.role_reassign_data,
-            user,
-            ticket_details.ticket.programs.all(),
-            "new_individual",
-        )
+        if need_reassign_roles:
+            reassign_roles_on_disable_individual_service(
+                individual_to_remove,
+                ticket_details.role_reassign_data,
+                user,
+                ticket_details.ticket.programs.all(),
+                "new_individual",
+            )
     else:
-        household = reassign_roles_on_disable_individual_service(
-            individual_to_remove, ticket_details.role_reassign_data, user, ticket_details.ticket.programs.all()
-        )
+        if need_reassign_roles:
+            reassign_roles_on_disable_individual_service(
+                individual_to_remove, ticket_details.role_reassign_data, user, ticket_details.ticket.programs.all()
+            )
     mark_as_duplicate_individual(
         individual_to_remove, unique_individual, household, user, ticket_details.ticket.programs.all()
     )
