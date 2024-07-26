@@ -1,13 +1,20 @@
+import re
+
 import pytest
+from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
+from hct_mis_api.apps.periodic_data_update.fixtures import PeriodicDataUpdateTemplateFactory, \
+    PeriodicDataUpdateUploadFactory
+from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate, PeriodicDataUpdateUpload
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from page_object.programme_population.periodic_data_update_templates import PeriodicDatUpdateTemplates
+from page_object.programme_population.periodic_data_update_uploads import PeriodicDataUpdateUploads
 from selenium_tests.page_object.programme_population.individuals import Individuals
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -78,7 +85,6 @@ class TestPeriodicDataTemplates:
     def test_periodic_data_template_export_and_download(
         self,
         program: Program,
-        individual: Individual,
         string_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,
     ) -> None:
@@ -112,3 +118,107 @@ class TestPeriodicDataTemplates:
             pageIndividuals.check_file_exists(f"./report/downloads/{periodic_data_update_template.file.file.name}")
             is True
         )
+
+    def test_periodic_data_template_list(
+        self,
+        program: Program,
+        string_attribute: FlexibleAttribute,
+        pageIndividuals: Individuals,
+        pagePeriodicDataUpdateTemplates: PeriodicDatUpdateTemplates,
+    ) -> None:
+        periodic_data_update_template = PeriodicDataUpdateTemplateFactory(
+            program=program,
+            business_area=program.business_area,
+            status=PeriodicDataUpdateTemplate.Status.EXPORTED,
+            number_of_records=10,
+            filters=dict(),
+            rounds_data=[
+                {
+                    "field": string_attribute.name,
+                    "round": 1,
+                    "round_name": string_attribute.pdu_data.rounds_names[0],
+                    "number_of_records": 0,
+                }
+            ],
+        )
+        periodic_data_update_template.refresh_from_db()
+        index = periodic_data_update_template.id
+
+        pageIndividuals.selectGlobalProgramFilter(program.name).click()
+        pageIndividuals.getNavProgrammePopulation().click()
+        pageIndividuals.getNavIndividuals().click()
+        pageIndividuals.getTabPeriodicDataUpdates().click()
+
+        pagePeriodicDataUpdateTemplates.getPduTemplatesBtn().click()
+        assert str(index) in pagePeriodicDataUpdateTemplates.getTemplateId(index).text
+        assert (
+            str(periodic_data_update_template.number_of_records)
+            in pagePeriodicDataUpdateTemplates.getTemplateRecords(index).text
+        )
+        assert (
+            f"{periodic_data_update_template.created_at:%d %b %Y}"
+            in pagePeriodicDataUpdateTemplates.getTemplateCreatedAt(index).text
+        )
+        assert (
+            periodic_data_update_template.created_by.get_full_name()
+            in pagePeriodicDataUpdateTemplates.getTemplateCreatedBy(index).text
+        )
+
+        assert (
+            "EXPORTED"
+            in pagePeriodicDataUpdateTemplates.getTemplateStatus(index).text
+        )
+
+    def test_periodic_data_template_details(
+        self,
+        program: Program,
+        string_attribute: FlexibleAttribute,
+        pageIndividuals: Individuals,
+        pagePeriodicDataUpdateTemplates: PeriodicDatUpdateTemplates,
+    ) -> None:
+        rounds_data = [
+            {
+                "field": string_attribute.name,
+                "round": 1,
+                "round_name": string_attribute.pdu_data.rounds_names[0],
+                "number_of_records": 0,
+            }
+        ]
+        periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
+            program=program,
+            business_area=program.business_area,
+            status=PeriodicDataUpdateTemplate.Status.TO_EXPORT,
+            filters=dict(),
+            rounds_data=rounds_data,
+        )
+        periodic_data_update_template.refresh_from_db()
+        index = periodic_data_update_template.id
+
+        pageIndividuals.selectGlobalProgramFilter(program.name).click()
+        pageIndividuals.getNavProgrammePopulation().click()
+        pageIndividuals.getNavIndividuals().click()
+        pageIndividuals.getTabPeriodicDataUpdates().click()
+
+        pagePeriodicDataUpdateTemplates.getPduTemplatesBtn().click()
+
+        btn = pagePeriodicDataUpdateTemplates.getTemplateDetailsBtn(index)
+        btn.find_element(By.TAG_NAME, "button").click()
+
+        row = pagePeriodicDataUpdateTemplates.driver.find_elements(
+            "xpath",
+            f"//*[contains(text(), '{rounds_data[0]['field']}')]",
+        )[0]
+        parent = row.find_element(By.XPATH, "./..")
+        elements = parent.get_attribute("outerHTML")
+
+        match = re.findall(r'<td[^>]*>(.*?)</td>', elements, re.DOTALL)
+        assert match[0] == rounds_data[0]['field']
+        assert match[1] == str(rounds_data[0]['round'])
+        assert match[2] == rounds_data[0]['round_name']
+        assert match[3] == str(rounds_data[0]['number_of_records'])
+
+        # this does not work cause data-cy magically does not exist in tests
+        # assert rounds_data[0]["field"] in pagePeriodicDataUpdateTemplates.getTemplateField(0).text
+        # assert str(rounds_data[0]["round"]) in pagePeriodicDataUpdateTemplates.getTemplateRoundNumber(0).text
+        # assert rounds_data[0]["round_name"] in pagePeriodicDataUpdateTemplates.getTemplateRoundName(0).text
+        # assert str(rounds_data[0]["number_of_records"]) in pagePeriodicDataUpdateTemplates.getTemplateNumberOfIndividuals(0).text
