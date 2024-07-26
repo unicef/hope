@@ -360,9 +360,9 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
         self.errors = []
         self.delivery_mechanisms_errors = []
-        self.pdu_flexible_attributes = FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU).select_related(
-            "pdu_data"
-        )
+        self.pdu_flexible_attributes = FlexibleAttribute.objects.filter(
+            type=FlexibleAttribute.PDU, program=program
+        ).select_related("pdu_data")
 
     def get_combined_fields(self) -> Dict:
         core_fields = (

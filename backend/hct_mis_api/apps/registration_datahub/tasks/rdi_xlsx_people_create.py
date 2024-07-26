@@ -11,7 +11,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, FlexibleAttribute
 from hct_mis_api.apps.core.utils import SheetImageLoader, serialize_flex_attributes
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.models import Country as GeoCountry
@@ -86,6 +86,8 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
 
         for cell, header_cell in zip(row, first_row):
             try:
+                if header_cell in self._pdu_column_names:
+                    continue
                 header = header_cell.value
                 combined_fields = self.COMBINED_FIELDS
                 current_field = combined_fields.get(header, {})
@@ -265,7 +267,11 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             if not any(has_value(cell) for cell in row):
                 continue
             for sheet_title in ("households", "individuals"):
-                obj_to_create = hh_obj() if sheet_title == "households" else ind_obj()
+                if sheet_title == "households":
+                    obj_to_create = hh_obj()
+                else:
+                    obj_to_create = ind_obj()
+                    self.handle_pdu_fields(row, first_row, obj_to_create)
                 self._create_hh_ind(obj_to_create, row, first_row, complex_fields, complex_types, sheet_title)
 
         PendingIndividual.objects.bulk_create(self.individuals)
@@ -287,6 +293,9 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         registration_data_import = RegistrationDataImport.objects.select_for_update().get(
             id=registration_data_import_id,
         )
+        self.pdu_flexible_attributes = FlexibleAttribute.objects.filter(
+            type=FlexibleAttribute.PDU, program=self.program
+        ).select_related("pdu_data")
         registration_data_import.status = RegistrationDataImport.IMPORTING
         registration_data_import.save()
 
