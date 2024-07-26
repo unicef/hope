@@ -7,7 +7,7 @@ export const api = {
 
   async get(url: string, params: Record<string, any> = {}) {
     const query = new URLSearchParams(params).toString();
-    const cacheKey = `${url}?${query}`;
+    const cacheKey = url + (query ? `?${query}` : '');
 
     const cached = this.cache.get(cacheKey);
     const headers = { ...this.headers };

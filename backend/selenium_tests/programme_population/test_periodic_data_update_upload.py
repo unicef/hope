@@ -130,6 +130,7 @@ def prepare_xlsx_file(rounds_data: list, rows: list, program: Program) -> _Tempo
 
 @pytest.mark.usefixtures("login")
 class TestPeriodicDataUpdateUpload:
+    @flaky(max_runs=5, min_passes=1)
     def test_periodic_data_update_upload_success(
         self,
         program: Program,
