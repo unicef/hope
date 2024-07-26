@@ -202,10 +202,7 @@ class TestPeriodicDataTemplates:
 
         btn = pagePeriodicDataUpdateTemplates.getTemplateDetailsBtn(index)
         btn.find_element(By.TAG_NAME, "button").click()
-        print(pagePeriodicDataUpdateTemplates.driver.page_source)
-        print(index)
-        print("dsaadssadadsdas")
-        # print(pagePeriodicDataUpdateTemplates.getDetailModal().text)
+        pagePeriodicDataUpdateTemplates.getDetailModal()
 
         assert rounds_data[0]["field"] in pagePeriodicDataUpdateTemplates.getTemplateField(0).text
         assert str(rounds_data[0]["round"]) in pagePeriodicDataUpdateTemplates.getTemplateRoundNumber(0).text
