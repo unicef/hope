@@ -34,7 +34,6 @@ def get_individual(individual_id: str) -> Individual:
 
 
 def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individuals: QuerySet[Individual]) -> None:
-    # TODO: what we have to do here with 'selected_distinct' ???
     rdi = grievance_ticket.registration_data_import
     if not rdi:
         return
@@ -201,7 +200,9 @@ def validate_individual_for_need_adjudication(
             raise PermissionDenied("Permission Denied: User does not have access to select individual")
 
     # validate Individual
-    if individual not in list(ticket_details.possible_duplicates.all()) + [ticket_details.golden_records_individual]:
+    if individual not in list(ticket_details.possible_duplicates.all()) + [ticket_details.golden_records_individual] + [
+        ticket_details.possible_duplicate
+    ]:
         raise ValidationError(
             f"The selected individual {individual.unicef_id} is not valid, must be one of those attached to the ticket"
         )
