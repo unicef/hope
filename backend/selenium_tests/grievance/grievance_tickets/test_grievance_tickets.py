@@ -395,3 +395,9 @@ class TestGrievanceTicketsHappyPath:
         assert "people-icon" in [ii.get_attribute("data-cy") for ii in
                                  pageGrievanceDetailsPage.getPossibleDuplicateRow()[1].find_elements(By.TAG_NAME,
                                                                                                      "svg")]
+        pageGrievanceDetailsPage.getButtonCloseTicket().click()
+        pageGrievanceDetailsPage.getButtonConfirm().click()
+
+        pageGrievanceDetailsPage.selectGlobalProgramFilter("Test Program").click()
+        pageGrievanceDetailsPage.getNavProgrammePopulation().click()
+        pageGrievanceDetailsPage.getNavIndividuals().click()
