@@ -89,6 +89,7 @@ class TestPeriodicDataTemplates:
         program: Program,
         string_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,
+        individual: Individual,
     ) -> None:
         periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
             program=program,
@@ -174,6 +175,7 @@ class TestPeriodicDataTemplates:
         string_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,
         pagePeriodicDataUpdateTemplates: PeriodicDatUpdateTemplates,
+        individual: Individual,
     ) -> None:
         rounds_data = [
             {
