@@ -11,6 +11,8 @@ import { programCycleStatusToColor } from '@utils/utils';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ProgramCycle from '@containers/tables/ProgramCycle/ProgramCycle';
 import headCells from '@containers/tables/ProgramCycle/HeadCells';
+import { AddNew } from '@containers/tables/ProgramCycle/AddNew';
+import { DeleteProgramCycle } from '@containers/tables/ProgramCycle/DeleteProgramCycle';
 
 interface ProgramCycleTableProps {
   program: ProgramQuery['program'];
@@ -28,7 +30,7 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
     ordering: 'created_at',
   });
 
-  // TODO fetch data from API
+  // TODO connect with API
   const isLoading = false;
   const error = '';
   const data: DataResponse = {
@@ -117,10 +119,8 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
           </IconButton>
         )}
 
-        {row.status === 'DRAFT' && (
-          <IconButton color="primary" onClick={() => console.log(row)}>
-            <DeleteIcon />
-          </IconButton>
+        {row.status === 'DRAFT' && data.results.length > 1 && (
+          <DeleteProgramCycle programCycle={row} />
         )}
       </TableCell>
     </ClickableTableRow>
@@ -136,6 +136,7 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
       isLoading={isLoading}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
+      actions={[<AddNew key="add-new" program={program} />]}
     />
   );
 };
