@@ -1,4 +1,4 @@
-import json
+import base64
 from time import sleep
 from typing import Generator
 
@@ -18,12 +18,19 @@ from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
 )
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from hct_mis_api.apps.household.fixtures import (
+    IndividualRoleInHouseholdFactory,
+    create_household_and_individuals,
+)
 from hct_mis_api.apps.household.models import HOST, Household, Individual
 from selenium_tests.drawer.test_drawer import get_program_with_dct_type_and_name
 from selenium_tests.page_object.programme_population.individuals import Individuals
 
 pytestmark = pytest.mark.django_db(transaction=True)
+
+
+def id_to_base64(object_id: str, name: str) -> str:
+    return base64.b64encode(f"{name}:{str(object_id)}".encode()).decode()
 
 
 @pytest.fixture
@@ -53,7 +60,6 @@ def create_custom_household(observed_disability: list[str], residence_status: st
     program = get_program_with_dct_type_and_name("Test Program", "1234")
     household, _ = create_household_and_individuals(
         household_data={
-            "id": "db6ab2a5-d318-47be-9ff8-fe0ccf5df169",
             "unicef_id": "HH-20-0000.0001",
             "rdi_merge_status": "MERGED",
             "business_area": program.business_area,
@@ -62,21 +68,18 @@ def create_custom_household(observed_disability: list[str], residence_status: st
         },
         individuals_data=[
             {
-                "id": "aa9da310-d33a-4106-8d65-994f4f315e11",
                 "unicef_id": "IND-00-0000.0011",
                 "rdi_merge_status": "MERGED",
                 "business_area": program.business_area,
                 "observed_disability": observed_disability,
             },
             {
-                "id": "aa9da310-d33a-4106-8d65-994f4f315e22",
                 "unicef_id": "IND-00-0000.0022",
                 "rdi_merge_status": "MERGED",
                 "business_area": program.business_area,
                 "observed_disability": observed_disability,
             },
             {
-                "id": "aa9da310-d33a-4106-8d65-994f4f315e33",
                 "unicef_id": "IND-00-0000.0033",
                 "rdi_merge_status": "MERGED",
                 "business_area": program.business_area,
@@ -143,18 +146,20 @@ def generate_grievance(
     # list of duplicate Individuals
     selected_individuals = []
 
+    role = IndividualRoleInHouseholdFactory(role="PRIMARY", household=hh, individual=individual_qs[0])
+
     role_data = {
         "HEAD": {
             "role": "HEAD",
-            "household": "SG91c2Vob2xkTm9kZTpkYjZhYjJhNS1kMzE4LTQ3YmUtOWZmOC1mZTBjY2Y1ZGYxNjk=",
-            "individual": "SW5kaXZpZHVhbE5vZGU6YWE5ZGEzMTAtZDMzYS00MTA2LThkNjUtOTk0ZjRmMzE1ZTEx",
-            "new_individual": "SW5kaXZpZHVhbE5vZGU6YWE5ZGEzMTAtZDMzYS00MTA2LThkNjUtOTk0ZjRmMzE1ZTIy",
+            "household": id_to_base64(hh.id, "HouseholdNode"),
+            "individual": id_to_base64(individual_qs[0].id, "IndividualNode"),
+            "new_individual": id_to_base64(individual_qs[1].id, "IndividualNode"),
         },
-        "6dc508c3-8d52-4ea1-ad00-af6a78c3454c": {
+        str(role.id): {
             "role": "PRIMARY",
-            "household": "SG91c2Vob2xkTm9kZTpkYjZhYjJhNS1kMzE4LTQ3YmUtOWZmOC1mZTBjY2Y1ZGYxNjk=",
-            "individual": "SW5kaXZpZHVhbE5vZGU6YWE5ZGEzMTAtZDMzYS00MTA2LThkNjUtOTk0ZjRmMzE1ZTEx",
-            "new_individual": "SW5kaXZpZHVhbE5vZGU6YWE5ZGEzMTAtZDMzYS00MTA2LThkNjUtOTk0ZjRmMzE1ZTIy",
+            "household": id_to_base64(hh.id, "HouseholdNode"),
+            "individual": id_to_base64(individual_qs[0].id, "IndividualNode"),
+            "new_individual": id_to_base64(individual_qs[1].id, "IndividualNode"),
         },
     }
 
@@ -162,7 +167,7 @@ def generate_grievance(
         ticket=grievance_ticket,
         is_multiple_duplicates_version=True,
         golden_records_individual=individual_qs[0],
-        role_reassign_data=json.dumps(role_data),
+        role_reassign_data=role_data,
     )
     # list of possible duplicates in the ticket
     ticket_detail.possible_duplicates.add(*possible_duplicates)
