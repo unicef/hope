@@ -34,7 +34,7 @@ class PeriodicDatUpdateTemplates(BaseComponents):
     templateAction = 'td[data-cy="template-action-{}"]'
     tablePagination = 'div[data-cy="table-pagination"]'
     # details
-    detailModal = 'h2[data-cy="periodic-data-update-detail"]'
+    detailModal = 'div[data-cy="periodic-data-update-detail"]'
     templateField = 'td[data-cy="template-field-{}"]'
     templateRoundNumber = 'td[data-cy="template-round-number-{}"]'
     templateRoundName = 'td[data-cy="template-round-name-{}"]'

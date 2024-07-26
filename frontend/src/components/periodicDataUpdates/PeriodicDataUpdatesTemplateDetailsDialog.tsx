@@ -48,7 +48,7 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: React.FC<
   if (isLoading) return <LoadingComponent />;
 
   return (
-    <Dialog open={open} onClose={onClose} scroll="paper">
+    <Dialog open={open} onClose={onClose} scroll="paper" data-cy="periodic-data-update-detail">
       <DialogTitle>{t('Periodic Data Updates')}</DialogTitle>
       <DialogContent>
         <LabelizedField label={t('Template Id')}>{template.id}</LabelizedField>

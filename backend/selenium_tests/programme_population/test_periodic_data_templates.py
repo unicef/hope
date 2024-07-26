@@ -1,6 +1,8 @@
 import re
 
 import pytest
+
+from page_object.base_components import BaseComponents
 from page_object.programme_population.periodic_data_update_templates import (
     PeriodicDatUpdateTemplates,
 )
@@ -204,16 +206,12 @@ class TestPeriodicDataTemplates:
 
         btn = pagePeriodicDataUpdateTemplates.getTemplateDetailsBtn(index)
         btn.find_element(By.TAG_NAME, "button").click()
+        print(pagePeriodicDataUpdateTemplates.driver.page_source)
+        print(index)
+        print("dsaadssadadsdas")
+        # print(pagePeriodicDataUpdateTemplates.getDetailModal().text)
 
-        row = pagePeriodicDataUpdateTemplates.driver.find_elements(
-            "xpath",
-            f"//*[contains(text(), '{rounds_data[0]['field']}')]",
-        )[0]
-        parent = row.find_element(By.XPATH, "./..")
-        elements = parent.get_attribute("outerHTML")
-
-        match = re.findall(r"<td[^>]*>(.*?)</td>", elements, re.DOTALL)
-        assert match[0] == rounds_data[0]["field"]
-        assert match[1] == str(rounds_data[0]["round"])
-        assert match[2] == rounds_data[0]["round_name"]
-        assert match[3] == str(rounds_data[0]["number_of_records"])
+        assert rounds_data[0]["field"] in pagePeriodicDataUpdateTemplates.getTemplateField(0).text
+        assert str(rounds_data[0]["round"]) in pagePeriodicDataUpdateTemplates.getTemplateRoundNumber(0).text
+        assert rounds_data[0]["round_name"] in pagePeriodicDataUpdateTemplates.getTemplateRoundName(0).text
+        assert str(rounds_data[0]["number_of_records"]) in pagePeriodicDataUpdateTemplates.getTemplateNumberOfIndividuals(0).text
