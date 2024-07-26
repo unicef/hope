@@ -44,8 +44,12 @@ from page_object.programme_population.households import Households
 from page_object.programme_population.households_details import HouseholdsDetails
 from page_object.programme_population.individuals import Individuals
 from page_object.programme_population.individuals_details import IndividualsDetails
-from page_object.programme_population.periodic_data_update_templates import PeriodicDatUpdateTemplates
-from page_object.programme_population.periodic_data_update_uploads import PeriodicDataUpdateUploads
+from page_object.programme_population.periodic_data_update_templates import (
+    PeriodicDatUpdateTemplates,
+)
+from page_object.programme_population.periodic_data_update_uploads import (
+    PeriodicDataUpdateUploads,
+)
 from page_object.programme_users.programme_users import ProgrammeUsers
 from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from page_object.registration_data_import.registration_data_import import (

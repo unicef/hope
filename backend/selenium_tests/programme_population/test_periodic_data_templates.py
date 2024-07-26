@@ -1,20 +1,22 @@
 import re
 
 import pytest
+from page_object.programme_population.periodic_data_update_templates import (
+    PeriodicDatUpdateTemplates,
+)
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.periodic_data_update.fixtures import PeriodicDataUpdateTemplateFactory, \
-    PeriodicDataUpdateUploadFactory
-from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate, PeriodicDataUpdateUpload
+from hct_mis_api.apps.periodic_data_update.fixtures import (
+    PeriodicDataUpdateTemplateFactory,
+)
+from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from page_object.programme_population.periodic_data_update_templates import PeriodicDatUpdateTemplates
-from page_object.programme_population.periodic_data_update_uploads import PeriodicDataUpdateUploads
 from selenium_tests.page_object.programme_population.individuals import Individuals
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -164,10 +166,7 @@ class TestPeriodicDataTemplates:
             in pagePeriodicDataUpdateTemplates.getTemplateCreatedBy(index).text
         )
 
-        assert (
-            "EXPORTED"
-            in pagePeriodicDataUpdateTemplates.getTemplateStatus(index).text
-        )
+        assert "EXPORTED" in pagePeriodicDataUpdateTemplates.getTemplateStatus(index).text
 
     def test_periodic_data_template_details(
         self,
@@ -211,8 +210,8 @@ class TestPeriodicDataTemplates:
         parent = row.find_element(By.XPATH, "./..")
         elements = parent.get_attribute("outerHTML")
 
-        match = re.findall(r'<td[^>]*>(.*?)</td>', elements, re.DOTALL)
-        assert match[0] == rounds_data[0]['field']
-        assert match[1] == str(rounds_data[0]['round'])
-        assert match[2] == rounds_data[0]['round_name']
-        assert match[3] == str(rounds_data[0]['number_of_records'])
+        match = re.findall(r"<td[^>]*>(.*?)</td>", elements, re.DOTALL)
+        assert match[0] == rounds_data[0]["field"]
+        assert match[1] == str(rounds_data[0]["round"])
+        assert match[2] == rounds_data[0]["round_name"]
+        assert match[3] == str(rounds_data[0]["number_of_records"])

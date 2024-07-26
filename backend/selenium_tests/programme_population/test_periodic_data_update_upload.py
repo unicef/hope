@@ -4,13 +4,21 @@ from typing import Any
 import openpyxl
 import pytest
 from flaky import flaky
+from page_object.programme_population.periodic_data_update_templates import (
+    PeriodicDatUpdateTemplates,
+)
+from page_object.programme_population.periodic_data_update_uploads import (
+    PeriodicDataUpdateUploads,
+)
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.periodic_data_update.fixtures import PeriodicDataUpdateTemplateFactory, \
-    PeriodicDataUpdateUploadFactory
+from hct_mis_api.apps.periodic_data_update.fixtures import (
+    PeriodicDataUpdateTemplateFactory,
+    PeriodicDataUpdateUploadFactory,
+)
 from hct_mis_api.apps.periodic_data_update.models import (
     PeriodicDataUpdateTemplate,
     PeriodicDataUpdateUpload,
@@ -21,8 +29,6 @@ from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_t
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from page_object.programme_population.periodic_data_update_templates import PeriodicDatUpdateTemplates
-from page_object.programme_population.periodic_data_update_uploads import PeriodicDataUpdateUploads
 from selenium_tests.page_object.programme_population.individuals import Individuals
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -275,15 +281,6 @@ class TestPeriodicDataUpdateUpload:
         index = pdu_upload.id
         assert str(index) in pagePeriodicDataUploads.getUpdateId(index).text
         assert str(pdu_upload.template.id) in pagePeriodicDataUploads.getUpdateTemplate(index).text
-        assert (
-                f"{pdu_upload.created_at:%d %b %Y}"
-                in pagePeriodicDataUploads.getUpdateCreatedAt(index).text
-        )
-        assert (
-                pdu_upload.created_by.get_full_name()
-                in pagePeriodicDataUploads.getUpdateCreatedBy(index).text
-        )
-        assert (
-                "SUCCESSFUL"
-                in pagePeriodicDataUploads.getUpdateStatus(index).text
-        )
+        assert f"{pdu_upload.created_at:%d %b %Y}" in pagePeriodicDataUploads.getUpdateCreatedAt(index).text
+        assert pdu_upload.created_by.get_full_name() in pagePeriodicDataUploads.getUpdateCreatedBy(index).text
+        assert "SUCCESSFUL" in pagePeriodicDataUploads.getUpdateStatus(index).text
