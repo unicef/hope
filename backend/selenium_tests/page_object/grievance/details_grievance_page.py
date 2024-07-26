@@ -388,7 +388,6 @@ class GrievanceDetailsPage(BaseComponents):
     def getCheckbox(self) -> WebElement:
         return self.wait_for(self.checkbox)
 
-
     def getApproveBoxNeedsAdjudicationTitle(self) -> WebElement:
         return self.wait_for(self.approveBoxNeedsAdjudicationTitle)
 
