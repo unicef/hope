@@ -16,10 +16,10 @@ export const IndividualFlags: React.FC<IndividualFlagsProps> = ({
 
   const getDuplicateTooltip = (individualObject): React.ReactElement => {
     if (individualObject?.status === 'DUPLICATE') {
-      return <WarningTooltip confirmed message={t('Confirmed Duplicate')} />;
+      return <WarningTooltip data-cy="tooltip-confirmed-duplicate" confirmed message={t('Confirmed Duplicate')} />;
     }
     if (individualObject?.deduplicationGoldenRecordStatus !== 'UNIQUE') {
-      return <WarningTooltip message={t('Possible Duplicate')} />;
+      return <WarningTooltip data-cy="tooltip-possible-duplicate" message={t('Possible Duplicate')} />;
     }
     return null;
   };
@@ -28,7 +28,7 @@ export const IndividualFlags: React.FC<IndividualFlagsProps> = ({
     individualObject,
   ): React.ReactElement => {
     if (individualObject?.sanctionListPossibleMatch) {
-      return <FlagTooltip message={t('Sanction List Possible Match')} />;
+      return <FlagTooltip data-cy="tooltip-sanction-list-possible" message={t('Sanction List Possible Match')} />;
     }
     return null;
   };
@@ -38,7 +38,7 @@ export const IndividualFlags: React.FC<IndividualFlagsProps> = ({
   ): React.ReactElement => {
     if (individualObject?.sanctionListConfirmedMatch) {
       return (
-        <FlagTooltip message={t('Sanction List Confirmed Match')} confirmed />
+        <FlagTooltip data-cy="sanction-list-confirmed" message={t('Sanction List Confirmed Match')} confirmed />
       );
     }
     return null;

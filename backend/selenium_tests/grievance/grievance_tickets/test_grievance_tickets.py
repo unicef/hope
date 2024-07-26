@@ -20,6 +20,7 @@ from hct_mis_api.apps.grievance.models import (
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import HOST, Household, Individual
 from selenium_tests.drawer.test_drawer import get_program_with_dct_type_and_name
+from selenium_tests.page_object.programme_population.individuals import Individuals
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -327,6 +328,7 @@ class TestGrievanceTicketsHappyPath:
         add_grievance_needs_adjudication: None,
         pageGrievanceTickets: GrievanceTickets,
         pageGrievanceDetailsPage: GrievanceDetailsPage,
+        pageIndividuals: Individuals,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -364,7 +366,7 @@ class TestGrievanceTicketsHappyPath:
                 for ii in pageGrievanceDetailsPage.getPossibleDuplicateGoldenRow().find_elements(By.TAG_NAME, "svg")
             ]
         except BaseException:
-            sleep(2)
+            sleep(4)
             assert "person-icon" not in [
                 ii.get_attribute("data-cy")
                 for ii in pageGrievanceDetailsPage.getPossibleDuplicateGoldenRow().find_elements(By.TAG_NAME, "svg")
@@ -410,3 +412,22 @@ class TestGrievanceTicketsHappyPath:
             ii.get_attribute("data-cy")
             for ii in pageGrievanceDetailsPage.getPossibleDuplicateRow()[1].find_elements(By.TAG_NAME, "svg")
         ]
+        duplicated_individual_unicef_id = pageGrievanceDetailsPage.getPossibleDuplicateRow()[1].text.split(" ")[0]
+        pageGrievanceDetailsPage.getButtonCloseTicket().click()
+        pageGrievanceDetailsPage.getButtonConfirm().click()
+        pageGrievanceDetailsPage.disappearButtonConfirm()
+
+        pageGrievanceDetailsPage.selectGlobalProgramFilter("Test Program").click()
+        pageGrievanceDetailsPage.getNavProgrammePopulation().click()
+        pageIndividuals.getNavIndividuals().click()
+        pageIndividuals.getIndividualTableRow()
+        assert 3 == len(pageIndividuals.getIndividualTableRow())
+        for icon in pageIndividuals.getIndividualTableRow()[0].find_elements(By.TAG_NAME, "svg"):
+            assert "Confirmed Duplicate" in icon.get_attribute("aria-label")
+            break
+        else:
+            raise AssertionError(f"Icon for {pageIndividuals.getIndividualTableRow()[0].text} does not appear")
+        for individual_row in pageIndividuals.getIndividualTableRow():
+            if duplicated_individual_unicef_id in individual_row.text:
+                for icon in individual_row.find_elements(By.TAG_NAME, "svg"):
+                    assert "Confirmed Duplicate" in icon.get_attribute("aria-label")
