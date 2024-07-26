@@ -11,7 +11,7 @@ const headCells: HeadCell<ProgramCycle>[] = [
     dataCy: 'head-cell-id',
   },
   {
-    id: 'title',
+    id: 'name',
     numeric: false,
     disablePadding: false,
     label: 'Programme Cycles Title',

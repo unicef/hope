@@ -4,15 +4,13 @@ import React, { ReactElement, useState } from 'react';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import TableCell from '@mui/material/TableCell';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { IconButton } from '@mui/material';
 import { StatusBox } from '@core/StatusBox';
-import EditIcon from '@mui/icons-material/Edit';
 import { programCycleStatusToColor } from '@utils/utils';
-import DeleteIcon from '@mui/icons-material/Delete';
 import ProgramCycle from '@containers/tables/ProgramCycle/ProgramCycle';
 import headCells from '@containers/tables/ProgramCycle/HeadCells';
 import { AddNew } from '@containers/tables/ProgramCycle/AddNew';
 import { DeleteProgramCycle } from '@containers/tables/ProgramCycle/DeleteProgramCycle';
+import { EditProgramCycle } from '@containers/tables/ProgramCycle/EditProgramCycle';
 
 interface ProgramCycleTableProps {
   program: ProgramQuery['program'];
@@ -38,35 +36,35 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
       {
         id: 'bc83b39a-d731-4a57-bfec-9cf2f7a65097',
         unicef_id: 'P-1',
-        title: 'Default Programme Cycle',
+        name: 'Default Programme Cycle',
         status: 'ACTIVE',
         total_entitled_quantity: null,
         total_undelivered_quantity: null,
         total_delivered_quantity: null,
-        start_date: '01.01.2020',
+        start_date: '2020-01-01',
         end_date: '',
       },
       {
         id: 'd81c9633-5362-4d2f-93a6-d30f92d90230',
         unicef_id: 'P-2',
-        title: 'January Payments 2020',
+        name: 'January Payments 2020',
         status: 'DRAFT',
         total_entitled_quantity: null,
         total_undelivered_quantity: null,
         total_delivered_quantity: null,
-        start_date: '01.01.2020',
-        end_date: '02.01.2020',
+        start_date: '2020-01-01',
+        end_date: '2020-02-01',
       },
       {
         id: 'b870d17d-7555-4565-86e2-69bae4fa3fd1',
         unicef_id: 'P-3',
-        title: 'February Payments 2020',
+        name: 'February Payments 2020',
         status: 'FINISHED',
         total_entitled_quantity: null,
         total_undelivered_quantity: null,
         total_delivered_quantity: null,
-        start_date: '02.01.2020',
-        end_date: '03.01.2020',
+        start_date: '2020-02-01',
+        end_date: '2020-03-01',
       },
     ],
     count: 3,
@@ -78,17 +76,13 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
     FINISHED: 'Finished',
   };
 
-  const editRow = (row: ProgramCycle): void => {
-    console.log(row);
-  };
-
   const renderRow = (row: ProgramCycle): ReactElement => (
     <ClickableTableRow key={row.id} data-cy={`program-cycle-row-${row.id}`}>
       <TableCell data-cy={`program-cycle-id-${row.id}`}>
         {row.unicef_id}
       </TableCell>
       <TableCell data-cy={`program-cycle-title-${row.id}`}>
-        {row.title}
+        {row.name}
       </TableCell>
       <TableCell data-cy={`program-cycle-status-${row.id}`}>
         <StatusBox
@@ -114,9 +108,7 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
 
       <TableCell data-cy={`program-cycle-details-btn-${row.id}`}>
         {(row.status === 'DRAFT' || row.status === 'ACTIVE') && (
-          <IconButton color="primary" onClick={() => editRow(row)}>
-            <EditIcon />
-          </IconButton>
+          <EditProgramCycle programCycle={row} />
         )}
 
         {row.status === 'DRAFT' && data.results.length > 1 && (
