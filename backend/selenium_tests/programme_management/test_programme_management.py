@@ -438,7 +438,7 @@ class TestBusinessAreas:
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
         assert "Business Area" in pageProgrammeDetails.getLabelAreaAccess().text
 
-    @pytest.mark.skip(reason="Unstable test")
+    # @pytest.mark.skip(reason="Unstable test")
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -476,7 +476,12 @@ class TestBusinessAreas:
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)
-        pageProgrammeManagement.getInputPduFieldsObjectName(0)
+        pageProgrammeManagement.getInputPduFieldsObjectName(0).send_keys("Time Series Field Name 1")
+        pageProgrammeManagement.getSelectPduFieldsObjectPduDataSubtype(0).click()
+        pageProgrammeManagement.select_listbox_element("Text").click()
+        pageProgrammeManagement.getSelectPduFieldsObjectPduDataNumberOfRounds(0).click()
+        pageProgrammeManagement.select_listbox_element("1").click()
+        pageProgrammeManagement.getInputPduFieldsRoundsNames(0, 0).send_keys("Round 1")
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
@@ -484,13 +489,26 @@ class TestBusinessAreas:
         pageProgrammeManagement.getButtonSave().click()
         pageProgrammeDetails.getCopyProgram().click()
         # 1st step (Details)
+        programme_name = pageProgrammeManagement.getInputProgrammeName()
+        programme_name.click()
+        programme_name.send_keys(Keys.CONTROL + "a")
+        programme_name.send_keys(Keys.DELETE)
+        pageProgrammeManagement.screenshot("your name")
+        programme_name.send_keys("New Programme")
+
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)
-        pageProgrammeManagement.getInputPduFieldsObjectName(0)
+        pageProgrammeManagement.getInputPduFieldsObjectName(0).send_keys("Any name")
+        pageProgrammeManagement.getSelectPduFieldsObjectPduDataSubtype(0).click()
+        pageProgrammeManagement.select_listbox_element("Number").click()
+        pageProgrammeManagement.getSelectPduFieldsObjectPduDataNumberOfRounds(0).click()
+        pageProgrammeManagement.select_listbox_element("1").click()
+        pageProgrammeManagement.getInputPduFieldsRoundsNames(0, 0).send_keys("Round 1")
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
         pageProgrammeManagement.getButtonSave().click()
-        assert "Copy of Programme" in pageProgrammeDetails.getHeaderTitle().text
+        pageProgrammeDetails.wait_for_text("New Programme", pageProgrammeDetails.headerTitle)
+        assert "New Programme" in pageProgrammeDetails.getHeaderTitle().text
 
 
 @pytest.mark.usefixtures("login")
