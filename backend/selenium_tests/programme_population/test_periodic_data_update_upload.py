@@ -9,6 +9,8 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import Individual
+from hct_mis_api.apps.periodic_data_update.fixtures import PeriodicDataUpdateTemplateFactory, \
+    PeriodicDataUpdateUploadFactory
 from hct_mis_api.apps.periodic_data_update.models import (
     PeriodicDataUpdateTemplate,
     PeriodicDataUpdateUpload,
@@ -19,6 +21,8 @@ from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_t
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from page_object.programme_population.periodic_data_update_templates import PeriodicDatUpdateTemplates
+from page_object.programme_population.periodic_data_update_uploads import PeriodicDataUpdateUploads
 from selenium_tests.page_object.programme_population.individuals import Individuals
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -235,3 +239,51 @@ class TestPeriodicDataUpdateUpload:
             pageIndividuals.screenshot("upload_error")
             error_text = pageIndividuals.getPduUploadError().text
             assert error_text == "Periodic Data Update Template with ID -1 not found"
+
+    def test_periodic_data_uploads_list(
+        self,
+        program: Program,
+        string_attribute: FlexibleAttribute,
+        pageIndividuals: Individuals,
+        pagePeriodicDataUpdateTemplates: PeriodicDatUpdateTemplates,
+        pagePeriodicDataUploads: PeriodicDataUpdateUploads,
+    ) -> None:
+        periodic_data_update_template = PeriodicDataUpdateTemplateFactory(
+            program=program,
+            business_area=program.business_area,
+            status=PeriodicDataUpdateTemplate.Status.TO_EXPORT,
+            filters=dict(),
+            rounds_data=[
+                {
+                    "field": string_attribute.name,
+                    "round": 1,
+                    "round_name": string_attribute.pdu_data.rounds_names[0],
+                    "number_of_records": 0,
+                }
+            ],
+        )
+        pdu_upload = PeriodicDataUpdateUploadFactory(
+            template=periodic_data_update_template,
+            status=PeriodicDataUpdateUpload.Status.SUCCESSFUL,
+        )
+        pageIndividuals.selectGlobalProgramFilter(program.name).click()
+        pageIndividuals.getNavProgrammePopulation().click()
+        pageIndividuals.getNavIndividuals().click()
+        pageIndividuals.getTabPeriodicDataUpdates().click()
+        pagePeriodicDataUpdateTemplates.getPduUpdatesBtn().click()
+
+        index = pdu_upload.id
+        assert str(index) in pagePeriodicDataUploads.getUpdateId(index).text
+        assert str(pdu_upload.template.id) in pagePeriodicDataUploads.getUpdateTemplate(index).text
+        assert (
+                f"{pdu_upload.created_at:%d %b %Y}"
+                in pagePeriodicDataUploads.getUpdateCreatedAt(index).text
+        )
+        assert (
+                pdu_upload.created_by.get_full_name()
+                in pagePeriodicDataUploads.getUpdateCreatedBy(index).text
+        )
+        assert (
+                "SUCCESSFUL"
+                in pagePeriodicDataUploads.getUpdateStatus(index).text
+        )

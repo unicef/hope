@@ -65,10 +65,12 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: React.FC<
             <TableBody>
               {templateDetailsData?.rounds_data?.map((roundData, index) => (
                 <TableRow key={index}>
-                  <TableCell>{roundData.field}</TableCell>
-                  <TableCell>{roundData.round}</TableCell>
-                  <TableCell>{roundData.round_name}</TableCell>
-                  <TableCell>{roundData.number_of_records}</TableCell>
+                  <TableCell data-cy={`template-field-${index}`}>{roundData.field}</TableCell>
+                  <TableCell data-cy={`template-round-number-${index}`}>{roundData.round}</TableCell>
+                  <TableCell data-cy={`template-round-name-${index}`}>{roundData.round_name}</TableCell>
+                  <TableCell data-cy={`template-number-of-individuals-${index}`}>
+                    {roundData.number_of_records}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -216,9 +216,3 @@ class TestPeriodicDataTemplates:
         assert match[1] == str(rounds_data[0]['round'])
         assert match[2] == rounds_data[0]['round_name']
         assert match[3] == str(rounds_data[0]['number_of_records'])
-
-        # this does not work cause data-cy magically does not exist in tests
-        # assert rounds_data[0]["field"] in pagePeriodicDataUpdateTemplates.getTemplateField(0).text
-        # assert str(rounds_data[0]["round"]) in pagePeriodicDataUpdateTemplates.getTemplateRoundNumber(0).text
-        # assert rounds_data[0]["round_name"] in pagePeriodicDataUpdateTemplates.getTemplateRoundName(0).text
-        # assert str(rounds_data[0]["number_of_records"]) in pagePeriodicDataUpdateTemplates.getTemplateNumberOfIndividuals(0).text
