@@ -1,3 +1,4 @@
+from time import sleep
 from typing import Generator
 
 from django.conf import settings
@@ -8,6 +9,7 @@ from page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from page_object.grievance.grievance_tickets import GrievanceTickets
 from page_object.grievance.new_ticket import NewTicket
 from pytest_django import DjangoDbBlocker
+from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea
@@ -90,17 +92,17 @@ def add_grievance_needs_adjudication() -> None:
 
 
 def generate_grievance(
-    unicef_id: str = "GRV-0000001",
-    status: int = GrievanceTicket.STATUS_NEW,
-    category: int = GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-    created_by: User | None = None,
-    assigned_to: User | None = None,
-    business_area: BusinessArea | None = None,
-    priority: int = 1,
-    urgency: int = 1,
-    household_unicef_id: str = "HH-20-0000.0001",
-    updated_at: str = "2023-09-27T11:26:33.846Z",
-    created_at: str = "2022-04-30T09:54:07.827000",
+        unicef_id: str = "GRV-0000001",
+        status: int = GrievanceTicket.STATUS_NEW,
+        category: int = GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        created_by: User | None = None,
+        assigned_to: User | None = None,
+        business_area: BusinessArea | None = None,
+        priority: int = 1,
+        urgency: int = 1,
+        household_unicef_id: str = "HH-20-0000.0001",
+        updated_at: str = "2023-09-27T11:26:33.846Z",
+        created_at: str = "2022-04-30T09:54:07.827000",
 ) -> GrievanceTicket:
     created_by = User.objects.first() if created_by is None else created_by
     assigned_to = User.objects.first() if assigned_to is None else assigned_to
@@ -133,7 +135,7 @@ def generate_grievance(
     # list of distinct Individuals
     selected_distinct = [individual_qs[0]]
     # list of duplicate Individuals
-    selected_individuals = [individual_qs[2]]
+    selected_individuals = []
 
     ticket_detail = TicketNeedsAdjudicationDetails.objects.create(
         ticket=grievance_ticket,
@@ -153,11 +155,11 @@ def generate_grievance(
 @pytest.mark.usefixtures("login")
 class TestSmokeGrievanceTickets:
     def test_check_grievance_tickets_user_generated_page(
-        self,
-        create_programs: None,
-        add_households: None,
-        add_grievance: None,
-        pageGrievanceTickets: GrievanceTickets,
+            self,
+            create_programs: None,
+            add_households: None,
+            add_grievance: None,
+            pageGrievanceTickets: GrievanceTickets,
     ) -> None:
         """
         Go to Grievance tickets user generated page
@@ -191,11 +193,11 @@ class TestSmokeGrievanceTickets:
         assert expected_labels == [i.text for i in pageGrievanceTickets.getTableLabel()]
 
     def test_check_grievance_tickets_system_generated_page(
-        self,
-        create_programs: None,
-        add_households: None,
-        add_grievance: None,
-        pageGrievanceTickets: GrievanceTickets,
+            self,
+            create_programs: None,
+            add_households: None,
+            add_grievance: None,
+            pageGrievanceTickets: GrievanceTickets,
     ) -> None:
         """
         Go to Grievance tickets system generated page
@@ -215,12 +217,12 @@ class TestSmokeGrievanceTickets:
         assert "NEW TICKET" in pageGrievanceTickets.getButtonNewTicket().text
 
     def test_check_grievance_tickets_details_page(
-        self,
-        create_programs: None,
-        add_households: None,
-        add_grievance: None,
-        pageGrievanceTickets: GrievanceTickets,
-        pageGrievanceDetailsPage: GrievanceDetailsPage,
+            self,
+            create_programs: None,
+            add_households: None,
+            add_grievance: None,
+            pageGrievanceTickets: GrievanceTickets,
+            pageGrievanceDetailsPage: GrievanceDetailsPage,
     ) -> None:
         """
         Go to Grievance tickets details page
@@ -267,11 +269,11 @@ class TestGrievanceTicketsHappyPath:
     )
     @pytest.mark.skip(reason="ToDo")
     def test_grievance_tickets_create_new_ticket(
-        self,
-        pageGrievanceTickets: GrievanceTickets,
-        pageGrievanceNewTicket: NewTicket,
-        pageGrievanceDetailsPage: GrievanceDetailsPage,
-        test_data: dict,
+            self,
+            pageGrievanceTickets: GrievanceTickets,
+            pageGrievanceNewTicket: NewTicket,
+            pageGrievanceDetailsPage: GrievanceDetailsPage,
+            test_data: dict,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -296,10 +298,10 @@ class TestGrievanceTicketsHappyPath:
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
 
     def test_grievance_tickets_create_new_ticket_referral(
-        self,
-        pageGrievanceTickets: GrievanceTickets,
-        pageGrievanceNewTicket: NewTicket,
-        pageGrievanceDetailsPage: GrievanceDetailsPage,
+            self,
+            pageGrievanceTickets: GrievanceTickets,
+            pageGrievanceNewTicket: NewTicket,
+            pageGrievanceDetailsPage: GrievanceDetailsPage,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -321,13 +323,75 @@ class TestGrievanceTicketsHappyPath:
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
 
     def test_grievance_tickets_needs_adjudication(
-        self,
-        add_grievance_needs_adjudication: None,
-        pageGrievanceTickets: GrievanceTickets,
-        pageGrievanceDetailsPage: GrievanceDetailsPage,
+            self,
+            add_grievance_needs_adjudication: None,
+            pageGrievanceTickets: GrievanceTickets,
+            pageGrievanceDetailsPage: GrievanceDetailsPage,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getTabSystemGenerated().click()
         pageGrievanceTickets.getTicketListRow()[0].click()
-        pageGrievanceDetailsPage.screenshot("needs_adjudication")
+        pageGrievanceDetailsPage.getSelectAllCheckbox().click()
+        pageGrievanceDetailsPage.getPersonIcon()
+        assert "person-icon" in [ii.get_attribute("data-cy") for ii in
+                                 pageGrievanceDetailsPage.getPossibleDuplicateGoldenRow().find_elements(By.TAG_NAME,
+                                                                                                        "svg")]
+        assert "people-icon" not in [ii.get_attribute("data-cy") for ii in
+                                     pageGrievanceDetailsPage.getPossibleDuplicateRow()[0].find_elements(By.TAG_NAME,
+                                                                                                         "svg")]
+        assert "person-icon" not in [ii.get_attribute("data-cy") for ii in
+                                     pageGrievanceDetailsPage.getPossibleDuplicateRow()[0].find_elements(By.TAG_NAME,
+                                                                                                         "svg")]
+        assert "people-icon" not in [ii.get_attribute("data-cy") for ii in
+                                     pageGrievanceDetailsPage.getPossibleDuplicateRow()[1].find_elements(By.TAG_NAME,
+                                                                                                         "svg")]
+        assert "person-icon" not in [ii.get_attribute("data-cy") for ii in
+                                     pageGrievanceDetailsPage.getPossibleDuplicateRow()[1].find_elements(By.TAG_NAME,
+                                                                                                         "svg")]
+        pageGrievanceDetailsPage.getButtonClear().click()
+        pageGrievanceDetailsPage.getButtonConfirm().click()
+        pageGrievanceDetailsPage.disappearPersonIcon()
+        pageGrievanceDetailsPage.disappearPeopleIcon()
+        try:
+            assert "person-icon" not in [ii.get_attribute("data-cy") for ii in
+                                         pageGrievanceDetailsPage.getPossibleDuplicateGoldenRow().find_elements(By.TAG_NAME,
+                                                                                                                "svg")]
+        except BaseException:
+            sleep(2)
+            assert "person-icon" not in [ii.get_attribute("data-cy") for ii in
+                                         pageGrievanceDetailsPage.getPossibleDuplicateGoldenRow().find_elements(By.TAG_NAME,
+                                                                                                                "svg")]
+        assert "person-icon" not in [ii.get_attribute("data-cy") for ii in
+                                     pageGrievanceDetailsPage.getPossibleDuplicateGoldenRow().find_elements(By.TAG_NAME,
+                                                                                                            "svg")]
+        assert "people-icon" not in [ii.get_attribute("data-cy") for ii in
+                                     pageGrievanceDetailsPage.getPossibleDuplicateRow()[0].find_elements(By.TAG_NAME,
+                                                                                                         "svg")]
+        assert "person-icon" not in [ii.get_attribute("data-cy") for ii in
+                                     pageGrievanceDetailsPage.getPossibleDuplicateRow()[0].find_elements(By.TAG_NAME,
+                                                                                                         "svg")]
+        assert "people-icon" not in [ii.get_attribute("data-cy") for ii in
+                                     pageGrievanceDetailsPage.getPossibleDuplicateRow()[1].find_elements(By.TAG_NAME,
+                                                                                                         "svg")]
+        assert "person-icon" not in [ii.get_attribute("data-cy") for ii in
+                                     pageGrievanceDetailsPage.getPossibleDuplicateRow()[1].find_elements(By.TAG_NAME,
+                                                                                                         "svg")]
+        pageGrievanceDetailsPage.getSelectCheckbox()[0].click()
+        pageGrievanceDetailsPage.getButtonMarkDistinct().click()
+        pageGrievanceDetailsPage.getButtonConfirm().click()
+        pageGrievanceDetailsPage.getPersonIcon()
+        pageGrievanceDetailsPage.getCheckboxIndividual().click()
+        pageGrievanceDetailsPage.getSelectCheckbox()[1].click()
+        pageGrievanceDetailsPage.getButtonMarkDuplicate().click()
+        pageGrievanceDetailsPage.getButtonConfirm().click()
+        pageGrievanceDetailsPage.getPeopleIcon()
+        assert "people-icon" in [ii.get_attribute("data-cy") for ii in
+                                 pageGrievanceDetailsPage.getPossibleDuplicateGoldenRow().find_elements(By.TAG_NAME,
+                                                                                                        "svg")]
+        assert "person-icon" in [ii.get_attribute("data-cy") for ii in
+                                 pageGrievanceDetailsPage.getPossibleDuplicateRow()[0].find_elements(By.TAG_NAME,
+                                                                                                     "svg")]
+        assert "people-icon" in [ii.get_attribute("data-cy") for ii in
+                                 pageGrievanceDetailsPage.getPossibleDuplicateRow()[1].find_elements(By.TAG_NAME,
+                                                                                                     "svg")]

@@ -97,7 +97,7 @@ export const NeedsAdjudicationTable = ({
     !isActiveProgram;
 
   const renderPossibleDuplicateRow = (possibleDuplicate) => (
-    <TableRow key={possibleDuplicate.id} data-cy={`possible-duplicate-row-${possibleDuplicate.id}`}>
+    <TableRow key={possibleDuplicate.id} data-cy="possible-duplicate-row">
       <TableCell align="left" data-cy="checkbox-cell">
         <Checkbox
           color="primary"
