@@ -402,6 +402,22 @@ export function reportStatusToColor(
   }
 }
 
+export function programCycleStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'Draft':
+      return theme.hctPalette.gray;
+    case 'Active':
+      return theme.hctPalette.green;
+    case 'Finished':
+      return theme.hctPalette.gray;
+    default:
+      return theme.hctPalette.gray;
+  }
+}
+
 export function selectFields(
   fullObject,
   keys: string[],
