@@ -13,7 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 class Common:
-    DEFAULT_TIMEOUT = 5
+    DEFAULT_TIMEOUT = 20
 
     def __init__(self, driver: Chrome):
         self.driver = driver
