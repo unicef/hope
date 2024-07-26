@@ -103,10 +103,10 @@ class Individuals(BaseComponents):
     def getIndividualLocation(self) -> WebElement:
         return self.wait_for(self.individualLocation)
 
-    def getTableRow(self) -> WebElement:
+    def getTableRow(self) -> [WebElement]:
         return self.get_elements(self.tableRow)
 
-    def getIndividualTableRow(self) -> WebElement:
+    def getIndividualTableRow(self) -> [WebElement]:
         self.wait_for(self.individualTableRow)
         return self.get_elements(self.individualTableRow)
 

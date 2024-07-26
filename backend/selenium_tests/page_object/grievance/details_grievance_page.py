@@ -1,3 +1,5 @@
+from time import sleep
+
 from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -169,6 +171,14 @@ class GrievanceDetailsPage(BaseComponents):
         return self.wait_for(self.title)
 
     def getButtonCloseTicket(self) -> WebElement:
+        # Workaround because elements overlapped even though Selenium saw that they were available:
+        self.driver.execute_script(
+            """
+            container = document.querySelector("div[data-cy='main-content']")
+            container.scrollBy(0,-600)
+            """
+        )
+        sleep(2)
         return self.wait_for(self.buttonCloseTicket)
 
     def getButtonAssignToMe(self) -> WebElement:
@@ -182,6 +192,9 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getButtonConfirm(self) -> WebElement:
         return self.wait_for(self.buttonConfirm)
+
+    def disappearButtonConfirm(self) -> WebElement:
+        return self.wait_for_disappear(self.buttonConfirm)
 
     def getButtonEdit(self) -> WebElement:
         return self.wait_for(self.buttonEdit)
