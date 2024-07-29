@@ -54,6 +54,8 @@ services:
     volumes:
       - ./backend:/code/
       - backend-data:/data
+      - ./backend/pyproject.toml:/packages/pyproject.toml
+      - ./backend/pdm.lock:/packages/pdm.lock
       - ipython_data_local:/root/.ipython
       - ./backend/pyproject.toml:/packages/pyproject.toml
       - ./backend/pdm.lock:/packages/pdm.lock
