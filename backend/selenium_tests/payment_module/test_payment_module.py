@@ -19,9 +19,13 @@ from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
-    DeliveryMechanismFactory, generate_delivery_mechanisms,
+    generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import FinancialServiceProvider, PaymentPlan, DeliveryMechanism
+from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
+    FinancialServiceProvider,
+    PaymentPlan,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory

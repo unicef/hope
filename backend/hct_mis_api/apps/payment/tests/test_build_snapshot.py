@@ -9,12 +9,12 @@ from pytz import utc
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismDataFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    RealProgramFactory, generate_delivery_mechanisms,
+    RealProgramFactory,
+    generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.payment.services import payment_household_snapshot_service
@@ -103,7 +103,7 @@ class TestBuildSnapshot(TestCase):
         self.assertEqual(
             self.p1.household_snapshot.snapshot_data["primary_collector"]["delivery_mechanisms_data"],
             {
-                "ATM Card": {
+                "atm_card": {
                     "card_expiry_date_atm_card": "2022-01-01",
                     "card_number_atm_card": "123",
                     "full_name": self.hoh1.full_name,

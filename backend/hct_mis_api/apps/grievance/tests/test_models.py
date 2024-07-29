@@ -3,7 +3,10 @@ from unittest import mock
 from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory, get_core_fields_attributes
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+    FieldFactory,
+    get_core_fields_attributes,
+)
 from hct_mis_api.apps.core.field_attributes.fields_types import (
     _DELIVERY_MECHANISM_DATA,
     _HOUSEHOLD,
@@ -17,9 +20,11 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import LOT_DIFFICULTY
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory, generate_delivery_mechanisms
-from hct_mis_api.apps.payment.models import DeliveryMechanismData, DeliveryMechanism
+from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismDataFactory,
+    generate_delivery_mechanisms,
+)
+from hct_mis_api.apps.payment.models import DeliveryMechanism, DeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
@@ -54,9 +59,9 @@ class TestDeliveryMechanismDataModel(TestCase):
     def test_delivery_data(self) -> None:
         dmd = DeliveryMechanismDataFactory(data={"name_of_cardholder_atm_card": "test"}, individual=self.ind)
         delivery_mechanism_fields = [
-            self.all_fields["full_name"],
-            self.all_fields["number_of_children"],
-            self.all_fields["name_of_cardholder_atm_card"],
+            "full_name",
+            "number_of_children",
+            "name_of_cardholder_atm_card",
         ]
         self.hh.number_of_children = 1
         self.hh.save()
@@ -78,9 +83,9 @@ class TestDeliveryMechanismDataModel(TestCase):
         dmd.individual.seeing_disability = ""
         dmd.individual.save()
         required_fields = [
-            self.all_fields["seeing_disability"],
-            self.all_fields["number_of_children"],
-            self.all_fields["name_of_cardholder_atm_card"],
+            "seeing_disability",
+            "number_of_children",
+            "name_of_cardholder_atm_card",
         ]
         with mock.patch.object(dmd, "required_fields", required_fields):
             dmd.validate()
@@ -157,23 +162,19 @@ class TestDeliveryMechanismDataModel(TestCase):
                         self.assertEqual(dmd_2.possible_duplicate_of, dmd_1)
 
     def test_delivery_mechanism_fields(self) -> None:
-        dmd = DeliveryMechanismDataFactory(
-            individual=self.ind, delivery_mechanism=self.dm_atm_card
-        )
+        dmd = DeliveryMechanismDataFactory(individual=self.ind, delivery_mechanism=self.dm_atm_card)
         self.assertEqual(
             dmd.all_fields,
             [
-                "full_name",
                 "card_expiry_date_atm_card",
                 "card_number_atm_card",
                 "name_of_cardholder_atm_card",
+                "full_name",
             ],
         )
 
     def test_required_fields(self) -> None:
-        dmd = DeliveryMechanismDataFactory(
-            individual=self.ind, delivery_mechanism=self.dm_atm_card
-        )
+        dmd = DeliveryMechanismDataFactory(individual=self.ind, delivery_mechanism=self.dm_atm_card)
         self.assertEqual(
             dmd.required_fields,
             [
@@ -184,9 +185,7 @@ class TestDeliveryMechanismDataModel(TestCase):
         )
 
     def test_unique_fields(self) -> None:
-        dmd = DeliveryMechanismDataFactory(
-            individual=self.ind, delivery_mechanism=self.dm_atm_card
-        )
+        dmd = DeliveryMechanismDataFactory(individual=self.ind, delivery_mechanism=self.dm_atm_card)
         self.assertEqual(
             dmd.unique_fields,
             [
@@ -198,22 +197,22 @@ class TestDeliveryMechanismDataModel(TestCase):
 
     def test_get_all_delivery_mechanisms_xlsx_fields(self) -> None:
         fields = DeliveryMechanismData.get_all_delivery_mechanisms_fields()
+        print(fields)
         self.assertEqual(
             fields,
             [
-                "full_name",
-                "card_number_atm_card",
-                "card_expiry_date_atm_card",
-                "name_of_cardholder_atm_card",
-                "card_number_deposit_to_card",
-                "delivery_phone_number_mobile_money",
-                "provider_mobile_money",
-                "bank_name_transfer_to_account",
-                "bank_account_number_transfer_to_account",
-                "mobile_phone_number_cash_over_the_counter",
                 "wallet_name_transfer_to_digital_wallet",
                 "blockchain_name_transfer_to_digital_wallet",
+                "mobile_phone_number_cash_over_the_counter",
+                "card_expiry_date_atm_card",
+                "card_number_atm_card",
+                "name_of_cardholder_atm_card",
+                "provider_mobile_money",
+                "bank_name_transfer_to_account",
                 "wallet_address_transfer_to_digital_wallet",
+                "bank_account_number_transfer_to_account",
+                "card_number_deposit_to_card",
+                "delivery_phone_number_mobile_money",
             ],
         )
 
@@ -225,10 +224,10 @@ class TestDeliveryMechanismDataModel(TestCase):
         self.assertEqual(
             dmd.all_fields,
             [
-                "full_name",
                 "card_number_atm_card",
                 "card_expiry_date_atm_card",
                 "name_of_cardholder_atm_card",
+                "full_name",
             ],
         )
 
@@ -268,6 +267,7 @@ class TestDeliveryMechanismDataModel(TestCase):
         )
 
     def test_revalidate_for_grievance_ticket(self) -> None:
+        self.maxDiff = None
         ba = BusinessArea.objects.get(slug="afghanistan")
         grievance_ticket = GrievanceTicket.objects.create(
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
@@ -291,6 +291,7 @@ class TestDeliveryMechanismDataModel(TestCase):
             },
             delivery_mechanism=self.dm_atm_card,
         )
+        print(dmd.delivery_data)
 
         with mock.patch.object(dmd, "validate"):
             dmd.revalidate_for_grievance_ticket(grievance_ticket)
@@ -300,6 +301,7 @@ class TestDeliveryMechanismDataModel(TestCase):
                 grievance_ticket.description,
                 "Missing required fields ['full_name', 'name_of_cardholder_atm_card'] values for delivery mechanism ATM Card",
             )
+            print(individual_data_update_ticket.individual_data)
             self.assertEqual(
                 individual_data_update_ticket.individual_data,
                 {

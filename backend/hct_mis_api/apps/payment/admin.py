@@ -410,6 +410,7 @@ class FspXlsxTemplatePerDeliveryMechanismAdminInline(admin.TabularInline):
     raw_id_fields = ("financial_service_provider",)
     exclude = ("delivery_mechanism_choice",)
 
+
 @admin.register(FinancialServiceProvider)
 class FinancialServiceProviderAdmin(HOPEModelAdminBase):
     form = FinancialServiceProviderAdminForm

@@ -17,15 +17,19 @@ from hct_mis_api.apps.household.fixtures import (
     create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    RealProgramFactory, generate_delivery_mechanisms,
+    RealProgramFactory,
+    generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import AcceptanceProcessThreshold, PaymentPlan, DeliveryMechanism
+from hct_mis_api.apps.payment.models import (
+    AcceptanceProcessThreshold,
+    DeliveryMechanism,
+    PaymentPlan,
+)
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 

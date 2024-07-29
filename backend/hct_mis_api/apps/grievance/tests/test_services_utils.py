@@ -2,9 +2,9 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.test import TestCase
 
 import pytest
-from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import (
     BusinessAreaFactory,

@@ -24,9 +24,10 @@ from hct_mis_api.apps.payment.fixtures import (
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     GenericPayment,
-    PaymentPlan, DeliveryMechanism,
+    PaymentPlan,
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -99,11 +100,10 @@ def base_setup(cls: Any) -> None:
     }
     generate_delivery_mechanisms()
     cls.dm_cash = DeliveryMechanism.objects.get(code="cash")
-    cls.dm_transfer = DeliveryMechanism.objects.get(code="transfer_to_account")
+    cls.dm_transfer = DeliveryMechanism.objects.get(code="transfer")
     cls.dm_transfer_to_digital_wallet = DeliveryMechanism.objects.get(code="transfer_to_digital_wallet")
     cls.dm_voucher = DeliveryMechanism.objects.get(code="voucher")
     cls.dm_mobile_money = DeliveryMechanism.objects.get(code="mobile_money")
-    cls.dm_transfer_to_digital_wallet = DeliveryMechanism.objects.get(code="transfer_to_digital_wallet")
 
 
 def payment_plan_setup(cls: Any) -> None:
@@ -133,6 +133,7 @@ def payment_plan_setup(cls: Any) -> None:
     )
 
     cls.santander_fsp.delivery_mechanisms.set([cls.dm_transfer, cls.dm_cash, cls.dm_transfer_to_digital_wallet])
+    cls.santander_fsp.allowed_business_areas.add(cls.business_area)
     cls.encoded_santander_fsp_id = encode_id_base64(cls.santander_fsp.id, "FinancialServiceProvider")
 
     cls.bank_of_america_fsp = FinancialServiceProviderFactory(
@@ -430,10 +431,11 @@ class TestFSPAssignment(APITestCase):
         available_mechs_data = query_response["data"]["availableFspsForDeliveryMechanisms"]
         assert available_mechs_data is not None, query_response
         assert len(available_mechs_data) == 2
-        assert available_mechs_data[0]["deliveryMechanism"] == self.dm_transfer.code
+        assert available_mechs_data[0]["deliveryMechanism"] == self.dm_transfer.name
         transfer_fsps_names = [x["name"] for x in available_mechs_data[0]["fsps"]]
-        assert all(name in transfer_fsps_names for name in ["Santander", "Bank of Europe"])
-        assert available_mechs_data[1]["deliveryMechanism"] == self.dm_voucher.code
+        assert "Santander" in transfer_fsps_names
+        assert "Bank of Europe" in transfer_fsps_names
+        assert available_mechs_data[1]["deliveryMechanism"] == self.dm_voucher.name
         voucher_fsp_names = [f["name"] for f in available_mechs_data[1]["fsps"]]
         assert "Bank of America" in voucher_fsp_names
         assert "Bank of Europe" in voucher_fsp_names
@@ -562,7 +564,7 @@ class TestFSPAssignment(APITestCase):
         assert new_data["deliveryMechanisms"][1]["fsp"] is not None
 
         for fsp in [self.santander_fsp, self.bank_of_america_fsp, self.bank_of_europe_fsp]:
-            fsp.delivery_mechanisms.append(self.dm_mobile_money)
+            fsp.delivery_mechanisms.add(self.dm_mobile_money)
         new_program_mutation_variables = dict(
             input=dict(
                 paymentPlanId=self.encoded_payment_plan_id,

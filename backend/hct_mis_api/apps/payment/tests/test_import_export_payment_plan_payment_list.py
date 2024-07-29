@@ -27,15 +27,17 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentFactory,
     PaymentPlanFactory,
     RealProgramFactory,
-    ServiceProviderFactory, generate_delivery_mechanisms,
+    ServiceProviderFactory,
+    generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
     PaymentPlan,
     PaymentPlanSplit,
-    ServiceProvider, DeliveryMechanism,
+    ServiceProvider,
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.utils import to_decimal
@@ -89,9 +91,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
             vision_vendor_number=123456789,
         )
         cls.fsp_1.delivery_mechanisms.add(cls.dm_cash)
-        FspXlsxTemplatePerDeliveryMechanismFactory(
-            financial_service_provider=cls.fsp_1, delivery_mechanism=cls.dm_cash
-        )
+        FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=cls.fsp_1, delivery_mechanism=cls.dm_cash)
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=cls.payment_plan,
             financial_service_provider=cls.fsp_1,

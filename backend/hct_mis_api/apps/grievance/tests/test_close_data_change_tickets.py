@@ -42,7 +42,10 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory, generate_delivery_mechanisms
+from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismDataFactory,
+    generate_delivery_mechanisms,
+)
 from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -738,7 +741,7 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
                 "delivery_mechanism_data_to_edit": [
                     {
                         "id": str(dmd.id),
-                        "label": self.dm_atm_card.name, # TODO MB code?
+                        "label": self.dm_atm_card.name,  # TODO MB code?
                         "approve_status": True,
                         "data_fields": [
                             {"name": "name_of_cardholder_atm_card", "value": "Marek"},

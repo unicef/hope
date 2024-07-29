@@ -11,8 +11,11 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory, generate_delivery_mechanisms
+from hct_mis_api.apps.payment.fixtures import (
+    CashPlanFactory,
+    PaymentRecordFactory,
+    generate_delivery_mechanisms,
+)
 from hct_mis_api.apps.payment.models import DeliveryMechanism
 
 

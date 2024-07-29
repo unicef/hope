@@ -34,7 +34,12 @@ from hct_mis_api.apps.core.tests.test_exchange_rates import (
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
-from hct_mis_api.apps.payment.models import CashPlan, PaymentRecord, ServiceProvider, DeliveryMechanism
+from hct_mis_api.apps.payment.models import (
+    CashPlan,
+    DeliveryMechanism,
+    PaymentRecord,
+    ServiceProvider,
+)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
@@ -267,7 +272,9 @@ class TestPullDataFromDatahub(TestCase):
         self.assertEqual(
             payment_record.entitlement_card_issue_date, self.dh_payment_record.entitlement_card_issue_date.date()
         )
-        self.assertEqual(payment_record.delivery_type, DeliveryMechanism.objects.get(name=self.dh_payment_record.delivery_type))
+        self.assertEqual(
+            payment_record.delivery_type, DeliveryMechanism.objects.get(name=self.dh_payment_record.delivery_type)
+        )
         self.assertEqual(payment_record.currency, self.dh_payment_record.currency)
         self.assertEqual(payment_record.entitlement_quantity, self.dh_payment_record.entitlement_quantity)
         self.assertEqual(payment_record.delivered_quantity, self.dh_payment_record.delivered_quantity)

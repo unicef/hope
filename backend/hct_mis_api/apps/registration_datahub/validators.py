@@ -48,7 +48,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanismData, DeliveryMechanism
+from hct_mis_api.apps.payment.models import DeliveryMechanism, DeliveryMechanismData
 from hct_mis_api.apps.registration_data.models import KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 from hct_mis_api.apps.registration_datahub.utils import (
@@ -123,7 +123,9 @@ class ImportDataInstanceValidator:
     def __init__(self, is_social_worker_program: bool = False) -> None:
         self.is_social_worker_program = is_social_worker_program
         self.all_fields = self.get_all_fields()
-        self.delivery_mechanisms_xlsx_fields = DeliveryMechanismData.get_all_delivery_mechanisms_fields(by_xlsx_name=True)
+        self.delivery_mechanisms_xlsx_fields = DeliveryMechanismData.get_all_delivery_mechanisms_fields(
+            by_xlsx_name=True
+        )
         if self.is_social_worker_program:
             self.delivery_mechanisms_xlsx_fields = [f"pp_{field}" for field in self.delivery_mechanisms_xlsx_fields]
 

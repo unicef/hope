@@ -50,7 +50,10 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
 )
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory, generate_delivery_mechanisms
+from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismDataFactory,
+    generate_delivery_mechanisms,
+)
 from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -572,7 +575,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "delivery_mechanism_data_to_edit": [
                     {
                         "id": str(self.dmd.id),
-                        "label": self.dmd.delivery_mechanism,
+                        "label": self.dmd.delivery_mechanism.name,
                         "approve_status": False,
                         "data_fields": [
                             {

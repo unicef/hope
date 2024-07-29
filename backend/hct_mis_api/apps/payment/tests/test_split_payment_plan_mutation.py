@@ -15,9 +15,10 @@ from hct_mis_api.apps.payment.fixtures import (
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
-    PaymentPlan, DeliveryMechanism,
+    PaymentPlan,
 )
 
 SPLIT_PAYMENT_MUTATION = """

@@ -660,22 +660,22 @@ class TestXLSXValidatorsMethods(APITestCase):
             [
                 {
                     "header": "name_of_cardholder_atm_card_i_c",
-                    "message": "Field name_of_cardholder_atm_card_i_c is required for delivery mechanism ATM Card",
+                    "message": "Field name_of_cardholder_atm_card_i_c is required for delivery mechanism atm_card",
                     "row_number": 3,
                 },
                 {
                     "header": "name_of_cardholder_atm_card_i_c",
-                    "message": "Field name_of_cardholder_atm_card_i_c is required for delivery mechanism ATM Card",
+                    "message": "Field name_of_cardholder_atm_card_i_c is required for delivery mechanism atm_card",
                     "row_number": 14,
                 },
                 {
                     "header": "card_expiry_date_atm_card_i_c",
-                    "message": "Field card_expiry_date_atm_card_i_c is required for delivery mechanism ATM Card",
+                    "message": "Field card_expiry_date_atm_card_i_c is required for delivery mechanism atm_card",
                     "row_number": 15,
                 },
                 {
                     "header": "name_of_cardholder_atm_card_i_c",
-                    "message": "Field name_of_cardholder_atm_card_i_c is required for delivery mechanism ATM Card",
+                    "message": "Field name_of_cardholder_atm_card_i_c is required for delivery mechanism atm_card",
                     "row_number": 15,
                 },
             ],
@@ -693,19 +693,19 @@ class TestXLSXValidatorsMethods(APITestCase):
             [
                 {
                     "header": "pp_card_expiry_date_atm_card_i_c",
-                    "message": "Field pp_card_expiry_date_atm_card_i_c is required for delivery mechanism ATM Card",
+                    "message": "Field pp_card_expiry_date_atm_card_i_c is required for delivery mechanism atm_card",
                     "row_number": 4,
                 },
                 {
                     "header": "pp_name_of_cardholder_atm_card_i_c",
                     "message": "Field pp_name_of_cardholder_atm_card_i_c is required for "
-                    "delivery mechanism ATM Card",
+                    "delivery mechanism atm_card",
                     "row_number": 4,
                 },
                 {
                     "header": "pp_name_of_cardholder_atm_card_i_c",
                     "message": "Field pp_name_of_cardholder_atm_card_i_c is required for "
-                    "delivery mechanism ATM Card",
+                    "delivery mechanism atm_card",
                     "row_number": 5,
                 },
             ],
@@ -742,24 +742,24 @@ class TestXLSXValidatorsMethods(APITestCase):
                     {
                         "header": "name_of_cardholder_atm_card_i_c",
                         "message": "Field name_of_cardholder_atm_card_i_c is required for delivery "
-                        "mechanism ATM Card",
+                        "mechanism atm_card",
                         "row_number": 3,
                     },
                     {
                         "header": "name_of_cardholder_atm_card_i_c",
                         "message": "Field name_of_cardholder_atm_card_i_c is required for delivery "
-                        "mechanism ATM Card",
+                        "mechanism atm_card",
                         "row_number": 14,
                     },
                     {
                         "header": "card_expiry_date_atm_card_i_c",
-                        "message": "Field card_expiry_date_atm_card_i_c is required for delivery mechanism ATM Card",
+                        "message": "Field card_expiry_date_atm_card_i_c is required for delivery mechanism atm_card",
                         "row_number": 15,
                     },
                     {
                         "header": "name_of_cardholder_atm_card_i_c",
                         "message": "Field name_of_cardholder_atm_card_i_c is required for delivery "
-                        "mechanism ATM Card",
+                        "mechanism atm_card",
                         "row_number": 15,
                     },
                 ],

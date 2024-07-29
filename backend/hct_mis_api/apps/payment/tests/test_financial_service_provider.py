@@ -3,13 +3,13 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
-    FspXlsxTemplatePerDeliveryMechanismFactory, generate_delivery_mechanisms,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
+    generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import FinancialServiceProvider, DeliveryMechanism
+from hct_mis_api.apps.payment.models import DeliveryMechanism, FinancialServiceProvider
 
 
 class TestAllFinancialServiceProviders(APITestCase):
@@ -27,7 +27,13 @@ class TestAllFinancialServiceProviders(APITestCase):
         allFinancialServiceProviders {
             edges {
                 node {
-                    deliveryMechanisms
+                    deliveryMechanisms {
+                        edges {
+                            node {
+                                name
+                            }
+                        }
+                    }
                     communicationChannel
                     distributionLimit
                     xlsxTemplates {

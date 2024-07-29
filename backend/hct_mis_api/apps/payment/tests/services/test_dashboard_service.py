@@ -9,7 +9,6 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryF
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
     FinancialServiceProviderFactory,
@@ -18,7 +17,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentRecordFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import GenericPayment, DeliveryMechanism
+from hct_mis_api.apps.payment.models import DeliveryMechanism, GenericPayment
 from hct_mis_api.apps.payment.services.dashboard_service import (
     payment_verification_chart_query,
 )

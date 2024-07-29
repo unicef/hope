@@ -19,7 +19,7 @@ from hct_mis_api.apps.payment.celery_tasks import create_cash_plan_reconciliatio
 from hct_mis_api.apps.payment.models import (
     CashPlan,
     PaymentRecord,
-    PaymentVerificationSummary, DeliveryMechanism,
+    PaymentVerificationSummary,
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
 

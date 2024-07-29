@@ -1339,7 +1339,7 @@ class FinancialServiceProvider(LimitBusinessAreaModelMixin, TimeStampedUUIDModel
     delivery_mechanisms_choices = HorizontalChoiceArrayField(
         models.CharField(choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES, max_length=32), null=True
     )  # TODO MB drop later
-    delivery_mechanisms = models.ManyToManyField("DeliveryMechanism")
+    delivery_mechanisms = models.ManyToManyField("payment.DeliveryMechanism")
     distribution_limit = models.DecimalField(
         decimal_places=2,
         max_digits=12,
@@ -2306,16 +2306,17 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
     @cached_property
     def delivery_mechanism_all_fields_definitions(self) -> List[dict]:
         all_core_fields = get_core_fields_attributes()
-        return [field for field in all_core_fields if field["name"] in self.delivery_mechanism.all_fields]
+        return [field for field in all_core_fields if field["name"] in self.all_fields]
 
     @cached_property
     def delivery_mechanism_required_fields_definitions(self) -> List[dict]:
         all_core_fields = get_core_fields_attributes()
-        return [field for field in all_core_fields if field["name"] in self.delivery_mechanism.required_fields]
+        return [field for field in all_core_fields if field["name"] in self.required_fields]
 
     @cached_property
     def all_fields(self) -> List[dict]:
         return self.delivery_mechanism.all_fields
+
     @cached_property
     def unique_fields(self) -> List[str]:
         return self.delivery_mechanism.unique_fields
@@ -2435,13 +2436,15 @@ class DeliveryMechanism(TimeStampedUUIDModel):
 
     @property
     def all_fields(self) -> List[str]:
-        return list(set(self.required_fields + self.optional_fields))
+        return self.required_fields + self.optional_fields
+
     @property
     def all_dm_fields(self) -> List[str]:
         core_fields = [cf["name"] for cf in CORE_FIELDS_ATTRIBUTES]
         return [field for field in self.all_fields if field not in core_fields]
 
     def get_core_fields_definitions(self) -> List[dict]:
+        core_fields = [cf["name"] for cf in CORE_FIELDS_ATTRIBUTES]
         return [
             {
                 "id": str(uuid.uuid4()),
@@ -2459,6 +2462,7 @@ class DeliveryMechanism(TimeStampedUUIDModel):
                 "scope": [Scope.XLSX, Scope.XLSX_PEOPLE, Scope.DELIVERY_MECHANISM],
             }
             for field in self.all_fields
+            if field not in core_fields
         ]
 
     @classmethod
@@ -2469,9 +2473,9 @@ class DeliveryMechanism(TimeStampedUUIDModel):
         return definitions
 
     @classmethod
-    def get_choices(cls, is_active: bool = True) -> List[Tuple[str, str]]:
+    def get_choices(cls, only_active: bool = True) -> List[Tuple[str, str]]:
         dms = cls.objects.all().values_list("code", "name")
-        if is_active:
+        if only_active:
             dms.filter(is_active=True)
         return list(dms)
 
@@ -2479,6 +2483,6 @@ class DeliveryMechanism(TimeStampedUUIDModel):
     def get_delivery_mechanisms_to_xlsx_fields_mapping(cls) -> Dict[str, List[str]]:
         required_fields_map = defaultdict(list)
         for dm in cls.objects.filter(is_active=True):
-            required_fields_map[dm.code].extend([f"{field}_i_c" for field in dm.delivery_mechanism_required_fields_definitions])
+            required_fields_map[dm.code].extend([f"{field}_i_c" for field in dm.required_fields])
 
         return required_fields_map

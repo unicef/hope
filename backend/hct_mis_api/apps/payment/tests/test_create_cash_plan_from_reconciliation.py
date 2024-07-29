@@ -46,13 +46,7 @@ class TestCreateCashPlanFromReconciliation(APITestCase):
         }
         header_row = ["id", "status", "amount", "Entitlement Quantity"]
         service = CreateCashPlanReconciliationService(
-            self.business_area,
-            BytesIO(),
-            column_mapping,
-            {},
-            "HRVN",
-            DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
-            ""
+            self.business_area, BytesIO(), column_mapping, {}, "HRVN", DeliveryMechanismChoices.DELIVERY_TYPE_CASH, ""
         )
         with self.assertRaises(ValidationError):
             service._parse_header(header_row)

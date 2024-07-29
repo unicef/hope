@@ -230,7 +230,7 @@ class DeliveryMechanismData(FlexibleArgumentsDataclassMixin):
     requirements: DeliveryMechanismDataRequirements
     transfer_type: str
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.requirements = DeliveryMechanismDataRequirements.create_from_dict(self.requirements)  # type: ignore
 
 

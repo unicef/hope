@@ -40,6 +40,7 @@ from hct_mis_api.apps.payment.models import (
     Approval,
     ApprovalProcess,
     CashPlan,
+    DeliveryMechanism,
     DeliveryMechanismData,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
@@ -54,7 +55,6 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationPlan,
     PaymentVerificationSummary,
     ServiceProvider,
-    DeliveryMechanism,
 )
 from hct_mis_api.apps.payment.utils import to_decimal
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
@@ -199,6 +199,7 @@ class DeliveryMechanismFactory(DjangoModelFactory):
     code = factory.Faker("uuid4")
     name = factory.Faker("sentence", nb_words=3, variable_nb_words=True, ext_word_list=None)
     transfer_type = factory.fuzzy.FuzzyChoice(DeliveryMechanism.TransferType.choices, getter=lambda c: c[0])
+
     class Meta:
         model = DeliveryMechanism
 
@@ -680,7 +681,6 @@ class PendingDeliveryMechanismDataFactory(DeliveryMechanismDataFactory):
 
     class Meta:
         model = DeliveryMechanismData
-
 
 
 def create_payment_verification_plan_with_status(
@@ -1276,9 +1276,9 @@ def generate_delivery_mechanisms() -> None:
             code=dm["code"],
             defaults={
                 "name": dm["name"],
-                "required_fields": dm["requirements"]["required_fields"],
-                "optional_fields": dm["requirements"]["optional_fields"],
-                "unique_fields": dm["requirements"]["unique_fields"],
+                "required_fields": dm["requirements"]["required_fields"],  # type: ignore
+                "optional_fields": dm["requirements"]["optional_fields"],  # type: ignore
+                "unique_fields": dm["requirements"]["unique_fields"],  # type: ignore
                 "transfer_type": dm["transfer_type"],
                 "is_active": True,
             },

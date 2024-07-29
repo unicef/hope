@@ -68,5 +68,8 @@ class TestTemplateFileGenerator(TestCase):
         self.assertEqual("pp_index_id", people_rows[0][86])
         self.assertEqual("Index ID - INTEGER - required", people_rows[1][86])
 
-        self.assertEqual("pp_wallet_address_transfer_to_digital_wallet_i_c", people_rows[0][-1])
-        self.assertEqual("Wallet Address - STRING", people_rows[1][-1])
+        self.assertEqual("pp_wallet_name_transfer_to_digital_wallet_i_c", people_rows[0][-1])
+        self.assertEqual(
+            "Wallet Name Transfer To Digital Wallet (Transfer to Digital Wallet Delivery Mechanism) - STRING",
+            people_rows[1][-1],
+        )

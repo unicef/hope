@@ -912,10 +912,9 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise GraphQLError("Payment plan must be locked to choose delivery mechanisms")
         delivery_mechanisms_in_order = input.get("delivery_mechanisms", [])
+        delivery_mechanisms_instances_in_order = []
         for delivery_mechanism_code in delivery_mechanisms_in_order:
-            delivery_mechanism = DeliveryMechanism.objects.filter(
-                code=delivery_mechanism_code, is_active=True
-            ).first()
+            delivery_mechanism = DeliveryMechanism.objects.filter(code=delivery_mechanism_code, is_active=True).first()
             if not delivery_mechanism:
                 raise GraphQLError(f"Delivery mechanism '{delivery_mechanism_code}' is not active/valid.")
             if (
@@ -925,10 +924,11 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
                 raise GraphQLError(
                     "For currency USDC can be assigned only delivery mechanism Transfer to Digital Wallet"
                 )
+            delivery_mechanisms_instances_in_order.append(delivery_mechanism)
 
         DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=payment_plan).delete()
         current_time = timezone.now()
-        for index, delivery_mechanism in enumerate(delivery_mechanisms_in_order):
+        for index, delivery_mechanism in enumerate(delivery_mechanisms_instances_in_order):
             DeliveryMechanismPerPaymentPlan.objects.update_or_create(
                 payment_plan=payment_plan,
                 delivery_mechanism=delivery_mechanism,

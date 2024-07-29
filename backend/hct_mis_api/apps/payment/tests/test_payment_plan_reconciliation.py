@@ -52,11 +52,12 @@ from hct_mis_api.apps.payment.fixtures import (
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
     FinancialServiceProviderXlsxTemplate,
     Payment,
     PaymentPlan,
     PaymentVerification,
-    PaymentVerificationPlan, DeliveryMechanism,
+    PaymentVerificationPlan,
 )
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
@@ -426,9 +427,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             distribution_limit=None,
         )
         santander_fsp.delivery_mechanisms.set([dm_cash, dm_transfer])
-        FspXlsxTemplatePerDeliveryMechanismFactory(
-            financial_service_provider=santander_fsp, delivery_mechanism=dm_cash
-        )
+        FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=santander_fsp, delivery_mechanism=dm_cash)
         FspXlsxTemplatePerDeliveryMechanismFactory(
             financial_service_provider=santander_fsp, delivery_mechanism=dm_transfer
         )
@@ -488,8 +487,6 @@ class TestPaymentPlanReconciliation(APITestCase):
         payment.refresh_from_db()
         self.assertEqual(payment.entitlement_quantity, 500)
 
-        encoded_dm_cash_id = encode_id_base64(dm_cash.id, "DeliveryMechanism")
-
         choose_dms_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
@@ -497,7 +494,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                 input=dict(
                     paymentPlanId=encoded_payment_plan_id,
                     deliveryMechanisms=[
-                        encoded_dm_cash_id,
+                        dm_cash.code,
                     ],
                 )
             ),
@@ -527,7 +524,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                 "paymentPlanId": encoded_payment_plan_id,
                 "mappings": [
                     {
-                        "deliveryMechanism": encoded_dm_cash_id,
+                        "deliveryMechanism": dm_cash.code,
                         "fspId": encoded_santander_fsp_id,
                         "order": 1,
                     }

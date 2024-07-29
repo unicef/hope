@@ -13,11 +13,11 @@ import elasticsearch
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.fixtures import (
+    generate_delivery_mechanisms,
     generate_payment_plan,
     generate_real_cash_plans,
     generate_reconciled_payment_plan,
     update_fsps,
-    generate_delivery_mechanisms,
 )
 
 logger = logging.getLogger(__name__)

@@ -159,6 +159,17 @@ class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoOb
         connection_class = ExtendedConnection
 
 
+class DeliveryMechanismNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.PM_LOCK_AND_UNLOCK_FSP),)
+    code = graphene.String()
+    name = graphene.String()
+
+    class Meta:
+        model = DeliveryMechanism
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
 class FinancialServiceProviderNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PM_LOCK_AND_UNLOCK_FSP),)
     full_name = graphene.String(source="name")
@@ -447,7 +458,7 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
         return self.fsp_auth_code or ""  # type: ignore
 
 
-class DeliveryMechanismNode(DjangoObjectType):
+class DeliveryMechanismPerPaymentPlanNode(DjangoObjectType):
     name = graphene.String()
     order = graphene.Int()
     fsp = graphene.Field(FinancialServiceProviderNode)
@@ -481,12 +492,12 @@ def _calculate_volume(
 
 
 class VolumeByDeliveryMechanismNode(graphene.ObjectType):
-    delivery_mechanism = graphene.Field(DeliveryMechanismNode)
+    delivery_mechanism = graphene.Field(DeliveryMechanismPerPaymentPlanNode)
     volume = graphene.Float()
     volume_usd = graphene.Float()
 
     def resolve_delivery_mechanism(self, info: Any) -> "VolumeByDeliveryMechanismNode":
-        return self  # DeliveryMechanismNode uses the same model
+        return self  # DeliveryMechanismPerPaymentPlanNode uses the same model
 
     def resolve_volume(self, info: Any) -> Optional[_decimal.Decimal]:  # non-usd
         return _calculate_volume(self, "entitlement_quantity")  # type: ignore
@@ -542,7 +553,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     has_fsp_delivery_mechanism_xlsx_template = graphene.Boolean()
     imported_file_name = graphene.String()
     payments_conflicts_count = graphene.Int()
-    delivery_mechanisms = graphene.List(DeliveryMechanismNode)
+    delivery_mechanisms = graphene.List(DeliveryMechanismPerPaymentPlanNode)
     volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
     split_choices = graphene.List(ChoiceObject)
     verification_plans = DjangoPermissionFilterConnectionField(
@@ -1092,17 +1103,18 @@ class Query(graphene.ObjectType):
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input["payment_plan_id"]))
         delivery_mechanisms = (
             DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=payment_plan)
-            .values_list("delivery_mechanism", flat=True)
+            .values_list("delivery_mechanism__name", flat=True)
             .order_by("delivery_mechanism_order")
         )
 
-        def get_fsps_for_delivery_mechanism(mechanism: str) -> List:
+        def get_fsps_for_delivery_mechanism(mechanism_name: str) -> List:
             fsps = FinancialServiceProvider.objects.filter(
-                Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism=mechanism)
+                Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=mechanism_name)
                 | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
-                delivery_mechanisms__contains=[mechanism],
+                delivery_mechanisms__name=mechanism_name,
                 allowed_business_areas__slug=business_area_slug,
             ).distinct()
+
             return (
                 [
                     # This basically checks if FSP can accept ANY additional volume,
@@ -1258,11 +1270,11 @@ class Query(graphene.ObjectType):
         )
 
         volume_by_delivery_type = (
-            payment_items_qs.values("delivery_type__name")
-            .order_by("delivery_type__name")
+            payment_items_qs.values("delivery_type")
+            .order_by("delivery_type")
             .annotate(volume=Sum("delivered_quantity_usd"))
             .merge_by(
-                "delivery_type__name",
+                "delivery_type",
                 aggregated_fields=["volume"],
             )
         )
@@ -1271,7 +1283,8 @@ class Query(graphene.ObjectType):
         data = []
         for volume_dict in volume_by_delivery_type:
             if volume_dict.get("volume"):
-                labels.append(volume_dict.get("delivery_type"))
+                dm = DeliveryMechanism.objects.get(id=volume_dict.get("delivery_type"))
+                labels.append(dm.name)
                 data.append(volume_dict.get("volume"))
 
         return {"labels": labels, "datasets": [{"data": data}]}

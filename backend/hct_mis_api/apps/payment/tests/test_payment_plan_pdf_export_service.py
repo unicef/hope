@@ -5,13 +5,13 @@ from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     ApprovalFactory,
     ApprovalProcessFactory,
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
-    PaymentPlanFactory, generate_delivery_mechanisms,
+    PaymentPlanFactory,
+    generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import Approval, DeliveryMechanism
 from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (

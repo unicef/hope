@@ -2,12 +2,12 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
-    FinancialServiceProviderXlsxTemplateFactory, generate_delivery_mechanisms,
+    FinancialServiceProviderXlsxTemplateFactory,
+    generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import FinancialServiceProvider, DeliveryMechanism
+from hct_mis_api.apps.payment.models import DeliveryMechanism, FinancialServiceProvider
 
 QUERY_FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATE = """
 query financialServiceProviderXlsxTemplate($id:ID!) {
@@ -94,7 +94,13 @@ allFinancialServiceProviders(
         node {
             name,
             visionVendorNumber
-            deliveryMechanisms
+            deliveryMechanisms {
+                edges {
+                    node {
+                        name
+                    }
+                }
+            }
             communicationChannel
         }
     }
