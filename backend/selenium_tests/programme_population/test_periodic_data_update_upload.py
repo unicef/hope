@@ -240,6 +240,8 @@ class TestPeriodicDataUpdateUpload:
             pageIndividuals.getTabPeriodicDataUpdates().click()
             pageIndividuals.getButtonImport().click()
             pageIndividuals.getDialogImport()
+            from time import sleep
+            sleep(2)
             pageIndividuals.upload_file(tmp_file.name)
             for i in range(10):
                 pageIndividuals.screenshot(i, delay_sec=0.1)
