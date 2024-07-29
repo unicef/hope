@@ -85,7 +85,7 @@ export function LookUpReassignRole({
         roleReassignData =
           ticket?.needsAdjudicationTicketDetails?.roleReassignData;
         setShouldUseMultiple(
-          ticket?.needsAdjudicationTicketDetails?.selectedIndividuals?.length >
+          ticket?.needsAdjudicationTicketDetails?.selectedDuplicates?.length >
             0,
         );
         break;
