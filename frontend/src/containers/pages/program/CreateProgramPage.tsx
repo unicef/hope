@@ -202,7 +202,6 @@ export const CreateProgramPage = (): ReactElement => {
         errors,
         setErrors,
       }) => {
-        console.log('errors', errors);
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
           .map((partner) => ({

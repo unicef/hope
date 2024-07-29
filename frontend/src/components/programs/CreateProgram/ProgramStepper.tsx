@@ -75,7 +75,12 @@ export const handleNext = async ({
     values.pduFields[values.pduFields.length - 1].pduData.roundsNames.length ===
       0;
 
-  if (lastPduFieldIsEmpty || !isAllPduFieldsValidOrInitial) {
+  const hasSomePduFields = values.pduFields.length > 0;
+
+  if (
+    lastPduFieldIsEmpty ||
+    (!isAllPduFieldsValidOrInitial && !hasSomePduFields)
+  ) {
     setErrors({
       ...errors,
       pduFields: 'Please complete the PDU fields correctly.',

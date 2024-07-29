@@ -22,6 +22,8 @@ export const PeoplePage = (): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const { businessArea } = useBaseUrl();
+  const isNewTemplateJustCreated =
+    location.state?.isNewTemplateJustCreated || false;
   const permissions = usePermissions();
   const { data: householdChoicesData, loading: householdChoicesLoading } =
     useHouseholdChoiceDataQuery();
@@ -49,8 +51,9 @@ export const PeoplePage = (): React.ReactElement => {
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  // Local state for managing tabs
-  const [currentTab, setCurrentTab] = useState(0);
+  const [currentTab, setCurrentTab] = useState(
+    isNewTemplateJustCreated ? 1 : 0,
+  );
 
   const { data: individualChoicesData, loading: individualChoicesLoading } =
     useIndividualChoiceDataQuery();
