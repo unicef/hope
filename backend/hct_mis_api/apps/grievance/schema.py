@@ -407,7 +407,8 @@ class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
     has_duplicated_document = graphene.Boolean()
     extra_data = graphene.Field(TicketNeedsAdjudicationDetailsExtraDataNode)
     possible_duplicates = graphene.List(IndividualNode)
-    selected_individuals = graphene.List(IndividualNode)
+    selected_duplicates = graphene.List(IndividualNode)
+    selected_distinct = graphene.List(IndividualNode)
 
     class Meta:
         model = TicketNeedsAdjudicationDetails
@@ -423,8 +424,11 @@ class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
     def resolve_possible_duplicates(self, info: Any) -> QuerySet:
         return self.possible_duplicates.all()
 
-    def resolve_selected_individuals(self, info: Any) -> QuerySet:
+    def resolve_selected_duplicates(self, info: Any) -> QuerySet:
         return self.selected_individuals.all()
+
+    def resolve_selected_distinct(self, info: Any) -> QuerySet:
+        return self.selected_distinct.all()
 
 
 class TicketSystemFlaggingDetailsNode(DjangoObjectType):
