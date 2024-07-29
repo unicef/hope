@@ -112,7 +112,7 @@ class TestPeriodicDataTemplates:
         status = pageIndividuals.getTemplateStatus(periodic_data_update_template.pk).text
         assert status == "NOT SCHEDULED"
         pageIndividuals.getExportBtn(periodic_data_update_template.pk).click()
-        for i in range(10):
+        for _ in range(10):
             status = pageIndividuals.getTemplateStatus(periodic_data_update_template.pk).text
             if status == "EXPORTED":
                 break

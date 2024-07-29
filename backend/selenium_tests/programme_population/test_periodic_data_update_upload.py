@@ -241,10 +241,11 @@ class TestPeriodicDataUpdateUpload:
             pageIndividuals.getButtonImport().click()
             pageIndividuals.getDialogImport()
             from time import sleep
+
             sleep(2)
             pageIndividuals.upload_file(tmp_file.name)
-            for i in range(10):
-                pageIndividuals.screenshot(i, delay_sec=0.1)
+            for number in range(30):
+                pageIndividuals.screenshot(number, delay_sec=0.1)
             pageIndividuals.getButtonImportSubmit().click()
             error_text = pageIndividuals.getPduUploadError().text
             assert error_text == "Periodic Data Update Template with ID -1 not found"
