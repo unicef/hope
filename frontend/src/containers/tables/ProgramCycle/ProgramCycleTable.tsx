@@ -8,7 +8,7 @@ import { StatusBox } from '@core/StatusBox';
 import { programCycleStatusToColor } from '@utils/utils';
 import ProgramCycle from '@containers/tables/ProgramCycle/ProgramCycle';
 import headCells from '@containers/tables/ProgramCycle/HeadCells';
-import { AddNew } from '@containers/tables/ProgramCycle/AddNew';
+import { AddNewProgramCycle } from '@containers/tables/ProgramCycle/NewProgramCycle/AddNewProgramCycle';
 import { DeleteProgramCycle } from '@containers/tables/ProgramCycle/DeleteProgramCycle';
 import { EditProgramCycle } from '@containers/tables/ProgramCycle/EditProgramCycle';
 
@@ -42,7 +42,7 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
         total_undelivered_quantity: null,
         total_delivered_quantity: null,
         start_date: '2020-01-01',
-        end_date: '',
+        end_date: '2020-02-01',
       },
       {
         id: 'd81c9633-5362-4d2f-93a6-d30f92d90230',
@@ -52,8 +52,8 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
         total_entitled_quantity: null,
         total_undelivered_quantity: null,
         total_delivered_quantity: null,
-        start_date: '2020-01-01',
-        end_date: '2020-02-01',
+        start_date: '2020-02-01',
+        end_date: '2020-03-01',
       },
       {
         id: 'b870d17d-7555-4565-86e2-69bae4fa3fd1',
@@ -63,8 +63,8 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
         total_entitled_quantity: null,
         total_undelivered_quantity: null,
         total_delivered_quantity: null,
-        start_date: '2020-02-01',
-        end_date: '2020-03-01',
+        start_date: '2020-03-01',
+        end_date: '',
       },
     ],
     count: 3,
@@ -107,12 +107,16 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
       </TableCell>
 
       <TableCell data-cy={`program-cycle-details-btn-${row.id}`}>
-        {(row.status === 'DRAFT' || row.status === 'ACTIVE') && (
-          <EditProgramCycle programCycle={row} />
-        )}
+        {program.status === 'ACTIVE' && (
+          <>
+            {(row.status === 'DRAFT' || row.status === 'ACTIVE') && (
+              <EditProgramCycle programCycle={row} />
+            )}
 
-        {row.status === 'DRAFT' && data.results.length > 1 && (
-          <DeleteProgramCycle programCycle={row} />
+            {row.status === 'DRAFT' && data.results.length > 1 && (
+              <DeleteProgramCycle programCycle={row} />
+            )}
+          </>
         )}
       </TableCell>
     </ClickableTableRow>
@@ -128,7 +132,13 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
       isLoading={isLoading}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
-      actions={[<AddNew key="add-new" program={program} />]}
+      actions={[
+        <AddNewProgramCycle
+          key="add-new"
+          program={program}
+          programCycles={data.results}
+        />,
+      ]}
     />
   );
 };
