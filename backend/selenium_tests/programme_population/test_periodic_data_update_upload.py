@@ -1,3 +1,4 @@
+import os
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 from typing import Any
 
@@ -31,6 +32,13 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 from selenium_tests.page_object.programme_population.individuals import Individuals
 
 pytestmark = pytest.mark.django_db(transaction=True)
+
+
+@pytest.fixture
+def clear_downloaded_files() -> None:
+    yield
+    for file in os.listdir("./report/downloads/"):
+        os.remove(os.path.join("./report/downloads", file))
 
 
 @pytest.fixture
@@ -132,6 +140,7 @@ class TestPeriodicDataUpdateUpload:
     # @flaky(max_runs=5, min_passes=1)
     def test_periodic_data_update_upload_success(
         self,
+        clear_downloaded_files: None,
         program: Program,
         individual: Individual,
         string_attribute: FlexibleAttribute,
@@ -171,6 +180,7 @@ class TestPeriodicDataUpdateUpload:
     # @flaky(max_runs=5, min_passes=1)
     def test_periodic_data_update_upload_form_error(
         self,
+        clear_downloaded_files: None,
         program: Program,
         individual: Individual,
         date_attribute: FlexibleAttribute,
@@ -209,6 +219,7 @@ class TestPeriodicDataUpdateUpload:
 
     def test_periodic_data_update_upload_error(
         self,
+        clear_downloaded_files: None,
         program: Program,
         individual: Individual,
         string_attribute: FlexibleAttribute,
@@ -250,6 +261,7 @@ class TestPeriodicDataUpdateUpload:
 
     def test_periodic_data_uploads_list(
         self,
+        clear_downloaded_files: None,
         program: Program,
         string_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,
