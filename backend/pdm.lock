@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:8c3ff58d48266375256311faa3f74df9304c0adf61e236955ebc148b2e6dcebd"
+content_hash = "sha256:1a27a3d8c548c562079a583d058f56c0708e41de6cd330978ff1ca8b961d3b9f"
 
 [[package]]
 name = "amqp"
@@ -1125,15 +1125,15 @@ files = [
 
 [[package]]
 name = "django-multiselectfield"
-version = "0.1.13"
+version = "0.1.12"
 summary = "Django multiple select field"
 groups = ["default"]
 dependencies = [
     "django>=1.4",
 ]
 files = [
-    {file = "django_multiselectfield-0.1.13-py3-none-any.whl", hash = "sha256:f146ef568c823a409f4021b98781666ec2debabfceca9176116d749dc39cb8b3"},
-    {file = "django_multiselectfield-0.1.13.tar.gz", hash = "sha256:437d72632f4c0ca416951917632529c3d1d42b62bb6c3c03e3396fa50265be94"},
+    {file = "django-multiselectfield-0.1.12.tar.gz", hash = "sha256:d0a4c71568fb2332c71478ffac9f8708e01314a35cf923dfd7a191343452f9f9"},
+    {file = "django_multiselectfield-0.1.12-py3-none-any.whl", hash = "sha256:c270faa7f80588214c55f2d68cbddb2add525c2aa830c216b8a198de914eb470"},
 ]
 
 [[package]]
