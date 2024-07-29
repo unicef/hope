@@ -135,7 +135,7 @@ class ProgramCycleFilter(FilterSet):
 
     order_by = CustomOrderingFilter(
         fields=(
-            Lower("name"),
+            Lower("title"),
             "status",
             "start_date",
             "end_date",

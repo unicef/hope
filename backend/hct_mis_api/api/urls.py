@@ -62,6 +62,17 @@ urlpatterns = [
                     "rdi/<uuid:rdi>/push/people/", endpoints.rdi.PushPeopleToRDIView().as_view(), name="rdi-push-people"
                 ),
                 path("rdi/<uuid:rdi>/push/lax/", endpoints.rdi.PushLaxToRDIView().as_view(), name="rdi-push-lax"),
+                path(
+                    "programs/<str:program_id>/",
+                    include(
+                        [
+                            path(
+                                "cycles/",
+                                include("hct_mis_api.apps.program.api.urls", namespace="cycles"),
+                            ),
+                        ]
+                    ),
+                ),
             ]
         ),
     ),

@@ -33,3 +33,7 @@ class ProgrammeViewListAndDetailsPermission(BaseRestPermission):
 
 class PaymentViewListManagerialPermission(BaseRestPermission):
     PERMISSIONS = [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL]
+
+
+class ProgramCycleViewListPermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST]

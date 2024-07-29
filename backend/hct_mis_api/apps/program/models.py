@@ -278,7 +278,6 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedMod
             "status",
             "start_date",
             "end_date",
-            "description",
         ],
     )
     DRAFT = "DRAFT"
