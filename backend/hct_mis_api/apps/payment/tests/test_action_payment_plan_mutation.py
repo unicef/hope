@@ -23,9 +23,9 @@ from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    RealProgramFactory,
+    RealProgramFactory, generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import AcceptanceProcessThreshold, PaymentPlan
+from hct_mis_api.apps.payment.models import AcceptanceProcessThreshold, PaymentPlan, DeliveryMechanism
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
@@ -80,6 +80,7 @@ class TestActionPaymentPlanMutation(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        generate_delivery_mechanisms()
         cls.user = UserFactory.create(first_name="Rachel", last_name="Walker")
         create_afghanistan()
         AcceptanceProcessThreshold.objects.create(
@@ -101,12 +102,12 @@ class TestActionPaymentPlanMutation(APITestCase):
         )
         IndividualRoleInHouseholdFactory(household=household, individual=individuals[0], role=ROLE_PRIMARY)
 
-        cls.financial_service_provider = FinancialServiceProviderFactory(
-            delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH]
-        )
+        cls.financial_service_provider = FinancialServiceProviderFactory()
+        dm_cash = DeliveryMechanism.objects.get(code="cash")
+        cls.financial_service_provider.delivery_mechanisms.set([dm_cash])
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=cls.payment_plan,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+            delivery_mechanism=dm_cash,
             financial_service_provider=cls.financial_service_provider,
         )
         PaymentFactory(parent=cls.payment_plan, collector=individuals[0], currency="PLN")

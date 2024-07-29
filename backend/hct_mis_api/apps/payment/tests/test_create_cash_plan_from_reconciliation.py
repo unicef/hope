@@ -3,6 +3,7 @@ from io import BytesIO
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
+from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
 from hct_mis_api.apps.payment.services.create_cash_plan_from_reconciliation import (
     CreateCashPlanReconciliationService,
     ValidationError,
@@ -13,6 +14,7 @@ class TestCreateCashPlanFromReconciliation(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
+        generate_delivery_mechanisms()
 
     def test_parse_header_assign_indexes(self) -> None:
         column_mapping = {
@@ -44,7 +46,13 @@ class TestCreateCashPlanFromReconciliation(APITestCase):
         }
         header_row = ["id", "status", "amount", "Entitlement Quantity"]
         service = CreateCashPlanReconciliationService(
-            self.business_area, BytesIO(), column_mapping, {}, "HRVN", DeliveryMechanismChoices.DELIVERY_TYPE_CASH, ""
+            self.business_area,
+            BytesIO(),
+            column_mapping,
+            {},
+            "HRVN",
+            DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+            ""
         )
         with self.assertRaises(ValidationError):
             service._parse_header(header_row)

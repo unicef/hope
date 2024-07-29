@@ -14,8 +14,9 @@ from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismDataFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    RealProgramFactory,
+    RealProgramFactory, generate_delivery_mechanisms,
 )
+from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.payment.services import payment_household_snapshot_service
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
@@ -28,6 +29,8 @@ class TestBuildSnapshot(TestCase):
     def setUpTestData(cls) -> None:
         cls.maxDiff = None
         create_afghanistan()
+        generate_delivery_mechanisms()
+        cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
 
         with freeze_time("2020-10-10"):
             program = RealProgramFactory()
@@ -56,7 +59,7 @@ class TestBuildSnapshot(TestCase):
             )
             DeliveryMechanismDataFactory(
                 individual=cls.hoh1,
-                delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
+                delivery_mechanism=cls.dm_atm_card,
                 data={
                     "card_number_atm_card": "123",
                     "card_expiry_date_atm_card": "2022-01-01",

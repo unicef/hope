@@ -295,6 +295,7 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         "financial_service_provider",
     )
     inlines = [PaymentHouseholdSnapshotInline]
+    exclude = ("delivery_type_choice",)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("household", "parent", "business_area")
@@ -307,6 +308,7 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
 class DeliveryMechanismPerPaymentPlanAdmin(HOPEModelAdminBase):
     list_display = ("delivery_mechanism_order", "delivery_mechanism", "payment_plan", "status")
     raw_id_fields = ("payment_plan", "financial_service_provider", "created_by", "sent_by")
+    exclude = ("delivery_mechanism_choice",)
 
 
 @admin.register(FinancialServiceProviderXlsxTemplate)
@@ -350,6 +352,7 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
     list_display = ("financial_service_provider", "delivery_mechanism", "xlsx_template", "created_by")
     fields = ("financial_service_provider", "delivery_mechanism", "xlsx_template")
     autocomplete_fields = ("financial_service_provider", "xlsx_template")
+    exclude = ("delivery_mechanism_choice",)
 
     def save_model(
         self, request: HttpRequest, obj: FspXlsxTemplatePerDeliveryMechanism, form: "Form", change: bool
@@ -405,7 +408,7 @@ class FspXlsxTemplatePerDeliveryMechanismAdminInline(admin.TabularInline):
     extra = 0
     readonly_fields = ("created_by",)
     raw_id_fields = ("financial_service_provider",)
-
+    exclude = ("delivery_mechanism_choice",)
 
 @admin.register(FinancialServiceProvider)
 class FinancialServiceProviderAdmin(HOPEModelAdminBase):
@@ -433,6 +436,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
     )
     readonly_fields = ("fsp_xlsx_templates", "data_transfer_configuration")
     inlines = (FspXlsxTemplatePerDeliveryMechanismAdminInline,)
+    exclude = ("delivery_mechanisms_choices",)
 
     def fsp_xlsx_templates(self, obj: FinancialServiceProvider) -> str:
         return format_html(

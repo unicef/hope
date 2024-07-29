@@ -14,10 +14,7 @@ from django.utils import timezone
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
-    CORE_FIELDS_ATTRIBUTES,
-    FieldFactory,
-)
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import (
     _DELIVERY_MECHANISM_DATA,
     _INDIVIDUAL,
@@ -258,7 +255,7 @@ def handle_update_payment_channel(payment_channel: Dict) -> Optional[BankAccount
 
 def handle_update_delivery_mechanism_data(delivery_mechanism_datas: List[Dict]) -> List[DeliveryMechanismData]:
     delivery_mechanism_datas_to_update = []
-    all_fields: dict = FieldFactory(CORE_FIELDS_ATTRIBUTES).to_dict_by("name")
+    all_fields: dict = FieldFactory().to_dict_by("name")
 
     for dmd_data in delivery_mechanism_datas:
         dmd = get_object_or_404(DeliveryMechanismData, id=dmd_data.get("id"))

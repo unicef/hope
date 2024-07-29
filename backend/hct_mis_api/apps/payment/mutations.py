@@ -32,7 +32,6 @@ from hct_mis_api.apps.payment.celery_tasks import (
     payment_plan_apply_engine_rule,
     payment_plan_exclude_beneficiaries,
 )
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.inputs import (
     ActionPaymentPlanInput,
     AssignFspToDeliveryMechanismInput,
@@ -44,6 +43,7 @@ from hct_mis_api.apps.payment.inputs import (
 )
 from hct_mis_api.apps.payment.models import (
     CashPlan,
+    DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     Payment,
@@ -912,14 +912,15 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise GraphQLError("Payment plan must be locked to choose delivery mechanisms")
         delivery_mechanisms_in_order = input.get("delivery_mechanisms", [])
-        for delivery_mechanism in delivery_mechanisms_in_order:
-            if delivery_mechanism == "":
-                raise GraphQLError("Delivery mechanism cannot be empty.")
-            if delivery_mechanism not in [choice[0] for choice in DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES]:
-                raise GraphQLError(f"Delivery mechanism '{delivery_mechanism}' is not valid.")
+        for delivery_mechanism_code in delivery_mechanisms_in_order:
+            delivery_mechanism = DeliveryMechanism.objects.filter(
+                code=delivery_mechanism_code, is_active=True
+            ).first()
+            if not delivery_mechanism:
+                raise GraphQLError(f"Delivery mechanism '{delivery_mechanism_code}' is not active/valid.")
             if (
                 payment_plan.currency == USDC
-                and delivery_mechanism != DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET
+                and delivery_mechanism.transfer_type != DeliveryMechanism.TransferType.DIGITAL
             ):
                 raise GraphQLError(
                     "For currency USDC can be assigned only delivery mechanism Transfer to Digital Wallet"
@@ -961,7 +962,8 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
 
         if payment_plan.currency == USDC:
             for mapping in mappings:
-                if mapping["delivery_mechanism"] != DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET:
+                delivery_mechanism = DeliveryMechanism.objects.get(code=mapping["delivery_mechanism"])
+                if delivery_mechanism.transfer_type != DeliveryMechanism.TransferType.DIGITAL:
                     raise GraphQLError(
                         "For currency USDC can be assigned only delivery mechanism Transfer to Digital Wallet"
                     )
@@ -979,7 +981,7 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
                 "delivery_mechanism_per_payment_plan": get_object_or_404(
                     DeliveryMechanismPerPaymentPlan,
                     payment_plan=payment_plan,
-                    delivery_mechanism=mapping["delivery_mechanism"],
+                    delivery_mechanism=get_object_or_404(DeliveryMechanism, code=mapping["delivery_mechanism"]),
                     delivery_mechanism_order=mapping["order"],
                 ),
                 "chosen_configuration": mapping.get("chosen_configuration", None),

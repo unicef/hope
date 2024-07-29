@@ -27,7 +27,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentFactory,
     PaymentPlanFactory,
     RealProgramFactory,
-    ServiceProviderFactory,
+    ServiceProviderFactory, generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
@@ -35,7 +35,7 @@ from hct_mis_api.apps.payment.models import (
     FspXlsxTemplatePerDeliveryMechanism,
     PaymentPlan,
     PaymentPlanSplit,
-    ServiceProvider,
+    ServiceProvider, DeliveryMechanism,
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.utils import to_decimal
@@ -65,6 +65,7 @@ def invalid_file() -> File:
 class ImportExportPaymentPlanPaymentListTest(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        generate_delivery_mechanisms()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         country_origin = geo_models.Country.objects.filter(iso_code2="PL").first()
@@ -78,20 +79,23 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         if ServiceProvider.objects.count() < 3:
             ServiceProviderFactory.create_batch(3)
         program = RealProgramFactory()
+        cls.dm_cash = DeliveryMechanism.objects.get(code="cash")
+        cls.dm_transfer = DeliveryMechanism.objects.get(code="transfer")
+        cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
         cls.payment_plan = PaymentPlanFactory(program=program, business_area=cls.business_area)
         cls.fsp_1 = FinancialServiceProviderFactory(
             name="Test FSP 1",
-            delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH],
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
             vision_vendor_number=123456789,
         )
+        cls.fsp_1.delivery_mechanisms.add(cls.dm_cash)
         FspXlsxTemplatePerDeliveryMechanismFactory(
-            financial_service_provider=cls.fsp_1, delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH
+            financial_service_provider=cls.fsp_1, delivery_mechanism=cls.dm_cash
         )
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=cls.payment_plan,
             financial_service_provider=cls.fsp_1,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+            delivery_mechanism=cls.dm_cash,
             delivery_mechanism_order=1,
         )
         program.households.set(Household.objects.all().values_list("id", flat=True))
@@ -189,31 +193,29 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertEqual(wb.active["E2"].value, "TEST_VILLAGE")
 
     def test_export_payment_plan_payment_list_per_fsp(self) -> None:
-        financial_service_provider1 = FinancialServiceProviderFactory(
-            delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH]
-        )
+        financial_service_provider1 = FinancialServiceProviderFactory()
+        financial_service_provider1.delivery_mechanisms.add(self.dm_cash)
         FspXlsxTemplatePerDeliveryMechanismFactory(
             financial_service_provider=financial_service_provider1,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+            delivery_mechanism=self.dm_cash,
         )
-        financial_service_provider2 = FinancialServiceProviderFactory(
-            delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER]
-        )
+        financial_service_provider2 = FinancialServiceProviderFactory()
+        financial_service_provider2.delivery_mechanisms.add(self.dm_transfer)
         FspXlsxTemplatePerDeliveryMechanismFactory(
             financial_service_provider=financial_service_provider2,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+            delivery_mechanism=self.dm_transfer,
         )
 
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+            delivery_mechanism=self.dm_cash,
             financial_service_provider=financial_service_provider1,
             delivery_mechanism_order=2,
         )
 
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+            delivery_mechanism=self.dm_transfer,
             financial_service_provider=financial_service_provider2,
             delivery_mechanism_order=3,
         )
@@ -259,16 +261,15 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
     def test_export_payment_plan_payment_list_per_split(self, min_no_of_payments_in_chunk_mock: Any) -> None:
         min_no_of_payments_in_chunk_mock.__get__ = mock.Mock(return_value=2)
 
-        financial_service_provider1 = FinancialServiceProviderFactory(
-            delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH]
-        )
+        financial_service_provider1 = FinancialServiceProviderFactory()
+        financial_service_provider1.delivery_mechanisms.add(self.dm_cash)
         FspXlsxTemplatePerDeliveryMechanismFactory(
             financial_service_provider=financial_service_provider1,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+            delivery_mechanism=self.dm_cash,
         )
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+            delivery_mechanism=self.dm_cash,
             financial_service_provider=financial_service_provider1,
             delivery_mechanism_order=2,
         )
@@ -369,7 +370,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
             financial_service_provider=self.fsp_1,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+            delivery_mechanism=self.dm_cash,
             delivery_mechanism_order=1,
         )
         # set generate_token_and_order_numbers to False
@@ -441,14 +442,14 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         # get_template error
         self.assertEqual(
             FspXlsxTemplatePerDeliveryMechanism.objects.filter(
-                delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
+                delivery_mechanism=self.dm_atm_card,
                 financial_service_provider=self.fsp_1,
             ).count(),
             0,
         )
         export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
         with self.assertRaises(GraphQLError) as e:
-            export_service.get_template(self.fsp_1, DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD)
+            export_service.get_template(self.fsp_1, self.dm_atm_card)
         self.assertEqual(
             e.exception.message,
             f"Not possible to generate export file. There isn't any FSP XLSX Template assigned to Payment "

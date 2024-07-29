@@ -5,9 +5,9 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
-    FinancialServiceProviderXlsxTemplateFactory,
+    FinancialServiceProviderXlsxTemplateFactory, generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import FinancialServiceProvider
+from hct_mis_api.apps.payment.models import FinancialServiceProvider, DeliveryMechanism
 
 QUERY_FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATE = """
 query financialServiceProviderXlsxTemplate($id:ID!) {
@@ -106,6 +106,9 @@ allFinancialServiceProviders(
 class TestFSPRelatedSchema(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        generate_delivery_mechanisms()
+        cls.dm_cash = DeliveryMechanism.objects.get(code="cash")
+        cls.dm_voucher = DeliveryMechanism.objects.get(code="voucher")
         cls.business_area = create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -114,19 +117,19 @@ class TestFSPRelatedSchema(APITestCase):
         cls.fsp_1 = FinancialServiceProviderFactory(
             name="FSP_1",
             vision_vendor_number="149-69-3686",
-            delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH],
             distribution_limit=10_000,
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
         )
         cls.fsp_1.allowed_business_areas.add(cls.business_area)
+        cls.fsp_1.delivery_mechanisms.add(cls.dm_cash)
         cls.fsp_2 = FinancialServiceProviderFactory(
             name="FSP_2",
             vision_vendor_number="666-69-3686",
-            delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER],
             distribution_limit=20_000,
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
         )
         cls.fsp_2.allowed_business_areas.add(cls.business_area)
+        cls.fsp_2.delivery_mechanisms.add(cls.dm_voucher)
 
         # Generate FinancialServiceProvidersXlsxTemplates
         cls.fsp_xlsx_template_1 = FinancialServiceProviderXlsxTemplateFactory(

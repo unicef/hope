@@ -10,11 +10,12 @@ import pytest
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
-    CORE_FIELDS_ATTRIBUTES,
+    get_core_fields_attributes,
 )
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.utils import SheetImageLoader
 from hct_mis_api.apps.geo.fixtures import CountryFactory
+from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
 from hct_mis_api.apps.registration_datahub.validators import UploadXLSXInstanceValidator
 
 
@@ -27,6 +28,7 @@ class TestXLSXValidatorsMethods(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         call_command("loadflexfieldsattributes")
+        generate_delivery_mechanisms()
 
         cls.business_area = create_afghanistan()
         cls.country = CountryFactory()
@@ -658,12 +660,12 @@ class TestXLSXValidatorsMethods(APITestCase):
             [
                 {
                     "header": "name_of_cardholder_atm_card_i_c",
-                    "message": "Field name_of_cardholder_atm_card_i_c is required for delivery " "mechanism ATM Card",
+                    "message": "Field name_of_cardholder_atm_card_i_c is required for delivery mechanism ATM Card",
                     "row_number": 3,
                 },
                 {
                     "header": "name_of_cardholder_atm_card_i_c",
-                    "message": "Field name_of_cardholder_atm_card_i_c is required for delivery " "mechanism ATM Card",
+                    "message": "Field name_of_cardholder_atm_card_i_c is required for delivery mechanism ATM Card",
                     "row_number": 14,
                 },
                 {
@@ -673,7 +675,7 @@ class TestXLSXValidatorsMethods(APITestCase):
                 },
                 {
                     "header": "name_of_cardholder_atm_card_i_c",
-                    "message": "Field name_of_cardholder_atm_card_i_c is required for delivery " "mechanism ATM Card",
+                    "message": "Field name_of_cardholder_atm_card_i_c is required for delivery mechanism ATM Card",
                     "row_number": 15,
                 },
             ],
@@ -691,7 +693,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             [
                 {
                     "header": "pp_card_expiry_date_atm_card_i_c",
-                    "message": "Field pp_card_expiry_date_atm_card_i_c is required for delivery " "mechanism ATM Card",
+                    "message": "Field pp_card_expiry_date_atm_card_i_c is required for delivery mechanism ATM Card",
                     "row_number": 4,
                 },
                 {
@@ -717,15 +719,15 @@ class TestXLSXValidatorsMethods(APITestCase):
         """
         self.maxDiff = None
 
-        core_fields_attributes = CORE_FIELDS_ATTRIBUTES.copy()
+        core_fields_attributes = get_core_fields_attributes().copy()
         full_name = [field for field in core_fields_attributes if field["name"] == "full_name"][0]
         full_name["required"] = False
         full_name["required_for_payment"] = True
         core_fields_attributes.append(full_name)
 
         with mock.patch(
-            "hct_mis_api.apps.core.field_attributes.core_fields_attributes.CORE_FIELDS_ATTRIBUTES",
-            core_fields_attributes,
+            "hct_mis_api.apps.core.field_attributes.core_fields_attributes.get_core_fields_attributes",
+            lambda: core_fields_attributes,
         ):
             file_path = f"{self.FILES_DIR_PATH}/rdi_import_3_hh_missing_required_delivery_fields.xlsx"
             with open(file_path, "rb") as file:

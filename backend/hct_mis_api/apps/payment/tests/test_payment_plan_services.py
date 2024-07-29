@@ -27,18 +27,17 @@ from hct_mis_api.apps.payment.celery_tasks import (
     prepare_follow_up_payment_plan_task,
     prepare_payment_plan_task,
 )
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentPlanFactory, generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
     Payment,
     PaymentPlan,
-    PaymentPlanSplit,
+    PaymentPlanSplit, DeliveryMechanism,
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -51,10 +50,12 @@ class TestPaymentPlanServices(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        generate_delivery_mechanisms()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
         cls.create_user_role_with_permissions(cls.user, [Permissions.PM_CREATE], cls.business_area)
+        cls.dm_transfer_to_account = DeliveryMechanism.objects.get(code="transfer_to_account")
 
     def test_delete_open(self) -> None:
         pp: PaymentPlan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
@@ -654,16 +655,14 @@ class TestPaymentPlanServices(APITestCase):
 
         pg_fsp = FinancialServiceProviderFactory(
             name="Western Union",
-            delivery_mechanisms=[
-                DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
-            ],
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             payment_gateway_id="123",
         )
+        pg_fsp.delivery_mechanisms.add(self.dm_transfer_to_account)
         dm = DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=pp,
             financial_service_provider=pg_fsp,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
+            delivery_mechanism=self.dm_transfer_to_account,
             sent_to_payment_gateway=True,
         )
 

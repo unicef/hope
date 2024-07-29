@@ -1,5 +1,6 @@
 from django.test import TestCase
 
+from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
 from hct_mis_api.apps.registration_datahub.template_generator import (
     TemplateFileGenerator,
 )
@@ -33,6 +34,7 @@ class TestTemplateFileGenerator(TestCase):
         self.assertEqual(expected, result)
 
     def test_add_template_columns(self) -> None:
+        generate_delivery_mechanisms()
         wb = TemplateFileGenerator._create_workbook()
         result_wb = TemplateFileGenerator._add_template_columns(wb)
 
@@ -66,11 +68,5 @@ class TestTemplateFileGenerator(TestCase):
         self.assertEqual("pp_index_id", people_rows[0][86])
         self.assertEqual("Index ID - INTEGER - required", people_rows[1][86])
 
-        self.assertEqual("pp_card_expiry_date_atm_card_i_c", people_rows[0][93])
-        self.assertEqual("Card expiry date (ATM card) - DATE", people_rows[1][93])
-
-        self.assertEqual("pp_bank_name_transfer_to_account_i_c", people_rows[0][98])
-        self.assertEqual("Bank Name (Transfer to Account) - STRING", people_rows[1][98])
-
-        self.assertEqual("pp_wallet_address_transfer_to_digital_wallet_i_c", people_rows[0][103])
-        self.assertEqual("Wallet Address - STRING", people_rows[1][103])
+        self.assertEqual("pp_wallet_address_transfer_to_digital_wallet_i_c", people_rows[0][-1])
+        self.assertEqual("Wallet Address - STRING", people_rows[1][-1])

@@ -14,8 +14,8 @@ from rest_framework import serializers
 from urllib3 import Retry
 
 from hct_mis_api.apps.core.utils import chunks
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     Payment,
@@ -212,6 +212,26 @@ class FspData(FlexibleArgumentsDataclassMixin):
     name: str
     vision_vendor_number: str
     configs: List[Optional[dict]]  # {id: value, key: value, label: value}
+    delivery_mechanisms: List[str]
+
+
+@dataclasses.dataclass()
+class DeliveryMechanismDataRequirements(FlexibleArgumentsDataclassMixin):
+    required_fields: List[str]
+    optional_fields: List[str]
+    unique_fields: List[str]
+
+
+@dataclasses.dataclass()
+class DeliveryMechanismData(FlexibleArgumentsDataclassMixin):
+    id: int
+    code: str
+    name: str
+    requirements: DeliveryMechanismDataRequirements
+    transfer_type: str
+
+    def __post_init__(self):
+        self.requirements = DeliveryMechanismDataRequirements.create_from_dict(self.requirements)  # type: ignore
 
 
 @dataclasses.dataclass()
@@ -238,6 +258,7 @@ class PaymentGatewayAPI:
         PAYMENT_INSTRUCTION_ADD_RECORDS = "payment_instructions/{remote_id}/add_records/"
         GET_FSPS = "fsp/"
         GET_PAYMENT_RECORDS = "payment_records/"
+        GET_DELIVERY_MECHANISMS = "delivery_mechanisms/"
 
     def __init__(self) -> None:
         self.api_key = os.getenv("PAYMENT_GATEWAY_API_KEY")
@@ -271,6 +292,217 @@ class PaymentGatewayAPI:
     def get_fsps(self) -> List[FspData]:
         response_data = self._get(self.Endpoints.GET_FSPS)
         return [FspData.create_from_dict(fsp_data) for fsp_data in response_data]
+
+    def get_delivery_mechanisms(self) -> List[DeliveryMechanismData]:
+        # response_data = self._get(self.Endpoints.GET_DELIVERY_MECHANISMS)
+        # return response_data
+
+        data = [
+            {
+                "id": 1,
+                "code": "cardless_cash_withdrawal",
+                "name": "Cardless cash withdrawal",
+                "requirements": {
+                    "required_fields": [],
+                    "optional_fields": [
+                        "full_name",
+                    ],
+                    "unique_fields": [],
+                },
+                "transfer_type": "CASH",
+            },
+            {
+                "id": 2,
+                "code": "cash",
+                "name": "Cash",
+                "requirements": {
+                    "required_fields": [],
+                    "optional_fields": [
+                        "full_name",
+                    ],
+                    "unique_fields": [],
+                },
+                "transfer_type": "CASH",
+            },
+            {
+                "id": 3,
+                "code": "cash_by_fsp",
+                "name": "Cash by FSP",
+                "requirements": {
+                    "required_fields": [],
+                    "optional_fields": [
+                        "full_name",
+                    ],
+                    "unique_fields": [],
+                },
+                "transfer_type": "CASH",
+            },
+            {
+                "id": 4,
+                "code": "cheque",
+                "name": "Cheque",
+                "requirements": {
+                    "required_fields": [],
+                    "optional_fields": [
+                        "full_name",
+                    ],
+                    "unique_fields": [],
+                },
+                "transfer_type": "CASH",
+            },
+            {
+                "id": 5,
+                "code": "deposit_to_card",
+                "name": "Deposit to Card",
+                "requirements": {
+                    "required_fields": [
+                        "card_number_deposit_to_card",
+                    ],
+                    "optional_fields": [
+                        "full_name",
+                    ],
+                    "unique_fields": [
+                        "card_number_deposit_to_card",
+                    ],
+                },
+                "transfer_type": "CASH",
+            },
+            {
+                "id": 6,
+                "code": "mobile_money",
+                "name": "Mobile Money",
+                "requirements": {
+                    "required_fields": ["delivery_phone_number_mobile_money", "provider_mobile_money"],
+                    "optional_fields": [
+                        "full_name",
+                    ],
+                    "unique_fields": ["delivery_phone_number_mobile_money", "provider_mobile_money"],
+                },
+                "transfer_type": "CASH",
+            },
+            {
+                "id": 7,
+                "code": "pre-paid_card",
+                "name": "Pre-paid card",
+                "requirements": {
+                    "required_fields": [],
+                    "optional_fields": [
+                        "full_name",
+                    ],
+                    "unique_fields": [],
+                },
+                "transfer_type": "CASH",
+            },
+            {
+                "id": 8,
+                "code": "referral",
+                "name": "Referral",
+                "requirements": {
+                    "required_fields": [],
+                    "optional_fields": [
+                        "full_name",
+                    ],
+                    "unique_fields": [],
+                },
+                "transfer_type": "CASH",
+            },
+            {
+                "id": 9,
+                "code": "transfer",
+                "name": "Transfer",
+                "requirements": {
+                    "required_fields": [],
+                    "optional_fields": [
+                        "full_name",
+                    ],
+                    "unique_fields": [],
+                },
+                "transfer_type": "CASH",
+            },
+            {
+                "id": 10,
+                "code": "transfer_to_account",
+                "name": "Transfer to Account",
+                "requirements": {
+                    "required_fields": ["bank_name_transfer_to_account", "bank_account_number_transfer_to_account"],
+                    "optional_fields": [
+                        "full_name",
+                    ],
+                    "unique_fields": [
+                        "bank_account_number_transfer_to_account",
+                    ],
+                },
+                "transfer_type": "CASH",
+            },
+            {
+                "id": 11,
+                "code": "voucher",
+                "name": "Voucher",
+                "requirements": {
+                    "required_fields": [],
+                    "optional_fields": [
+                        "full_name",
+                    ],
+                    "unique_fields": [],
+                },
+                "transfer_type": "VOUCHER",
+            },
+            {
+                "id": 12,
+                "code": "cash_over_the_counter",
+                "name": "Cash over the counter",
+                "requirements": {
+                    "required_fields": [
+                        "mobile_phone_number_cash_over_the_counter",
+                    ],
+                    "optional_fields": [
+                        "full_name",
+                    ],
+                    "unique_fields": [],
+                },
+                "transfer_type": "CASH",
+            },
+            {
+                "id": 13,
+                "code": "atm_card",
+                "name": "ATM Card",
+                "requirements": {
+                    "required_fields": [
+                        "card_number_atm_card",
+                        "card_expiry_date_atm_card",
+                        "name_of_cardholder_atm_card",
+                    ],
+                    "optional_fields": [
+                        "full_name",
+                    ],
+                    "unique_fields": [
+                        "card_number_atm_card",
+                        "card_expiry_date_atm_card",
+                        "name_of_cardholder_atm_card",
+                    ],
+                },
+                "transfer_type": "CASH",
+            },
+            {
+                "id": 14,
+                "code": "transfer_to_digital_wallet",
+                "name": "Transfer to Digital Wallet",
+                "requirements": {
+                    "required_fields": [
+                        "blockchain_name_transfer_to_digital_wallet",
+                        "wallet_address_transfer_to_digital_wallet",
+                    ],
+                    "optional_fields": ["full_name", "wallet_name_transfer_to_digital_wallet"],
+                    "unique_fields": [
+                        "blockchain_name_transfer_to_digital_wallet",
+                        "wallet_address_transfer_to_digital_wallet",
+                    ],
+                },
+                "transfer_type": "DIGITAL",
+            },
+        ]
+
+        return [DeliveryMechanismData.create_from_dict(d) for d in data]
 
     def create_payment_instruction(self, data: dict) -> PaymentInstructionData:
         response_data = self._post(self.Endpoints.CREATE_PAYMENT_INSTRUCTION, data)
@@ -408,19 +640,20 @@ class PaymentGatewayService:
     def sync_fsps(self) -> None:
         fsps = self.api.get_fsps()
         for fsp in fsps:
-            FinancialServiceProvider.objects.update_or_create(
+            fsp, created = FinancialServiceProvider.objects.update_or_create(
                 payment_gateway_id=fsp.id,
                 defaults={
                     "vision_vendor_number": fsp.vision_vendor_number,
                     "name": fsp.name,
                     "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
                     "data_transfer_configuration": fsp.configs,
-                    "delivery_mechanisms": [
-                        DeliveryMechanismChoices.DELIVERY_TYPE_CASH_OVER_THE_COUNTER,
-                        DeliveryMechanismChoices.DELIVERY_TYPE_MOBILE_MONEY,
-                    ],
                 },
             )
+
+            if not created:
+                fsp.delivery_mechanisms.clear()
+
+            fsp.delivery_mechanisms.add(*DeliveryMechanism.objects.filter(code__in=fsp.delivery_mechanisms))
 
     def sync_records(self) -> None:
         def update_payment(
@@ -516,3 +749,19 @@ class PaymentGatewayService:
                                 update_payment(
                                     payment, pg_payment_records, delivery_mechanism, payment_plan, exchange_rate
                                 )
+
+    def sync_delivery_mechanisms(self) -> None:
+        delivery_mechanisms: List[DeliveryMechanismData] = self.api.get_delivery_mechanisms()
+        for dm in delivery_mechanisms:
+            DeliveryMechanism.objects.update_or_create(
+                code=dm.code,
+                defaults={
+                    "payment_gateway_id": dm.id,
+                    "name": dm.name,
+                    "required_fields": dm.requirements.required_fields,
+                    "optional_fields": dm.requirements.optional_fields,
+                    "unique_fields": dm.requirements.unique_fields,
+                    "transfer_type": dm.transfer_type,
+                    "is_active": True,
+                },
+            )

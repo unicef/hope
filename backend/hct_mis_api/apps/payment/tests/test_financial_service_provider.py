@@ -7,9 +7,9 @@ from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoice
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
-    FspXlsxTemplatePerDeliveryMechanismFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory, generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import FinancialServiceProvider
+from hct_mis_api.apps.payment.models import FinancialServiceProvider, DeliveryMechanism
 
 
 class TestAllFinancialServiceProviders(APITestCase):
@@ -47,6 +47,8 @@ class TestAllFinancialServiceProviders(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        generate_delivery_mechanisms()
+        cls.dm_cash = DeliveryMechanism.objects.get(code="cash")
         cls.business_area = create_afghanistan()
         cls.user = UserFactory.create()
         permissions = [
@@ -59,11 +61,11 @@ class TestAllFinancialServiceProviders(APITestCase):
         fsps = FinancialServiceProviderFactory.create_batch(
             9,
             distribution_limit=9999,
-            delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH],
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
         )
         for fsp in fsps:
             fsp.allowed_business_areas.add(cls.business_area)
+            fsp.delivery_mechanisms.add(cls.dm_cash)
             FspXlsxTemplatePerDeliveryMechanismFactory(
                 financial_service_provider=fsp,
                 xlsx_template=fsp_xlsx_template,

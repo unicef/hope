@@ -42,8 +42,8 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory
+from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory, generate_delivery_mechanisms
+from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.models import MergeStatusModel
@@ -69,6 +69,7 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
+        generate_delivery_mechanisms()
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
         partner = PartnerFactory(name="Partner")
@@ -321,6 +322,7 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
             },
             approve_status=True,
         )
+        cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
 
         super().setUpTestData()
 
@@ -719,7 +721,7 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
         )
         dmd = DeliveryMechanismDataFactory(
             individual=self.individuals[0],
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
+            delivery_mechanism=self.dm_atm_card,
         )
         self.assertEqual(dmd.data, {})
         ticket = GrievanceTicketFactory(
@@ -736,7 +738,7 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
                 "delivery_mechanism_data_to_edit": [
                     {
                         "id": str(dmd.id),
-                        "label": DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
+                        "label": self.dm_atm_card.name, # TODO MB code?
                         "approve_status": True,
                         "data_fields": [
                             {"name": "name_of_cardholder_atm_card", "value": "Marek"},

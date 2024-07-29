@@ -1,10 +1,10 @@
 from typing import Any
-from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from django.core.exceptions import ValidationError
 
 import pytest
+from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -45,7 +45,6 @@ class FlexibleAttribute:
             return MagicMock()
 
 
-@pytest.mark.django_db
 class TestGrievanceUtils(TestCase):
     def test_to_phone_number_str(self) -> None:
         data = {"phone_number": 123456789}

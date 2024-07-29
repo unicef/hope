@@ -49,13 +49,14 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
+    generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     Payment,
     PaymentPlan,
     PaymentVerification,
-    PaymentVerificationPlan,
+    PaymentVerificationPlan, DeliveryMechanism,
 )
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
@@ -300,6 +301,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             code="full", description="Full individual collected", active=True, type="STANDARD"
         )
         cls.data_collecting_type.limit_to.add(cls.business_area)
+        generate_delivery_mechanisms()
 
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_receiving_reconciliations_from_fsp(self, mock_get_exchange_rate: Any) -> None:
@@ -416,19 +418,19 @@ class TestPaymentPlanReconciliation(APITestCase):
         encoded_payment_plan_id = create_payment_plan_response["data"]["createPaymentPlan"]["paymentPlan"]["id"]
         payment_plan_id = decode_id_string(encoded_payment_plan_id)
 
+        dm_cash = DeliveryMechanism.objects.get(code="cash")
+        dm_transfer = DeliveryMechanism.objects.get(code="transfer_to_account")
+
         santander_fsp = FinancialServiceProviderFactory(
             name="Santander",
-            delivery_mechanisms=[
-                DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
-                DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
-            ],
             distribution_limit=None,
         )
+        santander_fsp.delivery_mechanisms.set([dm_cash, dm_transfer])
         FspXlsxTemplatePerDeliveryMechanismFactory(
-            financial_service_provider=santander_fsp, delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH
+            financial_service_provider=santander_fsp, delivery_mechanism=dm_cash
         )
         FspXlsxTemplatePerDeliveryMechanismFactory(
-            financial_service_provider=santander_fsp, delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER
+            financial_service_provider=santander_fsp, delivery_mechanism=dm_transfer
         )
         encoded_santander_fsp_id = encode_id_base64(santander_fsp.id, "FinancialServiceProvider")
 
@@ -486,6 +488,8 @@ class TestPaymentPlanReconciliation(APITestCase):
         payment.refresh_from_db()
         self.assertEqual(payment.entitlement_quantity, 500)
 
+        encoded_dm_cash_id = encode_id_base64(dm_cash.id, "DeliveryMechanism")
+
         choose_dms_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
@@ -493,7 +497,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                 input=dict(
                     paymentPlanId=encoded_payment_plan_id,
                     deliveryMechanisms=[
-                        DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+                        encoded_dm_cash_id,
                     ],
                 )
             ),
@@ -523,7 +527,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                 "paymentPlanId": encoded_payment_plan_id,
                 "mappings": [
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+                        "deliveryMechanism": encoded_dm_cash_id,
                         "fspId": encoded_santander_fsp_id,
                         "order": 1,
                     }
@@ -551,7 +555,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         payment_plan.refresh_from_db()
         assert (
             payment_plan.delivery_mechanisms.filter(
-                financial_service_provider=santander_fsp, delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH
+                financial_service_provider=santander_fsp, delivery_mechanism=dm_cash
             ).count()
             == 1
         )

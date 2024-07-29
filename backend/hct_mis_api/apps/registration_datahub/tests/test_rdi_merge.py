@@ -40,9 +40,8 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory
-from hct_mis_api.apps.payment.models import DeliveryMechanismData
+from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory, generate_delivery_mechanisms
+from hct_mis_api.apps.payment.models import DeliveryMechanismData, DeliveryMechanism
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import (
@@ -601,6 +600,7 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
     def setUpTestData(cls) -> None:
         cls.program = ProgramFactory()
         cls.rdi = RegistrationDataImportFactory(program=cls.program)
+        generate_delivery_mechanisms()
 
     def test_create_grievance_tickets_for_delivery_mechanisms_errors(self) -> None:
         program = ProgramFactory()
@@ -616,10 +616,12 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
         ind3.full_name = ind.full_name
         ind3.save()
 
+        dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
+
         # valid data
         dmd = DeliveryMechanismDataFactory(
             individual=ind,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
+            delivery_mechanism=dm_atm_card,
             data={
                 "card_number_atm_card": "123",
                 "card_expiry_date_atm_card": "2022-01-01",
@@ -629,7 +631,7 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
         # invalid data, ticket should be created
         dmd2 = DeliveryMechanismDataFactory(
             individual=ind2,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
+            delivery_mechanism=dm_atm_card,
             data={
                 "card_number_atm_card": "123",
                 "card_expiry_date_atm_card": None,
@@ -639,7 +641,7 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
         # not unique data, ticket should be created
         dmd3 = DeliveryMechanismDataFactory(
             individual=ind3,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
+            delivery_mechanism=dm_atm_card,
             data={
                 "card_number_atm_card": "123",
                 "card_expiry_date_atm_card": "2022-01-01",

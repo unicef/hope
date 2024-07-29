@@ -23,7 +23,7 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
+from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification, DeliveryMechanism
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.reporting.models import DashboardReport
 
@@ -35,6 +35,8 @@ logger = logging.getLogger(__name__)
 
 
 class GenerateDashboardReportContentHelpers:
+    delivery_mechanism_choices = DeliveryMechanism.get_choices(is_active=False)
+
     @classmethod
     def get_beneficiaries(cls, report: DashboardReport) -> Tuple[Any, Dict]:
         children_count_fields = [
@@ -114,7 +116,7 @@ class GenerateDashboardReportContentHelpers:
 
         def aggregate_by_delivery_type(payment_records: QuerySet[PaymentRecord]) -> Dict:
             result = dict()
-            for delivery_type in DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES:
+            for delivery_type in cls.delivery_mechanism_choices:
                 value = delivery_type[0]
                 result[value] = (
                     payment_records.filter(delivery_type=value)
@@ -148,12 +150,12 @@ class GenerateDashboardReportContentHelpers:
         def get_filter_query(cash: bool, month: int) -> Q:
             if cash:
                 return Q(
-                    cashplan__payment_items__delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_CASH,
+                    cashplan__payment_items__delivery_type__transfer_type=DeliveryMechanism.TransferType.CASH,
                     cashplan__payment_items__delivery_date__month=month,
                 )
             else:
                 return Q(
-                    cashplan__payment_items__delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_VOUCHER,
+                    cashplan__payment_items__delivery_type__transfer_type=DeliveryMechanism.TransferType.VOUCHER,
                     cashplan__payment_items__delivery_date__month=month,
                 )
 
@@ -352,14 +354,14 @@ class GenerateDashboardReportContentHelpers:
             .annotate(
                 total_cash=Sum(
                     "paymentrecord__delivered_quantity_usd",
-                    filter=Q(paymentrecord__delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_CASH),
+                    filter=Q(paymentrecord__delivery_type__transfer_type=DeliveryMechanism.TransferType.CASH),
                     output_field=DecimalField(),
                 )
             )
             .annotate(
                 total_voucher=Sum(
                     "paymentrecord__delivered_quantity_usd",
-                    filter=Q(paymentrecord__delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_VOUCHER),
+                    filter=Q(paymentrecord__delivery_type__transfer_type=DeliveryMechanism.TransferType.VOUCHER),
                     output_field=DecimalField(),
                 )
             )
@@ -432,13 +434,13 @@ class GenerateDashboardReportContentHelpers:
             result.append(instance.get(f"{field}__sum", 0))
         return tuple(result)
 
-    @staticmethod
-    def format_volumes_by_delivery_row(instance: Dict, is_totals: bool, *args: Any) -> Tuple:
+    @classmethod
+    def format_volumes_by_delivery_row(cls, instance: Dict, is_totals: bool, *args: Any) -> Tuple:
         result = [
             instance.get("business_area_code", "") if not is_totals else "",
             instance.get("name", "") if not is_totals else "Total",
         ]
-        for choice in DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES:
+        for choice in cls.delivery_mechanism_choices:
             result.append(instance.get(choice[0]))
 
         return tuple(result)
@@ -785,7 +787,7 @@ class GenerateDashboardReportService:
                 "business area",
                 "programme",
             ),
-            SHARED: tuple(choice[1] for choice in DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES),
+            SHARED: tuple(choice[1] for choice in DeliveryMechanism.get_choices(is_active=False)),
         },
         DashboardReport.INDIVIDUALS_REACHED: {
             HQ: (
@@ -864,7 +866,7 @@ class GenerateDashboardReportService:
     REMOVE_EMPTY_COLUMNS = {
         DashboardReport.VOLUME_BY_DELIVERY_MECHANISM: (
             3,
-            len(DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES) + 3,
+            DeliveryMechanism.objects.all().count() + 3,
         )
     }
     META_SHEET = "Meta data"

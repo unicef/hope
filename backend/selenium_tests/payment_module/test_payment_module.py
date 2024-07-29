@@ -19,8 +19,9 @@ from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
+    DeliveryMechanismFactory, generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import FinancialServiceProvider, PaymentPlan
+from hct_mis_api.apps.payment.models import FinancialServiceProvider, PaymentPlan, DeliveryMechanism
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
@@ -61,6 +62,9 @@ def create_test_program() -> Program:
 
 @pytest.fixture
 def create_targeting(create_test_program: Program) -> None:
+    generate_delivery_mechanisms()
+    dm_cash = DeliveryMechanism.objects.get(code="cash")
+
     targeting_criteria = TargetingCriteriaFactory()
 
     tp = TargetPopulationFactory(
@@ -91,10 +95,10 @@ def create_targeting(create_test_program: Program) -> None:
     fsp_1 = FinancialServiceProviderFactory(
         name="FSP_1",
         vision_vendor_number="149-69-3686",
-        delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH],
         distribution_limit=10_000,
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
     )
+    fsp_1.delivery_mechanisms.set([dm_cash])
     fsp_1.allowed_business_areas.add(business_area)
     FspXlsxTemplatePerDeliveryMechanismFactory(
         financial_service_provider=fsp_1,

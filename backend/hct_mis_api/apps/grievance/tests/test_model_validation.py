@@ -10,7 +10,9 @@ from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
+    generate_delivery_mechanisms,
 )
+from hct_mis_api.apps.payment.models import DeliveryMechanism
 
 
 class TestGrievanceModelValidation(TestCase):
@@ -80,13 +82,17 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
     def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.user = UserFactory.create()
+        generate_delivery_mechanisms()
 
     def test_clean(self) -> None:
-        fsp = FinancialServiceProviderFactory(delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD])
+        dm_cash = DeliveryMechanism.objects.get(code="cash")
+        dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
+        fsp = FinancialServiceProviderFactory()
+        fsp.delivery_mechanisms.set([dm_atm_card])
         template = FinancialServiceProviderXlsxTemplateFactory()
         template_per_dm_cash = FspXlsxTemplatePerDeliveryMechanismFactory(
             financial_service_provider=fsp,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+            delivery_mechanism=dm_cash,
             xlsx_template=template,
         )
 
@@ -98,7 +104,7 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
 
         template_per_dm_atm_card = FspXlsxTemplatePerDeliveryMechanismFactory(
             financial_service_provider=fsp,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
+            delivery_mechanism=dm_atm_card,
             xlsx_template=template,
         )
 

@@ -18,18 +18,17 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualRoleInHouseholdFactory,
 )
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentPlanFactory, generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
     Payment,
     PaymentPlan,
-    PaymentPlanSplit,
+    PaymentPlanSplit, DeliveryMechanism,
 )
 from hct_mis_api.apps.payment.services.payment_gateway import (
     AddRecordsResponseData,
@@ -52,6 +51,8 @@ class TestPaymentGatewayService(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
+        generate_delivery_mechanisms()
+        cls.dm_cash_over_the_counter = DeliveryMechanism.objects.get(code="cash_over_the_counter")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
 
@@ -62,16 +63,14 @@ class TestPaymentGatewayService(APITestCase):
         )
         cls.pg_fsp = FinancialServiceProviderFactory(
             name="Western Union",
-            delivery_mechanisms=[
-                DeliveryMechanismChoices.DELIVERY_TYPE_CASH_OVER_THE_COUNTER,
-            ],
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             payment_gateway_id="123",
         )
+        cls.pg_fsp.delivery_mechanisms.add(cls.dm_cash_over_the_counter)
         cls.dm = DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=cls.pp,
             financial_service_provider=cls.pg_fsp,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH_OVER_THE_COUNTER,
+            delivery_mechanism=cls.dm_cash_over_the_counter,
             sent_to_payment_gateway=False,
         )
         cls.payments = []

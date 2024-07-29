@@ -17,7 +17,6 @@ from hct_mis_api.apps.reporting.services.generate_dashboard_report_service impor
     GenerateDashboardReportService,
 )
 
-
 class TestGenerateDashboardReportService(TestCase):
     @parameterized.expand(
         [

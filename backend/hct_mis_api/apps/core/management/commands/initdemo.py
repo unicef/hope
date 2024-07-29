@@ -17,6 +17,7 @@ from hct_mis_api.apps.payment.fixtures import (
     generate_real_cash_plans,
     generate_reconciled_payment_plan,
     update_fsps,
+    generate_delivery_mechanisms,
 )
 
 logger = logging.getLogger(__name__)
@@ -79,6 +80,7 @@ class Command(BaseCommand):
         except elasticsearch.exceptions.RequestError as e:
             logger.error(e)
 
+        generate_delivery_mechanisms()
         generate_payment_plan()
         generate_real_cash_plans()
         generate_reconciled_payment_plan()

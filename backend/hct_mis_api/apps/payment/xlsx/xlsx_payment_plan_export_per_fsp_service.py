@@ -18,7 +18,7 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
     Payment,
-    PaymentPlan,
+    PaymentPlan, DeliveryMechanism,
 )
 from hct_mis_api.apps.payment.validators import generate_numeric_token
 from hct_mis_api.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
@@ -70,7 +70,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         return wb, ws
 
     def get_template(
-        self, fsp: "FinancialServiceProvider", delivery_mechanism: str
+        self, fsp: "FinancialServiceProvider", delivery_mechanism: DeliveryMechanism
     ) -> FinancialServiceProviderXlsxTemplate:
         fsp_xlsx_template_per_delivery_mechanism = FspXlsxTemplatePerDeliveryMechanism.objects.filter(
             delivery_mechanism=delivery_mechanism,
