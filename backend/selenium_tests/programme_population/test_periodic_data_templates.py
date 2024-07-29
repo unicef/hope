@@ -1,3 +1,5 @@
+from time import sleep
+
 import pytest
 from page_object.programme_population.periodic_data_update_templates import (
     PeriodicDatUpdateTemplates,
@@ -110,8 +112,13 @@ class TestPeriodicDataTemplates:
         status = pageIndividuals.getTemplateStatus(periodic_data_update_template.pk).text
         assert status == "NOT SCHEDULED"
         pageIndividuals.getExportBtn(periodic_data_update_template.pk).click()
-        status = pageIndividuals.getTemplateStatus(periodic_data_update_template.pk).text
-        assert status == "EXPORTED"
+        for i in range(10):
+            status = pageIndividuals.getTemplateStatus(periodic_data_update_template.pk).text
+            if status == "EXPORTED":
+                break
+            sleep(1)
+        else:
+            assert status == "EXPORTED"
         pageIndividuals.getDownloadBtn(periodic_data_update_template.pk).click()
         periodic_data_update_template.refresh_from_db()
         assert (
