@@ -156,6 +156,7 @@ class TestPeriodicDataUpdateUpload:
         pageIndividuals.getTabPeriodicDataUpdates().click()
         pageIndividuals.getButtonImport().click()
         pageIndividuals.getDialogImport()
+        assert "IMPORT" in pageIndividuals.getButtonImportSubmit().text
         pageIndividuals.upload_file(tmp_file.name)
         pageIndividuals.getButtonImportSubmit().click()
         pageIndividuals.getPduUpdates().click()
@@ -197,8 +198,10 @@ class TestPeriodicDataUpdateUpload:
         pageIndividuals.upload_file(tmp_file.name)
         pageIndividuals.getButtonImportSubmit().click()
         pageIndividuals.getPduUpdates().click()
+        pageIndividuals.getStatusContainer()
         periodic_data_update_upload = PeriodicDataUpdateUpload.objects.first()
         assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.FAILED
+        assert pageIndividuals.getStatusContainer().text == "FAILED"
         assert pageIndividuals.getUpdateStatus(periodic_data_update_upload.pk).text == "FAILED"
         pageIndividuals.getUpdateDetailsBtn(periodic_data_update_upload.pk).click()
         error_text = "Row: 2\nTest String Attribute__round_value\nEnter a valid date."
@@ -240,12 +243,7 @@ class TestPeriodicDataUpdateUpload:
             pageIndividuals.getTabPeriodicDataUpdates().click()
             pageIndividuals.getButtonImport().click()
             pageIndividuals.getDialogImport()
-            from time import sleep
-
-            sleep(2)
             pageIndividuals.upload_file(tmp_file.name)
-            for number in range(30):
-                pageIndividuals.screenshot(number, delay_sec=0.1)
             pageIndividuals.getButtonImportSubmit().click()
             error_text = pageIndividuals.getPduUploadError().text
             assert error_text == "Periodic Data Update Template with ID -1 not found"
