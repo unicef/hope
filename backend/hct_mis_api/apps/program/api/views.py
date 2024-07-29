@@ -6,6 +6,7 @@ from django.db.models import QuerySet
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -13,24 +14,52 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.api.permissions import ProgramCycleViewListPermission
-from hct_mis_api.apps.core.api.mixins import BusinessAreaProgramMixin
+from hct_mis_api.apps.account.api.permissions import (
+    ProgramCycleCreatePermission,
+    ProgramCycleDeletePermission,
+    ProgramCycleUpdatePermission,
+    ProgramCycleViewDetailsPermission,
+    ProgramCycleViewListPermission,
+)
+from hct_mis_api.apps.core.api.mixins import ActionMixin, BusinessAreaProgramMixin
 from hct_mis_api.apps.program.api.caches import ProgramCycleKeyConstructor
 from hct_mis_api.apps.program.api.filters import ProgramCycleFilter
-from hct_mis_api.apps.program.api.serializers import ProgramCycleListSerializer
-from hct_mis_api.apps.program.models import ProgramCycle
+from hct_mis_api.apps.program.api.serializers import (
+    ProgramCycleCreateSerializer,
+    ProgramCycleDeleteSerializer,
+    ProgramCycleListSerializer,
+    ProgramCycleUpdateSerializer,
+)
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 logger = logging.getLogger(__name__)
 
 
 class ProgramCycleViewSet(
+    ActionMixin,
     BusinessAreaProgramMixin,
-    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
     GenericViewSet,
 ):
-    serializer_class = ProgramCycleListSerializer
-    permission_classes = [ProgramCycleViewListPermission]
+    serializer_classes_by_action = {
+        "list": ProgramCycleListSerializer,
+        "retrieve": ProgramCycleListSerializer,
+        "create": ProgramCycleCreateSerializer,
+        "update": ProgramCycleUpdateSerializer,
+        "delete": ProgramCycleDeleteSerializer,
+    }
+    permission_classes_by_action = {
+        "list": [ProgramCycleViewListPermission],
+        "retrieve": [ProgramCycleViewDetailsPermission],
+        "create": [ProgramCycleCreatePermission],
+        "update": [ProgramCycleUpdatePermission],
+        "delete": [ProgramCycleDeletePermission],
+    }
+
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = ProgramCycleFilter
 
@@ -48,3 +77,15 @@ class ProgramCycleViewSet(
         instance = self.get_object()
         serializer = ProgramCycleListSerializer(instance)
         return Response(serializer.data)
+
+    def perform_destroy(self, program_cycle: ProgramCycle) -> None:
+        if program_cycle.program.status != Program.ACTIVE:
+            raise ValidationError("Only Programme Cycle for Active Programme can be deleted.")
+
+        if program_cycle.status != ProgramCycle.DRAFT:
+            raise ValidationError("Only Draft Programme Cycle can be deleted.")
+
+        if program_cycle.program.cycles.count() == 1:
+            raise ValidationError("Don’t allow to delete last Cycle.")
+
+        program_cycle.delete()

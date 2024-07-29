@@ -66,10 +66,7 @@ urlpatterns = [
                     "programs/<str:program_id>/",
                     include(
                         [
-                            path(
-                                "cycles/",
-                                include("hct_mis_api.apps.program.api.urls", namespace="cycles"),
-                            ),
+                            path("", include("hct_mis_api.apps.program.api.urls", namespace="programs")),
                         ]
                     ),
                 ),

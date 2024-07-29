@@ -375,6 +375,7 @@ class Mutations(graphene.ObjectType):
     copy_program = CopyProgram.Field()
 
     # program cycle
+    # TODO: remove graphql mutation as we will have REST API
     create_program_cycle = CreateProgramCycle.Field()
     update_program_cycle = UpdateProgramCycle.Field()
     delete_program_cycle = DeleteProgramCycle.Field()
