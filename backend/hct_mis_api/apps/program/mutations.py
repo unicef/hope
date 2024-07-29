@@ -8,7 +8,7 @@ import graphene
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.flexible_attribute_service import (
+from hct_mis_api.apps.periodic_data_update.service.flexible_attribute_service import (
     FlexibleAttributeForPDUService,
 )
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
