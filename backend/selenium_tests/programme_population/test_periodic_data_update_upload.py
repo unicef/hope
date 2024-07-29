@@ -3,7 +3,6 @@ from typing import Any
 
 import openpyxl
 import pytest
-from flaky import flaky
 from page_object.programme_population.periodic_data_update_templates import (
     PeriodicDatUpdateTemplates,
 )
@@ -242,6 +241,7 @@ class TestPeriodicDataUpdateUpload:
             pageIndividuals.getButtonImport().click()
             pageIndividuals.getDialogImport()
             from time import sleep
+
             sleep(2)
             pageIndividuals.upload_file(tmp_file.name)
             sleep(2)
