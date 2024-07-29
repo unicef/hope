@@ -93,10 +93,12 @@ class PeriodicDataUpdateTemplateViewSet(
     @action(detail=True, methods=["post"])
     def export(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         pdu_template = self.get_object()
+
         if pdu_template.status == PeriodicDataUpdateTemplate.Status.EXPORTING:
             raise ValidationError("Template is already being exported")
         if pdu_template.file:
             raise ValidationError("Template is already exported")
+
         pdu_template.queue()
         return Response(status=status.HTTP_200_OK, data={"message": "Exporting template"})
 
@@ -108,11 +110,11 @@ class PeriodicDataUpdateTemplateViewSet(
             raise ValidationError("Template is not exported yet")
         if not pdu_template.number_of_records:
             raise ValidationError("Template has no records")
-        if template_file := pdu_template.file:
-            return Response({"url": template_file.file.url}, status=status.HTTP_200_OK)
-        else:
+        if not pdu_template.file:
             logger.error(f"XLSX File not found. PeriodicDataUpdateTemplate ID: {pdu_template.id}")
             raise ValidationError("Template file is missing")
+
+        return Response({"url": pdu_template.file.file.url}, status=status.HTTP_200_OK)
 
 
 class PeriodicDataUpdateUploadViewSet(

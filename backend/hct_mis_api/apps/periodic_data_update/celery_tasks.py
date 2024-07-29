@@ -72,6 +72,6 @@ def remove_old_pdu_template_files_task(self: Any, expiration_days: int = 30) -> 
 
                 logger.info(f"Removed old PDU FileTemp: {file_qs.count()}")
 
-    except Exception as e:
-        logger.exception("Remove old PDU files Error")
-        raise self.retry(exc=e)
+    except Exception as e:  # pragma: no cover
+        logger.exception("Remove old PDU files Error")  # pragma: no cover
+        raise self.retry(exc=e)  # pragma: no cover
