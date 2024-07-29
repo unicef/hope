@@ -110,7 +110,6 @@ class TestPeriodicDataTemplates:
         status = pageIndividuals.getTemplateStatus(periodic_data_update_template.pk).text
         assert status == "NOT SCHEDULED"
         pageIndividuals.getExportBtn(periodic_data_update_template.pk).click()
-        pageIndividuals.screenshot("test_periodic_data_template_export")
         status = pageIndividuals.getTemplateStatus(periodic_data_update_template.pk).text
         assert status == "EXPORTED"
         pageIndividuals.getDownloadBtn(periodic_data_update_template.pk).click()

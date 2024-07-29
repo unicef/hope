@@ -260,7 +260,6 @@ class TestSmokePaymentVerification:
         pagePaymentVerificationDetails.getButtonFinish().click()
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
-        pagePaymentVerificationDetails.screenshot("1")
         assert "Payment Plan" in pagePaymentVerificationDetails.getPageHeaderTitle().text
         assert "FINISHED" in pagePaymentVerificationDetails.getLabelStatus().text
         assert "FINISHED" in pagePaymentVerificationDetails.getVerificationPlanStatus().text
