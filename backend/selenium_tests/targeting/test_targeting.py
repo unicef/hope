@@ -6,7 +6,6 @@ from django.core.management import call_command
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from flaky import flaky
 from page_object.targeting.targeting import Targeting
 from page_object.targeting.targeting_create import TargetingCreate
 from page_object.targeting.targeting_details import TargetingDetails
@@ -671,7 +670,7 @@ class TestTargeting:
         pageTargeting.countTargetPopulations(2)
         filters.getButtonFiltersClear().click()
 
-    @flaky(max_runs=5, min_passes=1)
+    # @flaky(max_runs=5, min_passes=1)
     def test_targeting_and_labels(
         self,
         create_programs: None,

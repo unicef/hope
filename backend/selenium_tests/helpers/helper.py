@@ -98,7 +98,7 @@ class Common:
     ) -> None:
         from time import sleep
 
-        sleep(2)
+        sleep(5)
         self._wait(timeout).until(EC.presence_of_element_located((By.XPATH, xpath))).send_keys(upload_file)
         sleep(2)
 
