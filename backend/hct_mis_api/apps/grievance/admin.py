@@ -152,6 +152,7 @@ class TicketNeedsAdjudicationDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase
         "selected_individual",
         "possible_duplicates",
         "selected_individuals",
+        "selected_distinct",
     )
 
 

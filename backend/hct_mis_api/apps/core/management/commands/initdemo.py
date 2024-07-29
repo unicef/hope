@@ -63,7 +63,6 @@ class Command(BaseCommand):
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/documenttype.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data.json")
-        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/grievance/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/accountability/fixtures/data.json")
 
         call_command(
@@ -86,6 +85,7 @@ class Command(BaseCommand):
 
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/pdu.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/programpartnerthrough.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/grievance/fixtures/data.json")
 
         email_list = [
             "jan.romaniak@kellton.com",
