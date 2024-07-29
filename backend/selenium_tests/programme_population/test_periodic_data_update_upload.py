@@ -130,7 +130,7 @@ def prepare_xlsx_file(rounds_data: list, rows: list, program: Program) -> _Tempo
 
 @pytest.mark.usefixtures("login")
 class TestPeriodicDataUpdateUpload:
-    @flaky(max_runs=5, min_passes=1)
+    # @flaky(max_runs=5, min_passes=1)
     def test_periodic_data_update_upload_success(
         self,
         program: Program,
@@ -168,7 +168,7 @@ class TestPeriodicDataUpdateUpload:
         assert individual.flex_fields[flexible_attribute.name]["1"]["collection_date"] == "2021-05-02"
         assert pageIndividuals.getUpdateStatus(periodic_data_update_upload.pk).text == "SUCCESSFUL"
 
-    @flaky(max_runs=5, min_passes=1)
+    # @flaky(max_runs=5, min_passes=1)
     def test_periodic_data_update_upload_form_error(
         self,
         program: Program,
@@ -241,7 +241,10 @@ class TestPeriodicDataUpdateUpload:
             pageIndividuals.getTabPeriodicDataUpdates().click()
             pageIndividuals.getButtonImport().click()
             pageIndividuals.getDialogImport()
+            from time import sleep
+            sleep(2)
             pageIndividuals.upload_file(tmp_file.name)
+            sleep(2)
             pageIndividuals.getButtonImportSubmit().click()
             pageIndividuals.screenshot("upload_error")
             error_text = pageIndividuals.getPduUploadError().text

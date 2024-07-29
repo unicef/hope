@@ -33,7 +33,7 @@ services:
     command: |
       bash -c "
         waitforit -host=db -port=5432 -timeout=30
-        pytest -svvv -k periodic_data_update selenium_tests --cov-report xml:./coverage.xml --html-report=./report/report.html --randomly-seed=42
+        pytest -svvv -k TestPeriodicDataUpdateUpload selenium_tests --cov-report xml:./coverage.xml --html-report=./report/report.html --randomly-seed=42
       "
     depends_on:
       db:
