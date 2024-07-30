@@ -185,7 +185,7 @@ class APITestCase(SnapshotTestTestCase):
 class BaseElasticSearchTestCase(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        connections.create_connection(hosts=["elasticsearch:9200"], timeout=20)
+        connections.create_connection(hosts=[settings.ELASTICSEARCH_HOST], timeout=20)  # pragma: no cover
         cls.rebuild_search_index()
 
     @classmethod
@@ -199,7 +199,7 @@ class BaseElasticSearchTestCase(TestCase):
     @pytest.fixture(autouse=True)
     def _setup_elasticsearch(self, django_elasticsearch_setup: None) -> None:
         # Setup elasticsearch to work in parallel
-        pass
+        yield
 
 
 class UploadDocumentsBase(APITestCase):

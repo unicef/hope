@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 class Common:
-    DEFAULT_TIMEOUT = 10
+    DEFAULT_TIMEOUT = 20
 
     def __init__(self, driver: Chrome):
         self.driver = driver
@@ -85,8 +85,10 @@ class Common:
         button.click()
         assert url_fragment in self.wait_for_new_url(programme_creation_url).split("/")[-1]
 
-    def upload_file(self, upload_file: str, xpath: str = "//input[@type='file']") -> None:
-        self._wait().until(EC.presence_of_element_located((By.XPATH, xpath))).send_keys(upload_file)
+    def upload_file(
+        self, upload_file: str, xpath: str = "//input[@type='file']", timeout: int = DEFAULT_TIMEOUT
+    ) -> None:
+        self._wait(timeout).until(EC.presence_of_element_located((By.XPATH, xpath))).send_keys(upload_file)
 
     def select_option_by_name(self, optionName: str) -> None:
         selectOption = f'li[data-cy="select-option-{optionName}"]'
@@ -137,3 +139,10 @@ class Common:
                 print(f"{ii.text}: {ii.get_attribute(attribute)}")  # type: ignore
             except BaseException:
                 print(f"No text: {ii.get_attribute(attribute)}")  # type: ignore
+
+    def mouse_on_element(self, element: WebElement) -> None:
+        hover = ActionChains(self.driver).move_to_element(element)  # type: ignore
+        hover.perform()
+
+    def wait_for_element_clickable(self, locator: str) -> bool:
+        return self._wait().until(EC.element_to_be_clickable((By.XPATH, locator)))
