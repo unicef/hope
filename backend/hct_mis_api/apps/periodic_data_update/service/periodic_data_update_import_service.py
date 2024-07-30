@@ -223,7 +223,7 @@ class PeriodicDataUpdateImportService:
                 raise ValidationError(
                     f"Value already exists for field {field_name} for round {round_number} and individual {individual_uuid} / {individual_unicef_id}"
                 )
-            self._set_round_value(individual, field_name, round_number, value_from_xlsx, collection_date_from_xlsx)
+            self.set_round_value(individual, field_name, round_number, value_from_xlsx, collection_date_from_xlsx)
         return individual
 
     def _get_round_value(
@@ -237,8 +237,9 @@ class PeriodicDataUpdateImportService:
                 return round_data.get("value")
         return None
 
-    def _set_round_value(
-        self, individual: Individual, pdu_field_name: str, round_number: int, value: Any, collection_date: Any
+    @staticmethod
+    def set_round_value(
+        individual: Individual, pdu_field_name: str, round_number: int, value: Any, collection_date: Any
     ) -> None:
         flex_fields_data = individual.flex_fields
         if pdu_field_name not in flex_fields_data:

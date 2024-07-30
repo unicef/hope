@@ -431,7 +431,7 @@ class TestPeriodicDataUpdateImportService(TestCase):
         service._open_workbook()
         service._read_flexible_attributes()
         self.individual.flex_fields = {}
-        service._set_round_value(self.individual, flexible_attribute.name, 1, "1996-06-21", "2021-05-02")
+        service.set_round_value(self.individual, flexible_attribute.name, 1, "1996-06-21", "2021-05-02")
         self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], "1996-06-21")
         self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
 
