@@ -1,9 +1,12 @@
 import json
 from typing import Callable
 
+from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
+from django.core.files.base import ContentFile
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
+from django.utils import timezone
 
 import freezegun
 import pytest
@@ -16,9 +19,21 @@ from hct_mis_api.apps.account.fixtures import (
     UserFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.fixtures import (
+    FlexibleAttributeForPDUFactory,
+    PeriodicFieldDataFactory,
+)
+from hct_mis_api.apps.core.models import FileTemp, PeriodicFieldData
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.periodic_data_update.fixtures import (
     PeriodicDataUpdateTemplateFactory,
     PeriodicDataUpdateUploadFactory,
+)
+from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
+    PeriodicDataUpdateExportTemplateService,
+)
+from hct_mis_api.apps.periodic_data_update.tests.test_periodic_data_update_import_service import (
+    add_pdu_data_to_xlsx,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
@@ -48,6 +63,13 @@ class TestPeriodicDataUpdateUploadViews:
         self.pdu_upload_program2 = PeriodicDataUpdateUploadFactory(template=pdu_template_program2, created_by=self.user)
         self.url_list = reverse(
             "api:periodic-data-update:periodic-data-update-uploads-list",
+            kwargs={
+                "business_area": self.afghanistan.slug,
+                "program_id": id_to_base64(self.program1.id, "Program"),
+            },
+        )
+        self.url_upload = reverse(
+            "api:periodic-data-update:periodic-data-update-uploads-upload",
             kwargs={
                 "business_area": self.afghanistan.slug,
                 "program_id": id_to_base64(self.program1.id, "Program"),
@@ -147,7 +169,7 @@ class TestPeriodicDataUpdateUploadViews:
             "created_by": self.pdu_upload_program2.created_by.get_full_name(),
         } not in response_json
 
-    def test_list_periodic_data_update_templates_caching(
+    def test_list_periodic_data_update_uploads_caching(
         self,
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
@@ -179,3 +201,122 @@ class TestPeriodicDataUpdateUploadViews:
             assert len(ctx.captured_queries) == 5
 
             assert etag_second_call == etag
+
+    @pytest.mark.parametrize(
+        "permissions, partner_permissions, access_to_program, expected_status",
+        [
+            ([], [], True, status.HTTP_403_FORBIDDEN),
+            ([Permissions.PDU_UPLOAD], [], True, status.HTTP_202_ACCEPTED),
+            ([], [Permissions.PDU_UPLOAD], True, status.HTTP_202_ACCEPTED),
+            (
+                [Permissions.PDU_UPLOAD],
+                [Permissions.PDU_UPLOAD],
+                True,
+                status.HTTP_202_ACCEPTED,
+            ),
+            ([], [], False, status.HTTP_403_FORBIDDEN),
+            ([Permissions.PDU_UPLOAD], [], False, status.HTTP_403_FORBIDDEN),
+            ([], [Permissions.PDU_UPLOAD], False, status.HTTP_403_FORBIDDEN),
+            (
+                [Permissions.PDU_UPLOAD],
+                [Permissions.PDU_VIEW_LIST_AND_DETAILS],
+                False,
+                status.HTTP_403_FORBIDDEN,
+            ),
+        ],
+    )
+    def test_upload_periodic_data_update_upload_permission(
+        self,
+        permissions: list,
+        partner_permissions: list,
+        access_to_program: bool,
+        expected_status: str,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        create_partner_role_with_permissions: Callable,
+        update_partner_access_to_program: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            permissions,
+            self.afghanistan,
+        )
+        create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
+        if access_to_program:
+            update_partner_access_to_program(self.partner, self.program1)
+
+        file = FileTemp.objects.create(
+            object_id=self.pdu_upload1_program1.pk,
+            content_type=get_content_type_for_model(self.pdu_upload1_program1),
+            created=timezone.now(),
+            file=ContentFile(b"Test content", f"Test File {self.pdu_upload1_program1.pk}.xlsx"),
+        )
+
+        response = self.client.post(self.url_upload, file=file.file)
+        assert response.status_code == expected_status
+
+    def test_upload_periodic_data_update_upload(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PDU_UPLOAD],
+            self.afghanistan,
+            self.program1,
+        )
+
+        _, individuals = create_household_and_individuals(
+            household_data={
+                "business_area": self.afghanistan,
+                "program_id": self.program1.pk,
+            },
+            individuals_data=[
+                {
+                    "business_area": self.afghanistan,
+                    "program_id": self.program1.pk,
+                },
+            ],
+        )
+        individual = individuals[0]
+        pdu_data = PeriodicFieldDataFactory(
+            subtype=PeriodicFieldData.STRING,
+            number_of_rounds=1,
+            rounds_names=["January"],
+        )
+        pdu_field = FlexibleAttributeForPDUFactory(
+            program=self.program1,
+            name="PDU Field",
+            pdu_data=pdu_data,
+        )
+        pdu_template = PeriodicDataUpdateTemplateFactory(
+            program=self.program1,
+            rounds_data=[
+                {
+                    "field": pdu_field.name,
+                    "round": 1,
+                    "round_name": pdu_field.pdu_data.rounds_names[0],
+                    "number_of_records": 1,
+                }
+            ],
+        )
+        rows = ([["Positive", "2024-07-20"]],)
+
+        service = PeriodicDataUpdateExportTemplateService(pdu_template)
+        service.generate_workbook()
+        service.save_xlsx_file()
+        tmp_file = add_pdu_data_to_xlsx(pdu_template, rows)
+
+        response = self.client.post(self.url_upload, file=tmp_file.file)
+        assert response.status_code == status.HTTP_202_ACCEPTED
+
+        individual.refresh_from_db()
+        assert individual.flex_fields[pdu_field.name]["1"]["value"] == "Positive"
+        assert individual.flex_fields[pdu_field.name]["1"]["collection_date"] == "2024-07-20"
