@@ -1,5 +1,3 @@
-import React from 'react';
-import { FieldArray } from 'formik';
 import {
   Box,
   Checkbox,
@@ -12,22 +10,28 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useAllPduFieldsQuery } from '@generated/graphql';
-import { LoadingComponent } from '@core/LoadingComponent';
+import { FieldArray } from 'formik';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface Field {
-  id: string;
-  name: string;
+  field: string;
+  rounds: {
+    round: number;
+    round_name: string;
+  }[];
+  numberOfRounds: number;
+  roundNumber: number;
+  roundName: string;
+  checked?: boolean;
 }
 
 interface SelectedField extends Field {
-  roundNumber?: number;
+  round: number;
 }
 
 interface FieldsToUpdateProps {
   values: {
-    selectedFields: SelectedField[];
+    roundsData: SelectedField[];
   };
   setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void;
 }
@@ -36,22 +40,37 @@ export const FieldsToUpdate: React.FC<FieldsToUpdateProps> = ({
   values,
   setFieldValue,
 }) => {
-  const { businessArea, programId } = useBaseUrl();
-  const { data, loading } = useAllPduFieldsQuery({
-    variables: {
-      businessAreaSlug: businessArea,
-      programId: programId,
-    },
-  });
+  const [checkedFields, setCheckedFields] = useState<SelectedField[]>([]);
+  const isInitialized = useRef(false);
 
-  if (loading) {
-    return <LoadingComponent />;
-  }
+  useEffect(() => {
+    if (!isInitialized.current) {
+      const initialCheckedFields = values.roundsData.map((field) => ({
+        ...field,
+        checked: false,
+      }));
+      setCheckedFields(initialCheckedFields);
+      isInitialized.current = true;
+    }
+  }, [values.roundsData]);
+
+  const handleCheckboxChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    field: SelectedField,
+  ) => {
+    const updatedCheckedFields = checkedFields.map((checkedField) =>
+      checkedField.field === field.field
+        ? { ...checkedField, checked: event.target.checked }
+        : checkedField,
+    );
+    setCheckedFields(updatedCheckedFields);
+    setFieldValue('roundsData', updatedCheckedFields);
+  };
 
   return (
     <FieldArray
-      name="selectedFields"
-      render={(arrayHelpers) => (
+      name="roundsData"
+      render={() => (
         <TableContainer component={Box}>
           <Table>
             <TableHead>
@@ -62,52 +81,40 @@ export const FieldsToUpdate: React.FC<FieldsToUpdateProps> = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.allPduFields.map((field) => (
-                <TableRow key={field.id}>
+              {values.roundsData.map((field, index) => (
+                <TableRow key={`${field.field}-${field.round}`}>
                   <TableCell>
                     <Checkbox
-                      checked={values.selectedFields.some(
-                        (selectedField) => selectedField.id === field.id,
-                      )}
-                      onChange={(event) => {
-                        const selectedIndex = values.selectedFields.findIndex(
-                          (selectedField) => selectedField.id === field.id,
-                        );
-                        if (event.target.checked) {
-                          arrayHelpers.push({
-                            id: field.id,
-                            roundNumber: 1, // Default round number when first selected
-                          });
-                        } else if (selectedIndex > -1) {
-                          arrayHelpers.remove(selectedIndex);
-                        }
-                      }}
+                      checked={checkedFields[index]?.checked || false}
+                      onChange={(event) => handleCheckboxChange(event, field)}
                     />
                   </TableCell>
-                  <TableCell>{field.labelEn}</TableCell>
+                  <TableCell>{field.field}</TableCell>
                   <TableCell>
                     <Select
-                      value={
-                        values.selectedFields.find(
-                          (selectedField) => selectedField.id === field.id,
-                        )?.roundNumber || ''
-                      }
+                      value={field.roundNumber}
                       onChange={(event) => {
-                        const selectedIndex = values.selectedFields.findIndex(
-                          (selectedField) => selectedField.id === field.id,
+                        const selectedIndex = values.roundsData.findIndex(
+                          (selectedField) =>
+                            selectedField.field === field.field,
+                        );
+                        const newRoundNumber = Number(event.target.value);
+                        const newRoundName =
+                          field.rounds[newRoundNumber - 1].round_name;
+
+                        setFieldValue(
+                          `roundsData[${selectedIndex}].roundNumber`,
+                          newRoundNumber,
                         );
                         setFieldValue(
-                          `selectedFields[${selectedIndex}].roundNumber`,
-                          event.target.value,
+                          `roundsData[${selectedIndex}].roundName`,
+                          newRoundName,
                         );
                       }}
-                      displayEmpty
                     >
-                      <MenuItem value="" disabled>
-                        -
-                      </MenuItem>
-                      {[...Array(field.pduData.numberOfRounds).keys()].map(
-                        (num) => (
+                      {Array.from(
+                        { length: field.numberOfRounds },
+                        (_, num) => (
                           <MenuItem key={num + 1} value={num + 1}>
                             {num + 1}
                           </MenuItem>

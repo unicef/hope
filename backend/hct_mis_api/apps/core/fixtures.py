@@ -132,6 +132,7 @@ class PeriodicFieldDataFactory(DjangoModelFactory):
 class FlexibleAttributeForPDUFactory(DjangoModelFactory):
     name = factory.Faker("word")
     associated_with = FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
+    label = {"English(EN)": "PDU field"}
     type = FlexibleAttribute.PDU
     pdu_data = factory.SubFactory(PeriodicFieldDataFactory)
 
@@ -152,6 +153,7 @@ def create_pdu_flexible_attribute(
         name=name,
         type=FlexibleAttribute.PDU,
         associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        label={"English(EN)": "PDU field"},
         program=program,
     )
     flexible_attribute.pdu_data = PeriodicFieldData.objects.create(

@@ -29,10 +29,10 @@ class ActionMixin:
         if self.action in self.permission_classes_by_action:
             return [permission() for permission in self.permission_classes_by_action[self.action]]
         else:
-            return super().get_permissions()
+            return super().get_permissions()  # pragma: no cover
 
     def get_serializer_class(self) -> Any:
         if self.action in self.serializer_classes_by_action:
             return self.serializer_classes_by_action[self.action]
         else:
-            return super().get_serializer_class()
+            return super().get_serializer_class()  # pragma: no cover

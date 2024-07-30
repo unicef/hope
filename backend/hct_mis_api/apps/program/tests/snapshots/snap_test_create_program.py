@@ -479,6 +479,46 @@ snapshots['TestCreateProgram::test_create_program_with_pdu_fields 1'] = {
     }
 }
 
+snapshots['TestCreateProgram::test_create_program_with_pdu_fields_duplicated_field_names_in_input 1'] = {
+    'data': {
+        'createProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Time Series Field names must be unique.',
+            'path': [
+                'createProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestCreateProgram::test_create_program_with_pdu_fields_existing_field_name 1'] = {
+    'data': {
+        'createProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['Time Series Field with name PDU Field 1 already exists.']",
+            'path': [
+                'createProgram'
+            ]
+        }
+    ]
+}
+
 snapshots['TestCreateProgram::test_create_program_with_pdu_fields_invalid_data 1'] = {
     'data': {
         'createProgram': None

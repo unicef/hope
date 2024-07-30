@@ -431,7 +431,7 @@ class TestCopyProgram(APITestCase):
         )
         self.assertEqual(Program.objects.get(name="copied name").pdu_fields.count(), 4)
 
-    def test_create_program_with_pdu_fields_invalid_data(self) -> None:
+    def test_copy_program_with_pdu_fields_invalid_data(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
         # pdu data with mismatched number of rounds and rounds names
         self.copy_data["programData"]["pduFields"] = [
@@ -449,6 +449,61 @@ class TestCopyProgram(APITestCase):
                     "subtype": "STRING",
                     "numberOfRounds": 1,
                     "roundsNames": ["Round *", "Round 2*"],
+                },
+            },
+        ]
+
+        self.snapshot_graphql_request(
+            request_string=self.COPY_PROGRAM_MUTATION, context={"user": self.user}, variables=self.copy_data
+        )
+
+    def test_copy_program_with_pdu_fields_duplicated_field_names_in_input(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        # pdu data with duplicated field names in the input
+        self.copy_data["programData"]["pduFields"] = [
+            {
+                "name": "PDU Field 1",
+                "pduData": {
+                    "subtype": "DECIMAL",
+                    "numberOfRounds": 3,
+                    "roundsNames": ["Round 1", "Round 2", "Round 3"],
+                },
+            },
+            {
+                "name": "PDU Field 1",
+                "pduData": {
+                    "subtype": "STRING",
+                    "numberOfRounds": 2,
+                    "roundsNames": ["Round *", "Round 2*"],
+                },
+            },
+        ]
+
+        self.snapshot_graphql_request(
+            request_string=self.COPY_PROGRAM_MUTATION, context={"user": self.user}, variables=self.copy_data
+        )
+
+    def test_copy_program_with_pdu_fields_existing_field_name(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        # pdu data with field name that already exists in the database
+        pdu_data = PeriodicFieldDataFactory(
+            subtype=PeriodicFieldData.DATE,
+            number_of_rounds=1,
+            rounds_names=["Round 1"],
+        )
+        program = ProgramFactory(business_area=self.business_area, name="Test Program 1")
+        FlexibleAttributeForPDUFactory(
+            program=program,
+            name="PDU Field 1",
+            pdu_data=pdu_data,
+        )
+        self.copy_data["programData"]["pduFields"] = [
+            {
+                "name": "PDU Field 1",
+                "pduData": {
+                    "subtype": "DECIMAL",
+                    "numberOfRounds": 3,
+                    "roundsNames": ["Round 1", "Round 2", "Round 3"],
                 },
             },
         ]
