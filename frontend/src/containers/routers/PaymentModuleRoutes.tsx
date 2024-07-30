@@ -23,6 +23,7 @@ import { PeoplePaymentDetailsPage } from '@containers/pages/paymentmodulepeople/
 import { SetUpPeopleFspPage } from '@containers/pages/paymentmodulepeople/SetUpPeopleFspPage';
 import { PeoplePaymentPlanDetailsPage } from '@containers/pages/paymentmodulepeople/PeoplePaymentPlanDetailsPage';
 import { PeopleFollowUpPaymentPlanDetailsPage } from '@containers/pages/paymentmodulepeople/PeopleFollowUpPaymentPlanDetailsPage';
+import { ProgramCyclePage } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCyclePage';
 
 export const PaymentModuleRoutes = (): React.ReactElement => {
   const { isSocialDctType } = useProgramContext();
@@ -31,12 +32,38 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
   if (isSocialDctType) {
     children = [
       {
-        path: '',
-        element: <PeoplePaymentModulePage />,
-      },
-      {
-        path: 'new-plan',
-        element: <CreatePeoplePaymentPlanPage />,
+        path: 'payment-plans',
+        children: [
+          {
+            path: '',
+            element: <PeoplePaymentModulePage />,
+          },
+          {
+            path: 'new-plan',
+            element: <CreatePeoplePaymentPlanPage />,
+          },
+          {
+            path: ':id',
+            children: [
+              {
+                path: '',
+                element: <PeoplePaymentPlanDetailsPage />,
+              },
+              {
+                path: 'edit',
+                element: <EditPeoplePaymentPlanPage />,
+              },
+              {
+                path: 'setup-fsp/edit',
+                element: <EditPeopleSetUpFspPage />,
+              },
+              {
+                path: 'setup-fsp/create',
+                element: <SetUpPeopleFspPage />,
+              },
+            ],
+          },
+        ],
       },
       {
         path: 'followup-payment-plans/:id',
@@ -60,27 +87,6 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
         ],
       },
       {
-        path: 'payment-plans/:id',
-        children: [
-          {
-            path: '',
-            element: <PeoplePaymentPlanDetailsPage />,
-          },
-          {
-            path: 'edit',
-            element: <EditPeoplePaymentPlanPage />,
-          },
-          {
-            path: 'setup-fsp/edit',
-            element: <EditPeopleSetUpFspPage />,
-          },
-          {
-            path: 'setup-fsp/create',
-            element: <SetUpPeopleFspPage />,
-          },
-        ],
-      },
-      {
         path: 'payments/:id',
         element: <PeoplePaymentDetailsPage />,
       },
@@ -88,12 +94,38 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
   } else {
     children = [
       {
-        path: '',
-        element: <PaymentModulePage />,
-      },
-      {
-        path: 'new-plan',
-        element: <CreatePaymentPlanPage />,
+        path: 'payment-plans',
+        children: [
+          {
+            path: '',
+            element: <PaymentModulePage />,
+          },
+          {
+            path: 'new-plan',
+            element: <CreatePaymentPlanPage />,
+          },
+          {
+            path: ':id',
+            children: [
+              {
+                path: '',
+                element: <PaymentPlanDetailsPage />,
+              },
+              {
+                path: 'edit',
+                element: <EditPaymentPlanPage />,
+              },
+              {
+                path: 'setup-fsp/edit',
+                element: <EditSetUpFspPage />,
+              },
+              {
+                path: 'setup-fsp/create',
+                element: <SetUpFspPage />,
+              },
+            ],
+          },
+        ],
       },
       {
         path: 'followup-payment-plans/:id',
@@ -117,29 +149,21 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
         ],
       },
       {
-        path: 'payment-plans/:id',
+        path: 'payments/:id',
+        element: <PaymentDetailsPage />,
+      },
+      {
+        path: 'program-cycles',
         children: [
           {
             path: '',
-            element: <PaymentPlanDetailsPage />,
+            element: <ProgramCyclePage />,
           },
           {
-            path: 'edit',
-            element: <EditPaymentPlanPage />,
-          },
-          {
-            path: 'setup-fsp/edit',
-            element: <EditSetUpFspPage />,
-          },
-          {
-            path: 'setup-fsp/create',
-            element: <SetUpFspPage />,
+            path: ':id',
+            element: false,
           },
         ],
-      },
-      {
-        path: 'payments/:id',
-        element: <PaymentDetailsPage />,
       },
     ];
   }

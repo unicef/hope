@@ -51,7 +51,7 @@ export const PeoplePaymentModulePage = (): React.ReactElement => {
             variant="contained"
             color="primary"
             component={Link}
-            to={`/${baseUrl}/payment-module/new-plan`}
+            to={`/${baseUrl}/payment-module/payment-plans/new-plan`}
             data-cy="button-new-payment-plan"
             title={t('Program has to be active to create new Payment Program')}
             disabled={!isActiveProgram}

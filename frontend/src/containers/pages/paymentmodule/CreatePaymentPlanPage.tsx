@@ -56,9 +56,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
             )
           : schema,
       ),
-    currency: Yup.string()
-      .nullable()
-      .required(t('Currency is required')),
+    currency: Yup.string().nullable().required(t('Currency is required')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
     ),
@@ -137,7 +135,6 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
           <AutoSubmitFormOnEnter />
           <CreatePaymentPlanHeader
             handleSubmit={submitForm}
-            baseUrl={baseUrl}
             permissions={permissions}
             loadingCreate={loadingCreate}
           />

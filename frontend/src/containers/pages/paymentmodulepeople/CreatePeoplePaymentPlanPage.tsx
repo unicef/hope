@@ -135,7 +135,6 @@ export const CreatePeoplePaymentPlanPage = (): React.ReactElement => {
           <AutoSubmitFormOnEnter />
           <CreatePaymentPlanHeader
             handleSubmit={submitForm}
-            baseUrl={baseUrl}
             permissions={permissions}
             loadingCreate={loadingCreate}
           />

@@ -44,7 +44,7 @@ export const PeoplePaymentDetailsPage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module/`,
+      to: `/${baseUrl}/payment-module/payment-plans`,
     },
     {
       title: ` ${paymentPlanIsFollowUp ? 'Follow-up ' : ''} Payment Plan ${
