@@ -24,6 +24,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.models import DeliveryMechanismData
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
@@ -293,6 +294,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         registration_data_import = RegistrationDataImport.objects.select_for_update().get(
             id=registration_data_import_id,
         )
+        self.program = Program.objects.get(id=program_id)
         self.pdu_flexible_attributes = FlexibleAttribute.objects.filter(
             type=FlexibleAttribute.PDU, program=self.program
         ).select_related("pdu_data")
