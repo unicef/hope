@@ -2337,15 +2337,13 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         return fields
 
     @classmethod
-    def get_scope_delivery_mechanisms_fields(cls, by: str = "name") -> List[dict]:
+    def get_scope_delivery_mechanisms_fields(cls, by: str = "name") -> List[str]:
         from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
             FieldFactory,
         )
         from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 
-        delivery_mechanisms_fields = [
-            _field for _field in FieldFactory.from_scope(Scope.DELIVERY_MECHANISM).to_dict_by(by).values()
-        ]
+        delivery_mechanisms_fields = list(FieldFactory.from_scope(Scope.DELIVERY_MECHANISM).to_dict_by(by).keys())
 
         return delivery_mechanisms_fields
 

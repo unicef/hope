@@ -114,7 +114,6 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                         individual=obj_to_create if sheet_title == "individuals" else None,
                         household=obj_to_create if sheet_title == "households" else None,
                         is_field_required=current_field.get("required", False),
-                        field=current_field,
                     )
                     if value is not None:
                         setattr(
@@ -223,10 +222,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             },
         }
         complex_fields["individuals"].update(
-            {
-                f"pp_{field['xlsx_field']}": self._handle_delivery_mechanism_fields
-                for field in delivery_mechanism_xlsx_fields
-            }
+            {f"pp_{field}": self._handle_delivery_mechanism_fields for field in delivery_mechanism_xlsx_fields}
         )
         document_complex_types: Dict[str, Callable] = {}
         for document_type in DocumentType.objects.all():

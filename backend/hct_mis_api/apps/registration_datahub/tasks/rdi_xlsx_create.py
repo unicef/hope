@@ -42,7 +42,10 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualIdentity,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
+from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
+    PendingDeliveryMechanismData,
+)
 from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
@@ -74,6 +77,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self.collectors = defaultdict(list)
         self.bank_accounts = defaultdict(dict)
         self.delivery_mechanisms_data = defaultdict(dict)
+        self.delivery_mechanisms_required_fields_map = (
+            DeliveryMechanism.get_delivery_mechanisms_to_xlsx_fields_mapping()
+        )
+        self.available_delivery_mechanisms = DeliveryMechanism.objects.filter(is_active=True).in_bulk(field_name="code")
         super().__init__()
 
     def _handle_collect_individual_data(
@@ -118,21 +125,22 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         header: str,
         row_num: int,
         individual: PendingIndividual,
-        field: Dict[str, Any],
         *args: Any,
         **kwargs: Any,
     ) -> None:
         if value is None:
             return
 
-        name = header.replace("_i_c", "").replace("pp_", "")
+        name = header.replace("pp_", "")
 
         self.delivery_mechanisms_data[f"individual_{row_num}"]["individual"] = individual
-        for delivery_mechanism in field.get("delivery_mechanisms", []):
-            if delivery_mechanism not in self.delivery_mechanisms_data[f"individual_{row_num}"]:
-                self.delivery_mechanisms_data[f"individual_{row_num}"][delivery_mechanism] = {name: value}
-            else:
-                self.delivery_mechanisms_data[f"individual_{row_num}"][delivery_mechanism].update({name: value})
+        for delivery_mechanism, required_fields in self.delivery_mechanisms_required_fields_map.items():
+            if name in required_fields:
+                name = name.replace("_i_c", "")
+                if delivery_mechanism not in self.delivery_mechanisms_data[f"individual_{row_num}"]:
+                    self.delivery_mechanisms_data[f"individual_{row_num}"][delivery_mechanism] = {name: value}
+                else:
+                    self.delivery_mechanisms_data[f"individual_{row_num}"][delivery_mechanism].update({name: value})
 
     def _handle_document_fields(
         self,
@@ -400,7 +408,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 imported_delivery_mechanism_data.append(
                     PendingDeliveryMechanismData(
                         individual=individual,
-                        delivery_mechanism=delivery_type,
+                        delivery_mechanism=self.available_delivery_mechanisms[delivery_type],
                         data=json.dumps(values, cls=DjangoJSONEncoder),
                         rdi_merge_status=MergeStatusModel.PENDING,
                     )
@@ -502,7 +510,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             },
         }
         complex_fields["individuals"].update(
-            {field["xlsx_field"]: self._handle_delivery_mechanism_fields for field in delivery_mechanism_xlsx_fields}
+            {field: self._handle_delivery_mechanism_fields for field in delivery_mechanism_xlsx_fields}
         )
         document_complex_types: Dict[str, Callable] = {}
         for document_type in DocumentType.objects.all():
@@ -589,7 +597,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                 individual=obj_to_create if sheet_title == "individuals" else None,
                                 household=obj_to_create if sheet_title == "households" else None,
                                 is_field_required=current_field.get("required", False),
-                                field=current_field,
                             )
                             if value is not None:
                                 setattr(
