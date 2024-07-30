@@ -198,6 +198,26 @@ class TestAreaViews:
         response_json_2 = response_level_2.json()["results"]
         assert len(response_json_2) == 2
 
+    def test_list_areas_search_by_name(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GEO_VIEW_LIST],
+            self.afghanistan,
+        )
+
+        response = self.client.get(self.url_list, {"name": "Area 1"})
+        assert response.status_code == status.HTTP_200_OK
+
+        response_json_1 = response.json()["results"]
+        assert len(response_json_1) == 3
+
     def test_list_areas_caching(
         self,
         api_client: Callable,

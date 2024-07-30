@@ -37,21 +37,25 @@ class TestTargetPopulationViews:
             business_area=self.afghanistan,
             program=self.program1,
             status=TargetPopulation.STATUS_OPEN,
+            name="Test TP 1",
         )
         self.tp2 = TargetPopulationFactory(
             business_area=self.afghanistan,
             program=self.program1,
             status=TargetPopulation.STATUS_LOCKED,
+            name="Test TP 2",
         )
         self.tp3 = TargetPopulationFactory(
             business_area=self.afghanistan,
             program=self.program1,
             status=TargetPopulation.STATUS_ASSIGNED,
+            name="Test 3 TP",
         )
         self.tp_program2 = TargetPopulationFactory(
             business_area=self.afghanistan,
             program=self.program2,
             status=TargetPopulation.STATUS_ASSIGNED,
+            name="Test TP Program 2",
         )
 
         self.url_list = reverse(
@@ -158,6 +162,46 @@ class TestTargetPopulationViews:
             "status": self.tp1.get_status_display(),
             "created_at": "2022-01-01T00:00:00Z",
         } not in response_json
+
+    def test_list_target_populations_filter(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.TARGETING_VIEW_LIST],
+            self.afghanistan,
+            self.program1,
+        )
+        response = self.client.get(self.url_list, {"status": TargetPopulation.STATUS_OPEN})
+        assert response.status_code == status.HTTP_200_OK
+
+        response_json = response.json()["results"]
+        assert len(response_json) == 1
+
+    def test_list_target_populations_search_by_name(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.TARGETING_VIEW_LIST],
+            self.afghanistan,
+            self.program1,
+        )
+        response = self.client.get(self.url_list, {"name": "Test TP"})
+        assert response.status_code == status.HTTP_200_OK
+
+        response_json = response.json()["results"]
+        assert len(response_json) == 2
 
     def test_list_target_populations_caching(
         self,

@@ -37,21 +37,25 @@ class TestRegistrationDataImportViews:
             business_area=self.afghanistan,
             program=self.program1,
             status=RegistrationDataImport.IMPORTING,
+            name="RDI A 1",
         )
         self.rdi2 = RegistrationDataImportFactory(
             business_area=self.afghanistan,
             program=self.program1,
             status=RegistrationDataImport.IN_REVIEW,
+            name="RDI A 2",
         )
         self.rdi3 = RegistrationDataImportFactory(
             business_area=self.afghanistan,
             program=self.program1,
             status=RegistrationDataImport.MERGED,
+            name="RDI B 1",
         )
         self.rdi_program2 = RegistrationDataImportFactory(
             business_area=self.afghanistan,
             program=self.program2,
             status=RegistrationDataImport.MERGED,
+            name="RDI Program 2",
         )
 
         self.url_list = reverse(
@@ -163,6 +167,46 @@ class TestRegistrationDataImportViews:
             "data_source": self.rdi1.get_data_source_display(),
             "created_at": "2022-01-01T00:00:00Z",
         } not in response_json
+
+    def test_list_registration_data_imports_filter(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.RDI_VIEW_LIST],
+            self.afghanistan,
+            self.program1,
+        )
+        response = self.client.get(self.url_list, {"status": RegistrationDataImport.MERGED})
+        assert response.status_code == status.HTTP_200_OK
+
+        response_json = response.json()["results"]
+        assert len(response_json) == 1
+
+    def test_list_registration_data_imports_search_by_name(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.RDI_VIEW_LIST],
+            self.afghanistan,
+            self.program1,
+        )
+        response = self.client.get(self.url_list, {"name": "RDI A"})
+        assert response.status_code == status.HTTP_200_OK
+
+        response_json = response.json()["results"]
+        assert len(response_json) == 2
 
     def test_list_registration_data_imports_caching(
         self,
