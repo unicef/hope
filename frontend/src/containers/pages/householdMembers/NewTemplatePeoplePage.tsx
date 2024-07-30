@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 
-export const NewTemplatePage = (): React.ReactElement => {
+export const NewTemplatePeoplePage = (): React.ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { baseUrl, businessArea, programId } = useBaseUrl();
