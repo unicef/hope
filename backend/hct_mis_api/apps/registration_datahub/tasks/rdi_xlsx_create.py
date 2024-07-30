@@ -6,7 +6,7 @@ from collections import defaultdict
 from datetime import date, datetime
 from functools import cached_property, partial
 from io import BytesIO
-from typing import Any, Callable, Dict, Generator, Optional, Union
+from typing import Any, Callable, Dict, Optional, Union
 
 from django.contrib.gis.geos import Point
 from django.core.files import File
@@ -87,10 +87,12 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         super().__init__()
 
     @cached_property
-    def _pdu_column_names(self) -> Generator[str, None, None]:
+    def _pdu_column_names(self) -> list[str]:
+        list_of_pdu_column_names = []
         for flexible_attribute in self.pdu_flexible_attributes:
-            yield f"{flexible_attribute.name}_round_1_value"
-            yield f"{flexible_attribute.name}_round_1_collection_date"
+            list_of_pdu_column_names.append(f"{flexible_attribute.name}_round_1_value")
+            list_of_pdu_column_names.append(f"{flexible_attribute.name}_round_1_collection_date")
+        return list_of_pdu_column_names
 
     def _handle_collect_individual_data(
         self,
