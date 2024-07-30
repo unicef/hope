@@ -18,7 +18,7 @@ from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 class ProgramCycleAPITestCase(HOPEApiTestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         super().setUpTestData()
         user_permissions = [
             Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
@@ -92,7 +92,7 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
             "title": "New Created Cycle",
             "start_date": "2024-01-10",
         }
-        response = self.client.post(self.url, data, format="json")
+        response = self.client.post(self.list_url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(ProgramCycle.objects.count(), 4)
         self.assertEqual(ProgramCycle.objects.last().title, "New Created Cycle")
