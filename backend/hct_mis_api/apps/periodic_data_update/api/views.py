@@ -173,7 +173,7 @@ class PeriodicDataUpdateUploadViewSet(
                 status=status.HTTP_202_ACCEPTED,
             )
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # pragma: no cover
 
 
 class PeriodicFieldViewSet(
