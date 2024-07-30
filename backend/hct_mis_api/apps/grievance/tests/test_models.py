@@ -193,22 +193,21 @@ class TestDeliveryMechanismDataModel(TestCase):
 
     def test_get_all_delivery_mechanisms_xlsx_fields(self) -> None:
         fields = DeliveryMechanismData.get_all_delivery_mechanisms_fields()
-        print(fields)
         self.assertEqual(
             fields,
             [
-                "card_expiry_date_atm_card",
                 "card_number_atm_card",
-                "delivery_phone_number_mobile_money",
-                "bank_account_number_transfer_to_account",
-                "bank_name_transfer_to_account",
-                "mobile_phone_number_cash_over_the_counter",
-                "provider_mobile_money",
-                "wallet_address_transfer_to_digital_wallet",
-                "card_number_deposit_to_card",
-                "wallet_name_transfer_to_digital_wallet",
+                "card_expiry_date_atm_card",
                 "name_of_cardholder_atm_card",
+                "mobile_phone_number_cash_over_the_counter",
+                "card_number_deposit_to_card",
+                "delivery_phone_number_mobile_money",
+                "provider_mobile_money",
+                "bank_name_transfer_to_account",
+                "bank_account_number_transfer_to_account",
                 "blockchain_name_transfer_to_digital_wallet",
+                "wallet_address_transfer_to_digital_wallet",
+                "wallet_name_transfer_to_digital_wallet",
             ],
         )
 

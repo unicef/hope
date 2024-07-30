@@ -2327,14 +2327,14 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
 
     @classmethod
     def get_all_delivery_mechanisms_fields(cls, by_xlsx_name: bool = False) -> List[str]:
-        fields = set()
+        fields = []
         for dm in DeliveryMechanism.objects.filter(is_active=True):
-            fields.update(dm.all_dm_fields)
+            fields.extend([f for f in dm.all_dm_fields if f not in fields])
 
         if by_xlsx_name:
             return [f"{field}_i_c" for field in fields]
 
-        return list(fields)
+        return fields
 
     @classmethod
     def get_scope_delivery_mechanisms_fields(cls, by: str = "name") -> List[dict]:

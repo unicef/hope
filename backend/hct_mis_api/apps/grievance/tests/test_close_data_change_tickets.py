@@ -741,7 +741,7 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
                 "delivery_mechanism_data_to_edit": [
                     {
                         "id": str(dmd.id),
-                        "label": self.dm_atm_card.name,  # TODO MB code?
+                        "label": self.dm_atm_card.name,
                         "approve_status": True,
                         "data_fields": [
                             {"name": "name_of_cardholder_atm_card", "value": "Marek"},
@@ -752,7 +752,7 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
             },
         )
 
-        self.graphql_request(
+        response = self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
@@ -760,6 +760,8 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
         )
+        assert "errors" not in response, response["errors"]
+
         individual = self.individuals[0]
         individual.refresh_from_db()
         self.assertEqual(individual.full_name, "MarekMarek")
