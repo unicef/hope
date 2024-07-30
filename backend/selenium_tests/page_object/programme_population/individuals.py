@@ -47,6 +47,7 @@ class Individuals(BaseComponents):
     downloadBtn = 'button[data-cy="download-btn-{}"]'
     exportBtn = 'button[data-cy="export-btn-{}"]'
     pduUpdates = 'button[data-cy="pdu-updates"]'
+    statusContainer = '[data-cy="status-container"]'
     pduFormErrors = 'div[data-cy="pdu-form-errors"]'
     pduUploadError = 'div[data-cy="pdu-upload-error"]'
 
@@ -165,6 +166,9 @@ class Individuals(BaseComponents):
 
     def getPduUpdates(self) -> WebElement:
         return self.wait_for(self.pduUpdates)
+
+    def getStatusContainer(self) -> WebElement:
+        return self.wait_for(self.statusContainer)
 
     def getPduFormErrors(self) -> WebElement:
         return self.wait_for(self.pduFormErrors)

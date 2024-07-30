@@ -1,9 +1,9 @@
+import os
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 from typing import Any
 
 import openpyxl
 import pytest
-from flaky import flaky
 from page_object.programme_population.periodic_data_update_templates import (
     PeriodicDatUpdateTemplates,
 )
@@ -32,6 +32,13 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 from selenium_tests.page_object.programme_population.individuals import Individuals
 
 pytestmark = pytest.mark.django_db(transaction=True)
+
+
+@pytest.fixture
+def clear_downloaded_files() -> None:
+    yield
+    for file in os.listdir("./report/downloads/"):
+        os.remove(os.path.join("./report/downloads", file))
 
 
 @pytest.fixture
@@ -130,9 +137,10 @@ def prepare_xlsx_file(rounds_data: list, rows: list, program: Program) -> _Tempo
 
 @pytest.mark.usefixtures("login")
 class TestPeriodicDataUpdateUpload:
-    @flaky(max_runs=5, min_passes=1)
+    # @flaky(max_runs=5, min_passes=1)
     def test_periodic_data_update_upload_success(
         self,
+        clear_downloaded_files: None,
         program: Program,
         individual: Individual,
         string_attribute: FlexibleAttribute,
@@ -157,6 +165,7 @@ class TestPeriodicDataUpdateUpload:
         pageIndividuals.getTabPeriodicDataUpdates().click()
         pageIndividuals.getButtonImport().click()
         pageIndividuals.getDialogImport()
+        assert "IMPORT" in pageIndividuals.getButtonImportSubmit().text
         pageIndividuals.upload_file(tmp_file.name)
         pageIndividuals.getButtonImportSubmit().click()
         pageIndividuals.getPduUpdates().click()
@@ -168,9 +177,10 @@ class TestPeriodicDataUpdateUpload:
         assert individual.flex_fields[flexible_attribute.name]["1"]["collection_date"] == "2021-05-02"
         assert pageIndividuals.getUpdateStatus(periodic_data_update_upload.pk).text == "SUCCESSFUL"
 
-    @flaky(max_runs=5, min_passes=1)
+    # @flaky(max_runs=5, min_passes=1)
     def test_periodic_data_update_upload_form_error(
         self,
+        clear_downloaded_files: None,
         program: Program,
         individual: Individual,
         date_attribute: FlexibleAttribute,
@@ -198,8 +208,10 @@ class TestPeriodicDataUpdateUpload:
         pageIndividuals.upload_file(tmp_file.name)
         pageIndividuals.getButtonImportSubmit().click()
         pageIndividuals.getPduUpdates().click()
+        pageIndividuals.getStatusContainer()
         periodic_data_update_upload = PeriodicDataUpdateUpload.objects.first()
         assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.FAILED
+        assert pageIndividuals.getStatusContainer().text == "FAILED"
         assert pageIndividuals.getUpdateStatus(periodic_data_update_upload.pk).text == "FAILED"
         pageIndividuals.getUpdateDetailsBtn(periodic_data_update_upload.pk).click()
         error_text = "Row: 2\nTest String Attribute__round_value\nEnter a valid date."
@@ -207,6 +219,7 @@ class TestPeriodicDataUpdateUpload:
 
     def test_periodic_data_update_upload_error(
         self,
+        clear_downloaded_files: None,
         program: Program,
         individual: Individual,
         string_attribute: FlexibleAttribute,
@@ -243,12 +256,12 @@ class TestPeriodicDataUpdateUpload:
             pageIndividuals.getDialogImport()
             pageIndividuals.upload_file(tmp_file.name)
             pageIndividuals.getButtonImportSubmit().click()
-            pageIndividuals.screenshot("upload_error")
             error_text = pageIndividuals.getPduUploadError().text
             assert error_text == "Periodic Data Update Template with ID -1 not found"
 
     def test_periodic_data_uploads_list(
         self,
+        clear_downloaded_files: None,
         program: Program,
         string_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,

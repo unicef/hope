@@ -493,7 +493,6 @@ class TestBusinessAreas:
         programme_name.click()
         programme_name.send_keys(Keys.CONTROL + "a")
         programme_name.send_keys(Keys.DELETE)
-        pageProgrammeManagement.screenshot("your name")
         programme_name.send_keys("New Programme")
 
         pageProgrammeManagement.getButtonNext().click()
