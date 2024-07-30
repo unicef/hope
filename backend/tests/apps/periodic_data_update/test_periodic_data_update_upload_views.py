@@ -2,6 +2,8 @@ import json
 from typing import Callable
 
 from django.core.cache import cache
+from django.core.files import File
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
@@ -285,7 +287,16 @@ class TestPeriodicDataUpdateUploadViews:
         service.save_xlsx_file()
         tmp_file = add_pdu_data_to_xlsx(pdu_template, rows)
 
-        response = self.client.post(self.url_upload, file=tmp_file.file)
+        file = File(tmp_file)
+        with open(file.name, "rb") as f:  # type: ignore
+            simple_file = SimpleUploadedFile(
+                "file.xlsx",
+                f.read(),
+                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            )
+        response = self.client.post(self.url_upload, {"file": simple_file}, format="multipart")
+        file.close()
+
         assert response.status_code == expected_status
 
     def test_upload_periodic_data_update_upload(
@@ -344,7 +355,16 @@ class TestPeriodicDataUpdateUploadViews:
         service.save_xlsx_file()
         tmp_file = add_pdu_data_to_xlsx(pdu_template, rows)
 
-        response = self.client.post(self.url_upload, file=tmp_file.file)
+        file = File(tmp_file)
+        with open(file.name, "rb") as f:  # type: ignore
+            simple_file = SimpleUploadedFile(
+                "file.xlsx",
+                f.read(),
+                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            )
+        response = self.client.post(self.url_upload, {"file": simple_file}, format="multipart")
+        file.close()
+
         assert response.status_code == status.HTTP_202_ACCEPTED
 
         individual.refresh_from_db()
