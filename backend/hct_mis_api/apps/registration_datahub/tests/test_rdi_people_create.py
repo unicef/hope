@@ -20,6 +20,7 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
+from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
 from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -58,6 +59,7 @@ class TestRdiXlsxPeople(BaseElasticSearchTestCase):
         cls.registration_data_import = RegistrationDataImportFactory(
             business_area=cls.business_area, program=cls.program, import_data=cls.import_data
         )
+        generate_delivery_mechanisms()
 
         super().setUpTestData()
 

@@ -163,7 +163,6 @@ class TestDeliveryMechanismDataModel(TestCase):
 
     def test_delivery_mechanism_fields(self) -> None:
         dmd = DeliveryMechanismDataFactory(individual=self.ind, delivery_mechanism=self.dm_atm_card)
-        print(dmd.all_fields)
         self.assertEqual(
             dmd.all_fields,
             ["card_number_atm_card", "card_expiry_date_atm_card", "name_of_cardholder_atm_card", "full_name"],

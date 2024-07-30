@@ -40,6 +40,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualIdentity,
 )
+from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
 from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -122,6 +123,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             label="Tax Number Identification",
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
         )
+        generate_delivery_mechanisms()
         super().setUpTestData()
 
     def test_execute_xd(self) -> None:
