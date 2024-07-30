@@ -1,3 +1,4 @@
+import os
 from time import sleep
 
 import pytest
@@ -20,6 +21,13 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 from selenium_tests.page_object.programme_population.individuals import Individuals
 
 pytestmark = pytest.mark.django_db(transaction=True)
+
+
+@pytest.fixture
+def clear_downloaded_files() -> None:
+    yield
+    for file in os.listdir("./report/downloads/"):
+        os.remove(os.path.join("./report/downloads", file))
 
 
 @pytest.fixture
@@ -90,6 +98,7 @@ class TestPeriodicDataTemplates:
         string_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,
         individual: Individual,
+        clear_downloaded_files: None,
     ) -> None:
         periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
             program=program,
