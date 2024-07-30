@@ -101,6 +101,8 @@ class NewTicket(BaseComponents):
     inputIndividualdataWhoanswersaltphone = 'input[data-cy="input-individualData.whoAnswersAltPhone"]'
     inputIndividualdataWhoanswersphone = 'input[data-cy="input-individualData.whoAnswersPhone"]'
     inputIndividualdataBlockchainName = 'input[data-cy="input-individualData.blockchainName"]'
+    selectHouseholddataupdatefieldsFieldname = 'div[data-cy="select-householdDataUpdateFields[{}].fieldName"]'
+    buttonAddNewField = 'button[data-cy="button-add-new-field"]'
 
     # Texts
     textLookUpHousehold = "LOOK UP HOUSEHOLD"
@@ -421,3 +423,10 @@ class NewTicket(BaseComponents):
 
     def getInputIndividualdataWhoanswersphone(self) -> WebElement:
         return self.wait_for(self.inputIndividualdataWhoanswersphone)
+
+    def getButtonAddNewField(self) -> WebElement:
+        return self.wait_for(self.buttonAddNewField)
+
+    def getSelectHouseholddataupdatefieldsFieldname(self, index: int) -> WebElement:
+        field = self.wait_for(self.selectHouseholddataupdatefieldsFieldname.format(index))
+        return field.find_element(By.XPATH, "./..")

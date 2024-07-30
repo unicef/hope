@@ -589,17 +589,29 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getHouseholdTab()
         pageGrievanceNewTicket.getHouseholdTableRows(0).click()
+        if "Individual Data Update" in test_data["type"]:
+            pageGrievanceNewTicket.getIndividualTab().click()
+            pageGrievanceNewTicket.getIndividualTableRows(0).click()
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getReceivedConsent().click()
         pageGrievanceNewTicket.getButtonNext().click()
 
         pageGrievanceNewTicket.getDescription().send_keys("Add Individual - TEST")
-
+        pageGrievanceNewTicket.getButtonAddNewField()
+        pageGrievanceNewTicket.driver.execute_script(
+            """
+            container = document.querySelector("div[data-cy='main-content']")
+            container.scrollBy(0,600)
+            """
+        )
+        sleep(2)
         pageGrievanceNewTicket.screenshot("1")
         from selenium_tests.tools.tag_name_finder import printing
         printing("Mapping", pageGrievanceNewTicket.driver)
         printing("Methods", pageGrievanceNewTicket.driver)
         printing("Assert", pageGrievanceNewTicket.driver, page_object_str="pageGrievanceNewTicket")
+
+        pageGrievanceNewTicket.getSelectHouseholddataupdatefieldsFieldname(0).click()
 
     def test_grievance_tickets_create_new_tickets_Grievance_Complaint_Partner_Related_Complaint(self,
                                                                                                 pageGrievanceTickets: GrievanceTickets,
