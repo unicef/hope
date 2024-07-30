@@ -780,7 +780,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             self.pdu_flexible_attributes = FlexibleAttribute.objects.filter(
                 type=FlexibleAttribute.PDU, program=self.program
             ).select_related("pdu_data")
-
             import_data = ImportData.objects.get(id=import_data_id)
 
             self.business_area = BusinessArea.objects.get(id=business_area_id)
