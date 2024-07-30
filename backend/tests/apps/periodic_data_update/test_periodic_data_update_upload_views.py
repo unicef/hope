@@ -1,12 +1,9 @@
 import json
 from typing import Callable
 
-from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
-from django.core.files.base import ContentFile
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
-from django.utils import timezone
 
 import freezegun
 import pytest
@@ -23,7 +20,7 @@ from hct_mis_api.apps.core.fixtures import (
     FlexibleAttributeForPDUFactory,
     PeriodicFieldDataFactory,
 )
-from hct_mis_api.apps.core.models import FileTemp, PeriodicFieldData
+from hct_mis_api.apps.core.models import PeriodicFieldData
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.periodic_data_update.fixtures import (
     PeriodicDataUpdateTemplateFactory,
@@ -248,14 +245,47 @@ class TestPeriodicDataUpdateUploadViews:
         if access_to_program:
             update_partner_access_to_program(self.partner, self.program1)
 
-        file = FileTemp.objects.create(
-            object_id=self.pdu_upload1_program1.pk,
-            content_type=get_content_type_for_model(self.pdu_upload1_program1),
-            created=timezone.now(),
-            file=ContentFile(b"Test content", f"Test File {self.pdu_upload1_program1.pk}.xlsx"),
+        create_household_and_individuals(
+            household_data={
+                "business_area": self.afghanistan,
+                "program_id": self.program1.pk,
+            },
+            individuals_data=[
+                {
+                    "business_area": self.afghanistan,
+                    "program_id": self.program1.pk,
+                },
+            ],
         )
+        pdu_data = PeriodicFieldDataFactory(
+            subtype=PeriodicFieldData.STRING,
+            number_of_rounds=1,
+            rounds_names=["January"],
+        )
+        pdu_field = FlexibleAttributeForPDUFactory(
+            program=self.program1,
+            name="PDU Field",
+            pdu_data=pdu_data,
+        )
+        pdu_template = PeriodicDataUpdateTemplateFactory(
+            program=self.program1,
+            rounds_data=[
+                {
+                    "field": pdu_field.name,
+                    "round": 1,
+                    "round_name": pdu_field.pdu_data.rounds_names[0],
+                    "number_of_records": 1,
+                }
+            ],
+        )
+        rows = [["Positive", "2024-07-20"]]
 
-        response = self.client.post(self.url_upload, file=file.file)
+        service = PeriodicDataUpdateExportTemplateService(pdu_template)
+        service.generate_workbook()
+        service.save_xlsx_file()
+        tmp_file = add_pdu_data_to_xlsx(pdu_template, rows)
+
+        response = self.client.post(self.url_upload, file=tmp_file.file)
         assert response.status_code == expected_status
 
     def test_upload_periodic_data_update_upload(
@@ -307,7 +337,7 @@ class TestPeriodicDataUpdateUploadViews:
                 }
             ],
         )
-        rows = ([["Positive", "2024-07-20"]],)
+        rows = [["Positive", "2024-07-20"]]
 
         service = PeriodicDataUpdateExportTemplateService(pdu_template)
         service.generate_workbook()
