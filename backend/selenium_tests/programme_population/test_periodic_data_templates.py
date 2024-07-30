@@ -1,3 +1,6 @@
+import os
+from time import sleep
+
 import pytest
 from page_object.programme_population.periodic_data_update_templates import (
     PeriodicDatUpdateTemplates,
@@ -18,6 +21,13 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 from selenium_tests.page_object.programme_population.individuals import Individuals
 
 pytestmark = pytest.mark.django_db(transaction=True)
+
+
+@pytest.fixture
+def clear_downloaded_files() -> None:
+    yield
+    for file in os.listdir("./report/downloads/"):
+        os.remove(os.path.join("./report/downloads", file))
 
 
 @pytest.fixture
@@ -88,6 +98,7 @@ class TestPeriodicDataTemplates:
         string_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,
         individual: Individual,
+        clear_downloaded_files: None,
     ) -> None:
         periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
             program=program,
@@ -110,8 +121,13 @@ class TestPeriodicDataTemplates:
         status = pageIndividuals.getTemplateStatus(periodic_data_update_template.pk).text
         assert status == "NOT SCHEDULED"
         pageIndividuals.getExportBtn(periodic_data_update_template.pk).click()
-        status = pageIndividuals.getTemplateStatus(periodic_data_update_template.pk).text
-        assert status == "EXPORTED"
+        for _ in range(10):
+            status = pageIndividuals.getTemplateStatus(periodic_data_update_template.pk).text
+            if status == "EXPORTED":
+                break
+            sleep(1)
+        else:
+            assert status == "EXPORTED"
         pageIndividuals.getDownloadBtn(periodic_data_update_template.pk).click()
         periodic_data_update_template.refresh_from_db()
         assert (

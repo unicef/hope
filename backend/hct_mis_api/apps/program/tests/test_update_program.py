@@ -765,3 +765,163 @@ class TestUpdateProgram(APITestCase):
                 "version": self.program.version,
             },
         )
+
+    def test_update_program_with_pdu_fields_duplicated_field_names_in_input(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        # pdu data with duplicated field names in the input
+        update_data = {
+            "programData": {
+                "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                "name": "Program with Updated PDU Fields",
+                "pduFields": [
+                    {
+                        "id": self.id_to_base64(self.pdu_field_to_be_preserved.id, "PeriodicFieldNode"),
+                        "name": "PDU Field To Be Preserved",
+                        "pduData": {
+                            "subtype": "DATE",
+                            "numberOfRounds": 1,
+                            "roundsNames": ["Round To Be Preserved"],
+                        },
+                    },
+                    {
+                        "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
+                        "name": "PDU Field 1",
+                        "pduData": {
+                            "subtype": "BOOLEAN",
+                            "numberOfRounds": 3,
+                            "roundsNames": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                        },
+                    },
+                    {
+                        "name": "PDU Field 1",
+                        "pduData": {
+                            "subtype": "BOOLEAN",
+                            "numberOfRounds": 4,
+                            "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
+                        },
+                    },
+                ],
+            }
+        }
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                **update_data,
+                "version": self.program.version,
+            },
+        )
+
+    def test_update_program_with_pdu_fields_existing_field_name_for_new_field(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        # pdu data with NEW field with name that already exists in the database
+        pdu_data = PeriodicFieldDataFactory(
+            subtype=PeriodicFieldData.DATE,
+            number_of_rounds=1,
+            rounds_names=["Round 1"],
+        )
+        program = ProgramFactory(business_area=self.business_area, name="Test Program 1")
+        FlexibleAttributeForPDUFactory(
+            program=program,
+            name="PDU Field 1",
+            pdu_data=pdu_data,
+        )
+        update_data = {
+            "programData": {
+                "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                "name": "Program with Updated PDU Fields",
+                "pduFields": [
+                    {
+                        "id": self.id_to_base64(self.pdu_field_to_be_preserved.id, "PeriodicFieldNode"),
+                        "name": "PDU Field To Be Preserved",
+                        "pduData": {
+                            "subtype": "DATE",
+                            "numberOfRounds": 1,
+                            "roundsNames": ["Round To Be Preserved"],
+                        },
+                    },
+                    {
+                        "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
+                        "name": "PDU Field - Updated",
+                        "pduData": {
+                            "subtype": "BOOLEAN",
+                            "numberOfRounds": 3,
+                            "roundsNames": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                        },
+                    },
+                    {
+                        "name": "PDU Field 1",
+                        "pduData": {
+                            "subtype": "BOOLEAN",
+                            "numberOfRounds": 4,
+                            "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
+                        },
+                    },
+                ],
+            }
+        }
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                **update_data,
+                "version": self.program.version,
+            },
+        )
+
+    def test_update_program_with_pdu_fields_existing_field_name_for_updated_field(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        # pdu data with UPDATED field with name that already exists in the database
+        pdu_data = PeriodicFieldDataFactory(
+            subtype=PeriodicFieldData.DATE,
+            number_of_rounds=1,
+            rounds_names=["Round 1"],
+        )
+        program = ProgramFactory(business_area=self.business_area, name="Test Program 1")
+        FlexibleAttributeForPDUFactory(
+            program=program,
+            name="PDU Field 1",
+            pdu_data=pdu_data,
+        )
+        update_data = {
+            "programData": {
+                "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                "name": "Program with Updated PDU Fields",
+                "pduFields": [
+                    {
+                        "id": self.id_to_base64(self.pdu_field_to_be_preserved.id, "PeriodicFieldNode"),
+                        "name": "PDU Field To Be Preserved",
+                        "pduData": {
+                            "subtype": "DATE",
+                            "numberOfRounds": 1,
+                            "roundsNames": ["Round To Be Preserved"],
+                        },
+                    },
+                    {
+                        "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
+                        "name": "PDU Field 1",
+                        "pduData": {
+                            "subtype": "BOOLEAN",
+                            "numberOfRounds": 3,
+                            "roundsNames": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                        },
+                    },
+                    {
+                        "name": "PDU Field - New",
+                        "pduData": {
+                            "subtype": "BOOLEAN",
+                            "numberOfRounds": 4,
+                            "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
+                        },
+                    },
+                ],
+            }
+        }
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                **update_data,
+                "version": self.program.version,
+            },
+        )

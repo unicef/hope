@@ -836,6 +836,66 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 3'] = {
     }
 }
 
+snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_duplicated_field_names_in_input 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Time Series Field names must be unique.',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field_name_for_new_field 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['Time Series Field with name PDU Field 1 already exists.']",
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field_name_for_updated_field 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['Time Series Field with name PDU Field 1 already exists.']",
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
 snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_invalid_data 1'] = {
     'data': {
         'updateProgram': None

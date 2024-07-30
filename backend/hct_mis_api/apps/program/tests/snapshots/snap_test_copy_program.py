@@ -330,6 +330,66 @@ snapshots['TestCopyProgram::test_copy_program_with_pdu_fields 1'] = {
     }
 }
 
+snapshots['TestCopyProgram::test_copy_program_with_pdu_fields_duplicated_field_names_in_input 1'] = {
+    'data': {
+        'copyProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Time Series Field names must be unique.',
+            'path': [
+                'copyProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestCopyProgram::test_copy_program_with_pdu_fields_existing_field_name 1'] = {
+    'data': {
+        'copyProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['Time Series Field with name PDU Field 1 already exists.']",
+            'path': [
+                'copyProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestCopyProgram::test_copy_program_with_pdu_fields_invalid_data 1'] = {
+    'data': {
+        'copyProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Number of rounds does not match the number of round names',
+            'path': [
+                'copyProgram'
+            ]
+        }
+    ]
+}
+
 snapshots['TestCopyProgram::test_copy_program_without_permissions 1'] = {
     'data': {
         'copyProgram': None
@@ -385,24 +445,4 @@ snapshots['TestCopyProgram::test_copy_with_permissions 1'] = {
             'validationErrors': None
         }
     }
-}
-
-snapshots['TestCopyProgram::test_create_program_with_pdu_fields_invalid_data 1'] = {
-    'data': {
-        'copyProgram': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': 'Number of rounds does not match the number of round names',
-            'path': [
-                'copyProgram'
-            ]
-        }
-    ]
 }

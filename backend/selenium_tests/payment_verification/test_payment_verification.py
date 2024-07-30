@@ -261,7 +261,12 @@ class TestSmokePaymentVerification:
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
         assert "Payment Plan" in pagePaymentVerificationDetails.getPageHeaderTitle().text
-        assert "FINISHED" in pagePaymentVerificationDetails.getLabelStatus().text
+        for _ in range(5):
+            if "FINISHED" in pagePaymentVerificationDetails.getLabelStatus().text:
+                break
+            sleep(1)
+        else:
+            raise AssertionError(f"Error: FINISHED in {pagePaymentVerificationDetails.getLabelStatus().text}")
         assert "FINISHED" in pagePaymentVerificationDetails.getVerificationPlanStatus().text
         assert "100%" in pagePaymentVerificationDetails.getLabelSuccessful().text
 

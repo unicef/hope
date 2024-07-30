@@ -75,7 +75,6 @@ export const uploadPeriodicDataUpdateTemplate = async (
     `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-uploads/upload/`,
     formData,
   );
-  console.log('response', response);
   return response;
 };
 
@@ -86,6 +85,34 @@ export const fetchPeriodicDataUpdateUploadDetails = async (
 ) => {
   const response = await api.get(
     `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-uploads/${uploadId}/`,
+  );
+  return response;
+};
+
+export const createPeriodicDataUpdateTemplate = async (
+  businessAreaSlug: string,
+  programId: string,
+  roundsData: string,
+  filters: string,
+) => {
+  const payload = {
+    rounds_data: roundsData,
+    filters: filters,
+  };
+
+  const response = await api.post(
+    `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/`,
+    payload,
+  );
+  return response;
+};
+
+export const fetchPeriodicFields = async (
+  businessAreaSlug: string,
+  programId: string,
+): Promise<any> => {
+  const response = await api.get(
+    `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-fields/`,
   );
   return response;
 };

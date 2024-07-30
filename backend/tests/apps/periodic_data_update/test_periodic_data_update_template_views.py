@@ -1,9 +1,12 @@
 import json
 from typing import Callable
 
+from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
+from django.core.files.base import ContentFile
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
+from django.utils import timezone
 
 import freezegun
 import pytest
@@ -16,6 +19,7 @@ from hct_mis_api.apps.account.fixtures import (
     UserFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.periodic_data_update.fixtures import (
     PeriodicDataUpdateTemplateFactory,
 )
@@ -74,6 +78,38 @@ class TestPeriodicDataUpdateTemplateViews:
             kwargs={
                 "business_area": self.afghanistan.slug,
                 "program_id": id_to_base64(self.program2.id, "Program"),
+            },
+        )
+        self.url_export_pdu_template_program1 = reverse(
+            "api:periodic-data-update:periodic-data-update-templates-export",
+            kwargs={
+                "business_area": self.afghanistan.slug,
+                "program_id": id_to_base64(self.program1.id, "Program"),
+                "pk": self.pdu_template1.id,
+            },
+        )
+        self.url_export_pdu_template_program2 = reverse(
+            "api:periodic-data-update:periodic-data-update-templates-export",
+            kwargs={
+                "business_area": self.afghanistan.slug,
+                "program_id": id_to_base64(self.program2.id, "Program"),
+                "pk": self.pdu_template_program2.id,
+            },
+        )
+        self.url_download_pdu_template_program1 = reverse(
+            "api:periodic-data-update:periodic-data-update-templates-download",
+            kwargs={
+                "business_area": self.afghanistan.slug,
+                "program_id": id_to_base64(self.program1.id, "Program"),
+                "pk": self.pdu_template1.id,
+            },
+        )
+        self.url_download_pdu_template_program2 = reverse(
+            "api:periodic-data-update:periodic-data-update-templates-download",
+            kwargs={
+                "business_area": self.afghanistan.slug,
+                "program_id": id_to_base64(self.program2.id, "Program"),
+                "pk": self.pdu_template_program2.id,
             },
         )
 
@@ -457,3 +493,314 @@ class TestPeriodicDataUpdateTemplateViews:
 
         response_json = response.json()
         assert response_json == {"rounds_data": ["Each Field can only be used once in the template."]}
+
+    @pytest.mark.parametrize(
+        "permissions, partner_permissions, access_to_program, expected_status",
+        [
+            ([], [], True, status.HTTP_403_FORBIDDEN),
+            ([Permissions.PDU_TEMPLATE_CREATE], [], True, status.HTTP_200_OK),
+            ([], [Permissions.PDU_TEMPLATE_CREATE], True, status.HTTP_200_OK),
+            (
+                [Permissions.PDU_TEMPLATE_CREATE],
+                [Permissions.PDU_TEMPLATE_CREATE],
+                True,
+                status.HTTP_200_OK,
+            ),
+            ([], [], False, status.HTTP_403_FORBIDDEN),
+            ([Permissions.PDU_TEMPLATE_CREATE], [], False, status.HTTP_403_FORBIDDEN),
+            ([], [Permissions.PDU_TEMPLATE_CREATE], False, status.HTTP_403_FORBIDDEN),
+            (
+                [Permissions.PDU_TEMPLATE_CREATE],
+                [Permissions.PDU_TEMPLATE_CREATE],
+                False,
+                status.HTTP_403_FORBIDDEN,
+            ),
+        ],
+    )
+    def test_export_periodic_data_update_template_permission(
+        self,
+        permissions: list,
+        partner_permissions: list,
+        access_to_program: bool,
+        expected_status: str,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        create_partner_role_with_permissions: Callable,
+        update_partner_access_to_program: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            permissions,
+            self.afghanistan,
+        )
+        create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
+        if access_to_program:
+            update_partner_access_to_program(self.partner, self.program1)
+
+        self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.TO_EXPORT
+        self.pdu_template1.save()
+
+        response = self.client.post(self.url_export_pdu_template_program1)
+        assert response.status_code == expected_status
+
+        # no access to Program2
+        response_forbidden = self.client.post(self.url_export_pdu_template_program2)
+        assert response_forbidden.status_code == 403
+
+    def test_export_periodic_data_update_template(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PDU_TEMPLATE_CREATE],
+            self.afghanistan,
+            self.program1,
+        )
+
+        self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.TO_EXPORT
+        self.pdu_template1.file = None
+        self.pdu_template1.save()
+
+        response = self.client.post(self.url_export_pdu_template_program1)
+        assert response.status_code == status.HTTP_200_OK
+
+        self.pdu_template1.refresh_from_db()
+        assert self.pdu_template1.status == PeriodicDataUpdateTemplate.Status.EXPORTED
+        assert self.pdu_template1.file is not None
+
+    def test_export_periodic_data_update_template_already_exporting(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PDU_TEMPLATE_CREATE],
+            self.afghanistan,
+            self.program1,
+        )
+
+        self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.EXPORTING
+        self.pdu_template1.file = None
+        self.pdu_template1.save()
+
+        response = self.client.post(self.url_export_pdu_template_program1)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+        response_json = response.json()
+        assert response_json == ["Template is already being exported"]
+
+    def test_export_periodic_data_update_template_already_exported(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PDU_TEMPLATE_CREATE],
+            self.afghanistan,
+            self.program1,
+        )
+
+        file = FileTemp.objects.create(
+            object_id=self.pdu_template1.pk,
+            content_type=get_content_type_for_model(self.pdu_template1),
+            created=timezone.now(),
+            file=ContentFile(b"Test content", f"Test File {self.pdu_template1.pk}.xlsx"),
+        )
+        self.pdu_template1.file = file
+        self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.EXPORTED
+        self.pdu_template1.save()
+
+        response = self.client.post(self.url_export_pdu_template_program1)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+        response_json = response.json()
+        assert response_json == ["Template is already exported"]
+
+    @pytest.mark.parametrize(
+        "permissions, partner_permissions, access_to_program, expected_status",
+        [
+            ([], [], True, status.HTTP_403_FORBIDDEN),
+            ([Permissions.PDU_TEMPLATE_DOWNLOAD], [], True, status.HTTP_200_OK),
+            ([], [Permissions.PDU_TEMPLATE_DOWNLOAD], True, status.HTTP_200_OK),
+            (
+                [Permissions.PDU_TEMPLATE_DOWNLOAD],
+                [Permissions.PDU_TEMPLATE_DOWNLOAD],
+                True,
+                status.HTTP_200_OK,
+            ),
+            ([], [], False, status.HTTP_403_FORBIDDEN),
+            ([Permissions.PDU_TEMPLATE_DOWNLOAD], [], False, status.HTTP_403_FORBIDDEN),
+            ([], [Permissions.PDU_TEMPLATE_DOWNLOAD], False, status.HTTP_403_FORBIDDEN),
+            (
+                [Permissions.PDU_TEMPLATE_DOWNLOAD],
+                [Permissions.PDU_TEMPLATE_DOWNLOAD],
+                False,
+                status.HTTP_403_FORBIDDEN,
+            ),
+        ],
+    )
+    def test_download_periodic_data_update_template_permission(
+        self,
+        permissions: list,
+        partner_permissions: list,
+        access_to_program: bool,
+        expected_status: str,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        create_partner_role_with_permissions: Callable,
+        update_partner_access_to_program: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            permissions,
+            self.afghanistan,
+        )
+        create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
+        if access_to_program:
+            update_partner_access_to_program(self.partner, self.program1)
+
+        self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.EXPORTED
+
+        file = FileTemp.objects.create(
+            object_id=self.pdu_template1.pk,
+            content_type=get_content_type_for_model(self.pdu_template1),
+            created=timezone.now(),
+            file=ContentFile(b"Test content", f"Test File {self.pdu_template1.pk}.xlsx"),
+        )
+        self.pdu_template1.file = file
+        self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.EXPORTED
+        self.pdu_template1.save()
+
+        response = self.client.get(self.url_download_pdu_template_program1)
+        assert response.status_code == expected_status
+
+        # no access to Program2
+        response_forbidden = self.client.get(self.url_download_pdu_template_program2)
+        assert response_forbidden.status_code == 403
+
+    def test_download_periodic_data_update_template(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PDU_TEMPLATE_DOWNLOAD],
+            self.afghanistan,
+            self.program1,
+        )
+
+        file = FileTemp.objects.create(
+            object_id=self.pdu_template1.pk,
+            content_type=get_content_type_for_model(self.pdu_template1),
+            created=timezone.now(),
+            file=ContentFile(b"Test content", f"Test File {self.pdu_template1.pk}.xlsx"),
+        )
+        self.pdu_template1.file = file
+        self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.EXPORTED
+        self.pdu_template1.save()
+
+        response = self.client.get(self.url_download_pdu_template_program1)
+        assert response.status_code == status.HTTP_200_OK
+
+        self.pdu_template1.refresh_from_db()
+        assert self.pdu_template1.status == PeriodicDataUpdateTemplate.Status.EXPORTED
+        response_json = response.json()
+        assert response_json == {"url": file.file.url}
+
+    def test_download_periodic_data_update_template_not_exported(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PDU_TEMPLATE_DOWNLOAD],
+            self.afghanistan,
+            self.program1,
+        )
+
+        self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.TO_EXPORT
+        self.pdu_template1.save()
+
+        response = self.client.get(self.url_download_pdu_template_program1)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+        response_json = response.json()
+        assert response_json == ["Template is not exported yet"]
+
+    def test_download_periodic_data_update_template_no_records(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PDU_TEMPLATE_DOWNLOAD],
+            self.afghanistan,
+            self.program1,
+        )
+
+        self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.EXPORTED
+        self.pdu_template1.number_of_records = 0
+        self.pdu_template1.save()
+
+        response = self.client.get(self.url_download_pdu_template_program1)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+        response_json = response.json()
+        assert response_json == ["Template has no records"]
+
+    def test_download_periodic_data_update_template_no_file(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PDU_TEMPLATE_DOWNLOAD],
+            self.afghanistan,
+            self.program1,
+        )
+
+        self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.EXPORTED
+        self.pdu_template1.number_of_records = 1
+        self.pdu_template1.file = None
+        self.pdu_template1.save()
+
+        response = self.client.get(self.url_download_pdu_template_program1)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+        response_json = response.json()
+        assert response_json == ["Template file is missing"]

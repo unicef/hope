@@ -8,9 +8,6 @@ import graphene
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.flexible_attribute_service import (
-    FlexibleAttributeForPDUService,
-)
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt
@@ -23,6 +20,9 @@ from hct_mis_api.apps.core.validators import (
     CommonValidator,
     DataCollectingTypeValidator,
     PartnersDataValidator,
+)
+from hct_mis_api.apps.periodic_data_update.service.flexible_attribute_service import (
+    FlexibleAttributeForPDUService,
 )
 from hct_mis_api.apps.program.celery_tasks import copy_program_task
 from hct_mis_api.apps.program.inputs import (
