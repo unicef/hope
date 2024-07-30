@@ -234,6 +234,35 @@ class TestPeriodicDataUpdateImportService(TestCase):
             errors,
         )
 
+    def test_read_periodic_data_update_non_form_errors(self) -> None:
+        flexible_attribute = self.date_attribute
+        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+            [
+                {
+                    "field": flexible_attribute.name,
+                    "round": 1,
+                    "round_name": flexible_attribute.pdu_data.rounds_names[0],
+                    "number_of_records": 0,
+                }
+            ],
+            [["2021-05-02", "2021-05-02"]],
+        )
+        service = PeriodicDataUpdateExportTemplateService(periodic_data_update_template)
+        service.generate_workbook()
+        service.save_xlsx_file()
+        flexible_attribute.delete()
+        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service.import_data()
+        self.assertEqual(periodic_data_update_upload.status, PeriodicDataUpdateUpload.Status.FAILED)
+        errors = {
+            "form_errors": [],
+            "non_form_errors": ["Some fields are missing in the flexible attributes"],
+        }
+        self.assertEqual(
+            json.loads(periodic_data_update_upload.error_message),
+            errors,
+        )
+
     def test_read_periodic_data_update_template_object(self) -> None:
         periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
             program=self.program,

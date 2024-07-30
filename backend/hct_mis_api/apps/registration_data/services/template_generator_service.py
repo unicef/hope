@@ -36,22 +36,23 @@ class TemplateFileGeneratorService:
         self._add_households_columns()
         self._add_individuals_columns()
         self._add_people_columns()
+        self._handle_choices({**self.households_fields, **self.individuals_fields})
         return wb
 
     def _add_households_columns(self) -> None:
-        households_fields = {
+        self.households_fields = {
             **self.core_fields.associated_with_household().to_dict_by("xlsx_field"),
             **self.flex_fields["households"],
         }
-        households_rows = self._handle_name_and_label_row(households_fields)
+        households_rows = self._handle_name_and_label_row(self.households_fields)
         self._append_rows(self.households_ws, households_rows)
 
     def _add_individuals_columns(self) -> None:
-        individuals_fields = {
+        self.individuals_fields = {
             **self.core_fields.associated_with_individual_with_delivery_mechanism_data().to_dict_by("xlsx_field"),
             **self.flex_fields["individuals"],
         }
-        individuals_rows = self._handle_name_and_label_row(individuals_fields)
+        individuals_rows = self._handle_name_and_label_row(self.individuals_fields)
         pdu_names, pdu_labels = self._get_pdu_columns()
         individuals_rows[0].extend(pdu_names)
         individuals_rows[1].extend(pdu_labels)
@@ -96,7 +97,7 @@ class TemplateFileGeneratorService:
                 return flexible_attribute.label["English(EN)"]
         return flexible_attribute.name
 
-    def _handle_choices(self, fields: Dict) -> List[List[str]]:
+    def _handle_choices(self, fields: Dict) -> None:
         rows: list[list[str]] = [["Field Name", "Label", "Value to be used in template"]]
 
         for field_name, field_value in fields.items():
@@ -113,7 +114,7 @@ class TemplateFileGeneratorService:
                     ]
                     rows.append(row)
 
-        return rows
+        self.choices_ws.append(rows)
 
     def _handle_name_and_label_row(self, fields: Dict) -> Tuple[List[str], List[str]]:
         names: List[str] = []
