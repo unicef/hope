@@ -1401,11 +1401,11 @@ class Query(graphene.ObjectType):
             .annotate(
                 total_delivered_cash=Sum(
                     "delivered_quantity_usd",
-                    filter=Q(delivery_type__transfer_type__in=DeliveryMechanism.TransferType.CASH),
+                    filter=Q(delivery_type__transfer_type=DeliveryMechanism.TransferType.CASH.value),
                 ),
                 total_delivered_voucher=Sum(
                     "delivered_quantity_usd",
-                    filter=Q(delivery_type__transfer_type__in=DeliveryMechanism.TransferType.VOUCHER),
+                    filter=Q(delivery_type__transfer_type=DeliveryMechanism.TransferType.VOUCHER.value),
                 ),
                 business_area_name=F("business_area__name"),
             )

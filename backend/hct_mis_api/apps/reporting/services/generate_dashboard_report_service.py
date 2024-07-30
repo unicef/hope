@@ -151,12 +151,12 @@ class GenerateDashboardReportContentHelpers:
         def get_filter_query(cash: bool, month: int) -> Q:
             if cash:
                 return Q(
-                    cashplan__payment_items__delivery_type__transfer_type=DeliveryMechanism.TransferType.CASH,
+                    cashplan__payment_items__delivery_type__transfer_type=DeliveryMechanism.TransferType.CASH.value,
                     cashplan__payment_items__delivery_date__month=month,
                 )
             else:
                 return Q(
-                    cashplan__payment_items__delivery_type__transfer_type=DeliveryMechanism.TransferType.VOUCHER,
+                    cashplan__payment_items__delivery_type__transfer_type=DeliveryMechanism.TransferType.VOUCHER.value,
                     cashplan__payment_items__delivery_date__month=month,
                 )
 
@@ -355,14 +355,14 @@ class GenerateDashboardReportContentHelpers:
             .annotate(
                 total_cash=Sum(
                     "paymentrecord__delivered_quantity_usd",
-                    filter=Q(paymentrecord__delivery_type__transfer_type=DeliveryMechanism.TransferType.CASH),
+                    filter=Q(paymentrecord__delivery_type__transfer_type=DeliveryMechanism.TransferType.CASH.value),
                     output_field=DecimalField(),
                 )
             )
             .annotate(
                 total_voucher=Sum(
                     "paymentrecord__delivered_quantity_usd",
-                    filter=Q(paymentrecord__delivery_type__transfer_type=DeliveryMechanism.TransferType.VOUCHER),
+                    filter=Q(paymentrecord__delivery_type__transfer_type=DeliveryMechanism.TransferType.VOUCHER.value),
                     output_field=DecimalField(),
                 )
             )

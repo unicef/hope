@@ -329,12 +329,12 @@ class Query(graphene.ObjectType):
                 delivery_month=F("delivery_date__month"),
                 total_delivered_cash=Sum(
                     "delivered_quantity_usd",
-                    filter=Q(delivery_type__transfer_type=DeliveryMechanism.TransferType.CASH),
+                    filter=Q(delivery_type__transfer_type=DeliveryMechanism.TransferType.CASH.value),
                     output_field=DecimalField(),
                 ),
                 total_delivered_voucher=Sum(
                     "delivered_quantity_usd",
-                    filter=Q(delivery_type__transfer_type=DeliveryMechanism.TransferType.VOUCHER),
+                    filter=Q(delivery_type__transfer_type=DeliveryMechanism.TransferType.VOUCHER.value),
                     output_field=DecimalField(),
                 ),
             )
