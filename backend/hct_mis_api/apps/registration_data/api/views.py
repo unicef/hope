@@ -4,6 +4,7 @@ from typing import Any
 from django.db.models import QuerySet
 
 from constance import config
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
 from rest_framework.filters import OrderingFilter
 from rest_framework.request import Request
@@ -15,6 +16,7 @@ from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.api.permissions import RDIViewListPermission
 from hct_mis_api.apps.core.api.mixins import BusinessAreaProgramMixin
 from hct_mis_api.apps.registration_data.api.caches import RDIKeyConstructor
+from hct_mis_api.apps.registration_data.api.filters import RegistrationDataImportFilter
 from hct_mis_api.apps.registration_data.api.serializers import (
     RegistrationDataImportListSerializer,
 )
@@ -30,7 +32,8 @@ class RegistrationDataImportViewSet(
 ):
     serializer_class = RegistrationDataImportListSerializer
     permission_classes = [RDIViewListPermission]
-    filter_backends = (OrderingFilter,)
+    filter_backends = (OrderingFilter, DjangoFilterBackend)
+    filterset_class = RegistrationDataImportFilter
 
     def get_queryset(self) -> QuerySet:
         business_area = self.get_business_area()
