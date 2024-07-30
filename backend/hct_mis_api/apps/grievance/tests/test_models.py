@@ -163,14 +163,10 @@ class TestDeliveryMechanismDataModel(TestCase):
 
     def test_delivery_mechanism_fields(self) -> None:
         dmd = DeliveryMechanismDataFactory(individual=self.ind, delivery_mechanism=self.dm_atm_card)
+        print(dmd.all_fields)
         self.assertEqual(
             dmd.all_fields,
-            [
-                "card_expiry_date_atm_card",
-                "card_number_atm_card",
-                "name_of_cardholder_atm_card",
-                "full_name",
-            ],
+            ["card_number_atm_card", "card_expiry_date_atm_card", "name_of_cardholder_atm_card", "full_name"],
         )
 
     def test_required_fields(self) -> None:
@@ -201,18 +197,18 @@ class TestDeliveryMechanismDataModel(TestCase):
         self.assertEqual(
             fields,
             [
-                "wallet_name_transfer_to_digital_wallet",
-                "blockchain_name_transfer_to_digital_wallet",
-                "mobile_phone_number_cash_over_the_counter",
                 "card_expiry_date_atm_card",
                 "card_number_atm_card",
-                "name_of_cardholder_atm_card",
-                "provider_mobile_money",
-                "bank_name_transfer_to_account",
-                "wallet_address_transfer_to_digital_wallet",
-                "bank_account_number_transfer_to_account",
-                "card_number_deposit_to_card",
                 "delivery_phone_number_mobile_money",
+                "bank_account_number_transfer_to_account",
+                "bank_name_transfer_to_account",
+                "mobile_phone_number_cash_over_the_counter",
+                "provider_mobile_money",
+                "wallet_address_transfer_to_digital_wallet",
+                "card_number_deposit_to_card",
+                "wallet_name_transfer_to_digital_wallet",
+                "name_of_cardholder_atm_card",
+                "blockchain_name_transfer_to_digital_wallet",
             ],
         )
 
@@ -234,6 +230,7 @@ class TestDeliveryMechanismDataModel(TestCase):
     def test_get_grievance_ticket_payload_for_errors(self) -> None:
         dmd = DeliveryMechanismDataFactory(
             individual=self.ind,
+            delivery_mechanism=self.dm_atm_card,
             validation_errors={
                 "full_name": "Missing required payment data",
                 "number_of_children": "Missing required payment data",
@@ -291,7 +288,6 @@ class TestDeliveryMechanismDataModel(TestCase):
             },
             delivery_mechanism=self.dm_atm_card,
         )
-        print(dmd.delivery_data)
 
         with mock.patch.object(dmd, "validate"):
             dmd.revalidate_for_grievance_ticket(grievance_ticket)
@@ -301,7 +297,6 @@ class TestDeliveryMechanismDataModel(TestCase):
                 grievance_ticket.description,
                 "Missing required fields ['full_name', 'name_of_cardholder_atm_card'] values for delivery mechanism ATM Card",
             )
-            print(individual_data_update_ticket.individual_data)
             self.assertEqual(
                 individual_data_update_ticket.individual_data,
                 {
@@ -356,7 +351,7 @@ class TestDeliveryMechanismDataModel(TestCase):
                         "delivery_mechanism_data_to_edit": [
                             {
                                 "id": str(dmd.id),
-                                "label": dmd.delivery_mechanism,
+                                "label": dmd.delivery_mechanism.name,
                                 "approve_status": False,
                                 "data_fields": [
                                     {
