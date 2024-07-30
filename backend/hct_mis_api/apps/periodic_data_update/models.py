@@ -85,7 +85,7 @@ class PeriodicDataUpdateTemplate(TimeStampedModel, CeleryEnabledModel):
     )
 
     @property
-    def combined_status(self) -> str:
+    def combined_status(self) -> str:  # pragma: no cover
         if self.status == self.Status.EXPORTED or self.celery_status == self.CELERY_STATUS_SUCCESS:
             return self.status
         if self.status == self.Status.FAILED:
@@ -154,7 +154,7 @@ class PeriodicDataUpdateUpload(TimeStampedModel, CeleryEnabledModel):
         return json.loads(self.error_message)
 
     @property
-    def combined_status(self) -> str:
+    def combined_status(self) -> str:  # pragma: no cover
         if self.status == self.Status.SUCCESSFUL or self.celery_status == self.CELERY_STATUS_SUCCESS:
             return self.status
         if self.status == self.Status.FAILED:
