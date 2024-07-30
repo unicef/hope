@@ -50,6 +50,7 @@ class ProgramCycleViewSet(
         "retrieve": ProgramCycleListSerializer,
         "create": ProgramCycleCreateSerializer,
         "update": ProgramCycleUpdateSerializer,
+        "partial_update": ProgramCycleUpdateSerializer,
         "delete": ProgramCycleDeleteSerializer,
     }
     permission_classes_by_action = {
@@ -57,11 +58,13 @@ class ProgramCycleViewSet(
         "retrieve": [ProgramCycleViewDetailsPermission],
         "create": [ProgramCycleCreatePermission],
         "update": [ProgramCycleUpdatePermission],
+        "partial_update": [ProgramCycleUpdatePermission],
         "delete": [ProgramCycleDeletePermission],
     }
 
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = ProgramCycleFilter
+    # filterset_fields = ['status', 'title']
 
     def get_queryset(self) -> QuerySet:
         business_area = self.get_business_area()

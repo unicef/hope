@@ -59,11 +59,11 @@ class ProgramCycleCreateSerializer(EncodedIdSerializerMixin):
         if program.status != Program.ACTIVE:
             raise serializers.ValidationError("Create Programme Cycle is possible only for Active Programme.")
 
-        if start_date < program.start_date:
+        if start_date and start_date < program.start_date:
             raise serializers.ValidationError(
                 {"start_date": "Programme Cycle start date cannot be earlier than programme start date"}
             )
-        if end_date > program.end_date:
+        if end_date and end_date > program.end_date:
             raise serializers.ValidationError(
                 {"end_date": "Programme Cycle end date cannot be earlier than programme end date"}
             )
@@ -114,7 +114,7 @@ class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
         if data.get("start_date") is None:
             raise ValidationError("Not possible leave the Programme Cycle start date empty.")
 
-        if data.get("end_date") is None:
+        if not self.instance.end_date and data.get("end_date") is None:
             raise ValidationError(
                 "Not possible leave the Programme Cycle end date empty if it was empty upon starting the edit."
             )
