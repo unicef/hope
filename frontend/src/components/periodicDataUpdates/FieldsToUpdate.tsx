@@ -71,27 +71,36 @@ export const FieldsToUpdate: React.FC<FieldsToUpdateProps> = ({
     <FieldArray
       name="roundsData"
       render={() => (
-        <TableContainer component={Box}>
-          <Table>
+        <TableContainer component={Box} data-cy="table-container">
+          <Table data-cy="table">
             <TableHead>
               <TableRow>
-                <TableCell></TableCell>
-                <TableCell>Field</TableCell>
-                <TableCell>Round Number</TableCell>
+                <TableCell data-cy="table-header-checkbox"></TableCell>
+                <TableCell data-cy="table-header-field">Field</TableCell>
+                <TableCell data-cy="table-header-roundNumber">
+                  Round Number
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {values.roundsData.map((field, index) => (
-                <TableRow key={`${field.field}-${field.round}`}>
+                <TableRow
+                  key={`${field.field}-${field.round}`}
+                  data-cy={`table-row-${field.field}`}
+                >
                   <TableCell>
                     <Checkbox
+                      data-cy={`checkbox-${field.field}`}
                       checked={checkedFields[index]?.checked || false}
                       onChange={(event) => handleCheckboxChange(event, field)}
                     />
                   </TableCell>
-                  <TableCell>{field.field}</TableCell>
-                  <TableCell>
+                  <TableCell data-cy={`table-cell-field-${field.field}`}>
+                    {field.field}
+                  </TableCell>
+                  <TableCell data-cy={`table-cell-roundNumber-${field.field}`}>
                     <Select
+                      data-cy={`select-roundNumber-${field.field}`}
                       value={field.roundNumber}
                       onChange={(event) => {
                         const selectedIndex = values.roundsData.findIndex(
