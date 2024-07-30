@@ -98,8 +98,7 @@ class TemplateFileGeneratorService:
         return flexible_attribute.name
 
     def _handle_choices(self, fields: Dict) -> None:
-        rows: list[list[str]] = [["Field Name", "Label", "Value to be used in template"]]
-
+        self.choices_ws.append(["Field Name", "Label", "Value to be used in template"])
         for field_name, field_value in fields.items():
             is_admin_level = field_name in ("admin1_h_c", "admin2_h_c")
             choices = field_value["choices"]
@@ -112,9 +111,7 @@ class TemplateFileGeneratorService:
                         str(choice["label"]["English(EN)"]),
                         choice["value"],
                     ]
-                    rows.append(row)
-
-        self.choices_ws.append(rows)
+                    self.choices_ws.append(row)
 
     def _handle_name_and_label_row(self, fields: Dict) -> Tuple[List[str], List[str]]:
         names: List[str] = []
