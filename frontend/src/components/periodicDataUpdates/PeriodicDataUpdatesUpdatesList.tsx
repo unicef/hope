@@ -99,7 +99,6 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
       ),
   });
   const handleDialogOpen = (uploadId) => {
-    console.log('xDDDDDDDDDDDD');
     setSelectedUploadId(uploadId);
     setIsDialogOpen(true);
   };
@@ -125,7 +124,11 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
       </TableCell>
       <TableCell data-cy={`update-details-${row.id}`}>
         {row.status === 'FAILED' ? (
-          <IconButton data-cy={`update-details-btn-${row.id}`} color="primary" onClick={() => handleDialogOpen(row.id)}>
+          <IconButton
+            data-cy={`update-details-btn-${row.id}`}
+            color="primary"
+            onClick={() => handleDialogOpen(row.id)}
+          >
             <VisibilityIcon />
           </IconButton>
         ) : null}
