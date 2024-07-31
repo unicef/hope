@@ -192,10 +192,10 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
         PaymentPlanFactory(program_cycle=self.cycle2, total_delivered_quantity_usd=Decimal("1500.00"))
         self.cycle2.refresh_from_db()
         self.assertEqual(self.cycle2.total_delivered_quantity_usd, 1500)
-        # response = self.client.get(self.list_url, {"total_delivered_quantity_usd": '{"min": "1000", "max": "2000"}'})
-        # self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # self.assertEqual(len(response.data["results"]), 1)
-        # self.assertEqual(response.data["results"][0]["total_delivered_quantity_usd"], "1500.00")
+        response = self.client.get(self.list_url, {"total_delivered_quantity_usd": '{"min": "1000", "max": "1900"}'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(str(response.data["results"][0]["total_delivered_quantity_usd"]), "1500.00")
 
 
 class ProgramCycleCreateSerializerTest(TestCase):

@@ -46,12 +46,12 @@ class ProgramCycleFilter(filters.FilterSet):
         q_obj = Q()
         if values:
             queryset = queryset.annotate(
-                total_delivered_quantity_usd=Coalesce(
+                total_delivered_q_usd=Coalesce(
                     Sum("payment_plans__total_delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
                 )
             )
             if min_value is not None:
-                q_obj |= Q(Q(total_delivered_quantity_usd__gte=min_value))
+                q_obj &= Q(Q(total_delivered_q_usd__gte=min_value))
             if max_value is not None:
-                q_obj |= Q(Q(total_delivered_quantity_usd__lte=max_value))
+                q_obj &= Q(Q(total_delivered_q_usd__lte=max_value))
         return queryset.filter(q_obj)
