@@ -6,6 +6,7 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     get_core_fields_attributes,
 )
 from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_STRING, Scope
+from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
 
 
 class TestCoreFields(APITestCase):
@@ -86,3 +87,19 @@ class TestCoreFields(APITestCase):
     def test_xlsx_people_scope_modification(self) -> None:
         factory_result = FieldFactory.from_only_scopes(self.scopes)
         self.assertEqual(factory_result[0]["xlsx_field"], "pp_given_name_i_c")
+
+    def test_get_all_core_fields_choices(self) -> None:
+        choices = FieldFactory.get_all_core_fields_choices()
+        self.assertEqual(len(choices), 137)
+        self.assertEqual(choices[0], ("age", "Age (calculated)"))
+
+        generate_delivery_mechanisms()
+        choices = FieldFactory.get_all_core_fields_choices()
+        self.assertEqual(len(choices), 149)
+        self.assertEqual(
+            choices[-1],
+            (
+                "wallet_name_transfer_to_digital_wallet",
+                "Wallet Name Transfer To Digital Wallet (Transfer to Digital Wallet Delivery Mechanism)",
+            ),
+        )
