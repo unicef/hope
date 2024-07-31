@@ -33,13 +33,13 @@ class TestAllProgramsQuery(APITestCase):
     """
 
     ALL_PROGRAMS_QUERY_WITH_PROGRAM_CYCLE_FILTERS = """
-    query AllPrograms($businessArea: String!, $orderBy: String, $name: String, $compatibleDct: Boolean, $cycleSearch: String, $cycleTotalDeliveredQuantityUsdFrom: Float, $cycleTotalDeliveredQuantityUsdTo: Float) {
+    query AllPrograms($businessArea: String!, $orderBy: String, $name: String, $compatibleDct: Boolean, $cycleOrderBy: String, $cycleSearch: String, $cycleTotalDeliveredQuantityUsdFrom: Float, $cycleTotalDeliveredQuantityUsdTo: Float) {
         allPrograms(businessArea: $businessArea, orderBy: $orderBy, name: $name, compatibleDct: $compatibleDct) {
           totalCount
           edges {
             node {
               name
-              cycles(search: $cycleSearch, totalDeliveredQuantityUsdFrom: $cycleTotalDeliveredQuantityUsdFrom, totalDeliveredQuantityUsdTo: $cycleTotalDeliveredQuantityUsdTo) {
+              cycles(orderBy: $cycleOrderBy, search: $cycleSearch, totalDeliveredQuantityUsdFrom: $cycleTotalDeliveredQuantityUsdFrom, totalDeliveredQuantityUsdTo: $cycleTotalDeliveredQuantityUsdTo) {
                 totalCount
                 edges {
                   node {
@@ -247,6 +247,7 @@ class TestAllProgramsQuery(APITestCase):
                 "businessArea": self.business_area.slug,
                 "orderBy": "name",
                 "name": "Program with all partners access",
+                "cycleOrderBy": "title",
                 "cycleTotalDeliveredQuantityUsdTo": 1000,
             },
         )
