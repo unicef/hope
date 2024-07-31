@@ -15,7 +15,7 @@ class PeriodicFieldDataInput(graphene.InputObjectType):
 
 class PDUFieldInput(graphene.InputObjectType):
     id = graphene.String(required=False)
-    name = graphene.String()
+    label = graphene.String()
     pdu_data = PeriodicFieldDataInput()
 
 

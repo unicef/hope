@@ -58,6 +58,7 @@ class TestCreateProgram(APITestCase):
           partnerAccess
           pduFields {
             name
+            label
             pduData {
               subtype
               numberOfRounds
@@ -385,7 +386,7 @@ class TestCreateProgram(APITestCase):
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
         self.program_data["programData"]["pduFields"] = [
             {
-                "name": "PDU Field 1",
+                "label": "PDU Field 1",
                 "pduData": {
                     "subtype": "DECIMAL",
                     "numberOfRounds": 3,
@@ -393,7 +394,7 @@ class TestCreateProgram(APITestCase):
                 },
             },
             {
-                "name": "PDU Field 2",
+                "label": "PDU Field 2",
                 "pduData": {
                     "subtype": "STRING",
                     "numberOfRounds": 1,
@@ -401,7 +402,7 @@ class TestCreateProgram(APITestCase):
                 },
             },
             {
-                "name": "PDU Field 3",
+                "label": "PDU Field 3",
                 "pduData": {
                     "subtype": "DATE",
                     "numberOfRounds": 2,
@@ -409,7 +410,7 @@ class TestCreateProgram(APITestCase):
                 },
             },
             {
-                "name": "PDU Field 4",
+                "label": "PDU Field 4",
                 "pduData": {
                     "subtype": "BOOLEAN",
                     "numberOfRounds": 4,
@@ -427,7 +428,7 @@ class TestCreateProgram(APITestCase):
         # pdu data with mismatched number of rounds and rounds names
         self.program_data["programData"]["pduFields"] = [
             {
-                "name": "PDU Field 1",
+                "label": "PDU Field 1",
                 "pduData": {
                     "subtype": "DECIMAL",
                     "numberOfRounds": 3,
@@ -435,7 +436,7 @@ class TestCreateProgram(APITestCase):
                 },
             },
             {
-                "name": "PDU Field 2 Invalid",
+                "label": "PDU Field 2 Invalid",
                 "pduData": {
                     "subtype": "STRING",
                     "numberOfRounds": 1,
@@ -453,7 +454,7 @@ class TestCreateProgram(APITestCase):
         # pdu data with duplicated field names in the input
         self.program_data["programData"]["pduFields"] = [
             {
-                "name": "PDU Field 1",
+                "label": "PDU Field 1",
                 "pduData": {
                     "subtype": "DECIMAL",
                     "numberOfRounds": 3,
@@ -461,7 +462,7 @@ class TestCreateProgram(APITestCase):
                 },
             },
             {
-                "name": "PDU Field 1",
+                "label": "PDU Field 1",
                 "pduData": {
                     "subtype": "STRING",
                     "numberOfRounds": 2,
@@ -485,12 +486,12 @@ class TestCreateProgram(APITestCase):
         program = ProgramFactory(business_area=self.business_area, name="Test Program 1")
         FlexibleAttributeForPDUFactory(
             program=program,
-            name="PDU Field 1",
+            label="PDU Field 1",
             pdu_data=pdu_data,
         )
         self.program_data["programData"]["pduFields"] = [
             {
-                "name": "PDU Field 1",
+                "label": "PDU Field 1",
                 "pduData": {
                     "subtype": "DECIMAL",
                     "numberOfRounds": 3,

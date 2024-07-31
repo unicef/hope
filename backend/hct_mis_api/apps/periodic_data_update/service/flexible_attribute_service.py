@@ -9,6 +9,7 @@ from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.periodic_data_update.signals import (
     increment_periodic_field_version_cache,
 )
+from hct_mis_api.apps.periodic_data_update.utils import field_label_to_field_name
 from hct_mis_api.apps.program.models import Program
 
 
@@ -33,10 +34,10 @@ class FlexibleAttributeForPDUService:
             program=self.program,
             pdu_data=pdu_data_object,
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
-            label={"English(EN)": "PDU field"},
         )
 
     def create_pdu_flex_attributes(self) -> None:
+        self._populate_names_and_labels()
         self._validate_pdu_names_in_batch()
         for pdu_field in self.pdu_fields:
             self.create_pdu_flex_attribute(pdu_field)
@@ -66,6 +67,7 @@ class FlexibleAttributeForPDUService:
     def update_pdu_flex_attributes(self) -> None:
         if self.program.registration_imports.exists():
             raise GraphQLError("Cannot update PDU fields for a program with RDIs.")
+        self._populate_names_and_labels()
         self._validate_pdu_names_in_batch()
         flexible_attribute_ids_to_preserve = []
         for pdu_field in self.pdu_fields:
@@ -87,3 +89,8 @@ class FlexibleAttributeForPDUService:
     def _validate_pdu_name_against_existing(pdu_field: dict, existing_object_id: Optional[str] = None) -> None:
         if FlexibleAttribute.objects.filter(name=pdu_field["name"]).exclude(id=existing_object_id).exists():
             raise ValidationError(f"Time Series Field with name {pdu_field['name']} already exists.")
+
+    def _populate_names_and_labels(self) -> None:
+        for pdu_field in self.pdu_fields:
+            pdu_field["name"] = field_label_to_field_name(pdu_field["label"])
+            pdu_field["label"] = {"English(EN)": pdu_field["label"]}

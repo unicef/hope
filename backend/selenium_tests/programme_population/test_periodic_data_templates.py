@@ -16,6 +16,7 @@ from hct_mis_api.apps.periodic_data_update.fixtures import (
     PeriodicDataUpdateTemplateFactory,
 )
 from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
+from hct_mis_api.apps.periodic_data_update.utils import field_label_to_field_name
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -61,7 +62,7 @@ def individual(program: Program) -> Individual:
 @pytest.fixture
 def string_attribute() -> FlexibleAttribute:
     return create_flexible_attribute(
-        name="Test String Attribute",
+        label="Test String Attribute",
         subtype=FlexibleAttribute.STRING,
         number_of_rounds=1,
         rounds_names=["Test Round"],
@@ -71,7 +72,7 @@ def string_attribute() -> FlexibleAttribute:
 @pytest.fixture
 def date_attribute() -> FlexibleAttribute:
     return create_flexible_attribute(
-        name="Test String Attribute",
+        label="Test Date Attribute",
         subtype=FlexibleAttribute.DATE,
         number_of_rounds=1,
         rounds_names=["Test Round"],
@@ -79,10 +80,14 @@ def date_attribute() -> FlexibleAttribute:
 
 
 def create_flexible_attribute(
-    name: str, subtype: str, number_of_rounds: int, rounds_names: list[str]
+    label: str, subtype: str, number_of_rounds: int, rounds_names: list[str]
 ) -> FlexibleAttribute:
+    name = field_label_to_field_name(label)
     flexible_attribute = FlexibleAttribute.objects.create(
-        name=name, type=FlexibleAttribute.PDU, associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
+        label={"English(EN)": label},
+        name=name,
+        type=FlexibleAttribute.PDU,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
     )
     flexible_attribute.pdu_data = PeriodicFieldData.objects.create(
         subtype=subtype, number_of_rounds=number_of_rounds, rounds_names=rounds_names
@@ -253,7 +258,7 @@ class TestPeriodicDataTemplates:
         pagePeriodicDataUpdateTemplatesDetails.select_listbox_element(individual.registration_data_import.name).click()
         pagePeriodicDataUpdateTemplatesDetails.getSubmitButton().click()
 
-        pagePeriodicDataUpdateTemplatesDetails.getCheckbox(string_attribute.name).click()
+        pagePeriodicDataUpdateTemplatesDetails.getCheckbox(string_attribute.label).click()
         pagePeriodicDataUpdateTemplatesDetails.getSubmitButton().click()
         pagePeriodicDataUpdateTemplatesDetails.screenshot("submitted")
 

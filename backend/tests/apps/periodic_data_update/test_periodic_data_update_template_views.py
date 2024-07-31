@@ -295,6 +295,7 @@ class TestPeriodicDataUpdateTemplateViews:
             "rounds_data": self.pdu_template_program2.rounds_data,
         } == response_json
 
+    @pytest.mark.skip("Caching is disabled for now")
     def test_list_periodic_data_update_templates_caching(
         self,
         api_client: Callable,
@@ -417,12 +418,12 @@ class TestPeriodicDataUpdateTemplateViews:
         data = {
             "rounds_data": [
                 {
-                    "field": "Vaccination Records Update",
+                    "field": "vaccination_records_update",
                     "round": 2,
                     "round_name": "February vaccination",
                 },
                 {
-                    "field": "Health Records Update",
+                    "field": "health_records_update",
                     "round": 4,
                     "round_name": "April",
                 },
@@ -435,12 +436,12 @@ class TestPeriodicDataUpdateTemplateViews:
         }
         expected_result = [
             {
-                "field": "Vaccination Records Update",
+                "field": "vaccination_records_update",
                 "round": 2,
                 "round_name": "February vaccination",
                 "number_of_records": 0,
             },
-            {"field": "Health Records Update", "round": 4, "round_name": "April", "number_of_records": 0},
+            {"field": "health_records_update", "round": 4, "round_name": "April", "number_of_records": 0},
         ]
         response = self.client.post(self.url_create_pdu_template_program1, data=data)
         assert response.status_code == status.HTTP_201_CREATED
@@ -472,12 +473,12 @@ class TestPeriodicDataUpdateTemplateViews:
         data = {
             "rounds_data": [
                 {
-                    "field": "Vaccination Records Update",
+                    "field": "vaccination_records_update",
                     "round": 2,
                     "round_name": "February vaccination",
                 },
                 {
-                    "field": "Vaccination Records Update",
+                    "field": "vaccination_records_update",
                     "round": 4,
                     "round_name": "April",
                 },

@@ -128,6 +128,7 @@ class TestPeriodicFieldViews:
         assert {
             "id": id_to_base64((self.periodic_field1.id), "FlexibleAttribute"),
             "name": self.periodic_field1.name,
+            "label": self.periodic_field1.label["English(EN)"],
             "pdu_data": {
                 "subtype": self.periodic_field1.pdu_data.subtype,
                 "number_of_rounds": self.periodic_field1.pdu_data.number_of_rounds,
@@ -137,6 +138,7 @@ class TestPeriodicFieldViews:
         assert {
             "id": id_to_base64(self.periodic_field2.id, "FlexibleAttribute"),
             "name": self.periodic_field2.name,
+            "label": self.periodic_field2.label["English(EN)"],
             "pdu_data": {
                 "subtype": self.periodic_field2.pdu_data.subtype,
                 "number_of_rounds": self.periodic_field2.pdu_data.number_of_rounds,
@@ -146,6 +148,7 @@ class TestPeriodicFieldViews:
         assert {
             "id": id_to_base64(self.periodic_field3.id, "FlexibleAttribute"),
             "name": self.periodic_field3.name,
+            "label": self.periodic_field3.label["English(EN)"],
             "pdu_data": {
                 "subtype": self.periodic_field3.pdu_data.subtype,
                 "number_of_rounds": self.periodic_field3.pdu_data.number_of_rounds,
@@ -155,6 +158,7 @@ class TestPeriodicFieldViews:
         assert {
             "id": id_to_base64(self.periodic_field_data_program2.id, "FlexibleAttribute"),
             "name": self.periodic_field_program2.name,
+            "label": self.periodic_field_program2.label["English(EN)"],
             "pdu_data": {
                 "subtype": self.periodic_field_program2.pdu_data.subtype,
                 "number_of_rounds": self.periodic_field_program2.pdu_data.number_of_rounds,

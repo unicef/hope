@@ -60,6 +60,7 @@ class TestCopyProgram(APITestCase):
           partnerAccess
           pduFields {
             name
+            label
             pduData {
               subtype
               numberOfRounds
@@ -195,7 +196,7 @@ class TestCopyProgram(APITestCase):
         )
         FlexibleAttributeForPDUFactory(
             program=cls.program,
-            name="PDU Field In Original Program",
+            label="PDU Field In Original Program",
             pdu_data=pdu_data,
         )
 
@@ -393,7 +394,7 @@ class TestCopyProgram(APITestCase):
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
         self.copy_data["programData"]["pduFields"] = [
             {
-                "name": "PDU Field 1",
+                "label": "PDU Field 1",
                 "pduData": {
                     "subtype": "DECIMAL",
                     "numberOfRounds": 3,
@@ -401,7 +402,7 @@ class TestCopyProgram(APITestCase):
                 },
             },
             {
-                "name": "PDU Field 2",
+                "label": "PDU Field 2",
                 "pduData": {
                     "subtype": "STRING",
                     "numberOfRounds": 1,
@@ -409,7 +410,7 @@ class TestCopyProgram(APITestCase):
                 },
             },
             {
-                "name": "PDU Field 3",
+                "label": "PDU Field 3",
                 "pduData": {
                     "subtype": "DATE",
                     "numberOfRounds": 2,
@@ -417,7 +418,7 @@ class TestCopyProgram(APITestCase):
                 },
             },
             {
-                "name": "PDU Field 4",
+                "label": "PDU Field 4",
                 "pduData": {
                     "subtype": "BOOLEAN",
                     "numberOfRounds": 4,
@@ -436,7 +437,7 @@ class TestCopyProgram(APITestCase):
         # pdu data with mismatched number of rounds and rounds names
         self.copy_data["programData"]["pduFields"] = [
             {
-                "name": "PDU Field 1",
+                "label": "PDU Field 1",
                 "pduData": {
                     "subtype": "DECIMAL",
                     "numberOfRounds": 3,
@@ -444,7 +445,7 @@ class TestCopyProgram(APITestCase):
                 },
             },
             {
-                "name": "PDU Field 2 Invalid",
+                "label": "PDU Field 2 Invalid",
                 "pduData": {
                     "subtype": "STRING",
                     "numberOfRounds": 1,
@@ -462,7 +463,7 @@ class TestCopyProgram(APITestCase):
         # pdu data with duplicated field names in the input
         self.copy_data["programData"]["pduFields"] = [
             {
-                "name": "PDU Field 1",
+                "label": "PDU Field 1",
                 "pduData": {
                     "subtype": "DECIMAL",
                     "numberOfRounds": 3,
@@ -470,7 +471,7 @@ class TestCopyProgram(APITestCase):
                 },
             },
             {
-                "name": "PDU Field 1",
+                "label": "PDU Field 1",
                 "pduData": {
                     "subtype": "STRING",
                     "numberOfRounds": 2,
@@ -494,12 +495,12 @@ class TestCopyProgram(APITestCase):
         program = ProgramFactory(business_area=self.business_area, name="Test Program 1")
         FlexibleAttributeForPDUFactory(
             program=program,
-            name="PDU Field 1",
+            label="PDU Field 1",
             pdu_data=pdu_data,
         )
         self.copy_data["programData"]["pduFields"] = [
             {
-                "name": "PDU Field 1",
+                "label": "PDU Field 1",
                 "pduData": {
                     "subtype": "DECIMAL",
                     "numberOfRounds": 3,

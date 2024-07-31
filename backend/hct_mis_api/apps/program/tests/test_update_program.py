@@ -49,6 +49,7 @@ class TestUpdateProgram(APITestCase):
           partnerAccess
           pduFields {
             name
+            label
             pduData {
               subtype
               numberOfRounds
@@ -66,6 +67,7 @@ class TestUpdateProgram(APITestCase):
             name
             pduFields {
               name
+              label
               pduData {
                 subtype
                 numberOfRounds
@@ -138,7 +140,7 @@ class TestUpdateProgram(APITestCase):
         )
         cls.pdu_field_to_be_removed = FlexibleAttributeForPDUFactory(
             program=cls.program,
-            name="PDU Field To Be Removed",
+            label="PDU Field To Be Removed",
             pdu_data=cls.pdu_data_to_be_removed,
         )
         cls.pdu_data_to_be_updated = PeriodicFieldDataFactory(
@@ -148,7 +150,7 @@ class TestUpdateProgram(APITestCase):
         )
         cls.pdu_field_to_be_updated = FlexibleAttributeForPDUFactory(
             program=cls.program,
-            name="PDU Field To Be Updated",
+            label="PDU Field To Be Updated",
             pdu_data=cls.pdu_data_to_be_updated,
         )
         cls.pdu_data_to_be_preserved = PeriodicFieldDataFactory(
@@ -158,7 +160,7 @@ class TestUpdateProgram(APITestCase):
         )
         cls.pdu_field_to_be_preserved = FlexibleAttributeForPDUFactory(
             program=cls.program,
-            name="PDU Field To Be Preserved",
+            label="PDU Field To Be Preserved",
             pdu_data=cls.pdu_data_to_be_preserved,
         )
 
@@ -634,7 +636,7 @@ class TestUpdateProgram(APITestCase):
                 "pduFields": [
                     {
                         "id": self.id_to_base64(self.pdu_field_to_be_preserved.id, "PeriodicFieldNode"),
-                        "name": "PDU Field To Be Preserved",
+                        "label": "PDU Field To Be Preserved",
                         "pduData": {
                             "subtype": "DATE",
                             "numberOfRounds": 1,
@@ -643,7 +645,7 @@ class TestUpdateProgram(APITestCase):
                     },
                     {
                         "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
-                        "name": "PDU Field - Updated",
+                        "label": "PDU Field - Updated",
                         "pduData": {
                             "subtype": "BOOLEAN",
                             "numberOfRounds": 3,
@@ -651,7 +653,7 @@ class TestUpdateProgram(APITestCase):
                         },
                     },
                     {
-                        "name": "PDU Field - New",
+                        "label": "PDU Field - New",
                         "pduData": {
                             "subtype": "BOOLEAN",
                             "numberOfRounds": 4,
@@ -685,13 +687,13 @@ class TestUpdateProgram(APITestCase):
             self.program.pdu_fields.count(),
             3,
         )
-        self.assertIsNone(FlexibleAttribute.objects.filter(name="PDU Field To Be Removed").first())
-        self.assertIsNone(FlexibleAttribute.objects.filter(name="PDU Field To Be Updated").first())
+        self.assertIsNone(FlexibleAttribute.objects.filter(name="pdu_field_to_be_removed").first())
+        self.assertIsNone(FlexibleAttribute.objects.filter(name="pdu_field_to_be_updated").first())
         self.assertEqual(
-            FlexibleAttribute.objects.filter(name="PDU Field - Updated").first().pdu_data.subtype, "BOOLEAN"
+            FlexibleAttribute.objects.filter(name="pdu_field_-_updated").first().pdu_data.subtype, "BOOLEAN"
         )
-        self.assertIsNotNone(FlexibleAttribute.objects.filter(name="PDU Field - New").first())
-        self.assertIsNotNone(FlexibleAttribute.objects.filter(name="PDU Field To Be Preserved").first())
+        self.assertIsNotNone(FlexibleAttribute.objects.filter(name="pdu_field_-_new").first())
+        self.assertIsNotNone(FlexibleAttribute.objects.filter(name="pdu_field_to_be_preserved").first())
 
     def test_update_program_with_pdu_fields_invalid_data(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
@@ -702,7 +704,7 @@ class TestUpdateProgram(APITestCase):
                 "pduFields": [
                     {
                         "id": self.id_to_base64(self.pdu_field_to_be_preserved.id, "PeriodicFieldNode"),
-                        "name": "PDU Field To Be Preserved",
+                        "label": "PDU Field To Be Preserved",
                         "pduData": {
                             "subtype": "DATE",
                             "numberOfRounds": 1,
@@ -711,7 +713,7 @@ class TestUpdateProgram(APITestCase):
                     },
                     {
                         "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
-                        "name": "PDU Field - Updated",
+                        "label": "PDU Field - Updated",
                         "pduData": {
                             "subtype": "BOOLEAN",
                             "numberOfRounds": 1,
@@ -719,7 +721,7 @@ class TestUpdateProgram(APITestCase):
                         },
                     },
                     {
-                        "name": "PDU Field - New",
+                        "label": "PDU Field - New",
                         "pduData": {
                             "subtype": "BOOLEAN",
                             "numberOfRounds": 3,
@@ -747,7 +749,7 @@ class TestUpdateProgram(APITestCase):
                 "name": "Program with Updated PDU Fields",
                 "pduFields": [
                     {
-                        "name": "PDU Field - New",
+                        "label": "PDU Field - New",
                         "pduData": {
                             "subtype": "BOOLEAN",
                             "numberOfRounds": 4,
@@ -776,7 +778,7 @@ class TestUpdateProgram(APITestCase):
                 "pduFields": [
                     {
                         "id": self.id_to_base64(self.pdu_field_to_be_preserved.id, "PeriodicFieldNode"),
-                        "name": "PDU Field To Be Preserved",
+                        "label": "PDU Field To Be Preserved",
                         "pduData": {
                             "subtype": "DATE",
                             "numberOfRounds": 1,
@@ -785,7 +787,7 @@ class TestUpdateProgram(APITestCase):
                     },
                     {
                         "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
-                        "name": "PDU Field 1",
+                        "label": "PDU Field 1",
                         "pduData": {
                             "subtype": "BOOLEAN",
                             "numberOfRounds": 3,
@@ -793,7 +795,7 @@ class TestUpdateProgram(APITestCase):
                         },
                     },
                     {
-                        "name": "PDU Field 1",
+                        "label": "PDU Field 1",
                         "pduData": {
                             "subtype": "BOOLEAN",
                             "numberOfRounds": 4,
@@ -823,7 +825,7 @@ class TestUpdateProgram(APITestCase):
         program = ProgramFactory(business_area=self.business_area, name="Test Program 1")
         FlexibleAttributeForPDUFactory(
             program=program,
-            name="PDU Field 1",
+            label="PDU Field 1",
             pdu_data=pdu_data,
         )
         update_data = {
@@ -833,7 +835,7 @@ class TestUpdateProgram(APITestCase):
                 "pduFields": [
                     {
                         "id": self.id_to_base64(self.pdu_field_to_be_preserved.id, "PeriodicFieldNode"),
-                        "name": "PDU Field To Be Preserved",
+                        "label": "PDU Field To Be Preserved",
                         "pduData": {
                             "subtype": "DATE",
                             "numberOfRounds": 1,
@@ -842,7 +844,7 @@ class TestUpdateProgram(APITestCase):
                     },
                     {
                         "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
-                        "name": "PDU Field - Updated",
+                        "label": "PDU Field - Updated",
                         "pduData": {
                             "subtype": "BOOLEAN",
                             "numberOfRounds": 3,
@@ -850,7 +852,7 @@ class TestUpdateProgram(APITestCase):
                         },
                     },
                     {
-                        "name": "PDU Field 1",
+                        "label": "PDU Field 1",
                         "pduData": {
                             "subtype": "BOOLEAN",
                             "numberOfRounds": 4,
@@ -880,7 +882,7 @@ class TestUpdateProgram(APITestCase):
         program = ProgramFactory(business_area=self.business_area, name="Test Program 1")
         FlexibleAttributeForPDUFactory(
             program=program,
-            name="PDU Field 1",
+            label="PDU Field 1",
             pdu_data=pdu_data,
         )
         update_data = {
@@ -890,7 +892,7 @@ class TestUpdateProgram(APITestCase):
                 "pduFields": [
                     {
                         "id": self.id_to_base64(self.pdu_field_to_be_preserved.id, "PeriodicFieldNode"),
-                        "name": "PDU Field To Be Preserved",
+                        "label": "PDU Field To Be Preserved",
                         "pduData": {
                             "subtype": "DATE",
                             "numberOfRounds": 1,
@@ -899,7 +901,7 @@ class TestUpdateProgram(APITestCase):
                     },
                     {
                         "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
-                        "name": "PDU Field 1",
+                        "label": "PDU Field 1",
                         "pduData": {
                             "subtype": "BOOLEAN",
                             "numberOfRounds": 3,
@@ -907,7 +909,7 @@ class TestUpdateProgram(APITestCase):
                         },
                     },
                     {
-                        "name": "PDU Field - New",
+                        "label": "PDU Field - New",
                         "pduData": {
                             "subtype": "BOOLEAN",
                             "numberOfRounds": 4,

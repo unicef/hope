@@ -781,7 +781,7 @@ class TestXLSXValidatorsMethods(APITestCase):
     )
     def test_validate_pdu_string_valid(self, subtype: str, data_row: list) -> None:
         create_pdu_flexible_attribute(
-            name="pdu_flex_attribute",
+            label="PDU Flex Attribute",
             subtype=subtype,
             number_of_rounds=1,
             rounds_names=["May"],
@@ -805,7 +805,7 @@ class TestXLSXValidatorsMethods(APITestCase):
     )
     def test_validate_pdu_string_value_error(self, subtype: str, data_row: list) -> None:
         create_pdu_flexible_attribute(
-            name="pdu_flex_attribute",
+            label="PDU Flex Attribute",
             subtype=subtype,
             number_of_rounds=1,
             rounds_names=["May"],
@@ -832,7 +832,7 @@ class TestXLSXValidatorsMethods(APITestCase):
     def test_validate_pdu_wrong_collection_date(self) -> None:
         data_row = ["Test", "bar"]
         create_pdu_flexible_attribute(
-            name="pdu_flex_attribute",
+            label="PFU Flex Attribute",
             subtype=PeriodicFieldData.STRING,
             number_of_rounds=1,
             rounds_names=["May"],
@@ -859,7 +859,7 @@ class TestXLSXValidatorsMethods(APITestCase):
     def test_validate_pdu_empty_row(self) -> None:
         data_row = ["Test", "bar"]
         create_pdu_flexible_attribute(
-            name="pdu_flex_attribute",
+            label="PDU Flex Attribute",
             subtype=PeriodicFieldData.STRING,
             number_of_rounds=1,
             rounds_names=["May"],

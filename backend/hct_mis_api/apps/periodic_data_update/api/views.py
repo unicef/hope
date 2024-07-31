@@ -28,11 +28,7 @@ from hct_mis_api.apps.core.api.mixins import (
     ProgramMixin,
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.periodic_data_update.api.caches import (
-    PDUTemplateKeyConstructor,
-    PDUUpdateKeyConstructor,
-    PeriodicFieldKeyConstructor,
-)
+from hct_mis_api.apps.periodic_data_update.api.caches import PeriodicFieldKeyConstructor
 from hct_mis_api.apps.periodic_data_update.api.serializers import (
     PeriodicDataUpdateTemplateCreateSerializer,
     PeriodicDataUpdateTemplateDetailSerializer,
@@ -80,8 +76,10 @@ class PeriodicDataUpdateTemplateViewSet(
         program = self.get_program()
         return PeriodicDataUpdateTemplate.objects.filter(business_area=business_area, program=program)
 
-    @etag_decorator(PDUTemplateKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=PDUTemplateKeyConstructor())
+    # caching disabled until we decide how to handle cache + dynamic status
+    # to enable - just uncomment the decorators and related tests
+    # @etag_decorator(PDUTemplateKeyConstructor)
+    # @cache_response(timeout=config.REST_API_TTL, key_func=PDUTemplateKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -141,8 +139,10 @@ class PeriodicDataUpdateUploadViewSet(
         program = self.get_program()
         return PeriodicDataUpdateUpload.objects.filter(template__business_area=business_area, template__program=program)
 
-    @etag_decorator(PDUUpdateKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=PDUUpdateKeyConstructor())
+    # caching disabled until we decide how to handle cache + dynamic status
+    # to enable - just uncomment the decorators and related tests
+    # @etag_decorator(PDUUpdateKeyConstructor)
+    # @cache_response(timeout=config.REST_API_TTL, key_func=PDUUpdateKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 

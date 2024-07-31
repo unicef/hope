@@ -17,7 +17,7 @@ class TestTemplateFileGenerator(TestCase):
         create_afghanistan()
         cls.program = get_program_with_dct_type_and_name()
         create_pdu_flexible_attribute(
-            name="pdu_flex_attribute",
+            label="PDU Flex Attribute",
             subtype=PeriodicFieldData.STRING,
             number_of_rounds=1,
             rounds_names=["May"],

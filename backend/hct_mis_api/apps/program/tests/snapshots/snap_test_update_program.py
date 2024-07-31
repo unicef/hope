@@ -85,7 +85,8 @@ snapshots['TestUpdateProgram::test_update_full_area_access_flag 1'] = {
                 ],
                 'pduFields': [
                     {
-                        'name': 'PDU Field To Be Removed',
+                        'label': '{"English(EN)": "PDU Field To Be Removed"}',
+                        'name': 'pdu_field_to_be_removed',
                         'pduData': {
                             'numberOfRounds': 3,
                             'roundsNames': [
@@ -97,7 +98,8 @@ snapshots['TestUpdateProgram::test_update_full_area_access_flag 1'] = {
                         }
                     },
                     {
-                        'name': 'PDU Field To Be Updated',
+                        'label': '{"English(EN)": "PDU Field To Be Updated"}',
+                        'name': 'pdu_field_to_be_updated',
                         'pduData': {
                             'numberOfRounds': 2,
                             'roundsNames': [
@@ -108,7 +110,8 @@ snapshots['TestUpdateProgram::test_update_full_area_access_flag 1'] = {
                         }
                     },
                     {
-                        'name': 'PDU Field To Be Preserved',
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
                         'pduData': {
                             'numberOfRounds': 1,
                             'roundsNames': [
@@ -171,7 +174,8 @@ snapshots['TestUpdateProgram::test_update_full_area_access_flag 2'] = {
                 ],
                 'pduFields': [
                     {
-                        'name': 'PDU Field To Be Removed',
+                        'label': '{"English(EN)": "PDU Field To Be Removed"}',
+                        'name': 'pdu_field_to_be_removed',
                         'pduData': {
                             'numberOfRounds': 3,
                             'roundsNames': [
@@ -183,7 +187,8 @@ snapshots['TestUpdateProgram::test_update_full_area_access_flag 2'] = {
                         }
                     },
                     {
-                        'name': 'PDU Field To Be Updated',
+                        'label': '{"English(EN)": "PDU Field To Be Updated"}',
+                        'name': 'pdu_field_to_be_updated',
                         'pduData': {
                             'numberOfRounds': 2,
                             'roundsNames': [
@@ -194,7 +199,8 @@ snapshots['TestUpdateProgram::test_update_full_area_access_flag 2'] = {
                         }
                     },
                     {
-                        'name': 'PDU Field To Be Preserved',
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
                         'pduData': {
                             'numberOfRounds': 1,
                             'roundsNames': [
@@ -236,7 +242,8 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_0_with_permissio
                 ],
                 'pduFields': [
                     {
-                        'name': 'PDU Field To Be Removed',
+                        'label': '{"English(EN)": "PDU Field To Be Removed"}',
+                        'name': 'pdu_field_to_be_removed',
                         'pduData': {
                             'numberOfRounds': 3,
                             'roundsNames': [
@@ -248,7 +255,8 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_0_with_permissio
                         }
                     },
                     {
-                        'name': 'PDU Field To Be Updated',
+                        'label': '{"English(EN)": "PDU Field To Be Updated"}',
+                        'name': 'pdu_field_to_be_updated',
                         'pduData': {
                             'numberOfRounds': 2,
                             'roundsNames': [
@@ -259,7 +267,8 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_0_with_permissio
                         }
                     },
                     {
-                        'name': 'PDU Field To Be Preserved',
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
                         'pduData': {
                             'numberOfRounds': 1,
                             'roundsNames': [
@@ -405,7 +414,8 @@ snapshots['TestUpdateProgram::test_update_program_partners_0_valid 1'] = {
                 ],
                 'pduFields': [
                     {
-                        'name': 'PDU Field To Be Removed',
+                        'label': '{"English(EN)": "PDU Field To Be Removed"}',
+                        'name': 'pdu_field_to_be_removed',
                         'pduData': {
                             'numberOfRounds': 3,
                             'roundsNames': [
@@ -417,7 +427,8 @@ snapshots['TestUpdateProgram::test_update_program_partners_0_valid 1'] = {
                         }
                     },
                     {
-                        'name': 'PDU Field To Be Updated',
+                        'label': '{"English(EN)": "PDU Field To Be Updated"}',
+                        'name': 'pdu_field_to_be_updated',
                         'pduData': {
                             'numberOfRounds': 2,
                             'roundsNames': [
@@ -428,7 +439,8 @@ snapshots['TestUpdateProgram::test_update_program_partners_0_valid 1'] = {
                         }
                     },
                     {
-                        'name': 'PDU Field To Be Preserved',
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
                         'pduData': {
                             'numberOfRounds': 1,
                             'roundsNames': [
@@ -522,7 +534,8 @@ snapshots['TestUpdateProgram::test_update_program_partners_all_partners_access 1
                 ],
                 'pduFields': [
                     {
-                        'name': 'PDU Field To Be Removed',
+                        'label': '{"English(EN)": "PDU Field To Be Removed"}',
+                        'name': 'pdu_field_to_be_removed',
                         'pduData': {
                             'numberOfRounds': 3,
                             'roundsNames': [
@@ -534,7 +547,8 @@ snapshots['TestUpdateProgram::test_update_program_partners_all_partners_access 1
                         }
                     },
                     {
-                        'name': 'PDU Field To Be Updated',
+                        'label': '{"English(EN)": "PDU Field To Be Updated"}',
+                        'name': 'pdu_field_to_be_updated',
                         'pduData': {
                             'numberOfRounds': 2,
                             'roundsNames': [
@@ -545,7 +559,8 @@ snapshots['TestUpdateProgram::test_update_program_partners_all_partners_access 1
                         }
                     },
                     {
-                        'name': 'PDU Field To Be Preserved',
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
                         'pduData': {
                             'numberOfRounds': 1,
                             'roundsNames': [
@@ -687,7 +702,8 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 1'] = {
             'name': 'initial name',
             'pduFields': [
                 {
-                    'name': 'PDU Field To Be Removed',
+                    'label': '{"English(EN)": "PDU Field To Be Removed"}',
+                    'name': 'pdu_field_to_be_removed',
                     'pduData': {
                         'numberOfRounds': 3,
                         'roundsNames': [
@@ -699,7 +715,8 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 1'] = {
                     }
                 },
                 {
-                    'name': 'PDU Field To Be Updated',
+                    'label': '{"English(EN)": "PDU Field To Be Updated"}',
+                    'name': 'pdu_field_to_be_updated',
                     'pduData': {
                         'numberOfRounds': 2,
                         'roundsNames': [
@@ -710,7 +727,8 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 1'] = {
                     }
                 },
                 {
-                    'name': 'PDU Field To Be Preserved',
+                    'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                    'name': 'pdu_field_to_be_preserved',
                     'pduData': {
                         'numberOfRounds': 1,
                         'roundsNames': [
@@ -750,7 +768,8 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 2'] = {
                 ],
                 'pduFields': [
                     {
-                        'name': 'PDU Field To Be Preserved',
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
                         'pduData': {
                             'numberOfRounds': 1,
                             'roundsNames': [
@@ -760,7 +779,8 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 2'] = {
                         }
                     },
                     {
-                        'name': 'PDU Field - Updated',
+                        'label': '{"English(EN)": "PDU Field - Updated"}',
+                        'name': 'pdu_field_-_updated',
                         'pduData': {
                             'numberOfRounds': 3,
                             'roundsNames': [
@@ -772,7 +792,8 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 2'] = {
                         }
                     },
                     {
-                        'name': 'PDU Field - New',
+                        'label': '{"English(EN)": "PDU Field - New"}',
+                        'name': 'pdu_field_-_new',
                         'pduData': {
                             'numberOfRounds': 4,
                             'roundsNames': [
@@ -797,7 +818,8 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 3'] = {
             'name': 'Program with Updated PDU Fields',
             'pduFields': [
                 {
-                    'name': 'PDU Field To Be Preserved',
+                    'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                    'name': 'pdu_field_to_be_preserved',
                     'pduData': {
                         'numberOfRounds': 1,
                         'roundsNames': [
@@ -807,7 +829,8 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 3'] = {
                     }
                 },
                 {
-                    'name': 'PDU Field - Updated',
+                    'label': '{"English(EN)": "PDU Field - Updated"}',
+                    'name': 'pdu_field_-_updated',
                     'pduData': {
                         'numberOfRounds': 3,
                         'roundsNames': [
@@ -819,7 +842,8 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 3'] = {
                     }
                 },
                 {
-                    'name': 'PDU Field - New',
+                    'label': '{"English(EN)": "PDU Field - New"}',
+                    'name': 'pdu_field_-_new',
                     'pduData': {
                         'numberOfRounds': 4,
                         'roundsNames': [
@@ -868,7 +892,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
                     'line': 3
                 }
             ],
-            'message': "['Time Series Field with name PDU Field 1 already exists.']",
+            'message': "['Time Series Field with name pdu_field_1 already exists.']",
             'path': [
                 'updateProgram'
             ]
@@ -888,7 +912,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
                     'line': 3
                 }
             ],
-            'message': "['Time Series Field with name PDU Field 1 already exists.']",
+            'message': "['Time Series Field with name pdu_field_1 already exists.']",
             'path': [
                 'updateProgram'
             ]

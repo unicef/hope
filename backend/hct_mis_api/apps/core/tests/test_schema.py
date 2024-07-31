@@ -100,7 +100,7 @@ class TestAllPduFields(APITestCase):
         )
         FlexibleAttributeForPDUFactory(
             program=cls.program,
-            name="PDU Field 1",
+            label="PDU Field 1",
             pdu_data=pdu_data1,
         )
         pdu_data2 = PeriodicFieldDataFactory(
@@ -110,7 +110,7 @@ class TestAllPduFields(APITestCase):
         )
         FlexibleAttributeForPDUFactory(
             program=cls.program,
-            name="PDU Field 2",
+            label="PDU Field 2",
             pdu_data=pdu_data2,
         )
 
@@ -123,13 +123,13 @@ class TestAllPduFields(APITestCase):
         )
         FlexibleAttributeForPDUFactory(
             program=other_program,
-            name="PDU Field Different Program",
+            label="PDU Field Different Program",
             pdu_data=pdu_data_different_program,
         )
         # Create a non-PDU field
         FlexibleAttribute.objects.create(
             type=FlexibleAttribute.STRING,
-            name="Not PDU Field",
+            label="Not PDU Field",
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
         )
 

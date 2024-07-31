@@ -26,6 +26,7 @@ from hct_mis_api.apps.periodic_data_update.models import (
 from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PeriodicDataUpdateExportTemplateService,
 )
+from hct_mis_api.apps.periodic_data_update.utils import field_label_to_field_name
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -71,7 +72,7 @@ def individual(program: Program) -> Individual:
 @pytest.fixture
 def string_attribute(program: Program) -> FlexibleAttribute:
     return create_flexible_attribute(
-        name="Test String Attribute",
+        label="Test String Attribute",
         subtype=FlexibleAttribute.STRING,
         number_of_rounds=1,
         rounds_names=["Test Round"],
@@ -82,7 +83,7 @@ def string_attribute(program: Program) -> FlexibleAttribute:
 @pytest.fixture
 def date_attribute(program: Program) -> FlexibleAttribute:
     return create_flexible_attribute(
-        name="Test String Attribute",
+        label="Test Date Attribute",
         subtype=FlexibleAttribute.DATE,
         number_of_rounds=1,
         rounds_names=["Test Round"],
@@ -91,9 +92,11 @@ def date_attribute(program: Program) -> FlexibleAttribute:
 
 
 def create_flexible_attribute(
-    name: str, subtype: str, number_of_rounds: int, rounds_names: list[str], program: Program
+    label: str, subtype: str, number_of_rounds: int, rounds_names: list[str], program: Program
 ) -> FlexibleAttribute:
+    name = field_label_to_field_name(label)
     flexible_attribute = FlexibleAttribute.objects.create(
+        label={"English(EN)": label},
         name=name,
         type=FlexibleAttribute.PDU,
         associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
@@ -214,7 +217,7 @@ class TestPeriodicDataUpdateUpload:
         assert pageIndividuals.getStatusContainer().text == "FAILED"
         assert pageIndividuals.getUpdateStatus(periodic_data_update_upload.pk).text == "FAILED"
         pageIndividuals.getUpdateDetailsBtn(periodic_data_update_upload.pk).click()
-        error_text = "Row: 2\nTest String Attribute__round_value\nEnter a valid date."
+        error_text = "Row: 2\ntest_string_attribute__round_value\nEnter a valid date."
         assert pageIndividuals.getPduFormErrors().text == error_text
 
     def test_periodic_data_update_upload_error(

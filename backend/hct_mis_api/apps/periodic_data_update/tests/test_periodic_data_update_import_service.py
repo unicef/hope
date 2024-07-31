@@ -71,28 +71,28 @@ class TestPeriodicDataUpdateImportService(TestCase):
         )
         cls.individual = cls.individuals[0]
         cls.string_attribute = create_pdu_flexible_attribute(
-            name="string_attribute",
+            label="String Attribute",
             subtype=PeriodicFieldData.STRING,
             number_of_rounds=1,
             rounds_names=["May"],
             program=cls.program,
         )
         cls.decimal_attribute = create_pdu_flexible_attribute(
-            name="decimal_attribute",
+            label="Decimal Attribute",
             subtype=PeriodicFieldData.DECIMAL,
             number_of_rounds=1,
             rounds_names=["May"],
             program=cls.program,
         )
         cls.boolean_attribute = create_pdu_flexible_attribute(
-            name="boolean_attribute",
+            label="Boolean Attribute",
             subtype=PeriodicFieldData.BOOLEAN,
             number_of_rounds=1,
             rounds_names=["May"],
             program=cls.program,
         )
         cls.date_attribute = create_pdu_flexible_attribute(
-            name="date_attribute",
+            label="Date Attribute",
             subtype=PeriodicFieldData.DATE,
             number_of_rounds=1,
             rounds_names=["May"],

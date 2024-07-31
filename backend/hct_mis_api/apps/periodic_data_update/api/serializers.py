@@ -122,11 +122,16 @@ class PeriodicFieldDataSerializer(serializers.ModelSerializer):
 
 class PeriodicFieldSerializer(EncodedIdSerializerMixin):
     pdu_data = PeriodicFieldDataSerializer()
+    label = serializers.SerializerMethodField()
 
     class Meta:
         model = FlexibleAttribute
         fields = (
             "id",
             "name",
+            "label",
             "pdu_data",
         )
+
+    def get_label(self, obj: FlexibleAttribute) -> str:
+        return obj.label.get("English(EN)", "")

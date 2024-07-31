@@ -275,7 +275,8 @@ snapshots['TestCopyProgram::test_copy_program_with_pdu_fields 1'] = {
                 ],
                 'pduFields': [
                     {
-                        'name': 'PDU Field 1',
+                        'label': '{"English(EN)": "PDU Field 1"}',
+                        'name': 'pdu_field_1',
                         'pduData': {
                             'numberOfRounds': 3,
                             'roundsNames': [
@@ -287,7 +288,8 @@ snapshots['TestCopyProgram::test_copy_program_with_pdu_fields 1'] = {
                         }
                     },
                     {
-                        'name': 'PDU Field 2',
+                        'label': '{"English(EN)": "PDU Field 2"}',
+                        'name': 'pdu_field_2',
                         'pduData': {
                             'numberOfRounds': 1,
                             'roundsNames': [
@@ -297,7 +299,8 @@ snapshots['TestCopyProgram::test_copy_program_with_pdu_fields 1'] = {
                         }
                     },
                     {
-                        'name': 'PDU Field 3',
+                        'label': '{"English(EN)": "PDU Field 3"}',
+                        'name': 'pdu_field_3',
                         'pduData': {
                             'numberOfRounds': 2,
                             'roundsNames': [
@@ -308,7 +311,8 @@ snapshots['TestCopyProgram::test_copy_program_with_pdu_fields 1'] = {
                         }
                     },
                     {
-                        'name': 'PDU Field 4',
+                        'label': '{"English(EN)": "PDU Field 4"}',
+                        'name': 'pdu_field_4',
                         'pduData': {
                             'numberOfRounds': 4,
                             'roundsNames': [
@@ -362,7 +366,7 @@ snapshots['TestCopyProgram::test_copy_program_with_pdu_fields_existing_field_nam
                     'line': 3
                 }
             ],
-            'message': "['Time Series Field with name PDU Field 1 already exists.']",
+            'message': "['Time Series Field with name pdu_field_1 already exists.']",
             'path': [
                 'copyProgram'
             ]

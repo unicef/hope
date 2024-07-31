@@ -4477,7 +4477,7 @@ export type Node = {
 
 export type PduFieldInput = {
   id?: InputMaybe<Scalars['String']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
+  label?: InputMaybe<Scalars['String']['input']>;
   pduData?: InputMaybe<PeriodicFieldDataInput>;
 };
 
@@ -5486,6 +5486,7 @@ export enum PeriodicFieldDataSubtype {
 export type PeriodicFieldNode = Node & {
   __typename?: 'PeriodicFieldNode';
   id: Scalars['ID']['output'];
+  label: Scalars['JSONString']['output'];
   name: Scalars['String']['output'];
   pduData?: Maybe<PeriodicFieldDataNode>;
 };
@@ -27653,6 +27654,7 @@ export type PeriodicFieldDataNodeResolvers<ContextType = any, ParentType extends
 
 export type PeriodicFieldNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PeriodicFieldNode'] = ResolversParentTypes['PeriodicFieldNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  label?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   pduData?: Resolver<Maybe<ResolversTypes['PeriodicFieldDataNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

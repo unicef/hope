@@ -62,7 +62,7 @@ class TestRdiXlsxPeople(BaseElasticSearchTestCase):
             business_area=cls.business_area, program=cls.program, import_data=cls.import_data
         )
         cls.string_attribute = create_pdu_flexible_attribute(
-            name="pdu_string_attribute",
+            label="PDU String Attribute",
             subtype=PeriodicFieldData.STRING,
             number_of_rounds=1,
             rounds_names=["May"],

@@ -47,7 +47,7 @@ class TestProgramQuery(APITestCase):
         )
         FlexibleAttributeForPDUFactory(
             program=cls.program,
-            name="PDU Field 1",
+            label="PDU Field 1",
             pdu_data=pdu_data1,
         )
         pdu_data2 = PeriodicFieldDataFactory(
@@ -57,7 +57,7 @@ class TestProgramQuery(APITestCase):
         )
         FlexibleAttributeForPDUFactory(
             program=cls.program,
-            name="PDU Field 2",
+            label="PDU Field 2",
             pdu_data=pdu_data2,
         )
         pdu_data3 = PeriodicFieldDataFactory(
@@ -67,7 +67,7 @@ class TestProgramQuery(APITestCase):
         )
         FlexibleAttributeForPDUFactory(
             program=cls.program,
-            name="PDU Field 3",
+            label="PDU Field 3",
             pdu_data=pdu_data3,
         )
         pdu_data4 = PeriodicFieldDataFactory(
@@ -77,7 +77,7 @@ class TestProgramQuery(APITestCase):
         )
         FlexibleAttributeForPDUFactory(
             program=cls.program,
-            name="PDU Field 4",
+            label="PDU Field 4",
             pdu_data=pdu_data4,
         )
 
@@ -91,7 +91,7 @@ class TestProgramQuery(APITestCase):
         )
         FlexibleAttributeForPDUFactory(
             program=program_other,
-            name="PDU Field Other",
+            label="PDU Field Other",
             pdu_data=pdu_data_other,
         )
 

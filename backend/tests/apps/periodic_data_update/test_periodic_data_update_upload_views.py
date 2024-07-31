@@ -168,6 +168,7 @@ class TestPeriodicDataUpdateUploadViews:
             "created_by": self.pdu_upload_program2.created_by.get_full_name(),
         } not in response_json
 
+    @pytest.mark.skip(reason="Caching is disabled for now")
     def test_list_periodic_data_update_uploads_caching(
         self,
         api_client: Callable,
@@ -266,7 +267,7 @@ class TestPeriodicDataUpdateUploadViews:
         )
         pdu_field = FlexibleAttributeForPDUFactory(
             program=self.program1,
-            name="PDU Field",
+            label="PDU Field",
             pdu_data=pdu_data,
         )
         pdu_template = PeriodicDataUpdateTemplateFactory(
@@ -334,7 +335,7 @@ class TestPeriodicDataUpdateUploadViews:
         )
         pdu_field = FlexibleAttributeForPDUFactory(
             program=self.program1,
-            name="PDU Field",
+            label="PDU Field",
             pdu_data=pdu_data,
         )
         pdu_template = PeriodicDataUpdateTemplateFactory(

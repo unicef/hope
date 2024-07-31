@@ -13,6 +13,7 @@ from hct_mis_api.apps.core.models import (
     PeriodicFieldData,
     StorageFile,
 )
+from hct_mis_api.apps.periodic_data_update.utils import field_label_to_field_name
 from hct_mis_api.apps.program.models import Program
 
 faker = Faker()
@@ -130,9 +131,9 @@ class PeriodicFieldDataFactory(DjangoModelFactory):
 
 
 class FlexibleAttributeForPDUFactory(DjangoModelFactory):
-    name = factory.Faker("word")
     associated_with = FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
-    label = {"English(EN)": "PDU field"}
+    label = factory.Faker("word")
+    name = factory.LazyAttribute(lambda instance: field_label_to_field_name(instance.label))
     type = FlexibleAttribute.PDU
     pdu_data = factory.SubFactory(PeriodicFieldDataFactory)
 
@@ -142,18 +143,27 @@ class FlexibleAttributeForPDUFactory(DjangoModelFactory):
 
         return ProgramFactory()
 
+    @classmethod
+    def _create(cls, target_class: Any, *args: Any, **kwargs: Any) -> FlexibleAttribute:
+        label = kwargs.pop("label", None)
+        obj = super()._create(target_class, *args, **kwargs)
+        obj.label = {"English(EN)": label}
+        obj.save()
+        return obj
+
     class Meta:
         model = FlexibleAttribute
 
 
 def create_pdu_flexible_attribute(
-    name: str, subtype: str, number_of_rounds: int, rounds_names: list[str], program: Program
+    label: str, subtype: str, number_of_rounds: int, rounds_names: list[str], program: Program
 ) -> FlexibleAttribute:
+    name = field_label_to_field_name(label)
     flexible_attribute = FlexibleAttribute.objects.create(
-        name=name,
         type=FlexibleAttribute.PDU,
         associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
-        label={"English(EN)": "PDU field"},
+        label={"English(EN)": label},
+        name=name,
         program=program,
     )
     flexible_attribute.pdu_data = PeriodicFieldData.objects.create(
