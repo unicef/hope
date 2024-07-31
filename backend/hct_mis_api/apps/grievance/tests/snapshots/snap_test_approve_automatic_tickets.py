@@ -42,6 +42,109 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
     ]
 }
 
+snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_new_input_fields 1'] = {
+    'data': {
+        'approveNeedsAdjudication': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 11,
+                    'line': 5
+                }
+            ],
+            'message': 'Only one option for duplicate or distinct or clear individuals is available',
+            'path': [
+                'approveNeedsAdjudication'
+            ]
+        }
+    ]
+}
+
+snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_new_input_fields 2'] = {
+    'data': {
+        'approveNeedsAdjudication': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 11,
+                    'line': 5
+                }
+            ],
+            'message': '["A user can not flag individuals when a ticket is not in the \'For Approval\' status"]',
+            'path': [
+                'approveNeedsAdjudication'
+            ]
+        }
+    ]
+}
+
+snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_new_input_fields 3'] = {
+    'data': {
+        'approveNeedsAdjudication': {
+            'grievanceTicket': {
+                'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
+                'needsAdjudicationTicketDetails': {
+                    'selectedDistinct': [
+                    ],
+                    'selectedDuplicates': [
+                        {
+                            'unicefId': 'IND-222-222'
+                        }
+                    ],
+                    'selectedIndividual': None
+                }
+            }
+        }
+    }
+}
+
+snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_new_input_fields 4'] = {
+    'data': {
+        'approveNeedsAdjudication': {
+            'grievanceTicket': {
+                'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
+                'needsAdjudicationTicketDetails': {
+                    'selectedDistinct': [
+                        {
+                            'unicefId': 'IND-123-123'
+                        }
+                    ],
+                    'selectedDuplicates': [
+                        {
+                            'unicefId': 'IND-222-222'
+                        }
+                    ],
+                    'selectedIndividual': None
+                }
+            }
+        }
+    }
+}
+
+snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_new_input_fields 5'] = {
+    'data': {
+        'approveNeedsAdjudication': {
+            'grievanceTicket': {
+                'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
+                'needsAdjudicationTicketDetails': {
+                    'selectedDistinct': [
+                    ],
+                    'selectedDuplicates': [
+                        {
+                            'unicefId': 'IND-222-222'
+                        }
+                    ],
+                    'selectedIndividual': None
+                }
+            }
+        }
+    }
+}
+
 snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_should_allow_uncheck_selected_individual_0_with_permission 1'] = {
     'data': {
         'approveNeedsAdjudication': {

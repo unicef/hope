@@ -57,8 +57,9 @@ COPY --from=waitforit /data/waitforit /usr/local/bin/waitforit
 # Dist builder image
 FROM base as builder
 
-RUN pip install pdm==2.15.2 &&\
-    pip install --upgrade pip setuptools &&\
+RUN pip install --upgrade pip &&\
+    pip install pdm==2.15.2 &&\
+    pip install setuptools==71.1.0 &&\
     pdm config cache_dir /var/cache/pdm &&\
     pdm config python.use_venv false &&\
     pdm config venv.in_project true &&\
@@ -66,7 +67,7 @@ RUN pip install pdm==2.15.2 &&\
 
 WORKDIR $PDM_PACKAGES
 COPY backend/pyproject.toml backend/pdm.lock ./
-RUN pdm sync --prod --no-editable --no-self
+RUN pdm sync --prod --no-editable --no-self --no-isolation
 
 # Dev image
 FROM builder AS dev
@@ -82,7 +83,7 @@ RUN apt-get update \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-RUN pdm sync --no-editable --no-self
+RUN pdm sync --no-editable --no-self --no-isolation
 
 WORKDIR $CODE
 COPY ./backend ./
