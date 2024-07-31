@@ -46,6 +46,7 @@ from page_object.programme_population.individuals import Individuals
 from page_object.programme_population.individuals_details import IndividualsDetails
 from page_object.programme_population.periodic_data_update_templates import (
     PeriodicDatUpdateTemplates,
+    PeriodicDatUpdateTemplatesDetails,
 )
 from page_object.programme_population.periodic_data_update_uploads import (
     PeriodicDataUpdateUploads,
@@ -298,6 +299,14 @@ def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> Individu
 @pytest.fixture
 def pagePeriodicDataUpdateTemplates(request: FixtureRequest, browser: Chrome) -> PeriodicDatUpdateTemplates:
     yield PeriodicDatUpdateTemplates(browser)
+
+
+@pytest.fixture
+def pagePeriodicDataUpdateTemplatesDetails(
+    request: FixtureRequest,
+    browser: Chrome,
+) -> PeriodicDatUpdateTemplatesDetails:
+    yield PeriodicDatUpdateTemplatesDetails(browser)
 
 
 @pytest.fixture
