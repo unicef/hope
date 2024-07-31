@@ -198,6 +198,8 @@ class TestAllProgramsQuery(APITestCase):
         self.create_user_role_with_permissions(
             self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.business_area
         )
+        self.user.partner = self.unicef_partner
+        self.user.save()
         self.snapshot_graphql_request(
             request_string=self.ALL_PROGRAMS_QUERY_WITH_PROGRAM_CYCLE_FILTERS,
             context={

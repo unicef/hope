@@ -192,15 +192,15 @@ snapshots['TestAllProgramsQuery::test_all_programs_with_cycles_filter 3'] = {
                                 {
                                     'node': {
                                         'status': 'ACTIVE',
-                                        'title': 'Default Cycle',
-                                        'totalDeliveredQuantityUsd': 0.0
+                                        'title': 'Second CYCLE with total_delivered_quantity_usd',
+                                        'totalDeliveredQuantityUsd': 999.0
                                     }
                                 },
                                 {
                                     'node': {
                                         'status': 'ACTIVE',
-                                        'title': 'Second CYCLE with total_delivered_quantity_usd',
-                                        'totalDeliveredQuantityUsd': 999.0
+                                        'title': 'Default Cycle',
+                                        'totalDeliveredQuantityUsd': 0.0
                                     }
                                 }
                             ],
