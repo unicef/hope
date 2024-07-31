@@ -154,3 +154,175 @@ class PeriodicDatUpdateTemplates(BaseComponents):
 
     def getDetailModal(self) -> WebElement:
         return self.wait_for(self.detailModal)
+
+
+class PeriodicDatUpdateTemplatesDetails(BaseComponents):
+    navProgramPopulation = 'a[data-cy="nav-Program Population"]'
+    navHouseholdMembers = 'a[data-cy="nav-Household members"]'
+    navProgramDetails = 'a[data-cy="nav-Program Details"]'
+    pageHeaderContainer = 'div[data-cy="page-header-container"]'
+    arrow_back = 'div[data-cy="arrow_back"]'
+    breadcrumbsContainer = 'div[data-cy="breadcrumbs-container"]'
+    breadcrumbsElementContainer = 'span[data-cy="breadcrumbs-element-container"]'
+    breadcrumbsLink = 'a[data-cy="breadcrumbs-link"]'
+    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
+    title = 'h6[data-cy="title"]'
+    labelKey = 'div[data-cy="label-key"]'
+    filtersRegistrationDataImport = 'div[data-cy="filters-registration-data-import"]'
+    registrationDataImportInput = 'div[data-cy="Registration Data Import-input"]'
+    filtersTargetPopulationAutocomplete = 'div[data-cy="filters-target-population-autocomplete"]'
+    targetPopulationInput = 'div[data-cy="Target Population-input"]'
+    selectFilter = 'div[data-cy="select-filter"]'
+    indFiltersGender = 'div[data-cy="ind-filters-gender"]'
+    hhFiltersAgeFrom = 'div[data-cy="hh-filters-age-from"]'
+    hhFiltersAgeTo = 'div[data-cy="hh-filters-age-to"]'
+    indFiltersRegDateFrom = 'div[data-cy="ind-filters-reg-date-from"]'
+    indFiltersRegDateTo = 'div[data-cy="ind-filters-reg-date-to"]'
+    indFiltersGrievanceTicket = 'div[data-cy="ind-filters-grievance-ticket"]'
+    filterAdministrativeArea = 'div[data-cy="filter-administrative-area"]'
+    adminLevel1Input = 'div[data-cy="Admin Level 1-input"]'
+    adminLevel2Input = 'div[data-cy="Admin Level 2-input"]'
+    indFiltersReceivedAssistance = 'div[data-cy="ind-filters-received-assistance"]'
+    buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
+    buttonFiltersApply = 'button[data-cy="button-filters-apply"]'
+    cancelButton = 'a[data-cy="cancel-button"]'
+    submitButton = 'button[data-cy="submit-button"]'
+    tableContainer = 'div[data-cy="table-container"]'
+    table = 'table[data-cy="table"]'
+    tableHeaderCheckbox = 'th[data-cy="table-header-checkbox"]'
+    tableHeaderField = 'th[data-cy="table-header-field"]'
+    tableHeaderRoundnumber = 'th[data-cy="table-header-roundNumber"]'
+    tableRow = 'tr[data-cy="table-row-{}"]'
+    checkbox = 'span[data-cy="checkbox-{}"]'
+    tableCellField = 'td[data-cy="table-cell-field-{}"]'
+    tableCellRoundnumber = 'td[data-cy="table-cell-roundNumber-{}"]'
+    selectRoundnumber = 'div[data-cy="select-roundNumber-{}"]'
+    backButton = 'button[data-cy="back-button"]'
+
+    def getNavProgramPopulation(self) -> WebElement:
+        return self.wait_for(self.navProgramPopulation)
+
+    def getNavHouseholdMembers(self) -> WebElement:
+        return self.wait_for(self.navHouseholdMembers)
+
+    def getNavProgramDetails(self) -> WebElement:
+        return self.wait_for(self.navProgramDetails)
+
+    def getPageHeaderContainer(self) -> WebElement:
+        return self.wait_for(self.pageHeaderContainer)
+
+    def getArrow_back(self) -> WebElement:
+        return self.wait_for(self.arrow_back)
+
+    def getBreadcrumbsContainer(self) -> WebElement:
+        return self.wait_for(self.breadcrumbsContainer)
+
+    def getBreadcrumbsElementContainer(self) -> WebElement:
+        return self.wait_for(self.breadcrumbsElementContainer)
+
+    def getBreadcrumbsLink(self) -> WebElement:
+        return self.wait_for(self.breadcrumbsLink)
+
+    def getPageHeaderTitle(self) -> WebElement:
+        return self.wait_for(self.pageHeaderTitle)
+
+    def getTitle(self) -> WebElement:
+        return self.wait_for(self.title)
+
+    def getLabelKey(self) -> WebElement:
+        return self.wait_for(self.labelKey)
+
+    def getFiltersRegistrationDataImport(self) -> WebElement:
+        return self.wait_for(self.filtersRegistrationDataImport)
+
+    def getRegistrationDataImportInput(self) -> WebElement:
+        return self.wait_for(self.registrationDataImportInput)
+
+    def getFiltersTargetPopulationAutocomplete(self) -> WebElement:
+        return self.wait_for(self.filtersTargetPopulationAutocomplete)
+
+    def getTargetPopulationInput(self) -> WebElement:
+        return self.wait_for(self.targetPopulationInput)
+
+    def getSelectFilter(self) -> WebElement:
+        return self.wait_for(self.selectFilter)
+
+    def getIndFiltersGender(self) -> WebElement:
+        return self.wait_for(self.indFiltersGender)
+
+    def getHhFiltersAgeFrom(self) -> WebElement:
+        return self.wait_for(self.hhFiltersAgeFrom)
+
+    def getHhFiltersAgeTo(self) -> WebElement:
+        return self.wait_for(self.hhFiltersAgeTo)
+
+    def getIndFiltersRegDateFrom(self) -> WebElement:
+        return self.wait_for(self.indFiltersRegDateFrom)
+
+    def getIndFiltersRegDateTo(self) -> WebElement:
+        return self.wait_for(self.indFiltersRegDateTo)
+
+    def getIndFiltersGrievanceTicket(self) -> WebElement:
+        return self.wait_for(self.indFiltersGrievanceTicket)
+
+    def getFilterAdministrativeArea(self) -> WebElement:
+        return self.wait_for(self.filterAdministrativeArea)
+
+    def getAdminLevel1Input(self) -> WebElement:
+        return self.wait_for(self.adminLevel1Input)
+
+    def getAdminLevel2Input(self) -> WebElement:
+        return self.wait_for(self.adminLevel2Input)
+
+    def getIndFiltersReceivedAssistance(self) -> WebElement:
+        return self.wait_for(self.indFiltersReceivedAssistance)
+
+    def getButtonFiltersClear(self) -> WebElement:
+        return self.wait_for(self.buttonFiltersClear)
+
+    def getButtonFiltersApply(self) -> WebElement:
+        return self.wait_for(self.buttonFiltersApply)
+
+    def getCancelButton(self) -> WebElement:
+        return self.wait_for(self.cancelButton)
+
+    def getSubmitButton(self) -> WebElement:
+        return self.wait_for(self.submitButton)
+
+    def getTableContainer(self) -> WebElement:
+        return self.wait_for(self.tableContainer)
+
+    def getTable(self) -> WebElement:
+        return self.wait_for(self.table)
+
+    def getTableHeaderCheckbox(self) -> WebElement:
+        return self.wait_for(self.tableHeaderCheckbox)
+
+    def getTableHeaderField(self) -> WebElement:
+        return self.wait_for(self.tableHeaderField)
+
+    def getTableHeaderRoundnumber(self) -> WebElement:
+        return self.wait_for(self.tableHeaderRoundnumber)
+
+    def getTableRow(self, index: str) -> WebElement:
+        locator = self.tableRow.format(index)
+        return self.wait_for(locator)
+
+    def getCheckbox(self, index: str) -> WebElement:
+        locator = self.checkbox.format(index)
+        return self.wait_for(locator)
+
+    def getTableCellField(self, index: str) -> WebElement:
+        locator = self.tableCellField.format(index)
+        return self.wait_for(locator)
+
+    def getTableCellRoundnumber(self, index: str) -> WebElement:
+        locator = self.tableCellRoundnumber.format(index)
+        return self.wait_for(locator)
+
+    def getSelectRoundnumber(self, index: str) -> WebElement:
+        locator = self.selectRoundnumber.format(index)
+        return self.wait_for(locator)
+
+    def getBackButton(self) -> WebElement:
+        return self.wait_for(self.backButton)

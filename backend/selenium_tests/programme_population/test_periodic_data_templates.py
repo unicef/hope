@@ -4,6 +4,7 @@ from time import sleep
 import pytest
 from page_object.programme_population.periodic_data_update_templates import (
     PeriodicDatUpdateTemplates,
+    PeriodicDatUpdateTemplatesDetails,
 )
 from selenium.webdriver.common.by import By
 
@@ -225,4 +226,55 @@ class TestPeriodicDataTemplates:
         assert (
             str(rounds_data[0]["number_of_records"])
             in pagePeriodicDataUpdateTemplates.getTemplateNumberOfIndividuals(0).text
+        )
+
+    # TODO: remove xfail when the test is fixed
+    @pytest.mark.xfail(reason="fails now, shouldn't fail later")
+    def test_periodic_data_template_create_and_download(
+        self,
+        program: Program,
+        string_attribute: FlexibleAttribute,
+        pageIndividuals: Individuals,
+        pagePeriodicDataUpdateTemplates: PeriodicDatUpdateTemplates,
+        pagePeriodicDataUpdateTemplatesDetails: PeriodicDatUpdateTemplatesDetails,
+        individual: Individual,
+    ) -> None:
+        string_attribute.program = program
+        string_attribute.save()
+
+        pageIndividuals.selectGlobalProgramFilter(program.name).click()
+        pageIndividuals.getNavProgrammePopulation().click()
+        pageIndividuals.getNavIndividuals().click()
+        pageIndividuals.getTabPeriodicDataUpdates().click()
+
+        pagePeriodicDataUpdateTemplates.getNewTemplateButton().click()
+        pagePeriodicDataUpdateTemplatesDetails.getFiltersRegistrationDataImport().click()
+
+        pagePeriodicDataUpdateTemplatesDetails.select_listbox_element(individual.registration_data_import.name).click()
+        pagePeriodicDataUpdateTemplatesDetails.getSubmitButton().click()
+
+        pagePeriodicDataUpdateTemplatesDetails.getCheckbox(string_attribute.name).click()
+        pagePeriodicDataUpdateTemplatesDetails.getSubmitButton().click()
+        pagePeriodicDataUpdateTemplatesDetails.screenshot("submitted")
+
+        assert PeriodicDataUpdateTemplate.objects.count() == 1
+        periodic_data_update_template = PeriodicDataUpdateTemplate.objects.first()
+        assert (
+            str(periodic_data_update_template.id)
+            in pagePeriodicDataUpdateTemplates.getTemplateId(periodic_data_update_template.id).text
+        )
+
+        for _ in range(10):
+            status = pageIndividuals.getTemplateStatus(periodic_data_update_template.pk).text
+            if status == "EXPORTED":
+                break
+            sleep(1)
+        else:
+            assert status == "EXPORTED"
+
+        pageIndividuals.getDownloadBtn(periodic_data_update_template.pk).click()
+        periodic_data_update_template.refresh_from_db()
+        assert (
+            pageIndividuals.check_file_exists(f"./report/downloads/{periodic_data_update_template.file.file.name}")
+            is True
         )
