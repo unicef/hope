@@ -67,11 +67,11 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
         {program.status === 'ACTIVE' && (
           <>
             {(row.status === 'Draft' || row.status === 'Active') && (
-              <EditProgramCycle programCycle={row} />
+              <EditProgramCycle program={program} programCycle={row} />
             )}
 
             {row.status === 'Draft' && data.results.length > 1 && (
-              <DeleteProgramCycle programCycle={row} />
+              <DeleteProgramCycle program={program} programCycle={row} />
             )}
           </>
         )}
@@ -81,6 +81,18 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
 
   if (isLoading) {
     return null;
+  }
+
+  const actions = [];
+
+  if (program.status !== 'DRAFT') {
+    actions.push(
+      <AddNewProgramCycle
+        key="add-new"
+        program={program}
+        programCycles={data.results}
+      />,
+    );
   }
 
   return (
@@ -93,13 +105,7 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
       isLoading={isLoading}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
-      actions={[
-        <AddNewProgramCycle
-          key="add-new"
-          program={program}
-          programCycles={data.results}
-        />,
-      ]}
+      actions={actions}
     />
   );
 };

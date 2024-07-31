@@ -7,8 +7,8 @@ import { DialogActions } from '@containers/dialogs/DialogActions';
 import { LoadingButton } from '@core/LoadingButton';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Field, Form, Formik, FormikHelpers, FormikValues } from 'formik';
-import { today } from '@utils/utils';
+import { Field, Form, Formik, FormikValues } from 'formik';
+import { decodeIdString, today } from '@utils/utils';
 import moment from 'moment';
 import * as Yup from 'yup';
 import { GreyText } from '@core/GreyText';
@@ -16,7 +16,16 @@ import Grid from '@mui/material/Grid';
 import { LabelizedField } from '@core/LabelizedField';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
-import { ProgramCycle } from '@api/programCycleApi';
+import {
+  ProgramCycle,
+  ProgramCycleUpdate,
+  ProgramCycleUpdateResponse,
+  updateProgramCycle,
+} from '@api/programCycleApi';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { DefaultError } from '@tanstack/query-core';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 
 interface UpdateProgramCycleProps {
   program: ProgramQuery['program'];
@@ -34,6 +43,9 @@ export const UpdateProgramCycle = ({
   step,
 }: UpdateProgramCycleProps) => {
   const { t } = useTranslation();
+  const { businessArea } = useBaseUrl();
+  const queryClient = useQueryClient();
+  const { showMessage } = useSnackbar();
 
   const validationSchemaPreviousProgramCycle = Yup.object().shape({
     previousProgramCycleEndDate: Yup.date()
@@ -62,12 +74,38 @@ export const UpdateProgramCycle = ({
     previousProgramCycleEndDate: undefined,
   };
 
-  // TODO connect with API
-  const handleSubmit = (
-    values: FormikValues,
-    formikHelpers: FormikHelpers<FormikValues>,
-  ) => {
-    onSubmit();
+  const { mutateAsync, isPending } = useMutation<
+    ProgramCycleUpdateResponse,
+    DefaultError,
+    ProgramCycleUpdate
+  >({
+    mutationFn: async (body) => {
+      return updateProgramCycle(
+        businessArea,
+        program.id,
+        decodeIdString(programCycle.id),
+        body,
+      );
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['programCycles', businessArea, program.id],
+      });
+      onSubmit();
+    },
+  });
+
+  const handleSubmit = async (values: FormikValues) => {
+    try {
+      await mutateAsync({
+        title: programCycle.title,
+        start_date: programCycle.start_date,
+        end_date: values.previousProgramCycleEndDate,
+      });
+      showMessage(t('Programme Cycle Updated'));
+    } catch (e) {
+      showMessage(e.message);
+    }
   };
 
   return (
@@ -130,7 +168,7 @@ export const UpdateProgramCycle = ({
                 {t('CANCEL')}
               </Button>
               <LoadingButton
-                loading={false}
+                loading={isPending}
                 type="submit"
                 color="primary"
                 variant="contained"

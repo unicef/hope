@@ -7,6 +7,8 @@ import AddIcon from '@mui/icons-material/Add';
 import { CreateProgramCycle } from '@containers/tables/ProgramCycle/NewProgramCycle/CreateProgramCycle';
 import { UpdateProgramCycle } from '@containers/tables/ProgramCycle/NewProgramCycle/UpdateProgramCycle';
 import { ProgramCycle } from '@api/programCycleApi';
+import { useQueryClient } from '@tanstack/react-query';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface AddNewProgramCycleProps {
   program: ProgramQuery['program'];
@@ -20,9 +22,13 @@ export const AddNewProgramCycle = ({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
+  const queryClient = useQueryClient();
+  const { businessArea } = useBaseUrl();
 
-  const handleClose = () => {
-    // TODO refresh program cycles list
+  const handleClose = async () => {
+    await queryClient.invalidateQueries({
+      queryKey: ['programCycles', businessArea, program.id],
+    });
     setOpen(false);
   };
 
@@ -31,7 +37,6 @@ export const AddNewProgramCycle = ({
   };
 
   const handleSubmit = (): void => {
-    // TODO refresh program cycles list
     setOpen(false);
   };
 

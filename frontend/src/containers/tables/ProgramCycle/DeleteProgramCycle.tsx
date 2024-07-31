@@ -15,28 +15,63 @@ import { DialogDescription } from '@containers/dialogs/DialogDescription';
 import { GreyText } from '@core/GreyText';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { LoadingButton } from '@core/LoadingButton';
+import { ProgramQuery } from '@generated/graphql';
+import {
+  deleteProgramCycle,
+  ProgramCycle,
+  ProgramCycleUpdate,
+  ProgramCycleUpdateResponse,
+  updateProgramCycle,
+} from '@api/programCycleApi';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { DefaultError } from '@tanstack/query-core';
+import { decodeIdString } from '@utils/utils';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const WhiteDeleteIcon = styled(DeleteIcon)`
   color: #fff;
 `;
 
 interface DeleteProgramCycleProps {
-  programCycle;
+  program: ProgramQuery['program'];
+  programCycle: ProgramCycle;
 }
 
 export const DeleteProgramCycle = ({
+  program,
   programCycle,
 }: DeleteProgramCycleProps): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const { businessArea } = useBaseUrl();
+  const { showMessage } = useSnackbar();
+  const queryClient = useQueryClient();
 
-  // TODO connect with API
-  const handleDelete = (): void => {
-    console.log('Delete program cycle', programCycle);
-    setOpen(false);
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: async () => {
+      return deleteProgramCycle(
+        businessArea,
+        program.id,
+        decodeIdString(programCycle.id),
+      );
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['programCycles', businessArea, program.id],
+      });
+      setOpen(false);
+    },
+  });
+
+  const handleDelete = async (): Promise<void> => {
+    try {
+      await mutateAsync();
+      showMessage(t('Programme Cycle Deleted'));
+    } catch (e) {
+      showMessage(e.message);
+    }
   };
-
-  const loading = false;
 
   return (
     <>
@@ -60,7 +95,7 @@ export const DeleteProgramCycle = ({
           <DialogActions>
             <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <LoadingButton
-              loading={loading}
+              loading={isPending}
               error
               type="submit"
               variant="contained"

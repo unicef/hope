@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import { today } from '@utils/utils';
+import { decodeIdString, today } from '@utils/utils';
 import moment from 'moment';
 import {
   Button,
@@ -23,51 +23,88 @@ import { FormikDateField } from '@shared/Formik/FormikDateField';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { LoadingButton } from '@core/LoadingButton';
-import { ProgramCycle } from '@api/programCycleApi';
+import {
+  ProgramCycle,
+  ProgramCycleUpdate,
+  ProgramCycleUpdateResponse,
+  updateProgramCycle,
+} from '@api/programCycleApi';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ProgramQuery } from '@generated/graphql';
+import type { DefaultError } from '@tanstack/query-core';
+import { useSnackbar } from '@hooks/useSnackBar';
 
 interface EditProgramCycleProps {
   programCycle: ProgramCycle;
+  program: ProgramQuery['program'];
 }
 
 export const EditProgramCycle = ({
   programCycle,
+  program,
 }: EditProgramCycleProps): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const { businessArea } = useBaseUrl();
+  const { showMessage } = useSnackbar();
+  const queryClient = useQueryClient();
 
-  const loading = false;
+  const { mutateAsync, isPending } = useMutation<
+    ProgramCycleUpdateResponse,
+    DefaultError,
+    ProgramCycleUpdate
+  >({
+    mutationFn: async (body) => {
+      return updateProgramCycle(
+        businessArea,
+        program.id,
+        decodeIdString(programCycle.id),
+        body,
+      );
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['programCycles', businessArea, program.id],
+      });
+      setOpen(false);
+    },
+  });
 
-  // TODO connect with API
-  const handleUpdate = (values): void => {
-    console.log(values);
-    setOpen(false);
+  const handleUpdate = async (values: any): Promise<void> => {
+    try {
+      await mutateAsync(values);
+      showMessage(t('Programme Cycle Updated'));
+    } catch (e) {
+      showMessage(e.message);
+    }
   };
 
   const initialValues: {
     [key: string]: string | boolean | number;
   } = {
-    name: programCycle.title,
-    startDate: programCycle.start_date,
-    endDate: programCycle.end_date,
+    title: programCycle.title,
+    start_date: programCycle.start_date,
+    end_date: programCycle.end_date,
   };
 
   const validationSchema = Yup.object().shape({
-    name: Yup.string()
+    title: Yup.string()
       .required(t('Programme Cycle title is required'))
       .min(2, t('Too short'))
       .max(150, t('Too long')),
-    startDate: Yup.date().required(t('Start Date is required')),
-    endDate: Yup.date()
+    start_date: Yup.date().required(t('Start Date is required')),
+    end_date: Yup.date()
       .required(t('End Date is required'))
       .min(today, t('End Date cannot be in the past'))
       .when(
-        'startDate',
-        (startDate, schema) =>
-          startDate &&
+        'start_date',
+        (start_date, schema) =>
+          start_date &&
           schema.min(
-            startDate,
+            start_date,
             `${t('End date have to be greater than')} ${moment(
-              startDate,
+              start_date,
             ).format('YYYY-MM-DD')}`,
           ),
       ),
@@ -88,7 +125,7 @@ export const EditProgramCycle = ({
         <Formik
           initialValues={initialValues}
           onSubmit={(values) => {
-            handleUpdate(values);
+            void handleUpdate(values);
           }}
           validationSchema={validationSchema}
         >
@@ -107,7 +144,7 @@ export const EditProgramCycle = ({
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
                     <Field
-                      name="name"
+                      name="title"
                       fullWidth
                       variant="outlined"
                       label={t('Programme Cycle Title')}
@@ -117,7 +154,7 @@ export const EditProgramCycle = ({
                   </Grid>
                   <Grid item xs={6}>
                     <Field
-                      name="startDate"
+                      name="start_date"
                       label={t('Start Date')}
                       component={FormikDateField}
                       required
@@ -129,7 +166,7 @@ export const EditProgramCycle = ({
                   </Grid>
                   <Grid item xs={6}>
                     <Field
-                      name="endDate"
+                      name="end_date"
                       label={t('End Date')}
                       component={FormikDateField}
                       fullWidth
@@ -152,7 +189,7 @@ export const EditProgramCycle = ({
                     {t('CANCEL')}
                   </Button>
                   <LoadingButton
-                    loading={loading}
+                    loading={isPending}
                     type="submit"
                     color="primary"
                     variant="contained"
