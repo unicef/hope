@@ -612,7 +612,7 @@ class TestGrievanceTickets:
         printing("Assert", pageGrievanceNewTicket.driver, page_object_str="pageGrievanceNewTicket")
 
         pageGrievanceNewTicket.getSelectFieldName().click()
-        pageGrievanceNewTicket.select_option_by_name("Females age 12 - 17 with disability").click()
+        pageGrievanceNewTicket.select_option_by_name("Females age 12 - 17 with disability")
         pageGrievanceNewTicket.screenshot("1")
 
     def test_grievance_tickets_create_new_tickets_Grievance_Complaint_Partner_Related_Complaint(self,
