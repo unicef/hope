@@ -12,14 +12,10 @@ from page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from page_object.grievance.grievance_tickets import GrievanceTickets
 from page_object.grievance.new_ticket import NewTicket
 from pytest_django import DjangoDbBlocker
-from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
-from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.household.models import HOST, Household
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from selenium_tests.helpers.date_time_format import FormatTime
@@ -567,10 +563,44 @@ class TestGrievanceTickets:
         "test_data",
         [
             pytest.param(
-                {"category": "Data Change", "type": "Individual Data Update"}, id="Data Change Individual Data Update"
-            ),
-            pytest.param(
                 {"category": "Data Change", "type": "Household Data Update"}, id="Data Change Household Data Update"
+            ),
+        ])
+    def test_hh_grievance_tickets_create_new_ticket(self,
+                                                 pageGrievanceTickets: GrievanceTickets,
+                                                 pageGrievanceNewTicket: NewTicket,
+                                                 pageGrievanceDetailsPage: GrievanceDetailsPage,
+                                                 household_without_disabilities: Household,
+                                                 test_data: List[str]) -> None:
+        pageGrievanceTickets.getNavGrievance().click()
+        assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
+        pageGrievanceTickets.getButtonNewTicket().click()
+        pageGrievanceNewTicket.getSelectCategory().click()
+        pageGrievanceNewTicket.select_option_by_name(test_data["category"])
+        pageGrievanceNewTicket.getIssueType().click()
+        pageGrievanceNewTicket.select_option_by_name(test_data["type"])
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getHouseholdTab()
+        pageGrievanceNewTicket.getHouseholdTableRows(0).click()
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getReceivedConsent().click()
+        pageGrievanceNewTicket.getButtonNext().click()
+
+        pageGrievanceNewTicket.getDescription().send_keys("Add Individual - TEST")
+        pageGrievanceNewTicket.getButtonAddNewField()
+        pageGrievanceNewTicket.getSelectFieldName().click()
+        pageGrievanceNewTicket.select_option_by_name("Females age 12 - 17 with disability")
+        pageGrievanceNewTicket.getInputValue().send_keys("1")
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceDetailsPage.getCheckboxHouseholdData()
+        assert "Female Age Group 12 17" in pageGrievanceDetailsPage.getRows()[0].text
+        assert "- 1" in pageGrievanceDetailsPage.getRows()[0].text
+
+    @pytest.mark.parametrize(
+        "test_data",
+        [
+            pytest.param(
+                {"category": "Data Change", "type": "Individual Data Update"}, id="Data Change Individual Data Update"
             ),
         ])
     def test_grievance_tickets_create_new_ticket(self,
@@ -589,9 +619,8 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getHouseholdTab()
         pageGrievanceNewTicket.getHouseholdTableRows(0).click()
-        if "Individual Data Update" in test_data["type"]:
-            pageGrievanceNewTicket.getIndividualTab().click()
-            pageGrievanceNewTicket.getIndividualTableRows(0).click()
+        pageGrievanceNewTicket.getIndividualTab().click()
+        pageGrievanceNewTicket.getIndividualTableRows(0).click()
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getReceivedConsent().click()
         pageGrievanceNewTicket.getButtonNext().click()
@@ -611,10 +640,15 @@ class TestGrievanceTickets:
         printing("Methods", pageGrievanceNewTicket.driver)
         printing("Assert", pageGrievanceNewTicket.driver, page_object_str="pageGrievanceNewTicket")
 
-        pageGrievanceNewTicket.getSelectFieldName().click()
-        pageGrievanceNewTicket.select_option_by_name("Females age 12 - 17 with disability")
-        pageGrievanceNewTicket.screenshot("1")
-
+        pageGrievanceNewTicket.getIndividualFieldName().click()
+        pageGrievanceNewTicket.select_option_by_name("Gender")
+        pageGrievanceNewTicket.getInputIndividualData("Gender").click()
+        pageGrievanceNewTicket.select_listbox_element("Female").click()
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceDetailsPage.getCheckboxIndividualData()
+        row = pageGrievanceDetailsPage.getRows()[0].text.split(" ")
+        assert "Gender" in row[0]
+        assert "Female" in row[-1]
     def test_grievance_tickets_create_new_tickets_Grievance_Complaint_Partner_Related_Complaint(self,
                                                                                                 pageGrievanceTickets: GrievanceTickets,
                                                                                                 pageGrievanceNewTicket: NewTicket,

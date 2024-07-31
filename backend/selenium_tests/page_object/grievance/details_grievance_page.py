@@ -79,7 +79,8 @@ class GrievanceDetailsPage(BaseComponents):
     checkbox = 'tr[role="checkbox"]'
     labelPartner = 'div[data-cy="label-Partner"]'
     labelAdministrativeLevel2 = 'div[data-cy="label-Administrative Level 2"]'
-
+    checkboxHouseholdData = 'span[data-cy="checkbox-household-data"]'
+    checkboxIndividualData = 'span[data-cy="checkbox-requested-data-change"]'
     approveBoxNeedsAdjudicationTitle = 'h6[data-cy="approve-box-needs-adjudication-title"]'
     buttonCreateLinkedTicket = 'button[data-cy="button-create-linked-ticket"]'
     buttonMarkDistinct = 'button[data-cy="button-mark-distinct"]'
@@ -405,6 +406,12 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getApproveBoxNeedsAdjudicationTitle(self) -> WebElement:
         return self.wait_for(self.approveBoxNeedsAdjudicationTitle)
+
+    def getCheckboxHouseholdData(self) -> WebElement:
+        return self.wait_for(self.checkboxHouseholdData)
+
+    def getCheckboxIndividualData(self) -> WebElement:
+        return self.wait_for(self.checkboxIndividualData)
 
     def getButtonCreateLinkedTicket(self) -> WebElement:
         return self.wait_for(self.buttonCreateLinkedTicket)
