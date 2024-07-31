@@ -3,7 +3,7 @@ import string
 from datetime import timedelta
 from decimal import Decimal
 from random import choice, randint
-from typing import Any, List, Optional, Union
+from typing import Any, Optional, Union
 from uuid import UUID
 
 from django.contrib.contenttypes.models import ContentType
@@ -796,25 +796,6 @@ def generate_real_cash_plans() -> None:
                 PaymentVerificationPlan.STATUS_ACTIVE,
             )
 
-    program.households.set(
-        PaymentRecord.objects.exclude(status=PaymentRecord.STATUS_ERROR)
-        .filter(parent__in=cash_plans)
-        .values_list("household__id", flat=True)
-    )
-
-
-def generate_real_cash_plans_for_households(households: List[Household]) -> None:
-    if ServiceProvider.objects.count() < 3:
-        ServiceProviderFactory.create_batch(3, business_area=households[0].business_area)
-    program = RealProgramFactory(business_area=households[0].business_area)
-    cash_plans = RealCashPlanFactory.create_batch(3, program=program, business_area=households[0].business_area)
-    for cash_plan in cash_plans:
-        for hh in households:
-            RealPaymentRecordFactory(
-                parent=cash_plan,
-                household=hh,
-                business_area=hh.business_area,
-            )
     program.households.set(
         PaymentRecord.objects.exclude(status=PaymentRecord.STATUS_ERROR)
         .filter(parent__in=cash_plans)
