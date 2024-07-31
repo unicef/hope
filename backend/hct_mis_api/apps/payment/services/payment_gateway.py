@@ -220,10 +220,11 @@ class FspData(FlexibleArgumentsDataclassMixin):
     remote_id: str
     name: str
     vision_vendor_number: str
-    configs: List[FspConfig]
+    configs: List[Union[FspConfig, Dict]]
 
     def __post_init__(self) -> None:
-        self.configs = [FspConfig.create_from_dict(config) for config in self.configs]  # type: ignore
+        if self.configs and isinstance(self.configs[0], dict):
+            self.configs = [FspConfig.create_from_dict(config) for config in self.configs]  # type: ignore
 
 
 @dataclasses.dataclass()
@@ -238,7 +239,7 @@ class DeliveryMechanismData(FlexibleArgumentsDataclassMixin):
     id: int
     code: str
     name: str
-    requirements: DeliveryMechanismDataRequirements
+    requirements: Union[DeliveryMechanismDataRequirements, Dict]
     transfer_type: str
 
     def __post_init__(self) -> None:
@@ -443,27 +444,26 @@ class PaymentGatewayService:
                     _add_records(payments, delivery_mechanism)
 
     def sync_fsps(self) -> None:
-        fsps = self.api.get_fsps()
-        for fsp in fsps:
+        fsps_data = self.api.get_fsps()
+        for fsp_data in fsps_data:
             fsp, created = FinancialServiceProvider.objects.update_or_create(
-                payment_gateway_id=fsp.id,
+                payment_gateway_id=fsp_data.id,
                 defaults={
-                    "vision_vendor_number": fsp.vision_vendor_number,
-                    "name": fsp.name,
+                    "vision_vendor_number": fsp_data.vision_vendor_number,
+                    "name": fsp_data.name,
                     "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                    "data_transfer_configuration": [dataclasses.asdict(config) for config in fsp.configs],
+                    "data_transfer_configuration": [dataclasses.asdict(config) for config in fsp_data.configs],
                 },
             )
 
             if not created:
                 fsp.delivery_mechanisms.clear()
-            for config in fsp.configs:
-                delivery_mechanisms_pg_ids = set([config.delivery_mechanism for config in fsp.configs])
-                if config.delivery_mechanisms_pg_ids:
-                    delivery_mechanisms = DeliveryMechanism.objects.filter(
-                        payment_gateway_id__in=delivery_mechanisms_pg_ids
-                    )
-                    fsp.delivery_mechanisms.set(delivery_mechanisms)
+            delivery_mechanisms_pg_ids = set([config.delivery_mechanism for config in fsp_data.configs])
+            if delivery_mechanisms_pg_ids:
+                delivery_mechanisms = DeliveryMechanism.objects.filter(
+                    payment_gateway_id__in=delivery_mechanisms_pg_ids
+                )
+                fsp.delivery_mechanisms.set(delivery_mechanisms)
 
     def sync_records(self) -> None:
         def update_payment(
