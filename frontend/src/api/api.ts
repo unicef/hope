@@ -62,4 +62,39 @@ export const api = {
     // If the response is not empty, parse it as JSON and return it
     return { data: JSON.parse(text) };
   },
+
+  async put(url: string, data: Record<string, any> = {}) {
+    const response = await fetch(`${this.baseURL}${url}`, {
+      method: 'PUT',
+      headers: {
+        ...this.headers,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error puting data to ${url}`);
+    }
+    const text = await response.text();
+    if (!text) {
+      return { data: null };
+    }
+    return { data: JSON.parse(text) };
+  },
+
+  async delete(url: string) {
+    const response = await fetch(`${this.baseURL}${url}`, {
+      method: 'DELETE',
+      headers: {
+        ...this.headers,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error deleting data from ${url}`);
+    }
+    return;
+  },
 };
