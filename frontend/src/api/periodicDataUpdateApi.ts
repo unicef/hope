@@ -92,8 +92,9 @@ export const fetchPeriodicDataUpdateUploadDetails = async (
 export const createPeriodicDataUpdateTemplate = async (
   businessAreaSlug: string,
   programId: string,
-  roundsData: string,
-  filters: string,
+  //TODO MS: Add types
+  roundsData: any,
+  filters: any,
 ) => {
   const payload = {
     rounds_data: roundsData,

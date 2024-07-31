@@ -3,86 +3,55 @@ import { FiltersSection } from '@components/core/FiltersSection';
 import { NumberTextField } from '@components/core/NumberTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { Grid, MenuItem } from '@mui/material';
-import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
-import { RdiAutocomplete } from '@shared/autocompletes/RdiAutocomplete';
-import { TargetPopulationAutocomplete } from '@shared/autocompletes/TargetPopulationAutocomplete';
-import { createHandleApplyFilterChange } from '@utils/utils';
+import { AdminAreaAutocompleteMultipleRest } from '@shared/autocompletes/rest/AdminAreaAutocompleteMultipleRest';
+import { RdiAutocompleteRest } from '@shared/autocompletes/rest/RdiAutocompleteRest';
+import { TargetPopulationAutocompleteRest } from '@shared/autocompletes/rest/TargetPopulationAutocompleteRest';
 import { t } from 'i18next';
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 
 interface FilterIndividualsProps {
   filter;
   setFilter: (filter) => void;
-  initialFilter;
-  appliedFilter;
-  setAppliedFilter: (filter) => void;
   isOnPaper: boolean;
 }
 
 export const FilterIndividuals: React.FC<FilterIndividualsProps> = ({
   filter,
   setFilter,
-  initialFilter,
-  appliedFilter,
-  setAppliedFilter,
+
   isOnPaper = true,
 }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const { handleFilterChange, applyFilterChanges, clearFilter } =
-    createHandleApplyFilterChange(
-      initialFilter,
-      navigate,
-      location,
-      filter,
-      setFilter,
-      appliedFilter,
-      setAppliedFilter,
-    );
-  const handleApplyFilter = (): void => {
-    applyFilterChanges();
-  };
-
-  const handleClearFilter = (): void => {
-    clearFilter();
+  const handleStateFilterChange = (name, value) => {
+    setFilter((prevFilter) => ({
+      ...prevFilter,
+      [name]: value,
+    }));
   };
 
   return (
-    <FiltersSection
-      clearHandler={handleClearFilter}
-      applyHandler={handleApplyFilter}
-      isOnPaper={isOnPaper}
-    >
+    <FiltersSection isOnPaper={isOnPaper} withApplyClearButtons={false}>
       <Grid container alignItems="flex-end" spacing={3}>
         <Grid item xs={3}>
-          <RdiAutocomplete
-            filter={filter}
-            name="registrationDataImport"
-            value={filter.registrationDataImport}
-            initialFilter={initialFilter}
-            appliedFilter={appliedFilter}
-            setAppliedFilter={setAppliedFilter}
-            setFilter={setFilter}
+          <RdiAutocompleteRest
+            value={filter.registrationDataImportId}
+            onChange={(selectedItem) =>
+              handleStateFilterChange('registrationDataImportId', selectedItem)
+            }
           />
         </Grid>
         <Grid item xs={3}>
-          <TargetPopulationAutocomplete
-            name="targetPopulation"
-            value={filter.targetPopulation}
-            filter={filter}
-            setFilter={setFilter}
-            initialFilter={initialFilter}
-            appliedFilter={appliedFilter}
-            setAppliedFilter={setAppliedFilter}
+          <TargetPopulationAutocompleteRest
+            value={filter.targetPopulationId}
+            onChange={(selectedItem) =>
+              handleStateFilterChange('targetPopulationId', selectedItem)
+            }
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) => handleFilterChange('sex', e.target.value)}
+            onChange={(e) => handleStateFilterChange('gender', e.target.value)}
             label={t('Gender')}
-            value={filter.sex}
+            value={filter.gender}
             data-cy="ind-filters-gender"
           >
             <MenuItem key="male" value="MALE">
@@ -96,47 +65,47 @@ export const FilterIndividuals: React.FC<FilterIndividualsProps> = ({
         <Grid item xs={3}>
           <NumberTextField
             topLabel={t('Age')}
-            value={filter.ageMin}
+            value={filter.ageFrom}
             placeholder={t('From')}
             fullWidth
-            onChange={(e) => handleFilterChange('ageMin', e.target.value)}
+            onChange={(e) => handleStateFilterChange('ageFrom', e.target.value)}
             data-cy="hh-filters-age-from"
           />
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
-            value={filter.ageMax}
+            value={filter.ageTo}
             placeholder={t('To')}
             fullWidth
-            onChange={(e) => handleFilterChange('ageMax', e.target.value)}
+            onChange={(e) => handleStateFilterChange('ageTo', e.target.value)}
             data-cy="hh-filters-age-to"
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={3}>
           <DatePickerFilter
             topLabel={t('Registration Date')}
             placeholder={t('From')}
             onChange={(date) =>
-              handleFilterChange('lastRegistrationDateMin', date)
+              handleStateFilterChange('registrationDateFrom', date)
             }
-            value={filter.lastRegistrationDateMin}
+            value={filter.registrationDateFrom}
             dataCy="ind-filters-reg-date-from"
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={3}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
-              handleFilterChange('lastRegistrationDateMax', date)
+              handleStateFilterChange('registrationDateTo', date)
             }
-            value={filter.lastRegistrationDateMax}
+            value={filter.registrationDateTo}
             dataCy="ind-filters-reg-date-to"
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) =>
-              handleFilterChange('hasGrievanceTicket', e.target.value)
+              handleStateFilterChange('hasGrievanceTicket', e.target.value)
             }
             label={t('Has a Grievance Ticket')}
             value={filter.hasGrievanceTicket}
@@ -150,37 +119,34 @@ export const FilterIndividuals: React.FC<FilterIndividualsProps> = ({
             </MenuItem>
           </SelectFilter>
         </Grid>
-        {/* //TODO MS: possibly replace with new component with checkboxes in filters options */}
-        <Grid item xs={3}>
-          <AdminAreaAutocomplete
-            name="administrativeArea1"
-            level={1}
-            value={filter.administrativeArea}
-            filter={filter}
-            setFilter={setFilter}
-            initialFilter={initialFilter}
-            appliedFilter={appliedFilter}
-            setAppliedFilter={setAppliedFilter}
-            dataCy="filter-administrative-area"
-          />
+        <Grid p={3} container alignItems="flex-start" spacing={3}>
+          <Grid item xs={6}>
+            <AdminAreaAutocompleteMultipleRest
+              value={filter.admin1}
+              onChange={(_, option) => {
+                handleStateFilterChange('admin1', option);
+              }}
+              level={1}
+              dataCy="filter-admin1"
+              disabled={filter.admin2.length > 0}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <AdminAreaAutocompleteMultipleRest
+              value={filter.admin2}
+              onChange={(_, option) => {
+                handleStateFilterChange('admin2', option);
+              }}
+              level={2}
+              dataCy="filter-admin2"
+              disabled={filter.admin1.length > 0}
+            />
+          </Grid>
         </Grid>
         <Grid item xs={3}>
-          <AdminAreaAutocomplete
-            name="administrativeArea2"
-            level={2}
-            value={filter.administrativeArea}
-            filter={filter}
-            setFilter={setFilter}
-            initialFilter={initialFilter}
-            appliedFilter={appliedFilter}
-            setAppliedFilter={setAppliedFilter}
-            dataCy="filter-administrative-area"
-          />
-        </Grid>
-        <Grid item xs={2}>
           <SelectFilter
             onChange={(e) =>
-              handleFilterChange('receivedAssistance', e.target.value)
+              handleStateFilterChange('receivedAssistance', e.target.value)
             }
             label={t('Received Assistance')}
             value={filter.receivedAssistance}

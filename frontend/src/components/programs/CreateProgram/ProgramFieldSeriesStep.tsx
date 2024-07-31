@@ -67,7 +67,7 @@ export const ProgramFieldSeriesStep = ({
                     <Grid container spacing={3} alignItems="flex-start">
                       <Grid item xs={3}>
                         <Field
-                          name={`pduFields.${index}.name`}
+                          name={`pduFields.${index}.label`}
                           fullWidth
                           variant="outlined"
                           label={t('Time Series Field Name')}

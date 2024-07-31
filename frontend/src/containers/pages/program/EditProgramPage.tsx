@@ -117,7 +117,7 @@ export const EditProgramPage = (): ReactElement => {
 
     const { editMode, ...requestValues } = values;
     const pduFieldsToSend = values.pduFields
-      .filter((item) => item.name !== '')
+      .filter((item) => item.label !== '')
       .map(({ __typename, pduData, ...rest }) => ({
         ...rest,
         pduData: pduData
@@ -176,7 +176,7 @@ export const EditProgramPage = (): ReactElement => {
       pduFields.length == 0
         ? [
             {
-              name: '',
+              label: '',
               pduData: {
                 subtype: '',
                 numberOfRounds: null,
