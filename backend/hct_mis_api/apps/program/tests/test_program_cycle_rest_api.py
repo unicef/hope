@@ -225,6 +225,14 @@ class ProgramCycleCreateSerializerTest(TestCase):
             serializer.is_valid(raise_exception=True)
         self.assertIn("Programme Cycles' title should be unique.", str(error.exception))
 
+    def test_validate_if_no_end_date(self) -> None:
+        ProgramCycleFactory(program=self.program, title="Cycle 1", end_date=None)
+        data = {"title": "Cycle 123123", "start_date": "2025-01-02", "end_date": "2025-01-12"}
+        serializer = ProgramCycleCreateSerializer(data=data, context=self.get_serializer_context())
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn("All Programme Cycles should have end date for creation new one.", str(error.exception))
+
     def test_validate_program_status(self) -> None:
         self.program.status = Program.DRAFT
         self.program.save()
@@ -279,7 +287,7 @@ class ProgramCycleUpdateSerializerTest(TestCase):
 
     def test_validate_title_unique(self) -> None:
         ProgramCycleFactory(program=self.program, title="Cycle 1")
-        data = {"title": "Cycle 1"}
+        data = {"title": "Cycle 1 "}
         serializer = ProgramCycleUpdateSerializer(instance=self.cycle, data=data, context=self.get_serializer_context())
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)

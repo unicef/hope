@@ -98,6 +98,7 @@ class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
         fields = ["title", "start_date", "end_date"]
 
     def validate_title(self, value: str) -> str:
+        value = value.strip()
         if ProgramCycle.objects.filter(title=value).exclude(id=self.instance.id).exists():
             raise serializers.ValidationError("A ProgramCycle with this title already exists.")
 

@@ -267,3 +267,19 @@ class TestAllProgramsQuery(APITestCase):
                 "cycleTotalDeliveredQuantityUsdTo": 1000,
             },
         )
+        self.snapshot_graphql_request(
+            request_string=self.ALL_PROGRAMS_QUERY_WITH_PROGRAM_CYCLE_FILTERS,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={
+                "businessArea": self.business_area.slug,
+                "orderBy": "name",
+                "name": "Program with all partners access",
+                "cycleOrderBy": "title",
+                "cycleTotalDeliveredQuantityUsdTo": None,
+            },
+        )

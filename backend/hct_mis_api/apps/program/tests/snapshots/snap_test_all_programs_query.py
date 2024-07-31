@@ -241,3 +241,37 @@ snapshots['TestAllProgramsQuery::test_all_programs_with_cycles_filter 4'] = {
         }
     }
 }
+
+snapshots['TestAllProgramsQuery::test_all_programs_with_cycles_filter 5'] = {
+    'data': {
+        'allPrograms': {
+            'edges': [
+                {
+                    'node': {
+                        'cycles': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'status': 'ACTIVE',
+                                        'title': 'Default Cycle',
+                                        'totalDeliveredQuantityUsd': 0.0
+                                    }
+                                },
+                                {
+                                    'node': {
+                                        'status': 'ACTIVE',
+                                        'title': 'Second CYCLE with total_delivered_quantity_usd',
+                                        'totalDeliveredQuantityUsd': 999.0
+                                    }
+                                }
+                            ],
+                            'totalCount': 2
+                        },
+                        'name': 'Program with all partners access'
+                    }
+                }
+            ],
+            'totalCount': 1
+        }
+    }
+}
