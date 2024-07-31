@@ -258,7 +258,7 @@ class TestPeriodicDataTemplates:
         pagePeriodicDataUpdateTemplatesDetails.select_listbox_element(individual.registration_data_import.name).click()
         pagePeriodicDataUpdateTemplatesDetails.getSubmitButton().click()
 
-        pagePeriodicDataUpdateTemplatesDetails.getCheckbox(string_attribute.label).click()
+        pagePeriodicDataUpdateTemplatesDetails.getCheckbox(string_attribute.label["English(EN)"]).click()
         pagePeriodicDataUpdateTemplatesDetails.getSubmitButton().click()
         pagePeriodicDataUpdateTemplatesDetails.screenshot("submitted")
 
