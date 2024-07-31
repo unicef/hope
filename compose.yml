@@ -54,6 +54,8 @@ services:
     volumes:
       - ./backend:/code/
       - backend-data:/data
+      - ./backend/pyproject.toml:/packages/pyproject.toml
+      - ./backend/pdm.lock:/packages/pdm.lock
       - ipython_data_local:/root/.ipython
     command: "dev"
     depends_on:
@@ -165,7 +167,6 @@ services:
       - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
       - xpack.security.enabled=false
       - transport.host=localhost
-      - bootstrap.system_call_filter=false
     ulimits:
       memlock:
         soft: -1

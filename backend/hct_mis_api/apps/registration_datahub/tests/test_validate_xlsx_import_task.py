@@ -15,12 +15,20 @@ from hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import import (
 
 
 class TestValidateXlsxImportTask(TestCase):
-    databases = {"default", "registration_datahub"}
+    databases = {"default"}
 
     @classmethod
     def setUpTestData(cls) -> None:
         cls.business_area = BusinessAreaFactory()
         cls.program = ProgramFactory()
+
+        content = Path(
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
+        ).read_bytes()
+        file = File(BytesIO(content), name="new_reg_data_import.xlsx")
+        cls.import_data = ImportData.objects.create(
+            file=file,
+        )
 
     @patch(
         "hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import.UploadXLSXInstanceValidator.validate_everything"
@@ -46,25 +54,20 @@ class TestValidateXlsxImportTask(TestCase):
     @patch(
         "hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import.UploadXLSXInstanceValidator.validate_everything"
     )
-    def test_individuals(self, validate_everything_mock: Mock) -> None:
-        content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
-        ).read_bytes()
-        file = File(BytesIO(content), name="new_reg_data_import.xlsx")
-        import_data = ImportData.objects.create(
-            file=file,
-        )
-
+    def test_import_individuals_without_errors(self, validate_everything_mock: Mock) -> None:
         validate_everything_mock.return_value = [], []
-        ValidateXlsxImport().execute(import_data, False)
+        ValidateXlsxImport().execute(self.import_data, False)
         assert validate_everything_mock.call_count == 1
 
-        import_data.refresh_from_db()
-        assert import_data.status == ImportData.STATUS_FINISHED
-        assert import_data.number_of_households == 3
-        assert import_data.number_of_individuals == 7
+        self.import_data.refresh_from_db()
+        assert self.import_data.status == ImportData.STATUS_FINISHED
+        assert self.import_data.number_of_households == 3
+        assert self.import_data.number_of_individuals == 7
 
-        validate_everything_mock.reset_mock()
+    @patch(
+        "hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import.UploadXLSXInstanceValidator.validate_everything"
+    )
+    def test_import_individuals_with_errors(self, validate_everything_mock: Mock) -> None:
         validate_everything_mock.return_value = [
             {
                 "row_number": 1,
@@ -73,23 +76,41 @@ class TestValidateXlsxImportTask(TestCase):
             }
         ], [
             {
+                "header": "name_of_cardholder_atm_card_i_c",
+                "message": "Field name_of_cardholder_atm_card_i_c is required for delivery " "mechanism ATM Card",
                 "row_number": 2,
-                "header": "Last Name",
-                "error": "Last Name is required",
-            }
+            },
         ]
-        ValidateXlsxImport().execute(import_data, False)
+        ValidateXlsxImport().execute(self.import_data, False)
         assert validate_everything_mock.call_count == 1
-        assert import_data.status == ImportData.STATUS_VALIDATION_ERROR
+        assert self.import_data.status == ImportData.STATUS_VALIDATION_ERROR
 
-        validate_everything_mock.reset_mock()
+    @patch(
+        "hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import.UploadXLSXInstanceValidator.validate_everything"
+    )
+    def test_import_individuals_with_general_errors(self, validate_everything_mock: Mock) -> None:
+        validate_everything_mock.return_value = [
+            {
+                "row_number": 1,
+                "header": "First Name",
+                "error": "First Name is required",
+            }
+        ], []
+        ValidateXlsxImport().execute(self.import_data, False)
+        assert validate_everything_mock.call_count == 1
+        assert self.import_data.status == ImportData.STATUS_VALIDATION_ERROR
+
+    @patch(
+        "hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import.UploadXLSXInstanceValidator.validate_everything"
+    )
+    def test_import_individuals_with_delivery_mechanisms_errors(self, validate_everything_mock: Mock) -> None:
         validate_everything_mock.return_value = [], [
             {
+                "header": "name_of_cardholder_atm_card_i_c",
+                "message": "Field name_of_cardholder_atm_card_i_c is required for delivery " "mechanism ATM Card",
                 "row_number": 2,
-                "header": "Last Name",
-                "error": "Last Name is required",
-            }
+            },
         ]
-        ValidateXlsxImport().execute(import_data, False)
+        ValidateXlsxImport().execute(self.import_data, False)
         assert validate_everything_mock.call_count == 1
-        assert import_data.status == ImportData.STATUS_DELIVERY_MECHANISMS_VALIDATION_ERROR
+        assert self.import_data.status == ImportData.STATUS_DELIVERY_MECHANISMS_VALIDATION_ERROR

@@ -166,7 +166,7 @@ class KoboAPI:
         if not self.business_area:
             logger.error("Business area is not provided")
             raise ValueError("Business area is not provided")
-        projects_url = self._get_url("assets")
+        projects_url = self._get_url("assets/")
 
         results = self._handle_paginated_results(projects_url)
         return filter_by_owner(results, self.business_area)
@@ -181,7 +181,7 @@ class KoboAPI:
         if only_active_submissions:
             additional_query_params = 'query={"_validation_status.uid":"validation_status_approved"}'
         submissions_url = self._get_url(
-            f"assets/{uid}/data",
+            f"assets/{uid}/data/",
             additional_query_params=additional_query_params,
         )
 

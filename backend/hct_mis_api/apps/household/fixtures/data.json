@@ -210,6 +210,7 @@
     "total_cash_received_usd": null,
     "total_cash_received": null,
     "programs": [],
+    "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718",
     "copied_from": null
   }
 },
@@ -453,6 +454,7 @@
     "enrolled_in_nutrition_programme": null,
     "administration_of_rutf": null,
     "unicef_id": "IND-74-0000.0001",
+    "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718",
     "deduplication_golden_record_status": "DUPLICATE",
     "deduplication_batch_status": "DUPLICATE_IN_BATCH",
     "deduplication_golden_record_results": {
@@ -861,6 +863,7 @@
     "enrolled_in_nutrition_programme": null,
     "administration_of_rutf": null,
     "unicef_id": "IND-88-0000.0006",
+    "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718",
     "deduplication_golden_record_status": "DUPLICATE",
     "deduplication_batch_status": "DUPLICATE_IN_BATCH",
     "deduplication_golden_record_results": {
@@ -873,6 +876,104 @@
           "full_name": "Jan Romaniak",
           "proximity_to_score": 3.0
         }
+      ],
+      "possible_duplicates": []
+    },
+    "deduplication_batch_results": {
+      "score": {
+        "max": 9.0,
+        "min": 9.0,
+        "qty": 1
+      },
+      "duplicates": [
+        {
+          "dob": "1991-11-18",
+          "score": 9.0,
+          "hit_id": "87201b6a-4d00-4ae2-ad1b-30dca2b83614",
+          "location": "AF1115",
+          "full_name": "Jan Romaniak",
+          "proximity_to_score": 3.0
+        }
+      ],
+      "possible_duplicates": []
+    },
+    "imported_individual_id": "6f116cf6-04ca-4d98-b275-638acae21108",
+    "sanction_list_possible_match": false,
+    "sanction_list_confirmed_match": false,
+    "pregnant": false,
+    "observed_disability": "",
+    "seeing_disability": "",
+    "hearing_disability": "",
+    "physical_disability": "",
+    "memory_disability": "",
+    "selfcare_disability": "",
+    "comms_disability": "",
+    "who_answers_phone": "",
+    "who_answers_alt_phone": "",
+    "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
+    "fchild_hoh": false,
+    "child_hoh": false,
+    "detail_id": 5,
+    "disability_certificate_picture": "",
+    "vector_column": "'jan':1 'romaniak':2",
+    "copied_from": null
+  }
+},
+{
+  "model": "household.individual",
+  "pk": "e92d41d0-202f-4138-b344-4c30a1751797",
+  "fields": {
+    "rdi_merge_status": "MERGED",
+    "created_at": "2022-08-10T14:30:11.107Z",
+    "updated_at": "2022-08-10T14:30:11.107Z",
+    "is_removed": false,
+    "removed_date": null,
+    "last_sync_at": null,
+    "version": 1665481609912221,
+    "individual_collection": 6,
+    "duplicate": false,
+    "duplicate_date": null,
+    "withdrawn": false,
+    "withdrawn_date": null,
+    "individual_id": "",
+    "photo": "",
+    "full_name": "Jan Romaniak",
+    "given_name": "Jan",
+    "middle_name": "",
+    "family_name": "Romaniak",
+    "sex": "MALE",
+    "birth_date": "1923-01-01",
+    "estimated_birth_date": true,
+    "marital_status": "MARRIED",
+    "phone_no": "0048734123423",
+    "phone_no_alternative": "",
+    "email": "fake111test@email.com",
+    "relationship": "FREE_UNION",
+    "household": "3db2729e-7259-4b13-83b2-3090d847e5cc",
+    "registration_data_import": "c749ab01-16dc-48af-a764-5f3a873f0a7d",
+    "disability": "not disabled",
+    "work_status": "NOT_PROVIDED",
+    "first_registration_date": "1988-06-15",
+    "last_registration_date": "1988-06-15",
+    "flex_fields": {},
+    "user_fields": {},
+    "enrolled_in_nutrition_programme": null,
+    "administration_of_rutf": null,
+    "unicef_id": "IND-88-0000.0999",
+    "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718",
+    "deduplication_golden_record_status": "DUPLICATE",
+    "deduplication_batch_status": "DUPLICATE_IN_BATCH",
+    "deduplication_golden_record_results": {
+      "duplicates": [
+        {
+          "dob": "1991-11-18",
+          "score": 9.0,
+          "hit_id": "bc5a5b20-74a4-4d48-ab63-99a0c913850d",
+          "location": "Abband",
+          "full_name": "Jan Romaniak",
+          "proximity_to_score": 3.0
+        }
+
       ],
       "possible_duplicates": []
     },

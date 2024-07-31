@@ -417,6 +417,10 @@ class PaymentPlanSplit(TimeStampedUUIDModel):
     def chosen_configuration(self) -> Optional[str]:
         return self.payment_plan.delivery_mechanisms.first().chosen_configuration
 
+    @property
+    def delivery_mechanism(self) -> Optional[str]:
+        return self.payment_plan.delivery_mechanisms.first().delivery_mechanism
+
 
 class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel, AdminUrlMixin):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
@@ -1836,18 +1840,18 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
     )  # type: ignore
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
     verification_channel = models.CharField(max_length=50, choices=VERIFICATION_CHANNEL_CHOICES)
-    sample_size = models.PositiveIntegerField(null=True)
-    responded_count = models.PositiveIntegerField(null=True)
-    received_count = models.PositiveIntegerField(null=True)
-    not_received_count = models.PositiveIntegerField(null=True)
-    received_with_problems_count = models.PositiveIntegerField(null=True)
-    confidence_interval = models.FloatField(null=True)
-    margin_of_error = models.FloatField(null=True)
+    sample_size = models.PositiveIntegerField(null=True, blank=True)
+    responded_count = models.PositiveIntegerField(null=True, blank=True)
+    received_count = models.PositiveIntegerField(null=True, blank=True)
+    not_received_count = models.PositiveIntegerField(null=True, blank=True)
+    received_with_problems_count = models.PositiveIntegerField(null=True, blank=True)
+    confidence_interval = models.FloatField(null=True, blank=True)
+    margin_of_error = models.FloatField(null=True, blank=True)
     rapid_pro_flow_id = models.CharField(max_length=255, blank=True)
     rapid_pro_flow_start_uuids = ArrayField(models.CharField(max_length=255, blank=True), default=list)
-    age_filter = JSONField(null=True)
-    excluded_admin_areas_filter = JSONField(null=True)
-    sex_filter = models.CharField(null=True, max_length=10)
+    age_filter = JSONField(null=True, blank=True)
+    excluded_admin_areas_filter = JSONField(null=True, blank=True)
+    sex_filter = models.CharField(null=True, max_length=10, blank=True)
     activation_date = models.DateTimeField(null=True)
     completion_date = models.DateTimeField(null=True)
     xlsx_file_exporting = models.BooleanField(default=False)

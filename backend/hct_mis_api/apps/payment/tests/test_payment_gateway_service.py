@@ -7,7 +7,6 @@ from django.utils import timezone
 
 import pytest
 from pytz import utc
-from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -80,7 +79,7 @@ class TestPaymentGatewayService(APITestCase):
             collector = IndividualFactory(
                 household=None,
                 flex_fields={
-                    "service_provider_code": "123456789",
+                    "service_provider_code_i_f": "123456789",
                 },
             )
             hoh = IndividualFactory(household=None)
@@ -570,7 +569,7 @@ class TestPaymentGatewayService(APITestCase):
                         "first_name": self.payments[0].collector.given_name,
                         "full_name": self.payments[0].collector.full_name,
                         "destination_currency": self.payments[0].currency,
-                        "service_provider_code": self.payments[0].collector.flex_fields["service_provider_code"],
+                        "service_provider_code": self.payments[0].collector.flex_fields["service_provider_code_i_f"],
                     },
                     "extra_data": {},
                 }
@@ -582,8 +581,11 @@ class TestPaymentGatewayService(APITestCase):
     def test_api_add_records_to_payment_instruction_validation_error(self, post_mock: Any) -> None:
         payment = self.payments[0]
         payment.entitlement_quantity = None
+        payment.collector.flex_fields = {}
         payment.save()
+        payment.collector.save()
         with self.assertRaisesMessage(
-            ValidationError, "{'amount': [ErrorDetail(string='This field may not be null.', code='null')]}"
+            PaymentGatewayAPI.PaymentGatewayAPIException,
+            "{'amount': [ErrorDetail(string='This field may not be null.', code='null')]}",
         ):
             PaymentGatewayAPI().add_records_to_payment_instruction([payment], "123")
