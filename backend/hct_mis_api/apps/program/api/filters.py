@@ -40,13 +40,18 @@ class ProgramCycleFilter(filters.FilterSet):
             q_obj |= Q(Q(title__istartswith=value) | Q(unicef_id__istartswith=value))
         return qs.filter(q_obj)
 
-    def filter_total_delivered_quantity_usd(self, queryset: QuerySet, name: str, value: Any) -> QuerySet:
-        if value:
-            # annotate total_delivered_quantity_usd
+    def filter_total_delivered_quantity_usd(self, queryset: QuerySet, name: str, values: Any) -> QuerySet:
+        min_value = values.get("min")
+        max_value = values.get("max")
+        q_obj = Q()
+        if values:
             queryset = queryset.annotate(
                 total_delivered_quantity_usd=Coalesce(
                     Sum("payment_plans__total_delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
                 )
             )
-
-        return queryset.filter()
+            if min_value is not None:
+                q_obj |= Q(Q(total_delivered_quantity_usd__gte=min_value))
+            if max_value is not None:
+                q_obj |= Q(Q(total_delivered_quantity_usd__lte=max_value))
+        return queryset.filter(q_obj)

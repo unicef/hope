@@ -1,17 +1,29 @@
 import base64
 from decimal import Decimal
+from typing import Any, Dict
 
+from django.test import TestCase
 from django.urls import reverse
 
 from rest_framework import status
-from rest_framework.test import APIClient
+from rest_framework.exceptions import ValidationError
+from rest_framework.test import APIClient, APIRequestFactory
 
 from hct_mis_api.api.tests.base import HOPEApiTestCase
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.account.models import Role, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
-from hct_mis_api.apps.program.api.serializers import ProgramCycleListSerializer
+from hct_mis_api.apps.program.api.serializers import (
+    ProgramCycleCreateSerializer,
+    ProgramCycleListSerializer,
+    ProgramCycleUpdateSerializer,
+)
+from hct_mis_api.apps.program.api.views import ProgramCycleViewSet
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 
@@ -156,10 +168,10 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
 
     def test_filter_by_end_date_lte(self) -> None:
         self.client.force_authenticate(user=self.user)
-        response = self.client.get(self.list_url, {"end_date__lte": "2023-06-30"})
+        response = self.client.get(self.list_url, {"end_date__lte": "2023-01-15"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 3)
-        # self.assertEqual(response.data["results"][0]["end_date"], "2023-06-30")
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(response.data["results"][0]["end_date"], "2023-01-10")
 
     def test_filter_by_program(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -178,7 +190,161 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
         self.client.force_authenticate(user=self.user)
         PaymentPlanFactory(program_cycle=self.cycle1, total_delivered_quantity_usd=Decimal("500.00"))
         PaymentPlanFactory(program_cycle=self.cycle2, total_delivered_quantity_usd=Decimal("1500.00"))
-        # response = self.client.get(self.list_url, {'total_delivered_quantity_usd': '1000,2000'})
+        self.cycle2.refresh_from_db()
+        self.assertEqual(self.cycle2.total_delivered_quantity_usd, 1500)
+        # TODO: have to fix this one
+        # response = self.client.get(self.list_url, {"total_delivered_quantity_usd": "{\"min\": \"1000\", \"max\": \"2000\"}"})
         # self.assertEqual(response.status_code, status.HTTP_200_OK)
         # self.assertEqual(len(response.data["results"]), 1)
-        # self.assertEqual(response.data["results"][0]['total_delivered_quantity_usd'], '1500.00')
+        # self.assertEqual(response.data["results"][0]["total_delivered_quantity_usd"], "1500.00")
+
+
+class ProgramCycleCreateSerializerTest(TestCase):
+    def setUp(self) -> None:
+        BusinessAreaFactory(name="Afghanistan")
+        self.factory = APIRequestFactory()
+        self.program = ProgramFactory(
+            status=Program.ACTIVE,
+            start_date="2023-01-01",
+            end_date="2099-12-31",
+            cycle__status=ProgramCycle.ACTIVE,
+            cycle__start_date="2023-01-02",
+            cycle__end_date="2023-01-10",
+        )
+        self.program_id = base64.b64encode(f"ProgramNode:{str(self.program.pk)}".encode()).decode()
+
+    def get_serializer_context(self) -> Dict[str, Any]:
+        request = self.factory.get("/")
+        request.parser_context = {"kwargs": {"program_id": str(self.program_id)}}
+        return {"request": request}
+
+    def test_validate_title_unique(self) -> None:
+        ProgramCycleFactory(program=self.program, title="Cycle 1")
+        data = {"title": "Cycle 1", "start_date": "2033-01-02", "end_date": "2033-01-12"}
+        serializer = ProgramCycleCreateSerializer(data=data, context=self.get_serializer_context())
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn("Programme Cycles' title should be unique.", str(error.exception))
+
+    def test_validate_program_status(self) -> None:
+        self.program.status = Program.DRAFT
+        self.program.save()
+        data = {"title": "Cycle new", "start_date": self.program.start_date, "end_date": self.program.end_date}
+        serializer = ProgramCycleCreateSerializer(data=data, context=self.get_serializer_context())
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn("Create Programme Cycle is possible only for Active Programme.", str(error.exception))
+
+    def test_validate_start_date(self) -> None:
+        data = {"title": "Cycle 3", "start_date": "2022-01-01", "end_date": "2023-01-01"}
+        serializer = ProgramCycleCreateSerializer(data=data, context=self.get_serializer_context())
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn("Programme Cycle start date cannot be earlier than programme start date", str(error.exception))
+
+    def test_validate_end_date(self) -> None:
+        data = {"title": "Cycle new", "start_date": "2098-01-01", "end_date": "2111-01-01"}
+        serializer = ProgramCycleCreateSerializer(data=data, context=self.get_serializer_context())
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn("Programme Cycle end date cannot be later than programme end date", str(error.exception))
+
+    def test_validate_overlapping_cycles(self) -> None:
+        ProgramCycleFactory(program=self.program, start_date="2023-02-01", end_date="2023-02-20")
+        data = {"title": "Cycle new", "start_date": "2023-02-15", "end_date": "2023-03-01"}
+        serializer = ProgramCycleCreateSerializer(data=data, context=self.get_serializer_context())
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn("Program Cycles' timeframes must not overlap.", str(error.exception))
+
+
+class ProgramCycleUpdateSerializerTest(TestCase):
+    def setUp(self) -> None:
+        BusinessAreaFactory(name="Afghanistan")
+        self.factory = APIRequestFactory()
+        self.program = ProgramFactory(
+            status=Program.ACTIVE,
+            start_date="2023-01-01",
+            end_date="2099-12-31",
+            cycle__status=ProgramCycle.ACTIVE,
+            cycle__start_date="2023-01-02",
+            cycle__end_date="2023-12-10",
+        )
+        self.program_id = base64.b64encode(f"ProgramNode:{str(self.program.pk)}".encode()).decode()
+        self.cycle = self.program.cycles.first()
+
+    def get_serializer_context(self) -> Dict[str, Any]:
+        request = self.factory.get("/")
+        request.parser_context = {"kwargs": {"program_id": self.program_id, "pk": str(self.cycle.id)}}
+        return {"request": request}
+
+    def test_validate_title_unique(self) -> None:
+        ProgramCycleFactory(program=self.program, title="Cycle 1")
+        data = {"title": "Cycle 1"}
+        serializer = ProgramCycleUpdateSerializer(instance=self.cycle, data=data, context=self.get_serializer_context())
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn("A ProgramCycle with this title already exists.", str(error.exception))
+
+    def test_validate_program_status(self) -> None:
+        self.program.status = Program.DRAFT
+        self.program.save()
+        data = {"title": "Cycle 2"}
+        serializer = ProgramCycleUpdateSerializer(instance=self.cycle, data=data, context=self.get_serializer_context())
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn("Update Programme Cycle is possible only for Active Programme.", str(error.exception))
+
+    def test_validate_start_date(self) -> None:
+        data = {"end_date": "2023-11-11"}
+        serializer = ProgramCycleUpdateSerializer(instance=self.cycle, data=data, context=self.get_serializer_context())
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn("Not possible leave the Programme Cycle start date empty.", str(error.exception))
+
+    def test_validate_end_date(self) -> None:
+        self.cycle.end_date = None
+        self.cycle.save()
+        data = {"start_date": "2023-02-02"}
+        serializer = ProgramCycleUpdateSerializer(instance=self.cycle, data=data, context=self.get_serializer_context())
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn(
+            "Not possible leave the Programme Cycle end date empty if it was empty upon starting the edit.",
+            str(error.exception),
+        )
+
+
+class ProgramCycleViewSetTestCase(TestCase):
+    def setUp(self) -> None:
+        BusinessAreaFactory(name="Afghanistan")
+        self.viewset = ProgramCycleViewSet()
+
+    def test_delete_non_active_program(self) -> None:
+        program = ProgramFactory(status=Program.DRAFT, cycle__status=ProgramCycle.DRAFT)
+        cycle = program.cycles.first()
+        with self.assertRaises(ValidationError) as context:
+            self.viewset.perform_destroy(cycle)
+        self.assertEqual(context.exception.detail[0], "Only Programme Cycle for Active Programme can be deleted.")  # type: ignore
+
+    def test_delete_non_draft_cycle(self) -> None:
+        program = ProgramFactory(status=Program.ACTIVE, cycle__status=ProgramCycle.ACTIVE)
+        cycle = program.cycles.first()
+        with self.assertRaises(ValidationError) as context:
+            self.viewset.perform_destroy(cycle)
+        self.assertEqual(context.exception.detail[0], "Only Draft Programme Cycle can be deleted.")  # type: ignore
+
+    def test_delete_last_cycle(self) -> None:
+        program = ProgramFactory(status=Program.ACTIVE, cycle__status=ProgramCycle.DRAFT)
+        cycle = program.cycles.first()
+        with self.assertRaises(ValidationError) as context:
+            self.viewset.perform_destroy(cycle)
+        self.assertEqual(context.exception.detail[0], "Don’t allow to delete last Cycle.")  # type: ignore
+
+    def test_successful_delete(self) -> None:
+        program = ProgramFactory(status=Program.ACTIVE)
+        cycle1 = ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
+        cycle2 = ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
+        self.viewset.perform_destroy(cycle1)
+        self.assertFalse(ProgramCycle.objects.filter(id=cycle1.id).exists())
+        self.assertTrue(ProgramCycle.objects.filter(id=cycle2.id).exists())

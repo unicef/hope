@@ -65,7 +65,7 @@ class ProgramCycleCreateSerializer(EncodedIdSerializerMixin):
             )
         if end_date and end_date > program.end_date:
             raise serializers.ValidationError(
-                {"end_date": "Programme Cycle end date cannot be earlier than programme end date"}
+                {"end_date": "Programme Cycle end date cannot be later than programme end date"}
             )
 
         if program.cycles.filter(end_date__isnull=True).exists():

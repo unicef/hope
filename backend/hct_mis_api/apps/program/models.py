@@ -310,18 +310,24 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedMod
 
     @property
     def total_entitled_quantity_usd(self) -> Decimal:
-        total = self.payment_plans.aggregate(total=Sum("total_entitled_quantity_usd"))["total"]
-        return total or Decimal(0.0)
+        total_entitled = self.payment_plans.aggregate(total_entitled=Sum("total_entitled_quantity_usd"))[
+            "total_entitled"
+        ]
+        return total_entitled or Decimal(0.0)
 
     @property
     def total_undelivered_quantity_usd(self) -> Decimal:
-        total = self.payment_plans.aggregate(total=Sum("total_undelivered_quantity_usd"))["total"]
-        return total or Decimal(0.0)
+        total_undelivered = self.payment_plans.aggregate(total_undelivered=Sum("total_undelivered_quantity_usd"))[
+            "total_undelivered"
+        ]
+        return total_undelivered or Decimal(0.0)
 
     @property
     def total_delivered_quantity_usd(self) -> Decimal:
-        total = self.payment_plans.aggregate(total=Sum("total_delivered_quantity_usd"))["total"]
-        return total or Decimal(0.0)
+        total_delivered = self.payment_plans.aggregate(total_delivered=Sum("total_delivered_quantity_usd"))[
+            "total_delivered"
+        ]
+        return total_delivered or Decimal(0.0)
 
     def validate_program_active_status(self) -> None:
         # all changes with Program Cycle are possible within Active Program
