@@ -17,6 +17,7 @@
       "CommunicationMessageRecipientMapNode",
       "DataCollectingTypeNode",
       "DeliveryMechanismNode",
+      "DeliveryMechanismPerPaymentPlanNode",
       "DocumentNode",
       "FeedbackMessageNode",
       "FeedbackNode",

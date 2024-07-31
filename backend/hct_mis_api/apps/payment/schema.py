@@ -460,12 +460,16 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
 
 class DeliveryMechanismPerPaymentPlanNode(DjangoObjectType):
     name = graphene.String()
+    code = graphene.String()
     order = graphene.Int()
     fsp = graphene.Field(FinancialServiceProviderNode)
     chosen_configuration = graphene.String()
 
     def resolve_name(self, info: Any) -> graphene.String:
-        return self.delivery_mechanism
+        return self.delivery_mechanism.name
+
+    def resolve_code(self, info: Any) -> graphene.String:
+        return self.delivery_mechanism.code
 
     def resolve_order(self, info: Any) -> graphene.Int:
         return self.delivery_mechanism_order
