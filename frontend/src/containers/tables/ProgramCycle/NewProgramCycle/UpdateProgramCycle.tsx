@@ -1,5 +1,4 @@
 import { ProgramQuery } from '@generated/graphql';
-import ProgramCycle from '@containers/tables/ProgramCycle/ProgramCycle';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
 import { DialogDescription } from '@containers/dialogs/DialogDescription';
@@ -17,6 +16,7 @@ import Grid from '@mui/material/Grid';
 import { LabelizedField } from '@core/LabelizedField';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
+import { ProgramCycle } from '@api/programCycleApi';
 
 interface UpdateProgramCycleProps {
   program: ProgramQuery['program'];
@@ -57,7 +57,7 @@ export const UpdateProgramCycle = ({
     [key: string]: string | boolean | number | null;
   } = {
     previousProgramCycleId: programCycle.id,
-    previousProgramCycleName: programCycle.name,
+    previousProgramCycleName: programCycle.title,
     previousProgramCycleStartDate: programCycle.start_date,
     previousProgramCycleEndDate: undefined,
   };

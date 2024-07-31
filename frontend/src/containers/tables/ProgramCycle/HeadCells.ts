@@ -1,5 +1,5 @@
 import { HeadCell } from '@core/Table/EnhancedTableHead';
-import ProgramCycle from '@containers/tables/ProgramCycle/ProgramCycle';
+import { ProgramCycle } from '@api/programCycleApi';
 
 const headCells: HeadCell<ProgramCycle>[] = [
   {
@@ -7,15 +7,13 @@ const headCells: HeadCell<ProgramCycle>[] = [
     numeric: false,
     disablePadding: false,
     label: 'Programme Cycles ID',
-    disableSort: true,
     dataCy: 'head-cell-id',
   },
   {
-    id: 'name',
+    id: 'title',
     numeric: false,
     disablePadding: false,
     label: 'Programme Cycles Title',
-    disableSort: true,
     dataCy: 'head-cell-programme-cycles-title',
   },
   {
@@ -23,7 +21,6 @@ const headCells: HeadCell<ProgramCycle>[] = [
     numeric: false,
     disablePadding: false,
     label: 'Status',
-    disableSort: true,
     dataCy: 'head-cell-status',
   },
   {
@@ -62,7 +59,6 @@ const headCells: HeadCell<ProgramCycle>[] = [
     numeric: false,
     disablePadding: false,
     label: 'End Date',
-    disableSort: true,
     dataCy: 'head-cell-end-date',
   },
   {

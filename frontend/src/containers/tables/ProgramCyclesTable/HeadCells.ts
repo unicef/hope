@@ -1,5 +1,5 @@
 import { HeadCell } from '@core/Table/EnhancedTableHead';
-import ProgramCycle from '@containers/tables/ProgramCycle/ProgramCycle';
+import { ProgramCycle } from '@api/programCycleApi';
 
 export const headCells: HeadCell<ProgramCycle>[] = [
   {
@@ -11,7 +11,7 @@ export const headCells: HeadCell<ProgramCycle>[] = [
     dataCy: 'head-cell-id',
   },
   {
-    id: 'name',
+    id: 'title',
     numeric: false,
     disablePadding: false,
     label: 'Programme Cycles Title',

@@ -38,7 +38,7 @@ export const ProgramCyclesTable = ({
       {
         id: 'bc83b39a-d731-4a57-bfec-9cf2f7a65097',
         unicef_id: 'P-1',
-        name: 'Default Programme Cycle',
+        title: 'Default Programme Cycle',
         status: 'ACTIVE',
         total_entitled_quantity: null,
         total_undelivered_quantity: null,
@@ -49,7 +49,7 @@ export const ProgramCyclesTable = ({
       {
         id: 'd81c9633-5362-4d2f-93a6-d30f92d90230',
         unicef_id: 'P-2',
-        name: 'January Payments 2020',
+        title: 'January Payments 2020',
         status: 'DRAFT',
         total_entitled_quantity: null,
         total_undelivered_quantity: null,
@@ -60,7 +60,7 @@ export const ProgramCyclesTable = ({
       {
         id: 'b870d17d-7555-4565-86e2-69bae4fa3fd1',
         unicef_id: 'P-3',
-        name: 'February Payments 2020',
+        title: 'February Payments 2020',
         status: 'FINISHED',
         total_entitled_quantity: null,
         total_undelivered_quantity: null,
@@ -84,7 +84,7 @@ export const ProgramCyclesTable = ({
         {row.unicef_id}
       </TableCell>
       <TableCell data-cy={`program-cycle-title-${row.id}`}>
-        {row.name}
+        {row.title}
       </TableCell>
       <TableCell data-cy={`program-cycle-status-${row.id}`}>
         <StatusBox

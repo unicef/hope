@@ -1,4 +1,3 @@
-import ProgramCycle from '@containers/tables/ProgramCycle/ProgramCycle';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
@@ -24,6 +23,7 @@ import { FormikDateField } from '@shared/Formik/FormikDateField';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { LoadingButton } from '@core/LoadingButton';
+import { ProgramCycle } from '@api/programCycleApi';
 
 interface EditProgramCycleProps {
   programCycle: ProgramCycle;
@@ -46,7 +46,7 @@ export const EditProgramCycle = ({
   const initialValues: {
     [key: string]: string | boolean | number;
   } = {
-    name: programCycle.name,
+    name: programCycle.title,
     startDate: programCycle.start_date,
     endDate: programCycle.end_date,
   };
