@@ -34,6 +34,8 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.services.payment_gateway import (
     AddRecordsResponseData,
+    DeliveryMechanismData,
+    DeliveryMechanismDataRequirements,
     PaymentGatewayAPI,
     PaymentGatewayService,
     PaymentInstructionStatus,
@@ -590,3 +592,54 @@ class TestPaymentGatewayService(APITestCase):
             "{'amount': [ErrorDetail(string='This field may not be null.', code='null')]}",
         ):
             PaymentGatewayAPI().add_records_to_payment_instruction([payment], "123")
+
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_delivery_mechanisms")
+    def test_sync_delivery_mechanisms(self, get_delivery_mechanisms_mock: Any) -> None:
+        assert DeliveryMechanism.objects.all().count() == 16
+
+        dm_cash = DeliveryMechanism.objects.get(code="cash")
+        dm_cash.is_active = False
+        dm_cash.save()
+
+        get_delivery_mechanisms_mock.return_value = [
+            DeliveryMechanismData(
+                id=33,
+                code="new_dm",
+                name="New DM",
+                requirements=DeliveryMechanismDataRequirements(
+                    required_fields=["required_field"],
+                    optional_fields=[
+                        "full_name",
+                    ],
+                    unique_fields=[],
+                ),
+                transfer_type="CASH",
+            ),
+            DeliveryMechanismData(
+                id=2,
+                code="cash",
+                name="Cash",
+                requirements=DeliveryMechanismDataRequirements(
+                    required_fields=["new_required_field"],
+                    optional_fields=[
+                        "full_name",
+                        "new_optional_field",
+                    ],
+                    unique_fields=["new_unique_field"],
+                ),
+                transfer_type="CASH",
+            ),
+        ]
+
+        pg_service = PaymentGatewayService()
+        pg_service.api.get_delivery_mechanisms = get_delivery_mechanisms_mock  # type: ignore
+
+        pg_service.sync_delivery_mechanisms()
+        dm_cash = DeliveryMechanism.objects.get(code="cash")
+        assert dm_cash.is_active
+        assert dm_cash.required_fields == ["new_required_field"]
+        assert dm_cash.optional_fields == ["full_name", "new_optional_field"]
+        assert dm_cash.unique_fields == ["new_unique_field"]
+
+        dm_new = DeliveryMechanism.objects.get(code="new_dm")
+        assert dm_new.is_active

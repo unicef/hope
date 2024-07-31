@@ -453,11 +453,11 @@ class TestFinancialServiceProviderModel(TestCase):
 
 
 class TestDynamicChoiceArrayField(TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.mock_choices = [("field1", "Field 1"), ("field2", "Field 2")]
         self.mock_choices_callable = MagicMock(return_value=self.mock_choices)
 
-    def test_choices(self):
+    def test_choices(self) -> None:
         field = DynamicChoiceArrayField(
             base_field=models.CharField(max_length=255), choices_callable=self.mock_choices_callable
         )
@@ -478,7 +478,7 @@ class TestForm(forms.ModelForm):
 
 
 class TestFinancialServiceProviderXlsxTemplate(TestCase):
-    def test_model_form_integration(self):
+    def test_model_form_integration(self) -> None:
         form = TestForm(data={"core_fields": ["age", "residence_status"]})  # real existing core fields
         self.assertTrue(form.is_valid())
         template = form.save()
