@@ -605,13 +605,15 @@ class TestGrievanceTickets:
             """
         )
         sleep(2)
-        pageGrievanceNewTicket.screenshot("1")
+        pageGrievanceNewTicket.screenshot("0")
         from selenium_tests.tools.tag_name_finder import printing
         printing("Mapping", pageGrievanceNewTicket.driver)
         printing("Methods", pageGrievanceNewTicket.driver)
         printing("Assert", pageGrievanceNewTicket.driver, page_object_str="pageGrievanceNewTicket")
 
-        pageGrievanceNewTicket.getSelectHouseholddataupdatefieldsFieldname(0).click()
+        pageGrievanceNewTicket.getSelectFieldName().click()
+        pageGrievanceNewTicket.select_option_by_name("Females age 12 - 17 with disability").click()
+        pageGrievanceNewTicket.screenshot("1")
 
     def test_grievance_tickets_create_new_tickets_Grievance_Complaint_Partner_Related_Complaint(self,
                                                                                                 pageGrievanceTickets: GrievanceTickets,
