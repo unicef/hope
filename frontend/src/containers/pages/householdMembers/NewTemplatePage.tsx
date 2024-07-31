@@ -1,3 +1,4 @@
+import moment from 'moment';
 import {
   createPeriodicDataUpdateTemplate,
   fetchPeriodicFields,
@@ -13,11 +14,10 @@ import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, Step, StepLabel, Stepper } from '@mui/material';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { getFilterFromQueryParams } from '@utils/utils';
 import { Formik } from 'formik';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 
 export const NewTemplatePage = (): React.ReactElement => {
@@ -25,33 +25,30 @@ export const NewTemplatePage = (): React.ReactElement => {
   const navigate = useNavigate();
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
-  const location = useLocation();
   const { showMessage } = useSnackbar();
-
   const initialFilter = {
-    registrationDataImport: '',
-    genderIdentity: '',
-    ageMin: null,
-    ageMax: null,
+    registration_data_import_id: null,
+    target_population_id: null,
+    gender: '',
+    ageFrom: '',
+    ageTo: '',
+    registrationDateFrom: '',
+    registrationDateTo: '',
     hasGrievanceTicket: '',
+    admin1: [],
+    admin2: [],
     receivedAssistance: '',
-    householdSizeMin: null,
-    householdSizeMax: null,
   };
 
-  const [filter, setFilter] = useState(
-    getFilterFromQueryParams(location, initialFilter),
-  );
-  const [appliedFilter, setAppliedFilter] = useState(
-    getFilterFromQueryParams(location, initialFilter),
-  );
+  const [filter, setFilter] = useState(initialFilter);
 
   const createTemplate = useMutation({
     mutationFn: (params: {
       businessAreaSlug: string;
       programId: string;
-      roundsData: string;
-      filters: string;
+      //TODO MS: Add types
+      roundsData: any;
+      filters: any;
     }) =>
       createPeriodicDataUpdateTemplate(
         params.businessAreaSlug,
@@ -108,7 +105,6 @@ export const NewTemplatePage = (): React.ReactElement => {
   const mappedRoundsData = mapToInitialValuesRoundsData(periodicFieldsData);
 
   const initialValues = {
-    ...appliedFilter,
     roundsData: mappedRoundsData,
   };
 
@@ -129,35 +125,39 @@ export const NewTemplatePage = (): React.ReactElement => {
 
   const handleSubmit = (values) => {
     const filters = {
-      ...appliedFilter,
-      registration_data_import_id:
-        values.registrationDataImport ||
-        appliedFilter.registration_data_import_id ||
-        undefined,
-      target_population_id:
-        values.targetPopulation ||
-        appliedFilter.target_population_id ||
-        undefined,
-      gender: values.genderIdentity || appliedFilter.gender || undefined,
-      age:
-        values.ageMin || values.ageMax
-          ? { from: values.ageMin, to: values.ageMax }
-          : appliedFilter.age || undefined,
-      registration_date:
-        values.registrationDateFrom || values.registrationDateTo
-          ? { from: values.registrationDateFrom, to: values.registrationDateTo }
-          : appliedFilter.registration_date || undefined,
-      has_grievance_ticket:
-        values.hasGrievanceTicket ||
-        appliedFilter.has_grievance_ticket ||
-        undefined,
-      admin1: values.admin1 || appliedFilter.admin1 || undefined,
-      admin2: values.admin2 || appliedFilter.admin2 || undefined,
-      received_assistance:
-        values.receivedAssistance ||
-        appliedFilter.received_assistance ||
-        undefined,
+      registration_data_import_id: filter.registration_data_import_id,
+      target_population_id: filter.target_population_id,
+      gender: filter.gender,
+      age: {
+        from: Number(filter.ageFrom),
+        to: Number(filter.ageTo),
+      },
+      registration_date: {
+        from: moment(filter.registrationDateFrom).format('YYYY-MM-DD'),
+        to: moment(filter.registrationDateTo).format('YYYY-MM-DD'),
+      },
+      has_grievance_ticket: filter.hasGrievanceTicket === 'YES' ? true : false,
+      admin1: filter.admin1?.map((el) => el.value),
+      admin2: filter.admin2?.map((el) => el.value),
+      received_assistance: filter.receivedAssistance === 'YES' ? true : false,
     };
+
+    const isEmpty = (value) => {
+      if (value == null) return true;
+      if (typeof value === 'string' && value.trim() === '') return true;
+      if (Array.isArray(value) && value.length === 0) return true;
+      if (
+        typeof value === 'object' &&
+        !Array.isArray(value) &&
+        Object.keys(value).length === 0
+      )
+        return true;
+      return false;
+    };
+
+    const filtersToSend = Object.fromEntries(
+      Object.entries(filters).filter(([, value]) => !isEmpty(value)),
+    );
 
     const roundsDataToSend = values.roundsData
       .filter((el) => el.checked)
@@ -169,11 +169,7 @@ export const NewTemplatePage = (): React.ReactElement => {
 
     const payload = {
       rounds_data: roundsDataToSend,
-      filters: JSON.stringify(
-        Object.fromEntries(
-          Object.entries(filters).filter(([, v]) => v != null),
-        ),
-      ),
+      filters: filtersToSend,
     };
 
     createTemplate.mutate({
@@ -221,9 +217,6 @@ export const NewTemplatePage = (): React.ReactElement => {
                   isOnPaper={false}
                   filter={filter}
                   setFilter={setFilter}
-                  initialFilter={initialFilter}
-                  appliedFilter={appliedFilter}
-                  setAppliedFilter={setAppliedFilter}
                 />
               )}
               {activeStep === 1 && (

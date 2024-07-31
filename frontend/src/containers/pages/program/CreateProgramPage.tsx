@@ -137,7 +137,7 @@ export const CreateProgramPage = (): ReactElement => {
     partnerAccess: ProgramPartnerAccess.AllPartnersAccess,
     pduFields: [
       {
-        name: '',
+        label: '',
         pduData: {
           subtype: '',
           numberOfRounds: null,
