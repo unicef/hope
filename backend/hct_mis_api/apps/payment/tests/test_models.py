@@ -25,12 +25,10 @@ from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField, DynamicChoi
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
-    FinancialServiceProviderXlsxTemplateFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentPlanSplitFactory,
     RealProgramFactory,
-    generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
