@@ -832,7 +832,7 @@ class TestXLSXValidatorsMethods(APITestCase):
     def test_validate_pdu_wrong_collection_date(self) -> None:
         data_row = ["Test", "bar"]
         create_pdu_flexible_attribute(
-            label="PFU Flex Attribute",
+            label="PDU Flex Attribute",
             subtype=PeriodicFieldData.STRING,
             number_of_rounds=1,
             rounds_names=["May"],

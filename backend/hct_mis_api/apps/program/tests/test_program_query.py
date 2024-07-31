@@ -20,6 +20,7 @@ PROGRAM_QUERY = """
         name
         status
         pduFields {
+          label
           name
           pduData {
             subtype

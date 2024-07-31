@@ -13,7 +13,8 @@ snapshots['TestProgramQuery::test_single_program_query_0_with_permission 1'] = {
             'name': 'Test Program Query',
             'pduFields': [
                 {
-                    'name': 'PDU Field 1',
+                    'label': '{"English(EN)": "PDU Field 1"}',
+                    'name': 'pdu_field_1',
                     'pduData': {
                         'numberOfRounds': 3,
                         'roundsNames': [
@@ -25,7 +26,8 @@ snapshots['TestProgramQuery::test_single_program_query_0_with_permission 1'] = {
                     }
                 },
                 {
-                    'name': 'PDU Field 2',
+                    'label': '{"English(EN)": "PDU Field 2"}',
+                    'name': 'pdu_field_2',
                     'pduData': {
                         'numberOfRounds': 2,
                         'roundsNames': [
@@ -36,7 +38,8 @@ snapshots['TestProgramQuery::test_single_program_query_0_with_permission 1'] = {
                     }
                 },
                 {
-                    'name': 'PDU Field 3',
+                    'label': '{"English(EN)": "PDU Field 3"}',
+                    'name': 'pdu_field_3',
                     'pduData': {
                         'numberOfRounds': 1,
                         'roundsNames': [
@@ -46,7 +49,8 @@ snapshots['TestProgramQuery::test_single_program_query_0_with_permission 1'] = {
                     }
                 },
                 {
-                    'name': 'PDU Field 4',
+                    'label': '{"English(EN)": "PDU Field 4"}',
+                    'name': 'pdu_field_4',
                     'pduData': {
                         'numberOfRounds': 2,
                         'roundsNames': [
