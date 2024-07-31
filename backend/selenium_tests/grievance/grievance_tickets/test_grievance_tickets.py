@@ -626,29 +626,26 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getButtonNext().click()
 
         pageGrievanceNewTicket.getDescription().send_keys("Add Individual - TEST")
-        pageGrievanceNewTicket.getButtonAddNewField()
-        pageGrievanceNewTicket.driver.execute_script(
-            """
-            container = document.querySelector("div[data-cy='main-content']")
-            container.scrollBy(0,600)
-            """
-        )
-        sleep(2)
-        pageGrievanceNewTicket.screenshot("0")
-        from selenium_tests.tools.tag_name_finder import printing
-        printing("Mapping", pageGrievanceNewTicket.driver)
-        printing("Methods", pageGrievanceNewTicket.driver)
-        printing("Assert", pageGrievanceNewTicket.driver, page_object_str="pageGrievanceNewTicket")
-
-        pageGrievanceNewTicket.getIndividualFieldName().click()
+        pageGrievanceNewTicket.getButtonAddNewField().click()
+        pageGrievanceNewTicket.getIndividualFieldName(0).click()
         pageGrievanceNewTicket.select_option_by_name("Gender")
         pageGrievanceNewTicket.getInputIndividualData("Gender").click()
         pageGrievanceNewTicket.select_listbox_element("Female").click()
+        pageGrievanceNewTicket.getIndividualFieldName(1).click()
+        pageGrievanceNewTicket.select_option_by_name("Preferred language")
+        pageGrievanceNewTicket.getInputIndividualData("Preferred language").click()
+        pageGrievanceNewTicket.select_listbox_element("English | English").click()
+
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceDetailsPage.getCheckboxIndividualData()
-        row = pageGrievanceDetailsPage.getRows()[0].text.split(" ")
-        assert "Gender" in row[0]
-        assert "Female" in row[-1]
+        row0 = pageGrievanceDetailsPage.getRows()[0].text.split(" ")
+        assert "Gender" in row0[0]
+        assert "Female" in row0[-1]
+
+        row1 = pageGrievanceDetailsPage.getRows()[1].text.split(" ")
+        assert "Preferred Language" in f'{row1[0]} {row1[1]}'
+        assert "English" in row1[-1]
+
     def test_grievance_tickets_create_new_tickets_Grievance_Complaint_Partner_Related_Complaint(self,
                                                                                                 pageGrievanceTickets: GrievanceTickets,
                                                                                                 pageGrievanceNewTicket: NewTicket,

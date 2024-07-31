@@ -63,7 +63,7 @@ class NewTicket(BaseComponents):
     labelCategoryDescription = 'div[data-cy="label-Category Description"]'
     labelIssueTypeDescription = 'div[data-cy="label-Issue Type Description"]'
     selectFieldName = 'div[data-cy="select-householdDataUpdateFields[0].fieldName"]'
-    individualFieldName = 'div[data-cy="select-individualDataUpdateFields[0].fieldName"]'
+    individualFieldName = 'div[data-cy="select-individualDataUpdateFields[{}].fieldName"]'
     inputValue = 'input[data-cy="input-householdDataUpdateFields[0].fieldValue"]'
     partner = 'div[data-cy="select-partner"]'
     tablePagination = '[data-cy="table-pagination"]'
@@ -313,8 +313,8 @@ class NewTicket(BaseComponents):
     def getInputValue(self) -> WebElement:
         return self.wait_for(self.inputValue)
 
-    def getIndividualFieldName(self) -> WebElement:
-        return self.wait_for(self.individualFieldName)
+    def getIndividualFieldName(self, index: int) -> WebElement:
+        return self.wait_for(self.individualFieldName.format(str(index)))
 
     def getPartner(self) -> WebElement:
         return self.wait_for(self.partner)
