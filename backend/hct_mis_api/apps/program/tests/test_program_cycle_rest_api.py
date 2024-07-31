@@ -258,11 +258,25 @@ class ProgramCycleCreateSerializerTest(TestCase):
 
     def test_validate_overlapping_cycles(self) -> None:
         ProgramCycleFactory(program=self.program, start_date="2023-02-01", end_date="2023-02-20")
-        data = {"title": "Cycle new", "start_date": "2023-02-15", "end_date": "2023-03-01"}
+        data3 = {"title": "Cycle new3", "start_date": "2023-02-01", "end_date": "2023-02-28"}
+        serializer = ProgramCycleCreateSerializer(data=data3, context=self.get_serializer_context())
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn(
+            "Programme Cycles' timeframes must not overlap with the provided start date.", str(error.exception)
+        )
+        data = {"title": "Cycle new", "start_date": "2023-02-01", "end_date": "2023-02-20"}
         serializer = ProgramCycleCreateSerializer(data=data, context=self.get_serializer_context())
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
-        self.assertIn("Program Cycles' timeframes must not overlap.", str(error.exception))
+        self.assertIn(
+            "Programme Cycles' timeframes must not overlap with the provided start date.", str(error.exception)
+        )
+        data2 = {"title": "Cycle new2", "start_date": "2023-01-15", "end_date": "2023-02-20"}
+        serializer = ProgramCycleCreateSerializer(data=data2, context=self.get_serializer_context())
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn("Programme Cycles' timeframes must not overlap with the provided end date.", str(error.exception))
 
 
 class ProgramCycleUpdateSerializerTest(TestCase):

@@ -3,7 +3,6 @@ from typing import Any, Dict
 from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.api.utils import EncodedIdSerializerMixin
 from hct_mis_api.apps.core.utils import decode_id_string
@@ -69,21 +68,17 @@ class ProgramCycleCreateSerializer(EncodedIdSerializerMixin):
             )
 
         if program.cycles.filter(end_date__isnull=True).exists():
-            raise ValidationError("All Programme Cycles should have end date for creation new one.")
+            raise serializers.ValidationError("All Programme Cycles should have end date for creation new one.")
 
-        # timeframes_overlapping
-        if start_date and end_date:
-            overlapping_cycles = program.cycles.all().filter(start_date__lt=end_date, end_date__gt=start_date)
-            if overlapping_cycles.exists():
-                raise ValidationError("Program Cycles' timeframes must not overlap.")
-        elif start_date:
-            overlapping_cycles = program.cycles.all().filter(start_date__lte=start_date, end_date__gte=start_date)
-            if overlapping_cycles.exists():
-                raise ValidationError("Program Cycles' timeframes must not overlap with the provided start date.")
-        elif end_date:
-            overlapping_cycles = program.cycles.all().filter(start_date__lte=end_date, end_date__gte=end_date)
-            if overlapping_cycles.exists():
-                raise ValidationError("Program Cycles' timeframes must not overlap with the provided end date.")
+        # timeframes overlapping
+        if start_date and program.cycles.filter(start_date__lte=start_date, end_date__gte=start_date).exists():
+            raise serializers.ValidationError(
+                {"start_date": "Programme Cycles' timeframes must not overlap with the provided start date."}
+            )
+        if end_date and program.cycles.filter(start_date__lte=end_date, end_date__gte=end_date).exists():
+            raise serializers.ValidationError(
+                {"end_date": "Programme Cycles' timeframes must not overlap with the provided end date."}
+            )
 
         return data
 
@@ -103,7 +98,7 @@ class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
             raise serializers.ValidationError("A ProgramCycle with this title already exists.")
 
         if value is None or "":
-            raise ValidationError("Not possible leave the Programme Cycle title empty.")
+            raise serializers.ValidationError("Not possible leave the Programme Cycle title empty.")
 
         return value
 
@@ -113,11 +108,15 @@ class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
             raise serializers.ValidationError("Update Programme Cycle is possible only for Active Programme.")
 
         if data.get("start_date") is None:
-            raise ValidationError("Not possible leave the Programme Cycle start date empty.")
+            raise serializers.ValidationError(
+                {"start_date": "Not possible leave the Programme Cycle start date empty."}
+            )
 
         if not self.instance.end_date and data.get("end_date") is None:
-            raise ValidationError(
-                "Not possible leave the Programme Cycle end date empty if it was empty upon starting the edit."
+            raise serializers.ValidationError(
+                {
+                    "end_date": "Not possible leave the Programme Cycle end date empty if it was empty upon starting the edit."
+                }
             )
 
         return data
