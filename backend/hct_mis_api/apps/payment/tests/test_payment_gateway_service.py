@@ -18,6 +18,9 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualRoleInHouseholdFactory,
 )
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
+from hct_mis_api.apps.payment.celery_tasks import (
+    periodic_sync_payment_gateway_delivery_mechanisms,
+)
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
@@ -712,3 +715,8 @@ class TestPaymentGatewayService(APITestCase):
         fsp_new = FinancialServiceProvider.objects.get(name="New FSP")
         assert fsp_new.payment_gateway_id == "33"
         assert list(fsp_new.delivery_mechanisms.values_list("code", flat=True)) == ["cash_over_the_counter", "transfer"]
+
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayService.sync_delivery_mechanisms")
+    def test_periodic_sync_payment_gateway_delivery_mechanisms(self, sync_delivery_mechanisms_mock: Any) -> None:
+        periodic_sync_payment_gateway_delivery_mechanisms()
+        assert sync_delivery_mechanisms_mock.call_count == 1
