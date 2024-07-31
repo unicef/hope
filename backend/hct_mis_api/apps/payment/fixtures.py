@@ -208,6 +208,7 @@ class FinancialServiceProviderXlsxTemplateFactory(DjangoModelFactory):
 class FinancialServiceProviderFactory(DjangoModelFactory):
     class Meta:
         model = FinancialServiceProvider
+        django_get_or_create = ("name",)
 
     name = factory.Faker("company")
     vision_vendor_number = factory.Faker("ssn")
