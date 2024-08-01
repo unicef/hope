@@ -31,10 +31,9 @@ export const api = {
     const etag = response.headers.get('ETag');
     const data = await response.json();
 
-    if (etag) {
+    if (etag && data !== undefined && data !== null) {
       this.cache.set(cacheKey, { etag, data });
     }
-
     return data;
   },
 

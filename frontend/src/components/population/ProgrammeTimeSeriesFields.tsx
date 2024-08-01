@@ -1,18 +1,23 @@
 import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
-import { Title } from '@core/Title';
-import { UniversalMoment } from '@core/UniversalMoment';
 import {
-  TableCell as MuiTableCell,
-  Table,
-  TableBody,
-  TableCell,
+  Typography,
   TableContainer,
+  Table,
   TableHead,
   TableRow,
-  Typography,
+  TableCell as MuiTableCell,
+  TableBody,
+  TableCell,
 } from '@mui/material';
-import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { Title } from '@core/Title';
+import { useTranslation } from 'react-i18next';
+import { useArrayToDict } from '@hooks/useArrayToDict';
+import {
+  AllIndividualsFlexFieldsAttributesQuery,
+  IndividualNode,
+} from '@generated/graphql';
+import { UniversalMoment } from '@core/UniversalMoment';
 
 const StyledTableCell = styled(MuiTableCell)`
   color: #adadad !important;
@@ -20,27 +25,40 @@ const StyledTableCell = styled(MuiTableCell)`
 
 //TODO MS: add proper type
 interface ProgrammeTimeSeriesFieldsProps {
+  individual: IndividualNode;
   periodicFieldsData: any;
 }
 
 export const ProgrammeTimeSeriesFields = ({
+  individual,
   periodicFieldsData,
 }: ProgrammeTimeSeriesFieldsProps): React.ReactElement => {
   const { t } = useTranslation();
-
-  const rows = periodicFieldsData?.results || [];
-
-  //TODO MS: add missing fields
-  const mappedRows = rows.flatMap((row) =>
-    (row.pdu_data?.rounds_names || []).map((roundName, index) => ({
-      fieldName: row.name,
-      roundNumber: index + 1,
-      roundName: roundName,
-      value: null, // Assuming value is not available in the provided data
-      dateOfCollection: null, // Assuming dateOfCollection is not available in the provided data
-    })),
+  const pduDataDict = useArrayToDict(
+    periodicFieldsData?.results || [],
+    'name',
+    '*',
   );
-
+  const rows = [];
+  for (const fieldName of Object.keys(individual.flexFields)) {
+    for (const roundNumber of Object.keys(individual.flexFields[fieldName])) {
+      const roundData = individual.flexFields[fieldName][roundNumber];
+      const roundName =
+        pduDataDict[fieldName].pdu_data.rounds_names[
+          parseInt(roundNumber) - 1
+        ];
+      const value = roundData.value;
+      const dateOfCollection = roundData.collection_date;
+      rows.push({
+        key:`${pduDataDict[fieldName]}-roundNumber`,
+        fieldName: pduDataDict[fieldName].label,
+        roundNumber: roundNumber,
+        roundName: roundName,
+        value,
+        dateOfCollection,
+      });
+    }
+  }
   return (
     <ContainerColumnWithBorder>
       <Title>
@@ -64,8 +82,8 @@ export const ProgrammeTimeSeriesFields = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {mappedRows.map((row, index) => (
-              <TableRow key={`${row.fieldName}-${row.roundNumber}-${index}`}>
+            {rows.map((row, index) => (
+              <TableRow key={row.key}>
                 <TableCell component="th" scope="row">
                   {row.fieldName}
                 </TableCell>

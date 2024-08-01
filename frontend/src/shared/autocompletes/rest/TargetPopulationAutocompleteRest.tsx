@@ -14,10 +14,7 @@ export const TargetPopulationAutocompleteRest = ({
   onChange: (e) => void;
 }): React.ReactElement => {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
-
-  const [inputValue, onInputTextChange] = useState('');
-  const debouncedInputText = useDebounce(inputValue, 800);
+  const [queryParams, setQueryParams] = useState({});
   const { businessArea, programId } = useBaseUrl();
 
   // Define the mapOptions function
@@ -27,7 +24,6 @@ export const TargetPopulationAutocompleteRest = ({
       value: option.id,
     }));
   };
-
   return (
     <BaseAutocompleteRest
       value={value}
@@ -37,27 +33,22 @@ export const TargetPopulationAutocompleteRest = ({
       businessArea={businessArea}
       programId={programId}
       handleChange={(_, selectedValue) => {
-        if (!selectedValue) {
-          onInputTextChange('');
-        }
         onChange(selectedValue);
       }}
-      handleOpen={() => setOpen(true)}
-      open={open}
-      handleClose={(_, reason) =>
-        handleAutocompleteClose(setOpen, onInputTextChange, reason)
-      }
       handleOptionSelected={(option, value1) =>
         handleOptionSelected(option?.value, value1)
       }
       handleOptionLabel={(option) => {
         return option === '' ? '' : option.name;
       }}
-      inputValue={inputValue}
-      onInputTextChange={onInputTextChange}
-      debouncedInputText={debouncedInputText}
+      onDebouncedInputTextChanges={(text) => {
+        setQueryParams({
+          name: text,
+        });
+      }}
       startAdornment={null}
       mapOptions={mapOptions}
+      queryParams={queryParams}
     />
   );
 };
