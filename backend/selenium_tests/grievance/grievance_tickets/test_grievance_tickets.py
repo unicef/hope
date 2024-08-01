@@ -329,7 +329,7 @@ class TestSmokeGrievanceTickets:
         assert "-" in pageGrievanceDetailsPage.getTicketPaymentLabel().text
         assert "-" in pageGrievanceDetailsPage.getLabelPaymentPlan().text
         assert "-" in pageGrievanceDetailsPage.getLabelPaymentPlanVerification().text
-        assert "Test Programm" in pageGrievanceDetailsPage.getLabelProgramme().text
+        assert "Test Program" in pageGrievanceDetailsPage.getLabelProgramme().text
         assert "Andarab" in pageGrievanceDetailsPage.getAdministrativeLevel().text
         assert "-" in pageGrievanceDetailsPage.getAreaVillage().text
         assert "English | English" in pageGrievanceDetailsPage.getLanguagesSpoken().text
@@ -544,7 +544,7 @@ class TestGrievanceTickets:
         assert "Data Change" in pageGrievanceDetailsPage.getTicketCategory().text
         assert "Add Individual" in pageGrievanceDetailsPage.getLabelIssueType().text
         assert household_without_disabilities.unicef_id in pageGrievanceDetailsPage.getTicketHouseholdID().text
-        assert "Test Programm" in pageGrievanceDetailsPage.getLabelProgramme().text
+        assert "Test Program" in pageGrievanceDetailsPage.getLabelProgramme().text
         assert datetime.now().strftime("%-d %b %Y") in pageGrievanceDetailsPage.getLabelDateCreation().text
         assert datetime.now().strftime("%-d %b %Y") in pageGrievanceDetailsPage.getLabelLastModifiedDate().text
         assert "-" in pageGrievanceDetailsPage.getLabelAdministrativeLevel2().text
