@@ -54,11 +54,12 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: React.FC<
       queryFn: () => fetchPeriodicFields(businessArea, programId),
     });
   const pduDataDict = useArrayToDict(
-    periodicFieldsData?.results || [],
+    periodicFieldsData?.results,
     'name',
     '*',
   );
-  if (isLoading || periodicFieldsLoading || !pduDataDict) return <LoadingComponent />;
+  if (isLoading || periodicFieldsLoading || !pduDataDict)
+    return <LoadingComponent />;
   return (
     <Dialog
       open={open}
@@ -83,7 +84,7 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: React.FC<
               {templateDetailsData?.rounds_data?.map((roundData, index) => (
                 <TableRow key={index}>
                   <TableCell data-cy={`template-field-${index}`}>
-                    {roundData.field}
+                    {pduDataDict[roundData.field].label}
                   </TableCell>
                   <TableCell data-cy={`template-round-number-${index}`}>
                     {roundData.round}
