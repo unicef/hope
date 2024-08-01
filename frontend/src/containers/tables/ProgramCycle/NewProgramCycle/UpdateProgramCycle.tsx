@@ -47,31 +47,31 @@ export const UpdateProgramCycle = ({
   const queryClient = useQueryClient();
   const { showMessage } = useSnackbar();
 
-  const validationSchemaPreviousProgramCycle = Yup.object().shape({
-    previousProgramCycleEndDate: Yup.date()
+  const validationSchema = Yup.object().shape({
+    end_date: Yup.date()
       .required(t('End Date is required'))
       .min(today, t('End Date cannot be in the past'))
       .max(program.endDate, t('End Date cannot be after Programme End Date'))
       .when(
-        'previousProgramCycleStartDate',
-        (previousProgramCycleStartDate, schema) =>
-          previousProgramCycleStartDate &&
+        'start_date',
+        (start_date, schema) =>
+          start_date &&
           schema.min(
-            previousProgramCycleStartDate,
+            start_date,
             `${t('End date have to be greater than')} ${moment(
-              previousProgramCycleStartDate,
+              start_date,
             ).format('YYYY-MM-DD')}`,
           ),
       ),
   });
 
-  const initialValuesPreviousProgramCycle: {
+  const initialValues: {
     [key: string]: string | boolean | number | null;
   } = {
-    previousProgramCycleId: programCycle.id,
-    previousProgramCycleName: programCycle.title,
-    previousProgramCycleStartDate: programCycle.start_date,
-    previousProgramCycleEndDate: undefined,
+    id: programCycle.id,
+    title: programCycle.title,
+    start_date: programCycle.start_date,
+    end_date: undefined,
   };
 
   const { mutateAsync, isPending } = useMutation<
@@ -100,7 +100,7 @@ export const UpdateProgramCycle = ({
       await mutateAsync({
         title: programCycle.title,
         start_date: programCycle.start_date,
-        end_date: values.previousProgramCycleEndDate,
+        end_date: values.end_date,
       });
       showMessage(t('Programme Cycle Updated'));
     } catch (e) {
@@ -110,8 +110,8 @@ export const UpdateProgramCycle = ({
 
   return (
     <Formik
-      initialValues={initialValuesPreviousProgramCycle}
-      validationSchema={validationSchemaPreviousProgramCycle}
+      initialValues={initialValues}
+      validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
       {({ submitForm, values }) => (
@@ -138,7 +138,7 @@ export const UpdateProgramCycle = ({
                   data-cy="previous-program-cycle-name"
                   label={t('Programme Cycle Name')}
                 >
-                  {values.previousProgramCycleName}
+                  {values.title}
                 </LabelizedField>
               </Grid>
               <Grid item xs={6}>
@@ -146,12 +146,12 @@ export const UpdateProgramCycle = ({
                   data-cy="previous-program-cycle-start-date"
                   label={t('Start Date')}
                 >
-                  {values.previousProgramCycleStartDate}
+                  {values.start_date}
                 </LabelizedField>
               </Grid>
               <Grid item xs={6}>
                 <Field
-                  name="previousProgramCycleEndDate"
+                  name="end_date"
                   label={t('End Date')}
                   component={FormikDateField}
                   required
