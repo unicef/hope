@@ -178,7 +178,7 @@ class TestPeriodicDataTemplates:
             in pagePeriodicDataUpdateTemplates.getTemplateRecords(index).text
         )
         assert (
-            f"{periodic_data_update_template.created_at:%d %b %Y}"
+            f"{periodic_data_update_template.created_at:%-d %b %Y}"
             in pagePeriodicDataUpdateTemplates.getTemplateCreatedAt(index).text
         )
         assert (
@@ -233,8 +233,6 @@ class TestPeriodicDataTemplates:
             in pagePeriodicDataUpdateTemplates.getTemplateNumberOfIndividuals(0).text
         )
 
-    # TODO: remove xfail when the test is fixed
-    @pytest.mark.xfail(reason="fails now, shouldn't fail later")
     def test_periodic_data_template_create_and_download(
         self,
         program: Program,
