@@ -70,7 +70,7 @@ class BusinessAreaVersionKeyBit(KeyBitBase):
 
 class ProgramKeyBit(KeyBitBase):
     def get_data(
-            self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
     ) -> str:
         program_id = decode_id_string(kwargs.get("program_id"))
         version = get_or_create_cache_key(f"{program_id}:version", 1)
