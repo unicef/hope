@@ -167,7 +167,7 @@ export const DuplicateProgramPage = (): ReactElement => {
     partnerAccess,
     pduFields: [
       {
-        name: '',
+        label: '',
         pduData: {
           subtype: '',
           numberOfRounds: null,
