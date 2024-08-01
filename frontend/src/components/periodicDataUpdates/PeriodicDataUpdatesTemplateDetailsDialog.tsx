@@ -14,10 +14,14 @@ import {
   Button,
 } from '@mui/material';
 import { LabelizedField } from '@components/core/LabelizedField';
-import { fetchPeriodicDataUpdateTemplateDetails } from '@api/periodicDataUpdateApi';
+import {
+  fetchPeriodicDataUpdateTemplateDetails,
+  fetchPeriodicFields,
+} from '@api/periodicDataUpdateApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery } from '@tanstack/react-query';
 import { LoadingComponent } from '@components/core/LoadingComponent';
+import { useArrayToDict } from '@hooks/useArrayToDict';
 
 interface PeriodicDataUpdatesTemplateDetailsDialogProps {
   open: boolean;
@@ -44,11 +48,24 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: React.FC<
         template.id,
       ),
   });
-
-  if (isLoading) return <LoadingComponent />;
-
+  const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
+    useQuery({
+      queryKey: ['periodicFields', businessArea, programId],
+      queryFn: () => fetchPeriodicFields(businessArea, programId),
+    });
+  const pduDataDict = useArrayToDict(
+    periodicFieldsData?.results || [],
+    'name',
+    '*',
+  );
+  if (isLoading || periodicFieldsLoading||!pduDataDict) return <LoadingComponent />;
   return (
-    <Dialog open={open} onClose={onClose} scroll="paper" data-cy="periodic-data-update-detail">
+    <Dialog
+      open={open}
+      onClose={onClose}
+      scroll="paper"
+      data-cy="periodic-data-update-detail"
+    >
       <DialogTitle>{t('Periodic Data Updates')}</DialogTitle>
       <DialogContent>
         <LabelizedField label={t('Template Id')}>{template.id}</LabelizedField>
@@ -65,10 +82,18 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: React.FC<
             <TableBody>
               {templateDetailsData?.rounds_data?.map((roundData, index) => (
                 <TableRow key={index}>
-                  <TableCell data-cy={`template-field-${index}`}>{roundData.field}</TableCell>
-                  <TableCell data-cy={`template-round-number-${index}`}>{roundData.round}</TableCell>
-                  <TableCell data-cy={`template-round-name-${index}`}>{roundData.round_name}</TableCell>
-                  <TableCell data-cy={`template-number-of-individuals-${index}`}>
+                  <TableCell data-cy={`template-field-${index}`}>
+                    {roundData.field}
+                  </TableCell>
+                  <TableCell data-cy={`template-round-number-${index}`}>
+                    {roundData.round}
+                  </TableCell>
+                  <TableCell data-cy={`template-round-name-${index}`}>
+                    {roundData.round_name}
+                  </TableCell>
+                  <TableCell
+                    data-cy={`template-number-of-individuals-${index}`}
+                  >
                     {roundData.number_of_records}
                   </TableCell>
                 </TableRow>
