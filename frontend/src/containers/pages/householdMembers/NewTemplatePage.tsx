@@ -86,11 +86,11 @@ export const NewTemplatePage = (): React.ReactElement => {
       return [];
     }
     return data.results.map((item) => {
-      const { name, pdu_data } = item;
+      const { name, pdu_data, label } = item;
       const { rounds_names } = pdu_data;
-
       return {
         field: name,
+        label,
         rounds: rounds_names.map((_, roundIndex) => ({
           round: roundIndex + 1,
           round_name: rounds_names[roundIndex],
