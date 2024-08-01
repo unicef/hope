@@ -1,10 +1,12 @@
 from datetime import datetime
+from decimal import Decimal
 
 import pytest
 from dateutil.relativedelta import relativedelta
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 
@@ -37,7 +39,8 @@ def create_program_cycle(create_test_program: Program) -> ProgramCycle:
         status=ProgramCycle.ACTIVE,
         program=create_test_program,
     )
-    # TODO: add PaymentPlan maybe to have some total amount numbers in the table
+    PaymentPlanFactory(program_cycle=program_cycle, total_delivered_quantity_usd=Decimal("333.99"))
+    PaymentPlanFactory(program_cycle=program_cycle, total_delivered_quantity_usd=Decimal("1500.00"))
     yield program_cycle
 
 

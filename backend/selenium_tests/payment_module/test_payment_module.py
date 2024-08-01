@@ -70,6 +70,7 @@ def create_targeting(create_test_program: Program) -> None:
         program=create_test_program,
         status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
         targeting_criteria=targeting_criteria,
+        program_cycle=create_test_program.cycles.first(),
     )
     households = [
         create_household(

@@ -91,7 +91,6 @@ class TargetPopulationFactory(DjangoModelFactory):
     status = TargetPopulation.STATUS_OPEN
     program = factory.LazyAttribute(lambda t: Program.objects.filter(status=Program.ACTIVE).first())
     business_area = factory.LazyAttribute(lambda t: BusinessArea.objects.first())
-    program_cycle = factory.LazyAttribute(lambda t: t.program.cycles.first())
 
     @factory.post_generation
     def households(self, create: bool, extracted: Iterable, **kwargs: Any) -> None:
