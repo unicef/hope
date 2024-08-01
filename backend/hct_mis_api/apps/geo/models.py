@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import CICharField
-from django.db.models import JSONField
+from django.db.models import JSONField, Q, UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 
 from natural_keys import NaturalKeyModel
@@ -123,8 +123,14 @@ class Area(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
 
     class Meta:
         verbose_name_plural = "Areas"
-        unique_together = ("name", "p_code")
         ordering = ("name",)
+        constraints = [
+            UniqueConstraint(
+                fields=["p_code"],
+                name="unique_area_p_code_not_blank",
+                condition=~Q(p_code=""),
+            )
+        ]
 
     class MPTTMeta:
         order_insertion_by = ("name", "p_code")
