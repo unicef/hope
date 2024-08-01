@@ -7,6 +7,7 @@ from django.db.models.functions import Coalesce
 
 from django_filters import rest_framework as filters
 
+from hct_mis_api.apps.core.filters import DecimalRangeFilter
 from hct_mis_api.apps.core.utils import decode_id_string_required
 from hct_mis_api.apps.program.models import ProgramCycle
 
@@ -17,6 +18,8 @@ class ProgramCycleFilter(filters.FilterSet):
         choices=ProgramCycle.STATUS_CHOICE,
     )
     program = filters.CharFilter(method="filter_by_program")
+    start_date = filters.DateFilter(field_name="start_date", lookup_expr="gte")
+    end_date = filters.DateFilter(field_name="end_date", lookup_expr="lte")
     total_delivered_quantity_usd_from = filters.NumberFilter(method="filter_total_delivered_quantity_usd")
     total_delivered_quantity_usd_to = filters.NumberFilter(method="filter_total_delivered_quantity_usd")
 
@@ -26,8 +29,6 @@ class ProgramCycleFilter(filters.FilterSet):
             "title": [
                 "startswith",
             ],
-            "start_date": ["gte"],
-            "end_date": ["lte"],
         }
 
     def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:

@@ -1,9 +1,17 @@
 import { api } from '@api/api';
 
+export type ProgramCycleStatus = 'Active' | 'Draft' | 'Finished';
+
 export interface ProgramCyclesQuery {
   ordering: string;
   limit?: number;
   offset?: number;
+  search?: string;
+  status?: ProgramCycleStatus;
+  total_entitled_quantity_usd_from?: number;
+  total_entitled_quantity_usd_to?: number;
+  start_date?: string;
+  end_date?: string;
 }
 
 export interface PaginatedListResponse<T> {
@@ -12,8 +20,6 @@ export interface PaginatedListResponse<T> {
   previous?: string;
   results: T[];
 }
-
-export type ProgramCycleStatus = 'Active' | 'Draft' | 'Finished';
 
 export interface ProgramCycle {
   id: string;
@@ -33,7 +39,20 @@ export const fetchProgramCycles = async (
   programId: string,
   query: ProgramCyclesQuery,
 ): Promise<PaginatedListResponse<ProgramCycle>> => {
-  return api.get(`${businessArea}/programs/${programId}/cycles/`, query);
+  const params = {
+    offset: query.offset,
+    limit: query.limit,
+    ordering: query.ordering,
+    search: query.search,
+    total_entitled_quantity_usd_from: query.total_entitled_quantity_usd_from,
+    total_entitled_quantity_usd_to: query.total_entitled_quantity_usd_to,
+    start_date: query.start_date,
+    end_date: query.end_date,
+  } as ProgramCyclesQuery;
+  if (query.status) {
+    params.status = query.status;
+  }
+  return api.get(`${businessArea}/programs/${programId}/cycles/`, params);
 };
 
 export const fetchProgramCycle = async (

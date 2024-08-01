@@ -16,11 +16,11 @@ import { TableWrapper } from '@core/TableWrapper';
 
 const initialFilter = {
   search: '',
-  status: [],
-  totalDeliveredQuantityUsdFrom: '',
-  totalDeliveredQuantityUsdTo: '',
-  startDate: '',
-  endDate: '',
+  status: '',
+  total_entitled_quantity_usd_from: '',
+  total_entitled_quantity_usd_to: '',
+  start_date: '',
+  end_date: '',
 };
 
 export const ProgramCyclePage = (): React.ReactElement => {
