@@ -107,7 +107,7 @@ def create_targeting(create_test_program: Program) -> None:
     FspXlsxTemplatePerDeliveryMechanismFactory(
         financial_service_provider=fsp_1,
         xlsx_template=fsp_xlsx_template,
-        delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+        delivery_mechanism=dm_cash,
     )
 
 
