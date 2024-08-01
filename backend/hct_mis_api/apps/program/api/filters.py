@@ -7,7 +7,6 @@ from django.db.models.functions import Coalesce
 
 from django_filters import rest_framework as filters
 
-from hct_mis_api.apps.core.filters import DecimalRangeFilter
 from hct_mis_api.apps.core.utils import decode_id_string_required
 from hct_mis_api.apps.program.models import ProgramCycle
 
