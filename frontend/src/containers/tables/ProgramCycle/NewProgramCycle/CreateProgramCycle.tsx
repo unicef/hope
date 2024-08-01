@@ -97,7 +97,7 @@ export const CreateProgramCycle = ({
         start_date: values.start_date,
         end_date: values.end_date,
       });
-      showMessage(t('Programme Cycle Updated'));
+      showMessage(t('Programme Cycle Created'));
     } catch (e) {
       showMessage(e.message);
     }
@@ -107,9 +107,7 @@ export const CreateProgramCycle = ({
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
-      onSubmit={(values) => {
-        handleSubmit(values);
-      }}
+      onSubmit={handleSubmit}
     >
       {({ submitForm }) => (
         <Form>
@@ -167,7 +165,6 @@ export const CreateProgramCycle = ({
                 </Button>
                 <LoadingButton
                   loading={isPending}
-                  type="submit"
                   color="primary"
                   variant="contained"
                   onClick={submitForm}

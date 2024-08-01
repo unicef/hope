@@ -124,9 +124,7 @@ export const EditProgramCycle = ({
       <Dialog open={open} onClose={() => setOpen(false)} scroll="paper">
         <Formik
           initialValues={initialValues}
-          onSubmit={(values) => {
-            void handleUpdate(values);
-          }}
+          onSubmit={handleUpdate}
           validationSchema={validationSchema}
         >
           {({ submitForm }) => (
@@ -180,8 +178,7 @@ export const EditProgramCycle = ({
               <DialogFooter>
                 <DialogActions>
                   <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
+                    onClick={() => {
                       setOpen(false);
                     }}
                     data-cy="button-cancel"
@@ -190,13 +187,9 @@ export const EditProgramCycle = ({
                   </Button>
                   <LoadingButton
                     loading={isPending}
-                    type="submit"
                     color="primary"
                     variant="contained"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      void submitForm();
-                    }}
+                    onClick={submitForm}
                     data-cy="button-save"
                   >
                     {t('Save')}

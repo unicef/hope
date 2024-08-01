@@ -96,8 +96,7 @@ export const DeleteProgramCycle = ({
             <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <LoadingButton
               loading={isPending}
-              error
-              type="submit"
+              color="error"
               variant="contained"
               onClick={handleDelete}
               data-cy="button-delete"

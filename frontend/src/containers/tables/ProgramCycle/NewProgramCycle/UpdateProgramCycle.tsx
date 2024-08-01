@@ -22,7 +22,7 @@ import {
   ProgramCycleUpdateResponse,
   updateProgramCycle,
 } from '@api/programCycleApi';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import type { DefaultError } from '@tanstack/query-core';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -44,7 +44,6 @@ export const UpdateProgramCycle = ({
 }: UpdateProgramCycleProps) => {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
-  const queryClient = useQueryClient();
   const { showMessage } = useSnackbar();
 
   const validationSchema = Yup.object().shape({
@@ -88,9 +87,6 @@ export const UpdateProgramCycle = ({
       );
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ['programCycles', businessArea, program.id],
-      });
       onSubmit();
     },
   });
@@ -169,7 +165,6 @@ export const UpdateProgramCycle = ({
               </Button>
               <LoadingButton
                 loading={isPending}
-                type="submit"
                 color="primary"
                 variant="contained"
                 onClick={submitForm}
