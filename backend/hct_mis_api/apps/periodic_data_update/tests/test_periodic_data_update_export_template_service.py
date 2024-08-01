@@ -286,10 +286,10 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
             name="State2",
             area_level=2,
         )
-        area1a = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="area1")
-        area2a = AreaFactory(name="City Test2", area_type=area_type_level_2, p_code="area2", parent=area1a)
-        area1b = AreaFactory(name="City Test1b", area_type=area_type_level_1, p_code="area1")
-        area2b = AreaFactory(name="City Test2b", area_type=area_type_level_2, p_code="area2", parent=area1b)
+        area1a = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="area1a")
+        area2a = AreaFactory(name="City Test2", area_type=area_type_level_2, p_code="area2a", parent=area1a)
+        area1b = AreaFactory(name="City Test1b", area_type=area_type_level_1, p_code="area1b")
+        area2b = AreaFactory(name="City Test2b", area_type=area_type_level_2, p_code="area2b", parent=area1b)
         create_household_and_individuals(
             household_data={
                 "business_area": self.business_area,
