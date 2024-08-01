@@ -1,3 +1,4 @@
+import moment from 'moment';
 import {
   createPeriodicDataUpdateTemplate,
   fetchPeriodicFields,
@@ -42,12 +43,7 @@ export const NewTemplatePeoplePage = (): React.ReactElement => {
     receivedAssistance: '',
   };
 
-  const [filter, setFilter] = useState(
-    getFilterFromQueryParams(location, initialFilter),
-  );
-  const [appliedFilter, setAppliedFilter] = useState(
-    getFilterFromQueryParams(location, initialFilter),
-  );
+  const [filter, setFilter] = useState(initialFilter);
 
   const createTemplate = useMutation({
     mutationFn: (params: {
