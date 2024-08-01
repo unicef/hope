@@ -223,7 +223,15 @@ class PeriodicDataUpdateImportService:
                 raise ValidationError(
                     f"Value already exists for field {field_name} for round {round_number} and individual {individual_uuid} / {individual_unicef_id}"
                 )
-            self.set_round_value(individual, field_name, round_number, value_from_xlsx, collection_date_from_xlsx)
+            self.set_round_value(
+                individual,
+                field_name,
+                round_number,
+                value_from_xlsx,
+                collection_date_from_xlsx
+                if collection_date_from_xlsx
+                else self.periodic_data_update_template.created_at.date(),
+            )
         return individual
 
     def _get_round_value(

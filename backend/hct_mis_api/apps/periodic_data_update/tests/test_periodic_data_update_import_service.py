@@ -204,6 +204,29 @@ class TestPeriodicDataUpdateImportService(TestCase):
         self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], "1996-06-21")
         self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
 
+    def test_import_data_date_no_collection_date(self) -> None:
+        flexible_attribute = self.date_attribute
+        periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
+            [
+                {
+                    "field": flexible_attribute.name,
+                    "round": 1,
+                    "round_name": flexible_attribute.pdu_data.rounds_names[0],
+                    "number_of_records": 0,
+                }
+            ],
+            [["1996-06-21"]],
+        )
+        periodic_data_update_template.created_at = datetime.datetime(2021, 3, 7)
+        periodic_data_update_template.save()
+        service = PeriodicDataUpdateImportService(periodic_data_update_upload)
+        service.import_data()
+        self.assertEqual(periodic_data_update_upload.status, PeriodicDataUpdateUpload.Status.SUCCESSFUL)
+        self.assertEqual(periodic_data_update_upload.error_message, None)
+        self.individual.refresh_from_db()
+        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], "1996-06-21")
+        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-03-07")
+
     def test_import_data_date_fail(self) -> None:
         flexible_attribute = self.date_attribute
         periodic_data_update_template, periodic_data_update_upload = self.prepare_test_data(
