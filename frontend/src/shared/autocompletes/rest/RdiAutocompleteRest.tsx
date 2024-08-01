@@ -38,6 +38,7 @@ export const RdiAutocompleteRest = ({
       fetchFunction={(businessArea, programId, queryParams) =>
         fetchRegistrationDataImports(businessArea, programId, {
           status: 'MERGED',
+          name: debouncedInputText,
           ...queryParams,
         })
       }

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { StyledAutocomplete, StyledTextField } from '../StyledAutocomplete';
 
@@ -29,7 +29,6 @@ export function BaseAutocompleteRest({
   mapOptions = (opts) => opts,
   autocompleteProps = {},
   textFieldProps = {},
-  fetchfunctionParams = {},
 }: {
   value: string;
   disabled?: boolean;
@@ -59,7 +58,11 @@ export function BaseAutocompleteRest({
   autocompleteProps?: Record<string, any>;
   textFieldProps?: Record<string, any>;
 }): React.ReactElement {
-  const prevValueRef = useRef(value);
+  const [modifiedOptions, setModifiedOptions] = React.useState<OptionType[]>(
+    [],
+  );
+
+  //TODO: add refetching on typing
 
   const { data, isLoading } = useQuery({
     queryKey: [label, businessArea, programId, queryParams],
@@ -67,11 +70,9 @@ export function BaseAutocompleteRest({
   });
 
   useEffect(() => {
-    const prevValue = prevValueRef.current;
-    if (prevValue !== '' && value === '' && inputValue !== '') {
+    if (value === '' && inputValue !== '') {
       onInputTextChange('');
     }
-    prevValueRef.current = value;
   }, [value, onInputTextChange, inputValue]);
 
   // load data on mount to match the value from the url
@@ -88,15 +89,17 @@ export function BaseAutocompleteRest({
     queryParams,
   ]);
 
-  if (!data) return null;
+  useEffect(() => {
+    setModifiedOptions(
+      mapOptions(options.length > 0 ? options : data?.results || []),
+    );
+  }, [options, data, mapOptions]);
 
-  const modifiedOptions = mapOptions(
-    options.length > 0 ? options : data.results || [],
-  );
+  if (!data) return null;
 
   return (
     <StyledAutocomplete
-      key={prevValueRef.current}
+      key={data}
       freeSolo={false}
       filterOptions={(x) => x}
       value={value}
