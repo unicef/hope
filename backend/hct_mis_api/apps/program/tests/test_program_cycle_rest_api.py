@@ -161,14 +161,14 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
 
     def test_filter_by_start_date_gte(self) -> None:
         self.client.force_authenticate(user=self.user)
-        response = self.client.get(self.list_url, {"start_date__gte": "2023-03-01"})
+        response = self.client.get(self.list_url, {"start_date": "2023-03-01"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["start_date"], "2023-05-01")
 
     def test_filter_by_end_date_lte(self) -> None:
         self.client.force_authenticate(user=self.user)
-        response = self.client.get(self.list_url, {"end_date__lte": "2023-01-15"})
+        response = self.client.get(self.list_url, {"end_date": "2023-01-15"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["end_date"], "2023-01-10")

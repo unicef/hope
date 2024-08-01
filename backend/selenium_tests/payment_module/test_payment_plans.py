@@ -148,6 +148,7 @@ class TestSmokePaymentModule:
     def test_smoke_payment_plan(self, create_payment_plan: PaymentPlan, pagePaymentModule: PaymentModule) -> None:
         pagePaymentModule.selectGlobalProgramFilter("Test Program").click()
         pagePaymentModule.getNavPaymentModule().click()
+        pagePaymentModule.getNavPaymentPlans().click()
         assert "Payment Module" in pagePaymentModule.getPageHeaderTitle().text
         assert "NEW PAYMENT PLAN" in pagePaymentModule.getButtonNewPaymentPlan().text
         assert "Status" in pagePaymentModule.getSelectFilter().text
@@ -177,6 +178,7 @@ class TestSmokePaymentModule:
     ) -> None:
         pagePaymentModule.selectGlobalProgramFilter("Test Program").click()
         pagePaymentModule.getNavPaymentModule().click()
+        pagePaymentModule.getNavPaymentPlans().click()
         pagePaymentModule.getButtonNewPaymentPlan().click()
 
         assert "New Payment Plan" in pageNewPaymentPlan.getPageHeaderTitle().text
@@ -196,6 +198,7 @@ class TestSmokePaymentModule:
     ) -> None:
         pagePaymentModule.selectGlobalProgramFilter("Test Program").click()
         pagePaymentModule.getNavPaymentModule().click()
+        pagePaymentModule.getNavPaymentPlans().click()
         assert "NEW PAYMENT PLAN" in pagePaymentModule.getButtonNewPaymentPlan().text
         pagePaymentModule.getRow(0).click()
         assert "ACCEPTED" in pagePaymentModuleDetails.getStatusContainer().text
@@ -249,6 +252,7 @@ class TestSmokePaymentModule:
         program = Program.objects.get(name="Test Program")
         pagePaymentModule.selectGlobalProgramFilter("Test Program").click()
         pagePaymentModule.getNavPaymentModule().click()
+        pagePaymentModule.getNavPaymentPlans().click()
         pagePaymentModule.getButtonNewPaymentPlan().click()
         pageNewPaymentPlan.getInputTargetPopulation().click()
         pageNewPaymentPlan.select_listbox_element(targeting.name).click()
