@@ -294,6 +294,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         registration_data_import = RegistrationDataImport.objects.select_for_update().get(
             id=registration_data_import_id,
         )
+        self.registration_data_import = registration_data_import
         self.program = Program.objects.get(id=program_id)
         self.pdu_flexible_attributes = FlexibleAttribute.objects.filter(
             type=FlexibleAttribute.PDU, program=self.program

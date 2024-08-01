@@ -90,9 +90,7 @@ class TemplateFileGeneratorService:
             label_row.append(
                 f"{self._get_label(flexible_attribute)} - First round value - {flexible_attribute.pdu_data.subtype}"
             )
-            label_row.append(
-                f"{self._get_label(flexible_attribute)} - First round collection date - DATE"
-            )
+            label_row.append(f"{self._get_label(flexible_attribute)} - First round collection date - DATE")
         return name_row, label_row
 
     def _get_label(self, flexible_attribute: FlexibleAttribute) -> str:

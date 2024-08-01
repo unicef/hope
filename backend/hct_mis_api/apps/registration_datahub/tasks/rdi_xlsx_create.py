@@ -526,7 +526,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             subtype = flexible_attribute.pdu_data.subtype
             handle_subtype = handle_subtype_mapping[subtype]
             value = handle_subtype(value_cell)
-            collection_date = self._handle_date_field(collection_date_cell)
+            if not collection_date_cell.value:
+                collection_date = self.registration_data_import.created_at.date()
+            else:
+                collection_date = self._handle_date_field(collection_date_cell)
             PeriodicDataUpdateImportService.set_round_value(
                 individual, flexible_attribute.name, 1, value, collection_date
             )
@@ -776,6 +779,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             registration_data_import = RegistrationDataImport.objects.select_for_update().get(
                 id=registration_data_import_id,
             )
+            self.registration_data_import = registration_data_import
             registration_data_import.status = RegistrationDataImport.IMPORTING
             registration_data_import.save()
             self.program = registration_data_import.program

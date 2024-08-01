@@ -1,3 +1,4 @@
+import datetime
 import json
 from datetime import date
 from io import BytesIO
@@ -245,6 +246,8 @@ class TestRdiXlsxCreateTask(BaseElasticSearchTestCase):
             program=self.program,
             import_data=import_data,
         )
+        registration_data_import.created_at = datetime.datetime(2021, 3, 7)
+        registration_data_import.save()
         task = self.RdiXlsxCreateTask()
         task.execute(registration_data_import.id, import_data.id, self.business_area.id, self.program.id)
 
@@ -290,7 +293,7 @@ class TestRdiXlsxCreateTask(BaseElasticSearchTestCase):
             {
                 "muac_i_f": 1,
                 "jan_decimal_i_f": 12.376,
-                "pdu_date_attribute": {"1": {"value": "1996-06-26", "collection_date": "2024-07-07"}},
+                "pdu_date_attribute": {"1": {"value": "1996-06-26", "collection_date": "2021-03-07"}},
                 "pdu_string_attribute": {"1": {"value": "Test PDU Value", "collection_date": "2020-01-08"}},
             },
         )
