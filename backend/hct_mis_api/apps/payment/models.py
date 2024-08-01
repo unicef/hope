@@ -2303,25 +2303,25 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
             else:
                 self.unique_key = unique_key
 
-    @cached_property
+    @property
     def delivery_mechanism_all_fields_definitions(self) -> List[dict]:
         all_core_fields = get_core_fields_attributes()
         return [field for field in all_core_fields if field["name"] in self.all_fields]
 
-    @cached_property
+    @property
     def delivery_mechanism_required_fields_definitions(self) -> List[dict]:
         all_core_fields = get_core_fields_attributes()
         return [field for field in all_core_fields if field["name"] in self.required_fields]
 
-    @cached_property
+    @property
     def all_fields(self) -> List[dict]:
         return self.delivery_mechanism.all_fields
 
-    @cached_property
+    @property
     def unique_fields(self) -> List[str]:
         return self.delivery_mechanism.unique_fields
 
-    @cached_property
+    @property
     def required_fields(self) -> List[str]:
         return self.delivery_mechanism.required_fields
 
