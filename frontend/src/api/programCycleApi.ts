@@ -43,11 +43,12 @@ export const fetchProgramCycles = async (
     offset: query.offset,
     limit: query.limit,
     ordering: query.ordering,
-    search: query.search,
-    total_entitled_quantity_usd_from: query.total_entitled_quantity_usd_from,
-    total_entitled_quantity_usd_to: query.total_entitled_quantity_usd_to,
-    start_date: query.start_date,
-    end_date: query.end_date,
+    search: query.search ?? '',
+    total_entitled_quantity_usd_from:
+      query.total_entitled_quantity_usd_from ?? '',
+    total_entitled_quantity_usd_to: query.total_entitled_quantity_usd_to ?? '',
+    start_date: query.start_date ?? '',
+    end_date: query.end_date ?? '',
   } as ProgramCyclesQuery;
   if (query.status) {
     params.status = query.status;

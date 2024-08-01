@@ -13,6 +13,7 @@ import { EditProgramCycle } from '@containers/tables/ProgramCycle/EditProgramCyc
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { fetchProgramCycles, ProgramCycle } from '@api/programCycleApi';
+import { BlackLink } from '@core/BlackLink';
 
 interface ProgramCycleTableProps {
   program: ProgramQuery['program'];
@@ -24,7 +25,7 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
     limit: 5,
     ordering: 'created_at',
   });
-  const { businessArea } = useBaseUrl();
+  const { businessArea, baseUrl } = useBaseUrl();
 
   const { data, error, isLoading } = useQuery({
     queryKey: ['programCycles', businessArea, program.id, queryVariables],
@@ -33,51 +34,56 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
     },
   });
 
-  const renderRow = (row: ProgramCycle): ReactElement => (
-    <ClickableTableRow key={row.id} data-cy={`program-cycle-row-${row.id}`}>
-      <TableCell data-cy={`program-cycle-id-${row.id}`}>
-        {row.unicef_id}
-      </TableCell>
-      <TableCell data-cy={`program-cycle-title-${row.id}`}>
-        {row.title}
-      </TableCell>
-      <TableCell data-cy={`program-cycle-status-${row.id}`}>
-        <StatusBox
-          status={row.status}
-          statusToColor={programCycleStatusToColor}
-        />
-      </TableCell>
-      <TableCell data-cy={`program-cycle-total-entitled-quantity-${row.id}`}>
-        {row.total_entitled_quantity_usd || '-'}
-      </TableCell>
-      <TableCell data-cy={`program-cycle-total-undelivered-quantity-${row.id}`}>
-        {row.total_undelivered_quantity_usd || '-'}
-      </TableCell>
-      <TableCell data-cy={`program-cycle-total-delivered-quantity-${row.id}`}>
-        {row.total_delivered_quantity_usd || '-'}
-      </TableCell>
-      <TableCell data-cy={`program-cycle-start-date-${row.id}`}>
-        <UniversalMoment>{row.start_date}</UniversalMoment>
-      </TableCell>
-      <TableCell data-cy={`program-cycle-end-date-${row.id}`}>
-        <UniversalMoment>{row.end_date}</UniversalMoment>
-      </TableCell>
+  const renderRow = (row: ProgramCycle): ReactElement => {
+    const detailsUrl = `/${baseUrl}/payment-module/program-cycles/${row.id}`;
+    return (
+      <ClickableTableRow key={row.id} data-cy={`program-cycle-row-${row.id}`}>
+        <TableCell data-cy={`program-cycle-id-${row.id}`}>
+          <BlackLink to={detailsUrl}>{row.unicef_id}</BlackLink>
+        </TableCell>
+        <TableCell data-cy={`program-cycle-title-${row.id}`}>
+          {row.title}
+        </TableCell>
+        <TableCell data-cy={`program-cycle-status-${row.id}`}>
+          <StatusBox
+            status={row.status}
+            statusToColor={programCycleStatusToColor}
+          />
+        </TableCell>
+        <TableCell data-cy={`program-cycle-total-entitled-quantity-${row.id}`}>
+          {row.total_entitled_quantity_usd || '-'}
+        </TableCell>
+        <TableCell
+          data-cy={`program-cycle-total-undelivered-quantity-${row.id}`}
+        >
+          {row.total_undelivered_quantity_usd || '-'}
+        </TableCell>
+        <TableCell data-cy={`program-cycle-total-delivered-quantity-${row.id}`}>
+          {row.total_delivered_quantity_usd || '-'}
+        </TableCell>
+        <TableCell data-cy={`program-cycle-start-date-${row.id}`}>
+          <UniversalMoment>{row.start_date}</UniversalMoment>
+        </TableCell>
+        <TableCell data-cy={`program-cycle-end-date-${row.id}`}>
+          <UniversalMoment>{row.end_date}</UniversalMoment>
+        </TableCell>
 
-      <TableCell data-cy={`program-cycle-details-btn-${row.id}`}>
-        {program.status === 'ACTIVE' && (
-          <>
-            {(row.status === 'Draft' || row.status === 'Active') && (
-              <EditProgramCycle program={program} programCycle={row} />
-            )}
+        <TableCell data-cy={`program-cycle-details-btn-${row.id}`}>
+          {program.status === 'ACTIVE' && (
+            <>
+              {(row.status === 'Draft' || row.status === 'Active') && (
+                <EditProgramCycle program={program} programCycle={row} />
+              )}
 
-            {row.status === 'Draft' && data.results.length > 1 && (
-              <DeleteProgramCycle program={program} programCycle={row} />
-            )}
-          </>
-        )}
-      </TableCell>
-    </ClickableTableRow>
-  );
+              {row.status === 'Draft' && data.results.length > 1 && (
+                <DeleteProgramCycle program={program} programCycle={row} />
+              )}
+            </>
+          )}
+        </TableCell>
+      </ClickableTableRow>
+    );
+  };
 
   if (isLoading) {
     return null;

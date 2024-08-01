@@ -13,6 +13,7 @@ import {
   ProgramCycle,
   ProgramCyclesQuery,
 } from '@api/programCycleApi';
+import { BlackLink } from '@core/BlackLink';
 
 interface ProgramCyclesTableProps {
   program;
@@ -50,7 +51,7 @@ export const ProgramCyclesTable = ({
   const renderRow = (row: ProgramCycle): ReactElement => (
     <ClickableTableRow key={row.id} data-cy={`program-cycle-row-${row.id}`}>
       <TableCell data-cy={`program-cycle-id-${row.id}`}>
-        {row.unicef_id}
+        <BlackLink to={`./${row.id}`}>{row.unicef_id}</BlackLink>
       </TableCell>
       <TableCell data-cy={`program-cycle-title-${row.id}`}>
         {row.title}
