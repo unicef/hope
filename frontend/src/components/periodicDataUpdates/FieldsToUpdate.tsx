@@ -27,6 +27,7 @@ interface Field {
 
 interface SelectedField extends Field {
   round: number;
+  label: string;
 }
 
 interface FieldsToUpdateProps {
