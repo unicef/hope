@@ -64,7 +64,6 @@ class ProgramCycleViewSet(
 
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = ProgramCycleFilter
-    # filterset_fields = ['status', 'title']
 
     def get_queryset(self) -> QuerySet:
         business_area = self.get_business_area()
