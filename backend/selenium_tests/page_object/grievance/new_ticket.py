@@ -103,7 +103,7 @@ class NewTicket(BaseComponents):
     inputIndividualdataBlockchainName = 'input[data-cy="input-individualData.blockchainName"]'
     selectHouseholddataupdatefieldsFieldname = 'div[data-cy="select-householdDataUpdateFields[{}].fieldName"]'
     buttonAddNewField = 'button[data-cy="button-add-new-field"]'
-    inputIndividualData = 'div[data-cy="input-individual-data-{}"]' #Gender
+    inputIndividualData = 'div[data-cy="input-individual-data-{}"]'  # Gender
 
     # Texts
     textLookUpHousehold = "LOOK UP HOUSEHOLD"
