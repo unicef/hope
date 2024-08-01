@@ -150,6 +150,11 @@ export const EditProgramPage = (): ReactElement => {
     }
   };
 
+  const mappedPduFields = Object.entries(pduFields).map(([, field]) => ({
+    ...field,
+    label: JSON.parse(field.label)['English(EN)'],
+  }));
+
   const initialValues = {
     editMode: true,
     name,
@@ -184,7 +189,7 @@ export const EditProgramPage = (): ReactElement => {
               },
             },
           ]
-        : pduFields,
+        : mappedPduFields,
   };
   initialValues.budget =
     data.program.budget === '0.00' ? '' : data.program.budget;
