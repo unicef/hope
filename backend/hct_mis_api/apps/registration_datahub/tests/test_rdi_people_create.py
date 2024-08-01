@@ -118,21 +118,21 @@ class TestRdiXlsxPeople(BaseElasticSearchTestCase):
         self.assertEqual(dmd3.rdi_merge_status, MergeStatusModel.PENDING)
         self.assertEqual(
             json.loads(dmd1.data),
-            {"card_number_atm_card": "164260858", "card_expiry_date_atm_card": "1995-06-03T00:00:00"},
+            {"card_number__atm_card": "164260858", "card_expiry_date__atm_card": "1995-06-03T00:00:00"},
         )
         self.assertEqual(
             json.loads(dmd2.data),
             {
-                "card_number_atm_card": "1975549730",
-                "card_expiry_date_atm_card": "2022-02-17T00:00:00",
-                "name_of_cardholder_atm_card": "Name1",
+                "card_number__atm_card": "1975549730",
+                "card_expiry_date__atm_card": "2022-02-17T00:00:00",
+                "name_of_cardholder__atm_card": "Name1",
             },
         )
         self.assertEqual(
             json.loads(dmd3.data),
             {
-                "card_number_atm_card": "870567340",
-                "card_expiry_date_atm_card": "2016-06-27T00:00:00",
-                "name_of_cardholder_atm_card": "Name2",
+                "card_number__atm_card": "870567340",
+                "card_expiry_date__atm_card": "2016-06-27T00:00:00",
+                "name_of_cardholder__atm_card": "Name2",
             },
         )

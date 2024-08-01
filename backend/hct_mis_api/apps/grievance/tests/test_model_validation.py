@@ -109,11 +109,11 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
 
         with self.assertRaisesMessage(
             ValidationError,
-            f"['card_number_atm_card', 'card_expiry_date_atm_card', 'name_of_cardholder_atm_card'] fields are required by delivery mechanism "
+            f"['card_number__atm_card', 'card_expiry_date__atm_card', 'name_of_cardholder__atm_card'] fields are required by delivery mechanism "
             f"{template_per_dm_atm_card.delivery_mechanism} and must be present in the template core fields",
         ):
             template_per_dm_atm_card.clean()
 
-        template.core_fields = ["card_number_atm_card", "card_expiry_date_atm_card", "name_of_cardholder_atm_card"]
+        template.core_fields = ["card_number__atm_card", "card_expiry_date__atm_card", "name_of_cardholder__atm_card"]
         template.save()
         template_per_dm_atm_card.clean()

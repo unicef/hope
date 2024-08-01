@@ -61,9 +61,9 @@ class TestBuildSnapshot(TestCase):
                 individual=cls.hoh1,
                 delivery_mechanism=cls.dm_atm_card,
                 data={
-                    "card_number_atm_card": "123",
-                    "card_expiry_date_atm_card": "2022-01-01",
-                    "name_of_cardholder_atm_card": "Marek",
+                    "card_number__atm_card": "123",
+                    "card_expiry_date__atm_card": "2022-01-01",
+                    "name_of_cardholder__atm_card": "Marek",
                 },
             )
             cls.p1 = PaymentFactory(
@@ -104,10 +104,10 @@ class TestBuildSnapshot(TestCase):
             self.p1.household_snapshot.snapshot_data["primary_collector"]["delivery_mechanisms_data"],
             {
                 "atm_card": {
-                    "card_expiry_date_atm_card": "2022-01-01",
-                    "card_number_atm_card": "123",
+                    "card_expiry_date__atm_card": "2022-01-01",
+                    "card_number__atm_card": "123",
                     "full_name": self.hoh1.full_name,
-                    "name_of_cardholder_atm_card": "Marek",
+                    "name_of_cardholder__atm_card": "Marek",
                 }
             },
         )

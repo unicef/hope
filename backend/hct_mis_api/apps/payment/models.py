@@ -2430,7 +2430,10 @@ class DeliveryMechanism(TimeStampedUUIDModel):
         verbose_name_plural = "Delivery Mechanisms"
 
     def get_label_for_field(self, field: str) -> str:
-        return " ".join(word.capitalize() for word in field.split("_")) + f" ({self.name} Delivery Mechanism)"
+        return (
+            " ".join(word.capitalize() for word in field.replace("__", "_").split("_"))
+            + f" ({self.name} Delivery Mechanism)"
+        )
 
     @property
     def all_fields(self) -> List[str]:

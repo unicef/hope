@@ -99,7 +99,7 @@ class TestCoreFields(APITestCase):
         self.assertEqual(
             choices[-1],
             (
-                "wallet_name_transfer_to_digital_wallet",
+                "wallet_name__transfer_to_digital_wallet",
                 "Wallet Name Transfer To Digital Wallet (Transfer to Digital Wallet Delivery Mechanism)",
             ),
         )

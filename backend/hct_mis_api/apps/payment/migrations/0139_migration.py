@@ -64,13 +64,13 @@ def populate_delivery_mechanisms(apps, schema_editor):
             "name": "Deposit to Card",
             "requirements": {
                 "required_fields": [
-                    "card_number_deposit_to_card",
+                    "card_number__deposit_to_card",
                 ],
                 "optional_fields": [
                     "full_name",
                 ],
                 "unique_fields": [
-                    "card_number_deposit_to_card",
+                    "card_number__deposit_to_card",
                 ],
             },
             "transfer_type": "CASH",
@@ -79,11 +79,11 @@ def populate_delivery_mechanisms(apps, schema_editor):
             "code": "mobile_money",
             "name": "Mobile Money",
             "requirements": {
-                "required_fields": ["delivery_phone_number_mobile_money", "provider_mobile_money"],
+                "required_fields": ["delivery_phone_number__mobile_money", "provider__mobile_money"],
                 "optional_fields": [
                     "full_name",
                 ],
-                "unique_fields": ["delivery_phone_number_mobile_money", "provider_mobile_money"],
+                "unique_fields": ["delivery_phone_number__mobile_money", "provider__mobile_money"],
             },
             "transfer_type": "CASH",
         },
@@ -127,12 +127,12 @@ def populate_delivery_mechanisms(apps, schema_editor):
             "code": "transfer_to_account",
             "name": "Transfer to Account",
             "requirements": {
-                "required_fields": ["bank_name_transfer_to_account", "bank_account_number_transfer_to_account"],
+                "required_fields": ["bank_name__transfer_to_account", "bank_account_number__transfer_to_account"],
                 "optional_fields": [
                     "full_name",
                 ],
                 "unique_fields": [
-                    "bank_account_number_transfer_to_account",
+                    "bank_account_number__transfer_to_account",
                 ],
             },
             "transfer_type": "CASH",
@@ -154,7 +154,7 @@ def populate_delivery_mechanisms(apps, schema_editor):
             "name": "Cash over the counter",
             "requirements": {
                 "required_fields": [
-                    "mobile_phone_number_cash_over_the_counter",
+                    "mobile_phone_number__cash_over_the_counter",
                 ],
                 "optional_fields": [
                     "full_name",
@@ -168,17 +168,17 @@ def populate_delivery_mechanisms(apps, schema_editor):
             "name": "ATM Card",
             "requirements": {
                 "required_fields": [
-                    "card_number_atm_card",
-                    "card_expiry_date_atm_card",
-                    "name_of_cardholder_atm_card",
+                    "card_number__atm_card",
+                    "card_expiry_date__atm_card",
+                    "name_of_cardholder__atm_card",
                 ],
                 "optional_fields": [
                     "full_name",
                 ],
                 "unique_fields": [
-                    "card_number_atm_card",
-                    "card_expiry_date_atm_card",
-                    "name_of_cardholder_atm_card",
+                    "card_number__atm_card",
+                    "card_expiry__date_atm_card",
+                    "name_of_cardholder__atm_card",
                 ],
             },
             "transfer_type": "CASH",
@@ -188,13 +188,13 @@ def populate_delivery_mechanisms(apps, schema_editor):
             "name": "Transfer to Digital Wallet",
             "requirements": {
                 "required_fields": [
-                    "blockchain_name_transfer_to_digital_wallet",
-                    "wallet_address_transfer_to_digital_wallet",
+                    "blockchain_name__transfer_to_digital_wallet",
+                    "wallet_address__transfer_to_digital_wallet",
                 ],
-                "optional_fields": ["full_name", "wallet_name_transfer_to_digital_wallet"],
+                "optional_fields": ["full_name", "wallet_name__transfer_to_digital_wallet"],
                 "unique_fields": [
-                    "blockchain_name_transfer_to_digital_wallet",
-                    "wallet_address_transfer_to_digital_wallet",
+                    "blockchain_name__transfer_to_digital_wallet",
+                    "wallet_address__transfer_to_digital_wallet",
                 ],
             },
             "transfer_type": "DIGITAL",

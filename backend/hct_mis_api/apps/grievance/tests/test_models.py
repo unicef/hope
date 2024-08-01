@@ -57,11 +57,11 @@ class TestDeliveryMechanismDataModel(TestCase):
         self.assertEqual(dmd.get_associated_object(_INDIVIDUAL), dmd.individual)
 
     def test_delivery_data(self) -> None:
-        dmd = DeliveryMechanismDataFactory(data={"name_of_cardholder_atm_card": "test"}, individual=self.ind)
+        dmd = DeliveryMechanismDataFactory(data={"name_of_cardholder__atm_card": "test"}, individual=self.ind)
         delivery_mechanism_fields = [
             "full_name",
             "number_of_children",
-            "name_of_cardholder_atm_card",
+            "name_of_cardholder__atm_card",
         ]
         self.hh.number_of_children = 1
         self.hh.save()
@@ -72,7 +72,7 @@ class TestDeliveryMechanismDataModel(TestCase):
                 {
                     "full_name": dmd.individual.full_name,
                     "number_of_children": 1,
-                    "name_of_cardholder_atm_card": "test",
+                    "name_of_cardholder__atm_card": "test",
                 },
             )
 
@@ -85,7 +85,7 @@ class TestDeliveryMechanismDataModel(TestCase):
         required_fields = [
             "seeing_disability",
             "number_of_children",
-            "name_of_cardholder_atm_card",
+            "name_of_cardholder__atm_card",
         ]
         with mock.patch.object(dmd, "required_fields", required_fields):
             dmd.validate()
@@ -94,7 +94,7 @@ class TestDeliveryMechanismDataModel(TestCase):
                 {
                     "seeing_disability": "Missing required payment data",
                     "number_of_children": "Missing required payment data",
-                    "name_of_cardholder_atm_card": "Missing required payment data",
+                    "name_of_cardholder__atm_card": "Missing required payment data",
                 },
             )
             self.assertEqual(dmd.is_valid, False)
@@ -102,17 +102,17 @@ class TestDeliveryMechanismDataModel(TestCase):
     def test_update_unique_fields(self) -> None:
         unique_fields = [
             "seeing_disability",
-            "name_of_cardholder_atm_card",
+            "name_of_cardholder__atm_card",
         ]
 
         dmd_1 = DeliveryMechanismDataFactory(
-            data={"name_of_cardholder_atm_card": "test"}, individual=self.ind, is_valid=True
+            data={"name_of_cardholder__atm_card": "test"}, individual=self.ind, is_valid=True
         )
         dmd_1.individual.seeing_disability = LOT_DIFFICULTY
         dmd_1.individual.save()
 
         dmd_2 = DeliveryMechanismDataFactory(
-            data={"name_of_cardholder_atm_card": "test2"}, individual=self.ind2, is_valid=True
+            data={"name_of_cardholder__atm_card": "test2"}, individual=self.ind2, is_valid=True
         )
         dmd_2.individual.seeing_disability = LOT_DIFFICULTY
         dmd_2.individual.save()
@@ -126,7 +126,7 @@ class TestDeliveryMechanismDataModel(TestCase):
     def test_update_unique_fields_possible_duplicates(self) -> None:
         unique_fields = [
             "seeing_disability",
-            "name_of_cardholder_atm_card",
+            "name_of_cardholder__atm_card",
         ]
 
         dmd_1 = DeliveryMechanismDataFactory(individual=self.ind, is_valid=True)
@@ -134,7 +134,7 @@ class TestDeliveryMechanismDataModel(TestCase):
 
         delivery_data = {
             "seeing_disability": LOT_DIFFICULTY,
-            "name_of_cardholder_atm_card": "test",
+            "name_of_cardholder__atm_card": "test",
         }
 
         with mock.patch.object(dmd_1, "unique_fields", unique_fields):
@@ -156,7 +156,7 @@ class TestDeliveryMechanismDataModel(TestCase):
                             dmd_2.validation_errors,
                             {
                                 "seeing_disability": "Payment data not unique across Program",
-                                "name_of_cardholder_atm_card": "Payment data not unique across Program",
+                                "name_of_cardholder__atm_card": "Payment data not unique across Program",
                             },
                         )
                         self.assertEqual(dmd_2.possible_duplicate_of, dmd_1)
@@ -165,7 +165,7 @@ class TestDeliveryMechanismDataModel(TestCase):
         dmd = DeliveryMechanismDataFactory(individual=self.ind, delivery_mechanism=self.dm_atm_card)
         self.assertEqual(
             dmd.all_fields,
-            ["card_number_atm_card", "card_expiry_date_atm_card", "name_of_cardholder_atm_card", "full_name"],
+            ["card_number__atm_card", "card_expiry_date__atm_card", "name_of_cardholder__atm_card", "full_name"],
         )
 
     def test_required_fields(self) -> None:
@@ -173,9 +173,9 @@ class TestDeliveryMechanismDataModel(TestCase):
         self.assertEqual(
             dmd.required_fields,
             [
-                "card_number_atm_card",
-                "card_expiry_date_atm_card",
-                "name_of_cardholder_atm_card",
+                "card_number__atm_card",
+                "card_expiry_date__atm_card",
+                "name_of_cardholder__atm_card",
             ],
         )
 
@@ -184,9 +184,9 @@ class TestDeliveryMechanismDataModel(TestCase):
         self.assertEqual(
             dmd.unique_fields,
             [
-                "card_number_atm_card",
-                "card_expiry_date_atm_card",
-                "name_of_cardholder_atm_card",
+                "card_number__atm_card",
+                "card_expiry_date__atm_card",
+                "name_of_cardholder__atm_card",
             ],
         )
 
@@ -195,18 +195,18 @@ class TestDeliveryMechanismDataModel(TestCase):
         self.assertEqual(
             fields,
             [
-                "card_number_atm_card",
-                "card_expiry_date_atm_card",
-                "name_of_cardholder_atm_card",
-                "mobile_phone_number_cash_over_the_counter",
-                "card_number_deposit_to_card",
-                "delivery_phone_number_mobile_money",
-                "provider_mobile_money",
-                "bank_name_transfer_to_account",
-                "bank_account_number_transfer_to_account",
-                "blockchain_name_transfer_to_digital_wallet",
-                "wallet_address_transfer_to_digital_wallet",
-                "wallet_name_transfer_to_digital_wallet",
+                "card_number__atm_card",
+                "card_expiry_date__atm_card",
+                "name_of_cardholder__atm_card",
+                "mobile_phone_number__cash_over_the_counter",
+                "card_number__deposit_to_card",
+                "delivery_phone_number__mobile_money",
+                "provider__mobile_money",
+                "bank_name__transfer_to_account",
+                "bank_account_number__transfer_to_account",
+                "blockchain_name__transfer_to_digital_wallet",
+                "wallet_address__transfer_to_digital_wallet",
+                "wallet_name__transfer_to_digital_wallet",
             ],
         )
 
@@ -218,9 +218,9 @@ class TestDeliveryMechanismDataModel(TestCase):
         self.assertEqual(
             dmd.all_fields,
             [
-                "card_number_atm_card",
-                "card_expiry_date_atm_card",
-                "name_of_cardholder_atm_card",
+                "card_number__atm_card",
+                "card_expiry_date__atm_card",
+                "name_of_cardholder__atm_card",
                 "full_name",
             ],
         )
@@ -232,7 +232,7 @@ class TestDeliveryMechanismDataModel(TestCase):
             validation_errors={
                 "full_name": "Missing required payment data",
                 "number_of_children": "Missing required payment data",
-                "name_of_cardholder_atm_card": "Missing required payment data",
+                "name_of_cardholder__atm_card": "Missing required payment data",
             },
         )
         self.assertEqual(
@@ -253,7 +253,7 @@ class TestDeliveryMechanismDataModel(TestCase):
                         "previous_value": None,
                     },
                     {
-                        "name": "name_of_cardholder_atm_card",
+                        "name": "name_of_cardholder__atm_card",
                         "value": None,
                         "previous_value": None,
                     },
@@ -282,7 +282,7 @@ class TestDeliveryMechanismDataModel(TestCase):
             is_valid=False,
             validation_errors={
                 "full_name": "Missing required payment data",
-                "name_of_cardholder_atm_card": "Missing required payment data",
+                "name_of_cardholder__atm_card": "Missing required payment data",
             },
             delivery_mechanism=self.dm_atm_card,
         )
@@ -293,7 +293,7 @@ class TestDeliveryMechanismDataModel(TestCase):
             self.assertEqual(grievance_ticket.status, GrievanceTicket.STATUS_IN_PROGRESS)
             self.assertEqual(
                 grievance_ticket.description,
-                "Missing required fields ['full_name', 'name_of_cardholder_atm_card'] values for delivery mechanism ATM Card",
+                "Missing required fields ['full_name', 'name_of_cardholder__atm_card'] values for delivery mechanism ATM Card",
             )
             self.assertEqual(
                 individual_data_update_ticket.individual_data,
@@ -310,7 +310,7 @@ class TestDeliveryMechanismDataModel(TestCase):
                                     "previous_value": dmd.individual.full_name,
                                 },
                                 {
-                                    "name": "name_of_cardholder_atm_card",
+                                    "name": "name_of_cardholder__atm_card",
                                     "value": None,
                                     "previous_value": None,
                                 },
@@ -358,7 +358,7 @@ class TestDeliveryMechanismDataModel(TestCase):
                                         "previous_value": dmd.individual.full_name,
                                     },
                                     {
-                                        "name": "name_of_cardholder_atm_card",
+                                        "name": "name_of_cardholder__atm_card",
                                         "value": None,
                                         "previous_value": None,
                                     },
