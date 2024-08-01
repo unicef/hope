@@ -38,7 +38,7 @@ export const handleNext = async ({
   const currentStepErrors = stepFields[step].some((field) => errors[field]);
 
   const initialPduFieldState = {
-    name: '',
+    label: '',
     pduData: {
       subtype: '',
       numberOfRounds: null,
@@ -49,7 +49,7 @@ export const handleNext = async ({
   // Check if all pduFields are either valid, empty, or match the initial state
   const isAllPduFieldsValidOrInitial = values.pduFields.every((pduField) => {
     const isInitialState =
-      pduField.name === initialPduFieldState.name &&
+      pduField.label === initialPduFieldState.label &&
       pduField.pduData.subtype === initialPduFieldState.pduData.subtype &&
       pduField.pduData.numberOfRounds ===
         initialPduFieldState.pduData.numberOfRounds &&
@@ -57,7 +57,7 @@ export const handleNext = async ({
         initialPduFieldState.pduData.roundsNames.length;
 
     const isValidState =
-      pduField.name &&
+      pduField.label &&
       pduField.pduData.subtype &&
       pduField.pduData.numberOfRounds &&
       pduField.pduData.roundsNames.length === pduField.pduData.numberOfRounds;
