@@ -79,7 +79,7 @@ export const DuplicateProgramPage = (): ReactElement => {
 
     const pduFieldsToSend = values.pduFields.every(
       (pduField) =>
-        pduField.label === initialPduFieldState.label &&
+        pduField.label === initialPduFieldState.label.englishEn &&
         pduField.pduData.subtype === initialPduFieldState.pduData.subtype &&
         pduField.pduData.numberOfRounds ===
           initialPduFieldState.pduData.numberOfRounds &&
