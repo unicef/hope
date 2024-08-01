@@ -48,7 +48,7 @@ export const programDetails = gql`
     }
     pduFields {
       id
-      name
+      label
       pduData {
         id
         subtype

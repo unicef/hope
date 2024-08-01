@@ -68,7 +68,7 @@ export const handleNext = async ({
   // Check if the last pduField entry is empty when there are more than one
   const lastPduFieldIsEmpty =
     values.pduFields.length > 1 &&
-    values.pduFields[values.pduFields.length - 1].name === '' &&
+    values.pduFields[values.pduFields.length - 1].label === '' &&
     values.pduFields[values.pduFields.length - 1].pduData.subtype === '' &&
     values.pduFields[values.pduFields.length - 1].pduData.numberOfRounds ===
       null &&
