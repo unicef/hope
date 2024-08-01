@@ -124,22 +124,35 @@ export const NewTemplatePage = (): React.ReactElement => {
   };
 
   const handleSubmit = (values) => {
+    const yesNoToBoolean = (value) => {
+      if (value === 'YES') {
+        return true;
+      }
+      if (value === 'NO') {
+        return false;
+      }
+      return null;
+    };
     const filters = {
       registration_data_import_id: filter.registration_data_import_id,
       target_population_id: filter.target_population_id,
       gender: filter.gender,
       age: {
-        from: Number(filter.ageFrom),
-        to: Number(filter.ageTo),
+        from: filter.ageFrom ? Number(filter.ageFrom) : null,
+        to: filter.ageFrom ? Number(filter.ageTo) : null,
       },
       registration_date: {
-        from: moment(filter.registrationDateFrom).format('YYYY-MM-DD'),
-        to: moment(filter.registrationDateTo).format('YYYY-MM-DD'),
+        from: filter.registrationDateFrom
+          ? moment(filter.registrationDateFrom).format('YYYY-MM-DD')
+          : null,
+        to: filter.registrationDateTo
+          ? moment(filter.registrationDateTo).format('YYYY-MM-DD')
+          : null,
       },
-      has_grievance_ticket: filter.hasGrievanceTicket === 'YES' ? true : false,
+      has_grievance_ticket: yesNoToBoolean(filter.hasGrievanceTicket),
       admin1: filter.admin1?.map((el) => el.value),
       admin2: filter.admin2?.map((el) => el.value),
-      received_assistance: filter.receivedAssistance === 'YES' ? true : false,
+      received_assistance: yesNoToBoolean(filter.receivedAssistance),
     };
 
     const isEmpty = (value) => {
@@ -150,6 +163,13 @@ export const NewTemplatePage = (): React.ReactElement => {
         typeof value === 'object' &&
         !Array.isArray(value) &&
         Object.keys(value).length === 0
+      )
+        return true;
+      if (
+        typeof value === 'object' &&
+        !Array.isArray(value) &&
+        !value.from &&
+        !value.to
       )
         return true;
       return false;

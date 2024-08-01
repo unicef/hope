@@ -164,7 +164,7 @@ export const ProgramFieldSeriesStep = ({
                 color="primary"
                 onClick={() =>
                   arrayHelpers.push({
-                    name: '',
+                    label:'',
                     pduData: {
                       subtype: '',
                       numberOfRounds: null,

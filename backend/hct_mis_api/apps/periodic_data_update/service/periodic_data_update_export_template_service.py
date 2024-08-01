@@ -3,6 +3,7 @@ from typing import Optional, Union
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
+from django.db import transaction
 from django.db.models import Q, QuerySet
 
 import openpyxl
@@ -50,19 +51,25 @@ class PeriodicDataUpdateExportTemplateService:
         self.received_assistance_filter = periodic_data_update_template.filters.get("received_assistance")
 
     def generate_workbook(self) -> openpyxl.Workbook:
-        self._create_workbook()
-        self._add_meta()
-        self.ws_pdu.append(self._generate_header())
-        for round_info_data in self.rounds_data:
-            round_info_data["number_of_records"] = 0
-        self.periodic_data_update_template.number_of_records = 0
-        queryset = self._get_individuals_queryset()
-        for individual in queryset:
-            row = self._generate_row(individual)
-            if row:
-                self.periodic_data_update_template.number_of_records += 1
-                self.ws_pdu.append(row)
-        return self.wb
+        try:
+            with transaction.atomic():
+                self._create_workbook()
+                self._add_meta()
+                self.ws_pdu.append(self._generate_header())
+                for round_info_data in self.rounds_data:
+                    round_info_data["number_of_records"] = 0
+                self.periodic_data_update_template.number_of_records = 0
+                queryset = self._get_individuals_queryset()
+                for individual in queryset:
+                    row = self._generate_row(individual)
+                    if row:
+                        self.periodic_data_update_template.number_of_records += 1
+                        self.ws_pdu.append(row)
+                return self.wb
+        except Exception:
+            self.periodic_data_update_template.status = PeriodicDataUpdateTemplate.Status.FAILED
+            self.periodic_data_update_template.save()
+            raise
 
     def save_xlsx_file(self) -> None:
         filename = f"Periodic Data Update Template {self.periodic_data_update_template.pk}.xlsx"
@@ -158,12 +165,20 @@ class PeriodicDataUpdateExportTemplateService:
         if self.age_filter:
             age_from = self.age_filter.get("from")
             age_to = self.age_filter.get("to")
-            q = age_to_birth_date_query("RANGE", [age_from, age_to])
-            queryset = queryset.filter(q)
+            queryset = queryset.filter(age_to_birth_date_query("RANGE", [age_from, age_to]))
         if self.registration_date_filter:
             registration_date_from = self.registration_date_filter.get("from")
             registration_date_to = self.registration_date_filter.get("to")
-            queryset = queryset.filter(first_registration_date__range=[registration_date_from, registration_date_to])
+            if not registration_date_from and not registration_date_to:
+                pass
+            elif not registration_date_to:
+                queryset = queryset.filter(first_registration_date__gte=registration_date_from)
+            elif not registration_date_from:
+                queryset = queryset.filter(first_registration_date__lte=registration_date_to)
+            else:
+                queryset = queryset.filter(
+                    first_registration_date__range=[registration_date_from, registration_date_to]
+                )
 
         if self.admin1_filter:
             queryset = queryset.filter(household__admin1__in=self.admin1_filter)
