@@ -1,20 +1,18 @@
 import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 import {
-  Typography,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
   TableCell as MuiTableCell,
+  Table,
   TableBody,
   TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
 } from '@mui/material';
-import styled from 'styled-components';
-import { Title } from '@core/Title';
 import { useTranslation } from 'react-i18next';
-import { useArrayToDict } from '@hooks/useArrayToDict';
-import { AllIndividualsFlexFieldsAttributesQuery, IndividualNode } from '@generated/graphql';
-import { UniversalMoment } from '@core/UniversalMoment';
+import styled from 'styled-components';
 
 const StyledTableCell = styled(MuiTableCell)`
   color: #adadad !important;
@@ -22,40 +20,26 @@ const StyledTableCell = styled(MuiTableCell)`
 
 //TODO MS: add proper type
 interface ProgrammeTimeSeriesFieldsProps {
-  individual: IndividualNode;
-  flexFieldsData: AllIndividualsFlexFieldsAttributesQuery;
+  periodicFieldsData: any;
 }
 
 export const ProgrammeTimeSeriesFields = ({
-                                            individual,
-                                            flexFieldsData,
+  periodicFieldsData,
 }: ProgrammeTimeSeriesFieldsProps): React.ReactElement => {
   const { t } = useTranslation();
-  const flexAttributesDict = useArrayToDict(
-    flexFieldsData?.allIndividualsFlexFieldsAttributes,
-    'name',
-    '*',
-  );
-  const rows = [];
-  for (const fieldName of Object.keys(individual.flexFields)) {
-    if (flexAttributesDict[fieldName]?.type !== 'PDU') {
-      continue;
-    }
-    for (const roundNumber of Object.keys(individual.flexFields[fieldName])) {
-      const roundData = individual.flexFields[fieldName][roundNumber];
-      const roundName = flexAttributesDict[fieldName].pduData.roundsNames[parseInt(roundNumber) - 1];
-      const value = roundData.value;
-      const dateOfCollection = roundData.collection_date;
-      rows.push({
-        fieldName: flexAttributesDict[fieldName].labelEn,
-        roundNumber: roundNumber,
-        roundName: roundName,
-        value,
-        dateOfCollection,
-      });
-    }
-  }
 
+  const rows = periodicFieldsData?.results || [];
+
+  //TODO MS: add missing fields
+  const mappedRows = rows.flatMap((row) =>
+    (row.pdu_data?.rounds_names || []).map((roundName, index) => ({
+      fieldName: row.name,
+      roundNumber: index + 1,
+      roundName: roundName,
+      value: null, // Assuming value is not available in the provided data
+      dateOfCollection: null, // Assuming dateOfCollection is not available in the provided data
+    })),
+  );
 
   return (
     <ContainerColumnWithBorder>
@@ -80,15 +64,17 @@ export const ProgrammeTimeSeriesFields = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row, index) => (
-              <TableRow key={index}>
+            {mappedRows.map((row, index) => (
+              <TableRow key={`${row.fieldName}-${row.roundNumber}-${index}`}>
                 <TableCell component="th" scope="row">
                   {row.fieldName}
                 </TableCell>
                 <TableCell align="right">{row.roundNumber}</TableCell>
                 <TableCell align="left">{row.roundName}</TableCell>
                 <TableCell align="left">{row.value}</TableCell>
-                <TableCell align="right"><UniversalMoment>{row.dateOfCollection}</UniversalMoment></TableCell>
+                <TableCell align="right">
+                  <UniversalMoment>{row.dateOfCollection}</UniversalMoment>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

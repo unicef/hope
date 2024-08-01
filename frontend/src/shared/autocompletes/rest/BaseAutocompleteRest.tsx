@@ -29,6 +29,7 @@ export function BaseAutocompleteRest({
   mapOptions = (opts) => opts,
   autocompleteProps = {},
   textFieldProps = {},
+  fetchfunctionParams = {},
 }: {
   value: string;
   disabled?: boolean;

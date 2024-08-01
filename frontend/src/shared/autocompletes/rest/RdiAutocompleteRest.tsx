@@ -28,14 +28,19 @@ export const RdiAutocompleteRest = ({
     }));
   };
 
-  //TODO: poczytaj wiadomości od Pauliny zanim coś scommitujesz
   return (
     <BaseAutocompleteRest
       value={value}
       disabled={disabled}
       label={t('Registration Data Import')}
       dataCy="filters-registration-data-import"
-      fetchFunction={fetchRegistrationDataImports}
+      // eslint-disable-next-line @typescript-eslint/no-shadow
+      fetchFunction={(businessArea, programId, queryParams) =>
+        fetchRegistrationDataImports(businessArea, programId, {
+          status: 'MERGED',
+          ...queryParams,
+        })
+      }
       businessArea={businessArea}
       programId={programId}
       handleChange={(_, selectedValue) => {
