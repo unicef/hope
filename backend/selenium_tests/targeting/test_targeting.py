@@ -91,6 +91,9 @@ def get_program_with_dct_type_and_name(
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
+        cycle__title="First Cycle In Programme",
+        cycle__start_date=datetime.now() - relativedelta(days=5),
+        cycle__end_date=datetime.now() + relativedelta(months=5),
     )
     return program
 
@@ -98,6 +101,7 @@ def get_program_with_dct_type_and_name(
 @pytest.fixture
 def create_targeting(household_without_disabilities: Household) -> TargetPopulation:
     program = Program.objects.first()
+    program_cycle = program.cycles.first()
     target_population = TargetPopulation.objects.update_or_create(
         pk=UUID("00000000-0000-0000-0000-faceb00c0123"),
         name="Test Target Population",
@@ -106,6 +110,7 @@ def create_targeting(household_without_disabilities: Household) -> TargetPopulat
         business_area=BusinessArea.objects.get(slug="afghanistan"),
         program=Program.objects.get(name="Test Programm"),
         created_by=User.objects.first(),
+        program_cycle=program_cycle,
     )[0]
     target_population.save()
     household, _ = create_household(

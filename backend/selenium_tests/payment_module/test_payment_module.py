@@ -21,8 +21,8 @@ from hct_mis_api.apps.payment.fixtures import (
     FspXlsxTemplatePerDeliveryMechanismFactory,
 )
 from hct_mis_api.apps.payment.models import FinancialServiceProvider, PaymentPlan
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.fixtures import (
@@ -56,6 +56,9 @@ def create_test_program() -> Program:
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=Program.ACTIVE,
+        cycle__title="First cycle for Test Program",
+        cycle__start_date=datetime.now() - relativedelta(days=5),
+        cycle__end_date=datetime.now() + relativedelta(days=5),
     )
 
 
@@ -113,10 +116,17 @@ def clear_downloaded_files() -> None:
 @pytest.fixture
 def create_payment_plan(create_targeting: None) -> PaymentPlan:
     tp = TargetPopulation.objects.get(program__name="Test Program")
+    cycle = ProgramCycleFactory(
+        program=tp.program,
+        title="Cycle for PaymentPlan",
+        status=ProgramCycle.ACTIVE,
+        start_date=datetime.now(),
+        end_date=datetime.now() + relativedelta(days=14),
+    )
     payment_plan = PaymentPlan.objects.update_or_create(
         business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
         target_population=tp,
-        program_cycle=tp.program.cycles.first(),
+        program_cycle=cycle,
         currency="USD",
         dispersion_start_date=datetime.now(),
         dispersion_end_date=datetime.now() + relativedelta(days=14),
