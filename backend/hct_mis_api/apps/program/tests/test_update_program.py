@@ -816,7 +816,7 @@ class TestUpdateProgram(APITestCase):
 
     def test_update_program_with_pdu_fields_existing_field_name_for_new_field(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
-        # pdu data with NEW field with name that already exists in the database
+        # pdu data with NEW field with name that already exists in the database but in different program -> no fail
         pdu_data = PeriodicFieldDataFactory(
             subtype=PeriodicFieldData.DATE,
             number_of_rounds=1,
@@ -873,7 +873,7 @@ class TestUpdateProgram(APITestCase):
 
     def test_update_program_with_pdu_fields_existing_field_name_for_updated_field(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
-        # pdu data with UPDATED field with name that already exists in the database
+        # pdu data with UPDATED field with name that already exists in the database but in different program -> no fail
         pdu_data = PeriodicFieldDataFactory(
             subtype=PeriodicFieldData.DATE,
             number_of_rounds=1,

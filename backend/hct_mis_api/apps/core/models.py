@@ -216,7 +216,7 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
     )
 
     type = models.CharField(max_length=16, choices=TYPE_CHOICE)
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
     required = models.BooleanField(default=False)
     program = models.ForeignKey(
         "program.Program",
@@ -242,6 +242,14 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
         blank=True,
     )
     associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=("name", "program"), name="unique_name_program"),
+            models.UniqueConstraint(
+                fields=("name",), condition=Q(program__isnull=True), name="unique_name_without_program"
+            ),
+        ]
 
     @property
     def is_flex_field(self) -> bool:

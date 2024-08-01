@@ -882,42 +882,142 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_duplicated_fie
 
 snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field_name_for_new_field 1'] = {
     'data': {
-        'updateProgram': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': "['Time Series Field with name pdu_field_1 already exists.']",
-            'path': [
-                'updateProgram'
-            ]
+        'updateProgram': {
+            'program': {
+                'dataCollectingType': {
+                    'code': 'full_collection',
+                    'label': 'Full'
+                },
+                'name': 'Program with Updated PDU Fields',
+                'partnerAccess': 'NONE_PARTNERS_ACCESS',
+                'partners': [
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF'
+                    }
+                ],
+                'pduFields': [
+                    {
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
+                        'pduData': {
+                            'numberOfRounds': 1,
+                            'roundsNames': [
+                                'Round To Be Preserved'
+                            ],
+                            'subtype': 'DATE'
+                        }
+                    },
+                    {
+                        'label': '{"English(EN)": "PDU Field - Updated"}',
+                        'name': 'pdu_field_-_updated',
+                        'pduData': {
+                            'numberOfRounds': 3,
+                            'roundsNames': [
+                                'Round 1 Updated',
+                                'Round 2 Updated',
+                                'Round 3 Updated'
+                            ],
+                            'subtype': 'BOOLEAN'
+                        }
+                    },
+                    {
+                        'label': '{"English(EN)": "PDU Field 1"}',
+                        'name': 'pdu_field_1',
+                        'pduData': {
+                            'numberOfRounds': 4,
+                            'roundsNames': [
+                                'Round 1A',
+                                'Round 2B',
+                                'Round 3C',
+                                'Round 4D'
+                            ],
+                            'subtype': 'BOOLEAN'
+                        }
+                    }
+                ],
+                'status': 'DRAFT'
+            }
         }
-    ]
+    }
 }
 
 snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field_name_for_updated_field 1'] = {
     'data': {
-        'updateProgram': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': "['Time Series Field with name pdu_field_1 already exists.']",
-            'path': [
-                'updateProgram'
-            ]
+        'updateProgram': {
+            'program': {
+                'dataCollectingType': {
+                    'code': 'full_collection',
+                    'label': 'Full'
+                },
+                'name': 'Program with Updated PDU Fields',
+                'partnerAccess': 'NONE_PARTNERS_ACCESS',
+                'partners': [
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF'
+                    }
+                ],
+                'pduFields': [
+                    {
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
+                        'pduData': {
+                            'numberOfRounds': 1,
+                            'roundsNames': [
+                                'Round To Be Preserved'
+                            ],
+                            'subtype': 'DATE'
+                        }
+                    },
+                    {
+                        'label': '{"English(EN)": "PDU Field 1"}',
+                        'name': 'pdu_field_1',
+                        'pduData': {
+                            'numberOfRounds': 3,
+                            'roundsNames': [
+                                'Round 1 Updated',
+                                'Round 2 Updated',
+                                'Round 3 Updated'
+                            ],
+                            'subtype': 'BOOLEAN'
+                        }
+                    },
+                    {
+                        'label': '{"English(EN)": "PDU Field - New"}',
+                        'name': 'pdu_field_-_new',
+                        'pduData': {
+                            'numberOfRounds': 4,
+                            'roundsNames': [
+                                'Round 1A',
+                                'Round 2B',
+                                'Round 3C',
+                                'Round 4D'
+                            ],
+                            'subtype': 'BOOLEAN'
+                        }
+                    }
+                ],
+                'status': 'DRAFT'
+            }
         }
-    ]
+    }
 }
 
 snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_invalid_data 1'] = {

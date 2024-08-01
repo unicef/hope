@@ -475,9 +475,9 @@ class TestCreateProgram(APITestCase):
             request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
         )
 
-    def test_create_program_with_pdu_fields_existing_field_name(self) -> None:
+    def test_create_program_with_pdu_fields_existing_field_name_in_different_program(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
-        # pdu data with field name that already exists in the database
+        # pdu data with field name that already exists in the database but in different program -> no fail
         pdu_data = PeriodicFieldDataFactory(
             subtype=PeriodicFieldData.DATE,
             number_of_rounds=1,

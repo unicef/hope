@@ -1,6 +1,4 @@
-from typing import Any, Dict, Optional
-
-from django.core.exceptions import ValidationError
+from typing import Any, Dict
 
 from graphql import GraphQLError
 
@@ -24,7 +22,6 @@ class FlexibleAttributeForPDUService:
             raise GraphQLError("Number of rounds does not match the number of round names")
 
     def create_pdu_flex_attribute(self, pdu_field: dict) -> FlexibleAttribute:
-        self._validate_pdu_name_against_existing(pdu_field)
         pdu_data = pdu_field.pop("pdu_data")
         self._validate_pdu_data(pdu_data)
         pdu_data_object = PeriodicFieldData.objects.create(**pdu_data)
@@ -43,7 +40,6 @@ class FlexibleAttributeForPDUService:
             self.create_pdu_flex_attribute(pdu_field)
 
     def update_pdu_flex_attribute(self, pdu_field: dict, flexible_attribute_id: Any) -> None:
-        self._validate_pdu_name_against_existing(pdu_field, flexible_attribute_id)
         pdu_data = pdu_field.pop("pdu_data")
         self._validate_pdu_data(pdu_data)
         flexible_attribute_object = FlexibleAttribute.objects.get(id=flexible_attribute_id)
@@ -84,11 +80,6 @@ class FlexibleAttributeForPDUService:
         pdu_names = [pdu_field["name"] for pdu_field in self.pdu_fields]
         if len(pdu_names) != len(set(pdu_names)):
             raise GraphQLError("Time Series Field names must be unique.")
-
-    @staticmethod
-    def _validate_pdu_name_against_existing(pdu_field: dict, existing_object_id: Optional[str] = None) -> None:
-        if FlexibleAttribute.objects.filter(name=pdu_field["name"]).exclude(id=existing_object_id).exists():
-            raise ValidationError(f"Time Series Field with name {pdu_field['name']} already exists.")
 
     def _populate_names_and_labels(self) -> None:
         for pdu_field in self.pdu_fields:

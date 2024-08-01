@@ -503,24 +503,63 @@ snapshots['TestCreateProgram::test_create_program_with_pdu_fields_duplicated_fie
     ]
 }
 
-snapshots['TestCreateProgram::test_create_program_with_pdu_fields_existing_field_name 1'] = {
+snapshots['TestCreateProgram::test_create_program_with_pdu_fields_existing_field_name_in_different_program 1'] = {
     'data': {
-        'createProgram': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': "['Time Series Field with name pdu_field_1 already exists.']",
-            'path': [
-                'createProgram'
-            ]
+        'createProgram': {
+            'program': {
+                'administrativeAreasOfImplementation': 'Lorem Ipsum',
+                'budget': '20000000',
+                'cashPlus': True,
+                'dataCollectingType': {
+                    'active': True,
+                    'code': 'partial_individuals',
+                    'description': 'Partial individuals collected',
+                    'individualFiltersAvailable': True,
+                    'label': 'Partial'
+                },
+                'description': 'my description of program',
+                'endDate': '2021-12-20',
+                'frequencyOfPayments': 'REGULAR',
+                'isSocialWorkerProgram': False,
+                'name': 'Test',
+                'partnerAccess': 'NONE_PARTNERS_ACCESS',
+                'partners': [
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF'
+                    }
+                ],
+                'pduFields': [
+                    {
+                        'label': '{"English(EN)": "PDU Field 1"}',
+                        'name': 'pdu_field_1',
+                        'pduData': {
+                            'numberOfRounds': 3,
+                            'roundsNames': [
+                                'Round 1',
+                                'Round 2',
+                                'Round 3'
+                            ],
+                            'subtype': 'DECIMAL'
+                        }
+                    }
+                ],
+                'populationGoal': 150000,
+                'sector': 'EDUCATION',
+                'startDate': '2019-12-20',
+                'status': 'DRAFT'
+            },
+            'validationErrors': None
         }
-    ]
+    }
 }
 
 snapshots['TestCreateProgram::test_create_program_with_pdu_fields_invalid_data 1'] = {
