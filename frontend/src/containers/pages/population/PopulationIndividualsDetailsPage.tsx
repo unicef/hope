@@ -25,6 +25,8 @@ import { isPermissionDeniedError } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { AdminButton } from '@core/AdminButton';
 import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
+import { fetchPeriodicFields } from '@api/periodicDataUpdateApi';
+import { useQuery } from '@tanstack/react-query';
 
 const Container = styled.div`
   padding: 20px;
@@ -38,7 +40,7 @@ const Container = styled.div`
 export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
 
   const { data, loading, error } = useIndividualQuery({
@@ -57,11 +59,18 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
   const { data: grievancesChoices, loading: grievancesChoicesLoading } =
     useGrievancesChoiceDataQuery();
 
+  const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
+    useQuery({
+      queryKey: ['periodicFields', businessArea, programId],
+      queryFn: () => fetchPeriodicFields(businessArea, programId),
+    });
+
   if (
     loading ||
     choicesLoading ||
     flexFieldsDataLoading ||
-    grievancesChoicesLoading
+    grievancesChoicesLoading ||
+    periodicFieldsLoading
   )
     return <LoadingComponent />;
 
@@ -72,6 +81,7 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
     !choicesData ||
     !flexFieldsData ||
     !grievancesChoices ||
+    !periodicFieldsData ||
     permissions === null
   )
     return null;
@@ -123,9 +133,7 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
           flexFieldsData={flexFieldsData}
           individual={individual as IndividualNode}
         />
-        <ProgrammeTimeSeriesFields
-          flexFieldsData={flexFieldsData}
-          individual={individual as IndividualNode} />
+        <ProgrammeTimeSeriesFields periodicFieldsData={periodicFieldsData} />
         {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTable objectId={individual?.id} />
         )}

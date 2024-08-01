@@ -71,7 +71,7 @@ export const CreateProgramPage = (): ReactElement => {
         : [];
     const { editMode, ...requestValues } = values;
     const initialPduFieldState = {
-      name: '',
+      label: '',
       pduData: {
         subtype: '',
         numberOfRounds: null,
@@ -81,7 +81,7 @@ export const CreateProgramPage = (): ReactElement => {
 
     const pduFieldsToSend = values.pduFields.every(
       (pduField) =>
-        pduField.name === initialPduFieldState.name &&
+        pduField.label === initialPduFieldState.label &&
         pduField.pduData.subtype === initialPduFieldState.pduData.subtype &&
         pduField.pduData.numberOfRounds ===
           initialPduFieldState.pduData.numberOfRounds &&

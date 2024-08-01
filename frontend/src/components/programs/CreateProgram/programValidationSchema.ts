@@ -65,7 +65,7 @@ export const programValidationSchema = (
     pduFields: Yup.array().of(
       Yup.object()
         .shape({
-          name: Yup.string()
+          label: Yup.string()
             .nullable()
             .min(3, t('Too short'))
             .max(150, t('Too long')),
@@ -94,17 +94,16 @@ export const programValidationSchema = (
           'pduFields-validation',
           t('Please complete the PDU fields correctly.'), // Custom error message
           function (value) {
-            const { name, pduData } = value;
+            const { label, pduData } = value;
             const { subtype, numberOfRounds, roundsNames } = pduData;
-
             const isInitialState =
-              !name &&
+              !label &&
               !subtype &&
               numberOfRounds === null &&
               roundsNames.length === 0;
 
             const isValidState =
-              name &&
+              label &&
               subtype &&
               numberOfRounds &&
               roundsNames.length === numberOfRounds;
