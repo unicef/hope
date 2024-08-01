@@ -96,7 +96,7 @@ export const FieldsToUpdate: React.FC<FieldsToUpdateProps> = ({
                     />
                   </TableCell>
                   <TableCell data-cy={`table-cell-field-${field.field}`}>
-                    {field.field}
+                    {field.label}
                   </TableCell>
                   <TableCell data-cy={`table-cell-roundNumber-${field.field}`}>
                     <Select
