@@ -58,7 +58,7 @@ class ProgrammeManagement(BaseComponents):
     stepButtonPartners = 'button[data-cy="step-button-partners"]'
     title = 'h6[data-cy="title"]'
     description = 'div[data-cy="description"]'
-    inputPduFieldsObjectName = 'input[data-cy="input-pduFields.{}.name"]'
+    inputPduFieldsObjectLabel = 'input[data-cy="input-pduFields.{}.label"]'
     selectPduFieldsObjectPduDataSubtype = 'div[data-cy="select-pduFields.{}.pduData.subtype"]'
     selectPduFieldsObjectPduDataNumberOfRounds = 'div[data-cy="select-pduFields.{}.pduData.numberOfRounds"]'
     inputPduFieldsRoundsNames = 'input[data-cy="input-pduFields.{}.pduData.roundsNames.{}"]'
@@ -79,8 +79,8 @@ class ProgrammeManagement(BaseComponents):
     def getDescription(self) -> WebElement:
         return self.wait_for(self.description)
 
-    def getInputPduFieldsObjectName(self, index: int) -> WebElement:
-        locator = self.inputPduFieldsObjectName.format(index)
+    def getInputPduFieldsObjectLabel(self, index: int) -> WebElement:
+        locator = self.inputPduFieldsObjectLabel.format(index)
         return self.wait_for(locator)
 
     def getSelectPduFieldsObjectPduDataSubtype(self, index: int) -> WebElement:

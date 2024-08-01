@@ -20,6 +20,7 @@ from hct_mis_api.apps.periodic_data_update.utils import field_label_to_field_nam
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from selenium_tests.page_object.programme_population.individuals import Individuals
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -41,7 +42,7 @@ def program() -> Program:
 @pytest.fixture
 def individual(program: Program) -> Individual:
     business_area = create_afghanistan()
-    rdi = RegistrationDataImportFactory()
+    rdi = RegistrationDataImportFactory(status=RegistrationDataImport.MERGED, program=program)
     household, individuals = create_household_and_individuals(
         household_data={
             "business_area": business_area,
@@ -60,27 +61,29 @@ def individual(program: Program) -> Individual:
 
 
 @pytest.fixture
-def string_attribute() -> FlexibleAttribute:
+def string_attribute(program: Program) -> FlexibleAttribute:
     return create_flexible_attribute(
         label="Test String Attribute",
         subtype=FlexibleAttribute.STRING,
         number_of_rounds=1,
         rounds_names=["Test Round"],
+        program=program,
     )
 
 
 @pytest.fixture
-def date_attribute() -> FlexibleAttribute:
+def date_attribute(program: Program) -> FlexibleAttribute:
     return create_flexible_attribute(
         label="Test Date Attribute",
         subtype=FlexibleAttribute.DATE,
         number_of_rounds=1,
         rounds_names=["Test Round"],
+        program=program,
     )
 
 
 def create_flexible_attribute(
-    label: str, subtype: str, number_of_rounds: int, rounds_names: list[str]
+    label: str, subtype: str, number_of_rounds: int, rounds_names: list[str], program: Program
 ) -> FlexibleAttribute:
     name = field_label_to_field_name(label)
     flexible_attribute = FlexibleAttribute.objects.create(
@@ -88,6 +91,7 @@ def create_flexible_attribute(
         name=name,
         type=FlexibleAttribute.PDU,
         associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        program=program,
     )
     flexible_attribute.pdu_data = PeriodicFieldData.objects.create(
         subtype=subtype, number_of_rounds=number_of_rounds, rounds_names=rounds_names
@@ -225,7 +229,7 @@ class TestPeriodicDataTemplates:
         btn.find_element(By.TAG_NAME, "button").click()
         pagePeriodicDataUpdateTemplates.getDetailModal()
 
-        assert rounds_data[0]["field"] in pagePeriodicDataUpdateTemplates.getTemplateField(0).text
+        assert string_attribute.label["English(EN)"] in pagePeriodicDataUpdateTemplates.getTemplateField(0).text
         assert str(rounds_data[0]["round"]) in pagePeriodicDataUpdateTemplates.getTemplateRoundNumber(0).text
         assert rounds_data[0]["round_name"] in pagePeriodicDataUpdateTemplates.getTemplateRoundName(0).text
         assert (
@@ -242,9 +246,6 @@ class TestPeriodicDataTemplates:
         pagePeriodicDataUpdateTemplatesDetails: PeriodicDatUpdateTemplatesDetails,
         individual: Individual,
     ) -> None:
-        string_attribute.program = program
-        string_attribute.save()
-
         pageIndividuals.selectGlobalProgramFilter(program.name).click()
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
@@ -255,11 +256,9 @@ class TestPeriodicDataTemplates:
 
         pagePeriodicDataUpdateTemplatesDetails.select_listbox_element(individual.registration_data_import.name).click()
         pagePeriodicDataUpdateTemplatesDetails.getSubmitButton().click()
-
-        pagePeriodicDataUpdateTemplatesDetails.getCheckbox(string_attribute.label["English(EN)"]).click()
+        pagePeriodicDataUpdateTemplatesDetails.getCheckbox(string_attribute.name).click()
         pagePeriodicDataUpdateTemplatesDetails.getSubmitButton().click()
-        pagePeriodicDataUpdateTemplatesDetails.screenshot("submitted")
-
+        pagePeriodicDataUpdateTemplates.getNewTemplateButton()  # wait for the page to load
         assert PeriodicDataUpdateTemplate.objects.count() == 1
         periodic_data_update_template = PeriodicDataUpdateTemplate.objects.first()
         assert (
