@@ -68,6 +68,15 @@ class BusinessAreaVersionKeyBit(KeyBitBase):
         return str(business_area_version)
 
 
+class ProgramKeyBit(KeyBitBase):
+    def get_data(
+            self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+    ) -> str:
+        program_id = decode_id_string(kwargs.get("program_id"))
+        version = get_or_create_cache_key(f"{program_id}:version", 1)
+        return str(version)
+
+
 class KeyConstructorMixin(KeyConstructor):
     business_area_version = BusinessAreaVersionKeyBit()
     unique_method_id = bits.UniqueMethodIdKeyBit()
