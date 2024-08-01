@@ -298,6 +298,6 @@ class TestPeriodicDataUpdateUpload:
         index = pdu_upload.id
         assert str(index) in pagePeriodicDataUploads.getUpdateId(index).text
         assert str(pdu_upload.template.id) in pagePeriodicDataUploads.getUpdateTemplate(index).text
-        assert f"{pdu_upload.created_at:%d %b %Y}" in pagePeriodicDataUploads.getUpdateCreatedAt(index).text
+        assert f"{pdu_upload.created_at:%-d %b %Y}" in pagePeriodicDataUploads.getUpdateCreatedAt(index).text
         assert pdu_upload.created_by.get_full_name() in pagePeriodicDataUploads.getUpdateCreatedBy(index).text
         assert "SUCCESSFUL" in pagePeriodicDataUploads.getUpdateStatus(index).text
