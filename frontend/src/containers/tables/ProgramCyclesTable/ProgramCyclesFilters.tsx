@@ -72,7 +72,6 @@ export const ProgramCyclesFilters = ({
             onChange={(e) => handleFilterChange('status', e.target.value)}
             variant="outlined"
             label={t('Status')}
-            multiple
             value={filter.status}
             fullWidth
           >
@@ -89,26 +88,32 @@ export const ProgramCyclesFilters = ({
           <NumberTextField
             id="totalEntitledQuantityUsdFromFilter"
             topLabel={t('Total Entitled Quantity')}
-            value={filter.totalEntitledQuantityUsdFrom}
+            value={filter.total_entitled_quantity_usd_from}
             placeholder={t('From')}
             onChange={(e) =>
-              handleFilterChange('totalEntitledQuantityUsdFrom', e.target.value)
+              handleFilterChange(
+                'total_entitled_quantity_usd_from',
+                e.target.value,
+              )
             }
           />
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
             id="totalEntitledQuantityUsdToFilter"
-            value={filter.totalEntitledQuantityUsdTo}
+            value={filter.total_entitled_quantity_usd_to}
             placeholder={t('To')}
             onChange={(e) =>
-              handleFilterChange('totalEntitledQuantityUsdTo', e.target.value)
+              handleFilterChange(
+                'total_entitled_quantity_usd_to',
+                e.target.value,
+              )
             }
             error={
-              filter.totalEntitledQuantityUsdFrom &&
-              filter.totalEntitledQuantityUsdTo &&
-              filter.totalEntitledQuantityUsdFrom >
-                filter.totalEntitledQuantityUsdTo
+              filter.total_entitled_quantity_usd_from &&
+              filter.total_entitled_quantity_usd_to &&
+              filter.total_entitled_quantity_usd_from >
+                filter.total_entitled_quantity_usd_to
             }
           />
         </Grid>
@@ -117,7 +122,7 @@ export const ProgramCyclesFilters = ({
             topLabel="Date"
             onChange={(date) =>
               handleFilterChange(
-                'startDate',
+                'start_date',
                 date ? moment(date).format('YYYY-MM-DD') : '',
               )
             }
@@ -128,11 +133,11 @@ export const ProgramCyclesFilters = ({
           <DatePickerFilter
             onChange={(date) =>
               handleFilterChange(
-                'endDate',
+                'end_date',
                 date ? moment(date).format('YYYY-MM-DD') : '',
               )
             }
-            value={filter.endDate}
+            value={filter.end_date}
           />
         </Grid>
       </Grid>

@@ -18,6 +18,8 @@ class ProgramCycleFilter(filters.FilterSet):
         choices=ProgramCycle.STATUS_CHOICE,
     )
     program = filters.CharFilter(method="filter_by_program")
+    start_date = filters.DateFilter(field_name="start_date", lookup_expr="gte")
+    end_date = filters.DateFilter(field_name="end_date", lookup_expr="lte")
     total_delivered_quantity_usd = DecimalRangeFilter(method="filter_total_delivered_quantity_usd")
 
     class Meta:
@@ -26,8 +28,6 @@ class ProgramCycleFilter(filters.FilterSet):
             "title": [
                 "startswith",
             ],
-            "start_date": ["gte"],
-            "end_date": ["lte"],
         }
 
     def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
