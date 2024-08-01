@@ -1,8 +1,9 @@
 import * as React from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { StyledAutocomplete, StyledTextField } from '../StyledAutocomplete';
+import { useDebounce } from '@hooks/useDebounce';
 
 type OptionType = any;
 
@@ -16,19 +17,13 @@ export function BaseAutocompleteRest({
   programId,
   queryParams,
   handleChange,
-  handleClose,
   handleOptionSelected,
   handleOptionLabel,
-  handleOpen,
-  open,
-  inputValue,
-  onInputTextChange,
-  debouncedInputText,
   startAdornment = null,
-  options = [],
   mapOptions = (opts) => opts,
   autocompleteProps = {},
   textFieldProps = {},
+  onDebouncedInputTextChanges,
 }: {
   value: string;
   disabled?: boolean;
@@ -43,63 +38,41 @@ export function BaseAutocompleteRest({
   programId: string;
   queryParams?: Record<string, any>;
   handleChange: (event, newValue) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  handleClose: (_: any, reason: string) => void;
   handleOptionSelected: (option: OptionType, value: OptionType) => boolean;
   handleOptionLabel: (option: OptionType) => string;
-  handleOpen: () => void;
-  open: boolean;
-  inputValue: string;
-  onInputTextChange: (value) => void;
-  debouncedInputText: string;
   startAdornment?: React.ReactNode;
-  options?: OptionType[];
   mapOptions?: (options: OptionType[]) => OptionType[];
   autocompleteProps?: Record<string, any>;
   textFieldProps?: Record<string, any>;
+  onDebouncedInputTextChanges: (text: string) => void;
 }): React.ReactElement {
   const [modifiedOptions, setModifiedOptions] = React.useState<OptionType[]>(
     [],
   );
-
-  //TODO: add refetching on typing
-
+  const [inputValue, setInputValue] = useState('');
+  const debouncedInputText = useDebounce(inputValue, 800);
+  const [open, setOpen] = useState(false);
   const { data, isLoading } = useQuery({
     queryKey: [label, businessArea, programId, queryParams],
-    queryFn: () => fetchFunction(businessArea, programId, queryParams),
+    queryFn: () => fetchFunction(businessArea, programId, { ...queryParams }),
   });
+  useEffect(
+    () => onDebouncedInputTextChanges(debouncedInputText),
+    [debouncedInputText],
+  );
 
   useEffect(() => {
     if (value === '' && inputValue !== '') {
-      onInputTextChange('');
+      setInputValue('');
     }
-  }, [value, onInputTextChange, inputValue]);
-
-  // load data on mount to match the value from the url
-  useEffect(() => {
-    if (open) {
-      fetchFunction(businessArea, programId, queryParams);
-    }
-  }, [
-    open,
-    debouncedInputText,
-    fetchFunction,
-    businessArea,
-    programId,
-    queryParams,
-  ]);
+  }, [value, setInputValue, inputValue]);
 
   useEffect(() => {
-    setModifiedOptions(
-      mapOptions(options.length > 0 ? options : data?.results || []),
-    );
-  }, [options, data, mapOptions]);
-
-  if (!data) return null;
+    setModifiedOptions(mapOptions(data?.results || []));
+  }, [data, mapOptions]);
 
   return (
     <StyledAutocomplete
-      key={data}
       freeSolo={false}
       filterOptions={(x) => x}
       value={value}
@@ -107,8 +80,13 @@ export function BaseAutocompleteRest({
       open={open}
       options={modifiedOptions}
       onChange={handleChange}
-      onOpen={handleOpen}
-      onClose={handleClose}
+      onOpen={() => setOpen(true)}
+      onClose={() => {
+        setOpen(false);
+        if (value === null) {
+          setInputValue('');
+        }
+      }}
       isOptionEqualToValue={(option, selectedValue) =>
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         handleOptionSelected(option as any, selectedValue as any)
@@ -125,7 +103,7 @@ export function BaseAutocompleteRest({
           size="small"
           data-cy={`${label}-input`}
           value={inputValue}
-          onChange={(e) => onInputTextChange(e.target.value)}
+          onChange={(e) => setInputValue(e.target.value)}
           InputProps={{
             ...params.InputProps,
             startAdornment,
