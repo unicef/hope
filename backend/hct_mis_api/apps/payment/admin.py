@@ -22,6 +22,7 @@ from smart_admin.mixins import LinkedObjectsMixin
 from hct_mis_api.apps.payment.forms import ImportPaymentRecordsForm
 from hct_mis_api.apps.payment.models import (
     CashPlan,
+    DeliveryMechanism,
     DeliveryMechanismData,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
@@ -470,3 +471,8 @@ class DeliveryMechanismDataAdmin(HOPEModelAdminBase):
     list_display = ("individual", "delivery_mechanism", "is_valid")
     raw_id_fields = ("individual", "possible_duplicate_of")
     readonly_fields = ("possible_duplicate_of", "unique_key", "signature_hash", "validation_errors")
+
+
+@admin.register(DeliveryMechanism)
+class DeliveryMechanismAdmin(HOPEModelAdminBase):
+    list_display = ("code", "name", "is_active", "transfer_type")
