@@ -36,8 +36,8 @@ export const IndividualAdditionalRegistrationInformation = ({
   );
 
   const fields = Object.entries(individual?.flexFields || {})
-    .filter(([key, value]) => {
-      return flexAttributesDict[key]
+    .filter(([key]) => {
+      return flexAttributesDict[key];
     })
     .map(([key, value]: [string, string | string[]]) => {
       if (flexAttributesDict[key]?.type === 'IMAGE') {
