@@ -97,6 +97,8 @@ export const EditProgramPage = (): ReactElement => {
     pduFields,
   } = data.program;
 
+  console.log(data.program);
+
   const handleSubmit = async (values): Promise<void> => {
     const budgetValue = parseFloat(values.budget) ?? 0;
     const budgetToFixed = !Number.isNaN(budgetValue)
@@ -150,10 +152,15 @@ export const EditProgramPage = (): ReactElement => {
     }
   };
 
-  const mappedPduFields = Object.entries(pduFields).map(([, field]) => ({
-    ...field,
-    label: JSON.parse(field.label)['English(EN)'],
-  }));
+  const programHasRdi = registrationImports.totalCount > 0;
+
+  const mappedPduFields = Object.entries(pduFields).map(([, field]) => {
+    const { ...rest } = field;
+    return {
+      ...rest,
+      label: JSON.parse(field.label)['English(EN)'],
+    };
+  });
 
   const initialValues = {
     editMode: true,
@@ -177,8 +184,9 @@ export const EditProgramPage = (): ReactElement => {
         areaAccess: partner.areaAccess,
       })),
     partnerAccess,
-    pduFields:
-      pduFields.length == 0
+    pduFields: programHasRdi
+      ? undefined
+      : pduFields.length == 0
         ? [
             {
               label: '',
@@ -191,6 +199,7 @@ export const EditProgramPage = (): ReactElement => {
           ]
         : mappedPduFields,
   };
+
   initialValues.budget =
     data.program.budget === '0.00' ? '' : data.program.budget;
   initialValues.populationGoal =
@@ -288,7 +297,6 @@ export const EditProgramPage = (): ReactElement => {
           ? stepsData[step].description
           : undefined;
 
-        const programHasRdi = registrationImports.totalCount > 0;
         return (
           <>
             <PageHeader
