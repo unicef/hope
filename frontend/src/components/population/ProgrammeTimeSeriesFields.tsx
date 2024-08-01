@@ -44,13 +44,11 @@ export const ProgrammeTimeSeriesFields = ({
     for (const roundNumber of Object.keys(individual.flexFields[fieldName])) {
       const roundData = individual.flexFields[fieldName][roundNumber];
       const roundName =
-        pduDataDict[fieldName].pdu_data.rounds_names[
-          parseInt(roundNumber) - 1
-        ];
+        pduDataDict[fieldName].pdu_data.rounds_names[parseInt(roundNumber) - 1];
       const value = roundData.value;
       const dateOfCollection = roundData.collection_date;
       rows.push({
-        key:`${pduDataDict[fieldName]}-roundNumber`,
+        key: `${pduDataDict[fieldName]}-roundNumber`,
         fieldName: pduDataDict[fieldName].label,
         roundNumber: roundNumber,
         roundName: roundName,
@@ -89,7 +87,13 @@ export const ProgrammeTimeSeriesFields = ({
                 </TableCell>
                 <TableCell align="right">{row.roundNumber}</TableCell>
                 <TableCell align="left">{row.roundName}</TableCell>
-                <TableCell align="left">{row.value}</TableCell>
+                <TableCell align="left">
+                  {typeof row.value == 'boolean'
+                    ? row.value
+                      ? 'YES'
+                      : 'NO'
+                    : row.value}
+                </TableCell>
                 <TableCell align="right">
                   <UniversalMoment>{row.dateOfCollection}</UniversalMoment>
                 </TableCell>
