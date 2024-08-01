@@ -44,11 +44,11 @@ class AreaTypeFactory(DjangoModelFactory):
 class AreaFactory(DjangoModelFactory):
     class Meta:
         model = Area
-        django_get_or_create = ("name", "p_code", "area_type")
+        django_get_or_create = ("p_code",)
 
     name = factory.LazyFunction(faker.city)
     parent = None
-    p_code = faker.bothify(text="AF@@@@@@")
+    p_code = factory.LazyFunction(lambda: faker.bothify(text="AF@@@@@@"))
     area_type = factory.SubFactory(AreaTypeFactory)
     geom = factory.LazyFunction(create_fake_multipolygon)
     point = None
