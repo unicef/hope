@@ -14,11 +14,10 @@ import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, Step, StepLabel, Stepper } from '@mui/material';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { getFilterFromQueryParams } from '@utils/utils';
 import { Formik } from 'formik';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 
 export const NewTemplatePeoplePage = (): React.ReactElement => {
@@ -26,7 +25,6 @@ export const NewTemplatePeoplePage = (): React.ReactElement => {
   const navigate = useNavigate();
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
-  const location = useLocation();
   const { showMessage } = useSnackbar();
 
   const initialFilter = {

@@ -13,10 +13,7 @@ import styled from 'styled-components';
 import { Title } from '@core/Title';
 import { useTranslation } from 'react-i18next';
 import { useArrayToDict } from '@hooks/useArrayToDict';
-import {
-  AllIndividualsFlexFieldsAttributesQuery,
-  IndividualNode,
-} from '@generated/graphql';
+import { IndividualNode } from '@generated/graphql';
 import { UniversalMoment } from '@core/UniversalMoment';
 
 const StyledTableCell = styled(MuiTableCell)`
@@ -80,7 +77,7 @@ export const ProgrammeTimeSeriesFields = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row, index) => (
+            {rows.map((row) => (
               <TableRow key={row.key}>
                 <TableCell component="th" scope="row">
                   {row.fieldName}

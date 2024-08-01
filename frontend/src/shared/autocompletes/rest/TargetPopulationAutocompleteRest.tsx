@@ -1,7 +1,6 @@
 import { fetchTargetPopulations } from '@api/targetPopulationApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useDebounce } from '@hooks/useDebounce';
-import { handleAutocompleteClose, handleOptionSelected } from '@utils/utils';
+import { handleOptionSelected } from '@utils/utils';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BaseAutocompleteRest } from './BaseAutocompleteRest';

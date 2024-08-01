@@ -58,7 +58,7 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: React.FC<
     'name',
     '*',
   );
-  if (isLoading || periodicFieldsLoading||!pduDataDict) return <LoadingComponent />;
+  if (isLoading || periodicFieldsLoading || !pduDataDict) return <LoadingComponent />;
   return (
     <Dialog
       open={open}

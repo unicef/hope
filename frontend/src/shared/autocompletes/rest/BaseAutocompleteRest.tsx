@@ -58,6 +58,7 @@ export function BaseAutocompleteRest({
   });
   useEffect(
     () => onDebouncedInputTextChanges(debouncedInputText),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [debouncedInputText],
   );
 
