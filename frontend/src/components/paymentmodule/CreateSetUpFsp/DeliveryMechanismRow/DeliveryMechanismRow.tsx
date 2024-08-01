@@ -32,7 +32,7 @@ export function DeliveryMechanismRow({
 
 
   const handleDeliveryMechanismChange = (e): void => {
-    console.log('e', e.target)
+    console.log('e', e.target);
     setFieldValue(`deliveryMechanisms[${index}].chosenConfiguration`, '');
     setFieldValue(`deliveryMechanisms[${index}].deliveryMechanism`, e.target.value);
   };

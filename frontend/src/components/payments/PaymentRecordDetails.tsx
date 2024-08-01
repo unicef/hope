@@ -174,7 +174,7 @@ export function PaymentRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('DELIVERY TYPE')}
-              value={paymentRecord.deliveryType}
+              value={paymentRecord.deliveryType.name}
             />
           </Grid>
           <Grid item xs={3}>

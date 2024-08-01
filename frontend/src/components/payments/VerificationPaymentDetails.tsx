@@ -119,7 +119,7 @@ export function VerificationPaymentDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('DELIVERY TYPE')}
-              value={deliveryTypeDict[payment.deliveryType]}
+              value={deliveryTypeDict[payment.deliveryType.name]}
             />
           </Grid>
           <Grid item xs={3}>

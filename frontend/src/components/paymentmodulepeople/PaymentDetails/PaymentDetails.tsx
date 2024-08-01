@@ -213,7 +213,7 @@ export function PaymentDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('DELIVERY MECHANISM')}
-              value={payment.deliveryType}
+              value={payment.deliveryType.name}
             />
           </Grid>
           <Grid item xs={3}>
