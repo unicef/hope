@@ -1463,7 +1463,9 @@ class Query(graphene.ObjectType):
 
         payment_plan_qs = payment_plan_qs.annotate(
             fsp_names=ArraySubquery(fsp_qs.values_list("name", flat=True)),
-            delivery_types=ArraySubquery(delivery_mechanisms_per_pp_qs.values_list("delivery_mechanism", flat=True)),
+            delivery_types=ArraySubquery(
+                delivery_mechanisms_per_pp_qs.values_list("delivery_mechanism__name", flat=True)
+            ),
             currency_order=F("currency"),
         )
         cash_plan_qs = CashPlan.objects.all().annotate(

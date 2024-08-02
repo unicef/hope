@@ -2224,7 +2224,7 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
     all_objects = models.Manager()
 
     def __str__(self) -> str:
-        return f"[{self.id}] {self.individual} - {self.delivery_mechanism}"
+        return f"{self.individual} - {self.delivery_mechanism}"
 
     class Meta:
         constraints = [
