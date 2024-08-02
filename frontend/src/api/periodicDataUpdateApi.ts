@@ -111,9 +111,11 @@ export const createPeriodicDataUpdateTemplate = async (
 export const fetchPeriodicFields = async (
   businessAreaSlug: string,
   programId: string,
+  params = {},
 ): Promise<any> => {
   const response = await api.get(
     `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-fields/`,
+    params,
   );
   return response;
 };

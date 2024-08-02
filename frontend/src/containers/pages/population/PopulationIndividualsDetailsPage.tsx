@@ -62,7 +62,8 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
       queryKey: ['periodicFields', businessArea, programId],
-      queryFn: () => fetchPeriodicFields(businessArea, programId),
+      queryFn: () =>
+        fetchPeriodicFields(businessArea, programId, { limit: 1000 }),
     });
 
   if (
