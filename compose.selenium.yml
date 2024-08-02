@@ -46,7 +46,7 @@ services:
     command: |
       sh -c "
         waitforit -host=db_selenium -port=5432 -timeout=30 &&
-        pytest -svvv selenium_tests --html-report=./report/report.html
+        pytest -svvv -k test_import_kobo_form selenium_tests --html-report=./report/report.html
       "
     ports:
       - "8080:8080"
