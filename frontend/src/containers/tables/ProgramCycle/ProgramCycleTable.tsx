@@ -41,7 +41,7 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
         <TableCell data-cy={`program-cycle-id-${row.id}`}>
           <BlackLink to={detailsUrl}>{row.unicef_id}</BlackLink>
         </TableCell>
-        <TableCell data-cy={`program-cycle-title-${row.id}`}>
+        <TableCell data-cy="program-cycle-title">
           {row.title}
         </TableCell>
         <TableCell data-cy={`program-cycle-status-${row.id}`}>
