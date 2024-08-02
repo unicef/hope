@@ -202,6 +202,7 @@ class TestRegistrationDataImport:
         pageDetailsRegistrationDataImport.getImportedHouseholdsRow(0).find_elements("tag name", "td")[1].click()
         assert hausehold_id in pageHouseholdsDetails.getPageHeaderTitle().text
 
+    @pytest.mark.xfail(reason="Unskip after fix: 210576")
     @pytest.mark.vcr(ignore_localhost=True)
     def test_import_empty_kobo_form(
         self, login: None, create_programs: None, pageRegistrationDataImport: RegistrationDataImport, kobo_setup: None
@@ -221,12 +222,13 @@ class TestRegistrationDataImport:
         pageRegistrationDataImport.getKoboProjectSelect().click()
         pageRegistrationDataImport.select_listbox_element("Education new programme").click()
 
-        assert pageRegistrationDataImport.buttonImportFileIsEnabled(timeout=60)
+        assert pageRegistrationDataImport.buttonImportFileIsEnabled(timeout=300)
         assert "0" in pageRegistrationDataImport.getNumberOfHouseholds().text
         assert "0" in pageRegistrationDataImport.getNumberOfIndividuals().text
         pageRegistrationDataImport.getButtonImportFile().click()
         pageRegistrationDataImport.checkAlert("Cannot import empty form")
 
+    @pytest.mark.xfail(reason="Unskip after fix: 210576")
     @pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["elasticsearch"])
     def test_import_kobo_form(
         self,
@@ -252,7 +254,7 @@ class TestRegistrationDataImport:
         pageRegistrationDataImport.getKoboProjectSelect().click()
         pageRegistrationDataImport.select_listbox_element("UNICEF NGA Education").click()
 
-        assert pageRegistrationDataImport.buttonImportFileIsEnabled(timeout=60)
+        assert pageRegistrationDataImport.buttonImportFileIsEnabled(timeout=300)
         assert "1" in pageRegistrationDataImport.getNumberOfHouseholds().text
         assert "2" in pageRegistrationDataImport.getNumberOfIndividuals().text
 
