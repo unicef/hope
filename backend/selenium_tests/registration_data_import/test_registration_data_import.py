@@ -236,7 +236,7 @@ class TestRegistrationDataImport:
         pageRegistrationDataImport: RegistrationDataImport,
         pageDetailsRegistrationDataImport: RDIDetailsPage,
         kobo_setup: None,
-        areas: None
+        areas: None,
     ) -> None:
         # Go to Registration Data Import
         pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm").click()
