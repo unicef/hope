@@ -47,12 +47,12 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualIdentity,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_service import (
-    PeriodicDataUpdateImportService,
-)
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
     PendingDeliveryMechanismData,
+)
+from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_service import (
+    PeriodicDataUpdateImportService,
 )
 from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask

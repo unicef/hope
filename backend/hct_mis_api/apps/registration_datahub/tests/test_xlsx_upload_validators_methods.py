@@ -20,8 +20,8 @@ from hct_mis_api.apps.core.fixtures import (
 from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData
 from hct_mis_api.apps.core.utils import SheetImageLoader
 from hct_mis_api.apps.geo.fixtures import CountryFactory
-from hct_mis_api.apps.program.fixtures import get_program_with_dct_type_and_name
 from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
+from hct_mis_api.apps.program.fixtures import get_program_with_dct_type_and_name
 from hct_mis_api.apps.registration_datahub.validators import UploadXLSXInstanceValidator
 
 
