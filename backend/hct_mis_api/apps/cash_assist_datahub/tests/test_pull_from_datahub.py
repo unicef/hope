@@ -34,6 +34,7 @@ from hct_mis_api.apps.core.tests.test_exchange_rates import (
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.models import CashPlan, PaymentRecord, ServiceProvider
+from hct_mis_api.apps.program.fixtures import get_program_with_dct_type_and_name
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
@@ -51,18 +52,21 @@ class TestPullDataFromDatahub(TestCase):
     dh_cash_plan2 = None
     household = None
 
-    @staticmethod
-    def _pre_test_commands() -> None:
-        create_afghanistan()
+    @classmethod
+    def _pre_test_commands(cls) -> None:
+        cls.business_area = create_afghanistan()
+        cls.program = get_program_with_dct_type_and_name()
         call_command("loadcountries")
         call_command("loadcountrycodes")
 
     @classmethod
     def _setup_in_app_data(cls) -> None:
-        target_population = TargetPopulation()
-        target_population.name = "Test TP"
-        target_population.status = TargetPopulation.STATUS_PROCESSING
-        target_population.save()
+        target_population = TargetPopulation.objects.create(
+            name="Test TP",
+            status=TargetPopulation.STATUS_PROCESSING,
+            program=cls.program,
+            business_area=cls.business_area,
+        )
 
         program = Program()
         program.name = "Test Program"

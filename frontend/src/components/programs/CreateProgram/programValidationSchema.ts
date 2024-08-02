@@ -36,7 +36,7 @@ export const programValidationSchema = (
             )
           : schema,
       )
-      .when('editMode', ([editMode], schema) => {
+      .when('editMode', (editMode, schema) => {
         return editMode
           ? schema
           : schema.min(today, t('End Date cannot be in the past'));
@@ -61,5 +61,55 @@ export const programValidationSchema = (
         id: Yup.string().required(t('Partner ID is required')),
         areaAccess: Yup.string().required(t('Area Access is required')),
       }),
+    ),
+    pduFields: Yup.array().of(
+      Yup.object()
+        .shape({
+          label: Yup.string()
+            .nullable()
+            .min(3, t('Too short'))
+            .max(150, t('Too long')),
+          pduData: Yup.object().shape({
+            subtype: Yup.string().nullable(),
+            numberOfRounds: Yup.number().nullable(),
+            roundsNames: Yup.array()
+              .of(
+                Yup.string()
+                  .required(t('Round Name is required'))
+                  .min(3, t('Too short'))
+                  .max(150, t('Too long')),
+              )
+              .test(
+                'rounds-match-number',
+                '', // Custom error message
+                function (value) {
+                  const { numberOfRounds } = this.parent;
+                  if (!numberOfRounds) return true;
+                  return value.length === numberOfRounds;
+                },
+              ),
+          }),
+        })
+        .test(
+          'pduFields-validation',
+          t('Please complete the PDU fields correctly.'), // Custom error message
+          function (value) {
+            const { label, pduData } = value;
+            const { subtype, numberOfRounds, roundsNames } = pduData;
+            const isInitialState =
+              !label &&
+              !subtype &&
+              numberOfRounds === null &&
+              roundsNames.length === 0;
+
+            const isValidState =
+              label &&
+              subtype &&
+              numberOfRounds &&
+              roundsNames.length === numberOfRounds;
+
+            return isInitialState || isValidState;
+          },
+        ),
     ),
   });
