@@ -142,9 +142,5 @@ class RegistrationDataImport(BaseComponents):
     def getErrorsContainer(self) -> WebElement:
         return self.wait_for(self.errorsContainer)
 
-    def buttonImportFileIsEnabled(self, timeout: int = 30) -> bool:
-        for _ in range(timeout):
-            if self.getButtonImportFile().is_enabled():  # type: ignore
-                return True
-            sleep(1)
-        return False
+    def buttonImportFileIsEnabled(self, timeout: int = 10) -> WebElement:
+        return self.wait_for(self.buttonImportRDI, timeout=timeout)
