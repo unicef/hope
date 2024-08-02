@@ -139,6 +139,8 @@ class GrievanceDetailsPage(BaseComponents):
     headingCellChange_from = 'div[data-cy="heading-cell-change_from"]'
     headingCellChange_to = 'div[data-cy="heading-cell-change_to"]'
     pagination = 'div[data-cy="pagination"]'
+    buttonAdmin = 'div[data-cy="button-admin"]'
+
     # Texts
     textTitle = "Ticket ID: "
     textStatusNew = "New"
@@ -599,3 +601,6 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getButtonCancel(self) -> WebElement:
         return self.wait_for(self.buttonCancel)
+
+    def getButtonAdmin(self) -> WebElement:
+        return self.wait_for(self.buttonAdmin)
