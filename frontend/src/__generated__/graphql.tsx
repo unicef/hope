@@ -1443,22 +1443,57 @@ export type DeliveryMechanismDataPayloadFieldObjectType = {
 
 export type DeliveryMechanismNode = Node & {
   __typename?: 'DeliveryMechanismNode';
-  chosenConfiguration?: Maybe<Scalars['String']['output']>;
+  code?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
-  createdBy: UserNode;
-  deliveryMechanism?: Maybe<DeliveryMechanismPerPaymentPlanDeliveryMechanism>;
-  deliveryMechanismOrder: Scalars['Int']['output'];
-  financialServiceProvider?: Maybe<FinancialServiceProviderNode>;
-  fsp?: Maybe<FinancialServiceProviderNode>;
+  deliverymechanismperpaymentplanSet: DeliveryMechanismPerPaymentPlanNodeConnection;
+  financialserviceproviderSet: FinancialServiceProviderNodeConnection;
   id: Scalars['ID']['output'];
+  isActive: Scalars['Boolean']['output'];
   name?: Maybe<Scalars['String']['output']>;
-  order?: Maybe<Scalars['Int']['output']>;
-  paymentPlan: PaymentPlanNode;
-  sentBy?: Maybe<UserNode>;
-  sentDate: Scalars['DateTime']['output'];
-  sentToPaymentGateway: Scalars['Boolean']['output'];
-  status: Scalars['String']['output'];
+  optionalFields: Array<Scalars['String']['output']>;
+  paymentGatewayId?: Maybe<Scalars['String']['output']>;
+  paymentSet: PaymentNodeConnection;
+  paymentrecordSet: PaymentRecordNodeConnection;
+  requiredFields: Array<Scalars['String']['output']>;
+  transferType: DeliveryMechanismTransferType;
+  uniqueFields: Array<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
+};
+
+
+export type DeliveryMechanismNodeDeliverymechanismperpaymentplanSetArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type DeliveryMechanismNodeFinancialserviceproviderSetArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type DeliveryMechanismNodePaymentSetArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type DeliveryMechanismNodePaymentrecordSetArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type DeliveryMechanismNodeConnection = {
@@ -1475,7 +1510,7 @@ export type DeliveryMechanismNodeEdge = {
   node?: Maybe<DeliveryMechanismNode>;
 };
 
-export enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
+export enum DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice {
   AtmCard = 'ATM_CARD',
   CardlessCashWithdrawal = 'CARDLESS_CASH_WITHDRAWAL',
   Cash = 'CASH',
@@ -1489,6 +1524,48 @@ export enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   Transfer = 'TRANSFER',
   TransferToAccount = 'TRANSFER_TO_ACCOUNT',
   TransferToDigitalWallet = 'TRANSFER_TO_DIGITAL_WALLET',
+  Voucher = 'VOUCHER'
+}
+
+export type DeliveryMechanismPerPaymentPlanNode = Node & {
+  __typename?: 'DeliveryMechanismPerPaymentPlanNode';
+  chosenConfiguration?: Maybe<Scalars['String']['output']>;
+  code?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  createdBy: UserNode;
+  deliveryMechanism: DeliveryMechanismNode;
+  deliveryMechanismChoice?: Maybe<DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice>;
+  deliveryMechanismOrder: Scalars['Int']['output'];
+  financialServiceProvider?: Maybe<FinancialServiceProviderNode>;
+  fsp?: Maybe<FinancialServiceProviderNode>;
+  id: Scalars['ID']['output'];
+  name?: Maybe<Scalars['String']['output']>;
+  order?: Maybe<Scalars['Int']['output']>;
+  paymentPlan: PaymentPlanNode;
+  sentBy?: Maybe<UserNode>;
+  sentDate: Scalars['DateTime']['output'];
+  sentToPaymentGateway: Scalars['Boolean']['output'];
+  status: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type DeliveryMechanismPerPaymentPlanNodeConnection = {
+  __typename?: 'DeliveryMechanismPerPaymentPlanNodeConnection';
+  edgeCount?: Maybe<Scalars['Int']['output']>;
+  edges: Array<Maybe<DeliveryMechanismPerPaymentPlanNodeEdge>>;
+  pageInfo: PageInfo;
+  totalCount?: Maybe<Scalars['Int']['output']>;
+};
+
+export type DeliveryMechanismPerPaymentPlanNodeEdge = {
+  __typename?: 'DeliveryMechanismPerPaymentPlanNodeEdge';
+  cursor: Scalars['String']['output'];
+  node?: Maybe<DeliveryMechanismPerPaymentPlanNode>;
+};
+
+export enum DeliveryMechanismTransferType {
+  Cash = 'CASH',
+  Digital = 'DIGITAL',
   Voucher = 'VOUCHER'
 }
 
@@ -1822,8 +1899,9 @@ export type FinancialServiceProviderNode = Node & {
   createdAt: Scalars['DateTime']['output'];
   createdBy?: Maybe<UserNode>;
   dataTransferConfiguration?: Maybe<Scalars['JSONString']['output']>;
-  deliveryMechanisms: Array<Scalars['String']['output']>;
-  deliveryMechanismsPerPaymentPlan: DeliveryMechanismNodeConnection;
+  deliveryMechanisms: DeliveryMechanismNodeConnection;
+  deliveryMechanismsChoices?: Maybe<Array<Scalars['String']['output']>>;
+  deliveryMechanismsPerPaymentPlan: DeliveryMechanismPerPaymentPlanNodeConnection;
   distributionLimit?: Maybe<Scalars['Float']['output']>;
   fullName?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -1842,6 +1920,15 @@ export type FinancialServiceProviderNodeAllowedBusinessAreasArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['UUID']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type FinancialServiceProviderNodeDeliveryMechanismsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -4695,7 +4782,7 @@ export type PaymentConflictDataNode = {
   paymentUnicefId?: Maybe<Scalars['String']['output']>;
 };
 
-export enum PaymentDeliveryType {
+export enum PaymentDeliveryTypeChoice {
   AtmCard = 'ATM_CARD',
   CardlessCashWithdrawal = 'CARDLESS_CASH_WITHDRAWAL',
   Cash = 'CASH',
@@ -4743,7 +4830,8 @@ export type PaymentNode = Node & {
   deliveredQuantity?: Maybe<Scalars['Float']['output']>;
   deliveredQuantityUsd?: Maybe<Scalars['Float']['output']>;
   deliveryDate?: Maybe<Scalars['DateTime']['output']>;
-  deliveryType?: Maybe<PaymentDeliveryType>;
+  deliveryType?: Maybe<DeliveryMechanismNode>;
+  deliveryTypeChoice?: Maybe<PaymentDeliveryTypeChoice>;
   distributionModality?: Maybe<Scalars['String']['output']>;
   entitlementDate?: Maybe<Scalars['DateTime']['output']>;
   entitlementQuantity?: Maybe<Scalars['Float']['output']>;
@@ -5007,7 +5095,7 @@ export type PaymentPlanNode = Node & {
   createdBy: UserNode;
   currency: PaymentPlanCurrency;
   currencyName?: Maybe<Scalars['String']['output']>;
-  deliveryMechanisms?: Maybe<Array<Maybe<DeliveryMechanismNode>>>;
+  deliveryMechanisms?: Maybe<Array<Maybe<DeliveryMechanismPerPaymentPlanNode>>>;
   dispersionEndDate?: Maybe<Scalars['Date']['output']>;
   dispersionStartDate?: Maybe<Scalars['Date']['output']>;
   endDate?: Maybe<Scalars['Date']['output']>;
@@ -5139,7 +5227,7 @@ export type PaymentRecordAndPaymentNode = {
   verification?: Maybe<PaymentVerificationNode>;
 };
 
-export enum PaymentRecordDeliveryType {
+export enum PaymentRecordDeliveryTypeChoice {
   AtmCard = 'ATM_CARD',
   CardlessCashWithdrawal = 'CARDLESS_CASH_WITHDRAWAL',
   Cash = 'CASH',
@@ -5172,7 +5260,8 @@ export type PaymentRecordNode = Node & {
   deliveredQuantity?: Maybe<Scalars['Float']['output']>;
   deliveredQuantityUsd?: Maybe<Scalars['Float']['output']>;
   deliveryDate?: Maybe<Scalars['DateTime']['output']>;
-  deliveryType?: Maybe<PaymentRecordDeliveryType>;
+  deliveryType?: Maybe<DeliveryMechanismNode>;
+  deliveryTypeChoice?: Maybe<PaymentRecordDeliveryTypeChoice>;
   distributionModality: Scalars['String']['output'];
   entitlementCardIssueDate?: Maybe<Scalars['Date']['output']>;
   entitlementCardNumber?: Maybe<Scalars['String']['output']>;
@@ -9009,7 +9098,7 @@ export type UserNode = Node & {
   availableForExport: Scalars['Boolean']['output'];
   businessAreas?: Maybe<UserBusinessAreaNodeConnection>;
   changedTargetPopulations: TargetPopulationNodeConnection;
-  createdDeliveryMechanisms: DeliveryMechanismNodeConnection;
+  createdDeliveryMechanisms: DeliveryMechanismPerPaymentPlanNodeConnection;
   createdFinancialServiceProviderXlsxTemplates: FinancialServiceProviderXlsxTemplateNodeConnection;
   createdFinancialServiceProviders: FinancialServiceProviderNodeConnection;
   createdPaymentPlans: PaymentPlanNodeConnection;
@@ -9038,7 +9127,7 @@ export type UserNode = Node & {
   partnerRoles?: Maybe<Array<Maybe<PartnerRoleNode>>>;
   registrationDataImports: RegistrationDataImportNodeConnection;
   reports: ReportNodeConnection;
-  sentDeliveryMechanisms: DeliveryMechanismNodeConnection;
+  sentDeliveryMechanisms: DeliveryMechanismPerPaymentPlanNodeConnection;
   status: UserStatus;
   surveys: SurveyNodeConnection;
   targetPopulations: TargetPopulationNodeConnection;
@@ -9325,7 +9414,7 @@ export enum UserStatus {
 
 export type VolumeByDeliveryMechanismNode = Node & {
   __typename?: 'VolumeByDeliveryMechanismNode';
-  deliveryMechanism?: Maybe<DeliveryMechanismNode>;
+  deliveryMechanism?: Maybe<DeliveryMechanismPerPaymentPlanNode>;
   id: Scalars['ID']['output'];
   volume?: Maybe<Scalars['Float']['output']>;
   volumeUsd?: Maybe<Scalars['Float']['output']>;
@@ -9386,7 +9475,7 @@ export type IndividualDetailedFragment = { __typename?: 'IndividualNode', givenN
 
 export type MergedIndividualMinimalFragment = { __typename?: 'IndividualNode', id: string, unicefId?: string | null, age?: number | null, fullName: string, birthDate: any, sex: IndividualSex, role?: string | null, relationship?: IndividualRelationship | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, deduplicationBatchResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, datahubId?: any | null } | null };
 
-export type PaymentRecordDetailsFragment = { __typename?: 'PaymentRecordNode', id: string, status: PaymentRecordStatus, statusDate: any, caId?: string | null, caHashId?: any | null, registrationCaId?: string | null, fullName: string, distributionModality: string, totalPersonsCovered: number, currency: string, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveredQuantityUsd?: number | null, deliveryDate?: any | null, deliveryType?: PaymentRecordDeliveryType | null, entitlementCardIssueDate?: any | null, entitlementCardNumber?: string | null, transactionReferenceId?: string | null, verification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, statusDate?: any | null, receivedAmount?: number | null } | null, household: { __typename?: 'HouseholdNode', id: string, status?: string | null, size?: number | null, unicefId?: string | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, phoneNo: string, phoneNoAlternative: string, phoneNoValid?: boolean | null, phoneNoAlternativeValid?: boolean | null } | null }, targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string }, parent?: { __typename?: 'CashPlanNode', id: string, caId?: string | null, program: { __typename?: 'ProgramNode', id: string, name: string }, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, verificationChannel: PaymentVerificationPlanVerificationChannel } | null } | null> } | null } | null, serviceProvider: { __typename?: 'ServiceProviderNode', id: string, fullName?: string | null, shortName?: string | null } };
+export type PaymentRecordDetailsFragment = { __typename?: 'PaymentRecordNode', id: string, status: PaymentRecordStatus, statusDate: any, caId?: string | null, caHashId?: any | null, registrationCaId?: string | null, fullName: string, distributionModality: string, totalPersonsCovered: number, currency: string, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveredQuantityUsd?: number | null, deliveryDate?: any | null, entitlementCardIssueDate?: any | null, entitlementCardNumber?: string | null, transactionReferenceId?: string | null, verification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, statusDate?: any | null, receivedAmount?: number | null } | null, household: { __typename?: 'HouseholdNode', id: string, status?: string | null, size?: number | null, unicefId?: string | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, phoneNo: string, phoneNoAlternative: string, phoneNoValid?: boolean | null, phoneNoAlternativeValid?: boolean | null } | null }, targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string }, parent?: { __typename?: 'CashPlanNode', id: string, caId?: string | null, program: { __typename?: 'ProgramNode', id: string, name: string }, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, verificationChannel: PaymentVerificationPlanVerificationChannel } | null } | null> } | null } | null, deliveryType?: { __typename?: 'DeliveryMechanismNode', name?: string | null } | null, serviceProvider: { __typename?: 'ServiceProviderNode', id: string, fullName?: string | null, shortName?: string | null } };
 
 export type ProgramDetailsFragment = { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null };
 
@@ -9625,14 +9714,14 @@ export type AssignFspToDeliveryMechMutationVariables = Exact<{
 }>;
 
 
-export type AssignFspToDeliveryMechMutation = { __typename?: 'Mutations', assignFspToDeliveryMechanism?: { __typename?: 'AssignFspToDeliveryMechanismMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, deliveryMechanisms?: Array<{ __typename?: 'DeliveryMechanismNode', id: string, name?: string | null, fsp?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null> | null } | null } | null };
+export type AssignFspToDeliveryMechMutation = { __typename?: 'Mutations', assignFspToDeliveryMechanism?: { __typename?: 'AssignFspToDeliveryMechanismMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, deliveryMechanisms?: Array<{ __typename?: 'DeliveryMechanismPerPaymentPlanNode', id: string, name?: string | null, fsp?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null> | null } | null } | null };
 
 export type ChooseDeliveryMechForPaymentPlanMutationVariables = Exact<{
   input: ChooseDeliveryMechanismsForPaymentPlanInput;
 }>;
 
 
-export type ChooseDeliveryMechForPaymentPlanMutation = { __typename?: 'Mutations', chooseDeliveryMechanismsForPaymentPlan?: { __typename?: 'ChooseDeliveryMechanismsForPaymentPlanMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, deliveryMechanisms?: Array<{ __typename?: 'DeliveryMechanismNode', id: string, name?: string | null, fsp?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null> | null } | null } | null };
+export type ChooseDeliveryMechForPaymentPlanMutation = { __typename?: 'Mutations', chooseDeliveryMechanismsForPaymentPlan?: { __typename?: 'ChooseDeliveryMechanismsForPaymentPlanMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, deliveryMechanisms?: Array<{ __typename?: 'DeliveryMechanismPerPaymentPlanNode', id: string, name?: string | null, fsp?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null> | null } | null } | null };
 
 export type CreateFollowUpPpMutationVariables = Exact<{
   dispersionStartDate: Scalars['Date']['input'];
@@ -9804,7 +9893,7 @@ export type MarkPrAsFailedMutationVariables = Exact<{
 }>;
 
 
-export type MarkPrAsFailedMutation = { __typename?: 'Mutations', markPaymentRecordAsFailed?: { __typename?: 'MarkPaymentRecordAsFailedMutation', paymentRecord?: { __typename?: 'PaymentRecordNode', id: string, status: PaymentRecordStatus, statusDate: any, caId?: string | null, caHashId?: any | null, registrationCaId?: string | null, fullName: string, distributionModality: string, totalPersonsCovered: number, currency: string, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveredQuantityUsd?: number | null, deliveryDate?: any | null, deliveryType?: PaymentRecordDeliveryType | null, entitlementCardIssueDate?: any | null, entitlementCardNumber?: string | null, transactionReferenceId?: string | null, verification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, statusDate?: any | null, receivedAmount?: number | null } | null, household: { __typename?: 'HouseholdNode', id: string, status?: string | null, size?: number | null, unicefId?: string | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, phoneNo: string, phoneNoAlternative: string, phoneNoValid?: boolean | null, phoneNoAlternativeValid?: boolean | null } | null }, targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string }, parent?: { __typename?: 'CashPlanNode', id: string, caId?: string | null, program: { __typename?: 'ProgramNode', id: string, name: string }, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, verificationChannel: PaymentVerificationPlanVerificationChannel } | null } | null> } | null } | null, serviceProvider: { __typename?: 'ServiceProviderNode', id: string, fullName?: string | null, shortName?: string | null } } | null } | null };
+export type MarkPrAsFailedMutation = { __typename?: 'Mutations', markPaymentRecordAsFailed?: { __typename?: 'MarkPaymentRecordAsFailedMutation', paymentRecord?: { __typename?: 'PaymentRecordNode', id: string, status: PaymentRecordStatus, statusDate: any, caId?: string | null, caHashId?: any | null, registrationCaId?: string | null, fullName: string, distributionModality: string, totalPersonsCovered: number, currency: string, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveredQuantityUsd?: number | null, deliveryDate?: any | null, entitlementCardIssueDate?: any | null, entitlementCardNumber?: string | null, transactionReferenceId?: string | null, verification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, statusDate?: any | null, receivedAmount?: number | null } | null, household: { __typename?: 'HouseholdNode', id: string, status?: string | null, size?: number | null, unicefId?: string | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, phoneNo: string, phoneNoAlternative: string, phoneNoValid?: boolean | null, phoneNoAlternativeValid?: boolean | null } | null }, targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string }, parent?: { __typename?: 'CashPlanNode', id: string, caId?: string | null, program: { __typename?: 'ProgramNode', id: string, name: string }, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, verificationChannel: PaymentVerificationPlanVerificationChannel } | null } | null> } | null } | null, deliveryType?: { __typename?: 'DeliveryMechanismNode', name?: string | null } | null, serviceProvider: { __typename?: 'ServiceProviderNode', id: string, fullName?: string | null, shortName?: string | null } } | null } | null };
 
 export type RevertMarkPrAsFailedMutationVariables = Exact<{
   paymentRecordId: Scalars['ID']['input'];
@@ -9813,7 +9902,7 @@ export type RevertMarkPrAsFailedMutationVariables = Exact<{
 }>;
 
 
-export type RevertMarkPrAsFailedMutation = { __typename?: 'Mutations', revertMarkPaymentRecordAsFailed?: { __typename?: 'RevertMarkPaymentRecordAsFailedMutation', paymentRecord?: { __typename?: 'PaymentRecordNode', id: string, status: PaymentRecordStatus, statusDate: any, caId?: string | null, caHashId?: any | null, registrationCaId?: string | null, fullName: string, distributionModality: string, totalPersonsCovered: number, currency: string, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveredQuantityUsd?: number | null, deliveryDate?: any | null, deliveryType?: PaymentRecordDeliveryType | null, entitlementCardIssueDate?: any | null, entitlementCardNumber?: string | null, transactionReferenceId?: string | null, verification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, statusDate?: any | null, receivedAmount?: number | null } | null, household: { __typename?: 'HouseholdNode', id: string, status?: string | null, size?: number | null, unicefId?: string | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, phoneNo: string, phoneNoAlternative: string, phoneNoValid?: boolean | null, phoneNoAlternativeValid?: boolean | null } | null }, targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string }, parent?: { __typename?: 'CashPlanNode', id: string, caId?: string | null, program: { __typename?: 'ProgramNode', id: string, name: string }, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, verificationChannel: PaymentVerificationPlanVerificationChannel } | null } | null> } | null } | null, serviceProvider: { __typename?: 'ServiceProviderNode', id: string, fullName?: string | null, shortName?: string | null } } | null } | null };
+export type RevertMarkPrAsFailedMutation = { __typename?: 'Mutations', revertMarkPaymentRecordAsFailed?: { __typename?: 'RevertMarkPaymentRecordAsFailedMutation', paymentRecord?: { __typename?: 'PaymentRecordNode', id: string, status: PaymentRecordStatus, statusDate: any, caId?: string | null, caHashId?: any | null, registrationCaId?: string | null, fullName: string, distributionModality: string, totalPersonsCovered: number, currency: string, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveredQuantityUsd?: number | null, deliveryDate?: any | null, entitlementCardIssueDate?: any | null, entitlementCardNumber?: string | null, transactionReferenceId?: string | null, verification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, statusDate?: any | null, receivedAmount?: number | null } | null, household: { __typename?: 'HouseholdNode', id: string, status?: string | null, size?: number | null, unicefId?: string | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, phoneNo: string, phoneNoAlternative: string, phoneNoValid?: boolean | null, phoneNoAlternativeValid?: boolean | null } | null }, targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string }, parent?: { __typename?: 'CashPlanNode', id: string, caId?: string | null, program: { __typename?: 'ProgramNode', id: string, name: string }, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, verificationChannel: PaymentVerificationPlanVerificationChannel } | null } | null> } | null } | null, deliveryType?: { __typename?: 'DeliveryMechanismNode', name?: string | null } | null, serviceProvider: { __typename?: 'ServiceProviderNode', id: string, fullName?: string | null, shortName?: string | null } } | null } | null };
 
 export type SplitPpMutationVariables = Exact<{
   paymentPlanId: Scalars['ID']['input'];
@@ -10440,14 +10529,14 @@ export type PaymentQueryVariables = Exact<{
 }>;
 
 
-export type PaymentQuery = { __typename?: 'Query', payment?: { __typename?: 'PaymentNode', id: string, unicefId?: string | null, distributionModality?: string | null, status: PaymentStatus, statusDate: any, snapshotCollectorBankName?: string | null, snapshotCollectorBankAccountNumber?: string | null, debitCardNumber?: string | null, debitCardIssuer?: string | null, currency: string, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveryDate?: any | null, deliveredQuantityUsd?: number | null, deliveryType?: PaymentDeliveryType | null, transactionReferenceId?: string | null, additionalCollectorName?: string | null, additionalDocumentType?: string | null, additionalDocumentNumber?: string | null, reasonForUnsuccessfulPayment?: string | null, snapshotCollectorFullName?: string | null, adminUrl?: string | null, targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string } | null, sourcePayment?: { __typename?: 'PaymentNode', id: string, unicefId?: string | null } | null, verification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, statusDate?: any | null, receivedAmount?: number | null, isManuallyEditable?: boolean | null, adminUrl?: string | null } | null, household: { __typename?: 'HouseholdNode', id: string, size?: number | null, status?: string | null, unicefId?: string | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, phoneNo: string, phoneNoAlternative: string, phoneNoValid?: boolean | null, phoneNoAlternativeValid?: boolean | null, fullName: string } | null }, collector: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string, email: string, phoneNo: string, phoneNoValid?: boolean | null, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null }, parent: { __typename?: 'PaymentPlanNode', id: string, status: PaymentPlanStatus, isFollowUp: boolean, unicefId?: string | null, program: { __typename?: 'ProgramNode', id: string, name: string }, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, verificationChannel: PaymentVerificationPlanVerificationChannel } | null } | null> } | null }, serviceProvider?: { __typename?: 'FinancialServiceProviderNode', id: string, fullName?: string | null } | null } | null };
+export type PaymentQuery = { __typename?: 'Query', payment?: { __typename?: 'PaymentNode', id: string, unicefId?: string | null, distributionModality?: string | null, status: PaymentStatus, statusDate: any, snapshotCollectorBankName?: string | null, snapshotCollectorBankAccountNumber?: string | null, debitCardNumber?: string | null, debitCardIssuer?: string | null, currency: string, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveryDate?: any | null, deliveredQuantityUsd?: number | null, transactionReferenceId?: string | null, additionalCollectorName?: string | null, additionalDocumentType?: string | null, additionalDocumentNumber?: string | null, reasonForUnsuccessfulPayment?: string | null, snapshotCollectorFullName?: string | null, adminUrl?: string | null, targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string } | null, sourcePayment?: { __typename?: 'PaymentNode', id: string, unicefId?: string | null } | null, verification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, statusDate?: any | null, receivedAmount?: number | null, isManuallyEditable?: boolean | null, adminUrl?: string | null } | null, household: { __typename?: 'HouseholdNode', id: string, size?: number | null, status?: string | null, unicefId?: string | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, phoneNo: string, phoneNoAlternative: string, phoneNoValid?: boolean | null, phoneNoAlternativeValid?: boolean | null, fullName: string } | null }, collector: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string, email: string, phoneNo: string, phoneNoValid?: boolean | null, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null }, parent: { __typename?: 'PaymentPlanNode', id: string, status: PaymentPlanStatus, isFollowUp: boolean, unicefId?: string | null, program: { __typename?: 'ProgramNode', id: string, name: string }, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, verificationChannel: PaymentVerificationPlanVerificationChannel } | null } | null> } | null }, deliveryType?: { __typename?: 'DeliveryMechanismNode', name?: string | null } | null, serviceProvider?: { __typename?: 'FinancialServiceProviderNode', id: string, fullName?: string | null } | null } | null };
 
 export type PaymentPlanQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type PaymentPlanQuery = { __typename?: 'Query', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, version: any, unicefId?: string | null, status: PaymentPlanStatus, canCreateFollowUp?: boolean | null, backgroundActionStatus?: PaymentPlanBackgroundActionStatus | null, canCreatePaymentVerificationPlan?: boolean | null, availablePaymentRecordsCount?: number | null, bankReconciliationSuccess?: number | null, bankReconciliationError?: number | null, adminUrl?: string | null, currency: PaymentPlanCurrency, currencyName?: string | null, startDate?: any | null, endDate?: any | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, totalHouseholdsCount: number, totalIndividualsCount: number, totalEntitledQuantity?: number | null, totalDeliveredQuantity?: number | null, totalUndeliveredQuantity?: number | null, totalWithdrawnHouseholdsCount?: number | null, hasPaymentListExportFile?: boolean | null, hasFspDeliveryMechanismXlsxTemplate?: boolean | null, importedFileDate?: any | null, importedFileName?: string | null, totalEntitledQuantityUsd?: number | null, paymentsConflictsCount?: number | null, canSendToPaymentGateway?: boolean | null, canSplit?: boolean | null, exclusionReason: string, excludeHouseholdError: string, isFollowUp: boolean, unsuccessfulPaymentsCount?: number | null, createdBy: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string }, program: { __typename?: 'ProgramNode', id: string, name: string, caId?: string | null }, targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string }, approvalProcess: { __typename?: 'ApprovalProcessNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'ApprovalProcessNodeEdge', node?: { __typename?: 'ApprovalProcessNode', id: string, sentForApprovalDate?: any | null, sentForAuthorizationDate?: any | null, sentForFinanceReleaseDate?: any | null, approvalNumberRequired: number, authorizationNumberRequired: number, financeReleaseNumberRequired: number, rejectedOn?: string | null, sentForApprovalBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, sentForAuthorizationBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, sentForFinanceReleaseBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, actions?: { __typename?: 'FilteredActionsListNode', approval?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, authorization?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, financeRelease?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, reject?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null } | null } | null } | null> }, steficonRule?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null, deliveryMechanisms?: Array<{ __typename?: 'DeliveryMechanismNode', id: string, name?: string | null, order?: number | null, sentToPaymentGateway: boolean, chosenConfiguration?: string | null, fsp?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string, communicationChannel: FinancialServiceProviderCommunicationChannel, isPaymentGateway?: boolean | null } | null } | null> | null, splitChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, volumeByDeliveryMechanism?: Array<{ __typename?: 'VolumeByDeliveryMechanismNode', volume?: number | null, volumeUsd?: number | null, deliveryMechanism?: { __typename?: 'DeliveryMechanismNode', id: string, name?: string | null, order?: number | null, fsp?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null } | null> | null, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, unicefId?: string | null, adminUrl?: string | null, status: PaymentVerificationPlanStatus, sampleSize?: number | null, receivedCount?: number | null, notReceivedCount?: number | null, respondedCount?: number | null, verificationChannel: PaymentVerificationPlanVerificationChannel, sampling: PaymentVerificationPlanSampling, receivedWithProblemsCount?: number | null, rapidProFlowId: string, confidenceInterval?: number | null, marginOfError?: number | null, activationDate?: any | null, completionDate?: any | null, excludedAdminAreasFilter?: Array<string | null> | null, sexFilter?: string | null, xlsxFileExporting: boolean, hasXlsxFile?: boolean | null, xlsxFileWasDownloaded?: boolean | null, xlsxFileImported: boolean, ageFilter?: { __typename?: 'AgeFilterObject', min?: number | null, max?: number | null } | null } | null } | null> } | null, paymentVerificationSummary?: { __typename?: 'PaymentVerificationSummaryNode', id: string, createdAt: any, updatedAt: any, status: PaymentVerificationSummaryStatus, activationDate?: any | null, completionDate?: any | null } | null, paymentItems: { __typename?: 'PaymentNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'PaymentNodeEdge', node?: { __typename?: 'PaymentNode', id: string, status: PaymentStatus } | null } | null> }, reconciliationSummary?: { __typename?: 'ReconciliationSummaryNode', deliveredFully?: number | null, deliveredPartially?: number | null, notDelivered?: number | null, unsuccessful?: number | null, pending?: number | null, numberOfPayments?: number | null, reconciled?: number | null } | null, excludedHouseholds?: Array<{ __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null> | null, followUps: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, createdAt: any, paymentItems: { __typename?: 'PaymentNodeConnection', totalCount?: number | null } } | null } | null> }, sourcePaymentPlan?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null } | null } | null };
+export type PaymentPlanQuery = { __typename?: 'Query', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, version: any, unicefId?: string | null, status: PaymentPlanStatus, canCreateFollowUp?: boolean | null, backgroundActionStatus?: PaymentPlanBackgroundActionStatus | null, canCreatePaymentVerificationPlan?: boolean | null, availablePaymentRecordsCount?: number | null, bankReconciliationSuccess?: number | null, bankReconciliationError?: number | null, adminUrl?: string | null, currency: PaymentPlanCurrency, currencyName?: string | null, startDate?: any | null, endDate?: any | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, totalHouseholdsCount: number, totalIndividualsCount: number, totalEntitledQuantity?: number | null, totalDeliveredQuantity?: number | null, totalUndeliveredQuantity?: number | null, totalWithdrawnHouseholdsCount?: number | null, hasPaymentListExportFile?: boolean | null, hasFspDeliveryMechanismXlsxTemplate?: boolean | null, importedFileDate?: any | null, importedFileName?: string | null, totalEntitledQuantityUsd?: number | null, paymentsConflictsCount?: number | null, canSendToPaymentGateway?: boolean | null, canSplit?: boolean | null, exclusionReason: string, excludeHouseholdError: string, isFollowUp: boolean, unsuccessfulPaymentsCount?: number | null, createdBy: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string }, program: { __typename?: 'ProgramNode', id: string, name: string, caId?: string | null }, targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string }, approvalProcess: { __typename?: 'ApprovalProcessNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'ApprovalProcessNodeEdge', node?: { __typename?: 'ApprovalProcessNode', id: string, sentForApprovalDate?: any | null, sentForAuthorizationDate?: any | null, sentForFinanceReleaseDate?: any | null, approvalNumberRequired: number, authorizationNumberRequired: number, financeReleaseNumberRequired: number, rejectedOn?: string | null, sentForApprovalBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, sentForAuthorizationBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, sentForFinanceReleaseBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, actions?: { __typename?: 'FilteredActionsListNode', approval?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, authorization?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, financeRelease?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, reject?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null } | null } | null } | null> }, steficonRule?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null, deliveryMechanisms?: Array<{ __typename?: 'DeliveryMechanismPerPaymentPlanNode', id: string, name?: string | null, code?: string | null, order?: number | null, sentToPaymentGateway: boolean, chosenConfiguration?: string | null, fsp?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string, communicationChannel: FinancialServiceProviderCommunicationChannel, isPaymentGateway?: boolean | null } | null } | null> | null, splitChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, volumeByDeliveryMechanism?: Array<{ __typename?: 'VolumeByDeliveryMechanismNode', volume?: number | null, volumeUsd?: number | null, deliveryMechanism?: { __typename?: 'DeliveryMechanismPerPaymentPlanNode', id: string, name?: string | null, order?: number | null, fsp?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null } | null> | null, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, unicefId?: string | null, adminUrl?: string | null, status: PaymentVerificationPlanStatus, sampleSize?: number | null, receivedCount?: number | null, notReceivedCount?: number | null, respondedCount?: number | null, verificationChannel: PaymentVerificationPlanVerificationChannel, sampling: PaymentVerificationPlanSampling, receivedWithProblemsCount?: number | null, rapidProFlowId: string, confidenceInterval?: number | null, marginOfError?: number | null, activationDate?: any | null, completionDate?: any | null, excludedAdminAreasFilter?: Array<string | null> | null, sexFilter?: string | null, xlsxFileExporting: boolean, hasXlsxFile?: boolean | null, xlsxFileWasDownloaded?: boolean | null, xlsxFileImported: boolean, ageFilter?: { __typename?: 'AgeFilterObject', min?: number | null, max?: number | null } | null } | null } | null> } | null, paymentVerificationSummary?: { __typename?: 'PaymentVerificationSummaryNode', id: string, createdAt: any, updatedAt: any, status: PaymentVerificationSummaryStatus, activationDate?: any | null, completionDate?: any | null } | null, paymentItems: { __typename?: 'PaymentNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'PaymentNodeEdge', node?: { __typename?: 'PaymentNode', id: string, status: PaymentStatus } | null } | null> }, reconciliationSummary?: { __typename?: 'ReconciliationSummaryNode', deliveredFully?: number | null, deliveredPartially?: number | null, notDelivered?: number | null, unsuccessful?: number | null, pending?: number | null, numberOfPayments?: number | null, reconciled?: number | null } | null, excludedHouseholds?: Array<{ __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null> | null, followUps: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, createdAt: any, paymentItems: { __typename?: 'PaymentNodeConnection', totalCount?: number | null } } | null } | null> }, sourcePaymentPlan?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null } | null } | null };
 
 export type AllCashPlansQueryVariables = Exact<{
   program?: InputMaybe<Scalars['ID']['input']>;
@@ -10568,7 +10657,7 @@ export type PaymentRecordQueryVariables = Exact<{
 }>;
 
 
-export type PaymentRecordQuery = { __typename?: 'Query', paymentRecord?: { __typename?: 'PaymentRecordNode', id: string, status: PaymentRecordStatus, statusDate: any, caId?: string | null, caHashId?: any | null, registrationCaId?: string | null, fullName: string, distributionModality: string, totalPersonsCovered: number, currency: string, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveryDate?: any | null, entitlementCardIssueDate?: any | null, entitlementCardNumber?: string | null, deliveredQuantityUsd?: number | null, deliveryType?: PaymentRecordDeliveryType | null, transactionReferenceId?: string | null, targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string }, verification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, statusDate?: any | null, receivedAmount?: number | null, isManuallyEditable?: boolean | null, adminUrl?: string | null } | null, household: { __typename?: 'HouseholdNode', id: string, size?: number | null, status?: string | null, unicefId?: string | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, phoneNo: string, phoneNoAlternative: string, phoneNoValid?: boolean | null, phoneNoAlternativeValid?: boolean | null, fullName: string } | null }, parent?: { __typename?: 'CashPlanNode', id: string, unicefId?: string | null, caId?: string | null, program: { __typename?: 'ProgramNode', id: string, name: string }, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, verificationChannel: PaymentVerificationPlanVerificationChannel } | null } | null> } | null } | null, serviceProvider: { __typename?: 'ServiceProviderNode', id: string, fullName?: string | null, shortName?: string | null } } | null };
+export type PaymentRecordQuery = { __typename?: 'Query', paymentRecord?: { __typename?: 'PaymentRecordNode', id: string, status: PaymentRecordStatus, statusDate: any, caId?: string | null, caHashId?: any | null, registrationCaId?: string | null, fullName: string, distributionModality: string, totalPersonsCovered: number, currency: string, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveryDate?: any | null, entitlementCardIssueDate?: any | null, entitlementCardNumber?: string | null, deliveredQuantityUsd?: number | null, transactionReferenceId?: string | null, targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string }, verification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, statusDate?: any | null, receivedAmount?: number | null, isManuallyEditable?: boolean | null, adminUrl?: string | null } | null, household: { __typename?: 'HouseholdNode', id: string, size?: number | null, status?: string | null, unicefId?: string | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, phoneNo: string, phoneNoAlternative: string, phoneNoValid?: boolean | null, phoneNoAlternativeValid?: boolean | null, fullName: string } | null }, parent?: { __typename?: 'CashPlanNode', id: string, unicefId?: string | null, caId?: string | null, program: { __typename?: 'ProgramNode', id: string, name: string }, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, verificationChannel: PaymentVerificationPlanVerificationChannel } | null } | null> } | null } | null, deliveryType?: { __typename?: 'DeliveryMechanismNode', name?: string | null } | null, serviceProvider: { __typename?: 'ServiceProviderNode', id: string, fullName?: string | null, shortName?: string | null } } | null };
 
 export type AllPaymentVerificationLogEntriesQueryVariables = Exact<{
   businessArea: Scalars['String']['input'];
@@ -12146,7 +12235,9 @@ export const PaymentRecordDetailsFragmentDoc = gql`
   deliveredQuantity
   deliveredQuantityUsd
   deliveryDate
-  deliveryType
+  deliveryType {
+    name
+  }
   entitlementCardIssueDate
   entitlementCardNumber
   transactionReferenceId
@@ -18823,7 +18914,9 @@ export const PaymentDocument = gql`
       }
     }
     deliveredQuantityUsd
-    deliveryType
+    deliveryType {
+      name
+    }
     transactionReferenceId
     serviceProvider {
       id
@@ -19012,6 +19105,7 @@ export const PaymentPlanDocument = gql`
     deliveryMechanisms {
       id
       name
+      code
       order
       sentToPaymentGateway
       chosenConfiguration
@@ -20032,7 +20126,9 @@ export const PaymentRecordDocument = gql`
       }
     }
     deliveredQuantityUsd
-    deliveryType
+    deliveryType {
+      name
+    }
     transactionReferenceId
     serviceProvider {
       id
@@ -24071,7 +24167,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping of interface types */
 export type ResolversInterfaceTypes<RefType extends Record<string, unknown>> = {
-  Node: ( ApprovalProcessNode ) | ( AreaNode ) | ( AreaTypeNode ) | ( BankAccountInfoNode ) | ( BusinessAreaNode ) | ( CashPlanNode ) | ( CommunicationMessageNode ) | ( CommunicationMessageRecipientMapNode ) | ( DataCollectingTypeNode ) | ( DeliveryMechanismNode ) | ( DocumentNode ) | ( FeedbackMessageNode ) | ( FeedbackNode ) | ( FinancialServiceProviderNode ) | ( FinancialServiceProviderXlsxTemplateNode ) | ( GrievanceDocumentNode ) | ( GrievanceTicketNode ) | ( HouseholdNode ) | ( ImportDataNode ) | ( ImportedDocumentNode ) | ( ImportedHouseholdNode ) | ( ImportedIndividualIdentityNode ) | ( ImportedIndividualNode ) | ( IndividualIdentityNode ) | ( IndividualNode ) | ( KoboImportDataNode ) | ( LogEntryNode ) | ( PaymentHouseholdSnapshotNode ) | ( PaymentNode ) | ( PaymentPlanNode ) | ( PaymentRecordNode ) | ( PaymentVerificationLogEntryNode ) | ( PaymentVerificationNode ) | ( PaymentVerificationPlanNode ) | ( PaymentVerificationSummaryNode ) | ( PeriodicFieldNode ) | ( ProgramNode ) | ( RecipientNode ) | ( RegistrationDataImportDatahubNode ) | ( RegistrationDataImportNode ) | ( ReportNode ) | ( RuleCommitNode ) | ( SanctionListIndividualAliasNameNode ) | ( SanctionListIndividualCountriesNode ) | ( SanctionListIndividualDateOfBirthNode ) | ( SanctionListIndividualDocumentNode ) | ( SanctionListIndividualNationalitiesNode ) | ( SanctionListIndividualNode ) | ( ServiceProviderNode ) | ( SteficonRuleNode ) | ( SurveyNode ) | ( TargetPopulationNode ) | ( TicketAddIndividualDetailsNode ) | ( TicketComplaintDetailsNode ) | ( TicketDeleteHouseholdDetailsNode ) | ( TicketDeleteIndividualDetailsNode ) | ( TicketHouseholdDataUpdateDetailsNode ) | ( TicketIndividualDataUpdateDetailsNode ) | ( TicketNeedsAdjudicationDetailsNode ) | ( TicketNegativeFeedbackDetailsNode ) | ( TicketNoteNode ) | ( TicketPaymentVerificationDetailsNode ) | ( TicketPositiveFeedbackDetailsNode ) | ( TicketReferralDetailsNode ) | ( TicketSensitiveDetailsNode ) | ( TicketSystemFlaggingDetailsNode ) | ( UserBusinessAreaNode ) | ( UserNode ) | ( VolumeByDeliveryMechanismNode );
+  Node: ( ApprovalProcessNode ) | ( AreaNode ) | ( AreaTypeNode ) | ( BankAccountInfoNode ) | ( BusinessAreaNode ) | ( CashPlanNode ) | ( CommunicationMessageNode ) | ( CommunicationMessageRecipientMapNode ) | ( DataCollectingTypeNode ) | ( DeliveryMechanismNode ) | ( DeliveryMechanismPerPaymentPlanNode ) | ( DocumentNode ) | ( FeedbackMessageNode ) | ( FeedbackNode ) | ( FinancialServiceProviderNode ) | ( FinancialServiceProviderXlsxTemplateNode ) | ( GrievanceDocumentNode ) | ( GrievanceTicketNode ) | ( HouseholdNode ) | ( ImportDataNode ) | ( ImportedDocumentNode ) | ( ImportedHouseholdNode ) | ( ImportedIndividualIdentityNode ) | ( ImportedIndividualNode ) | ( IndividualIdentityNode ) | ( IndividualNode ) | ( KoboImportDataNode ) | ( LogEntryNode ) | ( PaymentHouseholdSnapshotNode ) | ( PaymentNode ) | ( PaymentPlanNode ) | ( PaymentRecordNode ) | ( PaymentVerificationLogEntryNode ) | ( PaymentVerificationNode ) | ( PaymentVerificationPlanNode ) | ( PaymentVerificationSummaryNode ) | ( PeriodicFieldNode ) | ( ProgramNode ) | ( RecipientNode ) | ( RegistrationDataImportDatahubNode ) | ( RegistrationDataImportNode ) | ( ReportNode ) | ( RuleCommitNode ) | ( SanctionListIndividualAliasNameNode ) | ( SanctionListIndividualCountriesNode ) | ( SanctionListIndividualDateOfBirthNode ) | ( SanctionListIndividualDocumentNode ) | ( SanctionListIndividualNationalitiesNode ) | ( SanctionListIndividualNode ) | ( ServiceProviderNode ) | ( SteficonRuleNode ) | ( SurveyNode ) | ( TargetPopulationNode ) | ( TicketAddIndividualDetailsNode ) | ( TicketComplaintDetailsNode ) | ( TicketDeleteHouseholdDetailsNode ) | ( TicketDeleteIndividualDetailsNode ) | ( TicketHouseholdDataUpdateDetailsNode ) | ( TicketIndividualDataUpdateDetailsNode ) | ( TicketNeedsAdjudicationDetailsNode ) | ( TicketNegativeFeedbackDetailsNode ) | ( TicketNoteNode ) | ( TicketPaymentVerificationDetailsNode ) | ( TicketPositiveFeedbackDetailsNode ) | ( TicketReferralDetailsNode ) | ( TicketSensitiveDetailsNode ) | ( TicketSystemFlaggingDetailsNode ) | ( UserBusinessAreaNode ) | ( UserNode ) | ( VolumeByDeliveryMechanismNode );
 };
 
 /** Mapping between all available schema types and the resolvers types */
@@ -24196,7 +24292,11 @@ export type ResolversTypes = {
   DeliveryMechanismNode: ResolverTypeWrapper<DeliveryMechanismNode>;
   DeliveryMechanismNodeConnection: ResolverTypeWrapper<DeliveryMechanismNodeConnection>;
   DeliveryMechanismNodeEdge: ResolverTypeWrapper<DeliveryMechanismNodeEdge>;
-  DeliveryMechanismPerPaymentPlanDeliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism;
+  DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice: DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice;
+  DeliveryMechanismPerPaymentPlanNode: ResolverTypeWrapper<DeliveryMechanismPerPaymentPlanNode>;
+  DeliveryMechanismPerPaymentPlanNodeConnection: ResolverTypeWrapper<DeliveryMechanismPerPaymentPlanNodeConnection>;
+  DeliveryMechanismPerPaymentPlanNodeEdge: ResolverTypeWrapper<DeliveryMechanismPerPaymentPlanNodeEdge>;
+  DeliveryMechanismTransferType: DeliveryMechanismTransferType;
   DiscardPaymentVerificationPlan: ResolverTypeWrapper<DiscardPaymentVerificationPlan>;
   DjangoDebug: ResolverTypeWrapper<DjangoDebug>;
   DjangoDebugSQL: ResolverTypeWrapper<DjangoDebugSql>;
@@ -24357,7 +24457,7 @@ export type ResolversTypes = {
   PartnerRoleNode: ResolverTypeWrapper<PartnerRoleNode>;
   PartnerType: ResolverTypeWrapper<PartnerType>;
   PaymentConflictDataNode: ResolverTypeWrapper<PaymentConflictDataNode>;
-  PaymentDeliveryType: PaymentDeliveryType;
+  PaymentDeliveryTypeChoice: PaymentDeliveryTypeChoice;
   PaymentDetailsApproveMutation: ResolverTypeWrapper<PaymentDetailsApproveMutation>;
   PaymentHouseholdSnapshotNode: ResolverTypeWrapper<PaymentHouseholdSnapshotNode>;
   PaymentNode: ResolverTypeWrapper<PaymentNode>;
@@ -24370,7 +24470,7 @@ export type ResolversTypes = {
   PaymentPlanNodeEdge: ResolverTypeWrapper<PaymentPlanNodeEdge>;
   PaymentPlanStatus: PaymentPlanStatus;
   PaymentRecordAndPaymentNode: ResolverTypeWrapper<PaymentRecordAndPaymentNode>;
-  PaymentRecordDeliveryType: PaymentRecordDeliveryType;
+  PaymentRecordDeliveryTypeChoice: PaymentRecordDeliveryTypeChoice;
   PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus;
   PaymentRecordNode: ResolverTypeWrapper<PaymentRecordNode>;
   PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>;
@@ -24715,6 +24815,9 @@ export type ResolversParentTypes = {
   DeliveryMechanismNode: DeliveryMechanismNode;
   DeliveryMechanismNodeConnection: DeliveryMechanismNodeConnection;
   DeliveryMechanismNodeEdge: DeliveryMechanismNodeEdge;
+  DeliveryMechanismPerPaymentPlanNode: DeliveryMechanismPerPaymentPlanNode;
+  DeliveryMechanismPerPaymentPlanNodeConnection: DeliveryMechanismPerPaymentPlanNodeConnection;
+  DeliveryMechanismPerPaymentPlanNodeEdge: DeliveryMechanismPerPaymentPlanNodeEdge;
   DiscardPaymentVerificationPlan: DiscardPaymentVerificationPlan;
   DjangoDebug: DjangoDebug;
   DjangoDebugSQL: DjangoDebugSql;
@@ -25759,21 +25862,20 @@ export type DeliveredQuantityNodeResolvers<ContextType = any, ParentType extends
 };
 
 export type DeliveryMechanismNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeliveryMechanismNode'] = ResolversParentTypes['DeliveryMechanismNode']> = {
-  chosenConfiguration?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  code?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  createdBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>;
-  deliveryMechanism?: Resolver<Maybe<ResolversTypes['DeliveryMechanismPerPaymentPlanDeliveryMechanism']>, ParentType, ContextType>;
-  deliveryMechanismOrder?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>;
-  fsp?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>;
+  deliverymechanismperpaymentplanSet?: Resolver<ResolversTypes['DeliveryMechanismPerPaymentPlanNodeConnection'], ParentType, ContextType, Partial<DeliveryMechanismNodeDeliverymechanismperpaymentplanSetArgs>>;
+  financialserviceproviderSet?: Resolver<ResolversTypes['FinancialServiceProviderNodeConnection'], ParentType, ContextType, Partial<DeliveryMechanismNodeFinancialserviceproviderSetArgs>>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  isActive?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  order?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  paymentPlan?: Resolver<ResolversTypes['PaymentPlanNode'], ParentType, ContextType>;
-  sentBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
-  sentDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  sentToPaymentGateway?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  status?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  optionalFields?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  paymentGatewayId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, Partial<DeliveryMechanismNodePaymentSetArgs>>;
+  paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, Partial<DeliveryMechanismNodePaymentrecordSetArgs>>;
+  requiredFields?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  transferType?: Resolver<ResolversTypes['DeliveryMechanismTransferType'], ParentType, ContextType>;
+  uniqueFields?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -25789,6 +25891,42 @@ export type DeliveryMechanismNodeConnectionResolvers<ContextType = any, ParentTy
 export type DeliveryMechanismNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeliveryMechanismNodeEdge'] = ResolversParentTypes['DeliveryMechanismNodeEdge']> = {
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   node?: Resolver<Maybe<ResolversTypes['DeliveryMechanismNode']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type DeliveryMechanismPerPaymentPlanNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeliveryMechanismPerPaymentPlanNode'] = ResolversParentTypes['DeliveryMechanismPerPaymentPlanNode']> = {
+  chosenConfiguration?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  code?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>;
+  deliveryMechanism?: Resolver<ResolversTypes['DeliveryMechanismNode'], ParentType, ContextType>;
+  deliveryMechanismChoice?: Resolver<Maybe<ResolversTypes['DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice']>, ParentType, ContextType>;
+  deliveryMechanismOrder?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>;
+  fsp?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  order?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  paymentPlan?: Resolver<ResolversTypes['PaymentPlanNode'], ParentType, ContextType>;
+  sentBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
+  sentDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  sentToPaymentGateway?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type DeliveryMechanismPerPaymentPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeliveryMechanismPerPaymentPlanNodeConnection'] = ResolversParentTypes['DeliveryMechanismPerPaymentPlanNodeConnection']> = {
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edges?: Resolver<Array<Maybe<ResolversTypes['DeliveryMechanismPerPaymentPlanNodeEdge']>>, ParentType, ContextType>;
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type DeliveryMechanismPerPaymentPlanNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeliveryMechanismPerPaymentPlanNodeEdge'] = ResolversParentTypes['DeliveryMechanismPerPaymentPlanNodeEdge']> = {
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  node?: Resolver<Maybe<ResolversTypes['DeliveryMechanismPerPaymentPlanNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -26013,8 +26151,9 @@ export type FinancialServiceProviderNodeResolvers<ContextType = any, ParentType 
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
   dataTransferConfiguration?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>;
-  deliveryMechanisms?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
-  deliveryMechanismsPerPaymentPlan?: Resolver<ResolversTypes['DeliveryMechanismNodeConnection'], ParentType, ContextType, Partial<FinancialServiceProviderNodeDeliveryMechanismsPerPaymentPlanArgs>>;
+  deliveryMechanisms?: Resolver<ResolversTypes['DeliveryMechanismNodeConnection'], ParentType, ContextType, Partial<FinancialServiceProviderNodeDeliveryMechanismsArgs>>;
+  deliveryMechanismsChoices?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
+  deliveryMechanismsPerPaymentPlan?: Resolver<ResolversTypes['DeliveryMechanismPerPaymentPlanNodeConnection'], ParentType, ContextType, Partial<FinancialServiceProviderNodeDeliveryMechanismsPerPaymentPlanArgs>>;
   distributionLimit?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -27152,7 +27291,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'ApprovalProcessNode' | 'AreaNode' | 'AreaTypeNode' | 'BankAccountInfoNode' | 'BusinessAreaNode' | 'CashPlanNode' | 'CommunicationMessageNode' | 'CommunicationMessageRecipientMapNode' | 'DataCollectingTypeNode' | 'DeliveryMechanismNode' | 'DocumentNode' | 'FeedbackMessageNode' | 'FeedbackNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'GrievanceDocumentNode' | 'GrievanceTicketNode' | 'HouseholdNode' | 'ImportDataNode' | 'ImportedDocumentNode' | 'ImportedHouseholdNode' | 'ImportedIndividualIdentityNode' | 'ImportedIndividualNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'KoboImportDataNode' | 'LogEntryNode' | 'PaymentHouseholdSnapshotNode' | 'PaymentNode' | 'PaymentPlanNode' | 'PaymentRecordNode' | 'PaymentVerificationLogEntryNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'PeriodicFieldNode' | 'ProgramNode' | 'RecipientNode' | 'RegistrationDataImportDatahubNode' | 'RegistrationDataImportNode' | 'ReportNode' | 'RuleCommitNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualDateOfBirthNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualNode' | 'ServiceProviderNode' | 'SteficonRuleNode' | 'SurveyNode' | 'TargetPopulationNode' | 'TicketAddIndividualDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketNoteNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'UserBusinessAreaNode' | 'UserNode' | 'VolumeByDeliveryMechanismNode', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'ApprovalProcessNode' | 'AreaNode' | 'AreaTypeNode' | 'BankAccountInfoNode' | 'BusinessAreaNode' | 'CashPlanNode' | 'CommunicationMessageNode' | 'CommunicationMessageRecipientMapNode' | 'DataCollectingTypeNode' | 'DeliveryMechanismNode' | 'DeliveryMechanismPerPaymentPlanNode' | 'DocumentNode' | 'FeedbackMessageNode' | 'FeedbackNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'GrievanceDocumentNode' | 'GrievanceTicketNode' | 'HouseholdNode' | 'ImportDataNode' | 'ImportedDocumentNode' | 'ImportedHouseholdNode' | 'ImportedIndividualIdentityNode' | 'ImportedIndividualNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'KoboImportDataNode' | 'LogEntryNode' | 'PaymentHouseholdSnapshotNode' | 'PaymentNode' | 'PaymentPlanNode' | 'PaymentRecordNode' | 'PaymentVerificationLogEntryNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'PeriodicFieldNode' | 'ProgramNode' | 'RecipientNode' | 'RegistrationDataImportDatahubNode' | 'RegistrationDataImportNode' | 'ReportNode' | 'RuleCommitNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualDateOfBirthNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualNode' | 'ServiceProviderNode' | 'SteficonRuleNode' | 'SurveyNode' | 'TargetPopulationNode' | 'TicketAddIndividualDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketNoteNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'UserBusinessAreaNode' | 'UserNode' | 'VolumeByDeliveryMechanismNode', ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
 };
 
@@ -27286,7 +27425,8 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   deliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   deliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   deliveryDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
-  deliveryType?: Resolver<Maybe<ResolversTypes['PaymentDeliveryType']>, ParentType, ContextType>;
+  deliveryType?: Resolver<Maybe<ResolversTypes['DeliveryMechanismNode']>, ParentType, ContextType>;
+  deliveryTypeChoice?: Resolver<Maybe<ResolversTypes['PaymentDeliveryTypeChoice']>, ParentType, ContextType>;
   distributionModality?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   entitlementDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   entitlementQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
@@ -27361,7 +27501,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   createdBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>;
   currency?: Resolver<ResolversTypes['PaymentPlanCurrency'], ParentType, ContextType>;
   currencyName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  deliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeliveryMechanismNode']>>>, ParentType, ContextType>;
+  deliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeliveryMechanismPerPaymentPlanNode']>>>, ParentType, ContextType>;
   dispersionEndDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   dispersionStartDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   endDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
@@ -27455,7 +27595,8 @@ export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends Res
   deliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   deliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   deliveryDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
-  deliveryType?: Resolver<Maybe<ResolversTypes['PaymentRecordDeliveryType']>, ParentType, ContextType>;
+  deliveryType?: Resolver<Maybe<ResolversTypes['DeliveryMechanismNode']>, ParentType, ContextType>;
+  deliveryTypeChoice?: Resolver<Maybe<ResolversTypes['PaymentRecordDeliveryTypeChoice']>, ParentType, ContextType>;
   distributionModality?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   entitlementCardIssueDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   entitlementCardNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -29112,7 +29253,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   availableForExport?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   businessAreas?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNodeConnection']>, ParentType, ContextType, Partial<UserNodeBusinessAreasArgs>>;
   changedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, Partial<UserNodeChangedTargetPopulationsArgs>>;
-  createdDeliveryMechanisms?: Resolver<ResolversTypes['DeliveryMechanismNodeConnection'], ParentType, ContextType, Partial<UserNodeCreatedDeliveryMechanismsArgs>>;
+  createdDeliveryMechanisms?: Resolver<ResolversTypes['DeliveryMechanismPerPaymentPlanNodeConnection'], ParentType, ContextType, Partial<UserNodeCreatedDeliveryMechanismsArgs>>;
   createdFinancialServiceProviderXlsxTemplates?: Resolver<ResolversTypes['FinancialServiceProviderXlsxTemplateNodeConnection'], ParentType, ContextType, Partial<UserNodeCreatedFinancialServiceProviderXlsxTemplatesArgs>>;
   createdFinancialServiceProviders?: Resolver<ResolversTypes['FinancialServiceProviderNodeConnection'], ParentType, ContextType, Partial<UserNodeCreatedFinancialServiceProvidersArgs>>;
   createdPaymentPlans?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, Partial<UserNodeCreatedPaymentPlansArgs>>;
@@ -29141,7 +29282,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   partnerRoles?: Resolver<Maybe<Array<Maybe<ResolversTypes['PartnerRoleNode']>>>, ParentType, ContextType>;
   registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, Partial<UserNodeRegistrationDataImportsArgs>>;
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, Partial<UserNodeReportsArgs>>;
-  sentDeliveryMechanisms?: Resolver<ResolversTypes['DeliveryMechanismNodeConnection'], ParentType, ContextType, Partial<UserNodeSentDeliveryMechanismsArgs>>;
+  sentDeliveryMechanisms?: Resolver<ResolversTypes['DeliveryMechanismPerPaymentPlanNodeConnection'], ParentType, ContextType, Partial<UserNodeSentDeliveryMechanismsArgs>>;
   status?: Resolver<ResolversTypes['UserStatus'], ParentType, ContextType>;
   surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, Partial<UserNodeSurveysArgs>>;
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, Partial<UserNodeTargetPopulationsArgs>>;
@@ -29175,7 +29316,7 @@ export type UserRoleNodeResolvers<ContextType = any, ParentType extends Resolver
 };
 
 export type VolumeByDeliveryMechanismNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['VolumeByDeliveryMechanismNode'] = ResolversParentTypes['VolumeByDeliveryMechanismNode']> = {
-  deliveryMechanism?: Resolver<Maybe<ResolversTypes['DeliveryMechanismNode']>, ParentType, ContextType>;
+  deliveryMechanism?: Resolver<Maybe<ResolversTypes['DeliveryMechanismPerPaymentPlanNode']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   volume?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   volumeUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
@@ -29307,6 +29448,9 @@ export type Resolvers<ContextType = any> = {
   DeliveryMechanismNode?: DeliveryMechanismNodeResolvers<ContextType>;
   DeliveryMechanismNodeConnection?: DeliveryMechanismNodeConnectionResolvers<ContextType>;
   DeliveryMechanismNodeEdge?: DeliveryMechanismNodeEdgeResolvers<ContextType>;
+  DeliveryMechanismPerPaymentPlanNode?: DeliveryMechanismPerPaymentPlanNodeResolvers<ContextType>;
+  DeliveryMechanismPerPaymentPlanNodeConnection?: DeliveryMechanismPerPaymentPlanNodeConnectionResolvers<ContextType>;
+  DeliveryMechanismPerPaymentPlanNodeEdge?: DeliveryMechanismPerPaymentPlanNodeEdgeResolvers<ContextType>;
   DiscardPaymentVerificationPlan?: DiscardPaymentVerificationPlanResolvers<ContextType>;
   DjangoDebug?: DjangoDebugResolvers<ContextType>;
   DjangoDebugSQL?: DjangoDebugSqlResolvers<ContextType>;

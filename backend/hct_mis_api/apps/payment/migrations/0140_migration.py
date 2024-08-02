@@ -19,66 +19,43 @@ def data_migration_financialserviceprovider_delivery_mechanisms(apps, schema_edi
 def data_migration_deliverymechanismdata_delivery_mechanism(apps, schema_editor):
     DeliveryMechanismData = apps.get_model("payment", "DeliveryMechanismData")
     DeliveryMechanism = apps.get_model("payment", "DeliveryMechanism")
-    dms = list(DeliveryMechanism.objects.all())
 
-    dmds = DeliveryMechanismData.objects.exclude(delivery_mechanism_choice__isnull=True)
-    for dmd in dmds:
-        dmd_dm = [dm for dm in dms if dm.name == dmd.delivery_mechanism_choice][0]
-        dmd.delivery_mechanism = dmd_dm
-
-    DeliveryMechanismData.objects.bulk_update(dmds, ["delivery_mechanism"])
+    for dm in DeliveryMechanism.objects.all():
+        DeliveryMechanismData.objects.filter(delivery_mechanism_choice=dm.name).update(delivery_mechanism=dm)
 
 
 def data_migration_deliverymechanismperpaymentplan_delivery_mechanism(apps, schema_editor):
     DeliveryMechanismPerPaymentPlan = apps.get_model("payment", "DeliveryMechanismPerPaymentPlan")
     DeliveryMechanism = apps.get_model("payment", "DeliveryMechanism")
-    dms = list(DeliveryMechanism.objects.all())
 
-    dmppps = DeliveryMechanismPerPaymentPlan.objects.exclude(delivery_mechanism_choice__isnull=True)
-    for dmppp in dmppps:
-        dmppp_dm = [dm for dm in dms if dm.name == dmppp.delivery_mechanism_choice][0]
-        dmppp.delivery_mechanism = dmppp_dm
-
-    DeliveryMechanismPerPaymentPlan.objects.bulk_update(dmppps, ["delivery_mechanism"])
+    for dm in DeliveryMechanism.objects.all():
+        DeliveryMechanismPerPaymentPlan.objects.filter(delivery_mechanism_choice=dm.name).update(delivery_mechanism=dm)
 
 
 def data_migration_fspxlsxtemplateperdeliverymechanism_delivery_mechanism(apps, schema_editor):
     FspXlsxTemplatePerDeliveryMechanism = apps.get_model("payment", "FspXlsxTemplatePerDeliveryMechanism")
     DeliveryMechanism = apps.get_model("payment", "DeliveryMechanism")
-    dms = list(DeliveryMechanism.objects.all())
 
-    fspxtdms = FspXlsxTemplatePerDeliveryMechanism.objects.exclude(delivery_mechanism_choice__isnull=True)
-    for fspxtdm in fspxtdms:
-        fspxtdm_dm = [dm for dm in dms if dm.name == fspxtdm.delivery_mechanism_choice][0]
-        fspxtdm.delivery_mechanism = fspxtdm_dm
-
-    FspXlsxTemplatePerDeliveryMechanism.objects.bulk_update(fspxtdms, ["delivery_mechanism"])
+    for dm in DeliveryMechanism.objects.all():
+        FspXlsxTemplatePerDeliveryMechanism.objects.filter(delivery_mechanism_choice=dm.name).update(
+            delivery_mechanism=dm
+        )
 
 
 def data_migration_payment_delivery_type(apps, schema_editor):
     Payment = apps.get_model("payment", "Payment")
     DeliveryMechanism = apps.get_model("payment", "DeliveryMechanism")
-    dms = list(DeliveryMechanism.objects.all())
 
-    payments = Payment.objects.exclude(delivery_type_choice__isnull=True)
-    for payment in payments:
-        payment_dm = [dm for dm in dms if dm.name == payment.delivery_type_choice][0]
-        payment.delivery_type = payment_dm
-
-    Payment.objects.bulk_update(payments, ["delivery_type"])
+    for dm in DeliveryMechanism.objects.all():
+        Payment.objects.filter(delivery_type_choice=dm.name).update(delivery_type=dm)
 
 
 def data_migration_payment_record_delivery_type(apps, schema_editor):
     PaymentRecord = apps.get_model("payment", "PaymentRecord")
     DeliveryMechanism = apps.get_model("payment", "DeliveryMechanism")
-    dms = list(DeliveryMechanism.objects.all())
 
-    payment_records = PaymentRecord.objects.exclude(delivery_type_choice__isnull=True)
-    for payment_record in payment_records:
-        payment_record_dm = [dm for dm in dms if dm.name == payment_record.delivery_type_choice][0]
-        payment_record.delivery_type = payment_record_dm
-
-    PaymentRecord.objects.bulk_update(payment_records, ["delivery_type"])
+    for dm in DeliveryMechanism.objects.all():
+        PaymentRecord.objects.filter(delivery_type_choice=dm.name).update(delivery_type=dm)
 
 
 class Migration(migrations.Migration):
@@ -101,17 +78,31 @@ class Migration(migrations.Migration):
             new_name="delivery_mechanisms_choices",
         ),
         migrations.AlterField(
-            model_name='financialserviceprovider',
-            name='delivery_mechanisms_choices',
-            field=hct_mis_api.apps.account.models.HorizontalChoiceArrayField(base_field=models.CharField(
-                choices=[('Cardless cash withdrawal', 'Cardless cash withdrawal'), ('Cash', 'Cash'),
-                         ('Cash by FSP', 'Cash by FSP'), ('Cheque', 'Cheque'), ('Deposit to Card', 'Deposit to Card'),
-                         ('Mobile Money', 'Mobile Money'), ('Pre-paid card', 'Pre-paid card'), ('Referral', 'Referral'),
-                         ('Transfer', 'Transfer'), ('Transfer to Account', 'Transfer to Account'),
-                         ('Voucher', 'Voucher'), ('ATM Card', 'ATM Card'),
-                         ('Cash over the counter', 'Cash over the counter'),
-                         ('Transfer to Digital Wallet', 'Transfer to Digital Wallet')], max_length=32), null=True,
-                                                                             size=None),
+            model_name="financialserviceprovider",
+            name="delivery_mechanisms_choices",
+            field=hct_mis_api.apps.account.models.HorizontalChoiceArrayField(
+                base_field=models.CharField(
+                    choices=[
+                        ("Cardless cash withdrawal", "Cardless cash withdrawal"),
+                        ("Cash", "Cash"),
+                        ("Cash by FSP", "Cash by FSP"),
+                        ("Cheque", "Cheque"),
+                        ("Deposit to Card", "Deposit to Card"),
+                        ("Mobile Money", "Mobile Money"),
+                        ("Pre-paid card", "Pre-paid card"),
+                        ("Referral", "Referral"),
+                        ("Transfer", "Transfer"),
+                        ("Transfer to Account", "Transfer to Account"),
+                        ("Voucher", "Voucher"),
+                        ("ATM Card", "ATM Card"),
+                        ("Cash over the counter", "Cash over the counter"),
+                        ("Transfer to Digital Wallet", "Transfer to Digital Wallet"),
+                    ],
+                    max_length=32,
+                ),
+                null=True,
+                size=None,
+            ),
         ),
         migrations.AddField(
             model_name="financialserviceprovider",
@@ -195,8 +186,8 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AlterUniqueTogether(
-            name='fspxlsxtemplateperdeliverymechanism',
-            unique_together={('financial_service_provider', 'delivery_mechanism')},
+            name="fspxlsxtemplateperdeliverymechanism",
+            unique_together={("financial_service_provider", "delivery_mechanism")},
         ),
         migrations.RenameField(
             model_name="payment",
