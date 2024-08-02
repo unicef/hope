@@ -48,7 +48,7 @@ class TestDeliveryMechanismDataModel(TestCase):
 
     def test_str(self) -> None:
         dmd = DeliveryMechanismDataFactory(individual=self.ind)
-        self.assertEqual(str(dmd), f"[{dmd.id}] {dmd.individual} - {dmd.delivery_mechanism}")
+        self.assertEqual(str(dmd), f"{dmd.individual} - {dmd.delivery_mechanism}")
 
     def test_get_associated_object(self) -> None:
         dmd = DeliveryMechanismDataFactory(data={"test": "test"}, individual=self.ind)
