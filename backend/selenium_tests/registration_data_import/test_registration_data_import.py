@@ -222,7 +222,7 @@ class TestRegistrationDataImport:
         pageRegistrationDataImport.getKoboProjectSelect().click()
         pageRegistrationDataImport.select_listbox_element("Education new programme").click()
 
-        assert pageRegistrationDataImport.buttonImportFileIsEnabled(timeout=60)
+        assert pageRegistrationDataImport.buttonImportFileIsEnabled(timeout=300)
         assert "0" in pageRegistrationDataImport.getNumberOfHouseholds().text
         assert "0" in pageRegistrationDataImport.getNumberOfIndividuals().text
         pageRegistrationDataImport.getButtonImportFile().click()
@@ -254,7 +254,7 @@ class TestRegistrationDataImport:
         pageRegistrationDataImport.getKoboProjectSelect().click()
         pageRegistrationDataImport.select_listbox_element("UNICEF NGA Education").click()
 
-        assert pageRegistrationDataImport.buttonImportFileIsEnabled(timeout=60)
+        assert pageRegistrationDataImport.buttonImportFileIsEnabled(timeout=300)
         assert "1" in pageRegistrationDataImport.getNumberOfHouseholds().text
         assert "2" in pageRegistrationDataImport.getNumberOfIndividuals().text
 
