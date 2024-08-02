@@ -834,8 +834,12 @@ class TestGrievanceTickets:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getTicketListRow()[0].click()
+        pageGrievanceDetailsPage.getButtonAssignToMe().click()
+        pageGrievanceDetailsPage.getButtonSetInProgress().click()
+        pageGrievanceDetailsPage.driver.refresh()
         pageGrievanceDetailsPage.getExpandCollapseButton().click()
-        pageGrievanceDetailsPage.screenshot("1")
+        assert "Assigned" in pageGrievanceDetailsPage.getLogRow()[0].text
+        assert "In Progress" in pageGrievanceDetailsPage.getLogRow()[0].text
 
     def test_grievance_tickets_go_to_admin_panel_button(
             self,

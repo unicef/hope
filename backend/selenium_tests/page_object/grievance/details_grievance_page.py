@@ -140,6 +140,7 @@ class GrievanceDetailsPage(BaseComponents):
     headingCellChange_to = 'div[data-cy="heading-cell-change_to"]'
     pagination = 'div[data-cy="pagination"]'
     buttonAdmin = 'div[data-cy="button-admin"]'
+    logRow = 'div[data-cy="log-row"]'
 
     # Texts
     textTitle = "Ticket ID: "
@@ -604,3 +605,7 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getButtonAdmin(self) -> WebElement:
         return self.wait_for(self.buttonAdmin)
+
+    def getLogRow(self) -> [WebElement]:
+        self.wait_for(self.logRow)
+        return self.get_elements(self.logRow)
