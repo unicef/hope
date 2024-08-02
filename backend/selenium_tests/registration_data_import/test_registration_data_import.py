@@ -228,7 +228,6 @@ class TestRegistrationDataImport:
         pageRegistrationDataImport.getButtonImportFile().click()
         pageRegistrationDataImport.checkAlert("Cannot import empty form")
 
-    @pytest.mark.xfail(reason="Unskip after fix: 210576")
     @pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["elasticsearch"])
     def test_import_kobo_form(
         self,
