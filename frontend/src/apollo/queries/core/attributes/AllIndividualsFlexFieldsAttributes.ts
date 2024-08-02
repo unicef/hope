@@ -13,6 +13,11 @@ export const AllIndividualsFlexFieldsAttributes = gql`
         language
         label
       }
+      pduData {
+        id
+        numberOfRounds
+        roundsNames
+      }
       labelEn
       hint
       choices {

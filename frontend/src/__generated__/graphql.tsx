@@ -1067,6 +1067,7 @@ export type CopyProgramInput = {
   name?: InputMaybe<Scalars['String']['input']>;
   partnerAccess?: InputMaybe<Scalars['String']['input']>;
   partners?: InputMaybe<Array<InputMaybe<ProgramPartnerThroughInput>>>;
+  pduFields?: InputMaybe<Array<InputMaybe<PduFieldInput>>>;
   populationGoal?: InputMaybe<Scalars['Int']['input']>;
   programmeCode?: InputMaybe<Scalars['String']['input']>;
   sector?: InputMaybe<Scalars['String']['input']>;
@@ -1241,6 +1242,7 @@ export type CreateProgramInput = {
   name?: InputMaybe<Scalars['String']['input']>;
   partnerAccess?: InputMaybe<Scalars['String']['input']>;
   partners?: InputMaybe<Array<InputMaybe<ProgramPartnerThroughInput>>>;
+  pduFields?: InputMaybe<Array<InputMaybe<PduFieldInput>>>;
   populationGoal?: InputMaybe<Scalars['Int']['input']>;
   programmeCode?: InputMaybe<Scalars['String']['input']>;
   sector?: InputMaybe<Scalars['String']['input']>;
@@ -1789,6 +1791,7 @@ export type FieldAttributeNode = {
   labelEn?: Maybe<Scalars['String']['output']>;
   labels?: Maybe<Array<Maybe<LabelNode>>>;
   name?: Maybe<Scalars['String']['output']>;
+  pduData?: Maybe<PeriodicFieldDataNode>;
   required?: Maybe<Scalars['Boolean']['output']>;
   type?: Maybe<Scalars['String']['output']>;
 };
@@ -4472,6 +4475,18 @@ export type Node = {
   id: Scalars['ID']['output'];
 };
 
+export type PduFieldInput = {
+  id?: InputMaybe<Scalars['String']['input']>;
+  label?: InputMaybe<Scalars['String']['input']>;
+  pduData?: InputMaybe<PeriodicFieldDataInput>;
+};
+
+export type PduSubtypeChoiceObject = {
+  __typename?: 'PDUSubtypeChoiceObject';
+  displayName?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
 export type PageInfo = {
   __typename?: 'PageInfo';
   endCursor?: Maybe<Scalars['String']['output']>;
@@ -5447,6 +5462,35 @@ export enum PaymentVerificationSummaryStatus {
   Pending = 'PENDING'
 }
 
+export type PeriodicFieldDataInput = {
+  numberOfRounds?: InputMaybe<Scalars['Int']['input']>;
+  roundsNames?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  subtype?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type PeriodicFieldDataNode = {
+  __typename?: 'PeriodicFieldDataNode';
+  id: Scalars['ID']['output'];
+  numberOfRounds: Scalars['Int']['output'];
+  roundsNames: Array<Scalars['String']['output']>;
+  subtype: PeriodicFieldDataSubtype;
+};
+
+export enum PeriodicFieldDataSubtype {
+  Boolean = 'BOOLEAN',
+  Date = 'DATE',
+  Decimal = 'DECIMAL',
+  String = 'STRING'
+}
+
+export type PeriodicFieldNode = Node & {
+  __typename?: 'PeriodicFieldNode';
+  id: Scalars['ID']['output'];
+  label: Scalars['JSONString']['output'];
+  name: Scalars['String']['output'];
+  pduData?: Maybe<PeriodicFieldDataNode>;
+};
+
 export type PositiveFeedbackTicketExtras = {
   household?: InputMaybe<Scalars['ID']['input']>;
   individual?: InputMaybe<Scalars['ID']['input']>;
@@ -5492,6 +5536,7 @@ export type ProgramNode = Node & {
   partners?: Maybe<Array<Maybe<PartnerNode>>>;
   paymentSet: PaymentNodeConnection;
   paymentplanSet: PaymentPlanNodeConnection;
+  pduFields?: Maybe<Array<Maybe<PeriodicFieldNode>>>;
   populationGoal: Scalars['Int']['output'];
   programmeCode?: Maybe<Scalars['String']['output']>;
   registrationImports: RegistrationDataImportNodeConnection;
@@ -5759,6 +5804,7 @@ export type Query = {
   allPaymentVerificationPlan?: Maybe<PaymentVerificationPlanNodeConnection>;
   allPaymentVerifications?: Maybe<PaymentVerificationNodeConnection>;
   allPayments?: Maybe<PaymentNodeConnection>;
+  allPduFields?: Maybe<Array<Maybe<FieldAttributeNode>>>;
   allPrograms?: Maybe<ProgramNodeConnection>;
   allRapidProFlows?: Maybe<Array<Maybe<RapidProFlow>>>;
   allRegistrationDataImports?: Maybe<RegistrationDataImportNodeConnection>;
@@ -5839,6 +5885,7 @@ export type Query = {
   paymentRecordVerification?: Maybe<PaymentVerificationNode>;
   paymentVerificationPlan?: Maybe<PaymentVerificationPlanNode>;
   paymentVerificationStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
+  pduSubtypeChoices?: Maybe<Array<Maybe<PduSubtypeChoiceObject>>>;
   program?: Maybe<ProgramNode>;
   programFrequencyOfPaymentsChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   programScopeChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
@@ -6409,6 +6456,12 @@ export type QueryAllPaymentsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanId: Scalars['String']['input'];
   programId?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryAllPduFieldsArgs = {
+  businessAreaSlug: Scalars['String']['input'];
+  programId: Scalars['String']['input'];
 };
 
 
@@ -8637,6 +8690,7 @@ export type UpdateProgramInput = {
   name?: InputMaybe<Scalars['String']['input']>;
   partnerAccess?: InputMaybe<Scalars['String']['input']>;
   partners?: InputMaybe<Array<InputMaybe<ProgramPartnerThroughInput>>>;
+  pduFields?: InputMaybe<Array<InputMaybe<PduFieldInput>>>;
   populationGoal?: InputMaybe<Scalars['Int']['input']>;
   programmeCode?: InputMaybe<Scalars['String']['input']>;
   sector?: InputMaybe<Scalars['String']['input']>;
@@ -9334,7 +9388,7 @@ export type MergedIndividualMinimalFragment = { __typename?: 'IndividualNode', i
 
 export type PaymentRecordDetailsFragment = { __typename?: 'PaymentRecordNode', id: string, status: PaymentRecordStatus, statusDate: any, caId?: string | null, caHashId?: any | null, registrationCaId?: string | null, fullName: string, distributionModality: string, totalPersonsCovered: number, currency: string, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveredQuantityUsd?: number | null, deliveryDate?: any | null, deliveryType?: PaymentRecordDeliveryType | null, entitlementCardIssueDate?: any | null, entitlementCardNumber?: string | null, transactionReferenceId?: string | null, verification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, statusDate?: any | null, receivedAmount?: number | null } | null, household: { __typename?: 'HouseholdNode', id: string, status?: string | null, size?: number | null, unicefId?: string | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, phoneNo: string, phoneNoAlternative: string, phoneNoValid?: boolean | null, phoneNoAlternativeValid?: boolean | null } | null }, targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string }, parent?: { __typename?: 'CashPlanNode', id: string, caId?: string | null, program: { __typename?: 'ProgramNode', id: string, name: string }, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, verificationChannel: PaymentVerificationPlanVerificationChannel } | null } | null> } | null } | null, serviceProvider: { __typename?: 'ServiceProviderNode', id: string, fullName?: string | null, shortName?: string | null } };
 
-export type ProgramDetailsFragment = { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null };
+export type ProgramDetailsFragment = { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null };
 
 export type RegistrationMinimalFragment = { __typename?: 'RegistrationDataImportNode', id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, numberOfIndividuals: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null };
 
@@ -9815,7 +9869,7 @@ export type UpdateProgramMutationVariables = Exact<{
 }>;
 
 
-export type UpdateProgramMutation = { __typename?: 'Mutations', updateProgram?: { __typename?: 'UpdateProgram', validationErrors?: any | null, program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null } | null } | null };
+export type UpdateProgramMutation = { __typename?: 'Mutations', updateProgram?: { __typename?: 'UpdateProgram', validationErrors?: any | null, program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null } | null } | null };
 
 export type CreateRegistrationKoboImportMutationVariables = Exact<{
   registrationDataImportData: RegistrationKoboImportMutationInput;
@@ -10182,7 +10236,15 @@ export type AllHouseholdsFlexFieldsAttributesQuery = { __typename?: 'Query', all
 export type AllIndividualsFlexFieldsAttributesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AllIndividualsFlexFieldsAttributesQuery = { __typename?: 'Query', allIndividualsFlexFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', isFlexField?: boolean | null, id?: string | null, type?: string | null, name?: string | null, required?: boolean | null, associatedWith?: string | null, labelEn?: string | null, hint?: string | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null };
+export type AllIndividualsFlexFieldsAttributesQuery = { __typename?: 'Query', allIndividualsFlexFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', isFlexField?: boolean | null, id?: string | null, type?: string | null, name?: string | null, required?: boolean | null, associatedWith?: string | null, labelEn?: string | null, hint?: string | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, numberOfRounds: number, roundsNames: Array<string> } | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null };
+
+export type AllPduFieldsQueryVariables = Exact<{
+  businessAreaSlug: Scalars['String']['input'];
+  programId: Scalars['String']['input'];
+}>;
+
+
+export type AllPduFieldsQuery = { __typename?: 'Query', allPduFields?: Array<{ __typename?: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, numberOfRounds: number } | null } | null> | null };
 
 export type FlexFieldsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -10196,6 +10258,11 @@ export type ImportedIndividualFieldsQueryVariables = Exact<{
 
 
 export type ImportedIndividualFieldsQuery = { __typename?: 'Query', allFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', isFlexField?: boolean | null, id?: string | null, type?: string | null, name?: string | null, associatedWith?: string | null, labelEn?: string | null, hint?: string | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null };
+
+export type PduSubtypeChoicesDataQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PduSubtypeChoicesDataQuery = { __typename?: 'Query', pduSubtypeChoices?: Array<{ __typename?: 'PDUSubtypeChoiceObject', value?: string | null, displayName?: string | null } | null> | null };
 
 export type AllFeedbacksQueryVariables = Exact<{
   offset?: InputMaybe<Scalars['Int']['input']>;
@@ -10792,7 +10859,7 @@ export type ProgramQueryVariables = Exact<{
 }>;
 
 
-export type ProgramQuery = { __typename?: 'Query', program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null } | null };
+export type ProgramQuery = { __typename?: 'Query', program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null } | null };
 
 export type ProgrammeChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -12131,6 +12198,19 @@ export const ProgramDetailsFragmentDoc = gql`
     areas {
       id
       level
+    }
+  }
+  registrationImports {
+    totalCount
+  }
+  pduFields {
+    id
+    label
+    pduData {
+      id
+      subtype
+      numberOfRounds
+      roundsNames
     }
   }
 }
@@ -17338,6 +17418,11 @@ export const AllIndividualsFlexFieldsAttributesDocument = gql`
       language
       label
     }
+    pduData {
+      id
+      numberOfRounds
+      roundsNames
+    }
     labelEn
     hint
     choices {
@@ -17385,6 +17470,53 @@ export type AllIndividualsFlexFieldsAttributesQueryHookResult = ReturnType<typeo
 export type AllIndividualsFlexFieldsAttributesLazyQueryHookResult = ReturnType<typeof useAllIndividualsFlexFieldsAttributesLazyQuery>;
 export type AllIndividualsFlexFieldsAttributesSuspenseQueryHookResult = ReturnType<typeof useAllIndividualsFlexFieldsAttributesSuspenseQuery>;
 export type AllIndividualsFlexFieldsAttributesQueryResult = Apollo.QueryResult<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>;
+export const AllPduFieldsDocument = gql`
+    query AllPduFields($businessAreaSlug: String!, $programId: String!) {
+  allPduFields(businessAreaSlug: $businessAreaSlug, programId: $programId) {
+    id
+    name
+    labelEn
+    pduData {
+      id
+      numberOfRounds
+    }
+  }
+}
+    `;
+
+/**
+ * __useAllPduFieldsQuery__
+ *
+ * To run a query within a React component, call `useAllPduFieldsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllPduFieldsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllPduFieldsQuery({
+ *   variables: {
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *      programId: // value for 'programId'
+ *   },
+ * });
+ */
+export function useAllPduFieldsQuery(baseOptions: Apollo.QueryHookOptions<AllPduFieldsQuery, AllPduFieldsQueryVariables> & ({ variables: AllPduFieldsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AllPduFieldsQuery, AllPduFieldsQueryVariables>(AllPduFieldsDocument, options);
+      }
+export function useAllPduFieldsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllPduFieldsQuery, AllPduFieldsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AllPduFieldsQuery, AllPduFieldsQueryVariables>(AllPduFieldsDocument, options);
+        }
+export function useAllPduFieldsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllPduFieldsQuery, AllPduFieldsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AllPduFieldsQuery, AllPduFieldsQueryVariables>(AllPduFieldsDocument, options);
+        }
+export type AllPduFieldsQueryHookResult = ReturnType<typeof useAllPduFieldsQuery>;
+export type AllPduFieldsLazyQueryHookResult = ReturnType<typeof useAllPduFieldsLazyQuery>;
+export type AllPduFieldsSuspenseQueryHookResult = ReturnType<typeof useAllPduFieldsSuspenseQuery>;
+export type AllPduFieldsQueryResult = Apollo.QueryResult<AllPduFieldsQuery, AllPduFieldsQueryVariables>;
 export const FlexFieldsDocument = gql`
     query FlexFields {
   allGroupsWithFields {
@@ -17491,6 +17623,46 @@ export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImpor
 export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
 export type ImportedIndividualFieldsSuspenseQueryHookResult = ReturnType<typeof useImportedIndividualFieldsSuspenseQuery>;
 export type ImportedIndividualFieldsQueryResult = Apollo.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
+export const PduSubtypeChoicesDataDocument = gql`
+    query pduSubtypeChoicesData {
+  pduSubtypeChoices {
+    value
+    displayName
+  }
+}
+    `;
+
+/**
+ * __usePduSubtypeChoicesDataQuery__
+ *
+ * To run a query within a React component, call `usePduSubtypeChoicesDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePduSubtypeChoicesDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePduSubtypeChoicesDataQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function usePduSubtypeChoicesDataQuery(baseOptions?: Apollo.QueryHookOptions<PduSubtypeChoicesDataQuery, PduSubtypeChoicesDataQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PduSubtypeChoicesDataQuery, PduSubtypeChoicesDataQueryVariables>(PduSubtypeChoicesDataDocument, options);
+      }
+export function usePduSubtypeChoicesDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PduSubtypeChoicesDataQuery, PduSubtypeChoicesDataQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PduSubtypeChoicesDataQuery, PduSubtypeChoicesDataQueryVariables>(PduSubtypeChoicesDataDocument, options);
+        }
+export function usePduSubtypeChoicesDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PduSubtypeChoicesDataQuery, PduSubtypeChoicesDataQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PduSubtypeChoicesDataQuery, PduSubtypeChoicesDataQueryVariables>(PduSubtypeChoicesDataDocument, options);
+        }
+export type PduSubtypeChoicesDataQueryHookResult = ReturnType<typeof usePduSubtypeChoicesDataQuery>;
+export type PduSubtypeChoicesDataLazyQueryHookResult = ReturnType<typeof usePduSubtypeChoicesDataLazyQuery>;
+export type PduSubtypeChoicesDataSuspenseQueryHookResult = ReturnType<typeof usePduSubtypeChoicesDataSuspenseQuery>;
+export type PduSubtypeChoicesDataQueryResult = Apollo.QueryResult<PduSubtypeChoicesDataQuery, PduSubtypeChoicesDataQueryVariables>;
 export const AllFeedbacksDocument = gql`
     query AllFeedbacks($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $issueType: String, $createdAtRange: String, $createdBy: String, $feedbackId: String, $orderBy: String, $program: String, $isActiveProgram: String) {
   allFeedbacks(
@@ -23899,7 +24071,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping of interface types */
 export type ResolversInterfaceTypes<RefType extends Record<string, unknown>> = {
-  Node: ( ApprovalProcessNode ) | ( AreaNode ) | ( AreaTypeNode ) | ( BankAccountInfoNode ) | ( BusinessAreaNode ) | ( CashPlanNode ) | ( CommunicationMessageNode ) | ( CommunicationMessageRecipientMapNode ) | ( DataCollectingTypeNode ) | ( DeliveryMechanismNode ) | ( DocumentNode ) | ( FeedbackMessageNode ) | ( FeedbackNode ) | ( FinancialServiceProviderNode ) | ( FinancialServiceProviderXlsxTemplateNode ) | ( GrievanceDocumentNode ) | ( GrievanceTicketNode ) | ( HouseholdNode ) | ( ImportDataNode ) | ( ImportedDocumentNode ) | ( ImportedHouseholdNode ) | ( ImportedIndividualIdentityNode ) | ( ImportedIndividualNode ) | ( IndividualIdentityNode ) | ( IndividualNode ) | ( KoboImportDataNode ) | ( LogEntryNode ) | ( PaymentHouseholdSnapshotNode ) | ( PaymentNode ) | ( PaymentPlanNode ) | ( PaymentRecordNode ) | ( PaymentVerificationLogEntryNode ) | ( PaymentVerificationNode ) | ( PaymentVerificationPlanNode ) | ( PaymentVerificationSummaryNode ) | ( ProgramNode ) | ( RecipientNode ) | ( RegistrationDataImportDatahubNode ) | ( RegistrationDataImportNode ) | ( ReportNode ) | ( RuleCommitNode ) | ( SanctionListIndividualAliasNameNode ) | ( SanctionListIndividualCountriesNode ) | ( SanctionListIndividualDateOfBirthNode ) | ( SanctionListIndividualDocumentNode ) | ( SanctionListIndividualNationalitiesNode ) | ( SanctionListIndividualNode ) | ( ServiceProviderNode ) | ( SteficonRuleNode ) | ( SurveyNode ) | ( TargetPopulationNode ) | ( TicketAddIndividualDetailsNode ) | ( TicketComplaintDetailsNode ) | ( TicketDeleteHouseholdDetailsNode ) | ( TicketDeleteIndividualDetailsNode ) | ( TicketHouseholdDataUpdateDetailsNode ) | ( TicketIndividualDataUpdateDetailsNode ) | ( TicketNeedsAdjudicationDetailsNode ) | ( TicketNegativeFeedbackDetailsNode ) | ( TicketNoteNode ) | ( TicketPaymentVerificationDetailsNode ) | ( TicketPositiveFeedbackDetailsNode ) | ( TicketReferralDetailsNode ) | ( TicketSensitiveDetailsNode ) | ( TicketSystemFlaggingDetailsNode ) | ( UserBusinessAreaNode ) | ( UserNode ) | ( VolumeByDeliveryMechanismNode );
+  Node: ( ApprovalProcessNode ) | ( AreaNode ) | ( AreaTypeNode ) | ( BankAccountInfoNode ) | ( BusinessAreaNode ) | ( CashPlanNode ) | ( CommunicationMessageNode ) | ( CommunicationMessageRecipientMapNode ) | ( DataCollectingTypeNode ) | ( DeliveryMechanismNode ) | ( DocumentNode ) | ( FeedbackMessageNode ) | ( FeedbackNode ) | ( FinancialServiceProviderNode ) | ( FinancialServiceProviderXlsxTemplateNode ) | ( GrievanceDocumentNode ) | ( GrievanceTicketNode ) | ( HouseholdNode ) | ( ImportDataNode ) | ( ImportedDocumentNode ) | ( ImportedHouseholdNode ) | ( ImportedIndividualIdentityNode ) | ( ImportedIndividualNode ) | ( IndividualIdentityNode ) | ( IndividualNode ) | ( KoboImportDataNode ) | ( LogEntryNode ) | ( PaymentHouseholdSnapshotNode ) | ( PaymentNode ) | ( PaymentPlanNode ) | ( PaymentRecordNode ) | ( PaymentVerificationLogEntryNode ) | ( PaymentVerificationNode ) | ( PaymentVerificationPlanNode ) | ( PaymentVerificationSummaryNode ) | ( PeriodicFieldNode ) | ( ProgramNode ) | ( RecipientNode ) | ( RegistrationDataImportDatahubNode ) | ( RegistrationDataImportNode ) | ( ReportNode ) | ( RuleCommitNode ) | ( SanctionListIndividualAliasNameNode ) | ( SanctionListIndividualCountriesNode ) | ( SanctionListIndividualDateOfBirthNode ) | ( SanctionListIndividualDocumentNode ) | ( SanctionListIndividualNationalitiesNode ) | ( SanctionListIndividualNode ) | ( ServiceProviderNode ) | ( SteficonRuleNode ) | ( SurveyNode ) | ( TargetPopulationNode ) | ( TicketAddIndividualDetailsNode ) | ( TicketComplaintDetailsNode ) | ( TicketDeleteHouseholdDetailsNode ) | ( TicketDeleteIndividualDetailsNode ) | ( TicketHouseholdDataUpdateDetailsNode ) | ( TicketIndividualDataUpdateDetailsNode ) | ( TicketNeedsAdjudicationDetailsNode ) | ( TicketNegativeFeedbackDetailsNode ) | ( TicketNoteNode ) | ( TicketPaymentVerificationDetailsNode ) | ( TicketPositiveFeedbackDetailsNode ) | ( TicketReferralDetailsNode ) | ( TicketSensitiveDetailsNode ) | ( TicketSystemFlaggingDetailsNode ) | ( UserBusinessAreaNode ) | ( UserNode ) | ( VolumeByDeliveryMechanismNode );
 };
 
 /** Mapping between all available schema types and the resolvers types */
@@ -24175,6 +24347,8 @@ export type ResolversTypes = {
   NeedsAdjudicationApproveMutation: ResolverTypeWrapper<NeedsAdjudicationApproveMutation>;
   NegativeFeedbackTicketExtras: NegativeFeedbackTicketExtras;
   Node: ResolverTypeWrapper<ResolversInterfaceTypes<ResolversTypes>['Node']>;
+  PDUFieldInput: PduFieldInput;
+  PDUSubtypeChoiceObject: ResolverTypeWrapper<PduSubtypeChoiceObject>;
   PageInfo: ResolverTypeWrapper<PageInfo>;
   PageInfoNode: ResolverTypeWrapper<PageInfoNode>;
   PaginatedCashPlanAndPaymentPlanNode: ResolverTypeWrapper<PaginatedCashPlanAndPaymentPlanNode>;
@@ -24222,6 +24396,10 @@ export type ResolversTypes = {
   PaymentVerificationSummaryNodeConnection: ResolverTypeWrapper<PaymentVerificationSummaryNodeConnection>;
   PaymentVerificationSummaryNodeEdge: ResolverTypeWrapper<PaymentVerificationSummaryNodeEdge>;
   PaymentVerificationSummaryStatus: PaymentVerificationSummaryStatus;
+  PeriodicFieldDataInput: PeriodicFieldDataInput;
+  PeriodicFieldDataNode: ResolverTypeWrapper<PeriodicFieldDataNode>;
+  PeriodicFieldDataSubtype: PeriodicFieldDataSubtype;
+  PeriodicFieldNode: ResolverTypeWrapper<PeriodicFieldNode>;
   PositiveFeedbackTicketExtras: PositiveFeedbackTicketExtras;
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments;
   ProgramNode: ResolverTypeWrapper<ProgramNode>;
@@ -24661,6 +24839,8 @@ export type ResolversParentTypes = {
   NeedsAdjudicationApproveMutation: NeedsAdjudicationApproveMutation;
   NegativeFeedbackTicketExtras: NegativeFeedbackTicketExtras;
   Node: ResolversInterfaceTypes<ResolversParentTypes>['Node'];
+  PDUFieldInput: PduFieldInput;
+  PDUSubtypeChoiceObject: PduSubtypeChoiceObject;
   PageInfo: PageInfo;
   PageInfoNode: PageInfoNode;
   PaginatedCashPlanAndPaymentPlanNode: PaginatedCashPlanAndPaymentPlanNode;
@@ -24694,6 +24874,9 @@ export type ResolversParentTypes = {
   PaymentVerificationSummaryNode: PaymentVerificationSummaryNode;
   PaymentVerificationSummaryNodeConnection: PaymentVerificationSummaryNodeConnection;
   PaymentVerificationSummaryNodeEdge: PaymentVerificationSummaryNodeEdge;
+  PeriodicFieldDataInput: PeriodicFieldDataInput;
+  PeriodicFieldDataNode: PeriodicFieldDataNode;
+  PeriodicFieldNode: PeriodicFieldNode;
   PositiveFeedbackTicketExtras: PositiveFeedbackTicketExtras;
   ProgramNode: ProgramNode;
   ProgramNodeConnection: ProgramNodeConnection;
@@ -25805,6 +25988,7 @@ export type FieldAttributeNodeResolvers<ContextType = any, ParentType extends Re
   labelEn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['LabelNode']>>>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  pduData?: Resolver<Maybe<ResolversTypes['PeriodicFieldDataNode']>, ParentType, ContextType>;
   required?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -26968,8 +27152,14 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'ApprovalProcessNode' | 'AreaNode' | 'AreaTypeNode' | 'BankAccountInfoNode' | 'BusinessAreaNode' | 'CashPlanNode' | 'CommunicationMessageNode' | 'CommunicationMessageRecipientMapNode' | 'DataCollectingTypeNode' | 'DeliveryMechanismNode' | 'DocumentNode' | 'FeedbackMessageNode' | 'FeedbackNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'GrievanceDocumentNode' | 'GrievanceTicketNode' | 'HouseholdNode' | 'ImportDataNode' | 'ImportedDocumentNode' | 'ImportedHouseholdNode' | 'ImportedIndividualIdentityNode' | 'ImportedIndividualNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'KoboImportDataNode' | 'LogEntryNode' | 'PaymentHouseholdSnapshotNode' | 'PaymentNode' | 'PaymentPlanNode' | 'PaymentRecordNode' | 'PaymentVerificationLogEntryNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'ProgramNode' | 'RecipientNode' | 'RegistrationDataImportDatahubNode' | 'RegistrationDataImportNode' | 'ReportNode' | 'RuleCommitNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualDateOfBirthNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualNode' | 'ServiceProviderNode' | 'SteficonRuleNode' | 'SurveyNode' | 'TargetPopulationNode' | 'TicketAddIndividualDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketNoteNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'UserBusinessAreaNode' | 'UserNode' | 'VolumeByDeliveryMechanismNode', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'ApprovalProcessNode' | 'AreaNode' | 'AreaTypeNode' | 'BankAccountInfoNode' | 'BusinessAreaNode' | 'CashPlanNode' | 'CommunicationMessageNode' | 'CommunicationMessageRecipientMapNode' | 'DataCollectingTypeNode' | 'DeliveryMechanismNode' | 'DocumentNode' | 'FeedbackMessageNode' | 'FeedbackNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'GrievanceDocumentNode' | 'GrievanceTicketNode' | 'HouseholdNode' | 'ImportDataNode' | 'ImportedDocumentNode' | 'ImportedHouseholdNode' | 'ImportedIndividualIdentityNode' | 'ImportedIndividualNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'KoboImportDataNode' | 'LogEntryNode' | 'PaymentHouseholdSnapshotNode' | 'PaymentNode' | 'PaymentPlanNode' | 'PaymentRecordNode' | 'PaymentVerificationLogEntryNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'PeriodicFieldNode' | 'ProgramNode' | 'RecipientNode' | 'RegistrationDataImportDatahubNode' | 'RegistrationDataImportNode' | 'ReportNode' | 'RuleCommitNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualDateOfBirthNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualNode' | 'ServiceProviderNode' | 'SteficonRuleNode' | 'SurveyNode' | 'TargetPopulationNode' | 'TicketAddIndividualDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketNoteNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'UserBusinessAreaNode' | 'UserNode' | 'VolumeByDeliveryMechanismNode', ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+};
+
+export type PduSubtypeChoiceObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['PDUSubtypeChoiceObject'] = ResolversParentTypes['PDUSubtypeChoiceObject']> = {
+  displayName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type PageInfoResolvers<ContextType = any, ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo']> = {
@@ -27454,6 +27644,22 @@ export type PaymentVerificationSummaryNodeEdgeResolvers<ContextType = any, Paren
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type PeriodicFieldDataNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PeriodicFieldDataNode'] = ResolversParentTypes['PeriodicFieldDataNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  numberOfRounds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  roundsNames?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  subtype?: Resolver<ResolversTypes['PeriodicFieldDataSubtype'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type PeriodicFieldNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PeriodicFieldNode'] = ResolversParentTypes['PeriodicFieldNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  label?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  pduData?: Resolver<Maybe<ResolversTypes['PeriodicFieldDataNode']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type ProgramNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramNode'] = ResolversParentTypes['ProgramNode']> = {
   activityLogs?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, Partial<ProgramNodeActivityLogsArgs>>;
   adminAreas?: Resolver<ResolversTypes['AreaNodeConnection'], ParentType, ContextType, Partial<ProgramNodeAdminAreasArgs>>;
@@ -27488,6 +27694,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   partners?: Resolver<Maybe<Array<Maybe<ResolversTypes['PartnerNode']>>>, ParentType, ContextType>;
   paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, Partial<ProgramNodePaymentSetArgs>>;
   paymentplanSet?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, Partial<ProgramNodePaymentplanSetArgs>>;
+  pduFields?: Resolver<Maybe<Array<Maybe<ResolversTypes['PeriodicFieldNode']>>>, ParentType, ContextType>;
   populationGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   programmeCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   registrationImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, Partial<ProgramNodeRegistrationImportsArgs>>;
@@ -27564,6 +27771,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanNodeConnection']>, ParentType, ContextType, Partial<QueryAllPaymentVerificationPlanArgs>>;
   allPaymentVerifications?: Resolver<Maybe<ResolversTypes['PaymentVerificationNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllPaymentVerificationsArgs, 'businessArea'>>;
   allPayments?: Resolver<Maybe<ResolversTypes['PaymentNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllPaymentsArgs, 'businessArea' | 'paymentPlanId'>>;
+  allPduFields?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, RequireFields<QueryAllPduFieldsArgs, 'businessAreaSlug' | 'programId'>>;
   allPrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllProgramsArgs, 'businessArea'>>;
   allRapidProFlows?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlow']>>>, ParentType, ContextType, RequireFields<QueryAllRapidProFlowsArgs, 'businessAreaSlug'>>;
   allRegistrationDataImports?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNodeConnection']>, ParentType, ContextType, Partial<QueryAllRegistrationDataImportsArgs>>;
@@ -27644,6 +27852,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   paymentRecordVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordVerificationArgs, 'id'>>;
   paymentVerificationPlan?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanNode']>, ParentType, ContextType, RequireFields<QueryPaymentVerificationPlanArgs, 'id'>>;
   paymentVerificationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
+  pduSubtypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['PDUSubtypeChoiceObject']>>>, ParentType, ContextType>;
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType, RequireFields<QueryProgramArgs, 'id'>>;
   programFrequencyOfPaymentsChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   programScopeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
@@ -29197,6 +29406,7 @@ export type Resolvers<ContextType = any> = {
   Mutations?: MutationsResolvers<ContextType>;
   NeedsAdjudicationApproveMutation?: NeedsAdjudicationApproveMutationResolvers<ContextType>;
   Node?: NodeResolvers<ContextType>;
+  PDUSubtypeChoiceObject?: PduSubtypeChoiceObjectResolvers<ContextType>;
   PageInfo?: PageInfoResolvers<ContextType>;
   PageInfoNode?: PageInfoNodeResolvers<ContextType>;
   PaginatedCashPlanAndPaymentPlanNode?: PaginatedCashPlanAndPaymentPlanNodeResolvers<ContextType>;
@@ -29230,6 +29440,8 @@ export type Resolvers<ContextType = any> = {
   PaymentVerificationSummaryNode?: PaymentVerificationSummaryNodeResolvers<ContextType>;
   PaymentVerificationSummaryNodeConnection?: PaymentVerificationSummaryNodeConnectionResolvers<ContextType>;
   PaymentVerificationSummaryNodeEdge?: PaymentVerificationSummaryNodeEdgeResolvers<ContextType>;
+  PeriodicFieldDataNode?: PeriodicFieldDataNodeResolvers<ContextType>;
+  PeriodicFieldNode?: PeriodicFieldNodeResolvers<ContextType>;
   ProgramNode?: ProgramNodeResolvers<ContextType>;
   ProgramNodeConnection?: ProgramNodeConnectionResolvers<ContextType>;
   ProgramNodeEdge?: ProgramNodeEdgeResolvers<ContextType>;
