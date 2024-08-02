@@ -58,23 +58,26 @@ class TestDeliveryMechanismDataModel(TestCase):
 
     def test_delivery_data(self) -> None:
         dmd = DeliveryMechanismDataFactory(data={"name_of_cardholder__atm_card": "test"}, individual=self.ind)
-        delivery_mechanism_fields = [
+        optional_fields = [
             "full_name",
+        ]
+        delivery_mechanism_fields = [
             "number_of_children",
             "name_of_cardholder__atm_card",
         ]
         self.hh.number_of_children = 1
         self.hh.save()
 
-        with mock.patch.object(dmd, "all_fields", delivery_mechanism_fields):
-            self.assertEqual(
-                dmd.delivery_data,
-                {
-                    "full_name": dmd.individual.full_name,
-                    "number_of_children": 1,
-                    "name_of_cardholder__atm_card": "test",
-                },
-            )
+        with mock.patch.object(dmd.delivery_mechanism, "optional_fields", optional_fields):
+            with mock.patch.object(dmd.delivery_mechanism, "required_fields", delivery_mechanism_fields):
+                self.assertEqual(
+                    dmd.delivery_data,
+                    {
+                        "full_name": dmd.individual.full_name,
+                        "number_of_children": 1,
+                        "name_of_cardholder__atm_card": "test",
+                    },
+                )
 
     def test_validate(self) -> None:
         dmd = DeliveryMechanismDataFactory(data={"test": "test"}, individual=self.ind)
@@ -87,7 +90,7 @@ class TestDeliveryMechanismDataModel(TestCase):
             "number_of_children",
             "name_of_cardholder__atm_card",
         ]
-        with mock.patch.object(dmd, "required_fields", required_fields):
+        with mock.patch.object(dmd.delivery_mechanism, "required_fields", required_fields):
             dmd.validate()
             self.assertEqual(
                 dmd.validation_errors,
@@ -117,7 +120,7 @@ class TestDeliveryMechanismDataModel(TestCase):
         dmd_2.individual.seeing_disability = LOT_DIFFICULTY
         dmd_2.individual.save()
 
-        with mock.patch.object(dmd_1, "unique_fields", unique_fields):
+        with mock.patch.object(dmd_1.delivery_mechanism, "unique_fields", unique_fields):
             dmd_1.update_unique_field()
             self.assertEqual(dmd_1.is_valid, True)
             self.assertIsNotNone(dmd_1.unique_key)
@@ -137,8 +140,8 @@ class TestDeliveryMechanismDataModel(TestCase):
             "name_of_cardholder__atm_card": "test",
         }
 
-        with mock.patch.object(dmd_1, "unique_fields", unique_fields):
-            with mock.patch.object(dmd_2, "unique_fields", unique_fields):
+        with mock.patch.object(dmd_1.delivery_mechanism, "unique_fields", unique_fields):
+            with mock.patch.object(dmd_2.delivery_mechanism, "unique_fields", unique_fields):
                 with mock.patch.object(dmd_1, "delivery_data", delivery_data):
                     with mock.patch.object(dmd_2, "delivery_data", delivery_data):
                         dmd_1.update_unique_field()
