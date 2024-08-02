@@ -34,7 +34,11 @@ from hct_mis_api.apps.core.kobo.common import (
     KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
     get_field_name,
 )
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    FlexibleAttribute,
+    PeriodicFieldData,
+)
 from hct_mis_api.apps.core.utils import (
     SheetImageLoader,
     rename_dict_keys,
@@ -48,6 +52,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.payment.models import DeliveryMechanism, DeliveryMechanismData
 from hct_mis_api.apps.registration_data.models import KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
@@ -120,8 +125,8 @@ class ImportDataInstanceValidator:
         "unhcr_id_issuer_i_c": "unhcr_id_no_i_c",
     }
 
-    def __init__(self, is_social_worker_program: bool = False) -> None:
-        self.is_social_worker_program = is_social_worker_program
+    def __init__(self, program: Program) -> None:
+        self.is_social_worker_program = program.is_social_worker_program
         self.all_fields = self.get_all_fields()
         self.delivery_mechanisms_xlsx_fields = DeliveryMechanismData.get_all_delivery_mechanisms_fields(
             by_xlsx_name=True
@@ -346,15 +351,18 @@ class ImportDataInstanceValidator:
 
 
 class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
-    def __init__(self, is_social_worker_program: bool = False) -> None:
-        super().__init__(is_social_worker_program)
-        self.is_social_worker_program = is_social_worker_program
+    def __init__(self, program: Program) -> None:
+        super().__init__(program)
+        self.is_social_worker_program = program.is_social_worker_program
         self.head_of_household_count = defaultdict(int)
         self.combined_fields = self.get_combined_fields()
         self.household_ids = []
 
         self.errors = []
         self.delivery_mechanisms_errors = []
+        self.pdu_flexible_attributes = FlexibleAttribute.objects.filter(
+            type=FlexibleAttribute.PDU, program=program
+        ).select_related("pdu_data")
 
     def get_combined_fields(self) -> Dict:
         core_fields = (
@@ -413,6 +421,20 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             raise
 
     def float_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> bool:
+        try:
+            if not self.required_validator(value, header, *args, **kwargs):  # pragma: no cover
+                return False
+            if value is None:
+                return True
+            Decimal(value)
+            return True
+        except InvalidOperation:
+            return False
+        except Exception as e:  # pragma: no cover
+            logger.exception(e)
+            raise
+
+    def decimal_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):  # pragma: no cover
                 return False
@@ -538,8 +560,12 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         try:
             if isinstance(value, bool):
                 return True
-            if self.all_fields[header]["required"] is False and (value is None or value == ""):
-                return True
+            try:
+                if self.all_fields[header]["required"] is False and (value is None or value == ""):
+                    return True
+            except KeyError:
+                if value is None or value == "":
+                    return True
             if type(value) is str:
                 value = value.capitalize()
                 if value in ("True", "False"):
@@ -557,6 +583,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             if is_required:
                 return is_not_empty
 
+            return True
+        except KeyError:
             return True
         except Exception as e:  # pragma: no cover
             logger.exception(e)
@@ -761,6 +789,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         identities_numbers if header_value_doc in identities_numbers.keys() else documents_numbers
                     )
                     documents_or_identity_dict[header_value_doc]["validation_data"].append({"row_number": row[0].row})
+                self.errors.extend(self._validate_pdu(row, first_row, row_number))
 
             if sheet.title == "Individuals":
                 for household_id, count in self.head_of_household_count.items():
@@ -1144,6 +1173,50 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
+    def _validate_pdu(self, row: list[Any], header_row: list[Any], row_number: int) -> list:
+        header_row = [header.value for header in header_row]
+        validation_subtype_mapping = {
+            PeriodicFieldData.DATE: self.date_validator,
+            PeriodicFieldData.DECIMAL: self.decimal_validator,
+            PeriodicFieldData.STRING: self.string_validator,
+            PeriodicFieldData.BOOLEAN: self.bool_validator,
+        }
+        errors = []
+        for flexible_attribute in self.pdu_flexible_attributes:
+            column_value = f"{flexible_attribute.name}_round_1_value"
+            column_collection_date = f"{flexible_attribute.name}_round_1_collection_date"
+            subtype = flexible_attribute.pdu_data.subtype
+            if column_value not in header_row:
+                continue
+            column_value_index = header_row.index(column_value)
+            column_collection_date_index = header_row.index(column_collection_date)
+            value = row[column_value_index].value
+            if value is None or value == "":
+                continue
+            collection_date = None
+            is_collection_date_valid = True
+            if column_collection_date_index >= 0:
+                collection_date = row[column_collection_date_index].value
+                is_collection_date_valid = self.date_validator(collection_date, column_collection_date)
+            is_value_valid = validation_subtype_mapping[subtype](value, column_value)
+            if not is_collection_date_valid:
+                errors.append(
+                    {
+                        "row_number": row_number,
+                        "header": column_collection_date,
+                        "message": f"Invalid value {collection_date} for field {column_collection_date}",
+                    }
+                )
+            if not is_value_valid:
+                errors.append(
+                    {
+                        "row_number": row_number,
+                        "header": column_value,
+                        "message": f"Invalid value {value} for field {column_value}",
+                    }
+                )
+        return errors
+
     def _count_individuals(self, individuals_sheet: Worksheet) -> int:
         first_row = individuals_sheet[1]
         individuals_count = 0
@@ -1163,8 +1236,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
 
 class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, program: Program) -> None:
+        super().__init__(program)
         self.combined_fields = self.get_combined_fields()
         self.expected_household_fields = self.get_expected_household_fields()
         self.expected_individuals_fields = self.get_expected_individuals_fields()

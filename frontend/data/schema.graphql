@@ -623,6 +623,7 @@ input CopyProgramInput {
   partners: [ProgramPartnerThroughInput]
   partnerAccess: String
   programmeCode: String
+  pduFields: [PDUFieldInput]
 }
 
 input CopyTargetPopulationInput {
@@ -786,6 +787,7 @@ input CreateProgramInput {
   partners: [ProgramPartnerThroughInput]
   partnerAccess: String
   programmeCode: String
+  pduFields: [PDUFieldInput]
 }
 
 type CreateReport {
@@ -1279,6 +1281,7 @@ type FieldAttributeNode {
   choices: [CoreFieldChoiceObject]
   associatedWith: String
   isFlexField: Boolean
+  pduData: PeriodicFieldDataNode
 }
 
 type FilteredActionsListNode {
@@ -2870,6 +2873,17 @@ interface Node {
   id: ID!
 }
 
+input PDUFieldInput {
+  id: String
+  label: String
+  pduData: PeriodicFieldDataInput
+}
+
+type PDUSubtypeChoiceObject {
+  value: String
+  displayName: String
+}
+
 type PageInfo {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
@@ -3617,6 +3631,33 @@ enum PaymentVerificationSummaryStatus {
   PENDING
 }
 
+input PeriodicFieldDataInput {
+  subtype: String
+  numberOfRounds: Int
+  roundsNames: [String]
+}
+
+type PeriodicFieldDataNode {
+  id: ID!
+  subtype: PeriodicFieldDataSubtype!
+  numberOfRounds: Int!
+  roundsNames: [String!]!
+}
+
+enum PeriodicFieldDataSubtype {
+  DATE
+  DECIMAL
+  STRING
+  BOOLEAN
+}
+
+type PeriodicFieldNode implements Node {
+  name: String!
+  pduData: PeriodicFieldDataNode
+  label: JSONString!
+  id: ID!
+}
+
 input PositiveFeedbackTicketExtras {
   household: ID
   individual: ID
@@ -3657,6 +3698,7 @@ type ProgramNode implements Node {
   programmeCode: String
   partnerAccess: ProgramPartnerAccess!
   partners: [PartnerNode]
+  pduFields: [PeriodicFieldNode]
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -3814,6 +3856,7 @@ type Query {
   businessArea(businessAreaSlug: String!): BusinessAreaNode
   allBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, slug: String): BusinessAreaNodeConnection
   allFieldsAttributes(flexField: Boolean, businessAreaSlug: String, programId: String): [FieldAttributeNode]
+  allPduFields(businessAreaSlug: String!, programId: String!): [FieldAttributeNode]
   allGroupsWithFields: [GroupAttributeNode]
   koboProject(uid: String!, businessAreaSlug: String!): KoboAssetObject
   allKoboProjects(businessAreaSlug: String!, onlyDeployed: Boolean, before: String, after: String, first: Int, last: Int): KoboAssetObjectConnection
@@ -3821,6 +3864,7 @@ type Query {
   allLanguages(code: String, before: String, after: String, first: Int, last: Int): LanguageObjectConnection
   dataCollectingType(id: ID!): DataCollectingTypeNode
   dataCollectionTypeChoices: [DataCollectingTypeChoiceObject]
+  pduSubtypeChoices: [PDUSubtypeChoiceObject]
   program(id: ID!): ProgramNode
   allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, name: String, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, compatibleDct: Boolean, orderBy: String): ProgramNodeConnection
   chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
@@ -5182,6 +5226,7 @@ input UpdateProgramInput {
   partners: [ProgramPartnerThroughInput]
   partnerAccess: String
   programmeCode: String
+  pduFields: [PDUFieldInput]
 }
 
 input UpdateTargetPopulationInput {

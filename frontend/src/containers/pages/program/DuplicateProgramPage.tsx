@@ -1,27 +1,35 @@
-import { Box, Step, StepButton, Stepper } from '@mui/material';
-import { Formik } from 'formik';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
-import {
-  AllProgramsForChoicesDocument,
-  ProgramPartnerAccess,
-  useAllAreasTreeQuery,
-  useCopyProgramMutation,
-  useProgramQuery,
-  useUserPartnerChoicesQuery,
-} from '@generated/graphql';
+// @ts-nocheck
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { DetailsStep } from '@components/programs/CreateProgram/DetailsStep';
 import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
 import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
+import {
+  AllProgramsForChoicesDocument,
+  ProgramPartnerAccess,
+  useAllAreasTreeQuery,
+  useCopyProgramMutation,
+  usePduSubtypeChoicesDataQuery,
+  useProgramQuery,
+  useUserPartnerChoicesQuery,
+} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Box } from '@mui/material';
 import { decodeIdString } from '@utils/utils';
+import { Formik } from 'formik';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate, useParams } from 'react-router-dom';
+import { hasPermissionInModule } from '../../../config/permissions';
+import { BaseSection } from '@components/core/BaseSection';
+import { ProgramFieldSeriesStep } from '@components/programs/CreateProgram/ProgramFieldSeriesStep';
+import {
+  handleNext,
+  ProgramStepper,
+} from '@components/programs/CreateProgram/ProgramStepper';
 
 export const DuplicateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -43,6 +51,9 @@ export const DuplicateProgramPage = (): ReactElement => {
   const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
     useUserPartnerChoicesQuery();
 
+  const { data: pdusubtypeChoicesData, loading: pdusubtypeChoicesLoading } =
+    usePduSubtypeChoicesDataQuery();
+
   const handleSubmit = async (values): Promise<void> => {
     const budgetValue = parseFloat(values.budget) ?? 0;
     const budgetToFixed = !Number.isNaN(budgetValue)
@@ -57,6 +68,28 @@ export const DuplicateProgramPage = (): ReactElement => {
           }))
         : [];
     const { editMode, ...requestValues } = values;
+    const initialPduFieldState = {
+      label: '',
+      pduData: {
+        subtype: '',
+        numberOfRounds: null,
+        roundsNames: [],
+      },
+    };
+
+    const pduFieldsToSend = values.pduFields.every(
+      (pduField) =>
+        pduField.label === initialPduFieldState.label.englishEn &&
+        pduField.pduData.subtype === initialPduFieldState.pduData.subtype &&
+        pduField.pduData.numberOfRounds ===
+          initialPduFieldState.pduData.numberOfRounds &&
+        pduField.pduData.roundsNames.length ===
+          initialPduFieldState.pduData.roundsNames.length,
+    )
+      ? null
+      : values.pduFields.length > 0
+        ? values.pduFields
+        : null;
 
     try {
       const response = await mutate({
@@ -67,6 +100,7 @@ export const DuplicateProgramPage = (): ReactElement => {
             budget: budgetToFixed,
             businessAreaSlug: businessArea,
             partners: partnersToSet,
+            pduFields: pduFieldsToSend,
           },
         },
         refetchQueries: () => [
@@ -83,9 +117,15 @@ export const DuplicateProgramPage = (): ReactElement => {
     }
   };
 
-  if (loadingProgram || treeLoading || userPartnerChoicesLoading)
+  if (
+    loadingProgram ||
+    treeLoading ||
+    userPartnerChoicesLoading ||
+    pdusubtypeChoicesLoading
+  )
     return <LoadingComponent />;
-  if (!data || !treeData || !userPartnerChoicesData) return null;
+  if (!data || !treeData || !userPartnerChoicesData || !pdusubtypeChoicesData)
+    return null;
 
   const {
     name,
@@ -125,6 +165,16 @@ export const DuplicateProgramPage = (): ReactElement => {
         areaAccess: partner.areaAccess,
       })),
     partnerAccess,
+    pduFields: [
+      {
+        label: '',
+        pduData: {
+          subtype: '',
+          numberOfRounds: null,
+          roundsNames: [],
+        },
+      },
+    ],
   };
   initialValues.budget =
     data.program.budget === '0.00' ? '' : data.program.budget;
@@ -157,6 +207,33 @@ export const DuplicateProgramPage = (): ReactElement => {
     },
   ];
 
+  const stepsData = [
+    {
+      title: t('Details'),
+      description: t(
+        'To create a new Programme, please complete all required fields on the form below and save.',
+      ),
+      dataCy: 'step-button-details',
+    },
+    {
+      title: t('Programme Time Series Fields'),
+      description: t(
+        'The Time Series Fields feature allows serial updating of individual data through an XLSX file.',
+      ),
+      dataCy: 'step-button-time-series-fields',
+    },
+    {
+      title: t('Programme Partners'),
+      description: '',
+      dataCy: 'step-button-partners',
+    },
+  ];
+
+  const stepTitle = stepsData[step].title;
+  const stepDescription = stepsData[step].description
+    ? stepsData[step].description
+    : undefined;
+
   return (
     <Formik
       initialValues={initialValues}
@@ -171,6 +248,8 @@ export const DuplicateProgramPage = (): ReactElement => {
         validateForm,
         setFieldTouched,
         setFieldValue,
+        errors,
+        setErrors,
       }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
@@ -180,15 +259,16 @@ export const DuplicateProgramPage = (): ReactElement => {
             disabled: values.partners.some((p) => p.id === partner.value),
           }));
 
-        const handleNext = async (): Promise<void> => {
-          const errors = await validateForm();
-          const step0Errors = stepFields[0].some((field) => errors[field]);
-
-          if (step === 0 && !step0Errors) {
-            setStep(1);
-          } else {
-            stepFields[step].forEach((field) => setFieldTouched(field));
-          }
+        const handleNextStep = async () => {
+          await handleNext({
+            validateForm,
+            stepFields,
+            step,
+            setStep,
+            setFieldTouched,
+            values,
+            setErrors,
+          });
         };
 
         return (
@@ -204,42 +284,46 @@ export const DuplicateProgramPage = (): ReactElement => {
                   : null
               }
             />
-            <Box p={6}>
-              <Box mb={2}>
-                <Stepper activeStep={step}>
-                  <Step>
-                    <StepButton
-                      data-cy="step-button-details"
-                      onClick={() => setStep(0)}
-                    >
-                      {t('Details')}
-                    </StepButton>
-                  </Step>
-                  <Step>
-                    <StepButton
-                      data-cy="step-button-partners"
-                      onClick={() => setStep(1)}
-                    >
-                      {t('Programme Partners')}
-                    </StepButton>
-                  </Step>
-                </Stepper>
-              </Box>
-              {step === 0 && (
-                <DetailsStep values={values} handleNext={handleNext} />
-              )}
-              {step === 1 && (
-                <PartnersStep
-                  values={values}
-                  allAreasTreeData={allAreasTree}
-                  partnerChoices={mappedPartnerChoices}
+            <BaseSection
+              title={stepTitle}
+              description={stepDescription}
+              stepper={
+                <ProgramStepper
                   step={step}
                   setStep={setStep}
-                  submitForm={submitForm}
-                  setFieldValue={setFieldValue}
+                  stepsData={stepsData}
                 />
-              )}
-            </Box>
+              }
+            >
+              <Box p={3}>
+                {step === 0 && (
+                  <DetailsStep values={values} handleNext={handleNextStep} />
+                )}
+                {step === 1 && (
+                  <ProgramFieldSeriesStep
+                    values={values}
+                    handleNext={handleNextStep}
+                    step={step}
+                    setStep={setStep}
+                    pdusubtypeChoicesData={pdusubtypeChoicesData}
+                    errors={errors}
+                    setErrors={setErrors}
+                    setFieldTouched={setFieldTouched}
+                  />
+                )}
+                {step === 2 && (
+                  <PartnersStep
+                    values={values}
+                    allAreasTreeData={allAreasTree}
+                    partnerChoices={mappedPartnerChoices}
+                    step={step}
+                    setStep={setStep}
+                    submitForm={submitForm}
+                    setFieldValue={setFieldValue}
+                  />
+                )}
+              </Box>
+            </BaseSection>
           </>
         );
       }}

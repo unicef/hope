@@ -112,6 +112,8 @@ def create_targeting(create_test_program: Program) -> None:
 
 @pytest.fixture
 def clear_downloaded_files() -> None:
+    for file in os.listdir("./report/downloads/"):
+        os.remove(os.path.join("./report/downloads", file))
     yield
     for file in os.listdir("./report/downloads/"):
         os.remove(os.path.join("./report/downloads", file))

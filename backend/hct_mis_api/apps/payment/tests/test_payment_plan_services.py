@@ -78,7 +78,12 @@ class TestPaymentPlanServices(APITestCase):
     @freeze_time("2020-10-10")
     def test_create_validation_errors(self) -> None:
         targeting = TargetPopulationFactory()
-
+        program = targeting.program
+        program.start_date = timezone.datetime(2021, 10, 12, tzinfo=utc).date()
+        program.end_date = timezone.datetime(2021, 12, 10, tzinfo=utc).date()
+        program.save()
+        self.business_area.is_payment_plan_applicable = False
+        self.business_area.save()
         input_data = dict(
             business_area_slug="afghanistan",
             targeting_id=self.id_to_base64(targeting.id, "Targeting"),
@@ -100,11 +105,6 @@ class TestPaymentPlanServices(APITestCase):
         ):
             PaymentPlanService.create(input_data=input_data, user=self.user)
         targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-        targeting.save()
-
-        with self.assertRaisesMessage(GraphQLError, "TargetPopulation should have related Program defined"):
-            PaymentPlanService.create(input_data=input_data, user=self.user)
-        targeting.program = ProgramFactory()
         targeting.save()
 
         with self.assertRaisesMessage(
@@ -179,7 +179,7 @@ class TestPaymentPlanServices(APITestCase):
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_update_validation_errors(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
-        new_targeting = TargetPopulationFactory(program=None)
+        new_targeting = TargetPopulationFactory(program=ProgramFactory())
 
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
@@ -210,11 +210,6 @@ class TestPaymentPlanServices(APITestCase):
         ):
             pp = PaymentPlanService(payment_plan=pp).update(input_data=input_data)
         new_targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-        new_targeting.save()
-
-        with self.assertRaisesMessage(GraphQLError, "TargetPopulation should have related Program defined"):
-            pp = PaymentPlanService(payment_plan=pp).update(input_data=input_data)
-        new_targeting.program = ProgramFactory()
         new_targeting.save()
 
         with self.assertRaisesMessage(

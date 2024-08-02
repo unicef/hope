@@ -118,6 +118,7 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
                 number_of_households=0,
                 business_area=program.business_area,
                 data_source=RegistrationDataImport.EDOPOMOGA,
+                program=program,
             )
 
             business_area = storage_obj.business_area

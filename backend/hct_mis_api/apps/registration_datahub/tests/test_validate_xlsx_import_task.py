@@ -6,8 +6,9 @@ from django.conf import settings
 from django.core.files import File
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import DataCollectingType
+from hct_mis_api.apps.program.fixtures import get_program_with_dct_type_and_name
 from hct_mis_api.apps.registration_data.models import ImportData
 from hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import import (
     ValidateXlsxImport,
@@ -19,8 +20,9 @@ class TestValidateXlsxImportTask(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.business_area = BusinessAreaFactory()
-        cls.program = ProgramFactory()
+        cls.business_area = create_afghanistan()
+        cls.program = get_program_with_dct_type_and_name()
+        cls.program_with_social_worker = get_program_with_dct_type_and_name(dct_type=DataCollectingType.Type.SOCIAL)
 
         content = Path(
             f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
@@ -43,7 +45,7 @@ class TestValidateXlsxImportTask(TestCase):
         )
 
         validate_everything_mock.return_value = [], []
-        ValidateXlsxImport().execute(import_data, True)
+        ValidateXlsxImport().execute(import_data, self.program_with_social_worker)
         assert validate_everything_mock.call_count == 1
 
         import_data.refresh_from_db()
@@ -56,7 +58,7 @@ class TestValidateXlsxImportTask(TestCase):
     )
     def test_import_individuals_without_errors(self, validate_everything_mock: Mock) -> None:
         validate_everything_mock.return_value = [], []
-        ValidateXlsxImport().execute(self.import_data, False)
+        ValidateXlsxImport().execute(self.import_data, self.program)
         assert validate_everything_mock.call_count == 1
 
         self.import_data.refresh_from_db()
@@ -81,7 +83,7 @@ class TestValidateXlsxImportTask(TestCase):
                 "row_number": 2,
             },
         ]
-        ValidateXlsxImport().execute(self.import_data, False)
+        ValidateXlsxImport().execute(self.import_data, self.program)
         assert validate_everything_mock.call_count == 1
         assert self.import_data.status == ImportData.STATUS_VALIDATION_ERROR
 
@@ -96,7 +98,7 @@ class TestValidateXlsxImportTask(TestCase):
                 "error": "First Name is required",
             }
         ], []
-        ValidateXlsxImport().execute(self.import_data, False)
+        ValidateXlsxImport().execute(self.import_data, self.program)
         assert validate_everything_mock.call_count == 1
         assert self.import_data.status == ImportData.STATUS_VALIDATION_ERROR
 
@@ -111,6 +113,6 @@ class TestValidateXlsxImportTask(TestCase):
                 "row_number": 2,
             },
         ]
-        ValidateXlsxImport().execute(self.import_data, False)
+        ValidateXlsxImport().execute(self.import_data, self.program)
         assert validate_everything_mock.call_count == 1
         assert self.import_data.status == ImportData.STATUS_DELIVERY_MECHANISMS_VALIDATION_ERROR
