@@ -33,16 +33,14 @@ from hct_mis_api.apps.core.tests.test_exchange_rates import (
 )
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.fixtures import (
-    generate_delivery_mechanisms,
-    get_program_with_dct_type_and_name,
-)
+from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
 from hct_mis_api.apps.payment.models import (
     CashPlan,
     DeliveryMechanism,
     PaymentRecord,
     ServiceProvider,
 )
+from hct_mis_api.apps.program.fixtures import get_program_with_dct_type_and_name
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 

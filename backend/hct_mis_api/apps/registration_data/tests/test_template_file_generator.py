@@ -68,6 +68,12 @@ class TestTemplateFileGenerator(TestCase):
         self.assertEqual("age", individuals_rows[0][0])
         self.assertEqual("Age (calculated) - INTEGER", individuals_rows[1][0])
 
+        self.assertIn("wallet_name__transfer_to_digital_wallet_i_c", individuals_rows[0])
+        self.assertIn(
+            "Wallet Name Transfer To Digital Wallet (Transfer to Digital Wallet Delivery Mechanism) - STRING",
+            individuals_rows[1],
+        )
+
         people_rows = tuple(result_wb["People"].iter_rows(values_only=True))
 
         self.assertEqual("pp_age", people_rows[0][0])
@@ -88,8 +94,8 @@ class TestTemplateFileGenerator(TestCase):
         self.assertEqual("pp_index_id", people_rows[0][86])
         self.assertEqual("Index ID - INTEGER - required", people_rows[1][86])
 
-        self.assertEqual("pp_wallet_name__transfer_to_digital_wallet_i_c", people_rows[0][-1])
-        self.assertEqual(
+        self.assertIn("pp_wallet_name__transfer_to_digital_wallet_i_c", people_rows[0])
+        self.assertIn(
             "Wallet Name Transfer To Digital Wallet (Transfer to Digital Wallet Delivery Mechanism) - STRING",
-            people_rows[1][-1],
+            people_rows[1],
         )
