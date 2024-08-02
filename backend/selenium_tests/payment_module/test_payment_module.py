@@ -105,6 +105,8 @@ def create_targeting(create_test_program: Program) -> None:
 
 @pytest.fixture
 def clear_downloaded_files() -> None:
+    for file in os.listdir("./report/downloads/"):
+        os.remove(os.path.join("./report/downloads", file))
     yield
     for file in os.listdir("./report/downloads/"):
         os.remove(os.path.join("./report/downloads", file))
@@ -227,7 +229,6 @@ class TestSmokePaymentModule:
         assert "FSP Auth Code" in pagePaymentModuleDetails.getTableLabel()[9].text
         assert "Reconciliation" in pagePaymentModuleDetails.getTableLabel()[10].text
 
-    @pytest.mark.skip(reason="Random fail on pipeline")
     def test_payment_plan_happy_path(
         self,
         clear_downloaded_files: None,
