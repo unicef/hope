@@ -103,7 +103,7 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
 
   return (
     <UniversalRestTable
-      title="Program Cycles"
+      title="Programme Cycles"
       renderRow={renderRow}
       headCells={headCells}
       data={data}

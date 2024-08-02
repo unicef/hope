@@ -14,6 +14,8 @@ import {
   ProgramCyclesQuery,
 } from '@api/programCycleApi';
 import { BlackLink } from '@core/BlackLink';
+import { useTranslation } from 'react-i18next';
+import { Button } from '@mui/material';
 
 interface ProgramCyclesTableProps {
   program;
@@ -32,6 +34,7 @@ export const ProgramCyclesTable = ({
   });
 
   const { businessArea } = useBaseUrl();
+  const { t } = useTranslation();
 
   const { data, refetch, error, isLoading } = useQuery({
     queryKey: ['programCycles', businessArea, program.id, queryVariables],
@@ -47,6 +50,16 @@ export const ProgramCyclesTable = ({
   useEffect(() => {
     void refetch();
   }, [queryVariables, refetch]);
+
+  const reactivateAction = (paymentCycle: ProgramCycle) => {
+    // TODO connect with action
+    console.log('reactivate action');
+  };
+
+  const finishAction = (paymentCycle: ProgramCycle) => {
+    // TODO connect with action
+    console.log('finish action');
+  };
 
   const renderRow = (row: ProgramCycle): ReactElement => (
     <ClickableTableRow key={row.id} data-cy="program-cycle-row">
@@ -72,14 +85,23 @@ export const ProgramCyclesTable = ({
         <UniversalMoment>{row.end_date}</UniversalMoment>
       </TableCell>
       <TableCell data-cy={`program-cycle-details-btn-${row.id}`}>
-        {/*  TODO add actions finish, reactivate */}
+        {row.status === 'Finished' && (
+          <Button onClick={() => reactivateAction(row)} variant="text">
+            {t('REACTIVATE')}
+          </Button>
+        )}
+        {row.status === 'Active' && (
+          <Button onClick={() => finishAction(row)} variant="text">
+            {t('FINISH')}
+          </Button>
+        )}
       </TableCell>
     </ClickableTableRow>
   );
 
   return (
     <UniversalRestTable
-      title="Program Cycles"
+      title="Programme Cycles"
       renderRow={renderRow}
       headCells={headCells}
       data={data}
