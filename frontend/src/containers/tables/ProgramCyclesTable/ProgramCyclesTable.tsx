@@ -49,7 +49,7 @@ export const ProgramCyclesTable = ({
   }, [queryVariables, refetch]);
 
   const renderRow = (row: ProgramCycle): ReactElement => (
-    <ClickableTableRow key={row.id} data-cy={`program-cycle-row-${row.id}`}>
+    <ClickableTableRow key={row.id} data-cy="program-cycle-row">
       <TableCell data-cy={`program-cycle-id-${row.id}`}>
         <BlackLink to={`./${row.id}`}>{row.unicef_id}</BlackLink>
       </TableCell>
