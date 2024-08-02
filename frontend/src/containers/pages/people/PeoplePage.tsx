@@ -1,4 +1,3 @@
-import { Box } from '@mui/material';
 import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,17 +9,21 @@ import {
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import { PeriodicDataUpdates } from '@components/periodicDataUpdates/PeriodicDataUpdates'; // Import PeriodicDataUpdates component
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { PeopleListTable } from '@containers/tables/people/PeopleListTable';
 import { PeopleFilter } from '@components/people/PeopleFilter';
+import { Box, Tabs, Tab, Fade } from '@mui/material';
 
 export const PeoplePage = (): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const { businessArea } = useBaseUrl();
+  const isNewTemplateJustCreated =
+    location.state?.isNewTemplateJustCreated || false;
   const permissions = usePermissions();
   const { data: householdChoicesData, loading: householdChoicesLoading } =
     useHouseholdChoiceDataQuery();
@@ -48,6 +51,10 @@ export const PeoplePage = (): React.ReactElement => {
     getFilterFromQueryParams(location, initialFilter),
   );
 
+  const [currentTab, setCurrentTab] = useState(
+    isNewTemplateJustCreated ? 1 : 0,
+  );
+
   const { data: individualChoicesData, loading: individualChoicesLoading } =
     useIndividualChoiceDataQuery();
 
@@ -64,29 +71,55 @@ export const PeoplePage = (): React.ReactElement => {
 
   return (
     <>
-      <PageHeader title={t('People')} />
-      <PeopleFilter
-        filter={filter}
-        choicesData={individualChoicesData}
-        setFilter={setFilter}
-        initialFilter={initialFilter}
-        appliedFilter={appliedFilter}
-        setAppliedFilter={setAppliedFilter}
+      <PageHeader
+        title={t('People')}
+        tabs={
+          <Tabs
+            value={currentTab}
+            onChange={(_, newValue) => {
+              setCurrentTab(newValue);
+            }}
+          >
+            <Tab data-cy="tab-people" label="People" />
+            <Tab
+              data-cy="tab-periodic-data-updates"
+              label="Periodic Data Updates"
+            />
+          </Tabs>
+        }
       />
-      <Box
-        display="flex"
-        flexDirection="column"
-        data-cy="page-details-container"
-      >
-        <PeopleListTable
-          filter={appliedFilter}
-          businessArea={businessArea}
-          canViewDetails={hasPermissions(
-            PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
-            permissions,
+      <Fade in={true} timeout={500} key={currentTab}>
+        <Box>
+          {currentTab === 0 ? (
+            <>
+              <PeopleFilter
+                filter={filter}
+                choicesData={individualChoicesData}
+                setFilter={setFilter}
+                initialFilter={initialFilter}
+                appliedFilter={appliedFilter}
+                setAppliedFilter={setAppliedFilter}
+              />
+              <Box
+                display="flex"
+                flexDirection="column"
+                data-cy="page-details-container"
+              >
+                <PeopleListTable
+                  filter={appliedFilter}
+                  businessArea={businessArea}
+                  canViewDetails={hasPermissions(
+                    PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+                    permissions,
+                  )}
+                />
+              </Box>
+            </>
+          ) : (
+            <PeriodicDataUpdates />
           )}
-        />
-      </Box>
+        </Box>
+      </Fade>
     </>
   );
 };

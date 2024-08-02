@@ -79,7 +79,6 @@ export const DeliveryMechanismDataToEditTable = ({
                       color="primary"
                       data-cy="checkbox-edit-delivery-mechanism-data"
                       onChange={(): void => {
-                        console.log('index', index);
                         handleSelectDeliveryMechanismDataToEdit(index);
                       }}
                       disabled={
