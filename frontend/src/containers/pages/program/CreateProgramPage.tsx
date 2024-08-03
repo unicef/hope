@@ -275,7 +275,11 @@ export const CreateProgramPage = (): ReactElement => {
             >
               <Box p={3}>
                 {step === 0 && (
-                  <DetailsStep values={values} handleNext={handleNextStep} />
+                  <DetailsStep
+                    values={values}
+                    handleNext={handleNextStep}
+                    errors={errors}
+                  />
                 )}
                 {step === 1 && (
                   <ProgramFieldSeriesStep
