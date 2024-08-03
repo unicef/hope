@@ -1,4 +1,3 @@
-import moment from 'moment';
 import {
   createPeriodicDataUpdateTemplate,
   fetchPeriodicFields,
@@ -15,17 +14,21 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, Step, StepLabel, Stepper } from '@mui/material';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Formik } from 'formik';
+import moment from 'moment';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 
 export const NewTemplatePage = (): React.ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isPeople = location.pathname.includes('people');
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
+
   const initialFilter = {
     registration_data_import_id: null,
     target_population_id: null,
@@ -65,7 +68,10 @@ export const NewTemplatePage = (): React.ReactElement => {
   });
 
   const [activeStep, setActiveStep] = useState(0);
-  const steps = ['Filter Individuals', 'Fields to Update'];
+  const steps = [
+    `Filter ${isPeople ? 'People' : 'Individuals'}`,
+    'Fields to Update',
+  ];
 
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
