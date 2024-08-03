@@ -8,11 +8,13 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 interface DetailsStepProps {
   values;
   handleNext?: () => Promise<void>;
+  errors: any;
 }
 
 export const DetailsStep: React.FC<DetailsStepProps> = ({
   values,
   handleNext,
+  errors,
 }) => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
@@ -39,6 +41,12 @@ export const DetailsStep: React.FC<DetailsStepProps> = ({
           color="primary"
           data-cy="button-next"
           onClick={handleNextClick}
+          disabled={
+            Boolean(errors) &&
+            (Array.isArray(errors)
+              ? errors.length > 0
+              : Object.keys(errors).length > 0)
+          }
         >
           {t('Next')}
         </Button>
