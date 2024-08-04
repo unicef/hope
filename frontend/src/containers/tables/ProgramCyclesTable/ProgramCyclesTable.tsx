@@ -63,28 +63,28 @@ export const ProgramCyclesTable = ({
 
   const renderRow = (row: ProgramCycle): ReactElement => (
     <ClickableTableRow key={row.id} data-cy="program-cycle-row">
-      <TableCell data-cy={`program-cycle-id-${row.id}`}>
+      <TableCell data-cy={`program-cycle-id`}>
         <BlackLink to={`./${row.id}`}>{row.unicef_id}</BlackLink>
       </TableCell>
-      <TableCell data-cy={`program-cycle-title-${row.id}`}>
+      <TableCell data-cy={`program-cycle-title`}>
         {row.title}
       </TableCell>
-      <TableCell data-cy={`program-cycle-status-${row.id}`}>
+      <TableCell data-cy={`program-cycle-status`}>
         <StatusBox
           status={row.status}
           statusToColor={programCycleStatusToColor}
         />
       </TableCell>
-      <TableCell data-cy={`program-cycle-total-entitled-quantity-${row.id}`}>
+      <TableCell data-cy={`program-cycle-total-entitled-quantity`}>
         {row.total_entitled_quantity_usd || '-'}
       </TableCell>
-      <TableCell data-cy={`program-cycle-start-date-${row.id}`}>
+      <TableCell data-cy={`program-cycle-start-date`}>
         <UniversalMoment>{row.start_date}</UniversalMoment>
       </TableCell>
-      <TableCell data-cy={`program-cycle-end-date-${row.id}`}>
+      <TableCell data-cy={`program-cycle-end-date`}>
         <UniversalMoment>{row.end_date}</UniversalMoment>
       </TableCell>
-      <TableCell data-cy={`program-cycle-details-btn-${row.id}`}>
+      <TableCell data-cy={`program-cycle-details-btn`}>
         {row.status === 'Finished' && (
           <Button onClick={() => reactivateAction(row)} variant="text">
             {t('REACTIVATE')}

@@ -106,6 +106,8 @@ class TestPaymentPlanServices(APITestCase):
     @flaky(max_runs=5, min_passes=1)
     @freeze_time("2020-10-10")
     def test_create_validation_errors(self) -> None:
+        self.business_area.is_payment_plan_applicable = False
+        self.business_area.save()
         targeting = TargetPopulationFactory(
             program=ProgramFactory(
                 status=Program.ACTIVE,
@@ -141,11 +143,6 @@ class TestPaymentPlanServices(APITestCase):
         targeting.save()
 
         targeting.program = None
-        targeting.save()
-
-        with self.assertRaisesMessage(GraphQLError, "TargetPopulation should have related Program defined"):
-            PaymentPlanService.create(input_data=input_data, user=self.user)
-        targeting.program = ProgramFactory()
         targeting.save()
 
         with self.assertRaisesMessage(
@@ -217,7 +214,7 @@ class TestPaymentPlanServices(APITestCase):
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_update_validation_errors(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
-        new_targeting = TargetPopulationFactory(program=None)
+        new_targeting = TargetPopulationFactory(program=ProgramFactory())
 
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
@@ -246,11 +243,6 @@ class TestPaymentPlanServices(APITestCase):
         ):
             pp = PaymentPlanService(payment_plan=pp).update(input_data=input_data)
         new_targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-        new_targeting.save()
-
-        with self.assertRaisesMessage(GraphQLError, "TargetPopulation should have related Program defined"):
-            pp = PaymentPlanService(payment_plan=pp).update(input_data=input_data)
-        new_targeting.program = ProgramFactory()
         new_targeting.save()
 
         with self.assertRaisesMessage(

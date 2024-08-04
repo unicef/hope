@@ -1041,7 +1041,7 @@ class TestRegistrationImportCeleryTasks(APITestCase):
     ) -> None:
         kobo_import_data = KoboImportData.objects.create(kobo_asset_id="1234", pull_pictures=True)
         mock_task_instance = PullKoboSubmissionsTask.return_value
-        pull_kobo_submissions_task.delay(kobo_import_data.id)
+        pull_kobo_submissions_task.delay(kobo_import_data.id, self.program.id)
         mock_task_instance.execute.assert_called_once()
 
     @patch("hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import.ValidateXlsxImport")
@@ -1061,7 +1061,7 @@ class TestRegistrationImportCeleryTasks(APITestCase):
             pull_pictures=True,
         )
         mock_get_project_submissions.return_value = VALID_JSON
-        resp_1 = PullKoboSubmissions().execute(kobo_import_data_with_pics)
+        resp_1 = PullKoboSubmissions().execute(kobo_import_data_with_pics, self.program)
         self.assertEqual(str(resp_1["kobo_import_data_id"]), str(kobo_import_data_with_pics.id))
 
         kobo_import_data_without_pics = KoboImportData.objects.create(
@@ -1070,5 +1070,5 @@ class TestRegistrationImportCeleryTasks(APITestCase):
             pull_pictures=False,
         )
         mock_get_project_submissions.return_value = VALID_JSON
-        resp_2 = PullKoboSubmissions().execute(kobo_import_data_without_pics)
+        resp_2 = PullKoboSubmissions().execute(kobo_import_data_without_pics, self.program)
         self.assertEqual(str(resp_2["kobo_import_data_id"]), str(kobo_import_data_without_pics.id))

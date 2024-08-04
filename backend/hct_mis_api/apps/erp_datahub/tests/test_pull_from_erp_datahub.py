@@ -21,9 +21,9 @@ class TestPullDataFromErpDatahub(TestCase):
     funds_commitment_1 = None
     funds_commitment_2 = None
 
-    @staticmethod
-    def _pre_test_commands() -> None:
-        create_afghanistan()
+    @classmethod
+    def _pre_test_commands(cls) -> None:
+        cls.business_area = create_afghanistan()
 
     @classmethod
     def _setup_in_app_data(cls) -> None:

@@ -27,6 +27,7 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.core.models import BusinessArea, StorageFile
+from hct_mis_api.apps.core.utils import FlexFieldsEncoder
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.signals import (
     household_deleted,
@@ -986,7 +987,7 @@ class Individual(
     )
     first_registration_date = models.DateField()
     last_registration_date = models.DateField()
-    flex_fields = JSONField(default=dict, blank=True)
+    flex_fields = JSONField(default=dict, blank=True, encoder=FlexFieldsEncoder)
     user_fields = JSONField(default=dict, blank=True)
     enrolled_in_nutrition_programme = models.BooleanField(null=True)
     administration_of_rutf = models.BooleanField(null=True)

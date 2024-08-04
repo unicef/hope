@@ -1,17 +1,18 @@
 import random
 import string
-from datetime import timedelta
+from datetime import datetime, timedelta
 from random import randint
 from typing import Any
 
 from django.utils.timezone import utc
 
 import factory
+from dateutil.relativedelta import relativedelta
 from factory import fuzzy
 from factory.django import DjangoModelFactory
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 
@@ -96,3 +97,18 @@ class ProgramFactory(DjangoModelFactory):
         if not create:
             return
         ProgramCycleFactory(program=self, **kwargs)
+
+
+def get_program_with_dct_type_and_name(
+    dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE, **kwargs: dict
+) -> Program:
+    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
+    dct = DataCollectingTypeFactory(type=dct_type)
+    program = ProgramFactory(
+        start_date=datetime.now() - relativedelta(months=1),
+        end_date=datetime.now() + relativedelta(months=1),
+        data_collecting_type=dct,
+        status=status,
+        **kwargs,
+    )
+    return program
