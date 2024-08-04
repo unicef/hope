@@ -70,6 +70,7 @@ export const CreateProgramPage = (): ReactElement => {
           }))
         : [];
     const { editMode, ...requestValues } = values;
+
     const initialPduFieldState = {
       label: '',
       pduData: {
@@ -79,18 +80,59 @@ export const CreateProgramPage = (): ReactElement => {
       },
     };
 
-    const pduFieldsToSend = values.pduFields.every(
-      (pduField) =>
+    const arePduFieldsEqual = (pduField) => {
+      const initialRoundsNames = initialPduFieldState.pduData.roundsNames.map(
+        (name) => name || '',
+      );
+      const currentRoundsNames = pduField.pduData.roundsNames.map((name) =>
+        name === null || name === undefined ? '' : name,
+      );
+
+      return (
         pduField.label === initialPduFieldState.label &&
         pduField.pduData.subtype === initialPduFieldState.pduData.subtype &&
         pduField.pduData.numberOfRounds ===
           initialPduFieldState.pduData.numberOfRounds &&
-        pduField.pduData.roundsNames.length ===
-          initialPduFieldState.pduData.roundsNames.length,
-    )
+        currentRoundsNames.length === initialRoundsNames.length &&
+        currentRoundsNames.every(
+          (name, index) => name === initialRoundsNames[index],
+        )
+      );
+    };
+
+    // Function to replace null and undefined values, and ensure length consistency
+    const transformPduField = (pduField) => {
+      // Replace null and undefined values with empty strings
+      const transformedRoundsNames = pduField.pduData.roundsNames.map((name) =>
+        name === null || name === undefined ? '' : name,
+      );
+
+      // Adjust roundsNames length to match numberOfRounds
+      while (transformedRoundsNames.length < pduField.pduData.numberOfRounds) {
+        transformedRoundsNames.push('');
+      }
+
+      // Trim roundsNames if it's longer than numberOfRounds
+      const finalRoundsNames = transformedRoundsNames.slice(
+        0,
+        pduField.pduData.numberOfRounds,
+      );
+
+      return {
+        ...pduField,
+        pduData: {
+          ...pduField.pduData,
+          roundsNames: finalRoundsNames,
+        },
+      };
+    };
+
+    const pduFieldsWithReplacedNulls = values.pduFields.map(transformPduField);
+
+    const pduFieldsToSend = pduFieldsWithReplacedNulls.every(arePduFieldsEqual)
       ? null
-      : values.pduFields.length > 0
-        ? values.pduFields
+      : pduFieldsWithReplacedNulls.length > 0
+        ? pduFieldsWithReplacedNulls
         : null;
 
     try {
@@ -112,6 +154,7 @@ export const CreateProgramPage = (): ReactElement => {
           },
         ],
       });
+
       showMessage('Programme created.');
       navigate(`/${baseUrl}/details/${response.data.createProgram.program.id}`);
     } catch (e) {
