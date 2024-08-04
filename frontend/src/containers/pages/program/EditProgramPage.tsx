@@ -97,8 +97,6 @@ export const EditProgramPage = (): ReactElement => {
     pduFields,
   } = data.program;
 
-  console.log(data.program);
-
   const handleSubmit = async (values): Promise<void> => {
     const budgetValue = parseFloat(values.budget) ?? 0;
     const budgetToFixed = !Number.isNaN(budgetValue)
@@ -123,11 +121,19 @@ export const EditProgramPage = (): ReactElement => {
       .map(({ __typename, pduData, ...rest }) => ({
         ...rest,
         pduData: pduData
-          ? Object.fromEntries(
-              Object.entries(pduData).filter(
-                ([key]) => key !== '__typename' && key !== 'id',
+          ? {
+              ...Object.fromEntries(
+                Object.entries(pduData).filter(
+                  ([key]) => key !== '__typename' && key !== 'id',
+                ),
               ),
-            )
+              roundsNames:
+                pduData.roundsNames.length === 1
+                  ? ['']
+                  : pduData.roundsNames.map((roundName) =>
+                      roundName == null ? '' : roundName,
+                    ),
+            }
           : pduData,
       }));
 
