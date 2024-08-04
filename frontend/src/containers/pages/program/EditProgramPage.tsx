@@ -128,7 +128,9 @@ export const EditProgramPage = (): ReactElement => {
                 ),
               ),
               roundsNames:
-                pduData.roundsNames.length === 1
+                pduData.numberOfRounds === 1 &&
+                (pduData.roundsNames == null ||
+                  pduData.roundsNames.length === 0)
                   ? ['']
                   : pduData.roundsNames.map((roundName) =>
                       roundName == null ? '' : roundName,
