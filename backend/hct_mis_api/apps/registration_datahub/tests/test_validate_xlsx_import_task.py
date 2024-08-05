@@ -78,8 +78,8 @@ class TestValidateXlsxImportTask(TestCase):
             }
         ], [
             {
-                "header": "name_of_cardholder_atm_card_i_c",
-                "message": "Field name_of_cardholder_atm_card_i_c is required for delivery " "mechanism ATM Card",
+                "header": "name_of_cardholder__atm_card_i_c",
+                "message": "Field name_of_cardholder__atm_card_i_c is required for delivery " "mechanism ATM Card",
                 "row_number": 2,
             },
         ]
@@ -108,8 +108,8 @@ class TestValidateXlsxImportTask(TestCase):
     def test_import_individuals_with_delivery_mechanisms_errors(self, validate_everything_mock: Mock) -> None:
         validate_everything_mock.return_value = [], [
             {
-                "header": "name_of_cardholder_atm_card_i_c",
-                "message": "Field name_of_cardholder_atm_card_i_c is required for delivery " "mechanism ATM Card",
+                "header": "name_of_cardholder__atm_card_i_c",
+                "message": "Field name_of_cardholder__atm_card_i_c is required for delivery " "mechanism ATM Card",
                 "row_number": 2,
             },
         ]

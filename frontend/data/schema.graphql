@@ -956,19 +956,18 @@ type DeliveryMechanismNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  paymentPlan: PaymentPlanNode!
-  financialServiceProvider: FinancialServiceProviderNode
-  createdBy: UserNode!
-  sentDate: DateTime!
-  sentBy: UserNode
-  status: String!
-  deliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism
-  deliveryMechanismOrder: Int!
-  sentToPaymentGateway: Boolean!
-  chosenConfiguration: String
+  paymentGatewayId: String
+  code: String
   name: String
-  order: Int
-  fsp: FinancialServiceProviderNode
+  optionalFields: [String!]!
+  requiredFields: [String!]!
+  uniqueFields: [String!]!
+  isActive: Boolean!
+  transferType: DeliveryMechanismTransferType!
+  financialserviceproviderSet(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
+  deliverymechanismperpaymentplanSet(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
+  paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
+  paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
 }
 
 type DeliveryMechanismNodeConnection {
@@ -983,7 +982,7 @@ type DeliveryMechanismNodeEdge {
   cursor: String!
 }
 
-enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
+enum DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice {
   CARDLESS_CASH_WITHDRAWAL
   CASH
   CASH_BY_FSP
@@ -998,6 +997,45 @@ enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   ATM_CARD
   CASH_OVER_THE_COUNTER
   TRANSFER_TO_DIGITAL_WALLET
+}
+
+type DeliveryMechanismPerPaymentPlanNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  paymentPlan: PaymentPlanNode!
+  financialServiceProvider: FinancialServiceProviderNode
+  createdBy: UserNode!
+  sentDate: DateTime!
+  sentBy: UserNode
+  status: String!
+  deliveryMechanismChoice: DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice
+  deliveryMechanism: DeliveryMechanismNode!
+  deliveryMechanismOrder: Int!
+  sentToPaymentGateway: Boolean!
+  chosenConfiguration: String
+  name: String
+  code: String
+  order: Int
+  fsp: FinancialServiceProviderNode
+}
+
+type DeliveryMechanismPerPaymentPlanNodeConnection {
+  pageInfo: PageInfo!
+  edges: [DeliveryMechanismPerPaymentPlanNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type DeliveryMechanismPerPaymentPlanNodeEdge {
+  node: DeliveryMechanismPerPaymentPlanNode
+  cursor: String!
+}
+
+enum DeliveryMechanismTransferType {
+  CASH
+  VOUCHER
+  DIGITAL
 }
 
 type DiscardPaymentVerificationPlan {
@@ -1271,13 +1309,14 @@ type FinancialServiceProviderNode implements Node {
   createdBy: UserNode
   name: String!
   visionVendorNumber: String!
-  deliveryMechanisms: [String!]!
+  deliveryMechanismsChoices: [String!]
+  deliveryMechanisms(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
   distributionLimit: Float
   communicationChannel: FinancialServiceProviderCommunicationChannel!
   dataTransferConfiguration: JSONString
   xlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxTemplateNodeConnection!
   paymentGatewayId: String
-  deliveryMechanismsPerPaymentPlan(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
+  deliveryMechanismsPerPaymentPlan(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   fullName: String
   isPaymentGateway: Boolean
@@ -2931,7 +2970,7 @@ type PaymentConflictDataNode {
   paymentUnicefId: String
 }
 
-enum PaymentDeliveryType {
+enum PaymentDeliveryTypeChoice {
   CARDLESS_CASH_WITHDRAWAL
   CASH
   CASH_BY_FSP
@@ -2973,7 +3012,8 @@ type PaymentNode implements Node {
   statusDate: DateTime!
   household: HouseholdNode!
   headOfHousehold: IndividualNode
-  deliveryType: PaymentDeliveryType
+  deliveryTypeChoice: PaymentDeliveryTypeChoice
+  deliveryType: DeliveryMechanismNode
   currency: String!
   entitlementQuantity: Float
   entitlementQuantityUsd: Float
@@ -3255,7 +3295,7 @@ type PaymentPlanNode implements Node {
   excludeHouseholdError: String!
   name: String
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
-  deliveryMechanisms: [DeliveryMechanismNode]
+  deliveryMechanisms: [DeliveryMechanismPerPaymentPlanNode]
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
   adminUrl: String
@@ -3320,7 +3360,7 @@ type PaymentRecordAndPaymentNode {
   verification: PaymentVerificationNode
 }
 
-enum PaymentRecordDeliveryType {
+enum PaymentRecordDeliveryTypeChoice {
   CARDLESS_CASH_WITHDRAWAL
   CASH
   CASH_BY_FSP
@@ -3352,7 +3392,8 @@ type PaymentRecordNode implements Node {
   statusDate: DateTime!
   household: HouseholdNode!
   headOfHousehold: IndividualNode
-  deliveryType: PaymentRecordDeliveryType
+  deliveryTypeChoice: PaymentRecordDeliveryTypeChoice
+  deliveryType: DeliveryMechanismNode
   currency: String!
   entitlementQuantity: Float
   entitlementQuantityUsd: Float
@@ -5310,8 +5351,8 @@ type UserNode implements Node {
   createdPaymentPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   createdFinancialServiceProviderXlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxTemplateNodeConnection!
   createdFinancialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
-  createdDeliveryMechanisms(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
-  sentDeliveryMechanisms(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
+  createdDeliveryMechanisms(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
+  sentDeliveryMechanisms(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
   approvalSet: [ApprovalNode!]!
   createdTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   assignedTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
@@ -5357,7 +5398,7 @@ enum UserStatus {
 
 type VolumeByDeliveryMechanismNode implements Node {
   id: ID!
-  deliveryMechanism: DeliveryMechanismNode
+  deliveryMechanism: DeliveryMechanismPerPaymentPlanNode
   volume: Float
   volumeUsd: Float
 }

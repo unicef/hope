@@ -13,6 +13,7 @@ import elasticsearch
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.fixtures import (
+    generate_delivery_mechanisms,
     generate_payment_plan,
     generate_real_cash_plans,
     generate_reconciled_payment_plan,
@@ -78,6 +79,7 @@ class Command(BaseCommand):
         except elasticsearch.exceptions.RequestError as e:
             logger.error(e)
 
+        generate_delivery_mechanisms()
         generate_payment_plan()
         generate_real_cash_plans()
         generate_reconciled_payment_plan()

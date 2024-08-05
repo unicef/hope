@@ -71,7 +71,7 @@ class PaymentRecordFactory(DjangoModelFactory):
         tzinfo=utc,
     )
     delivery_type = fuzzy.FuzzyChoice(
-        payment_models.DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
+        DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
         getter=lambda c: c[0],
     )
     currency = factory.Faker("currency_code")

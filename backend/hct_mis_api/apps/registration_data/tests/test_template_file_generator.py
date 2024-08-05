@@ -5,6 +5,7 @@ from hct_mis_api.apps.core.fixtures import (
     create_pdu_flexible_attribute,
 )
 from hct_mis_api.apps.core.models import PeriodicFieldData
+from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
 from hct_mis_api.apps.program.fixtures import get_program_with_dct_type_and_name
 from hct_mis_api.apps.registration_data.services.template_generator_service import (
     TemplateFileGeneratorService,
@@ -51,6 +52,7 @@ class TestTemplateFileGenerator(TestCase):
         self.assertEqual(expected, result)
 
     def test_add_template_columns(self) -> None:
+        generate_delivery_mechanisms()
         result_wb = TemplateFileGeneratorService(self.program).create_workbook()
 
         households_rows = tuple(result_wb["Households"].iter_rows(values_only=True))
@@ -65,6 +67,12 @@ class TestTemplateFileGenerator(TestCase):
 
         self.assertEqual("age", individuals_rows[0][0])
         self.assertEqual("Age (calculated) - INTEGER", individuals_rows[1][0])
+
+        self.assertIn("wallet_name__transfer_to_digital_wallet_i_c", individuals_rows[0])
+        self.assertIn(
+            "Wallet Name Transfer To Digital Wallet (Transfer to Digital Wallet Delivery Mechanism) - STRING",
+            individuals_rows[1],
+        )
 
         people_rows = tuple(result_wb["People"].iter_rows(values_only=True))
 
@@ -86,11 +94,8 @@ class TestTemplateFileGenerator(TestCase):
         self.assertEqual("pp_index_id", people_rows[0][86])
         self.assertEqual("Index ID - INTEGER - required", people_rows[1][86])
 
-        self.assertEqual("pp_card_expiry_date_atm_card_i_c", people_rows[0][93])
-        self.assertEqual("Card expiry date (ATM card) - DATE", people_rows[1][93])
-
-        self.assertEqual("pp_bank_name_transfer_to_account_i_c", people_rows[0][98])
-        self.assertEqual("Bank Name (Transfer to Account) - STRING", people_rows[1][98])
-
-        self.assertEqual("pp_wallet_address_transfer_to_digital_wallet_i_c", people_rows[0][103])
-        self.assertEqual("Wallet Address - STRING", people_rows[1][103])
+        self.assertIn("pp_wallet_name__transfer_to_digital_wallet_i_c", people_rows[0])
+        self.assertIn(
+            "Wallet Name Transfer To Digital Wallet (Transfer to Digital Wallet Delivery Mechanism) - STRING",
+            people_rows[1],
+        )
