@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { Checkbox } from '@mui/material';
 import { useDebounce } from '@hooks/useDebounce';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -12,13 +11,6 @@ import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import { fetchAreas } from '@api/sharedApi';
 import { capitalize } from 'lodash';
-
-const ScrollableBox = styled.div`
-  max-height: 200px;
-  overflow: scroll;
-  padding-top: 20px;
-  padding-bottom: 20px;
-`;
 
 export function AdminAreaAutocompleteMultipleRest({
   value,
@@ -98,48 +90,46 @@ export function AdminAreaAutocompleteMultipleRest({
   };
 
   return (
-    <ScrollableBox>
-      <StyledAutocomplete
-        data-cy={dataCy}
-        multiple
-        disableCloseOnSelect
-        fullWidth
-        filterOptions={(options1) => options1}
-        onChange={handleChange}
-        value={newValue}
-        getOptionLabel={(option: any) => option.name}
-        disabled={disabled}
-        options={options}
-        loading={loading}
-        isOptionEqualToValue={(option: any, value1: any) =>
-          option.value === value1.value
-        }
-        renderOption={(props, option: any, { selected }) => (
-          <li {...props}>
-            <Checkbox
-              icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-              checkedIcon={<CheckBoxIcon fontSize="small" />}
-              style={{ marginRight: 8 }}
-              checked={selected}
-            />
-            {option.name}
-          </li>
-        )}
-        renderInput={(params) => (
-          <StyledTextField
-            {...params}
-            inputProps={{
-              ...params.inputProps,
-              value: inputValue,
-            }}
-            size="small"
-            label={`Admin Level ${level}`}
-            variant="outlined"
-            value={inputValue}
-            onChange={(e) => setInputTextChange(e.target.value)}
+    <StyledAutocomplete
+      data-cy={dataCy}
+      multiple
+      disableCloseOnSelect
+      fullWidth
+      filterOptions={(options1) => options1}
+      onChange={handleChange}
+      value={newValue}
+      getOptionLabel={(option: any) => option.name}
+      disabled={disabled}
+      options={options}
+      loading={loading}
+      isOptionEqualToValue={(option: any, value1: any) =>
+        option.value === value1.value
+      }
+      renderOption={(props, option: any, { selected }) => (
+        <li {...props}>
+          <Checkbox
+            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+            checkedIcon={<CheckBoxIcon fontSize="small" />}
+            style={{ marginRight: 8 }}
+            checked={selected}
           />
-        )}
-      />
-    </ScrollableBox>
+          {option.name}
+        </li>
+      )}
+      renderInput={(params) => (
+        <StyledTextField
+          {...params}
+          inputProps={{
+            ...params.inputProps,
+            value: inputValue,
+          }}
+          size="small"
+          label={`Admin Level ${level}`}
+          variant="outlined"
+          value={inputValue}
+          onChange={(e) => setInputTextChange(e.target.value)}
+        />
+      )}
+    />
   );
 }
