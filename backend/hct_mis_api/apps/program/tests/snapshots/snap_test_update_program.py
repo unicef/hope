@@ -51,6 +51,44 @@ snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_progr
                         'name': 'UNICEF'
                     }
                 ],
+                'pduFields': [
+                    {
+                        'label': '{"English(EN)": "PDU Field To Be Removed"}',
+                        'name': 'pdu_field_to_be_removed',
+                        'pduData': {
+                            'numberOfRounds': 3,
+                            'roundsNames': [
+                                'Round 1 To Be Removed',
+                                'Round 2 To Be Removed',
+                                'Round 3 To Be Removed'
+                            ],
+                            'subtype': 'DECIMAL'
+                        }
+                    },
+                    {
+                        'label': '{"English(EN)": "PDU Field To Be Updated"}',
+                        'name': 'pdu_field_to_be_updated',
+                        'pduData': {
+                            'numberOfRounds': 2,
+                            'roundsNames': [
+                                'Round 1 To Be Updated',
+                                'Round 2 To Be Updated'
+                            ],
+                            'subtype': 'STRING'
+                        }
+                    },
+                    {
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
+                        'pduData': {
+                            'numberOfRounds': 1,
+                            'roundsNames': [
+                                'Round To Be Preserved'
+                            ],
+                            'subtype': 'DATE'
+                        }
+                    }
+                ],
                 'status': 'FINISHED'
             }
         }
