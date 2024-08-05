@@ -129,8 +129,16 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
 
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     status_date = models.DateTimeField()
-    start_date = models.DateTimeField(db_index=True)
-    end_date = models.DateTimeField(db_index=True)
+    start_date = models.DateTimeField(
+        db_index=True,
+        blank=True,
+        null=True,
+    )
+    end_date = models.DateTimeField(
+        db_index=True,
+        blank=True,
+        null=True,
+    )
     program = models.ForeignKey("program.Program", on_delete=models.CASCADE)
     exchange_rate = models.DecimalField(decimal_places=8, blank=True, null=True, max_digits=14)
 

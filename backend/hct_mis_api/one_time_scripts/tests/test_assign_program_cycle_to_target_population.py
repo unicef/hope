@@ -13,14 +13,24 @@ class TestAssignProgramToGrievanceTickets(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         business_area = create_afghanistan()
-        cls.program = ProgramFactory(business_area=business_area, cycle__title="Default Cycle")
-        cls.tp = TargetPopulationFactory(program=cls.program)
-        program2 = ProgramFactory(business_area=business_area)
-        cls.tp_with_program2 = TargetPopulationFactory(program=program2)
+        cls.program = ProgramFactory(
+            business_area=business_area,
+            cycle__title="Default Cycle",
+            cycle__start_date="2020-01-01",
+            cycle__end_date="2020-01-25",
+        )
+        cls.tp = TargetPopulationFactory(program=cls.program, program_cycle=None)
         # other cycle
-        ProgramCycleFactory(program=cls.program, title="Last Cycle", status=ProgramCycle.DRAFT)
+        ProgramCycleFactory(
+            program=cls.program,
+            title="Last Cycle",
+            status=ProgramCycle.DRAFT,
+            start_date="2022-01-01",
+            end_date="2022-01-22",
+        )
 
     def test_update_tp_cycles(self) -> None:
+        self.assertIsNone(self.tp.program_cycle)
         program_cycle = self.program.cycles.first()
         self.assertEqual(program_cycle.title, "Default Cycle")
         cycle_2 = self.program.cycles.last()
@@ -30,4 +40,6 @@ class TestAssignProgramToGrievanceTickets(TestCase):
 
         assign_program_cycle_to_target_population()
 
+        self.tp.refresh_from_db()
+        self.assertIsNotNone(self.tp.program_cycle)
         self.assertEqual(self.tp.program_cycle.title, "Default Cycle")
