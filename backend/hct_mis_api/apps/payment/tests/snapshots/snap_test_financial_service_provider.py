@@ -14,9 +14,15 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                 {
                     'node': {
                         'communicationChannel': 'XLSX',
-                        'deliveryMechanisms': [
-                            'Cash'
-                        ],
+                        'deliveryMechanisms': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'name': 'Cash'
+                                    }
+                                }
+                            ]
+                        },
                         'distributionLimit': 9999.0,
                         'xlsxTemplates': {
                             'edges': [
@@ -32,9 +38,15 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                 {
                     'node': {
                         'communicationChannel': 'XLSX',
-                        'deliveryMechanisms': [
-                            'Cash'
-                        ],
+                        'deliveryMechanisms': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'name': 'Cash'
+                                    }
+                                }
+                            ]
+                        },
                         'distributionLimit': 9999.0,
                         'xlsxTemplates': {
                             'edges': [
@@ -50,9 +62,15 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                 {
                     'node': {
                         'communicationChannel': 'XLSX',
-                        'deliveryMechanisms': [
-                            'Cash'
-                        ],
+                        'deliveryMechanisms': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'name': 'Cash'
+                                    }
+                                }
+                            ]
+                        },
                         'distributionLimit': 9999.0,
                         'xlsxTemplates': {
                             'edges': [
@@ -68,9 +86,15 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                 {
                     'node': {
                         'communicationChannel': 'XLSX',
-                        'deliveryMechanisms': [
-                            'Cash'
-                        ],
+                        'deliveryMechanisms': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'name': 'Cash'
+                                    }
+                                }
+                            ]
+                        },
                         'distributionLimit': 9999.0,
                         'xlsxTemplates': {
                             'edges': [
@@ -86,9 +110,15 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                 {
                     'node': {
                         'communicationChannel': 'XLSX',
-                        'deliveryMechanisms': [
-                            'Cash'
-                        ],
+                        'deliveryMechanisms': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'name': 'Cash'
+                                    }
+                                }
+                            ]
+                        },
                         'distributionLimit': 9999.0,
                         'xlsxTemplates': {
                             'edges': [
@@ -104,9 +134,15 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                 {
                     'node': {
                         'communicationChannel': 'XLSX',
-                        'deliveryMechanisms': [
-                            'Cash'
-                        ],
+                        'deliveryMechanisms': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'name': 'Cash'
+                                    }
+                                }
+                            ]
+                        },
                         'distributionLimit': 9999.0,
                         'xlsxTemplates': {
                             'edges': [
@@ -122,9 +158,15 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                 {
                     'node': {
                         'communicationChannel': 'XLSX',
-                        'deliveryMechanisms': [
-                            'Cash'
-                        ],
+                        'deliveryMechanisms': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'name': 'Cash'
+                                    }
+                                }
+                            ]
+                        },
                         'distributionLimit': 9999.0,
                         'xlsxTemplates': {
                             'edges': [
@@ -140,9 +182,15 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                 {
                     'node': {
                         'communicationChannel': 'XLSX',
-                        'deliveryMechanisms': [
-                            'Cash'
-                        ],
+                        'deliveryMechanisms': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'name': 'Cash'
+                                    }
+                                }
+                            ]
+                        },
                         'distributionLimit': 9999.0,
                         'xlsxTemplates': {
                             'edges': [
@@ -158,9 +206,15 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                 {
                     'node': {
                         'communicationChannel': 'XLSX',
-                        'deliveryMechanisms': [
-                            'Cash'
-                        ],
+                        'deliveryMechanisms': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'name': 'Cash'
+                                    }
+                                }
+                            ]
+                        },
                         'distributionLimit': 9999.0,
                         'xlsxTemplates': {
                             'edges': [

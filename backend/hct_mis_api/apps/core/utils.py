@@ -1,11 +1,13 @@
 import functools
 import io
 import itertools
+import json
 import logging
 import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
+from decimal import Decimal
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -216,7 +218,7 @@ def serialize_flex_attributes() -> Dict[str, Dict[str, Any]]:
     """
     from hct_mis_api.apps.core.models import FlexibleAttribute
 
-    flex_attributes = FlexibleAttribute.objects.prefetch_related("choices").all()
+    flex_attributes = FlexibleAttribute.objects.exclude(type=FlexibleAttribute.PDU).prefetch_related("choices").all()
 
     result_dict = {
         "individuals": {},
@@ -915,6 +917,15 @@ class AutoCompleteFilterTemp(AutoCompleteFilter):
             return [str(obj.first()) or ""]
 
         return []
+
+
+class FlexFieldsEncoder(json.JSONEncoder):
+    def default(self, obj: Any) -> Any:
+        if isinstance(obj, date):
+            return obj.isoformat()
+        if isinstance(obj, Decimal):
+            return str(obj)
+        return super().default(obj)
 
 
 class JSONBSet(Func):

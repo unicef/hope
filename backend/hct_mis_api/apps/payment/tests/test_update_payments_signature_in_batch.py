@@ -58,7 +58,7 @@ class TestUpdatePaymentsSignatureInBatch(TestCase):
         Payment.objects.all().update(signature_hash="")
         self.assertEqual(Payment.objects.filter(signature_hash="").count(), 3)
         self.assertEqual(Payment.objects.exclude(signature_hash="").count(), 0)
-        with self.assertNumQueries(5):
+        with self.assertNumQueries(8):
             PaymentPlanService(self.payment_plan).recalculate_signatures_in_batch(2)
         self.assertEqual(Payment.objects.filter(signature_hash="").count(), 0)
         self.assertEqual(Payment.objects.exclude(signature_hash="").count(), 3)

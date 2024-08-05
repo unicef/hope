@@ -623,6 +623,7 @@ input CopyProgramInput {
   partners: [ProgramPartnerThroughInput]
   partnerAccess: String
   programmeCode: String
+  pduFields: [PDUFieldInput]
 }
 
 input CopyTargetPopulationInput {
@@ -786,6 +787,7 @@ input CreateProgramInput {
   partners: [ProgramPartnerThroughInput]
   partnerAccess: String
   programmeCode: String
+  pduFields: [PDUFieldInput]
 }
 
 type CreateReport {
@@ -899,6 +901,8 @@ type DeduplicationResultNode {
   proximityToScore: Float
   location: String
   age: Int
+  duplicate: Boolean
+  distinct: Boolean
 }
 
 type DeleteHouseholdApproveMutation {
@@ -952,19 +956,18 @@ type DeliveryMechanismNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  paymentPlan: PaymentPlanNode!
-  financialServiceProvider: FinancialServiceProviderNode
-  createdBy: UserNode!
-  sentDate: DateTime!
-  sentBy: UserNode
-  status: String!
-  deliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism
-  deliveryMechanismOrder: Int!
-  sentToPaymentGateway: Boolean!
-  chosenConfiguration: String
+  paymentGatewayId: String
+  code: String
   name: String
-  order: Int
-  fsp: FinancialServiceProviderNode
+  optionalFields: [String!]!
+  requiredFields: [String!]!
+  uniqueFields: [String!]!
+  isActive: Boolean!
+  transferType: DeliveryMechanismTransferType!
+  financialserviceproviderSet(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
+  deliverymechanismperpaymentplanSet(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
+  paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
+  paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
 }
 
 type DeliveryMechanismNodeConnection {
@@ -979,7 +982,7 @@ type DeliveryMechanismNodeEdge {
   cursor: String!
 }
 
-enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
+enum DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice {
   CARDLESS_CASH_WITHDRAWAL
   CASH
   CASH_BY_FSP
@@ -994,6 +997,45 @@ enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   ATM_CARD
   CASH_OVER_THE_COUNTER
   TRANSFER_TO_DIGITAL_WALLET
+}
+
+type DeliveryMechanismPerPaymentPlanNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  paymentPlan: PaymentPlanNode!
+  financialServiceProvider: FinancialServiceProviderNode
+  createdBy: UserNode!
+  sentDate: DateTime!
+  sentBy: UserNode
+  status: String!
+  deliveryMechanismChoice: DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice
+  deliveryMechanism: DeliveryMechanismNode!
+  deliveryMechanismOrder: Int!
+  sentToPaymentGateway: Boolean!
+  chosenConfiguration: String
+  name: String
+  code: String
+  order: Int
+  fsp: FinancialServiceProviderNode
+}
+
+type DeliveryMechanismPerPaymentPlanNodeConnection {
+  pageInfo: PageInfo!
+  edges: [DeliveryMechanismPerPaymentPlanNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type DeliveryMechanismPerPaymentPlanNodeEdge {
+  node: DeliveryMechanismPerPaymentPlanNode
+  cursor: String!
+}
+
+enum DeliveryMechanismTransferType {
+  CASH
+  VOUCHER
+  DIGITAL
 }
 
 type DiscardPaymentVerificationPlan {
@@ -1239,6 +1281,7 @@ type FieldAttributeNode {
   choices: [CoreFieldChoiceObject]
   associatedWith: String
   isFlexField: Boolean
+  pduData: PeriodicFieldDataNode
 }
 
 type FilteredActionsListNode {
@@ -1266,13 +1309,14 @@ type FinancialServiceProviderNode implements Node {
   createdBy: UserNode
   name: String!
   visionVendorNumber: String!
-  deliveryMechanisms: [String!]!
+  deliveryMechanismsChoices: [String!]
+  deliveryMechanisms(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
   distributionLimit: Float
   communicationChannel: FinancialServiceProviderCommunicationChannel!
   dataTransferConfiguration: JSONString
   xlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxTemplateNodeConnection!
   paymentGatewayId: String
-  deliveryMechanismsPerPaymentPlan(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
+  deliveryMechanismsPerPaymentPlan(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   fullName: String
   isPaymentGateway: Boolean
@@ -2053,7 +2097,7 @@ type ImportedHouseholdNode implements Node {
   consentSign: String!
   consent: Boolean
   consentSharing: HouseholdConsentSharing!
-  residenceStatus: HouseholdResidenceStatus!
+  residenceStatus: HouseholdResidenceStatus
   countryOrigin: String
   country: String
   address: String!
@@ -2455,6 +2499,7 @@ type IndividualNode implements Node {
   ticketsystemflaggingdetailsSet(offset: Int, before: String, after: String, first: Int, last: Int): TicketSystemFlaggingDetailsNodeConnection!
   ticketGoldenRecords(offset: Int, before: String, after: String, first: Int, last: Int): TicketNeedsAdjudicationDetailsNodeConnection!
   ticketDuplicates(offset: Int, before: String, after: String, first: Int, last: Int): TicketNeedsAdjudicationDetailsNodeConnection!
+  selectedDistinct(offset: Int, before: String, after: String, first: Int, last: Int): TicketNeedsAdjudicationDetailsNodeConnection!
   ticketSelected(offset: Int, before: String, after: String, first: Int, last: Int): TicketNeedsAdjudicationDetailsNodeConnection!
   positiveFeedbackTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketPositiveFeedbackDetailsNodeConnection!
   negativeFeedbackTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketNegativeFeedbackDetailsNodeConnection!
@@ -2752,7 +2797,7 @@ type Mutations {
   approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveDeleteHousehold(approveStatus: Boolean!, grievanceTicketId: ID!, reasonHhId: String, version: BigInt): DeleteHouseholdApproveMutation
   approveSystemFlagging(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
-  approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID, selectedIndividualIds: [ID], version: BigInt): NeedsAdjudicationApproveMutation
+  approveNeedsAdjudication(clearIndividualIds: [ID], distinctIndividualIds: [ID], duplicateIndividualIds: [ID], grievanceTicketId: ID!, selectedIndividualId: ID, version: BigInt): NeedsAdjudicationApproveMutation
   approvePaymentDetails(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): PaymentDetailsApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, newIndividualId: ID, role: String!, version: BigInt): ReassignRoleMutation
   bulkUpdateGrievanceAssignee(assignedTo: String!, businessAreaSlug: String!, grievanceTicketIds: [ID]!): BulkUpdateGrievanceTicketsAssigneesMutation
@@ -2826,6 +2871,17 @@ input NegativeFeedbackTicketExtras {
 
 interface Node {
   id: ID!
+}
+
+input PDUFieldInput {
+  id: String
+  label: String
+  pduData: PeriodicFieldDataInput
+}
+
+type PDUSubtypeChoiceObject {
+  value: String
+  displayName: String
 }
 
 type PageInfo {
@@ -2914,7 +2970,7 @@ type PaymentConflictDataNode {
   paymentUnicefId: String
 }
 
-enum PaymentDeliveryType {
+enum PaymentDeliveryTypeChoice {
   CARDLESS_CASH_WITHDRAWAL
   CASH
   CASH_BY_FSP
@@ -2956,7 +3012,8 @@ type PaymentNode implements Node {
   statusDate: DateTime!
   household: HouseholdNode!
   headOfHousehold: IndividualNode
-  deliveryType: PaymentDeliveryType
+  deliveryTypeChoice: PaymentDeliveryTypeChoice
+  deliveryType: DeliveryMechanismNode
   currency: String!
   entitlementQuantity: Float
   entitlementQuantityUsd: Float
@@ -3238,7 +3295,7 @@ type PaymentPlanNode implements Node {
   excludeHouseholdError: String!
   name: String
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
-  deliveryMechanisms: [DeliveryMechanismNode]
+  deliveryMechanisms: [DeliveryMechanismPerPaymentPlanNode]
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
   adminUrl: String
@@ -3303,7 +3360,7 @@ type PaymentRecordAndPaymentNode {
   verification: PaymentVerificationNode
 }
 
-enum PaymentRecordDeliveryType {
+enum PaymentRecordDeliveryTypeChoice {
   CARDLESS_CASH_WITHDRAWAL
   CASH
   CASH_BY_FSP
@@ -3335,7 +3392,8 @@ type PaymentRecordNode implements Node {
   statusDate: DateTime!
   household: HouseholdNode!
   headOfHousehold: IndividualNode
-  deliveryType: PaymentRecordDeliveryType
+  deliveryTypeChoice: PaymentRecordDeliveryTypeChoice
+  deliveryType: DeliveryMechanismNode
   currency: String!
   entitlementQuantity: Float
   entitlementQuantityUsd: Float
@@ -3573,6 +3631,33 @@ enum PaymentVerificationSummaryStatus {
   PENDING
 }
 
+input PeriodicFieldDataInput {
+  subtype: String
+  numberOfRounds: Int
+  roundsNames: [String]
+}
+
+type PeriodicFieldDataNode {
+  id: ID!
+  subtype: PeriodicFieldDataSubtype!
+  numberOfRounds: Int!
+  roundsNames: [String!]!
+}
+
+enum PeriodicFieldDataSubtype {
+  DATE
+  DECIMAL
+  STRING
+  BOOLEAN
+}
+
+type PeriodicFieldNode implements Node {
+  name: String!
+  pduData: PeriodicFieldDataNode
+  label: JSONString!
+  id: ID!
+}
+
 input PositiveFeedbackTicketExtras {
   household: ID
   individual: ID
@@ -3613,6 +3698,7 @@ type ProgramNode implements Node {
   programmeCode: String
   partnerAccess: ProgramPartnerAccess!
   partners: [PartnerNode]
+  pduFields: [PeriodicFieldNode]
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -3770,6 +3856,7 @@ type Query {
   businessArea(businessAreaSlug: String!): BusinessAreaNode
   allBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, slug: String): BusinessAreaNodeConnection
   allFieldsAttributes(flexField: Boolean, businessAreaSlug: String, programId: String): [FieldAttributeNode]
+  allPduFields(businessAreaSlug: String!, programId: String!): [FieldAttributeNode]
   allGroupsWithFields: [GroupAttributeNode]
   koboProject(uid: String!, businessAreaSlug: String!): KoboAssetObject
   allKoboProjects(businessAreaSlug: String!, onlyDeployed: Boolean, before: String, after: String, first: Int, last: Int): KoboAssetObjectConnection
@@ -3777,6 +3864,7 @@ type Query {
   allLanguages(code: String, before: String, after: String, first: Int, last: Int): LanguageObjectConnection
   dataCollectingType(id: ID!): DataCollectingTypeNode
   dataCollectionTypeChoices: [DataCollectingTypeChoiceObject]
+  pduSubtypeChoices: [PDUSubtypeChoiceObject]
   program(id: ID!): ProgramNode
   allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, name: String, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, compatibleDct: Boolean, orderBy: String): ProgramNodeConnection
   chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
@@ -4826,18 +4914,20 @@ type TicketNeedsAdjudicationDetailsNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  goldenRecordsIndividual: IndividualNode!
   isMultipleDuplicatesVersion: Boolean!
-  possibleDuplicate: IndividualNode
+  goldenRecordsIndividual: IndividualNode!
   possibleDuplicates: [IndividualNode]
-  selectedIndividual: IndividualNode
-  selectedIndividuals: [IndividualNode]
+  selectedDistinct: [IndividualNode]
+  selectedIndividuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   roleReassignData: JSONString!
   extraData: TicketNeedsAdjudicationDetailsExtraDataNode
   scoreMin: Float!
   scoreMax: Float!
   isCrossArea: Boolean!
+  selectedIndividual: IndividualNode
+  possibleDuplicate: IndividualNode
   hasDuplicatedDocument: Boolean
+  selectedDuplicates: [IndividualNode]
 }
 
 type TicketNeedsAdjudicationDetailsNodeConnection {
@@ -5136,6 +5226,7 @@ input UpdateProgramInput {
   partners: [ProgramPartnerThroughInput]
   partnerAccess: String
   programmeCode: String
+  pduFields: [PDUFieldInput]
 }
 
 input UpdateTargetPopulationInput {
@@ -5260,8 +5351,8 @@ type UserNode implements Node {
   createdPaymentPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   createdFinancialServiceProviderXlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxTemplateNodeConnection!
   createdFinancialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
-  createdDeliveryMechanisms(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
-  sentDeliveryMechanisms(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
+  createdDeliveryMechanisms(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
+  sentDeliveryMechanisms(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
   approvalSet: [ApprovalNode!]!
   createdTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   assignedTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
@@ -5307,7 +5398,7 @@ enum UserStatus {
 
 type VolumeByDeliveryMechanismNode implements Node {
   id: ID!
-  deliveryMechanism: DeliveryMechanismNode
+  deliveryMechanism: DeliveryMechanismPerPaymentPlanNode
   volume: Float
   volumeUsd: Float
 }

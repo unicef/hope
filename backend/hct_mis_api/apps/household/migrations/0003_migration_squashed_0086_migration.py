@@ -22,23 +22,6 @@ from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_DECIMAL
 from hct_mis_api.apps.core.utils import serialize_flex_attributes, fix_flex_type_fields
 
 
-def remove_duplicates(apps, schema_editor):
-    DocumentType = apps.get_model("household", "DocumentType")
-
-    master_qs_types = DocumentType.objects.annotate(
-        concat_country_label=Concat(
-            F("label"),
-            F("country"),
-            output_field=models.CharField(),
-        ),
-    ).distinct("concat_country_label")
-
-    for master in master_qs_types:
-        DocumentType.objects.filter(country=master.country, label=master.label).exclude(
-            pk=master.pk
-        ).delete()
-
-
 def set_document_types(apps, schema_editor):
     choices = {
         "Driving License": "DRIVERS_LICENSE",
@@ -53,73 +36,8 @@ def set_document_types(apps, schema_editor):
         obj.save()
 
 
-def set_business_area(apps, schema_editor):
-    BusinessArea = apps.get_model("core", "BusinessArea")
-    afghanistan = BusinessArea.objects.filter(slug="afghanistan").first()
-    if afghanistan is None:
-        return
-    Household = apps.get_model("household", "Household")
-    Household.objects.filter(business_area__isnull=True).update(
-        business_area=afghanistan
-    )
-
-
-def fix_marital_status(apps, schema_editor):
-    Individual = apps.get_model("household", "Individual")
-    Individual.objects.filter(marital_status="WIDOW").update(marital_status="WIDOWED")
-
-
 def empty_reverse(apps, schema_editor):
     pass
-
-
-def fix_residence_status(apps, schema_editor):
-    Household = apps.get_model("household", "Household")
-    Household.objects.filter(residence_status="OTHER").update(
-        residence_status="NON_HOST"
-    )
-    Household.objects.filter(residence_status="MIGRANT").update(
-        residence_status="REFUGEE"
-    )
-    Household.objects.filter(residence_status="CITIZEN").update(residence_status="HOST")
-
-
-def fix_relationship(apps, schema_editor):
-    Individual = apps.get_model("household", "Individual")
-    Individual.objects.filter(relationship="").update(relationship="UNKNOWN")
-
-
-def set_business_areas(apps, schema_editor):
-    Individual = apps.get_model("household", "Individual")
-    BusinessArea = apps.get_model("core", "BusinessArea")
-    Individual.objects.all().update(business_area=BusinessArea.objects.first())
-
-
-def revert_setting_business_areas(apps, schema_editor):
-    Individual = apps.get_model("household", "Individual")
-    Individual.objects.all().update(business_area=None)
-
-
-def set_sys_field(individual, key, value):
-    if "sys" not in individual.user_fields:
-        individual.user_fields["sys"] = {}
-    individual.user_fields["sys"][key] = value
-
-
-def fix_muac_flex_field(apps, schema_editor):
-    Individual = apps.get_model("household", "Individual")
-    for individual in Individual.objects.filter(flex_fields__has_key="muac_i_f"):
-        muac = individual.flex_fields.get("muac_i_f")
-        if muac is None:
-            continue
-        set_sys_field(individual, "old_muac", muac)
-        if isinstance(muac, str):
-            muac = float(muac)
-        if muac > 27:
-            muac /= 10
-        muac = str(muac)
-        individual.flex_fields["muac_i_f"] = muac
-        individual.save()
 
 
 def cast_single_flex_field(value):
@@ -259,38 +177,6 @@ def set_disability(apps, schema_editor):
     )
 
 
-def fix_fields_individuals(apps, schema_editor):
-    Individual = apps.get_model("household", "Individual")
-    individuals = Individual.objects.all()
-
-    all_flex_fields = serialize_flex_attributes().get("individuals", {})
-    if all_flex_fields and individuals:
-        decimal_flex_fields = [
-            key
-            for key, value in all_flex_fields.items()
-            if value["type"] == TYPE_DECIMAL
-        ]
-
-        individuals = fix_flex_type_fields(individuals, decimal_flex_fields)
-        Individual.objects.bulk_update(individuals, ("flex_fields",), 1000)
-
-
-def fix_fields_households(apps, schema_editor):
-    Household = apps.get_model("household", "Household")
-    households = Household.objects.all()
-
-    all_flex_fields = serialize_flex_attributes().get("households", {})
-    if all_flex_fields and households:
-        decimal_flex_fields = [
-            key
-            for key, value in all_flex_fields.items()
-            if value["type"] == TYPE_DECIMAL
-        ]
-
-        households = fix_flex_type_fields(households, decimal_flex_fields)
-        Household.objects.bulk_update(households, ("flex_fields",), 1000)
-
-
 class Migration(migrations.Migration):
     dependencies = [
         ("steficon", "0002_migration"),
@@ -300,7 +186,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(remove_duplicates, empty_reverse),
         migrations.AddField(
             model_name="documenttype",
             name="type",
@@ -581,7 +466,6 @@ class Migration(migrations.Migration):
                 to="core.businessarea",
             ),
         ),
-        migrations.RunPython(set_business_area, empty_reverse),
         migrations.AlterField(
             model_name="household",
             name="business_area",
@@ -886,8 +770,6 @@ class Migration(migrations.Migration):
                 max_length=255,
             ),
         ),
-        migrations.RunPython(fix_marital_status, empty_reverse),
-        migrations.RunPython(fix_residence_status, empty_reverse),
         migrations.AlterField(
             model_name="individual",
             name="registration_data_import",
@@ -1024,7 +906,6 @@ class Migration(migrations.Migration):
                 max_length=255,
             ),
         ),
-        migrations.RunPython(fix_relationship, empty_reverse),
         migrations.AddField(
             model_name="individual",
             name="business_area",
@@ -1034,7 +915,6 @@ class Migration(migrations.Migration):
                 to="core.businessarea",
             ),
         ),
-        migrations.RunPython(set_business_areas, revert_setting_business_areas),
         migrations.AlterField(
             model_name="individual",
             name="business_area",
@@ -2088,7 +1968,6 @@ class Migration(migrations.Migration):
                 choices=[("WFP", "WFP"), ("UNHCR", "UNHCR")], max_length=100
             ),
         ),
-        migrations.RunPython(fix_muac_flex_field, empty_reverse),
         migrations.RunPython(cast_flex_field_values, empty_reverse),
         migrations.RunPython(round_muac, empty_reverse),
         migrations.AlterField(
@@ -2294,8 +2173,6 @@ class Migration(migrations.Migration):
             old_name="male_age_group_6_11_disabled_count",
             new_name="male_age_group_5_12_disabled_count",
         ),
-        migrations.RunPython(fix_fields_individuals, migrations.RunPython.noop),
-        migrations.RunPython(fix_fields_households, migrations.RunPython.noop),
         migrations.AddField(
             model_name="agency",
             name="country_new",

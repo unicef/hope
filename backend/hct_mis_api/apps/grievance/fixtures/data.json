@@ -23,7 +23,8 @@
     "registration_data_import": "c749ab01-16dc-48af-a764-5f3a873f0a7d",
     "extras": {},
     "ignored": false,
-    "household_unicef_id": "HH-20-0000.0014"
+    "household_unicef_id": "HH-20-0000.0014",
+    "programs": ["939ff91b-7f89-4e3c-9519-26ed62f51718"]
   }
 },
 {
@@ -46,7 +47,9 @@
           "hit_id": "efaad4e3-f8d9-481b-a902-f5f23deb52f9",
           "location": "Abband",
           "full_name": "Jan Romaniak",
-          "proximity_to_score": 3.0
+          "proximity_to_score": 3.0,
+          "duplicate": false,
+          "distinct": false
         }
       ],
       "possible_duplicate": [
@@ -55,17 +58,32 @@
           "score": 9.0,
           "hit_id": "efaad4e3-f8d9-481b-a902-f5f23deb52f9",
           "location": "Abband",
-          "full_name": "Jan Romaniak",
-          "proximity_to_score": 3.0
+          "full_name": "Jan Romaniak1",
+          "proximity_to_score": 3.0,
+          "duplicate": true,
+          "distinct": false
+        },
+        {
+          "dob": "1923-01-01",
+          "score": 9.0,
+          "hit_id": "e92d41d0-202f-4138-b344-4c30a1751797",
+          "location": "Abband",
+          "full_name": "Jan Romaniak2",
+          "proximity_to_score": 3.0,
+          "duplicate": false,
+          "distinct": true
+
         }
       ]
     },
     "score_min": 9.0,
     "score_max": 9.0,
     "possible_duplicates": [
-      "efaad4e3-f8d9-481b-a902-f5f23deb52f9"
+      "efaad4e3-f8d9-481b-a902-f5f23deb52f9",
+      "e92d41d0-202f-4138-b344-4c30a1751797"
     ],
-    "selected_individuals": []
+    "selected_individuals": ["e92d41d0-202f-4138-b344-4c30a1751797"],
+    "selected_distinct": ["bc5a5b20-74a4-4d48-ab63-99a0c913850d"]
   }
 }
 ]

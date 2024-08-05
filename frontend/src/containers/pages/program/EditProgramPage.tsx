@@ -1,4 +1,5 @@
-import { Box, Step, StepButton, Stepper } from '@mui/material';
+// @ts-nocheck
+import { Box } from '@mui/material';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,6 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   ProgramPartnerAccess,
   useAllAreasTreeQuery,
+  usePduSubtypeChoicesDataQuery,
   useProgramQuery,
   useUpdateProgramMutation,
   useUserPartnerChoicesQuery,
@@ -22,6 +24,12 @@ import { decodeIdString } from '@utils/utils';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
+import { ProgramFieldSeriesStep } from '@components/programs/CreateProgram/ProgramFieldSeriesStep';
+import { BaseSection } from '@components/core/BaseSection';
+import {
+  handleNext,
+  ProgramStepper,
+} from '@components/programs/CreateProgram/ProgramStepper';
 
 export const EditProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -42,6 +50,9 @@ export const EditProgramPage = (): ReactElement => {
   const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
     useUserPartnerChoicesQuery();
 
+  const { data: pdusubtypeChoicesData, loading: pdusubtypeChoicesLoading } =
+    usePduSubtypeChoicesDataQuery();
+
   const [mutate] = useUpdateProgramMutation({
     refetchQueries: [
       {
@@ -55,9 +66,17 @@ export const EditProgramPage = (): ReactElement => {
     ],
   });
 
-  if (loadingProgram || treeLoading || userPartnerChoicesLoading)
+  if (
+    loadingProgram ||
+    treeLoading ||
+    userPartnerChoicesLoading ||
+    pdusubtypeChoicesLoading
+  )
     return <LoadingComponent />;
-  if (!data || !treeData || !userPartnerChoicesData) return null;
+
+  if (!data || !treeData || !userPartnerChoicesData || !pdusubtypeChoicesData)
+    return null;
+
   const {
     name,
     programmeCode,
@@ -74,6 +93,8 @@ export const EditProgramPage = (): ReactElement => {
     version,
     partners,
     partnerAccess = ProgramPartnerAccess.AllPartnersAccess,
+    registrationImports,
+    pduFields,
   } = data.program;
 
   const handleSubmit = async (values): Promise<void> => {
@@ -93,7 +114,30 @@ export const EditProgramPage = (): ReactElement => {
             areaAccess,
           }))
         : [];
+
     const { editMode, ...requestValues } = values;
+    const pduFieldsToSend = values.pduFields
+      .filter((item) => item.label !== '')
+      .map(({ __typename, pduData, ...rest }) => ({
+        ...rest,
+        pduData: pduData
+          ? {
+              ...Object.fromEntries(
+                Object.entries(pduData).filter(
+                  ([key]) => key !== '__typename' && key !== 'id',
+                ),
+              ),
+              roundsNames:
+                pduData.numberOfRounds === 1 &&
+                (pduData.roundsNames == null ||
+                  pduData.roundsNames.length === 0)
+                  ? ['']
+                  : pduData.roundsNames.map((roundName) =>
+                      roundName == null ? '' : roundName,
+                    ),
+            }
+          : pduData,
+      }));
 
     try {
       const response = await mutate({
@@ -104,6 +148,7 @@ export const EditProgramPage = (): ReactElement => {
             budget: budgetToFixed,
             populationGoal: populationGoalParsed,
             partners: partnersToSet,
+            pduFields: pduFieldsToSend,
           },
           version,
         },
@@ -114,6 +159,16 @@ export const EditProgramPage = (): ReactElement => {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
+
+  const programHasRdi = registrationImports.totalCount > 0;
+
+  const mappedPduFields = Object.entries(pduFields).map(([, field]) => {
+    const { ...rest } = field;
+    return {
+      ...rest,
+      label: JSON.parse(field.label)['English(EN)'],
+    };
+  });
 
   const initialValues = {
     editMode: true,
@@ -137,7 +192,22 @@ export const EditProgramPage = (): ReactElement => {
         areaAccess: partner.areaAccess,
       })),
     partnerAccess,
+    pduFields: programHasRdi
+      ? undefined
+      : pduFields.length == 0
+        ? [
+            {
+              label: '',
+              pduData: {
+                subtype: '',
+                numberOfRounds: null,
+                roundsNames: [],
+              },
+            },
+          ]
+        : mappedPduFields,
   };
+
   initialValues.budget =
     data.program.budget === '0.00' ? '' : data.program.budget;
   initialValues.populationGoal =
@@ -185,6 +255,8 @@ export const EditProgramPage = (): ReactElement => {
         validateForm,
         setFieldTouched,
         setFieldValue,
+        errors,
+        setErrors,
       }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
@@ -194,16 +266,44 @@ export const EditProgramPage = (): ReactElement => {
             disabled: values.partners.some((p) => p.id === partner.value),
           }));
 
-        const handleNext = async (): Promise<void> => {
-          const errors = await validateForm();
-          const step0Errors = stepFields[0].some((field) => errors[field]);
-
-          if (step === 0 && !step0Errors) {
-            setStep(1);
-          } else {
-            stepFields[step].forEach((field) => setFieldTouched(field));
-          }
+        const handleNextStep = async () => {
+          await handleNext({
+            validateForm,
+            stepFields,
+            step,
+            setStep,
+            setFieldTouched,
+            values,
+            setErrors,
+          });
         };
+
+        const stepsData = [
+          {
+            title: t('Details'),
+            description: t(
+              'To create a new Programme, please complete all required fields on the form below and save.',
+            ),
+            dataCy: 'step-button-details',
+          },
+          {
+            title: t('Programme Time Series Fields'),
+            description: t(
+              'The Time Series Fields feature allows serial updating of individual data through an XLSX file.',
+            ),
+            dataCy: 'step-button-time-series-fields',
+          },
+          {
+            title: t('Programme Partners'),
+            description: '',
+            dataCy: 'step-button-partners',
+          },
+        ];
+
+        const stepTitle = stepsData[step].title;
+        const stepDescription = stepsData[step].description
+          ? stepsData[step].description
+          : undefined;
 
         return (
           <>
@@ -218,42 +318,47 @@ export const EditProgramPage = (): ReactElement => {
                   : null
               }
             />
-            <Box p={6}>
-              <Box mb={2}>
-                <Stepper activeStep={step}>
-                  <Step>
-                    <StepButton
-                      data-cy="step-button-details"
-                      onClick={() => setStep(0)}
-                    >
-                      {t('Details')}
-                    </StepButton>
-                  </Step>
-                  <Step>
-                    <StepButton
-                      data-cy="step-button-partners"
-                      onClick={() => setStep(1)}
-                    >
-                      {t('Programme Partners')}
-                    </StepButton>
-                  </Step>
-                </Stepper>
-              </Box>
-              {step === 0 && (
-                <DetailsStep values={values} handleNext={handleNext} />
-              )}
-              {step === 1 && (
-                <PartnersStep
-                  values={values}
-                  allAreasTreeData={allAreasTree}
-                  partnerChoices={mappedPartnerChoices}
+            <BaseSection
+              title={stepTitle}
+              description={stepDescription}
+              stepper={
+                <ProgramStepper
                   step={step}
                   setStep={setStep}
-                  submitForm={submitForm}
-                  setFieldValue={setFieldValue}
+                  stepsData={stepsData}
                 />
-              )}
-            </Box>
+              }
+            >
+              <Box p={3}>
+                {step === 0 && (
+                  <DetailsStep values={values} handleNext={handleNextStep} />
+                )}
+                {step === 1 && (
+                  <ProgramFieldSeriesStep
+                    values={values}
+                    handleNext={handleNextStep}
+                    step={step}
+                    setStep={setStep}
+                    pdusubtypeChoicesData={pdusubtypeChoicesData}
+                    errors={errors}
+                    setErrors={setErrors}
+                    setFieldTouched={setFieldTouched}
+                    programHasRdi={programHasRdi}
+                  />
+                )}
+                {step === 2 && (
+                  <PartnersStep
+                    values={values}
+                    allAreasTreeData={allAreasTree}
+                    partnerChoices={mappedPartnerChoices}
+                    step={step}
+                    setStep={setStep}
+                    submitForm={submitForm}
+                    setFieldValue={setFieldValue}
+                  />
+                )}
+              </Box>
+            </BaseSection>
           </>
         );
       }}

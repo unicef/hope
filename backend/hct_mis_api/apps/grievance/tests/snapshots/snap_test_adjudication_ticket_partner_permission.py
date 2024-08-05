@@ -75,7 +75,7 @@ snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_
             'locations': [
                 {
                     'column': 7,
-                    'line': 7
+                    'line': 8
                 }
             ],
             'message': 'Permission Denied: User does not have access to select individual',
@@ -147,10 +147,10 @@ snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_
             'locations': [
                 {
                     'column': 7,
-                    'line': 7
+                    'line': 8
                 }
             ],
-            'message': 'The selected individual is not valid, must be one of those attached to the ticket',
+            'message': "['The selected individual IND-111 is not valid, must be one of those attached to the ticket']",
             'path': [
                 'approveNeedsAdjudication'
             ]
@@ -167,10 +167,10 @@ snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_
             'locations': [
                 {
                     'column': 7,
-                    'line': 7
+                    'line': 8
                 }
             ],
-            'message': 'Only one option for selected individuals is available',
+            'message': 'Only one option for duplicate or distinct or clear individuals is available',
             'path': [
                 'approveNeedsAdjudication'
             ]

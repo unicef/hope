@@ -125,17 +125,12 @@ class TestProgrammeDetails:
         assert "ACTIVATE" in pageProgrammeDetails.getButtonActivateProgram().text
         assert "" in pageProgrammeDetails.getCopyProgram().text
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
-        from datetime import date
-
-        today = date.today()
-        assert (
-            FormatTime(today.day, today.month - 1, today.year).date_in_text_format
-            in pageProgrammeDetails.getLabelStartDate().text
-        )
-        assert (
-            FormatTime(today.day, today.month + 1, today.year).date_in_text_format
-            in pageProgrammeDetails.getLabelEndDate().text
-        )
+        assert (datetime.now() - relativedelta(months=1)).strftime(
+            "%-d %b %Y"
+        ) in pageProgrammeDetails.getLabelStartDate().text
+        assert (datetime.now() + relativedelta(months=1)).strftime(
+            "%-d %b %Y"
+        ) in pageProgrammeDetails.getLabelEndDate().text
         assert program.programme_code in pageProgrammeDetails.getLabelProgrammeCode().text
         assert program.sector.replace("_", " ").title() in pageProgrammeDetails.getLabelSelector().text
         assert program.data_collecting_type.label in pageProgrammeDetails.getLabelDataCollectingType().text
