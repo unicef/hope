@@ -21,6 +21,7 @@ interface PartnersStepProps {
   setStep: (step: number) => void;
   submitForm: () => void;
   setFieldValue;
+  programId?: string;
 }
 
 export const PartnersStep: React.FC<PartnersStepProps> = ({
@@ -31,9 +32,10 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
   setStep,
   submitForm,
   setFieldValue,
+  programId: formProgramId,
 }) => {
   const { t } = useTranslation();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, programId, businessArea } = useBaseUrl();
 
   useEffect(() => {
     if (
@@ -137,7 +139,11 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
           <Button
             data-cy="button-cancel"
             component={Link}
-            to={`/${baseUrl}/list`}
+            to={
+              formProgramId
+                ? `/${businessArea}/programs/${programId}/details/${formProgramId}`
+                : `/${baseUrl}/list`
+            }
           >
             {t('Cancel')}
           </Button>

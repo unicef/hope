@@ -63,40 +63,21 @@ export const programValidationSchema = (
       }),
     ),
     pduFields: Yup.array().of(
-      Yup.object()
-        .shape({
-          label: Yup.string()
+      Yup.object().shape({
+        label: Yup.string()
+          .nullable()
+          .min(3, t('Too short'))
+          .max(150, t('Too long'))
+          .required(t('Label is required')),
+        pduData: Yup.object().shape({
+          subtype: Yup.string().nullable().required(t('Subtype is required')),
+          numberOfRounds: Yup.number()
             .nullable()
-            .min(3, t('Too short'))
-            .max(150, t('Too long')),
-          pduData: Yup.object().shape({
-            subtype: Yup.string().nullable(),
-            numberOfRounds: Yup.number().nullable(),
-            roundsNames: Yup.array().of(
-              Yup.string().min(3, t('Too short')).max(150, t('Too long')),
-            ),
-          }),
-        })
-        .test(
-          'pduFields-validation',
-          t('Please complete the PDU fields correctly.'),
-          function (value) {
-            const { label, pduData } = value;
-            const { subtype, numberOfRounds, roundsNames } = pduData;
-
-            // Check if any field is empty or incomplete
-            const isAnyFieldEmpty =
-              !label || !subtype || numberOfRounds === null;
-
-            // Ensure that all fields are either completely filled or completely empty
-            const isAllFieldsEmpty =
-              !label &&
-              !subtype &&
-              numberOfRounds === null &&
-              roundsNames.length === 0;
-
-            return !isAnyFieldEmpty || isAllFieldsEmpty;
-          },
-        ),
+            .required(t('Number of rounds is required')),
+          roundsNames: Yup.array().of(
+            Yup.string().min(3, t('Too short')).max(150, t('Too long')),
+          ),
+        }),
+      }),
     ),
   });
