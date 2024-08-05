@@ -9,7 +9,6 @@ from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
-from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -24,7 +23,6 @@ from hct_mis_api.apps.account.api.permissions import (
     ProgramCycleViewListPermission,
 )
 from hct_mis_api.apps.core.api.mixins import ActionMixin, BusinessAreaProgramMixin
-from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.program.api.caches import ProgramCycleKeyConstructor
 from hct_mis_api.apps.program.api.filters import ProgramCycleFilter
 from hct_mis_api.apps.program.api.serializers import (
