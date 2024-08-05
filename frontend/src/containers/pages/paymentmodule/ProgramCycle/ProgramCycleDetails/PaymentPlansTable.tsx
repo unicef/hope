@@ -2,6 +2,7 @@ import React from 'react';
 import { ProgramCycle } from '@api/programCycleApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
+  AllPaymentPlansForTableQuery,
   AllPaymentPlansForTableQueryVariables,
   PaymentPlanNode,
   useAllPaymentPlansForTableQuery,
@@ -38,7 +39,10 @@ export const PaymentPlansTable = ({
   };
 
   return (
-    <UniversalTable<PaymentPlanNode, AllPaymentPlansForTableQueryVariables>
+    <UniversalTable<
+      AllPaymentPlansForTableQuery['allPaymentPlans']['edges'][0]['node'],
+      AllPaymentPlansForTableQueryVariables
+    >
       defaultOrderBy="-createdAt"
       title={title}
       headCells={headCells}

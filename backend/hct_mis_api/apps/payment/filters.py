@@ -264,6 +264,8 @@ class CashPlanFilter(FilterSet):
             "program": ["exact"],
             "assistance_through": ["exact", "startswith"],
             "service_provider__full_name": ["exact", "startswith"],
+            "start_date": ["exact", "lte", "gte"],
+            "end_date": ["exact", "lte", "gte"],
             "business_area": ["exact"],
         }
         model = CashPlan
@@ -282,6 +284,8 @@ class CashPlanFilter(FilterSet):
             "assistance_measurement",
             "assistance_through",
             "delivery_type",
+            "start_date",
+            "end_date",
             "program__name",
             "id",
             "updated_at",
@@ -419,7 +423,7 @@ def cash_plan_and_payment_plan_filter(queryset: ExtendedQuerySetSequence, **kwar
     service_provider = kwargs.get("service_provider")
     delivery_types = kwargs.get("delivery_type")
     verification_status = kwargs.get("verification_status")
-    # start_date_gte, end_date_lte = kwargs.get("start_date_gte"), kwargs.get("end_date_lte")
+    start_date_gte, end_date_lte = kwargs.get("start_date_gte"), kwargs.get("end_date_lte")
     search = kwargs.get("search")
 
     if business_area:
@@ -428,11 +432,10 @@ def cash_plan_and_payment_plan_filter(queryset: ExtendedQuerySetSequence, **kwar
     if program:
         queryset = queryset.filter(program=decode_id_string(program))
 
-    # CashPlan does not has a ProgramCycle FK for now
-    # if start_date_gte:
-    #     queryset = queryset.filter(program_cycle__start_date__gte=start_date_gte)
-    # if end_date_lte:
-    #     queryset = queryset.filter(program_cycle__end_date__lte=end_date_lte)
+    if start_date_gte:
+        queryset = queryset.filter(start_date__gte=start_date_gte)
+    if end_date_lte:
+        queryset = queryset.filter(end_date__lte=end_date_lte)
 
     if verification_status:
         queryset = queryset.filter(payment_verification_summary__status__in=verification_status)

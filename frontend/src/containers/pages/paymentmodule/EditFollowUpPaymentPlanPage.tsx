@@ -57,8 +57,6 @@ export const EditFollowUpPaymentPlanPage = (): React.ReactElement => {
 
   const initialValues = {
     targetingId: paymentPlan.targetPopulation.id,
-    startDate: paymentPlan.startDate,
-    endDate: paymentPlan.endDate,
     currency: {
       name: paymentPlan.currencyName,
       value: paymentPlan.currency,
@@ -70,19 +68,6 @@ export const EditFollowUpPaymentPlanPage = (): React.ReactElement => {
   const validationSchema = Yup.object().shape({
     targetingId: Yup.string().required(t('Target Population is required')),
     currency: Yup.string().nullable().required(t('Currency is required')),
-    startDate: Yup.date().required(t('Start Date is required')),
-    endDate: Yup.date()
-      .required(t('End Date is required'))
-      .when('startDate', (startDate: any, schema: Yup.DateSchema) =>
-        startDate
-          ? schema.min(
-              startDate,
-              `${t('End date has to be greater than')} ${moment(
-                startDate,
-              ).format('YYYY-MM-DD')}`,
-            )
-          : schema,
-      ),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
     ),
@@ -110,8 +95,6 @@ export const EditFollowUpPaymentPlanPage = (): React.ReactElement => {
           input: {
             paymentPlanId: id,
             targetingId: values.targetingId,
-            startDate: values.startDate,
-            endDate: values.endDate,
             dispersionStartDate: values.dispersionStartDate,
             dispersionEndDate: values.dispersionEndDate,
             currency: values.currency?.value

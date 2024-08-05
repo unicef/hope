@@ -33,6 +33,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
     name: '',
     criterias: [],
     program: programId,
+    programCycleId: '',
     excludedIds: '',
     exclusionReason: '',
     flagExcludeIfActiveAdjudicationTicket: false,
@@ -93,6 +94,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
         variables: {
           input: {
             programId: values.program,
+            programCycleId: values.programCycleId,
             name: values.name,
             excludedIds: values.excludedIds,
             exclusionReason: values.exclusionReason,

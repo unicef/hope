@@ -14,6 +14,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { fetchProgramCycles, ProgramCycle } from '@api/programCycleApi';
 import { BlackLink } from '@core/BlackLink';
+import { usePermissions } from '@hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
 interface ProgramCycleTableProps {
   program: ProgramQuery['program'];
@@ -26,6 +28,10 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
     ordering: 'created_at',
   });
   const { businessArea, baseUrl } = useBaseUrl();
+  const permissions = usePermissions();
+  const canCreateProgramCycle =
+    program.status !== 'DRAFT' &&
+    hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_CREATE, permissions);
 
   const { data, error, isLoading } = useQuery({
     queryKey: ['programCycles', businessArea, program.id, queryVariables],
@@ -36,14 +42,19 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
 
   const renderRow = (row: ProgramCycle): ReactElement => {
     const detailsUrl = `/${baseUrl}/payment-module/program-cycles/${row.id}`;
+    const canEditProgramCycle =
+      (row.status === 'Draft' || row.status === 'Active') &&
+      hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_UPDATE, permissions);
+    const canDeleteProgramCycle =
+      row.status === 'Draft' &&
+      data.results.length > 1 &&
+      hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_DELETE, permissions);
     return (
       <ClickableTableRow key={row.id} data-cy={`program-cycle-row-${row.id}`}>
         <TableCell data-cy={`program-cycle-id-${row.id}`}>
           <BlackLink to={detailsUrl}>{row.unicef_id}</BlackLink>
         </TableCell>
-        <TableCell data-cy="program-cycle-title">
-          {row.title}
-        </TableCell>
+        <TableCell data-cy="program-cycle-title">{row.title}</TableCell>
         <TableCell data-cy={`program-cycle-status-${row.id}`}>
           <StatusBox
             status={row.status}
@@ -71,11 +82,11 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
         <TableCell data-cy={`program-cycle-details-btn-${row.id}`}>
           {program.status === 'ACTIVE' && (
             <>
-              {(row.status === 'Draft' || row.status === 'Active') && (
+              {canEditProgramCycle && (
                 <EditProgramCycle program={program} programCycle={row} />
               )}
 
-              {row.status === 'Draft' && data.results.length > 1 && (
+              {canDeleteProgramCycle && (
                 <DeleteProgramCycle program={program} programCycle={row} />
               )}
             </>
@@ -91,7 +102,7 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
 
   const actions = [];
 
-  if (program.status !== 'DRAFT') {
+  if (canCreateProgramCycle) {
     actions.push(
       <AddNewProgramCycle
         key="add-new"

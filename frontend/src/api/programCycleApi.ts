@@ -7,6 +7,7 @@ export interface ProgramCyclesQuery {
   limit: number;
   offset: number;
   search?: string;
+  title?: string;
   status?: ProgramCycleStatus;
   total_entitled_quantity_usd_from?: number;
   total_entitled_quantity_usd_to?: number;
@@ -43,6 +44,7 @@ export const fetchProgramCycles = async (
     offset: query.offset,
     limit: query.limit,
     ordering: query.ordering,
+    title: query.title ?? '',
     search: query.search ?? '',
     total_entitled_quantity_usd_from:
       query.total_entitled_quantity_usd_from ?? '',

@@ -144,7 +144,6 @@ export const menuItems: MenuItem[] = [
     collapsable: true,
     permissionModule: 'PM',
     scopes: [SCOPE_PROGRAM],
-    permissions: [PERMISSIONS.PM_VIEW_LIST, PERMISSIONS.PM_VIEW_DETAILS],
     flag: 'isPaymentPlanApplicable',
     secondaryActions: [
       {
@@ -152,8 +151,10 @@ export const menuItems: MenuItem[] = [
         href: '/payment-module/program-cycles',
         selectedRegexp: /^\/payment-module\/program-cycles.*$/,
         icon: <PaymentIcon />,
-        // TODO add proper permissions
-        permissions: [PERMISSIONS.PM_VIEW_LIST, PERMISSIONS.PM_VIEW_DETAILS],
+        permissions: [
+          PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_LIST,
+          PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_DETAILS,
+        ],
         permissionModule: 'PM',
         scopes: [SCOPE_PROGRAM],
       },

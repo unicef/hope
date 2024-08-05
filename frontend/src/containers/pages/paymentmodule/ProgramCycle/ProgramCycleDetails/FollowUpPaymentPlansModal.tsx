@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PaymentPlanQuery } from '@generated/graphql';
+import { AllPaymentPlansForTableQuery } from '@generated/graphql';
 import styled from 'styled-components';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useTranslation } from 'react-i18next';
@@ -27,7 +27,7 @@ import TableBody from '@mui/material/TableBody';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 
 interface FollowUpPaymentPlansModalProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: AllPaymentPlansForTableQuery['allPaymentPlans']['edges'][0]['node'];
   canViewDetails: boolean;
 }
 
