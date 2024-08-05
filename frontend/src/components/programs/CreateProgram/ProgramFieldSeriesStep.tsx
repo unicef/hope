@@ -68,6 +68,7 @@ export const ProgramFieldSeriesStep = ({
                       <Grid item xs={3}>
                         <Field
                           name={`pduFields.${index}.label`}
+                          required
                           fullWidth
                           variant="outlined"
                           label={t('Time Series Field Name')}
@@ -78,6 +79,7 @@ export const ProgramFieldSeriesStep = ({
                       <Grid item xs={3}>
                         <Field
                           name={`pduFields.${index}.pduData.subtype`}
+                          required
                           fullWidth
                           variant="outlined"
                           label={t('Data Type')}
@@ -97,6 +99,7 @@ export const ProgramFieldSeriesStep = ({
                           <Field
                             name={`pduFields.${index}.pduData.numberOfRounds`}
                             fullWidth
+                            required
                             variant="outlined"
                             label={t('Number of Expected Rounds')}
                             component={FormikSelectField}
@@ -132,14 +135,7 @@ export const ProgramFieldSeriesStep = ({
                           ).keys(),
                         ].map((round) => (
                           <Grid item xs={12} key={round}>
-                            <FormControl
-                              fullWidth
-                              error={Boolean(
-                                errors.pduFields?.[index]?.pduData
-                                  ?.roundsNames?.[round],
-                              )}
-                              variant="outlined"
-                            >
+                            <FormControl fullWidth variant="outlined">
                               <Field
                                 name={`pduFields.${index}.pduData.roundsNames.${round}`}
                                 fullWidth
@@ -164,7 +160,7 @@ export const ProgramFieldSeriesStep = ({
                 color="primary"
                 onClick={() =>
                   arrayHelpers.push({
-                    label:'',
+                    label: '',
                     pduData: {
                       subtype: '',
                       numberOfRounds: null,
@@ -180,7 +176,9 @@ export const ProgramFieldSeriesStep = ({
               </Button>
             </Box>
             <FormHelperText error>
-              {typeof errors.pduFields === 'string' && errors.pduFields}
+              {errors.pduFields && errors.pduFields.length > 0
+                ? t('Please complete the PDU fields correctly.')
+                : null}
             </FormHelperText>
           </div>
         )}
@@ -208,6 +206,7 @@ export const ProgramFieldSeriesStep = ({
             color="primary"
             data-cy="button-next"
             onClick={handleNext}
+            disabled={errors.pduFields && errors.pduFields.length > 0}
           >
             {t('Next')}
           </Button>
