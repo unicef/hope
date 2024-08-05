@@ -243,7 +243,7 @@ export function PaymentDetails({
               value={payment.snapshotCollectorBankAccountNumber}
             />
           </Grid>
-          {payment.deliveryType.name === 'Deposit to Card' && (
+          {payment.deliveryType?.name === 'Deposit to Card' && (
             <>
               <Grid item xs={3}>
                 <LabelizedField

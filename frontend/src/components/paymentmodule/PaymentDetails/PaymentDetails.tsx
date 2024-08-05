@@ -213,7 +213,7 @@ export function PaymentDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('DELIVERY MECHANISM')}
-              value={payment.deliveryType.name}
+              value={payment.deliveryType?.name}
             />
           </Grid>
           <Grid item xs={3}>
@@ -243,7 +243,7 @@ export function PaymentDetails({
               value={payment.snapshotCollectorBankAccountNumber}
             />
           </Grid>
-          {payment.deliveryType.name === 'Deposit to Card' && (
+          {payment.deliveryType?.name === 'Deposit to Card' && (
             <>
               <Grid item xs={3}>
                 <LabelizedField
