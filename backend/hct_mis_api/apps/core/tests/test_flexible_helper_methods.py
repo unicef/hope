@@ -31,6 +31,8 @@ class TestFlexibleHelperMethods(TestCase):
                 "type",
                 "name",
                 "required",
+                "program",
+                "pdu_data",
                 "label",
                 "hint",
                 "group",

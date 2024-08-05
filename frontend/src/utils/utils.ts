@@ -55,6 +55,22 @@ export function opacityToHex(opacity: number): string {
   return Math.floor(opacity * 0xff).toString(16);
 }
 
+export function periodicDataUpdatesStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'Processing':
+      return theme.hctPalette.orange;
+    case 'Successful':
+      return theme.hctPalette.green;
+    case 'Failed':
+      return theme.hctPalette.red;
+    default:
+      return theme.hctPalette.gray;
+  }
+}
+
 export function programStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -261,6 +277,40 @@ export function targetPopulationBuildStatusToColor(
     [TargetPopulationBuildStatus.Failed]: theme.hctPalette.red,
     [TargetPopulationBuildStatus.Building]: theme.hctPalette.orange,
     [TargetPopulationBuildStatus.Pending]: theme.hctPalette.gray,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
+export function periodicDataUpdateTemplateStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    EXPORTED: theme.hctPalette.green,
+    FAILED: theme.hctPalette.red,
+    TO_EXPORT: theme.hctPalette.gray,
+    ['NOT_SCHEDULED']: theme.hctPalette.gray,
+    ['CANCELED']: theme.hctPalette.gray,
+    EXPORTING: theme.hctPalette.orange,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
+export function periodicDataUpdatesUpdatesStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    SUCCESSFUL: theme.hctPalette.green,
+    FAILED: theme.hctPalette.red,
+    PENDING: theme.hctPalette.gray,
+    ['NOT_SCHEDULED']: theme.hctPalette.gray,
+    ['CANCELED']: theme.hctPalette.gray,
+    PROCESSING: theme.hctPalette.orange,
   };
   if (status in colorsMap) {
     return colorsMap[status];

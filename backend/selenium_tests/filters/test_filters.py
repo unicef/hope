@@ -310,7 +310,7 @@ class TestSmokeFilters:
                 filters.selectFilter,
                 filters.hhFiltersStatus,
             ],
-            "Individuals": [
+            "Household Members": [
                 filters.indFiltersSearch,
                 filters.selectFilter,
                 filters.filtersDocumentType,

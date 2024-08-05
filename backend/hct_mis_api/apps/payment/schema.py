@@ -57,7 +57,6 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE, Household
 from hct_mis_api.apps.household.schema import HouseholdNode
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.filters import (
     FinancialServiceProviderFilter,
     FinancialServiceProviderXlsxTemplateFilter,
@@ -81,6 +80,7 @@ from hct_mis_api.apps.payment.models import (
     Approval,
     ApprovalProcess,
     CashPlan,
+    DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -155,6 +155,17 @@ class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoOb
 
     class Meta:
         model = FinancialServiceProviderXlsxTemplate
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class DeliveryMechanismNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.PM_LOCK_AND_UNLOCK_FSP),)
+    code = graphene.String()
+    name = graphene.String()
+
+    class Meta:
+        model = DeliveryMechanism
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
@@ -447,14 +458,18 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
         return self.fsp_auth_code or ""  # type: ignore
 
 
-class DeliveryMechanismNode(DjangoObjectType):
+class DeliveryMechanismPerPaymentPlanNode(DjangoObjectType):
     name = graphene.String()
+    code = graphene.String()
     order = graphene.Int()
     fsp = graphene.Field(FinancialServiceProviderNode)
     chosen_configuration = graphene.String()
 
     def resolve_name(self, info: Any) -> graphene.String:
-        return self.delivery_mechanism
+        return self.delivery_mechanism.name
+
+    def resolve_code(self, info: Any) -> graphene.String:
+        return self.delivery_mechanism.code
 
     def resolve_order(self, info: Any) -> graphene.Int:
         return self.delivery_mechanism_order
@@ -481,12 +496,12 @@ def _calculate_volume(
 
 
 class VolumeByDeliveryMechanismNode(graphene.ObjectType):
-    delivery_mechanism = graphene.Field(DeliveryMechanismNode)
+    delivery_mechanism = graphene.Field(DeliveryMechanismPerPaymentPlanNode)
     volume = graphene.Float()
     volume_usd = graphene.Float()
 
     def resolve_delivery_mechanism(self, info: Any) -> "VolumeByDeliveryMechanismNode":
-        return self  # DeliveryMechanismNode uses the same model
+        return self  # DeliveryMechanismPerPaymentPlanNode uses the same model
 
     def resolve_volume(self, info: Any) -> Optional[_decimal.Decimal]:  # non-usd
         return _calculate_volume(self, "entitlement_quantity")  # type: ignore
@@ -542,7 +557,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     has_fsp_delivery_mechanism_xlsx_template = graphene.Boolean()
     imported_file_name = graphene.String()
     payments_conflicts_count = graphene.Int()
-    delivery_mechanisms = graphene.List(DeliveryMechanismNode)
+    delivery_mechanisms = graphene.List(DeliveryMechanismPerPaymentPlanNode)
     volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
     split_choices = graphene.List(ChoiceObject)
     verification_plans = DjangoPermissionFilterConnectionField(
@@ -637,11 +652,19 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
             delivered_fully=Count("id", filter=Q(status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS)),
             delivered_partially=Count("id", filter=Q(status=GenericPayment.STATUS_DISTRIBUTION_PARTIAL)),
             not_delivered=Count("id", filter=Q(status=GenericPayment.STATUS_NOT_DISTRIBUTED)),
-            unsuccessful=Count("id", filter=Q(status=GenericPayment.STATUS_ERROR)),
-            force_failed=Count("id", filter=Q(status=GenericPayment.STATUS_FORCE_FAILED)),
-            pending=Count("id", filter=Q(status=GenericPayment.STATUS_PENDING)),
+            unsuccessful=Count(
+                "id",
+                filter=Q(
+                    status__in=[
+                        GenericPayment.STATUS_ERROR,
+                        GenericPayment.STATUS_FORCE_FAILED,
+                        GenericPayment.STATUS_MANUALLY_CANCELLED,
+                    ]
+                ),
+            ),
+            pending=Count("id", filter=Q(status__in=GenericPayment.PENDING_STATUSES)),
+            reconciled=Count("id", filter=~Q(status__in=GenericPayment.PENDING_STATUSES)),
             number_of_payments=Count("id"),
-            reconciled=Count("id", filter=~Q(status=GenericPayment.STATUS_PENDING)),
         )
 
     def resolve_excluded_households(self, info: Any) -> "QuerySet":
@@ -1084,17 +1107,18 @@ class Query(graphene.ObjectType):
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input["payment_plan_id"]))
         delivery_mechanisms = (
             DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=payment_plan)
-            .values_list("delivery_mechanism", flat=True)
+            .values_list("delivery_mechanism__name", flat=True)
             .order_by("delivery_mechanism_order")
         )
 
-        def get_fsps_for_delivery_mechanism(mechanism: str) -> List:
+        def get_fsps_for_delivery_mechanism(mechanism_name: str) -> List:
             fsps = FinancialServiceProvider.objects.filter(
-                Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism=mechanism)
+                Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=mechanism_name)
                 | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
-                delivery_mechanisms__contains=[mechanism],
+                delivery_mechanisms__name=mechanism_name,
                 allowed_business_areas__slug=business_area_slug,
             ).distinct()
+
             return (
                 [
                     # This basically checks if FSP can accept ANY additional volume,
@@ -1181,7 +1205,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(PaymentRecord.ENTITLEMENT_CARD_STATUS_CHOICE)
 
     def resolve_payment_record_delivery_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
-        return to_choice_object(DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES)
+        return to_choice_object(DeliveryMechanism.get_choices())
 
     def resolve_cash_plan_verification_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(PaymentVerificationPlan.STATUS_CHOICES)
@@ -1198,7 +1222,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(PaymentVerification.STATUS_CHOICES)
 
     def resolve_all_delivery_mechanisms(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
-        return to_choice_object(DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES)
+        return to_choice_object(DeliveryMechanism.get_choices())
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
@@ -1263,7 +1287,8 @@ class Query(graphene.ObjectType):
         data = []
         for volume_dict in volume_by_delivery_type:
             if volume_dict.get("volume"):
-                labels.append(volume_dict.get("delivery_type"))
+                dm = DeliveryMechanism.objects.get(id=volume_dict.get("delivery_type"))
+                labels.append(dm.name)
                 data.append(volume_dict.get("volume"))
 
         return {"labels": labels, "datasets": [{"data": data}]}
@@ -1380,11 +1405,11 @@ class Query(graphene.ObjectType):
             .annotate(
                 total_delivered_cash=Sum(
                     "delivered_quantity_usd",
-                    filter=Q(delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_CASH),
+                    filter=Q(delivery_type__transfer_type=DeliveryMechanism.TransferType.CASH.value),
                 ),
                 total_delivered_voucher=Sum(
                     "delivered_quantity_usd",
-                    filter=Q(delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_VOUCHER),
+                    filter=Q(delivery_type__transfer_type=DeliveryMechanism.TransferType.VOUCHER.value),
                 ),
                 business_area_name=F("business_area__name"),
             )
@@ -1438,7 +1463,9 @@ class Query(graphene.ObjectType):
 
         payment_plan_qs = payment_plan_qs.annotate(
             fsp_names=ArraySubquery(fsp_qs.values_list("name", flat=True)),
-            delivery_types=ArraySubquery(delivery_mechanisms_per_pp_qs.values_list("delivery_mechanism", flat=True)),
+            delivery_types=ArraySubquery(
+                delivery_mechanisms_per_pp_qs.values_list("delivery_mechanism__name", flat=True)
+            ),
             currency_order=F("currency"),
         )
         cash_plan_qs = CashPlan.objects.all().annotate(

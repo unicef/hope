@@ -75,12 +75,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cashplanpaymentverification',
             name='confidence_interval',
-            field=models.FloatField(null=True),
+            field=models.FloatField(null=True, blank=True),
         ),
         migrations.AddField(
             model_name='cashplanpaymentverification',
             name='margin_of_error',
-            field=models.FloatField(null=True),
+            field=models.FloatField(null=True, blank=True),
         ),
         migrations.AddField(
             model_name='cashplanpaymentverification',
@@ -105,17 +105,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cashplanpaymentverification',
             name='age_filter',
-            field=django.contrib.postgres.fields.jsonb.JSONField(null=True),
+            field=django.contrib.postgres.fields.jsonb.JSONField(null=True, blank=True),
         ),
         migrations.AddField(
             model_name='cashplanpaymentverification',
             name='excluded_admin_areas_filter',
-            field=django.contrib.postgres.fields.jsonb.JSONField(null=True),
+            field=django.contrib.postgres.fields.jsonb.JSONField(null=True, blank=True),
         ),
         migrations.AddField(
             model_name='cashplanpaymentverification',
             name='sex_filter',
-            field=models.CharField(max_length=10, null=True),
+            field=models.CharField(max_length=10, null=True, blank=True),
         ),
         migrations.RunPython(change_all_rapidpro_to_pending, empty_reverse),
         migrations.AddField(

@@ -19,12 +19,14 @@ export interface ConfirmationDialogOptions {
   extraContent?: string;
   warningContent?: string | null;
   disabled?: boolean;
+  type?: 'error' | 'primary';
 }
 
 export interface ConfirmationDialogProps extends ConfirmationDialogOptions {
   open: boolean;
   onSubmit: () => void;
   onClose: () => void;
+  type?: 'error' | 'primary';
 }
 
 export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
@@ -37,6 +39,7 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
   onSubmit,
   onClose,
   disabled = false,
+  type = 'primary',
 }) => {
   const { t } = useTranslation();
 
@@ -79,7 +82,7 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
           </Button>
           <Button
             variant="contained"
-            color="primary"
+            color={type}
             disabled={disabled}
             onClick={onSubmit}
             data-cy="button-confirm"

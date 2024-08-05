@@ -75,12 +75,12 @@ class PaymentPlanPDFExportService:
         release = approval_process.approvals.filter(type=Approval.FINANCE_RELEASE).first()
 
         reconciliation_qs = self.payment_plan.eligible_payments.aggregate(
-            pending=Count("id", filter=Q(status=GenericPayment.STATUS_PENDING)),
-            pending_usd=Sum("entitlement_quantity_usd", filter=Q(status=GenericPayment.STATUS_PENDING)),
-            pending_local=Sum("entitlement_quantity", filter=Q(status=GenericPayment.STATUS_PENDING)),
-            reconciled=Count("id", filter=~Q(status=GenericPayment.STATUS_PENDING)),
-            reconciled_usd=Sum("delivered_quantity_usd", filter=~Q(status=GenericPayment.STATUS_PENDING)),
-            reconciled_local=Sum("delivered_quantity", filter=~Q(status=GenericPayment.STATUS_PENDING)),
+            pending=Count("id", filter=Q(status__in=GenericPayment.PENDING_STATUSES)),
+            pending_usd=Sum("entitlement_quantity_usd", filter=Q(status__in=GenericPayment.PENDING_STATUSES)),
+            pending_local=Sum("entitlement_quantity", filter=Q(status__in=GenericPayment.PENDING_STATUSES)),
+            reconciled=Count("id", filter=~Q(status__in=GenericPayment.PENDING_STATUSES)),
+            reconciled_usd=Sum("delivered_quantity_usd", filter=~Q(status__in=GenericPayment.PENDING_STATUSES)),
+            reconciled_local=Sum("delivered_quantity", filter=~Q(status__in=GenericPayment.PENDING_STATUSES)),
         )
 
         pdf_context_data = {

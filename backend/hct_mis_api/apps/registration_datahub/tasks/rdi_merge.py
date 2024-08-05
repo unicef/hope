@@ -205,7 +205,7 @@ class RdiMergeTask:
                 if not delivery_mechanism_data.is_valid:
                     description = (
                         f"Fields not unique {list(delivery_mechanism_data.validation_errors.keys())} across program"
-                        f" for delivery mechanism {delivery_mechanism_data.delivery_mechanism}, possible duplicate of {delivery_mechanism_data.possible_duplicate_of}"
+                        f" for delivery mechanism {delivery_mechanism_data.delivery_mechanism.name}, possible duplicate of {delivery_mechanism_data.possible_duplicate_of}"
                     )
                     (
                         grievance_ticket,
