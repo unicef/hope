@@ -72,43 +72,30 @@ export const programValidationSchema = (
           pduData: Yup.object().shape({
             subtype: Yup.string().nullable(),
             numberOfRounds: Yup.number().nullable(),
-            roundsNames: Yup.array()
-              .of(
-                Yup.string()
-                  .required(t('Round Name is required'))
-                  .min(3, t('Too short'))
-                  .max(150, t('Too long')),
-              )
-              .test(
-                'rounds-match-number',
-                '', // Custom error message
-                function (value) {
-                  const { numberOfRounds } = this.parent;
-                  if (!numberOfRounds) return true;
-                  return value.length === numberOfRounds;
-                },
-              ),
+            roundsNames: Yup.array().of(
+              Yup.string().min(3, t('Too short')).max(150, t('Too long')),
+            ),
           }),
         })
         .test(
           'pduFields-validation',
-          t('Please complete the PDU fields correctly.'), // Custom error message
+          t('Please complete the PDU fields correctly.'),
           function (value) {
             const { label, pduData } = value;
             const { subtype, numberOfRounds, roundsNames } = pduData;
-            const isInitialState =
+
+            // Check if any field is empty or incomplete
+            const isAnyFieldEmpty =
+              !label || !subtype || numberOfRounds === null;
+
+            // Ensure that all fields are either completely filled or completely empty
+            const isAllFieldsEmpty =
               !label &&
               !subtype &&
               numberOfRounds === null &&
               roundsNames.length === 0;
 
-            const isValidState =
-              label &&
-              subtype &&
-              numberOfRounds &&
-              roundsNames.length === numberOfRounds;
-
-            return isInitialState || isValidState;
+            return !isAnyFieldEmpty || isAllFieldsEmpty;
           },
         ),
     ),
