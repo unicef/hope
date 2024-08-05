@@ -52,7 +52,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanismData
+from hct_mis_api.apps.payment.models import DeliveryMechanism, DeliveryMechanismData
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
@@ -128,8 +128,8 @@ class ImportDataInstanceValidator:
     def __init__(self, program: Program) -> None:
         self.is_social_worker_program = program.is_social_worker_program
         self.all_fields = self.get_all_fields()
-        self.delivery_mechanisms_xlsx_fields = list(
-            set([_field["xlsx_field"] for _field in DeliveryMechanismData.get_all_delivery_mechanisms_fields()])
+        self.delivery_mechanisms_xlsx_fields = DeliveryMechanismData.get_all_delivery_mechanisms_fields(
+            by_xlsx_name=True
         )
         if self.is_social_worker_program:
             self.delivery_mechanisms_xlsx_fields = [f"pp_{field}" for field in self.delivery_mechanisms_xlsx_fields]
@@ -296,7 +296,7 @@ class ImportDataInstanceValidator:
 
     def delivery_mechanisms_validator(self, xlsx_delivery_mechanisms_dict: Dict) -> List[Dict[str, Any]]:
         delivery_mechanisms_to_required_fields_mapping = (
-            DeliveryMechanismData.get_delivery_mechanisms_to_xlsx_fields_mapping(by="xlsx_field")
+            DeliveryMechanism.get_delivery_mechanisms_to_xlsx_fields_mapping()
         )
         if self.is_social_worker_program:
             delivery_mechanisms_to_required_fields_mapping = {

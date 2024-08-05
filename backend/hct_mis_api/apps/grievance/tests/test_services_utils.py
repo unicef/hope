@@ -1,8 +1,8 @@
 from typing import Any
-from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.test import TestCase
 
 import pytest
 
@@ -63,7 +63,6 @@ class FlexibleAttribute:
             return MagicMock()
 
 
-@pytest.mark.django_db
 class TestGrievanceUtils(TestCase):
     def test_to_phone_number_str(self) -> None:
         data = {"phone_number": 123456789}
