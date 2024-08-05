@@ -723,6 +723,15 @@ class TestGrievanceTickets:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getButtonNewTicket().click()
+        pageGrievanceNewTicket.getSelectCategory().click()
+        pageGrievanceNewTicket.select_option_by_name("Grievance Complaint")
+        pageGrievanceNewTicket.getIssueType().click()
+        pageGrievanceNewTicket.select_option_by_name("Payment Related Complaint")
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getHouseholdTab()
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getReceivedConsent().click()
+        pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.screenshot("1")
         from selenium_tests.tools.tag_name_finder import printing
 
