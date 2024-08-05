@@ -62,7 +62,7 @@ export function Notes({
     description: string,
     noteId: string,
   ): React.ReactElement => (
-    <Grid container key={noteId}>
+    <Grid container key={noteId}  data-cy="note-row">
       <Grid item xs={2}>
         <Avatar alt={`${name} picture`} src="/static/images/avatar/1.jpg" />
       </Grid>

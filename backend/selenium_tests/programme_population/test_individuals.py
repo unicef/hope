@@ -82,3 +82,7 @@ class TestSmokeIndividuals:
         assert "0048503123555" in pageIndividualsDetails.getLabelPhoneNumber().text
         assert "-" in pageIndividualsDetails.getLabelAlternativePhoneNumber().text
         assert "-" in pageIndividualsDetails.getLabelDateOfLastScreeningAgainstSanctionsList().text
+
+    @pytest.mark.skip(reason="ToDo")
+    def test_check_data_after_grievance_ticket_processed(self) -> None:
+        pass

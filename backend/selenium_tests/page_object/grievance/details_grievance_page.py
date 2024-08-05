@@ -53,6 +53,7 @@ class GrievanceDetailsPage(BaseComponents):
     cellVillage = 'th[data-cy="table-cell-village"]'
     newNoteField = 'textarea[data-cy="input-newNote"]'
     buttonNewNote = 'button[data-cy="button-add-note"]'
+    noteRow = '[data-cy="note-row"]'
     labelGENDER = 'div[data-cy="label-GENDER"]'
     labelRole = 'div[data-cy="label-role"]'
     labelPhoneNo = 'div[data-cy="label-phone no"]'
@@ -336,6 +337,10 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getButtonNewNote(self) -> WebElement:
         return self.wait_for(self.buttonNewNote)
+
+    def getNoteRows(self) -> [WebElement]:
+        self.wait_for(self.noteRow)
+        return self.get_elements(self.noteRow)
 
     def getLabelGENDER(self) -> WebElement:
         return self.wait_for(self.labelGENDER)
