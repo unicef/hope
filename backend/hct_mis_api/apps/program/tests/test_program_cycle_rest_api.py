@@ -2,6 +2,7 @@ import base64
 from decimal import Decimal
 from typing import Any, Dict
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.test import TestCase
 from django.urls import reverse
 
@@ -18,6 +19,7 @@ from hct_mis_api.apps.account.fixtures import (
 from hct_mis_api.apps.account.models import Role, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.api.serializers import (
     ProgramCycleCreateSerializer,
     ProgramCycleListSerializer,
@@ -198,6 +200,33 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(str(response.data["results"][0]["total_delivered_quantity_usd"]), "1500.00")
+
+    def test_reactivate_program_cycle(self) -> None:
+        self.client.force_authenticate(user=self.user)
+        self.cycle1.status = ProgramCycle.FINISHED
+        self.cycle1.save()
+
+        self.cycle1.refresh_from_db()
+        self.assertEqual(self.cycle1.status, ProgramCycle.FINISHED)
+        response = self.client.post(self.cycle_1_detail_url + "reactivate/", {}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.cycle1.refresh_from_db()
+        self.assertEqual(self.cycle1.status, ProgramCycle.ACTIVE)
+
+    def test_finish_program_cycle(self) -> None:
+        payment_plan = PaymentPlanFactory(program_cycle=self.cycle1, status=PaymentPlan.Status.IN_REVIEW)
+        self.client.force_authenticate(user=self.user)
+        self.assertEqual(self.cycle1.status, ProgramCycle.ACTIVE)
+        with self.assertRaises(DjangoValidationError) as error:
+            self.client.post(self.cycle_1_detail_url + "finish/", {}, format="json")
+        self.assertIn("All Payment Plans and Follow-Up Payment Plans have to be Reconciled.", str(error.exception))
+
+        payment_plan.status = PaymentPlan.Status.ACCEPTED
+        payment_plan.save()
+        response = self.client.post(self.cycle_1_detail_url + "finish/", {}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.cycle1.refresh_from_db()
+        self.assertEqual(self.cycle1.status, ProgramCycle.FINISHED)
 
 
 class ProgramCycleCreateSerializerTest(TestCase):

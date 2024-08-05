@@ -5,7 +5,8 @@ from django.db.models import QuerySet
 
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins
+from rest_framework import mixins, status
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
 from rest_framework.request import Request
@@ -76,8 +77,7 @@ class ProgramCycleViewSet(
         return super().list(request, *args, **kwargs)
 
     def retrieve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        instance = self.get_object()
-        serializer = ProgramCycleListSerializer(instance)
+        serializer = ProgramCycleListSerializer(self.get_object())
         return Response(serializer.data)
 
     def perform_destroy(self, program_cycle: ProgramCycle) -> None:
@@ -91,3 +91,15 @@ class ProgramCycleViewSet(
             raise ValidationError("Don’t allow to delete last Cycle.")
 
         program_cycle.delete()
+
+    @action(detail=True, methods=["post"])
+    def finish(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        program_cycle = self.get_object()
+        program_cycle.set_finish()
+        return Response(status=status.HTTP_200_OK, data={"message": "Programme Cycle Finished"})
+
+    @action(detail=True, methods=["post"])
+    def reactivate(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        program_cycle = self.get_object()
+        program_cycle.set_active()
+        return Response(status=status.HTTP_200_OK, data={"message": "Programme Cycle Reactivated"})

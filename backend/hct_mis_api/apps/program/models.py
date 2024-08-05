@@ -22,6 +22,7 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
@@ -334,6 +335,16 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedMod
         if self.program.status != Program.ACTIVE:
             raise ValidationError("Program should be within Active status.")
 
+    def validate_payment_plan_status(self) -> None:
+        if (
+            PaymentPlan.objects.filter(program_cycle=self)
+            .exclude(
+                status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
+            )
+            .exists()
+        ):
+            raise ValidationError("All Payment Plans and Follow-Up Payment Plans have to be Reconciled.")
+
     def set_active(self) -> None:
         self.validate_program_active_status()
         if self.status in (ProgramCycle.DRAFT, ProgramCycle.FINISHED):
@@ -348,6 +359,7 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedMod
 
     def set_finish(self) -> None:
         self.validate_program_active_status()
+        self.validate_payment_plan_status()
         if self.status == ProgramCycle.ACTIVE:
             self.status = ProgramCycle.FINISHED
             self.save()
