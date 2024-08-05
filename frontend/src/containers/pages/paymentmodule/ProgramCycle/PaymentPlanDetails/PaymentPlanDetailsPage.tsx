@@ -75,7 +75,6 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
     <Box display="flex" flexDirection="column">
       <PaymentPlanDetailsHeader
         paymentPlan={paymentPlan}
-        baseUrl={baseUrl}
         permissions={permissions}
       />
       <PaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />

@@ -4,8 +4,8 @@ export type ProgramCycleStatus = 'Active' | 'Draft' | 'Finished';
 
 export interface ProgramCyclesQuery {
   ordering: string;
-  limit?: number;
-  offset?: number;
+  limit: number;
+  offset: number;
   search?: string;
   status?: ProgramCycleStatus;
   total_entitled_quantity_usd_from?: number;
@@ -112,5 +112,27 @@ export const deleteProgramCycle = async (
 ): Promise<void> => {
   return api.delete(
     `${businessArea}/programs/${programId}/cycles/${programCycleId}/`,
+  );
+};
+
+export const finishProgramCycle = async (
+  businessArea: string,
+  programId: string,
+  programCycleId: string,
+): Promise<any> => {
+  return api.post(
+    `${businessArea}/programs/${programId}/cycles/${programCycleId}/finish/`,
+    {},
+  );
+};
+
+export const reactivateProgramCycle = async (
+  businessArea: string,
+  programId: string,
+  programCycleId: string,
+): Promise<any> => {
+  return api.post(
+    `${businessArea}/programs/${programId}/cycles/${programCycleId}/reactivate/`,
+    {},
   );
 };

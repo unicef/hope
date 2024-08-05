@@ -43,7 +43,7 @@ export const SetUpFspCore = ({
   const { baseUrl } = useBaseUrl();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { id } = useParams();
+  const { paymentPlanId: id } = useParams();
   const location = useLocation();
 
   const { data: deliveryMechanismsData, loading: deliveryMechanismLoading } =

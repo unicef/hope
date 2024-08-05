@@ -16,7 +16,7 @@ export function CreateSetUpFspHeader({
 }: CreateSetUpFspHeaderProps): React.ReactElement {
   const location = useLocation();
   const { t } = useTranslation();
-  const { id } = useParams();
+  const { paymentPlanId: id } = useParams();
   const isFollowUp = location.pathname.indexOf('followup') !== -1;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [

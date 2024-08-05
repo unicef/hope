@@ -7,15 +7,18 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { headCells } from '@containers/tables/ProgramCyclesTable/HeadCells';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   fetchProgramCycles,
+  finishProgramCycle,
   ProgramCycle,
   ProgramCyclesQuery,
+  reactivateProgramCycle,
 } from '@api/programCycleApi';
 import { BlackLink } from '@core/BlackLink';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@mui/material';
+import { useSnackbar } from '@hooks/useSnackBar';
 
 interface ProgramCyclesTableProps {
   program;
@@ -26,6 +29,7 @@ export const ProgramCyclesTable = ({
   program,
   filters,
 }: ProgramCyclesTableProps) => {
+  const { showMessage } = useSnackbar();
   const [queryVariables, setQueryVariables] = useState<ProgramCyclesQuery>({
     offset: 0,
     limit: 5,
@@ -35,6 +39,7 @@ export const ProgramCyclesTable = ({
 
   const { businessArea } = useBaseUrl();
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
 
   const { data, refetch, error, isLoading } = useQuery({
     queryKey: ['programCycles', businessArea, program.id, queryVariables],
@@ -42,6 +47,30 @@ export const ProgramCyclesTable = ({
       return fetchProgramCycles(businessArea, program.id, queryVariables);
     },
   });
+
+  const { mutateAsync: finishMutation, isPending: isPendingFinishing } =
+    useMutation({
+      mutationFn: async ({ programCycleId }: { programCycleId: string }) => {
+        return finishProgramCycle(businessArea, program.id, programCycleId);
+      },
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: ['programCycles', businessArea, program.id],
+        });
+      },
+    });
+
+  const { mutateAsync: reactivateMutation, isPending: isPendingReactivation } =
+    useMutation({
+      mutationFn: async ({ programCycleId }: { programCycleId: string }) => {
+        return reactivateProgramCycle(businessArea, program.id, programCycleId);
+      },
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: ['programCycles', businessArea, program.id],
+        });
+      },
+    });
 
   useEffect(() => {
     setQueryVariables((oldVariables) => ({ ...oldVariables, ...filters }));
@@ -51,47 +80,61 @@ export const ProgramCyclesTable = ({
     void refetch();
   }, [queryVariables, refetch]);
 
-  const reactivateAction = (paymentCycle: ProgramCycle) => {
-    // TODO connect with action
-    console.log('reactivate action');
+  const finishAction = async (programCycle: ProgramCycle) => {
+    try {
+      await finishMutation({ programCycleId: programCycle.id });
+      showMessage(t('Programme Cycle Finished'));
+    } catch (e) {
+      showMessage(e.message);
+    }
   };
 
-  const finishAction = (paymentCycle: ProgramCycle) => {
-    // TODO connect with action
-    console.log('finish action');
+  const reactivateAction = async (programCycle: ProgramCycle) => {
+    try {
+      await reactivateMutation({ programCycleId: programCycle.id });
+      showMessage(t('Programme Cycle Reactivated'));
+    } catch (e) {
+      showMessage(e.message);
+    }
   };
 
   const renderRow = (row: ProgramCycle): ReactElement => (
     <ClickableTableRow key={row.id} data-cy="program-cycle-row">
-      <TableCell data-cy={`program-cycle-id`}>
+      <TableCell data-cy="program-cycle-id">
         <BlackLink to={`./${row.id}`}>{row.unicef_id}</BlackLink>
       </TableCell>
-      <TableCell data-cy={`program-cycle-title`}>
-        {row.title}
-      </TableCell>
-      <TableCell data-cy={`program-cycle-status`}>
+      <TableCell data-cy="program-cycle-title">{row.title}</TableCell>
+      <TableCell data-cy="program-cycle-status">
         <StatusBox
           status={row.status}
           statusToColor={programCycleStatusToColor}
         />
       </TableCell>
-      <TableCell data-cy={`program-cycle-total-entitled-quantity`}>
+      <TableCell data-cy="program-cycle-total-entitled-quantity">
         {row.total_entitled_quantity_usd || '-'}
       </TableCell>
-      <TableCell data-cy={`program-cycle-start-date`}>
+      <TableCell data-cy="program-cycle-start-date">
         <UniversalMoment>{row.start_date}</UniversalMoment>
       </TableCell>
-      <TableCell data-cy={`program-cycle-end-date`}>
+      <TableCell data-cy="program-cycle-end-date">
         <UniversalMoment>{row.end_date}</UniversalMoment>
       </TableCell>
-      <TableCell data-cy={`program-cycle-details-btn`}>
+      <TableCell data-cy="program-cycle-details-btn">
         {row.status === 'Finished' && (
-          <Button onClick={() => reactivateAction(row)} variant="text">
+          <Button
+            onClick={() => reactivateAction(row)}
+            variant="text"
+            disabled={isPendingReactivation}
+          >
             {t('REACTIVATE')}
           </Button>
         )}
         {row.status === 'Active' && (
-          <Button onClick={() => finishAction(row)} variant="text">
+          <Button
+            onClick={() => finishAction(row)}
+            variant="text"
+            disabled={isPendingFinishing}
+          >
             {t('FINISH')}
           </Button>
         )}

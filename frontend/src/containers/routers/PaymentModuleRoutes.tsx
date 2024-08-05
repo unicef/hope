@@ -134,7 +134,7 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
             element: <PaymentModulePage />,
           },
           {
-            path: ':id',
+            path: ':paymentPlanId',
             children: [
               {
                 path: '',

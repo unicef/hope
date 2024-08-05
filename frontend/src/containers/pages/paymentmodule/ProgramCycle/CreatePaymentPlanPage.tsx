@@ -17,7 +17,7 @@ import {
 } from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 export const CreatePaymentPlanPage = (): React.ReactElement => {
   const navigate = useNavigate();
@@ -26,6 +26,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
+  const { programCycleId } = useParams();
 
   const { data: allTargetPopulationsData, loading: loadingTargetPopulations } =
     useAllTargetPopulationsQuery({
@@ -74,8 +75,6 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
 
   const handleSubmit = async (values: FormValues): Promise<void> => {
     try {
-      const startDate = null; // TODO fetch from program cycle
-      const endDate = null; // TODO fetch from program cycle
       const dispersionStartDate = values.dispersionStartDate
         ? format(new Date(values.dispersionStartDate), 'yyyy-MM-dd')
         : null;
@@ -89,10 +88,9 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
           input: {
             businessAreaSlug: businessArea,
             ...values,
-            startDate,
-            endDate,
             dispersionStartDate,
             dispersionEndDate,
+            programCycleId,
           },
         },
       });

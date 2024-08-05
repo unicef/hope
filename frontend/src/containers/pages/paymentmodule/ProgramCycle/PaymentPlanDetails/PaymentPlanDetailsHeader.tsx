@@ -15,36 +15,64 @@ import { AcceptedPaymentPlanHeaderButtons } from '@components/paymentmodule/Paym
 import { PageHeader } from '@core/PageHeader';
 import { StatusBox } from '@core/StatusBox';
 import {
+  decodeIdString,
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
 } from '@utils/utils';
+import { useQuery } from '@tanstack/react-query';
+import { fetchProgramCycle } from '@api/programCycleApi';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useParams } from 'react-router-dom';
 
 const StatusWrapper = styled(Box)`
   width: 150px;
 `;
 
 interface PaymentPlanDetailsHeaderProps {
-  baseUrl: string;
   permissions: string[];
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
 export const PaymentPlanDetailsHeader = ({
-  baseUrl,
   permissions,
   paymentPlan,
 }: PaymentPlanDetailsHeaderProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { businessArea, programId } = useBaseUrl();
+  const { programCycleId } = useParams();
+  const decodedProgramCycleId = decodeIdString(programCycleId);
+
+  const { data: programCycleData, isLoading: isLoadingProgramCycle } = useQuery(
+    {
+      queryKey: [
+        'programCyclesDetails',
+        businessArea,
+        programId,
+        decodedProgramCycleId,
+      ],
+      queryFn: async () => {
+        return fetchProgramCycle(
+          businessArea,
+          programId,
+          decodedProgramCycleId,
+        );
+      },
+    },
+  );
+
+  if (isLoadingProgramCycle) {
+    return null;
+  }
+
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module/`,
+      to: '../../..',
     },
-    // TODO fix breadcrumbs
-    // {
-    //   title: `${paymentPlan.programCycle.name} (ID: ${paymentPlan.programCycle.unicefId})`,
-    //   to: `/${baseUrl}/payment-module/program-cycles/${paymentPlan.programCycle.id}`,
-    // },
+    {
+      title: `${programCycleData.title} (ID: ${programCycleData.unicef_id})`,
+      to: '../..',
+    },
   ];
 
   const canRemove = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
@@ -75,7 +103,6 @@ export const PaymentPlanDetailsHeader = ({
     PERMISSIONS.PM_EXPORT_XLSX_FOR_FSP,
     permissions,
   );
-  const canSendToFsp = false; // TODO: disabled for now
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
   const canSendToPaymentGateway =
