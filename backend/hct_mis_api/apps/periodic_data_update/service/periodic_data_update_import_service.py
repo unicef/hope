@@ -22,8 +22,8 @@ from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_t
 class PeriodicDataUpdateBaseForm(forms.Form):
     individual__uuid = forms.UUIDField()
     individual_unicef_id = forms.CharField()
-    first_name = forms.CharField()
-    last_name = forms.CharField()
+    first_name = forms.CharField(required=False)
+    last_name = forms.CharField(required=False)
 
 
 class RowValidationError(ValidationError):
