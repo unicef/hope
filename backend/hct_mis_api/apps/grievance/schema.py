@@ -638,9 +638,9 @@ class Query(graphene.ObjectType):
             .apply_business_area(business_area_slug)
         )
         all_options = list(fields) + list(
-            FlexibleAttribute.objects.filter(
-                associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
-            ).prefetch_related("choices")
+            FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
+            .exclude(type=FlexibleAttribute.PDU)
+            .prefetch_related("choices")
         )
         return sort_by_attr(all_options, "label.English(EN)")
 

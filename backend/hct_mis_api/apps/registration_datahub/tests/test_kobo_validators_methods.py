@@ -6,6 +6,8 @@ from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
 )
@@ -470,7 +472,8 @@ class TestKoboSaveValidatorsMethods(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        create_afghanistan()
+        cls.business_area = create_afghanistan()
+        cls.program = ProgramFactory(name="Test Program", status=Program.ACTIVE, business_area=cls.business_area)
 
     def test_image_validator(self) -> None:
         # test for valid value
@@ -505,7 +508,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "xform": 549819,
             }
         ]
-        validator = KoboProjectImportDataInstanceValidator()
+        validator = KoboProjectImportDataInstanceValidator(self.program)
         result = validator.image_validator("signature-17_10_32.png", "consent_sign_h_c", valid_attachments)
         self.assertIsNone(result, None)
 
@@ -578,7 +581,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             [],
             None,
         )
-        validator = KoboProjectImportDataInstanceValidator()
+        validator = KoboProjectImportDataInstanceValidator(self.program)
         for valid_option in valid_geolocations:
             self.assertIsNone(
                 validator.geopoint_validator(
@@ -617,7 +620,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 ),
             },
         )
-        validator = KoboProjectImportDataInstanceValidator()
+        validator = KoboProjectImportDataInstanceValidator(self.program)
         for data in test_data:
             result = validator.date_validator(*data["args"])
             self.assertEqual(result, data["expected"])
@@ -699,13 +702,13 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 },
             },
         )
-        validator = KoboProjectImportDataInstanceValidator()
+        validator = KoboProjectImportDataInstanceValidator(self.program)
         for data in test_data:
             result = validator._get_field_type_error(*data["args"])
             self.assertEqual(result, data["expected"])
 
     def test_validate_everything(self) -> None:
-        validator = KoboProjectImportDataInstanceValidator()
+        validator = KoboProjectImportDataInstanceValidator(self.program)
         business_area = BusinessArea.objects.first()
 
         result = validator.validate_everything(self.VALID_JSON, business_area, True)

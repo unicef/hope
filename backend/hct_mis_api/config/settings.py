@@ -236,6 +236,7 @@ PROJECT_APPS = [
     "hct_mis_api.aurora.apps.Config",
     "hct_mis_api.apps.accountability.apps.AccountabilityConfig",
     "hct_mis_api.apps.web.apps.WebConfig",
+    "hct_mis_api.apps.periodic_data_update.apps.PeriodicDataUpdateConfig",
 ]
 
 DJANGO_APPS = [

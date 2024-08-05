@@ -37,7 +37,7 @@ def printing(what: str, web_driver: WebDriver, label: str = "data-cy", page_obje
 
 
 if __name__ == "__main__":
-    default_url = "http://localhost:8080"
+    default_url = "http://localhost:3000"
     url = input(f"Url of page (default is {default_url}):")
     if not url:
         url = default_url

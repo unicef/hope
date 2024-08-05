@@ -1,7 +1,9 @@
 import os
+import time
 from time import sleep
 from typing import Literal, Union
 
+from selenium.common import NoSuchElementException
 from selenium.webdriver import Chrome, Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -40,7 +42,13 @@ class Common:
             raise Exception("No elements found")
 
     def wait_for(self, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT) -> WebElement:
-        return self._wait(timeout).until(EC.visibility_of_element_located((element_type, locator)))
+        from selenium.common.exceptions import TimeoutException
+
+        try:
+            return self._wait(timeout).until(EC.visibility_of_element_located((element_type, locator)))
+        except TimeoutException:
+            pass
+        raise NoSuchElementException(f"Element: {locator} not found")
 
     def wait_for_disappear(
         self, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
@@ -88,7 +96,11 @@ class Common:
     def upload_file(
         self, upload_file: str, xpath: str = "//input[@type='file']", timeout: int = DEFAULT_TIMEOUT
     ) -> None:
+        from time import sleep
+
+        sleep(5)
         self._wait(timeout).until(EC.presence_of_element_located((By.XPATH, xpath))).send_keys(upload_file)
+        sleep(2)
 
     def select_option_by_name(self, optionName: str) -> None:
         selectOption = f'li[data-cy="select-option-{optionName}"]'
@@ -146,3 +158,12 @@ class Common:
 
     def wait_for_element_clickable(self, locator: str) -> bool:
         return self._wait().until(EC.element_to_be_clickable((By.XPATH, locator)))
+
+    def check_file_exists(self, filepath: str, timeout: int = DEFAULT_TIMEOUT) -> bool:
+        start_time = time.time()
+        while True:
+            if os.path.exists(filepath):
+                return True
+            elif time.time() - start_time > timeout:
+                raise TimeoutError(f"File {filepath} not found after {timeout} seconds")
+            sleep(0.02)

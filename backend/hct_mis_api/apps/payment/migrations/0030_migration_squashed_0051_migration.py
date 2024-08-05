@@ -166,12 +166,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='cashplanpaymentverification',
             name='age_filter',
-            field=models.JSONField(null=True),
+            field=models.JSONField(null=True, blank=True),
         ),
         migrations.AlterField(
             model_name='cashplanpaymentverification',
             name='excluded_admin_areas_filter',
-            field=models.JSONField(null=True),
+            field=models.JSONField(null=True, blank=True),
         ),
         migrations.AlterField(
             model_name='cashplanpaymentverificationsummary',

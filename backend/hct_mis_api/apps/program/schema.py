@@ -34,7 +34,11 @@ from hct_mis_api.apps.account.schema import PartnerNode
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.core.schema import ChoiceObject, DataCollectingTypeNode
+from hct_mis_api.apps.core.schema import (
+    ChoiceObject,
+    DataCollectingTypeNode,
+    PeriodicFieldNode,
+)
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_permission_decorator,
@@ -77,6 +81,7 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     data_collecting_type = graphene.Field(DataCollectingTypeNode, source="data_collecting_type")
     partners = graphene.List(PartnerNode)
     is_social_worker_program = graphene.Boolean()
+    pdu_fields = graphene.List(PeriodicFieldNode)
 
     class Meta:
         model = Program
@@ -108,6 +113,10 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     @staticmethod
     def resolve_is_social_worker_program(program: Program, info: Any, **kwargs: Any) -> bool:
         return program.is_social_worker_program
+
+    @staticmethod
+    def resolve_pdu_fields(program: Program, info: Any, **kwargs: Any) -> QuerySet:
+        return program.pdu_fields.all()
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
