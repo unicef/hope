@@ -14,12 +14,19 @@ from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
+    generate_delivery_mechanisms,
 )
+from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
+    FinancialServiceProvider,
+    PaymentPlan,
+)
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.payment.models import FinancialServiceProvider, PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
@@ -64,6 +71,9 @@ def create_test_program() -> Program:
 
 @pytest.fixture
 def create_targeting(create_test_program: Program) -> None:
+    generate_delivery_mechanisms()
+    dm_cash = DeliveryMechanism.objects.get(code="cash")
+
     targeting_criteria = TargetingCriteriaFactory()
 
     tp = TargetPopulationFactory(
@@ -95,15 +105,15 @@ def create_targeting(create_test_program: Program) -> None:
     fsp_1 = FinancialServiceProviderFactory(
         name="FSP_1",
         vision_vendor_number="149-69-3686",
-        delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH],
         distribution_limit=10_000,
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
     )
+    fsp_1.delivery_mechanisms.set([dm_cash])
     fsp_1.allowed_business_areas.add(business_area)
     FspXlsxTemplatePerDeliveryMechanismFactory(
         financial_service_provider=fsp_1,
         xlsx_template=fsp_xlsx_template,
-        delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+        delivery_mechanism=dm_cash,
     )
 
 

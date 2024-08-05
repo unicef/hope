@@ -49,8 +49,10 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
+    generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
     FinancialServiceProviderXlsxTemplate,
     Payment,
     PaymentPlan,
@@ -355,6 +357,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             code="full", description="Full individual collected", active=True, type="STANDARD"
         )
         cls.data_collecting_type.limit_to.add(cls.business_area)
+        generate_delivery_mechanisms()
 
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_receiving_reconciliations_from_fsp(self, mock_get_exchange_rate: Any) -> None:
@@ -519,19 +522,17 @@ class TestPaymentPlanReconciliation(APITestCase):
         # check if Cycle is active
         assert ProgramCycle.objects.filter(title="NEW NEW NAME").first().status == "ACTIVE"
 
+        dm_cash = DeliveryMechanism.objects.get(code="cash")
+        dm_transfer = DeliveryMechanism.objects.get(code="transfer_to_account")
+
         santander_fsp = FinancialServiceProviderFactory(
             name="Santander",
-            delivery_mechanisms=[
-                DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
-                DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
-            ],
             distribution_limit=None,
         )
+        santander_fsp.delivery_mechanisms.set([dm_cash, dm_transfer])
+        FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=santander_fsp, delivery_mechanism=dm_cash)
         FspXlsxTemplatePerDeliveryMechanismFactory(
-            financial_service_provider=santander_fsp, delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH
-        )
-        FspXlsxTemplatePerDeliveryMechanismFactory(
-            financial_service_provider=santander_fsp, delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER
+            financial_service_provider=santander_fsp, delivery_mechanism=dm_transfer
         )
         encoded_santander_fsp_id = encode_id_base64(santander_fsp.id, "FinancialServiceProvider")
 
@@ -596,7 +597,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                 input=dict(
                     paymentPlanId=encoded_payment_plan_id,
                     deliveryMechanisms=[
-                        DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+                        dm_cash.code,
                     ],
                 )
             ),
@@ -626,7 +627,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                 "paymentPlanId": encoded_payment_plan_id,
                 "mappings": [
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+                        "deliveryMechanism": dm_cash.code,
                         "fspId": encoded_santander_fsp_id,
                         "order": 1,
                     }
@@ -654,7 +655,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         payment_plan.refresh_from_db()
         assert (
             payment_plan.delivery_mechanisms.filter(
-                financial_service_provider=santander_fsp, delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH
+                financial_service_provider=santander_fsp, delivery_mechanism=dm_cash
             ).count()
             == 1
         )

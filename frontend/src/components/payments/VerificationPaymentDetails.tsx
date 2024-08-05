@@ -3,7 +3,6 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import {
-  choicesToDict,
   formatCurrencyWithSymbol,
   paymentStatusDisplayMap,
   paymentStatusToColor,
@@ -29,13 +28,11 @@ interface VerificationPaymentDetailsProps {
 export function VerificationPaymentDetails({
   payment,
   canViewActivityLog,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   choicesData,
 }: VerificationPaymentDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const { isSocialDctType } = useProgramContext();
-  const deliveryTypeDict = choicesToDict(
-    choicesData.paymentRecordDeliveryTypeChoices,
-  );
 
   return (
     <>
@@ -119,7 +116,7 @@ export function VerificationPaymentDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('DELIVERY TYPE')}
-              value={deliveryTypeDict[payment.deliveryType]}
+              value={payment.deliveryType?.name}
             />
           </Grid>
           <Grid item xs={3}>

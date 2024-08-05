@@ -3,7 +3,7 @@ import string
 from datetime import timedelta
 from decimal import Decimal
 from random import choice, randint
-from typing import Any, List, Optional, Union
+from typing import Any, Optional, Union
 from uuid import UUID
 
 from django.contrib.contenttypes.models import ContentType
@@ -40,6 +40,7 @@ from hct_mis_api.apps.payment.models import (
     Approval,
     ApprovalProcess,
     CashPlan,
+    DeliveryMechanism,
     DeliveryMechanismData,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
@@ -197,6 +198,16 @@ class ServiceProviderFactory(DjangoModelFactory):
     vision_id = factory.fuzzy.FuzzyInteger(1342342, 9999999932)
 
 
+class DeliveryMechanismFactory(DjangoModelFactory):
+    payment_gateway_id = factory.Faker("uuid4")
+    code = factory.Faker("uuid4")
+    name = factory.Faker("sentence", nb_words=3, variable_nb_words=True, ext_word_list=None)
+    transfer_type = factory.fuzzy.FuzzyChoice(DeliveryMechanism.TransferType.choices, getter=lambda c: c[0])
+
+    class Meta:
+        model = DeliveryMechanism
+
+
 class FinancialServiceProviderXlsxTemplateFactory(DjangoModelFactory):
     class Meta:
         model = FinancialServiceProviderXlsxTemplate
@@ -212,14 +223,6 @@ class FinancialServiceProviderFactory(DjangoModelFactory):
 
     name = factory.Faker("company")
     vision_vendor_number = factory.Faker("ssn")
-    delivery_mechanisms = factory.List(
-        [
-            factory.fuzzy.FuzzyChoice(
-                DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
-                getter=lambda c: c[0],
-            )
-        ]
-    )
     distribution_limit = factory.fuzzy.FuzzyDecimal(pow(10, 5), pow(10, 6))
     communication_channel = factory.fuzzy.FuzzyChoice(
         FinancialServiceProvider.COMMUNICATION_CHANNEL_CHOICES, getter=lambda c: c[0]
@@ -232,10 +235,7 @@ class FspXlsxTemplatePerDeliveryMechanismFactory(DjangoModelFactory):
         model = FspXlsxTemplatePerDeliveryMechanism
 
     financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
-    delivery_mechanism = factory.fuzzy.FuzzyChoice(
-        DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
-        getter=lambda c: c[0],
-    )
+    delivery_mechanism = factory.SubFactory(DeliveryMechanismFactory)
     xlsx_template = factory.SubFactory(FinancialServiceProviderXlsxTemplateFactory)
 
 
@@ -277,10 +277,6 @@ class PaymentRecordFactory(DjangoModelFactory):
         before_now=True,
         after_now=False,
         tzinfo=utc,
-    )
-    delivery_type = factory.fuzzy.FuzzyChoice(
-        DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
-        getter=lambda c: c[0],
     )
     currency = factory.Faker("currency_code")
     entitlement_quantity = factory.fuzzy.FuzzyDecimal(100.0, 10000.0)
@@ -518,10 +514,7 @@ class RealPaymentRecordFactory(DjangoModelFactory):
         after_now=False,
         tzinfo=utc,
     )
-    delivery_type = factory.fuzzy.FuzzyChoice(
-        DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
-        getter=lambda c: c[0],
-    )
+    delivery_type = factory.LazyAttribute(lambda o: DeliveryMechanism.objects.order_by("?").first())
     currency = factory.Faker("currency_code")
     entitlement_quantity = factory.fuzzy.FuzzyDecimal(100.0, 10000.0)
     delivered_quantity = factory.LazyAttribute(lambda o: Decimal(randint(10, int(o.entitlement_quantity))))
@@ -615,10 +608,7 @@ class PaymentFactory(DjangoModelFactory):
             )
         ).individual
     )
-    delivery_type = factory.fuzzy.FuzzyChoice(
-        DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
-        getter=lambda c: c[0],
-    )
+    delivery_type = factory.SubFactory(DeliveryMechanismFactory)
     currency = factory.Faker("currency_code")
     entitlement_quantity = factory.fuzzy.FuzzyDecimal(100.0, 10000.0)
     entitlement_quantity_usd = factory.LazyAttribute(lambda o: Decimal(randint(10, int(o.entitlement_quantity))))
@@ -674,19 +664,13 @@ class DeliveryMechanismPerPaymentPlanFactory(DjangoModelFactory):
         after_now=False,
         tzinfo=utc,
     )
-    delivery_mechanism = factory.fuzzy.FuzzyChoice(
-        DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
-        getter=lambda c: c[0],
-    )
+    delivery_mechanism = factory.SubFactory(DeliveryMechanismFactory)
     delivery_mechanism_order = factory.fuzzy.FuzzyInteger(1, 4)
 
 
 class DeliveryMechanismDataFactory(DjangoModelFactory):
     individual = factory.SubFactory(IndividualFactory)
-    delivery_mechanism = factory.fuzzy.FuzzyChoice(
-        DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
-        getter=lambda c: c[0],
-    )
+    delivery_mechanism = factory.SubFactory(DeliveryMechanismFactory)
     rdi_merge_status = MergeStatusModel.MERGED
 
     class Meta:
@@ -820,25 +804,6 @@ def generate_real_cash_plans() -> None:
     )
 
 
-def generate_real_cash_plans_for_households(households: List[Household]) -> None:
-    if ServiceProvider.objects.count() < 3:
-        ServiceProviderFactory.create_batch(3, business_area=households[0].business_area)
-    program = RealProgramFactory(business_area=households[0].business_area)
-    cash_plans = RealCashPlanFactory.create_batch(3, program=program, business_area=households[0].business_area)
-    for cash_plan in cash_plans:
-        for hh in households:
-            RealPaymentRecordFactory(
-                parent=cash_plan,
-                household=hh,
-                business_area=hh.business_area,
-            )
-    program.households.set(
-        PaymentRecord.objects.exclude(status=PaymentRecord.STATUS_ERROR)
-        .filter(parent__in=cash_plans)
-        .values_list("household__id", flat=True)
-    )
-
-
 def generate_reconciled_payment_plan() -> None:
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     root = User.objects.get(username="root")
@@ -865,14 +830,14 @@ def generate_reconciled_payment_plan() -> None:
     payment_plan.status_finished()
     payment_plan.save()
 
-    fsp_1 = FinancialServiceProviderFactory(
-        delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH],
-    )
+    dm_cash = DeliveryMechanism.objects.get(code="cash")
+    fsp_1 = FinancialServiceProviderFactory()
+    fsp_1.delivery_mechanisms.set([dm_cash])
     FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=fsp_1)
     DeliveryMechanismPerPaymentPlanFactory(
         payment_plan=payment_plan,
         financial_service_provider=fsp_1,
-        delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+        delivery_mechanism=dm_cash,
     )
 
     create_payment_verification_plan_with_status(
@@ -1032,23 +997,25 @@ def generate_payment_plan() -> None:
         program_cycle=program_cycle,
     )[0]
 
+    delivery_mechanism_cash = DeliveryMechanism.objects.get(code="cash")
+
     fsp_1_pk = UUID("00000000-0000-0000-0000-f00000000001")
     fsp_1 = FinancialServiceProvider.objects.update_or_create(
         pk=fsp_1_pk,
         name="Test FSP 1",
-        delivery_mechanisms=[DeliveryMechanismChoices.DELIVERY_TYPE_CASH],
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
         vision_vendor_number=123456789,
     )[0]
+    fsp_1.delivery_mechanisms.add(delivery_mechanism_cash)
 
     FspXlsxTemplatePerDeliveryMechanismFactory(
-        financial_service_provider=fsp_1, delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH
+        financial_service_provider=fsp_1, delivery_mechanism=delivery_mechanism_cash
     )
 
     DeliveryMechanismPerPaymentPlanFactory(
         payment_plan=payment_plan,
         financial_service_provider=fsp_1,
-        delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+        delivery_mechanism=delivery_mechanism_cash,
     )
     # create primary collector role
     IndividualRoleInHouseholdFactory(household=household_1, individual=individual_1, role=ROLE_PRIMARY)
@@ -1061,7 +1028,7 @@ def generate_payment_plan() -> None:
         currency="USD",
         household=household_1,
         collector=individual_1,
-        delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+        delivery_type=delivery_mechanism_cash,
         financial_service_provider=fsp_1,
         status_date=now,
         status=Payment.STATUS_PENDING,
@@ -1076,7 +1043,7 @@ def generate_payment_plan() -> None:
         currency="USD",
         household=household_2,
         collector=individual_2,
-        delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+        delivery_type=delivery_mechanism_cash,
         financial_service_provider=fsp_1,
         status_date=now,
         status=Payment.STATUS_PENDING,
@@ -1090,3 +1057,208 @@ def update_fsps() -> None:
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     for fsp in FinancialServiceProvider.objects.all():
         fsp.allowed_business_areas.add(afghanistan)
+
+
+def generate_delivery_mechanisms() -> None:
+    data = [
+        {
+            "code": "cardless_cash_withdrawal",
+            "name": "Cardless cash withdrawal",
+            "requirements": {
+                "required_fields": [],
+                "optional_fields": [
+                    "full_name",
+                ],
+                "unique_fields": [],
+            },
+            "transfer_type": "CASH",
+        },
+        {
+            "code": "cash",
+            "name": "Cash",
+            "requirements": {
+                "required_fields": [],
+                "optional_fields": [
+                    "full_name",
+                ],
+                "unique_fields": [],
+            },
+            "transfer_type": "CASH",
+        },
+        {
+            "code": "cash_by_fsp",
+            "name": "Cash by FSP",
+            "requirements": {
+                "required_fields": [],
+                "optional_fields": [
+                    "full_name",
+                ],
+                "unique_fields": [],
+            },
+            "transfer_type": "CASH",
+        },
+        {
+            "code": "cheque",
+            "name": "Cheque",
+            "requirements": {
+                "required_fields": [],
+                "optional_fields": [
+                    "full_name",
+                ],
+                "unique_fields": [],
+            },
+            "transfer_type": "CASH",
+        },
+        {
+            "code": "deposit_to_card",
+            "name": "Deposit to Card",
+            "requirements": {
+                "required_fields": [
+                    "card_number__deposit_to_card",
+                ],
+                "optional_fields": [
+                    "full_name",
+                ],
+                "unique_fields": [
+                    "card_number__deposit_to_card",
+                ],
+            },
+            "transfer_type": "CASH",
+        },
+        {
+            "code": "mobile_money",
+            "name": "Mobile Money",
+            "requirements": {
+                "required_fields": ["delivery_phone_number__mobile_money", "provider__mobile_money"],
+                "optional_fields": [
+                    "full_name",
+                ],
+                "unique_fields": ["delivery_phone_number__mobile_money", "provider__mobile_money"],
+            },
+            "transfer_type": "CASH",
+        },
+        {
+            "code": "pre-paid_card",
+            "name": "Pre-paid card",
+            "requirements": {
+                "required_fields": [],
+                "optional_fields": [
+                    "full_name",
+                ],
+                "unique_fields": [],
+            },
+            "transfer_type": "CASH",
+        },
+        {
+            "code": "referral",
+            "name": "Referral",
+            "requirements": {
+                "required_fields": [],
+                "optional_fields": [
+                    "full_name",
+                ],
+                "unique_fields": [],
+            },
+            "transfer_type": "CASH",
+        },
+        {
+            "code": "transfer",
+            "name": "Transfer",
+            "requirements": {
+                "required_fields": [],
+                "optional_fields": [
+                    "full_name",
+                ],
+                "unique_fields": [],
+            },
+            "transfer_type": "CASH",
+        },
+        {
+            "code": "transfer_to_account",
+            "name": "Transfer to Account",
+            "requirements": {
+                "required_fields": ["bank_name__transfer_to_account", "bank_account_number__transfer_to_account"],
+                "optional_fields": [
+                    "full_name",
+                ],
+                "unique_fields": [
+                    "bank_account_number__transfer_to_account",
+                ],
+            },
+            "transfer_type": "CASH",
+        },
+        {
+            "code": "voucher",
+            "name": "Voucher",
+            "requirements": {
+                "required_fields": [],
+                "optional_fields": [
+                    "full_name",
+                ],
+                "unique_fields": [],
+            },
+            "transfer_type": "VOUCHER",
+        },
+        {
+            "code": "cash_over_the_counter",
+            "name": "Cash over the counter",
+            "requirements": {
+                "required_fields": [
+                    "mobile_phone_number__cash_over_the_counter",
+                ],
+                "optional_fields": [
+                    "full_name",
+                ],
+                "unique_fields": [],
+            },
+            "transfer_type": "CASH",
+        },
+        {
+            "code": "atm_card",
+            "name": "ATM Card",
+            "requirements": {
+                "required_fields": [
+                    "card_number__atm_card",
+                    "card_expiry_date__atm_card",
+                    "name_of_cardholder__atm_card",
+                ],
+                "optional_fields": [
+                    "full_name",
+                ],
+                "unique_fields": [
+                    "card_number__atm_card",
+                    "card_expiry_date__atm_card",
+                    "name_of_cardholder__atm_card",
+                ],
+            },
+            "transfer_type": "CASH",
+        },
+        {
+            "code": "transfer_to_digital_wallet",
+            "name": "Transfer to Digital Wallet",
+            "requirements": {
+                "required_fields": [
+                    "blockchain_name__transfer_to_digital_wallet",
+                    "wallet_address__transfer_to_digital_wallet",
+                ],
+                "optional_fields": ["full_name", "wallet_name__transfer_to_digital_wallet"],
+                "unique_fields": [
+                    "blockchain_name__transfer_to_digital_wallet",
+                    "wallet_address__transfer_to_digital_wallet",
+                ],
+            },
+            "transfer_type": "DIGITAL",
+        },
+    ]
+    for dm in data:
+        DeliveryMechanism.objects.update_or_create(
+            code=dm["code"],
+            defaults={
+                "name": dm["name"],
+                "required_fields": dm["requirements"]["required_fields"],  # type: ignore
+                "optional_fields": dm["requirements"]["optional_fields"],  # type: ignore
+                "unique_fields": dm["requirements"]["unique_fields"],  # type: ignore
+                "transfer_type": dm["transfer_type"],
+                "is_active": True,
+            },
+        )

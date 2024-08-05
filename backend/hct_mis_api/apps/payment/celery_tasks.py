@@ -647,3 +647,22 @@ def send_payment_notification_emails(
         PaymentNotification(payment_plan, action, action_user, action_date_formatted).send_email_notification()
     except Exception as e:
         logger.exception(e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
+    from hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayAPI
+
+    try:
+        from hct_mis_api.apps.payment.services.payment_gateway import (
+            PaymentGatewayService,
+        )
+
+        PaymentGatewayService().sync_delivery_mechanisms()
+    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
+        return
+    except Exception as e:
+        logger.exception(e)
+        raise self.retry(exc=e)

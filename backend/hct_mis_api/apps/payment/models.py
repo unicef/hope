@@ -1,12 +1,13 @@
 import hashlib
 import json
 import logging
+import uuid
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
 from django import forms
 from django.conf import settings
@@ -53,11 +54,14 @@ from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     CORE_FIELDS_ATTRIBUTES,
     FieldFactory,
+    get_core_fields_attributes,
 )
 from hct_mis_api.apps.core.field_attributes.fields_types import (
     _DELIVERY_MECHANISM_DATA,
     _HOUSEHOLD,
     _INDIVIDUAL,
+    TYPE_STRING,
+    Scope,
 )
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
@@ -71,6 +75,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
+from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField
 from hct_mis_api.apps.payment.managers import PaymentManager
 from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
 from hct_mis_api.apps.steficon.models import RuleCommit
@@ -290,7 +295,10 @@ class GenericPayment(TimeStampedUUIDModel):
     status_date = models.DateTimeField()
     household = models.ForeignKey("household.Household", on_delete=models.CASCADE)
     head_of_household = models.ForeignKey("household.Individual", on_delete=models.CASCADE, null=True)
-    delivery_type = models.CharField(choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES, max_length=32, null=True)
+    delivery_type_choice = models.CharField(
+        choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES, max_length=32, null=True
+    )  # TODO MB drop later
+    delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.PROTECT, null=True)
     currency = models.CharField(
         max_length=4,
     )
@@ -1135,8 +1143,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         help_text=_("Select the columns to include in the report"),
     )
 
-    core_fields = HorizontalChoiceArrayField(
-        models.CharField(max_length=255, blank=True, choices=FieldFactory(CORE_FIELDS_ATTRIBUTES).to_choices()),
+    core_fields = DynamicChoiceArrayField(
+        models.CharField(max_length=255, blank=True),
+        choices_callable=FieldFactory.get_all_core_fields_choices,
         default=list,
         blank=True,
     )
@@ -1156,7 +1165,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         collector = payment.collector
         household = payment.household
 
-        core_fields_attributes = FieldFactory(CORE_FIELDS_ATTRIBUTES).to_dict_by("name")
+        core_fields_attributes = FieldFactory(get_core_fields_attributes()).to_dict_by("name")
         core_field = core_fields_attributes.get(core_field_name)
         if not core_field:
             # Some fields can be added to the template, such as 'size' or 'collect_individual_data'
@@ -1214,7 +1223,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "alternate_collector_sex": (alternate_collector, "sex"),
             "alternate_collector_phone_no": (alternate_collector, "phone_no"),
             "alternate_collector_document_numbers": (alternate_collector, "document_number"),
-            "payment_channel": (payment, "delivery_type"),
+            "payment_channel": (payment.delivery_type, "name"),
             "fsp_name": (payment.financial_service_provider, "name"),
             "currency": (payment, "currency"),
             "entitlement_quantity": (payment, "entitlement_quantity"),
@@ -1275,9 +1284,10 @@ class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
     financial_service_provider = models.ForeignKey(
         "FinancialServiceProvider", on_delete=models.CASCADE, related_name="fsp_xlsx_template_per_delivery_mechanisms"
     )
-    delivery_mechanism = models.CharField(
+    delivery_mechanism_choice = models.CharField(
         max_length=255, verbose_name=_("Delivery Mechanism"), choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES
-    )
+    )  # TODO MB drop later
+    delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.PROTECT)
     xlsx_template = models.ForeignKey(
         "FinancialServiceProviderXlsxTemplate",
         on_delete=models.CASCADE,
@@ -1291,13 +1301,9 @@ class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
         return f"{self.financial_service_provider.name} - {self.xlsx_template} - {self.delivery_mechanism}"  # pragma: no cover
 
     def clean(self) -> None:
-        delivery_mechanism_required_fields = [
-            field["name"]
-            for field in DeliveryMechanismData.get_required_delivery_mechanism_fields(self.delivery_mechanism)
-        ]
         missing_required_core_fields = [
             required_field
-            for required_field in delivery_mechanism_required_fields
+            for required_field in self.delivery_mechanism.required_fields
             if required_field not in self.xlsx_template.core_fields
         ]
         if missing_required_core_fields:
@@ -1306,7 +1312,7 @@ class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
                 f"{self.delivery_mechanism} and must be present in the template core fields"
             )
 
-        if self.delivery_mechanism not in self.financial_service_provider.delivery_mechanisms:
+        if self.delivery_mechanism not in self.financial_service_provider.delivery_mechanisms.all():
             raise ValidationError(
                 f"Delivery Mechanism {self.delivery_mechanism} is not supported by Financial Service Provider {self.financial_service_provider}"
             )
@@ -1332,9 +1338,10 @@ class FinancialServiceProvider(LimitBusinessAreaModelMixin, TimeStampedUUIDModel
     )
     name = models.CharField(max_length=100, unique=True)
     vision_vendor_number = models.CharField(max_length=100, unique=True)
-    delivery_mechanisms = HorizontalChoiceArrayField(
-        models.CharField(choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES, max_length=32)
-    )
+    delivery_mechanisms_choices = HorizontalChoiceArrayField(
+        models.CharField(choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES, max_length=32), null=True
+    )  # TODO MB drop later
+    delivery_mechanisms = models.ManyToManyField("payment.DeliveryMechanism")
     distribution_limit = models.DecimalField(
         decimal_places=2,
         max_digits=12,
@@ -1439,9 +1446,10 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         null=True,
     )
     status = FSMField(default=Status.NOT_SENT, protected=False, db_index=True)
-    delivery_mechanism = models.CharField(
+    delivery_mechanism_choice = models.CharField(
         max_length=255, choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES, db_index=True, null=True
-    )
+    )  # TODO MB drop later
+    delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.PROTECT)
     delivery_mechanism_order = models.PositiveIntegerField()
 
     sent_to_payment_gateway = models.BooleanField(default=False)
@@ -2192,9 +2200,10 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
     individual = models.ForeignKey(
         "household.Individual", on_delete=models.CASCADE, related_name="delivery_mechanisms_data"
     )
-    delivery_mechanism = models.CharField(
+    delivery_mechanism_choice = models.CharField(
         max_length=255, verbose_name=_("Delivery Mechanism"), choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES
-    )
+    )  # TODO MB drop later
+    delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.PROTECT)
     data = JSONField(default=dict, blank=True)
 
     is_valid: bool = models.BooleanField(default=False)  # type: ignore
@@ -2217,7 +2226,7 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
     all_objects = models.Manager()
 
     def __str__(self) -> str:
-        return f"[{self.id}] {self.individual} - {self.delivery_mechanism}"
+        return f"{self.individual} - {self.delivery_mechanism}"
 
     class Meta:
         constraints = [
@@ -2244,7 +2253,7 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
     @cached_property
     def delivery_data(self) -> Dict:
         delivery_data = {}
-        for field in self.delivery_mechanism_fields:
+        for field in self.delivery_mechanism_all_fields_definitions:
             associated_object = self.get_associated_object(field["associated_with"])
             if isinstance(associated_object, dict):
                 delivery_data[field["name"]] = associated_object.get(field["name"], None)
@@ -2255,7 +2264,7 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
 
     def validate(self) -> None:
         self.validation_errors = {}
-        for required_field in self.required_fields:
+        for required_field in self.delivery_mechanism_required_fields_definitions:
             associated_object = self.get_associated_object(required_field["associated_with"])
             if isinstance(associated_object, dict):
                 value = associated_object.get(required_field["name"], None)
@@ -2272,8 +2281,7 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
             sha256 = hashlib.sha256()
             sha256.update(self.individual.program.name.encode("utf-8"))
 
-            for field in self.unique_fields:
-                field_name = field["name"]
+            for field_name in self.unique_fields:
                 value = self.delivery_data.get(field_name, None)
                 sha256.update(str(value).encode("utf-8"))
 
@@ -2291,88 +2299,60 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
             if possible_duplicates.exists():
                 self.unique_key = None
                 self.is_valid = False
-                for field in self.unique_fields:
-                    self.validation_errors[field["name"]] = str(self.VALIDATION_ERROR_DATA_NOT_UNIQUE)
+                for field_name in self.unique_fields:
+                    self.validation_errors[field_name] = str(self.VALIDATION_ERROR_DATA_NOT_UNIQUE)
                 self.possible_duplicate_of = possible_duplicates.first()
             else:
                 self.unique_key = unique_key
 
-    @cached_property
-    def delivery_mechanism_fields(self) -> List[dict]:
-        return self.get_delivery_mechanism_fields(self.delivery_mechanism)
+    @property
+    def delivery_mechanism_all_fields_definitions(self) -> List[dict]:
+        all_core_fields = get_core_fields_attributes()
+        return [field for field in all_core_fields if field["name"] in self.all_fields]
 
-    @cached_property
-    def required_fields(self) -> List[dict]:
-        return [field for field in self.delivery_mechanism_fields if field.get("required_for_payment", False)]
+    @property
+    def delivery_mechanism_required_fields_definitions(self) -> List[dict]:
+        all_core_fields = get_core_fields_attributes()
+        return [field for field in all_core_fields if field["name"] in self.required_fields]
 
-    @cached_property
-    def unique_fields(self) -> List[dict]:
-        return [field for field in self.delivery_mechanism_fields if field.get("unique_for_payment", False)]
+    @property
+    def all_fields(self) -> List[dict]:
+        return self.delivery_mechanism.all_fields
 
-    @classmethod
-    def get_required_delivery_mechanism_fields(cls, delivery_mechanism: str) -> List[dict]:
-        fields = cls.get_all_delivery_mechanisms_fields()
-        return [
-            field
-            for field in fields
-            if (delivery_mechanism in field.get("delivery_mechanisms", []) and field.get("required_for_payment", False))
-        ]
+    @property
+    def unique_fields(self) -> List[str]:
+        return self.delivery_mechanism.unique_fields
 
-    @classmethod
-    def get_delivery_mechanism_fields(cls, delivery_mechanism: str) -> List[dict]:
-        fields = cls.get_all_delivery_mechanisms_fields()
-        return [field for field in fields if delivery_mechanism in field.get("delivery_mechanisms", [])]
+    @property
+    def required_fields(self) -> List[str]:
+        return self.delivery_mechanism.required_fields
 
     @classmethod
-    def get_all_delivery_mechanisms_fields(cls, by: str = "name") -> List[dict]:
+    def get_all_delivery_mechanisms_fields(cls, by_xlsx_name: bool = False) -> List[str]:
+        fields = []
+        for dm in DeliveryMechanism.objects.filter(is_active=True):
+            fields.extend([f for f in dm.all_dm_fields if f not in fields])
+
+        if by_xlsx_name:
+            return [f"{field}_i_c" for field in fields]
+
+        return fields
+
+    @classmethod
+    def get_scope_delivery_mechanisms_fields(cls, by: str = "name") -> List[str]:
         from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
             FieldFactory,
         )
         from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 
-        global_fields = [
-            _field
-            for _field in FieldFactory.not_from_scope(Scope.DELIVERY_MECHANISM).to_dict_by(by).values()
-            if _field.get("delivery_mechanisms", [])
-        ]
-        delivery_mechanisms_fields = [
-            _field
-            for _field in FieldFactory.from_scope(Scope.DELIVERY_MECHANISM).to_dict_by(by).values()
-            if _field.get(by) not in global_fields
-        ]
-
-        return global_fields + delivery_mechanisms_fields
-
-    @classmethod
-    def get_scope_delivery_mechanisms_fields(cls, by: str = "name") -> List[dict]:
-        from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
-            FieldFactory,
-        )
-        from hct_mis_api.apps.core.field_attributes.fields_types import Scope
-
-        delivery_mechanisms_fields = [
-            _field for _field in FieldFactory.from_scope(Scope.DELIVERY_MECHANISM).to_dict_by(by).values()
-        ]
+        delivery_mechanisms_fields = list(FieldFactory.from_scope(Scope.DELIVERY_MECHANISM).to_dict_by(by).keys())
 
         return delivery_mechanisms_fields
-
-    @classmethod
-    def get_delivery_mechanisms_to_xlsx_fields_mapping(cls, by: str = "name") -> Dict[str, List[str]]:
-        fields = {
-            field[by]: field.get("delivery_mechanisms", [])
-            for field in cls.get_all_delivery_mechanisms_fields()
-            if field.get("required_for_payment", False)
-        }
-        dm_required_fields_map = defaultdict(list)
-        for field_name, delivery_mechanisms in fields.items():
-            for dm in delivery_mechanisms:
-                dm_required_fields_map[dm].append(field_name)
-        return dm_required_fields_map
 
     def get_grievance_ticket_payload_for_errors(self) -> Dict[str, Any]:
         return {
             "id": str(self.id),
-            "label": self.delivery_mechanism,
+            "label": self.delivery_mechanism.name,
             "approve_status": False,
             "data_fields": [
                 {
@@ -2393,7 +2373,7 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
             grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
             description = (
                 f"Missing required fields {list(self.validation_errors.keys())}"
-                f" values for delivery mechanism {self.delivery_mechanism}"
+                f" values for delivery mechanism {self.delivery_mechanism.name}"
             )
             grievance_ticket.description = description
             individual_data_with_approve_status = self.get_grievance_ticket_payload_for_errors()
@@ -2408,7 +2388,7 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
                 grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
                 description = (
                     f"Fields not unique {list(self.validation_errors.keys())} across program"
-                    f" for delivery mechanism {self.delivery_mechanism}, possible duplicate of {self.possible_duplicate_of}"
+                    f" for delivery mechanism {self.delivery_mechanism.name}, possible duplicate of {self.possible_duplicate_of}"
                 )
                 grievance_ticket.description = description
                 individual_data_with_approve_status = self.get_grievance_ticket_payload_for_errors()
@@ -2426,3 +2406,86 @@ class PendingDeliveryMechanismData(DeliveryMechanismData):
         proxy = True
         verbose_name = "Imported Delivery Mechanism Data"
         verbose_name_plural = "Imported Delivery Mechanism Datas"
+
+
+class DeliveryMechanism(TimeStampedUUIDModel):
+    class TransferType(models.TextChoices):
+        CASH = "CASH", "Cash"
+        VOUCHER = "VOUCHER", "Voucher"
+        DIGITAL = "DIGITAL", "Digital"
+
+    payment_gateway_id = models.CharField(max_length=255, unique=True, null=True)
+    code = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255, unique=True)
+    optional_fields = ArrayField(default=list, base_field=models.CharField(max_length=255))
+    required_fields = ArrayField(default=list, base_field=models.CharField(max_length=255))
+    unique_fields = ArrayField(default=list, base_field=models.CharField(max_length=255))
+    is_active = models.BooleanField(default=True)
+    transfer_type = models.CharField(max_length=255, choices=TransferType.choices, default=TransferType.CASH)
+
+    def __str__(self) -> str:
+        return self.name
+
+    class Meta:
+        ordering = ["code"]
+        verbose_name = "Delivery Mechanism"
+        verbose_name_plural = "Delivery Mechanisms"
+
+    def get_label_for_field(self, field: str) -> str:
+        return (
+            " ".join(word.capitalize() for word in field.replace("__", "_").split("_"))
+            + f" ({self.name} Delivery Mechanism)"
+        )
+
+    @property
+    def all_fields(self) -> List[str]:
+        return self.required_fields + self.optional_fields
+
+    @property
+    def all_dm_fields(self) -> List[str]:
+        core_fields = [cf["name"] for cf in CORE_FIELDS_ATTRIBUTES]
+        return [field for field in self.all_fields if field not in core_fields]
+
+    def get_core_fields_definitions(self) -> List[dict]:
+        core_fields = [cf["name"] for cf in CORE_FIELDS_ATTRIBUTES]
+        return [
+            {
+                "id": str(uuid.uuid4()),
+                "type": TYPE_STRING,
+                "name": field,
+                "lookup": field,
+                "required": False,
+                "label": {"English(EN)": self.get_label_for_field(field)},
+                "hint": "",
+                "choices": [],
+                "associated_with": _DELIVERY_MECHANISM_DATA,
+                "required_for_payment": field in self.required_fields,
+                "unique_for_payment": field in self.unique_fields,
+                "xlsx_field": f"{field}_i_c",
+                "scope": [Scope.XLSX, Scope.XLSX_PEOPLE, Scope.DELIVERY_MECHANISM],
+            }
+            for field in self.all_fields
+            if field not in core_fields
+        ]
+
+    @classmethod
+    def get_all_core_fields_definitions(cls) -> List[dict]:
+        definitions = []
+        for delivery_mechanism in cls.objects.filter(is_active=True).order_by("code"):
+            definitions.extend(delivery_mechanism.get_core_fields_definitions())
+        return definitions
+
+    @classmethod
+    def get_choices(cls, only_active: bool = True) -> List[Tuple[str, str]]:
+        dms = cls.objects.all().values_list("code", "name")
+        if only_active:
+            dms.filter(is_active=True)
+        return list(dms)
+
+    @classmethod
+    def get_delivery_mechanisms_to_xlsx_fields_mapping(cls) -> Dict[str, List[str]]:
+        required_fields_map = defaultdict(list)
+        for dm in cls.objects.filter(is_active=True):
+            required_fields_map[dm.code].extend([f"{field}_i_c" for field in dm.required_fields])
+
+        return required_fields_map

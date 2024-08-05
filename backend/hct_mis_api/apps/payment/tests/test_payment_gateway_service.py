@@ -18,14 +18,18 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualRoleInHouseholdFactory,
 )
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
+from hct_mis_api.apps.payment.celery_tasks import (
+    periodic_sync_payment_gateway_delivery_mechanisms,
+)
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
     FinancialServiceProvider,
     Payment,
     PaymentPlan,
@@ -33,6 +37,9 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.services.payment_gateway import (
     AddRecordsResponseData,
+    DeliveryMechanismData,
+    DeliveryMechanismDataRequirements,
+    FspData,
     PaymentGatewayAPI,
     PaymentGatewayService,
     PaymentInstructionStatus,
@@ -52,6 +59,9 @@ class TestPaymentGatewayService(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
+        generate_delivery_mechanisms()
+        cls.dm_cash_over_the_counter = DeliveryMechanism.objects.get(code="cash_over_the_counter")
+        cls.dm_transfer = DeliveryMechanism.objects.get(code="transfer")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
 
@@ -62,16 +72,14 @@ class TestPaymentGatewayService(APITestCase):
         )
         cls.pg_fsp = FinancialServiceProviderFactory(
             name="Western Union",
-            delivery_mechanisms=[
-                DeliveryMechanismChoices.DELIVERY_TYPE_CASH_OVER_THE_COUNTER,
-            ],
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             payment_gateway_id="123",
         )
+        cls.pg_fsp.delivery_mechanisms.add(cls.dm_cash_over_the_counter)
         cls.dm = DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=cls.pp,
             financial_service_provider=cls.pg_fsp,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH_OVER_THE_COUNTER,
+            delivery_mechanism=cls.dm_cash_over_the_counter,
             sent_to_payment_gateway=False,
         )
         cls.payments = []
@@ -589,3 +597,126 @@ class TestPaymentGatewayService(APITestCase):
             "{'amount': [ErrorDetail(string='This field may not be null.', code='null')]}",
         ):
             PaymentGatewayAPI().add_records_to_payment_instruction([payment], "123")
+
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_delivery_mechanisms")
+    def test_sync_delivery_mechanisms(self, get_delivery_mechanisms_mock: Any) -> None:
+        assert DeliveryMechanism.objects.all().count() == 16
+
+        dm_cash = DeliveryMechanism.objects.get(code="cash")
+        dm_cash.is_active = False
+        dm_cash.save()
+
+        get_delivery_mechanisms_mock.return_value = [
+            DeliveryMechanismData(
+                id=33,
+                code="new_dm",
+                name="New DM",
+                requirements=DeliveryMechanismDataRequirements(
+                    required_fields=["required_field"],
+                    optional_fields=[
+                        "full_name",
+                    ],
+                    unique_fields=[],
+                ),
+                transfer_type="CASH",
+            ),
+            DeliveryMechanismData(
+                id=2,
+                code="cash",
+                name="Cash",
+                requirements=DeliveryMechanismDataRequirements(
+                    required_fields=["new_required_field"],
+                    optional_fields=[
+                        "full_name",
+                        "new_optional_field",
+                    ],
+                    unique_fields=["new_unique_field"],
+                ),
+                transfer_type="CASH",
+            ),
+        ]
+
+        pg_service = PaymentGatewayService()
+        pg_service.api.get_delivery_mechanisms = get_delivery_mechanisms_mock  # type: ignore
+
+        pg_service.sync_delivery_mechanisms()
+        dm_cash = DeliveryMechanism.objects.get(code="cash")
+        assert dm_cash.is_active
+        assert dm_cash.required_fields == ["new_required_field"]
+        assert dm_cash.optional_fields == ["full_name", "new_optional_field"]
+        assert dm_cash.unique_fields == ["new_unique_field"]
+
+        dm_new = DeliveryMechanism.objects.get(code="new_dm")
+        assert dm_new.is_active
+
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
+    def test_sync_fsps(self, get_fsps_mock: Any) -> None:
+        assert FinancialServiceProvider.objects.all().count() == 1
+
+        assert self.pg_fsp.name == "Western Union"
+        assert self.pg_fsp.payment_gateway_id == "123"
+        assert list(self.pg_fsp.delivery_mechanisms.values_list("code", flat=True)) == ["cash_over_the_counter"]
+
+        self.dm_cash_over_the_counter.payment_gateway_id = "555"
+        self.dm_cash_over_the_counter.save()
+        self.dm_transfer.payment_gateway_id = "666"
+        self.dm_transfer.save()
+
+        get_fsps_mock.return_value = [
+            FspData(
+                id=33,
+                remote_id="33",
+                name="New FSP",
+                vision_vendor_number="33",
+                configs=[
+                    {
+                        "id": 21,
+                        "key": "key21",
+                        "delivery_mechanism": self.dm_cash_over_the_counter.payment_gateway_id,
+                        "delivery_mechanism_name": self.dm_cash_over_the_counter.name,
+                        "label": "label21",
+                    },
+                    {
+                        "id": 22,
+                        "key": "key22",
+                        "delivery_mechanism": self.dm_transfer.payment_gateway_id,
+                        "delivery_mechanism_name": self.dm_transfer.name,
+                        "label": "label22",
+                    },
+                ],
+            ),
+            FspData(
+                id=123,
+                remote_id="123",
+                name="Western Union",
+                vision_vendor_number="123",
+                configs=[
+                    {
+                        "id": 23,
+                        "key": "key23",
+                        "delivery_mechanism": self.dm_transfer.payment_gateway_id,
+                        "delivery_mechanism_name": self.dm_transfer.name,
+                        "label": "label23",
+                    },
+                ],
+            ),
+        ]
+
+        pg_service = PaymentGatewayService()
+        pg_service.api.get_fsps = get_fsps_mock  # type: ignore
+
+        pg_service.sync_fsps()
+
+        self.pg_fsp.refresh_from_db()
+        assert self.pg_fsp.name == "Western Union"
+        assert self.pg_fsp.payment_gateway_id == "123"
+        assert list(self.pg_fsp.delivery_mechanisms.values_list("code", flat=True)) == ["transfer"]  # updated
+
+        fsp_new = FinancialServiceProvider.objects.get(name="New FSP")
+        assert fsp_new.payment_gateway_id == "33"
+        assert list(fsp_new.delivery_mechanisms.values_list("code", flat=True)) == ["cash_over_the_counter", "transfer"]
+
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayService.sync_delivery_mechanisms")
+    def test_periodic_sync_payment_gateway_delivery_mechanisms(self, sync_delivery_mechanisms_mock: Any) -> None:
+        periodic_sync_payment_gateway_delivery_mechanisms()
+        assert sync_delivery_mechanisms_mock.call_count == 1

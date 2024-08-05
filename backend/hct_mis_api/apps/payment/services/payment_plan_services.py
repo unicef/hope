@@ -560,7 +560,7 @@ class PaymentPlanService:
                 delivery_mechanism = delivery_mechanism_per_payment_plan.delivery_mechanism
                 fsp = mapping["fsp"]
 
-                if delivery_mechanism_per_payment_plan.delivery_mechanism not in fsp.delivery_mechanisms:
+                if delivery_mechanism_per_payment_plan.delivery_mechanism not in fsp.delivery_mechanisms.all():
                     raise GraphQLError(
                         f"Delivery mechanism '{delivery_mechanism_per_payment_plan.delivery_mechanism}' is not supported "
                         f"by FSP '{fsp}'"
