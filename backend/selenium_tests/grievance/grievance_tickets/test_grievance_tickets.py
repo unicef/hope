@@ -819,10 +819,14 @@ class TestGrievanceTickets:
             pageGrievanceNewTicket: NewTicket,
             pageGrievanceDetailsPage: GrievanceDetailsPage,
             household_without_disabilities: Household,
+            add_grievance_tickets: None,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getButtonNewTicket().click()
+        pageGrievanceTickets.getTicketListRow()[0].click()
+        pageGrievanceDetailsPage.getButtonNewNote().click()
+        pageGrievanceDetailsPage.screenshot("0")
 
     def test_grievance_tickets_activity_log(
             self,
