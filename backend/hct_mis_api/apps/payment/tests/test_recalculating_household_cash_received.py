@@ -92,6 +92,7 @@ class TestRecalculatingCash(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
+        payment_fixtures.generate_delivery_mechanisms()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
