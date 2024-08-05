@@ -12,22 +12,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='cashplan',
-            name='end_date',
-        ),
-        migrations.RemoveField(
-            model_name='cashplan',
-            name='start_date',
-        ),
-        migrations.RemoveField(
-            model_name='paymentplan',
-            name='end_date',
-        ),
-        migrations.RemoveField(
-            model_name='paymentplan',
-            name='start_date',
-        ),
         migrations.AlterField(
             model_name='paymentplan',
             name='program_cycle',

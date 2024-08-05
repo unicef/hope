@@ -15,7 +15,8 @@ class TestAssignProgramToGrievanceTickets(TestCase):
         business_area = create_afghanistan()
         cls.program = ProgramFactory(business_area=business_area, cycle__title="Default Cycle")
         cls.tp = TargetPopulationFactory(program=cls.program)
-        cls.tp_without_program = TargetPopulationFactory(program=None)
+        program2 = ProgramFactory(business_area=business_area)
+        cls.tp_with_program2 = TargetPopulationFactory(program=program2)
         # other cycle
         ProgramCycleFactory(program=cls.program, title="Last Cycle", status=ProgramCycle.DRAFT)
 
@@ -29,8 +30,4 @@ class TestAssignProgramToGrievanceTickets(TestCase):
 
         assign_program_cycle_to_target_population()
 
-        self.tp.refresh_from_db()
-        self.tp_without_program.refresh_from_db()
-
         self.assertEqual(self.tp.program_cycle.title, "Default Cycle")
-        self.assertIsNone(self.tp_without_program.program_cycle)

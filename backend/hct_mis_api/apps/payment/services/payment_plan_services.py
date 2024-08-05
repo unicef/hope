@@ -402,6 +402,8 @@ class PaymentPlanService:
                 dispersion_start_date=input_data["dispersion_start_date"],
                 dispersion_end_date=dispersion_end_date,
                 status_date=timezone.now(),
+                start_date=program_cycle.start_date,
+                end_date=program_cycle.end_date,
                 status=PaymentPlan.Status.PREPARING,
             )
             program_cycle.set_active()
@@ -659,6 +661,8 @@ class PaymentPlanService:
             currency=source_pp.currency,
             dispersion_start_date=dispersion_start_date,
             dispersion_end_date=dispersion_end_date,
+            start_date=source_pp.start_date,
+            end_date=source_pp.end_date,
         )
 
         transaction.on_commit(lambda: prepare_follow_up_payment_plan_task.delay(follow_up_pp.id))

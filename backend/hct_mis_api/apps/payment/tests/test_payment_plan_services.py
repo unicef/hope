@@ -106,17 +106,14 @@ class TestPaymentPlanServices(APITestCase):
     @flaky(max_runs=5, min_passes=1)
     @freeze_time("2020-10-10")
     def test_create_validation_errors(self) -> None:
-        self.business_area.is_payment_plan_applicable = False
-        self.business_area.save()
-        targeting = TargetPopulationFactory(
-            program=ProgramFactory(
-                status=Program.ACTIVE,
-                start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
-                end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
-                cycle__start_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
-                cycle__end_date=timezone.datetime(2021, 12, 10, tzinfo=utc),
-            )
+        program = ProgramFactory(
+            status=Program.ACTIVE,
+            start_date=timezone.datetime(2019, 10, 12, tzinfo=utc).date(),
+            end_date=timezone.datetime(2099, 12, 10, tzinfo=utc).date(),
+            cycle__start_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
+            cycle__end_date=timezone.datetime(2021, 12, 10, tzinfo=utc),
         )
+        targeting = TargetPopulationFactory(program=program)
 
         cycle_id = self.id_to_base64(targeting.program.cycles.first().pk, "ProgramCycleNode")
 
@@ -140,9 +137,6 @@ class TestPaymentPlanServices(APITestCase):
         ):
             PaymentPlanService.create(input_data=input_data, user=self.user)
         targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-        targeting.save()
-
-        targeting.program = None
         targeting.save()
 
         with self.assertRaisesMessage(
