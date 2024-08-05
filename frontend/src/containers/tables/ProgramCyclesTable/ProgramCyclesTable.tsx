@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import TableCell from '@mui/material/TableCell';
 import { StatusBox } from '@core/StatusBox';
-import { programCycleStatusToColor } from '@utils/utils';
+import { decodeIdString, programCycleStatusToColor } from '@utils/utils';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { headCells } from '@containers/tables/ProgramCyclesTable/HeadCells';
@@ -82,7 +82,8 @@ export const ProgramCyclesTable = ({
 
   const finishAction = async (programCycle: ProgramCycle) => {
     try {
-      await finishMutation({ programCycleId: programCycle.id });
+      const decodedProgramCycleId = decodeIdString(programCycle.id);
+      await finishMutation({ programCycleId: decodedProgramCycleId });
       showMessage(t('Programme Cycle Finished'));
     } catch (e) {
       showMessage(e.message);
@@ -91,7 +92,8 @@ export const ProgramCyclesTable = ({
 
   const reactivateAction = async (programCycle: ProgramCycle) => {
     try {
-      await reactivateMutation({ programCycleId: programCycle.id });
+      const decodedProgramCycleId = decodeIdString(programCycle.id);
+      await reactivateMutation({ programCycleId: decodedProgramCycleId });
       showMessage(t('Programme Cycle Reactivated'));
     } catch (e) {
       showMessage(e.message);

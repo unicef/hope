@@ -13,6 +13,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { decodeIdString } from '@utils/utils';
 
 interface ProgramCycleDetailsHeaderProps {
   programCycle: ProgramCycle;
@@ -26,10 +27,16 @@ export const ProgramCycleDetailsHeader = ({
   const queryClient = useQueryClient();
   const { businessArea, programId } = useBaseUrl();
 
+  const decodedProgramCycleId = decodeIdString(programCycle.id);
+
   const { mutateAsync: finishMutation, isPending: isPendingFinishing } =
     useMutation({
       mutationFn: async () => {
-        return finishProgramCycle(businessArea, programId, programCycle.id);
+        return finishProgramCycle(
+          businessArea,
+          programId,
+          decodedProgramCycleId,
+        );
       },
       onSuccess: async () => {
         await queryClient.invalidateQueries({
@@ -37,7 +44,7 @@ export const ProgramCycleDetailsHeader = ({
             'programCyclesDetails',
             businessArea,
             programId,
-            programCycle.id,
+            decodedProgramCycleId,
           ],
         });
       },
@@ -46,7 +53,11 @@ export const ProgramCycleDetailsHeader = ({
   const { mutateAsync: reactivateMutation, isPending: isPendingReactivation } =
     useMutation({
       mutationFn: async () => {
-        return reactivateProgramCycle(businessArea, programId, programCycle.id);
+        return reactivateProgramCycle(
+          businessArea,
+          programId,
+          decodedProgramCycleId,
+        );
       },
       onSuccess: async () => {
         await queryClient.invalidateQueries({
@@ -54,7 +65,7 @@ export const ProgramCycleDetailsHeader = ({
             'programCyclesDetails',
             businessArea,
             programId,
-            programCycle.id,
+            decodedProgramCycleId,
           ],
         });
       },
