@@ -1447,7 +1447,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
     delivery_mechanism_choice = models.CharField(
         max_length=255, choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES, db_index=True, null=True
     )  # TODO MB drop later
-    delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.PROTECT)
+    delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.SET_NULL, null=True)
     delivery_mechanism_order = models.PositiveIntegerField()
 
     sent_to_payment_gateway = models.BooleanField(default=False)
