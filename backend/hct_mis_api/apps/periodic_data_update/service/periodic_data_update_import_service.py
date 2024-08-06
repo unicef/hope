@@ -278,7 +278,7 @@ class PeriodicDataUpdateImportService:
         elif flexible_attribute.pdu_data.subtype == PeriodicFieldData.DECIMAL:
             return forms.DecimalField(required=False)
         elif flexible_attribute.pdu_data.subtype == PeriodicFieldData.BOOLEAN:
-            return forms.BooleanField(required=False)
+            return forms.NullBooleanField(required=False)
         elif flexible_attribute.pdu_data.subtype == PeriodicFieldData.DATE:
             return forms.DateField(required=False)
         raise ValidationError(f"Invalid subtype for field {flexible_attribute.name}")
