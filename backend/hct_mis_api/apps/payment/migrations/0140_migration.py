@@ -162,20 +162,12 @@ class Migration(migrations.Migration):
             model_name="fspxlsxtemplateperdeliverymechanism",
             name="delivery_mechanism",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.PROTECT, to="payment.deliverymechanism", null=True
+                on_delete=django.db.models.deletion.SET_NULL, to="payment.deliverymechanism", null=True
             ),
         ),
         migrations.RunPython(
             data_migration_fspxlsxtemplateperdeliverymechanism_delivery_mechanism,
             migrations.RunPython.noop,
-        ),
-        migrations.AlterField(
-            model_name="fspxlsxtemplateperdeliverymechanism",
-            name="delivery_mechanism",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.PROTECT,
-                to="payment.deliverymechanism",
-            ),
         ),
         migrations.AlterUniqueTogether(
             name="fspxlsxtemplateperdeliverymechanism",
@@ -195,14 +187,14 @@ class Migration(migrations.Migration):
             model_name="payment",
             name="delivery_type",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.PROTECT, to="payment.deliverymechanism", null=True
+                on_delete=django.db.models.deletion.SET_NULL, to="payment.deliverymechanism", null=True
             ),
         ),
         migrations.AddField(
             model_name="paymentrecord",
             name="delivery_type",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.PROTECT, to="payment.deliverymechanism", null=True
+                on_delete=django.db.models.deletion.SET_NULL, to="payment.deliverymechanism", null=True
             ),
         ),
         migrations.RunPython(
