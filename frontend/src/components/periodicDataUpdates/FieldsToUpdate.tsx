@@ -11,7 +11,7 @@ import {
   TableRow,
 } from '@mui/material';
 import { FieldArray } from 'formik';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 interface Field {
   field: string;
@@ -35,37 +35,41 @@ interface FieldsToUpdateProps {
     roundsData: SelectedField[];
   };
   setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void;
+  checkedFields?: Record<string, boolean>;
+  setCheckedFields?: (checkedFields: Record<string, boolean>) => void;
 }
 
 export const FieldsToUpdate: React.FC<FieldsToUpdateProps> = ({
   values,
   setFieldValue,
+  checkedFields,
+  setCheckedFields,
 }) => {
-  const [checkedFields, setCheckedFields] = useState<SelectedField[]>([]);
   const isInitialized = useRef(false);
 
   useEffect(() => {
     if (!isInitialized.current) {
-      const initialCheckedFields = values.roundsData.map((field) => ({
-        ...field,
-        checked: false,
-      }));
+      const initialCheckedFields = values.roundsData.reduce(
+        (acc, field) => {
+          acc[field.field] = false;
+          return acc;
+        },
+        {} as Record<string, boolean>,
+      );
       setCheckedFields(initialCheckedFields);
       isInitialized.current = true;
     }
-  }, [values.roundsData]);
+  }, [values.roundsData, setCheckedFields]);
 
   const handleCheckboxChange = (
     event: React.ChangeEvent<HTMLInputElement>,
     field: SelectedField,
   ) => {
-    const updatedCheckedFields = checkedFields.map((checkedField) =>
-      checkedField.field === field.field
-        ? { ...checkedField, checked: event.target.checked }
-        : checkedField,
-    );
+    const updatedCheckedFields = {
+      ...checkedFields,
+      [field.field]: event.target.checked,
+    };
     setCheckedFields(updatedCheckedFields);
-    setFieldValue('roundsData', updatedCheckedFields);
   };
 
   return (
@@ -84,7 +88,7 @@ export const FieldsToUpdate: React.FC<FieldsToUpdateProps> = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {values.roundsData.map((field, index) => (
+              {values.roundsData.map((field) => (
                 <TableRow
                   key={`${field.field}-${field.round}`}
                   data-cy={`table-row-${field.field}`}
@@ -92,7 +96,7 @@ export const FieldsToUpdate: React.FC<FieldsToUpdateProps> = ({
                   <TableCell>
                     <Checkbox
                       data-cy={`checkbox-${field.field}`}
-                      checked={checkedFields[index]?.checked || false}
+                      checked={checkedFields[field.field] || false}
                       onChange={(event) => handleCheckboxChange(event, field)}
                     />
                   </TableCell>

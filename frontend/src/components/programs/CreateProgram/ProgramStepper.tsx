@@ -46,40 +46,42 @@ export const handleNext = async ({
     },
   };
 
+  const pduFields = Array.isArray(values.pduFields) ? values.pduFields : [];
+
   // Check if all pduFields are either valid, empty, or match the initial state
-  const isAllPduFieldsValidOrInitial = values.pduFields.every((pduField) => {
-    const isInitialState =
-      pduField.label === initialPduFieldState.label &&
-      pduField.pduData.subtype === initialPduFieldState.pduData.subtype &&
-      pduField.pduData.numberOfRounds ===
-        initialPduFieldState.pduData.numberOfRounds &&
-      pduField.pduData.roundsNames.length ===
-        initialPduFieldState.pduData.roundsNames.length;
+  const isAllPduFieldsValidOrInitial =
+    pduFields.length === 0 ||
+    pduFields.every((pduField) => {
+      const isInitialState =
+        pduField.label === initialPduFieldState.label &&
+        pduField.pduData.subtype === initialPduFieldState.pduData.subtype &&
+        pduField.pduData.numberOfRounds ===
+          initialPduFieldState.pduData.numberOfRounds &&
+        pduField.pduData.roundsNames.length ===
+          initialPduFieldState.pduData.roundsNames.length;
 
-    const isValidState =
-      pduField.label &&
-      pduField.pduData.subtype &&
-      pduField.pduData.numberOfRounds &&
-      pduField.pduData.roundsNames.length === pduField.pduData.numberOfRounds;
+      const isValidState =
+        pduField.label &&
+        pduField.pduData.subtype &&
+        pduField.pduData.numberOfRounds &&
+        pduField.pduData.roundsNames.length === pduField.pduData.numberOfRounds;
 
-    return isInitialState || isValidState;
-  });
+      return isInitialState || isValidState;
+    });
 
   // Check if the last pduField entry is empty when there are more than one
   const lastPduFieldIsEmpty =
-    values.pduFields.length > 1 &&
-    values.pduFields[values.pduFields.length - 1].label === '' &&
-    values.pduFields[values.pduFields.length - 1].pduData.subtype === '' &&
-    values.pduFields[values.pduFields.length - 1].pduData.numberOfRounds ===
-      null &&
-    values.pduFields[values.pduFields.length - 1].pduData.roundsNames.length ===
-      0;
+    pduFields.length > 1 &&
+    pduFields[pduFields.length - 1].label === '' &&
+    pduFields[pduFields.length - 1].pduData.subtype === '' &&
+    pduFields[pduFields.length - 1].pduData.numberOfRounds === null &&
+    pduFields[pduFields.length - 1].pduData.roundsNames.length === 0;
 
-  const hasSomePduFields = values.pduFields.length > 0;
+  const hasSomePduFields = pduFields.length > 0;
 
   if (
-    lastPduFieldIsEmpty ||
-    (!isAllPduFieldsValidOrInitial && !hasSomePduFields)
+    (hasSomePduFields && lastPduFieldIsEmpty) ||
+    (!isAllPduFieldsValidOrInitial && hasSomePduFields)
   ) {
     setErrors({
       ...errors,

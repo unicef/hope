@@ -195,16 +195,7 @@ export const EditProgramPage = (): ReactElement => {
     pduFields: programHasRdi
       ? undefined
       : pduFields.length == 0
-        ? [
-            {
-              label: '',
-              pduData: {
-                subtype: '',
-                numberOfRounds: null,
-                roundsNames: [],
-              },
-            },
-          ]
+        ? []
         : mappedPduFields,
   };
 
@@ -331,7 +322,11 @@ export const EditProgramPage = (): ReactElement => {
             >
               <Box p={3}>
                 {step === 0 && (
-                  <DetailsStep values={values} handleNext={handleNextStep} />
+                  <DetailsStep
+                    values={values}
+                    handleNext={handleNextStep}
+                    programId={id}
+                  />
                 )}
                 {step === 1 && (
                   <ProgramFieldSeriesStep
@@ -344,6 +339,7 @@ export const EditProgramPage = (): ReactElement => {
                     setErrors={setErrors}
                     setFieldTouched={setFieldTouched}
                     programHasRdi={programHasRdi}
+                    programId={id}
                   />
                 )}
                 {step === 2 && (
@@ -355,6 +351,7 @@ export const EditProgramPage = (): ReactElement => {
                     setStep={setStep}
                     submitForm={submitForm}
                     setFieldValue={setFieldValue}
+                    programId={id}
                   />
                 )}
               </Box>

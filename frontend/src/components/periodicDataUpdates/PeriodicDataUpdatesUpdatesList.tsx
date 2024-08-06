@@ -1,4 +1,3 @@
-import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { IconButton, TableCell } from '@mui/material';
@@ -110,11 +109,9 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
 
   const renderUpdateRow = (row: Update): ReactElement => (
     <ClickableTableRow key={row.id} data-cy={`update-row-${row.id}`}>
-      <TableCell data-cy={`update-id-${row.id}`}>
-        <BlackLink>{row.id}</BlackLink>
-      </TableCell>
+      <TableCell data-cy={`update-id-${row.id}`}>{row.id}</TableCell>
       <TableCell data-cy={`update-template-${row.id}`}>
-        <BlackLink>{row.template}</BlackLink>
+        {row.template}
       </TableCell>
       <TableCell data-cy={`update-created-at-${row.id}`}>
         <UniversalMoment>{row.created_at}</UniversalMoment>
