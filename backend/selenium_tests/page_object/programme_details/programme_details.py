@@ -26,7 +26,9 @@ class ProgrammeDetails(BaseComponents):
     buttonActivateProgramModal = 'button[data-cy="button-activate-program-modal"]'
     labelProgrammeCode = 'div[data-cy="label-Programme Code"]'
     buttonFinishProgram = 'button[data-cy="button-finish-program"]'
-    cashPlanTableRow = 'tr[data-cy="cash-plan-table-row"]'
+    tableTitle = 'h6[data-cy="table-title"]'
+    buttonAddNewProgrammeCycle = 'button[data-cy="button-add-new-programme-cycle"]'
+    tablePagination = 'div[data-cy="table-pagination"]'
 
     def getLabelPartnerName(self) -> WebElement:
         return self.wait_for(self.labelPartnerName)
@@ -97,9 +99,14 @@ class ProgrammeDetails(BaseComponents):
     def getButtonFinishProgram(self) -> WebElement:
         return self.wait_for(self.buttonFinishProgram)
 
-    def getCashPlanTableRow(self) -> [WebElement]:
-        self.wait_for(self.cashPlanTableRow)
-        return self.get_elements(self.cashPlanTableRow)
+    def getTableTitle(self) -> WebElement:
+        return self.wait_for(self.tableTitle)
+
+    def getButtonAddNewProgrammeCycle(self) -> WebElement:
+        return self.wait_for(self.buttonAddNewProgrammeCycle)
+
+    def getTablePagination(self) -> WebElement:
+        return self.wait_for(self.tablePagination)
 
     def clickButtonFinishProgramPopup(self) -> None:
         self.wait_for('[data-cy="dialog-actions-container"]')
