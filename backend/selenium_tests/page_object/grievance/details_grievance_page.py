@@ -162,6 +162,9 @@ class GrievanceDetailsPage(BaseComponents):
     possibleDuplicateGoldenRow = 'tr[data-cy="possible-duplicate-golden-row"]'
     peopleIcon = 'svg[data-cy="people-icon"]'
     personIcon = 'svg[data-cy="person-icon"]'
+    buttonRotateImage = 'button[data-cy="button-rotate-image"]'
+    buttonCancel = 'button[data-cy="button-cancel"]'
+    linkShowPhoto = 'a[data-cy="link-show-photo"]'
 
     def getPersonIcon(self) -> WebElement:
         return self.wait_for(self.personIcon)
@@ -618,3 +621,9 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getPaymentRecord(self) -> WebElement:
         return self.wait_for(self.paymentRecord)
+
+    def getButtonRotateImage(self) -> WebElement:
+        return self.wait_for(self.buttonRotateImage)
+
+    def getLinkShowPhoto(self) -> WebElement:
+        return self.wait_for(self.linkShowPhoto)
