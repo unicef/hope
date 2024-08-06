@@ -40,7 +40,6 @@ export const PaymentPlanDetailsHeader = ({
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const { programCycleId } = useParams();
-  const decodedProgramCycleId = decodeIdString(programCycleId);
 
   const { data: programCycleData, isLoading: isLoadingProgramCycle } = useQuery(
     {
@@ -48,15 +47,16 @@ export const PaymentPlanDetailsHeader = ({
         'programCyclesDetails',
         businessArea,
         programId,
-        decodedProgramCycleId,
+        decodeIdString(programCycleId),
       ],
       queryFn: async () => {
         return fetchProgramCycle(
           businessArea,
           programId,
-          decodedProgramCycleId,
+          decodeIdString(programCycleId),
         );
       },
+      enabled: !!programCycleId,
     },
   );
 
@@ -64,16 +64,23 @@ export const PaymentPlanDetailsHeader = ({
     return null;
   }
 
-  const breadCrumbsItems: BreadCrumbsItem[] = [
-    {
+  const breadCrumbsItems: BreadCrumbsItem[] = [];
+
+  if (programCycleId) {
+    breadCrumbsItems.push({
       title: t('Payment Module'),
       to: '../../..',
-    },
-    {
+    });
+    breadCrumbsItems.push({
       title: `${programCycleData.title} (ID: ${programCycleData.unicef_id})`,
       to: '../..',
-    },
-  ];
+    });
+  } else {
+    breadCrumbsItems.push({
+      title: t('Payment Module'),
+      to: '..',
+    });
+  }
 
   const canRemove = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
   const canEdit = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
