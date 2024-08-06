@@ -17,6 +17,7 @@ from django.db.models.constraints import UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import SoftDeletableModel
+from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import DataCollectingType
@@ -333,7 +334,7 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedMod
     def validate_program_active_status(self) -> None:
         # all changes with Program Cycle are possible within Active Program
         if self.program.status != Program.ACTIVE:
-            raise ValidationError("Program should be within Active status.")
+            raise DRFValidationError("Program should be within Active status.")
 
     def validate_payment_plan_status(self) -> None:
         if (
@@ -343,7 +344,7 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedMod
             )
             .exists()
         ):
-            raise ValidationError("All Payment Plans and Follow-Up Payment Plans have to be Reconciled.")
+            raise DRFValidationError("All Payment Plans and Follow-Up Payment Plans have to be Reconciled.")
 
     def set_active(self) -> None:
         self.validate_program_active_status()

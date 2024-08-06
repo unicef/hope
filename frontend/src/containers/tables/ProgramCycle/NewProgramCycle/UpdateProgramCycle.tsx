@@ -100,7 +100,7 @@ export const UpdateProgramCycle = ({
       });
       showMessage(t('Programme Cycle Updated'));
     } catch (e) {
-      showMessage(e.message);
+      e.data?.forEach((message: string) => showMessage(message));
     }
   };
 
