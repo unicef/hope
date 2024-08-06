@@ -766,7 +766,6 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getButtonSubmit().click()
         assert "123-21-PR-00001" in pageGrievanceDetailsPage.getPaymentRecord().text
 
-    @pytest.mark.skip("ToDo")
     def test_grievance_tickets_look_up_linked_ticket(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -774,9 +773,16 @@ class TestGrievanceTickets:
         pageGrievanceDetailsPage: GrievanceDetailsPage,
         household_without_disabilities: Household,
     ) -> None:
-        pageGrievanceTickets.getNavGrievance().click()
-        assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getButtonNewTicket().click()
+        pageGrievanceNewTicket.getSelectCategory().click()
+        pageGrievanceNewTicket.select_option_by_name("Grievance Complaint")
+        pageGrievanceNewTicket.getIssueType().click()
+        pageGrievanceNewTicket.select_option_by_name("Partner Related Complaint")
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getHouseholdTab()
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getReceivedConsent().click()
+        pageGrievanceNewTicket.getButtonNext().click()
 
     @pytest.mark.skip("ToDo")
     def test_grievance_tickets_add_documentation(
