@@ -27,10 +27,13 @@ from hct_mis_api.apps.household.fixtures import (
     create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import HOST, Household, Individual
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory, CashPlanFactory
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory, TargetingCriteriaFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetPopulationFactory,
+)
 from selenium_tests.drawer.test_drawer import get_program_with_dct_type_and_name
 from selenium_tests.helpers.date_time_format import FormatTime
 from selenium_tests.page_object.admin_panel.admin_panel import AdminPanel
@@ -483,7 +486,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getDescription().send_keys("Happy path test 1234!")
         pageGrievanceNewTicket.getButtonNext().click()
         assert "Happy path test 1234!" in pageGrievanceDetailsPage.getTicketDescription().text
-        assert "Test Programm" in pageGrievanceDetailsPage.getLabelProgramme().text
+        assert "Test Program" in pageGrievanceDetailsPage.getLabelProgramme().text
         user = User.objects.first()
         assert f"{user.first_name} {user.last_name}" in pageGrievanceDetailsPage.getLabelCreatedBy().text
         assert test_data["category"] in pageGrievanceDetailsPage.getTicketCategory().text
