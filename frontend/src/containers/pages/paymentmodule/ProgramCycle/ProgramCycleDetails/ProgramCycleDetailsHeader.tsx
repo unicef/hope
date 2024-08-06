@@ -14,6 +14,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { decodeIdString } from '@utils/utils';
+import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
+import { usePermissions } from '@hooks/usePermissions';
 
 interface ProgramCycleDetailsHeaderProps {
   programCycle: ProgramCycle;
@@ -22,6 +24,7 @@ interface ProgramCycleDetailsHeaderProps {
 export const ProgramCycleDetailsHeader = ({
   programCycle,
 }: ProgramCycleDetailsHeaderProps): React.ReactElement => {
+  const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -99,20 +102,21 @@ export const ProgramCycleDetailsHeader = ({
   const buttons = (
     <>
       <Box display="flex" mt={2} mb={2}>
-        {programCycle.status !== 'Finished' && (
-          <Box>
-            <Button
-              variant="outlined"
-              color="primary"
-              component={Link}
-              startIcon={<AddIcon />}
-              to="payment-plans/new-plan"
-              data-cy="button-create-payment-plan"
-            >
-              {t('Create Payment Plan')}
-            </Button>
-          </Box>
-        )}
+        {programCycle.status !== 'Finished' &&
+          hasPermissions(PERMISSIONS.PM_CREATE, permissions) && (
+            <Box>
+              <Button
+                variant="outlined"
+                color="primary"
+                component={Link}
+                startIcon={<AddIcon />}
+                to="payment-plans/new-plan"
+                data-cy="button-create-payment-plan"
+              >
+                {t('Create Payment Plan')}
+              </Button>
+            </Box>
+          )}
         {programCycle.status === 'Active' && (
           <Box ml={2}>
             <Button
