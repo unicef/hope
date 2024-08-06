@@ -2,10 +2,7 @@ import React, { useState } from 'react';
 import { PageHeader } from '@core/PageHeader';
 import { useTranslation } from 'react-i18next';
 import { ProgramCyclesFilters } from '@containers/tables/ProgramCyclesTable/ProgramCyclesFilters';
-import {
-  getFilterFromQueryParams,
-  programCycleStatusToColor,
-} from '@utils/utils';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { useLocation } from 'react-router-dom';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';

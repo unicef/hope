@@ -16,16 +16,9 @@ import { GreyText } from '@core/GreyText';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { LoadingButton } from '@core/LoadingButton';
 import { ProgramQuery } from '@generated/graphql';
-import {
-  deleteProgramCycle,
-  ProgramCycle,
-  ProgramCycleUpdate,
-  ProgramCycleUpdateResponse,
-  updateProgramCycle,
-} from '@api/programCycleApi';
+import { deleteProgramCycle, ProgramCycle } from '@api/programCycleApi';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { DefaultError } from '@tanstack/query-core';
 import { decodeIdString } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 

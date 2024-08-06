@@ -4,7 +4,6 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
   AllPaymentPlansForTableQuery,
   AllPaymentPlansForTableQueryVariables,
-  PaymentPlanNode,
   useAllPaymentPlansForTableQuery,
 } from '@generated/graphql';
 import { UniversalTable } from '@containers/tables/UniversalTable';

@@ -86,7 +86,7 @@ export const UpdateProgramCycle = ({
         body,
       );
     },
-    onSuccess: async () => {
+    onSuccess: () => {
       onSubmit();
     },
   });
