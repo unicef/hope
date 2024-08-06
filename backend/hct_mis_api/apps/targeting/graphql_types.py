@@ -18,7 +18,9 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldF
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import ExtendedConnection, FieldAttributeNode
+from hct_mis_api.apps.core.utils import decode_id_string_required, decode_id_string
 from hct_mis_api.apps.household.schema import HouseholdNode
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.filters import HouseholdFilter, TargetPopulationFilter
 from hct_mis_api.apps.utils.schema import Arg
 
@@ -53,6 +55,12 @@ def filter_choices(field: Optional[Dict], args: List) -> Optional[Dict]:
     return field
 
 
+class FlexFieldClassification(graphene.Enum):
+    NOT_FLEX_FIELD = "NOT_FLEX_FIELD"
+    FLEX_FIELD_NOT_PDU = "FLEX_FIELD_NOT_PDU"
+    FLEX_FIELD_PDU = "FLEX_FIELD_PDU"
+
+
 class TargetingCriteriaRuleFilterNode(DjangoObjectType):
     arguments = graphene.List(Arg)
     field_attribute = graphene.Field(FieldAttributeNode)
@@ -61,9 +69,7 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
         return self.arguments
 
     def resolve_field_attribute(parent, info: Any) -> Optional[Dict]:
-        if parent.is_flex_field:
-            return FlexibleAttribute.objects.get(name=parent.field_name)
-        else:
+        if parent.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             field_attribute = get_field_by_name(
                 parent.field_name, parent.targeting_criteria_rule.targeting_criteria.target_population
             )
@@ -71,6 +77,12 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
             return filter_choices(
                 field_attribute, parent.arguments  # type: ignore # can't convert graphene list to list
             )
+
+        program = None
+        if parent.flex_field_classification == "FLEX_FIELD_PDU":
+            encoded_program_id = input.get("program") or info.context.headers.get("Program")
+            program = Program.objects.get(id=decode_id_string(encoded_program_id))
+        return FlexibleAttribute.objects.get(name=parent.field_name, program=program)
 
     class Meta:
         model = target_models.TargetingCriteriaRuleFilter
@@ -84,14 +96,18 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
         return self.arguments
 
     def resolve_field_attribute(parent, info: Any) -> Any:
-        if parent.is_flex_field:
-            return FlexibleAttribute.objects.get(name=parent.field_name)
+        if parent.flex_field_classification == "NOT_FLEX_FIELD":
+            field_attribute = get_field_by_name(
+                parent.field_name,
+                parent.individuals_filters_block.targeting_criteria_rule.targeting_criteria.target_population,
+            )
+            return filter_choices(field_attribute, parent.arguments)  # type: ignore # can't convert graphene list to list
 
-        field_attribute = get_field_by_name(
-            parent.field_name,
-            parent.individuals_filters_block.targeting_criteria_rule.targeting_criteria.target_population,
-        )
-        return filter_choices(field_attribute, parent.arguments)  # type: ignore # can't convert graphene list to list
+        program = None
+        if parent.flex_field_classification == "FLEX_FIELD_PDU":
+            encoded_program_id = input.get("program") or info.context.headers.get("Program")
+            program = Program.objects.get(id=decode_id_string(encoded_program_id))
+        return FlexibleAttribute.objects.get(name=parent.field_name, program=program)
 
     class Meta:
         model = target_models.TargetingIndividualBlockRuleFilter
@@ -164,6 +180,7 @@ class TargetPopulationNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObj
 class TargetingCriteriaRuleFilterObjectType(graphene.InputObjectType):
     comparison_method = graphene.String(required=True)
     is_flex_field = graphene.Boolean(required=True)
+    flex_field_classification = graphene.Field(FlexFieldClassification, required=True)
     field_name = graphene.String(required=True)
     arguments = graphene.List(Arg, required=True)
 

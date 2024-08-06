@@ -19,6 +19,7 @@ from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import get_attr_value
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 
 logger = logging.getLogger(__name__)
 
@@ -346,18 +347,27 @@ class TargetingCriteriaFilterBase:
         return self.get_query_for_lookup(f"{lookup_prefix}{lookup}", core_field_attr)
 
     def get_query_for_flex_field(self) -> Q:
-        flex_field_attr = FlexibleAttribute.objects.get(name=self.field_name)
-        if not flex_field_attr:
-            logger.error(f"There are no Flex Field Attributes associated with this fieldName {self.field_name}")
-            raise ValidationError(
-                f"There are no Flex Field Attributes associated with this fieldName {self.field_name}"
-            )
+        if self.flex_field_classification == FlexFieldClassification.FLEX_FIELD_PDU:
+            program = self.targeting_criteria_rule.targeting_criteria.target_population.program
+            flex_field_attr = FlexibleAttribute.objects.get(name=self.field_name, program=program)
+            if not flex_field_attr:
+                logger.error(f"There is no PDU Flex Field Attribute associated with this fieldName {self.field_name} in program {program.name}")
+                raise ValidationError(
+                    f"There is no PDU Flex Field Attribute associated with this fieldName {self.field_name} in program {program.name}"
+                )
+        else:
+            flex_field_attr = FlexibleAttribute.objects.get(name=self.field_name, program=None)
+            if not flex_field_attr:
+                logger.error(f"There is no Flex Field Attributes associated with this fieldName {self.field_name}")
+                raise ValidationError(
+                    f"There is no Flex Field Attributes associated with this fieldName {self.field_name}"
+                )
         lookup_prefix = self.get_lookup_prefix(_INDIVIDUAL if flex_field_attr.associated_with == 1 else _HOUSEHOLD)
         lookup = f"{lookup_prefix}flex_fields__{flex_field_attr.name}"
         return self.get_query_for_lookup(lookup, flex_field_attr)
 
     def get_query(self) -> Q:
-        if not self.is_flex_field:
+        if self.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             return self.get_query_for_core_field()
         return self.get_query_for_flex_field()
 
