@@ -146,20 +146,12 @@ class Migration(migrations.Migration):
             model_name="deliverymechanismperpaymentplan",
             name="delivery_mechanism",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.PROTECT, to="payment.deliverymechanism", null=True
+                on_delete=django.db.models.deletion.SET_NULL, to="payment.deliverymechanism", null=True
             ),
         ),
         migrations.RunPython(
             data_migration_deliverymechanismperpaymentplan_delivery_mechanism,
             migrations.RunPython.noop,
-        ),
-        migrations.AlterField(
-            model_name="deliverymechanismperpaymentplan",
-            name="delivery_mechanism",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.PROTECT,
-                to="payment.deliverymechanism",
-            ),
         ),
         migrations.RenameField(
             model_name="fspxlsxtemplateperdeliverymechanism",
