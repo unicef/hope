@@ -3,13 +3,13 @@ from datetime import datetime
 import pytest
 from dateutil.relativedelta import relativedelta
 from page_object.payment_module.program_cycle import ProgramCyclePage
+from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from selenium_tests.tools.tag_name_finder import printing
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -65,13 +65,7 @@ class TestSmokeProgramCycle:
         assert "" in pageProgramCycle.getDatePickerFilter().text
         assert "CLEAR" in pageProgramCycle.getButtonFiltersClear().text
         assert "APPLY" in pageProgramCycle.getButtonFiltersApply().text
-        assert "Program Cycles" in pageProgramCycle.getTableTitle().text
-
-        pageProgramCycle.screenshot("123")
-        printing("Mapping", pageProgramCycle.driver)
-        printing("Methods", pageProgramCycle.driver)
-        printing("Assert", pageProgramCycle.driver)
-
+        assert "Programme Cycles" in pageProgramCycle.getTableTitle().text
         assert "Programme Cycles ID" in pageProgramCycle.getHeadCellId().text
         assert "Programme Cycles Title" in pageProgramCycle.getHeadCellProgrammeCyclesTitle().text
         assert "Status" in pageProgramCycle.getHeadCellStatus().text
@@ -79,6 +73,35 @@ class TestSmokeProgramCycle:
         assert "Start Date" in pageProgramCycle.getHeadCellStartDate().text
         assert "End Date" in pageProgramCycle.getHeadCellEndDate().text
         assert "Rows per page: 5 1–3 of 3" in pageProgramCycle.getTablePagination().text.replace("\n", " ")
+
+        first_cycle = pageProgramCycle.getProgramCycleRow()[0]
+        second_cycle = pageProgramCycle.getProgramCycleRow()[1]
+        third_cycle = pageProgramCycle.getProgramCycleRow()[2]
+        assert (
+            "Default Programme Cycle"
+            in first_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-title"]').text
+        )
+        assert "Active" in first_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]').text
+        assert (
+            "-" in first_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-total-entitled-quantity"]').text
+        )
+        assert (
+            "Test Programme Cycle 001"
+            in second_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-title"]').text
+        )
+        assert "Active" in second_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]').text
+        assert (
+            "1833.99"
+            in second_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-total-entitled-quantity"]').text
+        )
+        assert (
+            "Programme Cycle in Draft"
+            in third_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-title"]').text
+        )
+        assert "Draft" in third_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]').text
+        assert (
+            "-" in third_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-total-entitled-quantity"]').text
+        )
 
     # def test_smoke_details_program_cycle(
     #     self,
