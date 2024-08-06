@@ -1,9 +1,15 @@
 // @ts-nocheck
-import { Box } from '@mui/material';
-import { Formik } from 'formik';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { BaseSection } from '@components/core/BaseSection';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { DetailsStep } from '@components/programs/CreateProgram/DetailsStep';
+import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
+import { ProgramFieldSeriesStep } from '@components/programs/CreateProgram/ProgramFieldSeriesStep';
+import {
+  handleNext,
+  ProgramStepper,
+} from '@components/programs/CreateProgram/ProgramStepper';
 import {
   ProgramPartnerAccess,
   useAllAreasTreeQuery,
@@ -12,24 +18,18 @@ import {
   useUpdateProgramMutation,
   useUserPartnerChoicesQuery,
 } from '@generated/graphql';
-import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/core/AllLogEntries';
-import { LoadingComponent } from '@components/core/LoadingComponent';
-import { PageHeader } from '@components/core/PageHeader';
-import { DetailsStep } from '@components/programs/CreateProgram/DetailsStep';
-import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
-import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { decodeIdString } from '@utils/utils';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
-import { ProgramFieldSeriesStep } from '@components/programs/CreateProgram/ProgramFieldSeriesStep';
-import { BaseSection } from '@components/core/BaseSection';
-import {
-  handleNext,
-  ProgramStepper,
-} from '@components/programs/CreateProgram/ProgramStepper';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Box } from '@mui/material';
+import { decodeIdString } from '@utils/utils';
+import { Formik } from 'formik';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/core/AllLogEntries';
+import { hasPermissionInModule } from '../../../config/permissions';
+import { editProgramValidationSchema } from '@components/programs/CreateProgram/editProgramValidationSchema';
 
 export const EditProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -192,11 +192,7 @@ export const EditProgramPage = (): ReactElement => {
         areaAccess: partner.areaAccess,
       })),
     partnerAccess,
-    pduFields: programHasRdi
-      ? undefined
-      : pduFields.length == 0
-        ? []
-        : mappedPduFields,
+    pduFields: mappedPduFields,
   };
 
   initialValues.budget =
@@ -238,7 +234,7 @@ export const EditProgramPage = (): ReactElement => {
       onSubmit={(values) => {
         handleSubmit(values);
       }}
-      validationSchema={programValidationSchema(t)}
+      validationSchema={editProgramValidationSchema(t)}
     >
       {({
         submitForm,
