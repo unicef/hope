@@ -3,6 +3,7 @@ import string
 from decimal import Decimal
 from typing import Any, Collection, Optional, Union
 
+from django.conf import settings
 from django.contrib.postgres.fields import CICharField
 from django.core.exceptions import ValidationError
 from django.core.validators import (
@@ -279,6 +280,7 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedMod
             "status",
             "start_date",
             "end_date",
+            "created_by",
         ],
     )
     DRAFT = "DRAFT"
@@ -294,6 +296,13 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedMod
     start_date = models.DateField()  # first from program
     end_date = models.DateField(null=True, blank=True)
     program = models.ForeignKey("Program", on_delete=models.CASCADE, related_name="cycles")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name=_("Created by"),
+    )
 
     class Meta:
         constraints = [

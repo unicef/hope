@@ -52,6 +52,7 @@ class ProgramCycleListSerializer(EncodedIdSerializerMixin):
             "total_entitled_quantity_usd",
             "total_undelivered_quantity_usd",
             "total_delivered_quantity_usd",
+            "created_by",
         )
 
 
@@ -79,6 +80,7 @@ class ProgramCycleCreateSerializer(EncodedIdSerializerMixin):
     def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
         program = self.get_program(self.context["request"].parser_context["kwargs"]["program_id"])
         data["program"] = program
+        data["created_by"] = self.context["request"].user
         start_date = data.get("start_date")
         end_date = data.get("end_date")
 

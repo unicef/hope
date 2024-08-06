@@ -33,7 +33,7 @@ class ProgramCycleAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEMod
     list_display = ("program", "status", "start_date", "end_date")
     date_hierarchy = "program__start_date"
     list_filter = (("status", ChoicesFieldComboFilter),)
-    raw_id_fields = ("program",)
+    raw_id_fields = ("program", "created_by")
 
 
 class ProgramCycleAdminInline(admin.TabularInline):
