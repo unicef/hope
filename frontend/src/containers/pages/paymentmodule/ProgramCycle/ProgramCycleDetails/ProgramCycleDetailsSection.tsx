@@ -7,7 +7,6 @@ import Grid from '@mui/material/Grid';
 import { StatusBox } from '@core/StatusBox';
 import { programCycleStatusToColor } from '@utils/utils';
 import { LabelizedField } from '@core/LabelizedField';
-import { Missing } from '@core/Missing';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ProgramCycle } from '@api/programCycleApi';
 import { useTranslation } from 'react-i18next';
@@ -36,7 +35,7 @@ export const ProgramCycleDetailsSection = ({
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label={t('Created By')}>
-                <Missing />
+                {programCycle.created_by}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>

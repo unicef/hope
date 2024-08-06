@@ -88,7 +88,6 @@ class ProgramCycleNode(BaseNodePermissionMixin, DjangoObjectType):
     class Meta:
         model = ProgramCycle
         filter_fields = [
-            "name",
             "status",
         ]
         interfaces = (relay.Node,)

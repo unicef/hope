@@ -23,12 +23,12 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export const EditPeoplePaymentPlanPage = (): React.ReactElement => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { paymentPlanId } = useParams();
   const { t } = useTranslation();
   const { data: paymentPlanData, loading: loadingPaymentPlan } =
     usePaymentPlanQuery({
       variables: {
-        id,
+        id: paymentPlanId,
       },
       fetchPolicy: 'cache-and-network',
     });
@@ -91,7 +91,7 @@ export const EditPeoplePaymentPlanPage = (): React.ReactElement => {
       const res = await mutate({
         variables: {
           input: {
-            paymentPlanId: id,
+            paymentPlanId,
             targetingId: values.targetingId,
             dispersionStartDate: values.dispersionStartDate,
             dispersionEndDate: values.dispersionEndDate,

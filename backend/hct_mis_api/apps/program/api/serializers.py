@@ -38,6 +38,7 @@ def validate_cycle_timeframes_overlapping(
 
 class ProgramCycleListSerializer(EncodedIdSerializerMixin):
     status = serializers.CharField(source="get_status_display")
+    created_by = serializers.SerializerMethodField()
 
     class Meta:
         model = ProgramCycle
@@ -57,6 +58,11 @@ class ProgramCycleListSerializer(EncodedIdSerializerMixin):
             "frequency_of_payments",
             "created_by",
         )
+
+    def get_created_by(self, obj: ProgramCycle) -> str:
+        if not obj.created_by:
+            return "-"
+        return f"{obj.created_by.first_name} {obj.created_by.last_name}"
 
 
 class ProgramCycleCreateSerializer(EncodedIdSerializerMixin):

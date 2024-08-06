@@ -32,6 +32,7 @@ export interface ProgramCycle {
   program_start_date: string;
   program_end_date: string;
   created_at: string;
+  created_by: string;
   total_entitled_quantity_usd: number;
   total_undelivered_quantity_usd: number;
   total_delivered_quantity_usd: number;
