@@ -97,6 +97,8 @@ export const EditProgramPage = (): ReactElement => {
     pduFields,
   } = data.program;
 
+  const programHasRdi = registrationImports.totalCount > 0;
+
   const handleSubmit = async (values): Promise<void> => {
     const budgetValue = parseFloat(values.budget) ?? 0;
     const budgetToFixed = !Number.isNaN(budgetValue)
@@ -140,15 +142,18 @@ export const EditProgramPage = (): ReactElement => {
       }));
 
     try {
+      const { pduFields: pduFieldsFromValues, ...requestValuesWithoutPdu } =
+        requestValues;
+
       const response = await mutate({
         variables: {
           programData: {
             id,
-            ...requestValues,
+            ...requestValuesWithoutPdu,
             budget: budgetToFixed,
             populationGoal: populationGoalParsed,
             partners: partnersToSet,
-            pduFields: pduFieldsToSend,
+            ...(!programHasRdi && { pduFields: pduFieldsToSend }),
           },
           version,
         },
@@ -159,8 +164,6 @@ export const EditProgramPage = (): ReactElement => {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
-
-  const programHasRdi = registrationImports.totalCount > 0;
 
   const mappedPduFields = Object.entries(pduFields).map(([, field]) => {
     const { ...rest } = field;
