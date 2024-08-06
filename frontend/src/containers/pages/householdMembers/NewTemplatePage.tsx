@@ -44,6 +44,9 @@ export const NewTemplatePage = (): React.ReactElement => {
   };
 
   const [filter, setFilter] = useState(initialFilter);
+  const [checkedFields, setCheckedFields] = useState<Record<string, boolean>>(
+    {},
+  );
 
   const createTemplate = useMutation({
     mutationFn: (params: {
@@ -186,7 +189,7 @@ export const NewTemplatePage = (): React.ReactElement => {
     );
 
     const roundsDataToSend = values.roundsData
-      .filter((el) => el.checked)
+      .filter((el) => checkedFields[el.field] === true)
       .map((data) => ({
         field: data.field,
         round: data.roundNumber,
@@ -210,13 +213,16 @@ export const NewTemplatePage = (): React.ReactElement => {
     <Formik initialValues={initialValues} onSubmit={handleSubmit}>
       {({ values, setFieldValue, submitForm }) => {
         const roundsDataToSend = values.roundsData
-          .filter((el) => el.checked)
+          .filter((el) => checkedFields[el.field] === true)
           .map((data) => ({
             field: data.field,
-            round: data.roundNumber,
-            round_name: data.roundName,
+            rounds: data.rounds
+              .filter((round) => round.checked)
+              .map((round) => ({
+                round: round.round,
+                round_name: round.round_name,
+              })),
           }));
-
         return (
           <form onSubmit={handleSubmit}>
             <PageHeader
@@ -246,7 +252,12 @@ export const NewTemplatePage = (): React.ReactElement => {
                 />
               )}
               {activeStep === 1 && (
-                <FieldsToUpdate values={values} setFieldValue={setFieldValue} />
+                <FieldsToUpdate
+                  values={values}
+                  setFieldValue={setFieldValue}
+                  checkedFields={checkedFields}
+                  setCheckedFields={setCheckedFields}
+                />
               )}
               <Box
                 display="flex"
