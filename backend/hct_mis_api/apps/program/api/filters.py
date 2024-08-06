@@ -19,16 +19,22 @@ class ProgramCycleFilter(filters.FilterSet):
     program = filters.CharFilter(method="filter_by_program")
     start_date = filters.DateFilter(field_name="start_date", lookup_expr="gte")
     end_date = filters.DateFilter(field_name="end_date", lookup_expr="lte")
+    title = filters.CharFilter(field_name="title", lookup_expr="istartswith")
     total_delivered_quantity_usd_from = filters.NumberFilter(method="filter_total_delivered_quantity_usd")
     total_delivered_quantity_usd_to = filters.NumberFilter(method="filter_total_delivered_quantity_usd")
 
     class Meta:
         model = ProgramCycle
-        fields = {
-            "title": [
-                "startswith",
-            ],
-        }
+        fields = [
+            "search",
+            "status",
+            "program",
+            "start_date",
+            "end_date",
+            "title",
+            "total_delivered_quantity_usd_from",
+            "total_delivered_quantity_usd_to",
+        ]
 
     def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return qs.filter(program_id=decode_id_string_required(value))
