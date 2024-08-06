@@ -36,7 +36,7 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
             element: <PeoplePaymentModulePage />,
           },
           {
-            path: ':id',
+            path: ':paymentPlanId',
             children: [
               {
                 path: '',
@@ -59,7 +59,7 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
         ],
       },
       {
-        path: 'followup-payment-plans/:id',
+        path: 'followup-payment-plans/:paymentPlanId',
         children: [
           {
             path: '',
@@ -157,7 +157,7 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
         ],
       },
       {
-        path: 'followup-payment-plans/:id',
+        path: 'followup-payment-plans/:paymentPlanId',
         children: [
           {
             path: '',

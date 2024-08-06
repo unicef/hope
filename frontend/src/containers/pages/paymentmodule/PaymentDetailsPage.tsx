@@ -22,12 +22,12 @@ import { AdminButton } from '@core/AdminButton';
 
 export function PaymentDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
-  const { id } = useParams();
+  const { paymentPlanId } = useParams();
   const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
   const { data, loading } = usePaymentQuery({
-    variables: { id },
+    variables: { id: paymentPlanId },
     fetchPolicy: 'cache-and-network',
   });
   const paymentPlanStatus = data?.payment?.parent?.status;
