@@ -1,5 +1,6 @@
 import random
 import string
+from datetime import date
 from decimal import Decimal
 from typing import Any, Collection, Optional, Union
 
@@ -330,6 +331,18 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedMod
             "total_delivered"
         ]
         return total_delivered or Decimal(0.0)
+
+    @property
+    def program_start_date(self) -> date:
+        return self.program.start_date
+
+    @property
+    def program_end_date(self) -> date:
+        return self.program.end_date
+
+    @property
+    def frequency_of_payments(self) -> str:
+        return self.program.get_frequency_of_payments_display()
 
     def validate_program_active_status(self) -> None:
         # all changes with Program Cycle are possible within Active Program
