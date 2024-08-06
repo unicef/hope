@@ -207,16 +207,7 @@ export const DuplicateProgramPage = (): ReactElement => {
         areaAccess: partner.areaAccess,
       })),
     partnerAccess,
-    pduFields: [
-      {
-        label: '',
-        pduData: {
-          subtype: '',
-          numberOfRounds: null,
-          roundsNames: [],
-        },
-      },
-    ],
+    pduFields: [],
   };
   initialValues.budget =
     data.program.budget === '0.00' ? '' : data.program.budget;
@@ -339,7 +330,11 @@ export const DuplicateProgramPage = (): ReactElement => {
             >
               <Box p={3}>
                 {step === 0 && (
-                  <DetailsStep values={values} handleNext={handleNextStep} />
+                  <DetailsStep
+                    values={values}
+                    handleNext={handleNextStep}
+                    programId={id}
+                  />
                 )}
                 {step === 1 && (
                   <ProgramFieldSeriesStep
@@ -351,6 +346,7 @@ export const DuplicateProgramPage = (): ReactElement => {
                     errors={errors}
                     setErrors={setErrors}
                     setFieldTouched={setFieldTouched}
+                    programId={id}
                   />
                 )}
                 {step === 2 && (
@@ -362,6 +358,7 @@ export const DuplicateProgramPage = (): ReactElement => {
                     setStep={setStep}
                     submitForm={submitForm}
                     setFieldValue={setFieldValue}
+                    programId={id}
                   />
                 )}
               </Box>

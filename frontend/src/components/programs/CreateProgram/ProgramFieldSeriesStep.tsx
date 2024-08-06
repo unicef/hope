@@ -4,14 +4,7 @@ import { PduSubtypeChoicesDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import {
-  Box,
-  Button,
-  FormControl,
-  FormHelperText,
-  Grid,
-  IconButton,
-} from '@mui/material';
+import { Box, Button, FormControl, Grid, IconButton } from '@mui/material';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { Field, FieldArray } from 'formik';
@@ -28,6 +21,7 @@ interface ProgramFieldSeriesStepProps {
   programHasRdi?: boolean;
   pdusubtypeChoicesData?: PduSubtypeChoicesDataQuery;
   errors: any;
+  programId?: string;
 }
 
 export const ProgramFieldSeriesStep = ({
@@ -38,9 +32,10 @@ export const ProgramFieldSeriesStep = ({
   programHasRdi,
   pdusubtypeChoicesData,
   errors,
+  programId: formProgramId,
 }: ProgramFieldSeriesStepProps) => {
   const { t } = useTranslation();
-  const { baseUrl } = useBaseUrl();
+  const { businessArea, programId, baseUrl } = useBaseUrl();
   const confirm = useConfirmation();
 
   const mappedPduSubtypeChoices = pdusubtypeChoicesData?.pduSubtypeChoices.map(
@@ -89,30 +84,52 @@ export const ProgramFieldSeriesStep = ({
                         />
                       </Grid>
                       <Grid item xs={3}>
-                        <FormControl
+                        <Field
+                          name={`pduFields.${index}.pduData.numberOfRounds`}
                           fullWidth
-                          error={Boolean(
-                            errors.pduFields?.[index]?.pduData?.numberOfRounds,
-                          )}
+                          required
                           variant="outlined"
-                        >
-                          <Field
-                            name={`pduFields.${index}.pduData.numberOfRounds`}
-                            fullWidth
-                            required
-                            variant="outlined"
-                            label={t('Number of Expected Rounds')}
-                            component={FormikSelectField}
-                            choices={[...Array(10).keys()].map((n) => ({
-                              value: n + 1,
-                              label: `${n + 1}`,
-                            }))}
-                            disabled={programHasRdi}
-                          />
-                          <FormHelperText>
-                            {errors.pduFields?.[index]?.pduData?.numberOfRounds}
-                          </FormHelperText>
-                        </FormControl>
+                          label={t('Number of Expected Rounds')}
+                          onChange={(e) => {
+                            const numberOfRounds = parseInt(e.target.value, 10);
+                            if (!isNaN(numberOfRounds) && numberOfRounds > 0) {
+                              const currentRoundsNames =
+                                values.pduFields[index].pduData.roundsNames ||
+                                [];
+                              let newRoundsNames;
+
+                              if (numberOfRounds > currentRoundsNames.length) {
+                                newRoundsNames = [
+                                  ...currentRoundsNames,
+                                  ...Array(
+                                    numberOfRounds - currentRoundsNames.length,
+                                  ).fill(''),
+                                ];
+                              } else {
+                                newRoundsNames = currentRoundsNames.slice(
+                                  0,
+                                  numberOfRounds,
+                                );
+                              }
+
+                              // Update the form state using setFieldValue
+                              arrayHelpers.form.setFieldValue(
+                                `pduFields.${index}.pduData.roundsNames`,
+                                newRoundsNames,
+                              );
+                              arrayHelpers.form.setFieldValue(
+                                `pduFields.${index}.pduData.numberOfRounds`,
+                                numberOfRounds,
+                              );
+                            }
+                          }}
+                          component={FormikSelectField}
+                          choices={[...Array(10).keys()].map((n) => ({
+                            value: n + 1,
+                            label: `${n + 1}`,
+                          }))}
+                          disabled={programHasRdi}
+                        />
                       </Grid>
                       <Grid item xs={1}>
                         <IconButton
@@ -175,11 +192,6 @@ export const ProgramFieldSeriesStep = ({
                 {t('Add Time Series Fields')}
               </Button>
             </Box>
-            <FormHelperText error>
-              {errors.pduFields && errors.pduFields.length > 0
-                ? t('Please complete the PDU fields correctly.')
-                : null}
-            </FormHelperText>
           </div>
         )}
       />
@@ -187,7 +199,11 @@ export const ProgramFieldSeriesStep = ({
         <Button
           data-cy="button-cancel"
           component={Link}
-          to={`/${baseUrl}/list`}
+          to={
+            formProgramId
+              ? `/${businessArea}/programs/${programId}/details/${formProgramId}`
+              : `/${baseUrl}/list`
+          }
         >
           {t('Cancel')}
         </Button>

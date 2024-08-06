@@ -26,15 +26,15 @@ export function DeliveryMechanismRow({
 }: DeliveryMechanismRowProps): React.ReactElement {
   const { t } = useTranslation();
   const chosenFsp = values.deliveryMechanisms[index].fsp;
-  const chosenDeliveryMechanism = values.deliveryMechanisms[index].deliveryMechanism;
-  console.log('values', values);
-  console.log('deliveryMechanismsChoices', deliveryMechanismsChoices);
-
+  const chosenDeliveryMechanism =
+    values.deliveryMechanisms[index].deliveryMechanism;
 
   const handleDeliveryMechanismChange = (e): void => {
-    console.log('e', e.target);
     setFieldValue(`deliveryMechanisms[${index}].chosenConfiguration`, '');
-    setFieldValue(`deliveryMechanisms[${index}].deliveryMechanism`, e.target.value);
+    setFieldValue(
+      `deliveryMechanisms[${index}].deliveryMechanism`,
+      e.target.value,
+    );
   };
   const handleFspChange = (e): void => {
     setFieldValue(`deliveryMechanisms[${index}].chosenConfiguration`, '');
@@ -63,7 +63,13 @@ export function DeliveryMechanismRow({
                   label={t('Delivery Mechanism')}
                   value={chosenDeliveryMechanism}
                 >
-                  {(deliveryMechanismsChoices.find(c => c.value === chosenDeliveryMechanism) || {}).name}
+                  {
+                    (
+                      deliveryMechanismsChoices.find(
+                        (c) => c.value === chosenDeliveryMechanism,
+                      ) || {}
+                    ).name
+                  }
                 </LabelizedField>
               )}
             </Box>
