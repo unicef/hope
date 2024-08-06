@@ -51,19 +51,21 @@ export const ProgramCycleDetailsSection = ({
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label={t('Programme Start Date')}>
-                <Missing />
-                {/*<UniversalMoment>{programStartDate}</UniversalMoment>*/}
+                <UniversalMoment>
+                  {programCycle.program_start_date}
+                </UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label={t('Programme End Date')}>
-                <Missing />
-                {/*<UniversalMoment>{programEndDate}</UniversalMoment>*/}
+                <UniversalMoment>
+                  {programCycle.program_end_date}
+                </UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label={t('Frequency of Payment')}>
-                <Missing />
+                {programCycle.frequency_of_payments}
               </LabelizedField>
             </Grid>
           </Grid>

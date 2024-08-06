@@ -99,7 +99,7 @@ export const CreateProgramCycle = ({
       });
       showMessage(t('Programme Cycle Created'));
     } catch (e) {
-      showMessage(e.message);
+      e.data?.forEach((message: string) => showMessage(message));
     }
   };
 

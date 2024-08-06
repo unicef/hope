@@ -48,10 +48,13 @@ class ProgramCycleListSerializer(EncodedIdSerializerMixin):
             "status",
             "start_date",
             "end_date",
+            "program_start_date",
+            "program_end_date",
             "created_at",
             "total_entitled_quantity_usd",
             "total_undelivered_quantity_usd",
             "total_delivered_quantity_usd",
+            "frequency_of_payments",
             "created_by",
         )
 

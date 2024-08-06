@@ -29,10 +29,13 @@ export interface ProgramCycle {
   status: ProgramCycleStatus;
   start_date: string;
   end_date: string;
+  program_start_date: string;
+  program_end_date: string;
   created_at: string;
   total_entitled_quantity_usd: number;
   total_undelivered_quantity_usd: number;
   total_delivered_quantity_usd: number;
+  frequency_of_payments: string;
 }
 
 export const fetchProgramCycles = async (
