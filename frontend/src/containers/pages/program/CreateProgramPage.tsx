@@ -178,16 +178,7 @@ export const CreateProgramPage = (): ReactElement => {
     frequencyOfPayments: 'REGULAR',
     partners: [],
     partnerAccess: ProgramPartnerAccess.AllPartnersAccess,
-    pduFields: [
-      {
-        label: '',
-        pduData: {
-          subtype: '',
-          numberOfRounds: null,
-          roundsNames: [],
-        },
-      },
-    ],
+    pduFields: [],
   };
 
   const stepFields = [
@@ -235,6 +226,7 @@ export const CreateProgramPage = (): ReactElement => {
         programmeCode: true,
       }}
       validationSchema={programValidationSchema(t)}
+      validateOnChange={true}
     >
       {({
         submitForm,
