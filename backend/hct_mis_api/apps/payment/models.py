@@ -298,7 +298,7 @@ class GenericPayment(TimeStampedUUIDModel):
     delivery_type_choice = models.CharField(
         choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES, max_length=32, null=True
     )  # TODO MB drop later
-    delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.PROTECT, null=True)
+    delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True)
     currency = models.CharField(
         max_length=4,
     )
@@ -1285,7 +1285,7 @@ class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
     delivery_mechanism_choice = models.CharField(
         max_length=255, verbose_name=_("Delivery Mechanism"), choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES
     )  # TODO MB drop later
-    delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.PROTECT)
+    delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.SET_NULL, null=True)
     xlsx_template = models.ForeignKey(
         "FinancialServiceProviderXlsxTemplate",
         on_delete=models.CASCADE,
