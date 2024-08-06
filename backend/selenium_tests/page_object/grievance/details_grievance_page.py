@@ -142,6 +142,7 @@ class GrievanceDetailsPage(BaseComponents):
     pagination = 'div[data-cy="pagination"]'
     buttonAdmin = 'div[data-cy="button-admin"]'
     logRow = 'div[data-cy="log-row"]'
+    paymentRecord = 'span[data-cy="payment-record"]'
 
     # Texts
     textTitle = "Ticket ID: "
@@ -614,3 +615,6 @@ class GrievanceDetailsPage(BaseComponents):
     def getLogRow(self) -> [WebElement]:
         self.wait_for(self.logRow)
         return self.get_elements(self.logRow)
+
+    def getPaymentRecord(self) -> WebElement:
+        return self.wait_for(self.paymentRecord)

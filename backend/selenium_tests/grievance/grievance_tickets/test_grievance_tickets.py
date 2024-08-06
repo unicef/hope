@@ -27,8 +27,10 @@ from hct_mis_api.apps.household.fixtures import (
     create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import HOST, Household, Individual
+from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory, CashPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory, TargetingCriteriaFactory
 from selenium_tests.drawer.test_drawer import get_program_with_dct_type_and_name
 from selenium_tests.helpers.date_time_format import FormatTime
 from selenium_tests.page_object.admin_panel.admin_panel import AdminPanel
@@ -72,6 +74,31 @@ def create_programs(django_db_setup: Generator[None, None, None], django_db_bloc
 @pytest.fixture
 def household_without_disabilities() -> Household:
     yield create_custom_household(observed_disability=[])
+
+
+@pytest.fixture
+def hh_with_payment_record(household_without_disabilities: Household) -> Household:
+    targeting_criteria = TargetingCriteriaFactory()
+
+    target_population = TargetPopulationFactory(
+        created_by=User.objects.first(),
+        targeting_criteria=targeting_criteria,
+        business_area=household_without_disabilities.business_area,
+    )
+    cash_plan = CashPlanFactory(
+        program=household_without_disabilities.program,
+        business_area=household_without_disabilities.business_area,
+    )
+    cash_plan.save()
+    payment_record = PaymentRecordFactory(
+        parent=cash_plan,
+        household=household_without_disabilities,
+        target_population=target_population,
+        delivered_quantity_usd=None,
+        business_area=household_without_disabilities.business_area,
+    )
+    payment_record.save()
+    return household_without_disabilities
 
 
 def find_text_of_label(element: WebElement) -> str:
@@ -718,7 +745,7 @@ class TestGrievanceTickets:
         pageGrievanceTickets: GrievanceTickets,
         pageGrievanceNewTicket: NewTicket,
         pageGrievanceDetailsPage: GrievanceDetailsPage,
-        household_without_disabilities: Household,
+        hh_with_payment_record: Household,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -729,14 +756,15 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.select_option_by_name("Payment Related Complaint")
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getHouseholdTab()
+        pageGrievanceNewTicket.getHouseholdTableRows(0).click()
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getReceivedConsent().click()
         pageGrievanceNewTicket.getButtonNext().click()
-        pageGrievanceNewTicket.screenshot("1")
-        from selenium_tests.tools.tag_name_finder import printing
-
-        printing("Mapping", pageGrievanceNewTicket.driver)
-        printing("Methods", pageGrievanceNewTicket.driver)
+        pageGrievanceNewTicket.getDescription().send_keys("TEST Payment Related Complaint")
+        pageGrievanceNewTicket.getLookUpPaymentRecord().click()
+        pageGrievanceNewTicket.getCheckboxSelectAll().click()
+        pageGrievanceNewTicket.getButtonSubmit().click()
+        assert "123-21-PR-00001" in pageGrievanceDetailsPage.getPaymentRecord().text
 
     @pytest.mark.skip("ToDo")
     def test_grievance_tickets_look_up_linked_ticket(

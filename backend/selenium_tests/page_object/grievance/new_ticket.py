@@ -104,6 +104,8 @@ class NewTicket(BaseComponents):
     selectHouseholddataupdatefieldsFieldname = 'div[data-cy="select-householdDataUpdateFields[{}].fieldName"]'
     buttonAddNewField = 'button[data-cy="button-add-new-field"]'
     inputIndividualData = 'div[data-cy="input-individual-data-{}"]'  # Gender
+    checkboxSelectAll = 'span[data-cy="checkbox-select-all"]'
+    buttonSubmit = 'button[data-cy="button-submit"]'
 
     # Texts
     textLookUpHousehold = "LOOK UP HOUSEHOLD"
@@ -274,6 +276,9 @@ class NewTicket(BaseComponents):
     def getLookUpButton(self) -> WebElement:
         return self.wait_for(self.lookUpButton)
 
+    def getLookUpPaymentRecord(self) -> [WebElement]:
+        return self.get_elements(self.lookUpButton)[1]
+
     def getCheckbox(self) -> WebElement:
         return self.wait_for(self.checkbox)
 
@@ -434,3 +439,9 @@ class NewTicket(BaseComponents):
 
     def getInputIndividualData(self, type: str) -> WebElement:
         return self.wait_for(self.inputIndividualData.format(type))
+
+    def getCheckboxSelectAll(self) -> WebElement:
+        return self.wait_for(self.checkboxSelectAll)
+
+    def getButtonSubmit(self) -> WebElement:
+        return self.get_elements(self.buttonSubmit)[1]
