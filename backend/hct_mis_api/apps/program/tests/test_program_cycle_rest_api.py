@@ -16,7 +16,7 @@ from hct_mis_api.apps.account.fixtures import (
     PartnerFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.models import Role, UserRole
+from hct_mis_api.apps.account.models import Role, UserRole, User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
@@ -245,6 +245,8 @@ class ProgramCycleCreateSerializerTest(TestCase):
 
     def get_serializer_context(self) -> Dict[str, Any]:
         request = self.factory.get("/")
+        user = User.objects.create_user(username="MyUser", first_name="FirstName", last_name="LastName", password="PassworD")
+        request.user = user
         request.parser_context = {"kwargs": {"program_id": str(self.program_id)}}
         return {"request": request}
 
