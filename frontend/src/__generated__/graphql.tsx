@@ -5625,6 +5625,7 @@ export type PositiveFeedbackTicketExtras = {
 export type ProgramCycleNode = Node & {
   __typename?: 'ProgramCycleNode';
   createdAt: Scalars['DateTime']['output'];
+  createdBy?: Maybe<UserNode>;
   endDate?: Maybe<Scalars['Date']['output']>;
   id: Scalars['ID']['output'];
   isRemoved: Scalars['Boolean']['output'];
@@ -27996,6 +27997,7 @@ export type PeriodicFieldNodeResolvers<ContextType = any, ParentType extends Res
 
 export type ProgramCycleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramCycleNode'] = ResolversParentTypes['ProgramCycleNode']> = {
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
   endDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;

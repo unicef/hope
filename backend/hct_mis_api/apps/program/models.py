@@ -304,6 +304,7 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedMod
         null=True,
         blank=True,
         verbose_name=_("Created by"),
+        related_name="+",
     )
 
     class Meta:
