@@ -39,6 +39,10 @@ def validate_cycle_timeframes_overlapping(
 class ProgramCycleListSerializer(EncodedIdSerializerMixin):
     status = serializers.CharField(source="get_status_display")
     created_by = serializers.SerializerMethodField()
+    start_date = serializers.DateField(format="%Y-%m-%d")
+    end_date = serializers.DateField(format="%Y-%m-%d")
+    program_start_date = serializers.DateField(format="%Y-%m-%d")
+    program_end_date = serializers.DateField(format="%Y-%m-%d")
 
     class Meta:
         model = ProgramCycle

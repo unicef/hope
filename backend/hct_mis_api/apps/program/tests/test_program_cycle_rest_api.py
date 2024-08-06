@@ -2,7 +2,6 @@ import base64
 from decimal import Decimal
 from typing import Any, Dict
 
-from django.core.exceptions import ValidationError as DjangoValidationError
 from django.test import TestCase
 from django.urls import reverse
 
@@ -53,10 +52,12 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
             status=Program.ACTIVE,
             start_date="2023-01-01",
             end_date="2099-12-31",
+            frequency_of_payments=Program.REGULAR,
             cycle__title="Default",
             cycle__status=ProgramCycle.ACTIVE,
             cycle__start_date="2023-01-02",
             cycle__end_date="2023-01-10",
+            cycle__created_by=cls.user,
         )
         cls.cycle1 = ProgramCycle.objects.create(
             program=cls.program,
@@ -64,6 +65,7 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
             status=ProgramCycle.ACTIVE,
             start_date="2023-02-01",
             end_date="2023-02-20",
+            created_by=cls.user,
         )
         cls.cycle2 = ProgramCycle.objects.create(
             program=cls.program,
@@ -71,6 +73,7 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
             status=ProgramCycle.DRAFT,
             start_date="2023-05-01",
             end_date="2023-05-25",
+            created_by=cls.user,
         )
         cls.program_id_base64 = base64.b64encode(f"ProgramNode:{str(cls.program.pk)}".encode()).decode()
         cls.list_url = reverse(
@@ -156,7 +159,7 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
 
     def test_filter_by_title_startswith(self) -> None:
         self.client.force_authenticate(user=self.user)
-        response = self.client.get(self.list_url, {"title__startswith": "Cycle"})
+        response = self.client.get(self.list_url, {"title": "Cycle"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["title"], "Cycle 1")
@@ -217,9 +220,10 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
         payment_plan = PaymentPlanFactory(program_cycle=self.cycle1, status=PaymentPlan.Status.IN_REVIEW)
         self.client.force_authenticate(user=self.user)
         self.assertEqual(self.cycle1.status, ProgramCycle.ACTIVE)
-        with self.assertRaises(DjangoValidationError) as error:
-            self.client.post(self.cycle_1_detail_url + "finish/", {}, format="json")
-        self.assertIn("All Payment Plans and Follow-Up Payment Plans have to be Reconciled.", str(error.exception))
+        self.assertEqual(payment_plan.status, PaymentPlan.Status.IN_REVIEW)
+        resp_error = self.client.post(self.cycle_1_detail_url + "finish/", {}, format="json")
+        self.assertEqual(resp_error.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("All Payment Plans and Follow-Up Payment Plans have to be Reconciled.", resp_error.data)
 
         payment_plan.status = PaymentPlan.Status.ACCEPTED
         payment_plan.save()
@@ -245,7 +249,7 @@ class ProgramCycleCreateSerializerTest(TestCase):
 
     def get_serializer_context(self) -> Dict[str, Any]:
         request = self.factory.get("/")
-        user = User.objects.create_user(
+        user, _ = User.objects.get_or_create(
             username="MyUser", first_name="FirstName", last_name="LastName", password="PassworD"
         )
         request.user = user

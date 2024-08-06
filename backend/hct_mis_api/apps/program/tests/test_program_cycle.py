@@ -1,10 +1,10 @@
 from decimal import Decimal
 from typing import Any, List, Optional
 
-from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from parameterized import parameterized
+from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
