@@ -23,6 +23,7 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useProgramContext } from 'src/programContext';
 import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 
 export const CreateTargetPopulationPage = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -94,7 +95,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
         variables: {
           input: {
             programId: values.program,
-            programCycleId: values.programCycleId,
+            programCycleId: values.programCycleId.value,
             name: values.name,
             excludedIds: values.excludedIds,
             exclusionReason: values.exclusionReason,
@@ -118,7 +119,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ submitForm, values }) => (
+      {({ submitForm, values, setFieldValue }) => (
         <Form>
           <AutoSubmitFormOnEnter />
           <CreateTargetPopulationHeader
@@ -133,6 +134,16 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
             <Box pt={3} pb={3}>
               <Typography variant="h6">{t('Targeting Criteria')}</Typography>
             </Box>
+            <Grid container mb={5}>
+              <Grid item xs={6}>
+                <ProgramCycleAutocompleteRest
+                  value={values.programCycleId}
+                  onChange={async (e) => {
+                    await setFieldValue('programCycleId', e);
+                  }}
+                />
+              </Grid>
+            </Grid>
             <Grid container>
               <Grid item xs={6}>
                 <Field
