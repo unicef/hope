@@ -379,8 +379,10 @@ class PaymentPlanService:
         if not target_population.program:
             raise GraphQLError("TargetPopulation should have related Program defined")
 
-        program_cycle_id = decode_id_string(input_data["program_cycle_id"])
-        program_cycle = ProgramCycle.objects.get(id=program_cycle_id)
+        if not target_population.program_cycle:
+            raise GraphQLError("Target Population should have assigned Program Cycle")
+
+        program_cycle = target_population.program_cycle
         if program_cycle.status not in (ProgramCycle.DRAFT, ProgramCycle.ACTIVE):
             raise GraphQLError("Impossible to create Payment Plan for Program Cycle within Finished status")
         if not program_cycle.start_date or not program_cycle.end_date:
@@ -444,6 +446,7 @@ class PaymentPlanService:
 
                 self.payment_plan.target_population = new_target_population
                 self.payment_plan.program = new_target_population.program
+                self.payment_plan.program_cycle = new_target_population.program_cycle
                 self.payment_plan.target_population.status = TargetPopulation.STATUS_ASSIGNED
                 self.payment_plan.target_population.save()
                 recreate_payments = True

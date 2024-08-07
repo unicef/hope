@@ -65,6 +65,7 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service impo
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
+from hct_mis_api.apps.targeting.models import TargetPopulation
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.household.models import Household, Individual
@@ -495,6 +496,11 @@ class TestPaymentPlanReconciliation(APITestCase):
         assert updated_cycles_data["edges"][0]["node"]["status"] == "DRAFT"
         assert updated_cycles_data["edges"][1]["node"]["status"] == "DRAFT"
 
+        # add other cycle to TP
+        TargetPopulation.objects.filter(name="TargP").update(
+            program_cycle_id=ProgramCycle.objects.get(title="NEW NEW NAME").id
+        )
+
         with patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
@@ -505,7 +511,6 @@ class TestPaymentPlanReconciliation(APITestCase):
                     "input": {
                         "businessAreaSlug": self.business_area.slug,
                         "targetingId": target_population_id,
-                        "programCycleId": encoded_cycle_id,
                         "dispersionStartDate": (timezone.now() - timedelta(days=1)).strftime("%Y-%m-%d"),
                         "dispersionEndDate": (timezone.now() + timedelta(days=1)).strftime("%Y-%m-%d"),
                         "currency": "USD",

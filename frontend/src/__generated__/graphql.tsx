@@ -679,6 +679,7 @@ export type BusinessAreaNodeTargetpopulationSetArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
@@ -1204,7 +1205,6 @@ export type CreatePaymentPlanInput = {
   currency: Scalars['String']['input'];
   dispersionEndDate: Scalars['Date']['input'];
   dispersionStartDate: Scalars['Date']['input'];
-  programCycleId: Scalars['ID']['input'];
   targetingId: Scalars['ID']['input'];
 };
 
@@ -2814,6 +2814,7 @@ export type HouseholdNodeTargetPopulationsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
@@ -5671,6 +5672,7 @@ export type ProgramCycleNodeTargetPopulationsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
@@ -5926,6 +5928,7 @@ export type ProgramNodeTargetpopulationSetArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
@@ -6250,6 +6253,7 @@ export type QueryAllActiveTargetPopulationsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
@@ -6816,6 +6820,7 @@ export type QueryAllTargetPopulationArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
@@ -7686,6 +7691,7 @@ export type RuleCommitNodeTargetPopulationsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
@@ -9211,6 +9217,7 @@ export type UserBusinessAreaNodeTargetpopulationSetArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
@@ -9330,6 +9337,7 @@ export type UserNodeChangedTargetPopulationsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
@@ -9433,6 +9441,7 @@ export type UserNodeFinalizedTargetPopulationsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
@@ -9518,6 +9527,7 @@ export type UserNodeTargetPopulationsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;

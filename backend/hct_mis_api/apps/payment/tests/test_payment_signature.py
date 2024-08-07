@@ -132,13 +132,13 @@ class TestPaymentSignature(APITestCase):
         IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
 
+        targeting.program_cycle = targeting.program.cycles.first()
         targeting.households.set([hh1, hh2])
         targeting.save()
 
         input_data = dict(
             business_area_slug="afghanistan",
             targeting_id=self.id_to_base64(targeting.id, "Targeting"),
-            program_cycle_id=self.id_to_base64(targeting.program.cycles.first().id, "ProgramCycle"),
             dispersion_start_date=parse_date("2020-09-10"),
             dispersion_end_date=parse_date("2020-11-10"),
             currency="USD",

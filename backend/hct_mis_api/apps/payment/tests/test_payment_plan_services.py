@@ -116,14 +116,11 @@ class TestPaymentPlanServices(APITestCase):
             cycle__start_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
             cycle__end_date=timezone.datetime(2021, 12, 10, tzinfo=utc),
         )
-        targeting = TargetPopulationFactory(program=program)
-
-        cycle_id = self.id_to_base64(targeting.program.cycles.first().pk, "ProgramCycleNode")
+        targeting = TargetPopulationFactory(program=program, program_cycle=program.cycles.first())
 
         input_data = dict(
             business_area_slug="afghanistan",
             targeting_id=self.id_to_base64(targeting.id, "Targeting"),
-            program_cycle_id=cycle_id,
             dispersion_start_date=parse_date("2020-09-10"),
             dispersion_end_date=parse_date("2020-09-11"),
             currency="USD",
@@ -163,6 +160,7 @@ class TestPaymentPlanServices(APITestCase):
         self.business_area.save()
 
         targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
+        targeting.program_cycle = targeting.program.cycles.first()
 
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
@@ -174,12 +172,10 @@ class TestPaymentPlanServices(APITestCase):
 
         targeting.households.set([hh1, hh2])
         targeting.save()
-        cycle_id = self.id_to_base64(targeting.program.cycles.first().pk, "ProgramCycleNode")
 
         input_data = dict(
             business_area_slug="afghanistan",
             targeting_id=self.id_to_base64(targeting.id, "Targeting"),
-            program_cycle_id=cycle_id,
             dispersion_start_date=parse_date("2020-09-10"),
             dispersion_end_date=parse_date("2020-11-10"),
             currency="USD",
@@ -189,7 +185,7 @@ class TestPaymentPlanServices(APITestCase):
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
-            with self.assertNumQueries(8):
+            with self.assertNumQueries(9):
                 pp = PaymentPlanService.create(input_data=input_data, user=self.user)
             assert mock_prepare_payment_plan_task.on_commit.call_count == 1
 
@@ -579,11 +575,11 @@ class TestPaymentPlanServices(APITestCase):
             ),
         )
         cycle = targeting.program.cycles.first()
-        cycle_id = self.id_to_base64(cycle.pk, "ProgramCycleNode")
+        targeting.program_cycle = targeting.program.cycles.first()
+        targeting.save()
         input_data = dict(
             business_area_slug="afghanistan",
             targeting_id=self.id_to_base64(targeting.id, "TargetingNode"),
-            program_cycle_id=cycle_id,
             dispersion_start_date=parse_date("2020-11-11"),
             dispersion_end_date=parse_date("2020-11-20"),
             currency="USD",
@@ -612,3 +608,21 @@ class TestPaymentPlanServices(APITestCase):
         PaymentPlanService.create(input_data=input_data, user=self.user)
         cycle.refresh_from_db()
         assert cycle.status == ProgramCycle.ACTIVE
+
+    def test_create_pp_validation_errors_if_tp_without_cycle(self) -> None:
+        self.business_area.is_payment_plan_applicable = True
+        self.business_area.save()
+        targeting_without_cycle = TargetPopulationFactory(
+            program=ProgramFactory(), status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
+        )
+        input_data = dict(
+            business_area_slug=self.business_area.slug,
+            targeting_id=self.id_to_base64(targeting_without_cycle.id, "TargetingNode"),
+            dispersion_start_date=parse_date("2020-09-10"),
+            dispersion_end_date=parse_date("2020-09-11"),
+            currency="USD",
+        )
+
+        self.assertIsNone(targeting_without_cycle.program_cycle)
+        with self.assertRaisesMessage(GraphQLError, "Target Population should have assigned Program Cycle"):
+            PaymentPlanService.create(input_data=input_data, user=self.user)
