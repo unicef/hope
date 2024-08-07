@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { StyledAutocomplete, StyledTextField } from '../StyledAutocomplete';
 import { useDebounce } from '@hooks/useDebounce';
+import { Simulate } from 'react-dom/test-utils';
+import error = Simulate.error;
+import { FormHelperText } from '@mui/material';
 
 type OptionType = any;
 
@@ -24,6 +27,8 @@ export function BaseAutocompleteRest({
   autocompleteProps = {},
   textFieldProps = {},
   onDebouncedInputTextChanges,
+  required = false,
+  error = null,
 }: {
   value: string;
   disabled?: boolean;
@@ -45,6 +50,8 @@ export function BaseAutocompleteRest({
   autocompleteProps?: Record<string, any>;
   textFieldProps?: Record<string, any>;
   onDebouncedInputTextChanges: (text: string) => void;
+  required?: boolean;
+  error?: string;
 }): React.ReactElement {
   const [modifiedOptions, setModifiedOptions] = React.useState<OptionType[]>(
     [],
@@ -97,28 +104,34 @@ export function BaseAutocompleteRest({
       loading={isLoading}
       {...autocompleteProps}
       renderInput={(params) => (
-        <StyledTextField
-          {...params}
-          label={label}
-          variant="outlined"
-          size="small"
-          data-cy={`${label}-input`}
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          InputProps={{
-            ...params.InputProps,
-            startAdornment,
-            endAdornment: (
-              <>
-                {isLoading ? (
-                  <CircularProgress color="inherit" size={20} />
-                ) : null}
-                {params.InputProps.endAdornment}
-              </>
-            ),
-          }}
-          {...textFieldProps}
-        />
+        <>
+          <StyledTextField
+            {...params}
+            label={label}
+            required={required}
+            error={!!error}
+            aria-errormessage={error}
+            variant="outlined"
+            size="small"
+            data-cy={`${label}-input`}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            InputProps={{
+              ...params.InputProps,
+              startAdornment,
+              endAdornment: (
+                <>
+                  {isLoading ? (
+                    <CircularProgress color="inherit" size={20} />
+                  ) : null}
+                  {params.InputProps.endAdornment}
+                </>
+              ),
+            }}
+            {...textFieldProps}
+          />
+          {!!error && <FormHelperText error>{error}</FormHelperText>}
+        </>
       )}
     />
   );

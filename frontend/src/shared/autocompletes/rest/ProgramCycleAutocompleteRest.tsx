@@ -8,9 +8,13 @@ import { fetchProgramCycles, ProgramCyclesQuery } from '@api/programCycleApi';
 export const ProgramCycleAutocompleteRest = ({
   value,
   onChange,
+  required = false,
+  error = null,
 }: {
   value;
   onChange: (e) => void;
+  required?: boolean;
+  error?: string;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [queryParams, setQueryParams] = useState<ProgramCyclesQuery>({
@@ -53,6 +57,8 @@ export const ProgramCycleAutocompleteRest = ({
       startAdornment={null}
       mapOptions={mapOptions}
       queryParams={queryParams}
+      required={required}
+      error={error}
     />
   );
 };

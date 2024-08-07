@@ -34,7 +34,10 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
     name: '',
     criterias: [],
     program: programId,
-    programCycleId: '',
+    programCycleId: {
+      value: '',
+      name: '',
+    },
     excludedIds: '',
     exclusionReason: '',
     flagExcludeIfActiveAdjudicationTicket: false,
@@ -81,12 +84,16 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
 
   const validationSchema = Yup.object().shape({
     name: Yup.string()
+      .required(t('Targeting name is required'))
       .min(3, t('Targeting name should have at least 3 characters.'))
       .max(255, t('Targeting name should have at most 255 characters.')),
     excludedIds: idValidation,
     householdIds: idValidation,
     individualIds: idValidation,
     exclusionReason: Yup.string().max(500, t('Too long')),
+    programCycleId: Yup.object().shape({
+      value: Yup.string().required('Program cycle is required'),
+    }),
   });
 
   const handleSubmit = async (values): Promise<void> => {
@@ -119,7 +126,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ submitForm, values, setFieldValue }) => (
+      {({ submitForm, values, setFieldValue, errors }) => (
         <Form>
           <AutoSubmitFormOnEnter />
           <CreateTargetPopulationHeader
@@ -141,6 +148,9 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
                   onChange={async (e) => {
                     await setFieldValue('programCycleId', e);
                   }}
+                  required
+                  // @ts-ignore
+                  error={errors.programCycleId?.value}
                 />
               </Grid>
             </Grid>

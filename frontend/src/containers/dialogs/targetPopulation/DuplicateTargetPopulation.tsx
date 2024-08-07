@@ -1,4 +1,4 @@
-import { Button, DialogContent, DialogTitle } from '@mui/material';
+import { Button, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { Field, Formik } from 'formik';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,9 +15,13 @@ import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
+import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
+  programCycleId: Yup.object().shape({
+    value: Yup.string().required('Program cycle is required'),
+  }),
 });
 
 interface DuplicateTargetPopulationProps {
@@ -39,6 +43,10 @@ export const DuplicateTargetPopulation = ({
   const initialValues = {
     name: '',
     id: targetPopulationId,
+    programCycleId: {
+      value: '',
+      name: '',
+    },
   };
 
   return (
@@ -53,8 +61,11 @@ export const DuplicateTargetPopulation = ({
         initialValues={initialValues}
         onSubmit={async (values) => {
           try {
+            const programCycleId = values.programCycleId.value;
             const res = await mutate({
-              variables: { input: { targetPopulationData: { ...values } } },
+              variables: {
+                input: { targetPopulationData: { ...values, programCycleId } },
+              },
             });
             setOpen(false);
             showMessage(t('Target Population Duplicated'));
@@ -66,7 +77,7 @@ export const DuplicateTargetPopulation = ({
           }
         }}
       >
-        {({ submitForm }) => (
+        {({ submitForm, setFieldValue, values, errors }) => (
           <>
             {open && <AutoSubmitFormOnEnter />}
             <DialogTitleWrapper>
@@ -82,14 +93,28 @@ export const DuplicateTargetPopulation = ({
                   'This duplicate will copy the Target Criteria of the Programme Population and update to the latest results from the system.',
                 )}
               </DialogDescription>
-              <Field
-                name="name"
-                fullWidth
-                label={t('Name Copy of Target Population')}
-                required
-                variant="outlined"
-                component={FormikTextField}
-              />
+              <Grid container spacing={4}>
+                <Grid item xs={12}>
+                  <Field
+                    name="name"
+                    fullWidth
+                    label={t('Name Copy of Target Population')}
+                    required
+                    variant="outlined"
+                    component={FormikTextField}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ProgramCycleAutocompleteRest
+                    value={values.programCycleId}
+                    onChange={async (e) => {
+                      await setFieldValue('programCycleId', e);
+                    }}
+                    required
+                    error={errors.programCycleId?.value}
+                  />
+                </Grid>
+              </Grid>
             </DialogContent>
             <DialogFooter>
               <DialogActions>
