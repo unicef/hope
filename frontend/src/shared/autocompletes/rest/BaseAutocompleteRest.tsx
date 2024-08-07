@@ -4,8 +4,6 @@ import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { StyledAutocomplete, StyledTextField } from '../StyledAutocomplete';
 import { useDebounce } from '@hooks/useDebounce';
-import { Simulate } from 'react-dom/test-utils';
-import error = Simulate.error;
 import { FormHelperText } from '@mui/material';
 
 type OptionType = any;
