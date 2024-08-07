@@ -214,14 +214,14 @@ class PeriodicDataUpdateImportService:
                 continue
             if round_number_from_xlsx != round_number:
                 raise ValidationError(
-                    f"Round number mismatch for field {field_name} and individual {individual_uuid} / {individual_unicef_id}"
+                    f"Round number mismatch for field {field_name} and individual {individual_unicef_id}"
                 )
             if not individual:
-                raise ValidationError(f"Individual with UUID {individual_uuid} / {individual_unicef_id} not found")
+                raise ValidationError(f"Individual not found for {individual_unicef_id} ")
             current_value = self._get_round_value(individual, field_name, round_number)
             if current_value and value_from_xlsx:
                 raise ValidationError(
-                    f"Value already exists for field {field_name} for round {round_number} and individual {individual_uuid} / {individual_unicef_id}"
+                    f"Value already exists for field {field_name} for round {round_number} and individual {individual_unicef_id}"
                 )
             self.set_round_value(
                 individual,
