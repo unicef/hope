@@ -1,6 +1,12 @@
 import { ProgramQuery } from '@generated/graphql';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
+import {
+  Box,
+  Button,
+  DialogContent,
+  DialogTitle,
+  FormHelperText,
+} from '@mui/material';
 import { DialogDescription } from '@containers/dialogs/DialogDescription';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogActions } from '@containers/dialogs/DialogActions';
@@ -33,6 +39,10 @@ interface UpdateProgramCycleProps {
   onClose: () => void;
   onSubmit: () => void;
   step?: string;
+}
+
+interface MutationError extends DefaultError {
+  data: any;
 }
 
 export const UpdateProgramCycle = ({
@@ -73,9 +83,9 @@ export const UpdateProgramCycle = ({
     end_date: undefined,
   };
 
-  const { mutateAsync, isPending } = useMutation<
+  const { mutateAsync, isPending, error } = useMutation<
     ProgramCycleUpdateResponse,
-    DefaultError,
+    MutationError,
     ProgramCycleUpdate
   >({
     mutationFn: async (body) => {
@@ -100,7 +110,7 @@ export const UpdateProgramCycle = ({
       });
       showMessage(t('Programme Cycle Updated'));
     } catch (e) {
-      e.data?.forEach((message: string) => showMessage(message));
+      /* empty */
     }
   };
 
@@ -155,6 +165,9 @@ export const UpdateProgramCycle = ({
                   decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
                   data-cy="input-previous-program-cycle-end-date"
                 />
+                {error?.data?.end_date && (
+                  <FormHelperText error>{error.data.end_date}</FormHelperText>
+                )}
               </Grid>
             </Grid>
           </DialogContent>

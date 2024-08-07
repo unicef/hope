@@ -2,7 +2,13 @@ import * as Yup from 'yup';
 import { today } from '@utils/utils';
 import moment from 'moment/moment';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
+import {
+  Box,
+  Button,
+  DialogContent,
+  DialogTitle,
+  FormHelperText,
+} from '@mui/material';
 import { DialogDescription } from '@containers/dialogs/DialogDescription';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogActions } from '@containers/dialogs/DialogActions';
@@ -22,7 +28,7 @@ import {
   ProgramCycleCreate,
   ProgramCycleCreateResponse,
 } from '@api/programCycleApi';
-import { DefaultError } from '@tanstack/query-core';
+import type { DefaultError } from '@tanstack/query-core';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 
@@ -31,6 +37,10 @@ interface CreateProgramCycleProps {
   onClose: () => void;
   onSubmit: () => void;
   step?: string;
+}
+
+interface MutationError extends DefaultError {
+  data: any;
 }
 
 export const CreateProgramCycle = ({
@@ -74,9 +84,9 @@ export const CreateProgramCycle = ({
     end_date: undefined,
   };
 
-  const { mutateAsync, isPending } = useMutation<
+  const { mutateAsync, isPending, error } = useMutation<
     ProgramCycleCreateResponse,
-    DefaultError,
+    MutationError,
     ProgramCycleCreate
   >({
     mutationFn: async (body) => {
@@ -99,7 +109,7 @@ export const CreateProgramCycle = ({
       });
       showMessage(t('Programme Cycle Created'));
     } catch (e) {
-      e.data?.forEach((message: string) => showMessage(message));
+      /* empty */
     }
   };
 
@@ -136,6 +146,9 @@ export const CreateProgramCycle = ({
                     component={FormikTextField}
                     required
                   />
+                  {error?.data?.title && (
+                    <FormHelperText error>{error.data.title}</FormHelperText>
+                  )}
                 </Grid>
                 <Grid item xs={6}>
                   <Field
@@ -146,6 +159,11 @@ export const CreateProgramCycle = ({
                     fullWidth
                     decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
                   />
+                  {error?.data?.start_date && (
+                    <FormHelperText error>
+                      {error.data.start_date}
+                    </FormHelperText>
+                  )}
                 </Grid>
                 <Grid item xs={6}>
                   <Field
@@ -155,6 +173,9 @@ export const CreateProgramCycle = ({
                     fullWidth
                     decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
                   />
+                  {error?.data?.end_date && (
+                    <FormHelperText error>{error.data.end_date}</FormHelperText>
+                  )}
                 </Grid>
               </Grid>
             </DialogContent>
