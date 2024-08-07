@@ -59,7 +59,12 @@ export const CreateProgramCycle = ({
       .required(t('Programme Cycle name is required'))
       .min(2, t('Too short'))
       .max(150, t('Too long')),
-    start_date: Yup.date().required(t('Start Date is required')),
+    start_date: Yup.date()
+      .required(t('Start Date is required'))
+      .min(
+        program.startDate,
+        t('Start Date cannot be before Programme Start Date'),
+      ),
     end_date: Yup.date()
       .min(today, t('End Date cannot be in the past'))
       .max(program.endDate, t('End Date cannot be after Programme End Date'))
