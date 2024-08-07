@@ -22,6 +22,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     periodic_sync_payment_gateway_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismDataFactory,
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
@@ -62,6 +63,7 @@ class TestPaymentGatewayService(APITestCase):
         generate_delivery_mechanisms()
         cls.dm_cash_over_the_counter = DeliveryMechanism.objects.get(code="cash_over_the_counter")
         cls.dm_transfer = DeliveryMechanism.objects.get(code="transfer")
+        cls.dm_mobile_money = DeliveryMechanism.objects.get(code="mobile_money")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
 
@@ -563,6 +565,33 @@ class TestPaymentGatewayService(APITestCase):
             },
             "errors": None,
         }
+
+        self.dm.delivery_mechanism = self.dm_cash_over_the_counter
+        self.dm.save()
+        PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
+        post_mock.assert_called_once_with(
+            "payment_instructions/123/add_records/",
+            [
+                {
+                    "remote_id": str(self.payments[0].id),
+                    "record_code": self.payments[0].unicef_id,
+                    "payload": {
+                        "amount": str(self.payments[0].entitlement_quantity),
+                        "phone_no": str(self.payments[0].collector.phone_no),
+                        "last_name": self.payments[0].collector.family_name,
+                        "first_name": self.payments[0].collector.given_name,
+                        "full_name": self.payments[0].collector.full_name,
+                        "destination_currency": self.payments[0].currency,
+                    },
+                    "extra_data": {},
+                }
+            ],
+            validate_response=True,
+        )
+
+        post_mock.reset_mock()
+        self.payments[0].delivery_type = self.dm_mobile_money
+        self.payments[0].save()
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
         post_mock.assert_called_once_with(
             "payment_instructions/123/add_records/",
@@ -578,6 +607,51 @@ class TestPaymentGatewayService(APITestCase):
                         "full_name": self.payments[0].collector.full_name,
                         "destination_currency": self.payments[0].currency,
                         "service_provider_code": self.payments[0].collector.flex_fields["service_provider_code_i_f"],
+                    },
+                    "extra_data": {},
+                }
+            ],
+            validate_response=True,
+        )
+
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
+    def test_api_add_records_to_payment_instruction_wallet_integration(self, post_mock: Any) -> None:
+        post_mock.return_value = {
+            "remote_id": "123",
+            "records": {
+                "1": self.payments[0].id,
+            },
+            "errors": None,
+        }
+
+        DeliveryMechanismDataFactory(
+            individual=self.payments[0].collector,
+            delivery_mechanism=self.dm_mobile_money,
+            data={
+                "service_provider_code__mobile_money": "ABC",
+                "delivery_phone_number__mobile_money": "123456789",
+                "provider__mobile_money": "Provider",
+            },
+        )
+        self.payments[0].delivery_type = self.dm_mobile_money
+        self.payments[0].save()
+        PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
+        post_mock.assert_called_once_with(
+            "payment_instructions/123/add_records/",
+            [
+                {
+                    "remote_id": str(self.payments[0].id),
+                    "record_code": self.payments[0].unicef_id,
+                    "payload": {
+                        "amount": str(self.payments[0].entitlement_quantity),
+                        "phone_no": str(self.payments[0].collector.phone_no),
+                        "last_name": self.payments[0].collector.family_name,
+                        "first_name": self.payments[0].collector.given_name,
+                        "full_name": self.payments[0].collector.full_name,
+                        "destination_currency": self.payments[0].currency,
+                        "service_provider_code__mobile_money": "ABC",
+                        "delivery_phone_number__mobile_money": "123456789",
+                        "provider__mobile_money": "Provider",
                     },
                     "extra_data": {},
                 }

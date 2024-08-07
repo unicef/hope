@@ -1130,9 +1130,7 @@ def generate_delivery_mechanisms() -> None:
             "name": "Mobile Money",
             "requirements": {
                 "required_fields": ["delivery_phone_number__mobile_money", "provider__mobile_money"],
-                "optional_fields": [
-                    "full_name",
-                ],
+                "optional_fields": ["full_name", "service_provider_code__mobile_money"],
                 "unique_fields": ["delivery_phone_number__mobile_money", "provider__mobile_money"],
             },
             "transfer_type": "CASH",
