@@ -71,6 +71,8 @@ export const EditProgramCycle = ({
     },
   });
 
+  const isEndDateRequired = !!programCycle.end_date;
+
   const handleUpdate = async (values: any): Promise<void> => {
     try {
       await mutateAsync(values);
@@ -85,21 +87,16 @@ export const EditProgramCycle = ({
   } = {
     title: programCycle.title,
     start_date: programCycle.start_date,
-    end_date: programCycle.end_date,
+    end_date: programCycle.end_date ?? undefined,
   };
 
-  const validationSchema = Yup.object().shape({
-    title: Yup.string()
-      .required(t('Programme Cycle title is required'))
-      .min(2, t('Too short'))
-      .max(150, t('Too long')),
-    start_date: Yup.date().required(t('Start Date is required')),
-    end_date: Yup.date()
-      .required(t('End Date is required'))
+  const endDateValidationSchema = () => {
+    const validation = Yup.date()
       .min(today, t('End Date cannot be in the past'))
+      .max(program.endDate, t('End Date cannot be after Programme End Date'))
       .when(
         'start_date',
-        (start_date, schema) =>
+        ([start_date], schema) =>
           start_date &&
           schema.min(
             start_date,
@@ -107,7 +104,27 @@ export const EditProgramCycle = ({
               start_date,
             ).format('YYYY-MM-DD')}`,
           ),
+      );
+
+    if (isEndDateRequired) {
+      return validation.required(t('End Date is required'));
+    }
+
+    return validation;
+  };
+
+  const validationSchema = Yup.object().shape({
+    title: Yup.string()
+      .required(t('Programme Cycle title is required'))
+      .min(2, t('Too short'))
+      .max(150, t('Too long')),
+    start_date: Yup.date()
+      .required(t('Start Date is required'))
+      .min(
+        program.startDate,
+        t('Start Date cannot be before Programme Start Date'),
       ),
+    end_date: endDateValidationSchema(),
   });
 
   return (
@@ -167,6 +184,7 @@ export const EditProgramCycle = ({
                       name="end_date"
                       label={t('End Date')}
                       component={FormikDateField}
+                      required={isEndDateRequired}
                       fullWidth
                       decoratorEnd={
                         <CalendarTodayRoundedIcon color="disabled" />
