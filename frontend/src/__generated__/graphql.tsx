@@ -11464,6 +11464,7 @@ export type AllTargetPopulationsQueryVariables = Exact<{
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
   businessArea?: InputMaybe<Scalars['String']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   createdAtRange?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
@@ -24078,7 +24079,7 @@ export type AllTargetPopulationForChoicesLazyQueryHookResult = ReturnType<typeof
 export type AllTargetPopulationForChoicesSuspenseQueryHookResult = ReturnType<typeof useAllTargetPopulationForChoicesSuspenseQuery>;
 export type AllTargetPopulationForChoicesQueryResult = Apollo.QueryResult<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>;
 export const AllTargetPopulationsDocument = gql`
-    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $totalHouseholdsCountMin: Int, $totalHouseholdsCountMax: Int, $businessArea: String, $program: [ID], $createdAtRange: String, $paymentPlanApplicable: Boolean) {
+    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $totalHouseholdsCountMin: Int, $totalHouseholdsCountMax: Int, $businessArea: String, $program: [ID], $programCycle: String, $createdAtRange: String, $paymentPlanApplicable: Boolean) {
   allTargetPopulation(
     after: $after
     before: $before
@@ -24091,6 +24092,7 @@ export const AllTargetPopulationsDocument = gql`
     totalHouseholdsCountMax: $totalHouseholdsCountMax
     businessArea: $businessArea
     program: $program
+    programCycle: $programCycle
     createdAtRange: $createdAtRange
     paymentPlanApplicable: $paymentPlanApplicable
   ) {
@@ -24129,6 +24131,7 @@ export const AllTargetPopulationsDocument = gql`
  *      totalHouseholdsCountMax: // value for 'totalHouseholdsCountMax'
  *      businessArea: // value for 'businessArea'
  *      program: // value for 'program'
+ *      programCycle: // value for 'programCycle'
  *      createdAtRange: // value for 'createdAtRange'
  *      paymentPlanApplicable: // value for 'paymentPlanApplicable'
  *   },

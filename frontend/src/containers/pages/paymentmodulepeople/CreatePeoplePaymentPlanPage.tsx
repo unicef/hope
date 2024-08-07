@@ -17,7 +17,7 @@ import {
 } from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 export const CreatePeoplePaymentPlanPage = (): React.ReactElement => {
   const navigate = useNavigate();
@@ -26,6 +26,7 @@ export const CreatePeoplePaymentPlanPage = (): React.ReactElement => {
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
+  const { programCycleId } = useParams();
 
   const { data: allTargetPopulationsData, loading: loadingTargetPopulations } =
     useAllTargetPopulationsQuery({
@@ -33,6 +34,7 @@ export const CreatePeoplePaymentPlanPage = (): React.ReactElement => {
         businessArea,
         paymentPlanApplicable: true,
         program: [programId],
+        programCycle: programCycleId,
       },
       fetchPolicy: 'network-only',
     });
@@ -45,7 +47,7 @@ export const CreatePeoplePaymentPlanPage = (): React.ReactElement => {
 
   const validationSchema = Yup.object().shape({
     targetingId: Yup.string().required(t('Target Population is required')),
-    currency: Yup.string().nullable().required(t('Currency is required')),
+    currency: Yup.string().required(t('Currency is required')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
     ),
@@ -80,13 +82,14 @@ export const CreatePeoplePaymentPlanPage = (): React.ReactElement => {
       const dispersionEndDate = values.dispersionEndDate
         ? format(new Date(values.dispersionEndDate), 'yyyy-MM-dd')
         : null;
+      const { currency, targetingId } = values;
 
       const res = await mutate({
         variables: {
-          //@ts-ignore
           input: {
             businessAreaSlug: businessArea,
-            ...values,
+            currency,
+            targetingId,
             dispersionStartDate,
             dispersionEndDate,
           },

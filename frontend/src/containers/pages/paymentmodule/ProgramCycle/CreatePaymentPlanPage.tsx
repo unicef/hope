@@ -34,6 +34,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
         businessArea,
         paymentPlanApplicable: true,
         program: [programId],
+        programCycle: programCycleId,
       },
       fetchPolicy: 'network-only',
     });
@@ -81,16 +82,16 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
       const dispersionEndDate = values.dispersionEndDate
         ? format(new Date(values.dispersionEndDate), 'yyyy-MM-dd')
         : null;
+      const { currency, targetingId } = values;
 
       const res = await mutate({
         variables: {
-          //@ts-ignore
           input: {
             businessAreaSlug: businessArea,
-            ...values,
+            currency,
+            targetingId,
             dispersionStartDate,
             dispersionEndDate,
-            programCycleId,
           },
         },
       });
