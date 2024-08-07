@@ -1,10 +1,64 @@
-from typing import Any
+import os
+from typing import Any, Dict, List, Optional, Union
 
+from requests import Response, session
+from requests.adapters import HTTPAdapter
 from rest_framework.generics import get_object_or_404
+from urllib3 import Retry
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.program.models import Program
+
+
+class BaseAPI:
+    API_KEY_ENV_NAME = ""
+    API_URL_ENV_NAME = ""
+
+    class APIException(Exception):
+        pass
+
+    class APIMissingCredentialsException(Exception):
+        pass
+
+    API_EXCEPTION_CLASS = APIException
+    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = APIMissingCredentialsException
+
+    def __init__(self) -> None:
+        self.api_key = os.getenv(self.API_KEY_ENV_NAME)
+        self.api_url = os.getenv(self.API_URL_ENV_NAME)
+
+        if not self.api_key or not self.api_url:
+            raise self.API_MISSING_CREDENTIALS_EXCEPTION_CLASS(f"Missing {self.__class__.__name__} Key/URL")
+
+        self._client = session()
+        retries = Retry(total=3, backoff_factor=1, status_forcelist=[502, 503, 504], allowed_methods=None)
+        self._client.mount(self.api_url, HTTPAdapter(max_retries=retries))
+        self._client.headers.update({"Authorization": f"Token {self.api_key}"})
+
+    def validate_response(self, response: Response) -> Response:
+        if not response.ok:
+            raise self.API_EXCEPTION_CLASS(
+                f"{self.__class__.__name__} Invalid response: {response}, {response.content!r}, {response.url}"
+            )
+
+        return response
+
+    def _post(self, endpoint: str, data: Optional[Union[Dict, List]] = None, validate_response: bool = True) -> Dict:
+        response = self._client.post(f"{self.api_url}{endpoint}", json=data)
+        if validate_response:
+            response = self.validate_response(response)
+        return response.json()
+
+    def _get(self, endpoint: str, params: Optional[Dict] = None) -> Dict:
+        response = self._client.get(f"{self.api_url}{endpoint}", params=params)
+        response = self.validate_response(response)
+        return response.json()
+
+    def _delete(self, endpoint: str, params: Optional[Dict] = None) -> Dict:
+        response = self._client.delete(f"{self.api_url}{endpoint}", params=params)
+        response = self.validate_response(response)
+        return response.json()
 
 
 class BusinessAreaMixin:

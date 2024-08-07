@@ -1,6 +1,5 @@
 import dataclasses
 import logging
-import os
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -8,11 +7,9 @@ from django.db.models import Q
 from django.utils.timezone import now
 
 from _decimal import Decimal
-from requests import Response, session
-from requests.adapters import HTTPAdapter
 from rest_framework import serializers
-from urllib3 import Retry
 
+from hct_mis_api.apps.core.api.mixins import BaseAPI
 from hct_mis_api.apps.core.utils import chunks
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
@@ -254,12 +251,18 @@ class AddRecordsResponseData(FlexibleArgumentsDataclassMixin):
     errors: Optional[dict] = None  # {"index": "error_message"}
 
 
-class PaymentGatewayAPI:
+class PaymentGatewayAPI(BaseAPI):
+    API_KEY_ENV_NAME = "PAYMENT_GATEWAY_API_KEY"
+    API_URL_ENV_NAME = "PAYMENT_GATEWAY_API_URL"
+
     class PaymentGatewayAPIException(Exception):
         pass
 
     class PaymentGatewayMissingAPICredentialsException(Exception):
         pass
+
+    API_EXCEPTION_CLASS = PaymentGatewayAPIException
+    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = PaymentGatewayMissingAPICredentialsException
 
     class Endpoints:
         CREATE_PAYMENT_INSTRUCTION = "payment_instructions/"
@@ -272,35 +275,6 @@ class PaymentGatewayAPI:
         GET_FSPS = "fsp/"
         GET_PAYMENT_RECORDS = "payment_records/"
         GET_DELIVERY_MECHANISMS = "delivery_mechanisms/"
-
-    def __init__(self) -> None:
-        self.api_key = os.getenv("PAYMENT_GATEWAY_API_KEY")
-        self.api_url = os.getenv("PAYMENT_GATEWAY_API_URL")
-
-        if not self.api_key or not self.api_url:
-            raise self.PaymentGatewayMissingAPICredentialsException("Missing Payment Gateway API Key/URL")
-
-        self._client = session()
-        retries = Retry(total=3, backoff_factor=1, status_forcelist=[502, 503, 504], allowed_methods=None)
-        self._client.mount(self.api_url, HTTPAdapter(max_retries=retries))
-        self._client.headers.update({"Authorization": f"Token {self.api_key}"})
-
-    def validate_response(self, response: Response) -> Response:
-        if not response.ok:
-            raise self.PaymentGatewayAPIException(f"Invalid response: {response}, {response.content!r}, {response.url}")
-
-        return response
-
-    def _post(self, endpoint: str, data: Optional[Union[Dict, List]] = None, validate_response: bool = True) -> Dict:
-        response = self._client.post(f"{self.api_url}{endpoint}", json=data)
-        if validate_response:
-            response = self.validate_response(response)
-        return response.json()
-
-    def _get(self, endpoint: str, params: Optional[Dict] = None) -> Dict:
-        response = self._client.get(f"{self.api_url}{endpoint}", params=params)
-        response = self.validate_response(response)
-        return response.json()
 
     def get_fsps(self) -> List[FspData]:
         response_data = self._get(self.Endpoints.GET_FSPS)
@@ -316,7 +290,7 @@ class PaymentGatewayAPI:
 
     def change_payment_instruction_status(self, status: PaymentInstructionStatus, remote_id: str) -> str:
         if status.value not in [s.value for s in PaymentInstructionStatus]:
-            raise self.PaymentGatewayAPIException(f"Can't set invalid Payment Instruction status: {status}")
+            raise self.API_EXCEPTION_CLASS(f"Can't set invalid Payment Instruction status: {status}")
 
         action_endpoint_map = {
             PaymentInstructionStatus.ABORTED: self.Endpoints.ABORT_PAYMENT_INSTRUCTION_STATUS,

@@ -8,6 +8,7 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 def import_program_population(
     import_from_program_id: str, import_to_program_id: str, rdi: RegistrationDataImport
 ) -> None:
+    # TODO MB ADD DEDUP
     copy_from_households = Household.objects.filter(
         program=import_from_program_id,
         withdrawn=False,

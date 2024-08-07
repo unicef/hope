@@ -54,6 +54,8 @@ logger = logging.getLogger(__name__)
 
 
 class RdiKoboCreateTask(RdiBaseCreateTask):
+    # TODO MB ADD DEDUP
+
     """
     Imports project data from Kobo via a REST API, parsing them and creating
     households/individuals in the Registration Datahub. Once finished it will

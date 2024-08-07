@@ -195,6 +195,11 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     )
     partners = models.ManyToManyField(to="account.Partner", through=ProgramPartnerThrough, related_name="programs")
 
+    biometric_deduplication_enabled = models.BooleanField(
+        default=False, help_text="Enable Deduplication of Face Images"
+    )
+    deduplication_set_id = models.UUIDField(blank=True, null=True)
+
     objects = SoftDeletableIsVisibleManager()
 
     def save(self, *args: Any, **kwargs: Any) -> None:

@@ -370,6 +370,7 @@ def create_roles_for_new_representation(new_household: Household, program: Progr
 
 
 def enroll_households_to_program(households: QuerySet, program: Program) -> None:
+    # TODO MB ADD DEDUP
     households_to_exclude = Household.objects.filter(
         program=program,
         unicef_id__in=households.values_list("unicef_id", flat=True),

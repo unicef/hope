@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 from django import forms
 from django.contrib import admin, messages
@@ -18,6 +18,9 @@ from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
 from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
+from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
+    BiometricDeduplicationService,
+)
 from hct_mis_api.apps.targeting.celery_tasks import create_tp_from_list
 from hct_mis_api.apps.targeting.models import TargetingCriteria
 from hct_mis_api.apps.utils.admin import (
@@ -66,6 +69,17 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
 
     inlines = (ProgramCycleAdminInline,)
     ordering = ("name",)
+
+    def save_model(self, request: HttpRequest, obj: Program, *args: Any) -> None:
+        if obj.pk:
+            original = Program.objects.get(pk=obj.pk)
+            if original.biometric_deduplication_enabled != obj.biometric_deduplication_enabled:
+                service = BiometricDeduplicationService()
+                if obj.biometric_deduplication_enabled:
+                    service.create_deduplication_set_for_program(obj)
+                else:
+                    service.delete_deduplication_set(obj)
+        super().save_model(request, obj, *args)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[Program]:
         return super().get_queryset(request).select_related("data_collecting_type", "business_area")
