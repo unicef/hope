@@ -427,7 +427,7 @@ class TestPeriodicDataUpdateImportService(TestCase):
         }
         with self.assertRaisesMessage(
             ValidationError,
-            f"Round number mismatch for field date_attribute and individual {self.individual.id} / {self.individual.unicef_id}",
+            f"Round number mismatch for field date_attribute and individual {self.individual.unicef_id}",
         ):
             service._import_cleaned_data(cleaned_data)
         not_existing_individual_id = uuid.uuid4()
@@ -443,7 +443,7 @@ class TestPeriodicDataUpdateImportService(TestCase):
         }
         with self.assertRaisesMessage(
             ValidationError,
-            f"Individual with UUID {not_existing_individual_id} / {self.individual.unicef_id} not found",
+            f"Individual not found for {self.individual.unicef_id}",
         ):
             service._import_cleaned_data(cleaned_data)
         self.individual.flex_fields = {
@@ -462,7 +462,7 @@ class TestPeriodicDataUpdateImportService(TestCase):
         }
         with self.assertRaisesMessage(
             ValidationError,
-            f"Value already exists for field date_attribute for round 1 and individual {self.individual.id} / {self.individual.unicef_id}",
+            f"Value already exists for field date_attribute for round 1 and individual {self.individual.unicef_id}",
         ):
             service._import_cleaned_data(cleaned_data)
 
