@@ -1078,6 +1078,7 @@ export type CopyProgramInput = {
 export type CopyTargetPopulationInput = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  programCycleId: Scalars['ID']['input'];
 };
 
 export type CopyTargetPopulationMutationInput = {

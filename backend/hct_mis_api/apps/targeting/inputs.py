@@ -8,6 +8,7 @@ class CopyTargetPopulationInput(graphene.InputObjectType):
 
     id = graphene.ID()
     name = graphene.String()
+    program_cycle_id = graphene.ID(required=True)
 
 
 class UpdateTargetPopulationInput(graphene.InputObjectType):

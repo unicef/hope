@@ -629,6 +629,7 @@ input CopyProgramInput {
 input CopyTargetPopulationInput {
   id: ID
   name: String
+  programCycleId: ID!
 }
 
 input CopyTargetPopulationMutationInput {
