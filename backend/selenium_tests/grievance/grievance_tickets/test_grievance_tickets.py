@@ -993,8 +993,9 @@ class TestGrievanceTickets:
         pageGrievanceTickets.getTicketListRow()[0].click()
         pageGrievanceDetailsPage.getInputNewnote().send_keys("Test adding new note.")
         pageGrievanceDetailsPage.getButtonNewNote().click()
-        user = User.objects.first()
-        assert f"{user.first_name} {user.last_name}" in pageGrievanceDetailsPage.getNoteRows()[0].text
+        user = pageGrievanceDetailsPage.getNoteName().text
+        assert 1 == len(pageGrievanceDetailsPage.getNoteRows())
+        assert user in pageGrievanceDetailsPage.getNoteRows()[0].text
         assert datetime.now().strftime("%-d %b %Y") in pageGrievanceDetailsPage.getNoteRows()[0].text
         assert "Test adding new note." in pageGrievanceDetailsPage.getNoteRows()[0].text
 
@@ -1139,3 +1140,13 @@ class TestGrievanceTickets:
             if duplicated_individual_unicef_id in individual_row.text:
                 for icon in individual_row.find_elements(By.TAG_NAME, "svg"):
                     assert "Confirmed Duplicate" in icon.get_attribute("aria-label")
+
+    def test_grievance_tickets_create_new_errors(
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+    ) -> None:
+        pageGrievanceTickets.getNavGrievance().click()
+        assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
+        pageGrievanceTickets.getButtonNewTicket().click()

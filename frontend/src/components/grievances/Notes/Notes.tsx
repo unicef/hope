@@ -68,7 +68,7 @@ export function Notes({
       </Grid>
       <Grid item xs={10}>
         <Grid item xs={12}>
-          <Box display="flex" justifyContent="space-between">
+          <Box display="flex" justifyContent="space-between" data-cy="note-name">
             <Name>{name}</Name>
             <Date>
               <UniversalMoment withTime>{date}</UniversalMoment>
