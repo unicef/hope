@@ -9,15 +9,17 @@ interface DetailsStepProps {
   values;
   handleNext?: () => Promise<void>;
   errors: any;
+  programId?: string;
 }
 
 export const DetailsStep: React.FC<DetailsStepProps> = ({
   values,
   handleNext,
   errors,
+  programId: formProgramId,
 }) => {
   const { t } = useTranslation();
-  const { baseUrl } = useBaseUrl();
+  const { businessArea, programId, baseUrl } = useBaseUrl();
 
   const handleNextClick = async (): Promise<void> => {
     if (handleNext) {
@@ -32,7 +34,11 @@ export const DetailsStep: React.FC<DetailsStepProps> = ({
         <Button
           data-cy="button-cancel"
           component={Link}
-          to={`/${baseUrl}/list`}
+          to={
+            formProgramId
+              ? `/${businessArea}/programs/${programId}/details/${formProgramId}`
+              : `/${baseUrl}/list`
+          }
         >
           {t('Cancel')}
         </Button>
