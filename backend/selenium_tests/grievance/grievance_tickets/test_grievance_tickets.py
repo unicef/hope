@@ -262,7 +262,7 @@ def create_four_grievance_tickets() -> [GrievanceTicket]:
     GrievanceTicket._meta.get_field("updated_at").auto_now = False
     grievance = list()
     for _ in range(4):
-        grievance.append(create_grievance_referral())
+        grievance.append(create_grievance_referral(assigned_to=""))
     GrievanceTicket._meta.get_field("created_at").auto_now_add = True
     GrievanceTicket._meta.get_field("updated_at").auto_now = True
     yield grievance
@@ -273,7 +273,7 @@ def create_grievance_referral(
     status: int = GrievanceTicket.STATUS_NEW,
     category: int = GrievanceTicket.CATEGORY_REFERRAL,
     created_by: User | None = None,
-    assigned_to: User | None = None,
+    assigned_to: User | None | str = None,
     business_area: BusinessArea | None = None,
     priority: int = 1,
     urgency: int = 1,
@@ -282,26 +282,30 @@ def create_grievance_referral(
     created_at: str = "2022-04-30T09:54:07.827000",
 ) -> GrievanceTicket:
     created_by = User.objects.first() if created_by is None else created_by
-    assigned_to = User.objects.first() if assigned_to is None else assigned_to
     business_area = BusinessArea.objects.filter(slug="afghanistan").first() if business_area is None else business_area
-    grievance_ticket = GrievanceTicket.objects.create(
-        **{
-            "business_area": business_area,
-            "unicef_id": unicef_id,
-            "language": "Polish",
-            "consent": True,
-            "description": "grievance_ticket_1",
-            "category": category,
-            "status": status,
-            "created_by": created_by,
-            "assigned_to": assigned_to,
-            "created_at": created_at,
-            "updated_at": updated_at,
-            "household_unicef_id": household_unicef_id,
-            "priority": priority,
-            "urgency": urgency,
-        }
-    )
+
+    ticket_data = {
+        "business_area": business_area,
+        "unicef_id": unicef_id,
+        "language": "Polish",
+        "consent": True,
+        "description": "grievance_ticket_1",
+        "category": category,
+        "status": status,
+        "created_by": created_by,
+        "created_at": created_at,
+        "updated_at": updated_at,
+        "household_unicef_id": household_unicef_id,
+        "priority": priority,
+        "urgency": urgency,
+    }
+    if assigned_to is None:
+        assigned_to = User.objects.first()
+        ticket_data["assigned_to"] = assigned_to
+    elif isinstance(assigned_to, User):
+        ticket_data["assigned_to"] = assigned_to
+
+    grievance_ticket = GrievanceTicket.objects.create(**ticket_data)
 
     from hct_mis_api.apps.grievance.models import TicketReferralDetails
 
@@ -915,20 +919,23 @@ class TestGrievanceTickets:
         pageHouseholds: Households,
         create_four_grievance_tickets: [GrievanceTicket],
     ) -> None:
-        # Assign, Set priority, Set urgency, Add note
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
-
-        pageGrievanceTickets.screenshot("3")
+        pageGrievanceTickets.getSelectAll().click()
+        pageGrievanceTickets.getButtonAssign().click()
+        pageGrievanceTickets.getDropdown().click()
+        pageGrievanceTickets.select_listbox_element("test@example.com").click()
         for str_row in pageGrievanceTickets.getRows():
             list_row = str_row.text.replace("\n", " ").split(" ")
-            print(len(list_row))
-            for data in list_row:
-                print(data)
-        # from selenium_tests.tools.tag_name_finder import printing
-        # printing("Mapping", pageGrievanceTickets.driver)
-        # printing("Methods", pageGrievanceTickets.driver)
-        # printing("Assert", pageGrievanceTickets.driver)
+            assert list_row[0] in pageGrievanceTickets.getSelectedTickets().text
+        pageGrievanceTickets.getButtonSave().click()
+        for str_row in pageGrievanceTickets.getRows():
+            list_row = str_row.text.replace("\n", " ").split(" ")
+            assert list_row[1] in "Assigned"
+            assert list_row[2] in "test@example.com"
+
+        pageGrievanceTickets.getButtonSetPriority().click()
+        pageGrievanceTickets.getDropdown().click()
 
     def test_grievance_tickets_process_tickets(
         self,

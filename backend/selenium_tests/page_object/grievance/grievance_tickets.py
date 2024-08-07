@@ -53,6 +53,10 @@ class GrievanceTickets(BaseComponents):
     buttonSetPriority = 'button[data-cy="button-Set priority"]'
     buttonSetUrgency = 'button[data-cy="button-Set Urgency"]'
     buttonAddNote = 'button[data-cy="button-add note"]'
+    selectedTickets = 'span[data-cy="selected-tickets"]'
+    buttonCancel = 'button[data-cy="button-cancel"]'
+    buttonSave = 'button[data-cy="button-save"]'
+    dropdown = 'tbody[data-cy="dropdown"]'
 
     dateTitleFilterPopup = 'div[class="MuiPaper-root MuiPopover-paper MuiPaper-elevation8 MuiPaper-rounded"]'
     daysFilterPopup = (
@@ -64,6 +68,17 @@ class GrievanceTickets(BaseComponents):
     textTabTitle = "Grievance Tickets List"
 
     # Elements
+    def getDropdown(self) -> WebElement:
+        return self.wait_for(self.dropdown)
+
+    def getButtonCancel(self) -> WebElement:
+        return self.wait_for(self.buttonCancel)
+
+    def getButtonSave(self) -> WebElement:
+        return self.wait_for(self.buttonSave)
+
+    def getSelectedTickets(self) -> WebElement:
+        return self.wait_for(self.selectedTickets)
 
     def getGrievanceTitle(self) -> WebElement:
         return self.wait_for(self.titlePage)
