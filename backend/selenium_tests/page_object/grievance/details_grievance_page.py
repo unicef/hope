@@ -53,6 +53,9 @@ class GrievanceDetailsPage(BaseComponents):
     cellVillage = 'th[data-cy="table-cell-village"]'
     newNoteField = 'textarea[data-cy="input-newNote"]'
     buttonNewNote = 'button[data-cy="button-add-note"]'
+    labelLanguagesSpoken = 'div[data-cy="label-Languages Spoken"]'
+    labelDocumentation = 'div[data-cy="label-Documentation"]'
+    labelDescription = 'div[data-cy="label-Description"]'
     noteRow = '[data-cy="note-row"]'
     noteName = '[data-cy="note-name"]'
     labelGENDER = 'div[data-cy="label-GENDER"]'
@@ -144,6 +147,7 @@ class GrievanceDetailsPage(BaseComponents):
     buttonAdmin = 'div[data-cy="button-admin"]'
     logRow = 'div[data-cy="log-row"]'
     paymentRecord = 'span[data-cy="payment-record"]'
+    labelGender = 'div[data-cy="label-GENDER"]'
 
     # Texts
     textTitle = "Ticket ID: "
@@ -166,6 +170,9 @@ class GrievanceDetailsPage(BaseComponents):
     buttonRotateImage = 'button[data-cy="button-rotate-image"]'
     buttonCancel = 'button[data-cy="button-cancel"]'
     linkShowPhoto = 'a[data-cy="link-show-photo"]'
+
+    def getLabelGender(self) -> WebElement:
+        return self.wait_for(self.labelGender)
 
     def getPersonIcon(self) -> WebElement:
         return self.wait_for(self.personIcon)
@@ -346,6 +353,15 @@ class GrievanceDetailsPage(BaseComponents):
     def getNoteRows(self) -> [WebElement]:
         self.wait_for(self.noteRow)
         return self.get_elements(self.noteRow)
+
+    def getLabelLanguagesSpoken(self) -> WebElement:
+        return self.wait_for(self.labelLanguagesSpoken)
+
+    def getLabelDocumentation(self) -> WebElement:
+        return self.wait_for(self.labelDocumentation)
+
+    def getLabelDescription(self) -> WebElement:
+        return self.wait_for(self.labelDescription)
 
     def getNoteName(self) -> WebElement:
         return self.wait_for(self.noteName)
