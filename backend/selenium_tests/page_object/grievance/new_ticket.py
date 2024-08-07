@@ -72,8 +72,8 @@ class NewTicket(BaseComponents):
     selectProgram = 'div[data-cy="select-program"]'
     inputIndividualdataPhonenoalternative = 'input[data-cy="input-individualDataPhoneNoAlternative"]'
     datePickerFilter = 'div[data-cy="date-picker-filter"]'
-    inputIndividualdataBlockchainname = 'input[data-cy="input-individualDataBlockchainName"]'
-    selectIndividualdataSelfcaredisability = 'div[data-cy="select-individualDataSelfcareDisability"]'
+    inputIndividualdataBlockchainname = 'input[data-cy="input-individualData.blockchainName"]'
+    selectIndividualdataSelfcaredisability = 'div[data-cy="select-individualData.selfcareDisability"]'
     selectIndividualdataObserveddisability = 'div[data-cy="select-individualData.observedDisability"]'
     selectIndividualdataWorkstatus = 'div[data-cy="select-individualData.workStatus"]'
     selectIndividualdataEstimatedbirthdate = 'div[data-cy="select-individualData.estimatedBirthDate"]'
@@ -100,7 +100,6 @@ class NewTicket(BaseComponents):
     inputIndividualdataWalletname = 'input[data-cy="input-individualData.walletName"]'
     inputIndividualdataWhoanswersaltphone = 'input[data-cy="input-individualData.whoAnswersAltPhone"]'
     inputIndividualdataWhoanswersphone = 'input[data-cy="input-individualData.whoAnswersPhone"]'
-    inputIndividualdataBlockchainName = 'input[data-cy="input-individualData.blockchainName"]'
     selectHouseholddataupdatefieldsFieldname = 'div[data-cy="select-householdDataUpdateFields[{}].fieldName"]'
     buttonAddNewField = 'button[data-cy="button-add-new-field"]'
     inputIndividualData = 'div[data-cy="input-individual-data-{}"]'  # Gender

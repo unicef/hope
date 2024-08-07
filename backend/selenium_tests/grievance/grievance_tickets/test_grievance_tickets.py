@@ -28,6 +28,7 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import HOST, Household, Individual
 from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
+from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.fixtures import (
@@ -79,7 +80,7 @@ def household_without_disabilities() -> Household:
 
 
 @pytest.fixture
-def hh_with_payment_record(household_without_disabilities: Household) -> Household:
+def hh_with_payment_record(household_without_disabilities: Household) -> PaymentRecord:
     targeting_criteria = TargetingCriteriaFactory()
 
     target_population = TargetPopulationFactory(
@@ -100,7 +101,7 @@ def hh_with_payment_record(household_without_disabilities: Household) -> Househo
         business_area=household_without_disabilities.business_area,
     )
     payment_record.save()
-    return household_without_disabilities
+    return payment_record
 
 
 def find_text_of_label(element: WebElement) -> str:
@@ -531,9 +532,11 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getPhoneNoAlternative().send_keys("999 999 999")
         pageGrievanceNewTicket.getDatePickerFilter().click()
         pageGrievanceNewTicket.getDatePickerFilter().send_keys(FormatTime(1, 5, 1986).numerically_formatted_date)
-        pageGrievanceNewTicket.getInputIndividualdataBlockchainName().send_keys("TEST")
+        pageGrievanceNewTicket.getInputIndividualdataBlockchainname().send_keys("TEST")
         pageGrievanceNewTicket.getInputIndividualdataFamilyname().send_keys("Teria")
         pageGrievanceNewTicket.getInputIndividualdataFullname().send_keys("Krido")
+        pageGrievanceNewTicket.getEstimatedBirthDate().click()
+        pageGrievanceNewTicket.select_listbox_element("Yes").click()
         pageGrievanceNewTicket.getSelectIndividualdataSex().click()
         pageGrievanceNewTicket.select_listbox_element("Male").click()
         pageGrievanceNewTicket.getInputIndividualdataGivenname().send_keys("Krato")
@@ -760,7 +763,7 @@ class TestGrievanceTickets:
         pageGrievanceTickets: GrievanceTickets,
         pageGrievanceNewTicket: NewTicket,
         pageGrievanceDetailsPage: GrievanceDetailsPage,
-        hh_with_payment_record: Household,
+        hh_with_payment_record: PaymentRecord,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -779,7 +782,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getLookUpPaymentRecord().click()
         pageGrievanceNewTicket.getCheckboxSelectAll().click()
         pageGrievanceNewTicket.getButtonSubmit().click()
-        assert "123-21-PR-00001" in pageGrievanceDetailsPage.getPaymentRecord().text
+        assert hh_with_payment_record.unicef_id in pageGrievanceDetailsPage.getPaymentRecord().text
 
     def test_grievance_tickets_look_up_linked_ticket(
         self,
@@ -915,7 +918,17 @@ class TestGrievanceTickets:
         # Assign, Set priority, Set urgency, Add note
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
+
         pageGrievanceTickets.screenshot("3")
+        for str_row in pageGrievanceTickets.getRows():
+            list_row = str_row.text.replace("\n", " ").split(" ")
+            print(len(list_row))
+            for data in list_row:
+                print(data)
+        # from selenium_tests.tools.tag_name_finder import printing
+        # printing("Mapping", pageGrievanceTickets.driver)
+        # printing("Methods", pageGrievanceTickets.driver)
+        # printing("Assert", pageGrievanceTickets.driver)
 
     def test_grievance_tickets_process_tickets(
         self,
