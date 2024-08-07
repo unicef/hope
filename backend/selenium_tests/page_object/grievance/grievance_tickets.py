@@ -57,7 +57,7 @@ class GrievanceTickets(BaseComponents):
     buttonCancel = 'button[data-cy="button-cancel"]'
     buttonSave = 'button[data-cy="button-save"]'
     dropdown = 'tbody[data-cy="dropdown"]'
-
+    statusContainer = '[data-cy="status-container"]'
     dateTitleFilterPopup = 'div[class="MuiPaper-root MuiPopover-paper MuiPaper-elevation8 MuiPaper-rounded"]'
     daysFilterPopup = (
         'div[class="MuiPickersSlideTransition-transitionContainer MuiPickersCalendar-transitionContainer"]'
@@ -70,6 +70,10 @@ class GrievanceTickets(BaseComponents):
     # Elements
     def getDropdown(self) -> WebElement:
         return self.wait_for(self.dropdown)
+
+    def getStatusContainer(self) -> [WebElement]:
+        self.wait_for(self.statusContainer)
+        return self.get_elements(self.statusContainer)
 
     def getButtonCancel(self) -> WebElement:
         return self.wait_for(self.buttonCancel)

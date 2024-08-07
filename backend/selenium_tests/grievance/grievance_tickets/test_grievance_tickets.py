@@ -204,7 +204,11 @@ def generate_grievance(
 
     hh = create_custom_household(observed_disability=[])
 
-    individual_qs = Individual.objects.filter(household=hh)
+    individual_qs = [
+        Individual.objects.get(unicef_id="IND-00-0000.0011"),
+        Individual.objects.get(unicef_id="IND-00-0000.0022"),
+        Individual.objects.get(unicef_id="IND-00-0000.0033"),
+    ]
 
     # list of possible duplicates in the ticket
     possible_duplicates = [individual_qs[1], individual_qs[2]]
@@ -504,7 +508,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getButtonNext().click()
         assert "Happy path test 1234!" in pageGrievanceDetailsPage.getTicketDescription().text
         assert "Test Program" in pageGrievanceDetailsPage.getLabelProgramme().text
-        user = User.objects.first()
+        user = User.objects.get(email="test@example.com")
         assert f"{user.first_name} {user.last_name}" in pageGrievanceDetailsPage.getLabelCreatedBy().text
         assert test_data["category"] in pageGrievanceDetailsPage.getTicketCategory().text
         assert test_data["type"] in pageGrievanceDetailsPage.getLabelIssueType().text
@@ -929,13 +933,45 @@ class TestGrievanceTickets:
             list_row = str_row.text.replace("\n", " ").split(" ")
             assert list_row[0] in pageGrievanceTickets.getSelectedTickets().text
         pageGrievanceTickets.getButtonSave().click()
+        pageGrievanceTickets.getStatusContainer()
+        for _ in range(50):
+            if "Assigned" in pageGrievanceTickets.getStatusContainer()[0].text:
+                break
+            sleep(0.1)
+        else:
+            assert "Assigned" in pageGrievanceTickets.getStatusContainer()[0].text
         for str_row in pageGrievanceTickets.getRows():
             list_row = str_row.text.replace("\n", " ").split(" ")
             assert list_row[1] in "Assigned"
-            assert list_row[2] in "test@example.com"
 
+        pageGrievanceTickets.getSelectAll().click()
         pageGrievanceTickets.getButtonSetPriority().click()
         pageGrievanceTickets.getDropdown().click()
+        pageGrievanceTickets.select_listbox_element("Medium").click()
+        pageGrievanceTickets.getButtonSave().click()
+        pageGrievanceTickets.getStatusContainer()
+        for _ in range(50):
+            if "Medium" in pageGrievanceTickets.getRows()[0].text:
+                break
+            sleep(0.1)
+        else:
+            assert "Medium" in pageGrievanceTickets.getRows()[0].text
+        for str_row in pageGrievanceTickets.getRows():
+            assert "Medium" in str_row.text.replace("\n", " ").split(" ")
+        pageGrievanceTickets.getSelectAll().click()
+        pageGrievanceTickets.getButtonSetUrgency().click()
+        pageGrievanceTickets.getDropdown().click()
+        pageGrievanceTickets.select_listbox_element("Urgent").click()
+        pageGrievanceTickets.getButtonSave().click()
+        pageGrievanceTickets.getStatusContainer()
+        for _ in range(50):
+            if "Urgent" in pageGrievanceTickets.getRows()[0].text:
+                break
+            sleep(0.1)
+        else:
+            assert "Urgent" in pageGrievanceTickets.getRows()[0].text
+        for str_row in pageGrievanceTickets.getRows():
+            assert "Urgent" in str_row.text.replace("\n", " ").split(" ")
 
     def test_grievance_tickets_process_tickets(
         self,
