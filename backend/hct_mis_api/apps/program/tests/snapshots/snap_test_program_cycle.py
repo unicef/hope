@@ -483,7 +483,7 @@ snapshots['TestProgramCycle::test_update_program_cycle 6'] = {
                     'line': 3
                 }
             ],
-            'message': 'Not possible leave the Programme Cycle end date empty if it was empty upon starting the edit.',
+            'message': 'Not possible leave the Programme Cycle end date empty if it was not empty upon starting the edit.',
             'path': [
                 'updateProgramCycle'
             ]

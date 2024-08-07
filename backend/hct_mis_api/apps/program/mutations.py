@@ -106,6 +106,7 @@ class CreateProgram(
             start_date=program.start_date,
             end_date=None,
             status=ProgramCycle.DRAFT,
+            created_by=info.context.user,
         )
         # create partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
         if partner_access == Program.SELECTED_PARTNERS_ACCESS:
@@ -271,7 +272,7 @@ class CopyProgram(
             partner_access=partner_access,
             partner=partner,
         )
-        program = copy_program_object(program_id, program_data)
+        program = copy_program_object(program_id, program_data, info.context.user)
 
         # create partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
         if partner_access == Program.SELECTED_PARTNERS_ACCESS:
@@ -314,6 +315,7 @@ class CreateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationEr
             start_date=program_cycle_data["start_date"],
             end_date=program_cycle_data.get("end_date"),
             status=ProgramCycle.DRAFT,
+            created_by=info.context.user,
         )
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
         return CreateProgramCycle(program=program)

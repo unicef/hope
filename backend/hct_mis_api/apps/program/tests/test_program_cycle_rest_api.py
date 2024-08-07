@@ -363,14 +363,14 @@ class ProgramCycleUpdateSerializerTest(TestCase):
         self.assertIn("Not possible leave the Programme Cycle start date empty.", str(error.exception))
 
     def test_validate_end_date(self) -> None:
-        self.cycle.end_date = None
+        self.cycle.end_date = "2023-02-03"
         self.cycle.save()
-        data = {"start_date": "2023-02-02"}
+        data = {"start_date": "2023-02-02", "end_date": None}
         serializer = ProgramCycleUpdateSerializer(instance=self.cycle, data=data, context=self.get_serializer_context())
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
         self.assertIn(
-            "Not possible leave the Programme Cycle end date empty if it was empty upon starting the edit.",
+            "This field may not be null.",
             str(error.exception),
         )
 

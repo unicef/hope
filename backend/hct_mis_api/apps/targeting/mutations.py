@@ -474,7 +474,9 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
             target_id = utils.decode_id_string(target_population_data.pop("id"))
             target_population = TargetPopulation.objects.get(id=target_id)
             program = target_population.program
-            program_cycle = get_object_or_404(ProgramCycle, pk=decode_id_string(target_population_data.get("program_cycle_id")))
+            program_cycle = get_object_or_404(
+                ProgramCycle, pk=decode_id_string(target_population_data.get("program_cycle_id"))
+            )
 
             if program_cycle.status == ProgramCycle.FINISHED:
                 raise ValidationError("Not possible to assign Finished Program Cycle to Targeting")

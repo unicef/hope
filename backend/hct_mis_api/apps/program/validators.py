@@ -161,7 +161,7 @@ class ProgramCycleValidator(CommonValidator):
 
             if program_cycle.end_date and "end_date" in kwargs and kwargs.get("end_date") is None:
                 raise ValidationError(
-                    "Not possible leave the Programme Cycle end date empty if it was empty upon starting the edit."
+                    "Not possible leave the Programme Cycle end date empty if it was not empty upon starting the edit."
                 )
 
             if program_cycle.title and "title" in kwargs and kwargs.get("title") is None:

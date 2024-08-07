@@ -128,7 +128,11 @@ class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
 
     def validate_title(self, value: str) -> str:
         value = value.strip()
-        if ProgramCycle.objects.filter(title=value).exclude(id=self.instance.id).exists():
+        if (
+            ProgramCycle.objects.filter(title=value, program=self.instance.program, is_removed=False)
+            .exclude(id=self.instance.id)
+            .exists()
+        ):
             raise serializers.ValidationError("A ProgramCycle with this title already exists.")
 
         if value is None or "":
@@ -146,10 +150,10 @@ class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
                 {"start_date": "Not possible leave the Programme Cycle start date empty."}
             )
 
-        if not self.instance.end_date and data.get("end_date") is None:
+        if self.instance.end_date and "end_date" in data and data.get("end_date") is None:
             raise serializers.ValidationError(
                 {
-                    "end_date": "Not possible leave the Programme Cycle end date empty if it was empty upon starting the edit."
+                    "end_date": "Not possible leave the Programme Cycle end date empty if it was not empty upon starting the edit."
                 }
             )
         validate_cycle_timeframes_overlapping(program, data.get("start_date"), data.get("end_date"), self.instance.pk)
