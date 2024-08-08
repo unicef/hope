@@ -125,20 +125,33 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         return {}
 
     def get_payload(self, obj: Payment) -> Dict:
-        payload = PaymentPayloadSerializer(
-            data={
-                "amount": obj.entitlement_quantity,
-                "phone_no": str(obj.collector.phone_no),
-                "last_name": obj.collector.family_name,
-                "first_name": obj.collector.given_name,
-                "full_name": obj.full_name,
-                "destination_currency": obj.currency,
-                "service_provider_code": obj.collector.flex_fields.get("service_provider_code_i_f", ""),
-            }
-        )
+        delivery_mechanism_data = obj.collector.delivery_mechanisms_data.filter(
+            delivery_mechanism=obj.delivery_type
+        ).first()
+
+        base_data = {
+            "amount": obj.entitlement_quantity,
+            "destination_currency": obj.currency,
+            "phone_no": str(obj.collector.phone_no),
+            "last_name": obj.collector.family_name,
+            "first_name": obj.collector.given_name,
+            "full_name": obj.full_name,
+        }
+        if (
+            obj.delivery_type.code == "mobile_money" and not delivery_mechanism_data
+        ):  # this workaround need to be dropped
+            base_data["service_provider_code"] = obj.collector.flex_fields.get("service_provider_code_i_f", "")
+
+        payload = PaymentPayloadSerializer(data=base_data)
         if not payload.is_valid():
             raise PaymentGatewayAPI.PaymentGatewayAPIException(payload.errors)
-        return payload.data
+
+        payload_data = payload.data
+
+        if delivery_mechanism_data:
+            payload_data.update(delivery_mechanism_data.delivery_data)
+
+        return payload_data
 
     class Meta:
         model = Payment
