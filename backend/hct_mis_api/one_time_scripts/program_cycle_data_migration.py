@@ -1,7 +1,8 @@
 import logging
+from datetime import datetime, timedelta
+from random import randint
 from typing import Optional
 
-from django.db import transaction
 from django.utils import timezone
 
 from hct_mis_api.apps.core.models import BusinessArea
@@ -14,17 +15,40 @@ logger = logging.getLogger(__name__)
 
 def adjust_cycles_start_and_end_dates_for_active_program(program: Program) -> None:
     logger.info("** ** ** Adjusting cycles start and end dates...")
-    # TODO: add here some code XD
-    # start_data = program.start_date
-    # end_data = program.end_date
-    #
-    # cycles_qs = ProgramCycle.objects.filter(program=program)
+    cycles_qs = ProgramCycle.objects.filter(program=program).only("start_date", "end_date").order_by("start_date")
+
+    for i in range(len(cycles_qs) - 1):
+        current_cycle = cycles_qs[i]
+        next_cycle = cycles_qs[i + 1]
+
+        if current_cycle.end_date is None:
+            # probably it's not possible but to be sure that no any cycles without end_date
+            new_end_date = next_cycle.start_date - timedelta(days=1)
+            current_cycle.end_date = new_end_date
+            current_cycle.save()
+
+        if current_cycle.end_date >= next_cycle.start_date:
+            new_end_date = next_cycle.start_date - timedelta(days=1)
+            current_cycle.end_date = new_end_date
+
+            new_start_date = current_cycle.end_date + timedelta(days=1)
+            next_cycle.start_date = new_start_date
+
+            current_cycle.save()
+            next_cycle.save()
+
+    # for last cycle if end_date is still null
+    last_cycle = cycles_qs.last()
+    if last_cycle.end_date is None:
+        last_cycle.end_date = last_cycle.start_date
+        last_cycle.save()
 
 
 def create_new_program_cycle(
     program_id: str, status: str, start_date: str, end_date: Optional[str] = None
 ) -> ProgramCycle:
     return ProgramCycle.objects.create(
+        title=f"Cycle {start_date} ({str(randint(111, 999))})",
         program_id=program_id,
         status=status,
         start_date=start_date,
@@ -55,8 +79,8 @@ def processing_with_finished_program(payment_plan: PaymentPlan, start_date: str,
 
 def processing_with_active_program(payment_plan: PaymentPlan) -> None:
     logger.info(f"** ** Processing Payment Plan {payment_plan.unicef_id}")
-    payment_plan_start_date = str(payment_plan.start_date)
-    payment_plan_end_date = str(payment_plan.end_date)
+    payment_plan_start_date = str(payment_plan.start_date.date())
+    payment_plan_end_date = str(payment_plan.end_date.date())
 
     if ProgramCycle.objects.filter(program_id=payment_plan.program_id).exists():
         cycle = ProgramCycle.objects.filter(program_id=payment_plan.program_id).first()
@@ -84,14 +108,24 @@ def processing_with_active_program(payment_plan: PaymentPlan) -> None:
     PaymentPlan.objects.filter(id=payment_plan.id).update(program_cycle=cycle)
 
     # adjust cycle start and end dates based on PaymentPlan
-    # if cycle start date if later than payment plan
-    if cycle.start_date > payment_plan.start_date:
-        cycle.start_date = payment_plan.start_date
-    # if end date is earlier should set payment plan end date
-    if cycle.end_date < payment_plan.end_date:
-        cycle.end_date = payment_plan.end_date
+    # if cycle start date if after than payment plan
+
+    cycle_start_date = (
+        datetime.strptime(cycle.start_date, "%Y-%m-%d").date()
+        if isinstance(cycle.start_date, str)
+        else cycle.start_date
+    )
+    cycle_end_date = (
+        datetime.strptime(cycle.end_date, "%Y-%m-%d").date() if isinstance(cycle.end_date, str) else cycle.end_date
+    )
+
+    if cycle_start_date and cycle_start_date > payment_plan.start_date.date():
+        cycle.start_date = payment_plan.start_date.date()
+    # if cycle end date is before payment plan end date
+    if (cycle_end_date and cycle_end_date < payment_plan.end_date.date()) or not cycle_end_date:
+        cycle.end_date = payment_plan.end_date.date()
     if cycle.status != ProgramCycle.ACTIVE:
-        cycle.status = ProgramCycle.FINISHED
+        cycle.status = ProgramCycle.ACTIVE
     cycle.save(update_fields=["start_date", "end_date", "status"])
 
 
@@ -116,17 +150,16 @@ def program_cycle_data_migration(batch_size: int = 1000) -> None:
 
                 processing_ids = pp_ids[batch_start:batch_end]
                 for pp_id in processing_ids:
-                    with transaction.atomic():
-                        payment_plan = PaymentPlan.objects.select_related("target_population").get(id=pp_id)
+                    payment_plan = PaymentPlan.objects.select_related("target_population").get(id=pp_id)
 
-                        if program.status == Program.FINISHED:
-                            start_data = program.start_date
-                            end_data = program.end_date
+                    if program.status == Program.FINISHED:
+                        start_data = program.start_date
+                        end_data = program.end_date
 
-                            processing_with_finished_program(payment_plan, start_data, end_data)
+                        processing_with_finished_program(payment_plan, start_data, end_data)
 
-                        if program.status == Program.ACTIVE:
-                            processing_with_active_program(payment_plan)
+                    if program.status == Program.ACTIVE:
+                        processing_with_active_program(payment_plan)
 
             # after create all Cycles let's adjust dates to find any overlapping
             adjust_cycles_start_and_end_dates_for_active_program(program)
