@@ -717,7 +717,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getSelectCategory().click()
         pageGrievanceNewTicket.select_option_by_name(str(test_data["category"]))
         pageGrievanceNewTicket.getIssueType().click()
-        pageGrievanceNewTicket.wait_for_element_clickable(f'li[data-cy="select-option-{test_data["type"]}"]')
+        pageGrievanceNewTicket.element_clickable(f'li[data-cy="select-option-{test_data["type"]}"]')
         pageGrievanceNewTicket.select_option_by_name(str(test_data["type"]))
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getHouseholdTab()
@@ -936,7 +936,6 @@ class TestGrievanceTickets:
         pageGrievanceTickets.getSelectAll().click()
         pageGrievanceTickets.getButtonAssign().click()
         pageGrievanceTickets.getDropdown().click()
-        pageGrievanceTickets.screenshot("0")
         pageGrievanceTickets.select_listbox_element("test@example.com")
         for str_row in pageGrievanceTickets.getRows():
             list_row = str_row.text.replace("\n", " ").split(" ")
