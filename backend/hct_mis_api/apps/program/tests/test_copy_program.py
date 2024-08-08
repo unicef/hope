@@ -229,11 +229,12 @@ class TestCopyProgram(APITestCase):
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
         self.assertIsNone(self.household1.household_collection)
         self.assertIsNone(self.individuals1[0].individual_collection)
-        self.snapshot_graphql_request(
-            request_string=self.COPY_PROGRAM_MUTATION,
-            context={"user": self.user},
-            variables=self.copy_data,
-        )
+        with self.captureOnCommitCallbacks(execute=True):
+            self.snapshot_graphql_request(
+                request_string=self.COPY_PROGRAM_MUTATION,
+                context={"user": self.user},
+                variables=self.copy_data,
+            )
         copied_program = Program.objects.exclude(id=self.program.id).order_by("created_at").last()
         self.assertEqual(copied_program.status, Program.DRAFT)
         self.assertEqual(copied_program.name, "copied name")
