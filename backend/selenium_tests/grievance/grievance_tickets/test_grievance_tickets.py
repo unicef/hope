@@ -459,8 +459,13 @@ class TestGrievanceTickets:
     @pytest.mark.parametrize(
         "test_data",
         [
-            pytest.param({"category": "Sensitive Grievance", "type": "Miscellaneous"}, id="Sensitive Grievance Miscellaneous"),
-            pytest.param({"category": "Sensitive Grievance", "type": "Personal disputes"}, id="Sensitive Grievance Personal disputes"),
+            pytest.param(
+                {"category": "Sensitive Grievance", "type": "Miscellaneous"}, id="Sensitive Grievance Miscellaneous"
+            ),
+            pytest.param(
+                {"category": "Sensitive Grievance", "type": "Personal disputes"},
+                id="Sensitive Grievance Personal disputes",
+            ),
             pytest.param(
                 {"category": "Grievance Complaint", "type": "Other Complaint"}, id="Grievance Complaint Other Complaint"
             ),
