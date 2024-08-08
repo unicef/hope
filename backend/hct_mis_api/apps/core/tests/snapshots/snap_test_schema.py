@@ -76,7 +76,7 @@ snapshots['TestPDUSubtypeChoices::test_pdu_subtype_choices_data 1'] = {
                 'value': 'STRING'
             },
             {
-                'displayName': 'Yes/No',
+                'displayName': 'Boolean (true/false)',
                 'value': 'BOOLEAN'
             }
         ]
