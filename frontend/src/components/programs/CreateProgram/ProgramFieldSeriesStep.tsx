@@ -150,11 +150,6 @@ export const ProgramFieldSeriesStep = ({
                               programHasRdi &&
                               values.editMode &&
                               round + 1 <= selectedNumberOfRounds;
-
-                            console.log(
-                              `Round: ${round + 1}, Selected Number of Rounds: ${selectedNumberOfRounds}, isDisabled: ${isDisabled}`,
-                            );
-
                             return (
                               <Grid item xs={12} key={round}>
                                 <FormControl fullWidth variant="outlined">
