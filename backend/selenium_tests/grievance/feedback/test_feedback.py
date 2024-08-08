@@ -364,9 +364,11 @@ class TestFeedback:
         pageGrievanceTickets: GrievanceTickets,
         pageGrievanceDetailsPage: GrievanceDetailsPage,
         pageFeedback: Feedback,
+        pageFeedbackDetails: FeedbackDetailsPage,
         add_feedbacks: None,
     ) -> None:
         # Go to Feedback
         pageFeedback.getNavGrievance().click()
         pageFeedback.getNavFeedback().click()
-        pageFeedback.screenshot("")
+        pageFeedback.waitForRows()[0].click()
+        pageFeedback.screenshot("0")
