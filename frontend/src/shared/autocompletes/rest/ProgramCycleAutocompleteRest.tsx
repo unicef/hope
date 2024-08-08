@@ -21,6 +21,7 @@ export const ProgramCycleAutocompleteRest = ({
     offset: 0,
     limit: 10,
     ordering: 'title',
+    status: ['ACTIVE', 'DRAFT'],
   });
   const { businessArea, programId } = useBaseUrl();
 
