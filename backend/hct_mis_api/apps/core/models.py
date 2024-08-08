@@ -251,6 +251,16 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
             ),
         ]
 
+    def clean(self):
+        if FlexibleAttribute.objects.filter(name=self.name, program__isnull=True).exclude(id=self.id).exists():
+            raise ValidationError(f'Flex field with name "{self.name}" already exists without a program.')
+        if self.program is None and FlexibleAttribute.objects.filter(name=self.name).exclude(id=self.id).exists():
+            raise ValidationError(f'Flex field with name "{self.name}" already exists inside a program.')
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        self.clean()
+        super().save(*args, **kwargs)
+
     @property
     def is_flex_field(self) -> bool:
         return True
