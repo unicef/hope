@@ -339,6 +339,7 @@ export const EditProgramPage = (): ReactElement => {
                     setFieldTouched={setFieldTouched}
                     programHasRdi={programHasRdi}
                     programId={id}
+                    program={data.program}
                   />
                 )}
                 {step === 2 && (
