@@ -192,11 +192,7 @@ export const EditProgramPage = (): ReactElement => {
         areaAccess: partner.areaAccess,
       })),
     partnerAccess,
-    pduFields: programHasRdi
-      ? undefined
-      : pduFields.length == 0
-        ? []
-        : mappedPduFields,
+    pduFields: pduFields.length == 0 ? [] : mappedPduFields,
   };
 
   initialValues.budget =
