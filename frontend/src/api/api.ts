@@ -5,8 +5,22 @@ export const api = {
   },
   cache: new Map(),
 
+  buildParams(data: Record<string, any> = {}) {
+    const params = new URLSearchParams();
+
+    Object.entries(data).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((v) => params.append(key, v.toString()));
+      } else {
+        params.append(key, value.toString());
+      }
+    });
+
+    return params.toString();
+  },
+
   async get(url: string, params: Record<string, any> = {}) {
-    const query = new URLSearchParams(params).toString();
+    const query = this.buildParams(params);
     const cacheKey = url + (query ? `?${query}` : '');
 
     const cached = this.cache.get(cacheKey);

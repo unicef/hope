@@ -2,13 +2,15 @@ import { api } from '@api/api';
 
 export type ProgramCycleStatus = 'Active' | 'Draft' | 'Finished';
 
+type ProgramCycleStatusQuery = 'ACTIVE' | 'DRAFT' | 'FINISHED';
+
 export interface ProgramCyclesQuery {
   ordering: string;
   limit: number;
   offset: number;
   search?: string;
   title?: string;
-  status?: ProgramCycleStatus;
+  status?: ProgramCycleStatusQuery[];
   total_entitled_quantity_usd_from?: number;
   total_entitled_quantity_usd_to?: number;
   start_date?: string;
