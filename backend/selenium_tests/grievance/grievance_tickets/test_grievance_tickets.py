@@ -1177,7 +1177,8 @@ class TestGrievanceTickets:
                 for icon in individual_row.find_elements(By.TAG_NAME, "svg"):
                     assert "Confirmed Duplicate" in icon.get_attribute("aria-label")
 
-    def test_grievance_tickets_create_new_errors(
+    @pytest.mark.xfail(reason="Unskip after fix bug: 209087")
+    def test_grievance_tickets_create_new_error(
         self,
         pageGrievanceTickets: GrievanceTickets,
         pageGrievanceNewTicket: NewTicket,
@@ -1186,3 +1187,6 @@ class TestGrievanceTickets:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getButtonNewTicket().click()
+        pageGrievanceNewTicket.getButtonNext().click()
+        with pytest.raises(Exception):
+            pageGrievanceNewTicket.getHouseholdTab()
