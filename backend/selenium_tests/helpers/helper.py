@@ -105,8 +105,8 @@ class Common:
 
     def select_option_by_name(self, optionName: str) -> None:
         selectOption = f'li[data-cy="select-option-{optionName}"]'
-        self.wait_for(selectOption).click()
         try:
+            self.wait_for(selectOption).click()
             self.wait_for_disappear(selectOption)
         except BaseException:
             sleep(1)
