@@ -27,9 +27,11 @@ export function FormikTextField({
   maxLength,
   ...otherProps
 }): React.ReactElement {
-  const isInvalid =
+  const isInvalid = Boolean(
     get(form.errors, field.name) &&
-    (get(form.touched, field.name) || form.submitCount > 0);
+      (get(form.touched, field.name) || form.submitCount > 0 || form.errors),
+  );
+
   const handleKeyPress = (evt): void => {
     if (type === 'number' && ['e', 'E', '+', '-'].includes(evt.key)) {
       evt.preventDefault();
