@@ -459,8 +459,8 @@ class TestGrievanceTickets:
     @pytest.mark.parametrize(
         "test_data",
         [
-            pytest.param({"category": "Sensitive Grievance", "type": "Miscellaneous"}, id="Sensitive Grievance"),
-            pytest.param({"category": "Sensitive Grievance", "type": "Personal disputes"}, id="Sensitive Grievance"),
+            pytest.param({"category": "Sensitive Grievance", "type": "Miscellaneous"}, id="Sensitive Grievance Miscellaneous"),
+            pytest.param({"category": "Sensitive Grievance", "type": "Personal disputes"}, id="Sensitive Grievance Personal disputes"),
             pytest.param(
                 {"category": "Grievance Complaint", "type": "Other Complaint"}, id="Grievance Complaint Other Complaint"
             ),
@@ -495,6 +495,8 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.select_option_by_name(test_data["category"])
         pageGrievanceNewTicket.getIssueType().click()
         pageGrievanceNewTicket.select_option_by_name(test_data["type"])
+        assert test_data["category"] in pageGrievanceNewTicket.getSelectCategory().text
+        assert test_data["type"] in pageGrievanceNewTicket.getIssueType().text
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getHouseholdTab()
         pageGrievanceNewTicket.getHouseholdTableRows(0).click()
@@ -710,6 +712,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getSelectCategory().click()
         pageGrievanceNewTicket.select_option_by_name(str(test_data["category"]))
         pageGrievanceNewTicket.getIssueType().click()
+        pageGrievanceNewTicket.wait_for_element_clickable(f'li[data-cy="select-option-{test_data["type"]}"]')
         pageGrievanceNewTicket.select_option_by_name(str(test_data["type"]))
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getHouseholdTab()
