@@ -8,12 +8,14 @@ import { Box, Button, FormControl, Grid, IconButton } from '@mui/material';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { Field, FieldArray } from 'formik';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 interface ProgramFieldSeriesStepProps {
   values: {
     pduFields: Array<any>;
+    editMode: boolean;
   };
   handleNext?: () => Promise<void>;
   setStep: (step: number) => void;
@@ -22,6 +24,7 @@ interface ProgramFieldSeriesStepProps {
   pdusubtypeChoicesData?: PduSubtypeChoicesDataQuery;
   errors: any;
   programId?: string;
+  setFieldValue;
 }
 
 export const ProgramFieldSeriesStep = ({
@@ -33,9 +36,11 @@ export const ProgramFieldSeriesStep = ({
   pdusubtypeChoicesData,
   errors,
   programId: formProgramId,
+  setFieldValue,
 }: ProgramFieldSeriesStepProps) => {
   const { t } = useTranslation();
   const { businessArea, programId, baseUrl } = useBaseUrl();
+
   const confirm = useConfirmation();
 
   const mappedPduSubtypeChoices = pdusubtypeChoicesData?.pduSubtypeChoices.map(
@@ -93,42 +98,31 @@ export const ProgramFieldSeriesStep = ({
                           onChange={(e) => {
                             const numberOfRounds = parseInt(e.target.value, 10);
                             if (!isNaN(numberOfRounds) && numberOfRounds > 0) {
-                              const currentRoundsNames =
-                                values.pduFields[index].pduData.roundsNames ||
-                                [];
-                              let newRoundsNames;
+                              const currentNumberOfRounds =
+                                values.pduFields[index].pduData
+                                  .numberOfRounds || 0;
 
-                              if (numberOfRounds > currentRoundsNames.length) {
-                                newRoundsNames = [
-                                  ...currentRoundsNames,
-                                  ...Array(
-                                    numberOfRounds - currentRoundsNames.length,
-                                  ).fill(''),
-                                ];
-                              } else {
-                                newRoundsNames = currentRoundsNames.slice(
-                                  0,
+                              if (
+                                numberOfRounds > currentNumberOfRounds ||
+                                !values.editMode
+                              ) {
+                                setFieldValue(
+                                  `pduFields.${index}.pduData.numberOfRounds`,
                                   numberOfRounds,
                                 );
                               }
-
-                              // Update the form state using setFieldValue
-                              arrayHelpers.form.setFieldValue(
-                                `pduFields.${index}.pduData.roundsNames`,
-                                newRoundsNames,
-                              );
-                              arrayHelpers.form.setFieldValue(
-                                `pduFields.${index}.pduData.numberOfRounds`,
-                                numberOfRounds,
-                              );
                             }
                           }}
                           component={FormikSelectField}
-                          choices={[...Array(10).keys()].map((n) => ({
+                          choices={[...Array(20).keys()].map((n) => ({
                             value: n + 1,
                             label: `${n + 1}`,
+                            disabled:
+                              values.editMode &&
+                              n + 1 <=
+                                (values.pduFields[index].pduData
+                                  .numberOfRounds || 0),
                           }))}
-                          disabled={programHasRdi}
                         />
                       </Grid>
                       <Grid item xs={1}>
@@ -150,21 +144,23 @@ export const ProgramFieldSeriesStep = ({
                           ...Array(
                             Number(_field.pduData.numberOfRounds),
                           ).keys(),
-                        ].map((round) => (
-                          <Grid item xs={12} key={round}>
-                            <FormControl fullWidth variant="outlined">
-                              <Field
-                                name={`pduFields.${index}.pduData.roundsNames.${round}`}
-                                fullWidth
-                                variant="outlined"
-                                label={`${t('Round')} ${round + 1} ${t('Name')}`}
-                                component={FormikTextField}
-                                type="text"
-                                disabled={programHasRdi}
-                              />
-                            </FormControl>
-                          </Grid>
-                        ))}
+                        ].map((round) => {
+                          return (
+                            <Grid item xs={12} key={round}>
+                              <FormControl fullWidth variant="outlined">
+                                <Field
+                                  name={`pduFields.${index}.pduData.roundsNames.${round}`}
+                                  fullWidth
+                                  variant="outlined"
+                                  label={`${t('Round')} ${round + 1} ${t('Name')}`}
+                                  component={FormikTextField}
+                                  type="text"
+                                  disabled={programHasRdi && !values.editMode}
+                                />
+                              </FormControl>
+                            </Grid>
+                          );
+                        })}
                     </Grid>
                     {values.pduFields.length > 1 &&
                       index < values.pduFields.length - 1 && <DividerLine />}

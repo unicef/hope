@@ -324,6 +324,7 @@ export const CreateProgramPage = (): ReactElement => {
                     setStep={setStep}
                     pdusubtypeChoicesData={pdusubtypeChoicesData}
                     errors={errors}
+                    setFieldValue={setFieldValue}
                   />
                 )}
                 {step === 2 && (
