@@ -328,7 +328,7 @@ class PeriodicFieldData(models.Model):
         (DATE, _("Date")),
         (DECIMAL, _("Number")),
         (STRING, _("Text")),
-        (BOOLEAN, _("Yes/No")),
+        (BOOLEAN, _("Boolean (true/false)")),
     )
 
     subtype = models.CharField(max_length=16, choices=TYPE_CHOICES)
