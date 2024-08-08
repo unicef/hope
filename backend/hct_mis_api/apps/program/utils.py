@@ -87,6 +87,7 @@ class CopyProgramPopulation:
             else:
                 individuals = self.copy_individuals_without_collections()
                 households = self.copy_households_without_collections(individuals)
+
             self.copy_household_related_data(households, individuals)
             self.copy_individual_related_data(individuals)
 
@@ -173,13 +174,8 @@ class CopyProgramPopulation:
             role.pk = None
             role.household = new_household
             role.rdi_merge_status = self.rdi_merge_status
-            role.individual = (
-                getattr(Individual, self.manager)
-                .filter(id__in=[ind.pk for ind in new_individuals])
-                .get(
-                    program=self.program,
-                    copied_from=role.individual,
-                )
+            role.individual = next(
+                filter(lambda ind: ind.program == self.program and ind.copied_from == role.individual, new_individuals)
             )
             roles_in_household.append(role)
         return roles_in_household
