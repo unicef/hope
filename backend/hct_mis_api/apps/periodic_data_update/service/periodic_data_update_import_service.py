@@ -26,6 +26,18 @@ class PeriodicDataUpdateBaseForm(forms.Form):
     last_name = forms.CharField(required=False)
 
 
+class StrictBooleanField(forms.Field):
+    def to_python(self, value: Union[Optional[str], bool]) -> Optional[bool]:
+        if value is None or value == "":
+            return None
+        if value in (True, "True", "true", "TRUE", "1"):
+            return True
+        elif value in (False, "False", "false", "FALSE", "0"):
+            return False
+        else:
+            raise ValidationError("Invalid boolean value", code="invalid")
+
+
 class RowValidationError(ValidationError):
     pass
 
@@ -278,7 +290,7 @@ class PeriodicDataUpdateImportService:
         elif flexible_attribute.pdu_data.subtype == PeriodicFieldData.DECIMAL:
             return forms.DecimalField(required=False)
         elif flexible_attribute.pdu_data.subtype == PeriodicFieldData.BOOLEAN:
-            return forms.NullBooleanField(required=False)
+            return StrictBooleanField(required=False)
         elif flexible_attribute.pdu_data.subtype == PeriodicFieldData.DATE:
             return forms.DateField(required=False)
         raise ValidationError(f"Invalid subtype for field {flexible_attribute.name}")
