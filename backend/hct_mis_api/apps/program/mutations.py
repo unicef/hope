@@ -200,7 +200,7 @@ class UpdateProgram(
         program.save()
 
         if pdu_fields is not None:
-            FlexibleAttributeForPDUService(program, pdu_fields).update_pdu_flex_attributes()
+            FlexibleAttributeForPDUService(program, pdu_fields).update_pdu_flex_attributes_in_program_update()
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return UpdateProgram(program=program)
