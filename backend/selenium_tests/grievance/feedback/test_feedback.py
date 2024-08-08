@@ -11,6 +11,9 @@ from page_object.programme_details.programme_details import ProgrammeDetails
 from pytest_django import DjangoDbBlocker
 from selenium.webdriver import Keys
 
+from selenium_tests.page_object.grievance.details_grievance_page import GrievanceDetailsPage
+from selenium_tests.page_object.grievance.grievance_tickets import GrievanceTickets
+
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
@@ -347,8 +350,7 @@ class TestFeedback:
         pageNewFeedback.getComments().send_keys("New comment, new comment. New comment?")
         pageNewFeedback.getInputArea().send_keys("Abkamari")
         pageNewFeedback.getInputLanguage().send_keys("English")
-        # ToDo: Enable after Fix bug
-        # pageNewFeedback.selectArea("Abband").click()
+        pageNewFeedback.selectArea("Abband").click()
         pageNewFeedback.getButtonNext().click()
         # Check edited Feedback
         assert "Draft Program" in pageFeedbackDetails.getProgramme().text
@@ -357,11 +359,14 @@ class TestFeedback:
         assert "Abkamari" in pageFeedbackDetails.getAreaVillagePayPoint().text
         assert "English" in pageFeedbackDetails.getLanguagesSpoken().text
 
-    @pytest.mark.skip(reason="Create during Grievance tickets creation tests")
     def test_create_linked_ticket(
         self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
         pageFeedback: Feedback,
+        add_feedbacks: None,
     ) -> None:
         # Go to Feedback
         pageFeedback.getNavGrievance().click()
         pageFeedback.getNavFeedback().click()
+        pageFeedback.screenshot("")
