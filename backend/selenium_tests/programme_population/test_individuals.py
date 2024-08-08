@@ -27,7 +27,7 @@ class TestSmokeIndividuals:
     def test_smoke_page_individuals(
         self, create_programs: None, add_households: None, pageIndividuals: Individuals
     ) -> None:
-        pageIndividuals.selectGlobalProgramFilter("Test Programm").click()
+        pageIndividuals.selectGlobalProgramFilter("Test Programm")
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         assert "Individuals" in pageIndividuals.getTableTitle().text
@@ -47,7 +47,7 @@ class TestSmokeIndividuals:
         pageIndividuals: Individuals,
         pageIndividualsDetails: IndividualsDetails,
     ) -> None:
-        pageIndividuals.selectGlobalProgramFilter("Test Programm").click()
+        pageIndividuals.selectGlobalProgramFilter("Test Programm")
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getIndividualTableRow()[0].click()

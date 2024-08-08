@@ -544,36 +544,36 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getInputIndividualdataFamilyname().send_keys("Teria")
         pageGrievanceNewTicket.getInputIndividualdataFullname().send_keys("Krido")
         pageGrievanceNewTicket.getEstimatedBirthDate().click()
-        pageGrievanceNewTicket.select_listbox_element("Yes").click()
+        pageGrievanceNewTicket.select_listbox_element("Yes")
         pageGrievanceNewTicket.getSelectIndividualdataSex().click()
-        pageGrievanceNewTicket.select_listbox_element("Male").click()
+        pageGrievanceNewTicket.select_listbox_element("Male")
         pageGrievanceNewTicket.getInputIndividualdataGivenname().send_keys("Krato")
         pageGrievanceNewTicket.getSelectIndividualdataCommsdisability().click()
-        pageGrievanceNewTicket.select_listbox_element("A lot of difficulty").click()
+        pageGrievanceNewTicket.select_listbox_element("A lot of difficulty")
         pageGrievanceNewTicket.getSelectIndividualdataHearingdisability().click()
-        pageGrievanceNewTicket.select_listbox_element("A lot of difficulty").click()
+        pageGrievanceNewTicket.select_listbox_element("A lot of difficulty")
         pageGrievanceNewTicket.getSelectIndividualdataMemorydisability().click()
-        pageGrievanceNewTicket.select_listbox_element("Cannot do at all").click()
+        pageGrievanceNewTicket.select_listbox_element("Cannot do at all")
         pageGrievanceNewTicket.getSelectIndividualdataSeeingdisability().click()
-        pageGrievanceNewTicket.select_listbox_element("Some difficulty").click()
+        pageGrievanceNewTicket.select_listbox_element("Some difficulty")
         pageGrievanceNewTicket.getSelectIndividualdataPhysicaldisability().click()
-        pageGrievanceNewTicket.select_listbox_element("None").click()
+        pageGrievanceNewTicket.select_listbox_element("None")
         pageGrievanceNewTicket.getInputIndividualdataEmail().send_keys("kridoteria@bukare.cz")
         pageGrievanceNewTicket.getSelectIndividualdataDisability().click()
-        pageGrievanceNewTicket.select_listbox_element("disabled").click()
+        pageGrievanceNewTicket.select_listbox_element("disabled")
         pageGrievanceNewTicket.getSelectIndividualdataPregnant().click()
-        pageGrievanceNewTicket.select_listbox_element("No").click()
+        pageGrievanceNewTicket.select_listbox_element("No")
         pageGrievanceNewTicket.getSelectIndividualdataMaritalstatus().click()
-        pageGrievanceNewTicket.select_listbox_element("Married").click()
+        pageGrievanceNewTicket.select_listbox_element("Married")
         pageGrievanceNewTicket.getInputIndividualdataMiddlename().send_keys("Batu")
         pageGrievanceNewTicket.getInputIndividualdataPaymentdeliveryphoneno().send_keys("123 456 789")
         pageGrievanceNewTicket.getInputIndividualdataPhoneno().send_keys("098 765 432")
         pageGrievanceNewTicket.getSelectIndividualdataPreferredlanguage().click()
-        pageGrievanceNewTicket.select_listbox_element("English").click()
+        pageGrievanceNewTicket.select_listbox_element("English")
         pageGrievanceNewTicket.getSelectIndividualdataRelationship().click()
-        pageGrievanceNewTicket.select_listbox_element("Wife / Husband").click()
+        pageGrievanceNewTicket.select_listbox_element("Wife / Husband")
         pageGrievanceNewTicket.getSelectIndividualdataRole().click()
-        pageGrievanceNewTicket.select_listbox_element("Alternate collector").click()
+        pageGrievanceNewTicket.select_listbox_element("Alternate collector")
         pageGrievanceNewTicket.getInputIndividualdataWalletaddress().send_keys("Wordoki")
         pageGrievanceNewTicket.getInputIndividualdataWalletname().send_keys("123")
         pageGrievanceNewTicket.getInputIndividualdataWhoanswersaltphone().send_keys("000 000 000")
@@ -614,15 +614,15 @@ class TestGrievanceTickets:
 
         pageGrievanceNewTicket.getInputIndividualdataFullname().send_keys("Krido")
         pageGrievanceNewTicket.getSelectIndividualdataSex().click()
-        pageGrievanceNewTicket.select_listbox_element("Male").click()
+        pageGrievanceNewTicket.select_listbox_element("Male")
 
         pageGrievanceNewTicket.getEstimatedBirthDate().click()
-        pageGrievanceNewTicket.select_listbox_element("Yes").click()
+        pageGrievanceNewTicket.select_listbox_element("Yes")
 
         pageGrievanceNewTicket.getSelectIndividualdataRelationship().click()
-        pageGrievanceNewTicket.select_listbox_element("Wife / Husband").click()
+        pageGrievanceNewTicket.select_listbox_element("Wife / Husband")
         pageGrievanceNewTicket.getSelectIndividualdataRole().click()
-        pageGrievanceNewTicket.select_listbox_element("Alternate collector").click()
+        pageGrievanceNewTicket.select_listbox_element("Alternate collector")
         pageGrievanceNewTicket.getButtonNext().click()
         assert "ASSIGN TO ME" in pageGrievanceDetailsPage.getButtonAssignToMe().text
         assert "New" in pageGrievanceDetailsPage.getTicketStatus().text
@@ -725,11 +725,11 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getIndividualFieldName(0).click()
         pageGrievanceNewTicket.select_option_by_name("Gender")
         pageGrievanceNewTicket.getInputIndividualData("Gender").click()
-        pageGrievanceNewTicket.select_listbox_element("Female").click()
+        pageGrievanceNewTicket.select_listbox_element("Female")
         pageGrievanceNewTicket.getIndividualFieldName(1).click()
         pageGrievanceNewTicket.select_option_by_name("Preferred language")
         pageGrievanceNewTicket.getInputIndividualData("Preferred language").click()
-        pageGrievanceNewTicket.select_listbox_element("English | English").click()
+        pageGrievanceNewTicket.select_listbox_element("English | English")
 
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceDetailsPage.getCheckboxIndividualData()
@@ -928,12 +928,14 @@ class TestGrievanceTickets:
         pageGrievanceTickets.getSelectAll().click()
         pageGrievanceTickets.getButtonAssign().click()
         pageGrievanceTickets.getDropdown().click()
-        pageGrievanceTickets.select_listbox_element("test@example.com").click()
+        pageGrievanceTickets.screenshot("0")
+        pageGrievanceTickets.select_listbox_element("test@example.com")
         for str_row in pageGrievanceTickets.getRows():
             list_row = str_row.text.replace("\n", " ").split(" ")
             assert list_row[0] in pageGrievanceTickets.getSelectedTickets().text
         pageGrievanceTickets.getButtonSave().click()
         pageGrievanceTickets.getStatusContainer()
+        pageGrievanceTickets.waitForRows()
         for _ in range(50):
             if "Assigned" in pageGrievanceTickets.getStatusContainer()[0].text:
                 break
@@ -947,9 +949,10 @@ class TestGrievanceTickets:
         pageGrievanceTickets.getSelectAll().click()
         pageGrievanceTickets.getButtonSetPriority().click()
         pageGrievanceTickets.getDropdown().click()
-        pageGrievanceTickets.select_listbox_element("Medium").click()
+        pageGrievanceTickets.select_listbox_element("Medium")
         pageGrievanceTickets.getButtonSave().click()
         pageGrievanceTickets.getStatusContainer()
+        pageGrievanceTickets.waitForRows()
         for _ in range(50):
             if "Medium" in pageGrievanceTickets.getRows()[0].text:
                 break
@@ -961,10 +964,11 @@ class TestGrievanceTickets:
         pageGrievanceTickets.getSelectAll().click()
         pageGrievanceTickets.getButtonSetUrgency().click()
         pageGrievanceTickets.getDropdown().click()
-        pageGrievanceTickets.select_listbox_element("Urgent").click()
+        pageGrievanceTickets.select_listbox_element("Urgent")
         pageGrievanceTickets.getButtonSave().click()
         pageGrievanceTickets.getStatusContainer()
-        for _ in range(50):
+        pageGrievanceTickets.waitForRows()
+        for _ in range(0):
             if "Urgent" in pageGrievanceTickets.getRows()[0].text:
                 break
             sleep(0.1)
@@ -1011,7 +1015,7 @@ class TestGrievanceTickets:
         pageGrievanceDetailsPage.getButtonCloseTicket().click()
         pageGrievanceDetailsPage.getButtonConfirm().click()
         assert "Ticket ID" in pageGrievanceDetailsPage.getTitle().text
-        pageGrievanceNewTicket.selectGlobalProgramFilter("Test Program").click()
+        pageGrievanceNewTicket.selectGlobalProgramFilter("Test Program")
         pageGrievanceNewTicket.getNavProgrammePopulation().click()
         pageHouseholds.getHouseholdsRows()[0].click()
         assert "5" in pageHouseholdsDetails.getRow05().text
@@ -1162,7 +1166,7 @@ class TestGrievanceTickets:
         pageGrievanceDetailsPage.getButtonConfirm().click()
         pageGrievanceDetailsPage.disappearButtonConfirm()
 
-        pageGrievanceDetailsPage.selectGlobalProgramFilter("Test Program").click()
+        pageGrievanceDetailsPage.selectGlobalProgramFilter("Test Program")
         pageGrievanceDetailsPage.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getIndividualTableRow()

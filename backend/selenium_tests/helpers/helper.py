@@ -79,14 +79,17 @@ class Common:
 
     def select_listbox_element(
         self, name: str, listbox: str = 'ul[role="listbox"]', tag_name: str = "li"
-    ) -> WebElement:
+    ) -> None:
         select_element = self.wait_for(listbox)
         items = select_element.find_elements("tag name", tag_name)
         for item in items:
             if name in item.text:
                 self._wait().until(EC.element_to_be_clickable((By.XPATH, f"//*[contains(text(), '{name}')]")))
-                return item
-        raise AssertionError(f"Element: {name} is not in the list: {[item.text for item in items]}")
+                item.click()
+                self.wait_for_disappear('ul[role="listbox"]')
+                break
+        else:
+            raise AssertionError(f"Element: {name} is not in the list: {[item.text for item in items]}")
 
     def check_page_after_click(self, button: WebElement, url_fragment: str) -> None:
         programme_creation_url = self.driver.current_url

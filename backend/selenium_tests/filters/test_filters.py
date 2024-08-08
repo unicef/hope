@@ -288,7 +288,7 @@ def create_programs() -> None:
 @pytest.mark.usefixtures("login")
 class TestSmokeFilters:
     def test_filters_selected_program(self, create_programs: None, filters: Filters) -> None:
-        filters.selectGlobalProgramFilter("Test Programm").click()
+        filters.selectGlobalProgramFilter("Test Programm")
 
         programs = {
             "Registration Data Import": [
@@ -529,7 +529,7 @@ class TestSmokeFilters:
         filters: Filters,
         pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
-        filters.selectGlobalProgramFilter("Test Programm").click()
+        filters.selectGlobalProgramFilter("Test Programm")
         assert "Test Programm" in pageProgrammeDetails.getHeaderTitle().text
         filters.wait_for(f'[data-cy="nav-{module[0]}').click()
         assert filters.waitForNumberOfRows(2)
