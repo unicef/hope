@@ -70,7 +70,7 @@ class TestProgramCycleDataMigration(TestCase):
             cycle__title="Cycle for program_active_001",
             cycle__status=ProgramCycle.DRAFT,
             cycle__start_date="2023-01-01",
-            cycle__end_date="2022-01-30",
+            cycle__end_date="2023-01-30",
         )
         program_active_002 = ProgramFactory(
             name="Active 002",
@@ -166,6 +166,7 @@ class TestProgramCycleDataMigration(TestCase):
         )
 
         cls.pp_1 = PaymentPlanFactory(
+            name="Payment Plan pp1",
             program=program_active_001,
             target_population=cls.tp_3,
             program_cycle=None,
@@ -173,6 +174,7 @@ class TestProgramCycleDataMigration(TestCase):
             end_date=end_date,
         )
         cls.pp_2 = PaymentPlanFactory(
+            name="Payment Plan pp2",
             program=program_active_001,
             target_population=cls.tp_3,
             program_cycle=None,
@@ -183,6 +185,7 @@ class TestProgramCycleDataMigration(TestCase):
         PaymentFactory(household=household_2, parent=cls.pp_2, status="Distribution Successful")
 
         cls.pp_3 = PaymentPlanFactory(
+            name="Payment Plan pp3",
             program=program_active_002,
             target_population=cls.tp_4,
             program_cycle=None,
@@ -190,6 +193,7 @@ class TestProgramCycleDataMigration(TestCase):
             end_date=end_date,
         )
         cls.pp_4 = PaymentPlanFactory(
+            name="Payment Plan pp4",
             program=program_active_002,
             target_population=cls.tp_4,
             program_cycle=None,
@@ -197,6 +201,7 @@ class TestProgramCycleDataMigration(TestCase):
             end_date=end_date,
         )
         cls.pp_5 = PaymentPlanFactory(
+            name="Payment Plan pp5",
             program=program_active_002,
             target_population=cls.tp_4,
             program_cycle=None,
@@ -207,14 +212,22 @@ class TestProgramCycleDataMigration(TestCase):
         # cycle 1 = Cycle 01
         PaymentFactory(household=household_3, parent=cls.pp_3, status="Distribution Successful")
         PaymentFactory(household=household_4, parent=cls.pp_3, status="Distribution Successful")
+
         # cycle 2 = new created
         PaymentFactory(household=household_4, parent=cls.pp_4, status="Distribution Successful")
         PaymentFactory(household=household_5, parent=cls.pp_4, status="Distribution Successful")
+
         # cycle 3 = new created
         PaymentFactory(household=household_5, parent=cls.pp_5, status="Distribution Successful")
         PaymentFactory(household=household_6, parent=cls.pp_5, status="Distribution Successful")
+        PaymentFactory(household=household_3, parent=cls.pp_5, status="Distribution Successful")
 
     def test_program_cycle_data_migration(self) -> None:
+        # check cycle for program_active_002
+        self.assertEqual(ProgramCycle.objects.filter(program=self.pp_3.program).count(), 1)
+        self.assertEqual(ProgramCycle.objects.filter(program=self.pp_3.program).first().title, "Cycle 01")
+
+        # run script
         program_cycle_data_migration()
 
         program_finished = Program.objects.get(name="Finished 001")
@@ -253,7 +266,9 @@ class TestProgramCycleDataMigration(TestCase):
         self.assertEqual(self.pp_5.program_cycle.status, ProgramCycle.ACTIVE)
         self.assertEqual(self.tp_4.program_cycle.status, ProgramCycle.ACTIVE)
 
-        values_cycles = ProgramCycle.objects.filter(program=self.pp_3.program).values("title", "start_date", "end_date")
-        # TODO: have to double check the logic here
+        program_active_002 = self.pp_3.program
+        values_cycles = ProgramCycle.objects.filter(program=program_active_002).values(
+            "title", "start_date", "end_date"
+        )
         print("result: \n", values_cycles)
-        # self.assertEqual(values_cycles.count(), 3)
+        self.assertEqual(values_cycles.count(), 3)

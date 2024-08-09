@@ -318,6 +318,14 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedMod
         ordering = ["start_date"]
         verbose_name = "ProgrammeCycle"
 
+    def clean(self) -> None:
+        if self.end_date and self.end_date < self.start_date:
+            raise ValidationError("End date cannot be before start date.")
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        self.clean()
+        super().save(*args, **kwargs)
+
     def __str__(self) -> str:
         return f"{self.title} ({self.status})"
 

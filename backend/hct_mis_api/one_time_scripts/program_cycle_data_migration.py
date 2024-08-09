@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from random import randint
 from typing import Optional
 
+from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.utils import timezone
 
 from hct_mis_api.apps.core.models import BusinessArea
@@ -16,32 +18,29 @@ logger = logging.getLogger(__name__)
 def adjust_cycles_start_and_end_dates_for_active_program(program: Program) -> None:
     logger.info("** ** ** Adjusting cycles start and end dates...")
     cycles_qs = ProgramCycle.objects.filter(program=program).only("start_date", "end_date").order_by("start_date")
+    if not cycles_qs:
+        return
 
-    for i in range(len(cycles_qs) - 1):
-        current_cycle = cycles_qs[i]
-        next_cycle = cycles_qs[i + 1]
-
-        if current_cycle.end_date is None:
+    previous_cycle = None
+    with transaction.atomic():
+        for cycle in cycles_qs:
             # probably it's not possible but to be sure that no any cycles without end_date
-            new_end_date = next_cycle.start_date - timedelta(days=1)
-            current_cycle.end_date = new_end_date
-            current_cycle.save()
+            if cycle.end_date is None:
+                cycle.end_date = cycle.start_date
 
-        if current_cycle.end_date >= next_cycle.start_date:
-            new_end_date = next_cycle.start_date - timedelta(days=1)
-            current_cycle.end_date = new_end_date
+            if previous_cycle:
+                if cycle.start_date <= previous_cycle.end_date:
+                    cycle.start_date = previous_cycle.end_date + timedelta(days=1)
+            if cycle.end_date < cycle.start_date:
+                cycle.end_date = cycle.start_date
+            try:
+                cycle.save()
+            except ValidationError:
+                # if validation error just save one day cycle
+                cycle.end_date = cycle.start_date
+                cycle.save()
 
-            new_start_date = current_cycle.end_date + timedelta(days=1)
-            next_cycle.start_date = new_start_date
-
-            current_cycle.save()
-            next_cycle.save()
-
-    # for last cycle if end_date is still null
-    last_cycle = cycles_qs.last()
-    if last_cycle.end_date is None:
-        last_cycle.end_date = last_cycle.start_date
-        last_cycle.save()
+            previous_cycle = cycle
 
 
 def create_new_program_cycle(
@@ -90,17 +89,15 @@ def processing_with_active_program(payment_plan: PaymentPlan) -> None:
         )
 
     # check if any conflicts in the cycle
-    new_hh_ids = list(payment_plan.eligible_payments.values_list("household_id", flat=True))
-
+    new_hh_ids = set(payment_plan.eligible_payments.values_list("household_id", flat=True))
     for comparing_with_payment_plan in PaymentPlan.objects.filter(program_cycle=cycle):
-        hh_ids_in_cycles = list(comparing_with_payment_plan.eligible_payments.values_list("household_id", flat=True))
+        hh_ids_in_cycles = set(comparing_with_payment_plan.eligible_payments.values_list("household_id", flat=True))
         # create new cycle if any conflicts
-        if any(hh_id in new_hh_ids for hh_id in hh_ids_in_cycles):
+        if new_hh_ids.intersection(hh_ids_in_cycles):
             cycle = create_new_program_cycle(
                 str(payment_plan.program_id), ProgramCycle.ACTIVE, payment_plan_start_date, payment_plan_end_date
             )
-            # just create new cycle and stop searching conflicts
-            continue
+            break
 
     # update TP
     TargetPopulation.objects.filter(id=payment_plan.target_population_id).update(program_cycle=cycle)
@@ -132,6 +129,7 @@ def processing_with_active_program(payment_plan: PaymentPlan) -> None:
 def program_cycle_data_migration(batch_size: int = 1000) -> None:
     start_time = timezone.now()
     logger.info("Hi There! Started Program Cycle Data Migration.")
+    logger.info(f"Cycles before running creation: {ProgramCycle.objects.all().count()}")
     for ba in BusinessArea.objects.all().only("id", "name"):
         logger.info(f"Started processing {ba.name}...")
 
@@ -164,4 +162,5 @@ def program_cycle_data_migration(batch_size: int = 1000) -> None:
             # after create all Cycles let's adjust dates to find any overlapping
             adjust_cycles_start_and_end_dates_for_active_program(program)
 
+    logger.info(f"Cycles after creation: {ProgramCycle.objects.all().count()}")
     print(f"Congratulations! Done in {timezone.now() - start_time}")

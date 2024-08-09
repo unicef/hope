@@ -1,4 +1,5 @@
 import base64
+from datetime import datetime
 from decimal import Decimal
 from typing import Any, Dict
 
@@ -363,7 +364,7 @@ class ProgramCycleUpdateSerializerTest(TestCase):
         self.assertIn("Not possible leave the Programme Cycle start date empty.", str(error.exception))
 
     def test_validate_end_date(self) -> None:
-        self.cycle.end_date = "2023-02-03"
+        self.cycle.end_date = datetime.strptime("2023-02-03", "%Y-%m-%d").date()
         self.cycle.save()
         data = {"start_date": "2023-02-02", "end_date": None}
         serializer = ProgramCycleUpdateSerializer(instance=self.cycle, data=data, context=self.get_serializer_context())
