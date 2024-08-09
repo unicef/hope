@@ -1,4 +1,3 @@
-import time
 from datetime import datetime
 from uuid import UUID
 
@@ -775,6 +774,8 @@ class TestTargeting:
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getButtonCreateNewByFilters().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
+        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
+        pageTargetingCreate.select_listbox_element("First Cycle In Programme").click()
         pageTargetingCreate.getAddCriteriaButton().click()
         pageTargetingCreate.getAddPeopleRuleButton().click()
         pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
