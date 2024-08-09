@@ -72,15 +72,18 @@ export const importedHouseholdMinimal = gql`
       fullName
     }
     size
-    admin1
-    admin1Title
-    admin2
-    admin2Title
+    admin1 {
+      pCode
+      name
+    }
+    admin2 {
+      pCode
+      name
+    }
     flexFields
     deviceid
     start
-    koboAssetId
-    rowId
+    detailId
     firstRegistrationDate
     lastRegistrationDate
     hasDuplicates
@@ -97,7 +100,6 @@ export const importedHouseholdDetailed = gql`
     countryOrigin
     registrationDataImport {
       id
-      hctId
       name
     }
     individuals {
@@ -140,7 +142,6 @@ export const importedIndividualMinimal = gql`
     }
     registrationDataImport {
       id
-      hctId
     }
   }
 `;
@@ -157,6 +158,7 @@ export const importedIndividualDetailed = gql`
     workStatus
     pregnant
     flexFields
+    importId
     observedDisability
     seeingDisability
     hearingDisability
@@ -183,7 +185,7 @@ export const importedIndividualDetailed = gql`
       edges {
         node {
           id
-          documentNumber
+          number
           partner
           country
         }
@@ -194,13 +196,18 @@ export const importedIndividualDetailed = gql`
     household {
       id
       importId
-      admin1
-      admin2
+      admin1{
+        pCode
+        name
+      }
+      admin2{
+        pCode
+        name
+      }
       address
     }
     registrationDataImport {
       id
-      hctId
       name
     }
     phoneNo

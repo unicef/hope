@@ -287,6 +287,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='businessarea',
             name='screen_beneficiary',
-            field=models.BooleanField(default=False),
+            field=models.BooleanField(default=False, help_text='Enable screen beneficiary against sanction list'),
         ),
     ]

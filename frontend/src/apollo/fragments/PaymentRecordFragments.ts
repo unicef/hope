@@ -56,7 +56,9 @@ export const paymentRecordDetails = gql`
     deliveredQuantity
     deliveredQuantityUsd
     deliveryDate
-    deliveryType
+    deliveryType {
+        name
+    }
     entitlementCardIssueDate
     entitlementCardNumber
     transactionReferenceId

@@ -21,9 +21,14 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string_required,
 )
 from hct_mis_api.apps.core.validators import BaseValidator, raise_program_status_is
+from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_data.models import (
+    ImportData,
+    KoboImportData,
+    RegistrationDataImport,
+)
 from hct_mis_api.apps.registration_data.schema import RegistrationDataImportNode
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
@@ -34,18 +39,10 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
     registration_xlsx_import_task,
     validate_xlsx_import_task,
 )
-from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.inputs import (
     RegistrationKoboImportMutationInput,
     RegistrationProgramPopulationImportMutationInput,
     RegistrationXlsxImportMutationInput,
-)
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportData,
-    ImportedHousehold,
-    ImportedIndividual,
-    KoboImportData,
-    RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.schema import (
     ImportDataNode,
@@ -72,7 +69,8 @@ def create_registration_data_import_objects(
     registration_data_import_data: Dict,
     user: "User",
     data_source: str,
-) -> Tuple[RegistrationDataImportDatahub, RegistrationDataImport, ImportData, BusinessArea]:
+    allow_delivery_mechanisms_validation_errors: bool = False,
+) -> Tuple[RegistrationDataImport, ImportData, BusinessArea]:
     import_data_id = decode_id_string(registration_data_import_data.pop("import_data_id"))
     import_data_obj = ImportData.objects.get(id=import_data_id)
 
@@ -80,11 +78,6 @@ def create_registration_data_import_objects(
     pull_pictures = registration_data_import_data.pop("pull_pictures", True)
     screen_beneficiary = registration_data_import_data.pop("screen_beneficiary", False)
     program_id = registration_data_import_data.pop("program_id", None)
-    created_obj_datahub = RegistrationDataImportDatahub.objects.create(
-        business_area_slug=business_area.slug,
-        import_data=import_data_obj,
-        **registration_data_import_data,
-    )
     created_obj_hct = RegistrationDataImport(
         status=RegistrationDataImport.IMPORTING,
         imported_by=user,
@@ -95,19 +88,14 @@ def create_registration_data_import_objects(
         pull_pictures=pull_pictures,
         screen_beneficiary=screen_beneficiary,
         program_id=program_id,
+        allow_delivery_mechanisms_validation_errors=allow_delivery_mechanisms_validation_errors,
+        import_data=import_data_obj,
         **registration_data_import_data,
     )
     created_obj_hct.full_clean()
     created_obj_hct.save()
 
-    created_obj_datahub.hct_id = created_obj_hct.id
-    created_obj_datahub.save()
-
-    created_obj_hct.datahub_id = created_obj_datahub.id
-    created_obj_hct.save()
-
     return (
-        created_obj_datahub,
         created_obj_hct,
         import_data_obj,
         business_area,
@@ -120,15 +108,11 @@ def create_registration_data_import_for_import_program_population(
     registration_data_import_data: Dict,
     user: "User",
     import_to_program_id: str,
-) -> Tuple[RegistrationDataImportDatahub, RegistrationDataImport, BusinessArea]:
+) -> Tuple[RegistrationDataImport, BusinessArea]:
     business_area = BusinessArea.objects.get(slug=registration_data_import_data.pop("business_area_slug"))
     pull_pictures = registration_data_import_data.pop("pull_pictures", True)
     screen_beneficiary = registration_data_import_data.pop("screen_beneficiary", False)
     import_from_program_id = registration_data_import_data.pop("import_from_program_id", None)
-    created_obj_datahub = RegistrationDataImportDatahub.objects.create(
-        business_area_slug=business_area.slug,
-        **registration_data_import_data,
-    )
     households = Household.objects.filter(
         program_id=import_from_program_id,
         withdrawn=False,
@@ -153,14 +137,7 @@ def create_registration_data_import_for_import_program_population(
     created_obj_hct.full_clean()
     created_obj_hct.save()
 
-    created_obj_datahub.hct_id = created_obj_hct.id
-    created_obj_datahub.save()
-
-    created_obj_hct.datahub_id = created_obj_datahub.id
-    created_obj_hct.save()
-
     return (
-        created_obj_datahub,
         created_obj_hct,
         business_area,
     )
@@ -173,12 +150,17 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
         registration_data_import_data = RegistrationXlsxImportMutationInput(required=True)
 
     @classmethod
-    def validate_import_data(cls, import_data_id: Optional[str]) -> None:
+    def validate_import_data(
+        cls, import_data_id: Optional[str], allow_delivery_mechanisms_validation_errors: bool = False
+    ) -> None:
         import_data = get_object_or_404(ImportData, id=decode_id_string(import_data_id))
-        if import_data.status != ImportData.STATUS_FINISHED:
+        if import_data.status != ImportData.STATUS_FINISHED and not (
+            import_data.status == ImportData.STATUS_DELIVERY_MECHANISMS_VALIDATION_ERROR
+            and allow_delivery_mechanisms_validation_errors
+        ):
             raise ValidationError("Cannot import file containing validation errors")
 
-        if import_data.number_of_households == 0 and import_data.number_of_individuals == 0:
+        if import_data.number_of_households == 0 and import_data.number_of_individuals == 0:  # pragma: no cover
             raise ValidationError("Cannot import empty form")
 
     @classmethod
@@ -188,7 +170,12 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
     def processed_mutate(
         cls, root: Any, info: Any, registration_data_import_data: Dict
     ) -> "RegistrationXlsxImportMutation":
-        cls.validate_import_data(registration_data_import_data.import_data_id)
+        allow_delivery_mechanisms_validation_errors = registration_data_import_data.pop(
+            "allow_delivery_mechanisms_validation_errors", False
+        )
+        cls.validate_import_data(
+            registration_data_import_data.import_data_id, allow_delivery_mechanisms_validation_errors
+        )
 
         program_id: str = decode_id_string_required(info.context.headers.get("Program"))
         program = Program.objects.get(id=program_id)
@@ -197,11 +184,12 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
 
         registration_data_import_data["program_id"] = program_id
         (
-            created_obj_datahub,
             created_obj_hct,
             import_data_obj,
             business_area,
-        ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "XLS")
+        ) = create_registration_data_import_objects(
+            registration_data_import_data, info.context.user, "XLS", allow_delivery_mechanisms_validation_errors
+        )
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
 
@@ -224,7 +212,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
 
         transaction.on_commit(
             lambda: registration_xlsx_import_task.delay(
-                registration_data_import_id=str(created_obj_datahub.id),
+                registration_data_import_id=str(created_obj_hct.id),
                 import_data_id=str(import_data_obj.id),
                 business_area_id=str(business_area.id),
                 program_id=str(program_id),
@@ -255,7 +243,6 @@ class RegistrationProgramPopulationImportMutation(BaseValidator, PermissionMutat
         import_from_program_id = decode_id_string_required(registration_data_import_data["import_from_program_id"])
         registration_data_import_data["import_from_program_id"] = import_from_program_id
         (
-            created_obj_datahub,
             created_obj_hct,
             business_area,
         ) = create_registration_data_import_for_import_program_population(
@@ -286,7 +273,7 @@ class RegistrationProgramPopulationImportMutation(BaseValidator, PermissionMutat
 
         transaction.on_commit(
             lambda: registration_program_population_import_task.delay(
-                registration_data_import_id=str(created_obj_datahub.id),
+                registration_data_import_id=str(created_obj_hct.id),
                 business_area_id=str(business_area.id),
                 import_from_program_id=str(import_from_program_id),
                 import_to_program_id=str(import_to_program_id),
@@ -300,7 +287,7 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
     ok = graphene.Boolean()
 
     class Arguments:
-        registration_data_import_datahub_id = graphene.ID(required=True)
+        registration_data_import_id = graphene.ID(required=True)
         version = BigInt(required=False)
 
     @classmethod
@@ -317,10 +304,10 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
     @is_authenticated
     @raise_program_status_is(Program.FINISHED)
     def mutate(
-        cls, root: Any, info: Any, registration_data_import_datahub_id: Optional[str], **kwargs: Any
+        cls, root: Any, info: Any, registration_data_import_id: Optional[str], **kwargs: Any
     ) -> "RegistrationDeduplicationMutation":
-        old_rdi_obj = RegistrationDataImport.objects.get(datahub_id=registration_data_import_datahub_id)
-        rdi_obj = RegistrationDataImport.objects.get(datahub_id=registration_data_import_datahub_id)
+        old_rdi_obj = RegistrationDataImport.objects.get(id=registration_data_import_id)
+        rdi_obj = RegistrationDataImport.objects.get(id=registration_data_import_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), rdi_obj)
         cls.has_permission(info, Permissions.RDI_RERUN_DEDUPE, rdi_obj.business_area)
 
@@ -336,7 +323,7 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
             old_rdi_obj,
             rdi_obj,
         )
-        rdi_deduplication_task.delay(registration_data_import_id=str(registration_data_import_datahub_id))
+        rdi_deduplication_task.delay(registration_data_import_id=str(registration_data_import_id))
 
         return cls(ok=True)
 
@@ -354,7 +341,12 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
     def processed_mutate(
         cls, root: Any, info: Any, registration_data_import_data: Dict
     ) -> RegistrationXlsxImportMutation:
-        RegistrationXlsxImportMutation.validate_import_data(registration_data_import_data.import_data_id)
+        allow_delivery_mechanisms_validation_errors = registration_data_import_data.pop(
+            "allow_delivery_mechanisms_validation_errors", False
+        )
+        RegistrationXlsxImportMutation.validate_import_data(
+            registration_data_import_data.import_data_id, allow_delivery_mechanisms_validation_errors
+        )
 
         program_id: str = decode_id_string_required(info.context.headers.get("Program"))
         program = Program.objects.get(id=program_id)
@@ -363,11 +355,12 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
 
         registration_data_import_data["program_id"] = program_id
         (
-            created_obj_datahub,
             created_obj_hct,
             import_data_obj,
             business_area,
-        ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "KOBO")
+        ) = create_registration_data_import_objects(
+            registration_data_import_data, info.context.user, "KOBO", allow_delivery_mechanisms_validation_errors
+        )
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
 
@@ -387,7 +380,7 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
 
         transaction.on_commit(
             lambda: registration_kobo_import_task.delay(
-                registration_data_import_id=str(created_obj_datahub.id),
+                registration_data_import_id=str(created_obj_hct.id),
                 import_data_id=str(import_data_obj.id),
                 business_area_id=str(business_area.id),
                 program_id=str(program_id),
@@ -455,7 +448,6 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
 
     @classmethod
     @transaction.atomic(using="default")
-    @transaction.atomic(using="registration_datahub")
     @is_authenticated
     @raise_program_status_is(Program.FINISHED)
     def mutate(cls, root: Any, info: Any, id: Optional[str], **kwargs: Any) -> "RefuseRegistrationDataImportMutation":
@@ -468,18 +460,18 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         cls.has_permission(info, Permissions.RDI_REFUSE_IMPORT, obj_hct.business_area)
         cls.validate(status=obj_hct.status)
 
-        ImportedHousehold.objects.filter(registration_data_import=obj_hct.datahub_id).delete()
+        Household.all_objects.filter(registration_data_import=obj_hct).delete()
         refuse_reason = kwargs.get("refuse_reason")
         if refuse_reason:
             obj_hct.refuse_reason = refuse_reason
         obj_hct.status = RegistrationDataImport.REFUSED_IMPORT
         obj_hct.save()
 
-        imported_individuals_to_remove = ImportedIndividual.objects.filter(registration_data_import=obj_hct.datahub_id)
+        individuals_to_remove = Individual.all_objects.filter(registration_data_import=obj_hct)
 
         remove_elasticsearch_documents_by_matching_ids(
-            list(imported_individuals_to_remove.values_list("id", flat=True)),
-            get_imported_individual_doc(obj_hct.business_area.slug),
+            list(individuals_to_remove.values_list("id", flat=True)),
+            get_individual_doc(obj_hct.business_area.slug),
         )
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,
@@ -501,7 +493,6 @@ class EraseRegistrationDataImportMutation(PermissionMutation):
 
     @classmethod
     @transaction.atomic(using="default")
-    @transaction.atomic(using="registration_datahub")
     @is_authenticated
     @raise_program_status_is(Program.FINISHED)
     def mutate(cls, root: Any, info: Any, id: Optional[str], **kwargs: Any) -> "EraseRegistrationDataImportMutation":
@@ -522,7 +513,7 @@ class EraseRegistrationDataImportMutation(PermissionMutation):
             logger.error(msg)
             raise GraphQLError(msg)
 
-        ImportedHousehold.objects.filter(registration_data_import=obj_hct.datahub_id).delete()
+        Household.all_objects.filter(registration_data_import=obj_hct).delete()
 
         obj_hct.erased = True
         obj_hct.save()
@@ -571,11 +562,18 @@ class SaveKoboProjectImportDataAsync(PermissionMutation):
         uid = Upload(required=True)
         business_area_slug = graphene.String(required=True)
         only_active_submissions = graphene.Boolean(required=True)
+        pull_pictures = graphene.Boolean(required=True)
 
     @classmethod
     @is_authenticated
     def mutate(
-        cls, root: Any, info: Any, uid: "UUID", business_area_slug: str, only_active_submissions: bool
+        cls,
+        root: Any,
+        info: Any,
+        uid: "UUID",
+        business_area_slug: str,
+        only_active_submissions: bool,
+        pull_pictures: bool,
     ) -> "SaveKoboProjectImportDataAsync":
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
 
@@ -586,6 +584,7 @@ class SaveKoboProjectImportDataAsync(PermissionMutation):
             status=ImportData.STATUS_PENDING,
             business_area_slug=business_area_slug,
             created_by_id=info.context.user.id,
+            pull_pictures=pull_pictures,
         )
         pull_kobo_submissions_task.delay(import_data.id)
         return SaveKoboProjectImportDataAsync(import_data=import_data)

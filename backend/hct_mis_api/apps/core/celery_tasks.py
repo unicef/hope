@@ -34,6 +34,7 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 from hct_mis_api.apps.utils.logs import log_start_and_end
+from hct_mis_api.apps.utils.models import MergeStatusModel
 from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 
 logger = logging.getLogger(__name__)
@@ -117,6 +118,7 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
                 number_of_households=0,
                 business_area=program.business_area,
                 data_source=RegistrationDataImport.EDOPOMOGA,
+                program=program,
             )
 
             business_area = storage_obj.business_area
@@ -164,6 +166,7 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
                         "last_registration_date": last_registration_date,
                         "sex": MALE,
                         "relationship": HEAD,
+                        "rdi_merge_status": MergeStatusModel.MERGED,
                     }
                     if family_id in families:
                         individual = Individual(**individual_data, household_id=families.get(family_id))
@@ -183,6 +186,7 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
                             storage_obj=storage_obj,
                             collect_individual_data=COLLECT_TYPE_SIZE_ONLY,
                             country=country,
+                            rdi_merge_status=MergeStatusModel.MERGED,
                         )
 
                         individual.household = household
@@ -192,6 +196,7 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
                             role=ROLE_PRIMARY,
                             individual=individual,
                             household=household,
+                            rdi_merge_status=MergeStatusModel.MERGED,
                         )
 
                         families[family_id] = household.id
@@ -202,6 +207,7 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
                         individual=individual,
                         status=Document.STATUS_INVALID,
                         country=country,
+                        rdi_merge_status=MergeStatusModel.MERGED,
                     )
 
                     tax = Document(
@@ -210,9 +216,12 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
                         individual=individual,
                         status=Document.STATUS_INVALID,
                         country=country,
+                        rdi_merge_status=MergeStatusModel.MERGED,
                     )
 
-                    bank_account_info = BankAccountInfo(bank_account_number=iban, individual=individual)
+                    bank_account_info = BankAccountInfo(
+                        bank_account_number=iban, individual=individual, rdi_merge_status=MergeStatusModel.MERGED
+                    )
 
                     documents.append(passport)
                     documents.append(tax)

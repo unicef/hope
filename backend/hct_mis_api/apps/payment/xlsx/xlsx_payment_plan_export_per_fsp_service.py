@@ -13,6 +13,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -70,7 +71,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         return wb, ws
 
     def get_template(
-        self, fsp: "FinancialServiceProvider", delivery_mechanism: str
+        self, fsp: "FinancialServiceProvider", delivery_mechanism: DeliveryMechanism
     ) -> FinancialServiceProviderXlsxTemplate:
         fsp_xlsx_template_per_delivery_mechanism = FspXlsxTemplatePerDeliveryMechanism.objects.filter(
             delivery_mechanism=delivery_mechanism,
@@ -142,8 +143,13 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name)
             for column_name in fsp_template_columns
         ]
+        delivery_mechanism_data = payment.collector.delivery_mechanisms_data.filter(
+            delivery_mechanism=payment.delivery_type
+        ).first()
         core_fields_row = [
-            FinancialServiceProviderXlsxTemplate.get_column_from_core_field(payment, column_name)
+            FinancialServiceProviderXlsxTemplate.get_column_from_core_field(
+                payment, column_name, delivery_mechanism_data
+            )
             for column_name in fsp_template_core_fields
         ]
         payment_row.extend(core_fields_row)
@@ -163,7 +169,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
     ) -> None:
         for delivery_mechanism_per_payment_plan in delivery_mechanism_per_payment_plan_list:
             fsp: FinancialServiceProvider = delivery_mechanism_per_payment_plan.financial_service_provider
-            delivery_mechanism: str = delivery_mechanism_per_payment_plan.delivery_mechanism
+            delivery_mechanism: DeliveryMechanism = delivery_mechanism_per_payment_plan.delivery_mechanism
             wb, ws_fsp = self.open_workbook(fsp.name)
             fsp_xlsx_template = self.get_template(fsp, delivery_mechanism)
             payment_ids = list(
@@ -192,7 +198,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             delivery_mechanism_per_payment_plan_list.first()  # type: ignore
         )
         fsp: FinancialServiceProvider = delivery_mechanism_per_payment_plan.financial_service_provider
-        delivery_mechanism: str = delivery_mechanism_per_payment_plan.delivery_mechanism
+        delivery_mechanism: DeliveryMechanism = delivery_mechanism_per_payment_plan.delivery_mechanism
         for i, split in enumerate(self.payment_plan.splits.all().order_by("order")):
             wb, ws_fsp = self.open_workbook(f"{fsp.name}-chunk{i + 1}")
             fsp_xlsx_template = self.get_template(fsp, delivery_mechanism)

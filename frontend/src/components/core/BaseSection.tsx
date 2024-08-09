@@ -21,43 +21,58 @@ const BoxContainer = styled(Box)`
 `;
 
 interface BaseSectionProps {
-  children?: ReactElement;
+  children?: ReactElement | ReactElement[];
   buttons?: ReactElement;
-  title: string | ReactElement;
+  title?: string | ReactElement;
   description?: string;
   p?: number;
   noPaper?: boolean;
+  tabs?: ReactElement;
+  stepper?: ReactElement;
 }
 
-export function BaseSection({
+export const BaseSection = ({
   children = <></>,
   buttons,
-  title,
+  title = '',
   description,
   p = 3,
   noPaper = false,
-}: BaseSectionProps): React.ReactElement {
+  tabs = null,
+  stepper = null,
+}: BaseSectionProps): React.ReactElement => {
   const { t } = useTranslation();
   const Container = noPaper ? BoxContainer : PaperContainer;
 
   return (
     <Container>
       <Box p={p}>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          {typeof title === 'string' ? (
-            <Typography variant="h6">{t(title)}</Typography>
-          ) : (
-            title
-          )}
+        {stepper && <Box mb={2}>{stepper}</Box>}
+        <Box
+          p={p}
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Box>
+            {typeof title === 'string' ? (
+              <Typography data-cy="title" variant="h6">
+                {t(title)}
+              </Typography>
+            ) : (
+              title
+            )}
+          </Box>
           {buttons}
         </Box>
+        {tabs && <Box mb={2}>{tabs}</Box>}
         {description && (
-          <Box mb={2}>
-            <GreyText>{description}</GreyText>
+          <Box pl={p} mb={2}>
+            <GreyText data-cy="description">{description}</GreyText>
           </Box>
         )}
         {children}
       </Box>
     </Container>
   );
-}
+};

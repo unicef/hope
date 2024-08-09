@@ -37,7 +37,7 @@ def track_old_partner_access(sender: Any, instance: Program, **kwargs: Any) -> N
 def handle_partner_access_change(sender: Any, instance: Program, created: bool, **kwargs: Any) -> None:
     if created:
         # grant access to UNICEF partner
-        unicef_partner = Partner.objects.get(name="UNICEF")
+        unicef_partner, _ = Partner.objects.get_or_create(name="UNICEF")
         create_program_partner_access([{"partner": unicef_partner.id, "areas": []}], instance)
 
     old_partner_access = instance.old_partner_access

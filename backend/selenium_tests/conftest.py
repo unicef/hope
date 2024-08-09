@@ -10,20 +10,48 @@ from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from flags.models import FlagState
+from page_object.accountability.communication import AccountabilityCommunication
+from page_object.accountability.comunication_details import (
+    AccountabilityCommunicationDetails,
+)
+from page_object.accountability.surveys import AccountabilitySurveys
+from page_object.accountability.surveys_details import AccountabilitySurveysDetails
 from page_object.admin_panel.admin_panel import AdminPanel
+from page_object.country_dashboard.country_dashboard import CountryDashboard
 from page_object.filters import Filters
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from page_object.grievance.feedback import Feedback
+from page_object.grievance.grievance_dashboard import GrievanceDashboard
 from page_object.grievance.grievance_tickets import GrievanceTickets
 from page_object.grievance.new_feedback import NewFeedback
 from page_object.grievance.new_ticket import NewTicket
+from page_object.managerial_console.managerial_console import ManagerialConsole
+from page_object.payment_module.new_payment_plan import NewPaymentPlan
+from page_object.payment_module.payment_module import PaymentModule
+from page_object.payment_module.payment_module_details import PaymentModuleDetails
+from page_object.payment_verification.payment_record import PaymentRecord
+from page_object.payment_verification.payment_verification import PaymentVerification
+from page_object.payment_verification.payment_verification_details import (
+    PaymentVerificationDetails,
+)
+from page_object.people.people import People
+from page_object.people.people_details import PeopleDetails
+from page_object.program_log.payment_log import ProgramLog
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
 from page_object.programme_population.households import Households
 from page_object.programme_population.households_details import HouseholdsDetails
 from page_object.programme_population.individuals import Individuals
 from page_object.programme_population.individuals_details import IndividualsDetails
+from page_object.programme_population.periodic_data_update_templates import (
+    PeriodicDatUpdateTemplates,
+    PeriodicDatUpdateTemplatesDetails,
+)
+from page_object.programme_population.periodic_data_update_uploads import (
+    PeriodicDataUpdateUploads,
+)
+from page_object.programme_users.programme_users import ProgrammeUsers
 from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
@@ -47,6 +75,8 @@ from hct_mis_api.apps.core.models import (
     DataCollectingType,
 )
 from hct_mis_api.apps.geo.models import Country
+from hct_mis_api.apps.household.fixtures import DocumentTypeFactory
+from hct_mis_api.apps.household.models import DocumentType
 
 
 def pytest_addoption(parser) -> None:  # type: ignore
@@ -151,9 +181,14 @@ def driver() -> Chrome:
     if not os.environ.get("STREAM"):
         chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--enable-logging")
     chrome_options.add_argument("--window-size=1920,1080")
-    return webdriver.Chrome(options=chrome_options)
+    if not os.path.exists("./report/downloads/"):
+        os.makedirs("./report/downloads/")
+    prefs = {"download.default_directory": "./report/downloads/"}
+    chrome_options.add_experimental_option("prefs", prefs)
+    yield webdriver.Chrome(options=chrome_options)
 
 
 @pytest.fixture(autouse=True)
@@ -178,7 +213,7 @@ def login(browser: Chrome) -> Chrome:
     browser.add_cookie({"name": "csrftoken", "value": pytest.CSRF})
     browser.add_cookie({"name": "sessionid", "value": pytest.SESSION_ID})
     browser.get(f"{browser.live_server.url}")
-    return browser
+    yield browser
 
 
 @pytest.fixture
@@ -237,6 +272,16 @@ def pageHouseholds(request: FixtureRequest, browser: Chrome) -> Households:
 
 
 @pytest.fixture
+def pagePeople(request: FixtureRequest, browser: Chrome) -> People:
+    yield People(browser)
+
+
+@pytest.fixture
+def pagePeopleDetails(request: FixtureRequest, browser: Chrome) -> PeopleDetails:
+    yield PeopleDetails(browser)
+
+
+@pytest.fixture
 def pageHouseholdsDetails(request: FixtureRequest, browser: Chrome) -> HouseholdsDetails:
     yield HouseholdsDetails(browser)
 
@@ -252,8 +297,46 @@ def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> Individu
 
 
 @pytest.fixture
+def pagePeriodicDataUpdateTemplates(request: FixtureRequest, browser: Chrome) -> PeriodicDatUpdateTemplates:
+    yield PeriodicDatUpdateTemplates(browser)
+
+
+@pytest.fixture
+def pagePeriodicDataUpdateTemplatesDetails(
+    request: FixtureRequest,
+    browser: Chrome,
+) -> PeriodicDatUpdateTemplatesDetails:
+    yield PeriodicDatUpdateTemplatesDetails(browser)
+
+
+@pytest.fixture
+def pagePeriodicDataUploads(request: FixtureRequest, browser: Chrome) -> PeriodicDataUpdateUploads:
+    yield PeriodicDataUpdateUploads(browser)
+
+
+@pytest.fixture
 def pageTargeting(request: FixtureRequest, browser: Chrome) -> Targeting:
     yield Targeting(browser)
+
+
+@pytest.fixture
+def pagePaymentModule(request: FixtureRequest, browser: Chrome) -> PaymentModule:
+    yield PaymentModule(browser)
+
+
+@pytest.fixture
+def pagePaymentRecord(request: FixtureRequest, browser: Chrome) -> PaymentRecord:
+    yield PaymentRecord(browser)
+
+
+@pytest.fixture
+def pagePaymentVerificationDetails(request: FixtureRequest, browser: Chrome) -> PaymentVerificationDetails:
+    yield PaymentVerificationDetails(browser)
+
+
+@pytest.fixture
+def pagePaymentVerification(request: FixtureRequest, browser: Chrome) -> PaymentVerification:
+    yield PaymentVerification(browser)
 
 
 @pytest.fixture
@@ -277,6 +360,63 @@ def pageGrievanceNewTicket(request: FixtureRequest, browser: Chrome) -> NewTicke
 
 
 @pytest.fixture
+def pageGrievanceDashboard(request: FixtureRequest, browser: Chrome) -> GrievanceDashboard:
+    yield GrievanceDashboard(browser)
+
+
+@pytest.fixture
+def pageManagerialConsole(request: FixtureRequest, browser: Chrome) -> ManagerialConsole:
+    yield ManagerialConsole(browser)
+
+
+@pytest.fixture
+def pagePaymentModuleDetails(request: FixtureRequest, browser: Chrome) -> PaymentModuleDetails:
+    yield PaymentModuleDetails(browser)
+
+
+@pytest.fixture
+def pageNewPaymentPlan(request: FixtureRequest, browser: Chrome) -> NewPaymentPlan:
+    yield NewPaymentPlan(browser)
+
+
+@pytest.fixture
+def pageAccountabilitySurveys(request: FixtureRequest, browser: Chrome) -> AccountabilitySurveys:
+    yield AccountabilitySurveys(browser)
+
+
+@pytest.fixture
+def pageAccountabilitySurveysDetails(request: FixtureRequest, browser: Chrome) -> AccountabilitySurveysDetails:
+    yield AccountabilitySurveysDetails(browser)
+
+
+@pytest.fixture
+def pageProgrammeUsers(request: FixtureRequest, browser: Chrome) -> ProgrammeUsers:
+    yield ProgrammeUsers(browser)
+
+
+@pytest.fixture
+def pageAccountabilityCommunication(request: FixtureRequest, browser: Chrome) -> AccountabilityCommunication:
+    yield AccountabilityCommunication(browser)
+
+
+@pytest.fixture
+def pageAccountabilityCommunicationDetails(
+    request: FixtureRequest, browser: Chrome
+) -> AccountabilityCommunicationDetails:
+    yield AccountabilityCommunicationDetails(browser)
+
+
+@pytest.fixture
+def pageProgramLog(request: FixtureRequest, browser: Chrome) -> ProgramLog:
+    yield ProgramLog(browser)
+
+
+@pytest.fixture
+def pageCountryDashboard(request: FixtureRequest, browser: Chrome) -> CountryDashboard:
+    yield CountryDashboard(browser)
+
+
+@pytest.fixture
 def business_area() -> BusinessArea:
     business_area, _ = BusinessArea.objects.get_or_create(
         **{
@@ -287,6 +427,7 @@ def business_area() -> BusinessArea:
             "region_code": "64",
             "region_name": "SAR",
             "slug": "afghanistan",
+            "screen_beneficiary": True,
             "has_data_sharing_agreement": True,
             "is_payment_plan_applicable": True,
             "is_accountability_applicable": True,
@@ -296,7 +437,7 @@ def business_area() -> BusinessArea:
     FlagState.objects.get_or_create(
         **{"name": "ALLOW_ACCOUNTABILITY_MODULE", "condition": "boolean", "value": "True", "required": False}
     )
-    return business_area
+    yield business_area
 
 
 @pytest.fixture
@@ -319,7 +460,7 @@ def create_super_user(business_area: BusinessArea) -> User:
 
     role, _ = Role.objects.update_or_create(name="Role", defaults={"permissions": permission_list})
 
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json")
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json", verbosity=0)
     country = Country.objects.get(name="Afghanistan")
     business_area.countries.add(country)
     user = UserFactory.create(
@@ -334,7 +475,7 @@ def create_super_user(business_area: BusinessArea) -> User:
     UserRole.objects.create(
         user=user,
         role=Role.objects.get(name="Role"),
-        business_area=BusinessArea.objects.get(name="Afghanistan"),
+        business_area=business_area,
     )
 
     for partner in Partner.objects.exclude(name="UNICEF"):
@@ -344,21 +485,50 @@ def create_super_user(business_area: BusinessArea) -> User:
     assert user.is_superuser
 
     dct_list = [
-        {"label": "Full", "code": "full", "description": "Full individual collected", "active": True},
-        {"label": "Size only", "code": "size_only", "description": "Size only collected", "active": True},
-        {"label": "WASH", "code": "wash", "description": "WASH", "active": True},
-        {"label": "Partial", "code": "partial", "description": "Partial individuals collected", "active": True},
+        {
+            "label": "Full",
+            "code": "full",
+            "description": "Full individual collected",
+            "active": True,
+            "type": DataCollectingType.Type.STANDARD,
+        },
+        {
+            "label": "Size only",
+            "code": "size_only",
+            "description": "Size only collected",
+            "active": True,
+            "type": DataCollectingType.Type.STANDARD,
+        },
+        {
+            "label": "WASH",
+            "code": "wash",
+            "description": "WASH",
+            "active": True,
+            "type": DataCollectingType.Type.STANDARD,
+        },
+        {
+            "label": "Partial",
+            "code": "partial",
+            "description": "Partial individuals collected",
+            "active": True,
+            "type": DataCollectingType.Type.STANDARD,
+        },
         {
             "label": "size/age/gender disaggregated",
             "code": "size_age_gender_disaggregated",
             "description": "No individual data",
             "active": True,
+            "type": DataCollectingType.Type.STANDARD,
         },
     ]
 
     for dct in dct_list:
         data_collecting_type = DataCollectingType.objects.create(
-            label=dct["label"], code=dct["code"], description=dct["description"], active=dct["active"]
+            label=dct["label"],
+            code=dct["code"],
+            description=dct["description"],
+            active=dct["active"],
+            type=dct["type"],
         )
         data_collecting_type.limit_to.add(business_area)
         data_collecting_type.save()
@@ -366,6 +536,23 @@ def create_super_user(business_area: BusinessArea) -> User:
         business_area=business_area, partner=partner
     )
     ba_partner_through.roles.set([role])
+
+    # add document types
+    doc_type_keys = (
+        "birth_certificate",
+        "drivers_license",
+        "electoral_card",
+        "tax_id",
+        "residence_permit_no",
+        "bank_statement",
+        "disability_certificate",
+        "other_id",
+        "foster_child",
+    )
+    for key in doc_type_keys:
+        DocumentTypeFactory(key=key)
+    DocumentType.objects.update_or_create(key="national_id", pk="227fcbc0-297a-4d85-8390-7de189278321")
+    DocumentType.objects.update_or_create(key="national_passport", pk="012a3ecb-0d6e-440f-9c68-83e5bf1ccddf")
     return user
 
 

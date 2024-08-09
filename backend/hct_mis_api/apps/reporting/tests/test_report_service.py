@@ -35,6 +35,7 @@ class TestGenerateReportService(TestCase):
     @classmethod
     def setUpTestData(self) -> None:
         create_afghanistan()
+        PartnerFactory(name="UNICEF")
         from hct_mis_api.apps.reporting.services.generate_report_service import (
             GenerateReportService,
         )

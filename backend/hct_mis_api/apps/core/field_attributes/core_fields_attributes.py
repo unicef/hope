@@ -1,7 +1,7 @@
 import copy
 import logging
 from functools import reduce
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Set
 
 from hct_mis_api.apps.core.attributes_qet_queries import (
     age_to_birth_date_query,
@@ -32,6 +32,7 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.field_attributes.fields_types import (
+    _DELIVERY_MECHANISM_DATA,
     _HOUSEHOLD,
     _INDIVIDUAL,
     TEMPLATE_HOH,
@@ -1786,7 +1787,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "account_holder_name_i_c",
-        "scope": [Scope.XLSX, Scope.PAYMENT_CHANNEL, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE],
+        "scope": [Scope.XLSX, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE],
     },
     {
         "id": "e9d964b9-aa85-4a0f-b1eb-4755bdad7592",
@@ -1799,7 +1800,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "bank_branch_name_i_c",
-        "scope": [Scope.XLSX, Scope.PAYMENT_CHANNEL, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE],
+        "scope": [Scope.XLSX, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE],
     },
     {
         "id": "bec7a6b9-476d-48a8-8822-e24ae023df42",
@@ -1856,8 +1857,8 @@ CORE_FIELDS_ATTRIBUTES = [
     {
         "id": "8ef6fd85-032f-42cf-8f1f-3398f88316af",
         "type": TYPE_STRING,
-        "name": "registration_id",
-        "lookup": "registration_id",
+        "name": "program_registration_id",
+        "lookup": "program_registration_id",
         "label": {"English(EN)": "Program registration id"},
         "hint": "",
         "required": False,
@@ -1869,15 +1870,21 @@ CORE_FIELDS_ATTRIBUTES = [
 ] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
 
 
+def get_core_fields_attributes() -> List[Dict[str, Any]]:
+    from hct_mis_api.apps.payment.models import DeliveryMechanism
+
+    return CORE_FIELDS_ATTRIBUTES + DeliveryMechanism.get_all_core_fields_definitions()
+
+
 class FieldFactory(list):
     def __init__(
-        self, fields: Optional[Any] = None, scopes: Optional[Iterable[Scope]] = None, *args: Any, **kwargs: Any
+        self, fields: Optional[Any] = None, scopes: Optional[Set[Scope]] = None, *args: Any, **kwargs: Any
     ) -> None:
         super().__init__(*args, **kwargs)
-        self.scopes: Iterable = scopes or set()
+        self.scopes: Set = scopes or set()
+        self.all_fields = copy.deepcopy(get_core_fields_attributes())
         if fields:
             self.extend(copy.deepcopy(fields))
-        self.all_fields = copy.deepcopy(CORE_FIELDS_ATTRIBUTES)
 
     def extend(self, __iterable: Iterable[dict]) -> None:
         items = list(__iterable)
@@ -1959,15 +1966,18 @@ class FieldFactory(list):
         return factory
 
     def associated_with_individual(self) -> "FieldFactory":
-        return self._associated_with(_INDIVIDUAL)
+        return self._associated_with([_INDIVIDUAL])
+
+    def associated_with_individual_with_delivery_mechanism_data(self) -> "FieldFactory":
+        return self._associated_with([_INDIVIDUAL, _DELIVERY_MECHANISM_DATA])
 
     def associated_with_household(self) -> "FieldFactory":
-        return self._associated_with(_HOUSEHOLD)
+        return self._associated_with([_HOUSEHOLD])
 
-    def _associated_with(self, associated_with: str) -> "FieldFactory":
+    def _associated_with(self, associated_with: List[str]) -> "FieldFactory":
         factory = FieldFactory(scopes=self.scopes)
         for item in self:
-            if item.get("associated_with") == associated_with:
+            if item.get("associated_with") in associated_with:
                 factory.append(item)
         return factory
 
@@ -1988,3 +1998,9 @@ class FieldFactory(list):
             if callable(choices):
                 field["choices"] = choices(business_area_slug=business_area_slug, program_id=program_id)
         return factory
+
+    @classmethod
+    def get_all_core_fields_choices(cls) -> List:
+        factory = cls()
+        factory.extend(factory.all_fields)
+        return factory.to_choices()

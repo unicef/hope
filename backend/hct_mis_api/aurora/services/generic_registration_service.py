@@ -2,24 +2,26 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from django.core.exceptions import ValidationError
 
-from django_countries.fields import Country
-
+from hct_mis_api.apps.geo.models import Area, Country
+from hct_mis_api.apps.household.forms import (
+    BankAccountInfoForm,
+    DocumentForm,
+    IndividualForm,
+)
 from hct_mis_api.apps.household.models import (
     DISABLED,
     HEAD,
     NOT_DISABLED,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    DocumentType,
+    PendingBankAccountInfo,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedBankAccountInfo,
-    ImportedDocument,
-    ImportedDocumentType,
-    ImportedHousehold,
-    ImportedIndividual,
-    ImportedIndividualRoleInHousehold,
-    RegistrationDataImportDatahub,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
@@ -111,6 +113,26 @@ class GenericRegistrationService(BaseRegistrationService):
             elif isinstance(value, dict):
                 if key in data_dict:
                     my_dict.update(cls._create_household_dict(data_dict[key], mapping_dict[key]))
+
+        # update admin areas values
+        admin2 = cls.get(data_dict, "admin2_h_c")
+        admin3 = cls.get(data_dict, "admin3_h_c")
+        admin4 = cls.get(data_dict, "admin4_h_c")
+
+        my_dict["admin2"] = str(Area.objects.get(p_code=admin2).id) if admin2 else None
+        my_dict["admin3"] = str(Area.objects.get(p_code=admin3).id) if admin3 else None
+        my_dict["admin4"] = str(Area.objects.get(p_code=admin4).id) if admin4 else None
+
+        if admin2 and Area.objects.filter(p_code=admin2).exists():
+            my_dict["admin1"] = str(Area.objects.get(p_code=admin2).parent.id)
+
+        if admin4 and Area.objects.filter(p_code=admin4).exists():
+            my_dict["admin_area"] = str(Area.objects.get(p_code=admin4).id)
+        elif admin3 and Area.objects.filter(p_code=admin3).exists():
+            my_dict["admin_area"] = str(Area.objects.get(p_code=admin3).id)
+        elif admin2 and Area.objects.filter(p_code=admin2).exists():
+            my_dict["admin_area"] = str(Area.objects.get(p_code=admin2).id)
+
         return my_dict
 
     @staticmethod
@@ -172,9 +194,9 @@ class GenericRegistrationService(BaseRegistrationService):
     def create_household_data(
         self,
         record: Any,
-        registration_data_import: RegistrationDataImportDatahub,
+        registration_data_import: RegistrationDataImport,
         mapping: Dict,
-    ) -> ImportedHousehold:
+    ) -> PendingHousehold:
         record_data_dict = record.get_data()
         household_payload = self._create_household_dict(record_data_dict, mapping)
         flex_fields = household_payload.pop("flex_fields", dict())
@@ -184,27 +206,31 @@ class GenericRegistrationService(BaseRegistrationService):
         household_data = {
             **household_payload,
             # "flex_registrations_record": record,
-            "registration_data_import": registration_data_import,
+            "registration_data_import": str(registration_data_import.pk),
+            "business_area": registration_data_import.business_area,
+            "program": registration_data_import.program,
             "first_registration_date": record.timestamp,
             "last_registration_date": record.timestamp,
-            "country_origin": Country(code=mapping["defaults"][COUNTRY]),
-            "country": Country(code=mapping["defaults"][COUNTRY]),
+            "country_origin": str(Country.objects.get(iso_code2=mapping["defaults"][COUNTRY]).pk),
+            "country": str(Country.objects.get(iso_code2=mapping["defaults"][COUNTRY]).pk),
             "consent": True,
             "collect_individual_data": YES,
             "size": len(record_data_dict[individuals_key]),
             "flex_fields": flex_fields,
         }
-        return self._create_object_and_validate(household_data, ImportedHousehold)
+        return self._create_object_and_validate(household_data, PendingHousehold)
 
     def create_individuals(
         self,
         record: Any,
-        household: ImportedHousehold,
+        household: PendingHousehold,
         mapping: Dict,
     ) -> Tuple:
         base_individual_data_dict = dict(
             household=household,
             registration_data_import=household.registration_data_import,
+            business_area=household.business_area,
+            program=household.program,
             first_registration_date=record.timestamp,
             last_registration_date=record.timestamp,
         )
@@ -227,7 +253,7 @@ class GenericRegistrationService(BaseRegistrationService):
                 **base_individual_data_dict,
                 **individual_data,
             )
-            individual = self._create_object_and_validate(individual_dict, ImportedIndividual)
+            individual = self._create_object_and_validate(individual_dict, PendingIndividual, IndividualForm)
 
             if individual.relationship == HEAD:
                 if head:
@@ -236,19 +262,20 @@ class GenericRegistrationService(BaseRegistrationService):
 
             for _, bank_data in banks_data.items():
                 bank_data[INDIVIDUAL_FIELD] = individual
-                self._create_object_and_validate(bank_data, ImportedBankAccountInfo)
+                self._create_object_and_validate(bank_data, PendingBankAccountInfo, BankAccountInfoForm)
 
             for _, document_data in documents_data.items():
                 key = document_data.pop("key", None)  # skip documents' without key
                 if key:
-                    document_data["type"] = ImportedDocumentType.objects.get(key=key)
+                    document_data["type"] = DocumentType.objects.get(key=key)
                     document_data[INDIVIDUAL_FIELD] = individual
-                    document_data[COUNTRY] = Country(code=mapping["defaults"][COUNTRY])
+                    document_data["program"] = individual.program
+                    document_data[COUNTRY] = str(Country.objects.get(iso_code2=mapping["defaults"][COUNTRY]).pk)
                     if photo_base_64 := document_data.get("photo", None):
                         document_data["photo"] = self._prepare_picture_from_base64(
                             photo_base_64, document_data.get("document_number", key)
                         )
-                    self._create_object_and_validate(document_data, ImportedDocument)
+                    self._create_object_and_validate(document_data, PendingDocument, DocumentForm)
 
             if self.get_boolean(extra_data.get(PRIMARY_COLLECTOR, False)):
                 if pr_collector:
@@ -264,9 +291,7 @@ class GenericRegistrationService(BaseRegistrationService):
 
         return individuals, head, pr_collector, sec_collector
 
-    def create_household_for_rdi_household(
-        self, record: Any, registration_data_import: RegistrationDataImportDatahub
-    ) -> None:
+    def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
         default_mapping = {
             "household": {
                 "admin1_h_c": "household.admin1",
@@ -333,11 +358,11 @@ class GenericRegistrationService(BaseRegistrationService):
             household.head_of_household = head
 
         if pr_collector:
-            ImportedIndividualRoleInHousehold.objects.create(
+            PendingIndividualRoleInHousehold.objects.create(
                 individual=pr_collector, household=household, role=ROLE_PRIMARY
             )
         if sec_collector:
-            ImportedIndividualRoleInHousehold.objects.create(
+            PendingIndividualRoleInHousehold.objects.create(
                 individual=sec_collector, household=household, role=ROLE_ALTERNATE
             )
 

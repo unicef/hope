@@ -1,3 +1,5 @@
+from time import sleep
+
 from helpers.helper import Common
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -13,8 +15,10 @@ class BaseComponents(Common):
     navRegistrationDataImport = 'a[data-cy="nav-Registration Data Import"]'
     navProgrammePopulation = 'a[data-cy="nav-Program Population"]'
     navHouseholds = 'a[data-cy="nav-Households"]'
-    navIndividuals = 'a[data-cy="nav-Individuals"]'
+    navIndividuals = 'a[data-cy="nav-Household Members"]'
+    navPeople = 'a[data-cy="nav-People"]'
     navProgrammeManagement = 'a[data-cy="nav-Programs"]'
+    navManagerialConsole = 'a[data-cy="nav-Managerial Console"]'
     navProgrammeDetails = 'a[data-cy="nav-Program Details"]'
     navTargeting = 'a[data-cy="nav-Targeting"]'
     navCashAssist = 'a[data-cy="nav-Cash Assist"]'
@@ -33,6 +37,7 @@ class BaseComponents(Common):
     navResourcesConversations = 'a[data-cy="nav-resources-Conversations"]'
     navResourcesToolsAndMaterials = 'a[data-cy="nav-resources-Tools and Materials"]'
     navResourcesReleaseNote = 'a[data-cy="nav-resources-Release Note"]'
+    navProgramLog = 'a[data-cy="nav-Program Log"]'
     mainContent = 'div[data-cy="main-content"]'
     drawerItems = 'div[data-cy="drawer-items"]'
     drawerInactiveSubheader = 'div[data-cy="program-inactive-subheader"]'
@@ -40,6 +45,10 @@ class BaseComponents(Common):
     globalProgramFilterSearchInput = 'input[data-cy="search-input-gpf"]'
     globalProgramFilterSearchButton = 'button[data-cy="search-icon"]'
     globalProgramFilterClearButton = 'button[data-cy="clear-icon"]'
+    rows = 'tr[role="checkbox"]'
+    alert = '[role="alert"]'
+    breadcrumbsChevronIcon = 'svg[data-cy="breadcrumbs-chevron-icon"]'
+    arrowBack = 'div[data-cy="arrow_back"]'
 
     # Text
     globalProgramFilterText = "All Programmes"
@@ -77,8 +86,14 @@ class BaseComponents(Common):
     def getNavIndividuals(self) -> WebElement:
         return self.wait_for(self.navIndividuals)
 
+    def getNavPeople(self) -> WebElement:
+        return self.wait_for(self.navPeople)
+
     def getNavProgrammeManagement(self) -> WebElement:
         return self.wait_for(self.navProgrammeManagement)
+
+    def getNavManagerialConsole(self) -> WebElement:
+        return self.wait_for(self.navManagerialConsole)
 
     def getNavProgrammeDetails(self) -> WebElement:
         return self.wait_for(self.navProgrammeDetails)
@@ -161,3 +176,37 @@ class BaseComponents(Common):
 
     def getGlobalProgramFilterSearchInput(self) -> WebElement:
         return self.wait_for(self.globalProgramFilterSearchInput)
+
+    def getBreadcrumbsChevronIcon(self) -> WebElement:
+        return self.wait_for(self.breadcrumbsChevronIcon)
+
+    def getArrowBack(self) -> WebElement:
+        return self.wait_for(self.arrowBack)
+
+    def getNavProgramLog(self) -> WebElement:
+        return self.wait_for(self.navProgramLog)
+
+    def waitForRows(self) -> [WebElement]:
+        self.wait_for(self.rows)
+        return self.get_elements(self.rows)
+
+    def getRows(self) -> [WebElement]:
+        return self.get_elements(self.rows)
+
+    def getAlert(self) -> WebElement:
+        return self.wait_for(self.alert)
+
+    def checkAlert(self, text: str) -> None:
+        self.getAlert()
+        for _ in range(10):
+            if text in self.getAlert().text:
+                break
+            sleep(1)
+        assert text in self.getAlert().text
+
+    def waitForNumberOfRows(self, number: int) -> bool:
+        for _ in range(5):
+            if len(self.getRows()) == number:
+                return True
+            sleep(1)
+        return False

@@ -57,6 +57,7 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
     MigrationStatus,
+    PeriodicFieldData,
     StorageFile,
     XLSXKoboTemplate,
 )
@@ -442,7 +443,7 @@ UNICEF HOPE""",
     def mark_submissions(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         business_area = self.get_queryset(request).get(pk=pk)
         if request.method == "POST":
-            from hct_mis_api.apps.registration_datahub.tasks.mark_submissions import (
+            from hct_mis_api.apps.registration_data.services.mark_submissions import (
                 MarkSubmissions,
             )
 
@@ -487,6 +488,11 @@ class FlexibleAttributeAdmin(GetManyFromRemoteMixin, SoftDeletableAdminMixin):
         JSONField: {"widget": JSONEditor},
     }
     raw_id_fields = ("group",)
+
+
+@admin.register(PeriodicFieldData)
+class PeriodicFieldDataAdmin(admin.ModelAdmin):
+    pass
 
 
 @admin.register(FlexibleAttributeGroup)

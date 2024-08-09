@@ -1,3 +1,4 @@
+import json
 import logging
 import random
 import string
@@ -13,7 +14,13 @@ from django.utils import timezone
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.activity_log.models import log_create
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+    FieldFactory,
+    get_core_fields_attributes,
+)
 from hct_mis_api.apps.core.field_attributes.fields_types import (
+    _DELIVERY_MECHANISM_DATA,
+    _INDIVIDUAL,
     FIELD_TYPES_TO_INTERNAL_TYPE,
     TYPE_IMAGE,
     TYPE_SELECT_MANY,
@@ -41,6 +48,8 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.models import DeliveryMechanismData
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -120,6 +129,7 @@ def handle_role(role: str, household: Household, individual: Individual) -> None
             household=household,
             role=role,
             defaults={"individual": individual},
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
 
@@ -132,16 +142,29 @@ def handle_add_document(document_data: Dict, individual: Individual) -> Document
     if photo:
         photo = photoraw
 
-    document_already_exists = Document.objects.filter(
+    document_type = DocumentType.objects.get(key=document_key)
+
+    if Document.objects.filter(
         document_number=number,
         type__key=document_key,
         country__iso_code3=country_code,
         program_id=individual.program_id,
-    ).exists()
-    if document_already_exists:
-        raise ValidationError(f"Document with number {number} of type {document_key} already exists")
+        status=Document.STATUS_VALID,
+    ).exists():
+        raise ValidationError(f"Document with number {number} of type {document_type} already exists")
 
-    document_type = DocumentType.objects.get(key=document_key)
+    if (
+        document_type.unique_for_individual
+        and Document.objects.filter(
+            type__key=document_key,
+            individual=individual,
+            country__iso_code3=country_code,
+            program_id=individual.program_id,
+            status=Document.STATUS_VALID,
+        ).exists()
+    ):
+        raise ValidationError(f"Document of type {document_type} already exists for this individual")
+
     country = geo_models.Country.objects.get(iso_code3=country_code)
 
     return Document(
@@ -151,6 +174,7 @@ def handle_add_document(document_data: Dict, individual: Individual) -> Document
         photo=photo,
         country=country,
         program_id=individual.program_id,
+        rdi_merge_status=MergeStatusModel.MERGED,
     )
 
 
@@ -164,21 +188,37 @@ def handle_edit_document(document_data: Dict) -> Document:
         photo = photoraw
 
     document = get_object_or_404(Document.objects.select_for_update(), id=(decode_id_string(document_data.get("id"))))
-    document_already_exists = (
+    document_type = DocumentType.objects.get(key=document_key)
+
+    if (
         Document.objects.exclude(pk=document.id)
         .filter(
             document_number=number,
             type__key=document_key,
             country__iso_code3=country_code,
             program_id=document.program_id,
+            status=Document.STATUS_VALID,
         )
         .exists()
-    )
-    if document_already_exists:
-        raise ValidationError(f"Document with number {number} of type {document_key} already exists")
+    ):
+        raise ValidationError(f"Document with number {number} of type {document_type} already exists")
+
+    if (
+        document_type.unique_for_individual
+        and Document.objects.exclude(pk=document.id)
+        .filter(
+            type__key=document_key,
+            individual=document.individual,
+            country__iso_code3=country_code,
+            program_id=document.program_id,
+            status=Document.STATUS_VALID,
+        )
+        .exists()
+    ):
+        raise ValidationError(f"Document of type {document_type} already exists for this individual")
 
     document.document_number = number
-    document.type = DocumentType.objects.get(key=document_key)
+    document.type = document_type
     document.country = geo_models.Country.objects.get(iso_code3=country_code)
     document.photo = photo
 
@@ -196,6 +236,7 @@ def handle_add_payment_channel(payment_channel: Dict, individual: Individual) ->
             bank_account_number=bank_account_number,
             account_holder_name=payment_channel.get("account_holder_name", ""),
             bank_branch_name=payment_channel.get("bank_branch_name", ""),
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
     return None
 
@@ -215,6 +256,35 @@ def handle_update_payment_channel(payment_channel: Dict) -> Optional[BankAccount
     return None
 
 
+def handle_update_delivery_mechanism_data(delivery_mechanism_datas: List[Dict]) -> List[DeliveryMechanismData]:
+    delivery_mechanism_datas_to_update = []
+    all_fields: dict = FieldFactory(get_core_fields_attributes()).to_dict_by("name")
+    for dmd_data in delivery_mechanism_datas:
+        dmd = get_object_or_404(DeliveryMechanismData, id=dmd_data.get("id"))
+        individual = dmd.individual
+        individual_updated = False
+        data = dmd.data if isinstance(dmd.data, dict) else json.loads(dmd.data)
+        for new_values in dmd_data.get("data_fields", []):
+            field_name = new_values.get("name")
+            field_value = new_values.get("value")
+            field_definition: dict = all_fields[field_name]
+
+            if field_definition["associated_with"] == _DELIVERY_MECHANISM_DATA:
+                data[field_name] = field_value
+            elif field_definition["associated_with"] == _INDIVIDUAL:
+                if hasattr(individual, field_name):
+                    setattr(individual, field_name, field_value)
+                    individual_updated = True
+
+        dmd.data = data
+        delivery_mechanism_datas_to_update.append(dmd)
+
+        if individual_updated:
+            individual.save()
+
+    return delivery_mechanism_datas_to_update
+
+
 def handle_add_identity(identity: Dict, individual: Individual) -> IndividualIdentity:
     partner_name = identity.get("partner")
     country_code = identity.get("country")
@@ -226,7 +296,9 @@ def handle_add_identity(identity: Dict, individual: Individual) -> IndividualIde
     if identity_already_exists:
         raise ValidationError(f"Identity with number {number}, partner: {partner_name} already exists")
 
-    return IndividualIdentity(number=number, individual=individual, partner=partner, country=country)
+    return IndividualIdentity(
+        number=number, individual=individual, partner=partner, country=country, rdi_merge_status=MergeStatusModel.MERGED
+    )
 
 
 def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
@@ -388,6 +460,29 @@ def prepare_edit_payment_channel(payment_channels: List[Dict]) -> List[Dict]:
         if type_ := pc.get("type"):
             if handler := handlers.get(type_):
                 items.append(handler(pc))
+    return items
+
+
+def prepare_edit_delivery_mechanism_data(delivery_mechanism_data: List[Dict]) -> List[Dict]:
+    items = []
+    for dmd in delivery_mechanism_data:
+        _id = dmd.get("id")
+        data_fields = dmd.get("data_fields", [])
+        delivery_mechanism_data = get_object_or_404(DeliveryMechanismData, id=_id)
+        data = {
+            "id": _id,
+            "label": dmd.get("label"),
+            "approve_status": False,
+            "data_fields": [
+                {
+                    "name": field.get("name"),
+                    "value": field.get("value"),
+                    "previous_value": delivery_mechanism_data.delivery_data.get(field.get("name")),
+                }
+                for field in data_fields
+            ],
+        }
+        items.append(data)
     return items
 
 

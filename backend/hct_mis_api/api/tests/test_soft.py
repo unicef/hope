@@ -2,6 +2,7 @@ import base64
 from pathlib import Path
 from typing import Any, Dict
 
+from django.core.management import call_command
 from django.urls import reverse
 
 from rest_framework import status
@@ -17,46 +18,44 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     SON_DAUGHTER,
+    DocumentType,
+    PendingHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedDocumentType,
-    ImportedHousehold,
-    RegistrationDataImportDatahub,
-)
 
 
 class PushLaxToRDITests(HOPEApiTestCase):
-    databases = {"default", "registration_datahub"}
+    databases = {"default"}
     user_permissions = [Grant.API_RDI_CREATE]
 
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        ImportedDocumentType.objects.create(
+        call_command("loadcountries")
+        call_command("loadcountrycodes")
+        DocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
         )
         cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)
-        cls.rdi = RegistrationDataImportDatahub.objects.create(
-            business_area_slug=cls.business_area.slug,
-            import_done=RegistrationDataImportDatahub.LOADING,
-        )
-        cls.rdi2 = RegistrationDataImport.objects.create(
+        cls.rdi = RegistrationDataImport.objects.create(
             business_area=cls.business_area,
             number_of_individuals=0,
             number_of_households=0,
-            datahub_id=cls.rdi.pk,
             status=RegistrationDataImport.LOADING,
             program=cls.program,
         )
         cls.url = reverse("api:rdi-push-lax", args=[cls.business_area.slug, str(cls.rdi.id)])
 
     def test_push_error_if_not_loading(self) -> None:
-        rdi = RegistrationDataImportDatahub.objects.create(
-            business_area_slug=self.business_area.slug,
-            import_done=RegistrationDataImportDatahub.NOT_STARTED,
+        rdi = RegistrationDataImport.objects.create(
+            name="test_push_error_if_not_loading",
+            business_area=self.business_area,
+            number_of_individuals=0,
+            number_of_households=0,
+            status=RegistrationDataImport.IN_REVIEW,
+            program=self.program,
         )
         url = reverse("api:rdi-push-lax", args=[self.business_area.slug, str(rdi.id)])
         response = self.client.post(url, {}, format="json")
@@ -82,7 +81,6 @@ class PushLaxToRDITests(HOPEApiTestCase):
                             {
                                 "document_number": 10,
                                 "image": base64_encoded_data,
-                                "doc_date": "2010-01-01",
                                 "country": "AF",
                                 "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                             }
@@ -114,7 +112,6 @@ class PushLaxToRDITests(HOPEApiTestCase):
                             {
                                 "document_number": 10,
                                 "image": base64_encoded_data,
-                                "doc_date": "2010-01-01",
                                 "country": "AF",
                                 "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                             }
@@ -151,7 +148,6 @@ class PushLaxToRDITests(HOPEApiTestCase):
                         "documents": [
                             {
                                 "document_number": 10,
-                                "doc_date": "2010-01-01",
                                 "country": "AF",
                                 "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                             }
@@ -183,7 +179,6 @@ class PushLaxToRDITests(HOPEApiTestCase):
                             {
                                 "document_number": 10,
                                 "image": base64_encoded_data,
-                                "doc_date": "2010-01-01",
                                 "country": "AF",
                                 "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                             }
@@ -215,7 +210,6 @@ class PushLaxToRDITests(HOPEApiTestCase):
                             {
                                 "document_number": 10,
                                 "image": base64_encoded_data,
-                                "doc_date": "2010-01-01",
                                 "country": "AF",
                                 "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                             }
@@ -246,7 +240,6 @@ class PushLaxToRDITests(HOPEApiTestCase):
                             {
                                 "document_number": 10,
                                 "image": base64_encoded_data,
-                                "doc_date": "2010-01-01",
                                 "country": "AF",
                                 "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                             }
@@ -270,10 +263,10 @@ class PushLaxToRDITests(HOPEApiTestCase):
         self.assertEqual(data["processed"], 6)
         self.assertEqual(data["errors"], 2)
         self.assertEqual(data["accepted"], 4)
-        hrdi = RegistrationDataImportDatahub.objects.filter(id=data["id"]).first()
-        self.assertIsNotNone(hrdi)
+        rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
+        self.assertIsNotNone(rdi)
         for valid in ["village1", "village4", "village5"]:
-            self.assertTrue(ImportedHousehold.objects.filter(registration_data_import=hrdi, village=valid).exists())
+            self.assertTrue(PendingHousehold.objects.filter(registration_data_import=rdi, village=valid).exists())
 
         self.assertDictEqual(
             data["households"][2], {"Household #3": [{"primary_collector": ["Missing Primary Collector"]}]}
@@ -282,7 +275,7 @@ class PushLaxToRDITests(HOPEApiTestCase):
             data["households"][5], {"Household #6": [{"head_of_household": ["Missing Head Of Household"]}]}
         )
         pk1 = list(data["households"][0].values())[0][0]["pk"]
-        hh = ImportedHousehold.objects.get(pk=pk1)
+        hh = PendingHousehold.objects.get(pk=pk1)
         self.assertEqual(hh.program_id, self.program.id)
         self.assertEqual(hh.head_of_household.full_name, "James Head #1")
         self.assertEqual(hh.primary_collector.full_name, "Mary Primary #1")
@@ -290,7 +283,7 @@ class PushLaxToRDITests(HOPEApiTestCase):
         self.assertEqual(hh.primary_collector.program_id, self.program.id)
 
         pk2 = list(data["households"][1].values())[0][0]["pk"]
-        hh = ImportedHousehold.objects.get(pk=pk2)
+        hh = PendingHousehold.objects.get(pk=pk2)
         self.assertEqual(hh.program_id, self.program.id)
         self.assertEqual(hh.head_of_household.full_name, "James Head #1")
         self.assertEqual(hh.primary_collector.full_name, "James Head #1")

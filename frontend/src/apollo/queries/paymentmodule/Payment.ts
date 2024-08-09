@@ -77,7 +77,9 @@ export const Payment = gql`
         }
       }
       deliveredQuantityUsd
-      deliveryType
+      deliveryType {
+          name
+      }
       transactionReferenceId
       serviceProvider {
         id

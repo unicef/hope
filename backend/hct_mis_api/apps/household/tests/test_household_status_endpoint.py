@@ -80,7 +80,9 @@ class TestDetails(TestCase):
         imported_household.detail_id = "HOPE-2022530111222"
         imported_household.save()
         ImportedIndividualRoleInHousehold.objects.create(
-            individual=imported_individual, role=ROLE_NO_ROLE, household=imported_household
+            individual=imported_individual,
+            role=ROLE_NO_ROLE,
+            household=imported_household,
         )
 
         registration_id = imported_household.detail_id
@@ -106,7 +108,9 @@ class TestDetails(TestCase):
         imported_household.head_of_household = imported_individual
         imported_household.save()
         ImportedIndividualRoleInHousehold.objects.create(
-            individual=imported_individual, role=ROLE_NO_ROLE, household=imported_household
+            individual=imported_individual,
+            role=ROLE_NO_ROLE,
+            household=imported_household,
         )
 
         imported_document_type = ImportedDocumentTypeFactory(
@@ -211,7 +215,9 @@ class TestDetails(TestCase):
         imported_household.detail_id = "HOPE-2022530111222"
         imported_household.save()
         ImportedIndividualRoleInHousehold.objects.create(
-            individual=imported_individual, role=ROLE_NO_ROLE, household=imported_household
+            individual=imported_individual,
+            role=ROLE_NO_ROLE,
+            household=imported_household,
         )
 
         registration_id = imported_household.detail_id

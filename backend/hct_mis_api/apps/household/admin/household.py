@@ -1,4 +1,5 @@
 import logging
+import re
 from itertools import chain
 from typing import Any, List, Optional
 from uuid import UUID
@@ -7,10 +8,11 @@ from django.contrib import admin, messages
 from django.contrib.messages import DEFAULT_TAGS
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from django.db.models import Q, QuerySet
+from django.db.models import F, Q, QuerySet, Value
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 from admin_cursor_paginator import CursorPaginatorAdmin
@@ -21,28 +23,37 @@ from adminfilters.depot.widget import DepotManager
 from adminfilters.querystring import QueryStringFilter
 from power_query.mixin import PowerQueryMixin
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
-from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import JSONBSet, decode_id_string_required
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.admin.mixins import (
     CustomTargetPopulationMixin,
     HouseholdWithDrawnMixin,
 )
-from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program_task
+from hct_mis_api.apps.household.celery_tasks import (
+    enroll_households_to_program_task,
+    mass_withdraw_households_from_list_task,
+)
 from hct_mis_api.apps.household.forms import MassEnrollForm
 from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    Document,
     Household,
     HouseholdCollection,
+    Individual,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.admin import (
     BusinessAreaForHouseholdCollectionListFilter,
     HOPEModelAdminBase,
     IsOriginalAdminMixin,
     LastSyncDateResetMixin,
+    LinkedObjectsManagerMixin,
+    RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
 )
 from hct_mis_api.apps.utils.security import is_root
@@ -70,11 +81,126 @@ class HouseholdRepresentationInline(admin.TabularInline):
         return False  # Disable adding new individual representations inline
 
 
+class HouseholdWithdrawFromListMixin:
+    @staticmethod
+    def get_program_from_encoded_id(program_id: str) -> Optional[Program]:
+        try:
+            decoded_program_id = decode_id_string_required(program_id)
+            return Program.objects.filter(id=decoded_program_id).first()
+        except Exception:
+            return None
+
+    @staticmethod
+    def get_household_queryset_from_list(household_id_list: list, program: Program) -> QuerySet:
+        return Household.objects.filter(
+            unicef_id__in=household_id_list,
+            withdrawn=False,
+            program=program,
+        )
+
+    @transaction.atomic
+    def mass_withdraw_households_from_list_bulk(self, household_id_list: list, tag: str, program: Program) -> None:
+        households = self.get_household_queryset_from_list(household_id_list, program)
+        individuals = Individual.objects.filter(household__in=households, withdrawn=False, duplicate=False)
+
+        tickets = GrievanceTicket.objects.belong_households_individuals(households, individuals)
+        ticket_ids = [t.ticket.id for t in tickets]
+        for status, _ in GrievanceTicket.STATUS_CHOICES:
+            if status == GrievanceTicket.STATUS_CLOSED:
+                continue
+            GrievanceTicket.objects.filter(id__in=ticket_ids, status=status).update(
+                extras=JSONBSet(F("extras"), Value("{status_before_withdrawn}"), Value(f'"{status}"')),
+                status=GrievanceTicket.STATUS_CLOSED,
+            )
+
+        Document.objects.filter(individual__in=individuals).update(status=Document.STATUS_INVALID)
+
+        individuals.update(
+            withdrawn=True,
+            withdrawn_date=timezone.now(),
+        )
+        households.update(
+            withdrawn=True,
+            withdrawn_date=timezone.now(),
+            user_fields=JSONBSet(F("user_fields"), Value("{withdrawn_tag}"), Value(f'"{tag}"')),
+        )
+
+    @staticmethod
+    def split_list_of_ids(household_list: str) -> list:
+        """
+        Split input list of ids by literal 'new line' or any of the following characters: "," "|" "/" or white spaces
+        """
+        return [hh_id.strip() for hh_id in re.split(r"new line|[,\|/\s]+", household_list) if hh_id]
+
+    @staticmethod
+    def get_and_set_context_data(request: HttpRequest, context: dict) -> None:
+        household_list = request.POST.get("household_list")
+        tag = request.POST.get("tag")
+        program_id = request.POST.get("program_id")
+        context["household_list"] = household_list
+        context["tag"] = tag
+        context["program_id"] = program_id
+
+    def withdraw_households_from_list(self, request: HttpRequest) -> Optional[HttpResponse]:
+        context = self.get_common_context(request, title="Withdraw households from list")
+        if request.method == "POST":
+            step = request.POST.get("step")
+            if step == "1":
+                context["step"] = "2"
+                self.get_and_set_context_data(request, context)
+                return TemplateResponse(
+                    request,
+                    "admin/household/household/withdraw_households_from_list.html",
+                    context,
+                )
+            elif step == "2":
+                context["step"] = "2"
+                self.get_and_set_context_data(request, context)
+                household_id_list = self.split_list_of_ids(context["household_list"])
+                program = self.get_program_from_encoded_id(context["program_id"])
+                if not program:
+                    self.message_user(
+                        request,
+                        f"Program with ID '{context['program_id']}' not found.",
+                        level=messages.ERROR,
+                    )
+                    return HttpResponseRedirect(reverse("admin:household_household_changelist"))
+
+                context["household_count"] = self.get_household_queryset_from_list(
+                    household_id_list,
+                    program,
+                ).count()
+                return TemplateResponse(
+                    request,
+                    "admin/household/household/withdraw_households_from_list.html",
+                    context,
+                )
+            else:
+                household_list = request.POST.get("household_list", "")
+                tag = request.POST.get("tag", "")
+                program_id = request.POST.get("program_id", "")
+
+                program = self.get_program_from_encoded_id(program_id)
+                household_id_list = self.split_list_of_ids(household_list)
+                household_count = self.get_household_queryset_from_list(
+                    household_id_list,
+                    program,  # type: ignore
+                ).count()
+
+                mass_withdraw_households_from_list_task.delay(household_id_list, tag, program.id)  # type: ignore
+                self.message_user(request, f"{household_count} Households are being withdrawn.")
+
+                return HttpResponseRedirect(reverse("admin:household_household_changelist"))
+
+        context["step"] = "1"
+        return TemplateResponse(request, "admin/household/household/withdraw_households_from_list.html", context)
+
+
 @admin.register(Household)
 class HouseholdAdmin(
     SoftDeletableAdminMixin,
     LastSyncDateResetMixin,
-    LinkedObjectsMixin,
+    LinkedObjectsManagerMixin,
     PowerQueryMixin,
     SmartFieldsetMixin,
     CursorPaginatorAdmin,
@@ -82,6 +208,8 @@ class HouseholdAdmin(
     CustomTargetPopulationMixin,
     HOPEModelAdminBase,
     IsOriginalAdminMixin,
+    HouseholdWithdrawFromListMixin,
+    RdiMergeStatusAdminMixin,
 ):
     list_display = (
         "unicef_id",
@@ -91,6 +219,7 @@ class HouseholdAdmin(
         "size",
         "withdrawn",
         "program",
+        "rdi_merge_status",
     )
     list_filter = (
         DepotManager,
@@ -169,6 +298,11 @@ class HouseholdAdmin(
             qs = qs.order_by(*ordering)
         return qs
 
+    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+        if db_field.name == "head_of_household":
+            kwargs["queryset"] = Individual.all_objects.all()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     def get_ignored_linked_objects(self, request: HttpRequest) -> List:
         return []
 
@@ -190,9 +324,10 @@ class HouseholdAdmin(
 
     @button()
     def members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
-        obj = Household.objects.get(pk=pk)
+        obj = Household.all_merge_status_objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
-        return HttpResponseRedirect(f"{url}?qs=unicef_id={obj.unicef_id}")
+        flt = f"&qs=household_id={obj.id}"
+        return HttpResponseRedirect(f"{url}?{flt}")
 
     @button()
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
@@ -203,13 +338,13 @@ class HouseholdAdmin(
         primary = None
         head = None
         try:
-            primary = IndividualRoleInHousehold.objects.get(household=hh, role=ROLE_PRIMARY)
+            primary = IndividualRoleInHousehold.all_objects.get(household=hh, role=ROLE_PRIMARY)
         except ObjectDoesNotExist:
             warnings.append([messages.ERROR, "Head of househould not found"])
 
-        alternate = IndividualRoleInHousehold.objects.filter(household=hh, role=ROLE_ALTERNATE).first()
+        alternate = IndividualRoleInHousehold.all_objects.filter(household=hh, role=ROLE_ALTERNATE).first()
         try:
-            head = hh.individuals.get(relationship=HEAD)
+            head = hh.individuals(manager="all_objects").get(relationship=HEAD)
         except ObjectDoesNotExist:
             warnings.append([messages.ERROR, "Head of househould not found"])
 
@@ -219,9 +354,9 @@ class HouseholdAdmin(
                 field = f"{gender}_age_group_{num_range}_count"
                 total_in_ranges += getattr(hh, field, 0) or 0
 
-        active_individuals = hh.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True))
-        ghosts_individuals = hh.individuals.filter(Q(duplicate=True) | Q(withdrawn=True))
-        all_individuals = hh.individuals.all()
+        active_individuals = hh.individuals(manager="all_objects").exclude(Q(duplicate=True) | Q(withdrawn=True))
+        ghosts_individuals = hh.individuals(manager="all_objects").filter(Q(duplicate=True) | Q(withdrawn=True))
+        all_individuals = hh.individuals(manager="all_objects").all()
         if hh.collect_individual_data:
             if active_individuals.count() != hh.size:
                 warnings.append([messages.WARNING, "HH size does not match"])
@@ -239,7 +374,7 @@ class HouseholdAdmin(
             )
 
         aaaa = active_individuals.values_list("unicef_id", flat=True)
-        bbb = Household.objects.filter(unicef_id__in=aaaa)
+        bbb = Household.all_objects.filter(unicef_id__in=aaaa)
         if bbb.count() > len(aaaa):
             warnings.append([messages.ERROR, "Unmarked duplicates found"])
 
@@ -334,6 +469,13 @@ class HouseholdAdmin(
         return TemplateResponse(request, "admin/household/household/enroll_households_to_program.html", context)
 
     mass_enroll_to_another_program.short_description = "Mass enroll households to another program"
+
+    @button(
+        label="Withdraw households from list",
+        permission=is_root,
+    )
+    def withdraw_households_from_list_button(self, request: HttpRequest) -> Optional[HttpResponse]:
+        return self.withdraw_households_from_list(request)
 
 
 @admin.register(HouseholdCollection)

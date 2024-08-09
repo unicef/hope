@@ -42,7 +42,7 @@ def handle_type_mapping(value: Any) -> Any:
 
 def create_payment_plan_snapshot_data(payment_plan: PaymentPlan) -> None:
     payments_ids = list(
-        Payment.objects.filter(parent=payment_plan, household_snapshot__isnull=True)
+        payment_plan.eligible_payments.filter(household_snapshot__isnull=True)
         .values_list("id", flat=True)
         .order_by("id")
     )
@@ -92,7 +92,9 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
         if str(household.primary_collector.id) in individuals_dict:
             household_data["primary_collector"] = individuals_dict[str(household.primary_collector.id)]
         else:
-            household_data["primary_collector"] = get_individual_snapshot(household.primary_collector)
+            household_data["primary_collector"] = get_individual_snapshot(
+                household.primary_collector, is_hh_collector=True
+            )
             household_data["needs_adjudication_tickets_count"] += household_data["primary_collector"][
                 "needs_adjudication_tickets_count"
             ]
@@ -100,7 +102,9 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
         if str(household.alternate_collector.id) in individuals_dict:
             household_data["alternate_collector"] = individuals_dict[str(household.alternate_collector.id)]
         else:
-            household_data["alternate_collector"] = get_individual_snapshot(household.alternate_collector)
+            household_data["alternate_collector"] = get_individual_snapshot(
+                household.alternate_collector, is_hh_collector=True
+            )
             household_data["needs_adjudication_tickets_count"] += household_data["alternate_collector"][
                 "needs_adjudication_tickets_count"
             ]
@@ -109,7 +113,7 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
     return PaymentHouseholdSnapshot(payment=payment, snapshot_data=household_data, household_id=household.id)
 
 
-def get_individual_snapshot(individual: Individual) -> dict:
+def get_individual_snapshot(individual: Individual, is_hh_collector: bool = False) -> dict:
     all_individual_data_dict = individual.__dict__
     keys = [key for key in all_individual_data_dict.keys() if key not in excluded_individual_fields]
     individual_data = {}
@@ -140,6 +144,11 @@ def get_individual_snapshot(individual: Individual) -> dict:
             "bank_name": bank_account_info.bank_name,
             "bank_account_number": bank_account_info.bank_account_number,
             "debit_card_number": bank_account_info.debit_card_number,
+        }
+
+    if is_hh_collector:
+        individual_data["delivery_mechanisms_data"] = {
+            dmd.delivery_mechanism.code: dmd.delivery_data for dmd in individual.delivery_mechanisms_data.all()
         }
 
     return individual_data

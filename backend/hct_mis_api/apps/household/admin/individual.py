@@ -20,7 +20,6 @@ from adminfilters.querystring import QueryStringFilter
 from adminfilters.value import ValueFilter
 from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
-from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.models import BusinessArea
@@ -30,6 +29,7 @@ from hct_mis_api.apps.household.celery_tasks import (
 )
 from hct_mis_api.apps.household.forms import UpdateIndividualsIBANFromXlsxForm
 from hct_mis_api.apps.household.models import (
+    Household,
     Individual,
     IndividualCollection,
     IndividualIdentity,
@@ -41,6 +41,8 @@ from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
     IsOriginalAdminMixin,
     LastSyncDateResetMixin,
+    LinkedObjectsManagerMixin,
+    RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
 )
 from hct_mis_api.apps.utils.security import is_root
@@ -52,11 +54,12 @@ logger = logging.getLogger(__name__)
 class IndividualAdmin(
     SoftDeletableAdminMixin,
     LastSyncDateResetMixin,
-    LinkedObjectsMixin,
+    LinkedObjectsManagerMixin,
     SmartFieldsetMixin,
     CursorPaginatorAdmin,
     HOPEModelAdminBase,
     IsOriginalAdminMixin,
+    RdiMergeStatusAdminMixin,
 ):
     # Custom template to merge AdminAdvancedFiltersMixin and ExtraButtonsMixin
     advanced_change_list_template = "admin/household/advanced_filters_extra_buttons_change_list.html"
@@ -71,6 +74,7 @@ class IndividualAdmin(
         "relationship",
         "birth_date",
         "program",
+        "rdi_merge_status",
     )
     advanced_filter_fields = (
         "updated_at",
@@ -158,6 +162,11 @@ class IndividualAdmin(
             )
         )
 
+    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+        if db_field.name == "household":
+            kwargs["queryset"] = Household.all_objects.all()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if isinstance(db_field, JSONField):
             if is_root(request):
@@ -169,7 +178,7 @@ class IndividualAdmin(
 
     @button()
     def household_members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
-        obj = Individual.objects.get(pk=pk)
+        obj = Individual.all_merge_status_objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
         flt = f"&qs=household_id={obj.household.id}&qs__negate=false"
         return HttpResponseRedirect(f"{url}?{flt}")
@@ -178,8 +187,8 @@ class IndividualAdmin(
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Sanity Check")
         obj = context["original"]
-        context["roles"] = obj.households_and_roles.all()
-        context["duplicates"] = Individual.objects.filter(unicef_id=obj.unicef_id)
+        context["roles"] = obj.households_and_roles(manager="all_objects").all()
+        context["duplicates"] = Individual.all_objects.filter(unicef_id=obj.unicef_id)
 
         return TemplateResponse(request, "admin/household/individual/sanity_check.html", context)
 
@@ -263,7 +272,9 @@ class BusinessAreaSlugFilter(InputFilter):
 
 
 @admin.register(IndividualRoleInHousehold)
-class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
+class IndividualRoleInHouseholdAdmin(
+    SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdminBase, RdiMergeStatusAdminMixin
+):
     list_display = ("individual", "household", "role")
     list_filter = (DepotManager, QueryStringFilter, "role", BusinessAreaSlugFilter)
     raw_id_fields = ("individual", "household", "copied_from")
@@ -278,15 +289,27 @@ class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase)
             )
         )
 
+    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+        if db_field.name == "individual":
+            kwargs["queryset"] = Individual.all_objects.all()
+        if db_field.name == "household":
+            kwargs["queryset"] = Household.all_objects.all()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 @admin.register(IndividualIdentity)
-class IndividualIdentityAdmin(HOPEModelAdminBase):
+class IndividualIdentityAdmin(HOPEModelAdminBase, RdiMergeStatusAdminMixin):
     list_display = ("partner", "individual", "number")
     list_filter = (("individual__unicef_id", ValueFilter.factory(label="Individual's UNICEF Id")),)
     raw_id_fields = ("individual", "partner", "copied_from")
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("individual", "partner")
+
+    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+        if db_field.name == "individual":
+            kwargs["queryset"] = Individual.all_objects.all()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class IndividualRepresentationInline(admin.TabularInline):

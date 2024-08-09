@@ -130,6 +130,7 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
         <TextField
           label="Search"
           value={searchText}
+          data-cy="search-approval"
           size="small"
           onChange={(e) => setSearchText(e.target.value)}
           InputProps={{
@@ -169,6 +170,7 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
             <TableCell padding="checkbox" style={{ width: '10%' }}>
               <Box sx={{ flex: 1 }}>
                 <Checkbox
+                  data-cy="select-all-approval"
                   checked={allSelected && selectedApproved.length > 0}
                   onClick={handleSelectAllApproved}
                 />
@@ -178,6 +180,7 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
               <TableCell key={column.field}>
                 {column.field === 'program' ? (
                   <ProgramSelect
+                    dataCy="program-select-approval"
                     selectedProgram={selectedProgram}
                     setSelectedProgram={setSelectedProgram}
                     programs={programs}
@@ -200,6 +203,7 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
             <TableRow key={row.id}>
               <TableCell padding="checkbox">
                 <Checkbox
+                  data-cy="select-approval"
                   checked={selectedApproved.includes(row.id)}
                   onChange={() =>
                     handleSelect(selectedApproved, setSelectedApproved, row.id)
@@ -207,7 +211,11 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
                 />
               </TableCell>
               {columns.map((column) => (
-                <TableCell key={column.field} align="left">
+                <TableCell
+                  data-cy="column-field"
+                  key={column.field}
+                  align="left"
+                >
                   {column.renderCell
                     ? column.renderCell({ value: row[column.field], row })
                     : row[column.field]}

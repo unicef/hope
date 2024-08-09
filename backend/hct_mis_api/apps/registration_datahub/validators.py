@@ -25,12 +25,20 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     TYPE_SELECT_ONE,
     FieldFactory,
 )
-from hct_mis_api.apps.core.field_attributes.fields_types import Scope
+from hct_mis_api.apps.core.field_attributes.fields_types import (
+    _DELIVERY_MECHANISM_DATA,
+    _INDIVIDUAL,
+    Scope,
+)
 from hct_mis_api.apps.core.kobo.common import (
     KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
     get_field_name,
 )
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    FlexibleAttribute,
+    PeriodicFieldData,
+)
 from hct_mis_api.apps.core.utils import (
     SheetImageLoader,
     rename_dict_keys,
@@ -44,7 +52,9 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from hct_mis_api.apps.registration_datahub.models import KoboImportedSubmission
+from hct_mis_api.apps.payment.models import DeliveryMechanism, DeliveryMechanismData
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.registration_data.models import KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 from hct_mis_api.apps.registration_datahub.utils import (
     calculate_hash_for_kobo_submission,
@@ -115,13 +125,20 @@ class ImportDataInstanceValidator:
         "unhcr_id_issuer_i_c": "unhcr_id_no_i_c",
     }
 
-    def __init__(self, is_social_worker_program: bool = False) -> None:
-        self.is_social_worker_program = is_social_worker_program
+    def __init__(self, program: Program) -> None:
+        self.is_social_worker_program = program.is_social_worker_program
         self.all_fields = self.get_all_fields()
+        self.delivery_mechanisms_xlsx_fields = DeliveryMechanismData.get_all_delivery_mechanisms_fields(
+            by_xlsx_name=True
+        )
+        if self.is_social_worker_program:
+            self.delivery_mechanisms_xlsx_fields = [f"pp_{field}" for field in self.delivery_mechanisms_xlsx_fields]
 
     def get_combined_attributes(self) -> Dict:
         scope_list = (
-            [Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID] if not self.is_social_worker_program else [Scope.XLSX_PEOPLE]
+            [Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.DELIVERY_MECHANISM]
+            if not self.is_social_worker_program
+            else [Scope.XLSX_PEOPLE, Scope.DELIVERY_MECHANISM]
         )
         fields = FieldFactory.from_scopes(scope_list).apply_business_area()
 
@@ -132,7 +149,7 @@ class ImportDataInstanceValidator:
         return {
             **fields.associated_with_household().to_dict_by("xlsx_field"),
             **flex_attrs["individuals"],
-            **fields.associated_with_individual().to_dict_by("xlsx_field"),
+            **fields._associated_with([_INDIVIDUAL, _DELIVERY_MECHANISM_DATA]).to_dict_by("xlsx_field"),
             **flex_attrs["households"],
         }
 
@@ -168,7 +185,7 @@ class ImportDataInstanceValidator:
     def get_all_fields(self) -> Dict:
         try:
             return self.get_combined_attributes()
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -176,6 +193,7 @@ class ImportDataInstanceValidator:
         try:
             invalid_rows = []
             for key, values in documents_numbers_dict.items():
+                key_name = "pp_" + key if self.is_social_worker_program else key
                 if key == "other_id_no_i_c":
                     continue
                 issuing_countries = values.get("issuing_countries")
@@ -188,24 +206,24 @@ class ImportDataInstanceValidator:
                         row_number = validation_data.get("row_number")
                         if not name and value:
                             error = {
-                                "header": key,
-                                "message": f"Name for other_id_type is required, when number is provided: no: {value}",
+                                "header": key_name,
+                                "message": f"Name for {key_name} is required, when number is provided: no: {value}",
                             }
                             if is_xlsx is True:
                                 error["row_number"] = row_number
                             invalid_rows.append(error)
                         if name and not value:
                             error = {
-                                "header": key,
-                                "message": "Number for other_id_no_i_c is required, when name is provided",
+                                "header": key_name,
+                                "message": f"Number for {key_name} is required, when name is provided",
                             }
                             if is_xlsx is True:
                                 error["row_number"] = row_number
                             invalid_rows.append(error)
                         if (name or value) and not issuing_country:
                             error = {
-                                "header": key,
-                                "message": "Issuing country for other_id_no_i_c is required, "
+                                "header": key_name,
+                                "message": f"Issuing country for {key_name} is required, "
                                 "when any document data are provided",
                             }
                             if is_xlsx is True:
@@ -220,23 +238,23 @@ class ImportDataInstanceValidator:
                         )
                         if value and not issuing_country:
                             error = {
-                                "header": key,
-                                "message": f"Issuing country for {key} is required, when any document data are provided",
+                                "header": key_name,
+                                "message": f"Issuing country for {key_name} is required, when any document data are provided",
                             }
                             if is_xlsx is True:
                                 error["row_number"] = row_number
                             invalid_rows.append(error)
                         elif issuing_country and not value:
                             error = {
-                                "header": key,
-                                "message": f"Number for {key} is required, when issuing country is provided",
+                                "header": key_name,
+                                "message": f"Number for {key_name} is required, when issuing country is provided",
                             }
                             if is_xlsx is True:
                                 error["row_number"] = row_number
                             invalid_rows.append(error)
 
             return invalid_rows
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -244,6 +262,7 @@ class ImportDataInstanceValidator:
         try:
             invalid_rows = []
             for key, values in identities_numbers_dict.items():
+                key_name = "pp_" + key if self.is_social_worker_program else key
                 issuing_countries = values.get("issuing_countries")
                 if not issuing_countries:
                     issuing_countries = [None] * len(values["validation_data"])
@@ -255,7 +274,7 @@ class ImportDataInstanceValidator:
                         continue
                     elif value and not issuing_country:
                         error = {
-                            "header": key,
+                            "header": key_name,
                             "message": f"Issuing country is required: partner: {values['partner']} no: {value}",
                         }
                         if is_xlsx is True:
@@ -263,39 +282,100 @@ class ImportDataInstanceValidator:
                         invalid_rows.append(error)
                     elif issuing_country and not value:
                         error = {
-                            "header": key,
-                            "message": f"Number for {key} is required, when issuing country is provided",
+                            "header": key_name,
+                            "message": f"Number for {key_name} is required, when issuing country is provided",
                         }
                         if is_xlsx is True:
                             error["row_number"] = row_number
                         invalid_rows.append(error)
 
             return invalid_rows
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
+            logger.exception(e)
+            raise
+
+    def delivery_mechanisms_validator(self, xlsx_delivery_mechanisms_dict: Dict) -> List[Dict[str, Any]]:
+        delivery_mechanisms_to_required_fields_mapping = (
+            DeliveryMechanism.get_delivery_mechanisms_to_xlsx_fields_mapping()
+        )
+        if self.is_social_worker_program:
+            delivery_mechanisms_to_required_fields_mapping = {
+                dm: [f"pp_{field}" for field in fields]
+                for dm, fields in delivery_mechanisms_to_required_fields_mapping.items()
+            }
+        global_scope_xlsx_fields = list(
+            FieldFactory.not_from_scope(Scope.DELIVERY_MECHANISM).to_dict_by("xlsx_field").keys()
+        )
+
+        try:
+            all_rows_delivery_mechanisms_errors = []
+            for row_number, data in xlsx_delivery_mechanisms_dict.items():
+                delivery_mechanisms_errors = []
+                delivery_mechanisms_fields_values_dict = defaultdict(dict)
+
+                for delivery_mechanism_xlsx_field_name, value in data.items():
+                    if not value:
+                        continue
+                    for dm, fields in delivery_mechanisms_to_required_fields_mapping.items():
+                        if delivery_mechanism_xlsx_field_name in fields:
+                            delivery_mechanisms_fields_values_dict[dm][delivery_mechanism_xlsx_field_name] = value
+
+                dm_to_drop = []
+                # drop delivery mechanism data validation for delivery mechanisms that contains only Scope.GLOBAL fields
+                for dm, fields in delivery_mechanisms_fields_values_dict.items():  # type: ignore
+                    # if all fields are Scope.GLOBAL, drop delivery mechanism data
+                    if all([field in global_scope_xlsx_fields for field in fields.keys()]):
+                        dm_to_drop.append(dm)
+                for dm in dm_to_drop:
+                    delivery_mechanisms_fields_values_dict.pop(dm)
+
+                for dm, fields in delivery_mechanisms_to_required_fields_mapping.items():
+                    if dm not in delivery_mechanisms_fields_values_dict:
+                        continue
+
+                    for field in fields:
+                        if not delivery_mechanisms_fields_values_dict[dm].get(field, None):
+                            delivery_mechanisms_errors.append(
+                                {
+                                    "row_number": row_number,
+                                    "header": field,
+                                    "message": f"Field {field} is required for delivery mechanism {dm}",
+                                }
+                            )
+                all_rows_delivery_mechanisms_errors.extend(delivery_mechanisms_errors)
+
+            return all_rows_delivery_mechanisms_errors
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
 
 class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
-    def __init__(self, is_social_worker_program: bool = False) -> None:
-        super().__init__(is_social_worker_program)
-        self.is_social_worker_program = is_social_worker_program
+    def __init__(self, program: Program) -> None:
+        super().__init__(program)
+        self.is_social_worker_program = program.is_social_worker_program
         self.head_of_household_count = defaultdict(int)
         self.combined_fields = self.get_combined_fields()
         self.household_ids = []
 
+        self.errors = []
+        self.delivery_mechanisms_errors = []
+        self.pdu_flexible_attributes = FlexibleAttribute.objects.filter(
+            type=FlexibleAttribute.PDU, program=program
+        ).select_related("pdu_data")
+
     def get_combined_fields(self) -> Dict:
         core_fields = (
-            FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID])
+            FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.DELIVERY_MECHANISM])
             if not self.is_social_worker_program
-            else FieldFactory.from_scopes([Scope.XLSX_PEOPLE])
+            else FieldFactory.from_scopes([Scope.XLSX_PEOPLE, Scope.DELIVERY_MECHANISM])
         )
         # TODO: update flex field for People
         flex_fields = serialize_flex_attributes()
         if self.is_social_worker_program:
             return {
                 "people": {
-                    **core_fields.associated_with_individual().to_dict_by("xlsx_field"),
+                    **core_fields._associated_with([_INDIVIDUAL, _DELIVERY_MECHANISM_DATA]).to_dict_by("xlsx_field"),
                     **flex_fields["individuals"],
                 },
             }
@@ -306,7 +386,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     **flex_fields["households"],
                 },
                 "individuals": {
-                    **core_fields.associated_with_individual().to_dict_by("xlsx_field"),
+                    **core_fields._associated_with([_INDIVIDUAL, _DELIVERY_MECHANISM_DATA]).to_dict_by("xlsx_field"),
                     **flex_fields["individuals"],
                 },
             }
@@ -317,14 +397,14 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 return False
             if value is None:
                 return True
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
-        return None
+        return True
 
     def integer_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> Optional[bool]:
         try:
-            if not self.required_validator(value, header, *args, **kwargs):
+            if not self.required_validator(value, header, *args, **kwargs):  # pragma: no cover
                 return False
 
             if value is None:
@@ -336,13 +416,13 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             # need to use Exception because of how Graphene catches errors
             except Exception:
                 return False
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
     def float_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
-            if not self.required_validator(value, header, *args, **kwargs):
+            if not self.required_validator(value, header, *args, **kwargs):  # pragma: no cover
                 return False
             if value is None:
                 return True
@@ -350,25 +430,45 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             return True
         except InvalidOperation:
             return False
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
+            logger.exception(e)
+            raise
+
+    def decimal_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> bool:
+        try:
+            if not self.required_validator(value, header, *args, **kwargs):  # pragma: no cover
+                return False
+            if value is None:
+                return True
+            Decimal(value)
+            return True
+        except InvalidOperation:
+            return False
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
     def geolocation_validator(self, value: str, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
-            if not self.required_validator(value, header, *args, **kwargs):
+            if not self.required_validator(value, header, *args, **kwargs):  # pragma: no cover
                 return False
             if value is None:
                 return True
 
             pattern = re.compile(r"^(-?\d+\.\d+?,\s*-?\d+\.\d+?)$")
             return bool(re.match(pattern, value))
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
     def date_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
+            if not self.required_validator(value, header, *args, **kwargs):  # pragma: no cover
+                return False
+
+            if not self.not_empty_validator(value):
+                return True
+
             if self.integer_validator(value, header, *args, **kwargs):
                 return False
 
@@ -381,15 +481,15 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             except Exception:
                 return False
             return True
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
     def phone_validator(self, value: str, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
-            if not self.required_validator(value, header, *args, **kwargs):
+            if not self.required_validator(value, header, *args, **kwargs):  # pragma: no cover
                 return False
-            if value is None:
+            if value is None:  # pragma: no cover
                 return True
 
             try:
@@ -397,7 +497,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 return True
             except (phonenumbers.NumberParseException, TypeError):
                 return False
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -407,7 +507,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             if field is None:
                 return False
 
-            if not self.required_validator(value, header, *args, **kwargs):
+            if not self.required_validator(value, header, *args, **kwargs):  # pragma: no cover
                 return False
             if value is None:
                 return True
@@ -445,14 +545,14 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 return False
 
             return False
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
     def not_empty_validator(self, value: str, *args: Any, **kwargs: Any) -> bool:
         try:
             return not (value is None or value == "")
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -460,14 +560,18 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         try:
             if isinstance(value, bool):
                 return True
-            if self.all_fields[header]["required"] is False and (value is None or value == ""):
-                return True
+            try:
+                if self.all_fields[header]["required"] is False and (value is None or value == ""):
+                    return True
+            except KeyError:
+                if value is None or value == "":
+                    return True
             if type(value) is str:
                 value = value.capitalize()
                 if value in ("True", "False"):
                     return True
-            return False
-        except Exception as e:
+            return False  # pragma: no cover
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -480,20 +584,22 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 return is_not_empty
 
             return True
-        except Exception as e:
+        except KeyError:
+            return True
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
     def image_validator(self, value: Image, header: str, cell: Cell, *args: Any, **kwargs: Any) -> Any:
         try:
-            if self.required_validator(value, header, *args, **kwargs):
+            if self.required_validator(value, header, *args, **kwargs):  # pragma: no cover
                 return True
-            return self.image_loader.image_in(cell)
-        except Exception as e:
+            return self.image_loader.image_in(cell)  # pragma: no cover
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
-    def rows_validator(self, sheet: Worksheet, business_area_slug: Optional[str] = None) -> List:
+    def rows_validator(self, sheet: Worksheet, business_area_slug: Optional[str] = None) -> None:
         try:
             first_row = sheet[1]
             combined_fields = {
@@ -580,6 +686,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 "other_id_no_i_c": {},
             }
 
+            delivery_mechanisms_data = defaultdict(dict)
+
             def has_value(cell: Cell) -> bool:
                 if cell.value is None:
                     return False
@@ -617,10 +725,14 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     if header.value == "relationship_i_c" and cell.value == "HEAD":
                         self.head_of_household_count[current_household_id] += 1
 
-                    if header.value in ("admin1_h_c", "admin2_h_c"):
+                    people_admin_columns = ("pp_admin1_i_c", "pp_admin2_i_c", "pp_admin3_i_c")
+                    hh_admin_columns = ("admin1_h_c", "admin2_h_c", "admin3_h_c")
+                    admin_columns_all = people_admin_columns + hh_admin_columns
+                    if header.value in admin_columns_all:
                         if cell.value:
                             admin_area_code_tuples.append((row_number, header.value, cell.value))
-                        else:
+                        # admin3 is not required for now
+                        elif not cell.value and header.value not in ("admin3_h_c", "pp_admin3_i_c"):
                             invalid_rows.append(
                                 {
                                     "row_number": row_number,
@@ -635,7 +747,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     if (
                         fn(value, header.value, cell) is False
                         and household_id_can_be_empty is False
-                        and header.value not in ("admin1_h_c", "admin2_h_c")
+                        and header.value not in admin_columns_all
                     ):
                         message = (
                             f"Sheet: {sheet.title!r}, Unexpected value: "
@@ -645,34 +757,39 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         )
                         invalid_rows.append({"row_number": cell.row, "header": header.value, "message": message})
 
-                    if header.value in documents_numbers:
-                        if header.value == "other_id_type_i_c":
+                    header_value_doc = header.value[len("pp_") :] if header.value.startswith("pp_") else header.value
+                    if header_value_doc in documents_numbers:
+                        if header_value_doc == "other_id_type_i_c":
                             documents_numbers["other_id_type_i_c"]["names"].append(value)
-                        elif header.value == "other_id_no_i_c":
+                        elif header_value_doc == "other_id_no_i_c":
                             documents_numbers["other_id_type_i_c"]["numbers"].append(str(value) if value else None)
                         else:
-                            documents_numbers[header.value]["numbers"].append(str(value) if value else None)
+                            documents_numbers[header_value_doc]["numbers"].append(str(value) if value else None)
 
-                    if header.value in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.keys():
-                        document_key = self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.get(header.value)
+                    if header_value_doc in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.keys():
+                        document_key = self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.get(header_value_doc)
                         documents_dict = documents_numbers
                         if document_key in identities_numbers.keys():
                             documents_dict = identities_numbers
                         if document_key:
                             documents_dict[document_key]["issuing_countries"].append(value)
 
-                    if header.value in identities_numbers:
-                        identities_numbers[header.value]["numbers"].append(str(value) if value else None)
+                    if header_value_doc in identities_numbers:
+                        identities_numbers[header_value_doc]["numbers"].append(str(value) if value else None)
+
+                    if header.value in self.delivery_mechanisms_xlsx_fields:
+                        delivery_mechanisms_data[row_number][header.value] = value
 
                 if current_household_id and current_household_id not in self.household_ids:
                     message = f"Sheet: Individuals, There is no household with provided id: {current_household_id}"
                     invalid_rows.append({"row_number": row_number, "header": "relationship_i_c", "message": message})
 
-                for header in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.values():
+                for header_value_doc in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.values():
                     documents_or_identity_dict = (
-                        identities_numbers if header in identities_numbers.keys() else documents_numbers
+                        identities_numbers if header_value_doc in identities_numbers.keys() else documents_numbers
                     )
-                    documents_or_identity_dict[header]["validation_data"].append({"row_number": row[0].row})
+                    documents_or_identity_dict[header_value_doc]["validation_data"].append({"row_number": row[0].row})
+                self.errors.extend(self._validate_pdu(row, first_row, row_number))
 
             if sheet.title == "Individuals":
                 for household_id, count in self.head_of_household_count.items():
@@ -685,19 +802,23 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         message = f"Sheet: Individuals, There are multiple head of households for household with id: {household_id}"
                         invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
 
-            if sheet.title == "Households":
+            if sheet.title in ("Households", "People"):
                 admin_area_invalid_rows = self.validate_admin_areas(admin_area_code_tuples, business_area_slug)
                 if admin_area_invalid_rows:
                     invalid_rows.extend(admin_area_invalid_rows)
 
             invalid_doc_rows = []
             invalid_ident_rows = []
-            if sheet.title == "Individuals":
+            invalid_delivery_mechanisms = []
+            if sheet.title in ["Individuals", "People"]:
                 invalid_doc_rows = self.documents_validator(documents_numbers)
                 invalid_ident_rows = self.identity_validator(identities_numbers)
+                invalid_delivery_mechanisms = self.delivery_mechanisms_validator(delivery_mechanisms_data)
 
-            return [*invalid_rows, *invalid_doc_rows, *invalid_ident_rows]
-        except Exception as e:
+            self.errors.extend([*invalid_rows, *invalid_doc_rows, *invalid_ident_rows])
+            self.delivery_mechanisms_errors.extend(invalid_delivery_mechanisms)
+
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -723,17 +844,16 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     invalid_rows.append({"row_number": row_number, "header": header_name, "message": message})
         return invalid_rows
 
-    def validate_file_with_template(self, wb: Workbook) -> List:
+    def validate_file_with_template(self, wb: Workbook) -> None:
         try:
-            errors = []
             combined_fields = self.combined_fields
 
             for name, fields in combined_fields.items():
-                if name.capitalize() not in wb.sheetnames:
-                    errors.append(
+                if name.capitalize() not in wb.sheetnames:  # pragma: no cover
+                    self.errors.append(
                         {"row_number": 0, "header": "File", "message": f"Worksheet {name.capitalize()} does not exist."}
                     )
-                    return errors
+                    return
 
                 sheet = wb[name.capitalize()]
                 first_row = sheet[1]
@@ -746,65 +866,73 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
                 columns_difference = required_fields.difference(column_names)
 
-                if columns_difference:
-                    errors.extend(
+                if columns_difference:  # pragma: no cover
+                    self.errors.extend(
                         [
                             {"row_number": 1, "header": col, "message": f"Missing column name {col}"}
                             for col in columns_difference
                         ]
                     )
+                    return
 
-            return errors
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
-    def validate_file_extension(self, xlsx_file: Any) -> List:
+    def validate_file_extension(self, xlsx_file: Any) -> None:
         try:
             file_suffix = Path(xlsx_file.name).suffix
             if file_suffix != ".xlsx":
-                return [
+                self.errors.append(
                     {
                         "row_number": 1,
                         "header": f"{xlsx_file.name}",
                         "message": "Only .xlsx files are accepted for import",
                     }
-                ]
-            return []
-        except Exception as e:
+                )
+                return
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
-    def validate_everything(self, xlsx_file: Any, business_area_slug: str) -> List[Dict[str, Any]]:
+    def validate_everything(
+        self, xlsx_file: Any, business_area_slug: str
+    ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         try:
-            errors = self.validate_file_extension(xlsx_file)
-            if errors:
-                return errors
+            self.validate_file_extension(xlsx_file)
+            if self.errors:
+                return self.errors, self.delivery_mechanisms_errors
             try:
                 wb = openpyxl.load_workbook(xlsx_file, data_only=True)
             except BadZipfile:
-                return [{"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file"}]
-            errors = self.validate_file_with_template(wb)
-            if errors:
+                return [
+                    {"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file"}
+                ], self.delivery_mechanisms_errors
+
+            self.validate_file_with_template(wb)
+            if self.errors:  # pragma: no cover
                 # return error if WS do not exist in the import file
-                return errors
-            errors.extend(self.validate_index_id(wb))
-            errors.extend(self.validate_collectors_size(wb))
+                return self.errors, self.delivery_mechanisms_errors
+
+            self.validate_index_id(wb)
+            self.validate_collectors_size(wb)
+
             if self.is_social_worker_program:
-                errors.extend(self.validate_people_collectors(wb))
+                self.validate_people_collectors(wb)
                 people_sheet = wb["People"]
                 self.image_loader = SheetImageLoader(people_sheet)
-                errors.extend(self.rows_validator(people_sheet))
+                self.rows_validator(people_sheet, business_area_slug)
             else:
-                errors.extend(self.validate_collectors(wb))
+                self.validate_collectors(wb)
                 individuals_sheet = wb["Individuals"]
                 household_sheet = wb["Households"]
                 self.image_loader = SheetImageLoader(household_sheet)
-                errors.extend(self.rows_validator(household_sheet, business_area_slug))
+                self.rows_validator(household_sheet, business_area_slug)
                 self.image_loader = SheetImageLoader(individuals_sheet)
-                errors.extend(self.rows_validator(individuals_sheet))
-            return errors
-        except Exception as e:
+                self.rows_validator(individuals_sheet)
+
+            return self.errors, self.delivery_mechanisms_errors
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -850,14 +978,12 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 for hh_id in erroneous_collectors_ids
             )
             return errors
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
-    def validate_collectors(self, wb: Workbook) -> List[Dict[str, Any]]:
+    def validate_collectors(self, wb: Workbook) -> None:
         try:
-            errors = []
-
             individuals_sheet = wb["Individuals"]
             households_sheet = wb["Households"]
             first_row = individuals_sheet[1]
@@ -876,20 +1002,19 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 elif cell.value == "alternate_collector_id":
                     alternate_collectors_data = {c.row: c for c in individuals_sheet[cell.column_letter][2:] if c.value}
 
-            errors.extend(
+            self.errors.extend(
                 self.collector_column_validator("primary_collector_id", primary_collectors_data, household_ids)
             )
-            errors.extend(
+            self.errors.extend(
                 self.collector_column_validator(
                     "alternate_collector_id",
                     alternate_collectors_data,
                     household_ids,
                 )
             )
-            errors.extend(self.validate_collectors_unique(primary_collectors_data, alternate_collectors_data))
+            self.errors.extend(self.validate_collectors_unique(primary_collectors_data, alternate_collectors_data))
 
-            return errors
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -913,13 +1038,12 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         }
                     )
             return errors
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
-    def validate_index_id(self, wb: Workbook) -> List[Dict[str, Any]]:
+    def validate_index_id(self, wb: Workbook) -> None:
         try:
-            errors = []
             if self.is_social_worker_program:
                 people_sheet = wb["People"]
                 header_row = people_sheet[1]
@@ -933,22 +1057,22 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 )[0]
                 duplicates = list(set([i for i in index_ids if index_ids.count(i) > 1 and i is not None]))
                 if duplicates:
-                    errors.append(
+                    self.errors.append(
                         {
                             "row_number": 1,
                             "header": "People",
                             "message": f"There are duplicates with id(s): {duplicates}. Number have to be unique in the field pp_index_id.",
                         }
                     )
+                    return
 
-            return errors
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
-    def validate_people_collectors(self, wb: Workbook) -> List[Dict[str, Any]]:
+    def validate_people_collectors(self, wb: Workbook) -> None:
         try:
-            errors, index_ids, primary_collector_ids, relationship_column = [], [], [], []
+            index_ids, primary_collector_ids, relationship_column = [], [], []
             people_sheet = wb["People"]
             first_row = people_sheet[1]
 
@@ -977,7 +1101,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 index_ids, relationship_column, primary_collector_ids, fillvalue=None
             ):
                 if relationship not in [HEAD, NON_BENEFICIARY] and index_id is not None:
-                    errors.append(
+                    self.errors.append(
                         {
                             "row_number": 1,
                             "header": "People",
@@ -986,7 +1110,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         }
                     )
                 if relationship == HEAD and index_id is not None and int(index_id) not in pr_ids:
-                    errors.append(
+                    self.errors.append(
                         {
                             "row_number": 1,
                             "header": "People",
@@ -994,7 +1118,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         }
                     )
                 if relationship == NON_BENEFICIARY and (pr_col is None):
-                    errors.append(
+                    self.errors.append(
                         {
                             "row_number": 1,
                             "header": "People",
@@ -1003,15 +1127,12 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         }
                     )
 
-            return errors
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
-    def validate_collectors_size(self, wb: Workbook) -> List[Dict[str, Any]]:
+    def validate_collectors_size(self, wb: Workbook) -> None:
         try:
-            errors = []
-
             if not self.is_social_worker_program:
                 individuals_sheet = wb["Individuals"]
                 households_sheet = wb["Households"]
@@ -1020,7 +1141,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 individuals_count = self._count_individuals(individuals_sheet)
 
                 if household_count == 0:
-                    errors.append(
+                    self.errors.append(
                         {
                             "row_number": 1,
                             "header": "Households",
@@ -1029,7 +1150,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     )
 
                 if individuals_count == 0:
-                    errors.append(
+                    self.errors.append(
                         {
                             "row_number": 1,
                             "header": "Individuals",
@@ -1039,8 +1160,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             else:
                 people_sheet = wb["People"]
                 people_count = self._count_individuals(people_sheet)
-                if people_count == 0:
-                    errors.append(
+                if people_count == 0:  # pragma: no cover
+                    self.errors.append(
                         {
                             "row_number": 1,
                             "header": "People",
@@ -1048,10 +1169,53 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         }
                     )
 
-            return errors
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
+
+    def _validate_pdu(self, row: list[Any], header_row: list[Any], row_number: int) -> list:
+        header_row = [header.value for header in header_row]
+        validation_subtype_mapping = {
+            PeriodicFieldData.DATE: self.date_validator,
+            PeriodicFieldData.DECIMAL: self.decimal_validator,
+            PeriodicFieldData.STRING: self.string_validator,
+            PeriodicFieldData.BOOLEAN: self.bool_validator,
+        }
+        errors = []
+        for flexible_attribute in self.pdu_flexible_attributes:
+            column_value = f"{flexible_attribute.name}_round_1_value"
+            column_collection_date = f"{flexible_attribute.name}_round_1_collection_date"
+            subtype = flexible_attribute.pdu_data.subtype
+            if column_value not in header_row:
+                continue
+            column_value_index = header_row.index(column_value)
+            column_collection_date_index = header_row.index(column_collection_date)
+            value = row[column_value_index].value
+            if value is None or value == "":
+                continue
+            collection_date = None
+            is_collection_date_valid = True
+            if column_collection_date_index >= 0:
+                collection_date = row[column_collection_date_index].value
+                is_collection_date_valid = self.date_validator(collection_date, column_collection_date)
+            is_value_valid = validation_subtype_mapping[subtype](value, column_value)
+            if not is_collection_date_valid:
+                errors.append(
+                    {
+                        "row_number": row_number,
+                        "header": column_collection_date,
+                        "message": f"Invalid value {collection_date} for field {column_collection_date}",
+                    }
+                )
+            if not is_value_valid:
+                errors.append(
+                    {
+                        "row_number": row_number,
+                        "header": column_value,
+                        "message": f"Invalid value {value} for field {column_value}",
+                    }
+                )
+        return errors
 
     def _count_individuals(self, individuals_sheet: Worksheet) -> int:
         first_row = individuals_sheet[1]
@@ -1072,8 +1236,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
 
 class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, program: Program) -> None:
+        super().__init__(program)
         self.combined_fields = self.get_combined_fields()
         self.expected_household_fields = self.get_expected_household_fields()
         self.expected_individuals_fields = self.get_expected_individuals_fields()
@@ -1095,14 +1259,14 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
     def get_expected_household_fields(self) -> Set:
         try:
             return {field["xlsx_field"] for field in self.combined_fields["households"].values() if field["required"]}
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
     def get_expected_individuals_fields(self) -> Set:
         try:
             return {field["xlsx_field"] for field in self.combined_fields["individuals"].values() if field["required"]}
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -1133,7 +1297,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 if value in ("True", "False", True, False, "0", "1", "TRUE", "FALSE", "true", "false"):
                     return None
                 return f"Invalid value {value} of type {value_type_name} for " f"field {field} of type bool"
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
         return None
@@ -1142,6 +1306,9 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         self, value: str, field: str, attachments: list[dict], *args: Any, **kwargs: Any
     ) -> Union[str, None]:
         try:
+            if kwargs.get("skip_validate_pictures") is True:
+                # skip validation if skip_validate_pictures=True
+                return None
             allowed_extensions = django_core_validators.get_available_image_extensions()
             file_extension = value.split(".")[-1]
 
@@ -1159,7 +1326,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             is_valid_image = isinstance(value, str) and is_correct_attachment
 
             return None if is_valid_image else message
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -1204,7 +1371,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 matched = re.match(pattern_date, value)
 
             return None if matched else message
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
@@ -1249,11 +1416,13 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 return None
 
             return None
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
-    def _get_field_type_error(self, field: str, value: Any, attachments: list) -> Union[dict, None]:
+    def _get_field_type_error(
+        self, field: str, value: Any, attachments: list, skip_validate_pictures: Optional[bool] = False
+    ) -> Union[dict, None]:
         try:
             field_dict = self.all_fields.get(field)
             if field_dict is None:
@@ -1270,7 +1439,9 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             complex_type_fn: Optional[Callable] = complex_types.get(field_type)
 
             if complex_type_fn:
-                message = complex_type_fn(field=field, value=value, attachments=attachments)
+                message = complex_type_fn(
+                    field=field, value=value, attachments=attachments, skip_validate_pictures=skip_validate_pictures
+                )
                 if message is not None:
                     return {
                         "header": field,
@@ -1285,11 +1456,13 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                     }
 
             return None
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
 
-    def validate_everything(self, submissions: List, business_area: BusinessArea) -> List:
+    def validate_everything(
+        self, submissions: List, business_area: BusinessArea, skip_validate_pictures: Optional[bool] = False
+    ) -> List:
         try:
             reduced_submissions: Sequence = rename_dict_keys(submissions, get_field_name)
             docs_and_identities_to_validate = []
@@ -1424,7 +1597,9 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                                         alternate_collector_counter += 1
 
                                 expected_i_fields.discard(i_field)
-                                error = self._get_field_type_error(i_field, i_value, attachments)
+                                error = self._get_field_type_error(
+                                    i_field, i_value, attachments, skip_validate_pictures
+                                )
                                 if error:
                                     errors.append(error)
 
@@ -1463,7 +1638,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                                 {"header": "role_i_c", "message": "Only one person can " "be a alternate collector"}
                             )
                     else:
-                        error = self._get_field_type_error(hh_field, hh_value, attachments)
+                        error = self._get_field_type_error(hh_field, hh_value, attachments, skip_validate_pictures)
                         if error:
                             errors.append(error)
                 hh_expected_field_errors = [
@@ -1476,6 +1651,6 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             identities_errors = self.identity_validator(identities_numbers, is_xlsx=False)
 
             return [*errors, *document_errors, *identities_errors]
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise

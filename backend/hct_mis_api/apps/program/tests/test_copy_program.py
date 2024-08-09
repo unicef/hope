@@ -6,7 +6,13 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
+from hct_mis_api.apps.core.fixtures import (
+    DataCollectingTypeFactory,
+    FlexibleAttributeForPDUFactory,
+    PeriodicFieldDataFactory,
+    create_afghanistan,
+)
+from hct_mis_api.apps.core.models import PeriodicFieldData
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.household.fixtures import (
     BankAccountInfoFactory,
@@ -52,6 +58,15 @@ class TestCopyProgram(APITestCase):
             areaAccess
           }
           partnerAccess
+          pduFields {
+            name
+            label
+            pduData {
+              subtype
+              numberOfRounds
+              roundsNames
+            }
+          }
         }
       validationErrors
       }
@@ -111,6 +126,10 @@ class TestCopyProgram(APITestCase):
         cls.document1 = DocumentFactory(individual=individual, program=individual.program)
         cls.individual_identity1 = IndividualIdentityFactory(individual=individual)
         cls.bank_account_info1 = BankAccountInfoFactory(individual=individual)
+        individual.individual_collection = None
+        individual.save()
+        cls.household1.household_collection = None
+        cls.household1.save()
         cls.household2, individuals2 = create_household_and_individuals(
             household_data={
                 "business_area": cls.business_area,
@@ -169,6 +188,18 @@ class TestCopyProgram(APITestCase):
         cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg)
         cls.area_not_in_afg = AreaFactory(name="Area not in AFG", area_type=cls.area_type_other)
 
+        # PDU data - on original Program - SHOULD NOT BE COPIED into new Program
+        pdu_data = PeriodicFieldDataFactory(
+            subtype=PeriodicFieldData.DECIMAL,
+            number_of_rounds=3,
+            rounds_names=["Round 1 Original", "Round 2 Original", "Round 3 Original"],
+        )
+        FlexibleAttributeForPDUFactory(
+            program=cls.program,
+            label="PDU Field In Original Program",
+            pdu_data=pdu_data,
+        )
+
     def test_copy_program_not_authenticated(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.COPY_PROGRAM_MUTATION,
@@ -196,7 +227,8 @@ class TestCopyProgram(APITestCase):
         self.assertEqual(Household.objects.count(), 3)
         self.assertEqual(Individual.objects.count(), 4)
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
-
+        self.assertIsNone(self.household1.household_collection)
+        self.assertIsNone(self.individuals1[0].individual_collection)
         self.snapshot_graphql_request(
             request_string=self.COPY_PROGRAM_MUTATION,
             context={"user": self.user},
@@ -279,6 +311,20 @@ class TestCopyProgram(APITestCase):
         )
         self.assertEqual(ProgramPartnerThrough.objects.filter(program=copied_program).count(), 1)
 
+        self.individuals1[0].refresh_from_db()
+        self.household1.refresh_from_db()
+
+        self.assertIsNotNone(self.household1.household_collection)
+        self.assertIsNotNone(self.individuals1[0].individual_collection)
+        self.assertEqual(
+            copied_program.household_set.filter(copied_from=self.household1).first().household_collection,
+            self.household1.household_collection,
+        )
+        self.assertEqual(
+            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().individual_collection,
+            self.individuals1[0].individual_collection,
+        )
+
     def test_copy_program_incompatible_collecting_type(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
         copy_data_incompatible = {**self.copy_data}
@@ -339,6 +385,129 @@ class TestCopyProgram(APITestCase):
     def test_copy_program_with_partners_none_partners_access(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
         self.copy_data["programData"]["partnerAccess"] = Program.NONE_PARTNERS_ACCESS
+
+        self.snapshot_graphql_request(
+            request_string=self.COPY_PROGRAM_MUTATION, context={"user": self.user}, variables=self.copy_data
+        )
+
+    def test_copy_program_with_pdu_fields(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        self.copy_data["programData"]["pduFields"] = [
+            {
+                "label": "PDU Field 1",
+                "pduData": {
+                    "subtype": "DECIMAL",
+                    "numberOfRounds": 3,
+                    "roundsNames": ["Round 1", "Round 2", "Round 3"],
+                },
+            },
+            {
+                "label": "PDU Field 2",
+                "pduData": {
+                    "subtype": "STRING",
+                    "numberOfRounds": 1,
+                    "roundsNames": ["Round *"],
+                },
+            },
+            {
+                "label": "PDU Field 3",
+                "pduData": {
+                    "subtype": "DATE",
+                    "numberOfRounds": 2,
+                    "roundsNames": ["Round A", "Round B"],
+                },
+            },
+            {
+                "label": "PDU Field 4",
+                "pduData": {
+                    "subtype": "BOOLEAN",
+                    "numberOfRounds": 4,
+                    "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
+                },
+            },
+        ]
+
+        self.snapshot_graphql_request(
+            request_string=self.COPY_PROGRAM_MUTATION, context={"user": self.user}, variables=self.copy_data
+        )
+        self.assertEqual(Program.objects.get(name="copied name").pdu_fields.count(), 4)
+
+    def test_copy_program_with_pdu_fields_invalid_data(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        # pdu data with mismatched number of rounds and rounds names
+        self.copy_data["programData"]["pduFields"] = [
+            {
+                "label": "PDU Field 1",
+                "pduData": {
+                    "subtype": "DECIMAL",
+                    "numberOfRounds": 3,
+                    "roundsNames": ["Round 1", "Round 2", "Round 3"],
+                },
+            },
+            {
+                "label": "PDU Field 2 Invalid",
+                "pduData": {
+                    "subtype": "STRING",
+                    "numberOfRounds": 1,
+                    "roundsNames": ["Round *", "Round 2*"],
+                },
+            },
+        ]
+
+        self.snapshot_graphql_request(
+            request_string=self.COPY_PROGRAM_MUTATION, context={"user": self.user}, variables=self.copy_data
+        )
+
+    def test_copy_program_with_pdu_fields_duplicated_field_names_in_input(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        # pdu data with duplicated field names in the input
+        self.copy_data["programData"]["pduFields"] = [
+            {
+                "label": "PDU Field 1",
+                "pduData": {
+                    "subtype": "DECIMAL",
+                    "numberOfRounds": 3,
+                    "roundsNames": ["Round 1", "Round 2", "Round 3"],
+                },
+            },
+            {
+                "label": "PDU Field 1",
+                "pduData": {
+                    "subtype": "STRING",
+                    "numberOfRounds": 2,
+                    "roundsNames": ["Round *", "Round 2*"],
+                },
+            },
+        ]
+
+        self.snapshot_graphql_request(
+            request_string=self.COPY_PROGRAM_MUTATION, context={"user": self.user}, variables=self.copy_data
+        )
+
+    def test_copy_program_with_pdu_fields_existing_field_name_in_different_program(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        # pdu data with field name that already exists in the database but in different program -> no fail
+        pdu_data = PeriodicFieldDataFactory(
+            subtype=PeriodicFieldData.DATE,
+            number_of_rounds=1,
+            rounds_names=["Round 1"],
+        )
+        program = ProgramFactory(business_area=self.business_area, name="Test Program 1")
+        FlexibleAttributeForPDUFactory(
+            program=program,
+            label="PDU Field 1",
+            pdu_data=pdu_data,
+        )
+        self.copy_data["programData"]["pduFields"] = [
+            {
+                "label": "PDU Field 1",
+                "pduData": {
+                    "subtype": "DECIMAL",
+                    "numberOfRounds": 3,
+                    "roundsNames": ["Round 1", "Round 2", "Round 3"],
+                },
+            },
+        ]
 
         self.snapshot_graphql_request(
             request_string=self.COPY_PROGRAM_MUTATION, context={"user": self.user}, variables=self.copy_data

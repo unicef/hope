@@ -10,7 +10,8 @@ from django.db import transaction
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import count_population
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.registration_datahub.models import KoboImportData
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.registration_data.models import KoboImportData
 from hct_mis_api.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
 )
@@ -19,7 +20,7 @@ from hct_mis_api.apps.registration_datahub.validators import (
 class PullKoboSubmissions:
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
-    def execute(self, kobo_import_data: KoboImportData) -> Dict:
+    def execute(self, kobo_import_data: KoboImportData, program: Program) -> Dict:
         kobo_import_data.status = KoboImportData.STATUS_RUNNING
         kobo_import_data.save()
         kobo_api = KoboAPI(kobo_import_data.business_area_slug)
@@ -27,8 +28,9 @@ class PullKoboSubmissions:
             kobo_import_data.kobo_asset_id, kobo_import_data.only_active_submissions
         )
         business_area = BusinessArea.objects.get(slug=kobo_import_data.business_area_slug)
-        validator = KoboProjectImportDataInstanceValidator()
-        validation_errors = validator.validate_everything(submissions, business_area)
+        validator = KoboProjectImportDataInstanceValidator(program)
+        skip_validate_pictures = kobo_import_data.pull_pictures is False
+        validation_errors = validator.validate_everything(submissions, business_area, skip_validate_pictures)
 
         number_of_households, number_of_individuals = count_population(submissions, business_area)
 

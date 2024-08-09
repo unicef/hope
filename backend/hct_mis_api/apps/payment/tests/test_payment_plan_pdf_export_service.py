@@ -11,8 +11,9 @@ from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentPlanFactory,
+    generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import Approval, GenericPayment
+from hct_mis_api.apps.payment.models import Approval, DeliveryMechanism
 from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
 )
@@ -21,7 +22,9 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 class TestPaymentPlanPDFExportService(TestCase):
     def setUp(self) -> None:
+        generate_delivery_mechanisms()
         create_afghanistan()
+        self.dm_cash = DeliveryMechanism.objects.get(code="cash")
         self.payment_plan = PaymentPlanFactory(
             program=ProgramFactory(data_collecting_type__type=DataCollectingType.Type.STANDARD)
         )
@@ -29,13 +32,12 @@ class TestPaymentPlanPDFExportService(TestCase):
         self.payment_plan.save()
         self.pdf_export_service = PaymentPlanPDFExportService(self.payment_plan)
 
-        financial_service_provider1 = FinancialServiceProviderFactory(
-            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH]
-        )
+        financial_service_provider1 = FinancialServiceProviderFactory()
+        financial_service_provider1.delivery_mechanisms.add(self.dm_cash)
 
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+            delivery_mechanism=self.dm_cash,
             financial_service_provider=financial_service_provider1,
             delivery_mechanism_order=1,
         )

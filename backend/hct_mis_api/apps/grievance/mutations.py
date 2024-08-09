@@ -61,6 +61,7 @@ from hct_mis_api.apps.grievance.utils import (
     delete_grievance_documents,
     get_individual,
     update_grievance_documents,
+    validate_individual_for_need_adjudication,
 )
 from hct_mis_api.apps.grievance.validators import (
     DataChangeValidator,
@@ -801,6 +802,9 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
         approved_payment_channels_to_create = graphene.List(graphene.Int)
         approved_payment_channels_to_edit = graphene.List(graphene.Int)
         approved_payment_channels_to_remove = graphene.List(graphene.Int)
+        approved_delivery_mechanism_data_to_create = graphene.List(graphene.Int)
+        approved_delivery_mechanism_data_to_edit = graphene.List(graphene.Int)
+        approved_delivery_mechanism_data_to_remove = graphene.List(graphene.Int)
         flex_fields_approve_data = graphene.JSONString()
         version = BigInt(required=False)
 
@@ -822,6 +826,9 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
         approved_payment_channels_to_create: List,
         approved_payment_channels_to_edit: List,
         approved_payment_channels_to_remove: List,
+        approved_delivery_mechanism_data_to_create: List,
+        approved_delivery_mechanism_data_to_edit: List,
+        approved_delivery_mechanism_data_to_remove: List,
         flex_fields_approve_data: Dict,
         **kwargs: Any,
     ) -> "IndividualDataChangeApproveMutation":
@@ -842,8 +849,10 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
         individual_approve_data = {to_snake_case(key): value for key, value in individual_approve_data.items()}
         individual_data_details = grievance_ticket.individual_data_update_ticket_details
         individual_data = individual_data_details.individual_data
-        cls.verify_approve_data_against_object_data(individual_data, individual_approve_data)
-        cls.verify_approve_data_against_object_data(individual_data.get("flex_fields"), flex_fields_approve_data)
+        if individual_approve_data:
+            cls.verify_approve_data_against_object_data(individual_data, individual_approve_data)
+        if flex_fields_approve_data:
+            cls.verify_approve_data_against_object_data(individual_data.get("flex_fields"), flex_fields_approve_data)
 
         documents_mapping = {
             "documents": approved_documents_to_create,
@@ -855,6 +864,9 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
             "payment_channels": approved_payment_channels_to_create,
             "payment_channels_to_remove": approved_payment_channels_to_remove,
             "payment_channels_to_edit": approved_payment_channels_to_edit,
+            "delivery_mechanism_data": approved_delivery_mechanism_data_to_create,
+            "delivery_mechanism_data_to_remove": approved_delivery_mechanism_data_to_remove,
+            "delivery_mechanism_data_to_edit": approved_delivery_mechanism_data_to_edit,
         }
 
         for field_name, item in individual_data.items():
@@ -1156,7 +1168,9 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
     class Arguments:
         grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
         selected_individual_id = graphene.Argument(graphene.ID, required=False)
-        selected_individual_ids = graphene.List(graphene.ID, required=False)
+        duplicate_individual_ids = graphene.List(graphene.ID, required=False)
+        distinct_individual_ids = graphene.List(graphene.ID, required=False)
+        clear_individual_ids = graphene.List(graphene.ID, required=False)
         version = BigInt(required=False)
 
     @classmethod
@@ -1178,49 +1192,62 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
             Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
         )
 
-        selected_individual_id = kwargs.get("selected_individual_id", None)
-        selected_individual_ids = kwargs.get("selected_individual_ids", None)
+        duplicate_individual_ids = kwargs.get("duplicate_individual_ids", [])
+        distinct_individual_ids = kwargs.get("distinct_individual_ids", [])
+        clear_individual_ids = kwargs.get("clear_individual_ids", [])
+        selected_individual_id = kwargs.get("selected_individual_id")
+
+        if any(
+            [
+                duplicate_individual_ids
+                and (selected_individual_id or distinct_individual_ids or clear_individual_ids),
+                clear_individual_ids
+                and (duplicate_individual_ids or distinct_individual_ids or selected_individual_id),
+            ]
+        ):
+            log_and_raise("Only one option for duplicate or distinct or clear individuals is available")
+
+        if (
+            duplicate_individual_ids or distinct_individual_ids or selected_individual_id
+        ) and grievance_ticket.status != GrievanceTicket.STATUS_FOR_APPROVAL:
+            raise ValidationError("A user can not flag individuals when a ticket is not in the 'For Approval' status")
 
         user = info.context.user
         partner = user.partner
 
-        if selected_individual_id and selected_individual_ids:
-            log_and_raise("Only one option for selected individuals is available")
+        ticket_details: TicketNeedsAdjudicationDetails = grievance_ticket.ticket_details
 
-        ticket_details = grievance_ticket.ticket_details
-
+        # using for old tickets
         if selected_individual_id:
             selected_individual = get_individual(selected_individual_id)
-
-            # Validate partner's permission
-            if not partner.is_unicef:
-                if not partner.has_area_access(
-                    area_id=selected_individual.household.admin2.id, program_id=selected_individual.program.id
-                ):
-                    raise PermissionDenied("Permission Denied: User does not have access to select individual")
-
-            if selected_individual not in (
-                ticket_details.golden_records_individual,
-                ticket_details.possible_duplicate,
-            ):
-                log_and_raise("The selected individual is not valid, must be one of those attached to the ticket")
+            validate_individual_for_need_adjudication(partner, selected_individual, ticket_details)
 
             ticket_details.selected_individual = selected_individual
             ticket_details.role_reassign_data = {}
 
-        if selected_individual_ids:  # Allow choosing multiple individuals
-            selected_individuals = [get_individual(_id) for _id in selected_individual_ids]
+        if clear_individual_ids:
+            clear_individuals = [get_individual(_id) for _id in clear_individual_ids]
+            # remove Individual from selected_individuals and selected_distinct
+            ticket_details.selected_individuals.remove(*clear_individuals)
+            ticket_details.selected_distinct.remove(*clear_individuals)
 
-            # Validate partner's permission
-            if not partner.is_unicef:
-                for selected_individual in selected_individuals:
-                    if not partner.has_area_access(
-                        area_id=selected_individual.household.admin2.id, program_id=selected_individual.program.id
-                    ):
-                        raise PermissionDenied("Permission Denied: User does not have access to select individual")
+        if distinct_individual_ids:
+            distinct_individuals = [get_individual(_id) for _id in distinct_individual_ids]
 
-            ticket_details.selected_individuals.remove(*ticket_details.selected_individuals.all())
-            ticket_details.selected_individuals.add(*selected_individuals)
+            for individual in distinct_individuals:
+                validate_individual_for_need_adjudication(partner, individual, ticket_details)
+
+            ticket_details.selected_distinct.add(*distinct_individuals)
+            ticket_details.selected_individuals.remove(*distinct_individuals)
+
+        if duplicate_individual_ids:
+            duplicate_individuals = [get_individual(_id) for _id in duplicate_individual_ids]
+
+            for individual in duplicate_individuals:
+                validate_individual_for_need_adjudication(partner, individual, ticket_details)
+
+            ticket_details.selected_individuals.add(*duplicate_individuals)
+            ticket_details.selected_distinct.remove(*duplicate_individuals)
 
         ticket_details.save()
         grievance_ticket.refresh_from_db()

@@ -1,11 +1,13 @@
 import functools
 import io
 import itertools
+import json
 import logging
 import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
+from decimal import Decimal
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -23,12 +25,13 @@ from typing import (
 from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Func, Q, Value
 from django.http import Http404
 from django.template.loader import render_to_string
 from django.utils import timezone
 
 import pytz
+from adminfilters.autocomplete import AutoCompleteFilter
 from django_filters import OrderingFilter
 from PIL import Image
 
@@ -215,7 +218,7 @@ def serialize_flex_attributes() -> Dict[str, Dict[str, Any]]:
     """
     from hct_mis_api.apps.core.models import FlexibleAttribute
 
-    flex_attributes = FlexibleAttribute.objects.prefetch_related("choices").all()
+    flex_attributes = FlexibleAttribute.objects.exclude(type=FlexibleAttribute.PDU).prefetch_related("choices").all()
 
     result_dict = {
         "individuals": {},
@@ -250,7 +253,9 @@ def get_combined_attributes() -> Dict:
 
     flex_attrs = serialize_flex_attributes()
     return {
-        **FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_ID, Scope.COLLECTOR])
+        **FieldFactory.from_scopes(
+            [Scope.GLOBAL, Scope.XLSX, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_ID, Scope.COLLECTOR, Scope.DELIVERY_MECHANISM]
+        )
         .apply_business_area()
         .to_dict_by("xlsx_field"),
         **flex_attrs["individuals"],
@@ -583,41 +588,26 @@ def xlrd_rows_iterator(sheet: "Worksheet") -> Generator:
         yield row
 
 
-def chart_map_choices(choices: Iterable) -> Dict:
-    return dict(choices)
-
-
 def chart_get_filtered_qs(
     qs: Any,
     year: int,
     business_area_slug_filter: Optional[Dict] = None,
-    additional_filters: Union[Dict, Q, None] = None,
+    additional_filters: Optional[Dict] = None,
     year_filter_path: Optional[str] = None,
-    payment_verification_gfk: bool = False,
 ) -> "QuerySet":
-    # if payment_verification_gfk True will use Q() object for filtering by PaymentPlan and CashPlan
-    q_obj = Q()
     if additional_filters is None:
         additional_filters = {}
-    if isinstance(additional_filters, Q):
-        q_obj, additional_filters = additional_filters, {}
     if year_filter_path is None:
-        year_filter = {"created_at__year": year}
+        year_filter = Q(created_at__year=year)
     else:
-        year_filter = {f"{year_filter_path}__year": year}
-        if payment_verification_gfk:
-            year_filter = {}
-            for k in year_filter_path.split(","):
-                q_obj |= Q(**{f"{k}__year": year})
+        year_filter = Q()
+        for k in year_filter_path.split(","):
+            year_filter |= Q(**{f"{k}__year": year})
 
     if business_area_slug_filter is None or "global" in business_area_slug_filter.values():
         business_area_slug_filter = {}
 
-    if payment_verification_gfk and len(business_area_slug_filter) > 1:
-        for key, value in business_area_slug_filter.items():
-            q_obj |= Q(**{key: value})
-
-    return qs.filter(q_obj, **year_filter, **business_area_slug_filter, **additional_filters)
+    return qs.filter(year_filter, **business_area_slug_filter, **additional_filters)
 
 
 def parse_list_values_to_int(list_to_parse: List) -> List[int]:
@@ -913,3 +903,35 @@ def send_email_notification(
         html_body=render_to_string(service.html_template, context=context),
         text_body=render_to_string(service.text_template, context=context),
     )
+
+
+# temporary fix for filter
+# https://github.com/saxix/django-adminfilters/blob/676765e3bf25038595a29756014c01e11c5a5d39/src/adminfilters/autocomplete.py#L55
+# not working with .all_objects()
+class AutoCompleteFilterTemp(AutoCompleteFilter):
+    def choices(self, changelist: Any) -> list:
+        self.query_string = changelist.get_query_string(remove=[self.lookup_kwarg, self.lookup_kwarg_isnull])
+        if self.lookup_val:
+            get_kwargs = {self.field.target_field.name: self.lookup_val}
+            obj = self.target_model.objects.filter(**get_kwargs) or self.target_model.all_objects.filter(**get_kwargs)
+            return [str(obj.first()) or ""]
+
+        return []
+
+
+class FlexFieldsEncoder(json.JSONEncoder):
+    def default(self, obj: Any) -> Any:
+        if isinstance(obj, date):
+            return obj.isoformat()
+        if isinstance(obj, Decimal):
+            return str(obj)
+        return super().default(obj)
+
+
+class JSONBSet(Func):
+    function = "jsonb_set"
+    template = "%(function)s(%(expressions)s)"
+
+    def __init__(self, expression: Any, path: Any, new_value: Any, create_missing: bool = True, **extra: Any) -> None:
+        create_missing = Value("true") if create_missing else Value("false")  # type: ignore
+        super().__init__(expression, path, new_value, create_missing, **extra)

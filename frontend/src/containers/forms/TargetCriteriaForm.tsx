@@ -139,12 +139,14 @@ export const TargetCriteriaForm = ({
   }, [data, loading]);
 
   if (!data) return null;
+
   const validate = ({
     filters,
     individualsFiltersBlocks,
   }): { nonFieldErrors?: string[] } => {
     const filterNullOrNoSelections = (filter): boolean =>
       filter.value === null ||
+      filter.value === '' ||
       (filter?.fieldAttribute?.type === 'SELECT_MANY' &&
         filter.value &&
         filter.value.length === 0);

@@ -7,6 +7,7 @@ from django.test import TestCase
 from parameterized import parameterized
 
 import hct_mis_api.apps.mis_datahub.models as dh_models
+from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
@@ -36,6 +37,7 @@ from hct_mis_api.apps.targeting.fixtures import (
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class TestSendTpToDatahub(TestCase):
@@ -44,6 +46,7 @@ class TestSendTpToDatahub(TestCase):
     @staticmethod
     def _pre_test_commands() -> None:
         create_afghanistan()
+        PartnerFactory(name="UNICEF")
         call_command("loadcountries")
         call_command("generatedocumenttypes")
         call_command("loadcountrycodes")
@@ -120,6 +123,7 @@ class TestSendTpToDatahub(TestCase):
             individual=cls.second_household_head,
             household=cls.household_second,
             role=ROLE_PRIMARY,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         cls.household_second.head_of_household = cls.second_household_head
         cls.household_second.save()
@@ -131,6 +135,7 @@ class TestSendTpToDatahub(TestCase):
             individual=cls.individual_primary,
             household=cls.household,
             role=ROLE_PRIMARY,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         Document.objects.create(
             document_number="1231231",
@@ -138,12 +143,14 @@ class TestSendTpToDatahub(TestCase):
             individual=cls.individual_primary,
             type=DocumentType.objects.filter(key="national_id").first(),
             program=cls.individual_primary.program,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         IndividualIdentity.objects.create(
             partner=cls.unhcr,
             individual=cls.individual_primary,
             number="1111",
             country=country,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
         cls.individual_alternate = IndividualFactory(
@@ -153,12 +160,14 @@ class TestSendTpToDatahub(TestCase):
             individual=cls.individual_alternate,
             household=cls.household,
             role=ROLE_ALTERNATE,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         IndividualIdentity.objects.create(
             individual=cls.individual_alternate,
             number="2222",
             partner=cls.unhcr,
             country=country,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
         cls.individual_no_role_first = IndividualFactory(
@@ -171,6 +180,7 @@ class TestSendTpToDatahub(TestCase):
             number="3333",
             partner=cls.unhcr,
             country=country,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
         cls.individual_no_role_second = IndividualFactory(
@@ -181,6 +191,7 @@ class TestSendTpToDatahub(TestCase):
             number="4444",
             partner=cls.unhcr,
             country=country,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
 
         cls.household.head_of_household = cls.individual_primary

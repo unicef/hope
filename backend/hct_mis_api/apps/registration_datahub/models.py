@@ -154,9 +154,6 @@ class ImportedHousehold(TimeStampedUUIDModel):
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK)
     kobo_submission_uuid = models.UUIDField(null=True, default=None)
     kobo_submission_time = models.DateTimeField(max_length=150, blank=True, null=True)
-    # TODO: remove 'kobo_asset_id' and 'row_id' after migrate data
-    kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
-    row_id = models.PositiveIntegerField(blank=True, null=True)
     detail_id = models.CharField(
         max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
     )
@@ -286,9 +283,6 @@ class ImportedIndividual(TimeStampedUUIDModel):
     comms_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     who_answers_phone = models.CharField(max_length=150, blank=True)
     who_answers_alt_phone = models.CharField(max_length=150, blank=True)
-    # TODO: remove 'kobo_asset_id' and 'row_id' after migrate data
-    kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
-    row_id = models.PositiveIntegerField(blank=True, null=True)
     detail_id = models.CharField(
         max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
     )
@@ -429,6 +423,7 @@ class ImportData(TimeStampedUUIDModel):
     STATUS_FINISHED = "FINISHED"
     STATUS_ERROR = "ERROR"
     STATUS_VALIDATION_ERROR = "VALIDATION_ERROR"
+    STATUS_DELIVERY_MECHANISMS_VALIDATION_ERROR = "DELIVERY_MECHANISMS_VALIDATION_ERROR"
 
     STATUS_CHOICES = (
         (STATUS_PENDING, _("Pending")),
@@ -436,8 +431,9 @@ class ImportData(TimeStampedUUIDModel):
         (STATUS_FINISHED, _("Finished")),
         (STATUS_ERROR, _("Error")),
         (STATUS_VALIDATION_ERROR, _("Validation Error")),
+        (STATUS_DELIVERY_MECHANISMS_VALIDATION_ERROR, _("Delivery Mechanisms Validation Error")),
     )
-    status = models.CharField(max_length=20, default=STATUS_FINISHED, choices=STATUS_CHOICES)
+    status = models.CharField(max_length=40, default=STATUS_FINISHED, choices=STATUS_CHOICES)
     business_area_slug = models.CharField(max_length=200, blank=True)
     file = models.FileField(null=True)
     data_type = models.CharField(max_length=4, choices=DATA_TYPE_CHOICES, default=XLSX)
@@ -445,6 +441,7 @@ class ImportData(TimeStampedUUIDModel):
     number_of_individuals = models.PositiveIntegerField(null=True)
     error = models.TextField(blank=True)
     validation_errors = models.TextField(blank=True)
+    delivery_mechanisms_validation_errors = models.TextField(blank=True)
     created_by_id = models.UUIDField(null=True)
 
 

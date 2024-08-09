@@ -8,15 +8,20 @@ from pytz import utc
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismDataFactory,
     PaymentFactory,
     PaymentPlanFactory,
     RealProgramFactory,
+    generate_delivery_mechanisms,
 )
+from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.payment.services import payment_household_snapshot_service
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class TestBuildSnapshot(TestCase):
@@ -24,6 +29,8 @@ class TestBuildSnapshot(TestCase):
     def setUpTestData(cls) -> None:
         cls.maxDiff = None
         create_afghanistan()
+        generate_delivery_mechanisms()
+        cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
 
         with freeze_time("2020-10-10"):
             program = RealProgramFactory()
@@ -44,6 +51,21 @@ class TestBuildSnapshot(TestCase):
             cls.hoh2 = IndividualFactory(household=None)
             cls.hh1 = HouseholdFactory(head_of_household=cls.hoh1)
             cls.hh2 = HouseholdFactory(head_of_household=cls.hoh2)
+            cls.primary_role = IndividualRoleInHousehold.objects.create(
+                household=cls.hh1,
+                individual=cls.hoh1,
+                role=ROLE_PRIMARY,
+                rdi_merge_status=MergeStatusModel.MERGED,
+            )
+            DeliveryMechanismDataFactory(
+                individual=cls.hoh1,
+                delivery_mechanism=cls.dm_atm_card,
+                data={
+                    "card_number__atm_card": "123",
+                    "card_expiry_date__atm_card": "2022-01-01",
+                    "name_of_cardholder__atm_card": "Marek",
+                },
+            )
             cls.p1 = PaymentFactory(
                 parent=cls.pp,
                 conflicted=False,
@@ -57,7 +79,7 @@ class TestBuildSnapshot(TestCase):
             )
             cls.p2 = PaymentFactory(
                 parent=cls.pp,
-                conflicted=True,
+                conflicted=False,
                 household=cls.hh2,
                 head_of_household=cls.hoh2,
                 entitlement_quantity=100.00,
@@ -77,6 +99,18 @@ class TestBuildSnapshot(TestCase):
         self.assertEqual(str(self.p2.household_snapshot.snapshot_data["id"]), str(self.hh2.id))
         self.assertEqual(len(self.p1.household_snapshot.snapshot_data["individuals"]), self.hh1.individuals.count())
         self.assertEqual(len(self.p2.household_snapshot.snapshot_data["individuals"]), self.hh2.individuals.count())
+        self.assertIsNotNone(self.p1.household_snapshot.snapshot_data["primary_collector"])
+        self.assertEqual(
+            self.p1.household_snapshot.snapshot_data["primary_collector"]["delivery_mechanisms_data"],
+            {
+                "atm_card": {
+                    "card_expiry_date__atm_card": "2022-01-01",
+                    "card_number__atm_card": "123",
+                    "full_name": self.hoh1.full_name,
+                    "name_of_cardholder__atm_card": "Marek",
+                }
+            },
+        )
 
     def test_batching(self) -> None:
         program = RealProgramFactory()

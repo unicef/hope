@@ -31,10 +31,9 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
 from hct_mis_api.apps.payment.models import (
     CashPlan,
+    DeliveryMechanism,
     FinancialServiceProvider,
-    FinancialServiceProviderXlsxReport,
     FinancialServiceProviderXlsxTemplate,
-    GenericPayment,
     Payment,
     PaymentPlan,
     PaymentRecord,
@@ -216,22 +215,14 @@ class FinancialServiceProviderXlsxTemplateFilter(FilterSet):
     order_by = CustomOrderingFilter(
         fields=(
             Lower("name"),
-            "created_by",
+            ("created_by__first_name", "created_by"),
         )
     )
 
 
-class FinancialServiceProviderXlsxReportFilter(FilterSet):
-    class Meta:
-        fields = ("status",)
-        model = FinancialServiceProviderXlsxReport
-
-    order_by = CustomOrderingFilter(fields=("status",))
-
-
 class FinancialServiceProviderFilter(FilterSet):
     delivery_mechanisms = MultipleChoiceFilter(
-        field_name="delivery_mechanisms", choices=GenericPayment.DELIVERY_TYPE_CHOICE
+        field_name="delivery_mechanisms", choices=DeliveryMechanism.get_choices()
     )
 
     class Meta:
@@ -260,7 +251,7 @@ class FinancialServiceProviderFilter(FilterSet):
 
 class CashPlanFilter(FilterSet):
     search = CharFilter(method="search_filter")
-    delivery_type = MultipleChoiceFilter(field_name="delivery_type", choices=PaymentRecord.DELIVERY_TYPE_CHOICE)
+    delivery_type = MultipleChoiceFilter(field_name="delivery_type", choices=DeliveryMechanism.get_choices())
     verification_status = MultipleChoiceFilter(
         field_name="payment_verification_summary__status", choices=PaymentVerificationPlan.STATUS_CHOICES
     )

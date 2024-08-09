@@ -4,14 +4,19 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from django.core.exceptions import ValidationError
 from django.forms import modelform_factory
 
-from django_countries.fields import Country
-
 from hct_mis_api.apps.core.utils import (
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     build_arg_dict_from_dict,
     build_flex_arg_dict_from_list_if_exists,
 )
+from hct_mis_api.apps.geo.models import Area, Country
+from hct_mis_api.apps.household.forms import (
+    BankAccountInfoForm,
+    DocumentForm,
+    IndividualForm,
+)
 from hct_mis_api.apps.household.models import (
+    BLANK,
     DISABLED,
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -24,16 +29,14 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     YES,
+    DocumentType,
+    PendingBankAccountInfo,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedBankAccountInfo,
-    ImportedDocument,
-    ImportedDocumentType,
-    ImportedHousehold,
-    ImportedIndividual,
-    ImportedIndividualRoleInHousehold,
-    RegistrationDataImportDatahub,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
@@ -90,11 +93,9 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]: ("tax_id_no_i_c", "tax_id_picture"),
     }
 
-    def create_household_for_rdi_household(
-        self, record: Any, registration_data_import: RegistrationDataImportDatahub
-    ) -> None:
-        individuals: List[ImportedIndividual] = []
-        documents: List[ImportedDocument] = []
+    def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
+        individuals: List[PendingIndividual] = []
+        documents: List[PendingDocument] = []
         record_data_dict = record.get_data()
         household_dict = record_data_dict.get("household", [])[0]
         individuals_array = record_data_dict.get("individuals", [])
@@ -110,21 +111,11 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
             household_data["size"] = len(individuals_array)
         if enumerator_rec_id:
             household_data["enumerator_rec_id"] = enumerator_rec_id
-        household = self._create_object_and_validate(household_data, ImportedHousehold)
+        household = self._create_object_and_validate(household_data, PendingHousehold)
         household.set_admin_areas()
 
         household.detail_id = record.source_id
-        household.save(
-            update_fields=(
-                "admin_area",
-                "admin_area_title",
-                "admin1_title",
-                "admin2_title",
-                "admin3_title",
-                "admin4_title",
-                "detail_id",
-            )
-        )
+        household.save(update_fields=("detail_id", "admin_area", "admin1", "admin2", "admin3", "admin4"))
 
         for index, individual_dict in enumerate(individuals_array):
             try:
@@ -132,7 +123,9 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
                 role = individual_data.pop("role")
                 phone_no = individual_data.pop("phone_no", "")
 
-                individual: ImportedIndividual = self._create_object_and_validate(individual_data, ImportedIndividual)
+                individual: PendingIndividual = self._create_object_and_validate(
+                    individual_data, PendingIndividual, IndividualForm
+                )
                 individual.disability_certificate_picture = individual_data.get("disability_certificate_picture")
                 individual.phone_no = phone_no
                 individual.detail_id = record.source_id
@@ -140,7 +133,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
 
                 bank_account_data = self._prepare_bank_account_info(individual_dict, individual)
                 if bank_account_data:
-                    self._create_object_and_validate(bank_account_data, ImportedBankAccountInfo)
+                    self._create_object_and_validate(bank_account_data, PendingBankAccountInfo, BankAccountInfoForm)
                 self._create_role(role, individual, household)
                 individuals.append(individual)
 
@@ -151,7 +144,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
             except ValidationError as e:
                 raise ValidationError({f"individual nr {index + 1}": [str(e)]}) from e
 
-        ImportedDocument.objects.bulk_create(documents)
+        PendingDocument.objects.bulk_create(documents)
 
     def _set_default_head_of_household(self, individuals_array: "QuerySet") -> None:
         for individual_data in individuals_array:
@@ -159,32 +152,42 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
                 individual_data["relationship_i_c"] = "head"
                 break
 
-    def _create_role(self, role: "Role", individual: ImportedIndividual, household: ImportedHousehold) -> None:
+    def _create_role(self, role: "Role", individual: PendingIndividual, household: PendingHousehold) -> None:
         if role == "y":
             defaults = dict(individual=individual, household=household)
-            if ImportedIndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).count() == 0:
-                ImportedIndividualRoleInHousehold.objects.create(**defaults, role=ROLE_PRIMARY)
-            elif (
-                ImportedIndividualRoleInHousehold.objects.filter(household=household, role=ROLE_ALTERNATE).count() == 0
-            ):
-                ImportedIndividualRoleInHousehold.objects.create(**defaults, role=ROLE_ALTERNATE)
+            if PendingIndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).count() == 0:
+                PendingIndividualRoleInHousehold.objects.create(**defaults, role=ROLE_PRIMARY)
+            elif PendingIndividualRoleInHousehold.objects.filter(household=household, role=ROLE_ALTERNATE).count() == 0:
+                PendingIndividualRoleInHousehold.objects.create(**defaults, role=ROLE_ALTERNATE)
             else:
                 raise ValidationError("There should be only two collectors!")
 
     def _prepare_household_data(
-        self, household_dict: Dict, record: Any, registration_data_import: RegistrationDataImportDatahub
+        self, household_dict: Dict, record: Any, registration_data_import: RegistrationDataImport
     ) -> Dict:
         household_data = dict(
-            **build_arg_dict_from_dict(household_dict, self.HOUSEHOLD_MAPPING_DICT),
-            # flex_registrations_record=record,
             registration_data_import=registration_data_import,
+            program=registration_data_import.program,
             first_registration_date=record.timestamp,
             last_registration_date=record.timestamp,
-            country_origin=Country(code="UA"),
-            country=Country(code="UA"),
+            country_origin=Country.objects.get(iso_code2="UA"),
+            country=Country.objects.get(iso_code2="UA"),
             consent=True,
             collect_individual_data=YES,
+            size=household_dict.get("size_h_c"),
+            business_area=registration_data_import.business_area,
+            residence_status=household_dict.get("residence_status_h_c", BLANK),
         )
+
+        admin1 = household_dict.get("admin1_h_c")
+        admin2 = household_dict.get("admin2_h_c")
+        admin3 = household_dict.get("admin2_h_c")
+        admin4 = household_dict.get("admin2_h_c")
+
+        household_data["admin1"] = str(Area.objects.get(p_code=admin1).id) if admin1 else None
+        household_data["admin2"] = str(Area.objects.get(p_code=admin2).id) if admin2 else None
+        household_data["admin3"] = str(Area.objects.get(p_code=admin3).id) if admin3 else None
+        household_data["admin4"] = str(Area.objects.get(p_code=admin4).id) if admin4 else None
 
         if residence_status := household_data.get("residence_status"):
             household_data["residence_status"] = residence_status.upper()
@@ -194,15 +197,17 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
     def _prepare_individual_data(
         self,
         individual_dict: Dict,
-        household: ImportedHousehold,
-        registration_data_import: RegistrationDataImportDatahub,
+        household: PendingHousehold,
+        registration_data_import: RegistrationDataImport,
     ) -> Dict:
         individual_data = dict(
             **build_arg_dict_from_dict(individual_dict, self.INDIVIDUAL_MAPPING_DICT),
-            household=household,
+            household=str(household.pk),
+            program=registration_data_import.program,
             registration_data_import=registration_data_import,
             first_registration_date=household.first_registration_date,
             last_registration_date=household.last_registration_date,
+            business_area=registration_data_import.business_area,
         )
         disability = individual_data.get("disability", "n")
         disability_certificate_picture = individual_data.get("disability_certificate_picture")
@@ -239,7 +244,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
 
         return individual_data
 
-    def _prepare_documents(self, individual_dict: Dict, individual: ImportedIndividual) -> List[ImportedDocument]:
+    def _prepare_documents(self, individual_dict: Dict, individual: PendingIndividual) -> List[PendingDocument]:
         documents = []
 
         for document_key_string, (
@@ -256,24 +261,26 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
 
             certificate_picture = self._prepare_picture_from_base64(certificate_picture, document_number)
 
-            document_type = ImportedDocumentType.objects.get(key=document_key_string)
+            document_type = DocumentType.objects.get(key=document_key_string)
             document_kwargs = {
-                "country": "UA",
+                "country": Country.objects.get(iso_code2="UA"),
                 "type": document_type,
                 "document_number": document_number,
-                "individual": individual,
+                "individual": individual.pk,
+                "program": individual.program,
             }
-            ModelClassForm = modelform_factory(ImportedDocument, fields=list(document_kwargs.keys()))
-            form = ModelClassForm(document_kwargs)
+            ModelClassForm = modelform_factory(PendingDocument, form=DocumentForm, fields=list(document_kwargs.keys()))
+            form = ModelClassForm(data=document_kwargs)
             if not form.is_valid():
                 raise ValidationError(form.errors)
-            document = ImportedDocument(photo=certificate_picture, **document_kwargs)
+            document_kwargs["individual"] = individual
+            document = PendingDocument(photo=certificate_picture, **document_kwargs)
             documents.append(document)
 
         return documents
 
     def _prepare_bank_account_info(
-        self, individual_dict: Dict, individual: ImportedIndividual
+        self, individual_dict: Dict, individual: PendingIndividual
     ) -> Optional[Dict[str, Any]]:
         if individual_dict.get("bank_account_h_f", "n") != "y":
             return None
@@ -290,11 +297,11 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
             "debit_card_number": str(individual_dict.get("bank_account_number", "")).replace(" ", ""),
             "account_holder_name": individual_dict.get("account_holder_name_i_c", ""),
             "bank_branch_name": individual_dict.get("bank_branch_name_i_c", ""),
-            "individual": individual,
+            "individual": str(individual.pk),
         }
         return bank_account_info_data
 
-    def validate_household(self, individuals_array: List[ImportedIndividual]) -> None:
+    def validate_household(self, individuals_array: List[PendingIndividual]) -> None:
         if not individuals_array:
             raise ValidationError("Household should has at least one individual")
 
@@ -302,7 +309,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         if not has_head:
             raise ValidationError("Household should has at least one Head of Household")
 
-    def _has_head(self, individuals_array: List[ImportedIndividual]) -> bool:
+    def _has_head(self, individuals_array: List[PendingIndividual]) -> bool:
         return any(
             individual_data.get(
                 "relationship_i_c",
@@ -327,8 +334,8 @@ class Registration2024(UkraineBaseRegistrationService):
     def _prepare_individual_data(
         self,
         individual_dict: Dict,
-        household: ImportedHousehold,
-        registration_data_import: RegistrationDataImportDatahub,
+        household: PendingHousehold,
+        registration_data_import: RegistrationDataImport,
     ) -> Dict:
         individual_data = super()._prepare_individual_data(individual_dict, household, registration_data_import)
         individual_data["flex_fields"] = build_flex_arg_dict_from_list_if_exists(

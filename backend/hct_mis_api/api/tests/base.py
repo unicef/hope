@@ -14,7 +14,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 
 
 class HOPEApiTestCase(APITestCase):
-    databases = {"default", "registration_datahub"}
+    databases = {"default"}
     user_permissions = [
         Grant.API_RDI_CREATE,
         Grant.API_RDI_UPLOAD,
@@ -45,7 +45,7 @@ class HOPEApiTestCase(APITestCase):
 
 
 class ConstanceSettingsAPITest(APITestCase):
-    databases = {"default", "registration_datahub"}
+    databases = {"default"}
     user_permissions = [
         Grant.API_READ_ONLY,
     ]
