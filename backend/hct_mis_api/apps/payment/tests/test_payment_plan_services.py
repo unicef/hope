@@ -603,7 +603,7 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService.create(input_data=input_data, user=self.user)
 
         cycle.status = ProgramCycle.DRAFT
-        cycle.end_date = parse_date("2020-11-25")
+        cycle.end_date = parse_date("2021-11-25")
         cycle.save()
         PaymentPlanService.create(input_data=input_data, user=self.user)
         cycle.refresh_from_db()

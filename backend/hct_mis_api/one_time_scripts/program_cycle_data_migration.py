@@ -106,6 +106,7 @@ def processing_with_active_program(payment_plan: PaymentPlan) -> None:
                 str(payment_plan.program_id), ProgramCycle.ACTIVE, payment_plan_start_date, payment_plan_end_date
             )
             break
+    print("PP , Cycle = , created", payment_plan.name, cycle)  # TODO: remove this print
     # update TP
     TargetPopulation.objects.filter(id=payment_plan.target_population_id).update(program_cycle=cycle)
     # update Payment Plan
