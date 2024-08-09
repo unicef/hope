@@ -499,7 +499,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getSelectCategory().click()
         pageGrievanceNewTicket.select_option_by_name(test_data["category"])
         pageGrievanceNewTicket.getIssueType().click()
-        pageGrievanceNewTicket.select_option_by_name(test_data["type"])
+        pageGrievanceNewTicket.select_listbox_element(test_data["type"])
         assert test_data["category"] in pageGrievanceNewTicket.getSelectCategory().text
         assert test_data["type"] in pageGrievanceNewTicket.getIssueType().text
         pageGrievanceNewTicket.getButtonNext().click()
@@ -536,7 +536,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getSelectCategory().click()
         pageGrievanceNewTicket.select_option_by_name("Data Change")
         pageGrievanceNewTicket.getIssueType().click()
-        pageGrievanceNewTicket.select_option_by_name("Add Individual")
+        pageGrievanceNewTicket.select_listbox_element("Add Individual")
         assert "Data Change" in pageGrievanceNewTicket.getSelectCategory().text
         assert "Add Individual" in pageGrievanceNewTicket.getIssueType().text
         pageGrievanceNewTicket.getButtonNext().click()
@@ -553,7 +553,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getInputIndividualdataFamilyname().send_keys("Teria")
         pageGrievanceNewTicket.getInputIndividualdataFullname().send_keys("Krido")
         pageGrievanceNewTicket.getEstimatedBirthDate().click()
-        pageGrievanceNewTicket.select_listbox_element("Yes")
+        pageGrievanceNewTicket.select_option_by_name("Yes")
         pageGrievanceNewTicket.getSelectIndividualdataSex().click()
         pageGrievanceNewTicket.select_listbox_element("Male")
         pageGrievanceNewTicket.getInputIndividualdataGivenname().send_keys("Krato")
@@ -609,7 +609,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getSelectCategory().click()
         pageGrievanceNewTicket.select_option_by_name("Data Change")
         pageGrievanceNewTicket.getIssueType().click()
-        pageGrievanceNewTicket.select_option_by_name("Add Individual")
+        pageGrievanceNewTicket.select_listbox_element("Add Individual")
         assert "Data Change" in pageGrievanceNewTicket.getSelectCategory().text
         assert "Add Individual" in pageGrievanceNewTicket.getIssueType().text
         pageGrievanceNewTicket.getButtonNext().click()
@@ -680,7 +680,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getSelectCategory().click()
         pageGrievanceNewTicket.select_option_by_name(str(test_data["category"]))
         pageGrievanceNewTicket.getIssueType().click()
-        pageGrievanceNewTicket.select_option_by_name(str(test_data["type"]))
+        pageGrievanceNewTicket.select_listbox_element(str(test_data["type"]))
         assert test_data["category"] in pageGrievanceNewTicket.getSelectCategory().text
         assert test_data["type"] in pageGrievanceNewTicket.getIssueType().text
         pageGrievanceNewTicket.getButtonNext().click()
@@ -770,7 +770,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getSelectCategory().click()
         pageGrievanceNewTicket.select_option_by_name("Grievance Complaint")
         pageGrievanceNewTicket.getIssueType().click()
-        pageGrievanceNewTicket.select_option_by_name("Partner Related Complaint")
+        pageGrievanceNewTicket.select_listbox_element("Partner Related Complaint")
         assert "Grievance Complaint" in pageGrievanceNewTicket.getSelectCategory().text
         assert "Partner Related Complaint" in pageGrievanceNewTicket.getIssueType().text
         pageGrievanceNewTicket.getButtonNext().click()
@@ -797,7 +797,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getSelectCategory().click()
         pageGrievanceNewTicket.select_option_by_name("Grievance Complaint")
         pageGrievanceNewTicket.getIssueType().click()
-        pageGrievanceNewTicket.select_option_by_name("Payment Related Complaint")
+        pageGrievanceNewTicket.select_listbox_element("Payment Related Complaint")
         assert "Grievance Complaint" in pageGrievanceNewTicket.getSelectCategory().text
         assert "Payment Related Complaint" in pageGrievanceNewTicket.getIssueType().text
         pageGrievanceNewTicket.getButtonNext().click()
@@ -889,7 +889,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getSelectCategory().click()
         pageGrievanceNewTicket.select_option_by_name("Data Change")
         pageGrievanceNewTicket.getIssueType().click()
-        pageGrievanceNewTicket.select_option_by_name("Individual Data Update")
+        pageGrievanceNewTicket.select_listbox_element("Individual Data Update")
         assert "Data Change" in pageGrievanceNewTicket.getSelectCategory().text
         assert "Individual Data Update" in pageGrievanceNewTicket.getIssueType().text
         pageGrievanceNewTicket.getButtonNext().click()
@@ -1013,7 +1013,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getSelectCategory().click()
         pageGrievanceNewTicket.select_option_by_name("Data Change")
         pageGrievanceNewTicket.getIssueType().click()
-        pageGrievanceNewTicket.select_option_by_name("Household Data Update")
+        pageGrievanceNewTicket.select_listbox_element("Household Data Update")
         assert "Data Change" in pageGrievanceNewTicket.getSelectCategory().text
         assert "Household Data Update" in pageGrievanceNewTicket.getIssueType().text
         pageGrievanceNewTicket.getButtonNext().click()
