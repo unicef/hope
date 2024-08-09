@@ -352,6 +352,7 @@ export const EditProgramPage = (): ReactElement => {
                         programHasRdi={programHasRdi}
                         programId={id}
                         program={data.program}
+                        setFieldValue={setFieldValue}
                       />
                     )}
                   </div>

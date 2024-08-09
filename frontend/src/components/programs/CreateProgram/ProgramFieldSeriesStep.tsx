@@ -103,9 +103,31 @@ export const ProgramFieldSeriesStep = ({
                                 e.target.value,
                                 10,
                               );
+                              const updatedRoundsNames = [
+                                ...values.pduFields[index].pduData.roundsNames,
+                              ];
+
+                              if (updatedRoundsNames.length < numberOfRounds) {
+                                for (
+                                  let i = updatedRoundsNames.length;
+                                  i < numberOfRounds;
+                                  i++
+                                ) {
+                                  updatedRoundsNames.push('');
+                                }
+                              } else if (
+                                updatedRoundsNames.length > numberOfRounds
+                              ) {
+                                updatedRoundsNames.length = numberOfRounds;
+                              }
+
                               setFieldValue(
                                 `pduFields.${index}.pduData.numberOfRounds`,
                                 numberOfRounds,
+                              );
+                              setFieldValue(
+                                `pduFields.${index}.pduData.roundsNames`,
+                                updatedRoundsNames,
                               );
                             }}
                             component={FormikSelectField}
