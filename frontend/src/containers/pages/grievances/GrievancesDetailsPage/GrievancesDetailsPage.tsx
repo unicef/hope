@@ -20,7 +20,7 @@ import { isPermissionDeniedError } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { grievancePermissions } from './grievancePermissions';
 
-export function GrievancesDetailsPage(): React.ReactElement {
+export const GrievancesDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
   const { data: currentUserData, loading: currentUserDataLoading } =
@@ -102,4 +102,4 @@ export function GrievancesDetailsPage(): React.ReactElement {
       )}
     </>
   );
-}
+};

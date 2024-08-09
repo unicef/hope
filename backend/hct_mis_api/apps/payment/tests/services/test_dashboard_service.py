@@ -9,15 +9,15 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryF
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentRecordFactory,
+    generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import GenericPayment
+from hct_mis_api.apps.payment.models import DeliveryMechanism, GenericPayment
 from hct_mis_api.apps.payment.services.dashboard_service import (
     payment_verification_chart_query,
 )
@@ -30,6 +30,9 @@ pytestmark = pytest.mark.django_db(transaction=True)
 class TestPaymentVerificationChartQuery:
     @pytest.fixture(autouse=True)
     def setUp(self) -> None:
+        generate_delivery_mechanisms()
+        self.dm_cash = DeliveryMechanism.objects.get(code="cash")
+        self.dm_voucher = DeliveryMechanism.objects.get(code="voucher")
         PartnerFactory(name="UNICEF")
         fsp = FinancialServiceProviderFactory()
 
@@ -83,7 +86,7 @@ class TestPaymentVerificationChartQuery:
             parent=cash_plan,
             delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
             household=household1,
-            delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+            delivery_type=self.dm_cash,
             delivered_quantity=10 + num,
             delivered_quantity_usd=10 + num,
             status=GenericPayment.STATUS_SUCCESS,
@@ -94,7 +97,7 @@ class TestPaymentVerificationChartQuery:
             parent=cash_plan,
             delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
             household=household2,
-            delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+            delivery_type=self.dm_voucher,
             delivered_quantity=20 + num,
             delivered_quantity_usd=20 + num,
             status=GenericPayment.STATUS_SUCCESS,
@@ -105,7 +108,7 @@ class TestPaymentVerificationChartQuery:
             parent=cash_plan,
             delivery_date=timezone.datetime(2021, 11, 10, tzinfo=utc),
             household=household3,
-            delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+            delivery_type=self.dm_cash,
             delivered_quantity=30 + num,
             delivered_quantity_usd=30 + num,
             status=GenericPayment.STATUS_ERROR,
@@ -117,7 +120,7 @@ class TestPaymentVerificationChartQuery:
         PaymentFactory(
             parent=payment_plan,
             delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
-            delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+            delivery_type=self.dm_cash,
             delivered_quantity=10 + num,
             delivered_quantity_usd=10 + num,
             status=GenericPayment.STATUS_SUCCESS,
@@ -129,7 +132,7 @@ class TestPaymentVerificationChartQuery:
         PaymentFactory(
             parent=payment_plan,
             delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
-            delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+            delivery_type=self.dm_voucher,
             delivered_quantity=20 + num,
             delivered_quantity_usd=20 + num,
             status=GenericPayment.STATUS_SUCCESS,
@@ -141,7 +144,7 @@ class TestPaymentVerificationChartQuery:
         PaymentFactory(
             parent=payment_plan,
             delivery_date=timezone.datetime(2021, 11, 10, tzinfo=utc),
-            delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+            delivery_type=self.dm_cash,
             delivered_quantity=30 + num,
             delivered_quantity_usd=30 + num,
             status=GenericPayment.STATUS_ERROR,

@@ -11,8 +11,12 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
+from hct_mis_api.apps.payment.fixtures import (
+    CashPlanFactory,
+    PaymentRecordFactory,
+    generate_delivery_mechanisms,
+)
+from hct_mis_api.apps.payment.models import DeliveryMechanism
 
 
 class TestChartTotalTransferredCashByCountry(APITestCase):
@@ -31,6 +35,9 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         call_command("loadbusinessareas")
+        generate_delivery_mechanisms()
+        dm_cash = DeliveryMechanism.objects.get(code="cash")
+        dm_voucher = DeliveryMechanism.objects.get(code="voucher")
         cls.partner = PartnerFactory(name="Test1")
         cls.user = UserFactory(partner=cls.partner)
         (household, _) = create_household(household_args={"size": 1})
@@ -43,7 +50,7 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
                 3,
                 delivery_date=delivery_date,
                 business_area=business_area,
-                delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+                delivery_type=dm_cash,
                 delivered_quantity_usd=200.20,
                 parent=cash_plan,
                 household=household,
@@ -53,7 +60,7 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
                 3,
                 delivery_date=delivery_date,
                 business_area=business_area,
-                delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+                delivery_type=dm_voucher,
                 delivered_quantity_usd=100.00,
                 parent=cash_plan,
                 household=household,

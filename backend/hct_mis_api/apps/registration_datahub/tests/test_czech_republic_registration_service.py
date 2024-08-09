@@ -223,6 +223,7 @@ class TestCzechRepublicRegistrationService(TestCase):
             Record.objects.filter(id__in=records_ids, ignored=False, status=Record.STATUS_IMPORTED).count(), 1
         )
         self.assertEqual(PendingHousehold.objects.count(), 1)
+        self.assertEqual(PendingHousehold.objects.filter(program=rdi.program).count(), 1)
 
         household = PendingHousehold.objects.first()
         self.assertEqual(household.consent, True)

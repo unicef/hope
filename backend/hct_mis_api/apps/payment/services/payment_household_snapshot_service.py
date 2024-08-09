@@ -148,7 +148,7 @@ def get_individual_snapshot(individual: Individual, is_hh_collector: bool = Fals
 
     if is_hh_collector:
         individual_data["delivery_mechanisms_data"] = {
-            dmd.delivery_mechanism: dmd.delivery_data for dmd in individual.delivery_mechanisms_data.all()
+            dmd.delivery_mechanism.code: dmd.delivery_data for dmd in individual.delivery_mechanisms_data.all()
         }
 
     return individual_data

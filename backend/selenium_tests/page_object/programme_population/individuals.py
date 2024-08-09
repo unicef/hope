@@ -1,3 +1,5 @@
+from typing import Union
+
 from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -30,6 +32,24 @@ class Individuals(BaseComponents):
     tableRow = 'tr[data-cy="table-row"]'
     tablePagination = 'div[data-cy="table-pagination"]'
     individualTableRow = 'tr[data-cy="individual-table-row"'
+
+    # PDU
+    tabPeriodicDataUpdates = 'button[data-cy="tab-periodic-data-updates"]'
+    buttonImport = 'button[data-cy="button-import"]'
+    dialogImport = 'div[data-cy="dialog-import"]'
+    fileInput = 'input[data-cy="file-input"]'
+    closeButton = 'button[data-cy="close-button"]'
+    buttonImportSubmit = 'button[data-cy="button-import-submit"]'
+    updateStatus = 'td[data-cy="update-status-{}"]'
+    templateStatus = 'td[data-cy="template-status-{}"]'
+    templateAction = 'td[data-cy="template-action-{}"]'
+    updateDetailsBtn = 'button[data-cy="update-details-btn-{}"]'
+    downloadBtn = 'button[data-cy="download-btn-{}"]'
+    exportBtn = 'button[data-cy="export-btn-{}"]'
+    pduUpdates = 'button[data-cy="pdu-updates"]'
+    statusContainer = '[data-cy="status-container"]'
+    pduFormErrors = 'div[data-cy="pdu-form-errors"]'
+    pduUploadError = 'div[data-cy="pdu-upload-error"]'
 
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
@@ -103,12 +123,58 @@ class Individuals(BaseComponents):
     def getIndividualLocation(self) -> WebElement:
         return self.wait_for(self.individualLocation)
 
-    def getTableRow(self) -> WebElement:
+    def getTableRow(self) -> [WebElement]:
         return self.get_elements(self.tableRow)
 
-    def getIndividualTableRow(self) -> WebElement:
+    def getIndividualTableRow(self) -> [WebElement]:
         self.wait_for(self.individualTableRow)
         return self.get_elements(self.individualTableRow)
 
     def getTablePagination(self) -> WebElement:
         return self.wait_for(self.tablePagination)
+
+    # PDU
+    def getTabPeriodicDataUpdates(self) -> WebElement:
+        return self.wait_for(self.tabPeriodicDataUpdates)
+
+    def getButtonImport(self) -> WebElement:
+        return self.wait_for(self.buttonImport)
+
+    def getDialogImport(self) -> WebElement:
+        return self.wait_for(self.dialogImport)
+
+    def getFileInput(self) -> WebElement:
+        return self.wait_for(self.fileInput)
+
+    def getCloseButton(self) -> WebElement:
+        return self.wait_for(self.closeButton)
+
+    def getButtonImportSubmit(self) -> WebElement:
+        return self.wait_for(self.buttonImportSubmit)
+
+    def getUpdateStatus(self, pk: Union[int, str]) -> WebElement:
+        return self.wait_for(self.updateStatus.format(pk))
+
+    def getDownloadBtn(self, pk: Union[int, str]) -> WebElement:
+        return self.wait_for(self.downloadBtn.format(pk))
+
+    def getExportBtn(self, pk: Union[int, str]) -> WebElement:
+        return self.wait_for(self.exportBtn.format(pk))
+
+    def getUpdateDetailsBtn(self, pk: Union[int, str]) -> WebElement:
+        return self.wait_for(self.updateDetailsBtn.format(pk))
+
+    def getPduUpdates(self) -> WebElement:
+        return self.wait_for(self.pduUpdates)
+
+    def getStatusContainer(self) -> WebElement:
+        return self.wait_for(self.statusContainer)
+
+    def getPduFormErrors(self) -> WebElement:
+        return self.wait_for(self.pduFormErrors)
+
+    def getPduUploadError(self) -> WebElement:
+        return self.wait_for(self.pduUploadError)
+
+    def getTemplateStatus(self, pk: Union[int, str]) -> WebElement:
+        return self.wait_for(self.templateStatus.format(pk))

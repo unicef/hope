@@ -205,3 +205,15 @@ def enroll_households_to_program_task(households_ids: List, program_for_enroll_i
     households = Household.objects.filter(pk__in=households_ids)
     program_for_enroll = Program.objects.get(id=program_for_enroll_id)
     enroll_households_to_program(households, program_for_enroll)
+
+
+@app.task()
+@log_start_and_end
+@sentry_tags
+def mass_withdraw_households_from_list_task(household_id_list: list, tag: str, program_id: str) -> None:
+    from hct_mis_api.apps.household.admin.household import (
+        HouseholdWithdrawFromListMixin,
+    )
+
+    program = Program.objects.get(id=program_id)
+    HouseholdWithdrawFromListMixin().mass_withdraw_households_from_list_bulk(household_id_list, tag, program)

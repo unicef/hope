@@ -60,6 +60,7 @@ export function CreateImportFromKoboForm({
             businessAreaSlug: businessArea,
             allowDeliveryMechanismsValidationErrors:
               values.allowDeliveryMechanismsValidationErrors,
+            pullPictures: values.pullPictures,
           },
         },
       });
@@ -77,6 +78,7 @@ export function CreateImportFromKoboForm({
       onlyActiveSubmissions: true,
       screenBeneficiary: false,
       allowDeliveryMechanismsValidationErrors: false,
+      pullPictures: false,
     },
     validationSchema,
     onSubmit,
@@ -91,12 +93,17 @@ export function CreateImportFromKoboForm({
       businessAreaSlug: businessArea,
       onlyActiveSubmissions: formik.values.onlyActiveSubmissions,
       koboAssetId: formik.values.koboAssetId,
+      pullPictures: formik.values.pullPictures,
     });
   };
   useEffect(() => stopPollingImportData, []);
   useEffect(() => {
     saveKoboInputData();
-  }, [formik.values.koboAssetId, formik.values.onlyActiveSubmissions]);
+  }, [
+    formik.values.koboAssetId,
+    formik.values.onlyActiveSubmissions,
+    formik.values.pullPictures,
+  ]);
   useEffect(() => {
     setSubmitForm(formik.submitForm);
   }, [formik.submitForm]);

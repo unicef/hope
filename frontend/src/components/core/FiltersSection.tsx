@@ -6,9 +6,10 @@ import { ClearApplyButtons } from './ClearApplyButtons';
 
 interface FiltersSectionProps {
   children: ReactElement | ReactElement[];
-  clearHandler: () => void;
-  applyHandler: () => void;
+  clearHandler?: () => void;
+  applyHandler?: () => void;
   isOnPaper?: boolean;
+  withApplyClearButtons?: boolean;
 }
 
 const FiltersPaper = styled(Paper)`
@@ -22,6 +23,7 @@ export const FiltersSection: React.FC<FiltersSectionProps> = ({
   clearHandler,
   applyHandler,
   isOnPaper = true,
+  withApplyClearButtons = true,
 }): ReactElement => {
   const [expanded] = useState(true);
 
@@ -52,16 +54,17 @@ export const FiltersSection: React.FC<FiltersSectionProps> = ({
         <Box display="flex" flexDirection="column" width="100%">
           {children}
           <Box display="flex" justifyContent="flex-end" mb={2}>
-            <ClearApplyButtons
-              clearHandler={clearHandler}
-              applyHandler={applyHandler}
-            />
+            {withApplyClearButtons && (
+              <ClearApplyButtons
+                clearHandler={clearHandler}
+                applyHandler={applyHandler}
+              />
+            )}
           </Box>
         </Box>
       </Collapse>
     </>
   );
-
   return isOnPaper ? (
     <FiltersPaper>{filtersComponent}</FiltersPaper>
   ) : (

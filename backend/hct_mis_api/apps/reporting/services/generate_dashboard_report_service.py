@@ -22,8 +22,11 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
+from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
+    PaymentRecord,
+    PaymentVerification,
+)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.reporting.models import DashboardReport
 
@@ -114,10 +117,10 @@ class GenerateDashboardReportContentHelpers:
 
         def aggregate_by_delivery_type(payment_records: QuerySet[PaymentRecord]) -> Dict:
             result = dict()
-            for delivery_type in DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES:
+            for delivery_type in DeliveryMechanism.get_choices(only_active=False):
                 value = delivery_type[0]
                 result[value] = (
-                    payment_records.filter(delivery_type=value)
+                    payment_records.filter(delivery_type__code=value)
                     .aggregate(Sum("delivered_quantity_usd", output_field=DecimalField()))
                     .get("delivered_quantity_usd__sum")
                 )
@@ -148,12 +151,12 @@ class GenerateDashboardReportContentHelpers:
         def get_filter_query(cash: bool, month: int) -> Q:
             if cash:
                 return Q(
-                    cashplan__payment_items__delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_CASH,
+                    cashplan__payment_items__delivery_type__transfer_type=DeliveryMechanism.TransferType.CASH.value,
                     cashplan__payment_items__delivery_date__month=month,
                 )
             else:
                 return Q(
-                    cashplan__payment_items__delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_VOUCHER,
+                    cashplan__payment_items__delivery_type__transfer_type=DeliveryMechanism.TransferType.VOUCHER.value,
                     cashplan__payment_items__delivery_date__month=month,
                 )
 
@@ -352,14 +355,14 @@ class GenerateDashboardReportContentHelpers:
             .annotate(
                 total_cash=Sum(
                     "paymentrecord__delivered_quantity_usd",
-                    filter=Q(paymentrecord__delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_CASH),
+                    filter=Q(paymentrecord__delivery_type__transfer_type=DeliveryMechanism.TransferType.CASH.value),
                     output_field=DecimalField(),
                 )
             )
             .annotate(
                 total_voucher=Sum(
                     "paymentrecord__delivered_quantity_usd",
-                    filter=Q(paymentrecord__delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_VOUCHER),
+                    filter=Q(paymentrecord__delivery_type__transfer_type=DeliveryMechanism.TransferType.VOUCHER.value),
                     output_field=DecimalField(),
                 )
             )
@@ -432,13 +435,13 @@ class GenerateDashboardReportContentHelpers:
             result.append(instance.get(f"{field}__sum", 0))
         return tuple(result)
 
-    @staticmethod
-    def format_volumes_by_delivery_row(instance: Dict, is_totals: bool, *args: Any) -> Tuple:
+    @classmethod
+    def format_volumes_by_delivery_row(cls, instance: Dict, is_totals: bool, *args: Any) -> Tuple:
         result = [
             instance.get("business_area_code", "") if not is_totals else "",
             instance.get("name", "") if not is_totals else "Total",
         ]
-        for choice in DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES:
+        for choice in DeliveryMechanism.get_choices(only_active=False):
             result.append(instance.get(choice[0]))
 
         return tuple(result)
@@ -686,140 +689,6 @@ class GenerateDashboardReportService:
     HQ = 1
     COUNTRY = 2
     SHARED = 3
-    HEADERS = {
-        DashboardReport.BENEFICIARIES_REACHED: {
-            HQ: ("business area", "country"),
-            COUNTRY: ("business area", "programme"),
-            SHARED: ("households reached", "individuals reached", "children reached"),
-        },
-        DashboardReport.TOTAL_TRANSFERRED_BY_ADMIN_AREA: {
-            HQ: (),
-            COUNTRY: (
-                "Admin Level 2",
-                "Admin Code",
-                "Total tranferred (USD)",
-                "Households reached",
-                "Female 0-5 Reached",
-                "Female 6-11 Reached",
-                "Female 12-17 Reached",
-                "Female 18-59 Reached",
-                "Female 60+ Reached",
-                "Male 0-5 Reached",
-                "Male 6-11 Reached",
-                "Male 12-17 Reached",
-                "Male 18-59 Reached",
-                "Male 60+ Reached",
-            ),
-            SHARED: (),
-        },
-        DashboardReport.PAYMENT_VERIFICATION: {
-            HQ: (),
-            COUNTRY: (),
-            SHARED: (
-                "business area",
-                "country",
-                "programme",
-                "cash plan verifications",
-                "Households Contacted",
-                "average sampling",
-                "Received",
-                "Not Received",
-                "Received with issues",
-                "Not Responded",
-            ),
-        },
-        DashboardReport.GRIEVANCES_AND_FEEDBACK: {
-            HQ: (
-                "business area",
-                "country",
-            ),
-            COUNTRY: ("business area",),
-            SHARED: (
-                "grievance tickets",
-                "feedback tickets",
-                "resolved tickets",
-                "Unresolved =<30 days",
-                "Unresolved >30 days",
-                "Unresolved >60 days",
-                "open sensitive grievances",
-            ),
-        },
-        DashboardReport.TOTAL_TRANSFERRED_BY_COUNTRY: {
-            HQ: (
-                "business area",
-                "country",
-                "actual cash transferred",
-                "actual voucher transferred",
-            ),
-            COUNTRY: (),
-            SHARED: (),
-        },
-        DashboardReport.PROGRAMS: {
-            HQ: (),
-            COUNTRY: (),
-            SHARED: (
-                "business area",
-                "country",
-                "programme",
-                "sector",
-                "cash+",
-                "frequency",
-                "unsuccessful payment",
-                "successful payment",
-            )
-            + tuple(
-                chain.from_iterable(
-                    [
-                        [f"{month.capitalize()} cash", f"{month.capitalize()} voucher"]
-                        for month in GenerateDashboardReportContentHelpers.get_all_months()
-                    ]
-                )
-            ),
-        },
-        DashboardReport.VOLUME_BY_DELIVERY_MECHANISM: {
-            HQ: (
-                "business area",
-                "country",
-            ),
-            COUNTRY: (
-                "business area",
-                "programme",
-            ),
-            SHARED: tuple(choice[1] for choice in DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES),
-        },
-        DashboardReport.INDIVIDUALS_REACHED: {
-            HQ: (
-                "business area",
-                "country",
-            ),
-            COUNTRY: (
-                "business area",
-                "programme",
-            ),
-            SHARED: (
-                "females 0-5 reached",
-                "females 0-5 w/ disability reached",
-                "females 6-11 reached",
-                "females 6-11 w/ disability reached",
-                "females 12-17 reached",
-                "females 12-17 w/ disability reached",
-                "females 18-59 reached",
-                "females 18-59 w/ disability reached",
-                "females 60+ reached",
-                "females 60+ w/ disability reached",
-                "males 0-5 reached",
-                "males 0-5 w/ disability reached",
-                "males 6-11 reached",
-                "males 6-11 w/ disability reached",
-                "males 12-17 reached",
-                "males 12-17 w/ disability reached",
-                "males 18-59 reached",
-                "males 18-59 w/ disability reached",
-                "males 60+ reached",
-                "males 60+ w/ disability reached",
-            ),
-        },
-    }
     ROW_CONTENT_METHODS: Dict = {
         DashboardReport.BENEFICIARIES_REACHED: (
             GenerateDashboardReportContentHelpers.get_beneficiaries,
@@ -861,12 +730,6 @@ class GenerateDashboardReportService:
         "business area",
         "report year",
     )
-    REMOVE_EMPTY_COLUMNS = {
-        DashboardReport.VOLUME_BY_DELIVERY_MECHANISM: (
-            3,
-            len(DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES) + 3,
-        )
-    }
     META_SHEET = "Meta data"
     MAX_COL_WIDTH = 75
 
@@ -875,6 +738,152 @@ class GenerateDashboardReportService:
         self.report_types = report.report_type
         self.business_area = report.business_area
         self.hq_or_country = self.HQ if report.business_area.slug == "global" else self.COUNTRY
+
+    @property
+    def headers(self) -> Dict:
+        return {
+            DashboardReport.BENEFICIARIES_REACHED: {
+                self.HQ: ("business area", "country"),
+                self.COUNTRY: ("business area", "programme"),
+                self.SHARED: ("households reached", "individuals reached", "children reached"),
+            },
+            DashboardReport.TOTAL_TRANSFERRED_BY_ADMIN_AREA: {
+                self.HQ: (),
+                self.COUNTRY: (
+                    "Admin Level 2",
+                    "Admin Code",
+                    "Total tranferred (USD)",
+                    "Households reached",
+                    "Female 0-5 Reached",
+                    "Female 6-11 Reached",
+                    "Female 12-17 Reached",
+                    "Female 18-59 Reached",
+                    "Female 60+ Reached",
+                    "Male 0-5 Reached",
+                    "Male 6-11 Reached",
+                    "Male 12-17 Reached",
+                    "Male 18-59 Reached",
+                    "Male 60+ Reached",
+                ),
+                self.SHARED: (),
+            },
+            DashboardReport.PAYMENT_VERIFICATION: {
+                self.HQ: (),
+                self.COUNTRY: (),
+                self.SHARED: (
+                    "business area",
+                    "country",
+                    "programme",
+                    "cash plan verifications",
+                    "Households Contacted",
+                    "average sampling",
+                    "Received",
+                    "Not Received",
+                    "Received with issues",
+                    "Not Responded",
+                ),
+            },
+            DashboardReport.GRIEVANCES_AND_FEEDBACK: {
+                self.HQ: (
+                    "business area",
+                    "country",
+                ),
+                self.COUNTRY: ("business area",),
+                self.SHARED: (
+                    "grievance tickets",
+                    "feedback tickets",
+                    "resolved tickets",
+                    "Unresolved =<30 days",
+                    "Unresolved >30 days",
+                    "Unresolved >60 days",
+                    "open sensitive grievances",
+                ),
+            },
+            DashboardReport.TOTAL_TRANSFERRED_BY_COUNTRY: {
+                self.HQ: (
+                    "business area",
+                    "country",
+                    "actual cash transferred",
+                    "actual voucher transferred",
+                ),
+                self.COUNTRY: (),
+                self.SHARED: (),
+            },
+            DashboardReport.PROGRAMS: {
+                self.HQ: (),
+                self.COUNTRY: (),
+                self.SHARED: (
+                    "business area",
+                    "country",
+                    "programme",
+                    "sector",
+                    "cash+",
+                    "frequency",
+                    "unsuccessful payment",
+                    "successful payment",
+                )
+                + tuple(
+                    chain.from_iterable(
+                        [
+                            [f"{month.capitalize()} cash", f"{month.capitalize()} voucher"]
+                            for month in GenerateDashboardReportContentHelpers.get_all_months()
+                        ]
+                    )
+                ),
+            },
+            DashboardReport.VOLUME_BY_DELIVERY_MECHANISM: {
+                self.HQ: (
+                    "business area",
+                    "country",
+                ),
+                self.COUNTRY: (
+                    "business area",
+                    "programme",
+                ),
+                self.SHARED: tuple(choice[1] for choice in DeliveryMechanism.get_choices(only_active=False)),
+            },
+            DashboardReport.INDIVIDUALS_REACHED: {
+                self.HQ: (
+                    "business area",
+                    "country",
+                ),
+                self.COUNTRY: (
+                    "business area",
+                    "programme",
+                ),
+                self.SHARED: (
+                    "females 0-5 reached",
+                    "females 0-5 w/ disability reached",
+                    "females 6-11 reached",
+                    "females 6-11 w/ disability reached",
+                    "females 12-17 reached",
+                    "females 12-17 w/ disability reached",
+                    "females 18-59 reached",
+                    "females 18-59 w/ disability reached",
+                    "females 60+ reached",
+                    "females 60+ w/ disability reached",
+                    "males 0-5 reached",
+                    "males 0-5 w/ disability reached",
+                    "males 6-11 reached",
+                    "males 6-11 w/ disability reached",
+                    "males 12-17 reached",
+                    "males 12-17 w/ disability reached",
+                    "males 18-59 reached",
+                    "males 18-59 w/ disability reached",
+                    "males 60+ reached",
+                    "males 60+ w/ disability reached",
+                ),
+            },
+        }
+
+    @property
+    def remove_empty_columns(self) -> dict:
+        return {
+            DashboardReport.VOLUME_BY_DELIVERY_MECHANISM: (
+                3,
+                DeliveryMechanism.objects.all().count() + 3,
+            )
+        }
 
     def _create_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
@@ -896,7 +905,7 @@ class GenerateDashboardReportService:
         self.ws_meta.append(info_row)
 
     def _add_headers(self, active_sheet: "Worksheet", report_type: str) -> int:
-        headers_row = self.HEADERS[report_type][self.hq_or_country] + self.HEADERS[report_type][self.SHARED]
+        headers_row = self.headers[report_type][self.hq_or_country] + self.headers[report_type][self.SHARED]
         headers_row = self._stringify_all_values(headers_row)
         active_sheet.append(headers_row)
         return len(headers_row)
@@ -929,7 +938,7 @@ class GenerateDashboardReportService:
             number_of_columns = self._add_headers(active_sheet, report_type)
             number_of_rows = self._add_rows(active_sheet, report_type)
             self._add_font_style_to_sheet(active_sheet, number_of_rows + 2)
-            remove_empty_columns_values = self.REMOVE_EMPTY_COLUMNS.get(report_type)
+            remove_empty_columns_values = self.remove_empty_columns.get(report_type)
             if remove_empty_columns_values:
                 self._remove_empty_columns(
                     active_sheet,

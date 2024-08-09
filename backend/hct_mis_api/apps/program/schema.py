@@ -34,19 +34,23 @@ from hct_mis_api.apps.account.schema import PartnerNode
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.core.schema import ChoiceObject, DataCollectingTypeNode
+from hct_mis_api.apps.core.schema import (
+    ChoiceObject,
+    DataCollectingTypeNode,
+    PeriodicFieldNode,
+)
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_permission_decorator,
     to_choice_object,
 )
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.filters import (
     CashPlanFilter,
     PaymentVerificationPlanFilter,
 )
 from hct_mis_api.apps.payment.models import (
     CashPlan,
+    DeliveryMechanism,
     GenericPayment,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
@@ -77,6 +81,7 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     data_collecting_type = graphene.Field(DataCollectingTypeNode, source="data_collecting_type")
     partners = graphene.List(PartnerNode)
     is_social_worker_program = graphene.Boolean()
+    pdu_fields = graphene.List(PeriodicFieldNode)
 
     class Meta:
         model = Program
@@ -108,6 +113,10 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     @staticmethod
     def resolve_is_social_worker_program(program: Program, info: Any, **kwargs: Any) -> bool:
         return program.is_social_worker_program
+
+    @staticmethod
+    def resolve_pdu_fields(program: Program, info: Any, **kwargs: Any) -> QuerySet:
+        return program.pdu_fields.all()
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -329,12 +338,12 @@ class Query(graphene.ObjectType):
                 delivery_month=F("delivery_date__month"),
                 total_delivered_cash=Sum(
                     "delivered_quantity_usd",
-                    filter=Q(delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_CASH),
+                    filter=Q(delivery_type__transfer_type=DeliveryMechanism.TransferType.CASH.value),
                     output_field=DecimalField(),
                 ),
                 total_delivered_voucher=Sum(
                     "delivered_quantity_usd",
-                    filter=Q(delivery_type__in=DeliveryMechanismChoices.DELIVERY_TYPES_IN_VOUCHER),
+                    filter=Q(delivery_type__transfer_type=DeliveryMechanism.TransferType.VOUCHER.value),
                     output_field=DecimalField(),
                 ),
             )
