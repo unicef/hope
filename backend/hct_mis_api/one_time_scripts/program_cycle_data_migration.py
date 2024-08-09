@@ -43,11 +43,19 @@ def adjust_cycles_start_and_end_dates_for_active_program(program: Program) -> No
             previous_cycle = cycle
 
 
+def generate_unique_cycle_title(start_date: str) -> str:
+    # add to the cycle title just random 4 digits
+    while True:
+        cycle_name = f"Cycle {start_date} ({str(randint(1111, 9999))})"
+        if not ProgramCycle.objects.filter(title=cycle_name).exists():
+            return cycle_name
+
+
 def create_new_program_cycle(
     program_id: str, status: str, start_date: str, end_date: Optional[str] = None
 ) -> ProgramCycle:
     return ProgramCycle.objects.create(
-        title=f"Cycle {start_date} ({str(randint(111, 999))})",
+        title=generate_unique_cycle_title(start_date),
         program_id=program_id,
         status=status,
         start_date=start_date,
@@ -98,7 +106,6 @@ def processing_with_active_program(payment_plan: PaymentPlan) -> None:
                 str(payment_plan.program_id), ProgramCycle.ACTIVE, payment_plan_start_date, payment_plan_end_date
             )
             break
-
     # update TP
     TargetPopulation.objects.filter(id=payment_plan.target_population_id).update(program_cycle=cycle)
     # update Payment Plan
