@@ -553,7 +553,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getInputIndividualdataFamilyname().send_keys("Teria")
         pageGrievanceNewTicket.getInputIndividualdataFullname().send_keys("Krido")
         pageGrievanceNewTicket.getEstimatedBirthDate().click()
-        pageGrievanceNewTicket.select_option_by_name("Yes")
+        pageGrievanceNewTicket.select_listbox_element("Yes")
         pageGrievanceNewTicket.getSelectIndividualdataSex().click()
         pageGrievanceNewTicket.select_listbox_element("Male")
         pageGrievanceNewTicket.getInputIndividualdataGivenname().send_keys("Krato")

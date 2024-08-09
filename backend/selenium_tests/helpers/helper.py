@@ -78,6 +78,7 @@ class Common:
         return self._wait(timeout).until(EC.element_to_be_clickable((element_type, locator)))
 
     def select_listbox_element(self, name: str, listbox: str = 'ul[role="listbox"]', tag_name: str = "li") -> None:
+        sleep(2)
         select_element = self.wait_for(listbox)
         items = select_element.find_elements("tag name", tag_name)
         for item in items:
