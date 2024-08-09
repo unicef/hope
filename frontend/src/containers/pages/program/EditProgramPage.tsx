@@ -129,14 +129,20 @@ export const EditProgramPage = (): ReactElement => {
                   ([key]) => key !== '__typename' && key !== 'id',
                 ),
               ),
-              roundsNames:
-                pduData.numberOfRounds === 1 &&
-                (pduData.roundsNames == null ||
-                  pduData.roundsNames.length === 0)
-                  ? ['']
-                  : pduData.roundsNames.map((roundName) =>
-                      roundName == null ? '' : roundName,
-                    ),
+              roundsNames: (() => {
+                if (!pduData.roundsNames) {
+                  pduData.roundsNames = [];
+                }
+
+                if (
+                  pduData.numberOfRounds === 1 &&
+                  pduData.roundsNames.length === 0
+                ) {
+                  return [''];
+                }
+
+                return pduData.roundsNames.map((roundName) => roundName || '');
+              })(),
             }
           : pduData,
       }));
