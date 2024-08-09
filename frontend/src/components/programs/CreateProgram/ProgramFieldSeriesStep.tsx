@@ -64,9 +64,6 @@ export const ProgramFieldSeriesStep = ({
           <div>
             {values.pduFields && values.pduFields.length > 0
               ? values.pduFields.map((_field, index) => {
-                  console.log(
-                    program?.pduFields[index]?.pduData?.numberOfRounds,
-                  );
                   return (
                     <Box key={index} pt={3} pb={3}>
                       <Grid container spacing={3} alignItems="flex-start">
@@ -95,6 +92,7 @@ export const ProgramFieldSeriesStep = ({
                         </Grid>
                         <Grid item xs={3}>
                           <Field
+                            key={values.pduFields[index].pduData.numberOfRounds}
                             name={`pduFields.${index}.pduData.numberOfRounds`}
                             fullWidth
                             required
