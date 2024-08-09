@@ -42,7 +42,7 @@ export function ReassignMultipleRoleBox({
   const { baseUrl } = useBaseUrl();
 
   const selectedIndividualsToReassign =
-    ticket.needsAdjudicationTicketDetails.selectedIndividuals?.filter(
+    ticket.needsAdjudicationTicketDetails.selectedDuplicates?.filter(
       (el) =>
         el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
     );

@@ -52,6 +52,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
     ) -> Dict:
         household_data = {
             "registration_data_import": registration_data_import,
+            "program": registration_data_import.program,
             "first_registration_date": record.timestamp,
             "last_registration_date": record.timestamp,
             "country_origin": Country.objects.get(iso_code2="LK"),
@@ -96,6 +97,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
             flex_fields=build_flex_arg_dict_from_list_if_exists(
                 head_of_household_info, SriLankaRegistrationService.INDIVIDUAL_FLEX_FIELDS
             ),
+            program=registration_data_import.program,
             **kwargs,
         )
 
@@ -116,6 +118,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
         if not national_id:
             return None
         return PendingDocument.objects.create(
+            program=imported_individual.program,
             document_number=national_id,
             individual=imported_individual,
             type=DocumentType.objects.get(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]),
@@ -129,6 +132,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
         if not national_id:
             return None
         return PendingDocument.objects.create(
+            program=imported_individual.program,
             document_number=national_id,
             individual=imported_individual,
             type=DocumentType.objects.get(
@@ -146,6 +150,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
             return None
         image = self._prepare_picture_from_base64(photo_base_64, bank_account)
         return PendingDocument.objects.create(
+            program=imported_individual.program,
             document_number=bank_account,
             individual=imported_individual,
             type=DocumentType.objects.get(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BANK_STATEMENT]),

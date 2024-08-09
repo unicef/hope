@@ -14,8 +14,8 @@ from rest_framework import serializers
 from urllib3 import Retry
 
 from hct_mis_api.apps.core.utils import chunks
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     Payment,
@@ -69,7 +69,7 @@ class PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer(ReadOnlyMo
         return {
             "user": self.context["user_email"],
             "config_key": obj.payment_plan.business_area.code,  # obj.chosen_configuration,
-            "delivery_mechanism": obj.delivery_mechanism.lower().replace(" ", "_"),
+            "delivery_mechanism": obj.delivery_mechanism.code,
         }
 
     def get_payload(self, obj: Any) -> Dict:
@@ -107,12 +107,12 @@ class PaymentInstructionFromSplitSerializer(PaymentInstructionFromDeliveryMechan
 
 class PaymentPayloadSerializer(serializers.Serializer):
     amount = serializers.DecimalField(max_digits=12, decimal_places=2, required=True)
-    phone_no = serializers.CharField(required=False)
-    last_name = serializers.CharField(required=False)
-    first_name = serializers.CharField(required=False)
-    full_name = serializers.CharField(required=False)
+    phone_no = serializers.CharField(required=False, allow_blank=True)
+    last_name = serializers.CharField(required=False, allow_blank=True)
+    first_name = serializers.CharField(required=False, allow_blank=True)
+    full_name = serializers.CharField(required=False, allow_blank=True)
     destination_currency = serializers.CharField(required=True)
-    service_provider_code = serializers.CharField(required=False)
+    service_provider_code = serializers.CharField(required=False, allow_blank=True)
 
 
 class PaymentSerializer(ReadOnlyModelSerializer):
@@ -125,20 +125,33 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         return {}
 
     def get_payload(self, obj: Payment) -> Dict:
-        payload = PaymentPayloadSerializer(
-            data={
-                "amount": obj.entitlement_quantity,
-                "phone_no": str(obj.collector.phone_no),
-                "last_name": obj.collector.family_name,
-                "first_name": obj.collector.given_name,
-                "full_name": obj.full_name,
-                "destination_currency": obj.currency,
-                "service_provider_code": obj.collector.flex_fields.get("service_provider_code", ""),
-            }
-        )
+        delivery_mechanism_data = obj.collector.delivery_mechanisms_data.filter(
+            delivery_mechanism=obj.delivery_type
+        ).first()
+
+        base_data = {
+            "amount": obj.entitlement_quantity,
+            "destination_currency": obj.currency,
+            "phone_no": str(obj.collector.phone_no),
+            "last_name": obj.collector.family_name,
+            "first_name": obj.collector.given_name,
+            "full_name": obj.full_name,
+        }
+        if (
+            obj.delivery_type.code == "mobile_money" and not delivery_mechanism_data
+        ):  # this workaround need to be dropped
+            base_data["service_provider_code"] = obj.collector.flex_fields.get("service_provider_code_i_f", "")
+
+        payload = PaymentPayloadSerializer(data=base_data)
         if not payload.is_valid():
-            raise serializers.ValidationError(payload.errors)
-        return payload.data
+            raise PaymentGatewayAPI.PaymentGatewayAPIException(payload.errors)
+
+        payload_data = payload.data
+
+        if delivery_mechanism_data:
+            payload_data.update(delivery_mechanism_data.delivery_data)
+
+        return payload_data
 
     class Meta:
         model = Payment
@@ -159,10 +172,9 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
     record_code: str
     parent: str
     status: str
-    hope_status: str
     auth_code: str
-    payout_amount: float
     fsp_code: str
+    payout_amount: Optional[float] = None
     message: Optional[str] = None
 
     def get_hope_status(self, entitlement_quantity: Decimal) -> str:
@@ -172,9 +184,8 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
                     self.payout_amount, entitlement_quantity
                 )
             except Exception:
-                raise PaymentGatewayAPI.PaymentGatewayAPIException(
-                    f"Invalid delivered_quantity {self.payout_amount} for Payment {self.remote_id}"
-                )
+                logger.error(f"Invalid delivered_quantity {self.payout_amount} for Payment {self.remote_id}")
+                _hope_status = Payment.STATUS_ERROR
             return _hope_status
 
         mapping = {
@@ -189,7 +200,8 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
 
         hope_status = mapping.get(self.status)
         if not hope_status:
-            raise PaymentGatewayAPI.PaymentGatewayAPIException(f"Invalid Payment status: {self.status}")
+            logger.error(f"Invalid Payment status: {self.status}")
+            hope_status = Payment.STATUS_ERROR
 
         return hope_status() if callable(hope_status) else hope_status
 
@@ -207,12 +219,45 @@ class PaymentInstructionData(FlexibleArgumentsDataclassMixin):
 
 
 @dataclasses.dataclass()
+class FspConfig(FlexibleArgumentsDataclassMixin):
+    id: int
+    key: str
+    delivery_mechanism: int
+    delivery_mechanism_name: str
+    label: Optional[str] = None
+
+
+@dataclasses.dataclass()
 class FspData(FlexibleArgumentsDataclassMixin):
     id: int
     remote_id: str
     name: str
     vision_vendor_number: str
-    configs: List[Optional[dict]]  # {id: value, key: value, label: value}
+    configs: List[Union[FspConfig, Dict]]
+
+    def __post_init__(self) -> None:
+        if self.configs and isinstance(self.configs[0], dict):
+            self.configs = [FspConfig.create_from_dict(config) for config in self.configs]  # type: ignore
+
+
+@dataclasses.dataclass()
+class DeliveryMechanismDataRequirements(FlexibleArgumentsDataclassMixin):
+    required_fields: List[str]
+    optional_fields: List[str]
+    unique_fields: List[str]
+
+
+@dataclasses.dataclass()
+class DeliveryMechanismData(FlexibleArgumentsDataclassMixin):
+    id: int
+    code: str
+    name: str
+    requirements: Union[DeliveryMechanismDataRequirements, Dict]
+    transfer_type: str
+
+    def __post_init__(self) -> None:
+        if isinstance(self.requirements, dict):
+            self.requirements = DeliveryMechanismDataRequirements.create_from_dict(self.requirements)
 
 
 @dataclasses.dataclass()
@@ -239,6 +284,7 @@ class PaymentGatewayAPI:
         PAYMENT_INSTRUCTION_ADD_RECORDS = "payment_instructions/{remote_id}/add_records/"
         GET_FSPS = "fsp/"
         GET_PAYMENT_RECORDS = "payment_records/"
+        GET_DELIVERY_MECHANISMS = "delivery_mechanisms/"
 
     def __init__(self) -> None:
         self.api_key = os.getenv("PAYMENT_GATEWAY_API_KEY")
@@ -272,6 +318,10 @@ class PaymentGatewayAPI:
     def get_fsps(self) -> List[FspData]:
         response_data = self._get(self.Endpoints.GET_FSPS)
         return [FspData.create_from_dict(fsp_data) for fsp_data in response_data]
+
+    def get_delivery_mechanisms(self) -> List[DeliveryMechanismData]:
+        response_data = self._get(self.Endpoints.GET_DELIVERY_MECHANISMS)
+        return [DeliveryMechanismData.create_from_dict(d) for d in response_data]
 
     def create_payment_instruction(self, data: dict) -> PaymentInstructionData:
         response_data = self._post(self.Endpoints.CREATE_PAYMENT_INSTRUCTION, data)
@@ -407,21 +457,26 @@ class PaymentGatewayService:
                     _add_records(payments, delivery_mechanism)
 
     def sync_fsps(self) -> None:
-        fsps = self.api.get_fsps()
-        for fsp in fsps:
-            FinancialServiceProvider.objects.update_or_create(
-                payment_gateway_id=fsp.id,
+        fsps_data = self.api.get_fsps()
+        for fsp_data in fsps_data:
+            fsp, created = FinancialServiceProvider.objects.update_or_create(
+                payment_gateway_id=fsp_data.id,
                 defaults={
-                    "vision_vendor_number": fsp.vision_vendor_number,
-                    "name": fsp.name,
+                    "vision_vendor_number": fsp_data.vision_vendor_number,
+                    "name": fsp_data.name,
                     "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                    "data_transfer_configuration": fsp.configs,
-                    "delivery_mechanisms": [
-                        DeliveryMechanismChoices.DELIVERY_TYPE_CASH_OVER_THE_COUNTER,
-                        DeliveryMechanismChoices.DELIVERY_TYPE_MOBILE_MONEY,
-                    ],
+                    "data_transfer_configuration": [dataclasses.asdict(config) for config in fsp_data.configs],
                 },
             )
+
+            if not created:
+                fsp.delivery_mechanisms.clear()
+            delivery_mechanisms_pg_ids = set([config.delivery_mechanism for config in fsp_data.configs])
+            if delivery_mechanisms_pg_ids:
+                delivery_mechanisms = DeliveryMechanism.objects.filter(
+                    payment_gateway_id__in=delivery_mechanisms_pg_ids
+                )
+                fsp.delivery_mechanisms.set(delivery_mechanisms)
 
     def sync_records(self) -> None:
         def update_payment(
@@ -444,21 +499,32 @@ class PaymentGatewayService:
             _payment.fsp_auth_code = matching_pg_payment.auth_code
             update_fields = ["status", "status_date", "fsp_auth_code"]
 
-            if _payment.status not in Payment.ALLOW_CREATE_VERIFICATION and matching_pg_payment.message:
-                _payment.reason_for_unsuccessful_payment = matching_pg_payment.message
+            if _payment.status in [
+                Payment.STATUS_ERROR,
+                Payment.STATUS_MANUALLY_CANCELLED,
+            ]:
+                if matching_pg_payment.message:
+                    _payment.reason_for_unsuccessful_payment = matching_pg_payment.message
+                elif matching_pg_payment.payout_amount:
+                    _payment.reason_for_unsuccessful_payment = f"Delivered amount: {matching_pg_payment.payout_amount}"
+                else:
+                    _payment.reason_for_unsuccessful_payment = "Unknown error"
                 update_fields.append("reason_for_unsuccessful_payment")
 
             delivered_quantity = matching_pg_payment.payout_amount
             if _payment.status in [
-                Payment.STATUS_SUCCESS,
                 Payment.STATUS_DISTRIBUTION_SUCCESS,
                 Payment.STATUS_DISTRIBUTION_PARTIAL,
+                Payment.STATUS_NOT_DISTRIBUTED,
             ]:
+                if _payment.status == Payment.STATUS_NOT_DISTRIBUTED and delivered_quantity is None:
+                    delivered_quantity = 0
+
                 update_fields.extend(["delivered_quantity", "delivered_quantity_usd"])
                 try:
                     _payment.delivered_quantity = to_decimal(delivered_quantity)
                     _payment.delivered_quantity_usd = get_quantity_in_usd(
-                        amount=Decimal(delivered_quantity),
+                        amount=Decimal(delivered_quantity),  # type: ignore
                         currency=_payment_plan.currency,
                         exchange_rate=Decimal(_exchange_rate),
                         currency_exchange_date=_payment_plan.currency_exchange_date,
@@ -506,3 +572,19 @@ class PaymentGatewayService:
                                 update_payment(
                                     payment, pg_payment_records, delivery_mechanism, payment_plan, exchange_rate
                                 )
+
+    def sync_delivery_mechanisms(self) -> None:
+        delivery_mechanisms: List[DeliveryMechanismData] = self.api.get_delivery_mechanisms()
+        for dm in delivery_mechanisms:
+            DeliveryMechanism.objects.update_or_create(
+                code=dm.code,
+                defaults={
+                    "payment_gateway_id": dm.id,
+                    "name": dm.name,
+                    "required_fields": dm.requirements.required_fields,
+                    "optional_fields": dm.requirements.optional_fields,
+                    "unique_fields": dm.requirements.unique_fields,
+                    "transfer_type": dm.transfer_type,
+                    "is_active": True,
+                },
+            )

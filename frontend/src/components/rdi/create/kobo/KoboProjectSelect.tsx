@@ -65,6 +65,7 @@ export function KoboProjectSelect(): React.ReactElement {
               ) : null}
             </>
           }
+          data-cy="kobo-project-select"
         >
           {koboProjects.map((item) => (
             <MenuItem key={item.node.id} value={item.node.id}>

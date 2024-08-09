@@ -48,8 +48,11 @@ export const RegistrationDataImportCreateDialog = (): React.ReactElement => {
   const [importType, setImportType] = useState('');
   const [submitDisabled, setSubmitDisabled] = useState(true);
   const [submitForm, setSubmitForm] = usePassFunctionFromChild();
-  const { isActiveProgram } = useProgramContext();
-
+  const { isActiveProgram, selectedProgram } = useProgramContext();
+  let programUUID = '';
+  if (selectedProgram) {
+    programUUID = atob(selectedProgram.id).split(':')[1];
+  }
   useEffect(() => {
     if (!open) {
       setImportType('');
@@ -165,7 +168,7 @@ export const RegistrationDataImportCreateDialog = (): React.ReactElement => {
             variant="text"
             color="primary"
             component="a"
-            href="/api/download-template"
+            href={`/api/program/${programUUID}/download-template`}
             data-cy="a-download-template"
           >
             {t('DOWNLOAD TEMPLATE')}

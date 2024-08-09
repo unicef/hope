@@ -128,6 +128,9 @@ def get_quantity_in_usd(
     if amount is None:
         return None
 
+    if amount == 0:
+        return Decimal(0)
+
     if not exchange_rate:
         if exchange_rates_client is None:
             exchange_rates_client = ExchangeRates()
@@ -167,7 +170,7 @@ def get_payment_plan_object(cash_or_payment_plan_id: str) -> Union["PaymentPlan"
 
 
 def get_payment_delivered_quantity_status_and_value(
-    delivered_quantity: Union[int, float, str], entitlement_quantity: Decimal
+    delivered_quantity: Optional[Union[int, float, str]], entitlement_quantity: Decimal
 ) -> typing.Tuple[str, Optional[Decimal]]:
     """
     * Fully Delivered (entitled quantity = delivered quantity) [int, float, str]

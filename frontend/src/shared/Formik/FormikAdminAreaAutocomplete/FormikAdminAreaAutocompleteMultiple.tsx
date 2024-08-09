@@ -1,5 +1,8 @@
 import * as React from 'react';
 import { AdminAreaAutocompleteMultiple } from '../../autocompletes/AdminAreaAutocompleteMultiple';
+import { FieldLabel } from '@core/FieldLabel';
+import { Box } from '@mui/material';
+import { t } from 'i18next';
 
 export function FormikAdminAreaAutocompleteMultiple({
   field,
@@ -15,11 +18,14 @@ export function FormikAdminAreaAutocompleteMultiple({
     }
   };
   return (
-    <AdminAreaAutocompleteMultiple
-      disabled={disabled}
-      value={field.value}
-      onChange={handleChange}
-      {...props}
-    />
+    <Box display="flex" flexDirection="column">
+      <FieldLabel>{t('Administrative Level 2')}</FieldLabel>
+      <AdminAreaAutocompleteMultiple
+        disabled={disabled}
+        value={field.value}
+        onChange={handleChange}
+        {...props}
+      />
+    </Box>
   );
 }

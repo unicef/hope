@@ -3,13 +3,16 @@ from django.contrib.admin.widgets import AdminSplitDateTime
 from django.contrib.postgres.forms import DecimalRangeField
 from django.templatetags.static import static
 
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.models import AcceptanceProcessThreshold, CashPlan
+from hct_mis_api.apps.payment.models import (
+    AcceptanceProcessThreshold,
+    CashPlan,
+    DeliveryMechanism,
+)
 
 
 class ImportPaymentRecordsForm(forms.ModelForm):
     currency = forms.ChoiceField(choices=(("UAH", "Hryvnia"),))
-    delivery_type = forms.ChoiceField(choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES)
+    delivery_type = forms.ModelChoiceField(queryset=DeliveryMechanism.objects.filter(is_active=True))
     reconciliation_file = forms.FileField()
     start_date = forms.SplitDateTimeField(widget=AdminSplitDateTime)
     end_date = forms.SplitDateTimeField(widget=AdminSplitDateTime)

@@ -2,10 +2,11 @@ from unittest.mock import patch
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
-    CORE_FIELDS_ATTRIBUTES,
     FieldFactory,
+    get_core_fields_attributes,
 )
 from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_STRING, Scope
+from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
 
 
 class TestCoreFields(APITestCase):
@@ -14,12 +15,12 @@ class TestCoreFields(APITestCase):
         super().setUp()
 
     def test_all_fields_have_lookup(self) -> None:
-        for field in CORE_FIELDS_ATTRIBUTES:
+        for field in get_core_fields_attributes():
             self.assertTrue(field.get("lookup"), f'{field.get("name")} does not have a lookup')
 
     @patch(
-        "hct_mis_api.apps.core.field_attributes.core_fields_attributes.CORE_FIELDS_ATTRIBUTES",
-        [
+        "hct_mis_api.apps.core.field_attributes.core_fields_attributes.get_core_fields_attributes",
+        lambda: [
             {
                 "id": "b1f90314-b8b8-4bcb-9265-9d48d1fce5a4",
                 "type": TYPE_STRING,
@@ -66,8 +67,8 @@ class TestCoreFields(APITestCase):
         self.assertEqual(len(factory_result), 2)
 
     @patch(
-        "hct_mis_api.apps.core.field_attributes.core_fields_attributes.CORE_FIELDS_ATTRIBUTES",
-        [
+        "hct_mis_api.apps.core.field_attributes.core_fields_attributes.get_core_fields_attributes",
+        lambda: [
             {
                 "id": "b1f90314-b8b8-4bcb-9265-9d48d1fce5a4",
                 "type": TYPE_STRING,
@@ -86,3 +87,19 @@ class TestCoreFields(APITestCase):
     def test_xlsx_people_scope_modification(self) -> None:
         factory_result = FieldFactory.from_only_scopes(self.scopes)
         self.assertEqual(factory_result[0]["xlsx_field"], "pp_given_name_i_c")
+
+    def test_get_all_core_fields_choices(self) -> None:
+        choices = FieldFactory.get_all_core_fields_choices()
+        self.assertEqual(len(choices), 137)
+        self.assertEqual(choices[0], ("age", "Age (calculated)"))
+
+        generate_delivery_mechanisms()
+        choices = FieldFactory.get_all_core_fields_choices()
+        self.assertEqual(len(choices), 150)
+        self.assertEqual(
+            choices[-1],
+            (
+                "wallet_name__transfer_to_digital_wallet",
+                "Wallet Name Transfer To Digital Wallet (Transfer to Digital Wallet Delivery Mechanism)",
+            ),
+        )

@@ -208,6 +208,7 @@ class GenericRegistrationService(BaseRegistrationService):
             # "flex_registrations_record": record,
             "registration_data_import": str(registration_data_import.pk),
             "business_area": registration_data_import.business_area,
+            "program": registration_data_import.program,
             "first_registration_date": record.timestamp,
             "last_registration_date": record.timestamp,
             "country_origin": str(Country.objects.get(iso_code2=mapping["defaults"][COUNTRY]).pk),
@@ -229,6 +230,7 @@ class GenericRegistrationService(BaseRegistrationService):
             household=household,
             registration_data_import=household.registration_data_import,
             business_area=household.business_area,
+            program=household.program,
             first_registration_date=record.timestamp,
             last_registration_date=record.timestamp,
         )
@@ -267,6 +269,7 @@ class GenericRegistrationService(BaseRegistrationService):
                 if key:
                     document_data["type"] = DocumentType.objects.get(key=key)
                     document_data[INDIVIDUAL_FIELD] = individual
+                    document_data["program"] = individual.program
                     document_data[COUNTRY] = str(Country.objects.get(iso_code2=mapping["defaults"][COUNTRY]).pk)
                     if photo_base_64 := document_data.get("photo", None):
                         document_data["photo"] = self._prepare_picture_from_base64(

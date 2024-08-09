@@ -205,7 +205,7 @@ class RdiMergeTask:
                 if not delivery_mechanism_data.is_valid:
                     description = (
                         f"Fields not unique {list(delivery_mechanism_data.validation_errors.keys())} across program"
-                        f" for delivery mechanism {delivery_mechanism_data.delivery_mechanism}, possible duplicate of {delivery_mechanism_data.possible_duplicate_of}"
+                        f" for delivery mechanism {delivery_mechanism_data.delivery_mechanism.name}, possible duplicate of {delivery_mechanism_data.possible_duplicate_of}"
                     )
                     (
                         grievance_ticket,
@@ -312,7 +312,7 @@ class RdiMergeTask:
                         )
 
                     # SANCTION LIST CHECK
-                    if obj_hct.should_check_against_sanction_list() and not obj_hct.business_area.screen_beneficiary:
+                    if obj_hct.should_check_against_sanction_list() and obj_hct.business_area.screen_beneficiary:
                         logger.info(f"RDI:{registration_data_import_id} Checking against sanction list")
                         CheckAgainstSanctionListPreMergeTask.execute(registration_data_import=obj_hct)
                         logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")
