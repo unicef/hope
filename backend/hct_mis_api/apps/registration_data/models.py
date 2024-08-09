@@ -104,6 +104,20 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         (EDOPOMOGA, "eDopomoga"),
         (PROGRAM_POPULATION, "Program Population"),
     )
+
+    DEDUP_ENGINE_PENDING = "PENDING"
+    DEDUP_ENGINE_UPLOADED = "UPLOADED"
+    DEDUP_ENGINE_IN_PROGRESS = "IN_PROGRESS"
+    DEDUP_ENGINE_FINISHED = "FINISHED"
+    DEDUP_ENGINE_ERROR = "ERROR"
+
+    DEDUP_ENGINE_STATUS_CHOICE = (
+        (DEDUP_ENGINE_PENDING, _("Pending")),
+        (DEDUP_ENGINE_UPLOADED, _("Uploaded")),
+        (DEDUP_ENGINE_IN_PROGRESS, _("In Progress")),
+        (DEDUP_ENGINE_FINISHED, _("Finished")),
+        (DEDUP_ENGINE_ERROR, _("Error")),
+    )
     name = CICharField(
         max_length=255,
         unique=True,
@@ -165,6 +179,10 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         null=True,
         blank=True,
     )
+    deduplication_engine_status = models.CharField(
+        max_length=255, choices=DEDUP_ENGINE_STATUS_CHOICE, null=True, default=None
+    )  # TODO on RDI create set to PENDING if program flag enabled
+    # if program flag enabled in admin set all RDI to PENDING
 
     def __str__(self) -> str:
         return self.name

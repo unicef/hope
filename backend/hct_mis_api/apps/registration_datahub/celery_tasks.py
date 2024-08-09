@@ -16,6 +16,9 @@ from hct_mis_api.apps.registration_datahub.exceptions import (
     AlreadyRunningException,
     WrongStatusException,
 )
+from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
+    BiometricDeduplicationService,
+)
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
 )
@@ -467,3 +470,11 @@ def remove_old_rdi_links_task(page_count: int = 100) -> None:
     except Exception:  # pragma: no cover
         logger.error("Removing old RDI objects failed")
         raise
+
+
+@app.task
+@sentry_tags
+@log_start_and_end
+def deduplication_engine_process(program_id: str) -> None:
+    program = Program.objects.get(id=program_id)
+    BiometricDeduplicationService().upload_and_process_deduplication_set(program)

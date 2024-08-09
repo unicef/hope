@@ -1,6 +1,9 @@
+import logging
 import uuid
 
-from hct_mis_api.apps.household.models import PendingIndividual
+from django.db.models import QuerySet
+
+from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
@@ -12,51 +15,91 @@ from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
 
 
 class BiometricDeduplicationService:
-    # TODO MB add async task that collects RDIs waiting for dedup and starts deduplication
+    class BiometricDeduplicationServiceException(Exception):
+        pass
 
     def __init__(self) -> None:
         self.api = DeduplicationEngineAPI()
 
-    def create_deduplication_set_for_program(self, program: Program) -> None:
+    def create_deduplication_set(self, program: Program) -> None:
         program.deduplication_set_id = uuid.uuid4()
         program.save(update_fields=["deduplication_set_id"])
 
         deduplication_set = DeduplicationSet(name=program.name, reference_id=str(program.deduplication_set_id))
         self.api.create_deduplication_set(deduplication_set)
 
-        images = DeduplicationImageSet(
-            data=[
-                DeduplicationImage(id=str(individual.id), image_url=individual.photo.name)
-                for individual in program.individuals.exclude(photo="")
-            ]
-        )  # TODO MB exclude withdrawn/duplicate
-
-        self.api.bulk_upload_images(deduplication_set.reference_id, images)
-
-        # if process lock not aquired mark all program rdis as waiting for dedup
-        self.api.process_deduplication(deduplication_set.reference_id)
-
-    def update_deduplication_set_for_rdi(self, rdi: RegistrationDataImport) -> None:
-        # CHeck if other rdis are not waiting for dedup
-        deduplication_set_id = str(rdi.program.deduplication_set_id)
-
-        individuals = PendingIndividual.objects.filter(registration_data_import=rdi)
+    def upload_individuals(self, deduplication_set_id: str, rdi: RegistrationDataImport) -> None:
+        individuals = (
+            Individual.objects.filter(is_removed=False, registration_data_import=rdi)
+            .exclude(photo="")
+            .only("id", "photo")
+        )  # TODO MB exclude withdrawn/duplicate?
 
         images = DeduplicationImageSet(
             data=[
-                DeduplicationImage(id=str(individual.id), image_url=individual.photo.name)
-                for individual in individuals.exclude(photo="")
+                DeduplicationImage(id=str(individual.id), image_url=individual.photo.name) for individual in individuals
             ]
-        )  # TODO MB exclude withdrawn/duplicate
+        )
+        try:
+            self.api.bulk_upload_images(deduplication_set_id, images)
+            rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_UPLOADED
+            rdi.save(update_fields=["deduplication_engine_status"])
 
-        self.api.bulk_upload_images(deduplication_set_id, images)
+        except DeduplicationEngineAPI.DeduplicationEngineAPIException:
+            logging.exception(f"Failed to upload images for RDI {rdi} to deduplication set {deduplication_set_id}")
+            rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_ERROR
+            rdi.save(update_fields=["deduplication_engine_status"])
 
-        # if process lock not aquired mark rdi as waiting for dedup
-        self.api.process_deduplication(deduplication_set_id)
+    def process_deduplication_set(self, deduplication_set_id: str, rdis: QuerySet[RegistrationDataImport]) -> None:
+        response_data, status = self.api.process_deduplication(deduplication_set_id)
+        if status == 409:
+            raise self.BiometricDeduplicationServiceException(
+                f"Deduplication is already in progress for deduplication set {deduplication_set_id}"
+            )
+        elif status == 200:
+            rdis.update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS)
+        else:
+            logging.error(
+                f"Failed to process deduplication set {deduplication_set_id}. Response[{status}]: {response_data}"
+            )
+            rdis.update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_ERROR)
+
+    def upload_and_process_deduplication_set(self, program: Program) -> None:
+        if not program.biometric_deduplication_enabled:
+            raise self.BiometricDeduplicationServiceException("Biometric deduplication is not enabled for this program")
+
+        if not program.deduplication_set_id:
+            self.create_deduplication_set(program)
+
+        if RegistrationDataImport.objects.filter(
+            program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+        ).exists():
+            raise self.BiometricDeduplicationServiceException("Deduplication is already in progress for some RDIs")
+
+        deduplication_set_id = str(program.deduplication_set_id)
+
+        rdis = RegistrationDataImport.objects.filter(
+            program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING
+        )
+        for rdi in rdis:
+            self.upload_individuals(deduplication_set_id, rdi)
+
+        all_uploaded = (
+            rdis.count()
+            == rdis.filter(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_UPLOADED).count()
+        )
+        if all_uploaded:
+            self.process_deduplication_set(deduplication_set_id, rdis)
+        else:
+            raise self.BiometricDeduplicationServiceException("Failed to upload images for all RDIs")
 
     def delete_deduplication_set(self, program: Program) -> None:
-        # delete na finish program
-        # delete na delete rdi?
         self.api.delete_deduplication_set(str(program.deduplication_set_id))
         program.deduplication_set_id = None
         program.save(update_fields=["deduplication_set_id"])
+
+    @classmethod
+    def mark_rdis_as_pending(cls, program: Program) -> None:
+        RegistrationDataImport.objects.filter(program=program, deduplication_engine_status__isnull=True).update(
+            status=RegistrationDataImport.DEDUP_ENGINE_PENDING
+        )

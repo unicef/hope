@@ -76,7 +76,7 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
             if original.biometric_deduplication_enabled != obj.biometric_deduplication_enabled:
                 service = BiometricDeduplicationService()
                 if obj.biometric_deduplication_enabled:
-                    service.create_deduplication_set_for_program(obj)
+                    service.mark_rdis_as_pending(obj)
                 else:
                     service.delete_deduplication_set(obj)
         super().save_model(request, obj, *args)

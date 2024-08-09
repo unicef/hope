@@ -285,7 +285,7 @@ class PaymentGatewayAPI(BaseAPI):
         return [DeliveryMechanismData.create_from_dict(d) for d in response_data]
 
     def create_payment_instruction(self, data: dict) -> PaymentInstructionData:
-        response_data = self._post(self.Endpoints.CREATE_PAYMENT_INSTRUCTION, data)
+        response_data, _ = self._post(self.Endpoints.CREATE_PAYMENT_INSTRUCTION, data)
         return PaymentInstructionData.create_from_dict(response_data)
 
     def change_payment_instruction_status(self, status: PaymentInstructionStatus, remote_id: str) -> str:
@@ -299,7 +299,7 @@ class PaymentGatewayAPI(BaseAPI):
             PaymentInstructionStatus.PROCESSED: self.Endpoints.PROCESS_PAYMENT_INSTRUCTION_STATUS,
             PaymentInstructionStatus.READY: self.Endpoints.READY_PAYMENT_INSTRUCTION_STATUS,
         }
-        response_data = self._post(action_endpoint_map[status].format(remote_id=remote_id))
+        response_data, _ = self._post(action_endpoint_map[status].format(remote_id=remote_id))
 
         return response_data["status"]
 
@@ -307,7 +307,7 @@ class PaymentGatewayAPI(BaseAPI):
         self, payment_records: List[Payment], remote_id: str, validate_response: bool = True
     ) -> AddRecordsResponseData:
         serializer = PaymentSerializer(payment_records, many=True)
-        response_data = self._post(
+        response_data, _ = self._post(
             self.Endpoints.PAYMENT_INSTRUCTION_ADD_RECORDS.format(remote_id=remote_id),
             serializer.data,
             validate_response=validate_response,
@@ -315,7 +315,7 @@ class PaymentGatewayAPI(BaseAPI):
         return AddRecordsResponseData.create_from_dict(response_data)
 
     def get_records_for_payment_instruction(self, payment_instruction_remote_id: str) -> List[PaymentRecordData]:
-        response_data = self._get(
+        response_data, _ = self._get(
             f"{self.Endpoints.GET_PAYMENT_RECORDS}?parent__remote_id={payment_instruction_remote_id}"
         )
         return [PaymentRecordData.create_from_dict(record_data) for record_data in response_data]

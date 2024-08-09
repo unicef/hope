@@ -121,6 +121,8 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
                 data_source=RegistrationDataImport.EDOPOMOGA,
                 program=program,
             )
+            if program.deduplication_engine_enabled:
+                registration_data_import.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PENDING
 
             business_area = storage_obj.business_area
             country = business_area.countries.first()

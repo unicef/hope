@@ -64,6 +64,8 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             program=programme,
             import_data=import_data,
         )
+        if programme.deduplication_engine_enabled:
+            rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PENDING
         return rdi
 
     @abc.abstractmethod

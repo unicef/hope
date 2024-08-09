@@ -1,5 +1,5 @@
 import dataclasses
-from typing import List
+from typing import List, Tuple
 
 from hct_mis_api.apps.core.api.mixins import BaseAPI
 
@@ -45,26 +45,28 @@ class DeduplicationEngineAPI(BaseAPI):
         BULK_DELETE_IMAGES = "deduplication_sets/{deduplication_set_pk}/images_bulk/clear/"  # DELETE - Delete all images for a deduplication set
 
     def delete_deduplication_set(self, deduplication_set_id: str) -> dict:
-        response_data = self._delete(self.Endpoints.DELETE_DEDUPLICATION_SET.format(pk=deduplication_set_id))
+        response_data, _ = self._delete(self.Endpoints.DELETE_DEDUPLICATION_SET.format(pk=deduplication_set_id))
         return response_data
 
     def create_deduplication_set(self, deduplication_set: DeduplicationSet) -> dict:
-        response_data = self._post(self.Endpoints.CREATE_DEDUPLICATION_SET, dataclasses.asdict(deduplication_set))
-        return response_data  # TODO MB some dataclass, response structure?
+        response_data, _ = self._post(self.Endpoints.CREATE_DEDUPLICATION_SET, dataclasses.asdict(deduplication_set))
+        return response_data
 
     def bulk_upload_images(self, deduplication_set_id: str, images: DeduplicationImageSet) -> dict:
-        response_data = self._post(
+        response_data, _ = self._post(
             self.Endpoints.BULK_UPLOAD_IMAGES.format(deduplication_set_pk=deduplication_set_id),
             dataclasses.asdict(images),
         )
-        return response_data  # TODO MB some dataclass, response structure?
+        return response_data
 
     def bulk_delete_images(self, deduplication_set_id: str) -> dict:
-        response_data = self._delete(
+        response_data, _ = self._delete(
             self.Endpoints.BULK_UPLOAD_IMAGES.format(deduplication_set_pk=deduplication_set_id)
         )
-        return response_data  # TODO MB some dataclass, response structure?
-
-    def process_deduplication(self, deduplication_set_id: str) -> dict:
-        response_data = self._post(self.Endpoints.PROCESS_DEDUPLICATION.format(pk=deduplication_set_id))
         return response_data
+
+    def process_deduplication(self, deduplication_set_id: str) -> Tuple[dict, int]:
+        response_data, status = self._post(
+            self.Endpoints.PROCESS_DEDUPLICATION.format(pk=deduplication_set_id), validate_response=False
+        )
+        return response_data, status
