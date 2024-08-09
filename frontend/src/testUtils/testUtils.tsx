@@ -63,6 +63,7 @@ export const fakeContextProgram = {
     id: '1',
     name: 'someName',
     status: ProgramStatus.Active,
+    pduFields: null,
     dataCollectingType: {
       id: '1',
       householdFiltersAvailable: true,
@@ -77,4 +78,5 @@ export const fakeContextProgram = {
   isActiveProgram: true,
   isSocialDctType: false,
   isStandardDctType: true,
+  programHasPdu: false,
 };
