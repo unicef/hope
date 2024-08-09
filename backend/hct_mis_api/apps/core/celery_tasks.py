@@ -105,7 +105,6 @@ def upload_new_kobo_template_and_update_flex_fields_task(self: Any, xlsx_kobo_te
 @log_start_and_end
 @sentry_tags
 def create_target_population_task(self: Any, storage_id: str, program_id: str, tp_name: str) -> None:
-    # TODO MB ADD DEDUP
     storage_obj = StorageFile.objects.get(id=storage_id)
     file_path = None
     program = Program.objects.get(id=program_id)
