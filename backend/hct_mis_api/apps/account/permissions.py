@@ -3,7 +3,6 @@ from collections import OrderedDict
 from enum import Enum, auto, unique
 from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
-from urllib.parse import urlparse
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import Model
@@ -19,14 +18,16 @@ from graphene_django.filter.utils import (
 
 from hct_mis_api.apps.core.extended_connection import DjangoFastConnectionField
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import decode_id_string, get_program_id_from_headers
+from hct_mis_api.apps.core.utils import get_program_id_from_headers
 
 logger = logging.getLogger(__name__)
 
 
 @unique
 class Permissions(Enum):
-    def _generate_next_value_(name: str, start: int, count: int, last_values: List[Any]) -> Any:  # type: ignore # https://github.com/python/mypy/issues/7591
+    def _generate_next_value_(  # type: ignore # https://github.com/python/mypy/issues/7591
+        name: str, start: int, count: int, last_values: List[Any]
+    ) -> Any:
         return name
 
     # RDI
