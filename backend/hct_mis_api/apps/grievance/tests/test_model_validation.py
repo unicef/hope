@@ -5,6 +5,13 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.payment.fixtures import (
+    FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
+    generate_delivery_mechanisms,
+)
+from hct_mis_api.apps.payment.models import DeliveryMechanism
 
 
 class TestGrievanceModelValidation(TestCase):
@@ -67,3 +74,46 @@ class TestGrievanceModelValidation(TestCase):
             "{'issue_type': ['Invalid issue type for selected category']}",
             grievance_ticket_2.save,
         )
+
+
+class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        create_afghanistan()
+        cls.user = UserFactory.create()
+        generate_delivery_mechanisms()
+
+    def test_clean(self) -> None:
+        dm_cash = DeliveryMechanism.objects.get(code="cash")
+        dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
+        fsp = FinancialServiceProviderFactory()
+        fsp.delivery_mechanisms.set([dm_atm_card])
+        template = FinancialServiceProviderXlsxTemplateFactory()
+        template_per_dm_cash = FspXlsxTemplatePerDeliveryMechanismFactory(
+            financial_service_provider=fsp,
+            delivery_mechanism=dm_cash,
+            xlsx_template=template,
+        )
+
+        with self.assertRaisesMessage(
+            ValidationError,
+            f"Delivery Mechanism {template_per_dm_cash.delivery_mechanism} is not supported by Financial Service Provider {fsp}",
+        ):
+            template_per_dm_cash.clean()
+
+        template_per_dm_atm_card = FspXlsxTemplatePerDeliveryMechanismFactory(
+            financial_service_provider=fsp,
+            delivery_mechanism=dm_atm_card,
+            xlsx_template=template,
+        )
+
+        with self.assertRaisesMessage(
+            ValidationError,
+            f"['card_number__atm_card', 'card_expiry_date__atm_card', 'name_of_cardholder__atm_card'] fields are required by delivery mechanism "
+            f"{template_per_dm_atm_card.delivery_mechanism} and must be present in the template core fields",
+        ):
+            template_per_dm_atm_card.clean()
+
+        template.core_fields = ["card_number__atm_card", "card_expiry_date__atm_card", "name_of_cardholder__atm_card"]
+        template.save()
+        template_per_dm_atm_card.clean()

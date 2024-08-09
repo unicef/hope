@@ -23,6 +23,8 @@ class RegistrationDataImport(BaseComponents):
     tablePagination = 'div[data-cy="table-pagination"]'
     tableRow = 'tr[role="checkbox"]'
     importTypeSelect = 'div[data-cy="import-type-select"]'
+    koboProjectSelect = 'div[data-cy="kobo-project-select"]'
+    progressCircle = 'span[role="progressbar"]'
     downloadTemplate = 'a[data-cy="a-download-template"]'
     buttonImportRDI = 'button[data-cy="button-import-rdi"]'
     excelItem = 'li[data-cy="excel-menu-item"]'
@@ -103,6 +105,13 @@ class RegistrationDataImport(BaseComponents):
     def getImportTypeSelect(self) -> WebElement:
         return self.wait_for(self.importTypeSelect)
 
+    def getKoboProjectSelect(self) -> WebElement:
+        return self.wait_for(self.koboProjectSelect)
+
+    def checkLoadingProgressCircle(self) -> None:
+        self.wait_for(self.progressCircle)
+        self.wait_for_disappear(self.progressCircle)
+
     def getDownloadTemplate(self) -> WebElement:
         return self.wait_for(self.downloadTemplate)
 
@@ -110,7 +119,7 @@ class RegistrationDataImport(BaseComponents):
         return self.wait_for(self.buttonImportRDI)
 
     def disappearButtonImportFile(self) -> None:
-        self.wait_for_disappear(self.buttonImportRDI)
+        self.wait_for_disappear(self.buttonImportRDI, timeout=30)
 
     def getExcelItem(self) -> WebElement:
         return self.wait_for(self.excelItem)

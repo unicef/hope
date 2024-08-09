@@ -38,7 +38,6 @@ from hct_mis_api.apps.utils.models import (
 if TYPE_CHECKING:
     from hct_mis_api.apps.household.models import Household, Individual
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -62,6 +61,26 @@ class GrievanceTicketManager(models.Manager):
             (TicketHouseholdDataUpdateDetails.objects.filter(household=household)),
             (TicketSensitiveDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
             (TicketComplaintDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
+        )
+
+    def belong_households_individuals(self, households: QuerySet, individuals: QuerySet) -> Iterable:
+        return chain(
+            (TicketReferralDetails.objects.filter(Q(individual__in=individuals) | Q(household__in=households))),
+            (TicketNegativeFeedbackDetails.objects.filter(Q(individual__in=individuals) | Q(household__in=households))),
+            (TicketPositiveFeedbackDetails.objects.filter(Q(individual__in=individuals) | Q(household__in=households))),
+            (
+                TicketNeedsAdjudicationDetails.objects.filter(
+                    Q(selected_individual__in=individuals) | Q(golden_records_individual__in=individuals)
+                )
+            ).distinct(),
+            (TicketSystemFlaggingDetails.objects.filter(golden_records_individual__in=individuals)),
+            (TicketDeleteIndividualDetails.objects.filter(individual__in=individuals)),
+            (TicketDeleteHouseholdDetails.objects.filter(household__in=households)),
+            (TicketAddIndividualDetails.objects.filter(household__in=households)),
+            (TicketIndividualDataUpdateDetails.objects.filter(individual__in=individuals)),
+            (TicketHouseholdDataUpdateDetails.objects.filter(household__in=households)),
+            (TicketSensitiveDetails.objects.filter(Q(individual__in=individuals) | Q(household__in=households))),
+            (TicketComplaintDetails.objects.filter(Q(individual__in=individuals) | Q(household__in=households))),
         )
 
     # remove 'is_original' after data migration
@@ -789,23 +808,31 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
         related_name="needs_adjudication_ticket_details",
         on_delete=models.CASCADE,
     )
+    is_multiple_duplicates_version = models.BooleanField(default=False)
+    # probably unique Individual
     golden_records_individual = models.ForeignKey(
         "household.Individual", related_name="ticket_golden_records", on_delete=models.CASCADE
     )
-    is_multiple_duplicates_version = models.BooleanField(default=False)
-    possible_duplicate = models.ForeignKey(
-        "household.Individual", related_name="+", on_delete=models.CASCADE, null=True
-    )  # this field will be deprecated
+    # list of possible duplicates in the ticket
     possible_duplicates = models.ManyToManyField("household.Individual", related_name="ticket_duplicates")
-    selected_individual = models.ForeignKey(
-        "household.Individual", null=True, related_name="+", on_delete=models.CASCADE
-    )  # this field will be deprecated
+    # list of unique Individuals
+    selected_distinct = models.ManyToManyField("household.Individual", related_name="selected_distinct")
+    # list of duplicate Individuals
+    # maybe rename to 'selected_duplicates'
     selected_individuals = models.ManyToManyField("household.Individual", related_name="ticket_selected")
     role_reassign_data = JSONField(default=dict)
     extra_data = JSONField(default=dict)
     score_min = models.FloatField(default=0.0)
     score_max = models.FloatField(default=0.0)
     is_cross_area = models.BooleanField(default=False)
+
+    # deprecated and will remove soon
+    selected_individual = models.ForeignKey(
+        "household.Individual", null=True, related_name="+", on_delete=models.CASCADE
+    )  # this field will be deprecated
+    possible_duplicate = models.ForeignKey(
+        "household.Individual", related_name="+", on_delete=models.CASCADE, null=True
+    )  # this field will be deprecated
 
     @property
     def has_duplicated_document(self) -> bool:

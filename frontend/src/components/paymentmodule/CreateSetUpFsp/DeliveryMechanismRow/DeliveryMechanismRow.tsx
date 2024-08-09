@@ -26,7 +26,16 @@ export function DeliveryMechanismRow({
 }: DeliveryMechanismRowProps): React.ReactElement {
   const { t } = useTranslation();
   const chosenFsp = values.deliveryMechanisms[index].fsp;
+  const chosenDeliveryMechanism =
+    values.deliveryMechanisms[index].deliveryMechanism;
 
+  const handleDeliveryMechanismChange = (e): void => {
+    setFieldValue(`deliveryMechanisms[${index}].chosenConfiguration`, '');
+    setFieldValue(
+      `deliveryMechanisms[${index}].deliveryMechanism`,
+      e.target.value,
+    );
+  };
   const handleFspChange = (e): void => {
     setFieldValue(`deliveryMechanisms[${index}].chosenConfiguration`, '');
     setFieldValue(`deliveryMechanisms[${index}].fsp`, e.target.value);
@@ -46,13 +55,22 @@ export function DeliveryMechanismRow({
                   label={t('Delivery Mechanism')}
                   component={FormikSelectField}
                   choices={deliveryMechanismsChoices}
+                  onChange={(e) => handleDeliveryMechanismChange(e)}
                 />
               )}
               {step === 1 && (
                 <LabelizedField
                   label={t('Delivery Mechanism')}
-                  value={values.deliveryMechanisms[index].deliveryMechanism}
-                />
+                  value={chosenDeliveryMechanism}
+                >
+                  {
+                    (
+                      deliveryMechanismsChoices.find(
+                        (c) => c.value === chosenDeliveryMechanism,
+                      ) || {}
+                    ).name
+                  }
+                </LabelizedField>
               )}
             </Box>
           </Grid>

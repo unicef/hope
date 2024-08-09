@@ -1,4 +1,5 @@
 import json
+import logging
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Union
 
@@ -18,29 +19,29 @@ from hct_mis_api.apps.core.kobo.common import (
 )
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import chunks, rename_dict_keys
+from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.geo.models import Country as GeoCountry
 from hct_mis_api.apps.household.models import (
     HEAD,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    DocumentType,
+    PendingBankAccountInfo,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualIdentity,
+    PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import (
+from hct_mis_api.apps.registration_data.models import (
     ImportData,
-    ImportedBankAccountInfo,
-    ImportedDocument,
-    ImportedDocumentType,
-    ImportedHousehold,
-    ImportedIndividual,
-    ImportedIndividualIdentity,
-    ImportedIndividualRoleInHousehold,
     KoboImportedSubmission,
-    RegistrationDataImportDatahub,
+    RegistrationDataImport,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
     RdiBaseCreateTask,
-    logger,
 )
 from hct_mis_api.apps.registration_datahub.tasks.utils import get_submission_metadata
 from hct_mis_api.apps.registration_datahub.utils import (
@@ -48,6 +49,8 @@ from hct_mis_api.apps.registration_datahub.utils import (
     find_attachment_in_kobo,
 )
 from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
+
+logger = logging.getLogger(__name__)
 
 
 class RdiKoboCreateTask(RdiBaseCreateTask):
@@ -57,20 +60,33 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     update the status of that registration data import instance.
     """
 
-    reduced_submissions = None
-    business_area = None
-    attachments: Optional[List[Dict]] = None
-
     def __init__(
         self,
+        registration_data_import_id: str,
+        business_area_id: str,
     ) -> None:
-        document_keys = ImportedDocumentType.objects.values_list("key", flat=True)
+        document_keys = DocumentType.objects.values_list("key", flat=True)
         self.DOCS_AND_IDENTITIES_FIELDS = [
             f"{key}_{suffix}" for key in document_keys for suffix in ["no_i_c", "photo_i_c", "issuer_i_c"]
         ]
+        self.BANK_RELATED_FIELDS = (
+            "bank_name_i_c",
+            "bank_account_number_i_c",
+            "debit_card_number_i_c",
+            "bank_branch_name_i_c",
+            "account_holder_name_i_c",
+        )
+        self.registration_data_import = RegistrationDataImport.objects.get(
+            id=registration_data_import_id,
+        )
+        self.business_area = BusinessArea.objects.get(id=business_area_id)
+
+        self.reduced_submissions: List[Any] = []
+        self.attachments: List[Dict] = []
+        super().__init__()
 
     def _handle_image_field(self, value: Any, is_flex_field: bool) -> Optional[Union[str, File]]:
-        if not self.registration_data_import_mis.pull_pictures:
+        if not self.registration_data_import.pull_pictures:
             return None
         if self.attachments is None:
             return None
@@ -98,7 +114,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         return float(value)
 
     def _cast_and_assign(
-        self, value: Union[str, list], field: str, obj: Union[ImportedIndividual, ImportedHousehold]
+        self, value: Union[str, list], field: str, obj: Union[PendingIndividual, PendingHousehold]
     ) -> None:
         complex_fields = {
             "IMAGE": self._handle_image_field,
@@ -117,6 +133,10 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         if field_data_dict["type"] in complex_fields:
             cast_fn = complex_fields.get(field_data_dict["type"])
             correct_value = cast_fn(value, is_flex_field)
+        elif field_data_dict["name"] in ["admin1", "admin2", "admin3", "admin4"]:
+            correct_value = Area.objects.get(p_code=value)
+        elif field_data_dict["name"] in ["country", "country_origin"]:
+            correct_value = GeoCountry.objects.get(iso_code2=Country(value).code)
         else:
             correct_value = self._cast_value(value, field)
 
@@ -135,37 +155,39 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         identities = []
         for documents_dict in documents_and_identities:
             for document_name, data in documents_dict.items():
-                if not ImportedIndividual.objects.filter(id=data["individual"].id).exists():
+                if not PendingIndividual.objects.filter(id=data["individual"].id).exists():
                     continue
 
                 is_identity = document_name in identity_fields
 
-                country = Country(data["issuing_country"])
+                if country := data.get("issuing_country"):
+                    data["country"] = GeoCountry.objects.get(iso_code2=Country(country).code)
 
                 if is_identity:
                     partner = "WFP" if document_name == "scope_id" else "UNHCR"
                     identities.append(
-                        ImportedIndividualIdentity(
+                        PendingIndividualIdentity(
                             partner=partner,
                             individual=data["individual"],
-                            document_number=data["number"],
-                            country=country,
+                            document_number=data.get("number", ""),
+                            country=data.get("country"),
                         )
                     )
                     continue
-                document_type = ImportedDocumentType.objects.get(key=document_name)
+                document_type = DocumentType.objects.get(key=document_name)
                 file = self._handle_image_field(data.get("photo", ""), False)
                 documents.append(
-                    ImportedDocument(
-                        document_number=data["number"],
-                        country=country,
+                    PendingDocument(
+                        document_number=data.get("number", ""),
                         photo=file,
                         individual=data["individual"],
                         type=document_type,
+                        program=data["individual"].program,
+                        country=data.get("country"),
                     )
                 )
-        ImportedDocument.objects.bulk_create(documents)
-        ImportedIndividualIdentity.objects.bulk_create(identities)
+        PendingDocument.objects.bulk_create(documents)
+        PendingIndividualIdentity.objects.bulk_create(identities)
 
     @staticmethod
     def _handle_collectors(collectors_dict: Dict, individuals_dict: Dict) -> None:
@@ -174,29 +196,18 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             for collector in collectors_list:
                 collector.individual_id = individuals_dict.get(hash_key)
                 collectors_to_bulk_create.append(collector)
-        ImportedIndividualRoleInHousehold.objects.bulk_create(collectors_to_bulk_create)
+        PendingIndividualRoleInHousehold.objects.bulk_create(collectors_to_bulk_create)
 
-    @transaction.atomic(using="default")
-    @transaction.atomic(using="registration_datahub")
+    @transaction.atomic()
     def execute(
         self,
-        registration_data_import_id: str,
         import_data_id: str,
-        business_area_id: str,
         program_id: Optional[str] = None,
     ) -> None:
-        registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
-            id=registration_data_import_id,
-        )
-        old_rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
-        self.registration_data_import_mis = old_rdi_mis
-        self.registration_data_import_datahub = registration_data_import
-        registration_data_import.import_done = RegistrationDataImportDatahub.STARTED
-        registration_data_import.save()
+        self.registration_data_import.status = RegistrationDataImport.IMPORTING
+        self.registration_data_import.save()
 
         import_data = ImportData.objects.get(id=import_data_id)
-
-        self.business_area = BusinessArea.objects.get(id=business_area_id)
 
         submissions_json = import_data.file.read()
         submissions = json.loads(submissions_json)
@@ -232,7 +243,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     household,
                     households_to_create,
                     individuals_ids_hash_dict,
-                    registration_data_import,
                     submission_meta_data,
                 )
             self.bulk_creates(bank_accounts_to_create, head_of_households_mapping, households_to_create)
@@ -240,57 +250,55 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             head_of_households_mapping = {}
             households_to_create = []
         self._handle_collectors(collectors_to_create, individuals_ids_hash_dict)
-        registration_data_import.import_done = RegistrationDataImportDatahub.DONE
-        registration_data_import.save()
-        rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
+
+        rdi_mis = RegistrationDataImport.objects.get(id=self.registration_data_import.id)
         rdi_mis.status = RegistrationDataImport.IN_REVIEW
         rdi_mis.save()
+
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,
             "business_area",
             None,
-            rdi_mis.program_id,
-            old_rdi_mis,
+            self.registration_data_import.program_id,
+            self.registration_data_import,
             rdi_mis,
         )
         if not self.business_area.postpone_deduplication:
-            DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_imported_individuals(
-                registration_data_import_datahub=registration_data_import
+            DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_pending_individuals(
+                registration_data_import=self.registration_data_import
             )
 
     def bulk_creates(
         self,
-        bank_accounts_to_create: list[ImportedBankAccountInfo],
+        bank_accounts_to_create: list[PendingBankAccountInfo],
         head_of_households_mapping: dict,
-        households_to_create: list[ImportedHousehold],
+        households_to_create: list[PendingHousehold],
     ) -> None:
-        ImportedHousehold.objects.bulk_create(households_to_create)
+        PendingHousehold.objects.bulk_create(households_to_create)
         households_to_update = []
         for household, individual in head_of_households_mapping.items():
             household.head_of_household = individual
             households_to_update.append(household)
-        ImportedHousehold.objects.bulk_update(
+        PendingHousehold.objects.bulk_update(
             households_to_update,
             ["head_of_household"],
         )
-        ImportedBankAccountInfo.objects.bulk_create(bank_accounts_to_create)
+        PendingBankAccountInfo.objects.bulk_create(bank_accounts_to_create)
 
     def handle_household(
         self,
-        bank_accounts_to_create: list[ImportedBankAccountInfo],
+        bank_accounts_to_create: list[PendingBankAccountInfo],
         collectors_to_create: dict,
         head_of_households_mapping: dict,
         household: dict,
-        households_to_create: list[ImportedHousehold],
+        households_to_create: list[PendingHousehold],
         individuals_ids_hash_dict: dict,
-        registration_data_import: RegistrationDataImportDatahub,
         submission_meta_data: dict,
     ) -> None:
         individuals_to_create_list = []
         documents_and_identities_to_create = []
-        # fix for support new field 'detail_id' in ImportedHousehold
-        submission_meta_data["detail_id"] = submission_meta_data.get("kobo_asset_id", "")
-        household_obj = ImportedHousehold(**submission_meta_data)
+        submission_meta_data["detail_id"] = submission_meta_data.pop("kobo_asset_id", "")
+        household_obj = PendingHousehold(**submission_meta_data)
         self.attachments = household.get("_attachments", [])
         registration_date = None
         current_individuals = []
@@ -299,7 +307,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 for individual in hh_value:
                     current_individual_docs_and_identities = defaultdict(dict)
                     current_individual_bank_account = {}
-                    individual_obj = ImportedIndividual()
+                    individual_obj = PendingIndividual()
                     only_collector_flag = False
                     role = None
                     for i_field, i_value in individual.items():
@@ -324,7 +332,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                             only_collector_flag = True
                         elif i_field == "role_i_c":
                             role = i_value.upper()
-                        elif i_field in ("bank_name_i_c", "bank_account_number_i_c"):
+                        elif i_field in self.BANK_RELATED_FIELDS:
                             name = i_field.replace("_i_c", "")
                             current_individual_bank_account["individual"] = individual_obj
                             current_individual_bank_account[name] = i_value
@@ -339,9 +347,11 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                             except Exception as e:
                                 self._handle_exception("Individual", i_field, e)
                     individual_obj.last_registration_date = individual_obj.first_registration_date
-                    individual_obj.registration_data_import = registration_data_import
+                    individual_obj.registration_data_import = self.registration_data_import
+                    individual_obj.program = self.registration_data_import.program
+                    individual_obj.business_area = self.business_area
                     individual_obj.age_at_registration = calculate_age_at_registration(
-                        registration_data_import, str(individual_obj.birth_date)
+                        self.registration_data_import.created_at, str(individual_obj.birth_date)
                     )
 
                     if individual_obj.relationship == HEAD:
@@ -354,9 +364,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     current_individuals.append(individual_obj)
                     documents_and_identities_to_create.append(current_individual_docs_and_identities)
                     if current_individual_bank_account:
-                        bank_accounts_to_create.append(ImportedBankAccountInfo(**current_individual_bank_account))
+                        bank_accounts_to_create.append(PendingBankAccountInfo(**current_individual_bank_account))
                     if role in (ROLE_PRIMARY, ROLE_ALTERNATE):
-                        role_obj = ImportedIndividualRoleInHousehold(
+                        role_obj = PendingIndividualRoleInHousehold(
                             individual_id=individual_obj.pk,
                             household_id=household_obj.pk,
                             role=role,
@@ -378,14 +388,16 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     self._handle_exception("Household", hh_field, e)
         household_obj.first_registration_date = registration_date
         household_obj.last_registration_date = registration_date
-        household_obj.registration_data_import = registration_data_import
+        household_obj.registration_data_import = self.registration_data_import
+        household_obj.program = self.registration_data_import.program
+        household_obj.business_area = self.business_area
         household_obj.set_admin_areas()
         households_to_create.append(household_obj)
         for ind in current_individuals:
             ind.first_registration_date = registration_date
             ind.last_registration_date = registration_date
             ind.detail_id = household_obj.detail_id
-        ImportedIndividual.objects.bulk_create(individuals_to_create_list)
+        PendingIndividual.objects.bulk_create(individuals_to_create_list)
         self._handle_documents_and_identities(documents_and_identities_to_create)
 
     def _handle_exception(self, assigned_to: str, field_name: str, e: BaseException) -> None:

@@ -29,7 +29,7 @@ exports[`components/dashboard/PaymentVerificationSection should render 1`] = `
       </span>
     </div>
     <div
-      class="MuiBox-root css-2y8fku"
+      class="MuiBox-root css-1k0gv8u"
     >
       <canvas
         height="0"

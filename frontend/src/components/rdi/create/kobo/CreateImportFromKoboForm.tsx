@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { CircularProgress } from '@mui/material';
+import { Box, CircularProgress } from '@mui/material';
 import { Field, FormikProvider, useFormik } from 'formik';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -58,6 +58,9 @@ export function CreateImportFromKoboForm({
             name: values.name,
             screenBeneficiary: values.screenBeneficiary,
             businessAreaSlug: businessArea,
+            allowDeliveryMechanismsValidationErrors:
+              values.allowDeliveryMechanismsValidationErrors,
+            pullPictures: values.pullPictures,
           },
         },
       });
@@ -74,6 +77,8 @@ export function CreateImportFromKoboForm({
       koboAssetId: '',
       onlyActiveSubmissions: true,
       screenBeneficiary: false,
+      allowDeliveryMechanismsValidationErrors: false,
+      pullPictures: false,
     },
     validationSchema,
     onSubmit,
@@ -88,20 +93,32 @@ export function CreateImportFromKoboForm({
       businessAreaSlug: businessArea,
       onlyActiveSubmissions: formik.values.onlyActiveSubmissions,
       koboAssetId: formik.values.koboAssetId,
+      pullPictures: formik.values.pullPictures,
     });
   };
   useEffect(() => stopPollingImportData, []);
   useEffect(() => {
     saveKoboInputData();
-  }, [formik.values.koboAssetId, formik.values.onlyActiveSubmissions]);
+  }, [
+    formik.values.koboAssetId,
+    formik.values.onlyActiveSubmissions,
+    formik.values.pullPictures,
+  ]);
   useEffect(() => {
     setSubmitForm(formik.submitForm);
   }, [formik.submitForm]);
   useEffect(() => {
-    if (koboImportData?.status === ImportDataStatus.Finished) {
+    if (
+      koboImportData?.status === ImportDataStatus.Finished ||
+      (koboImportData?.status ===
+        ImportDataStatus.DeliveryMechanismsValidationError &&
+        formik.values.allowDeliveryMechanismsValidationErrors)
+    ) {
       setSubmitDisabled(false);
+    } else {
+      setSubmitDisabled(true);
     }
-  }, [koboImportData]);
+  }, [koboImportData, formik.values.allowDeliveryMechanismsValidationErrors]);
 
   return (
     <div>
@@ -127,6 +144,22 @@ export function CreateImportFromKoboForm({
           variant="outlined"
           component={FormikTextField}
         />
+        <Box mt={2}>
+          {koboImportData?.status ===
+            ImportDataStatus.DeliveryMechanismsValidationError && (
+            <Box mt={2}>
+              <Field
+                name="allowDeliveryMechanismsValidationErrors"
+                fullWidth
+                label={t(
+                  'Ignore Delivery Mechanisms Validation Errors and Create Grievance Tickets',
+                )}
+                variant="outlined"
+                component={FormikCheckboxField}
+              />
+            </Box>
+          )}
+        </Box>
         <ScreenBeneficiaryField />
         {saveKoboLoading ? (
           <CircularProgressContainer>

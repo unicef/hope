@@ -8,6 +8,7 @@ from drf_spectacular.views import (
 
 from hct_mis_api.api import endpoints
 from hct_mis_api.api.endpoints.base import ConstanceSettingsAPIView
+from hct_mis_api.api.endpoints.program.views import ProgramGlobalListView
 from hct_mis_api.api.router import APIRouter
 
 app_name = "api"
@@ -35,6 +36,8 @@ urlpatterns = [
     ),
     path("lookups/role/", endpoints.lookups.Roles().as_view(), name="role-list"),
     path("lookups/sex/", endpoints.lookups.Sex().as_view(), name="sex-list"),
+    path("business_areas/", endpoints.core.BusinessAreaListView.as_view(), name="business-area-list"),
+    path("programs/", ProgramGlobalListView.as_view(), name="program-global-list"),
     path(
         "<slug:business_area>/",
         include(
@@ -48,7 +51,6 @@ urlpatterns = [
                 ),
                 path("rdi/create/", endpoints.rdi.CreateRDIView().as_view(), name="rdi-create"),
                 path("rdi/upload/", endpoints.rdi.UploadRDIView().as_view(), name="rdi-upload"),
-                path("rdi/upload/people/", endpoints.rdi.UploadPeopleRDIView().as_view(), name="rdi-upload-people"),
                 path("rdi/<uuid:rdi>/completed/", endpoints.rdi.CompleteRDIView().as_view(), name="rdi-complete"),
                 path(
                     "rdi/<uuid:rdi>/delegate/people/",
@@ -60,6 +62,31 @@ urlpatterns = [
                     "rdi/<uuid:rdi>/push/people/", endpoints.rdi.PushPeopleToRDIView().as_view(), name="rdi-push-people"
                 ),
                 path("rdi/<uuid:rdi>/push/lax/", endpoints.rdi.PushLaxToRDIView().as_view(), name="rdi-push-lax"),
+                path(
+                    "geo/",
+                    include("hct_mis_api.apps.geo.api.urls", namespace="geo"),
+                ),
+                path(
+                    "programs/<str:program_id>/",
+                    include(
+                        [
+                            path(
+                                "periodic-data-update/",
+                                include(
+                                    "hct_mis_api.apps.periodic_data_update.api.urls", namespace="periodic-data-update"
+                                ),
+                            ),
+                            path(
+                                "registration-data/",
+                                include("hct_mis_api.apps.registration_data.api.urls", namespace="registration-data"),
+                            ),
+                            path(
+                                "targeting/",
+                                include("hct_mis_api.apps.targeting.api.urls", namespace="targeting"),
+                            ),
+                        ]
+                    ),
+                ),
             ]
         ),
     ),

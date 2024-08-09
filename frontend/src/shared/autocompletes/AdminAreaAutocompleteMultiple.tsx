@@ -1,39 +1,35 @@
 import * as React from 'react';
-import get from 'lodash/get';
-import { Box, TextField } from '@mui/material';
-import Autocomplete from '@mui/lab/Autocomplete';
 import { useEffect, useState } from 'react';
+import get from 'lodash/get';
+import { Checkbox } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { useDebounce } from '@hooks/useDebounce';
-import { AllAdminAreasQuery, useAllAdminAreasQuery } from '@generated/graphql';
-import { FieldLabel } from '@components/core/FieldLabel';
-import { LoadingComponent } from '@components/core/LoadingComponent';
+import { useAllAdminAreasQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-
-const StyledAutocomplete = styled(Autocomplete)`
-  width: 232px;
-  .MuiFormControl-marginDense {
-    margin-top: 4px;
-  }
-`;
+import {
+  StyledAutocomplete,
+  StyledTextField,
+} from '@shared/autocompletes/StyledAutocomplete';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
 
 export function AdminAreaAutocompleteMultiple({
   value,
   onChange,
-  disabled,
-  parentId,
+  level = 2,
+  parentId = '',
+  disabled = false,
 }: {
-  value;
-  onChange;
-  disabled?;
-  parentId?;
+  value: string[];
+  onChange: (e, option) => void;
+  level?: number;
+  disabled?: boolean;
+  parentId?: string;
 }): React.ReactElement {
   const { t } = useTranslation();
-  const [open, setOpen] = React.useState(false);
   const [inputValue, setInputTextChange] = React.useState('');
 
-  const debouncedInputText = useDebounce(inputValue, 800);
+  const debouncedInputText = useDebounce(inputValue, 400);
   const [newValue, setNewValue] = useState([]);
   const { businessArea } = useBaseUrl();
   const { data, loading } = useAllAdminAreasQuery({
@@ -41,64 +37,64 @@ export function AdminAreaAutocompleteMultiple({
       first: 100,
       name: debouncedInputText,
       businessArea,
-      parentId: parentId || '',
+      level,
+      parentId,
     },
   });
   useEffect(() => {
     setNewValue(value);
   }, [data, value]);
+
   useEffect(() => {
     setInputTextChange('');
   }, [value]);
 
-  if (loading) return <LoadingComponent />;
-  if (!data) return null;
+  const options = get(data, 'allAdminAreas.edges', []);
   return (
-    <Box display="flex" flexDirection="column">
-      <FieldLabel>{t('Administrative Level 2')}</FieldLabel>
-      {/*@ts-ignore */}
-      <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
-        open={open}
-        multiple
-        fullWidth
-        filterOptions={(options1) => options1}
-        onChange={onChange}
-        value={newValue}
-        onOpen={() => {
-          setOpen(true);
-        }}
-        onClose={() => {
-          setOpen(false);
-        }}
-        isOptionEqualToValue={(option, value1) =>
-          value1?.node?.id === option.node.id
+    <StyledAutocomplete
+      multiple
+      disableCloseOnSelect
+      fullWidth
+      filterOptions={(options1) => options1}
+      onChange={onChange}
+      value={newValue}
+      getOptionLabel={(option: any) => {
+        if (!option.node) {
+          return '';
         }
-        getOptionLabel={(option) => {
-          if (!option.node) {
-            return '';
-          }
-          return `${option.node.name}`;
-        }}
-        disabled={disabled}
-        options={get(data, 'allAdminAreas.edges', [])}
-        loading={loading}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            inputProps={{
-              ...params.inputProps,
-              value: inputValue,
-            }}
-            size="small"
-            placeholder={
-              newValue.length > 0 ? null : t('Administrative Level 2')
-            }
-            variant="outlined"
-            value={inputValue}
-            onChange={(e) => setInputTextChange(e.target.value)}
+        return `${option.node.name}`;
+      }}
+      disabled={disabled}
+      options={options}
+      loading={loading}
+      isOptionEqualToValue={(option: any, value1: any) =>
+        option.node.name === value1.node.name
+      }
+      renderOption={(props, option: any, { selected }) => (
+        <li {...props}>
+          <Checkbox
+            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+            checkedIcon={<CheckBoxIcon fontSize="small" />}
+            style={{ marginRight: 8 }}
+            checked={selected}
           />
-        )}
-      />
-    </Box>
+          {option.node.name}
+        </li>
+      )}
+      renderInput={(params) => (
+        <StyledTextField
+          {...params}
+          inputProps={{
+            ...params.inputProps,
+            value: inputValue,
+          }}
+          size="small"
+          placeholder={newValue.length > 0 ? null : t('Administrative Level 2')}
+          variant="outlined"
+          value={inputValue}
+          onChange={(e) => setInputTextChange(e.target.value)}
+        />
+      )}
+    />
   );
 }

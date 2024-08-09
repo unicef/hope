@@ -1,8 +1,6 @@
 from typing import Dict
 from uuid import UUID
 
-from django.db.transaction import atomic
-
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
 from rest_framework.request import Request
@@ -10,9 +8,9 @@ from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedIndividualRoleInHousehold,
+from hct_mis_api.apps.household.models import (
+    ROLE_PRIMARY,
+    PendingIndividualRoleInHousehold,
 )
 
 
@@ -31,7 +29,7 @@ class DelegatePeopleSerializer(serializers.Serializer):
             delegate_id = delegate["delegate_id"]
             delegated_for = delegate["delegated_for"]
             for delegated_for_id in delegated_for:
-                updated += ImportedIndividualRoleInHousehold.objects.filter(
+                updated += PendingIndividualRoleInHousehold.objects.filter(
                     household__individuals__in=[delegated_for_id],
                     individual_id=delegated_for_id,
                     role=ROLE_PRIMARY,
@@ -43,7 +41,6 @@ class DelegatePeopleRDIView(HOPEAPIBusinessAreaView, HOPEAPIView):
     permission = Grant.API_RDI_UPLOAD
 
     @extend_schema(request=DelegatePeopleSerializer)
-    @atomic(using="registration_datahub")
     def post(self, request: "Request", business_area: str, rdi: UUID) -> Response:
         serializer = DelegatePeopleSerializer(data=request.data)
         if serializer.is_valid():

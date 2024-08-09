@@ -133,6 +133,46 @@ class TestCreateTargetPopulationMutation(APITestCase):
             variables=variables,
         )
 
+    def test_targeting_in_draft_program(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_CREATE], self.program.business_area)
+        self.program.status = Program.DRAFT
+        self.program.save()
+
+        variables = {
+            "createTargetPopulationInput": {
+                "name": "Example name 5",
+                "businessAreaSlug": "afghanistan",
+                "programId": self.id_to_base64(self.program.id, "ProgramNode"),
+                "excludedIds": "",
+                "targetingCriteria": {
+                    "rules": [
+                        {
+                            "filters": [
+                                {
+                                    "comparisonMethod": "EQUALS",
+                                    "fieldName": "size",
+                                    "arguments": [3],
+                                    "isFlexField": False,
+                                }
+                            ]
+                        }
+                    ]
+                },
+            }
+        }
+
+        response_error = self.graphql_request(
+            request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
+            context={"user": self.user},
+            variables=variables,
+        )
+        self.assertEqual(TargetPopulation.objects.count(), 0)
+        assert "errors" in response_error
+        self.assertIn(
+            "Only Active program can be assigned to Targeting",
+            response_error["errors"][0]["message"],
+        )
+
     def test_targeting_unique_constraints(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_CREATE], self.program.business_area)
 
@@ -179,7 +219,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
         assert "errors" in response_error
         self.assertEqual(TargetPopulation.objects.count(), 1)
         self.assertIn(
-            f"Target population with name: {variables['createTargetPopulationInput']['name']}, program: {self.program.name} and business_area: {variables['createTargetPopulationInput']['businessAreaSlug']} already exists.",
+            f"Target population with name: {variables['createTargetPopulationInput']['name']} and program: {self.program.name} already exists.",
             response_error["errors"][0]["message"],
         )
 
@@ -216,6 +256,11 @@ class TestCreateTargetPopulationMutation(APITestCase):
             {"householdIds": "HH-1, HH-2, HH-3, ", "individualIds": "IND-33, IND-33, ", "rules": []},
             {"householdIds": "HH-1", "individualIds": "IND-33", "rules": []},
             {"householdIds": "", "individualIds": "IND-33", "rules": []},
+            {"householdIds": "", "individualIds": "IND-33, IND-666", "rules": []},
+            {"householdIds": "", "individualIds": "IND-666", "rules": []},
+            {"householdIds": "HH-1, HH-666", "individualIds": "", "rules": []},
+            {"householdIds": "HH-666", "individualIds": "", "rules": []},
+            {"householdIds": "", "individualIds": "", "rules": []},
         ]
 
         for num, targeting_criteria in enumerate(targeting_criteria_list, 1):

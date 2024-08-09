@@ -9,6 +9,7 @@ from dateutil.relativedelta import relativedelta
 from helpers.date_time_format import FormatTime
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
+from selenium import webdriver
 from selenium.webdriver import Keys
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -18,7 +19,7 @@ pytestmark = pytest.mark.django_db(transaction=True)
 def create_programs() -> None:
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
-    return
+    yield
 
 
 @pytest.mark.usefixtures("login")
@@ -54,6 +55,7 @@ class TestProgrammeManagement:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
+        # 1st step (Details)
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
         pageProgrammeManagement.getInputStartDate().click()
@@ -63,6 +65,16 @@ class TestProgrammeManagement:
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getButtonNext().click()
+        # 2nd step (Time Series Fields)
+        pageProgrammeManagement.getButtonAddTimeSeriesField().click()
+        pageProgrammeManagement.getInputPduFieldsObjectLabel(0).send_keys("test series field name")
+        pageProgrammeManagement.getSelectPduFieldsObjectPduDataSubtype(0).click()
+        pageProgrammeManagement.select_listbox_element("Text").click()
+        pageProgrammeManagement.getSelectPduFieldsObjectPduDataNumberOfRounds(0).click()
+        pageProgrammeManagement.select_listbox_element("1").click()
+        pageProgrammeManagement.getInputPduFieldsRoundsNames(0, 0).send_keys("Round 1")
+        pageProgrammeManagement.getButtonNext().click()
+        # 3rd step (Partners)
         programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
@@ -104,6 +116,7 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
+        # 1st step (Details)
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
         pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
@@ -122,6 +135,10 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getInputPopulation().clear()
         pageProgrammeManagement.getInputPopulation().send_keys(test_data["populationGoals"])
         pageProgrammeManagement.getButtonNext().click()
+        # 2nd step (Time Series Fields)
+        pageProgrammeManagement.getButtonAddTimeSeriesField()
+        pageProgrammeManagement.getButtonNext().click()
+        # 3rd step (Partners)
         programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
@@ -160,6 +177,7 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
+        # 1st step (Details)
         pageProgrammeManagement.getInputProgrammeName().send_keys("New Programme")
         pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
@@ -169,6 +187,10 @@ class TestProgrammeManagement:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputFreqOfPaymentOneOff().click()
         pageProgrammeManagement.getButtonNext().click()
+        # 2nd step (Time Series Fields)
+        pageProgrammeManagement.getButtonAddTimeSeriesField()
+        pageProgrammeManagement.getButtonNext().click()
+        # 3rd step (Partners)
         programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
@@ -206,6 +228,7 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
+        # 1st step (Details)
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
         pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
@@ -215,6 +238,10 @@ class TestProgrammeManagement:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getButtonNext().click()
+        # 2nd step (Time Series Fields)
+        pageProgrammeManagement.getButtonAddTimeSeriesField()
+        pageProgrammeManagement.getButtonNext().click()
+        # 3rd step (Partners)
         programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
@@ -252,6 +279,7 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
+        # 1st step (Details)
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
         pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
@@ -261,6 +289,10 @@ class TestProgrammeManagement:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getButtonNext().click()
+        # 2nd step (Time Series Fields)
+        pageProgrammeManagement.getButtonAddTimeSeriesField()
+        pageProgrammeManagement.getButtonNext().click()
+        # 3rd step (Partners)
         programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
@@ -316,6 +348,7 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
+        # 1st step (Details)
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
         pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
@@ -325,6 +358,10 @@ class TestProgrammeManagement:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getButtonNext().click()
+        # 2nd step (Time Series Fields)
+        pageProgrammeManagement.getButtonAddTimeSeriesField()
+        pageProgrammeManagement.getButtonNext().click()
+        # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
         pageProgrammeManagement.selectWhoAccessToProgram("Only selected partners within the business area")
         pageProgrammeManagement.choosePartnerOption("UNHCR")
@@ -376,6 +413,7 @@ class TestBusinessAreas:
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
+        # 1st step (Details)
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
         pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
@@ -385,6 +423,10 @@ class TestBusinessAreas:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getButtonNext().click()
+        # 2nd step (Time Series Fields)
+        pageProgrammeManagement.getButtonAddTimeSeriesField()
+        pageProgrammeManagement.getButtonNext().click()
+        # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
         pageProgrammeManagement.selectWhoAccessToProgram("Only selected partners within the business area")
         pageProgrammeManagement.choosePartnerOption("UNHCR")
@@ -397,7 +439,7 @@ class TestBusinessAreas:
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
         assert "Business Area" in pageProgrammeDetails.getLabelAreaAccess().text
 
-    @pytest.mark.skip(reason="Unstable test")
+    # @pytest.mark.skip(reason="Unstable test")
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -424,6 +466,7 @@ class TestBusinessAreas:
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
+        # 1st step (Details)
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
         pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
@@ -433,13 +476,41 @@ class TestBusinessAreas:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getButtonNext().click()
+        # 2nd step (Time Series Fields)
+        pageProgrammeManagement.getButtonAddTimeSeriesField().click()
+        pageProgrammeManagement.getInputPduFieldsObjectLabel(0).send_keys("Time Series Field Name 1")
+        pageProgrammeManagement.getSelectPduFieldsObjectPduDataSubtype(0).click()
+        pageProgrammeManagement.select_listbox_element("Text").click()
+        pageProgrammeManagement.getSelectPduFieldsObjectPduDataNumberOfRounds(0).click()
+        pageProgrammeManagement.select_listbox_element("1").click()
+        pageProgrammeManagement.getInputPduFieldsRoundsNames(0, 0).send_keys("Round 1")
+        pageProgrammeManagement.getButtonNext().click()
+        # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
         pageProgrammeManagement.selectWhoAccessToProgram("None of the partners should have access")
         pageProgrammeManagement.getButtonSave().click()
         pageProgrammeDetails.getCopyProgram().click()
+        # 1st step (Details)
+        programme_name = pageProgrammeManagement.getInputProgrammeName()
+        programme_name.click()
+        programme_name.send_keys(Keys.CONTROL + "a")
+        programme_name.send_keys(Keys.DELETE)
+        programme_name.send_keys("New Programme")
+
         pageProgrammeManagement.getButtonNext().click()
+        # 2nd step (Time Series Fields)
+        pageProgrammeManagement.getButtonAddTimeSeriesField().click()
+        pageProgrammeManagement.getInputPduFieldsObjectLabel(0).send_keys("Any name")
+        pageProgrammeManagement.getSelectPduFieldsObjectPduDataSubtype(0).click()
+        pageProgrammeManagement.select_listbox_element("Number").click()
+        pageProgrammeManagement.getSelectPduFieldsObjectPduDataNumberOfRounds(0).click()
+        pageProgrammeManagement.select_listbox_element("1").click()
+        pageProgrammeManagement.getInputPduFieldsRoundsNames(0, 0).send_keys("Round 1")
+        pageProgrammeManagement.getButtonNext().click()
+        # 3rd step (Partners)
         pageProgrammeManagement.getButtonSave().click()
-        assert "Copy of Programme" in pageProgrammeDetails.getHeaderTitle().text
+        pageProgrammeDetails.wait_for_text("New Programme", pageProgrammeDetails.headerTitle)
+        assert "New Programme" in pageProgrammeDetails.getHeaderTitle().text
 
 
 @pytest.mark.usefixtures("login")
@@ -470,6 +541,7 @@ class TestAdminAreas:
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
+        # 1st step (Details)
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
         pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
@@ -479,6 +551,10 @@ class TestAdminAreas:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getButtonNext().click()
+        # 2nd step (Time Series Fields)
+        pageProgrammeManagement.getButtonAddTimeSeriesField()
+        pageProgrammeManagement.getButtonNext().click()
+        # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
         pageProgrammeManagement.selectWhoAccessToProgram("Only selected partners within the business area")
         pageProgrammeManagement.choosePartnerOption("UNHCR")
@@ -525,6 +601,7 @@ class TestComeBackScenarios:
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
+        # 1st step (Details)
         pageProgrammeManagement.getInputProgrammeName().send_keys("Test Name")
         pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
@@ -534,16 +611,27 @@ class TestComeBackScenarios:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getButtonNext().click()
+        # 2nd step (Time Series Fields)
+        pageProgrammeManagement.getButtonAddTimeSeriesField()
+        pageProgrammeManagement.getButtonNext().click()
+        # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
         pageProgrammeManagement.selectWhoAccessToProgram("Only selected partners within the business area")
         pageProgrammeManagement.choosePartnerOption("UNHCR")
+        pageProgrammeManagement.getButtonBack().click()
         pageProgrammeManagement.getButtonBack().click()
         assert "Test Name" in pageProgrammeManagement.getInputProgrammeName().get_attribute("value")
         pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.CONTROL, "a")
         pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.DELETE)
         assert "Programme Name is required" in pageProgrammeManagement.getLabelProgrammeName().text.split("\n")
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
+        # 2nd step (Time Series Fields)
         pageProgrammeManagement.getButtonNext().click()
+        pageProgrammeManagement.getButtonAddTimeSeriesField()
+        pageProgrammeManagement.getButtonNext().click()
+        # 3rd step (Partners)
+        pageProgrammeManagement.getAccessToProgram().click()
+        webdriver.ActionChains(pageProgrammeManagement.driver).send_keys(Keys.ESCAPE).perform()  # type: ignore
         programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
@@ -590,6 +678,10 @@ class TestManualCalendar:
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getButtonNext().click()
+        # 2nd step (Time Series Fields)
+        pageProgrammeManagement.getButtonAddTimeSeriesField()
+        pageProgrammeManagement.getButtonNext().click()
+        # 3rd step (Partners)
         programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
@@ -632,6 +724,7 @@ class TestManualCalendar:
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
+        # 1st step (Details)
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
         pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
@@ -641,6 +734,10 @@ class TestManualCalendar:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getButtonNext().click()
+        # 2nd step (Time Series Fields)
+        pageProgrammeManagement.getButtonAddTimeSeriesField()
+        pageProgrammeManagement.getButtonNext().click()
+        # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
         pageProgrammeManagement.selectWhoAccessToProgram(test_data["partners_access"])
         pageProgrammeManagement.getButtonSave().click()
@@ -657,6 +754,7 @@ class TestManualCalendar:
         pageProgrammeManagement.getTableRowByProgramName("Test Programm").click()
 
         pageProgrammeManagement.getButtonEditProgram().click()
+        # 1st step (Details)
         pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.CONTROL + "a")
         pageProgrammeManagement.getInputProgrammeName().send_keys("New name after Edit")
         pageProgrammeManagement.getInputProgrammeCode().send_keys(Keys.CONTROL + "a")
@@ -668,6 +766,10 @@ class TestManualCalendar:
         pageProgrammeManagement.getInputEndDate().send_keys(Keys.CONTROL + "a")
         pageProgrammeManagement.getInputEndDate().send_keys(FormatTime(1, 10, 2022).numerically_formatted_date)
         pageProgrammeManagement.getButtonNext().click()
+        # 2nd step (Time Series Fields)
+        pageProgrammeManagement.getButtonAddTimeSeriesField()
+        pageProgrammeManagement.getButtonNext().click()
+        # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
         pageProgrammeManagement.selectWhoAccessToProgram("None of the partners should have access")
         pageProgrammeManagement.getButtonSave().click()

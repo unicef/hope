@@ -1,8 +1,10 @@
 import json
 from datetime import datetime
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
+from django import forms
+from django.db import models
 from django.db.utils import IntegrityError
 from django.test import TestCase
 
@@ -19,6 +21,7 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualFactory,
     create_household,
 )
+from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
@@ -137,6 +140,38 @@ class TestPaymentPlanModel(TestCase):
     def test_get_exchange_rate_for_usdc_currency(self) -> None:
         pp = PaymentPlanFactory(currency=USDC)
         self.assertEqual(pp.get_exchange_rate(), 1.0)
+
+    def test_is_reconciled(self) -> None:
+        pp = PaymentPlanFactory(currency=USDC)
+        self.assertEqual(pp.is_reconciled, False)
+
+        PaymentFactory(parent=pp, currency="PLN", excluded=True)
+        self.assertEqual(pp.is_reconciled, False)
+
+        PaymentFactory(parent=pp, currency="PLN", conflicted=True)
+        self.assertEqual(pp.is_reconciled, False)
+
+        p1 = PaymentFactory(parent=pp, currency="PLN", status=Payment.STATUS_PENDING)
+        self.assertEqual(pp.is_reconciled, False)
+
+        p2 = PaymentFactory(parent=pp, currency="PLN", status=Payment.STATUS_SENT_TO_PG)
+        self.assertEqual(pp.is_reconciled, False)
+
+        p1.status = Payment.STATUS_SENT_TO_FSP
+        p1.save()
+        self.assertEqual(pp.is_reconciled, False)
+
+        p1.status = Payment.STATUS_DISTRIBUTION_SUCCESS
+        p1.save()
+        self.assertEqual(pp.is_reconciled, False)
+
+        p2.status = Payment.STATUS_SENT_TO_FSP
+        p2.save()
+        self.assertEqual(pp.is_reconciled, False)
+
+        p2.status = Payment.STATUS_DISTRIBUTION_PARTIAL
+        p2.save()
+        self.assertEqual(pp.is_reconciled, True)
 
 
 class TestPaymentModel(TestCase):
@@ -310,6 +345,7 @@ class TestPaymentPlanSplitModel(TestCase):
         pp_split1.payments.set([p1, p2])
         self.assertEqual(pp_split1.financial_service_provider, dm.financial_service_provider)
         self.assertEqual(pp_split1.chosen_configuration, dm.chosen_configuration)
+        self.assertEqual(pp_split1.delivery_mechanism, dm.delivery_mechanism)
 
 
 class TestFinancialServiceProviderModel(TestCase):
@@ -414,3 +450,43 @@ class TestFinancialServiceProviderModel(TestCase):
         self.assertEqual(blockchain_name, individuals[0].blockchain_name)
         wallet_address = fsp_xlsx_template.get_column_from_core_field(payment, "wallet_address")
         self.assertEqual(wallet_address, individuals[0].wallet_address)
+
+
+class TestDynamicChoiceArrayField(TestCase):
+    def setUp(self) -> None:
+        self.mock_choices = [("field1", "Field 1"), ("field2", "Field 2")]
+        self.mock_choices_callable = MagicMock(return_value=self.mock_choices)
+
+    def test_choices(self) -> None:
+        field = DynamicChoiceArrayField(
+            base_field=models.CharField(max_length=255), choices_callable=self.mock_choices_callable
+        )
+        form_field = field.formfield()
+
+        # Check if the choices_callable is passed to the form field
+        self.assertEqual(list(form_field.choices), self.mock_choices)
+        self.mock_choices_callable.assert_called_once()
+
+        # Check the form field class and choices
+        self.assertIsInstance(form_field, DynamicChoiceField)
+
+
+class TestForm(forms.ModelForm):
+    class Meta:
+        model = FinancialServiceProviderXlsxTemplate
+        fields = ["core_fields"]
+
+
+class TestFinancialServiceProviderXlsxTemplate(TestCase):
+    def test_model_form_integration(self) -> None:
+        form = TestForm(data={"core_fields": ["age", "residence_status"]})  # real existing core fields
+        self.assertTrue(form.is_valid())
+        template = form.save()
+        self.assertEqual(template.core_fields, ["age", "residence_status"])
+
+        form = TestForm(data={"core_fields": ["field1"]})  # fake core fields
+        self.assertFalse(form.is_valid())
+        self.assertEqual(
+            form.errors,
+            {"core_fields": ["Select a valid choice. field1 is not one of the available choices."]},
+        )

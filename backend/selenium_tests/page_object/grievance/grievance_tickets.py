@@ -12,6 +12,8 @@ class GrievanceTickets(BaseComponents):
     familyName = 'li[data-value="full_name"]'
     tabSystemGenerated = 'button[data-cy="tab-SYSTEM-GENERATED"]'
     tabUserGenerated = 'button[data-cy="tab-USER-GENERATED"]'
+    buttonCloseTicket = 'button[data-cy="button-close-ticket"]'
+    buttonConfirm = 'button[data-cy="button-confirm"]'
     creationDateFromFilter = 'div[data-cy="filters-creation-date-from"]'
     creationDateToFilter = 'div[data-cy="filters-creation-date-to"]'
     statusFilter = 'div[data-cy="filters-status"]'
@@ -184,7 +186,7 @@ class GrievanceTickets(BaseComponents):
         self.wait_for(self.ticketListRow)
         return self.get_elements(self.ticketListRow)
 
-    def getTableLabel(self) -> WebElement:
+    def getTableLabel(self) -> [WebElement]:
         return self.get_elements(self.tableLabel)
 
     def getDateTitleFilterPopup(self) -> WebElement:
@@ -210,3 +212,9 @@ class GrievanceTickets(BaseComponents):
 
     def getButtonAddNote(self) -> WebElement:
         return self.wait_for(self.buttonAddNote)
+
+    def getButtonCloseTicket(self) -> WebElement:
+        return self.wait_for(self.buttonCloseTicket)
+
+    def getButtonConfirm(self) -> WebElement:
+        return self.wait_for(self.buttonConfirm)

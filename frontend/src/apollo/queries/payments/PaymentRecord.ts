@@ -64,7 +64,9 @@ export const PAYMENT_RECORD_QUERY = gql`
         }
       }
       deliveredQuantityUsd
-      deliveryType
+      deliveryType {
+          name
+      }
       transactionReferenceId
       serviceProvider {
         id

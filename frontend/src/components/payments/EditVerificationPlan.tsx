@@ -127,7 +127,7 @@ export const EditVerificationPlan = ({
   const { showMessage } = useSnackbar();
   const [mutate, { loading }] = useEditPaymentVerificationPlanMutation();
   const { baseUrl, businessArea } = useBaseUrl();
-  const { isActiveProgram } = useProgramContext();
+  const { isActiveProgram, isSocialDctType } = useProgramContext();
   const navigate = useNavigate();
   useEffect(() => {
     if (paymentVerificationPlanNode.sampling === 'FULL_LIST') {
@@ -245,12 +245,11 @@ export const EditVerificationPlan = ({
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values, setValues }) => {
         // Redirect to error page if no flows available
-
         if (
+          rapidProFlows &&
           !rapidProFlows?.allRapidProFlows?.length &&
           values.verificationChannel === 'RAPIDPRO'
         ) {
-          //TODO MS Add last successful page as PV details page
           navigate(`/error/${businessArea}`, {
             state: {
               errorMessage: t(
@@ -277,7 +276,7 @@ export const EditVerificationPlan = ({
               color="primary"
               onClick={() => setOpen(true)}
               startIcon={<EditIcon />}
-              data-cy="button-new-plan"
+              data-cy="button-edit-plan"
               disabled={!isActiveProgram}
             >
               {t('Edit')}
@@ -332,7 +331,7 @@ export const EditVerificationPlan = ({
                           fontSize={16}
                           fontWeight="fontWeightBold"
                         >
-                          Sample size:
+                          Sample size:{' '}
                           {isNaN(sampleSizesData?.sampleSize?.sampleSize)
                             ? ' 0'
                             : ` ${sampleSizesData?.sampleSize?.sampleSize}`}{' '}
@@ -410,12 +409,14 @@ export const EditVerificationPlan = ({
                           />
                           <Field
                             name="ageCheckbox"
-                            label={t('Age of HoH')}
+                            label={t(isSocialDctType ? 'Age' : 'Age of HoH')}
                             component={FormikCheckboxField}
                           />
                           <Field
                             name="sexCheckbox"
-                            label={t('Gender of HoH')}
+                            label={t(
+                              isSocialDctType ? 'Gender' : 'Gender of HoH',
+                            )}
                             component={FormikCheckboxField}
                           />
                         </Box>
@@ -481,7 +482,7 @@ export const EditVerificationPlan = ({
                         fontSize={16}
                         fontWeight="fontWeightBold"
                       >
-                        Sample size:
+                        Sample size:{' '}
                         {isNaN(sampleSizesData?.sampleSize?.sampleSize)
                           ? ' 0'
                           : ` ${sampleSizesData?.sampleSize?.sampleSize}`}{' '}

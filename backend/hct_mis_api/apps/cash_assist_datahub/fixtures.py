@@ -15,6 +15,7 @@ from hct_mis_api.apps.cash_assist_datahub.models import (
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment import models as payment_models
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.program import models as program_models
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
@@ -70,7 +71,7 @@ class PaymentRecordFactory(DjangoModelFactory):
         tzinfo=utc,
     )
     delivery_type = fuzzy.FuzzyChoice(
-        payment_models.PaymentRecord.DELIVERY_TYPE_CHOICE,
+        DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
         getter=lambda c: c[0],
     )
     currency = factory.Faker("currency_code")
@@ -131,7 +132,7 @@ class CashPlanFactory(DjangoModelFactory):
         ext_word_list=None,
     )
     delivery_type = fuzzy.FuzzyChoice(
-        payment_models.PaymentRecord.DELIVERY_TYPE_CHOICE,
+        DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
         getter=lambda c: c[0],
     )
     assistance_measurement = factory.Faker("currency_name")

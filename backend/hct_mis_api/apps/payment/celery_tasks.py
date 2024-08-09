@@ -57,24 +57,6 @@ def get_sync_run_rapid_pro_task(self: Any) -> None:
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def fsp_generate_xlsx_report_task(self: Any, fsp_id: str) -> None:
-    try:
-        from hct_mis_api.apps.payment.models import FinancialServiceProvider
-        from hct_mis_api.apps.payment.services.generate_fsp_xlsx_service import (
-            GenerateReportService,
-        )
-
-        fsp = FinancialServiceProvider.objects.get(id=fsp_id)
-        service = GenerateReportService(fsp=fsp)
-        service.generate_report()
-    except Exception as e:
-        logger.exception(e)
-        raise self.retry(exc=e)
-
-
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
-@log_start_and_end
-@sentry_tags
 def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_id: str, user_id: str) -> None:
     try:
         user = get_user_model().objects.get(pk=user_id)
@@ -665,3 +647,22 @@ def send_payment_notification_emails(
         PaymentNotification(payment_plan, action, action_user, action_date_formatted).send_email_notification()
     except Exception as e:
         logger.exception(e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
+    from hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayAPI
+
+    try:
+        from hct_mis_api.apps.payment.services.payment_gateway import (
+            PaymentGatewayService,
+        )
+
+        PaymentGatewayService().sync_delivery_mechanisms()
+    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
+        return
+    except Exception as e:
+        logger.exception(e)
+        raise self.retry(exc=e)

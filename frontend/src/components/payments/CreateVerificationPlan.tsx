@@ -228,6 +228,7 @@ export const CreateVerificationPlan = ({
       {({ submitForm, values, setValues }) => {
         // Redirect to error page if no flows available
         if (
+          rapidProFlows &&
           !rapidProFlows?.allRapidProFlows?.length &&
           values.verificationChannel === 'RAPIDPRO'
         ) {
@@ -319,7 +320,7 @@ export const CreateVerificationPlan = ({
                             fontSize={16}
                             fontWeight="fontWeightBold"
                           >
-                            Sample size:
+                            Sample size:{' '}
                             {isNaN(sampleSizesData?.sampleSize?.sampleSize)
                               ? ''
                               : sampleSizesData?.sampleSize?.sampleSize}{' '}

@@ -32,7 +32,15 @@ from hct_mis_api.apps.core.tests.test_exchange_rates import (
     EXCHANGE_RATES_WITH_HISTORICAL_DATA,
 )
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.models import CashPlan, PaymentRecord, ServiceProvider
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
+from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
+from hct_mis_api.apps.payment.models import (
+    CashPlan,
+    DeliveryMechanism,
+    PaymentRecord,
+    ServiceProvider,
+)
+from hct_mis_api.apps.program.fixtures import get_program_with_dct_type_and_name
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
@@ -50,18 +58,21 @@ class TestPullDataFromDatahub(TestCase):
     dh_cash_plan2 = None
     household = None
 
-    @staticmethod
-    def _pre_test_commands() -> None:
-        create_afghanistan()
+    @classmethod
+    def _pre_test_commands(cls) -> None:
+        cls.business_area = create_afghanistan()
+        cls.program = get_program_with_dct_type_and_name()
         call_command("loadcountries")
         call_command("loadcountrycodes")
 
     @classmethod
     def _setup_in_app_data(cls) -> None:
-        target_population = TargetPopulation()
-        target_population.name = "Test TP"
-        target_population.status = TargetPopulation.STATUS_PROCESSING
-        target_population.save()
+        target_population = TargetPopulation.objects.create(
+            name="Test TP",
+            status=TargetPopulation.STATUS_PROCESSING,
+            program=cls.program,
+            business_area=cls.business_area,
+        )
 
         program = Program()
         program.name = "Test Program"
@@ -82,6 +93,7 @@ class TestPullDataFromDatahub(TestCase):
         cls.household = household
         cls.target_population = target_population
         cls.program = program
+        generate_delivery_mechanisms()
 
     @classmethod
     def _setup_datahub_data(cls) -> None:
@@ -168,7 +180,7 @@ class TestPullDataFromDatahub(TestCase):
         dh_payment_record.entitlement_card_number = "ASH12345678"
         dh_payment_record.entitlement_card_status = PaymentRecord.ENTITLEMENT_CARD_STATUS_ACTIVE
         dh_payment_record.entitlement_card_issue_date = timezone.now() - timedelta(days=10)
-        dh_payment_record.delivery_type = PaymentRecord.DELIVERY_TYPE_CASH
+        dh_payment_record.delivery_type = DeliveryMechanismChoices.DELIVERY_TYPE_CASH
         dh_payment_record.currency = "USD"
         dh_payment_record.entitlement_quantity = 10
         dh_payment_record.delivered_quantity = 10
@@ -264,8 +276,9 @@ class TestPullDataFromDatahub(TestCase):
         self.assertEqual(
             payment_record.entitlement_card_issue_date, self.dh_payment_record.entitlement_card_issue_date.date()
         )
-        self.assertEqual(payment_record.delivery_type, self.dh_payment_record.delivery_type)
-        self.assertEqual(payment_record.delivery_type, self.dh_payment_record.delivery_type)
+        self.assertEqual(
+            payment_record.delivery_type, DeliveryMechanism.objects.get(name=self.dh_payment_record.delivery_type)
+        )
         self.assertEqual(payment_record.currency, self.dh_payment_record.currency)
         self.assertEqual(payment_record.entitlement_quantity, self.dh_payment_record.entitlement_quantity)
         self.assertEqual(payment_record.delivered_quantity, self.dh_payment_record.delivered_quantity)

@@ -55,6 +55,22 @@ export function opacityToHex(opacity: number): string {
   return Math.floor(opacity * 0xff).toString(16);
 }
 
+export function periodicDataUpdatesStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'Processing':
+      return theme.hctPalette.orange;
+    case 'Successful':
+      return theme.hctPalette.green;
+    case 'Failed':
+      return theme.hctPalette.red;
+    default:
+      return theme.hctPalette.gray;
+  }
+}
+
 export function programStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -137,6 +153,8 @@ export function paymentStatusToColor(
 ): string {
   switch (status) {
     case PaymentStatus.Pending:
+    case PaymentStatus.SentToPaymentGateway:
+    case PaymentStatus.SentToFsp:
       return theme.hctPalette.orange;
     case PaymentStatus.DistributionSuccessful:
     case PaymentStatus.TransactionSuccessful:
@@ -166,6 +184,12 @@ export function paymentStatusDisplayMap(status: string): string {
     case PaymentRecordStatus.ForceFailed:
     case PaymentStatus.ForceFailed:
       return 'FORCE FAILED';
+    case PaymentStatus.ManuallyCancelled:
+      return 'MANUALLY CANCELLED';
+    case PaymentStatus.SentToPaymentGateway:
+      return 'SENT TO PAYMENT GATEWAY';
+    case PaymentStatus.SentToFsp:
+      return 'SENT TO FSP';
     default:
       return 'UNSUCCESSFUL';
   }
@@ -253,6 +277,40 @@ export function targetPopulationBuildStatusToColor(
     [TargetPopulationBuildStatus.Failed]: theme.hctPalette.red,
     [TargetPopulationBuildStatus.Building]: theme.hctPalette.orange,
     [TargetPopulationBuildStatus.Pending]: theme.hctPalette.gray,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
+export function periodicDataUpdateTemplateStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    EXPORTED: theme.hctPalette.green,
+    FAILED: theme.hctPalette.red,
+    TO_EXPORT: theme.hctPalette.gray,
+    ['NOT_SCHEDULED']: theme.hctPalette.gray,
+    ['CANCELED']: theme.hctPalette.gray,
+    EXPORTING: theme.hctPalette.orange,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
+export function periodicDataUpdatesUpdatesStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    SUCCESSFUL: theme.hctPalette.green,
+    FAILED: theme.hctPalette.red,
+    PENDING: theme.hctPalette.gray,
+    ['NOT_SCHEDULED']: theme.hctPalette.gray,
+    ['CANCELED']: theme.hctPalette.gray,
+    PROCESSING: theme.hctPalette.orange,
   };
   if (status in colorsMap) {
     return colorsMap[status];
@@ -409,27 +467,33 @@ export function camelToUnderscore(key): string {
   return key.replace(/([A-Z])/g, '_$1').toLowerCase();
 }
 
+//eslint-disable-next-line @typescript-eslint/no-use-before-define
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function camelizeArrayObjects(arr: any[]): { [key: string]: any }[] {
+  if (!Array.isArray(arr)) {
+    return arr;
+  }
+  //eslint-disable-next-line @typescript-eslint/no-use-before-define
+  return arr.map(camelizeObjectKeys);
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function camelizeObjectKeys(obj): { [key: string]: any } {
   if (!obj) {
     return obj;
   }
   return Object.keys(obj).reduce((acc, current) => {
-    if (typeof obj[current] === 'object') {
+    if (obj[current] == null) {
+      acc[camelCase(current)] = obj[current];
+    } else if (Array.isArray(obj[current])) {
+      acc[camelCase(current)] = camelizeArrayObjects(obj[current]);
+    } else if (typeof obj[current] === 'object') {
       acc[camelToUnderscore(current)] = camelizeObjectKeys(obj[current]);
     } else {
       acc[camelCase(current)] = obj[current];
     }
     return acc;
   }, {});
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function camelizeArrayObjects(arr): { [key: string]: any }[] {
-  if (!arr) {
-    return arr;
-  }
-  return arr.map(camelizeObjectKeys);
 }
 
 export function columnToOrderBy(
@@ -528,7 +592,7 @@ export function getPercentage(
 }
 
 export function formatNumber(value: number): string {
-  if (!value && value !== 0) return '';
+  if (!value && value !== 0) return '0';
   return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
 }
 

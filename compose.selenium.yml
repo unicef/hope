@@ -1,4 +1,4 @@
-version: '3.7'
+version: "3.7"
 
 volumes:
   backend-data-selenium:
@@ -73,7 +73,6 @@ services:
         cp -r ./hct_mis_api/apps/web/static/* /tmp/
       "
     restart: "no"
-
 
   redis:
     restart: always

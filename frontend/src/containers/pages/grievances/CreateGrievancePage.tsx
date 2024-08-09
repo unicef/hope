@@ -119,6 +119,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
       ? decodeIdString(linkedFeedbackId)
       : null,
     documentation: [],
+    individualDataUpdateFields: [{ fieldName: null, fieldValue: null }],
   };
 
   const { data: choicesData, loading: choicesLoading } =

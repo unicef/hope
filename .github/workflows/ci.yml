@@ -13,6 +13,11 @@ on:
     - staging
     - master
     - ephemeral-*
+    - long-term/*
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   frontend_tests:

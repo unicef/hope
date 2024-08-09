@@ -4,6 +4,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 
@@ -188,3 +189,48 @@ def filter_based_on_partner_areas_2(
         return queryset
     except (Partner.DoesNotExist, AssertionError):
         return queryset.model.objects.none()
+
+
+def validate_individual_for_need_adjudication(
+    partner: Partner, individual: Individual, ticket_details: TicketNeedsAdjudicationDetails
+) -> None:
+    # Validate partner's permission
+    if not partner.is_unicef:
+        if not partner.has_area_access(area_id=individual.household.admin2.id, program_id=individual.program.id):
+            raise PermissionDenied("Permission Denied: User does not have access to select individual")
+
+    # validate Individual
+    if individual not in list(ticket_details.possible_duplicates.all()) + [ticket_details.golden_records_individual] + [
+        ticket_details.possible_duplicate
+    ]:
+        raise ValidationError(
+            f"The selected individual {individual.unicef_id} is not valid, must be one of those attached to the ticket"
+        )
+
+    # validation for withdrawn Individual
+    if individual.withdrawn:
+        raise ValidationError(f"The selected individual {individual.unicef_id} is not valid, must be not withdrawn")
+
+
+def validate_all_individuals_before_close_needs_adjudication(ticket_details: TicketNeedsAdjudicationDetails) -> None:
+    duplicates_qs = ticket_details.selected_individuals.filter(withdrawn=False)
+    distinct_qs = ticket_details.selected_distinct.filter(withdrawn=False)
+    all_possible_duplicates = list(ticket_details.possible_duplicates.all()) + [
+        ticket_details.golden_records_individual
+    ]
+    withdrawn_in_all_possible_duplicates = [i for i in all_possible_duplicates if i.withdrawn]
+
+    # A user can flag all active individuals as duplicates but won’t be able to close the ticket
+    if not distinct_qs and duplicates_qs.count() == (
+        len(all_possible_duplicates) - len(withdrawn_in_all_possible_duplicates)
+    ):
+        raise ValidationError("Close ticket is not possible when all Individuals are flagged as duplicates")
+
+    if not distinct_qs and (not withdrawn_in_all_possible_duplicates or not duplicates_qs):
+        raise ValidationError(
+            "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is withdrawn or duplicate"
+        )
+
+    for individual in all_possible_duplicates:
+        if not individual.withdrawn and individual not in duplicates_qs and individual not in distinct_qs:
+            raise ValidationError("Close ticket is possible when all active Individuals are flagged")

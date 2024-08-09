@@ -35,7 +35,7 @@ def printing(what: str, web_driver: WebDriver, label: str = "data-cy", page_obje
 
 
 if __name__ == "__main__":
-    default_url = "http://localhost:8080"
+    default_url = "http://localhost:3000"
     url = input(f"Url of page (default is {default_url}):")
     if not url:
         url = default_url
@@ -50,6 +50,8 @@ if __name__ == "__main__":
     exit_loop = ""
     while exit_loop != "exit":
         exit_loop = input("Open the page and press Enter or write exit")
-        printing("Labels", driver)
+        printing("Mapping", driver)
         print("\n")
         printing("Methods", driver)
+        print("\n")
+        printing("Assert", driver)

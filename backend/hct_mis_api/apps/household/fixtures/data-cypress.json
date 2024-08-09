@@ -126,13 +126,13 @@
     "currency": "USD",
     "unhcr_id": "",
     "user_fields": {},
-    "kobo_asset_id": "",
-    "row_id": 4,
+    "detail_id": "4",
     "total_cash_received_usd": null,
     "total_cash_received": null,
     "programs": [],
     "copied_from": null,
-    "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
+    "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244",
+    "rdi_merge_status": "MERGED"
   }
 },
 {
@@ -206,13 +206,13 @@
     "currency": "USD",
     "unhcr_id": "",
     "user_fields": {},
-    "kobo_asset_id": "",
-    "row_id": 3,
+    "detail_id": "3",
     "total_cash_received_usd": null,
     "total_cash_received": null,
     "programs": [],
     "copied_from": null,
-    "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
+    "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244",
+    "rdi_merge_status": "MERGED"
   }
 },
 {
@@ -228,7 +228,8 @@
     "type": "227fcbc0-297a-4d85-8390-7de189278321",
     "country": "d1eb1574-8146-4c70-a804-caf163d451a6",
     "status": "VALID",
-    "cleared_date": "2022-08-10T14:30:11.116Z"
+    "cleared_date": "2022-08-10T14:30:11.116Z",
+    "rdi_merge_status": "MERGED"
   }
 },
 {
@@ -244,7 +245,8 @@
     "type": "227fcbc0-297a-4d85-8390-7de189278321",
     "country": "d1eb1574-8146-4c70-a804-caf163d451a6",
     "status": "VALID",
-    "cleared_date": "2022-08-10T14:30:11.116Z"
+    "cleared_date": "2022-08-10T14:30:11.116Z",
+    "rdi_merge_status": "MERGED"
   }
 },
 {
@@ -260,7 +262,8 @@
     "type": "227fcbc0-297a-4d85-8390-7de189278321",
     "country": "d1eb1574-8146-4c70-a804-caf163d451a6",
     "status": "VALID",
-    "cleared_date": "2022-08-10T14:30:11.116Z"
+    "cleared_date": "2022-08-10T14:30:11.116Z",
+    "rdi_merge_status": "MERGED"
   }
 },
 {
@@ -276,7 +279,8 @@
     "type": "012a3ecb-0d6e-440f-9c68-83e5bf1ccddf",
     "country": "d1eb1574-8146-4c70-a804-caf163d451a6",
     "status": "VALID",
-    "cleared_date": "2022-08-10T14:30:11.116Z"
+    "cleared_date": "2022-08-10T14:30:11.116Z",
+    "rdi_merge_status": "MERGED"
   }
 },
 {
@@ -292,7 +296,8 @@
     "type": "227fcbc0-297a-4d85-8390-7de189278321",
     "country": "d1eb1574-8146-4c70-a804-caf163d451a6",
     "status": "VALID",
-    "cleared_date": "2022-08-10T14:30:11.116Z"
+    "cleared_date": "2022-08-10T14:30:11.116Z",
+    "rdi_merge_status": "MERGED"
   }
 },
 {
@@ -308,7 +313,8 @@
     "type": "227fcbc0-297a-4d85-8390-7de189278321",
     "country": "d1eb1574-8146-4c70-a804-caf163d451a6",
     "status": "VALID",
-    "cleared_date": "2022-08-10T14:30:11.116Z"
+    "cleared_date": "2022-08-10T14:30:11.116Z",
+    "rdi_merge_status": "MERGED"
   }
 },
 {
@@ -324,7 +330,8 @@
     "type": "227fcbc0-297a-4d85-8390-7de189278321",
     "country": "d1eb1574-8146-4c70-a804-caf163d451a6",
     "status": "VALID",
-    "cleared_date": "2022-08-10T14:30:11.116Z"
+    "cleared_date": "2022-08-10T14:30:11.116Z",
+    "rdi_merge_status": "MERGED"
   }
 },
 {
@@ -333,7 +340,8 @@
   "fields": {
     "individual": "bc5a5b20-74a4-4d48-ab63-99a0c913850d",
     "number": "johniak pany",
-    "country": "d1eb1574-8146-4c70-a804-caf163d451a6"
+    "country": "d1eb1574-8146-4c70-a804-caf163d451a6",
+    "rdi_merge_status": "MERGED"
   }
 },
 {
@@ -345,7 +353,8 @@
     "last_sync_at": null,
     "individual": "e05d082f-ca29-4114-85d3-05118e73c284",
     "household": "3db2729e-7259-4b13-83b2-3090d847e5cc",
-    "role": "ALTERNATE"
+    "role": "ALTERNATE",
+    "rdi_merge_status": "MERGED"
   }
 },
 {
@@ -357,7 +366,8 @@
     "last_sync_at": null,
     "individual": "bc5a5b20-74a4-4d48-ab63-99a0c913850d",
     "household": "3db2729e-7259-4b13-83b2-3090d847e5cc",
-    "role": "PRIMARY"
+    "role": "PRIMARY",
+    "rdi_merge_status": "MERGED"
   }
 },
 {
@@ -369,7 +379,8 @@
     "last_sync_at": null,
     "individual": "c539b6ba-35fe-4ecb-a04b-c34af50da675",
     "household": "20077498-80f0-462a-82e6-866cef92d06a",
-    "role": "ALTERNATE"
+    "role": "ALTERNATE",
+    "rdi_merge_status": "MERGED"
   }
 },
 {
@@ -381,7 +392,8 @@
     "last_sync_at": null,
     "individual": "e7753941-b557-478f-81b3-9db7d18fc623",
     "household": "20077498-80f0-462a-82e6-866cef92d06a",
-    "role": "PRIMARY"
+    "role": "PRIMARY",
+    "rdi_merge_status": "MERGED"
   }
 },
 {
@@ -477,7 +489,8 @@
     "disability_certificate_picture": "",
     "vector_column": "'jan':1 'romaniak':2",
     "copied_from": null,
-    "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
+    "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244",
+    "rdi_merge_status": "MERGED"
   }
 },
 {
@@ -555,7 +568,8 @@
     "disability_certificate_picture": "",
     "vector_column": "'angela':1 'kowalska':2",
     "copied_from": null,
-    "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
+    "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244",
+    "rdi_merge_status": "MERGED"
   }
 },
 {
@@ -633,7 +647,8 @@
     "disability_certificate_picture": "",
     "vector_column": "'alicja':1 'kowalska':2",
     "copied_from": null,
-    "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
+    "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244",
+    "rdi_merge_status": "MERGED"
   }
 },
 {
@@ -711,7 +726,8 @@
     "disability_certificate_picture": "",
     "vector_column": "'alicja':1 'romaniak':2",
     "copied_from": null,
-    "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
+    "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244",
+    "rdi_merge_status": "MERGED"
   }
 },
 {
@@ -789,7 +805,8 @@
     "disability_certificate_picture": "",
     "vector_column": "'agata':1 'kowalska':2",
     "copied_from": null,
-    "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
+    "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244",
+    "rdi_merge_status": "MERGED"
   }
 },
 {
@@ -885,7 +902,8 @@
     "disability_certificate_picture": "",
     "vector_column": "'jan':1 'romaniak':2",
     "copied_from": null,
-    "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
+    "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244",
+    "rdi_merge_status": "MERGED"
   }
 }
 ]

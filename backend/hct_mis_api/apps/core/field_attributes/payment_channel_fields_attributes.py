@@ -10,6 +10,32 @@ from hct_mis_api.apps.core.field_attributes.lookup_functions import (
 
 PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
     {
+        "id": "22085a8d-205d-42a9-b5b3-951b51f11915",
+        "type": TYPE_STRING,
+        "name": "account_holder_name",
+        "lookup": "account_holder_name",
+        "label": {"English(EN)": "Account holder name"},
+        "hint": "",
+        "required": False,
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "account_holder_name_i_c",
+        "scope": [Scope.XLSX, Scope.KOBO_IMPORT],
+    },
+    {
+        "id": "e9d964b9-aa85-4a0f-b1eb-4755bdad7592",
+        "type": TYPE_STRING,
+        "name": "bank_branch_name",
+        "lookup": "bank_branch_name",
+        "label": {"English(EN)": "Bank branch name"},
+        "hint": "",
+        "required": False,
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "bank_branch_name_i_c",
+        "scope": [Scope.XLSX, Scope.KOBO_IMPORT],
+    },
+    {
         "id": "e5766962-1455-4ebc-8fad-fc89cdde792b",
         "type": TYPE_STRING,
         "name": "bank_name",
@@ -20,7 +46,7 @@ PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "bank_name_i_c",
-        "scope": [Scope.XLSX, Scope.PAYMENT_CHANNEL, Scope.XLSX_PEOPLE],
+        "scope": [Scope.XLSX, Scope.XLSX_PEOPLE],
     },
     {
         "id": "3d6a45f3-d3f7-48a0-801b-7a98c0da517a",
@@ -33,7 +59,7 @@ PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "bank_account_number_i_c",
-        "scope": [Scope.XLSX, Scope.PAYMENT_CHANNEL, Scope.XLSX_PEOPLE],
+        "scope": [Scope.XLSX, Scope.XLSX_PEOPLE],
     },
     {
         "id": "72e79eec-0c10-42d9-9c25-86162232a389",
@@ -46,7 +72,7 @@ PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "debit_card_issuer_i_c",
-        "scope": [Scope.XLSX, Scope.PAYMENT_CHANNEL, Scope.XLSX_PEOPLE],
+        "scope": [Scope.XLSX, Scope.XLSX_PEOPLE],
         "lookup_function": get_debit_card_issuer,
     },
     {
@@ -60,7 +86,7 @@ PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "debit_card_number_i_c",
-        "scope": [Scope.XLSX, Scope.PAYMENT_CHANNEL, Scope.XLSX_PEOPLE],
+        "scope": [Scope.XLSX, Scope.XLSX_PEOPLE],
         "lookup_function": get_debit_card_number,
     },
     {
@@ -74,6 +100,6 @@ PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "payment_delivery_phone_no_i_c",
-        "scope": [Scope.XLSX, Scope.PAYMENT_CHANNEL, Scope.INDIVIDUAL_UPDATE, Scope.TARGETING, Scope.XLSX_PEOPLE],
+        "scope": [Scope.XLSX, Scope.INDIVIDUAL_UPDATE, Scope.TARGETING, Scope.XLSX_PEOPLE],
     },
 ]
