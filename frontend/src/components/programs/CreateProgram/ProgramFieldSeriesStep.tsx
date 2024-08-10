@@ -173,10 +173,7 @@ export const ProgramFieldSeriesStep = ({
                             const isDisabled =
                               programHasRdi &&
                               values.editMode &&
-                              round + 1 <= selectedNumberOfRounds &&
-                              values.pduFields[index].pduData.roundsNames[
-                                round
-                              ] !== '';
+                              round + 1 <= selectedNumberOfRounds;
                             return (
                               <Grid item xs={12} key={round}>
                                 <FormControl fullWidth variant="outlined">
