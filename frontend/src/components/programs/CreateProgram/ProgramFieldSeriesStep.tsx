@@ -131,16 +131,20 @@ export const ProgramFieldSeriesStep = ({
                               );
                             }}
                             component={FormikSelectField}
-                            choices={[...Array(20).keys()].map((n) => ({
-                              value: n + 1,
-                              label: `${n + 1}`,
-                              disabled:
+                            choices={[...Array(20).keys()].map((n) => {
+                              const isDisabled =
                                 values.editMode &&
                                 programHasRdi &&
                                 n + 2 <=
                                   (program?.pduFields[index]?.pduData
-                                    ?.numberOfRounds || 0),
-                            }))}
+                                    ?.numberOfRounds || 0);
+
+                              return {
+                                value: n + 1,
+                                label: `${n + 1}`,
+                                disabled: isDisabled,
+                              };
+                            })}
                           />
                         </Grid>
                         <Grid item xs={1}>
@@ -169,7 +173,10 @@ export const ProgramFieldSeriesStep = ({
                             const isDisabled =
                               programHasRdi &&
                               values.editMode &&
-                              round + 1 <= selectedNumberOfRounds;
+                              round + 1 <= selectedNumberOfRounds &&
+                              values.pduFields[index].pduData.roundsNames[
+                                round
+                              ] !== '';
                             return (
                               <Grid item xs={12} key={round}>
                                 <FormControl fullWidth variant="outlined">
