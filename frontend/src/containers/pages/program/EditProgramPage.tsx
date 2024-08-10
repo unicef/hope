@@ -159,7 +159,7 @@ export const EditProgramPage = (): ReactElement => {
             budget: budgetToFixed,
             populationGoal: populationGoalParsed,
             partners: partnersToSet,
-            ...(!programHasRdi && { pduFields: pduFieldsToSend }),
+            pduFields: pduFieldsToSend,
           },
           version,
         },
