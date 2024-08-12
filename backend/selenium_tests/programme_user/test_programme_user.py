@@ -20,7 +20,7 @@ class TestSmokeAccountabilitySurveys:
         test_program: Program,
         pageProgrammeUsers: ProgrammeUsers,
     ) -> None:
-        pageProgrammeUsers.selectGlobalProgramFilter("Test Program").click()
+        pageProgrammeUsers.selectGlobalProgramFilter("Test Program")
         pageProgrammeUsers.getNavProgrammeUsers().click()
         assert "Users List" in pageProgrammeUsers.getTableTitle().text
         assert "Name" in pageProgrammeUsers.getTableLabel()[1].text
