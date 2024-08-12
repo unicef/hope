@@ -110,9 +110,9 @@ class NewFeedback(BaseComponents):
     def getAdminAreaAutocomplete(self) -> WebElement:
         return self.wait_for(self.adminAreaAutocomplete)
 
-    def selectArea(self, name: str) -> WebElement:
+    def selectArea(self, name: str) -> None:
         self.getAdminAreaAutocomplete().click()
-        return self.select_listbox_element(name)
+        self.select_listbox_element(name)
 
     def getIssueType(self) -> WebElement:
         return self.wait_for(self.issueType)
@@ -123,9 +123,9 @@ class NewFeedback(BaseComponents):
     def getProgrammeSelect(self) -> WebElement:
         return self.wait_for(self.programmeSelect)
 
-    def selectProgramme(self, name: str) -> WebElement:
+    def selectProgramme(self, name: str) -> None:
         self.getProgrammeSelect().click()
-        return self.select_listbox_element(name)
+        self.select_listbox_element(name)
 
     def checkElementsOnPage(self) -> None:
         assert self.textTitle in self.getTitlePage().text
@@ -137,4 +137,4 @@ class NewFeedback(BaseComponents):
 
     def chooseOptionByName(self, name: str) -> None:
         self.getSelectIssueType().click()
-        self.select_listbox_element(name).click()
+        self.select_listbox_element(name)

@@ -120,7 +120,7 @@ class TestProgrammeDetails:
     def test_program_details(self, standard_program: Program, pageProgrammeDetails: ProgrammeDetails) -> None:
         program = Program.objects.get(name="Test For Edit")
         # Go to Programme Details
-        pageProgrammeDetails.selectGlobalProgramFilter("Test For Edit").click()
+        pageProgrammeDetails.selectGlobalProgramFilter("Test For Edit")
         # Check Details page
         assert "Test For Edit" in pageProgrammeDetails.getHeaderTitle().text
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
@@ -156,7 +156,7 @@ class TestProgrammeDetails:
         pageProgrammeDetails: ProgrammeDetails,
         pageProgrammeManagement: ProgrammeManagement,
     ) -> None:
-        pageProgrammeDetails.selectGlobalProgramFilter("Test Programm").click()
+        pageProgrammeDetails.selectGlobalProgramFilter("Test Programm")
         pageProgrammeDetails.getButtonEditProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.CONTROL + "a")
         pageProgrammeManagement.getInputProgrammeName().send_keys("New name after Edit")
@@ -182,7 +182,7 @@ class TestProgrammeDetails:
     def test_program_details_happy_path(
         self, create_payment_plan: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
-        pageProgrammeDetails.selectGlobalProgramFilter("Test For Edit").click()
+        pageProgrammeDetails.selectGlobalProgramFilter("Test For Edit")
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
         assert "0" in pageProgrammeDetails.getLabelProgramSize().text
         pageProgrammeDetails.getButtonActivateProgram().click()
