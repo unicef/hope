@@ -1,9 +1,15 @@
 // @ts-nocheck
-import { Box } from '@mui/material';
-import { Formik } from 'formik';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { BaseSection } from '@components/core/BaseSection';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { DetailsStep } from '@components/programs/CreateProgram/DetailsStep';
+import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
+import { ProgramFieldSeriesStep } from '@components/programs/CreateProgram/ProgramFieldSeriesStep';
+import {
+  handleNext,
+  ProgramStepper,
+} from '@components/programs/CreateProgram/ProgramStepper';
 import {
   ProgramPartnerAccess,
   useAllAreasTreeQuery,
@@ -12,24 +18,18 @@ import {
   useUpdateProgramMutation,
   useUserPartnerChoicesQuery,
 } from '@generated/graphql';
-import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/core/AllLogEntries';
-import { LoadingComponent } from '@components/core/LoadingComponent';
-import { PageHeader } from '@components/core/PageHeader';
-import { DetailsStep } from '@components/programs/CreateProgram/DetailsStep';
-import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
-import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { decodeIdString } from '@utils/utils';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
-import { ProgramFieldSeriesStep } from '@components/programs/CreateProgram/ProgramFieldSeriesStep';
-import { BaseSection } from '@components/core/BaseSection';
-import {
-  handleNext,
-  ProgramStepper,
-} from '@components/programs/CreateProgram/ProgramStepper';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Box, Fade } from '@mui/material';
+import { decodeIdString } from '@utils/utils';
+import { Formik } from 'formik';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/core/AllLogEntries';
+import { hasPermissionInModule } from '../../../config/permissions';
+import { editProgramValidationSchema } from '@components/programs/CreateProgram/editProgramValidationSchema';
 
 export const EditProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -97,6 +97,8 @@ export const EditProgramPage = (): ReactElement => {
     pduFields,
   } = data.program;
 
+  const programHasRdi = registrationImports.totalCount > 0;
+
   const handleSubmit = async (values): Promise<void> => {
     const budgetValue = parseFloat(values.budget) ?? 0;
     const budgetToFixed = !Number.isNaN(budgetValue)
@@ -127,24 +129,33 @@ export const EditProgramPage = (): ReactElement => {
                   ([key]) => key !== '__typename' && key !== 'id',
                 ),
               ),
-              roundsNames:
-                pduData.numberOfRounds === 1 &&
-                (pduData.roundsNames == null ||
-                  pduData.roundsNames.length === 0)
-                  ? ['']
-                  : pduData.roundsNames.map((roundName) =>
-                      roundName == null ? '' : roundName,
-                    ),
+              roundsNames: (() => {
+                if (!pduData.roundsNames) {
+                  pduData.roundsNames = [];
+                }
+
+                if (
+                  pduData.numberOfRounds === 1 &&
+                  pduData.roundsNames.length === 0
+                ) {
+                  return [''];
+                }
+
+                return pduData.roundsNames.map((roundName) => roundName || '');
+              })(),
             }
           : pduData,
       }));
 
     try {
+      const { pduFields: pduFieldsFromValues, ...requestValuesWithoutPdu } =
+        requestValues;
+
       const response = await mutate({
         variables: {
           programData: {
             id,
-            ...requestValues,
+            ...requestValuesWithoutPdu,
             budget: budgetToFixed,
             populationGoal: populationGoalParsed,
             partners: partnersToSet,
@@ -159,8 +170,6 @@ export const EditProgramPage = (): ReactElement => {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
-
-  const programHasRdi = registrationImports.totalCount > 0;
 
   const mappedPduFields = Object.entries(pduFields).map(([, field]) => {
     const { ...rest } = field;
@@ -192,20 +201,7 @@ export const EditProgramPage = (): ReactElement => {
         areaAccess: partner.areaAccess,
       })),
     partnerAccess,
-    pduFields: programHasRdi
-      ? undefined
-      : pduFields.length == 0
-        ? [
-            {
-              label: '',
-              pduData: {
-                subtype: '',
-                numberOfRounds: null,
-                roundsNames: [],
-              },
-            },
-          ]
-        : mappedPduFields,
+    pduFields: mappedPduFields,
   };
 
   initialValues.budget =
@@ -247,7 +243,7 @@ export const EditProgramPage = (): ReactElement => {
       onSubmit={(values) => {
         handleSubmit(values);
       }}
-      validationSchema={programValidationSchema(t)}
+      validationSchema={editProgramValidationSchema(t)}
     >
       {({
         submitForm,
@@ -330,33 +326,53 @@ export const EditProgramPage = (): ReactElement => {
               }
             >
               <Box p={3}>
-                {step === 0 && (
-                  <DetailsStep values={values} handleNext={handleNextStep} />
-                )}
-                {step === 1 && (
-                  <ProgramFieldSeriesStep
-                    values={values}
-                    handleNext={handleNextStep}
-                    step={step}
-                    setStep={setStep}
-                    pdusubtypeChoicesData={pdusubtypeChoicesData}
-                    errors={errors}
-                    setErrors={setErrors}
-                    setFieldTouched={setFieldTouched}
-                    programHasRdi={programHasRdi}
-                  />
-                )}
-                {step === 2 && (
-                  <PartnersStep
-                    values={values}
-                    allAreasTreeData={allAreasTree}
-                    partnerChoices={mappedPartnerChoices}
-                    step={step}
-                    setStep={setStep}
-                    submitForm={submitForm}
-                    setFieldValue={setFieldValue}
-                  />
-                )}
+                <Fade in={step === 0} timeout={600}>
+                  <div>
+                    {step === 0 && (
+                      <DetailsStep
+                        values={values}
+                        handleNext={handleNextStep}
+                        programId={id}
+                      />
+                    )}
+                  </div>
+                </Fade>
+                <Fade in={step === 1} timeout={600}>
+                  <div>
+                    {step === 1 && (
+                      <ProgramFieldSeriesStep
+                        values={values}
+                        handleNext={handleNextStep}
+                        step={step}
+                        setStep={setStep}
+                        pdusubtypeChoicesData={pdusubtypeChoicesData}
+                        errors={errors}
+                        setErrors={setErrors}
+                        setFieldTouched={setFieldTouched}
+                        programHasRdi={programHasRdi}
+                        programId={id}
+                        program={data.program}
+                        setFieldValue={setFieldValue}
+                      />
+                    )}
+                  </div>
+                </Fade>
+                <Fade in={step === 2} timeout={600}>
+                  <div>
+                    {step === 2 && (
+                      <PartnersStep
+                        values={values}
+                        allAreasTreeData={allAreasTree}
+                        partnerChoices={mappedPartnerChoices}
+                        step={step}
+                        setStep={setStep}
+                        submitForm={submitForm}
+                        setFieldValue={setFieldValue}
+                        programId={id}
+                      />
+                    )}
+                  </div>
+                </Fade>
               </Box>
             </BaseSection>
           </>

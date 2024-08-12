@@ -3,7 +3,7 @@ import moment from 'moment';
 import { today } from '@utils/utils';
 import { TFunction } from 'i18next';
 
-export const programValidationSchema = (
+export const editProgramValidationSchema = (
   t: TFunction<'translation', undefined>,
 ): Yup.ObjectSchema<any, any, any, any> =>
   Yup.object().shape({
@@ -60,24 +60,6 @@ export const programValidationSchema = (
       Yup.object().shape({
         id: Yup.string().required(t('Partner ID is required')),
         areaAccess: Yup.string().required(t('Area Access is required')),
-      }),
-    ),
-    pduFields: Yup.array().of(
-      Yup.object().shape({
-        label: Yup.string()
-          .nullable()
-          .min(3, t('Too short'))
-          .max(150, t('Too long'))
-          .required(t('Label is required')),
-        pduData: Yup.object().shape({
-          subtype: Yup.string().nullable().required(t('Subtype is required')),
-          numberOfRounds: Yup.number()
-            .nullable()
-            .required(t('Number of rounds is required')),
-          roundsNames: Yup.array().of(
-            Yup.string().min(3, t('Too short')).max(150, t('Too long')),
-          ),
-        }),
       }),
     ),
   });

@@ -85,6 +85,17 @@ snapshots['TestUpdateProgram::test_update_full_area_access_flag 1'] = {
                 ],
                 'pduFields': [
                     {
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
+                        'pduData': {
+                            'numberOfRounds': 1,
+                            'roundsNames': [
+                                'Round To Be Preserved'
+                            ],
+                            'subtype': 'DATE'
+                        }
+                    },
+                    {
                         'label': '{"English(EN)": "PDU Field To Be Removed"}',
                         'name': 'pdu_field_to_be_removed',
                         'pduData': {
@@ -107,17 +118,6 @@ snapshots['TestUpdateProgram::test_update_full_area_access_flag 1'] = {
                                 'Round 2 To Be Updated'
                             ],
                             'subtype': 'STRING'
-                        }
-                    },
-                    {
-                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
-                        'name': 'pdu_field_to_be_preserved',
-                        'pduData': {
-                            'numberOfRounds': 1,
-                            'roundsNames': [
-                                'Round To Be Preserved'
-                            ],
-                            'subtype': 'DATE'
                         }
                     }
                 ],
@@ -174,6 +174,17 @@ snapshots['TestUpdateProgram::test_update_full_area_access_flag 2'] = {
                 ],
                 'pduFields': [
                     {
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
+                        'pduData': {
+                            'numberOfRounds': 1,
+                            'roundsNames': [
+                                'Round To Be Preserved'
+                            ],
+                            'subtype': 'DATE'
+                        }
+                    },
+                    {
                         'label': '{"English(EN)": "PDU Field To Be Removed"}',
                         'name': 'pdu_field_to_be_removed',
                         'pduData': {
@@ -196,17 +207,6 @@ snapshots['TestUpdateProgram::test_update_full_area_access_flag 2'] = {
                                 'Round 2 To Be Updated'
                             ],
                             'subtype': 'STRING'
-                        }
-                    },
-                    {
-                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
-                        'name': 'pdu_field_to_be_preserved',
-                        'pduData': {
-                            'numberOfRounds': 1,
-                            'roundsNames': [
-                                'Round To Be Preserved'
-                            ],
-                            'subtype': 'DATE'
                         }
                     }
                 ],
@@ -242,6 +242,17 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_0_with_permissio
                 ],
                 'pduFields': [
                     {
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
+                        'pduData': {
+                            'numberOfRounds': 1,
+                            'roundsNames': [
+                                'Round To Be Preserved'
+                            ],
+                            'subtype': 'DATE'
+                        }
+                    },
+                    {
                         'label': '{"English(EN)": "PDU Field To Be Removed"}',
                         'name': 'pdu_field_to_be_removed',
                         'pduData': {
@@ -264,17 +275,6 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_0_with_permissio
                                 'Round 2 To Be Updated'
                             ],
                             'subtype': 'STRING'
-                        }
-                    },
-                    {
-                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
-                        'name': 'pdu_field_to_be_preserved',
-                        'pduData': {
-                            'numberOfRounds': 1,
-                            'roundsNames': [
-                                'Round To Be Preserved'
-                            ],
-                            'subtype': 'DATE'
                         }
                     }
                 ],
@@ -414,6 +414,17 @@ snapshots['TestUpdateProgram::test_update_program_partners_0_valid 1'] = {
                 ],
                 'pduFields': [
                     {
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
+                        'pduData': {
+                            'numberOfRounds': 1,
+                            'roundsNames': [
+                                'Round To Be Preserved'
+                            ],
+                            'subtype': 'DATE'
+                        }
+                    },
+                    {
                         'label': '{"English(EN)": "PDU Field To Be Removed"}',
                         'name': 'pdu_field_to_be_removed',
                         'pduData': {
@@ -436,17 +447,6 @@ snapshots['TestUpdateProgram::test_update_program_partners_0_valid 1'] = {
                                 'Round 2 To Be Updated'
                             ],
                             'subtype': 'STRING'
-                        }
-                    },
-                    {
-                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
-                        'name': 'pdu_field_to_be_preserved',
-                        'pduData': {
-                            'numberOfRounds': 1,
-                            'roundsNames': [
-                                'Round To Be Preserved'
-                            ],
-                            'subtype': 'DATE'
                         }
                     }
                 ],
@@ -534,6 +534,17 @@ snapshots['TestUpdateProgram::test_update_program_partners_all_partners_access 1
                 ],
                 'pduFields': [
                     {
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
+                        'pduData': {
+                            'numberOfRounds': 1,
+                            'roundsNames': [
+                                'Round To Be Preserved'
+                            ],
+                            'subtype': 'DATE'
+                        }
+                    },
+                    {
                         'label': '{"English(EN)": "PDU Field To Be Removed"}',
                         'name': 'pdu_field_to_be_removed',
                         'pduData': {
@@ -556,17 +567,6 @@ snapshots['TestUpdateProgram::test_update_program_partners_all_partners_access 1
                                 'Round 2 To Be Updated'
                             ],
                             'subtype': 'STRING'
-                        }
-                    },
-                    {
-                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
-                        'name': 'pdu_field_to_be_preserved',
-                        'pduData': {
-                            'numberOfRounds': 1,
-                            'roundsNames': [
-                                'Round To Be Preserved'
-                            ],
-                            'subtype': 'DATE'
                         }
                     }
                 ],
@@ -702,6 +702,17 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 1'] = {
             'name': 'initial name',
             'pduFields': [
                 {
+                    'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                    'name': 'pdu_field_to_be_preserved',
+                    'pduData': {
+                        'numberOfRounds': 1,
+                        'roundsNames': [
+                            'Round To Be Preserved'
+                        ],
+                        'subtype': 'DATE'
+                    }
+                },
+                {
                     'label': '{"English(EN)": "PDU Field To Be Removed"}',
                     'name': 'pdu_field_to_be_removed',
                     'pduData': {
@@ -724,17 +735,6 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 1'] = {
                             'Round 2 To Be Updated'
                         ],
                         'subtype': 'STRING'
-                    }
-                },
-                {
-                    'label': '{"English(EN)": "PDU Field To Be Preserved"}',
-                    'name': 'pdu_field_to_be_preserved',
-                    'pduData': {
-                        'numberOfRounds': 1,
-                        'roundsNames': [
-                            'Round To Be Preserved'
-                        ],
-                        'subtype': 'DATE'
                     }
                 }
             ]
@@ -768,14 +768,17 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 2'] = {
                 ],
                 'pduFields': [
                     {
-                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
-                        'name': 'pdu_field_to_be_preserved',
+                        'label': '{"English(EN)": "PDU Field - New"}',
+                        'name': 'pdu_field_-_new',
                         'pduData': {
-                            'numberOfRounds': 1,
+                            'numberOfRounds': 4,
                             'roundsNames': [
-                                'Round To Be Preserved'
+                                'Round 1A',
+                                'Round 2B',
+                                'Round 3C',
+                                'Round 4D'
                             ],
-                            'subtype': 'DATE'
+                            'subtype': 'BOOLEAN'
                         }
                     },
                     {
@@ -792,17 +795,14 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 2'] = {
                         }
                     },
                     {
-                        'label': '{"English(EN)": "PDU Field - New"}',
-                        'name': 'pdu_field_-_new',
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
                         'pduData': {
-                            'numberOfRounds': 4,
+                            'numberOfRounds': 1,
                             'roundsNames': [
-                                'Round 1A',
-                                'Round 2B',
-                                'Round 3C',
-                                'Round 4D'
+                                'Round To Be Preserved'
                             ],
-                            'subtype': 'BOOLEAN'
+                            'subtype': 'DATE'
                         }
                     }
                 ],
@@ -818,14 +818,17 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 3'] = {
             'name': 'Program with Updated PDU Fields',
             'pduFields': [
                 {
-                    'label': '{"English(EN)": "PDU Field To Be Preserved"}',
-                    'name': 'pdu_field_to_be_preserved',
+                    'label': '{"English(EN)": "PDU Field - New"}',
+                    'name': 'pdu_field_-_new',
                     'pduData': {
-                        'numberOfRounds': 1,
+                        'numberOfRounds': 4,
                         'roundsNames': [
-                            'Round To Be Preserved'
+                            'Round 1A',
+                            'Round 2B',
+                            'Round 3C',
+                            'Round 4D'
                         ],
-                        'subtype': 'DATE'
+                        'subtype': 'BOOLEAN'
                     }
                 },
                 {
@@ -842,17 +845,14 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 3'] = {
                     }
                 },
                 {
-                    'label': '{"English(EN)": "PDU Field - New"}',
-                    'name': 'pdu_field_-_new',
+                    'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                    'name': 'pdu_field_to_be_preserved',
                     'pduData': {
-                        'numberOfRounds': 4,
+                        'numberOfRounds': 1,
                         'roundsNames': [
-                            'Round 1A',
-                            'Round 2B',
-                            'Round 3C',
-                            'Round 4D'
+                            'Round To Be Preserved'
                         ],
-                        'subtype': 'BOOLEAN'
+                        'subtype': 'DATE'
                     }
                 }
             ]
@@ -906,17 +906,6 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
                 ],
                 'pduFields': [
                     {
-                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
-                        'name': 'pdu_field_to_be_preserved',
-                        'pduData': {
-                            'numberOfRounds': 1,
-                            'roundsNames': [
-                                'Round To Be Preserved'
-                            ],
-                            'subtype': 'DATE'
-                        }
-                    },
-                    {
                         'label': '{"English(EN)": "PDU Field - Updated"}',
                         'name': 'pdu_field_-_updated',
                         'pduData': {
@@ -942,6 +931,17 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
                             ],
                             'subtype': 'BOOLEAN'
                         }
+                    },
+                    {
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
+                        'pduData': {
+                            'numberOfRounds': 1,
+                            'roundsNames': [
+                                'Round To Be Preserved'
+                            ],
+                            'subtype': 'DATE'
+                        }
                     }
                 ],
                 'status': 'DRAFT'
@@ -951,6 +951,96 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
 }
 
 snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field_name_for_updated_field 1'] = {
+    'data': {
+        'updateProgram': {
+            'program': {
+                'dataCollectingType': {
+                    'code': 'full_collection',
+                    'label': 'Full'
+                },
+                'name': 'Program with Updated PDU Fields',
+                'partnerAccess': 'NONE_PARTNERS_ACCESS',
+                'partners': [
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF'
+                    }
+                ],
+                'pduFields': [
+                    {
+                        'label': '{"English(EN)": "PDU Field - New"}',
+                        'name': 'pdu_field_-_new',
+                        'pduData': {
+                            'numberOfRounds': 4,
+                            'roundsNames': [
+                                'Round 1A',
+                                'Round 2B',
+                                'Round 3C',
+                                'Round 4D'
+                            ],
+                            'subtype': 'BOOLEAN'
+                        }
+                    },
+                    {
+                        'label': '{"English(EN)": "PDU Field 1"}',
+                        'name': 'pdu_field_1',
+                        'pduData': {
+                            'numberOfRounds': 3,
+                            'roundsNames': [
+                                'Round 1 Updated',
+                                'Round 2 Updated',
+                                'Round 3 Updated'
+                            ],
+                            'subtype': 'BOOLEAN'
+                        }
+                    },
+                    {
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
+                        'pduData': {
+                            'numberOfRounds': 1,
+                            'roundsNames': [
+                                'Round To Be Preserved'
+                            ],
+                            'subtype': 'DATE'
+                        }
+                    }
+                ],
+                'status': 'DRAFT'
+            }
+        }
+    }
+}
+
+snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_invalid_data 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Number of rounds does not match the number of round names',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RDI 1'] = {
     'data': {
         'updateProgram': {
             'program': {
@@ -987,30 +1077,30 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
                         }
                     },
                     {
-                        'label': '{"English(EN)": "PDU Field 1"}',
-                        'name': 'pdu_field_1',
+                        'label': '{"English(EN)": "PDU Field To Be Removed"}',
+                        'name': 'pdu_field_to_be_removed',
                         'pduData': {
                             'numberOfRounds': 3,
                             'roundsNames': [
-                                'Round 1 Updated',
-                                'Round 2 Updated',
-                                'Round 3 Updated'
+                                'Round 1 To Be Removed',
+                                'Round 2 To Be Removed',
+                                'Round 3 To Be Removed'
                             ],
-                            'subtype': 'BOOLEAN'
+                            'subtype': 'DECIMAL'
                         }
                     },
                     {
-                        'label': '{"English(EN)": "PDU Field - New"}',
-                        'name': 'pdu_field_-_new',
+                        'label': '{"English(EN)": "PDU Field To Be Updated"}',
+                        'name': 'pdu_field_to_be_updated',
                         'pduData': {
                             'numberOfRounds': 4,
                             'roundsNames': [
-                                'Round 1A',
-                                'Round 2B',
-                                'Round 3C',
-                                'Round 4D'
+                                'Round 1 To Be Updated',
+                                'Round 2 To Be Updated',
+                                'Round 3 New',
+                                'Round 4 New'
                             ],
-                            'subtype': 'BOOLEAN'
+                            'subtype': 'STRING'
                         }
                     }
                 ],
@@ -1020,7 +1110,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
     }
 }
 
-snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_invalid_data 1'] = {
+snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RDI_invalid_data_changed_existing_rounds_names 1'] = {
     'data': {
         'updateProgram': None
     },
@@ -1032,7 +1122,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_invalid_data 1
                     'line': 3
                 }
             ],
-            'message': 'Number of rounds does not match the number of round names',
+            'message': 'It is not possible to change the names of existing rounds for a Program with RDI',
             'path': [
                 'updateProgram'
             ]
@@ -1040,7 +1130,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_invalid_data 1
     ]
 }
 
-snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RDI 1'] = {
+snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RDI_invalid_data_decrease_rounds 1'] = {
     'data': {
         'updateProgram': None
     },
@@ -1052,10 +1142,146 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RD
                     'line': 3
                 }
             ],
-            'message': 'Cannot update PDU fields for a program with RDIs.',
+            'message': 'It is not possible to decrease the number of rounds for a Program with RDI',
             'path': [
                 'updateProgram'
             ]
         }
     ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RDI_new_field 1'] = {
+    'data': {
+        'updateProgram': {
+            'program': {
+                'dataCollectingType': {
+                    'code': 'full_collection',
+                    'label': 'Full'
+                },
+                'name': 'Program with Updated PDU Fields',
+                'partnerAccess': 'NONE_PARTNERS_ACCESS',
+                'partners': [
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF'
+                    }
+                ],
+                'pduFields': [
+                    {
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
+                        'pduData': {
+                            'numberOfRounds': 1,
+                            'roundsNames': [
+                                'Round To Be Preserved'
+                            ],
+                            'subtype': 'DATE'
+                        }
+                    },
+                    {
+                        'label': '{"English(EN)": "PDU Field To Be Removed"}',
+                        'name': 'pdu_field_to_be_removed',
+                        'pduData': {
+                            'numberOfRounds': 3,
+                            'roundsNames': [
+                                'Round 1 To Be Removed',
+                                'Round 2 To Be Removed',
+                                'Round 3 To Be Removed'
+                            ],
+                            'subtype': 'DECIMAL'
+                        }
+                    },
+                    {
+                        'label': '{"English(EN)": "PDU Field To Be Updated"}',
+                        'name': 'pdu_field_to_be_updated',
+                        'pduData': {
+                            'numberOfRounds': 2,
+                            'roundsNames': [
+                                'Round 1 To Be Updated',
+                                'Round 2 To Be Updated'
+                            ],
+                            'subtype': 'STRING'
+                        }
+                    }
+                ],
+                'status': 'DRAFT'
+            }
+        }
+    }
+}
+
+snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RDI_update_pdu_field 1'] = {
+    'data': {
+        'updateProgram': {
+            'program': {
+                'dataCollectingType': {
+                    'code': 'full_collection',
+                    'label': 'Full'
+                },
+                'name': 'Program with Updated PDU Fields',
+                'partnerAccess': 'NONE_PARTNERS_ACCESS',
+                'partners': [
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF'
+                    }
+                ],
+                'pduFields': [
+                    {
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
+                        'pduData': {
+                            'numberOfRounds': 1,
+                            'roundsNames': [
+                                'Round To Be Preserved'
+                            ],
+                            'subtype': 'DATE'
+                        }
+                    },
+                    {
+                        'label': '{"English(EN)": "PDU Field To Be Removed"}',
+                        'name': 'pdu_field_to_be_removed',
+                        'pduData': {
+                            'numberOfRounds': 3,
+                            'roundsNames': [
+                                'Round 1 To Be Removed',
+                                'Round 2 To Be Removed',
+                                'Round 3 To Be Removed'
+                            ],
+                            'subtype': 'DECIMAL'
+                        }
+                    },
+                    {
+                        'label': '{"English(EN)": "PDU Field To Be Updated"}',
+                        'name': 'pdu_field_to_be_updated',
+                        'pduData': {
+                            'numberOfRounds': 2,
+                            'roundsNames': [
+                                'Round 1 To Be Updated',
+                                'Round 2 To Be Updated'
+                            ],
+                            'subtype': 'STRING'
+                        }
+                    }
+                ],
+                'status': 'DRAFT'
+            }
+        }
+    }
 }

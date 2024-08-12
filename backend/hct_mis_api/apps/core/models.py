@@ -251,6 +251,22 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
             ),
         ]
 
+    def clean(self) -> None:
+        if (
+            self.program
+            and FlexibleAttribute.objects.filter(name=self.name, program__isnull=True).exclude(id=self.id).exists()
+        ):
+            raise ValidationError(f'Flex field with name "{self.name}" already exists without a program.')
+        elif (
+            not self.program
+            and FlexibleAttribute.objects.filter(name=self.name, program__isnull=False).exclude(id=self.id).exists()
+        ):
+            raise ValidationError(f'Flex field with name "{self.name}" already exists inside a program.')
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        self.clean()
+        super().save(*args, **kwargs)
+
     @property
     def is_flex_field(self) -> bool:
         return True
@@ -318,7 +334,7 @@ class PeriodicFieldData(models.Model):
         (DATE, _("Date")),
         (DECIMAL, _("Number")),
         (STRING, _("Text")),
-        (BOOLEAN, _("Yes/No")),
+        (BOOLEAN, _("Boolean (true/false)")),
     )
 
     subtype = models.CharField(max_length=16, choices=TYPE_CHOICES)
