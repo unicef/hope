@@ -8183,6 +8183,7 @@ export enum TargetingCriteriaRuleFilterComparisonMethod {
   Contains = 'CONTAINS',
   Equals = 'EQUALS',
   GreaterThan = 'GREATER_THAN',
+  IsNull = 'IS_NULL',
   LessThan = 'LESS_THAN',
   NotContains = 'NOT_CONTAINS',
   NotEquals = 'NOT_EQUALS',
@@ -8205,6 +8206,7 @@ export type TargetingCriteriaRuleFilterNode = {
   fieldName: Scalars['String']['output'];
   flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification;
   id: Scalars['UUID']['output'];
+  roundNumber?: Maybe<Scalars['Int']['output']>;
   targetingCriteriaRule: TargetingCriteriaRuleNode;
   updatedAt: Scalars['DateTime']['output'];
 };
@@ -8214,7 +8216,7 @@ export type TargetingCriteriaRuleFilterObjectType = {
   comparisonMethod: Scalars['String']['input'];
   fieldName: Scalars['String']['input'];
   flexFieldClassification: FlexFieldClassification;
-  onlyNull?: InputMaybe<Scalars['Boolean']['input']>;
+  roundNumber?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type TargetingCriteriaRuleNode = {
@@ -8236,6 +8238,7 @@ export enum TargetingIndividualBlockRuleFilterComparisonMethod {
   Contains = 'CONTAINS',
   Equals = 'EQUALS',
   GreaterThan = 'GREATER_THAN',
+  IsNull = 'IS_NULL',
   LessThan = 'LESS_THAN',
   NotContains = 'NOT_CONTAINS',
   NotEquals = 'NOT_EQUALS',
@@ -8259,6 +8262,7 @@ export type TargetingIndividualBlockRuleFilterNode = {
   flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification;
   id: Scalars['UUID']['output'];
   individualsFiltersBlock: TargetingIndividualRuleFilterBlockNode;
+  roundNumber?: Maybe<Scalars['Int']['output']>;
   updatedAt: Scalars['DateTime']['output'];
 };
 
@@ -28727,6 +28731,7 @@ export type TargetingCriteriaRuleFilterNodeResolvers<ContextType = any, ParentTy
   fieldName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   flexFieldClassification?: Resolver<ResolversTypes['TargetingCriteriaRuleFilterFlexFieldClassification'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
+  roundNumber?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   targetingCriteriaRule?: Resolver<ResolversTypes['TargetingCriteriaRuleNode'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -28751,6 +28756,7 @@ export type TargetingIndividualBlockRuleFilterNodeResolvers<ContextType = any, P
   flexFieldClassification?: Resolver<ResolversTypes['TargetingIndividualBlockRuleFilterFlexFieldClassification'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
   individualsFiltersBlock?: Resolver<ResolversTypes['TargetingIndividualRuleFilterBlockNode'], ParentType, ContextType>;
+  roundNumber?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
