@@ -292,7 +292,7 @@ def get_fields_attr_generators(
     flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None, program_id: Optional[str] = None
 ) -> Generator:
     if flex_field is not False:
-        yield from FlexibleAttribute.objects.exclude(type=FlexibleAttribute.PDU).order_by("created_at")
+        yield from FlexibleAttribute.objects.order_by("created_at")
     if flex_field is not True:
         if program_id and Program.objects.get(id=program_id).is_social_worker_program:
             yield from FieldFactory.from_only_scopes([Scope.XLSX_PEOPLE, Scope.TARGETING]).filtered_by_types(
