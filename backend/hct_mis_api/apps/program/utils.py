@@ -6,7 +6,7 @@ from django.db import transaction
 from django.db.models import Q, QuerySet
 
 from hct_mis_api.apps.account.models import Partner
-from hct_mis_api.apps.core.models import DataCollectingType
+from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
@@ -93,6 +93,7 @@ class CopyProgramPopulation:
     def copy_individual(self, individual: Individual) -> Individual:
         copied_from_pk = individual.pk
         individual.pk = None
+        individual.flex_fields = get_flex_fields_without_pdu_values(individual)
         individual.program = self.program
         individual.copied_from_id = copied_from_pk
         individual.registration_data_import = self.rdi
@@ -471,6 +472,7 @@ def copy_individual(individual: Individual, program: Program) -> tuple:
     original_individual_id = individual.id
     individual.copied_from_id = original_individual_id
     individual.pk = None
+    individual.flex_fields = get_flex_fields_without_pdu_values(individual)
     individual.program = program
     individual.household = None
     individual.registration_data_import = None
@@ -517,3 +519,16 @@ def remove_program_partner_access(partners_data: List, program: Program) -> None
         Q(partner_id__in=partner_ids) | Q(partner__name="UNICEF")
     )
     removed_partner_access.delete()
+
+
+def get_flex_fields_without_pdu_values(individual: Individual) -> dict:
+    flex_fields = individual.flex_fields
+    flex_fields_without_pdu = {}
+    for flex_field in flex_fields:
+        if FlexibleAttribute.objects.filter(
+            name=flex_field, program=individual.program, type=FlexibleAttribute.PDU
+        ).exists():
+            continue
+        else:
+            flex_fields_without_pdu[flex_field] = flex_fields[flex_field]
+    return flex_fields_without_pdu
