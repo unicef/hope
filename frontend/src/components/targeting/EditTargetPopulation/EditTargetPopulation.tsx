@@ -101,7 +101,7 @@ export const EditTargetPopulation = ({
     individualIds: idValidation,
     exclusionReason: Yup.string().max(500, t('Too long')),
     programCycleId: Yup.object().shape({
-      value: Yup.string().required('Program cycle is required'),
+      value: Yup.string().required('Program Cycle is required'),
     }),
   });
 

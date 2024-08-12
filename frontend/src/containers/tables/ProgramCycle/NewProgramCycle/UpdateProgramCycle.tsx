@@ -125,7 +125,7 @@ export const UpdateProgramCycle = ({
           <DialogTitleWrapper>
             <DialogTitle>
               <Box display="flex" justifyContent="space-between">
-                <Box>{t('Add New Programme Cycles')}</Box>
+                <Box>{t('Add New Programme Cycle')}</Box>
                 {step && <Box>{step}</Box>}
               </Box>
             </DialogTitle>
@@ -134,15 +134,15 @@ export const UpdateProgramCycle = ({
             <DialogDescription>
               <GreyText>
                 {t(
-                  'Before you create a new Cycles, it is necessary to specify the end date of the existing Cycles',
+                  'Before you create a new Cycle, it is necessary to specify the end date of the existing Cycle',
                 )}
               </GreyText>
             </DialogDescription>
             <Grid container spacing={3}>
               <Grid item xs={6}>
                 <LabelizedField
-                  data-cy="previous-program-cycle-name"
-                  label={t('Programme Cycle Name')}
+                  data-cy="previous-program-cycle-title"
+                  label={t('Programme Cycle Title')}
                 >
                   {values.title}
                 </LabelizedField>
@@ -181,7 +181,7 @@ export const UpdateProgramCycle = ({
                 color="primary"
                 variant="contained"
                 onClick={submitForm}
-                data-cy="button-activate-program-modal"
+                data-cy="button-update-program-cycle-modal"
               >
                 {t('NEXT')}
               </LoadingButton>

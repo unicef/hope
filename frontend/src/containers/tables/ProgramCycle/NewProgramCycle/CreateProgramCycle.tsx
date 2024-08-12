@@ -56,7 +56,7 @@ export const CreateProgramCycle = ({
 
   const validationSchema = Yup.object().shape({
     title: Yup.string()
-      .required(t('Programme Cycle name is required'))
+      .required(t('Programme Cycle Title is required'))
       .min(2, t('Too short'))
       .max(150, t('Too long')),
     start_date: Yup.date()
@@ -130,7 +130,7 @@ export const CreateProgramCycle = ({
             <DialogTitleWrapper>
               <DialogTitle>
                 <Box display="flex" justifyContent="space-between">
-                  <Box>{t('Add New Programme Cycles')}</Box>
+                  <Box>{t('Add New Programme Cycle')}</Box>
                   {step && <Box>{step}</Box>}
                 </Box>
               </DialogTitle>
@@ -138,7 +138,7 @@ export const CreateProgramCycle = ({
             <DialogContent>
               <DialogDescription>
                 <GreyText>
-                  {t('Are you sure you want to activate this Programme?')}
+                  {t('Enter data for the new Programme Cycle')}
                 </GreyText>
               </DialogDescription>
               <Grid container spacing={3}>

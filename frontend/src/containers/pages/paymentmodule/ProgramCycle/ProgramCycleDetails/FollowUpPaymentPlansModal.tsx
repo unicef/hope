@@ -8,7 +8,6 @@ import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import { BlackLink } from '@core/BlackLink';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { Missing } from '@core/Missing';
 import {
   Box,
   Button,
@@ -63,12 +62,6 @@ export const FollowUpPaymentPlansModal = ({
       <TableCell align="left">
         <UniversalMoment>{row.dispersionEndDate}</UniversalMoment>
       </TableCell>
-      <TableCell align="left">
-        <Missing />
-      </TableCell>
-      <TableCell align="left">
-        <Missing />
-      </TableCell>
     </TableRow>
   ));
 
@@ -116,15 +109,6 @@ export const FollowUpPaymentPlansModal = ({
                 </TableCell>
                 <TableCell data-cy="table-cell-end-date" align="left">
                   {t('Dispersion End Date')}
-                </TableCell>
-                <TableCell
-                  data-cy="table-cell-reconciliation-status"
-                  align="left"
-                >
-                  {t('Reconciliation Status')}
-                </TableCell>
-                <TableCell data-cy="table-cell-payment-id" align="left">
-                  {t('Payment ID')}
                 </TableCell>
               </TableRow>
             </TableHead>
