@@ -1361,6 +1361,12 @@ type FinishPaymentVerificationPlan {
   paymentPlan: GenericPaymentPlanNode
 }
 
+enum FlexFieldClassification {
+  NOT_FLEX_FIELD
+  FLEX_FIELD_NOT_PDU
+  FLEX_FIELD_PDU
+}
+
 scalar FlexFieldsScalar
 
 type FspChoice {
@@ -4697,13 +4703,19 @@ enum TargetingCriteriaRuleFilterComparisonMethod {
   LESS_THAN
 }
 
+enum TargetingCriteriaRuleFilterFlexFieldClassification {
+  NOT_FLEX_FIELD
+  FLEX_FIELD_NOT_PDU
+  FLEX_FIELD_PDU
+}
+
 type TargetingCriteriaRuleFilterNode {
   id: UUID!
   createdAt: DateTime!
   updatedAt: DateTime!
   comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod!
   targetingCriteriaRule: TargetingCriteriaRuleNode!
-  isFlexField: Boolean!
+  flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification!
   fieldName: String!
   arguments: [Arg]
   fieldAttribute: FieldAttributeNode
@@ -4712,6 +4724,7 @@ type TargetingCriteriaRuleFilterNode {
 input TargetingCriteriaRuleFilterObjectType {
   comparisonMethod: String!
   isFlexField: Boolean!
+  flexFieldClassification: FlexFieldClassification!
   fieldName: String!
   arguments: [Arg]!
 }
@@ -4741,13 +4754,19 @@ enum TargetingIndividualBlockRuleFilterComparisonMethod {
   LESS_THAN
 }
 
+enum TargetingIndividualBlockRuleFilterFlexFieldClassification {
+  NOT_FLEX_FIELD
+  FLEX_FIELD_NOT_PDU
+  FLEX_FIELD_PDU
+}
+
 type TargetingIndividualBlockRuleFilterNode {
   id: UUID!
   createdAt: DateTime!
   updatedAt: DateTime!
   comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod!
   individualsFiltersBlock: TargetingIndividualRuleFilterBlockNode!
-  isFlexField: Boolean!
+  flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification!
   fieldName: String!
   arguments: [Arg]
   fieldAttribute: FieldAttributeNode
