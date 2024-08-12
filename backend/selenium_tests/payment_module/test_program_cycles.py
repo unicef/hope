@@ -102,19 +102,3 @@ class TestSmokeProgramCycle:
         assert (
             "-" in third_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-total-entitled-quantity"]').text
         )
-
-    # def test_smoke_details_program_cycle(
-    #     self,
-    #     create_program_cycle: ProgramCycle,
-    #     pageProgramCycle: ProgramCycleModule,
-    #     pageProgramCycleDetails: ProgramCycleModuleDetails,
-    # ) -> None:
-    #     pageProgramCycle.selectGlobalProgramFilter("Test Program").click()
-    #     pageProgramCycle.getNavPaymentModule().click()
-    #
-    # def test_smoke_new_program_cycle(
-    #     self, create_test_program: Program, pageProgramCycle: ProgramCyclePage, pageNewProgramCycle: NewProgramCycle
-    # ) -> None:
-    #     pageProgramCycle.selectGlobalProgramFilter("Test Program").click()
-    #     pageProgramCycle.getNavProgramCycleModule().click()
-    #     pageProgramCycle.getButtonNewProgramCycle().click()

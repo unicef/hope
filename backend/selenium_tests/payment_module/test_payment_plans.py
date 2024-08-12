@@ -9,6 +9,11 @@ from dateutil.relativedelta import relativedelta
 from page_object.payment_module.new_payment_plan import NewPaymentPlan
 from page_object.payment_module.payment_module import PaymentModule
 from page_object.payment_module.payment_module_details import PaymentModuleDetails
+from page_object.payment_module.program_cycle import (
+    ProgramCycleDetailsPage,
+    ProgramCyclePage,
+)
+from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
@@ -159,7 +164,6 @@ class TestSmokePaymentModule:
         pagePaymentModule.getNavPaymentModule().click()
         pagePaymentModule.getNavPaymentPlans().click()
         assert "Payment Module" in pagePaymentModule.getPageHeaderTitle().text
-        assert "NEW PAYMENT PLAN" in pagePaymentModule.getButtonNewPaymentPlan().text
         assert "Status" in pagePaymentModule.getSelectFilter().text
         assert "" in pagePaymentModule.getFiltersTotalEntitledQuantityFrom().text
         assert "" in pagePaymentModule.getFiltersTotalEntitledQuantityTo().text
@@ -183,18 +187,21 @@ class TestSmokePaymentModule:
         assert "Rows per page: 5 1–1 of 1" in pagePaymentModule.getTablePagination().text.replace("\n", " ")
 
     def test_smoke_new_payment_plan(
-        self, create_test_program: Program, pagePaymentModule: PaymentModule, pageNewPaymentPlan: NewPaymentPlan
+        self,
+        create_test_program: Program,
+        pagePaymentModule: PaymentModule,
+        pageProgramCycle: ProgramCyclePage,
+        pageProgramCycleDetails: ProgramCycleDetailsPage,
+        pageNewPaymentPlan: NewPaymentPlan,
     ) -> None:
         pagePaymentModule.selectGlobalProgramFilter("Test Program").click()
         pagePaymentModule.getNavPaymentModule().click()
-        pagePaymentModule.getNavPaymentPlans().click()
-        pagePaymentModule.getButtonNewPaymentPlan().click()
-
+        pageProgramCycle.getNavProgrammeCycles().click()
+        pageProgramCycle.getProgramCycleRow()[0].find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-id"]').click()
+        pageProgramCycleDetails.getButtonCreatePaymentPlan().click()
         assert "New Payment Plan" in pageNewPaymentPlan.getPageHeaderTitle().text
         assert "SAVE" in pageNewPaymentPlan.getButtonSavePaymentPlan().text
         assert "Target Population" in pageNewPaymentPlan.getInputTargetPopulation().text
-        assert "Start Date*" in pageNewPaymentPlan.wait_for(pageNewPaymentPlan.inputStartDate).text
-        assert "End Date*" in pageNewPaymentPlan.wait_for(pageNewPaymentPlan.inputEndDate).text
         assert "Currency" in pageNewPaymentPlan.getInputCurrency().text
         assert "Dispersion Start Date*" in pageNewPaymentPlan.wait_for(pageNewPaymentPlan.inputDispersionStartDate).text
         assert "Dispersion End Date*" in pageNewPaymentPlan.wait_for(pageNewPaymentPlan.inputDispersionEndDate).text
@@ -208,7 +215,6 @@ class TestSmokePaymentModule:
         pagePaymentModule.selectGlobalProgramFilter("Test Program").click()
         pagePaymentModule.getNavPaymentModule().click()
         pagePaymentModule.getNavPaymentPlans().click()
-        assert "NEW PAYMENT PLAN" in pagePaymentModule.getButtonNewPaymentPlan().text
         pagePaymentModule.getRow(0).click()
         assert "ACCEPTED" in pagePaymentModuleDetails.getStatusContainer().text
         assert "EXPORT XLSX" in pagePaymentModuleDetails.getButtonExportXlsx().text
