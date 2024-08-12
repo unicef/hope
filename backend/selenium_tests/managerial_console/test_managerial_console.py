@@ -168,7 +168,7 @@ class TestSmokeManagerialConsole:
         pageManagerialConsole.getNavManagerialConsole().click()
         # Approve Payment Plan
         pageManagerialConsole.getProgramSelectApproval().click()
-        pageManagerialConsole.select_listbox_element("Test Programm").click()
+        pageManagerialConsole.select_listbox_element("Test Programm")
 
         pageManagerialConsole.getColumnField()
         pageManagerialConsole.getSelectApproval().click()
@@ -177,7 +177,7 @@ class TestSmokeManagerialConsole:
         pageManagerialConsole.getButtonSave().click()
         # Authorize Payment Plan
         pageManagerialConsole.getProgramSelectAuthorization().click()
-        pageManagerialConsole.select_listbox_element("Test Programm").click()
+        pageManagerialConsole.select_listbox_element("Test Programm")
         pageManagerialConsole.getColumnFieldAuthorization()
         pageManagerialConsole.getSelectAllAuthorization().click()
         pageManagerialConsole.getAuthorizeButton().click()
