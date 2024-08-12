@@ -244,6 +244,12 @@ class TargetingCriteriaFilterBase:
             "negative": False,
             "supported_types": ["INTEGER", "DECIMAL", "DATE"],
         },
+        "IS_NULL": {
+            "arguments": 1,
+            "lookup": "__isnull",
+            "negative": False,
+            "supported_types": ["PDU"],
+        },
     }
 
     COMPARISON_CHOICES = Choices(
@@ -255,6 +261,7 @@ class TargetingCriteriaFilterBase:
         ("NOT_IN_RANGE", _("Not in between <>")),
         ("GREATER_THAN", _("Greater than")),
         ("LESS_THAN", _("Less than")),
+        ("IS_NULL", _("Is null")),
     )
 
     def get_criteria_string(self) -> str:

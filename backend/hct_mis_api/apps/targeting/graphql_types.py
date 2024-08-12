@@ -182,7 +182,7 @@ class TargetingCriteriaRuleFilterObjectType(graphene.InputObjectType):
     flex_field_classification = graphene.Field(FlexFieldClassification, required=True)
     field_name = graphene.String(required=True)
     arguments = graphene.List(Arg, required=True)
-    only_null = graphene.Boolean(required=False)
+    round_number = graphene.Int()
 
 
 class TargetingIndividualRuleFilterBlockObjectType(graphene.InputObjectType):

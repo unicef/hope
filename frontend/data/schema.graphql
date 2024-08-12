@@ -4701,6 +4701,7 @@ enum TargetingCriteriaRuleFilterComparisonMethod {
   NOT_IN_RANGE
   GREATER_THAN
   LESS_THAN
+  IS_NULL
 }
 
 enum TargetingCriteriaRuleFilterFlexFieldClassification {
@@ -4718,6 +4719,7 @@ type TargetingCriteriaRuleFilterNode {
   flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification!
   fieldName: String!
   arguments: [Arg]
+  roundNumber: Int
   fieldAttribute: FieldAttributeNode
 }
 
@@ -4726,7 +4728,7 @@ input TargetingCriteriaRuleFilterObjectType {
   flexFieldClassification: FlexFieldClassification!
   fieldName: String!
   arguments: [Arg]!
-  onlyNull: Boolean
+  roundNumber: Int
 }
 
 type TargetingCriteriaRuleNode {
@@ -4752,6 +4754,7 @@ enum TargetingIndividualBlockRuleFilterComparisonMethod {
   NOT_IN_RANGE
   GREATER_THAN
   LESS_THAN
+  IS_NULL
 }
 
 enum TargetingIndividualBlockRuleFilterFlexFieldClassification {
@@ -4769,6 +4772,7 @@ type TargetingIndividualBlockRuleFilterNode {
   flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification!
   fieldName: String!
   arguments: [Arg]
+  roundNumber: Int
   fieldAttribute: FieldAttributeNode
 }
 
