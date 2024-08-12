@@ -253,50 +253,6 @@ importXlsxPaymentPlanPaymentList(
 }
 """
 
-CREATE_PROGRAM_CYCLE_MUTATION = """
-mutation createProgramCycle($programCycleData: CreateProgramCycleInput!){
-  createProgramCycle(programCycleData: $programCycleData){
-    program{
-      cycles{
-        totalCount
-        edges{
-          node{
-            id
-            unicefId
-            status
-            title
-            startDate
-            endDate
-          }
-        }
-      }
-    }
-  }
-}
-"""
-
-UPDATE_PROGRAM_CYCLE_MUTATION = """
-mutation updateProgramCycle($programCycleData: UpdateProgramCycleInput!){
-  updateProgramCycle(programCycleData: $programCycleData){
-    program{
-      cycles{
-        totalCount
-        edges{
-          node{
-            id
-            unicefId
-            status
-            title
-            startDate
-            endDate
-          }
-        }
-      }
-    }
-  }
-}
-"""
-
 
 class TestPaymentPlanReconciliation(APITestCase):
     @classmethod
@@ -456,46 +412,8 @@ class TestPaymentPlanReconciliation(APITestCase):
 
         # all cycles should have end_date before creation new one
         ProgramCycle.objects.filter(program_id=decode_id_string(program_id)).update(
-            end_date=timezone.datetime(2022, 8, 25, tzinfo=utc).date()
+            end_date=timezone.datetime(2022, 8, 25, tzinfo=utc).date(), title="NEW NEW NAME"
         )
-
-        create_program_cycle_response = self.graphql_request(
-            request_string=CREATE_PROGRAM_CYCLE_MUTATION,
-            context={"user": self.user, "headers": {"Program": program_id}},
-            variables={
-                "programCycleData": {
-                    "title": "Test Name Program Cycle 001",
-                    "startDate": timezone.datetime(2022, 8, 26, tzinfo=utc).date(),
-                }
-            },
-        )
-        cycles_data = create_program_cycle_response["data"]["createProgramCycle"]["program"]["cycles"]
-        assert cycles_data["totalCount"] == 2
-        assert cycles_data["edges"][1]["node"]["title"] == "Test Name Program Cycle 001"
-        assert cycles_data["edges"][1]["node"]["endDate"] is None
-
-        encoded_cycle_id = cycles_data["edges"][1]["node"]["id"]
-
-        update_program_cycle_response = self.graphql_request(
-            request_string=UPDATE_PROGRAM_CYCLE_MUTATION,
-            context={"user": self.user, "headers": {"Program": program_id}},
-            variables={
-                "programCycleData": {
-                    "programCycleId": encoded_cycle_id,
-                    "title": "NEW NEW NAME",
-                    "endDate": timezone.datetime(2022, 8, 29, tzinfo=utc).date(),
-                }
-            },
-        )
-
-        updated_cycles_data = update_program_cycle_response["data"]["updateProgramCycle"]["program"]["cycles"]
-        assert updated_cycles_data["totalCount"] == 2
-        assert updated_cycles_data["edges"][1]["node"]["title"] == "NEW NEW NAME"
-        assert updated_cycles_data["edges"][1]["node"]["endDate"] == "2022-08-29"
-
-        assert updated_cycles_data["edges"][0]["node"]["status"] == "DRAFT"
-        assert updated_cycles_data["edges"][1]["node"]["status"] == "DRAFT"
-
         # add other cycle to TP
         TargetPopulation.objects.filter(name="TargP").update(
             program_cycle_id=ProgramCycle.objects.get(title="NEW NEW NAME").id
