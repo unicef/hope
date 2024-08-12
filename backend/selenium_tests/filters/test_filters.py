@@ -32,6 +32,11 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetPopulationFactory,
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from selenium_tests.page_object.grievance.details_grievance_page import (
+    GrievanceDetailsPage,
+)
+from selenium_tests.page_object.grievance.grievance_tickets import GrievanceTickets
+from selenium_tests.page_object.grievance.new_ticket import NewTicket
 from selenium_tests.page_object.programme_details.programme_details import (
     ProgrammeDetails,
 )
@@ -283,7 +288,7 @@ def create_programs() -> None:
 @pytest.mark.usefixtures("login")
 class TestSmokeFilters:
     def test_filters_selected_program(self, create_programs: None, filters: Filters) -> None:
-        filters.selectGlobalProgramFilter("Test Programm").click()
+        filters.selectGlobalProgramFilter("Test Programm")
 
         programs = {
             "Registration Data Import": [
@@ -524,7 +529,7 @@ class TestSmokeFilters:
         filters: Filters,
         pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
-        filters.selectGlobalProgramFilter("Test Programm").click()
+        filters.selectGlobalProgramFilter("Test Programm")
         assert "Test Programm" in pageProgrammeDetails.getHeaderTitle().text
         filters.wait_for(f'[data-cy="nav-{module[0]}').click()
         assert filters.waitForNumberOfRows(2)
@@ -536,3 +541,15 @@ class TestSmokeFilters:
         filters.getFilterByLocator(module[1]).send_keys(module[2])
         filters.getButtonFiltersApply().click()
         assert filters.waitForNumberOfRows(1)
+
+    @pytest.mark.skip("ToDo")
+    def test_grievance_tickets_filters_of_households_and_individuals(
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        filters: Filters,
+    ) -> None:
+        pageGrievanceTickets.getNavGrievance().click()
+        assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
+        pageGrievanceTickets.getButtonNewTicket().click()
