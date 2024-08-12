@@ -94,7 +94,7 @@ export const targetPopulationDetailed = gql`
 
             id
             fieldName
-            isFlexField
+            flexFieldClassification
             arguments
             comparisonMethod
             fieldAttribute {
@@ -114,7 +114,7 @@ export const targetPopulationDetailed = gql`
           __typename
           id
           fieldName
-          isFlexField
+          flexFieldClassification
           arguments
           comparisonMethod
           fieldAttribute {
