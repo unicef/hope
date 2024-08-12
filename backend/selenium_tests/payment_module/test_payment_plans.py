@@ -261,9 +261,9 @@ class TestSmokePaymentModule:
         pageProgramCycleDetails: ProgramCycleDetailsPage,
     ) -> None:
         targeting = TargetPopulation.objects.first()
-        pagePaymentModule.selectGlobalProgramFilter("Test Program")
-        pagePaymentModule.getNavPaymentModule().click()
-        pagePaymentModule.getNavProgrammeCycles().click()
+        pageProgramCycle.selectGlobalProgramFilter("Test Program")
+        pageProgramCycle.getNavPaymentModule().click()
+        pageProgramCycle.getNavProgrammeCycles().click()
         assert (
             "Draft"
             in pageProgramCycle.getProgramCycleRow()[0]
