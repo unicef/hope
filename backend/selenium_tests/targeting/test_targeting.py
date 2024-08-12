@@ -365,7 +365,7 @@ class TestTargeting:
         assert "New Target Population" in pageTargetingCreate.getPageHeaderTitle().text
         assert "SAVE" in pageTargetingCreate.getButtonTargetPopulationCreate().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
-        pageTargetingCreate.select_listbox_element("First Cycle In Programme").click()
+        pageTargetingCreate.select_listbox_element("First Cycle In Programme")
         pageTargetingCreate.getInputIndividualids().send_keys("IND-88-0000.0002")
         pageTargetingCreate.getInputName().send_keys("Target Population for IND-88-0000.0002")
         pageTargetingCreate.clickButtonTargetPopulationCreate()
@@ -435,7 +435,7 @@ class TestTargeting:
         pageTargeting.chooseTargetPopulations(0).click()
         pageTargetingDetails.getButtonTargetPopulationDuplicate().click()
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
-        pageTargetingCreate.select_listbox_element("First Cycle In Programme").click()
+        pageTargetingCreate.select_listbox_element("First Cycle In Programme")
         pageTargetingDetails.getInputName().send_keys("a1!")
         pageTargetingDetails.get_elements(pageTargetingDetails.buttonTargetPopulationDuplicate)[1].click()
         pageTargetingDetails.disappearInputName()
@@ -628,7 +628,7 @@ class TestTargeting:
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getCreateUseIDs().click()
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
-        pageTargetingCreate.select_listbox_element("First Cycle In Programme").click()
+        pageTargetingCreate.select_listbox_element("First Cycle In Programme")
         pageTargetingCreate.getInputHouseholdids().send_keys(household_with_disability.unicef_id)
         pageTargetingCreate.getInputName().send_keys(f"Test {household_with_disability.unicef_id}")
         pageTargetingCreate.getInputFlagexcludeifonsanctionlist().click()
@@ -775,7 +775,7 @@ class TestTargeting:
         pageTargeting.getButtonCreateNewByFilters().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
-        pageTargetingCreate.select_listbox_element("First Cycle In Programme").click()
+        pageTargetingCreate.select_listbox_element("First Cycle In Programme")
         pageTargetingCreate.getAddCriteriaButton().click()
         pageTargetingCreate.getAddPeopleRuleButton().click()
         pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
