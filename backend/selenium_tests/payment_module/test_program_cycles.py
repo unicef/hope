@@ -56,7 +56,7 @@ def create_program_cycle(create_test_program: Program) -> ProgramCycle:
 @pytest.mark.usefixtures("login")
 class TestSmokeProgramCycle:
     def test_smoke_program_cycles(self, create_program_cycle: ProgramCycle, pageProgramCycle: ProgramCyclePage) -> None:
-        pageProgramCycle.selectGlobalProgramFilter("Test Program").click()
+        pageProgramCycle.selectGlobalProgramFilter("Test Program")
         pageProgramCycle.getNavPaymentModule().click()
         pageProgramCycle.getNavProgrammeCycles().click()
         assert "Payment Module" in pageProgramCycle.getPageHeaderContainer().text
