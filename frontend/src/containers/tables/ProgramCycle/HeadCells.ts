@@ -6,15 +6,15 @@ const headCells: HeadCell<ProgramCycle>[] = [
     id: 'unicef_id',
     numeric: false,
     disablePadding: false,
-    label: 'Programme Cycles ID',
+    label: 'Programme Cycle ID',
     dataCy: 'head-cell-id',
   },
   {
     id: 'title',
     numeric: false,
     disablePadding: false,
-    label: 'Programme Cycles Title',
-    dataCy: 'head-cell-programme-cycles-title',
+    label: 'Programme Cycle Title',
+    dataCy: 'head-cell-programme-cycle-title',
   },
   {
     id: 'status',

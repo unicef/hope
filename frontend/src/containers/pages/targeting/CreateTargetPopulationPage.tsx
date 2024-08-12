@@ -84,15 +84,15 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
 
   const validationSchema = Yup.object().shape({
     name: Yup.string()
-      .required(t('Targeting name is required'))
-      .min(3, t('Targeting name should have at least 3 characters.'))
-      .max(255, t('Targeting name should have at most 255 characters.')),
+      .required(t('Targeting Name is required'))
+      .min(3, t('Targeting Name should have at least 3 characters.'))
+      .max(255, t('Targeting Name should have at most 255 characters.')),
     excludedIds: idValidation,
     householdIds: idValidation,
     individualIds: idValidation,
     exclusionReason: Yup.string().max(500, t('Too long')),
     programCycleId: Yup.object().shape({
-      value: Yup.string().required('Program cycle is required'),
+      value: Yup.string().required('Program Cycle is required'),
     }),
   });
 
