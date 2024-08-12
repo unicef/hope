@@ -66,6 +66,7 @@ def create_test_program() -> Program:
         data_collecting_type=dct,
         status=Program.ACTIVE,
         cycle__title="First cycle for Test Program",
+        cycle__status=ProgramCycle.DRAFT,
         cycle__start_date=datetime.now() - relativedelta(days=5),
         cycle__end_date=datetime.now() + relativedelta(days=5),
     )
@@ -218,13 +219,7 @@ class TestSmokePaymentModule:
         pagePaymentModule.getRow(0).click()
         assert "ACCEPTED" in pagePaymentModuleDetails.getStatusContainer().text
         assert "EXPORT XLSX" in pagePaymentModuleDetails.getButtonExportXlsx().text
-        assert "Test Program" in pagePaymentModuleDetails.getLabelProgramme().text
         assert "USD" in pagePaymentModuleDetails.getLabelCurrency().text
-        assert str((datetime.now()).strftime("%-d %b %Y")) in pagePaymentModuleDetails.getLabelStartDate().text
-        assert (
-            str((datetime.now() + relativedelta(days=30)).strftime("%-d %b %Y"))
-            in pagePaymentModuleDetails.getLabelEndDate().text
-        )
         assert (
             str((datetime.now()).strftime("%-d %b %Y")) in pagePaymentModuleDetails.getLabelDispersionStartDate().text
         )
@@ -262,21 +257,23 @@ class TestSmokePaymentModule:
         pagePaymentModule: PaymentModule,
         pagePaymentModuleDetails: PaymentModuleDetails,
         pageNewPaymentPlan: NewPaymentPlan,
+        pageProgramCycle: ProgramCyclePage,
+        pageProgramCycleDetails: ProgramCycleDetailsPage,
     ) -> None:
         targeting = TargetPopulation.objects.first()
-        program = Program.objects.get(name="Test Program")
         pagePaymentModule.selectGlobalProgramFilter("Test Program").click()
         pagePaymentModule.getNavPaymentModule().click()
-        pagePaymentModule.getNavPaymentPlans().click()
-        pagePaymentModule.getButtonNewPaymentPlan().click()
+        pagePaymentModule.getNavProgrammeCycles().click()
+        assert (
+            "Draft"
+            in pageProgramCycle.getProgramCycleRow()[0]
+            .find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]')
+            .text
+        )
+        pageProgramCycle.getProgramCycleRow()[0].find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-id"]').click()
+        pageProgramCycleDetails.getButtonCreatePaymentPlan().click()
         pageNewPaymentPlan.getInputTargetPopulation().click()
         pageNewPaymentPlan.select_listbox_element(targeting.name).click()
-        pageNewPaymentPlan.getInputStartDate().click()
-        pageNewPaymentPlan.getInputStartDate().send_keys(
-            FormatTime(time=program.start_date + timedelta(days=12)).numerically_formatted_date
-        )
-        pageNewPaymentPlan.getInputEndDate().click()
-        pageNewPaymentPlan.getInputEndDate().send_keys(FormatTime(time=program.end_date).numerically_formatted_date)
         pageNewPaymentPlan.getInputCurrency().click()
         pageNewPaymentPlan.select_listbox_element("Czech koruna").click()
         pageNewPaymentPlan.getInputDispersionStartDate().click()
@@ -286,13 +283,7 @@ class TestSmokePaymentModule:
         pageNewPaymentPlan.getInputCurrency().click()
         pageNewPaymentPlan.getButtonSavePaymentPlan().click()
         assert "OPEN" in pagePaymentModuleDetails.getStatusContainer().text
-        assert "Test Program" in pagePaymentModuleDetails.getLabelProgramme().text
         assert "CZK" in pagePaymentModuleDetails.getLabelCurrency().text
-        assert (
-            FormatTime(time=program.start_date + timedelta(days=12)).date_in_text_format
-            in pagePaymentModuleDetails.getLabelStartDate().text
-        )
-        assert FormatTime(time=program.end_date).date_in_text_format in pagePaymentModuleDetails.getLabelEndDate().text
         assert (
             FormatTime(22, 1, 2024).date_in_text_format in pagePaymentModuleDetails.getLabelDispersionStartDate().text
         )
@@ -361,3 +352,11 @@ class TestSmokePaymentModule:
         pagePaymentModuleDetails.checkStatus("FINISHED")
         assert "14 (100%)" in pagePaymentModuleDetails.getLabelReconciled().text
         assert "18.2 CZK (0.7 USD)" in pagePaymentModuleDetails.getLabelTotalEntitledQuantity().text
+        pagePaymentModule.getNavPaymentModule().click()
+        pagePaymentModule.getNavProgrammeCycles().click()
+        assert (
+            "Active"
+            in pageProgramCycle.getProgramCycleRow()[0]
+            .find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]')
+            .text
+        )
