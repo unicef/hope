@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, Fade } from '@mui/material';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -178,16 +178,7 @@ export const CreateProgramPage = (): ReactElement => {
     frequencyOfPayments: 'REGULAR',
     partners: [],
     partnerAccess: ProgramPartnerAccess.AllPartnersAccess,
-    pduFields: [
-      {
-        label: '',
-        pduData: {
-          subtype: '',
-          numberOfRounds: null,
-          roundsNames: [],
-        },
-      },
-    ],
+    pduFields: [],
   };
 
   const stepFields = [
@@ -235,6 +226,7 @@ export const CreateProgramPage = (): ReactElement => {
         programmeCode: true,
       }}
       validationSchema={programValidationSchema(t)}
+      validateOnChange={true}
     >
       {({
         submitForm,
@@ -317,34 +309,47 @@ export const CreateProgramPage = (): ReactElement => {
               }
             >
               <Box p={3}>
-                {step === 0 && (
-                  <DetailsStep
-                    values={values}
-                    handleNext={handleNextStep}
-                    errors={errors}
-                  />
-                )}
-                {step === 1 && (
-                  <ProgramFieldSeriesStep
-                    values={values}
-                    handleNext={handleNextStep}
-                    step={step}
-                    setStep={setStep}
-                    pdusubtypeChoicesData={pdusubtypeChoicesData}
-                    errors={errors}
-                  />
-                )}
-                {step === 2 && (
-                  <PartnersStep
-                    values={values}
-                    allAreasTreeData={allAreasTree}
-                    partnerChoices={mappedPartnerChoices}
-                    step={step}
-                    setStep={setStep}
-                    submitForm={submitForm}
-                    setFieldValue={setFieldValue}
-                  />
-                )}
+                <Fade in={step === 0} timeout={600}>
+                  <div>
+                    {step === 0 && (
+                      <DetailsStep
+                        values={values}
+                        handleNext={handleNextStep}
+                        errors={errors}
+                      />
+                    )}
+                  </div>
+                </Fade>
+                <Fade in={step === 1} timeout={600}>
+                  <div>
+                    {step === 1 && (
+                      <ProgramFieldSeriesStep
+                        values={values}
+                        handleNext={handleNextStep}
+                        step={step}
+                        setStep={setStep}
+                        pdusubtypeChoicesData={pdusubtypeChoicesData}
+                        errors={errors}
+                        setFieldValue={setFieldValue}
+                      />
+                    )}
+                  </div>
+                </Fade>
+                <Fade in={step === 2} timeout={600}>
+                  <div>
+                    {step === 2 && (
+                      <PartnersStep
+                        values={values}
+                        allAreasTreeData={allAreasTree}
+                        partnerChoices={mappedPartnerChoices}
+                        step={step}
+                        setStep={setStep}
+                        submitForm={submitForm}
+                        setFieldValue={setFieldValue}
+                      />
+                    )}
+                  </div>
+                </Fade>
               </Box>
             </BaseSection>
           </>
