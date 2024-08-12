@@ -1010,7 +1010,7 @@ type DeliveryMechanismPerPaymentPlanNode implements Node {
   sentBy: UserNode
   status: String!
   deliveryMechanismChoice: DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice
-  deliveryMechanism: DeliveryMechanismNode!
+  deliveryMechanism: DeliveryMechanismNode
   deliveryMechanismOrder: Int!
   sentToPaymentGateway: Boolean!
   chosenConfiguration: String
