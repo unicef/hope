@@ -15,7 +15,6 @@ from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
     decode_id_string_required,
-    get_program_id_from_headers,
 )
 from hct_mis_api.apps.core.validators import (
     CommonValidator,
@@ -28,9 +27,7 @@ from hct_mis_api.apps.periodic_data_update.service.flexible_attribute_service im
 from hct_mis_api.apps.program.celery_tasks import copy_program_task
 from hct_mis_api.apps.program.inputs import (
     CopyProgramInput,
-    CreateProgramCycleInput,
     CreateProgramInput,
-    UpdateProgramCycleInput,
     UpdateProgramInput,
 )
 from hct_mis_api.apps.program.models import Program, ProgramCycle
@@ -41,8 +38,6 @@ from hct_mis_api.apps.program.utils import (
     remove_program_partner_access,
 )
 from hct_mis_api.apps.program.validators import (
-    ProgramCycleDeletionValidator,
-    ProgramCycleValidator,
     ProgramDeletionValidator,
     ProgrammeCodeValidator,
     ProgramValidator,
@@ -287,114 +282,8 @@ class CopyProgram(
         return CopyProgram(program=program)
 
 
-class CreateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationErrorMutationMixin):
-    program = graphene.Field(ProgramNode)
-
-    class Arguments:
-        program_cycle_data = CreateProgramCycleInput(required=True)
-
-    @classmethod
-    @is_authenticated
-    def processed_mutate(cls, root: Any, info: Any, program_cycle_data: Dict) -> "CreateProgramCycle":
-        program_id = get_program_id_from_headers(info.context.headers)
-        program = Program.objects.get(id=program_id)
-
-        cls.has_permission(info, Permissions.PM_PROGRAMME_CYCLE_CREATE, program.business_area)
-
-        cls.validate(
-            start_date=program_cycle_data["start_date"],
-            end_date=program_cycle_data.get("end_date"),
-            title=program_cycle_data["title"],
-            program=program,
-            is_create_action=True,
-        )
-
-        ProgramCycle.objects.create(
-            title=program_cycle_data["title"],
-            program=program,
-            start_date=program_cycle_data["start_date"],
-            end_date=program_cycle_data.get("end_date"),
-            status=ProgramCycle.DRAFT,
-            created_by=info.context.user,
-        )
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
-        return CreateProgramCycle(program=program)
-
-
-class UpdateProgramCycle(ProgramCycleValidator, PermissionMutation, ValidationErrorMutationMixin):
-    program = graphene.Field(ProgramNode)
-
-    class Arguments:
-        program_cycle_data = UpdateProgramCycleInput()
-        version = BigInt(required=False)
-
-    @classmethod
-    @transaction.atomic
-    @is_authenticated
-    def processed_mutate(cls, root: Any, info: Any, program_cycle_data: Dict, **kwargs: Any) -> "UpdateProgramCycle":
-        program_cycle_id = decode_id_string(program_cycle_data.pop("program_cycle_id", None))
-
-        program_cycle = ProgramCycle.objects.select_for_update().get(id=program_cycle_id)
-        check_concurrency_version_in_mutation(kwargs.get("version"), program_cycle)
-        program = program_cycle.program
-        business_area = program.business_area
-
-        cls.has_permission(info, Permissions.PM_PROGRAMME_CYCLE_UPDATE, business_area)
-
-        validation_kwargs_dict = {"program": program, "program_cycle": program_cycle}
-        input_fields = ["title", "start_date", "end_date"]
-        for input_field in input_fields:
-            if input_field in program_cycle_data:
-                validation_kwargs_dict.update({input_field: program_cycle_data.get(input_field)})
-
-        cls.validate(**validation_kwargs_dict)
-
-        if start_date := program_cycle_data.get("start_date"):
-            program_cycle.start_date = start_date
-
-        if end_date := program_cycle_data.get("end_date"):
-            program_cycle.end_date = end_date
-
-        if title := program_cycle_data.get("title"):
-            program_cycle.title = title
-
-        program_cycle.save()
-        # TODO: do we need logs for Program Cycle?
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, program, program)
-        return UpdateProgramCycle(program=program)
-
-
-class DeleteProgramCycle(ProgramCycleDeletionValidator, PermissionMutation):
-    program = graphene.Field(ProgramNode)
-
-    class Arguments:
-        program_cycle_id = graphene.ID(required=True)
-
-    @classmethod
-    @is_authenticated
-    def mutate(cls, root: Any, info: Any, **kwargs: Any) -> "DeleteProgramCycle":
-        decoded_id = decode_id_string(kwargs.get("program_cycle_id"))
-        program_cycle = ProgramCycle.objects.get(id=decoded_id)
-        old_program_cycle = ProgramCycle.objects.get(id=decoded_id)
-        program = old_program_cycle.program
-
-        cls.has_permission(info, Permissions.PM_PROGRAMME_CYCLE_DELETE, program.business_area)
-
-        cls.validate(program_cycle=program_cycle)
-
-        program_cycle.delete()
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, program, program)
-        return cls(program=program)
-
-
 class Mutations(graphene.ObjectType):
     create_program = CreateProgram.Field()
     update_program = UpdateProgram.Field()
     delete_program = DeleteProgram.Field()
     copy_program = CopyProgram.Field()
-
-    # program cycle
-    # TODO: remove graphql mutation as we will have REST API
-    create_program_cycle = CreateProgramCycle.Field()
-    update_program_cycle = UpdateProgramCycle.Field()
-    delete_program_cycle = DeleteProgramCycle.Field()
