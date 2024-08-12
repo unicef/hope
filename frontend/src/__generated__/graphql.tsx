@@ -8214,7 +8214,7 @@ export type TargetingCriteriaRuleFilterObjectType = {
   comparisonMethod: Scalars['String']['input'];
   fieldName: Scalars['String']['input'];
   flexFieldClassification: FlexFieldClassification;
-  isFlexField: Scalars['Boolean']['input'];
+  onlyNull?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type TargetingCriteriaRuleNode = {

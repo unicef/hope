@@ -4723,10 +4723,10 @@ type TargetingCriteriaRuleFilterNode {
 
 input TargetingCriteriaRuleFilterObjectType {
   comparisonMethod: String!
-  isFlexField: Boolean!
   flexFieldClassification: FlexFieldClassification!
   fieldName: String!
   arguments: [Arg]!
+  onlyNull: Boolean
 }
 
 type TargetingCriteriaRuleNode {

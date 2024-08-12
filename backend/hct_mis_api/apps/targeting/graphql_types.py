@@ -179,10 +179,10 @@ class TargetPopulationNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObj
 
 class TargetingCriteriaRuleFilterObjectType(graphene.InputObjectType):
     comparison_method = graphene.String(required=True)
-    is_flex_field = graphene.Boolean(required=True)
     flex_field_classification = graphene.Field(FlexFieldClassification, required=True)
     field_name = graphene.String(required=True)
     arguments = graphene.List(Arg, required=True)
+    only_null = graphene.Boolean(required=False)
 
 
 class TargetingIndividualRuleFilterBlockObjectType(graphene.InputObjectType):
