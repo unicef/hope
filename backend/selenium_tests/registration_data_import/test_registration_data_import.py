@@ -85,7 +85,7 @@ class TestSmokeRegistrationDataImport:
         self, create_programs: None, add_rdi: None, pageRegistrationDataImport: RegistrationDataImport
     ) -> None:
         # Go to Registration Data Import
-        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm").click()
+        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm")
         pageRegistrationDataImport.getNavRegistrationDataImport().click()
         # Check Elements on Page
         assert pageRegistrationDataImport.titleText in pageRegistrationDataImport.getPageHeaderTitle().text
@@ -105,7 +105,7 @@ class TestSmokeRegistrationDataImport:
         self, create_programs: None, pageRegistrationDataImport: RegistrationDataImport
     ) -> None:
         # Go to Registration Data Import
-        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm").click()
+        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm")
         pageRegistrationDataImport.getNavRegistrationDataImport().click()
         assert pageRegistrationDataImport.titleText in pageRegistrationDataImport.getPageHeaderTitle().text
         pageRegistrationDataImport.getButtonImport().click()
@@ -128,7 +128,7 @@ class TestSmokeRegistrationDataImport:
         pageDetailsRegistrationDataImport: RDIDetailsPage,
     ) -> None:
         # Go to Registration Data Import
-        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm").click()
+        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm")
         pageRegistrationDataImport.getNavRegistrationDataImport().click()
         assert pageRegistrationDataImport.expectedRows(2)
         assert "2" in pageRegistrationDataImport.getTableTitle().text
@@ -173,7 +173,7 @@ class TestRegistrationDataImport:
         pageHouseholdsDetails: HouseholdsDetails,
     ) -> None:
         # Go to Registration Data Import
-        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm").click()
+        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm")
         pageRegistrationDataImport.getNavRegistrationDataImport().click()
         assert pageRegistrationDataImport.titleText in pageRegistrationDataImport.getPageHeaderTitle().text
         pageRegistrationDataImport.getButtonImport().click()
@@ -208,7 +208,7 @@ class TestRegistrationDataImport:
         self, login: None, create_programs: None, pageRegistrationDataImport: RegistrationDataImport, kobo_setup: None
     ) -> None:
         # Go to Registration Data Import
-        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm").click()
+        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm")
         pageRegistrationDataImport.getNavRegistrationDataImport().click()
         assert pageRegistrationDataImport.titleText in pageRegistrationDataImport.getPageHeaderTitle().text
         pageRegistrationDataImport.getButtonImport().click()
@@ -220,7 +220,7 @@ class TestRegistrationDataImport:
         pageRegistrationDataImport.getInputName().send_keys("Test 1234 !")
 
         pageRegistrationDataImport.getKoboProjectSelect().click()
-        pageRegistrationDataImport.select_listbox_element("Education new programme").click()
+        pageRegistrationDataImport.select_listbox_element("Education new programme")
 
         assert pageRegistrationDataImport.buttonImportFileIsEnabled(timeout=300)
         assert "0" in pageRegistrationDataImport.getNumberOfHouseholds().text
@@ -240,7 +240,7 @@ class TestRegistrationDataImport:
         areas: None,
     ) -> None:
         # Go to Registration Data Import
-        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm").click()
+        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm")
         pageRegistrationDataImport.getNavRegistrationDataImport().click()
         assert pageRegistrationDataImport.titleText in pageRegistrationDataImport.getPageHeaderTitle().text
         pageRegistrationDataImport.getButtonImport().click()
@@ -252,7 +252,7 @@ class TestRegistrationDataImport:
         pageRegistrationDataImport.getInputName().send_keys("Test 1234 !")
 
         pageRegistrationDataImport.getKoboProjectSelect().click()
-        pageRegistrationDataImport.select_listbox_element("UNICEF NGA Education").click()
+        pageRegistrationDataImport.select_listbox_element("UNICEF NGA Education")
 
         assert pageRegistrationDataImport.buttonImportFileIsEnabled(timeout=300)
         assert "1" in pageRegistrationDataImport.getNumberOfHouseholds().text

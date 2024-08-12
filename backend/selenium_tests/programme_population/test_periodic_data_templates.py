@@ -124,7 +124,7 @@ class TestPeriodicDataTemplates:
                 }
             ],
         )
-        pageIndividuals.selectGlobalProgramFilter(program.name).click()
+        pageIndividuals.selectGlobalProgramFilter(program.name)
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
@@ -170,7 +170,7 @@ class TestPeriodicDataTemplates:
         periodic_data_update_template.refresh_from_db()
         index = periodic_data_update_template.id
 
-        pageIndividuals.selectGlobalProgramFilter(program.name).click()
+        pageIndividuals.selectGlobalProgramFilter(program.name)
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
@@ -218,7 +218,7 @@ class TestPeriodicDataTemplates:
         periodic_data_update_template.refresh_from_db()
         index = periodic_data_update_template.id
 
-        pageIndividuals.selectGlobalProgramFilter(program.name).click()
+        pageIndividuals.selectGlobalProgramFilter(program.name)
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
@@ -246,7 +246,7 @@ class TestPeriodicDataTemplates:
         pagePeriodicDataUpdateTemplatesDetails: PeriodicDatUpdateTemplatesDetails,
         individual: Individual,
     ) -> None:
-        pageIndividuals.selectGlobalProgramFilter(program.name).click()
+        pageIndividuals.selectGlobalProgramFilter(program.name)
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
@@ -254,7 +254,7 @@ class TestPeriodicDataTemplates:
         pagePeriodicDataUpdateTemplates.getNewTemplateButton().click()
         pagePeriodicDataUpdateTemplatesDetails.getFiltersRegistrationDataImport().click()
 
-        pagePeriodicDataUpdateTemplatesDetails.select_listbox_element(individual.registration_data_import.name).click()
+        pagePeriodicDataUpdateTemplatesDetails.select_listbox_element(individual.registration_data_import.name)
         pagePeriodicDataUpdateTemplatesDetails.getSubmitButton().click()
         pagePeriodicDataUpdateTemplatesDetails.getCheckbox(string_attribute.name).click()
         pagePeriodicDataUpdateTemplatesDetails.getSubmitButton().click()
