@@ -116,7 +116,7 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_pdu_fields(program: Program, info: Any, **kwargs: Any) -> QuerySet:
-        return program.pdu_fields.all()
+        return program.pdu_fields.order_by("name")
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
