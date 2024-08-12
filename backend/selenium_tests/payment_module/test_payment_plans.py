@@ -1,6 +1,6 @@
 import os
 import zipfile
-from datetime import datetime, timedelta
+from datetime import datetime
 from time import sleep
 
 import openpyxl
