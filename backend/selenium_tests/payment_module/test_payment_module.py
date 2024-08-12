@@ -145,7 +145,7 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
 @pytest.mark.usefixtures("login")
 class TestSmokePaymentModule:
     def test_smoke_payment_plan(self, create_payment_plan: PaymentPlan, pagePaymentModule: PaymentModule) -> None:
-        pagePaymentModule.selectGlobalProgramFilter("Test Program").click()
+        pagePaymentModule.selectGlobalProgramFilter("Test Program")
         pagePaymentModule.getNavPaymentModule().click()
         assert "Payment Module" in pagePaymentModule.getPageHeaderTitle().text
         assert "NEW PAYMENT PLAN" in pagePaymentModule.getButtonNewPaymentPlan().text
@@ -174,7 +174,7 @@ class TestSmokePaymentModule:
     def test_smoke_new_payment_plan(
         self, create_test_program: Program, pagePaymentModule: PaymentModule, pageNewPaymentPlan: NewPaymentPlan
     ) -> None:
-        pagePaymentModule.selectGlobalProgramFilter("Test Program").click()
+        pagePaymentModule.selectGlobalProgramFilter("Test Program")
         pagePaymentModule.getNavPaymentModule().click()
         pagePaymentModule.getButtonNewPaymentPlan().click()
 
@@ -193,7 +193,7 @@ class TestSmokePaymentModule:
         pagePaymentModule: PaymentModule,
         pagePaymentModuleDetails: PaymentModuleDetails,
     ) -> None:
-        pagePaymentModule.selectGlobalProgramFilter("Test Program").click()
+        pagePaymentModule.selectGlobalProgramFilter("Test Program")
         pagePaymentModule.getNavPaymentModule().click()
         assert "NEW PAYMENT PLAN" in pagePaymentModule.getButtonNewPaymentPlan().text
         pagePaymentModule.getRow(0).click()
@@ -246,11 +246,11 @@ class TestSmokePaymentModule:
     ) -> None:
         targeting = TargetPopulation.objects.first()
         program = Program.objects.get(name="Test Program")
-        pagePaymentModule.selectGlobalProgramFilter("Test Program").click()
+        pagePaymentModule.selectGlobalProgramFilter("Test Program")
         pagePaymentModule.getNavPaymentModule().click()
         pagePaymentModule.getButtonNewPaymentPlan().click()
         pageNewPaymentPlan.getInputTargetPopulation().click()
-        pageNewPaymentPlan.select_listbox_element(targeting.name).click()
+        pageNewPaymentPlan.select_listbox_element(targeting.name)
         pageNewPaymentPlan.getInputStartDate().click()
         pageNewPaymentPlan.getInputStartDate().send_keys(
             FormatTime(time=program.start_date + timedelta(days=12)).numerically_formatted_date
@@ -258,7 +258,7 @@ class TestSmokePaymentModule:
         pageNewPaymentPlan.getInputEndDate().click()
         pageNewPaymentPlan.getInputEndDate().send_keys(FormatTime(time=program.end_date).numerically_formatted_date)
         pageNewPaymentPlan.getInputCurrency().click()
-        pageNewPaymentPlan.select_listbox_element("Czech koruna").click()
+        pageNewPaymentPlan.select_listbox_element("Czech koruna")
         pageNewPaymentPlan.getInputDispersionStartDate().click()
         pageNewPaymentPlan.getInputDispersionStartDate().send_keys(FormatTime(22, 1, 2024).numerically_formatted_date)
         pageNewPaymentPlan.getInputDispersionEndDate().click()
@@ -280,7 +280,7 @@ class TestSmokePaymentModule:
         pagePaymentModuleDetails.getButtonLockPlan().click()
         pagePaymentModuleDetails.getButtonSubmit().click()
         pagePaymentModuleDetails.getInputEntitlementFormula().click()
-        pagePaymentModuleDetails.select_listbox_element("Test Rule").click()
+        pagePaymentModuleDetails.select_listbox_element("Test Rule")
         pagePaymentModuleDetails.getButtonApplySteficon().click()
 
         for _ in range(10):
@@ -293,10 +293,10 @@ class TestSmokePaymentModule:
             pagePaymentModuleDetails.getButtonSetUpFsp().click()
 
         pagePaymentModuleDetails.getSelectDeliveryMechanism().click()
-        pagePaymentModuleDetails.select_listbox_element("Cash").click()
+        pagePaymentModuleDetails.select_listbox_element("Cash")
         pagePaymentModuleDetails.getButtonNextSave().click()
         pagePaymentModuleDetails.getSelectDeliveryMechanismFSP().click()
-        pagePaymentModuleDetails.select_listbox_element("FSP_1").click()
+        pagePaymentModuleDetails.select_listbox_element("FSP_1")
         pagePaymentModuleDetails.getButtonNextSave().click()
         pagePaymentModuleDetails.checkStatus("LOCKED")
         pagePaymentModuleDetails.getButtonLockPlan().click()

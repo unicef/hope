@@ -138,7 +138,7 @@ def add_targeting() -> None:
 @pytest.mark.usefixtures("login")
 class TestSmokeTargeting:
     def test_smoke_targeting_page(self, create_programs: None, add_targeting: None, pageTargeting: Targeting) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         assert "Targeting" in pageTargeting.getTitlePage().text
         assert "CREATE NEW" in pageTargeting.getButtonCreateNew().text
@@ -152,7 +152,7 @@ class TestSmokeTargeting:
     def test_smoke_targeting_create_use_filters(
         self, create_programs: None, add_targeting: None, pageTargeting: Targeting, pageTargetingCreate: TargetingCreate
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getCreateUseFilters().click()
@@ -167,7 +167,7 @@ class TestSmokeTargeting:
     def test_smoke_targeting_create_use_ids(
         self, create_programs: None, add_targeting: None, pageTargeting: Targeting, pageTargetingCreate: TargetingCreate
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getCreateUseIDs().click()
@@ -186,7 +186,7 @@ class TestSmokeTargeting:
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.chooseTargetPopulations(0).click()
         assert "Copy TP" in pageTargetingDetails.getPageHeaderTitle().text
@@ -315,7 +315,7 @@ class TestTargeting:
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getCreateUseIDs().click()
@@ -347,7 +347,7 @@ class TestTargeting:
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getCreateUseIDs().click()
@@ -377,7 +377,7 @@ class TestTargeting:
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.chooseTargetPopulations(0).click()
         pageTargetingDetails.getLabelStatus()
@@ -395,7 +395,7 @@ class TestTargeting:
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         filters.selectFiltersSatus("OPEN")
         pageTargeting.chooseTargetPopulations(0).click()
@@ -417,7 +417,7 @@ class TestTargeting:
         pageTargetingCreate: TargetingCreate,
     ) -> None:
         program = Program.objects.get(name="Test Programm")
-        pageTargeting.selectGlobalProgramFilter(program.name).click()
+        pageTargeting.selectGlobalProgramFilter(program.name)
         pageTargeting.getNavTargeting().click()
         pageTargeting.chooseTargetPopulations(0).click()
         pageTargetingDetails.getButtonTargetPopulationDuplicate().click()
@@ -440,7 +440,7 @@ class TestTargeting:
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.chooseTargetPopulations(0).click()
         pageTargetingDetails.getButtonEdit().click()
@@ -465,7 +465,7 @@ class TestTargeting:
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.disappearLoadingRows()
         old_list = pageTargeting.getTargetPopulationsRows()
@@ -492,7 +492,7 @@ class TestTargeting:
         program = Program.objects.get(name="Test Programm")
         program.status = Program.DRAFT
         program.save()
-        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.mouse_on_element(pageTargeting.getButtonInactiveCreateNew())
         assert "Program has to be active to create a new Target Population" in pageTargeting.geTooltip().text
@@ -538,7 +538,7 @@ class TestTargeting:
         program = Program.objects.get(name="Test Programm")
         program.data_collecting_type.type = test_data["type"]
         program.data_collecting_type.save()
-        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getCreateUseIDs().click()
@@ -606,7 +606,7 @@ class TestTargeting:
         program = Program.objects.get(name="Test Programm")
         program.data_collecting_type.type = test_data["type"]
         program.data_collecting_type.save()
-        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getCreateUseIDs().click()
@@ -633,7 +633,7 @@ class TestTargeting:
         create_programs: None,
         pageTargeting: Targeting,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.getButtonTargetPopulation().click()
         pageTargeting.getTabFieldList()
@@ -647,7 +647,7 @@ class TestTargeting:
         pageTargeting: Targeting,
         filters: Filters,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         filters.getFiltersSearch().send_keys("Copy")
         filters.getButtonFiltersApply().click()
@@ -655,7 +655,7 @@ class TestTargeting:
         assert "OPEN" in pageTargeting.getStatusContainer().text
         filters.getButtonFiltersClear().click()
         filters.getFiltersStatus().click()
-        filters.select_listbox_element("Open").click()
+        filters.select_listbox_element("Open")
         filters.getButtonFiltersApply().click()
         pageTargeting.countTargetPopulations(1)
         assert "OPEN" in pageTargeting.getStatusContainer().text
@@ -678,7 +678,7 @@ class TestTargeting:
         add_targeting: None,
         pageTargeting: Targeting,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.getColumnName().click()
         pageTargeting.disappearLoadingRows()
@@ -720,7 +720,7 @@ class TestTargeting:
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getButtonCreateNewByFilters().click()
@@ -728,7 +728,7 @@ class TestTargeting:
         pageTargetingCreate.getAddCriteriaButton().click()
         pageTargetingCreate.getAddPeopleRuleButton().click()
         pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        pageTargetingCreate.select_listbox_element("Females Age 0 - 5").click()
+        pageTargetingCreate.select_listbox_element("Females Age 0 - 5")
         pageTargetingCreate.getInputFiltersValueFrom(0).send_keys("0")
         pageTargetingCreate.getInputFiltersValueTo(0).send_keys("1")
         pageTargetingCreate.getInputFiltersValueTo(0).send_keys("1")
@@ -748,7 +748,7 @@ class TestTargeting:
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
     ) -> None:
-        pageTargeting.selectGlobalProgramFilter("Test Programm").click()
+        pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getButtonCreateNewByFilters().click()
@@ -756,16 +756,16 @@ class TestTargeting:
         pageTargetingCreate.getAddCriteriaButton().click()
         pageTargetingCreate.getAddPeopleRuleButton().click()
         pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        pageTargetingCreate.select_listbox_element("Females Age 0 - 5").click()
+        pageTargetingCreate.select_listbox_element("Females Age 0 - 5")
         pageTargetingCreate.getInputFiltersValueFrom(0).send_keys("0")
         pageTargetingCreate.getInputFiltersValueTo(0).send_keys("1")
         pageTargetingCreate.getButtonHouseholdRule().click()
         pageTargetingCreate.getTargetingCriteriaAutoComplete(1).click()
-        pageTargetingCreate.select_listbox_element("Village").click()
+        pageTargetingCreate.select_listbox_element("Village")
         pageTargetingCreate.getInputFiltersValue(1).send_keys("Testtown")
         pageTargetingCreate.getButtonIndividualRule().click()
         pageTargetingCreate.getTargetingCriteriaAutoCompleteIndividual().click()
-        pageTargetingCreate.select_listbox_element("Does the Individual have disability?").click()
+        pageTargetingCreate.select_listbox_element("Does the Individual have disability?")
         pageTargetingCreate.getSelectMany().click()
         pageTargetingCreate.select_multiple_option_by_name(HEARING, SEEING)
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
@@ -783,7 +783,7 @@ class TestTargeting:
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
         pageTargetingCreate.getAddHouseholdRuleButton().click()
         pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        pageTargetingCreate.select_listbox_element("Males age 0 - 5 with disability").click()
+        pageTargetingCreate.select_listbox_element("Males age 0 - 5 with disability")
         pageTargetingCreate.getInputFiltersValueFrom(0).send_keys("1")
         pageTargetingCreate.getInputFiltersValueTo(0).send_keys("10")
         pageTargetingCreate.get_elements(pageTargetingCreate.targetingCriteriaAddDialogSaveButton)[1].click()

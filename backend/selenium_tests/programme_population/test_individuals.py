@@ -27,7 +27,7 @@ class TestSmokeIndividuals:
     def test_smoke_page_individuals(
         self, create_programs: None, add_households: None, pageIndividuals: Individuals
     ) -> None:
-        pageIndividuals.selectGlobalProgramFilter("Test Programm").click()
+        pageIndividuals.selectGlobalProgramFilter("Test Programm")
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         assert "Individuals" in pageIndividuals.getTableTitle().text
@@ -47,7 +47,7 @@ class TestSmokeIndividuals:
         pageIndividuals: Individuals,
         pageIndividualsDetails: IndividualsDetails,
     ) -> None:
-        pageIndividuals.selectGlobalProgramFilter("Test Programm").click()
+        pageIndividuals.selectGlobalProgramFilter("Test Programm")
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getIndividualTableRow()[0].click()
@@ -82,3 +82,7 @@ class TestSmokeIndividuals:
         assert "0048503123555" in pageIndividualsDetails.getLabelPhoneNumber().text
         assert "-" in pageIndividualsDetails.getLabelAlternativePhoneNumber().text
         assert "-" in pageIndividualsDetails.getLabelDateOfLastScreeningAgainstSanctionsList().text
+
+    @pytest.mark.skip(reason="ToDo")
+    def test_check_data_after_grievance_ticket_processed(self) -> None:
+        pass
