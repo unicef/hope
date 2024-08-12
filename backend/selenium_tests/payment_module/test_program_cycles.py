@@ -73,7 +73,6 @@ class TestSmokeProgramCycle:
         assert "Start Date" in pageProgramCycle.getHeadCellStartDate().text
         assert "End Date" in pageProgramCycle.getHeadCellEndDate().text
         assert "Rows per page: 5 1–3 of 3" in pageProgramCycle.getTablePagination().text.replace("\n", " ")
-
         first_cycle = pageProgramCycle.getProgramCycleRow()[0]
         second_cycle = pageProgramCycle.getProgramCycleRow()[1]
         third_cycle = pageProgramCycle.getProgramCycleRow()[2]
