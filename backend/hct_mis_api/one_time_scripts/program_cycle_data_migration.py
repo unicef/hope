@@ -161,7 +161,9 @@ def program_cycle_data_migration() -> None:
                     continue
 
                 payment_plan_qs = (
-                    PaymentPlan.objects.filter(program_id=program.id).order_by("start_date", "created_at").only("id")
+                    PaymentPlan.objects.filter(program_id=program.id)
+                    .order_by("start_date", "created_at")
+                    .only("id", "program_id", "target_population_id")
                 )
                 PaymentPlan.objects.filter(program_id=program.id).update(program_cycle=None)
                 processing_with_active_program(list(payment_plan_qs), default_cycle)
