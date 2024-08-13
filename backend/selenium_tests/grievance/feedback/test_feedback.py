@@ -11,6 +11,9 @@ from page_object.programme_details.programme_details import ProgrammeDetails
 from pytest_django import DjangoDbBlocker
 from selenium.webdriver import Keys
 
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from hct_mis_api.apps.household.models import Household, HOST
+from selenium_tests.helpers.fixtures import get_program_with_dct_type_and_name
 from selenium_tests.page_object.grievance.details_grievance_page import (
     GrievanceDetailsPage,
 )
@@ -40,6 +43,45 @@ def create_programs(django_db_setup: Generator[None, None, None], django_db_bloc
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
     yield
+
+
+@pytest.fixture
+def create_households_and_individuals() -> Household:
+    yield create_custom_household(observed_disability=[])
+
+
+def create_custom_household(observed_disability: list[str], residence_status: str = HOST) -> Household:
+    program = get_program_with_dct_type_and_name("Test Program", "1234")
+    household, _ = create_household_and_individuals(
+        household_data={
+            "unicef_id": "HH-20-0000.0001",
+            "rdi_merge_status": "MERGED",
+            "business_area": program.business_area,
+            "program": program,
+            "residence_status": residence_status,
+        },
+        individuals_data=[
+            {
+                "unicef_id": "IND-00-0000.0011",
+                "rdi_merge_status": "MERGED",
+                "business_area": program.business_area,
+                "observed_disability": observed_disability,
+            },
+            {
+                "unicef_id": "IND-00-0000.0022",
+                "rdi_merge_status": "MERGED",
+                "business_area": program.business_area,
+                "observed_disability": observed_disability,
+            },
+            {
+                "unicef_id": "IND-00-0000.0033",
+                "rdi_merge_status": "MERGED",
+                "business_area": program.business_area,
+                "observed_disability": observed_disability,
+            },
+        ],
+    )
+    return household
 
 
 @pytest.mark.usefixtures("login")
@@ -392,3 +434,67 @@ class TestFeedback:
         pageFeedback.getNavFeedback().click()
         pageFeedbackDetails.screenshot("0")
         pageFeedback.waitForRows()[0].find_elements("tag name", "a")[0].click()
+
+    def test_feedback_errors(
+        self,
+        pageFeedback: Feedback,
+        pageFeedbackDetails: FeedbackDetailsPage,
+        add_feedbacks: None,
+    ) -> None:
+        pass
+
+    def test_feedback_identity_verification(
+        self,
+        pageFeedback: Feedback,
+        pageFeedbackDetails: FeedbackDetailsPage,
+        create_households_and_individuals: Household,
+        pageNewFeedback: NewFeedback,
+    ) -> None:
+        # Go to Feedback
+        pageFeedback.getNavGrievance().click()
+        pageFeedback.getNavFeedback().click()
+        # Create Feedback
+        pageFeedback.getButtonSubmitNewFeedback().click()
+        pageNewFeedback.chooseOptionByName("Negative feedback")
+        pageNewFeedback.getButtonNext().click()
+        pageNewFeedback.getHouseholdTab()
+        pageNewFeedback.getHouseholdTableRows(0).click()
+        pageNewFeedback.getIndividualTab().click()
+        pageNewFeedback.getIndividualTableRow(0).click()
+        pageNewFeedback.getButtonNext().click()
+
+        pageNewFeedback.getInputQuestionnaire_size().click()
+        assert "-" in pageNewFeedback.getLabelHouseholdSize().text
+        assert "" in pageNewFeedback.getInputQuestionnaire_malechildrencount().text
+        assert "-" in pageNewFeedback.getLabelNumberOfMaleChildren().text
+        assert "" in pageNewFeedback.getInputQuestionnaire_femalechildrencount().text
+        assert "-" in pageNewFeedback.getLabelNumberOfFemaleChildren().text
+        assert "" in pageNewFeedback.getInputQuestionnaire_childrendisabledcount().text
+        assert "-" in pageNewFeedback.getLabelNumberOfDisabledChildren().text
+        assert "" in pageNewFeedback.getInputQuestionnaire_headofhousehold().text
+        assert "" in pageNewFeedback.getLabelHeadOfHousehold().text
+        assert "" in pageNewFeedback.getInputQuestionnaire_countryorigin().text
+        assert "-" in pageNewFeedback.getLabelCountryOfOrigin().text
+        assert "" in pageNewFeedback.getInputQuestionnaire_address().text
+        assert "-" in pageNewFeedback.getLabelAddress().text
+        assert "" in pageNewFeedback.getInputQuestionnaire_village().text
+        assert "-" in pageNewFeedback.getLabelVillage().text
+        assert "" in pageNewFeedback.getInputQuestionnaire_admin1().text
+        assert "-" in pageNewFeedback.getLabelAdministrativeLevel1().text
+        assert "" in pageNewFeedback.getInputQuestionnaire_admin2().text
+        assert "-" in pageNewFeedback.getLabelAdministrativeLevel2().text
+        assert "" in pageNewFeedback.getInputQuestionnaire_admin3().text
+        assert "-" in pageNewFeedback.getLabelAdministrativeLevel3().text
+        assert "" in pageNewFeedback.getInputQuestionnaire_admin4().text
+        assert "-" in pageNewFeedback.getLabelAdministrativeLevel4().text
+        assert "" in pageNewFeedback.getInputQuestionnaire_months_displaced_h_f().text
+        assert "-" in pageNewFeedback.getLabelLengthOfTimeSinceArrival().text
+        assert "" in pageNewFeedback.getInputQuestionnaire_fullname().text
+        assert "James Christopher Shaffer" in pageNewFeedback.getLabelIndividualFullName().text
+        assert "" in pageNewFeedback.getInputQuestionnaire_birthdate().text
+        assert "-" in pageNewFeedback.getLabelBirthDate().text
+        assert "" in pageNewFeedback.getInputQuestionnaire_phoneno().text
+        assert "-" in pageNewFeedback.getLabelPhoneNumber().text
+        assert "" in pageNewFeedback.getInputQuestionnaire_relationship().text
+        assert "HEAD" in pageNewFeedback.getLabelRelationshipToHoh().text
+        assert "" in pageNewFeedback.getInputConsent().text
