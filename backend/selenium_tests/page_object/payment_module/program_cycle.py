@@ -83,6 +83,7 @@ class ProgramCyclePage(BaseComponents):
         return self.wait_for(self.headCellEmpty)
 
     def getProgramCycleRow(self) -> [WebElement]:
+        self.wait_for(self.programCycleRow)
         return self.get_elements(self.programCycleRow)
 
     def getProgramCycleStatus(self) -> WebElement:
