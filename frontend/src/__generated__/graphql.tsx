@@ -10369,7 +10369,7 @@ export type ImportedIndividualFieldsQueryVariables = Exact<{
 }>;
 
 
-export type ImportedIndividualFieldsQuery = { __typename?: 'Query', allFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', isFlexField?: boolean | null, id?: string | null, type?: string | null, name?: string | null, associatedWith?: string | null, labelEn?: string | null, hint?: string | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null };
+export type ImportedIndividualFieldsQuery = { __typename?: 'Query', allFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', isFlexField?: boolean | null, id?: string | null, type?: string | null, name?: string | null, associatedWith?: string | null, labelEn?: string | null, hint?: string | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null };
 
 export type PduSubtypeChoicesDataQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -11279,7 +11279,7 @@ export type AllActiveTargetPopulationsQuery = { __typename?: 'Query', allActiveT
 export type AllFieldsAttributesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AllFieldsAttributesQuery = { __typename?: 'Query', allFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, associatedWith?: string | null, isFlexField?: boolean | null } | null> | null };
+export type AllFieldsAttributesQuery = { __typename?: 'Query', allFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, associatedWith?: string | null, isFlexField?: boolean | null, type?: string | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null };
 
 export type AllSteficonRulesQueryVariables = Exact<{
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
@@ -17700,6 +17700,12 @@ export const ImportedIndividualFieldsDocument = gql`
       admin
       listName
     }
+    pduData {
+      id
+      subtype
+      numberOfRounds
+      roundsNames
+    }
   }
 }
     `;
@@ -23776,6 +23782,13 @@ export const AllFieldsAttributesDocument = gql`
     labelEn
     associatedWith
     isFlexField
+    type
+    pduData {
+      id
+      subtype
+      numberOfRounds
+      roundsNames
+    }
   }
 }
     `;

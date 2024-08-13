@@ -28,9 +28,9 @@ import { DialogContainer } from '../dialogs/DialogContainer';
 import { DialogDescription } from '../dialogs/DialogDescription';
 import { DialogFooter } from '../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../dialogs/DialogTitleWrapper';
-import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
-import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
+import { TargetingCriteriaIndividualFilterBlocks } from './TargetingCriteriaIndividualFilterBlocks';
 import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
+import { TargetingCriteriaHouseholdFilter } from './TargetingCriteriaHouseholdFilter';
 
 const ButtonBox = styled.div`
   width: 300px;
@@ -77,7 +77,7 @@ class ArrayFieldWrapper extends React.Component<ArrayFieldWrapperProps> {
   }
 }
 
-interface TargetCriteriaFormPropTypes {
+interface TargetingCriteriaFormPropTypes {
   criteria?;
   addCriteria: (values) => void;
   open: boolean;
@@ -90,7 +90,7 @@ interface TargetCriteriaFormPropTypes {
 const associatedWith = (type) => (item) => item.associatedWith === type;
 const isNot = (type) => (item) => item.type !== type;
 
-export const TargetCriteriaForm = ({
+export const TargetingCriteriaForm = ({
   criteria,
   addCriteria,
   open,
@@ -98,7 +98,7 @@ export const TargetCriteriaForm = ({
   individualFiltersAvailable,
   householdFiltersAvailable,
   isSocialWorkingProgram,
-}: TargetCriteriaFormPropTypes): React.ReactElement => {
+}: TargetingCriteriaFormPropTypes): React.ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
 
@@ -140,6 +140,10 @@ export const TargetCriteriaForm = ({
 
   if (!data) return null;
 
+  console.log('allDataChoicesDict', allDataChoicesDict);
+  //add mapping ---> isFlexField === false --> NOT_FLEX_FIELD
+  //add mapping ---> isFlexField === true && type !== 'PDU' --> FLEX_FIELD_NOT_PDU
+  //add mapping for flexfieldcategorization ---> isFlexField === true && type === 'PDU' --> FLEX_FIELD_PDU
   const validate = ({
     filters,
     individualsFiltersBlocks,
@@ -267,7 +271,7 @@ export const TargetCriteriaForm = ({
                     ref={filtersArrayWrapperRef}
                   >
                     {values.filters.map((each, index) => (
-                      <TargetingCriteriaFilter
+                      <TargetingCriteriaHouseholdFilter
                         // eslint-disable-next-line
                         key={index}
                         index={index}
@@ -320,7 +324,7 @@ export const TargetCriteriaForm = ({
                         ref={individualsFiltersBlocksWrapperRef}
                       >
                         {values.individualsFiltersBlocks.map((each, index) => (
-                          <TargetCriteriaFilterBlocks
+                          <TargetingCriteriaIndividualFilterBlocks
                             // eslint-disable-next-line
                             key={index}
                             blockIndex={index}

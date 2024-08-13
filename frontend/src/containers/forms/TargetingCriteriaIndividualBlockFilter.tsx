@@ -3,7 +3,7 @@ import { SubField } from '@components/targeting/SubField';
 import { ImportedIndividualFieldsQuery } from '@generated/graphql';
 import { FieldChooser } from '@components/targeting/FieldChooser';
 
-export function TargetCriteriaBlockFilter({
+export function TargetingCriteriaIndividualBlockFilter({
   blockIndex,
   index,
   data,
@@ -20,6 +20,7 @@ export function TargetCriteriaBlockFilter({
   onChange: (e, object) => void;
   onDelete: () => void;
 }): React.ReactElement {
+  console.log('each', each);
   return (
     <div>
       <FieldChooser

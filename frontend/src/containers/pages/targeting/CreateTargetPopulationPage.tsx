@@ -13,7 +13,6 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import { CreateTargetPopulationHeader } from '@components/targeting/CreateTargetPopulation/CreateTargetPopulationHeader';
 import { Exclusions } from '@components/targeting/CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '@components/targeting/PaperContainer';
-import { TargetingCriteria } from '@components/targeting/TargetingCriteria';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -23,6 +22,7 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useProgramContext } from 'src/programContext';
 import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { TargetingCriteriaDisplay } from '@components/targeting/TargetingCriteriaDisplay/TargetingCriteriaDisplay';
 
 export const CreateTargetPopulationPage = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -152,7 +152,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
               <FieldArray
                 name="criterias"
                 render={(arrayHelpers) => (
-                  <TargetingCriteria
+                  <TargetingCriteriaDisplay
                     helpers={arrayHelpers}
                     rules={values.criterias}
                     screenBeneficiary={screenBeneficiary}

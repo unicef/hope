@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { chooseFieldType, clearField } from '@utils/targetingUtils';
 import { ImportedIndividualFieldsQuery } from '@generated/graphql';
-import { TargetCriteriaBlockFilter } from './TargetCriteriaBlockFilter';
+import { TargetingCriteriaIndividualBlockFilter } from './TargetingCriteriaIndividualBlockFilter';
 
 const Divider = styled.div`
   border-top: 1px solid #e2e2e2;
@@ -68,7 +68,7 @@ const GrayFiltersBlock = styled.div`
 const FilterWrapper = styled.div`
   padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(5)};
 `;
-export function TargetCriteriaFilterBlocks({
+export function TargetingCriteriaIndividualFilterBlocks({
   blockIndex,
   data,
   values,
@@ -84,6 +84,7 @@ export function TargetCriteriaFilterBlocks({
   const { t } = useTranslation();
   const shouldShowAndDivider =
     blockIndex + 1 < values.individualsFiltersBlocks.length;
+  console.log('values', values);
   return (
     <div>
       Set Individual Criteria
@@ -102,7 +103,7 @@ export function TargetCriteriaFilterBlocks({
                 return (
                   <Fragment key={blockIndex + index.toString()}>
                     <FilterWrapper>
-                      <TargetCriteriaBlockFilter
+                      <TargetingCriteriaIndividualBlockFilter
                         blockIndex={blockIndex}
                         index={index}
                         data={data}
