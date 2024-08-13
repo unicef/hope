@@ -68,7 +68,7 @@ class TestTargetPopulationQuery(APITestCase):
                 filters{
                   comparisonMethod
                   fieldName
-                  isFlexField
+                  flexFieldClassification
                   arguments
                   fieldAttribute{
                     labelEn

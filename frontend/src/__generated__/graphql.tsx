@@ -2014,7 +2014,7 @@ export type FinishPaymentVerificationPlan = {
   paymentPlan?: Maybe<GenericPaymentPlanNode>;
 };
 
-export enum FlexFieldClassification {
+export enum FlexFieldClassificationChoices {
   FlexFieldNotPdu = 'FLEX_FIELD_NOT_PDU',
   FlexFieldPdu = 'FLEX_FIELD_PDU',
   NotFlexField = 'NOT_FLEX_FIELD'
@@ -8215,7 +8215,7 @@ export type TargetingCriteriaRuleFilterObjectType = {
   arguments: Array<InputMaybe<Scalars['Arg']['input']>>;
   comparisonMethod: Scalars['String']['input'];
   fieldName: Scalars['String']['input'];
-  flexFieldClassification: FlexFieldClassification;
+  flexFieldClassification: FlexFieldClassificationChoices;
   roundNumber?: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -24361,7 +24361,7 @@ export type ResolversTypes = {
   FinancialServiceProviderXlsxTemplateNodeConnection: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeConnection>;
   FinancialServiceProviderXlsxTemplateNodeEdge: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeEdge>;
   FinishPaymentVerificationPlan: ResolverTypeWrapper<FinishPaymentVerificationPlan>;
-  FlexFieldClassification: FlexFieldClassification;
+  FlexFieldClassificationChoices: FlexFieldClassificationChoices;
   FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']['output']>;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   FspChoice: ResolverTypeWrapper<FspChoice>;

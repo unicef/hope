@@ -264,8 +264,12 @@ class TargetingCriteriaFilterBase:
         ("IS_NULL", _("Is null")),
     )
 
+    @property
+    def field_name_combined(self) -> str:
+        return f"{self.field_name}__{self.round_number}" if self.round_number else self.field_name
+
     def get_criteria_string(self) -> str:
-        return f"{{{self.field_name} {self.comparison_method} ({','.join([str(x) for x in self.arguments])})}}"
+        return f"{{{self.field_name_combined} {self.comparison_method} ({','.join([str(x) for x in self.arguments])})}}"
 
     def get_lookup_prefix(self, associated_with: str) -> str:
         return "individuals__" if associated_with == _INDIVIDUAL else ""
@@ -275,6 +279,8 @@ class TargetingCriteriaFilterBase:
         if not is_flex_field:
             return arguments
         type = get_attr_value("type", field_attr, None)
+        if type == FlexibleAttribute.PDU:
+            type = field_attr.pdu_data.subtype
         if type == TYPE_DECIMAL:
             return [float(arg) for arg in arguments]
         if type == TYPE_INTEGER:
@@ -362,6 +368,18 @@ class TargetingCriteriaFilterBase:
                 raise ValidationError(
                     f"There is no PDU Flex Field Attribute associated with this fieldName {self.field_name} in program {program.name}"
                 )
+            if not self.round_number:
+                logger.error(f"Round number is required for PDU Flex Field Attribute {self.field_name}")
+                raise ValidationError(f"Round number is required for PDU Flex Field Attribute {self.field_name}")
+            flex_field_attr_rounds_number = flex_field_attr.pdu_data.number_of_rounds
+            if self.round_number > flex_field_attr_rounds_number:
+                logger.error(
+                    f"Round number {self.round_number} is greater than the number of rounds {flex_field_attr_rounds_number} for PDU Flex Field Attribute {self.field_name}"
+                )
+                raise ValidationError(
+                    f"Round number {self.round_number} is greater than the number of rounds {flex_field_attr_rounds_number} for PDU Flex Field Attribute {self.field_name}"
+                )
+            field_name_combined = f"{flex_field_attr.name}__{self.round_number}"
         else:
             flex_field_attr = FlexibleAttribute.objects.get(name=self.field_name, program=None)
             if not flex_field_attr:
@@ -369,8 +387,9 @@ class TargetingCriteriaFilterBase:
                 raise ValidationError(
                     f"There is no Flex Field Attributes associated with this fieldName {self.field_name}"
                 )
+            field_name_combined = flex_field_attr.name
         lookup_prefix = self.get_lookup_prefix(_INDIVIDUAL if flex_field_attr.associated_with == 1 else _HOUSEHOLD)
-        lookup = f"{lookup_prefix}flex_fields__{flex_field_attr.name}"
+        lookup = f"{lookup_prefix}flex_fields__{field_name_combined}"
         return self.get_query_for_lookup(lookup, flex_field_attr)
 
     def get_query(self) -> Q:

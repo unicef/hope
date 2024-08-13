@@ -21,6 +21,7 @@ from hct_mis_api.apps.core.schema import ExtendedConnection, FieldAttributeNode
 from hct_mis_api.apps.core.utils import decode_id_string_required, decode_id_string
 from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.filters import HouseholdFilter, TargetPopulationFilter
 from hct_mis_api.apps.utils.schema import Arg
 
@@ -55,7 +56,7 @@ def filter_choices(field: Optional[Dict], args: List) -> Optional[Dict]:
     return field
 
 
-class FlexFieldClassification(graphene.Enum):
+class FlexFieldClassificationChoices(graphene.Enum):
     NOT_FLEX_FIELD = "NOT_FLEX_FIELD"
     FLEX_FIELD_NOT_PDU = "FLEX_FIELD_NOT_PDU"
     FLEX_FIELD_PDU = "FLEX_FIELD_PDU"
@@ -179,7 +180,7 @@ class TargetPopulationNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObj
 
 class TargetingCriteriaRuleFilterObjectType(graphene.InputObjectType):
     comparison_method = graphene.String(required=True)
-    flex_field_classification = graphene.Field(FlexFieldClassification, required=True)
+    flex_field_classification = graphene.Field(FlexFieldClassificationChoices, required=True)
     field_name = graphene.String(required=True)
     arguments = graphene.List(Arg, required=True)
     round_number = graphene.Int()

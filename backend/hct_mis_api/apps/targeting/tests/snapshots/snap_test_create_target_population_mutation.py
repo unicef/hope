@@ -27,7 +27,7 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_0_with_permi
                                     ],
                                     'comparisonMethod': 'EQUALS',
                                     'fieldName': 'size',
-                                    'isFlexField': False
+                                    'flexFieldClassification': 'NOT_FLEX_FIELD'
                                 }
                             ]
                         }
