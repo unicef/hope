@@ -208,12 +208,12 @@ class TestFeedback:
         pageFeedback.getRow(0).click()
         assert "-" in pageFeedbackDetails.getProgramme().text
         pageFeedbackDetails.getButtonEdit().click()
-        pageNewFeedback.selectProgramme("Test Programm").click()
+        pageNewFeedback.selectProgramme("Test Programm")
         pageNewFeedback.getButtonNext().click()
         # Check Feedback filtering by chosen Programme
         assert "Test Programm" in pageFeedbackDetails.getProgramme().text
         assert pageFeedback.globalProgramFilterText in pageFeedback.getGlobalProgramFilter().text
-        pageFeedback.selectGlobalProgramFilter("Test Programm").click()
+        pageFeedback.selectGlobalProgramFilter("Test Programm")
         assert "Test Programm" in pageProgrammeDetails.getHeaderTitle().text
         pageFeedback.wait_for_disappear(pageFeedback.navGrievanceDashboard)
         pageFeedback.getNavGrievance().click()
@@ -222,14 +222,14 @@ class TestFeedback:
         assert 1 == len(pageFeedback.getRows())
         assert "Negative Feedback" in pageFeedback.getRow(0).find_elements("tag name", "td")[1].text
 
-        pageFeedback.selectGlobalProgramFilter("Draft Program").click()
+        pageFeedback.selectGlobalProgramFilter("Draft Program")
         assert "Draft Program" in pageProgrammeDetails.getHeaderTitle().text
         pageFeedback.wait_for_disappear(pageFeedback.navGrievanceDashboard)
         pageFeedback.getNavGrievance().click()
         pageFeedback.getNavFeedback().click()
         assert 0 == len(pageFeedback.getRows())
 
-        pageFeedback.selectGlobalProgramFilter("All Programmes").click()
+        pageFeedback.selectGlobalProgramFilter("All Programmes")
         assert "Programme Management" in pageProgrammeDetails.getHeaderTitle().text
         pageFeedback.wait_for_disappear(pageFeedback.navGrievanceDashboard)
         pageFeedback.getNavGrievance().click()
@@ -340,7 +340,7 @@ class TestFeedback:
         pageFeedback.getRow(0).click()
         assert "-" in pageFeedbackDetails.getProgramme().text
         pageFeedbackDetails.getButtonEdit().click()
-        pageNewFeedback.selectProgramme("Draft Program").click()
+        pageNewFeedback.selectProgramme("Draft Program")
         pageNewFeedback.getDescription().click()
         pageNewFeedback.getDescription().send_keys(Keys.CONTROL, "a")
         pageNewFeedback.getDescription().send_keys("New description")
@@ -348,7 +348,7 @@ class TestFeedback:
         pageNewFeedback.getInputArea().send_keys("Abkamari")
         pageNewFeedback.getInputLanguage().send_keys("English")
         # ToDo: Enable after Fix bug
-        # pageNewFeedback.selectArea("Abband").click()
+        # pageNewFeedback.selectArea("Abband")
         pageNewFeedback.getButtonNext().click()
         # Check edited Feedback
         assert "Draft Program" in pageFeedbackDetails.getProgramme().text
