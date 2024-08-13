@@ -77,16 +77,19 @@ class Common:
     ) -> bool:
         return self._wait(timeout).until(EC.element_to_be_clickable((element_type, locator)))
 
-    def select_listbox_element(
-        self, name: str, listbox: str = 'ul[role="listbox"]', tag_name: str = "li"
-    ) -> WebElement:
+    def select_listbox_element(self, name: str, listbox: str = 'ul[role="listbox"]', tag_name: str = "li") -> None:
+        sleep(2)
         select_element = self.wait_for(listbox)
         items = select_element.find_elements("tag name", tag_name)
         for item in items:
+            sleep(0.3)
             if name in item.text:
                 self._wait().until(EC.element_to_be_clickable((By.XPATH, f"//*[contains(text(), '{name}')]")))
-                return item
-        raise AssertionError(f"Element: {name} is not in the list.")
+                item.click()
+                self.wait_for_disappear('ul[role="listbox"]')
+                break
+        else:
+            raise AssertionError(f"Element: {name} is not in the list: {[item.text for item in items]}")
 
     def check_page_after_click(self, button: WebElement, url_fragment: str) -> None:
         programme_creation_url = self.driver.current_url
@@ -104,8 +107,8 @@ class Common:
 
     def select_option_by_name(self, optionName: str) -> None:
         selectOption = f'li[data-cy="select-option-{optionName}"]'
-        self.wait_for(selectOption).click()
         try:
+            self.wait_for(selectOption).click()
             self.wait_for_disappear(selectOption)
         except BaseException:
             sleep(1)
