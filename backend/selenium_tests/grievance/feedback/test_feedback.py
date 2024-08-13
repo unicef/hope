@@ -11,7 +11,9 @@ from page_object.programme_details.programme_details import ProgrammeDetails
 from pytest_django import DjangoDbBlocker
 from selenium.webdriver import Keys
 
-from selenium_tests.page_object.grievance.details_grievance_page import GrievanceDetailsPage
+from selenium_tests.page_object.grievance.details_grievance_page import (
+    GrievanceDetailsPage,
+)
 from selenium_tests.page_object.grievance.new_ticket import NewTicket
 
 pytestmark = pytest.mark.django_db(transaction=True)
