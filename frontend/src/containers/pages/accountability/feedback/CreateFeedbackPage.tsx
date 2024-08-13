@@ -252,6 +252,7 @@ export function CreateFeedbackPage(): React.ReactElement {
       validateOnChange={activeStep < FeedbackSteps.Verification || validateData}
       validateOnBlur={activeStep < FeedbackSteps.Verification || validateData}
       validationSchema={validationSchemaWithSteps(activeStep)}
+      data-cy="error"
       // validate={(values) =>
       //   validateUsingSteps(values, activeStep, setValidateData)
       // }

@@ -438,10 +438,31 @@ class TestFeedback:
     def test_feedback_errors(
         self,
         pageFeedback: Feedback,
+        pageNewFeedback: NewFeedback,
         pageFeedbackDetails: FeedbackDetailsPage,
-        add_feedbacks: None,
+        create_households_and_individuals: Household,
     ) -> None:
-        pass
+        pageFeedback.getButtonSubmitNewFeedback().click()
+        # ToDo: Uncomment after fix 209087
+        # pageNewFeedback.getButtonNext().click()
+        # assert for pageNewFeedback.getError().text
+        # with pytest.raises(Exception):
+        #     pageNewFeedback.getHouseholdTab()
+        pageNewFeedback.chooseOptionByName("Negative feedback")
+        pageNewFeedback.getButtonNext().click()
+        pageNewFeedback.getHouseholdTab()
+        pageNewFeedback.getButtonNext().click()
+        pageNewFeedback.getReceivedConsent()
+        pageNewFeedback.getButtonNext().click()
+        assert "Consent is required" in pageNewFeedback.getError().text
+        pageNewFeedback.getReceivedConsent().click()
+        pageNewFeedback.getButtonNext().click()
+        pageNewFeedback.getDescription()
+        pageNewFeedback.getButtonNext().click()
+        assert "Description is required" in pageNewFeedback.getError().text
+        pageNewFeedback.getDescription().send_keys("New description")
+        pageNewFeedback.getButtonNext().click()
+        assert "New description" in pageFeedbackDetails.getDescription().text
 
     def test_feedback_identity_verification(
         self,

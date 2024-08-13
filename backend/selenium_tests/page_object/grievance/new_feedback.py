@@ -20,6 +20,7 @@ class NewFeedback(BaseComponents):
     lookUpTabsHouseHold = 'button[role="tab"]'
     lookUpTabsIndividual = 'button[role="tab"]'
     receivedConsent = 'span[data-cy="input-consent"]'
+    error = '[data-cy="error"]'
     description = 'textarea[data-cy="input-description"]'
     comments = 'textarea[data-cy="input-comments"]'
     adminAreaAutocomplete = 'div[data-cy="admin-area-autocomplete"]'
@@ -127,6 +128,9 @@ class NewFeedback(BaseComponents):
 
     def getReceivedConsent(self) -> WebElement:
         return self.wait_for(self.receivedConsent)
+
+    def getError(self) -> WebElement:
+        return self.wait_for(self.error)
 
     def getDescription(self) -> WebElement:
         return self.wait_for(self.description)
