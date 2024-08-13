@@ -374,7 +374,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         date_flexible_attribute = FlexibleAttribute(
             type=FlexibleAttribute.DECIMAL,
             name="flex_date_i_f",
-            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
         )
         date_flexible_attribute.save()
         flex_fields = [
@@ -391,9 +391,11 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         individual = household.primary_collector
         individual.flex_fields = {
             decimal_flexible_attribute.name: 123.45,
-            date_flexible_attribute.name: "2021-01-01",
         }
         individual.save()
+        household.flex_fields = {
+            date_flexible_attribute.name: "2021-01-01",
+        }
         BankAccountInfoFactory(
             individual=individual,
             account_holder_name="Kowalski",
