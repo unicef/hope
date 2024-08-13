@@ -1361,7 +1361,7 @@ type FinishPaymentVerificationPlan {
   paymentPlan: GenericPaymentPlanNode
 }
 
-enum FlexFieldClassification {
+enum FlexFieldClassificationChoices {
   NOT_FLEX_FIELD
   FLEX_FIELD_NOT_PDU
   FLEX_FIELD_PDU
@@ -4725,7 +4725,7 @@ type TargetingCriteriaRuleFilterNode {
 
 input TargetingCriteriaRuleFilterObjectType {
   comparisonMethod: String!
-  flexFieldClassification: FlexFieldClassification!
+  flexFieldClassification: FlexFieldClassificationChoices!
   fieldName: String!
   arguments: [Arg]!
   roundNumber: Int

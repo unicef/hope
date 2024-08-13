@@ -159,7 +159,7 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query_0_with_permission
                                     'type': 'INTEGER'
                                 },
                                 'fieldName': 'size',
-                                'isFlexField': False
+                                'flexFieldClassification': 'NOT_FLEX_FIELD'
                             }
                         ]
                     }
@@ -212,7 +212,7 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query_next_0_with_permi
                                     'type': 'SELECT_ONE'
                                 },
                                 'fieldName': 'residence_status',
-                                'isFlexField': False
+                                'flexFieldClassification': 'NOT_FLEX_FIELD'
                             }
                         ]
                     }

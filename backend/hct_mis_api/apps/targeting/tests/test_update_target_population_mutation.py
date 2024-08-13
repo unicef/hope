@@ -35,7 +35,7 @@ mutation UpdateTargetPopulation($updateTargetPopulationInput: UpdateTargetPopula
                     comparisonMethod
                     fieldName
                     arguments
-                    isFlexField
+                    flexFieldClassification
                 }
             }
         }
@@ -55,7 +55,7 @@ VARIABLES: Dict = {
                             "comparisonMethod": "EQUALS",
                             "fieldName": "size",
                             "arguments": [3],
-                            "isFlexField": False,
+                            "flexFieldClassification": "NOT_FLEX_FIELD",
                         }
                     ]
                 }
@@ -74,7 +74,7 @@ VARIABLES_WRONG_ARGS_COUNT = {
                             "comparisonMethod": "EQUALS",
                             "fieldName": "size",
                             "arguments": [3, 3],
-                            "isFlexField": False,
+                            "flexFieldClassification": "NOT_FLEX_FIELD",
                         }
                     ]
                 }
@@ -92,7 +92,7 @@ VARIABLES_WRONG_COMPARISON_METHOD = {
                             "comparisonMethod": "CONTAINS",
                             "fieldName": "size",
                             "arguments": [3],
-                            "isFlexField": False,
+                            "flexFieldClassification": "NOT_FLEX_FIELD",
                         }
                     ]
                 }
@@ -110,7 +110,7 @@ VARIABLES_UNKNOWN_COMPARISON_METHOD = {
                             "comparisonMethod": "BLABLA",
                             "fieldName": "size",
                             "arguments": [3],
-                            "isFlexField": False,
+                            "flexFieldClassification": "NOT_FLEX_FIELD",
                         }
                     ]
                 }
@@ -128,7 +128,7 @@ VARIABLES_UNKNOWN_FLEX_FIELD_NAME = {
                             "comparisonMethod": "EQUALS",
                             "fieldName": "foo_bar",
                             "arguments": [3],
-                            "isFlexField": True,
+                            "flexFieldClassification": "FLEX_FIELD_NOT_PDU",
                         }
                     ]
                 }
@@ -146,7 +146,7 @@ VARIABLES_UNKNOWN_CORE_FIELD_NAME = {
                             "comparisonMethod": "EQUALS",
                             "fieldName": "foo_bar",
                             "arguments": [3],
-                            "isFlexField": False,
+                            "flexFieldClassification": "NOT_FLEX_FIELD",
                         }
                     ]
                 }

@@ -33,7 +33,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                 comparisonMethod
                 fieldName
                 arguments
-                isFlexField
+                flexFieldClassification
               }
             }
           }
@@ -81,7 +81,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                                     "comparisonMethod": "EQUALS",
                                     "fieldName": "size",
                                     "arguments": [3],
-                                    "isFlexField": False,
+                                    "flexFieldClassification": "NOT_FLEX_FIELD",
                                 }
                             ]
                         }
@@ -118,7 +118,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                                     "comparisonMethod": "CONTAINS",
                                     "arguments": [],
                                     "fieldName": "registration_data_import",
-                                    "isFlexField": False,
+                                    "flexFieldClassification": "NOT_FLEX_FIELD",
                                 }
                             ],
                             "individualsFiltersBlocks": [],
@@ -152,7 +152,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                                     "comparisonMethod": "EQUALS",
                                     "fieldName": "size",
                                     "arguments": [3],
-                                    "isFlexField": False,
+                                    "flexFieldClassification": "NOT_FLEX_FIELD",
                                 }
                             ]
                         }
@@ -190,7 +190,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                                     "comparisonMethod": "EQUALS",
                                     "fieldName": "size",
                                     "arguments": [3],
-                                    "isFlexField": False,
+                                    "flexFieldClassification": "NOT_FLEX_FIELD",
                                 }
                             ]
                         }
