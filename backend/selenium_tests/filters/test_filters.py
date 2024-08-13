@@ -342,7 +342,7 @@ class TestSmokeFilters:
                 filters.datePickerFilterFrom,
                 filters.datePickerFilterTo,
             ],
-            "Payment Module": [
+            "Payment Plans": [
                 filters.selectFilter,
                 filters.filtersTotalEntitledQuantityFrom,
                 filters.filtersTotalEntitledQuantityTo,
@@ -420,6 +420,8 @@ class TestSmokeFilters:
                 filters.wait_for('[data-cy="nav-Program Population"]').click()
             if nav_menu == "Surveys":
                 filters.wait_for('[data-cy="nav-Accountability"]').click()
+            if nav_menu == "Payment Plans":
+                filters.wait_for('[data-cy="nav-Payment Module"]').click()
             filters.wait_for(f'[data-cy="nav-{nav_menu}"]').click()
             for locator in programs[nav_menu]:
                 try:
@@ -507,11 +509,13 @@ class TestSmokeFilters:
     @pytest.mark.parametrize(
         "module",
         [
-            pytest.param(["Registration Data Import", "filter-search", "Test"], id="Registration Data Import"),
-            pytest.param(["Targeting", "filters-search", "Test"], id="Targeting"),
-            pytest.param(["Payment Module", "filter-search", "PP-0060-22-11223344"], id="Payment Module"),
-            pytest.param(["Payment Verification", "filter-search", "PP-0000-00-11223344"], id="Payment Verification"),
-            pytest.param(["Grievance", "filters-search", "GRV-0000123"], id="Grievance"),
+            pytest.param([["Registration Data Import"], "filter-search", "Test"], id="Registration Data Import"),
+            pytest.param([["Targeting"], "filters-search", "Test"], id="Targeting"),
+            pytest.param([["Payment Verification"], "filter-search", "PP-0000-00-11223344"], id="Payment Verification"),
+            pytest.param([["Grievance"], "filters-search", "GRV-0000123"], id="Grievance"),
+            pytest.param(
+                [["Payment Module", "Payment Plans"], "filter-search", "PP-0060-22-11223344"], id="Payment Module"
+            ),
             # ToDo: uncomment after fix bug: 206395
             # pytest.param(["Program Population", "hh-filters-search", "HH-00-0000.1380"], id="Program Population"),
         ],
@@ -531,7 +535,10 @@ class TestSmokeFilters:
     ) -> None:
         filters.selectGlobalProgramFilter("Test Programm")
         assert "Test Programm" in pageProgrammeDetails.getHeaderTitle().text
-        filters.wait_for(f'[data-cy="nav-{module[0]}').click()
+
+        for element in module[0]:
+            filters.wait_for(f'[data-cy="nav-{element}').click()
+
         assert filters.waitForNumberOfRows(2)
         filters.getFilterByLocator(module[1]).send_keys("Wrong value")
         filters.getButtonFiltersApply().click()

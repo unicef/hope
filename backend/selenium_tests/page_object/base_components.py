@@ -23,6 +23,8 @@ class BaseComponents(Common):
     navTargeting = 'a[data-cy="nav-Targeting"]'
     navCashAssist = 'a[data-cy="nav-Cash Assist"]'
     navPaymentModule = 'a[data-cy="nav-Payment Module"]'
+    navProgrammeCycles = 'a[data-cy="nav-Programme Cycles"]'
+    navPaymentPlans = 'a[data-cy="nav-Payment Plans"]'
     navPaymentVerification = 'a[data-cy="nav-Payment Verification"]'
     navGrievance = 'a[data-cy="nav-Grievance"]'
     navGrievanceTickets = 'a[data-cy="nav-Grievance Tickets"]'
@@ -106,6 +108,12 @@ class BaseComponents(Common):
 
     def getNavPaymentModule(self) -> WebElement:
         return self.wait_for(self.navPaymentModule)
+
+    def getNavPaymentPlans(self) -> WebElement:
+        return self.wait_for(self.navPaymentPlans)
+
+    def getNavProgrammeCycles(self) -> WebElement:
+        return self.wait_for(self.navProgrammeCycles)
 
     def getNavPaymentVerification(self) -> WebElement:
         return self.wait_for(self.navPaymentVerification)

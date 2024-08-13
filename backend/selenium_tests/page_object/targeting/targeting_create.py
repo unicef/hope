@@ -52,6 +52,8 @@ class TargetingCreate(BaseComponents):
     autocompleteTargetCriteriaValues = 'div[data-cy="autocomplete-target-criteria-values"]'
     selectMany = 'div[data-cy="select-many"]'
     buttonEdit = 'button[data-cy="button-edit"]'
+    selectProgramCycleAutocomplete = 'div[data-cy="filters-program-cycle-autocomplete"]'
+    programmeCycleInput = 'div[data-cy="Programme Cycle-input"]'
 
     # Texts
     textTargetingCriteria = "Targeting Criteria"
@@ -194,3 +196,9 @@ class TargetingCreate(BaseComponents):
 
     def getButtonEdit(self) -> WebElement:
         return self.wait_for(self.buttonEdit)
+
+    def getFiltersProgramCycleAutocomplete(self) -> WebElement:
+        return self.wait_for(self.selectProgramCycleAutocomplete)
+
+    def getProgrammeCycleInput(self) -> WebElement:
+        return self.wait_for(self.programmeCycleInput)

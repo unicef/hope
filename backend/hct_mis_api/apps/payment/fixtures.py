@@ -131,14 +131,12 @@ class CashPlanFactory(DjangoModelFactory):
         ext_word_list=None,
     )
     distribution_level = "Registration Group"
-    start_date = factory.Faker(
+    dispersion_date = factory.Faker(
         "date_time_this_decade",
         before_now=False,
         after_now=True,
         tzinfo=utc,
     )
-    end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
-    dispersion_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
     coverage_duration = factory.fuzzy.FuzzyInteger(1, 4)
     coverage_unit = factory.Faker(
         "random_element",
@@ -181,6 +179,12 @@ class CashPlanFactory(DjangoModelFactory):
 
         PaymentVerificationSummaryFactory(generic_fk_obj=self)
 
+    @factory.post_generation
+    def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
+        if not create:
+            return
+        ProgramCycleFactory(program=self.program, **kwargs)
+
 
 class ServiceProviderFactory(DjangoModelFactory):
     class Meta:
@@ -215,6 +219,7 @@ class FinancialServiceProviderXlsxTemplateFactory(DjangoModelFactory):
 class FinancialServiceProviderFactory(DjangoModelFactory):
     class Meta:
         model = FinancialServiceProvider
+        django_get_or_create = ("name",)
 
     name = factory.Faker("company")
     vision_vendor_number = factory.Faker("ssn")
@@ -387,11 +392,10 @@ class RealProgramFactory(DjangoModelFactory):
     )
 
     @factory.post_generation
-    def program_cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
+    def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
         if not create:
             return
-
-        ProgramCycleFactory(program=self)
+        ProgramCycleFactory(program=self, **kwargs)
 
 
 class RealCashPlanFactory(DjangoModelFactory):
@@ -419,14 +423,12 @@ class RealCashPlanFactory(DjangoModelFactory):
         ext_word_list=None,
     )
     distribution_level = "Registration Group"
-    start_date = factory.Faker(
+    dispersion_date = factory.Faker(
         "date_time_this_decade",
-        before_now=True,
-        after_now=False,
+        before_now=False,
+        after_now=True,
         tzinfo=utc,
     )
-    end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
-    dispersion_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
     coverage_duration = factory.fuzzy.FuzzyInteger(1, 4)
     coverage_unit = factory.Faker(
         "random_element",
@@ -465,6 +467,12 @@ class RealCashPlanFactory(DjangoModelFactory):
             return
 
         PaymentVerificationSummaryFactory(generic_fk_obj=self)
+
+    @factory.post_generation
+    def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
+        if not create:
+            return
+        ProgramCycleFactory(program=self.program, **kwargs)
 
 
 class RealPaymentRecordFactory(DjangoModelFactory):
@@ -532,13 +540,6 @@ class PaymentPlanFactory(DjangoModelFactory):
         after_now=False,
         tzinfo=utc,
     )
-    start_date = factory.Faker(
-        "date_time_this_decade",
-        before_now=True,
-        after_now=False,
-        tzinfo=utc,
-    )
-    end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
     exchange_rate = factory.fuzzy.FuzzyDecimal(0.1, 9.9)
 
     total_entitled_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
@@ -813,8 +814,6 @@ def generate_reconciled_payment_plan() -> None:
         unicef_id="PP-0060-22-11223344",
         business_area=afghanistan,
         target_population=tp,
-        start_date=now,
-        end_date=now + timedelta(days=30),
         currency="USD",
         dispersion_start_date=now,
         dispersion_end_date=now + timedelta(days=14),
@@ -989,8 +988,6 @@ def generate_payment_plan() -> None:
         pk=payment_plan_pk,
         business_area=afghanistan,
         target_population=target_population,
-        start_date=now,
-        end_date=now + timedelta(days=30),
         currency="USD",
         dispersion_start_date=now,
         dispersion_end_date=now + timedelta(days=14),
@@ -1023,9 +1020,8 @@ def generate_payment_plan() -> None:
     # create primary collector role
     IndividualRoleInHouseholdFactory(household=household_1, individual=individual_1, role=ROLE_PRIMARY)
     IndividualRoleInHouseholdFactory(household=household_2, individual=individual_2, role=ROLE_PRIMARY)
-
     payment_1_pk = UUID("10000000-feed-beef-0000-00000badf00d")
-    Payment.objects.update_or_create(
+    Payment.objects.get_or_create(
         pk=payment_1_pk,
         parent=payment_plan,
         business_area=afghanistan,
@@ -1036,10 +1032,11 @@ def generate_payment_plan() -> None:
         financial_service_provider=fsp_1,
         status_date=now,
         status=Payment.STATUS_PENDING,
+        program=program,
     )
 
     payment_2_pk = UUID("20000000-feed-beef-0000-00000badf00d")
-    Payment.objects.update_or_create(
+    Payment.objects.get_or_create(
         pk=payment_2_pk,
         parent=payment_plan,
         business_area=afghanistan,
@@ -1050,6 +1047,7 @@ def generate_payment_plan() -> None:
         financial_service_provider=fsp_1,
         status_date=now,
         status=Payment.STATUS_PENDING,
+        program=program,
     )
 
     payment_plan.update_population_count_fields()
