@@ -8,11 +8,14 @@ from unittest.mock import patch
 from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
+from django.test import TestCase
+from django.urls import reverse
 
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.account.models import Role, User, UserRole
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import (
     BusinessArea,
@@ -67,7 +70,7 @@ def invalid_file() -> File:
     return File(BytesIO(content), name="pp_payment_list_invalid.xlsx")
 
 
-class ImportExportPaymentPlanPaymentListTest(APITestCase):
+class ImportExportPaymentPlanPaymentListTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
@@ -244,7 +247,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
             )
         )
         fsp_ids = self.payment_plan.delivery_mechanisms.values_list("financial_service_provider_id", flat=True)
-        with zipfile.ZipFile(self.payment_plan.export_file_per_fsp.file, mode="r") as zip_file:
+        with zipfile.ZipFile(self.payment_plan.export_file_per_fsp.file, mode="r") as zip_file:  # type: ignore
             file_list = zip_file.namelist()
             self.assertEqual(len(fsp_ids), len(file_list))
             fsp_xlsx_template_per_delivery_mechanism_list = FspXlsxTemplatePerDeliveryMechanism.objects.filter(
@@ -299,7 +302,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         )
         splits_count = self.payment_plan.splits.count()
         self.assertEqual(splits_count, 2)
-        with zipfile.ZipFile(self.payment_plan.export_file_per_fsp.file, mode="r") as zip_file:
+        with zipfile.ZipFile(self.payment_plan.export_file_per_fsp.file, mode="r") as zip_file:  # type: ignore
             file_list = zip_file.namelist()
             self.assertEqual(splits_count, len(file_list))
 
@@ -318,7 +321,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         )
         splits_count = self.payment_plan.splits.count()
         self.assertEqual(splits_count, 3)
-        with zipfile.ZipFile(self.payment_plan.export_file_per_fsp.file, mode="r") as zip_file:
+        with zipfile.ZipFile(self.payment_plan.export_file_per_fsp.file, mode="r") as zip_file:  # type: ignore
             file_list = zip_file.namelist()
             self.assertEqual(splits_count, len(file_list))
 
@@ -509,4 +512,37 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
             f"Not possible to generate export file. There isn't any FSP XLSX Template assigned to Payment "
             f"Plan {self.payment_plan.unicef_id} for FSP {self.fsp_1.name} and delivery "
             f"mechanism {DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD}.",
+        )
+
+    def test_flex_fields_admin_visibility(self) -> None:
+        user = User.objects.create_superuser(username="admin", password="password", email="admin@example.com")
+        permission_list = [Permissions.PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE.name]
+        role, created = Role.objects.update_or_create(name="LOL", defaults={"permissions": permission_list})
+        user_role, _ = UserRole.objects.get_or_create(user=user, role=role, business_area=self.business_area)
+        decimal_flexible_attribute = FlexibleAttribute(
+            type=FlexibleAttribute.DECIMAL,
+            name="flex_decimal_i_f",
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        )
+        decimal_flexible_attribute.save()
+        date_flexible_attribute = FlexibleAttribute(
+            type=FlexibleAttribute.DECIMAL,
+            name="flex_date_i_f",
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        )
+        date_flexible_attribute.save()
+        self.client.login(username="admin", password="password")
+        instance = FinancialServiceProviderXlsxTemplate(flex_fields=[], name="Test FSP XLSX Template")
+        instance.save()
+        url = reverse("admin:payment_financialserviceproviderxlsxtemplate_change", args=[instance.pk])
+        response: Any = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("flex_fields", response.context["adminform"].form.fields)
+        self.assertIn(
+            "flex_decimal_i_f",
+            (name for name, _ in response.context["adminform"].form.fields["flex_fields"].choices),
+        )
+        self.assertIn(
+            "flex_date_i_f",
+            (name for name, _ in response.context["adminform"].form.fields["flex_fields"].choices),
         )
