@@ -19,6 +19,7 @@ from hct_mis_api.apps.core.utils import (
     send_email_notification,
     send_email_notification_on_commit,
 )
+from hct_mis_api.apps.payment.api.dataclasses import SimilarityPair
 from hct_mis_api.apps.payment.models import PaymentPlan, PaymentVerificationPlan
 from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
@@ -669,6 +670,23 @@ def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def fetch_biometric_deduplication_results_and_process(deduplication_set_id: str) -> None:
+    service = BiometricDeduplicationService()
+    data = service.get_deduplication_set_results(deduplication_set_id)
+    similarity_pairs = [SimilarityPair(**item) for item in data]
+    with transaction.atomic():
+        service.create_duplicates(deduplication_set_id, similarity_pairs)
+        service.mark_rdis_as_deduplicated(deduplication_set_id)
+        transaction.on_commit(
+            lambda: create_biometric_deduplication_grievance_tickets_for_already_merged_individuals.delay(
+                deduplication_set_id
+            )
+        )
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)

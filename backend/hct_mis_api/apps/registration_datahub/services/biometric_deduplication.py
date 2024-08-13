@@ -33,6 +33,9 @@ class BiometricDeduplicationService:
         deduplication_set = DeduplicationSet(name=program.name, reference_id=str(program.deduplication_set_id))
         self.api.create_deduplication_set(deduplication_set)
 
+    def get_deduplication_set_results(self, deduplication_set_id: str) -> dict:
+        return self.api.get_duplicates(deduplication_set_id)
+
     def upload_individuals(self, deduplication_set_id: str, rdi: RegistrationDataImport) -> None:
         individuals = (
             Individual.objects.filter(is_removed=False, registration_data_import=rdi)
@@ -117,6 +120,13 @@ class BiometricDeduplicationService:
         RegistrationDataImport.objects.filter(
             program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
         ).update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED)
+
+    @classmethod
+    def mark_rdis_as_deduplication_error(cls, deduplication_set_id: str) -> None:
+        program = Program.objects.get(deduplication_set_id=deduplication_set_id)
+        RegistrationDataImport.objects.filter(
+            program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+        ).update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_ERROR)
 
     def create_biometric_deduplication_grievance_tickets_for_already_merged_individuals(
         self, deduplication_set_id: str

@@ -199,7 +199,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         default=False, help_text="Enable Deduplication of Face Images"
     )
     biometric_deduplication_threshold = models.FloatField(
-        default=90.0, help_text="Threshold for Face Image Deduplication"
+        default=0.0, help_text="Threshold for Face Image Deduplication"
     )
     deduplication_set_id = models.UUIDField(blank=True, null=True)
 

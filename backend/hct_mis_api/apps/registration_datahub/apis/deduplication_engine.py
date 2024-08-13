@@ -44,6 +44,8 @@ class DeduplicationEngineAPI(BaseAPI):
         BULK_UPLOAD_IMAGES = "deduplication_sets/{deduplication_set_pk}/images_bulk/"  # POST - Create view
         BULK_DELETE_IMAGES = "deduplication_sets/{deduplication_set_pk}/images_bulk/clear/"  # DELETE - Delete all images for a deduplication set
 
+        GET_DUPLICATES = "deduplication_sets/{deduplication_set_pk}/duplicates/"  # GET - List view
+
     def delete_deduplication_set(self, deduplication_set_id: str) -> dict:
         response_data, _ = self._delete(self.Endpoints.DELETE_DEDUPLICATION_SET.format(pk=deduplication_set_id))
         return response_data
@@ -63,6 +65,10 @@ class DeduplicationEngineAPI(BaseAPI):
         response_data, _ = self._delete(
             self.Endpoints.BULK_UPLOAD_IMAGES.format(deduplication_set_pk=deduplication_set_id)
         )
+        return response_data
+
+    def get_duplicates(self, deduplication_set_id: str) -> dict:
+        response_data, _ = self._get(self.Endpoints.GET_DUPLICATES.format(pk=deduplication_set_id))
         return response_data
 
     def process_deduplication(self, deduplication_set_id: str) -> Tuple[dict, int]:

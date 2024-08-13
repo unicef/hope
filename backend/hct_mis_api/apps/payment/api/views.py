@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Optional
 
 from django.db import transaction
@@ -30,24 +31,22 @@ from hct_mis_api.apps.core.api.mixins import BusinessAreaMixin, BusinessAreaProg
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.api.caches import PaymentPlanKeyConstructor
-from hct_mis_api.apps.payment.api.dataclasses import (
-    SimilarityIndividual,
-    SimilarityPair,
-)
 from hct_mis_api.apps.payment.api.filters import PaymentPlanFilter
 from hct_mis_api.apps.payment.api.serializers import (
+    DeduplicationEngineStatusSerializer,
     PaymentPlanBulkActionSerializer,
     PaymentPlanSerializer,
-    SimilarityPairSerializer,
 )
 from hct_mis_api.apps.payment.celery_tasks import (
-    create_biometric_deduplication_grievance_tickets_for_already_merged_individuals,
+    fetch_biometric_deduplication_results_and_process,
 )
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class PaymentPlanMixin:
@@ -177,27 +176,19 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
 
 
 class WebhookDeduplicationView(APIView):
-    serializer_class = SimilarityPairSerializer
+    serializer_class = DeduplicationEngineStatusSerializer
 
     @csrf_exempt
     def post(self, request: HttpRequest, set_id: str) -> Response:
-        serializer = self.serializer_class(data=request.data, many=True)
+        serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
-            similarity_pairs = [
-                SimilarityPair(
-                    similarity_score=item["similarity_score"],
-                    first_individual=SimilarityIndividual(**item["first_individual"]),
-                    second_individual=SimilarityIndividual(**item["second_individual"]),
-                )
-                for item in serializer.validated_data
-            ]
-            service = BiometricDeduplicationService()
-            service.create_duplicates(set_id, similarity_pairs)
-            service.mark_rdis_as_deduplicated(set_id)
-            transaction.on_commit(
-                lambda: create_biometric_deduplication_grievance_tickets_for_already_merged_individuals.delay(set_id)
-            )
+            if serializer.validated_data["state"] == "CLEAN":
+                fetch_biometric_deduplication_results_and_process.delay(set_id)
+            else:
+                service = BiometricDeduplicationService()
+                service.mark_rdis_as_deduplication_error(set_id)
+                logger.error(f"Failed to process deduplication set {set_id} {serializer.validated_data}")
 
             return Response(status=status.HTTP_200_OK)
 

@@ -2,13 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class SimilarityIndividual:
-    id: str
-    file: str
-
-
-@dataclass
 class SimilarityPair:
-    similarity_score: float
-    first_individual: SimilarityIndividual
-    second_individual: SimilarityIndividual
+    similarity_score: float  # TODO MB this is missing on dedup engine side
+    first: str
+    second: str

@@ -373,7 +373,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
         duplicates = []
         for pair in duplicates_data:
             # Ensure consistent ordering of individual1 and individual2
-            individual1, individual2 = sorted([pair.first_individual, pair.second_individual], key=lambda x: x.id)
+            individual1, individual2 = sorted([pair.first, pair.second], key=lambda x: x.id)
 
             duplicates.append(
                 cls(
