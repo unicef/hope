@@ -8,7 +8,7 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
@@ -21,8 +21,8 @@ from hct_mis_api.apps.targeting.services.targeting_stats_refresher import full_r
 
 class TestTargetPopulationQuery(APITestCase):
     ALL_TARGET_POPULATION_QUERY = """
-            query AllTargetPopulation($totalHouseholdsCountMin: Int) {
-                allTargetPopulation(totalHouseholdsCountMin:$totalHouseholdsCountMin, businessArea: "afghanistan", orderBy: "created_at") {
+            query AllTargetPopulation($totalHouseholdsCountMin: Int, $programCycle: String) {
+                allTargetPopulation(totalHouseholdsCountMin: $totalHouseholdsCountMin, businessArea: "afghanistan", programCycle: $programCycle orderBy: "created_at") {
                     edges {
                         node {
                              name
@@ -87,6 +87,7 @@ class TestTargetPopulationQuery(APITestCase):
         cls.partner = PartnerFactory(name="TestPartner")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory(name="test_program", status=Program.ACTIVE)
+        cls.cycle_2 = ProgramCycleFactory(program=cls.program)
 
         _ = create_household(
             {"size": 1, "residence_status": "HOST", "business_area": cls.business_area, "program": cls.program},
@@ -127,6 +128,7 @@ class TestTargetPopulationQuery(APITestCase):
             business_area=cls.business_area,
             targeting_criteria=targeting_criteria,
             program=cls.program,
+            program_cycle=cls.cycle_2,
         )
         cls.target_population_residence_status.save()
         cls.target_population_residence_status = full_rebuild(cls.target_population_residence_status)
@@ -241,4 +243,14 @@ class TestTargetPopulationQuery(APITestCase):
                     "TargetPopulationNode",
                 )
             },
+        )
+
+    def test_all_targets_query_filter_by_cycle(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.TARGETING_VIEW_LIST], self.business_area, self.program
+        )
+        self.snapshot_graphql_request(
+            request_string=TestTargetPopulationQuery.ALL_TARGET_POPULATION_QUERY,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            variables={"programCycle": self.id_to_base64(self.cycle_2.id, "ProgramCycleNode")},
         )
