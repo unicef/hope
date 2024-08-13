@@ -1,38 +1,52 @@
-export const chooseFieldType = (value, arrayHelpers, index): void => {
-  const values = {
-    isFlexField: value.isFlexField,
-    associatedWith: value.associatedWith,
+export const chooseFieldType = (fieldValue, arrayHelpers, index): void => {
+  console.log('fieldValue', fieldValue);
+  let flexFieldCategorization;
+  if (fieldValue.isFlexField === false) {
+    flexFieldCategorization = 'NOT_FLEX_FIELD';
+  } else if (fieldValue.isFlexField === true && fieldValue.type !== 'PDU') {
+    flexFieldCategorization = 'FLEX_FIELD_NOT_PDU';
+  } else if (fieldValue.isFlexField === true && fieldValue.type === 'PDU') {
+    flexFieldCategorization = 'FLEX_FIELD_PDU';
+  }
+
+  const updatedFieldValues = {
+    flexFieldCategorization,
+    associatedWith: fieldValue.associatedWith,
     fieldAttribute: {
-      labelEn: value.labelEn,
-      type: value.type,
+      labelEn: fieldValue.labelEn,
+      type: fieldValue.type,
       choices: null,
     },
     value: null,
+    pduData: fieldValue.pduData,
   };
-  switch (value.type) {
+
+  switch (fieldValue.type) {
     case 'INTEGER':
-      values.value = { from: '', to: '' };
+      updatedFieldValues.value = { from: '', to: '' };
       break;
     case 'DATE':
-      values.value = { from: undefined, to: undefined };
+      updatedFieldValues.value = { from: undefined, to: undefined };
       break;
     case 'SELECT_ONE':
-      values.fieldAttribute.choices = value.choices;
+      updatedFieldValues.fieldAttribute.choices = fieldValue.choices;
       break;
     case 'SELECT_MANY':
-      values.value = [];
-      values.fieldAttribute.choices = value.choices;
+      updatedFieldValues.value = [];
+      updatedFieldValues.fieldAttribute.choices = fieldValue.choices;
       break;
     default:
-      values.value = null;
+      updatedFieldValues.value = null;
       break;
   }
+
   arrayHelpers.replace(index, {
-    ...values,
-    fieldName: value.name,
-    type: value.type,
+    ...updatedFieldValues,
+    fieldName: fieldValue.name,
+    type: fieldValue.type,
   });
 };
+
 export const clearField = (arrayHelpers, index): void =>
   arrayHelpers.replace(index, {});
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -157,6 +171,7 @@ export function formatCriteriaFilters(filters) {
       fieldName: each.fieldName,
       isFlexField: each.isFlexField,
       fieldAttribute: each.fieldAttribute,
+      flexFieldClassification: each.flexFieldClassification,
     };
   });
 }
@@ -175,13 +190,13 @@ function mapFilterToVariable(filter): {
   comparisonMethod: string;
   arguments;
   fieldName: string;
-  isFlexField: boolean;
+  flexFieldClassification: string;
 } {
   return {
     comparisonMethod: filter.comparisonMethod,
     arguments: filter.arguments,
     fieldName: filter.fieldName,
-    isFlexField: filter.isFlexField,
+    flexFieldClassification: filter.flexFieldClassification,
   };
 }
 
@@ -206,4 +221,14 @@ export function getTargetingCriteriaVariables(values) {
       })),
     },
   };
+}
+
+const flexFieldClassificationMap = {
+  NOT_FLEX_FIELD: 'Not a Flex Field',
+  FLEX_FIELD_NOT_PDU: 'Flex Field Not PDU',
+  FLEX_FIELD_PDU: 'Flex Field PDU',
+};
+
+export function mapFlexFieldClassification(key: string): string {
+  return flexFieldClassificationMap[key] || 'Unknown Classification';
 }

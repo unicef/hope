@@ -70,6 +70,7 @@ const CriteriaField = ({ field, choicesDict }): React.ReactElement => {
       ? choices.find((each) => each.value === argument)?.labelEn
       : argument;
   };
+  console.log('field', field);
   const { t } = useTranslation();
   let fieldElement;
   switch (field.comparisonMethod) {
