@@ -80,7 +80,6 @@ def processing_with_finished_program(payment_plan: PaymentPlan, start_date: date
     PaymentPlan.objects.filter(id=payment_plan.id).update(program_cycle=cycle)
 
 
-@transaction.atomic
 def processing_with_active_program(payment_plans_list: list, default_cycle: ProgramCycle) -> None:
     hhs_in_cycles_dict = dict()
     for comparing_with_pp in payment_plans_list:
