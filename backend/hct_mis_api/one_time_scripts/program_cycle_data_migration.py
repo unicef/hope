@@ -1,14 +1,13 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 from random import randint
-from typing import Optional
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
@@ -51,11 +50,9 @@ def generate_unique_cycle_title(start_date: str) -> str:
             return cycle_name
 
 
-def create_new_program_cycle(
-    program_id: str, status: str, start_date: str, end_date: Optional[str] = None
-) -> ProgramCycle:
+def create_new_program_cycle(program_id: str, status: str, start_date: date, end_date: date) -> ProgramCycle:
     return ProgramCycle.objects.create(
-        title=generate_unique_cycle_title(start_date),
+        title=generate_unique_cycle_title(str(start_date)),
         program_id=program_id,
         status=status,
         start_date=start_date,
@@ -64,10 +61,9 @@ def create_new_program_cycle(
     )
 
 
-def processing_with_finished_program(payment_plan: PaymentPlan, start_date: str, end_date: str) -> None:
+def processing_with_finished_program(payment_plan: PaymentPlan, start_date: date, end_date: date) -> None:
     # update if exists or create new cycle
-    if ProgramCycle.objects.filter(program_id=payment_plan.program_id).exists():
-        cycle = ProgramCycle.objects.filter(program_id=payment_plan.program_id).first()
+    if cycle := ProgramCycle.objects.filter(program_id=payment_plan.program_id).first():
         if cycle.start_date != start_date:
             cycle.start_date = start_date
         if cycle.end_date != end_date:
@@ -84,90 +80,95 @@ def processing_with_finished_program(payment_plan: PaymentPlan, start_date: str,
     PaymentPlan.objects.filter(id=payment_plan.id).update(program_cycle=cycle)
 
 
-def processing_with_active_program(payment_plan: PaymentPlan) -> None:
-    logger.info(f"** ** Processing Payment Plan {payment_plan.unicef_id}")
-    payment_plan_start_date = str(payment_plan.start_date.date())
-    payment_plan_end_date = str(payment_plan.end_date.date())
-
-    if ProgramCycle.objects.filter(program_id=payment_plan.program_id).exists():
-        cycle = ProgramCycle.objects.filter(program_id=payment_plan.program_id).first()
-    else:
-        cycle = create_new_program_cycle(
-            str(payment_plan.program_id), ProgramCycle.ACTIVE, payment_plan_start_date, payment_plan_end_date
+@transaction.atomic
+def processing_with_active_program(payment_plans_list: list, default_cycle: ProgramCycle) -> None:
+    hhs_in_cycles_dict = dict()
+    for comparing_with_pp in payment_plans_list:
+        new_hh_ids = set(
+            [str(hh_id) for hh_id in comparing_with_pp.eligible_payments.values_list("household_id", flat=True)]
         )
+        cycles = (
+            ProgramCycle.objects.filter(program_id=comparing_with_pp.program_id).exclude(id=default_cycle.id).only("id")
+        )
+        for cycle in cycles:
+            cycle_id_str = str(cycle.id)
+            if cycle_id_str not in hhs_in_cycles_dict:
+                hhs_in_cycles_dict[cycle_id_str] = set(
+                    [
+                        str(hh_id)
+                        for hh_id in Payment.objects.filter(parent__program_cycle=cycle).values_list(
+                            "household_id", flat=True
+                        )
+                    ]
+                )
+            hh_ids_in_cycles = hhs_in_cycles_dict[cycle_id_str]
 
-    # check if any conflicts in the cycle
-    new_hh_ids = set(payment_plan.eligible_payments.values_list("household_id", flat=True))
-    for comparing_with_payment_plan in PaymentPlan.objects.filter(program_cycle=cycle):
-        hh_ids_in_cycles = set(comparing_with_payment_plan.eligible_payments.values_list("household_id", flat=True))
-        # create new cycle if any conflicts
-        if new_hh_ids.intersection(hh_ids_in_cycles):
-            cycle = create_new_program_cycle(
-                str(payment_plan.program_id), ProgramCycle.ACTIVE, payment_plan_start_date, payment_plan_end_date
-            )
+            # check any conflicts
+            if new_hh_ids.intersection(hh_ids_in_cycles):
+                continue
+
+            TargetPopulation.objects.filter(id=comparing_with_pp.target_population_id).update(program_cycle=cycle)
+            comparing_with_pp.program_cycle = cycle
+            hhs_in_cycles_dict[cycle_id_str].update(new_hh_ids)
             break
-    # update TP
-    TargetPopulation.objects.filter(id=payment_plan.target_population_id).update(program_cycle=cycle)
-    # update Payment Plan
-    PaymentPlan.objects.filter(id=payment_plan.id).update(program_cycle=cycle)
 
-    # adjust cycle start and end dates based on PaymentPlan
-    # if cycle start date if after than payment plan
+        if not comparing_with_pp.program_cycle:
+            cycle = create_new_program_cycle(
+                str(comparing_with_pp.program_id),
+                ProgramCycle.ACTIVE,
+                comparing_with_pp.start_date.date(),
+                comparing_with_pp.end_date.date(),
+            )
+            TargetPopulation.objects.filter(id=comparing_with_pp.target_population_id).update(program_cycle=cycle)
+            comparing_with_pp.program_cycle = cycle
+            hhs_in_cycles_dict[str(cycle.id)] = new_hh_ids
 
-    cycle_start_date = (
-        datetime.strptime(cycle.start_date, "%Y-%m-%d").date()
-        if isinstance(cycle.start_date, str)
-        else cycle.start_date
-    )
-    cycle_end_date = (
-        datetime.strptime(cycle.end_date, "%Y-%m-%d").date() if isinstance(cycle.end_date, str) else cycle.end_date
-    )
-
-    if cycle_start_date and cycle_start_date > payment_plan.start_date.date():
-        cycle.start_date = payment_plan.start_date.date()
-    # if cycle end date is before payment plan end date
-    if (cycle_end_date and cycle_end_date < payment_plan.end_date.date()) or not cycle_end_date:
-        cycle.end_date = payment_plan.end_date.date()
-    if cycle.status != ProgramCycle.ACTIVE:
-        cycle.status = ProgramCycle.ACTIVE
-    cycle.save(update_fields=["start_date", "end_date", "status"])
+        comparing_with_pp.save(update_fields=["program_cycle"])
 
 
-def program_cycle_data_migration(batch_size: int = 1000) -> None:
+def program_cycle_data_migration() -> None:
     start_time = timezone.now()
     logger.info("Hi There! Started Program Cycle Data Migration.")
     logger.info(f"Cycles before running creation: {ProgramCycle.objects.all().count()}")
     for ba in BusinessArea.objects.all().only("id", "name"):
         logger.info(f"Started processing {ba.name}...")
 
-        for program in Program.objects.filter(business_area_id=ba.id).only(
-            "id", "name", "start_date", "end_date", "status"
+        # FINISHED program
+        for finished_program in (
+            Program.objects.filter(business_area_id=ba.id)
+            .exclude(status__in=[Program.DRAFT, Program.ACTIVE])
+            .only("id", "name", "start_date", "end_date", "status")
         ):
-            logger.info(f"** Creating Program Cycles for program {program.name}")
+            start_data = finished_program.start_date
+            end_data = finished_program.end_date
+            for pp in PaymentPlan.objects.filter(program_id=finished_program.id).only(
+                "id", "program_id", "target_population_id"
+            ):
+                processing_with_finished_program(pp, start_data, end_data)
 
-            payment_plan_qs = PaymentPlan.objects.filter(program_id=program.id).only("id")
-            pp_count = payment_plan_qs.count()
-            pp_ids = list(payment_plan_qs.values_list("id", flat=True))
+        # ACTIVE program
+        for program in (
+            Program.objects.filter(business_area_id=ba.id)
+            .exclude(status=Program.FINISHED)
+            .only("id", "name", "start_date", "end_date", "status")
+        ):
+            with transaction.atomic():
+                logger.info(f"** Creating Program Cycles for program {program.name}")
 
-            for batch_start in range(0, pp_count, batch_size):
-                batch_end = batch_start + batch_size
-                logger.info(f"Handling {batch_start} - {batch_end}/{pp_count} PaymentPlans")
+                default_cycle = ProgramCycle.objects.filter(program_id=program.id).first()
+                if not default_cycle:
+                    logger.info(f"###### Default Program Cycles for program {program.name} does not exist")
+                    continue
 
-                processing_ids = pp_ids[batch_start:batch_end]
-                for pp_id in processing_ids:
-                    payment_plan = PaymentPlan.objects.select_related("target_population").get(id=pp_id)
+                payment_plan_qs = (
+                    PaymentPlan.objects.filter(program_id=program.id).order_by("start_date", "created_at").only("id")
+                )
+                PaymentPlan.objects.filter(program_id=program.id).update(program_cycle=None)
+                processing_with_active_program(list(payment_plan_qs), default_cycle)
+                default_cycle.delete()
 
-                    if program.status == Program.FINISHED:
-                        start_data = program.start_date
-                        end_data = program.end_date
-
-                        processing_with_finished_program(payment_plan, start_data, end_data)
-
-                    if program.status == Program.ACTIVE:
-                        processing_with_active_program(payment_plan)
-
-            # after create all Cycles let's adjust dates to find any overlapping
-            adjust_cycles_start_and_end_dates_for_active_program(program)
+                # after create all Cycles let's adjust dates to find any overlapping
+                adjust_cycles_start_and_end_dates_for_active_program(program)
 
     logger.info(f"Cycles after creation: {ProgramCycle.objects.all().count()}")
     print(f"Congratulations! Done in {timezone.now() - start_time}")

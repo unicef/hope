@@ -127,7 +127,6 @@ class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
         fields = ["title", "start_date", "end_date"]
 
     def validate_title(self, value: str) -> str:
-        value = value.strip()
         if (
             ProgramCycle.objects.filter(title=value, program=self.instance.program, is_removed=False)
             .exclude(id=self.instance.id)
@@ -135,20 +134,12 @@ class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
         ):
             raise serializers.ValidationError("A ProgramCycle with this title already exists.")
 
-        if value is None or "":
-            raise serializers.ValidationError("Not possible leave the Programme Cycle title empty.")
-
         return value
 
     def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
         program = self.instance.program
         if program.status != Program.ACTIVE:
             raise serializers.ValidationError("Update Programme Cycle is possible only for Active Programme.")
-
-        if data.get("start_date") is None:
-            raise serializers.ValidationError(
-                {"start_date": "Not possible leave the Programme Cycle start date empty."}
-            )
 
         if self.instance.end_date and "end_date" in data and data.get("end_date") is None:
             raise serializers.ValidationError(

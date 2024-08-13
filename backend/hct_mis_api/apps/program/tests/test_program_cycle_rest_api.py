@@ -356,13 +356,6 @@ class ProgramCycleUpdateSerializerTest(TestCase):
             serializer.is_valid(raise_exception=True)
         self.assertIn("Update Programme Cycle is possible only for Active Programme.", str(error.exception))
 
-    def test_validate_start_date(self) -> None:
-        data = {"end_date": "2023-11-11"}
-        serializer = ProgramCycleUpdateSerializer(instance=self.cycle, data=data, context=self.get_serializer_context())
-        with self.assertRaises(ValidationError) as error:
-            serializer.is_valid(raise_exception=True)
-        self.assertIn("Not possible leave the Programme Cycle start date empty.", str(error.exception))
-
     def test_validate_end_date(self) -> None:
         self.cycle.end_date = datetime.strptime("2023-02-03", "%Y-%m-%d").date()
         self.cycle.save()

@@ -252,8 +252,9 @@ class TestProgramCycleDataMigration(TestCase):
         self.tp_3.refresh_from_db()
 
         self.assertEqual(self.pp_1.program_cycle.status, ProgramCycle.ACTIVE)
-        self.assertEqual(self.pp_1.program_cycle.title, "Cycle for program_active_001")
-        self.assertEqual(self.tp_3.program_cycle.title, "Cycle for program_active_001")
+        # new default name starts with "Cycle {PaymentPlan.start_date} ({random 4 digits})"
+        self.assertTrue(self.pp_1.program_cycle.title.startswith("Cycle 2022-10-10 ("))
+        self.assertTrue(self.tp_3.program_cycle.title.startswith("Cycle 2022-10-10 ("))
 
         self.pp_3.refresh_from_db()
         self.pp_4.refresh_from_db()
@@ -261,7 +262,7 @@ class TestProgramCycleDataMigration(TestCase):
         self.tp_4.refresh_from_db()
 
         self.assertEqual(self.pp_3.program_cycle.status, ProgramCycle.ACTIVE)
-        self.assertEqual(self.pp_3.program_cycle.title, "Cycle 01")
+        self.assertTrue(self.pp_3.program_cycle.title.startswith("Cycle 2022-10-10 ("))
         self.assertEqual(self.pp_4.program_cycle.status, ProgramCycle.ACTIVE)
         self.assertEqual(self.pp_5.program_cycle.status, ProgramCycle.ACTIVE)
         self.assertEqual(self.tp_4.program_cycle.status, ProgramCycle.ACTIVE)
@@ -270,5 +271,4 @@ class TestProgramCycleDataMigration(TestCase):
         values_cycles = ProgramCycle.objects.filter(program=program_active_002).values(
             "title", "start_date", "end_date"
         )
-        print("result: \n", values_cycles)
         self.assertEqual(values_cycles.count(), 3)
