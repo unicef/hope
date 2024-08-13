@@ -14,7 +14,12 @@ from graphql import GraphQLError
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, FileTemp, FlexibleAttribute
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    DataCollectingType,
+    FileTemp,
+    FlexibleAttribute,
+)
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.fixtures import BankAccountInfoFactory, create_household
 from hct_mis_api.apps.household.models import Household
