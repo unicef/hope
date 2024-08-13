@@ -12,7 +12,7 @@ from pytest_django import DjangoDbBlocker
 from selenium.webdriver import Keys
 
 from selenium_tests.page_object.grievance.details_grievance_page import GrievanceDetailsPage
-from selenium_tests.page_object.grievance.grievance_tickets import GrievanceTickets
+from selenium_tests.page_object.grievance.new_ticket import NewTicket
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -361,7 +361,7 @@ class TestFeedback:
 
     def test_create_linked_ticket(
         self,
-        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
         pageGrievanceDetailsPage: GrievanceDetailsPage,
         pageFeedback: Feedback,
         pageFeedbackDetails: FeedbackDetailsPage,
@@ -371,4 +371,22 @@ class TestFeedback:
         pageFeedback.getNavGrievance().click()
         pageFeedback.getNavFeedback().click()
         pageFeedback.waitForRows()[0].click()
-        pageFeedback.screenshot("0")
+        pageFeedbackDetails.getButtonCreateLinkedTicket().click()
+        pageGrievanceNewTicket.getSelectCategory().click()
+        pageGrievanceNewTicket.select_option_by_name("Referral")
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getHouseholdTab()
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getReceivedConsent().click()
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getDescription().send_keys("Linked Ticket Referral")
+        pageGrievanceNewTicket.getButtonNext().click()
+        assert "Linked Ticket Referral" in pageGrievanceDetailsPage.getTicketDescription().text
+        grievance_ticket = pageGrievanceDetailsPage.getTitle().text.split(" ")[-1]
+        pageFeedback.getNavFeedback().click()
+        assert grievance_ticket in pageFeedback.waitForRows()[0].text
+        pageFeedback.waitForRows()[0].click()
+        assert grievance_ticket in pageGrievanceDetailsPage.getTitle().text.split(" ")[-1]
+        pageFeedback.getNavFeedback().click()
+        pageFeedbackDetails.screenshot("0")
+        pageFeedback.waitForRows()[0].find_elements("tag name", "a")[0].click()
