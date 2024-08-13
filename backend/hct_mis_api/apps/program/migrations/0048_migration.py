@@ -20,4 +20,9 @@ class Migration(migrations.Migration):
             name='deduplication_set_id',
             field=models.UUIDField(blank=True, null=True),
         ),
+        migrations.AddField(
+            model_name='program',
+            name='biometric_deduplication_threshold',
+            field=models.FloatField(default=90.0, help_text='Threshold for Face Image Deduplication'),
+        ),
     ]

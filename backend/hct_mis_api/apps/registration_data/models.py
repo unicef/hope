@@ -8,12 +8,14 @@ from django.core.validators import (
     MinLengthValidator,
     ProhibitNullCharactersValidator,
 )
-from django.db import models
-from django.db.models import Q
+from django.db import models, transaction
+from django.db.models import ExpressionWrapper, Q
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.mis_datahub.models import Program
+from hct_mis_api.apps.payment.api.dataclasses import SimilarityPair
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
     ConcurrencyModel,
@@ -312,3 +314,79 @@ class KoboImportedSubmission(models.Model):
         blank=True,
         on_delete=models.CASCADE,
     )
+
+
+class DeduplicationEngineSimilarityPairManager(models.Manager):
+    def get_queryset(self) -> models.QuerySet:
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                is_duplicate=ExpressionWrapper(
+                    models.Case(
+                        models.When(similarity_score__gte=models.F("program__threshold"), then=models.Value(True)),
+                        default=models.Value(False),
+                        output_field=models.BooleanField(),
+                    ),
+                    output_field=models.BooleanField(),
+                )
+            )
+        )
+
+    def duplicates(self) -> models.QuerySet:
+        return self.get_queryset().filter(is_duplicate=True)
+
+
+class DeduplicationEngineSimilarityPair(models.Model):
+    program = models.ForeignKey(
+        "program.Program", related_name="deduplication_engine_similarity_pairs", on_delete=models.CASCADE
+    )
+    individual1 = models.ForeignKey(
+        "household.Individual", related_name="biometric_duplicates_1", on_delete=models.CASCADE
+    )
+    individual2 = models.ForeignKey(
+        "household.Individual", related_name="biometric_duplicates_2", on_delete=models.CASCADE
+    )
+    similarity_score = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+    )
+
+    objects = DeduplicationEngineSimilarityPairManager()
+
+    class Meta:
+        unique_together = ("individual1", "individual2")
+        constraints = [
+            # Prevent an Individual from being marked as a duplicate of itself
+            models.CheckConstraint(
+                check=~models.Q(individual1=models.F("individual2")), name="prevent_self_duplicates"
+            ),
+            # Enforce a consistent ordering to avoid duplicate entries in reverse
+            models.CheckConstraint(
+                check=models.Q(individual1__lt=models.F("individual2")), name="individual1_lt_individual2"
+            ),
+        ]
+
+    @classmethod
+    def bulk_add_duplicates(cls, deduplication_set_id: str, duplicates_data: List[SimilarityPair]) -> None:
+        program = Program.objects.get(deduplication_set_id=deduplication_set_id)
+        duplicates = []
+        for pair in duplicates_data:
+            # Ensure consistent ordering of individual1 and individual2
+            individual1, individual2 = sorted([pair.first_individual, pair.second_individual], key=lambda x: x.id)
+
+            duplicates.append(
+                cls(
+                    program=program,
+                    individual1_id=individual1.id,
+                    individual2_id=individual2.id,
+                    similarity_score=pair.similarity_score,
+                )
+            )
+
+        with transaction.atomic():
+            cls.objects.bulk_create(duplicates, ignore_conflicts=True)
+
+    @property
+    def _is_duplicate(self) -> bool:
+        return self.similarity_score >= self.program.biometric_deduplication_threshold

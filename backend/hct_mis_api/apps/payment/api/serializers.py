@@ -56,3 +56,14 @@ class PaymentPlanBulkActionSerializer(serializers.Serializer):
     ids = serializers.ListField(child=serializers.CharField())
     action = serializers.ChoiceField(PaymentPlan.Action.choices)
     comment = serializers.CharField(required=False, allow_blank=True)
+
+
+class IndividualSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    file = serializers.CharField()
+
+
+class SimilarityPairSerializer(serializers.Serializer):
+    similarity_score = serializers.DecimalField(max_digits=5, decimal_places=2)
+    first_individual = IndividualSerializer()
+    second_individual = IndividualSerializer()

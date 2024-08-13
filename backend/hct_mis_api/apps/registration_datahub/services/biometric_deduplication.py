@@ -1,11 +1,16 @@
 import logging
 import uuid
+from typing import List
 
 from django.db.models import QuerySet
 
 from hct_mis_api.apps.household.models import Individual
+from hct_mis_api.apps.payment.api.dataclasses import SimilarityPair
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_data.models import (
+    DeduplicationEngineSimilarityPair,
+    RegistrationDataImport,
+)
 from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
@@ -103,3 +108,17 @@ class BiometricDeduplicationService:
         RegistrationDataImport.objects.filter(program=program, deduplication_engine_status__isnull=True).update(
             status=RegistrationDataImport.DEDUP_ENGINE_PENDING
         )
+
+    def create_duplicates(self, deduplication_set_id: str, similarity_pairs: List[SimilarityPair]) -> None:
+        DeduplicationEngineSimilarityPair.bulk_add_duplicates(deduplication_set_id, similarity_pairs)
+
+    def mark_rdis_as_deduplicated(self, deduplication_set_id: str) -> None:
+        program = Program.objects.get(deduplication_set_id=deduplication_set_id)
+        RegistrationDataImport.objects.filter(
+            program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+        ).update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED)
+
+    def create_biometric_deduplication_grievance_tickets_for_already_merged_individuals(
+        self, deduplication_set_id: str
+    ) -> None:
+        pass

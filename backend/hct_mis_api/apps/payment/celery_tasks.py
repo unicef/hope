@@ -33,6 +33,9 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service impo
 from hct_mis_api.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
 )
+from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
+    BiometricDeduplicationService,
+)
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 
@@ -666,3 +669,12 @@ def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def create_biometric_deduplication_grievance_tickets_for_already_merged_individuals(deduplication_set_id: str) -> None:
+    BiometricDeduplicationService().create_biometric_deduplication_grievance_tickets_for_already_merged_individuals(
+        deduplication_set_id
+    )

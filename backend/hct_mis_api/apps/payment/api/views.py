@@ -2,6 +2,8 @@ from typing import Any, Optional
 
 from django.db import transaction
 from django.db.models import QuerySet
+from django.http import HttpRequest
+from django.views.decorators.csrf import csrf_exempt
 
 from constance import config
 from django_filters import rest_framework as filters
@@ -12,6 +14,7 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
@@ -27,13 +30,24 @@ from hct_mis_api.apps.core.api.mixins import BusinessAreaMixin, BusinessAreaProg
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.api.caches import PaymentPlanKeyConstructor
+from hct_mis_api.apps.payment.api.dataclasses import (
+    SimilarityIndividual,
+    SimilarityPair,
+)
 from hct_mis_api.apps.payment.api.filters import PaymentPlanFilter
 from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanBulkActionSerializer,
     PaymentPlanSerializer,
+    SimilarityPairSerializer,
+)
+from hct_mis_api.apps.payment.celery_tasks import (
+    create_biometric_deduplication_grievance_tickets_for_already_merged_individuals,
 )
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
+    BiometricDeduplicationService,
+)
 
 
 class PaymentPlanMixin:
@@ -160,3 +174,32 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
             PaymentPlan.Action.REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW.name,
         }
         return action_to_permissions_map.get(action_name)
+
+
+class WebhookDeduplicationView(APIView):
+    serializer_class = SimilarityPairSerializer
+
+    @csrf_exempt
+    def post(self, request: HttpRequest, set_id: str) -> Response:
+        serializer = self.serializer_class(data=request.data, many=True)
+
+        if serializer.is_valid():
+            similarity_pairs = [
+                SimilarityPair(
+                    similarity_score=item["similarity_score"],
+                    first_individual=SimilarityIndividual(**item["first_individual"]),
+                    second_individual=SimilarityIndividual(**item["second_individual"]),
+                )
+                for item in serializer.validated_data
+            ]
+            service = BiometricDeduplicationService()
+            service.create_duplicates(set_id, similarity_pairs)
+            service.mark_rdis_as_deduplicated(set_id)
+            transaction.on_commit(
+                lambda: create_biometric_deduplication_grievance_tickets_for_already_merged_individuals.delay(set_id)
+            )
+
+            return Response(status=status.HTTP_200_OK)
+
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
