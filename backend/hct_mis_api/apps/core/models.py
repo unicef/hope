@@ -217,11 +217,7 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
     label = JSONField(default=dict)
     hint = JSONField(default=dict)
     group = models.ForeignKey(
-        "core.FlexibleAttributeGroup",
-        on_delete=models.CASCADE,
-        related_name="flex_attributes",
-        null=True,
-        blank=True
+        "core.FlexibleAttributeGroup", on_delete=models.CASCADE, related_name="flex_attributes", null=True, blank=True
     )
     associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
 

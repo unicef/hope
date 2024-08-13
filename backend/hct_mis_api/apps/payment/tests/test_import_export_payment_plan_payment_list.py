@@ -14,7 +14,7 @@ from graphql import GraphQLError
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, FileTemp
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, FileTemp, FlexibleAttribute
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.fixtures import BankAccountInfoFactory, create_household
 from hct_mis_api.apps.household.models import Household
@@ -349,6 +349,56 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertEqual(payment_row[bank_branch_name_index], "BranchJPMorgan")
         self.assertEqual(payment_row[bank_name_index], "JPMorgan")
         self.assertEqual(payment_row[bank_account_number_index], "362277220020615398848112903")
+
+    def test_payment_row_flex_fields(self) -> None:
+        core_fields = [
+            "account_holder_name",
+            "bank_branch_name",
+            "bank_name",
+            "bank_account_number",
+        ]
+        decimal_flexible_attribute = FlexibleAttribute(
+            type=FlexibleAttribute.DECIMAL,
+            name="flex_decimal_i_f",
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        )
+        decimal_flexible_attribute.save()
+        date_flexible_attribute = FlexibleAttribute(
+            type=FlexibleAttribute.DECIMAL,
+            name="flex_date_i_f",
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        )
+        date_flexible_attribute.save()
+        flex_fields = [
+            decimal_flexible_attribute.name,
+            date_flexible_attribute.name,
+        ]
+
+        export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
+        fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(
+            core_fields=core_fields, flex_fields=flex_fields
+        )
+        headers = export_service.prepare_headers(fsp_xlsx_template)
+        household, _ = create_household({"size": 1})
+        individual = household.primary_collector
+        individual.flex_fields = {
+            decimal_flexible_attribute.name: 123.45,
+            date_flexible_attribute.name: "2021-01-01",
+        }
+        individual.save()
+        BankAccountInfoFactory(
+            individual=individual,
+            account_holder_name="Kowalski",
+            bank_branch_name="BranchJPMorgan",
+            bank_name="JPMorgan",
+            bank_account_number="362277220020615398848112903",
+        )
+        payment = PaymentFactory(parent=self.payment_plan, household=household)
+        decimal_flexible_attribute_index = headers.index(decimal_flexible_attribute.name)
+        date_flexible_attribute_index = headers.index(date_flexible_attribute.name)
+        payment_row = export_service.get_payment_row(payment, fsp_xlsx_template)
+        self.assertEqual(payment_row[decimal_flexible_attribute_index], 123.45)
+        self.assertEqual(payment_row[date_flexible_attribute_index], "2021-01-01")
 
     def test_export_per_fsp_if_no_fsp_assigned_to_payment_plan(self) -> None:
         self.payment_plan.status = PaymentPlan.Status.ACCEPTED
