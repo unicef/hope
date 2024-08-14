@@ -18,7 +18,7 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldF
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import ExtendedConnection, FieldAttributeNode
-from hct_mis_api.apps.core.utils import decode_id_string_required, decode_id_string
+from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification

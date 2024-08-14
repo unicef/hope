@@ -9,16 +9,26 @@ from django.utils import timezone
 from freezegun import freeze_time
 from pytz import utc
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import (
+    FlexibleAttributeForPDUFactory,
+    PeriodicFieldDataFactory,
+    create_afghanistan,
+)
+from hct_mis_api.apps.core.models import PeriodicFieldData
 from hct_mis_api.apps.household.fixtures import (
     create_household,
     create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.models import (
+    TargetingCriteria,
+    TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,
+    TargetingIndividualRuleFilterBlock,
+    TargetPopulation,
 )
 
 
@@ -26,8 +36,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         households = []
-        create_afghanistan()
-        business_area = BusinessArea.objects.first()
+        business_area = create_afghanistan()
         (household, individuals) = create_household_and_individuals(
             {
                 "size": 1,
@@ -296,8 +305,7 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         call_command("loadflexfieldsattributes")
-        create_afghanistan()
-        business_area = BusinessArea.objects.first()
+        business_area = create_afghanistan()
         (household, individuals) = create_household(
             {
                 "size": 1,
@@ -331,7 +339,7 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
             comparison_method="EQUALS",
             field_name="total_households_h_f",
             arguments=[4],
-            is_flex_field=True,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_NOT_PDU,
         )
         query = rule_filter.get_query()
         queryset = Household.objects.filter(query)
@@ -343,7 +351,7 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
             comparison_method="CONTAINS",
             field_name="treatment_facility_h_f",
             arguments=["other_public", "private_doctor"],
-            is_flex_field=True,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_NOT_PDU,
         )
         query = rule_filter.get_query()
         queryset = Household.objects.filter(query)
@@ -354,7 +362,7 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
             comparison_method="CONTAINS",
             field_name="treatment_facility_h_f",
             arguments=["other_public", "government_health_center"],
-            is_flex_field=True,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_NOT_PDU,
         )
         query = rule_filter.get_query()
         queryset = Household.objects.filter(query)
@@ -365,7 +373,7 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
             comparison_method="NOT_CONTAINS",
             field_name="treatment_facility_h_f",
             arguments=["other_public", "government_health_center"],
-            is_flex_field=True,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_NOT_PDU,
         )
         query = rule_filter.get_query()
         queryset = Household.objects.filter(query)
@@ -376,8 +384,487 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
             comparison_method="CONTAINS",
             field_name="other_treatment_facility_h_f",
             arguments=["other"],
-            is_flex_field=True,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_NOT_PDU,
         )
         query = rule_filter.get_query()
         queryset = Household.objects.filter(query)
         self.assertEqual(queryset.count(), 1)
+
+
+class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        call_command("loadflexfieldsattributes")
+        business_area = create_afghanistan()
+        cls.program = ProgramFactory(name="Test Program for PDU Flex Rule Filter", business_area=business_area)
+
+        pdu_data_string = PeriodicFieldDataFactory(
+            subtype=PeriodicFieldData.STRING,
+            number_of_rounds=2,
+            rounds_names=["Round 1", "Rounds 2"],
+        )
+        cls.pdu_field_string = FlexibleAttributeForPDUFactory(
+            program=cls.program,
+            label="PDU Field STRING",
+            pdu_data=pdu_data_string,
+        )
+
+        pdu_data_decimal = PeriodicFieldDataFactory(
+            subtype=PeriodicFieldData.DECIMAL,
+            number_of_rounds=1,
+            rounds_names=["Round 1"],
+        )
+        cls.pdu_field_decimal = FlexibleAttributeForPDUFactory(
+            program=cls.program,
+            label="PDU Field DECIMAL",
+            pdu_data=pdu_data_decimal,
+        )
+
+        pdu_data_date = PeriodicFieldDataFactory(
+            subtype=PeriodicFieldData.DATE,
+            number_of_rounds=1,
+            rounds_names=["Round 1"],
+        )
+        cls.pdu_field_date = FlexibleAttributeForPDUFactory(
+            program=cls.program,
+            label="PDU Field DATE",
+            pdu_data=pdu_data_date,
+        )
+
+        pdu_data_boolean = PeriodicFieldDataFactory(
+            subtype=PeriodicFieldData.BOOLEAN,
+            number_of_rounds=1,
+            rounds_names=["Round 1"],
+        )
+        cls.pdu_field_boolean = FlexibleAttributeForPDUFactory(
+            program=cls.program,
+            label="PDU Field BOOLEAN",
+            pdu_data=pdu_data_boolean,
+        )
+
+        (household, individuals) = create_household(
+            {
+                "size": 1,
+                "business_area": business_area,
+                "program": cls.program,
+            },
+            {
+                "flex_fields": {
+                    cls.pdu_field_string.name: {"1": {"value": None}, "2": {"value": None}},
+                    cls.pdu_field_decimal.name: {"1": {"value": 2.5}},
+                    cls.pdu_field_date.name: {"1": {"value": "2020-10-10"}},
+                    cls.pdu_field_boolean.name: {"1": {"value": True}},
+                },
+                "business_area": business_area,
+            },
+        )
+        cls.individual1 = individuals[0]
+        cls.other_treatment_facility = household
+        (household, individuals) = create_household(
+            {
+                "size": 1,
+                "business_area": business_area,
+                "program": cls.program,
+            },
+            {
+                "flex_fields": {
+                    cls.pdu_field_string.name: {
+                        "1": {"value": "some value", "collection_date": "2020-10-10"},
+                        "2": {"value": None},
+                    },
+                    cls.pdu_field_decimal.name: {"1": {"value": 3}},
+                    cls.pdu_field_date.name: {"1": {"value": None}},
+                    cls.pdu_field_boolean.name: {"1": {"value": True}},
+                },
+                "business_area": business_area,
+            },
+        )
+        cls.individual2 = individuals[0]
+        (household, individuals) = create_household(
+            {
+                "size": 1,
+                "business_area": business_area,
+                "program": cls.program,
+            },
+            {
+                "flex_fields": {
+                    cls.pdu_field_string.name: {
+                        "1": {"value": "different value", "collection_date": "2020-10-10"},
+                        "2": {"value": None},
+                    },
+                    cls.pdu_field_decimal.name: {"1": {"value": 4}},
+                    cls.pdu_field_date.name: {"1": {"value": "2020-02-10"}},
+                    cls.pdu_field_boolean.name: {"1": {"value": None}},
+                },
+                "business_area": business_area,
+            },
+        )
+        cls.individual3 = individuals[0]
+        (household, individuals) = create_household(
+            {
+                "size": 1,
+                "business_area": business_area,
+                "program": cls.program,
+            },
+            {
+                "flex_fields": {
+                    cls.pdu_field_string.name: {
+                        "1": {"value": "other value", "collection_date": "2020-10-10"},
+                        "2": {"value": None},
+                    },
+                    cls.pdu_field_decimal.name: {"1": {"value": None}},
+                    cls.pdu_field_date.name: {"1": {"value": "2022-10-10"}},
+                    cls.pdu_field_boolean.name: {"1": {"value": False}},
+                },
+                "business_area": business_area,
+            },
+        )
+        cls.individual4 = individuals[0]
+        cls.individuals = [cls.individual1, cls.individual2, cls.individual3, cls.individual4]
+
+    def get_individuals_queryset(self) -> QuerySet[Household]:
+        return Individual.objects.filter(pk__in=[ind.pk for ind in self.individuals])
+
+    def test_rule_filter_pdu_string_contains(self) -> None:
+        tp = TargetPopulation(program=self.program)
+        tc = TargetingCriteria()
+        tc.target_population = tp
+        tc.save()
+        tcr = TargetingCriteriaRule()
+        tcr.targeting_criteria = tc
+        tcr.save()
+        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+            targeting_criteria_rule=tcr, target_only_hoh=False
+        )
+        individuals_filters_block.save()
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            individuals_filters_block=individuals_filters_block,
+            comparison_method="CONTAINS",
+            field_name=self.pdu_field_string.name,
+            arguments=["some"],
+            round_number=1,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_PDU,
+        )
+        query = rule_filter.get_query()
+
+        queryset = self.get_individuals_queryset().filter(query).distinct()
+        self.assertEqual(queryset.count(), 1)
+        self.assertIn(self.individual2, queryset)
+
+    def test_rule_filter_pdu_string_is_null(self) -> None:
+        tp = TargetPopulation(program=self.program)
+        tc = TargetingCriteria()
+        tc.target_population = tp
+        tc.save()
+        tcr = TargetingCriteriaRule()
+        tcr.targeting_criteria = tc
+        tcr.save()
+        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+            targeting_criteria_rule=tcr, target_only_hoh=False
+        )
+        individuals_filters_block.save()
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            individuals_filters_block=individuals_filters_block,
+            comparison_method="IS_NULL",
+            field_name=self.pdu_field_string.name,
+            arguments=[None],
+            round_number=1,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_PDU,
+        )
+        query = rule_filter.get_query()
+
+        queryset = self.get_individuals_queryset().filter(query).distinct()
+        self.assertEqual(queryset.count(), 1)
+        self.assertIn(self.individual1, queryset)
+
+    def test_rule_filter_pdu_decimal_range(self) -> None:
+        tp = TargetPopulation(program=self.program)
+        tc = TargetingCriteria()
+        tc.target_population = tp
+        tc.save()
+        tcr = TargetingCriteriaRule()
+        tcr.targeting_criteria = tc
+        tcr.save()
+        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+            targeting_criteria_rule=tcr, target_only_hoh=False
+        )
+        individuals_filters_block.save()
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            individuals_filters_block=individuals_filters_block,
+            comparison_method="RANGE",
+            field_name=self.pdu_field_decimal.name,
+            arguments=["2", "3"],
+            round_number=1,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_PDU,
+        )
+        query = rule_filter.get_query()
+
+        queryset = self.get_individuals_queryset().filter(query).distinct()
+        self.assertEqual(queryset.count(), 2)
+        self.assertIn(self.individual1, queryset)
+        self.assertIn(self.individual2, queryset)
+
+    def test_rule_filter_pdu_decimal_greater_than(self) -> None:
+        tp = TargetPopulation(program=self.program)
+        tc = TargetingCriteria()
+        tc.target_population = tp
+        tc.save()
+        tcr = TargetingCriteriaRule()
+        tcr.targeting_criteria = tc
+        tcr.save()
+        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+            targeting_criteria_rule=tcr, target_only_hoh=False
+        )
+        individuals_filters_block.save()
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            individuals_filters_block=individuals_filters_block,
+            comparison_method="GREATER_THAN",
+            field_name=self.pdu_field_decimal.name,
+            arguments=["2.5"],
+            round_number=1,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_PDU,
+        )
+        query = rule_filter.get_query()
+
+        queryset = self.get_individuals_queryset().filter(query).distinct()
+        self.assertEqual(queryset.count(), 3)
+        self.assertIn(self.individual1, queryset)
+        self.assertIn(self.individual2, queryset)
+        self.assertIn(self.individual3, queryset)
+
+    def test_rule_filter_pdu_decimal_less_than(self) -> None:
+        tp = TargetPopulation(program=self.program)
+        tc = TargetingCriteria()
+        tc.target_population = tp
+        tc.save()
+        tcr = TargetingCriteriaRule()
+        tcr.targeting_criteria = tc
+        tcr.save()
+        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+            targeting_criteria_rule=tcr, target_only_hoh=False
+        )
+        individuals_filters_block.save()
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            individuals_filters_block=individuals_filters_block,
+            comparison_method="LESS_THAN",
+            field_name=self.pdu_field_decimal.name,
+            arguments=["2.5"],
+            round_number=1,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_PDU,
+        )
+        query = rule_filter.get_query()
+        queryset = self.get_individuals_queryset().filter(query).distinct()
+
+        self.assertEqual(queryset.count(), 1)
+        self.assertIn(self.individual1, queryset)
+
+    def test_rule_filter_pdu_decimal_is_null(self) -> None:
+        tp = TargetPopulation(program=self.program)
+        tc = TargetingCriteria()
+        tc.target_population = tp
+        tc.save()
+        tcr = TargetingCriteriaRule()
+        tcr.targeting_criteria = tc
+        tcr.save()
+        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+            targeting_criteria_rule=tcr, target_only_hoh=False
+        )
+        individuals_filters_block.save()
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            individuals_filters_block=individuals_filters_block,
+            comparison_method="IS_NULL",
+            field_name=self.pdu_field_decimal.name,
+            arguments=[None],
+            round_number=1,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_PDU,
+        )
+        query = rule_filter.get_query()
+
+        queryset = self.get_individuals_queryset().filter(query).distinct()
+        self.assertEqual(queryset.count(), 1)
+        self.assertIn(self.individual4, queryset)
+
+    def test_rule_filter_pdu_date_range(self) -> None:
+        tp = TargetPopulation(program=self.program)
+        tc = TargetingCriteria()
+        tc.target_population = tp
+        tc.save()
+        tcr = TargetingCriteriaRule()
+        tcr.targeting_criteria = tc
+        tcr.save()
+        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+            targeting_criteria_rule=tcr, target_only_hoh=False
+        )
+        individuals_filters_block.save()
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            individuals_filters_block=individuals_filters_block,
+            comparison_method="RANGE",
+            field_name=self.pdu_field_date.name,
+            arguments=["2020-02-10", "2020-10-10"],
+            round_number=1,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_PDU,
+        )
+        query = rule_filter.get_query()
+
+        queryset = self.get_individuals_queryset().filter(query).distinct()
+        self.assertEqual(queryset.count(), 2)
+        self.assertIn(self.individual1, queryset)
+        self.assertIn(self.individual3, queryset)
+
+    def test_rule_filter_pdu_date_greater_than(self) -> None:
+        tp = TargetPopulation(program=self.program)
+        tc = TargetingCriteria()
+        tc.target_population = tp
+        tc.save()
+        tcr = TargetingCriteriaRule()
+        tcr.targeting_criteria = tc
+        tcr.save()
+        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+            targeting_criteria_rule=tcr, target_only_hoh=False
+        )
+        individuals_filters_block.save()
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            individuals_filters_block=individuals_filters_block,
+            comparison_method="GREATER_THAN",
+            field_name=self.pdu_field_date.name,
+            arguments=["2020-10-11"],
+            round_number=1,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_PDU,
+        )
+        query = rule_filter.get_query()
+
+        queryset = self.get_individuals_queryset().filter(query).distinct()
+        self.assertEqual(queryset.count(), 1)
+        self.assertIn(self.individual4, queryset)
+
+    def test_rule_filter_pdu_date_less_than(self) -> None:
+        tp = TargetPopulation(program=self.program)
+        tc = TargetingCriteria()
+        tc.target_population = tp
+        tc.save()
+        tcr = TargetingCriteriaRule()
+        tcr.targeting_criteria = tc
+        tcr.save()
+        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+            targeting_criteria_rule=tcr, target_only_hoh=False
+        )
+        individuals_filters_block.save()
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            individuals_filters_block=individuals_filters_block,
+            comparison_method="LESS_THAN",
+            field_name=self.pdu_field_date.name,
+            arguments=["2020-10-11"],
+            round_number=1,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_PDU,
+        )
+        query = rule_filter.get_query()
+        queryset = self.get_individuals_queryset().filter(query).distinct()
+
+        self.assertEqual(queryset.count(), 2)
+        self.assertIn(self.individual1, queryset)
+        self.assertIn(self.individual3, queryset)
+
+    def test_rule_filter_pdu_date_is_null(self) -> None:
+        tp = TargetPopulation(program=self.program)
+        tc = TargetingCriteria()
+        tc.target_population = tp
+        tc.save()
+        tcr = TargetingCriteriaRule()
+        tcr.targeting_criteria = tc
+        tcr.save()
+        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+            targeting_criteria_rule=tcr, target_only_hoh=False
+        )
+        individuals_filters_block.save()
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            individuals_filters_block=individuals_filters_block,
+            comparison_method="IS_NULL",
+            field_name=self.pdu_field_date.name,
+            arguments=[None],
+            round_number=1,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_PDU,
+        )
+        query = rule_filter.get_query()
+
+        queryset = self.get_individuals_queryset().filter(query).distinct()
+        self.assertEqual(queryset.count(), 1)
+        self.assertIn(self.individual2, queryset)
+
+    def test_rule_filter_pdu_boolean_true(self) -> None:
+        tp = TargetPopulation(program=self.program)
+        tc = TargetingCriteria()
+        tc.target_population = tp
+        tc.save()
+        tcr = TargetingCriteriaRule()
+        tcr.targeting_criteria = tc
+        tcr.save()
+        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+            targeting_criteria_rule=tcr, target_only_hoh=False
+        )
+        individuals_filters_block.save()
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            individuals_filters_block=individuals_filters_block,
+            comparison_method="EQUALS",
+            field_name=self.pdu_field_boolean.name,
+            arguments=[True],
+            round_number=1,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_PDU,
+        )
+        query = rule_filter.get_query()
+
+        queryset = self.get_individuals_queryset().filter(query).distinct()
+        self.assertEqual(queryset.count(), 2)
+        self.assertIn(self.individual1, queryset)
+        self.assertIn(self.individual2, queryset)
+
+    def test_rule_filter_pdu_boolean_false(self) -> None:
+        tp = TargetPopulation(program=self.program)
+        tc = TargetingCriteria()
+        tc.target_population = tp
+        tc.save()
+        tcr = TargetingCriteriaRule()
+        tcr.targeting_criteria = tc
+        tcr.save()
+        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+            targeting_criteria_rule=tcr, target_only_hoh=False
+        )
+        individuals_filters_block.save()
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            individuals_filters_block=individuals_filters_block,
+            comparison_method="EQUALS",
+            field_name=self.pdu_field_boolean.name,
+            arguments=[False],
+            round_number=1,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_PDU,
+        )
+        query = rule_filter.get_query()
+
+        queryset = self.get_individuals_queryset().filter(query).distinct()
+        self.assertEqual(queryset.count(), 1)
+        self.assertIn(self.individual4, queryset)
+
+    def test_rule_filter_pdu_boolean_is_null(self) -> None:
+        tp = TargetPopulation(program=self.program)
+        tc = TargetingCriteria()
+        tc.target_population = tp
+        tc.save()
+        tcr = TargetingCriteriaRule()
+        tcr.targeting_criteria = tc
+        tcr.save()
+        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+            targeting_criteria_rule=tcr, target_only_hoh=False
+        )
+        individuals_filters_block.save()
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            individuals_filters_block=individuals_filters_block,
+            comparison_method="IS_NULL",
+            field_name=self.pdu_field_boolean.name,
+            arguments=[None],
+            round_number=1,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_PDU,
+        )
+        query = rule_filter.get_query()
+
+        queryset = self.get_individuals_queryset().filter(query).distinct()
+        self.assertEqual(queryset.count(), 1)
+        self.assertIn(self.individual3, queryset)

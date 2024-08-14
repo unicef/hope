@@ -246,7 +246,7 @@ class TargetingCriteriaFilterBase:
         },
         "IS_NULL": {
             "arguments": 1,
-            "lookup": "__isnull",
+            "lookup": "",
             "negative": False,
             "supported_types": ["PDU"],
         },
@@ -280,6 +280,8 @@ class TargetingCriteriaFilterBase:
             return arguments
         type = get_attr_value("type", field_attr, None)
         if type == FlexibleAttribute.PDU:
+            if arguments == [None]:
+                return arguments
             type = field_attr.pdu_data.subtype
         if type == TYPE_DECIMAL:
             return [float(arg) for arg in arguments]
@@ -330,6 +332,13 @@ class TargetingCriteriaFilterBase:
             query = Q(**{f"{lookup}{comparison_attribute.get('lookup')}": argument})
         if comparison_attribute.get("negative"):
             return ~query
+        # ignore null values for PDU flex fields
+        if (
+            self.comparison_method != "IS_NULL"
+            and self.flex_field_classification == FlexFieldClassification.FLEX_FIELD_PDU
+        ):
+            query &= ~Q(**{f"{lookup}": None})
+
         return query
 
     def get_query_for_core_field(self) -> Q:
@@ -361,27 +370,31 @@ class TargetingCriteriaFilterBase:
 
     def get_query_for_flex_field(self) -> Q:
         if self.flex_field_classification == FlexFieldClassification.FLEX_FIELD_PDU:
-            program = self.targeting_criteria_rule.targeting_criteria.target_population.program
-            flex_field_attr = FlexibleAttribute.objects.get(name=self.field_name, program=program)
+            program = (
+                self.individuals_filters_block.targeting_criteria_rule.targeting_criteria.target_population.program
+            )
+            flex_field_attr = FlexibleAttribute.objects.filter(name=self.field_name, program=program).first()
             if not flex_field_attr:
-                logger.error(f"There is no PDU Flex Field Attribute associated with this fieldName {self.field_name} in program {program.name}")
+                logger.error(
+                    f"There is no PDU Flex Field Attribute associated with this fieldName {self.field_name} in program {program.name}"
+                )
                 raise ValidationError(
                     f"There is no PDU Flex Field Attribute associated with this fieldName {self.field_name} in program {program.name}"
                 )
             if not self.round_number:
-                logger.error(f"Round number is required for PDU Flex Field Attribute {self.field_name}")
-                raise ValidationError(f"Round number is required for PDU Flex Field Attribute {self.field_name}")
+                logger.error(f"Round number is missing for PDU Flex Field Attribute {self.field_name}")
+                raise ValidationError(f"Round number is missing for PDU Flex Field Attribute {self.field_name}")
             flex_field_attr_rounds_number = flex_field_attr.pdu_data.number_of_rounds
             if self.round_number > flex_field_attr_rounds_number:
                 logger.error(
-                    f"Round number {self.round_number} is greater than the number of rounds {flex_field_attr_rounds_number} for PDU Flex Field Attribute {self.field_name}"
+                    f"Round number {self.round_number} is greater than the number of rounds for PDU Flex Field Attribute {self.field_name}"
                 )
                 raise ValidationError(
-                    f"Round number {self.round_number} is greater than the number of rounds {flex_field_attr_rounds_number} for PDU Flex Field Attribute {self.field_name}"
+                    f"Round number {self.round_number} is greater than the number of rounds for PDU Flex Field Attribute {self.field_name}"
                 )
-            field_name_combined = f"{flex_field_attr.name}__{self.round_number}"
+            field_name_combined = f"{flex_field_attr.name}__{self.round_number}__value"
         else:
-            flex_field_attr = FlexibleAttribute.objects.get(name=self.field_name, program=None)
+            flex_field_attr = FlexibleAttribute.objects.filter(name=self.field_name, program=None).first()
             if not flex_field_attr:
                 logger.error(f"There is no Flex Field Attributes associated with this fieldName {self.field_name}")
                 raise ValidationError(
