@@ -29,6 +29,8 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_0_with_permi
                                     'fieldName': 'size',
                                     'flexFieldClassification': 'NOT_FLEX_FIELD'
                                 }
+                            ],
+                            'individualsFiltersBlocks': [
                             ]
                         }
                     ]
@@ -284,4 +286,85 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_compari
             ]
         }
     ]
+}
+
+snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_flex_field 1'] = {
+    'data': {
+        'createTargetPopulation': {
+            'targetPopulation': {
+                'hasEmptyCriteria': False,
+                'hasEmptyIdsCriteria': True,
+                'name': 'Example name 5',
+                'status': 'OPEN',
+                'targetingCriteria': {
+                    'householdIds': '',
+                    'individualIds': '',
+                    'rules': [
+                        {
+                            'filters': [
+                            ],
+                            'individualsFiltersBlocks': [
+                                {
+                                    'individualBlockFilters': [
+                                        {
+                                            'arguments': [
+                                                'Average'
+                                            ],
+                                            'comparisonMethod': 'CONTAINS',
+                                            'fieldName': 'flex_field_1',
+                                            'flexFieldClassification': 'FLEX_FIELD_NOT_PDU',
+                                            'roundNumber': None
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                'totalHouseholdsCount': None,
+                'totalIndividualsCount': None
+            }
+        }
+    }
+}
+
+snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_pdu_flex_field 1'] = {
+    'data': {
+        'createTargetPopulation': {
+            'targetPopulation': {
+                'hasEmptyCriteria': False,
+                'hasEmptyIdsCriteria': True,
+                'name': 'Example name 5',
+                'status': 'OPEN',
+                'targetingCriteria': {
+                    'householdIds': '',
+                    'individualIds': '',
+                    'rules': [
+                        {
+                            'filters': [
+                            ],
+                            'individualsFiltersBlocks': [
+                                {
+                                    'individualBlockFilters': [
+                                        {
+                                            'arguments': [
+                                                '2',
+                                                '3.5'
+                                            ],
+                                            'comparisonMethod': 'RANGE',
+                                            'fieldName': 'pdu_field_1',
+                                            'flexFieldClassification': 'FLEX_FIELD_PDU',
+                                            'roundNumber': 1
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                'totalHouseholdsCount': None,
+                'totalIndividualsCount': None
+            }
+        }
+    }
 }
