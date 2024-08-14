@@ -56,5 +56,23 @@
       "data_collecting_type": 1,
       "programme_code": "ABC1"
     }
+  },
+  {
+    "model": "program.programcycle",
+    "pk": "0f9bee36-ad0a-4ceb-90fc-195d389d9879",
+    "fields": {
+      "is_removed": false,
+      "created_at": "2024-08-07T13:41:22.721Z",
+      "updated_at": "2024-08-07T13:41:22.721Z",
+      "last_sync_at": null,
+      "version": 1723037136036459,
+      "unicef_id": "PC-0060-24-000078",
+      "title": "First Cycle In Programme",
+      "status": "ACTIVE",
+      "start_date": "2023-04-01",
+      "end_date": "2023-12-31",
+      "program": "de3a43bf-a755-41ff-a5c0-acd02cf3d244",
+      "created_by": null
+    }
   }
 ]

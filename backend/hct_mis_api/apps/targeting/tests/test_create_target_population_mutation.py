@@ -10,7 +10,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
@@ -18,18 +18,21 @@ class TestCreateTargetPopulationMutation(APITestCase):
     MUTATION_QUERY = """
     mutation CreateTargetPopulation($createTargetPopulationInput: CreateTargetPopulationInput!) {
       createTargetPopulation(input: $createTargetPopulationInput) {
-        targetPopulation{
+        targetPopulation {
           name
           status
           totalHouseholdsCount
           totalIndividualsCount
+          programCycle {
+            status
+          }
           hasEmptyCriteria
           hasEmptyIdsCriteria
-            targetingCriteria{
+            targetingCriteria {
             householdIds
             individualIds
-            rules{
-              filters{
+            rules {
+              filters {
                 comparisonMethod
                 fieldName
                 arguments
@@ -47,7 +50,10 @@ class TestCreateTargetPopulationMutation(APITestCase):
         cls.user = UserFactory.create()
         create_afghanistan()
         business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.program = ProgramFactory.create(name="program1", status=Program.ACTIVE, business_area=business_area)
+        cls.program = ProgramFactory.create(
+            name="program1", status=Program.ACTIVE, business_area=business_area, cycle__status=ProgramCycle.ACTIVE
+        )
+        cls.program_cycle = cls.program.cycles.first()
         create_household(
             {"size": 2, "residence_status": "HOST", "program": cls.program},
         )
@@ -72,6 +78,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                 "name": "Example name 5 ",
                 "businessAreaSlug": "afghanistan",
                 "programId": self.id_to_base64(self.program.id, "ProgramNode"),
+                "programCycleId": self.id_to_base64(self.program_cycle.id, "ProgramCycleNode"),
                 "excludedIds": "",
                 "targetingCriteria": {
                     "rules": [
@@ -109,6 +116,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                 "name": "Example name 5 ",
                 "businessAreaSlug": "afghanistan",
                 "programId": self.id_to_base64(self.program.id, "ProgramNode"),
+                "programCycleId": self.id_to_base64(self.program_cycle.id, "ProgramCycleNode"),
                 "excludedIds": "",
                 "targetingCriteria": {
                     "rules": [
@@ -143,6 +151,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                 "name": "Example name 5",
                 "businessAreaSlug": "afghanistan",
                 "programId": self.id_to_base64(self.program.id, "ProgramNode"),
+                "programCycleId": self.id_to_base64(self.program_cycle.id, "ProgramCycleNode"),
                 "excludedIds": "",
                 "targetingCriteria": {
                     "rules": [
@@ -181,6 +190,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                 "name": "Example name 5",
                 "businessAreaSlug": "afghanistan",
                 "programId": self.id_to_base64(self.program.id, "ProgramNode"),
+                "programCycleId": self.id_to_base64(self.program_cycle.id, "ProgramCycleNode"),
                 "excludedIds": "",
                 "targetingCriteria": {
                     "rules": [
@@ -269,6 +279,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                     "name": f"Test name {num}",
                     "businessAreaSlug": "afghanistan",
                     "programId": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "programCycleId": self.id_to_base64(self.program_cycle.id, "ProgramCycleNode"),
                     "excludedIds": "",
                     "targetingCriteria": targeting_criteria,
                 }
@@ -278,3 +289,44 @@ class TestCreateTargetPopulationMutation(APITestCase):
                 context={"user": self.user},
                 variables=variables,
             )
+
+    def test_create_targeting_if_program_cycle_finished(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_CREATE], self.program.business_area)
+        self.program_cycle.status = Program.FINISHED
+        self.program_cycle.save()
+
+        variables = {
+            "createTargetPopulationInput": {
+                "name": "Example name 5",
+                "businessAreaSlug": "afghanistan",
+                "programId": self.id_to_base64(self.program.id, "ProgramNode"),
+                "programCycleId": self.id_to_base64(self.program_cycle.id, "ProgramCycleNode"),
+                "excludedIds": "",
+                "targetingCriteria": {
+                    "rules": [
+                        {
+                            "filters": [
+                                {
+                                    "comparisonMethod": "EQUALS",
+                                    "fieldName": "size",
+                                    "arguments": [3],
+                                    "isFlexField": False,
+                                }
+                            ]
+                        }
+                    ]
+                },
+            }
+        }
+
+        response_error = self.graphql_request(
+            request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
+            context={"user": self.user},
+            variables=variables,
+        )
+        self.assertEqual(TargetPopulation.objects.count(), 0)
+        assert "errors" in response_error
+        self.assertIn(
+            "Not possible to assign Finished Program Cycle to Targeting",
+            response_error["errors"][0]["message"],
+        )

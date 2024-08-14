@@ -23,6 +23,7 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useProgramContext } from 'src/programContext';
 import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 
 export const CreateTargetPopulationPage = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -33,6 +34,10 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
     name: '',
     criterias: [],
     program: programId,
+    programCycleId: {
+      value: '',
+      name: '',
+    },
     excludedIds: '',
     exclusionReason: '',
     flagExcludeIfActiveAdjudicationTicket: false,
@@ -79,12 +84,16 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
 
   const validationSchema = Yup.object().shape({
     name: Yup.string()
-      .min(3, t('Targeting name should have at least 3 characters.'))
-      .max(255, t('Targeting name should have at most 255 characters.')),
+      .required(t('Targeting Name is required'))
+      .min(3, t('Targeting Name should have at least 3 characters.'))
+      .max(255, t('Targeting Name should have at most 255 characters.')),
     excludedIds: idValidation,
     householdIds: idValidation,
     individualIds: idValidation,
     exclusionReason: Yup.string().max(500, t('Too long')),
+    programCycleId: Yup.object().shape({
+      value: Yup.string().required('Program Cycle is required'),
+    }),
   });
 
   const handleSubmit = async (values): Promise<void> => {
@@ -93,6 +102,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
         variables: {
           input: {
             programId: values.program,
+            programCycleId: values.programCycleId.value,
             name: values.name,
             excludedIds: values.excludedIds,
             exclusionReason: values.exclusionReason,
@@ -116,7 +126,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ submitForm, values }) => (
+      {({ submitForm, values, setFieldValue, errors }) => (
         <Form>
           <AutoSubmitFormOnEnter />
           <CreateTargetPopulationHeader
@@ -131,6 +141,19 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
             <Box pt={3} pb={3}>
               <Typography variant="h6">{t('Targeting Criteria')}</Typography>
             </Box>
+            <Grid container mb={5}>
+              <Grid item xs={6}>
+                <ProgramCycleAutocompleteRest
+                  value={values.programCycleId}
+                  onChange={async (e) => {
+                    await setFieldValue('programCycleId', e);
+                  }}
+                  required
+                  // @ts-ignore
+                  error={errors.programCycleId?.value}
+                />
+              </Grid>
+            </Grid>
             <Grid container>
               <Grid item xs={6}>
                 <Field

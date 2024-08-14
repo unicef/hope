@@ -5,8 +5,22 @@ export const api = {
   },
   cache: new Map(),
 
+  buildParams(data: Record<string, any> = {}) {
+    const params = new URLSearchParams();
+
+    Object.entries(data).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((v) => params.append(key, v.toString()));
+      } else {
+        params.append(key, value.toString());
+      }
+    });
+
+    return params.toString();
+  },
+
   async get(url: string, params: Record<string, any> = {}) {
-    const query = new URLSearchParams(params).toString();
+    const query = this.buildParams(params);
     const cacheKey = url + (query ? `?${query}` : '');
 
     const cached = this.cache.get(cacheKey);
@@ -67,5 +81,40 @@ export const api = {
     }
 
     return { data: JSON.parse(text) };
+  },
+
+  async put(url: string, data: Record<string, any> = {}) {
+    const response = await fetch(`${this.baseURL}${url}`, {
+      method: 'PUT',
+      headers: {
+        ...this.headers,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error puting data to ${url}`);
+    }
+    const text = await response.text();
+    if (!text) {
+      return { data: null };
+    }
+    return { data: JSON.parse(text) };
+  },
+
+  async delete(url: string) {
+    const response = await fetch(`${this.baseURL}${url}`, {
+      method: 'DELETE',
+      headers: {
+        ...this.headers,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error deleting data from ${url}`);
+    }
+    return;
   },
 };

@@ -39,6 +39,15 @@ class TestProgramChoices(APITestCase):
     }
     """
 
+    QUERY_PROGRAM_CYCLE_STATUS_CHOICES = """
+        query ProgramCycleStatusChoices {
+            programCycleStatusChoices{
+                name
+                value
+            }
+        }
+        """
+
     @classmethod
     def setUpTestData(cls) -> None:
         cls.user = UserFactory()
@@ -64,5 +73,11 @@ class TestProgramChoices(APITestCase):
     def test_program_scope_choices(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_PROGRAM_SCOPE_CHOICES,
+            context={"user": self.user},
+        )
+
+    def test_program_cycle_status_choices(self) -> None:
+        self.snapshot_graphql_request(
+            request_string=self.QUERY_PROGRAM_CYCLE_STATUS_CHOICES,
             context={"user": self.user},
         )
