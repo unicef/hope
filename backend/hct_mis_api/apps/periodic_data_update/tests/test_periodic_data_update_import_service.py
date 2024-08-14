@@ -26,6 +26,7 @@ from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_t
 from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_service import (
     PeriodicDataUpdateImportService,
 )
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -70,6 +71,7 @@ class TestPeriodicDataUpdateImportService(TestCase):
             ],
         )
         cls.individual = cls.individuals[0]
+
         cls.string_attribute = create_pdu_flexible_attribute(
             label="String Attribute",
             subtype=PeriodicFieldData.STRING,
@@ -98,6 +100,9 @@ class TestPeriodicDataUpdateImportService(TestCase):
             rounds_names=["May"],
             program=cls.program,
         )
+
+        cls.individual.flex_fields = populate_pdu_with_null_values(cls.program, cls.individual.flex_fields)
+        cls.individual.save()
 
     def prepare_test_data(self, rounds_data: list, rows: list) -> tuple:
         periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
@@ -482,7 +487,6 @@ class TestPeriodicDataUpdateImportService(TestCase):
         service = PeriodicDataUpdateImportService(periodic_data_update_upload)
         service._open_workbook()
         service._read_flexible_attributes()
-        self.individual.flex_fields = {}
         service.set_round_value(self.individual, flexible_attribute.name, 1, "1996-06-21", "2021-05-02")
         self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], "1996-06-21")
         self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
