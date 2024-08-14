@@ -19,7 +19,7 @@ from hct_mis_api.apps.program.models import Program, ProgramCycle
 class ProgramCycleFactory(DjangoModelFactory):
     class Meta:
         model = ProgramCycle
-        django_get_or_create = ("iteration", "program")
+        django_get_or_create = ("program", "title")
 
     status = ProgramCycle.ACTIVE
     start_date = factory.Faker(
@@ -29,13 +29,13 @@ class ProgramCycleFactory(DjangoModelFactory):
         tzinfo=utc,
     )
     end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
-    description = factory.Faker(
+    title = factory.Faker(
         "sentence",
-        nb_words=10,
+        nb_words=3,
         variable_nb_words=True,
         ext_word_list=None,
     )
-    iteration = factory.Sequence(lambda n: n)
+    program = factory.SubFactory("program.fixtures.ProgramFactory")
 
 
 class ProgramFactory(DjangoModelFactory):
@@ -93,11 +93,10 @@ class ProgramFactory(DjangoModelFactory):
     )
 
     @factory.post_generation
-    def program_cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
+    def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
         if not create:
             return
-
-        ProgramCycleFactory(program=self)
+        ProgramCycleFactory(program=self, **kwargs)
 
 
 def get_program_with_dct_type_and_name(

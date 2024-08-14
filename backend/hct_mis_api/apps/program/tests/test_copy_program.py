@@ -325,6 +325,12 @@ class TestCopyProgram(APITestCase):
             self.individuals1[0].individual_collection,
         )
 
+        self.assertIsNotNone(copied_program.cycles.first())
+        self.assertEqual(copied_program.cycles.first().program_id, copied_program.pk)
+        self.assertEqual(copied_program.cycles.first().title, "Default Programme Cycle")
+        self.assertEqual(copied_program.cycles.first().status, "DRAFT")
+        self.assertIsNone(copied_program.cycles.first().end_date)
+
     def test_copy_program_incompatible_collecting_type(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
         copy_data_incompatible = {**self.copy_data}

@@ -9,12 +9,12 @@ import { usePermissions } from '@hooks/usePermissions';
 import { usePaymentPlanQuery } from '@generated/graphql';
 
 export const EditPeopleFollowUpSetUpFspPage = (): React.ReactElement => {
-  const { id } = useParams();
+  const { paymentPlanId } = useParams();
 
   const { data: paymentPlanData, loading: paymentPlanLoading } =
     usePaymentPlanQuery({
       variables: {
-        id,
+        id: paymentPlanId,
       },
       fetchPolicy: 'cache-and-network',
     });

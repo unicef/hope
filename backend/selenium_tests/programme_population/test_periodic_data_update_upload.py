@@ -162,7 +162,7 @@ class TestPeriodicDataUpdateUpload:
             [["Test Value", "2021-05-02"]],
             program,
         )
-        pageIndividuals.selectGlobalProgramFilter(program.name).click()
+        pageIndividuals.selectGlobalProgramFilter(program.name)
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
@@ -202,7 +202,7 @@ class TestPeriodicDataUpdateUpload:
             [["Test Value", "2021-05-02"]],
             program,
         )
-        pageIndividuals.selectGlobalProgramFilter(program.name).click()
+        pageIndividuals.selectGlobalProgramFilter(program.name)
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
@@ -251,7 +251,7 @@ class TestPeriodicDataUpdateUpload:
         with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
             wb.save(tmp_file.name)
             tmp_file.seek(0)
-            pageIndividuals.selectGlobalProgramFilter(program.name).click()
+            pageIndividuals.selectGlobalProgramFilter(program.name)
             pageIndividuals.getNavProgrammePopulation().click()
             pageIndividuals.getNavIndividuals().click()
             pageIndividuals.getTabPeriodicDataUpdates().click()
@@ -289,7 +289,7 @@ class TestPeriodicDataUpdateUpload:
             template=periodic_data_update_template,
             status=PeriodicDataUpdateUpload.Status.SUCCESSFUL,
         )
-        pageIndividuals.selectGlobalProgramFilter(program.name).click()
+        pageIndividuals.selectGlobalProgramFilter(program.name)
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
