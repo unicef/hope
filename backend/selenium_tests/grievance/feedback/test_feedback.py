@@ -12,7 +12,7 @@ from pytest_django import DjangoDbBlocker
 from selenium.webdriver import Keys
 
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.household.models import Household, HOST
+from hct_mis_api.apps.household.models import HOST, Household
 from selenium_tests.helpers.fixtures import get_program_with_dct_type_and_name
 from selenium_tests.page_object.grievance.details_grievance_page import (
     GrievanceDetailsPage,
@@ -442,6 +442,10 @@ class TestFeedback:
         pageFeedbackDetails: FeedbackDetailsPage,
         create_households_and_individuals: Household,
     ) -> None:
+        # Go to Feedback
+        pageFeedback.getNavGrievance().click()
+        pageFeedback.getNavFeedback().click()
+        # Create Feedback
         pageFeedback.getButtonSubmitNewFeedback().click()
         # ToDo: Uncomment after fix 209087
         # pageNewFeedback.getButtonNext().click()

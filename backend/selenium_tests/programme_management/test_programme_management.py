@@ -439,7 +439,6 @@ class TestBusinessAreas:
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
         assert "Business Area" in pageProgrammeDetails.getLabelAreaAccess().text
 
-    # @pytest.mark.skip(reason="Unstable test")
     @pytest.mark.parametrize(
         "test_data",
         [
