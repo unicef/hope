@@ -364,8 +364,8 @@ class TestCreateTargetPopulationMutation(APITestCase):
                                 {
                                     "individualBlockFilters": [
                                         {
-                                            "comparisonMethod": "CONTAINS",
-                                            "arguments": ["asdsaddsaads"],
+                                            "comparisonMethod": "RANGE",
+                                            "arguments": ["2", "3.5"],
                                             "fieldName": "pdu_field_1",
                                             "flexFieldClassification": "FLEX_FIELD_PDU",
                                             "roundNumber": "1",
