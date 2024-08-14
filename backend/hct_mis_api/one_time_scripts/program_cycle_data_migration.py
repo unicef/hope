@@ -171,7 +171,7 @@ def program_cycle_data_migration() -> None:
                 processing_with_active_program(list(payment_plan_qs), default_cycle_id)
 
                 if default_cycle:
-                    default_cycle.delete()
+                    default_cycle.delete(soft=False)
 
                 # after create all Cycles let's adjust dates to find any overlapping
                 adjust_cycles_start_and_end_dates_for_active_program(program)
