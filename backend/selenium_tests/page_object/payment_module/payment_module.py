@@ -6,7 +6,6 @@ from selenium.webdriver.remote.webelement import WebElement
 
 class PaymentModule(BaseComponents):
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    buttonNewPaymentPlan = 'a[data-cy="button-new-payment-plan"]'
     selectFilter = 'div[data-cy="select-filter"]'
     filtersTotalEntitledQuantityFrom = 'div[data-cy="filters-total-entitled-quantity-from"]'
     filtersTotalEntitledQuantityTo = 'div[data-cy="filters-total-entitled-quantity-to"]'
@@ -112,9 +111,6 @@ class PaymentModule(BaseComponents):
 
     def getPageHeaderTitle(self) -> WebElement:
         return self.wait_for(self.pageHeaderTitle)
-
-    def getButtonNewPaymentPlan(self) -> WebElement:
-        return self.wait_for(self.buttonNewPaymentPlan)
 
     def getSelectFilter(self) -> WebElement:
         return self.wait_for(self.selectFilter)
