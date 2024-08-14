@@ -46,7 +46,7 @@ ENV PDM_NO_SELF=True
 ENV PDM_PROJECT=$PDM_PACKAGES
 ENV PYPACKAGES=$PDM_PACKAGES/__pypackages__/3.11
 ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
-    PYTHONPATH=$PYPACKAGES/lib:$CODE:$PYTHONPATH \
+    PYTHONPATH=$PYPACKAGES/lib:$CODE:$PYTHONPATH:$CODE/src \
     PATH=$PYPACKAGES/bin:$PATH \
     XDG_RUNTIME_DIR=/run/user/"${UID}"
 
@@ -117,4 +117,4 @@ RUN NODE_ENV="production" NODE_OPTIONS="--max-old-space-size=4096" yarn build
 
 FROM be-dist AS dist
 
-COPY --chown=hope:hope --from=frontend-builder /fe-build/build ./hct_mis_api/apps/web/static/web
+COPY --chown=hope:hope --from=frontend-builder /fe-build/build ./src/hct_mis_api/apps/web/static/web

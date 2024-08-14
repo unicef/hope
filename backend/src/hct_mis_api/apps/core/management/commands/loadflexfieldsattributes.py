@@ -19,7 +19,7 @@ class Command(BaseCommand):
             dest="file",
             action="store",
             nargs="?",
-            default=f"{settings.PROJECT_ROOT}/../data/FlexibleAttributesInit.xlsx",
+            default=f"{settings.PROJECT_ROOT}/data/FlexibleAttributesInit.xlsx",
             type=str,
             help="file",
         )

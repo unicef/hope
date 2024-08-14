@@ -21,7 +21,7 @@ class Command(BaseCommand):
             dest="file",
             action="store",
             nargs="?",
-            default=f"{settings.PROJECT_ROOT}/../data/country_code_mapping.txt",
+            default=f"{settings.PROJECT_ROOT}/data/country_code_mapping.txt",
             type=str,
             help="file",
         )

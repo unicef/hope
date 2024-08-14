@@ -21,7 +21,7 @@ class Command(BaseCommand):
             dest="file",
             action="store",
             nargs="?",
-            default=f"{settings.PROJECT_ROOT}/../data/GetBusinessAreaList_XML.xml",
+            default=f"{settings.PROJECT_ROOT}/data/GetBusinessAreaList_XML.xml",
             type=str,
             help="file",
         )
