@@ -27,7 +27,7 @@ services:
       - ../backend/report/:/code/report/
       - type: volume
         source: backend-web-app
-        target: /code/hct_mis_api/apps/web
+        target: /code/src/hct_mis_api/apps/web
         volume:
           nocopy: false
     command: |
@@ -51,7 +51,7 @@ services:
       - backend-web-app:/tmp/
     command: |
       sh -c "
-        cp -r ./hct_mis_api/apps/web/* /tmp/
+        cp -r ./src/hct_mis_api/apps/web/* /tmp/
       "
     restart: "no"
 
