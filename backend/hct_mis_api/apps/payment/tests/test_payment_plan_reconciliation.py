@@ -360,7 +360,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                                         "comparisonMethod": "EQUALS",
                                         "arguments": ["True"],
                                         "fieldName": "consent",
-                                        "isFlexField": False,
+                                        "flexFieldClassification": "NOT_FLEX_FIELD",
                                     }
                                 ],
                                 "individualsFiltersBlocks": [],

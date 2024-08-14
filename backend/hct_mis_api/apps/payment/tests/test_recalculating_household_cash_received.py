@@ -132,7 +132,7 @@ class TestRecalculatingCash(APITestCase):
                                 {
                                     "comparisonMethod": "EQUALS",
                                     "fieldName": "consent",
-                                    "isFlexField": False,
+                                    "flexFieldClassification": "NOT_FLEX_FIELD",
                                     "arguments": [True],
                                 }
                             ],
