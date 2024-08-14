@@ -156,10 +156,7 @@ def program_cycle_data_migration() -> None:
                 logger.info(f"** Creating Program Cycles for program {program.name}")
 
                 default_cycle = ProgramCycle.objects.filter(program_id=program.id).first()
-                default_cycle_id: List = []
-                if default_cycle:
-                    default_cycle_id.append(str(default_cycle.id))
-                else:
+                if not default_cycle:
                     logger.info(f"###### Default Program Cycles for program {program.name} does not exist")
 
                 payment_plan_qs = (
@@ -168,6 +165,8 @@ def program_cycle_data_migration() -> None:
                     .only("id", "program_id", "target_population_id")
                 )
                 PaymentPlan.objects.filter(program_id=program.id).update(program_cycle=None)
+                # using list for .exclude__in=[]
+                default_cycle_id = [str(default_cycle.id)] if default_cycle else []
                 processing_with_active_program(list(payment_plan_qs), default_cycle_id)
 
                 if default_cycle:
