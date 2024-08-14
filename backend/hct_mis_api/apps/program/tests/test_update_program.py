@@ -690,9 +690,9 @@ class TestUpdateProgram(APITestCase):
         self.assertIsNone(FlexibleAttribute.objects.filter(name="pdu_field_to_be_removed").first())
         self.assertIsNone(FlexibleAttribute.objects.filter(name="pdu_field_to_be_updated").first())
         self.assertEqual(
-            FlexibleAttribute.objects.filter(name="pdu_field_-_updated").first().pdu_data.subtype, "BOOLEAN"
+            FlexibleAttribute.objects.filter(name="pdu_field_updated").first().pdu_data.subtype, "BOOLEAN"
         )
-        self.assertIsNotNone(FlexibleAttribute.objects.filter(name="pdu_field_-_new").first())
+        self.assertIsNotNone(FlexibleAttribute.objects.filter(name="pdu_field_new").first())
         self.assertIsNotNone(FlexibleAttribute.objects.filter(name="pdu_field_to_be_preserved").first())
 
     def test_update_program_with_pdu_fields_invalid_data(self) -> None:
