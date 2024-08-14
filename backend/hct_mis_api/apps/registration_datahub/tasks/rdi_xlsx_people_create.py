@@ -24,6 +24,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.models import DeliveryMechanismData
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
@@ -181,6 +182,9 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             obj_to_create = self._validate_birth_date(obj_to_create)
             obj_to_create.age_at_registration = calculate_age_at_registration(
                 registration_data_import.created_at, str(obj_to_create.birth_date)
+            )
+            obj_to_create.flex_fields = populate_pdu_with_null_values(
+                registration_data_import.program, obj_to_create.flex_fields
             )
 
             household = self.households[self.index_id]
