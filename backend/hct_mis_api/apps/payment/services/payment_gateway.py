@@ -290,11 +290,11 @@ class PaymentGatewayAPI(BaseAPI):
         GET_DELIVERY_MECHANISMS = "delivery_mechanisms/"
 
     def get_fsps(self) -> List[FspData]:
-        response_data = self._get(self.Endpoints.GET_FSPS)
+        response_data, _ = self._get(self.Endpoints.GET_FSPS)
         return [FspData.create_from_dict(fsp_data) for fsp_data in response_data]
 
     def get_delivery_mechanisms(self) -> List[DeliveryMechanismData]:
-        response_data = self._get(self.Endpoints.GET_DELIVERY_MECHANISMS)
+        response_data, _ = self._get(self.Endpoints.GET_DELIVERY_MECHANISMS)
         return [DeliveryMechanismData.create_from_dict(d) for d in response_data]
 
     def create_payment_instruction(self, data: dict) -> PaymentInstructionData:
