@@ -1,8 +1,10 @@
 import random
 import string
+from datetime import date
 from decimal import Decimal
 from typing import Any, Collection, Optional, Union
 
+from django.conf import settings
 from django.contrib.postgres.fields import CICharField
 from django.core.exceptions import ValidationError
 from django.core.validators import (
@@ -12,16 +14,18 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Q, QuerySet
+from django.db.models import Q, QuerySet, Sum
 from django.db.models.constraints import UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import SoftDeletableModel
+from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
@@ -29,6 +33,7 @@ from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
     SoftDeletableIsVisibleManager,
     TimeStampedUUIDModel,
+    UnicefIdentifiedModel,
 )
 from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
@@ -270,44 +275,123 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         super(Program, self).validate_unique()
 
 
-class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
+class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedModel, AbstractSyncable, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
-            "iteration",
+            "title",
             "status",
             "start_date",
             "end_date",
-            "description",
+            "created_by",
         ],
     )
+    DRAFT = "DRAFT"
     ACTIVE = "ACTIVE"
-    CLOSED = "CLOSED"
+    FINISHED = "FINISHED"
     STATUS_CHOICE = (
+        (DRAFT, _("Draft")),
         (ACTIVE, _("Active")),
-        (CLOSED, _("Closed")),
+        (FINISHED, _("Finished")),
     )
-
-    iteration = models.PositiveIntegerField(
-        validators=[
-            MinValueValidator(1),
-        ],
-        db_index=True,
-        default=1,
-    )
-    status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True)
+    title = models.CharField(_("Title"), max_length=255, null=True, blank=True, default="Default Programme Cycle")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True, default=DRAFT)
     start_date = models.DateField()  # first from program
     end_date = models.DateField(null=True, blank=True)
-    description = models.CharField(
-        blank=True,
-        max_length=255,
-        validators=[MinLengthValidator(3), MaxLengthValidator(255)],
-    )
     program = models.ForeignKey("Program", on_delete=models.CASCADE, related_name="cycles")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name=_("Created by"),
+        related_name="+",
+    )
 
     class Meta:
-        unique_together = ("iteration", "program")
-        ordering = ["program", "iteration"]
+        constraints = [
+            UniqueConstraint(
+                fields=["title", "program", "is_removed"],
+                condition=Q(is_removed=False),
+                name="program_cycle_name_unique_if_not_removed",
+            ),
+        ]
+        ordering = ["start_date"]
         verbose_name = "ProgrammeCycle"
 
+    def clean(self) -> None:
+        if self.end_date and self.end_date < self.start_date:
+            raise ValidationError("End date cannot be before start date.")
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        self.clean()
+        super().save(*args, **kwargs)
+
     def __str__(self) -> str:
-        return f"{self.program.name} - cycle {self.iteration}"
+        return f"{self.title} ({self.status})"
+
+    @property
+    def total_entitled_quantity_usd(self) -> Decimal:
+        total_entitled = self.payment_plans.aggregate(total_entitled=Sum("total_entitled_quantity_usd"))[
+            "total_entitled"
+        ]
+        return total_entitled or Decimal(0.0)
+
+    @property
+    def total_undelivered_quantity_usd(self) -> Decimal:
+        total_undelivered = self.payment_plans.aggregate(total_undelivered=Sum("total_undelivered_quantity_usd"))[
+            "total_undelivered"
+        ]
+        return total_undelivered or Decimal(0.0)
+
+    @property
+    def total_delivered_quantity_usd(self) -> Decimal:
+        total_delivered = self.payment_plans.aggregate(total_delivered=Sum("total_delivered_quantity_usd"))[
+            "total_delivered"
+        ]
+        return total_delivered or Decimal(0.0)
+
+    @property
+    def program_start_date(self) -> date:
+        return self.program.start_date
+
+    @property
+    def program_end_date(self) -> date:
+        return self.program.end_date
+
+    @property
+    def frequency_of_payments(self) -> str:
+        return self.program.get_frequency_of_payments_display()
+
+    def validate_program_active_status(self) -> None:
+        # all changes with Program Cycle are possible within Active Program
+        if self.program.status != Program.ACTIVE:
+            raise DRFValidationError("Program should be within Active status.")
+
+    def validate_payment_plan_status(self) -> None:
+        if (
+            PaymentPlan.objects.filter(program_cycle=self)
+            .exclude(
+                status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
+            )
+            .exists()
+        ):
+            raise DRFValidationError("All Payment Plans and Follow-Up Payment Plans have to be Reconciled.")
+
+    def set_active(self) -> None:
+        self.validate_program_active_status()
+        if self.status in (ProgramCycle.DRAFT, ProgramCycle.FINISHED):
+            self.status = ProgramCycle.ACTIVE
+            self.save()
+
+    def set_draft(self) -> None:
+        self.validate_program_active_status()
+        if self.status == ProgramCycle.ACTIVE:
+            self.status = ProgramCycle.DRAFT
+            self.save()
+
+    def set_finish(self) -> None:
+        self.validate_program_active_status()
+        self.validate_payment_plan_status()
+        if self.status == ProgramCycle.ACTIVE:
+            self.status = ProgramCycle.FINISHED
+            self.save()

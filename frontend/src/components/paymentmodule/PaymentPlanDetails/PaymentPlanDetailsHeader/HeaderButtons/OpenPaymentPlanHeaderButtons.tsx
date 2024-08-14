@@ -6,7 +6,6 @@ import { Link } from 'react-router-dom';
 import { PaymentPlanQuery } from '@generated/graphql';
 import { DeletePaymentPlan } from '../DeletePaymentPlan';
 import { LockPaymentPlan } from '../LockPaymentPlan';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from '../../../../../programContext';
 
 export interface OpenPaymentPlanHeaderButtonsProps {
@@ -23,9 +22,7 @@ export function OpenPaymentPlanHeaderButtons({
   canLock,
 }: OpenPaymentPlanHeaderButtonsProps): React.ReactElement {
   const { t } = useTranslation();
-  const { baseUrl } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
-  const { id, isFollowUp } = paymentPlan;
 
   return (
     <Box display="flex" alignItems="center">
@@ -37,9 +34,7 @@ export function OpenPaymentPlanHeaderButtons({
             color="primary"
             startIcon={<EditRounded />}
             component={Link}
-            to={`/${baseUrl}/payment-module/${
-              isFollowUp ? 'followup-payment-plans' : 'payment-plans'
-            }/${id}/edit`}
+            to={'./edit'}
             disabled={!isActiveProgram}
           >
             {t('Edit')}

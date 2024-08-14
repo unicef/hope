@@ -679,6 +679,7 @@ export type BusinessAreaNodeTargetpopulationSetArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
@@ -764,7 +765,7 @@ export type CashPlanNode = Node & {
   dispersionDate: Scalars['DateTime']['output'];
   distributionLevel: Scalars['String']['output'];
   downPayment?: Maybe<Scalars['String']['output']>;
-  endDate: Scalars['DateTime']['output'];
+  endDate?: Maybe<Scalars['DateTime']['output']>;
   exchangeRate?: Maybe<Scalars['Float']['output']>;
   fundsCommitment?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -773,7 +774,7 @@ export type CashPlanNode = Node & {
   paymentVerificationSummary?: Maybe<PaymentVerificationSummaryNode>;
   program: ProgramNode;
   serviceProvider?: Maybe<ServiceProviderNode>;
-  startDate: Scalars['DateTime']['output'];
+  startDate?: Maybe<Scalars['DateTime']['output']>;
   status: CashPlanStatus;
   statusDate: Scalars['DateTime']['output'];
   totalDeliveredQuantity?: Maybe<Scalars['Float']['output']>;
@@ -1077,6 +1078,7 @@ export type CopyProgramInput = {
 export type CopyTargetPopulationInput = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  programCycleId: Scalars['ID']['input'];
 };
 
 export type CopyTargetPopulationMutationInput = {
@@ -1204,8 +1206,6 @@ export type CreatePaymentPlanInput = {
   currency: Scalars['String']['input'];
   dispersionEndDate: Scalars['Date']['input'];
   dispersionStartDate: Scalars['Date']['input'];
-  endDate: Scalars['Date']['input'];
-  startDate: Scalars['Date']['input'];
   targetingId: Scalars['ID']['input'];
 };
 
@@ -1228,6 +1228,18 @@ export type CreateProgram = {
   __typename?: 'CreateProgram';
   program?: Maybe<ProgramNode>;
   validationErrors?: Maybe<Scalars['Arg']['output']>;
+};
+
+export type CreateProgramCycle = {
+  __typename?: 'CreateProgramCycle';
+  program?: Maybe<ProgramNode>;
+  validationErrors?: Maybe<Scalars['Arg']['output']>;
+};
+
+export type CreateProgramCycleInput = {
+  endDate?: InputMaybe<Scalars['Date']['input']>;
+  startDate: Scalars['Date']['input'];
+  title: Scalars['String']['input'];
 };
 
 export type CreateProgramInput = {
@@ -1286,6 +1298,7 @@ export type CreateTargetPopulationInput = {
   excludedIds: Scalars['String']['input'];
   exclusionReason?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
+  programCycleId: Scalars['ID']['input'];
   programId: Scalars['ID']['input'];
   targetingCriteria: TargetingCriteriaObjectType;
 };
@@ -1405,6 +1418,11 @@ export type DeletePaymentVerificationPlan = {
 export type DeleteProgram = {
   __typename?: 'DeleteProgram';
   ok?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type DeleteProgramCycle = {
+  __typename?: 'DeleteProgramCycle';
+  program?: Maybe<ProgramNode>;
 };
 
 export type DeleteRegistrationDataImport = {
@@ -2797,6 +2815,7 @@ export type HouseholdNodeTargetPopulationsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
@@ -4000,6 +4019,7 @@ export type Mutations = {
   createPaymentPlan?: Maybe<CreatePaymentPlanMutation>;
   createPaymentVerificationPlan?: Maybe<CreateVerificationPlanMutation>;
   createProgram?: Maybe<CreateProgram>;
+  createProgramCycle?: Maybe<CreateProgramCycle>;
   createReport?: Maybe<CreateReport>;
   createSurvey?: Maybe<CreateSurveyMutation>;
   createTargetPopulation?: Maybe<CreateTargetPopulationMutation>;
@@ -4007,6 +4027,7 @@ export type Mutations = {
   deletePaymentPlan?: Maybe<DeletePaymentPlanMutation>;
   deletePaymentVerificationPlan?: Maybe<DeletePaymentVerificationPlan>;
   deleteProgram?: Maybe<DeleteProgram>;
+  deleteProgramCycle?: Maybe<DeleteProgramCycle>;
   deleteRegistrationDataImport?: Maybe<DeleteRegistrationDataImport>;
   deleteTargetPopulation?: Maybe<DeleteTargetPopulationMutationPayload>;
   discardPaymentVerificationPlan?: Maybe<DiscardPaymentVerificationPlan>;
@@ -4050,6 +4071,7 @@ export type Mutations = {
   updatePaymentVerificationReceivedAndReceivedAmount?: Maybe<UpdatePaymentVerificationReceivedAndReceivedAmount>;
   updatePaymentVerificationStatusAndReceivedAmount?: Maybe<UpdatePaymentVerificationStatusAndReceivedAmount>;
   updateProgram?: Maybe<UpdateProgram>;
+  updateProgramCycle?: Maybe<UpdateProgramCycle>;
   updateTargetPopulation?: Maybe<UpdateTargetPopulationMutation>;
   uploadImportDataXlsxFileAsync?: Maybe<UploadImportDataXlsxFileAsync>;
 };
@@ -4241,6 +4263,11 @@ export type MutationsCreateProgramArgs = {
 };
 
 
+export type MutationsCreateProgramCycleArgs = {
+  programCycleData: CreateProgramCycleInput;
+};
+
+
 export type MutationsCreateReportArgs = {
   reportData: CreateReportInput;
 };
@@ -4275,6 +4302,11 @@ export type MutationsDeletePaymentVerificationPlanArgs = {
 
 export type MutationsDeleteProgramArgs = {
   programId: Scalars['String']['input'];
+};
+
+
+export type MutationsDeleteProgramCycleArgs = {
+  programCycleId: Scalars['ID']['input'];
 };
 
 
@@ -4533,6 +4565,12 @@ export type MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs = {
 
 export type MutationsUpdateProgramArgs = {
   programData?: InputMaybe<UpdateProgramInput>;
+  version?: InputMaybe<Scalars['BigInt']['input']>;
+};
+
+
+export type MutationsUpdateProgramCycleArgs = {
+  programCycleData?: InputMaybe<UpdateProgramCycleInput>;
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
@@ -5120,6 +5158,7 @@ export type PaymentPlanNode = Node & {
   paymentVerificationSummary?: Maybe<PaymentVerificationSummaryNode>;
   paymentsConflictsCount?: Maybe<Scalars['Int']['output']>;
   program: ProgramNode;
+  programCycle?: Maybe<ProgramCycleNode>;
   reconciliationSummary?: Maybe<ReconciliationSummaryNode>;
   sourcePaymentPlan?: Maybe<PaymentPlanNode>;
   splitChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
@@ -5585,6 +5624,89 @@ export type PositiveFeedbackTicketExtras = {
   individual?: InputMaybe<Scalars['ID']['input']>;
 };
 
+export type ProgramCycleNode = Node & {
+  __typename?: 'ProgramCycleNode';
+  createdAt: Scalars['DateTime']['output'];
+  createdBy?: Maybe<UserNode>;
+  endDate?: Maybe<Scalars['Date']['output']>;
+  id: Scalars['ID']['output'];
+  isRemoved: Scalars['Boolean']['output'];
+  lastSyncAt?: Maybe<Scalars['DateTime']['output']>;
+  paymentPlans: PaymentPlanNodeConnection;
+  program: ProgramNode;
+  startDate: Scalars['Date']['output'];
+  status: ProgramCycleStatus;
+  targetPopulations: TargetPopulationNodeConnection;
+  title?: Maybe<Scalars['String']['output']>;
+  totalDeliveredQuantityUsd?: Maybe<Scalars['Float']['output']>;
+  totalEntitledQuantityUsd?: Maybe<Scalars['Float']['output']>;
+  totalUndeliveredQuantityUsd?: Maybe<Scalars['Float']['output']>;
+  unicefId?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+  version: Scalars['BigInt']['output'];
+};
+
+
+export type ProgramCycleNodePaymentPlansArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type ProgramCycleNodeTargetPopulationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  businessArea?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
+  createdAtRange?: InputMaybe<Scalars['String']['input']>;
+  createdAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
+  createdAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
+  createdByName?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  households?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
+  program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
+  statusNot?: InputMaybe<Scalars['String']['input']>;
+  totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
+  totalHouseholdsCountMin?: InputMaybe<Scalars['Int']['input']>;
+  totalHouseholdsCountWithValidPhoneNoMax?: InputMaybe<Scalars['Int']['input']>;
+  totalHouseholdsCountWithValidPhoneNoMin?: InputMaybe<Scalars['Int']['input']>;
+  totalIndividualsCountMax?: InputMaybe<Scalars['Int']['input']>;
+  totalIndividualsCountMin?: InputMaybe<Scalars['Int']['input']>;
+  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+export type ProgramCycleNodeConnection = {
+  __typename?: 'ProgramCycleNodeConnection';
+  edgeCount?: Maybe<Scalars['Int']['output']>;
+  edges: Array<Maybe<ProgramCycleNodeEdge>>;
+  pageInfo: PageInfo;
+  totalCount?: Maybe<Scalars['Int']['output']>;
+};
+
+export type ProgramCycleNodeEdge = {
+  __typename?: 'ProgramCycleNodeEdge';
+  cursor: Scalars['String']['output'];
+  node?: Maybe<ProgramCycleNode>;
+};
+
+export enum ProgramCycleStatus {
+  Active = 'ACTIVE',
+  Draft = 'DRAFT',
+  Finished = 'FINISHED'
+}
+
 export enum ProgramFrequencyOfPayments {
   OneOff = 'ONE_OFF',
   Regular = 'REGULAR'
@@ -5603,6 +5725,7 @@ export type ProgramNode = Node & {
   cashPlus: Scalars['Boolean']['output'];
   cashplanSet: CashPlanNodeConnection;
   createdAt: Scalars['DateTime']['output'];
+  cycles?: Maybe<ProgramCycleNodeConnection>;
   dataCollectingType?: Maybe<DataCollectingTypeNode>;
   description: Scalars['String']['output'];
   endDate: Scalars['Date']['output'];
@@ -5671,6 +5794,22 @@ export type ProgramNodeCashplanSetArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type ProgramNodeCyclesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  endDate?: InputMaybe<Scalars['Date']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  startDate?: InputMaybe<Scalars['Date']['input']>;
+  status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  totalDeliveredQuantityUsdFrom?: InputMaybe<Scalars['Float']['input']>;
+  totalDeliveredQuantityUsdTo?: InputMaybe<Scalars['Float']['input']>;
 };
 
 
@@ -5790,6 +5929,7 @@ export type ProgramNodeTargetpopulationSetArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
@@ -5976,6 +6116,8 @@ export type Query = {
   paymentVerificationStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   pduSubtypeChoices?: Maybe<Array<Maybe<PduSubtypeChoiceObject>>>;
   program?: Maybe<ProgramNode>;
+  programCycle?: Maybe<ProgramCycleNode>;
+  programCycleStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   programFrequencyOfPaymentsChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   programScopeChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   programSectorChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
@@ -6112,6 +6254,7 @@ export type QueryAllActiveTargetPopulationsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
@@ -6457,6 +6600,7 @@ export type QueryAllPaymentPlansArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   program?: InputMaybe<Scalars['String']['input']>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
   sourcePaymentPlanId?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
@@ -6677,6 +6821,7 @@ export type QueryAllTargetPopulationArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
@@ -6955,6 +7100,11 @@ export type QueryPaymentVerificationPlanArgs = {
 
 
 export type QueryProgramArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryProgramCycleArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -7542,6 +7692,7 @@ export type RuleCommitNodeTargetPopulationsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
@@ -8049,6 +8200,7 @@ export type TargetPopulationNode = Node & {
   paymentPlans: PaymentPlanNodeConnection;
   paymentRecords: PaymentRecordNodeConnection;
   program?: Maybe<ProgramNode>;
+  programCycle?: Maybe<ProgramCycleNode>;
   selections: Array<HouseholdSelectionNode>;
   sentToDatahub: Scalars['Boolean']['output'];
   status: TargetPopulationStatus;
@@ -8740,9 +8892,7 @@ export type UpdatePaymentPlanInput = {
   currency?: InputMaybe<Scalars['String']['input']>;
   dispersionEndDate?: InputMaybe<Scalars['Date']['input']>;
   dispersionStartDate?: InputMaybe<Scalars['Date']['input']>;
-  endDate?: InputMaybe<Scalars['Date']['input']>;
   paymentPlanId: Scalars['ID']['input'];
-  startDate?: InputMaybe<Scalars['Date']['input']>;
   targetingId?: InputMaybe<Scalars['ID']['input']>;
 };
 
@@ -8765,6 +8915,19 @@ export type UpdateProgram = {
   __typename?: 'UpdateProgram';
   program?: Maybe<ProgramNode>;
   validationErrors?: Maybe<Scalars['Arg']['output']>;
+};
+
+export type UpdateProgramCycle = {
+  __typename?: 'UpdateProgramCycle';
+  program?: Maybe<ProgramNode>;
+  validationErrors?: Maybe<Scalars['Arg']['output']>;
+};
+
+export type UpdateProgramCycleInput = {
+  endDate?: InputMaybe<Scalars['Date']['input']>;
+  programCycleId: Scalars['ID']['input'];
+  startDate?: InputMaybe<Scalars['Date']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UpdateProgramInput = {
@@ -8792,6 +8955,7 @@ export type UpdateTargetPopulationInput = {
   exclusionReason?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['ID']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
+  programCycleId?: InputMaybe<Scalars['ID']['input']>;
   programId?: InputMaybe<Scalars['ID']['input']>;
   targetingCriteria?: InputMaybe<TargetingCriteriaObjectType>;
   vulnerabilityScoreMax?: InputMaybe<Scalars['Decimal']['input']>;
@@ -9054,6 +9218,7 @@ export type UserBusinessAreaNodeTargetpopulationSetArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
@@ -9173,6 +9338,7 @@ export type UserNodeChangedTargetPopulationsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
@@ -9276,6 +9442,7 @@ export type UserNodeFinalizedTargetPopulationsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
@@ -9361,6 +9528,7 @@ export type UserNodeTargetPopulationsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
@@ -9493,7 +9661,7 @@ export type ImportedIndividualDetailedFragment = { __typename?: 'ImportedIndivid
 
 export type TargetPopulationMinimalFragment = { __typename: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, createdAt: any, updatedAt: any, totalHouseholdsCount?: number | null, totalHouseholdsCountWithValidPhoneNo?: number | null, totalIndividualsCount?: number | null, program?: { __typename: 'ProgramNode', id: string, name: string } | null, createdBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null };
 
-export type TargetPopulationDetailedFragment = { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any, isSocialWorkerProgram?: boolean | null } | null, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds: string, individualIds: string, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null } | null };
+export type TargetPopulationDetailedFragment = { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any, isSocialWorkerProgram?: boolean | null } | null, programCycle?: { __typename: 'ProgramCycleNode', id: string, title?: string | null } | null, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds: string, individualIds: string, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null } | null };
 
 export type CreateFeedbackTicketMutationVariables = Exact<{
   input: CreateFeedbackInput;
@@ -10085,35 +10253,35 @@ export type FinalizeTpMutationVariables = Exact<{
 }>;
 
 
-export type FinalizeTpMutation = { __typename?: 'Mutations', finalizeTargetPopulation?: { __typename?: 'FinalizeTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any, isSocialWorkerProgram?: boolean | null } | null, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds: string, individualIds: string, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null } | null } | null } | null };
+export type FinalizeTpMutation = { __typename?: 'Mutations', finalizeTargetPopulation?: { __typename?: 'FinalizeTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any, isSocialWorkerProgram?: boolean | null } | null, programCycle?: { __typename: 'ProgramCycleNode', id: string, title?: string | null } | null, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds: string, individualIds: string, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null } | null } | null } | null };
 
 export type LockTpMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type LockTpMutation = { __typename?: 'Mutations', lockTargetPopulation?: { __typename?: 'LockTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any, isSocialWorkerProgram?: boolean | null } | null, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds: string, individualIds: string, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null } | null } | null } | null };
+export type LockTpMutation = { __typename?: 'Mutations', lockTargetPopulation?: { __typename?: 'LockTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any, isSocialWorkerProgram?: boolean | null } | null, programCycle?: { __typename: 'ProgramCycleNode', id: string, title?: string | null } | null, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds: string, individualIds: string, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null } | null } | null } | null };
 
 export type RebuildTpMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type RebuildTpMutation = { __typename?: 'Mutations', targetPopulationRebuild?: { __typename?: 'RebuildTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any, isSocialWorkerProgram?: boolean | null } | null, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds: string, individualIds: string, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null } | null } | null } | null };
+export type RebuildTpMutation = { __typename?: 'Mutations', targetPopulationRebuild?: { __typename?: 'RebuildTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any, isSocialWorkerProgram?: boolean | null } | null, programCycle?: { __typename: 'ProgramCycleNode', id: string, title?: string | null } | null, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds: string, individualIds: string, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null } | null } | null } | null };
 
 export type SetSteficonRuleOnTargetPopulationMutationVariables = Exact<{
   input: SetSteficonRuleOnTargetPopulationMutationInput;
 }>;
 
 
-export type SetSteficonRuleOnTargetPopulationMutation = { __typename?: 'Mutations', setSteficonRuleOnTargetPopulation?: { __typename?: 'SetSteficonRuleOnTargetPopulationMutationPayload', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any, isSocialWorkerProgram?: boolean | null } | null, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds: string, individualIds: string, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null } | null } | null } | null };
+export type SetSteficonRuleOnTargetPopulationMutation = { __typename?: 'Mutations', setSteficonRuleOnTargetPopulation?: { __typename?: 'SetSteficonRuleOnTargetPopulationMutationPayload', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any, isSocialWorkerProgram?: boolean | null } | null, programCycle?: { __typename: 'ProgramCycleNode', id: string, title?: string | null } | null, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds: string, individualIds: string, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null } | null } | null } | null };
 
 export type UnlockTpMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type UnlockTpMutation = { __typename?: 'Mutations', unlockTargetPopulation?: { __typename?: 'UnlockTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any, isSocialWorkerProgram?: boolean | null } | null, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds: string, individualIds: string, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null } | null } | null } | null };
+export type UnlockTpMutation = { __typename?: 'Mutations', unlockTargetPopulation?: { __typename?: 'UnlockTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any, isSocialWorkerProgram?: boolean | null } | null, programCycle?: { __typename: 'ProgramCycleNode', id: string, title?: string | null } | null, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds: string, individualIds: string, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null } | null } | null } | null };
 
 export type UpdateTpMutationVariables = Exact<{
   input: UpdateTargetPopulationInput;
@@ -10512,10 +10680,11 @@ export type AllPaymentPlansForTableQueryVariables = Exact<{
   dispersionEndDate?: InputMaybe<Scalars['Date']['input']>;
   isFollowUp?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Scalars['String']['input']>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type AllPaymentPlansForTableQuery = { __typename?: 'Query', allPaymentPlans?: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', cursor: string, node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, name?: string | null, isFollowUp: boolean, status: PaymentPlanStatus, currency: PaymentPlanCurrency, currencyName?: string | null, startDate?: any | null, endDate?: any | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, totalHouseholdsCount: number, totalIndividualsCount: number, totalEntitledQuantity?: number | null, totalDeliveredQuantity?: number | null, totalUndeliveredQuantity?: number | null, followUps: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null } | null } | null> }, createdBy: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string }, program: { __typename?: 'ProgramNode', id: string, name: string }, targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string } } | null } | null> } | null };
+export type AllPaymentPlansForTableQuery = { __typename?: 'Query', allPaymentPlans?: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', cursor: string, node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, name?: string | null, isFollowUp: boolean, status: PaymentPlanStatus, currency: PaymentPlanCurrency, currencyName?: string | null, startDate?: any | null, endDate?: any | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, totalHouseholdsCount: number, totalIndividualsCount: number, totalEntitledQuantity?: number | null, totalDeliveredQuantity?: number | null, totalUndeliveredQuantity?: number | null, followUps: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null } | null } | null> }, createdBy: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string }, program: { __typename?: 'ProgramNode', id: string, name: string }, targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string } } | null } | null> } | null };
 
 export type AvailableFspsForDeliveryMechanismsQueryVariables = Exact<{
   input: AvailableFspsForDeliveryMechanismsInput;
@@ -10555,7 +10724,7 @@ export type AllCashPlansQueryVariables = Exact<{
 }>;
 
 
-export type AllCashPlansQuery = { __typename?: 'Query', allCashPlans?: { __typename?: 'CashPlanNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'CashPlanNodeEdge', cursor: string, node?: { __typename?: 'CashPlanNode', id: string, caId?: string | null, assistanceThrough: string, totalNumberOfHouseholds?: number | null, deliveryType?: string | null, startDate: any, endDate: any, totalPersonsCovered: number, dispersionDate: any, assistanceMeasurement: string, status: CashPlanStatus, currency?: string | null, totalEntitledQuantity?: number | null, totalDeliveredQuantity?: number | null, totalUndeliveredQuantity?: number | null, updatedAt: any, serviceProvider?: { __typename?: 'ServiceProviderNode', id: string, caId: string, fullName?: string | null } | null, program: { __typename?: 'ProgramNode', id: string, name: string }, paymentVerificationSummary?: { __typename?: 'PaymentVerificationSummaryNode', id: string, status: PaymentVerificationSummaryStatus } | null } | null } | null> } | null };
+export type AllCashPlansQuery = { __typename?: 'Query', allCashPlans?: { __typename?: 'CashPlanNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'CashPlanNodeEdge', cursor: string, node?: { __typename?: 'CashPlanNode', id: string, caId?: string | null, assistanceThrough: string, totalNumberOfHouseholds?: number | null, deliveryType?: string | null, startDate?: any | null, endDate?: any | null, totalPersonsCovered: number, dispersionDate: any, assistanceMeasurement: string, status: CashPlanStatus, currency?: string | null, totalEntitledQuantity?: number | null, totalDeliveredQuantity?: number | null, totalUndeliveredQuantity?: number | null, updatedAt: any, serviceProvider?: { __typename?: 'ServiceProviderNode', id: string, caId: string, fullName?: string | null } | null, program: { __typename?: 'ProgramNode', id: string, name: string }, paymentVerificationSummary?: { __typename?: 'PaymentVerificationSummaryNode', id: string, status: PaymentVerificationSummaryStatus } | null } | null } | null> } | null };
 
 export type AllCashPlansAndPaymentPlansQueryVariables = Exact<{
   businessArea: Scalars['String']['input'];
@@ -10622,7 +10791,7 @@ export type CashPlanQueryVariables = Exact<{
 }>;
 
 
-export type CashPlanQuery = { __typename?: 'Query', cashPlan?: { __typename?: 'CashPlanNode', id: string, version: any, canCreatePaymentVerificationPlan?: boolean | null, availablePaymentRecordsCount?: number | null, name: string, startDate: any, endDate: any, updatedAt: any, status: CashPlanStatus, deliveryType?: string | null, fundsCommitment?: string | null, downPayment?: string | null, dispersionDate: any, assistanceThrough: string, caId?: string | null, caHashId?: any | null, bankReconciliationSuccess?: number | null, bankReconciliationError?: number | null, totalNumberOfHouseholds?: number | null, serviceProvider?: { __typename?: 'ServiceProviderNode', id: string, caId: string, fullName?: string | null } | null, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, unicefId?: string | null, adminUrl?: string | null, status: PaymentVerificationPlanStatus, sampleSize?: number | null, receivedCount?: number | null, notReceivedCount?: number | null, respondedCount?: number | null, verificationChannel: PaymentVerificationPlanVerificationChannel, sampling: PaymentVerificationPlanSampling, receivedWithProblemsCount?: number | null, rapidProFlowId: string, confidenceInterval?: number | null, marginOfError?: number | null, activationDate?: any | null, completionDate?: any | null, excludedAdminAreasFilter?: Array<string | null> | null, sexFilter?: string | null, xlsxFileExporting: boolean, hasXlsxFile?: boolean | null, xlsxFileWasDownloaded?: boolean | null, xlsxFileImported: boolean, ageFilter?: { __typename?: 'AgeFilterObject', min?: number | null, max?: number | null } | null } | null } | null> } | null, paymentVerificationSummary?: { __typename?: 'PaymentVerificationSummaryNode', id: string, createdAt: any, updatedAt: any, status: PaymentVerificationSummaryStatus, activationDate?: any | null, completionDate?: any | null } | null, program: { __typename?: 'ProgramNode', id: string, name: string, caId?: string | null }, paymentItems: { __typename?: 'PaymentRecordNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'PaymentRecordNodeEdge', node?: { __typename?: 'PaymentRecordNode', targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string } } | null } | null> } } | null };
+export type CashPlanQuery = { __typename?: 'Query', cashPlan?: { __typename?: 'CashPlanNode', id: string, version: any, canCreatePaymentVerificationPlan?: boolean | null, availablePaymentRecordsCount?: number | null, name: string, startDate?: any | null, endDate?: any | null, updatedAt: any, status: CashPlanStatus, deliveryType?: string | null, fundsCommitment?: string | null, downPayment?: string | null, dispersionDate: any, assistanceThrough: string, caId?: string | null, caHashId?: any | null, bankReconciliationSuccess?: number | null, bankReconciliationError?: number | null, totalNumberOfHouseholds?: number | null, serviceProvider?: { __typename?: 'ServiceProviderNode', id: string, caId: string, fullName?: string | null } | null, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, unicefId?: string | null, adminUrl?: string | null, status: PaymentVerificationPlanStatus, sampleSize?: number | null, receivedCount?: number | null, notReceivedCount?: number | null, respondedCount?: number | null, verificationChannel: PaymentVerificationPlanVerificationChannel, sampling: PaymentVerificationPlanSampling, receivedWithProblemsCount?: number | null, rapidProFlowId: string, confidenceInterval?: number | null, marginOfError?: number | null, activationDate?: any | null, completionDate?: any | null, excludedAdminAreasFilter?: Array<string | null> | null, sexFilter?: string | null, xlsxFileExporting: boolean, hasXlsxFile?: boolean | null, xlsxFileWasDownloaded?: boolean | null, xlsxFileImported: boolean, ageFilter?: { __typename?: 'AgeFilterObject', min?: number | null, max?: number | null } | null } | null } | null> } | null, paymentVerificationSummary?: { __typename?: 'PaymentVerificationSummaryNode', id: string, createdAt: any, updatedAt: any, status: PaymentVerificationSummaryStatus, activationDate?: any | null, completionDate?: any | null } | null, program: { __typename?: 'ProgramNode', id: string, name: string, caId?: string | null }, paymentItems: { __typename?: 'PaymentRecordNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'PaymentRecordNodeEdge', node?: { __typename?: 'PaymentRecordNode', targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string } } | null } | null> } } | null };
 
 export type IndividualPhotosQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -11296,6 +11465,7 @@ export type AllTargetPopulationsQueryVariables = Exact<{
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
   businessArea?: InputMaybe<Scalars['String']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
+  programCycle?: InputMaybe<Scalars['String']['input']>;
   createdAtRange?: InputMaybe<Scalars['String']['input']>;
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
@@ -11308,7 +11478,7 @@ export type TargetPopulationQueryVariables = Exact<{
 }>;
 
 
-export type TargetPopulationQuery = { __typename?: 'Query', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any, isSocialWorkerProgram?: boolean | null } | null, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds: string, individualIds: string, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null } | null } | null };
+export type TargetPopulationQuery = { __typename?: 'Query', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any, isSocialWorkerProgram?: boolean | null } | null, programCycle?: { __typename: 'ProgramCycleNode', id: string, title?: string | null } | null, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds: string, individualIds: string, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null } | null } | null };
 
 export type TargetPopulationHouseholdsQueryVariables = Exact<{
   targetPopulation: Scalars['ID']['input'];
@@ -12588,6 +12758,11 @@ export const TargetPopulationDetailedFragmentDoc = gql`
     startDate
     endDate
     isSocialWorkerProgram
+  }
+  programCycle {
+    __typename
+    id
+    title
   }
   createdBy {
     __typename
@@ -18667,7 +18842,7 @@ export type AllDeliveryMechanismsLazyQueryHookResult = ReturnType<typeof useAllD
 export type AllDeliveryMechanismsSuspenseQueryHookResult = ReturnType<typeof useAllDeliveryMechanismsSuspenseQuery>;
 export type AllDeliveryMechanismsQueryResult = Apollo.QueryResult<AllDeliveryMechanismsQuery, AllDeliveryMechanismsQueryVariables>;
 export const AllPaymentPlansForTableDocument = gql`
-    query AllPaymentPlansForTable($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $isFollowUp: Boolean, $program: String) {
+    query AllPaymentPlansForTable($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $isFollowUp: Boolean, $program: String, $programCycle: String) {
   allPaymentPlans(
     after: $after
     before: $before
@@ -18683,6 +18858,7 @@ export const AllPaymentPlansForTableDocument = gql`
     dispersionEndDate: $dispersionEndDate
     isFollowUp: $isFollowUp
     program: $program
+    programCycle: $programCycle
   ) {
     pageInfo {
       hasNextPage
@@ -18704,6 +18880,8 @@ export const AllPaymentPlansForTableDocument = gql`
             node {
               id
               unicefId
+              dispersionStartDate
+              dispersionEndDate
             }
           }
         }
@@ -18769,6 +18947,7 @@ export const AllPaymentPlansForTableDocument = gql`
  *      dispersionEndDate: // value for 'dispersionEndDate'
  *      isFollowUp: // value for 'isFollowUp'
  *      program: // value for 'program'
+ *      programCycle: // value for 'programCycle'
  *   },
  * });
  */
@@ -23906,7 +24085,7 @@ export type AllTargetPopulationForChoicesLazyQueryHookResult = ReturnType<typeof
 export type AllTargetPopulationForChoicesSuspenseQueryHookResult = ReturnType<typeof useAllTargetPopulationForChoicesSuspenseQuery>;
 export type AllTargetPopulationForChoicesQueryResult = Apollo.QueryResult<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>;
 export const AllTargetPopulationsDocument = gql`
-    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $totalHouseholdsCountMin: Int, $totalHouseholdsCountMax: Int, $businessArea: String, $program: [ID], $createdAtRange: String, $paymentPlanApplicable: Boolean) {
+    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $totalHouseholdsCountMin: Int, $totalHouseholdsCountMax: Int, $businessArea: String, $program: [ID], $programCycle: String, $createdAtRange: String, $paymentPlanApplicable: Boolean) {
   allTargetPopulation(
     after: $after
     before: $before
@@ -23919,6 +24098,7 @@ export const AllTargetPopulationsDocument = gql`
     totalHouseholdsCountMax: $totalHouseholdsCountMax
     businessArea: $businessArea
     program: $program
+    programCycle: $programCycle
     createdAtRange: $createdAtRange
     paymentPlanApplicable: $paymentPlanApplicable
   ) {
@@ -23957,6 +24137,7 @@ export const AllTargetPopulationsDocument = gql`
  *      totalHouseholdsCountMax: // value for 'totalHouseholdsCountMax'
  *      businessArea: // value for 'businessArea'
  *      program: // value for 'program'
+ *      programCycle: // value for 'programCycle'
  *      createdAtRange: // value for 'createdAtRange'
  *      paymentPlanApplicable: // value for 'paymentPlanApplicable'
  *   },
@@ -24167,7 +24348,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping of interface types */
 export type ResolversInterfaceTypes<RefType extends Record<string, unknown>> = {
-  Node: ( ApprovalProcessNode ) | ( AreaNode ) | ( AreaTypeNode ) | ( BankAccountInfoNode ) | ( BusinessAreaNode ) | ( CashPlanNode ) | ( CommunicationMessageNode ) | ( CommunicationMessageRecipientMapNode ) | ( DataCollectingTypeNode ) | ( DeliveryMechanismNode ) | ( DeliveryMechanismPerPaymentPlanNode ) | ( DocumentNode ) | ( FeedbackMessageNode ) | ( FeedbackNode ) | ( FinancialServiceProviderNode ) | ( FinancialServiceProviderXlsxTemplateNode ) | ( GrievanceDocumentNode ) | ( GrievanceTicketNode ) | ( HouseholdNode ) | ( ImportDataNode ) | ( ImportedDocumentNode ) | ( ImportedHouseholdNode ) | ( ImportedIndividualIdentityNode ) | ( ImportedIndividualNode ) | ( IndividualIdentityNode ) | ( IndividualNode ) | ( KoboImportDataNode ) | ( LogEntryNode ) | ( PaymentHouseholdSnapshotNode ) | ( PaymentNode ) | ( PaymentPlanNode ) | ( PaymentRecordNode ) | ( PaymentVerificationLogEntryNode ) | ( PaymentVerificationNode ) | ( PaymentVerificationPlanNode ) | ( PaymentVerificationSummaryNode ) | ( PeriodicFieldNode ) | ( ProgramNode ) | ( RecipientNode ) | ( RegistrationDataImportDatahubNode ) | ( RegistrationDataImportNode ) | ( ReportNode ) | ( RuleCommitNode ) | ( SanctionListIndividualAliasNameNode ) | ( SanctionListIndividualCountriesNode ) | ( SanctionListIndividualDateOfBirthNode ) | ( SanctionListIndividualDocumentNode ) | ( SanctionListIndividualNationalitiesNode ) | ( SanctionListIndividualNode ) | ( ServiceProviderNode ) | ( SteficonRuleNode ) | ( SurveyNode ) | ( TargetPopulationNode ) | ( TicketAddIndividualDetailsNode ) | ( TicketComplaintDetailsNode ) | ( TicketDeleteHouseholdDetailsNode ) | ( TicketDeleteIndividualDetailsNode ) | ( TicketHouseholdDataUpdateDetailsNode ) | ( TicketIndividualDataUpdateDetailsNode ) | ( TicketNeedsAdjudicationDetailsNode ) | ( TicketNegativeFeedbackDetailsNode ) | ( TicketNoteNode ) | ( TicketPaymentVerificationDetailsNode ) | ( TicketPositiveFeedbackDetailsNode ) | ( TicketReferralDetailsNode ) | ( TicketSensitiveDetailsNode ) | ( TicketSystemFlaggingDetailsNode ) | ( UserBusinessAreaNode ) | ( UserNode ) | ( VolumeByDeliveryMechanismNode );
+  Node: ( ApprovalProcessNode ) | ( AreaNode ) | ( AreaTypeNode ) | ( BankAccountInfoNode ) | ( BusinessAreaNode ) | ( CashPlanNode ) | ( CommunicationMessageNode ) | ( CommunicationMessageRecipientMapNode ) | ( DataCollectingTypeNode ) | ( DeliveryMechanismNode ) | ( DeliveryMechanismPerPaymentPlanNode ) | ( DocumentNode ) | ( FeedbackMessageNode ) | ( FeedbackNode ) | ( FinancialServiceProviderNode ) | ( FinancialServiceProviderXlsxTemplateNode ) | ( GrievanceDocumentNode ) | ( GrievanceTicketNode ) | ( HouseholdNode ) | ( ImportDataNode ) | ( ImportedDocumentNode ) | ( ImportedHouseholdNode ) | ( ImportedIndividualIdentityNode ) | ( ImportedIndividualNode ) | ( IndividualIdentityNode ) | ( IndividualNode ) | ( KoboImportDataNode ) | ( LogEntryNode ) | ( PaymentHouseholdSnapshotNode ) | ( PaymentNode ) | ( PaymentPlanNode ) | ( PaymentRecordNode ) | ( PaymentVerificationLogEntryNode ) | ( PaymentVerificationNode ) | ( PaymentVerificationPlanNode ) | ( PaymentVerificationSummaryNode ) | ( PeriodicFieldNode ) | ( ProgramCycleNode ) | ( ProgramNode ) | ( RecipientNode ) | ( RegistrationDataImportDatahubNode ) | ( RegistrationDataImportNode ) | ( ReportNode ) | ( RuleCommitNode ) | ( SanctionListIndividualAliasNameNode ) | ( SanctionListIndividualCountriesNode ) | ( SanctionListIndividualDateOfBirthNode ) | ( SanctionListIndividualDocumentNode ) | ( SanctionListIndividualNationalitiesNode ) | ( SanctionListIndividualNode ) | ( ServiceProviderNode ) | ( SteficonRuleNode ) | ( SurveyNode ) | ( TargetPopulationNode ) | ( TicketAddIndividualDetailsNode ) | ( TicketComplaintDetailsNode ) | ( TicketDeleteHouseholdDetailsNode ) | ( TicketDeleteIndividualDetailsNode ) | ( TicketHouseholdDataUpdateDetailsNode ) | ( TicketIndividualDataUpdateDetailsNode ) | ( TicketNeedsAdjudicationDetailsNode ) | ( TicketNegativeFeedbackDetailsNode ) | ( TicketNoteNode ) | ( TicketPaymentVerificationDetailsNode ) | ( TicketPositiveFeedbackDetailsNode ) | ( TicketReferralDetailsNode ) | ( TicketSensitiveDetailsNode ) | ( TicketSystemFlaggingDetailsNode ) | ( UserBusinessAreaNode ) | ( UserNode ) | ( VolumeByDeliveryMechanismNode );
 };
 
 /** Mapping between all available schema types and the resolvers types */
@@ -24260,6 +24441,8 @@ export type ResolversTypes = {
   CreatePaymentPlanMutation: ResolverTypeWrapper<CreatePaymentPlanMutation>;
   CreatePaymentVerificationInput: CreatePaymentVerificationInput;
   CreateProgram: ResolverTypeWrapper<CreateProgram>;
+  CreateProgramCycle: ResolverTypeWrapper<CreateProgramCycle>;
+  CreateProgramCycleInput: CreateProgramCycleInput;
   CreateProgramInput: CreateProgramInput;
   CreateReport: ResolverTypeWrapper<CreateReport>;
   CreateReportInput: CreateReportInput;
@@ -24283,6 +24466,7 @@ export type ResolversTypes = {
   DeletePaymentPlanMutation: ResolverTypeWrapper<DeletePaymentPlanMutation>;
   DeletePaymentVerificationPlan: ResolverTypeWrapper<DeletePaymentVerificationPlan>;
   DeleteProgram: ResolverTypeWrapper<DeleteProgram>;
+  DeleteProgramCycle: ResolverTypeWrapper<DeleteProgramCycle>;
   DeleteRegistrationDataImport: ResolverTypeWrapper<DeleteRegistrationDataImport>;
   DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput;
   DeleteTargetPopulationMutationPayload: ResolverTypeWrapper<DeleteTargetPopulationMutationPayload>;
@@ -24501,6 +24685,10 @@ export type ResolversTypes = {
   PeriodicFieldDataSubtype: PeriodicFieldDataSubtype;
   PeriodicFieldNode: ResolverTypeWrapper<PeriodicFieldNode>;
   PositiveFeedbackTicketExtras: PositiveFeedbackTicketExtras;
+  ProgramCycleNode: ResolverTypeWrapper<ProgramCycleNode>;
+  ProgramCycleNodeConnection: ResolverTypeWrapper<ProgramCycleNodeConnection>;
+  ProgramCycleNodeEdge: ResolverTypeWrapper<ProgramCycleNodeEdge>;
+  ProgramCycleStatus: ProgramCycleStatus;
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments;
   ProgramNode: ResolverTypeWrapper<ProgramNode>;
   ProgramNodeConnection: ResolverTypeWrapper<ProgramNodeConnection>;
@@ -24675,6 +24863,8 @@ export type ResolversTypes = {
   UpdatePaymentVerificationReceivedAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationReceivedAndReceivedAmount>;
   UpdatePaymentVerificationStatusAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationStatusAndReceivedAmount>;
   UpdateProgram: ResolverTypeWrapper<UpdateProgram>;
+  UpdateProgramCycle: ResolverTypeWrapper<UpdateProgramCycle>;
+  UpdateProgramCycleInput: UpdateProgramCycleInput;
   UpdateProgramInput: UpdateProgramInput;
   UpdateTargetPopulationInput: UpdateTargetPopulationInput;
   UpdateTargetPopulationMutation: ResolverTypeWrapper<UpdateTargetPopulationMutation>;
@@ -24784,6 +24974,8 @@ export type ResolversParentTypes = {
   CreatePaymentPlanMutation: CreatePaymentPlanMutation;
   CreatePaymentVerificationInput: CreatePaymentVerificationInput;
   CreateProgram: CreateProgram;
+  CreateProgramCycle: CreateProgramCycle;
+  CreateProgramCycleInput: CreateProgramCycleInput;
   CreateProgramInput: CreateProgramInput;
   CreateReport: CreateReport;
   CreateReportInput: CreateReportInput;
@@ -24806,6 +24998,7 @@ export type ResolversParentTypes = {
   DeletePaymentPlanMutation: DeletePaymentPlanMutation;
   DeletePaymentVerificationPlan: DeletePaymentVerificationPlan;
   DeleteProgram: DeleteProgram;
+  DeleteProgramCycle: DeleteProgramCycle;
   DeleteRegistrationDataImport: DeleteRegistrationDataImport;
   DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput;
   DeleteTargetPopulationMutationPayload: DeleteTargetPopulationMutationPayload;
@@ -24981,6 +25174,9 @@ export type ResolversParentTypes = {
   PeriodicFieldDataNode: PeriodicFieldDataNode;
   PeriodicFieldNode: PeriodicFieldNode;
   PositiveFeedbackTicketExtras: PositiveFeedbackTicketExtras;
+  ProgramCycleNode: ProgramCycleNode;
+  ProgramCycleNodeConnection: ProgramCycleNodeConnection;
+  ProgramCycleNodeEdge: ProgramCycleNodeEdge;
   ProgramNode: ProgramNode;
   ProgramNodeConnection: ProgramNodeConnection;
   ProgramNodeEdge: ProgramNodeEdge;
@@ -25133,6 +25329,8 @@ export type ResolversParentTypes = {
   UpdatePaymentVerificationReceivedAndReceivedAmount: UpdatePaymentVerificationReceivedAndReceivedAmount;
   UpdatePaymentVerificationStatusAndReceivedAmount: UpdatePaymentVerificationStatusAndReceivedAmount;
   UpdateProgram: UpdateProgram;
+  UpdateProgramCycle: UpdateProgramCycle;
+  UpdateProgramCycleInput: UpdateProgramCycleInput;
   UpdateProgramInput: UpdateProgramInput;
   UpdateTargetPopulationInput: UpdateTargetPopulationInput;
   UpdateTargetPopulationMutation: UpdateTargetPopulationMutation;
@@ -25491,7 +25689,7 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   dispersionDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   distributionLevel?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   downPayment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  endDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  endDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   exchangeRate?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   fundsCommitment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -25500,7 +25698,7 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   paymentVerificationSummary?: Resolver<Maybe<ResolversTypes['PaymentVerificationSummaryNode']>, ParentType, ContextType>;
   program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>;
   serviceProvider?: Resolver<Maybe<ResolversTypes['ServiceProviderNode']>, ParentType, ContextType>;
-  startDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  startDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['CashPlanStatus'], ParentType, ContextType>;
   statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
@@ -25734,6 +25932,12 @@ export type CreateProgramResolvers<ContextType = any, ParentType extends Resolve
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type CreateProgramCycleResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateProgramCycle'] = ResolversParentTypes['CreateProgramCycle']> = {
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type CreateReportResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateReport'] = ResolversParentTypes['CreateReport']> = {
   report?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -25841,6 +26045,11 @@ export type DeletePaymentVerificationPlanResolvers<ContextType = any, ParentType
 
 export type DeleteProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteProgram'] = ResolversParentTypes['DeleteProgram']> = {
   ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type DeleteProgramCycleResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteProgramCycle'] = ResolversParentTypes['DeleteProgramCycle']> = {
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -27231,6 +27440,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   createPaymentPlan?: Resolver<Maybe<ResolversTypes['CreatePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsCreatePaymentPlanArgs, 'input'>>;
   createPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['CreateVerificationPlanMutation']>, ParentType, ContextType, RequireFields<MutationsCreatePaymentVerificationPlanArgs, 'input'>>;
   createProgram?: Resolver<Maybe<ResolversTypes['CreateProgram']>, ParentType, ContextType, RequireFields<MutationsCreateProgramArgs, 'programData'>>;
+  createProgramCycle?: Resolver<Maybe<ResolversTypes['CreateProgramCycle']>, ParentType, ContextType, RequireFields<MutationsCreateProgramCycleArgs, 'programCycleData'>>;
   createReport?: Resolver<Maybe<ResolversTypes['CreateReport']>, ParentType, ContextType, RequireFields<MutationsCreateReportArgs, 'reportData'>>;
   createSurvey?: Resolver<Maybe<ResolversTypes['CreateSurveyMutation']>, ParentType, ContextType, RequireFields<MutationsCreateSurveyArgs, 'input'>>;
   createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>;
@@ -27238,6 +27448,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   deletePaymentPlan?: Resolver<Maybe<ResolversTypes['DeletePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsDeletePaymentPlanArgs, 'paymentPlanId'>>;
   deletePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['DeletePaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsDeletePaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>;
   deleteProgram?: Resolver<Maybe<ResolversTypes['DeleteProgram']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramArgs, 'programId'>>;
+  deleteProgramCycle?: Resolver<Maybe<ResolversTypes['DeleteProgramCycle']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramCycleArgs, 'programCycleId'>>;
   deleteRegistrationDataImport?: Resolver<Maybe<ResolversTypes['DeleteRegistrationDataImport']>, ParentType, ContextType, RequireFields<MutationsDeleteRegistrationDataImportArgs, 'registrationDataImportId'>>;
   deleteTargetPopulation?: Resolver<Maybe<ResolversTypes['DeleteTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsDeleteTargetPopulationArgs, 'input'>>;
   discardPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['DiscardPaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsDiscardPaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>;
@@ -27281,6 +27492,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   updatePaymentVerificationReceivedAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationReceivedAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs, 'paymentVerificationId' | 'received' | 'receivedAmount'>>;
   updatePaymentVerificationStatusAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationStatusAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs, 'paymentVerificationId' | 'receivedAmount'>>;
   updateProgram?: Resolver<Maybe<ResolversTypes['UpdateProgram']>, ParentType, ContextType, Partial<MutationsUpdateProgramArgs>>;
+  updateProgramCycle?: Resolver<Maybe<ResolversTypes['UpdateProgramCycle']>, ParentType, ContextType, Partial<MutationsUpdateProgramCycleArgs>>;
   updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>;
   uploadImportDataXlsxFileAsync?: Resolver<Maybe<ResolversTypes['UploadImportDataXLSXFileAsync']>, ParentType, ContextType, RequireFields<MutationsUploadImportDataXlsxFileAsyncArgs, 'businessAreaSlug' | 'file'>>;
 };
@@ -27291,7 +27503,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'ApprovalProcessNode' | 'AreaNode' | 'AreaTypeNode' | 'BankAccountInfoNode' | 'BusinessAreaNode' | 'CashPlanNode' | 'CommunicationMessageNode' | 'CommunicationMessageRecipientMapNode' | 'DataCollectingTypeNode' | 'DeliveryMechanismNode' | 'DeliveryMechanismPerPaymentPlanNode' | 'DocumentNode' | 'FeedbackMessageNode' | 'FeedbackNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'GrievanceDocumentNode' | 'GrievanceTicketNode' | 'HouseholdNode' | 'ImportDataNode' | 'ImportedDocumentNode' | 'ImportedHouseholdNode' | 'ImportedIndividualIdentityNode' | 'ImportedIndividualNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'KoboImportDataNode' | 'LogEntryNode' | 'PaymentHouseholdSnapshotNode' | 'PaymentNode' | 'PaymentPlanNode' | 'PaymentRecordNode' | 'PaymentVerificationLogEntryNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'PeriodicFieldNode' | 'ProgramNode' | 'RecipientNode' | 'RegistrationDataImportDatahubNode' | 'RegistrationDataImportNode' | 'ReportNode' | 'RuleCommitNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualDateOfBirthNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualNode' | 'ServiceProviderNode' | 'SteficonRuleNode' | 'SurveyNode' | 'TargetPopulationNode' | 'TicketAddIndividualDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketNoteNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'UserBusinessAreaNode' | 'UserNode' | 'VolumeByDeliveryMechanismNode', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'ApprovalProcessNode' | 'AreaNode' | 'AreaTypeNode' | 'BankAccountInfoNode' | 'BusinessAreaNode' | 'CashPlanNode' | 'CommunicationMessageNode' | 'CommunicationMessageRecipientMapNode' | 'DataCollectingTypeNode' | 'DeliveryMechanismNode' | 'DeliveryMechanismPerPaymentPlanNode' | 'DocumentNode' | 'FeedbackMessageNode' | 'FeedbackNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'GrievanceDocumentNode' | 'GrievanceTicketNode' | 'HouseholdNode' | 'ImportDataNode' | 'ImportedDocumentNode' | 'ImportedHouseholdNode' | 'ImportedIndividualIdentityNode' | 'ImportedIndividualNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'KoboImportDataNode' | 'LogEntryNode' | 'PaymentHouseholdSnapshotNode' | 'PaymentNode' | 'PaymentPlanNode' | 'PaymentRecordNode' | 'PaymentVerificationLogEntryNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'PeriodicFieldNode' | 'ProgramCycleNode' | 'ProgramNode' | 'RecipientNode' | 'RegistrationDataImportDatahubNode' | 'RegistrationDataImportNode' | 'ReportNode' | 'RuleCommitNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualDateOfBirthNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualNode' | 'ServiceProviderNode' | 'SteficonRuleNode' | 'SurveyNode' | 'TargetPopulationNode' | 'TicketAddIndividualDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketNoteNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'UserBusinessAreaNode' | 'UserNode' | 'VolumeByDeliveryMechanismNode', ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
 };
 
@@ -27526,6 +27738,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   paymentVerificationSummary?: Resolver<Maybe<ResolversTypes['PaymentVerificationSummaryNode']>, ParentType, ContextType>;
   paymentsConflictsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>;
+  programCycle?: Resolver<Maybe<ResolversTypes['ProgramCycleNode']>, ParentType, ContextType>;
   reconciliationSummary?: Resolver<Maybe<ResolversTypes['ReconciliationSummaryNode']>, ParentType, ContextType>;
   sourcePaymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>;
   splitChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
@@ -27801,6 +28014,42 @@ export type PeriodicFieldNodeResolvers<ContextType = any, ParentType extends Res
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type ProgramCycleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramCycleNode'] = ResolversParentTypes['ProgramCycleNode']> = {
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
+  endDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  paymentPlans?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, Partial<ProgramCycleNodePaymentPlansArgs>>;
+  program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>;
+  startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['ProgramCycleStatus'], ParentType, ContextType>;
+  targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, Partial<ProgramCycleNodeTargetPopulationsArgs>>;
+  title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  totalDeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  totalEntitledQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  totalUndeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ProgramCycleNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramCycleNodeConnection'] = ResolversParentTypes['ProgramCycleNodeConnection']> = {
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edges?: Resolver<Array<Maybe<ResolversTypes['ProgramCycleNodeEdge']>>, ParentType, ContextType>;
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ProgramCycleNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramCycleNodeEdge'] = ResolversParentTypes['ProgramCycleNodeEdge']> = {
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  node?: Resolver<Maybe<ResolversTypes['ProgramCycleNode']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type ProgramNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramNode'] = ResolversParentTypes['ProgramNode']> = {
   activityLogs?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, Partial<ProgramNodeActivityLogsArgs>>;
   adminAreas?: Resolver<ResolversTypes['AreaNodeConnection'], ParentType, ContextType, Partial<ProgramNodeAdminAreasArgs>>;
@@ -27813,6 +28062,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   cashPlus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, Partial<ProgramNodeCashplanSetArgs>>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  cycles?: Resolver<Maybe<ResolversTypes['ProgramCycleNodeConnection']>, ParentType, ContextType, Partial<ProgramNodeCyclesArgs>>;
   dataCollectingType?: Resolver<Maybe<ResolversTypes['DataCollectingTypeNode']>, ParentType, ContextType>;
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   endDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
@@ -27995,6 +28245,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   paymentVerificationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   pduSubtypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['PDUSubtypeChoiceObject']>>>, ParentType, ContextType>;
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType, RequireFields<QueryProgramArgs, 'id'>>;
+  programCycle?: Resolver<Maybe<ResolversTypes['ProgramCycleNode']>, ParentType, ContextType, RequireFields<QueryProgramCycleArgs, 'id'>>;
+  programCycleStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   programFrequencyOfPaymentsChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   programScopeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   programSectorChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
@@ -28652,6 +28904,7 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   paymentPlans?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, Partial<TargetPopulationNodePaymentPlansArgs>>;
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, Partial<TargetPopulationNodePaymentRecordsArgs>>;
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
+  programCycle?: Resolver<Maybe<ResolversTypes['ProgramCycleNode']>, ParentType, ContextType>;
   selections?: Resolver<Array<ResolversTypes['HouseholdSelectionNode']>, ParentType, ContextType>;
   sentToDatahub?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   status?: Resolver<ResolversTypes['TargetPopulationStatus'], ParentType, ContextType>;
@@ -29154,6 +29407,12 @@ export type UpdateProgramResolvers<ContextType = any, ParentType extends Resolve
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type UpdateProgramCycleResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateProgramCycle'] = ResolversParentTypes['UpdateProgramCycle']> = {
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type UpdateTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateTargetPopulationMutation'] = ResolversParentTypes['UpdateTargetPopulationMutation']> = {
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>;
   validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
@@ -29425,6 +29684,7 @@ export type Resolvers<ContextType = any> = {
   CreateGrievanceTicketMutation?: CreateGrievanceTicketMutationResolvers<ContextType>;
   CreatePaymentPlanMutation?: CreatePaymentPlanMutationResolvers<ContextType>;
   CreateProgram?: CreateProgramResolvers<ContextType>;
+  CreateProgramCycle?: CreateProgramCycleResolvers<ContextType>;
   CreateReport?: CreateReportResolvers<ContextType>;
   CreateSurveyMutation?: CreateSurveyMutationResolvers<ContextType>;
   CreateTargetPopulationMutation?: CreateTargetPopulationMutationResolvers<ContextType>;
@@ -29442,6 +29702,7 @@ export type Resolvers<ContextType = any> = {
   DeletePaymentPlanMutation?: DeletePaymentPlanMutationResolvers<ContextType>;
   DeletePaymentVerificationPlan?: DeletePaymentVerificationPlanResolvers<ContextType>;
   DeleteProgram?: DeleteProgramResolvers<ContextType>;
+  DeleteProgramCycle?: DeleteProgramCycleResolvers<ContextType>;
   DeleteRegistrationDataImport?: DeleteRegistrationDataImportResolvers<ContextType>;
   DeleteTargetPopulationMutationPayload?: DeleteTargetPopulationMutationPayloadResolvers<ContextType>;
   DeliveredQuantityNode?: DeliveredQuantityNodeResolvers<ContextType>;
@@ -29586,6 +29847,9 @@ export type Resolvers<ContextType = any> = {
   PaymentVerificationSummaryNodeEdge?: PaymentVerificationSummaryNodeEdgeResolvers<ContextType>;
   PeriodicFieldDataNode?: PeriodicFieldDataNodeResolvers<ContextType>;
   PeriodicFieldNode?: PeriodicFieldNodeResolvers<ContextType>;
+  ProgramCycleNode?: ProgramCycleNodeResolvers<ContextType>;
+  ProgramCycleNodeConnection?: ProgramCycleNodeConnectionResolvers<ContextType>;
+  ProgramCycleNodeEdge?: ProgramCycleNodeEdgeResolvers<ContextType>;
   ProgramNode?: ProgramNodeResolvers<ContextType>;
   ProgramNodeConnection?: ProgramNodeConnectionResolvers<ContextType>;
   ProgramNodeEdge?: ProgramNodeEdgeResolvers<ContextType>;
@@ -29715,6 +29979,7 @@ export type Resolvers<ContextType = any> = {
   UpdatePaymentVerificationReceivedAndReceivedAmount?: UpdatePaymentVerificationReceivedAndReceivedAmountResolvers<ContextType>;
   UpdatePaymentVerificationStatusAndReceivedAmount?: UpdatePaymentVerificationStatusAndReceivedAmountResolvers<ContextType>;
   UpdateProgram?: UpdateProgramResolvers<ContextType>;
+  UpdateProgramCycle?: UpdateProgramCycleResolvers<ContextType>;
   UpdateTargetPopulationMutation?: UpdateTargetPopulationMutationResolvers<ContextType>;
   Upload?: GraphQLScalarType;
   UploadImportDataXLSXFileAsync?: UploadImportDataXlsxFileAsyncResolvers<ContextType>;

@@ -129,8 +129,16 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
 
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     status_date = models.DateTimeField()
-    start_date = models.DateTimeField(db_index=True)
-    end_date = models.DateTimeField(db_index=True)
+    start_date = models.DateTimeField(
+        db_index=True,
+        blank=True,
+        null=True,
+    )
+    end_date = models.DateTimeField(
+        db_index=True,
+        blank=True,
+        null=True,
+    )
     program = models.ForeignKey("program.Program", on_delete=models.CASCADE)
     exchange_rate = models.DecimalField(decimal_places=8, blank=True, null=True, max_digits=14)
 
@@ -496,7 +504,9 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         FINISH = "FINISH", "Finish"
         SEND_TO_PAYMENT_GATEWAY = "SEND_TO_PAYMENT_GATEWAY", "Send to Payment Gateway"
 
-    program_cycle = models.ForeignKey("program.ProgramCycle", null=True, blank=True, on_delete=models.CASCADE)
+    program_cycle = models.ForeignKey(
+        "program.ProgramCycle", related_name="payment_plans", null=True, blank=True, on_delete=models.CASCADE
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
