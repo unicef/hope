@@ -394,7 +394,7 @@ class TestFeedback:
         pageNewFeedback.getComments().send_keys("New comment, new comment. New comment?")
         pageNewFeedback.getInputArea().send_keys("Abkamari")
         pageNewFeedback.getInputLanguage().send_keys("English")
-        pageNewFeedback.selectArea("Abband").click()
+        pageNewFeedback.selectArea("Abband")
         pageNewFeedback.getButtonNext().click()
         # Check edited Feedback
         assert "Draft Program" in pageFeedbackDetails.getProgramme().text
