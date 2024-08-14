@@ -262,11 +262,7 @@ class PeriodicDataUpdateImportService:
         individual: Individual, pdu_field_name: str, round_number: int, value: Any, collection_date: Any
     ) -> None:
         flex_fields_data = individual.flex_fields
-        if pdu_field_name not in flex_fields_data:
-            flex_fields_data[pdu_field_name] = {}
         field_data = flex_fields_data[pdu_field_name]
-        if str(round_number) not in field_data:
-            field_data[str(round_number)] = {}
         round_data = field_data.get(str(round_number))
         round_data["value"] = value
         round_data["collection_date"] = collection_date

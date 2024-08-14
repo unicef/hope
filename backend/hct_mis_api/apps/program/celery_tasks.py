@@ -30,3 +30,13 @@ def adjust_program_size_task(program_id: str) -> bool:
         )
     )
     return True
+
+
+@app.task()
+@sentry_tags
+@log_start_and_end
+def populate_pdu_new_rounds_with_null_values_task(program_id: str) -> bool:
+    program = Program.objects.get(id=program_id)
+    set_sentry_business_area_tag(program.business_area.name)
+    program.populate_pdu_new_rounds_with_null_values()
+    return True

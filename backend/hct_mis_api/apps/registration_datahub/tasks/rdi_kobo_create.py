@@ -34,6 +34,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualIdentity,
     PendingIndividualRoleInHousehold,
 )
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.registration_data.models import (
     ImportData,
     KoboImportedSubmission,
@@ -352,6 +353,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     individual_obj.business_area = self.business_area
                     individual_obj.age_at_registration = calculate_age_at_registration(
                         self.registration_data_import.created_at, str(individual_obj.birth_date)
+                    )
+                    individual_obj.flex_fields = populate_pdu_with_null_values(
+                        self.registration_data_import.program, individual_obj.flex_fields
                     )
 
                     if individual_obj.relationship == HEAD:
