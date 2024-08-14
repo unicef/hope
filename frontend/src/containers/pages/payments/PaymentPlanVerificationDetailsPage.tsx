@@ -71,9 +71,9 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const { id } = useParams();
+  const { paymentPlanId } = useParams();
   const { data, loading, error } = usePaymentPlanQuery({
-    variables: { id },
+    variables: { id: paymentPlanId },
     fetchPolicy: 'cache-and-network',
   });
   const { data: choicesData, loading: choicesLoading } =

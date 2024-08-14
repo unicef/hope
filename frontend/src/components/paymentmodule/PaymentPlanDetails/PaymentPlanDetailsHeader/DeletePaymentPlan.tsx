@@ -45,7 +45,7 @@ export function DeletePaymentPlan({
         },
       });
       showMessage(t('Payment Plan Deleted'));
-      navigate(`/${baseUrl}/payment-module`);
+      navigate(`/${baseUrl}/payment-module/payment-plans`);
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
