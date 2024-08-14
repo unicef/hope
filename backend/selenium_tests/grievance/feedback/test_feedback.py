@@ -432,7 +432,6 @@ class TestFeedback:
         pageFeedback.waitForRows()[0].click()
         assert grievance_ticket in pageGrievanceDetailsPage.getTitle().text.split(" ")[-1]
         pageFeedback.getNavFeedback().click()
-        pageFeedbackDetails.screenshot("0")
         pageFeedback.waitForRows()[0].find_elements("tag name", "a")[0].click()
 
     def test_feedback_errors(
@@ -463,7 +462,7 @@ class TestFeedback:
         pageNewFeedback.getButtonNext().click()
         pageNewFeedback.getDescription()
         pageNewFeedback.getButtonNext().click()
-        assert "Description is required" in pageNewFeedback.getError().text
+        assert "Description is required" in pageNewFeedback.getDivDescription().text
         pageNewFeedback.getDescription().send_keys("New description")
         pageNewFeedback.getButtonNext().click()
         assert "New description" in pageFeedbackDetails.getDescription().text
@@ -518,7 +517,10 @@ class TestFeedback:
         pageNewFeedback.getInputQuestionnaire_months_displaced_h_f().click()
         assert "-" in pageNewFeedback.getLabelLengthOfTimeSinceArrival().text
         pageNewFeedback.getInputQuestionnaire_fullname().click()
-        assert "James Christopher Shaffer" in pageNewFeedback.getLabelIndividualFullName().text
+        assert (
+            create_households_and_individuals.active_individuals.first().full_name
+            in pageNewFeedback.getLabelIndividualFullName().text
+        )
         pageNewFeedback.getInputQuestionnaire_birthdate().click()
         # ToDo: Uncomment after fix: 211708
         # assert "-" in pageNewFeedback.getLabelBirthDate().text

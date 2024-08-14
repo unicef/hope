@@ -61,7 +61,7 @@ export function Check({
         </Grid>
       )}
       {isInvalid && get(form.errors, field.name) && (
-        <FormHelperText error>{get(form.errors, field.name)}</FormHelperText>
+        <FormHelperText error data-cy="checkbox-error">{get(form.errors, field.name)}</FormHelperText>
       )}
     </Grid>
   );
