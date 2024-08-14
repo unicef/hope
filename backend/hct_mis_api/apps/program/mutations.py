@@ -102,8 +102,9 @@ class CreateProgram(
         ProgramCycle.objects.create(
             program=program,
             start_date=program.start_date,
-            end_date=program.end_date,
-            status=ProgramCycle.ACTIVE,
+            end_date=None,
+            status=ProgramCycle.DRAFT,
+            created_by=info.context.user,
         )
         # create partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
         if partner_access == Program.SELECTED_PARTNERS_ACCESS:
@@ -144,6 +145,7 @@ class UpdateProgram(
         partner_access = program_data.get("partner_access", program.partner_access)
         pdu_fields = program_data.pop("pdu_fields", None)
         programme_code = program_data.get("programme_code", "")
+
         if programme_code:
             programme_code = programme_code.upper()
             program_data["programme_code"] = programme_code
@@ -155,6 +157,10 @@ class UpdateProgram(
                 cls.has_permission(info, Permissions.PROGRAMME_ACTIVATE, business_area)
             elif status_to_set == Program.FINISHED:
                 cls.has_permission(info, Permissions.PROGRAMME_FINISH, business_area)
+
+                # check if all cycles are finished
+                if program.cycles.exclude(status=ProgramCycle.FINISHED).count() > 0:
+                    raise ValidationError("You cannot finish program if program has not finished cycles")
 
         if status_to_set not in [Program.ACTIVE, Program.FINISHED]:
             cls.validate_partners_data(
@@ -266,7 +272,7 @@ class CopyProgram(
             partner_access=partner_access,
             partner=partner,
         )
-        program = copy_program_object(program_id, program_data)
+        program = copy_program_object(program_id, program_data, info.context.user)
 
         # create partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
         if partner_access == Program.SELECTED_PARTNERS_ACCESS:

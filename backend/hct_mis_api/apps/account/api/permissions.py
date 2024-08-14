@@ -61,3 +61,23 @@ class TargetingViewListPermission(BaseRestPermission):
 
 class GeoViewListPermission(BaseRestPermission):
     PERMISSIONS = [Permissions.GEO_VIEW_LIST]
+
+
+class ProgramCycleViewListPermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST]
+
+
+class ProgramCycleViewDetailsPermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS]
+
+
+class ProgramCycleCreatePermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PM_PROGRAMME_CYCLE_CREATE]
+
+
+class ProgramCycleUpdatePermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PM_PROGRAMME_CYCLE_UPDATE]
+
+
+class ProgramCycleDeletePermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PM_PROGRAMME_CYCLE_DELETE]

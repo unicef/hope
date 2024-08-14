@@ -14,6 +14,9 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_0_with_permi
                 'hasEmptyCriteria': False,
                 'hasEmptyIdsCriteria': True,
                 'name': 'Example name 5',
+                'programCycle': {
+                    'status': 'ACTIVE'
+                },
                 'status': 'OPEN',
                 'targetingCriteria': {
                     'householdIds': '',
@@ -67,6 +70,9 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
                 'hasEmptyCriteria': True,
                 'hasEmptyIdsCriteria': False,
                 'name': 'Test name 1',
+                'programCycle': {
+                    'status': 'ACTIVE'
+                },
                 'status': 'OPEN',
                 'targetingCriteria': {
                     'householdIds': 'HH-1',
@@ -88,6 +94,9 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
                 'hasEmptyCriteria': True,
                 'hasEmptyIdsCriteria': False,
                 'name': 'Test name 2',
+                'programCycle': {
+                    'status': 'ACTIVE'
+                },
                 'status': 'OPEN',
                 'targetingCriteria': {
                     'householdIds': 'HH-1, HH-2, HH-3',
@@ -109,6 +118,9 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
                 'hasEmptyCriteria': True,
                 'hasEmptyIdsCriteria': False,
                 'name': 'Test name 3',
+                'programCycle': {
+                    'status': 'ACTIVE'
+                },
                 'status': 'OPEN',
                 'targetingCriteria': {
                     'householdIds': 'HH-1',
@@ -130,6 +142,9 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
                 'hasEmptyCriteria': True,
                 'hasEmptyIdsCriteria': False,
                 'name': 'Test name 4',
+                'programCycle': {
+                    'status': 'ACTIVE'
+                },
                 'status': 'OPEN',
                 'targetingCriteria': {
                     'householdIds': '',
@@ -151,6 +166,9 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
                 'hasEmptyCriteria': True,
                 'hasEmptyIdsCriteria': False,
                 'name': 'Test name 5',
+                'programCycle': {
+                    'status': 'ACTIVE'
+                },
                 'status': 'OPEN',
                 'targetingCriteria': {
                     'householdIds': '',
@@ -192,6 +210,9 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
                 'hasEmptyCriteria': True,
                 'hasEmptyIdsCriteria': False,
                 'name': 'Test name 7',
+                'programCycle': {
+                    'status': 'ACTIVE'
+                },
                 'status': 'OPEN',
                 'targetingCriteria': {
                     'householdIds': 'HH-1',

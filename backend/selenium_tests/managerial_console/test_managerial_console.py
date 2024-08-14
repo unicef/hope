@@ -67,8 +67,6 @@ def create_payment_plan(create_active_test_program: Program, second_test_program
     payment_plan = PaymentPlan.objects.update_or_create(
         business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
         target_population=tp,
-        start_date=datetime.now(),
-        end_date=datetime.now() + relativedelta(days=30),
         currency="USD",
         dispersion_start_date=datetime.now(),
         dispersion_end_date=datetime.now() + relativedelta(days=14),
@@ -76,6 +74,7 @@ def create_payment_plan(create_active_test_program: Program, second_test_program
         status=PaymentPlan.Status.IN_APPROVAL,
         created_by=User.objects.first(),
         program=tp.program,
+        program_cycle=tp.program.cycles.first(),
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
         is_follow_up=False,
