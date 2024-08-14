@@ -9,7 +9,7 @@ from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.one_time_scripts.program_cycle_data_migration import (
-    program_cycle_data_migration,
+    main_migration_cycle,
 )
 
 
@@ -228,7 +228,7 @@ class TestProgramCycleDataMigration(TestCase):
         self.assertEqual(ProgramCycle.objects.filter(program=self.pp_3.program).first().title, "Cycle 01")
 
         # run script
-        program_cycle_data_migration()
+        main_migration_cycle()
 
         program_finished = Program.objects.get(name="Finished 001")
         program_finished2 = Program.objects.get(name="Finished 002")

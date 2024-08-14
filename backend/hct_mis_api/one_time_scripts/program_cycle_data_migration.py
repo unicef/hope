@@ -1,7 +1,7 @@
 import logging
 from datetime import date, timedelta
 from random import randint
-from typing import List
+from typing import Dict, List
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -16,7 +16,6 @@ logger = logging.getLogger(__name__)
 
 
 def adjust_cycles_start_and_end_dates_for_active_program(program: Program) -> None:
-    logger.info("** ** ** Adjusting cycles start and end dates...")
     cycles_qs = ProgramCycle.objects.filter(program=program).only("start_date", "end_date").order_by("start_date")
     if not cycles_qs:
         return
@@ -34,11 +33,11 @@ def adjust_cycles_start_and_end_dates_for_active_program(program: Program) -> No
             if cycle.end_date < cycle.start_date:
                 cycle.end_date = cycle.start_date
             try:
-                cycle.save()
+                cycle.save(update_fields=["start_date", "end_date"])
             except ValidationError:
                 # if validation error just save one day cycle
                 cycle.end_date = cycle.start_date
-                cycle.save()
+                cycle.save(update_fields=["start_date", "end_date"])
 
             previous_cycle = cycle
 
@@ -74,7 +73,12 @@ def processing_with_finished_program(program: Program) -> None:
             cycle.end_date = end_date
         if cycle.status != ProgramCycle.FINISHED:
             cycle.status = ProgramCycle.FINISHED
-        cycle.save(update_fields=["start_date", "end_date", "status"])
+        try:
+            cycle.save(update_fields=["start_date", "end_date", "status"])
+        except ValidationError:
+            # if validation error just save one day cycle
+            cycle.end_date = cycle.start_date
+            cycle.save(update_fields=["start_date", "end_date", "status"])
     else:
         cycle = create_new_program_cycle(str(program.id), ProgramCycle.FINISHED, start_date, end_date)
 
@@ -84,11 +88,17 @@ def processing_with_finished_program(program: Program) -> None:
     PaymentPlan.objects.filter(program_id=program_id_str).update(program_cycle=cycle)
 
 
-def processing_with_active_program(payment_plans_list: list, default_cycle_id: List[str]) -> None:
+def processing_with_active_program(payment_plans_list_ids: List[str], default_cycle_id: List[str]) -> None:
     hhs_in_cycles_dict = dict()
-    for comparing_with_pp in payment_plans_list:
+    for comparing_with_pp_id in payment_plans_list_ids:
+        comparing_with_pp = (
+            PaymentPlan.objects.filter(id=comparing_with_pp_id).only("id", "program_id", "target_population_id").first()
+        )
         new_hh_ids = set(
-            [str(hh_id) for hh_id in comparing_with_pp.eligible_payments.values_list("household_id", flat=True)]
+            [
+                str(hh_id)
+                for hh_id in comparing_with_pp.eligible_payments.values_list("household_id", flat=True).iterator()
+            ]
         )
         cycles = (
             ProgramCycle.objects.filter(program_id=comparing_with_pp.program_id)
@@ -101,13 +111,13 @@ def processing_with_active_program(payment_plans_list: list, default_cycle_id: L
                 hhs_in_cycles_dict[cycle_id_str] = set(
                     [
                         str(hh_id)
-                        for hh_id in Payment.objects.filter(parent__program_cycle=cycle).values_list(
-                            "household_id", flat=True
-                        )
+                        for hh_id in Payment.objects.filter(parent__program_cycle=cycle)
+                        .values_list("household_id", flat=True)
+                        .iterator()
                     ]
                 )
             hh_ids_in_cycles = hhs_in_cycles_dict[cycle_id_str]
-
+            print("HH for compare == ", new_hh_ids, hh_ids_in_cycles)
             # check any conflicts
             if new_hh_ids.intersection(hh_ids_in_cycles):
                 continue
@@ -131,49 +141,65 @@ def processing_with_active_program(payment_plans_list: list, default_cycle_id: L
         comparing_with_pp.save(update_fields=["program_cycle"])
 
 
-def program_cycle_data_migration() -> None:
-    start_time = timezone.now()
-    logger.info("Hi There! Started Program Cycle Data Migration.")
-    logger.info(f"Cycles before running creation: {ProgramCycle.objects.all().count()}")
+def program_cycle_data_migration(program_id: str) -> None:
+    program = Program.objects.filter(id=program_id).only("id", "name", "start_date", "end_date", "status").first()
+
+    # FINISHED programs
+    if program.status == Program.FINISHED:
+        processing_with_finished_program(program)
+
+    # ACTIVE DRAFT
+    if program.status in [Program.DRAFT, Program.ACTIVE]:
+        with transaction.atomic():
+            print(f"** Creating Program Cycles for program {program.name}")
+            default_cycle = ProgramCycle.objects.filter(program_id=program.id).first()
+            if not default_cycle:
+                print("\n")
+                # print(f"###### Default Program Cycles for program {program.name} does not exist")
+
+            payment_plan_qs_ids = [
+                str(pp_id)
+                for pp_id in PaymentPlan.objects.filter(program_id=program.id)
+                .order_by("start_date", "created_at")
+                .only("id")
+                .values_list("id", flat=True)
+                .iterator()
+            ]
+            PaymentPlan.objects.filter(program_id=program.id).update(program_cycle=None)
+            # using list for .exclude__in=[]
+            default_cycle_id = [str(default_cycle.id)] if default_cycle else []
+            processing_with_active_program(payment_plan_qs_ids, default_cycle_id)
+
+            if default_cycle:
+                default_cycle.delete(soft=False)
+
+            # after create all Cycles let's adjust dates to find any overlapping
+            adjust_cycles_start_and_end_dates_for_active_program(program)
+
+
+def dict_per_ba_with_program_list() -> Dict:
+    results = {}
     for ba in BusinessArea.objects.all().only("id", "name"):
-        logger.info(f"Started processing {ba.name}...")
+        programs_ids = [
+            str(p_id) for p_id in Program.objects.filter(business_area_id=ba.id).only("id").values_list("id", flat=True)
+        ]
+        if len(programs_ids) > 0:
+            print(f"Started processing {ba.name}. Found {len(programs_ids)} programs.")
+            results.update({str(ba.id): programs_ids})
+            # {"123h23": ['p_123', 'p_321']}
+    return results
 
-        # FINISHED programs
-        for finished_program in (
-            Program.objects.filter(business_area_id=ba.id)
-            .exclude(status__in=[Program.DRAFT, Program.ACTIVE])
-            .only("id", "name", "start_date", "end_date", "status")
-        ):
-            processing_with_finished_program(finished_program)
 
-        # ACTIVE and DRAFT programs
-        for program in (
-            Program.objects.filter(business_area_id=ba.id)
-            .exclude(status=Program.FINISHED)
-            .only("id", "name", "start_date", "end_date", "status")
-        ):
-            with transaction.atomic():
-                logger.info(f"** Creating Program Cycles for program {program.name}")
+def main_migration_cycle() -> None:
+    start_time = timezone.now()
+    print("Hi There! Started Program Cycle Data Migration.")
+    print(f"Cycles before running creation: {ProgramCycle.objects.all().count()}")
 
-                default_cycle = ProgramCycle.objects.filter(program_id=program.id).first()
-                if not default_cycle:
-                    logger.info(f"###### Default Program Cycles for program {program.name} does not exist")
+    ba_dict = dict_per_ba_with_program_list()
 
-                payment_plan_qs = (
-                    PaymentPlan.objects.filter(program_id=program.id)
-                    .order_by("start_date", "created_at")
-                    .only("id", "program_id", "target_population_id")
-                )
-                PaymentPlan.objects.filter(program_id=program.id).update(program_cycle=None)
-                # using list for .exclude__in=[]
-                default_cycle_id = [str(default_cycle.id)] if default_cycle else []
-                processing_with_active_program(list(payment_plan_qs), default_cycle_id)
+    for programs in ba_dict.values():
+        for program_id in programs:
+            program_cycle_data_migration(program_id)
 
-                if default_cycle:
-                    default_cycle.delete(soft=False)
-
-                # after create all Cycles let's adjust dates to find any overlapping
-                adjust_cycles_start_and_end_dates_for_active_program(program)
-
-    logger.info(f"Cycles after creation: {ProgramCycle.objects.all().count()}")
+    print(f"Cycles after creation: {ProgramCycle.objects.all().count()}")
     print(f"Congratulations! Done in {timezone.now() - start_time}")
