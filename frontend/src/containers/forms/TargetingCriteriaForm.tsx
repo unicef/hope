@@ -140,10 +140,6 @@ export const TargetingCriteriaForm = ({
 
   if (!data) return null;
 
-  console.log('allDataChoicesDict', allDataChoicesDict);
-  //add mapping ---> isFlexField === false --> NOT_FLEX_FIELD
-  //add mapping ---> isFlexField === true && type !== 'PDU' --> FLEX_FIELD_NOT_PDU
-  //add mapping for flexfieldcategorization ---> isFlexField === true && type === 'PDU' --> FLEX_FIELD_PDU
   const validate = ({
     filters,
     individualsFiltersBlocks,
@@ -208,6 +204,7 @@ export const TargetingCriteriaForm = ({
 
   const handleSubmit = (values, bag): void => {
     const filters = formatCriteriaFilters(values.filters);
+
     const individualsFiltersBlocks = formatCriteriaIndividualsFiltersBlocks(
       values.individualsFiltersBlocks,
     );
@@ -225,166 +222,175 @@ export const TargetingCriteriaForm = ({
         validationSchema={validationSchema}
         enableReinitialize
       >
-        {({ submitForm, values, resetForm, errors }) => (
-          <Dialog
-            open={open}
-            onClose={onClose}
-            scroll="paper"
-            aria-labelledby="form-dialog-title"
-            fullWidth
-            maxWidth="md"
-          >
-            {open && <AutoSubmitFormOnEnter />}
-            <DialogTitleWrapper>
-              <DialogTitle component="div">
-                <Typography data-cy="title-add-filter" variant="h6">
-                  {t('Add Filter')}
-                </Typography>
-              </DialogTitle>
-            </DialogTitleWrapper>
-            <DialogContent>
-              {
-                // @ts-ignore
-                errors.nonFieldErrors && (
-                  <DialogError>
-                    <ul>
-                      {
-                        // @ts-ignore
-                        errors.nonFieldErrors.map((message) => (
-                          <li key={message}>{message}</li>
-                        ))
-                      }
-                    </ul>
-                  </DialogError>
-                )
-              }
-              <DialogDescription>
-                {isSocialWorkingProgram
-                  ? ''
-                  : 'All rules defined below have to be true for the entire household.'}
-              </DialogDescription>
-              <FieldArray
-                name="filters"
-                render={(arrayHelpers) => (
-                  <ArrayFieldWrapper
-                    arrayHelpers={arrayHelpers}
-                    ref={filtersArrayWrapperRef}
-                  >
-                    {values.filters.map((each, index) => (
-                      <TargetingCriteriaHouseholdFilter
-                        // eslint-disable-next-line
-                        key={index}
-                        index={index}
-                        data={isSocialWorkingProgram ? data : householdData}
-                        choicesDict={allDataChoicesDict}
-                        each={each}
-                        onChange={(e, object) => {
-                          if (object) {
-                            return chooseFieldType(object, arrayHelpers, index);
-                          }
-                          return clearField(arrayHelpers, index);
-                        }}
-                        values={values}
-                        onClick={() => arrayHelpers.remove(index)}
-                      />
-                    ))}
-                  </ArrayFieldWrapper>
-                )}
-              />
-              {householdFiltersAvailable || isSocialWorkingProgram ? (
-                <Box display="flex" flexDirection="column">
-                  <ButtonBox>
-                    <Button
-                      onClick={() =>
-                        filtersArrayWrapperRef.current
-                          .getArrayHelpers()
-                          .push({ fieldName: '' })
-                      }
-                      color="primary"
-                      startIcon={<AddCircleOutline />}
-                      data-cy="button-household-rule"
+        {({ submitForm, values, resetForm, errors }) => {
+          return (
+            <Dialog
+              open={open}
+              onClose={onClose}
+              scroll="paper"
+              aria-labelledby="form-dialog-title"
+              fullWidth
+              maxWidth="md"
+            >
+              {open && <AutoSubmitFormOnEnter />}
+              <DialogTitleWrapper>
+                <DialogTitle component="div">
+                  <Typography data-cy="title-add-filter" variant="h6">
+                    {t('Add Filter')}
+                  </Typography>
+                </DialogTitle>
+              </DialogTitleWrapper>
+              <DialogContent>
+                {
+                  // @ts-ignore
+                  errors.nonFieldErrors && (
+                    <DialogError>
+                      <ul>
+                        {
+                          // @ts-ignore
+                          errors.nonFieldErrors.map((message) => (
+                            <li key={message}>{message}</li>
+                          ))
+                        }
+                      </ul>
+                    </DialogError>
+                  )
+                }
+                <DialogDescription>
+                  {isSocialWorkingProgram
+                    ? ''
+                    : 'All rules defined below have to be true for the entire household.'}
+                </DialogDescription>
+                <FieldArray
+                  name="filters"
+                  render={(arrayHelpers) => (
+                    <ArrayFieldWrapper
+                      arrayHelpers={arrayHelpers}
+                      ref={filtersArrayWrapperRef}
                     >
-                      ADD {isSocialWorkingProgram ? 'PEOPLE' : 'HOUSEHOLD'} RULE
-                    </Button>
-                  </ButtonBox>
-                </Box>
-              ) : null}
-              {individualFiltersAvailable && !isSocialWorkingProgram ? (
-                <>
-                  {householdFiltersAvailable ? (
-                    <AndDivider>
-                      <AndDividerLabel>And</AndDividerLabel>
-                    </AndDivider>
-                  ) : null}
-                  <FieldArray
-                    name="individualsFiltersBlocks"
-                    render={(arrayHelpers) => (
-                      <ArrayFieldWrapper
-                        arrayHelpers={arrayHelpers}
-                        ref={individualsFiltersBlocksWrapperRef}
-                      >
-                        {values.individualsFiltersBlocks.map((each, index) => (
-                          <TargetingCriteriaIndividualFilterBlocks
-                            // eslint-disable-next-line
-                            key={index}
-                            blockIndex={index}
-                            data={individualData}
-                            values={values}
-                            choicesToDict={allDataChoicesDict}
-                            onDelete={() => arrayHelpers.remove(index)}
-                          />
-                        ))}
-                      </ArrayFieldWrapper>
-                    )}
-                  />
+                      {values.filters.map((each, index) => (
+                        <TargetingCriteriaHouseholdFilter
+                          // eslint-disable-next-line
+                          key={index}
+                          index={index}
+                          data={isSocialWorkingProgram ? data : householdData}
+                          choicesDict={allDataChoicesDict}
+                          each={each}
+                          onChange={(e, object) => {
+                            if (object) {
+                              return chooseFieldType(
+                                object,
+                                arrayHelpers,
+                                index,
+                              );
+                            }
+                            return clearField(arrayHelpers, index);
+                          }}
+                          values={values}
+                          onClick={() => arrayHelpers.remove(index)}
+                        />
+                      ))}
+                    </ArrayFieldWrapper>
+                  )}
+                />
+                {householdFiltersAvailable || isSocialWorkingProgram ? (
                   <Box display="flex" flexDirection="column">
                     <ButtonBox>
                       <Button
-                        data-cy="button-individual-rule"
                         onClick={() =>
-                          individualsFiltersBlocksWrapperRef.current
+                          filtersArrayWrapperRef.current
                             .getArrayHelpers()
-                            .push({
-                              individualBlockFilters: [{ fieldName: '' }],
-                            })
+                            .push({ fieldName: '' })
                         }
                         color="primary"
                         startIcon={<AddCircleOutline />}
+                        data-cy="button-household-rule"
                       >
-                        ADD INDIVIDUAL RULE GROUP
+                        ADD {isSocialWorkingProgram ? 'PEOPLE' : 'HOUSEHOLD'}{' '}
+                        RULE
                       </Button>
                     </ButtonBox>
                   </Box>
-                </>
-              ) : null}
-            </DialogContent>
-            <DialogFooter>
-              <DialogActions>
-                <StyledBox display="flex" justifyContent="flex-end">
-                  <div>
-                    <Button
-                      onClick={() => {
-                        resetForm();
-                        onClose();
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={submitForm}
-                      type="submit"
-                      color="primary"
-                      variant="contained"
-                      data-cy="button-target-population-add-criteria"
-                    >
-                      Save
-                    </Button>
-                  </div>
-                </StyledBox>
-              </DialogActions>
-            </DialogFooter>
-          </Dialog>
-        )}
+                ) : null}
+                {individualFiltersAvailable && !isSocialWorkingProgram ? (
+                  <>
+                    {householdFiltersAvailable ? (
+                      <AndDivider>
+                        <AndDividerLabel>And</AndDividerLabel>
+                      </AndDivider>
+                    ) : null}
+                    <FieldArray
+                      name="individualsFiltersBlocks"
+                      render={(arrayHelpers) => (
+                        <ArrayFieldWrapper
+                          arrayHelpers={arrayHelpers}
+                          ref={individualsFiltersBlocksWrapperRef}
+                        >
+                          {values.individualsFiltersBlocks.map(
+                            (each, index) => (
+                              <TargetingCriteriaIndividualFilterBlocks
+                                // eslint-disable-next-line
+                                key={index}
+                                blockIndex={index}
+                                data={individualData}
+                                values={values}
+                                choicesToDict={allDataChoicesDict}
+                                onDelete={() => arrayHelpers.remove(index)}
+                              />
+                            ),
+                          )}
+                        </ArrayFieldWrapper>
+                      )}
+                    />
+                    <Box display="flex" flexDirection="column">
+                      <ButtonBox>
+                        <Button
+                          data-cy="button-individual-rule"
+                          onClick={() =>
+                            individualsFiltersBlocksWrapperRef.current
+                              .getArrayHelpers()
+                              .push({
+                                individualBlockFilters: [{ fieldName: '' }],
+                              })
+                          }
+                          color="primary"
+                          startIcon={<AddCircleOutline />}
+                        >
+                          ADD INDIVIDUAL RULE GROUP
+                        </Button>
+                      </ButtonBox>
+                    </Box>
+                  </>
+                ) : null}
+              </DialogContent>
+              <DialogFooter>
+                <DialogActions>
+                  <StyledBox display="flex" justifyContent="flex-end">
+                    <div>
+                      <Button
+                        onClick={() => {
+                          resetForm();
+                          onClose();
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={submitForm}
+                        type="submit"
+                        color="primary"
+                        variant="contained"
+                        data-cy="button-target-population-add-criteria"
+                      >
+                        Save
+                      </Button>
+                    </div>
+                  </StyledBox>
+                </DialogActions>
+              </DialogFooter>
+            </Dialog>
+          );
+        }}
       </Formik>
     </DialogContainer>
   );

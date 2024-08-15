@@ -1,16 +1,15 @@
 export const chooseFieldType = (fieldValue, arrayHelpers, index): void => {
-  console.log('fieldValue', fieldValue);
-  let flexFieldCategorization;
+  let flexFieldClassification;
   if (fieldValue.isFlexField === false) {
-    flexFieldCategorization = 'NOT_FLEX_FIELD';
+    flexFieldClassification = 'NOT_FLEX_FIELD';
   } else if (fieldValue.isFlexField === true && fieldValue.type !== 'PDU') {
-    flexFieldCategorization = 'FLEX_FIELD_NOT_PDU';
+    flexFieldClassification = 'FLEX_FIELD_NOT_PDU';
   } else if (fieldValue.isFlexField === true && fieldValue.type === 'PDU') {
-    flexFieldCategorization = 'FLEX_FIELD_PDU';
+    flexFieldClassification = 'FLEX_FIELD_PDU';
   }
 
   const updatedFieldValues = {
-    flexFieldCategorization,
+    flexFieldClassification,
     associatedWith: fieldValue.associatedWith,
     fieldAttribute: {
       labelEn: fieldValue.labelEn,
@@ -162,20 +161,58 @@ export function formatCriteriaFilters(filters) {
         comparisonMethod = 'EQUALS';
         values = [each.value];
         break;
+      case 'PDU':
+        switch (each.pduData.subtype) {
+          case 'SELECT_ONE':
+            comparisonMethod = 'EQUALS';
+            values = [each.value];
+            break;
+          case 'SELECT_MANY':
+            comparisonMethod = 'CONTAINS';
+            values = [...each.value];
+            break;
+          case 'STRING':
+            comparisonMethod = 'CONTAINS';
+            values = [each.value];
+            break;
+          case 'DECIMAL':
+          case 'INTEGER':
+          case 'DATE':
+            if (each.value.from && each.value.to) {
+              comparisonMethod = 'RANGE';
+              values = [each.value.from, each.value.to];
+            } else if (each.value.from && !each.value.to) {
+              comparisonMethod = 'GREATER_THAN';
+              values = [each.value.from];
+            } else {
+              comparisonMethod = 'LESS_THAN';
+              values = [each.value.to];
+            }
+            break;
+          case 'BOOL':
+            comparisonMethod = 'EQUALS';
+            values = [each.value];
+            break;
+          default:
+            comparisonMethod = 'CONTAINS';
+            values = [each.value];
+        }
+        break;
       default:
         comparisonMethod = 'CONTAINS';
+        values = [each.value];
     }
+
     return {
+      ...each,
       comparisonMethod,
       arguments: values,
       fieldName: each.fieldName,
-      isFlexField: each.isFlexField,
       fieldAttribute: each.fieldAttribute,
       flexFieldClassification: each.flexFieldClassification,
     };
   });
 }
-
 // TODO Marcin make Type to this function
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function formatCriteriaIndividualsFiltersBlocks(
@@ -191,13 +228,22 @@ function mapFilterToVariable(filter): {
   arguments;
   fieldName: string;
   flexFieldClassification: string;
+  round?: number;
 } {
-  return {
+  const result = {
     comparisonMethod: filter.comparisonMethod,
     arguments: filter.arguments,
     fieldName: filter.fieldName,
     flexFieldClassification: filter.flexFieldClassification,
   };
+
+  //TODO MS: send some more fields?
+  if (filter.flexFieldClassification === 'FLEX_FIELD_PDU') {
+    // result.round = filter.round;
+    // result.roundName = filter.roundNames[filter.round - 1];
+  }
+
+  return result;
 }
 
 // TODO Marcin make Type to this function
