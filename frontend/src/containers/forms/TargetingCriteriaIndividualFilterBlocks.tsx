@@ -84,7 +84,6 @@ export function TargetingCriteriaIndividualFilterBlocks({
   const { t } = useTranslation();
   const shouldShowAndDivider =
     blockIndex + 1 < values.individualsFiltersBlocks.length;
-  console.log('values', values);
   return (
     <div>
       Set Individual Criteria

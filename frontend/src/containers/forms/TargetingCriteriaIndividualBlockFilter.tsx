@@ -20,7 +20,6 @@ export function TargetingCriteriaIndividualBlockFilter({
   onChange: (e, object) => void;
   onDelete: () => void;
 }): React.ReactElement {
-  console.log('each', each);
   return (
     <div>
       <FieldChooser

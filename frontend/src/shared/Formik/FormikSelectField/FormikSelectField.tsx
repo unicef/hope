@@ -33,7 +33,6 @@ export function FormikSelectField({
   onChange,
   ...otherProps
 }): React.ReactElement {
-  console.log('choices', otherProps.choices);
   const isInvalid = Boolean(
     get(form.errors, field.name) &&
       (get(form.touched, field.name) || form.submitCount > 0 || form.errors),
