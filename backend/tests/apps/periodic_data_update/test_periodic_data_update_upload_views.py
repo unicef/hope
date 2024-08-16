@@ -34,6 +34,7 @@ from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_t
 from hct_mis_api.apps.periodic_data_update.tests.test_periodic_data_update_import_service import (
     add_pdu_data_to_xlsx,
 )
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 pytestmark = pytest.mark.django_db
@@ -338,6 +339,8 @@ class TestPeriodicDataUpdateUploadViews:
             label="PDU Field",
             pdu_data=pdu_data,
         )
+        populate_pdu_with_null_values(self.program1, individual.flex_fields)
+        individual.save()
         pdu_template = PeriodicDataUpdateTemplateFactory(
             program=self.program1,
             rounds_data=[
