@@ -749,9 +749,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                     obj_to_create.age_at_registration = calculate_age_at_registration(
                         registration_data_import.created_at, str(obj_to_create.birth_date)
                     )
-                    obj_to_create.flex_fields = populate_pdu_with_null_values(
-                        registration_data_import.program, obj_to_create.flex_fields
-                    )
+                    populate_pdu_with_null_values(registration_data_import.program, obj_to_create.flex_fields)
                     self.handle_pdu_fields(row, first_row, obj_to_create)
                     self.individuals.append(obj_to_create)
             except Exception as e:  # pragma: no cover

@@ -101,7 +101,7 @@ class TestPeriodicDataUpdateImportService(TestCase):
             program=cls.program,
         )
 
-        cls.individual.flex_fields = populate_pdu_with_null_values(cls.program, cls.individual.flex_fields)
+        populate_pdu_with_null_values(cls.program, cls.individual.flex_fields)
         cls.individual.save()
 
     def prepare_test_data(self, rounds_data: list, rows: list) -> tuple:

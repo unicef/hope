@@ -339,7 +339,7 @@ class TestPeriodicDataUpdateUploadViews:
             label="PDU Field",
             pdu_data=pdu_data,
         )
-        individual.flex_fields = populate_pdu_with_null_values(self.program1, individual.flex_fields)
+        populate_pdu_with_null_values(self.program1, individual.flex_fields)
         individual.save()
         pdu_template = PeriodicDataUpdateTemplateFactory(
             program=self.program1,
