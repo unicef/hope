@@ -94,7 +94,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
         flex_fields_dict = build_flex_arg_dict_from_list_if_exists(
             head_of_household_info, SriLankaRegistrationService.INDIVIDUAL_FLEX_FIELDS
         )
-        flex_fields_dict = populate_pdu_with_null_values(registration_data_import.program, flex_fields_dict)  # type: ignore
+        populate_pdu_with_null_values(registration_data_import.program, flex_fields_dict)  # type: ignore
 
         individual_data = dict(
             **build_arg_dict_from_dict_if_exists(

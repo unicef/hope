@@ -43,6 +43,6 @@ def populate_pdu_with_null_values(program: Program, current_flex_fields: Optiona
 def populate_pdu_new_rounds_with_null_values(program: Program) -> None:
     individuals = []
     for ind in Individual.all_merge_status_objects.filter(program=program):
-        ind.flex_fields = populate_pdu_with_null_values(program, ind.flex_fields)
+        populate_pdu_with_null_values(program, ind.flex_fields)
         individuals.append(ind)
     Individual.all_merge_status_objects.bulk_update(individuals, ["flex_fields"])

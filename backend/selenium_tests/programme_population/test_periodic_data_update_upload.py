@@ -152,7 +152,7 @@ class TestPeriodicDataUpdateUpload:
         string_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,
     ) -> None:
-        individual.flex_fields = populate_pdu_with_null_values(program, individual.flex_fields)
+        populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
         flexible_attribute = string_attribute
         tmp_file = prepare_xlsx_file(
@@ -194,7 +194,7 @@ class TestPeriodicDataUpdateUpload:
         date_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,
     ) -> None:
-        individual.flex_fields = populate_pdu_with_null_values(program, individual.flex_fields)
+        populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
         flexible_attribute = date_attribute
         tmp_file = prepare_xlsx_file(
@@ -235,7 +235,7 @@ class TestPeriodicDataUpdateUpload:
         string_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,
     ) -> None:
-        individual.flex_fields = populate_pdu_with_null_values(program, individual.flex_fields)
+        populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
         periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
             program=program,

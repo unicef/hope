@@ -113,7 +113,7 @@ class TestPeriodicDataTemplates:
         individual: Individual,
         clear_downloaded_files: None,
     ) -> None:
-        individual.flex_fields = populate_pdu_with_null_values(program, individual.flex_fields)
+        populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
         periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
             program=program,
@@ -205,7 +205,7 @@ class TestPeriodicDataTemplates:
         pagePeriodicDataUpdateTemplates: PeriodicDatUpdateTemplates,
         individual: Individual,
     ) -> None:
-        individual.flex_fields = populate_pdu_with_null_values(program, individual.flex_fields)
+        populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
         rounds_data = [
             {
@@ -253,7 +253,7 @@ class TestPeriodicDataTemplates:
         pagePeriodicDataUpdateTemplatesDetails: PeriodicDatUpdateTemplatesDetails,
         individual: Individual,
     ) -> None:
-        individual.flex_fields = populate_pdu_with_null_values(program, individual.flex_fields)
+        populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
         pageIndividuals.selectGlobalProgramFilter(program.name).click()
         pageIndividuals.getNavProgrammePopulation().click()

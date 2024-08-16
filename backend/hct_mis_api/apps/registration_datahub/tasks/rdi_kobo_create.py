@@ -354,9 +354,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     individual_obj.age_at_registration = calculate_age_at_registration(
                         self.registration_data_import.created_at, str(individual_obj.birth_date)
                     )
-                    individual_obj.flex_fields = populate_pdu_with_null_values(
-                        self.registration_data_import.program, individual_obj.flex_fields
-                    )
+                    populate_pdu_with_null_values(self.registration_data_import.program, individual_obj.flex_fields)
 
                     if individual_obj.relationship == HEAD:
                         head_of_households_mapping[household_obj] = individual_obj
