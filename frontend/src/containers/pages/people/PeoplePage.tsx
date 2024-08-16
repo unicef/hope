@@ -84,7 +84,11 @@ export const PeoplePage = (): React.ReactElement => {
           >
             <Tab data-cy="tab-individuals" label="Individuals" />
             {!programHasPdu ? (
-              <Tooltip title="Program does not have PDU fields">
+              <Tooltip
+                title={t(
+                  'Programme does not have defined fields for periodic updates',
+                )}
+              >
                 <span>
                   <Tab
                     disabled={!programHasPdu}
