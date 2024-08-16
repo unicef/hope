@@ -9,6 +9,7 @@ import { FormikDecimalField } from '@shared/Formik/FormikDecimalField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { Grid } from '@mui/material';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 
 const FlexWrapper = styled.div`
   display: flex;
@@ -195,6 +196,15 @@ export function SubField({
                     : []
                 }
                 label="Round"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Field
+                name={`${baseName}.includeNullRound`}
+                label={t('Include records with null value for the round')}
+                color="primary"
+                component={FormikCheckboxField}
+                data-cy="input-include-null-round"
               />
             </Grid>
             <Grid item xs={12}>

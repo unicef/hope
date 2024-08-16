@@ -88,6 +88,10 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
   });
 
   const handleSubmit = async (values): Promise<void> => {
+    console.log(
+      'getTargetingCriteriaVariables',
+      getTargetingCriteriaVariables(values),
+    );
     try {
       const res = await mutate({
         variables: {
