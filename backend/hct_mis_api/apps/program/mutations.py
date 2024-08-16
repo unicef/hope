@@ -277,7 +277,10 @@ class CopyProgram(
         # create partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
         if partner_access == Program.SELECTED_PARTNERS_ACCESS:
             create_program_partner_access(partners_data, program, partner_access)
-        copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
+
+        transaction.on_commit(
+            lambda: copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
+        )
 
         if pdu_fields is not None:
             FlexibleAttributeForPDUService(program, pdu_fields).create_pdu_flex_attributes()
