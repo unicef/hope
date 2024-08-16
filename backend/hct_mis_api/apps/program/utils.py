@@ -20,6 +20,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
 from hct_mis_api.apps.program.validators import validate_data_collecting_type
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -93,7 +94,8 @@ class CopyProgramPopulation:
     def copy_individual(self, individual: Individual) -> Individual:
         copied_from_pk = individual.pk
         individual.pk = None
-        individual.flex_fields = get_flex_fields_without_pdu_values(individual)
+        copied_flex_fields = get_flex_fields_without_pdu_values(individual)
+        individual.flex_fields = populate_pdu_with_null_values(self.program, copied_flex_fields)
         individual.program = self.program
         individual.copied_from_id = copied_from_pk
         individual.registration_data_import = self.rdi
@@ -472,7 +474,8 @@ def copy_individual(individual: Individual, program: Program) -> tuple:
     original_individual_id = individual.id
     individual.copied_from_id = original_individual_id
     individual.pk = None
-    individual.flex_fields = get_flex_fields_without_pdu_values(individual)
+    copied_flex_fields = get_flex_fields_without_pdu_values(individual)
+    individual.flex_fields = populate_pdu_with_null_values(program, copied_flex_fields)
     individual.program = program
     individual.household = None
     individual.registration_data_import = None

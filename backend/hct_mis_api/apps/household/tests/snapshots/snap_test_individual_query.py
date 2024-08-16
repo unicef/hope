@@ -811,3 +811,33 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_without_search_
         }
     ]
 }
+
+snapshots['TestIndividualWithFlexFieldsQuery::test_individual_query_single_with_flex_fields 1'] = {
+    'data': {
+        'individual': {
+            'birthDate': '1943-07-30',
+            'familyName': 'Butler',
+            'flexFields': {
+                'pdu_field_1': {
+                    '1': {
+                        'collection_date': '2021-01-01',
+                        'value': 123.45
+                    },
+                    '2': {
+                        'collection_date': '2021-01-01',
+                        'value': 234.56
+                    }
+                },
+                'pdu_field_2': {
+                    '4': {
+                        'collection_date': '2021-01-01',
+                        'value': 'Value D'
+                    }
+                }
+            },
+            'fullName': 'Benjamin Butler',
+            'givenName': 'Benjamin',
+            'phoneNo': '(953)682-4596'
+        }
+    }
+}
