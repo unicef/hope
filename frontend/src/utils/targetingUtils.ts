@@ -237,10 +237,25 @@ function mapFilterToVariable(filter): {
     flexFieldClassification: filter.flexFieldClassification,
   };
 
-  //TODO MS: send some more fields?
   if (filter.flexFieldClassification === 'FLEX_FIELD_PDU') {
-    // result.round = filter.round;
-    // result.roundName = filter.roundNames[filter.round - 1];
+    result.round = filter.round;
+    result.includeNullRound = filter.includeNullRound;
+    console.log('filter:', filter);
+    console.log('filter.round:', filter.round);
+    console.log('filter.roundNames:', filter.roundNames);
+    console.log(
+      'filter.roundNames.length:',
+      filter.roundNames ? filter.roundNames.length : 'undefined',
+    );
+    if (
+      filter.roundNames &&
+      filter.roundNames.length >= filter.round &&
+      filter.round >= 1
+    ) {
+      result.roundName = filter.roundNames[filter.round - 1];
+    } else {
+      result.roundName = null;
+    }
   }
 
   return result;

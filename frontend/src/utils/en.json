@@ -892,5 +892,6 @@
   "Round Name is required": "Round Name is required",
   "Mark as Distinct": "Mark as Distinct",
   "Uniqueness": "Uniqueness",
-  "Are you sure you want to clear the selected ids? They won't be marked as a duplicate or distinct anymore.": "Are you sure you want to clear the selected ids? They won't be marked as a duplicate or distinct anymore."
+  "Are you sure you want to clear the selected ids? They won't be marked as a duplicate or distinct anymore.": "Are you sure you want to clear the selected ids? They won't be marked as a duplicate or distinct anymore.",
+  "Include records with null value for the round": "Include records with null value for the round"
 }
