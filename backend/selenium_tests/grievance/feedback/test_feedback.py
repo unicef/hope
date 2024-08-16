@@ -47,7 +47,11 @@ def create_programs(django_db_setup: Generator[None, None, None], django_db_bloc
 
 @pytest.fixture
 def create_households_and_individuals() -> Household:
-    yield create_custom_household(observed_disability=[])
+    hh = create_custom_household(observed_disability=[])
+    hh.male_children_count = 1
+    hh.female_children_count = 2
+    hh.save()
+    yield hh
 
 
 def create_custom_household(observed_disability: list[str], residence_status: str = HOST) -> Household:
@@ -484,6 +488,8 @@ class TestFeedback:
         pageNewFeedback.getHouseholdTab()
         pageNewFeedback.getHouseholdTableRows(0).click()
         pageNewFeedback.getIndividualTab().click()
+        individual_name = pageNewFeedback.getIndividualTableRow(0).text.split(" HH")[0][17:]
+        individual_unicef_id = pageNewFeedback.getIndividualTableRow(0).text.split(" ")[0]
         pageNewFeedback.getIndividualTableRow(0).click()
         pageNewFeedback.getButtonNext().click()
 
@@ -518,9 +524,10 @@ class TestFeedback:
         assert "-" in pageNewFeedback.getLabelLengthOfTimeSinceArrival().text
         pageNewFeedback.getInputQuestionnaire_fullname().click()
         assert (
-            create_households_and_individuals.active_individuals.first().full_name
+            create_households_and_individuals.active_individuals.get(unicef_id=individual_unicef_id).full_name
             in pageNewFeedback.getLabelIndividualFullName().text
         )
+        assert individual_name in pageNewFeedback.getLabelIndividualFullName().text
         pageNewFeedback.getInputQuestionnaire_birthdate().click()
         # ToDo: Uncomment after fix: 211708
         # assert "-" in pageNewFeedback.getLabelBirthDate().text
