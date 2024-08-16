@@ -252,6 +252,7 @@ class CopyProgram(
     @is_authenticated
     def processed_mutate(cls, root: Any, info: Any, program_data: Dict) -> "CopyProgram":
         program_id = decode_id_string_required(program_data.pop("id"))
+        rdi_id = decode_id_string_required(program_data.pop("rdi_id"))
         partners_data = program_data.pop("partners", [])
         partner_access = program_data.get("partner_access", [])
         business_area = Program.objects.get(id=program_id).business_area
@@ -279,7 +280,7 @@ class CopyProgram(
             create_program_partner_access(partners_data, program, partner_access)
 
         transaction.on_commit(
-            lambda: copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
+            lambda: copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id, rdi_id=rdi_id)
         )
 
         if pdu_fields is not None:

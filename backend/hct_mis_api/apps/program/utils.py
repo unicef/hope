@@ -67,9 +67,9 @@ class CopyProgramPopulation:
         copy_from_individuals: QuerySet[Individual],
         copy_from_households: QuerySet[Household],
         program: Program,
+        rdi: RegistrationDataImport,
         rdi_merge_status: str = MergeStatusModel.MERGED,
         create_collection: bool = True,
-        rdi: Optional[RegistrationDataImport] = None,
     ):
         """
         copy_from_individuals: QuerySet of Individuals to copy
@@ -303,7 +303,7 @@ class CopyProgramPopulation:
         return bank_accounts_info_list
 
 
-def copy_program_related_data(copy_from_program_id: str, new_program: Program) -> None:
+def copy_program_related_data(copy_from_program_id: str, new_program: Program, rdi: RegistrationDataImport) -> None:
     copy_from_individuals = Individual.objects.filter(program_id=copy_from_program_id, withdrawn=False, duplicate=False)
     copy_from_households = Household.objects.filter(
         program_id=copy_from_program_id,
@@ -314,6 +314,7 @@ def copy_program_related_data(copy_from_program_id: str, new_program: Program) -
         copy_from_individuals,
         copy_from_households,
         new_program,
+        rdi,
     ).copy_program_population()
 
     populate_index(
