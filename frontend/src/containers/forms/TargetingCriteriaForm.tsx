@@ -145,13 +145,15 @@ export const TargetingCriteriaForm = ({
     individualsFiltersBlocks,
   }): { nonFieldErrors?: string[] } => {
     const filterNullOrNoSelections = (filter): boolean =>
-      filter.value === null ||
-      filter.value === '' ||
-      (filter?.fieldAttribute?.type === 'SELECT_MANY' &&
-        filter.value &&
-        filter.value.length === 0);
+      filter.fieldAttribute?.type !== 'PDU' &&
+      (filter.value === null ||
+        filter.value === '' ||
+        (filter?.fieldAttribute?.type === 'SELECT_MANY' &&
+          filter.value &&
+          filter.value.length === 0));
 
     const filterEmptyFromTo = (filter): boolean =>
+      filter.fieldAttribute?.type !== 'PDU' &&
       typeof filter.value === 'object' &&
       filter.value !== null &&
       Object.prototype.hasOwnProperty.call(filter.value, 'from') &&

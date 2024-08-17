@@ -35,6 +35,7 @@ export function TargetingCriteriaIndividualBlockFilter({
         <div data-cy="autocomplete-target-criteria-values">
           <SubField
             field={each}
+            blockIndex={blockIndex}
             index={index}
             choicesDict={choicesDict}
             baseName={`individualsFiltersBlocks[${blockIndex}].individualBlockFilters[${index}]`}

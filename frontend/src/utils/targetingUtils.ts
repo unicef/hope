@@ -228,34 +228,17 @@ function mapFilterToVariable(filter): {
   arguments;
   fieldName: string;
   flexFieldClassification: string;
-  round?: number;
+  roundNumber?: number;
 } {
   const result = {
-    comparisonMethod: filter.comparisonMethod,
-    arguments: filter.arguments,
+    comparisonMethod: filter.isNull ? 'IS_NULL' : filter.comparisonMethod,
+    arguments: filter.isNull ? [null] : filter.arguments,
     fieldName: filter.fieldName,
     flexFieldClassification: filter.flexFieldClassification,
   };
 
   if (filter.flexFieldClassification === 'FLEX_FIELD_PDU') {
-    result.round = filter.round;
-    result.includeNullRound = filter.includeNullRound;
-    console.log('filter:', filter);
-    console.log('filter.round:', filter.round);
-    console.log('filter.roundNames:', filter.roundNames);
-    console.log(
-      'filter.roundNames.length:',
-      filter.roundNames ? filter.roundNames.length : 'undefined',
-    );
-    if (
-      filter.roundNames &&
-      filter.roundNames.length >= filter.round &&
-      filter.round >= 1
-    ) {
-      result.roundName = filter.roundNames[filter.round - 1];
-    } else {
-      result.roundName = null;
-    }
+    result.roundNumber = filter.roundNumber;
   }
 
   return result;
