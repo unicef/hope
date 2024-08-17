@@ -1,6 +1,7 @@
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
-import { Field } from 'formik';
+import { Field, useFormikContext } from 'formik';
 import * as React from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { FormikAutocomplete } from '@shared/Formik/FormikAutocomplete';
@@ -21,12 +22,34 @@ const InlineField = styled.div`
 
 export function SubField({
   field,
+  blockIndex = undefined,
   index,
   baseName,
   choicesDict,
 }): React.ReactElement {
   const { t } = useTranslation();
   const fieldComponent = <p>{field.fieldAttribute.type}</p>;
+  const { values, setFieldValue } = useFormikContext();
+  if (blockIndex === undefined) {
+    const match = baseName.match(/block\[(\d+)\]/);
+    if (match) {
+      blockIndex = parseInt(match[1], 10);
+    }
+  }
+
+  const isNullSelected =
+    blockIndex !== undefined && index !== undefined
+      ? values?.individualsFiltersBlocks?.[blockIndex]
+          ?.individualBlockFilters?.[index]?.isNull ?? false
+      : false;
+
+  useEffect(() => {
+    if (isNullSelected) {
+      setFieldValue(`${baseName}.value.from`, '');
+      setFieldValue(`${baseName}.value.to`, '');
+      setFieldValue(`${baseName}.value`, '');
+    }
+  }, [isNullSelected, setFieldValue, baseName]);
 
   const renderFieldByType = (type) => {
     switch (type) {
@@ -36,21 +59,31 @@ export function SubField({
             <InlineField>
               <Field
                 name={`${baseName}.value.from`}
+                key={
+                  isNullSelected
+                    ? `${baseName}-cleared-from`
+                    : `${baseName}-from`
+                }
                 label={`${field.fieldAttribute.labelEn} from`}
                 variant="outlined"
                 fullWidth
                 component={FormikDecimalField}
                 data-cy="decimal-from"
+                disabled={isNullSelected}
               />
             </InlineField>
             <InlineField>
               <Field
                 name={`${baseName}.value.to`}
+                key={
+                  isNullSelected ? `${baseName}-cleared-to` : `${baseName}-to`
+                }
                 label={`${field.fieldAttribute.labelEn} to`}
                 variant="outlined"
                 fullWidth
                 component={FormikDecimalField}
                 data-cy="decimal-to"
+                disabled={isNullSelected}
               />
             </InlineField>
           </FlexWrapper>
@@ -66,6 +99,7 @@ export function SubField({
                 component={FormikDateField}
                 decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
                 data-cy="date-from"
+                disabled={isNullSelected}
               />
             </InlineField>
             <InlineField>
@@ -76,6 +110,7 @@ export function SubField({
                 component={FormikDateField}
                 decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
                 data-cy="date-to"
+                disabled={isNullSelected}
               />
             </InlineField>
           </FlexWrapper>
@@ -93,6 +128,7 @@ export function SubField({
                 fullWidth
                 component={FormikTextField}
                 data-cy="integer-from"
+                disabled={isNullSelected}
               />
             </InlineField>
             <InlineField>
@@ -105,6 +141,7 @@ export function SubField({
                 fullWidth
                 component={FormikTextField}
                 data-cy="integer-to"
+                disabled={isNullSelected}
               />
             </InlineField>
           </FlexWrapper>
@@ -127,6 +164,7 @@ export function SubField({
             index={index}
             component={FormikSelectField}
             data-cy="select-one-select"
+            disabled={isNullSelected}
           />
         );
       case 'SELECT_MANY':
@@ -139,19 +177,37 @@ export function SubField({
             multiple
             component={FormikSelectField}
             data-cy="select-many"
+            disabled={isNullSelected}
           />
         );
       case 'STRING':
-        return (
-          <Field
-            name={`${baseName}.value`}
-            label={`${field.fieldAttribute.labelEn}`}
-            fullWidth
-            variant="outlined"
-            component={FormikTextField}
-            data-cy="string-textfield"
-          />
-        );
+        if (field.pduData) {
+          return (
+            <Field
+              name={`${baseName}.value`}
+              label={`${field.fieldAttribute.labelEn}`}
+              choices={[
+                { value: 'exists', name: t('Exists') },
+                { value: 'does_not_exist', name: t("Doesn't Exist") },
+              ]}
+              component={FormikSelectField}
+              data-cy="string-existence-select"
+              disabled={isNullSelected}
+            />
+          );
+        } else {
+          return (
+            <Field
+              name={`${baseName}.value`}
+              label={`${field.fieldAttribute.labelEn}`}
+              fullWidth
+              variant="outlined"
+              component={FormikTextField}
+              data-cy="string-textfield"
+              disabled={isNullSelected}
+            />
+          );
+        }
       case 'BOOL':
         return (
           <Field
@@ -176,6 +232,7 @@ export function SubField({
             index={index}
             component={FormikSelectField}
             data-cy="bool-field"
+            disabled={isNullSelected}
           />
         );
       case 'PDU':
@@ -200,17 +257,15 @@ export function SubField({
             </Grid>
             <Grid item xs={12}>
               <Field
-                name={`${baseName}.includeNullRound`}
-                label={t('Include records with null value for the round')}
+                name={`${baseName}.isNull`}
+                label={t('Include null values only')}
                 color="primary"
                 component={FormikCheckboxField}
                 data-cy="input-include-null-round"
               />
             </Grid>
             <Grid item xs={12}>
-              {field.pduData && field.pduData.subtype
-                ? renderFieldByType(field.pduData.subtype)
-                : null}
+              {renderFieldByType(field.pduData.subtype)}
             </Grid>
           </Grid>
         );
