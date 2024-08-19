@@ -87,7 +87,9 @@ def pytest_addoption(parser) -> None:  # type: ignore
     parser.addoption("--mapping", action="store_true", default=False, help="Enable mapping mode")
 
 
-def pytest_configure() -> None:
+def pytest_configure(config) -> None:  # type: ignore
+    config.addinivalue_line("markers", "night: This marker is intended for e2e tests conducted during the night on CI.")
+
     # delete all old screenshots
     for file in os.listdir("report/screenshot"):
         os.remove(os.path.join("report/screenshot", file))
