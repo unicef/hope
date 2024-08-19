@@ -587,7 +587,7 @@ class TestPaymentPlanServices(APITestCase):
 
         with self.assertRaisesMessage(
             GraphQLError,
-            "Impossible to create Payment Plan for Program Cycle within Finished status",
+            "Impossible to create Payment Plan for Programme Cycle within Finished status",
         ):
             cycle.status = ProgramCycle.FINISHED
             cycle.save()
@@ -595,7 +595,7 @@ class TestPaymentPlanServices(APITestCase):
 
         with self.assertRaisesMessage(
             GraphQLError,
-            "Impossible to create Payment Plan for Program Cycle without start and/or end dates",
+            "Impossible to create Payment Plan for Programme Cycle without start and/or end dates",
         ):
             cycle.status = ProgramCycle.ACTIVE
             cycle.end_date = None

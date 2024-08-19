@@ -16,6 +16,7 @@ from django.core.validators import (
 from django.db import models
 from django.db.models import Q, QuerySet, Sum
 from django.db.models.constraints import UniqueConstraint
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import SoftDeletableModel
@@ -321,6 +322,12 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedMod
     def clean(self) -> None:
         if self.end_date and self.end_date < self.start_date:
             raise ValidationError("End date cannot be before start date.")
+
+        # if self.start_date < timezone.now():
+        #     raise ValidationError("Start date cannot be in the past.")
+        # TODO: need fix initdemo data
+        # if self.program.cycles.filter(start_date__gte=self.start_date).exists():
+        #     raise ValidationError("Start date must be after the latest cycle.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()

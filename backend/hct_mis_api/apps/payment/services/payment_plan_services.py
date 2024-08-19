@@ -380,13 +380,13 @@ class PaymentPlanService:
             raise GraphQLError("TargetPopulation should have related Program defined")
 
         if not target_population.program_cycle:
-            raise GraphQLError("Target Population should have assigned Program Cycle")
+            raise GraphQLError("Target Population should have assigned Programme Cycle")
 
         program_cycle = target_population.program_cycle
         if program_cycle.status not in (ProgramCycle.DRAFT, ProgramCycle.ACTIVE):
-            raise GraphQLError("Impossible to create Payment Plan for Program Cycle within Finished status")
-        if not program_cycle.start_date or not program_cycle.end_date:
-            raise GraphQLError("Impossible to create Payment Plan for Program Cycle without start and/or end dates")
+            raise GraphQLError("Impossible to create Payment Plan for Programme Cycle within Finished status")
+        if not program_cycle.end_date:
+            raise GraphQLError("Impossible to create Payment Plan for Programme Cycle without end date")
 
         dispersion_end_date = input_data["dispersion_end_date"]
         if not dispersion_end_date or dispersion_end_date <= timezone.now().date():

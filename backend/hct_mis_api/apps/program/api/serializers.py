@@ -48,7 +48,6 @@ class ProgramCycleListSerializer(EncodedIdSerializerMixin):
         model = ProgramCycle
         fields = (
             "id",
-            "unicef_id",
             "title",
             "status",
             "start_date",

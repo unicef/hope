@@ -163,6 +163,8 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             raise ValidationError("Only Active program can be assigned to Targeting")
         if program_cycle.status == ProgramCycle.FINISHED:
             raise ValidationError("Not possible to assign Finished Program Cycle to Targeting")
+        if not program_cycle.end_date:
+            raise ValidationError("Not possible to create Targeting with Programme Cycle without end date")
 
         tp_name = input_data.get("name", "").strip()
         if TargetPopulation.objects.filter(name=tp_name, program=program, is_removed=False).exists():
@@ -266,6 +268,8 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             program_cycle = get_object_or_404(ProgramCycle, pk=decode_id_string(program_cycle_id_encoded))
             if program_cycle.status == ProgramCycle.FINISHED:
                 raise ValidationError("Not possible to assign Finished Program Cycle to Targeting")
+            if not program_cycle.end_date:
+                raise ValidationError("Not possible to assign Programme Cycle without end date")
             target_population.program_cycle = program_cycle
 
         if targeting_criteria_input:
