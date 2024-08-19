@@ -309,8 +309,8 @@ def pagePeriodicDataUpdateTemplates(request: FixtureRequest, browser: Chrome) ->
 
 @pytest.fixture
 def pagePeriodicDataUpdateTemplatesDetails(
-        request: FixtureRequest,
-        browser: Chrome,
+    request: FixtureRequest,
+    browser: Chrome,
 ) -> PeriodicDatUpdateTemplatesDetails:
     yield PeriodicDatUpdateTemplatesDetails(browser)
 
@@ -417,7 +417,7 @@ def pageAccountabilityCommunication(request: FixtureRequest, browser: Chrome) ->
 
 @pytest.fixture
 def pageAccountabilityCommunicationDetails(
-        request: FixtureRequest, browser: Chrome
+    request: FixtureRequest, browser: Chrome
 ) -> AccountabilityCommunicationDetails:
     yield AccountabilityCommunicationDetails(browser)
 

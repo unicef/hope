@@ -515,6 +515,7 @@ class TestBusinessAreas:
         pageProgrammeDetails.wait_for_text("New Programme", pageProgrammeDetails.headerTitle)
         assert "New Programme" in pageProgrammeDetails.getHeaderTitle().text
 
+
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestAdminAreas:
@@ -574,6 +575,7 @@ class TestAdminAreas:
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
         assert "1" in pageProgrammeDetails.getLabelAdminArea1().text
         assert "15" in pageProgrammeDetails.getLabelAdminArea2().text
+
 
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
@@ -650,6 +652,7 @@ class TestComeBackScenarios:
         assert "Yes" in pageProgrammeDetails.getLabelCashPlus().text
         assert "0" in pageProgrammeDetails.getLabelProgramSize().text
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
+
 
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
