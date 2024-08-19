@@ -1342,6 +1342,7 @@ type FinancialServiceProviderXlsxTemplateNode implements Node {
   name: String!
   columns: [String]
   coreFields: [String!]!
+  flexFields: [String!]!
   financialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
 }
 
@@ -3654,7 +3655,7 @@ enum PeriodicFieldDataSubtype {
   DATE
   DECIMAL
   STRING
-  BOOLEAN
+  BOOL
 }
 
 type PeriodicFieldNode implements Node {
@@ -4719,7 +4720,6 @@ type TargetingCriteriaRuleFilterNode {
   flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification!
   fieldName: String!
   arguments: [Arg]
-  roundNumber: Int
   fieldAttribute: FieldAttributeNode
 }
 

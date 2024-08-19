@@ -182,8 +182,7 @@ export const TargetingCriteriaDisplay = ({
                   onClick={() => setOpen(true)}
                   data-cy="button-target-population-add-criteria"
                 >
-                  {t('Add')} &apos;Or&apos;
-                  {t('Filter')}
+                  {t('Add')} &apos;Or&apos; {t('Filter')}
                 </Button>
               )}
             </>

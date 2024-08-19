@@ -28,7 +28,6 @@ export function SubField({
   choicesDict,
 }): React.ReactElement {
   const { t } = useTranslation();
-  const fieldComponent = <p>{field.fieldAttribute.type}</p>;
   const { values, setFieldValue } = useFormikContext();
   if (blockIndex === undefined) {
     const match = baseName.match(/block\[(\d+)\]/);
@@ -51,7 +50,12 @@ export function SubField({
     }
   }, [isNullSelected, setFieldValue, baseName]);
 
+  if (!field) {
+    return null;
+  }
+
   const renderFieldByType = (type) => {
+    console.log('field', type);
     switch (type) {
       case 'DECIMAL':
         return (
@@ -240,16 +244,20 @@ export function SubField({
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <Field
-                name={`${baseName}.round`}
+                name={`${baseName}.roundNumber`}
                 component={FormikSelectField}
                 choices={
-                  field.pduData && field.pduData.numberOfRounds
-                    ? [...Array(field.pduData.numberOfRounds).keys()].map(
-                        (n) => ({
-                          value: n + 1,
-                          name: `${n + 1}`,
-                        }),
-                      )
+                  field.pduData?.numberOfRounds ||
+                  field.fieldAttribute?.pduData?.numberOfRounds
+                    ? [
+                        ...Array(
+                          field.pduData?.numberOfRounds ||
+                            field.fieldAttribute?.pduData?.numberOfRounds,
+                        ).keys(),
+                      ].map((n) => ({
+                        value: n + 1,
+                        name: `${n + 1}`,
+                      }))
                     : []
                 }
                 label="Round"
@@ -258,20 +266,23 @@ export function SubField({
             <Grid item xs={12}>
               <Field
                 name={`${baseName}.isNull`}
-                label={t('Include null values only')}
+                label={t('Only Empty Values')}
                 color="primary"
                 component={FormikCheckboxField}
                 data-cy="input-include-null-round"
               />
             </Grid>
             <Grid item xs={12}>
-              {renderFieldByType(field.pduData.subtype)}
+              {renderFieldByType(
+                field.pduData?.subtype ||
+                  field.fieldAttribute?.pduData?.subtype,
+              )}
             </Grid>
           </Grid>
         );
 
       default:
-        return fieldComponent;
+        return <></>;
     }
   };
 

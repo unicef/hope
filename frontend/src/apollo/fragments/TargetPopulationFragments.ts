@@ -95,6 +95,7 @@ export const targetPopulationDetailed = gql`
             id
             fieldName
             flexFieldClassification
+            roundNumber
             arguments
             comparisonMethod
             fieldAttribute {
@@ -106,6 +107,12 @@ export const targetPopulationDetailed = gql`
               choices {
                 value
                 labelEn
+              }
+              pduData {
+                id
+                subtype
+                numberOfRounds
+                roundsNames
               }
             }
           }
@@ -126,6 +133,12 @@ export const targetPopulationDetailed = gql`
             choices {
               value
               labelEn
+            }
+            pduData {
+              id
+              subtype
+              numberOfRounds
+              roundsNames
             }
           }
         }

@@ -162,7 +162,10 @@ export function formatCriteriaFilters(filters) {
         values = [each.value];
         break;
       case 'PDU':
-        switch (each.pduData.subtype) {
+        switch (
+          each.pduData?.subtype ||
+          each.fieldAttribute?.pduData?.subtype
+        ) {
           case 'SELECT_ONE':
             comparisonMethod = 'EQUALS';
             values = [each.value];
@@ -230,6 +233,7 @@ function mapFilterToVariable(filter): {
   flexFieldClassification: string;
   roundNumber?: number;
 } {
+  console.log('xxxfilter', filter);
   const result = {
     comparisonMethod: filter.isNull ? 'IS_NULL' : filter.comparisonMethod,
     arguments: filter.isNull ? [null] : filter.arguments,
