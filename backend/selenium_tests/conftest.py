@@ -88,8 +88,6 @@ def pytest_addoption(parser) -> None:  # type: ignore
 
 
 def pytest_configure() -> None:
-    # config.addinivalue_line("markers", "night: This marker is intended for e2e tests conducted during the night on CI.")
-
     # delete all old screenshots
     for file in os.listdir("report/screenshot"):
         os.remove(os.path.join("report/screenshot", file))
@@ -309,8 +307,8 @@ def pagePeriodicDataUpdateTemplates(request: FixtureRequest, browser: Chrome) ->
 
 @pytest.fixture
 def pagePeriodicDataUpdateTemplatesDetails(
-    request: FixtureRequest,
-    browser: Chrome,
+        request: FixtureRequest,
+        browser: Chrome,
 ) -> PeriodicDatUpdateTemplatesDetails:
     yield PeriodicDatUpdateTemplatesDetails(browser)
 
@@ -417,7 +415,7 @@ def pageAccountabilityCommunication(request: FixtureRequest, browser: Chrome) ->
 
 @pytest.fixture
 def pageAccountabilityCommunicationDetails(
-    request: FixtureRequest, browser: Chrome
+        request: FixtureRequest, browser: Chrome
 ) -> AccountabilityCommunicationDetails:
     yield AccountabilityCommunicationDetails(browser)
 
