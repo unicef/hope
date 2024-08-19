@@ -76,11 +76,6 @@ class ProgramCycleViewSet(
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
-    # def retrieve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-    #     serializer_class = self.get_serializer_class()
-    #     serializer = serializer_class(self.get_object())
-    #     return Response(serializer.data)
-
     def perform_destroy(self, program_cycle: ProgramCycle) -> None:
         if program_cycle.program.status != Program.ACTIVE:
             raise ValidationError("Only Programme Cycle for Active Programme can be deleted.")
