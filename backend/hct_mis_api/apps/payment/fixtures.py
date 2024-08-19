@@ -776,6 +776,7 @@ def generate_real_cash_plans() -> None:
             program=program,
             status=TargetPopulation.STATUS_OPEN,
             targeting_criteria=targeting_criteria,
+            # program_cycle="",
         )
         full_rebuild(target_population)
         target_population.status = TargetPopulation.STATUS_READY_FOR_CASH_ASSIST

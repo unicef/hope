@@ -66,7 +66,7 @@ class TestSmokeProgramCycle:
         assert "CLEAR" in pageProgramCycle.getButtonFiltersClear().text
         assert "APPLY" in pageProgramCycle.getButtonFiltersApply().text
         assert "Programme Cycles" in pageProgramCycle.getTableTitle().text
-        assert "Programme Cycle ID" in pageProgramCycle.getHeadCellId().text
+        # assert "Programme Cycle ID" in pageProgramCycle.getHeadCellId().text
         assert "Programme Cycle Title" in pageProgramCycle.getHeadCellProgrammeCyclesTitle().text
         assert "Status" in pageProgramCycle.getHeadCellStatus().text
         assert "Total Entitled Quantity" in pageProgramCycle.getHeadCellTotalEntitledQuantity().text

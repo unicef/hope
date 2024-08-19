@@ -276,7 +276,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         super(Program, self).validate_unique()
 
 
-class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedModel, AbstractSyncable, ConcurrencyModel):
+class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedModel, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "title",
@@ -323,11 +323,11 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedMod
         if self.end_date and self.end_date < self.start_date:
             raise ValidationError("End date cannot be before start date.")
 
-        # if self.start_date < timezone.now():
-        #     raise ValidationError("Start date cannot be in the past.")
-        # TODO: need fix initdemo data
-        # if self.program.cycles.filter(start_date__gte=self.start_date).exists():
-        #     raise ValidationError("Start date must be after the latest cycle.")
+        if self.start_date < timezone.now().date():
+            raise ValidationError("Start date cannot be in the past.")
+
+        if self.program.cycles.filter(start_date__gte=self.start_date).exists():
+            raise ValidationError("Start date must be after the latest cycle.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()

@@ -153,7 +153,7 @@ export const ProgramCycleDetailsHeader = ({
         <Box display="flex" alignItems={'center'}>
           <Box display="flex" flexDirection="column">
             <Box>
-              {programCycle.title} (ID: {programCycle.unicef_id})
+              {programCycle.title}
             </Box>
           </Box>
         </Box>

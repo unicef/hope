@@ -770,17 +770,6 @@ type CreateProgram {
   program: ProgramNode
 }
 
-type CreateProgramCycle {
-  validationErrors: Arg
-  program: ProgramNode
-}
-
-input CreateProgramCycleInput {
-  title: String!
-  startDate: Date!
-  endDate: Date
-}
-
 input CreateProgramInput {
   name: String
   startDate: Date
@@ -932,10 +921,6 @@ type DeleteProgram {
   ok: Boolean
 }
 
-type DeleteProgramCycle {
-  program: ProgramNode
-}
-
 type DeleteRegistrationDataImport {
   ok: Boolean
 }
@@ -1025,7 +1010,7 @@ type DeliveryMechanismPerPaymentPlanNode implements Node {
   sentBy: UserNode
   status: String!
   deliveryMechanismChoice: DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice
-  deliveryMechanism: DeliveryMechanismNode!
+  deliveryMechanism: DeliveryMechanismNode
   deliveryMechanismOrder: Int!
   sentToPaymentGateway: Boolean!
   chosenConfiguration: String
@@ -2862,9 +2847,6 @@ type Mutations {
   updateProgram(programData: UpdateProgramInput, version: BigInt): UpdateProgram
   deleteProgram(programId: String!): DeleteProgram
   copyProgram(programData: CopyProgramInput!): CopyProgram
-  createProgramCycle(programCycleData: CreateProgramCycleInput!): CreateProgramCycle
-  updateProgramCycle(programCycleData: UpdateProgramCycleInput, version: BigInt): UpdateProgramCycle
-  deleteProgramCycle(programCycleId: ID!): DeleteProgramCycle
   uploadImportDataXlsxFileAsync(businessAreaSlug: String!, file: Upload!): UploadImportDataXLSXFileAsync
   deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
   registrationXlsxImport(registrationDataImportData: RegistrationXlsxImportMutationInput!): RegistrationXlsxImportMutation
@@ -3687,9 +3669,7 @@ type ProgramCycleNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  lastSyncAt: DateTime
   version: BigInt!
-  unicefId: String
   title: String
   status: ProgramCycleStatus!
   startDate: Date!
@@ -5267,18 +5247,6 @@ type UpdatePaymentVerificationStatusAndReceivedAmount {
 type UpdateProgram {
   validationErrors: Arg
   program: ProgramNode
-}
-
-type UpdateProgramCycle {
-  validationErrors: Arg
-  program: ProgramNode
-}
-
-input UpdateProgramCycleInput {
-  programCycleId: ID!
-  title: String
-  startDate: Date
-  endDate: Date
 }
 
 input UpdateProgramInput {

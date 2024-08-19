@@ -10,10 +10,13 @@ import factory
 from dateutil.relativedelta import relativedelta
 from factory import fuzzy
 from factory.django import DjangoModelFactory
+from faker import Faker
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.program.models import Program, ProgramCycle
+
+fake = Faker()
 
 
 class ProgramCycleFactory(DjangoModelFactory):
@@ -22,13 +25,15 @@ class ProgramCycleFactory(DjangoModelFactory):
         django_get_or_create = ("program", "title")
 
     status = ProgramCycle.ACTIVE
-    start_date = factory.Faker(
-        "date_time_this_decade",
-        before_now=True,
-        after_now=False,
-        tzinfo=utc,
+    start_date = factory.LazyAttribute(
+        lambda o: (
+            o.program.cycles.latest("start_date").start_date + timedelta(days=1)
+            if o.program.cycles.exists()
+            else fake.date_time_this_decade(before_now=False, after_now=True, tzinfo=utc).date()
+        )
     )
-    end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
+
+    end_date = factory.LazyAttribute(lambda o: (o.start_date + timedelta(days=randint(60, 1000))))
     title = factory.Faker(
         "sentence",
         nb_words=3,
