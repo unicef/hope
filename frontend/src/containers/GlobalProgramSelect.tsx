@@ -180,6 +180,7 @@ export const GlobalProgramSelect = () => {
             individualFiltersAvailable:
               dataCollectingType?.individualFiltersAvailable,
           },
+          pduFields: program.pduFields,
         });
       }
     } else {
