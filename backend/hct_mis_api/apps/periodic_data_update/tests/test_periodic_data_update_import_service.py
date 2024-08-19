@@ -88,7 +88,7 @@ class TestPeriodicDataUpdateImportService(TestCase):
         )
         cls.boolean_attribute = create_pdu_flexible_attribute(
             label="Boolean Attribute",
-            subtype=PeriodicFieldData.BOOLEAN,
+            subtype=PeriodicFieldData.BOOL,
             number_of_rounds=1,
             rounds_names=["May"],
             program=cls.program,

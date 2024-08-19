@@ -72,7 +72,7 @@ class TestProgramQuery(APITestCase):
             pdu_data=pdu_data3,
         )
         pdu_data4 = PeriodicFieldDataFactory(
-            subtype=PeriodicFieldData.BOOLEAN,
+            subtype=PeriodicFieldData.BOOL,
             number_of_rounds=2,
             rounds_names=["Round A", "Round B"],
         )

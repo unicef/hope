@@ -467,7 +467,7 @@ class TestCopyProgram(APITestCase):
             {
                 "label": "PDU Field 4",
                 "pduData": {
-                    "subtype": "BOOLEAN",
+                    "subtype": "BOOL",
                     "numberOfRounds": 4,
                     "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
                 },
