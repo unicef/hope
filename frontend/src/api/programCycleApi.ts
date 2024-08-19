@@ -39,6 +39,7 @@ export interface ProgramCycle {
   total_undelivered_quantity_usd: number;
   total_delivered_quantity_usd: number;
   frequency_of_payments: string;
+  admin_url?: string;
 }
 
 export const fetchProgramCycles = async (
