@@ -6,7 +6,7 @@ pytestmark = pytest.mark.django_db(transaction=True)
 
 @pytest.mark.usefixtures("login")
 class TestSmokeCountryDashboard:
-    @pytest.mark.night
+
     def test_smoke_country_dashboard(self, pageCountryDashboard: CountryDashboard) -> None:
         pageCountryDashboard.getNavCountryDashboard().click()
         assert "Dashboard" in pageCountryDashboard.getPageHeaderTitle().text
