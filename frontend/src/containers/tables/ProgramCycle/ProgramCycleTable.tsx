@@ -27,7 +27,7 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
     limit: 5,
     ordering: 'created_at',
   });
-  const { businessArea, baseUrl } = useBaseUrl();
+  const { businessArea, baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
   const canCreateProgramCycle =
     program.status !== 'DRAFT' &&
@@ -39,6 +39,8 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
       return fetchProgramCycles(businessArea, program.id, queryVariables);
     },
   });
+
+  const canViewDetails = programId !== 'all';
 
   const renderRow = (row: ProgramCycle): ReactElement => {
     const detailsUrl = `/${baseUrl}/payment-module/program-cycles/${row.id}`;
@@ -52,7 +54,11 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
     return (
       <ClickableTableRow key={row.id} data-cy={`program-cycle-row-${row.id}`}>
         <TableCell data-cy={`program-cycle-id-${row.id}`}>
-          <BlackLink to={detailsUrl}>{row.unicef_id}</BlackLink>
+          {canViewDetails ? (
+            <BlackLink to={detailsUrl}>{row.unicef_id}</BlackLink>
+          ) : (
+            row.unicef_id
+          )}
         </TableCell>
         <TableCell data-cy="program-cycle-title">{row.title}</TableCell>
         <TableCell data-cy={`program-cycle-status-${row.id}`}>
