@@ -27,7 +27,7 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
     limit: 5,
     ordering: 'created_at',
   });
-  const { businessArea, baseUrl } = useBaseUrl();
+  const { businessArea, baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
   const canCreateProgramCycle =
     program.status !== 'DRAFT' &&
@@ -40,6 +40,8 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
     },
   });
 
+  const canViewDetails = programId !== 'all';
+
   const renderRow = (row: ProgramCycle): ReactElement => {
     const detailsUrl = `/${baseUrl}/payment-module/program-cycles/${row.id}`;
     const canEditProgramCycle =
@@ -51,8 +53,12 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
       hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_DELETE, permissions);
     return (
       <ClickableTableRow key={row.id} data-cy={`program-cycle-row-${row.id}`}>
-        <TableCell data-cy="program-cycle-title">
-          <BlackLink to={detailsUrl}>{row.title}</BlackLink>
+        <TableCell data-cy={`program-cycle-title`}>
+          {canViewDetails ? (
+            <BlackLink to={detailsUrl}>{row.title}</BlackLink>
+          ) : (
+            row.title
+          )}
         </TableCell>
         <TableCell data-cy={`program-cycle-status-${row.id}`}>
           <StatusBox

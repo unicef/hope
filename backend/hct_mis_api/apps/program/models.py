@@ -276,7 +276,9 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         super(Program, self).validate_unique()
 
 
-class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedModel, ConcurrencyModel):
+class ProgramCycle(
+    AdminUrlMixin, SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedModel, ConcurrencyModel
+):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "title",

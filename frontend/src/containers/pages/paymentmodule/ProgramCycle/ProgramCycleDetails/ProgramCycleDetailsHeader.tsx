@@ -16,6 +16,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { decodeIdString } from '@utils/utils';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
+import { AdminButton } from '@core/AdminButton';
 
 interface ProgramCycleDetailsHeaderProps {
   programCycle: ProgramCycle;
@@ -159,6 +160,7 @@ export const ProgramCycleDetailsHeader = ({
         </Box>
       }
       breadCrumbs={breadCrumbsItems}
+      flags={<AdminButton adminUrl={programCycle.admin_url} />}
     >
       {buttons}
     </PageHeader>

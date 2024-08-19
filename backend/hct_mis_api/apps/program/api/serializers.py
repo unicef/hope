@@ -44,6 +44,7 @@ class ProgramCycleListSerializer(EncodedIdSerializerMixin):
     end_date = serializers.DateField(format="%Y-%m-%d")
     program_start_date = serializers.DateField(format="%Y-%m-%d")
     program_end_date = serializers.DateField(format="%Y-%m-%d")
+    admin_url = serializers.SerializerMethodField()
 
     class Meta:
         model = ProgramCycle
@@ -61,12 +62,17 @@ class ProgramCycleListSerializer(EncodedIdSerializerMixin):
             "total_delivered_quantity_usd",
             "frequency_of_payments",
             "created_by",
+            "admin_url",
         )
 
     def get_created_by(self, obj: ProgramCycle) -> str:
         if not obj.created_by:
             return "-"
         return f"{obj.created_by.first_name} {obj.created_by.last_name}"
+
+    def get_admin_url(self, obj: ProgramCycle) -> Optional[str]:
+        user = self.context["request"].user
+        return obj.admin_url if user.is_superuser else None
 
 
 class ProgramCycleCreateSerializer(EncodedIdSerializerMixin):
