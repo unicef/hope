@@ -16,7 +16,7 @@ def assign_individual_to_rdi(apps, schema_editor):
 
         if individual_qs.exists():
             rdi = RegistrationDataImport(
-                name="RDI for Individuals [data migration]",
+                name=f"RDI for Individuals [data migration for Programme: {program.name}]",
                 status="MERGED",
                 imported_by=None,
                 data_source="XLS",
