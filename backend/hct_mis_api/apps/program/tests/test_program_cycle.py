@@ -4,6 +4,7 @@ from decimal import Decimal
 from django.test import TestCase
 from django.utils import timezone
 
+import freezegun
 from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -14,6 +15,7 @@ from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactor
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 
+@freezegun.freeze_time("2020-01-01")
 class TestProgramCycleMethods(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:

@@ -2,6 +2,7 @@ from typing import Any, Dict, Optional
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 from rest_framework import serializers
 
@@ -99,6 +100,12 @@ class ProgramCycleCreateSerializer(EncodedIdSerializerMixin):
         if program.status != Program.ACTIVE:
             raise serializers.ValidationError("Create Programme Cycle is possible only for Active Programme.")
 
+        if start_date and start_date < timezone.now().date():
+            raise serializers.ValidationError("Start date must be today or in the future.")
+
+        if end_date and end_date < start_date:
+            raise serializers.ValidationError("End date must be after the start date.")
+
         if start_date and start_date < program.start_date:
             raise serializers.ValidationError(
                 {"start_date": "Programme Cycle start date cannot be earlier than programme start date"}
@@ -137,16 +144,21 @@ class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
 
     def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
         program = self.instance.program
+        end_date = data.get("end_date")
         if program.status != Program.ACTIVE:
             raise serializers.ValidationError("Update Programme Cycle is possible only for Active Programme.")
 
-        if self.instance.end_date and "end_date" in data and data.get("end_date") is None:
+        if self.instance.end_date and "end_date" in data and end_date is None:
             raise serializers.ValidationError(
                 {
                     "end_date": "Not possible leave the Programme Cycle end date empty if it was not empty upon starting the edit."
                 }
             )
-        validate_cycle_timeframes_overlapping(program, data.get("start_date"), data.get("end_date"), self.instance.pk)
+
+        if end_date and end_date < timezone.now().date():
+            raise serializers.ValidationError("Start date must be today or in the future.")
+
+        validate_cycle_timeframes_overlapping(program, data.get("start_date"), end_date, self.instance.pk)
         return data
 
 

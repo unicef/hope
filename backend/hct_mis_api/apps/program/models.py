@@ -1,6 +1,6 @@
 import random
 import string
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Any, Collection, Optional, Union
 
@@ -320,13 +320,23 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedMod
         verbose_name = "ProgrammeCycle"
 
     def clean(self) -> None:
-        if self.end_date and self.end_date < self.start_date:
+        start_date = (
+            datetime.strptime(self.start_date, "%Y-%m-%d").date()
+            if isinstance(self.start_date, str)
+            else self.start_date
+        )
+        end_date = (
+            datetime.strptime(self.end_date, "%Y-%m-%d").date() if isinstance(self.end_date, str) else self.end_date
+        )
+
+        if end_date and end_date < start_date:
             raise ValidationError("End date cannot be before start date.")
 
-        if self.start_date < timezone.now().date():
+        if start_date < timezone.now().date():
             raise ValidationError("Start date cannot be in the past.")
 
-        if self.program.cycles.filter(start_date__gte=self.start_date).exists():
+        # validate on create only
+        if not self.pk and self.program.cycles.filter(start_date__gte=self.start_date).exists():
             raise ValidationError("Start date must be after the latest cycle.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:

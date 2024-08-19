@@ -90,7 +90,9 @@ class ProgramCycleNode(BaseNodePermissionMixin, DjangoObjectType):
         filter_fields = [
             "status",
         ]
-        exclude = ["unicef_id",]
+        exclude = [
+            "unicef_id",
+        ]
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 

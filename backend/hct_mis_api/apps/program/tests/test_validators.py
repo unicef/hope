@@ -1,6 +1,8 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
+import freezegun
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
@@ -11,6 +13,7 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.program.validators import ProgramValidator
 
 
+@freezegun.freeze_time("2020-01-01")
 class TestProgramValidators(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
