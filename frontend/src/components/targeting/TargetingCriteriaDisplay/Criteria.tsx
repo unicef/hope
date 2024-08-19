@@ -84,7 +84,7 @@ const CriteriaField = ({ field, choicesDict }): React.ReactElement => {
       : argument;
   };
 
-  const displayValueOrDash = (value) => (value ? value : '-');
+  const displayValueOrEmpty = (value) => (value ? value : 'Empty');
 
   const { t } = useTranslation();
   let fieldElement;
@@ -94,7 +94,7 @@ const CriteriaField = ({ field, choicesDict }): React.ReactElement => {
       fieldElement = (
         <p>
           {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-          <span>{displayValueOrDash(field.arguments?.[0])}</span>
+          <span>{displayValueOrEmpty(field.arguments?.[0])}</span>
         </p>
       );
       break;
@@ -103,8 +103,8 @@ const CriteriaField = ({ field, choicesDict }): React.ReactElement => {
         <p>
           {field.fieldAttribute.labelEn || field.fieldName}:{' '}
           <span>
-            {displayValueOrDash(field.arguments?.[0])} -{' '}
-            {displayValueOrDash(field.arguments?.[1])}
+            {displayValueOrEmpty(field.arguments?.[0])} -{' '}
+            {displayValueOrEmpty(field.arguments?.[1])}
           </span>
         </p>
       );
@@ -117,7 +117,7 @@ const CriteriaField = ({ field, choicesDict }): React.ReactElement => {
             <span>{field.arguments?.[0] === 'True' ? t('Yes') : t('No')}</span>
           ) : (
             <span>
-              {displayValueOrDash(
+              {displayValueOrEmpty(
                 extractChoiceLabel(field, field.arguments?.[0]),
               )}
             </span>
@@ -126,21 +126,21 @@ const CriteriaField = ({ field, choicesDict }): React.ReactElement => {
       );
       break;
     case 'LESS_THAN':
+    case 'GREATER_THAN': {
+      const isLessThan = field.type === 'LESS_THAN';
+      const MathSignComponent = isLessThan ? LessThanEqual : GreaterThanEqual;
+      const altText = isLessThan ? 'less_than' : 'greater_than';
+      const displayValue = field.arguments?.[0];
+
       fieldElement = (
         <p>
           {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-          <span>{displayValueOrDash(field.arguments?.[0])}</span>
+          {displayValue && <MathSign src={MathSignComponent} alt={altText} />}
+          <span>{displayValueOrEmpty(displayValue)}</span>
         </p>
       );
       break;
-    case 'GREATER_THAN':
-      fieldElement = (
-        <p>
-          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-          <span>{displayValueOrDash(field.arguments?.[0])}</span>
-        </p>
-      );
-      break;
+    }
     case 'CONTAINS':
       fieldElement = (
         <p>
@@ -148,7 +148,7 @@ const CriteriaField = ({ field, choicesDict }): React.ReactElement => {
           {field.arguments?.map((argument, index) => (
             <React.Fragment key={index}>
               <span>
-                {displayValueOrDash(extractChoiceLabel(field, argument))}
+                {displayValueOrEmpty(extractChoiceLabel(field, argument))}
               </span>
               {index !== field.arguments.length - 1 && ', '}
             </React.Fragment>
@@ -160,7 +160,7 @@ const CriteriaField = ({ field, choicesDict }): React.ReactElement => {
       fieldElement = (
         <p>
           {field.fieldAttribute.labelEn}:{' '}
-          <span>{displayValueOrDash(field.arguments?.[0])}</span>
+          <span>{displayValueOrEmpty(field.arguments?.[0])}</span>
         </p>
       );
       break;
