@@ -778,7 +778,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 2'] = {
                                 'Round 3C',
                                 'Round 4D'
                             ],
-                            'subtype': 'BOOLEAN'
+                            'subtype': 'BOOL'
                         }
                     },
                     {
@@ -802,7 +802,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 2'] = {
                                 'Round 2 Updated',
                                 'Round 3 Updated'
                             ],
-                            'subtype': 'BOOLEAN'
+                            'subtype': 'BOOL'
                         }
                     }
                 ],
@@ -828,7 +828,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 3'] = {
                             'Round 3C',
                             'Round 4D'
                         ],
-                        'subtype': 'BOOLEAN'
+                        'subtype': 'BOOL'
                     }
                 },
                 {
@@ -852,7 +852,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 3'] = {
                             'Round 2 Updated',
                             'Round 3 Updated'
                         ],
-                        'subtype': 'BOOLEAN'
+                        'subtype': 'BOOL'
                     }
                 }
             ]
@@ -916,7 +916,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
                                 'Round 3C',
                                 'Round 4D'
                             ],
-                            'subtype': 'BOOLEAN'
+                            'subtype': 'BOOL'
                         }
                     },
                     {
@@ -940,7 +940,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
                                 'Round 2 Updated',
                                 'Round 3 Updated'
                             ],
-                            'subtype': 'BOOLEAN'
+                            'subtype': 'BOOL'
                         }
                     }
                 ],
@@ -985,7 +985,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
                                 'Round 2 Updated',
                                 'Round 3 Updated'
                             ],
-                            'subtype': 'BOOLEAN'
+                            'subtype': 'BOOL'
                         }
                     },
                     {
@@ -999,7 +999,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
                                 'Round 3C',
                                 'Round 4D'
                             ],
-                            'subtype': 'BOOLEAN'
+                            'subtype': 'BOOL'
                         }
                     },
                     {
