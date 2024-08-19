@@ -16,7 +16,9 @@ from adminfilters.mixin import AdminAutoCompleteSearchMixin
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
+from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
 from hct_mis_api.apps.targeting.celery_tasks import create_tp_from_list
 from hct_mis_api.apps.targeting.models import TargetingCriteria
@@ -25,6 +27,7 @@ from hct_mis_api.apps.utils.admin import (
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
 )
+from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 from mptt.forms import TreeNodeMultipleChoiceField
 
 
@@ -159,3 +162,14 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
             return TemplateResponse(request, "admin/program/program/program_partner_access.html", context)
         else:
             return TemplateResponse(request, "admin/program/program/program_partner_access_readonly.html", context)
+
+    @button(permission="account.can_reindex_programs")
+    def reindex_program(self, request: HttpRequest, pk: int) -> HttpResponseRedirect:
+        program = Program.objects.get(pk=pk)
+        populate_index(
+            Individual.all_merge_status_objects.filter(program=program),
+            get_individual_doc(program.business_area.slug),
+        )
+        populate_index(Household.all_merge_status_objects.filter(program=program), HouseholdDocument)
+        messages.success(request, f"Program {program.name} reindexed.")
+        return HttpResponseRedirect(reverse("admin:program_program_changelist"))

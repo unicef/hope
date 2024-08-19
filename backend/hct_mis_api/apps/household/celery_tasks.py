@@ -10,6 +10,7 @@ from concurrency.api import disable_concurrency
 from constance import config
 
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_FULL,
     COLLECT_TYPE_PARTIAL,
@@ -21,6 +22,7 @@ from hct_mis_api.apps.household.services.household_recalculate_data import (
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.program.utils import enroll_households_to_program
+from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.phone import calculate_phone_numbers_validity
 from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
@@ -205,6 +207,11 @@ def enroll_households_to_program_task(households_ids: List, program_for_enroll_i
     households = Household.objects.filter(pk__in=households_ids)
     program_for_enroll = Program.objects.get(id=program_for_enroll_id)
     enroll_households_to_program(households, program_for_enroll)
+    populate_index(
+        Individual.objects.filter(program=program_for_enroll),
+        get_individual_doc(program_for_enroll.business_area.slug),
+    )
+    populate_index(Household.objects.filter(program=program_for_enroll), HouseholdDocument)
 
 
 @app.task()
