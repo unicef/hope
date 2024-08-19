@@ -519,7 +519,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             PeriodicFieldData.DATE: self._handle_date_field,
             PeriodicFieldData.DECIMAL: self._handle_decimal_field,
             PeriodicFieldData.STRING: self._handle_string_field,
-            PeriodicFieldData.BOOLEAN: self._handle_bool_field,
+            PeriodicFieldData.BOOL: self._handle_bool_field,
         }
         for flexible_attribute in self.pdu_flexible_attributes:
             column_value = f"{flexible_attribute.name}_round_1_value"

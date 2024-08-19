@@ -117,7 +117,7 @@ class TestAllPduFields(APITestCase):
         # Create a PDU field for a different program
         other_program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE, name="Other Program")
         pdu_data_different_program = PeriodicFieldDataFactory(
-            subtype=PeriodicFieldData.BOOLEAN,
+            subtype=PeriodicFieldData.BOOL,
             number_of_rounds=1,
             rounds_names=["Round 1"],
         )

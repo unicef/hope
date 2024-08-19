@@ -285,7 +285,7 @@ class PeriodicDataUpdateImportService:
             return forms.CharField(required=False)
         elif flexible_attribute.pdu_data.subtype == PeriodicFieldData.DECIMAL:
             return forms.DecimalField(required=False)
-        elif flexible_attribute.pdu_data.subtype == PeriodicFieldData.BOOLEAN:
+        elif flexible_attribute.pdu_data.subtype == PeriodicFieldData.BOOL:
             return StrictBooleanField(required=False)
         elif flexible_attribute.pdu_data.subtype == PeriodicFieldData.DATE:
             return forms.DateField(required=False)

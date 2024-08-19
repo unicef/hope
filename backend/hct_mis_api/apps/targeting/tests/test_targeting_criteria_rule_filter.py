@@ -432,7 +432,7 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
         )
 
         pdu_data_boolean = PeriodicFieldDataFactory(
-            subtype=PeriodicFieldData.BOOLEAN,
+            subtype=PeriodicFieldData.BOOL,
             number_of_rounds=1,
             rounds_names=["Round 1"],
         )

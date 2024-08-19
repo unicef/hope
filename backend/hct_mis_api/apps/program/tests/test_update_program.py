@@ -651,7 +651,7 @@ class TestUpdateProgram(APITestCase):
                         "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
                         "label": "PDU Field - Updated",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 3,
                             "roundsNames": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
                         },
@@ -659,7 +659,7 @@ class TestUpdateProgram(APITestCase):
                     {
                         "label": "PDU Field - New",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 4,
                             "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
                         },
@@ -693,9 +693,7 @@ class TestUpdateProgram(APITestCase):
         )
         self.assertIsNone(FlexibleAttribute.objects.filter(name="pdu_field_to_be_removed").first())
         self.assertIsNone(FlexibleAttribute.objects.filter(name="pdu_field_to_be_updated").first())
-        self.assertEqual(
-            FlexibleAttribute.objects.filter(name="pdu_field_updated").first().pdu_data.subtype, "BOOLEAN"
-        )
+        self.assertEqual(FlexibleAttribute.objects.filter(name="pdu_field_updated").first().pdu_data.subtype, "BOOL")
         self.assertIsNotNone(FlexibleAttribute.objects.filter(name="pdu_field_new").first())
         self.assertIsNotNone(FlexibleAttribute.objects.filter(name="pdu_field_to_be_preserved").first())
 
@@ -719,7 +717,7 @@ class TestUpdateProgram(APITestCase):
                         "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
                         "label": "PDU Field - Updated",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 1,
                             "roundsNames": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
                         },
@@ -727,7 +725,7 @@ class TestUpdateProgram(APITestCase):
                     {
                         "label": "PDU Field - New",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 3,
                             "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
                         },
@@ -765,7 +763,7 @@ class TestUpdateProgram(APITestCase):
                         "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
                         "label": "PDU Field 1",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 3,
                             "roundsNames": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
                         },
@@ -773,7 +771,7 @@ class TestUpdateProgram(APITestCase):
                     {
                         "label": "PDU Field 1",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 4,
                             "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
                         },
@@ -822,7 +820,7 @@ class TestUpdateProgram(APITestCase):
                         "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
                         "label": "PDU Field - Updated",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 3,
                             "roundsNames": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
                         },
@@ -830,7 +828,7 @@ class TestUpdateProgram(APITestCase):
                     {
                         "label": "PDU Field 1",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 4,
                             "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
                         },
@@ -879,7 +877,7 @@ class TestUpdateProgram(APITestCase):
                         "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
                         "label": "PDU Field 1",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 3,
                             "roundsNames": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
                         },
@@ -887,7 +885,7 @@ class TestUpdateProgram(APITestCase):
                     {
                         "label": "PDU Field - New",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 4,
                             "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
                         },
@@ -916,7 +914,7 @@ class TestUpdateProgram(APITestCase):
                         "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
                         "label": "PDU Field - NAME WILL NOT BE UPDATED",
                         "pduData": {
-                            "subtype": "BOOLEAN",  # subtype will NOT be updated
+                            "subtype": "BOOL",  # subtype will NOT be updated
                             "numberOfRounds": 4,
                             "roundsNames": [
                                 "Round 1 To Be Updated",
@@ -950,7 +948,7 @@ class TestUpdateProgram(APITestCase):
                     {
                         "label": "PDU Field - New",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 4,
                             "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
                         },
@@ -980,7 +978,7 @@ class TestUpdateProgram(APITestCase):
                         "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
                         "label": "PDU Field - Updated",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 2,
                             "roundsNames": ["Round 1 To Be Updated", "Round 2 To Be Updated"],
                         },

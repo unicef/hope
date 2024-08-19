@@ -81,7 +81,7 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
 
         program = None
         if parent.flex_field_classification == "FLEX_FIELD_PDU":
-            encoded_program_id = input.get("program") or info.context.headers.get("Program")
+            encoded_program_id = info.context.headers.get("Program")
             program = Program.objects.get(id=decode_id_string(encoded_program_id))
         return FlexibleAttribute.objects.get(name=parent.field_name, program=program)
 
@@ -106,7 +106,7 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
 
         program = None
         if parent.flex_field_classification == "FLEX_FIELD_PDU":
-            encoded_program_id = input.get("program") or info.context.headers.get("Program")
+            encoded_program_id = info.context.headers.get("Program")
             program = Program.objects.get(id=decode_id_string(encoded_program_id))
         return FlexibleAttribute.objects.get(name=parent.field_name, program=program)
 
