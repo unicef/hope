@@ -59,6 +59,13 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Determine branch-specific tag
+        id: vars
+        run: |
+          branch_name=${GITHUB_REF##*/}
+          sanitized_branch_name=$(echo "${branch_name}" | tr -cd '[:alnum:]-' | tr '[:upper:]' '[:lower:]')
+          echo "branch_name=${sanitized_branch_name}" >> $GITHUB_ENV
+
       - name: Push dev
         run: |
           docker buildx create --use
@@ -68,6 +75,7 @@ jobs:
             --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dev \
             --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dev \
             -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
+            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ env.branch_name }}-latest-dev \
             -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-latest-dev \
             -f ./docker/Dockerfile \
             --target dev \
@@ -174,6 +182,7 @@ jobs:
             --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dist \
             --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dist \
             -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist \
+            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ env.branch_name }}-latest-dist \
             -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }} \
             -f ./docker/Dockerfile \
             --target dist \
