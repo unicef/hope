@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom';
 interface ProgramFieldSeriesStepProps {
   values: {
     pduFields: Array<any>;
+    editMode: boolean;
   };
   handleNext?: () => Promise<void>;
   setStep: (step: number) => void;
@@ -22,6 +23,8 @@ interface ProgramFieldSeriesStepProps {
   pdusubtypeChoicesData?: PduSubtypeChoicesDataQuery;
   errors: any;
   programId?: string;
+  setFieldValue;
+  program?;
 }
 
 export const ProgramFieldSeriesStep = ({
@@ -33,9 +36,12 @@ export const ProgramFieldSeriesStep = ({
   pdusubtypeChoicesData,
   errors,
   programId: formProgramId,
+  setFieldValue,
+  program,
 }: ProgramFieldSeriesStepProps) => {
   const { t } = useTranslation();
   const { businessArea, programId, baseUrl } = useBaseUrl();
+
   const confirm = useConfirmation();
 
   const mappedPduSubtypeChoices = pdusubtypeChoicesData?.pduSubtypeChoices.map(
@@ -57,119 +63,139 @@ export const ProgramFieldSeriesStep = ({
         render={(arrayHelpers) => (
           <div>
             {values.pduFields && values.pduFields.length > 0
-              ? values.pduFields.map((_field, index) => (
-                  <Box key={index} pt={3} pb={3}>
-                    <Grid container spacing={3} alignItems="flex-start">
-                      <Grid item xs={3}>
-                        <Field
-                          name={`pduFields.${index}.label`}
-                          required
-                          fullWidth
-                          variant="outlined"
-                          label={t('Time Series Field Name')}
-                          component={FormikTextField}
-                          disabled={programHasRdi}
-                        />
-                      </Grid>
-                      <Grid item xs={3}>
-                        <Field
-                          name={`pduFields.${index}.pduData.subtype`}
-                          required
-                          fullWidth
-                          variant="outlined"
-                          label={t('Data Type')}
-                          component={FormikSelectField}
-                          choices={mappedPduSubtypeChoices}
-                          disabled={programHasRdi}
-                        />
-                      </Grid>
-                      <Grid item xs={3}>
-                        <Field
-                          name={`pduFields.${index}.pduData.numberOfRounds`}
-                          fullWidth
-                          required
-                          variant="outlined"
-                          label={t('Number of Expected Rounds')}
-                          onChange={(e) => {
-                            const numberOfRounds = parseInt(e.target.value, 10);
-                            if (!isNaN(numberOfRounds) && numberOfRounds > 0) {
-                              const currentRoundsNames =
-                                values.pduFields[index].pduData.roundsNames ||
-                                [];
-                              let newRoundsNames;
+              ? values.pduFields.map((_field, index) => {
+                  return (
+                    <Box key={index} pt={3} pb={3}>
+                      <Grid container spacing={3} alignItems="flex-start">
+                        <Grid item xs={3}>
+                          <Field
+                            name={`pduFields.${index}.label`}
+                            required
+                            fullWidth
+                            variant="outlined"
+                            label={t('Time Series Field Name')}
+                            component={FormikTextField}
+                            disabled={programHasRdi}
+                          />
+                        </Grid>
+                        <Grid item xs={3}>
+                          <Field
+                            name={`pduFields.${index}.pduData.subtype`}
+                            required
+                            fullWidth
+                            variant="outlined"
+                            label={t('Data Type')}
+                            component={FormikSelectField}
+                            choices={mappedPduSubtypeChoices}
+                            disabled={programHasRdi}
+                          />
+                        </Grid>
+                        <Grid item xs={3}>
+                          <Field
+                            key={values.pduFields[index].pduData.numberOfRounds}
+                            name={`pduFields.${index}.pduData.numberOfRounds`}
+                            fullWidth
+                            required
+                            variant="outlined"
+                            label={t('Number of Expected Rounds')}
+                            onChange={(e) => {
+                              const numberOfRounds = parseInt(
+                                e.target.value,
+                                10,
+                              );
+                              const updatedRoundsNames = [
+                                ...values.pduFields[index].pduData.roundsNames,
+                              ];
 
-                              if (numberOfRounds > currentRoundsNames.length) {
-                                newRoundsNames = [
-                                  ...currentRoundsNames,
-                                  ...Array(
-                                    numberOfRounds - currentRoundsNames.length,
-                                  ).fill(''),
-                                ];
-                              } else {
-                                newRoundsNames = currentRoundsNames.slice(
-                                  0,
-                                  numberOfRounds,
-                                );
+                              if (updatedRoundsNames.length < numberOfRounds) {
+                                for (
+                                  let i = updatedRoundsNames.length;
+                                  i < numberOfRounds;
+                                  i++
+                                ) {
+                                  updatedRoundsNames.push('');
+                                }
+                              } else if (
+                                updatedRoundsNames.length > numberOfRounds
+                              ) {
+                                updatedRoundsNames.length = numberOfRounds;
                               }
 
-                              // Update the form state using setFieldValue
-                              arrayHelpers.form.setFieldValue(
-                                `pduFields.${index}.pduData.roundsNames`,
-                                newRoundsNames,
-                              );
-                              arrayHelpers.form.setFieldValue(
+                              setFieldValue(
                                 `pduFields.${index}.pduData.numberOfRounds`,
                                 numberOfRounds,
                               );
+                              setFieldValue(
+                                `pduFields.${index}.pduData.roundsNames`,
+                                updatedRoundsNames,
+                              );
+                            }}
+                            component={FormikSelectField}
+                            choices={[...Array(20).keys()].map((n) => {
+                              const isDisabled =
+                                values.editMode &&
+                                programHasRdi &&
+                                n + 2 <=
+                                  (program?.pduFields[index]?.pduData
+                                    ?.numberOfRounds || 0);
+
+                              return {
+                                value: n + 1,
+                                label: `${n + 1}`,
+                                disabled: isDisabled,
+                              };
+                            })}
+                          />
+                        </Grid>
+                        <Grid item xs={1}>
+                          <IconButton
+                            onClick={() =>
+                              confirm({
+                                title: confirmationModalTitle,
+                                content: confirmationText,
+                                type: 'error',
+                              }).then(() => arrayHelpers.remove(index))
                             }
-                          }}
-                          component={FormikSelectField}
-                          choices={[...Array(10).keys()].map((n) => ({
-                            value: n + 1,
-                            label: `${n + 1}`,
-                          }))}
-                          disabled={programHasRdi}
-                        />
+                            disabled={programHasRdi}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Grid>
+                        {_field.pduData.numberOfRounds &&
+                          [
+                            ...Array(
+                              Number(_field.pduData.numberOfRounds),
+                            ).keys(),
+                          ].map((round) => {
+                            const selectedNumberOfRounds =
+                              program?.pduFields?.[index]?.pduData
+                                ?.numberOfRounds || 0;
+                            const isDisabled =
+                              programHasRdi &&
+                              values.editMode &&
+                              round + 1 <= selectedNumberOfRounds;
+                            return (
+                              <Grid item xs={12} key={round}>
+                                <FormControl fullWidth variant="outlined">
+                                  <Field
+                                    name={`pduFields.${index}.pduData.roundsNames.${round}`}
+                                    fullWidth
+                                    variant="outlined"
+                                    label={`${t('Round')} ${round + 1} ${t('Name')}`}
+                                    component={FormikTextField}
+                                    type="text"
+                                    disabled={isDisabled}
+                                  />
+                                </FormControl>
+                              </Grid>
+                            );
+                          })}
                       </Grid>
-                      <Grid item xs={1}>
-                        <IconButton
-                          onClick={() =>
-                            confirm({
-                              title: confirmationModalTitle,
-                              content: confirmationText,
-                              type: 'error',
-                            }).then(() => arrayHelpers.remove(index))
-                          }
-                          disabled={programHasRdi}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Grid>
-                      {_field.pduData.numberOfRounds &&
-                        [
-                          ...Array(
-                            Number(_field.pduData.numberOfRounds),
-                          ).keys(),
-                        ].map((round) => (
-                          <Grid item xs={12} key={round}>
-                            <FormControl fullWidth variant="outlined">
-                              <Field
-                                name={`pduFields.${index}.pduData.roundsNames.${round}`}
-                                fullWidth
-                                variant="outlined"
-                                label={`${t('Round')} ${round + 1} ${t('Name')}`}
-                                component={FormikTextField}
-                                type="text"
-                                disabled={programHasRdi}
-                              />
-                            </FormControl>
-                          </Grid>
-                        ))}
-                    </Grid>
-                    {values.pduFields.length > 1 &&
-                      index < values.pduFields.length - 1 && <DividerLine />}
-                  </Box>
-                ))
+                      {values.pduFields.length > 1 &&
+                        index < values.pduFields.length - 1 && <DividerLine />}
+                    </Box>
+                  );
+                })
               : null}
             <Box mt={6}>
               <Button
