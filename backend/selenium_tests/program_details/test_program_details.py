@@ -199,7 +199,6 @@ class TestProgrammeDetails:
         assert "Programme Cycles" in pageProgrammeDetails.getTableTitle().text
         assert "Rows per page: 5 1–1 of 1" in pageProgrammeDetails.getTablePagination().text.replace("\n", " ")
         pageProgrammeDetails.getButtonFinishProgram().click()
-        pageProgrammeDetails.screenshot("123")
         pageProgrammeDetails.clickButtonFinishProgramPopup()
         for _ in range(10):
             if "FINISHED" in pageProgrammeDetails.getProgramStatus().text:
