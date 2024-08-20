@@ -39,7 +39,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                         'paymentsConflictsCount': 1,
                         'programCycle': {
                             'endDate': '2020-11-10',
-                            'startDate': '2020-09-10'
+                            'startDate': '2020-10-10'
                         },
                         'status': 'OPEN',
                         'totalDeliveredQuantity': 50.0,
@@ -76,7 +76,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                         'paymentsConflictsCount': 0,
                         'programCycle': {
                             'endDate': '2020-11-10',
-                            'startDate': '2020-09-10'
+                            'startDate': '2020-10-10'
                         },
                         'status': 'LOCKED',
                         'totalDeliveredQuantity': 50.0,
@@ -285,7 +285,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_open_payment_plan
                         'paymentPlanHardConflictedData': [
                             {
                                 'paymentPlanEndDate': '2020-11-10',
-                                'paymentPlanStartDate': '2020-09-10',
+                                'paymentPlanStartDate': '2020-10-10',
                                 'paymentPlanStatus': 'LOCKED'
                             }
                         ],

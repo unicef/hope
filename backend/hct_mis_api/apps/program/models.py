@@ -336,7 +336,13 @@ class ProgramCycle(AdminUrlMixin, SoftDeletableModel, TimeStampedUUIDModel, Unic
             raise ValidationError("Start date cannot be in the past.")
 
         # validate on create only
-        if not self.pk and self.program.cycles.filter(start_date__gte=self.start_date).exists():
+        if self._state.adding and self.program.cycles.filter(start_date__gte=self.start_date).exists():
+            print(
+                "===> save",
+                start_date,
+                self.program.cycles.filter(start_date__gte=self.start_date),
+                self.program.cycles.first().start_date,
+            )
             raise ValidationError("Start date must be after the latest cycle.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:

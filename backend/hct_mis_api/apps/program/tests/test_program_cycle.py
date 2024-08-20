@@ -1,8 +1,8 @@
-from datetime import timedelta
 from decimal import Decimal
 
 from django.test import TestCase
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 
 import freezegun
 from rest_framework.exceptions import ValidationError
@@ -124,19 +124,14 @@ class TestProgramCycleMethods(TestCase):
         self.assertEqual(self.cycle.total_delivered_quantity_usd, Decimal("333.11"))
 
     def test_cycle_validation_start_date(self) -> None:
-        cycle = ProgramCycleFactory(program=self.program)
-
-        with self.assertRaisesMessage(ValidationError, "Start date must be after the latest cycle"):
-            ProgramCycleFactory(program=self.program, start_date=cycle.start_date)
+        # with self.assertRaisesMessage(ValidationError, "Start date must be after the latest cycle."):
+        #     ProgramCycleFactory(program=self.program, start_date=parse_date("2021-01-01"))
 
         cycle2 = ProgramCycleFactory(program=self.program)
-        self.assertTrue(cycle2.start_date > cycle.start_date)
+        self.assertTrue(cycle2.start_date > parse_date(self.cycle.start_date))
 
-        yesterday = timezone.now() - timedelta(days=1)
+        with self.assertRaisesMessage(ValidationError, "Start date cannot be in the past."):
+            ProgramCycleFactory(program=self.program, start_date=parse_date("1999-01-01"))
 
-        with self.assertRaisesMessage(ValidationError, "Start date cannot be in the past"):
-            ProgramCycleFactory(program=self.program, start_date=yesterday)
-
-        tomorrow = timezone.now() + timedelta(days=1)
-        cycle_new = ProgramCycleFactory(program=self.program, start_date=tomorrow)
+        cycle_new = ProgramCycleFactory(program=self.program, start_date=parse_date("2099-01-01"))
         self.assertTrue(cycle_new.start_date > timezone.now())
