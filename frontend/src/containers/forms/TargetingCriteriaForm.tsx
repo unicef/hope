@@ -65,16 +65,13 @@ const validationSchema = Yup.object().shape({
               ['fieldName', 'fieldAttribute'],
               (fieldName, fieldAttribute, schema) => {
                 const parent = schema.parent;
-                console.log('Parent:', parent);
                 if (
                   parent &&
                   parent.fieldAttribute &&
                   parent.fieldAttribute.type === 'PDU'
                 ) {
-                  console.log('Round Number is required');
                   return Yup.string().required('Round Number is required');
                 }
-                console.log('Round Number is not required');
                 return Yup.string().notRequired();
               },
             ),
@@ -197,7 +194,6 @@ export const TargetingCriteriaForm = ({
 
     const hasIndividualsFiltersBlocksErrors = individualsFiltersBlocks.some(
       (block) => {
-        console.log('xxxblock', block);
         const hasNulls = block.individualBlockFilters.some(
           filterNullOrNoSelections,
         );
