@@ -12,7 +12,7 @@ from hct_mis_api.apps.core.fixtures import (
     PeriodicFieldDataFactory,
     create_afghanistan,
 )
-from hct_mis_api.apps.core.models import PeriodicFieldData
+from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.household.fixtures import (
     BankAccountInfoFactory,
@@ -118,16 +118,42 @@ class TestCopyProgram(APITestCase):
             ],
         )
         cls.entitlement_card1 = EntitlementCardFactory.create(household=cls.household1)
-        individual = cls.individuals1[0]
+        cls.individual = cls.individuals1[0]
         cls.individual_role_in_household1 = IndividualRoleInHouseholdFactory(
-            individual=individual,
+            individual=cls.individual,
             household=cls.household1,
         )
-        cls.document1 = DocumentFactory(individual=individual, program=individual.program)
-        cls.individual_identity1 = IndividualIdentityFactory(individual=individual)
-        cls.bank_account_info1 = BankAccountInfoFactory(individual=individual)
-        individual.individual_collection = None
-        individual.save()
+        cls.document1 = DocumentFactory(individual=cls.individual, program=cls.individual.program)
+        cls.individual_identity1 = IndividualIdentityFactory(individual=cls.individual)
+        cls.bank_account_info1 = BankAccountInfoFactory(individual=cls.individual)
+        cls.individual.individual_collection = None
+
+        # Flex fields on the individual (should be copied) and PDU flex fields (should be ignored)
+        pdu_data = PeriodicFieldDataFactory(
+            subtype=PeriodicFieldData.DECIMAL,
+            number_of_rounds=3,
+            rounds_names=["Round 1", "Round 2", "Round 3"],
+        )
+        pdu_field = FlexibleAttributeForPDUFactory(
+            program=cls.program,
+            label="PDU Field 1",
+            pdu_data=pdu_data,
+        )
+        flex_field = FlexibleAttribute.objects.create(
+            name="flex_field_1",
+            type=FlexibleAttribute.STRING,
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        )
+        cls.individual.flex_fields = {
+            pdu_field.name: {
+                "1": {
+                    "value": "1.1",
+                    "collection_date": "2021-01-01",
+                }
+            },
+            flex_field.name: "Value 1",
+        }
+        cls.individual.save()
         cls.household1.household_collection = None
         cls.household1.save()
         cls.household2, individuals2 = create_household_and_individuals(
@@ -324,6 +350,27 @@ class TestCopyProgram(APITestCase):
         self.assertEqual(
             copied_program.individuals.filter(copied_from=self.individuals1[0]).first().individual_collection,
             self.individuals1[0].individual_collection,
+        )
+        # check flex fields and PDU fields on original and copied individual
+        self.assertNotEqual(
+            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().flex_fields,
+            self.individuals1[0].flex_fields,
+        )
+        self.assertEqual(
+            self.individuals1[0].flex_fields,
+            {
+                "pdu_field_1": {
+                    "1": {
+                        "value": "1.1",
+                        "collection_date": "2021-01-01",
+                    }
+                },
+                "flex_field_1": "Value 1",
+            },
+        )
+        self.assertEqual(
+            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().flex_fields,
+            {"flex_field_1": "Value 1"},
         )
 
         self.assertIsNotNone(copied_program.cycles.first())

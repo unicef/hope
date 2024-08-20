@@ -16,11 +16,13 @@ import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { PeopleListTable } from '@containers/tables/people/PeopleListTable';
 import { PeopleFilter } from '@components/people/PeopleFilter';
-import { Box, Tabs, Tab, Fade } from '@mui/material';
+import { Box, Tabs, Tab, Fade, Tooltip } from '@mui/material';
+import { useProgramContext } from 'src/programContext';
 
 export const PeoplePage = (): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
+  const { programHasPdu } = useProgramContext();
   const { businessArea } = useBaseUrl();
   const isNewTemplateJustCreated =
     location.state?.isNewTemplateJustCreated || false;
@@ -80,11 +82,28 @@ export const PeoplePage = (): React.ReactElement => {
               setCurrentTab(newValue);
             }}
           >
-            <Tab data-cy="tab-people" label="People" />
-            <Tab
-              data-cy="tab-periodic-data-updates"
-              label="Periodic Data Updates"
-            />
+            <Tab data-cy="tab-individuals" label="Individuals" />
+            {!programHasPdu ? (
+              <Tooltip
+                title={t(
+                  'Programme does not have defined fields for periodic updates',
+                )}
+              >
+                <span>
+                  <Tab
+                    disabled={!programHasPdu}
+                    data-cy="tab-periodic-data-updates"
+                    label="Periodic Data Updates"
+                  />
+                </span>
+              </Tooltip>
+            ) : (
+              <Tab
+                disabled={!programHasPdu}
+                data-cy="tab-periodic-data-updates"
+                label="Periodic Data Updates"
+              />
+            )}
           </Tabs>
         }
       />
