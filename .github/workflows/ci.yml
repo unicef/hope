@@ -7,7 +7,6 @@ on:
     - staging
     - master
     - ephemeral-*
-    - feat/nightly-e2e-run
   pull_request:
     branches:
     - develop
