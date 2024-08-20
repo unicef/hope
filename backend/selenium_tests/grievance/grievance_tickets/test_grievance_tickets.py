@@ -454,6 +454,7 @@ class TestGrievanceTicketsHappyPath:
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
 
 
+@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestGrievanceTickets:
     @pytest.mark.parametrize(
