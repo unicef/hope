@@ -337,13 +337,41 @@ class TestProgrammeDetails:
         pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
         assert "ACTIVE" in pageProgrammeDetails.getProgramStatus().text
         pageProgrammeDetails.getButtonAddNewProgrammeCycle().click()
-        pageProgrammeDetails.getInputTitle().send_keys("Test Title")
+        pageProgrammeDetails.getInputTitle().send_keys("123")
         pageProgrammeDetails.getStartDateCycle().click()
         pageProgrammeDetails.getStartDateCycle().send_keys(
             (datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d")
         )
         pageProgrammeDetails.getEndDateCycle().click()
-        pageProgrammeDetails.getEndDateCycle().send_keys((datetime.now() + relativedelta(days=2)).strftime("%Y-%m-%d"))
+        pageProgrammeDetails.getEndDateCycle().send_keys((datetime.now() + relativedelta(days=10)).strftime("%Y-%m-%d"))
         pageProgrammeDetails.getButtonCreateProgramCycle().click()
+
+        pageProgrammeDetails.getButtonAddNewProgrammeCycle().click()
+        pageProgrammeDetails.getInputTitle().send_keys("Test %$ What?")
+        pageProgrammeDetails.getStartDateCycle().click()
+        pageProgrammeDetails.getStartDateCycle().send_keys(
+            (datetime.now() + relativedelta(days=11)).strftime("%Y-%m-%d")
+        )
+        pageProgrammeDetails.getEndDateCycle().click()
+        pageProgrammeDetails.getEndDateCycle().send_keys((datetime.now() + relativedelta(days=21)).strftime("%Y-%m-%d"))
+        pageProgrammeDetails.getButtonCreateProgramCycle().click()
+
         pageProgrammeDetails.getProgramCycleRow()
-        pageProgrammeDetails.screenshot("1")
+
+        assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[1].text
+        assert (datetime.now() + relativedelta(days=1)).strftime(
+            "%-d %b %Y"
+        ) in pageProgrammeDetails.getProgramCycleStartDate()[1].text
+        assert (datetime.now() + relativedelta(days=10)).strftime(
+            "%-d %b %Y"
+        ) in pageProgrammeDetails.getProgramCycleEndDate()[1].text
+        assert "123" in pageProgrammeDetails.getProgramCycleTitle()[1].text
+
+        assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[2].text
+        assert (datetime.now() + relativedelta(days=11)).strftime(
+            "%-d %b %Y"
+        ) in pageProgrammeDetails.getProgramCycleStartDate()[2].text
+        assert (datetime.now() + relativedelta(days=21)).strftime(
+            "%-d %b %Y"
+        ) in pageProgrammeDetails.getProgramCycleEndDate()[2].text
+        assert "123" in pageProgrammeDetails.getProgramCycleTitle()[2].text
