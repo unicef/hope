@@ -6,6 +6,7 @@ import logging
 import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
+from copy import deepcopy
 from datetime import date, datetime
 from decimal import Decimal
 from typing import (
@@ -703,7 +704,8 @@ def resolve_flex_fields_choices_to_string(parent: Any) -> Dict:
 
     flex_fields = dict(FlexibleAttribute.objects.values_list("name", "type"))
     flex_fields_with_str_choices: Dict = {**parent.flex_fields}
-    for flex_field_name, value in flex_fields_with_str_choices.items():
+    flex_fields_copy = deepcopy(flex_fields_with_str_choices)
+    for flex_field_name, value in flex_fields_copy.items():
         flex_field = flex_fields.get(flex_field_name)
         if flex_field is None:
             continue
@@ -712,6 +714,12 @@ def resolve_flex_fields_choices_to_string(parent: Any) -> Dict:
             flex_fields_with_str_choices[flex_field_name] = (
                 [str(current_choice_value) for current_choice_value in value] if isinstance(value, list) else str(value)
             )
+        if flex_field == FlexibleAttribute.PDU:
+            for round_number, round_data in flex_fields_copy[flex_field_name].items():
+                if round_data["value"] is None:
+                    flex_fields_with_str_choices[flex_field_name].pop(round_number)
+            if not flex_fields_with_str_choices[flex_field_name]:
+                flex_fields_with_str_choices.pop(flex_field_name)
 
     return flex_fields_with_str_choices
 

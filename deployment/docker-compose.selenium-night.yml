@@ -2,7 +2,7 @@ version: '3.7'
 volumes:
   backend-web-app:
 services:
-  selenium-night:
+  selenium:
     stdin_open: true
     environment:
       - REDIS_INSTANCE=redis:6379
