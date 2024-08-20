@@ -26,8 +26,8 @@ def create_test_program() -> Program:
         data_collecting_type=dct,
         status=Program.ACTIVE,
         cycle__title="Default Programme Cycle",
-        cycle__start_date=datetime.now() - relativedelta(days=25),
-        cycle__end_date=datetime.now() - relativedelta(days=20),
+        cycle__start_date=(datetime.now() - relativedelta(days=25)).date(),
+        cycle__end_date=(datetime.now() - relativedelta(days=20)).date(),
     )
 
 

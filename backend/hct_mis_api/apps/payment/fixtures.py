@@ -180,11 +180,12 @@ class CashPlanFactory(DjangoModelFactory):
 
         PaymentVerificationSummaryFactory(generic_fk_obj=self)
 
-    @factory.post_generation
-    def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
-        if not create:
-            return
-        ProgramCycleFactory(program=self.program, **kwargs)
+    # TODO: cash plan doesn't has FK to cycle
+    # @factory.post_generation
+    # def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
+    #     if not create:
+    #         return
+    #     ProgramCycleFactory(program=self.program, **kwargs)
 
 
 class ServiceProviderFactory(DjangoModelFactory):
