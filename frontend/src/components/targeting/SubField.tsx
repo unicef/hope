@@ -55,7 +55,6 @@ export function SubField({
   }
 
   const renderFieldByType = (type) => {
-    console.log('field', type);
     switch (type) {
       case 'DECIMAL':
         return (

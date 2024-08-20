@@ -233,7 +233,6 @@ function mapFilterToVariable(filter): {
   flexFieldClassification: string;
   roundNumber?: number;
 } {
-  console.log('xxxfilter', filter);
   const result = {
     comparisonMethod: filter.isNull ? 'IS_NULL' : filter.comparisonMethod,
     arguments: filter.isNull ? [null] : filter.arguments,
