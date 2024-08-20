@@ -53,6 +53,17 @@ snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_progr
                 ],
                 'pduFields': [
                     {
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
+                        'pduData': {
+                            'numberOfRounds': 1,
+                            'roundsNames': [
+                                'Round To Be Preserved'
+                            ],
+                            'subtype': 'DATE'
+                        }
+                    },
+                    {
                         'label': '{"English(EN)": "PDU Field To Be Removed"}',
                         'name': 'pdu_field_to_be_removed',
                         'pduData': {
@@ -75,17 +86,6 @@ snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_progr
                                 'Round 2 To Be Updated'
                             ],
                             'subtype': 'STRING'
-                        }
-                    },
-                    {
-                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
-                        'name': 'pdu_field_to_be_preserved',
-                        'pduData': {
-                            'numberOfRounds': 1,
-                            'roundsNames': [
-                                'Round To Be Preserved'
-                            ],
-                            'subtype': 'DATE'
                         }
                     }
                 ],
