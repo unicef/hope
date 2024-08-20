@@ -71,7 +71,6 @@ jobs:
           docker buildx create --use
 
           tags="-t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
-            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ env.BRANCH_NAME }}-latest-dev \
             -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-latest-dev"
 
           if [ -n "${{ env.BRANCH_NAME }}" ]; then
@@ -187,7 +186,6 @@ jobs:
           docker buildx create --use
 
           tags="-t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist \
-            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ env.BRANCH_NAME }}-latest-dist \
             -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}"
 
           if [ -n "${{ env.BRANCH_NAME }}" ]; then
