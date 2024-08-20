@@ -21,7 +21,7 @@ import {
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Box } from '@mui/material';
+import { Box, Fade } from '@mui/material';
 import { decodeIdString } from '@utils/utils';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
@@ -129,14 +129,20 @@ export const EditProgramPage = (): ReactElement => {
                   ([key]) => key !== '__typename' && key !== 'id',
                 ),
               ),
-              roundsNames:
-                pduData.numberOfRounds === 1 &&
-                (pduData.roundsNames == null ||
-                  pduData.roundsNames.length === 0)
-                  ? ['']
-                  : pduData.roundsNames.map((roundName) =>
-                      roundName == null ? '' : roundName,
-                    ),
+              roundsNames: (() => {
+                if (!pduData.roundsNames) {
+                  pduData.roundsNames = [];
+                }
+
+                if (
+                  pduData.numberOfRounds === 1 &&
+                  pduData.roundsNames.length === 0
+                ) {
+                  return [''];
+                }
+
+                return pduData.roundsNames.map((roundName) => roundName || '');
+              })(),
             }
           : pduData,
       }));
@@ -153,7 +159,7 @@ export const EditProgramPage = (): ReactElement => {
             budget: budgetToFixed,
             populationGoal: populationGoalParsed,
             partners: partnersToSet,
-            ...(!programHasRdi && { pduFields: pduFieldsToSend }),
+            pduFields: pduFieldsToSend,
           },
           version,
         },
@@ -320,39 +326,53 @@ export const EditProgramPage = (): ReactElement => {
               }
             >
               <Box p={3}>
-                {step === 0 && (
-                  <DetailsStep
-                    values={values}
-                    handleNext={handleNextStep}
-                    programId={id}
-                  />
-                )}
-                {step === 1 && (
-                  <ProgramFieldSeriesStep
-                    values={values}
-                    handleNext={handleNextStep}
-                    step={step}
-                    setStep={setStep}
-                    pdusubtypeChoicesData={pdusubtypeChoicesData}
-                    errors={errors}
-                    setErrors={setErrors}
-                    setFieldTouched={setFieldTouched}
-                    programHasRdi={programHasRdi}
-                    programId={id}
-                  />
-                )}
-                {step === 2 && (
-                  <PartnersStep
-                    values={values}
-                    allAreasTreeData={allAreasTree}
-                    partnerChoices={mappedPartnerChoices}
-                    step={step}
-                    setStep={setStep}
-                    submitForm={submitForm}
-                    setFieldValue={setFieldValue}
-                    programId={id}
-                  />
-                )}
+                <Fade in={step === 0} timeout={600}>
+                  <div>
+                    {step === 0 && (
+                      <DetailsStep
+                        values={values}
+                        handleNext={handleNextStep}
+                        programId={id}
+                      />
+                    )}
+                  </div>
+                </Fade>
+                <Fade in={step === 1} timeout={600}>
+                  <div>
+                    {step === 1 && (
+                      <ProgramFieldSeriesStep
+                        values={values}
+                        handleNext={handleNextStep}
+                        step={step}
+                        setStep={setStep}
+                        pdusubtypeChoicesData={pdusubtypeChoicesData}
+                        errors={errors}
+                        setErrors={setErrors}
+                        setFieldTouched={setFieldTouched}
+                        programHasRdi={programHasRdi}
+                        programId={id}
+                        program={data.program}
+                        setFieldValue={setFieldValue}
+                      />
+                    )}
+                  </div>
+                </Fade>
+                <Fade in={step === 2} timeout={600}>
+                  <div>
+                    {step === 2 && (
+                      <PartnersStep
+                        values={values}
+                        allAreasTreeData={allAreasTree}
+                        partnerChoices={mappedPartnerChoices}
+                        step={step}
+                        setStep={setStep}
+                        submitForm={submitForm}
+                        setFieldValue={setFieldValue}
+                        programId={id}
+                      />
+                    )}
+                  </div>
+                </Fade>
               </Box>
             </BaseSection>
           </>
