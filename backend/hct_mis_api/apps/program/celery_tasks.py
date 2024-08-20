@@ -1,4 +1,7 @@
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.periodic_data_update.utils import (
+    populate_pdu_new_rounds_with_null_values,
+)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.program.signals import program_copied
 from hct_mis_api.apps.program.utils import copy_program_related_data
@@ -29,4 +32,14 @@ def adjust_program_size_task(program_id: str) -> bool:
             "individual_count",
         )
     )
+    return True
+
+
+@app.task()
+@sentry_tags
+@log_start_and_end
+def populate_pdu_new_rounds_with_null_values_task(program_id: str) -> bool:
+    program = Program.objects.get(id=program_id)
+    set_sentry_business_area_tag(program.business_area.name)
+    populate_pdu_new_rounds_with_null_values(program)
     return True
