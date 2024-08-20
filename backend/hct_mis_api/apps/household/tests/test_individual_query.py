@@ -12,10 +12,12 @@ from hct_mis_api.apps.account.fixtures import (
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import (
+    FlexibleAttributeForPDUFactory,
+    PeriodicFieldDataFactory,
     create_afghanistan,
     generate_data_collecting_types,
 )
-from hct_mis_api.apps.core.models import DataCollectingType
+from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import (
@@ -24,8 +26,10 @@ from hct_mis_api.apps.household.fixtures import (
     DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
+    create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import DocumentType, Individual
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
@@ -624,6 +628,111 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
                 "user": self.user_with_no_access,
                 "headers": {
                     "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+
+class TestIndividualWithFlexFieldsQuery(APITestCase):
+    databases = "__all__"
+
+    INDIVIDUAL_QUERY = """
+    query Individual($id: ID!) {
+      individual(id: $id) {
+        fullName
+        givenName
+        familyName
+        phoneNo
+        birthDate
+        flexFields
+      }
+    }
+    """
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.user = UserFactory()
+        cls.business_area = create_afghanistan()
+
+        cls.program = ProgramFactory(
+            name="Test Program for Individual Query",
+            business_area=cls.business_area,
+            status=Program.ACTIVE,
+        )
+
+        household, individuals = create_household_and_individuals(
+            household_data={"business_area": cls.business_area, "program": cls.program},
+            individuals_data=[
+                {
+                    "full_name": "Benjamin Butler",
+                    "given_name": "Benjamin",
+                    "family_name": "Butler",
+                    "phone_no": "(953)682-4596",
+                    "birth_date": "1943-07-30",
+                    "id": "ffb2576b-126f-42de-b0f5-ef889b7bc1fe",
+                    "business_area": cls.business_area,
+                },
+            ],
+        )
+        pdu_data_1 = PeriodicFieldDataFactory(
+            subtype=PeriodicFieldData.DECIMAL,
+            number_of_rounds=3,
+            rounds_names=["Round 1", "Round 2", "Round 3"],
+        )
+        FlexibleAttributeForPDUFactory(
+            program=cls.program,
+            label="PDU Field 1",
+            pdu_data=pdu_data_1,
+        )
+        pdu_data_2 = PeriodicFieldDataFactory(
+            subtype=PeriodicFieldData.STRING,
+            number_of_rounds=4,
+            rounds_names=["Round A", "Round B", "Round C", "Round D"],
+        )
+        FlexibleAttributeForPDUFactory(
+            program=cls.program,
+            label="PDU Field 2",
+            pdu_data=pdu_data_2,
+        )
+
+        cls.individual = individuals[0]
+        # populate pdu fields with null values
+        cls.individual.flex_fields = populate_pdu_with_null_values(cls.program, {})
+        # populate some values - in the Individual Query only populated values should be returned
+        cls.individual.flex_fields["pdu_field_1"]["1"] = {"value": 123.45, "collection_date": "2021-01-01"}
+        cls.individual.flex_fields["pdu_field_1"]["2"] = {"value": 234.56, "collection_date": "2021-01-01"}
+        cls.individual.flex_fields["pdu_field_2"]["4"] = {"value": "Value D", "collection_date": "2021-01-01"}
+        cls.individual.save()
+
+    def test_individual_query_single_with_flex_fields(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], self.business_area, self.program
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.INDIVIDUAL_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"id": self.id_to_base64(self.individual.id, "IndividualNode")},
+        )
+        self.assertEqual(
+            self.individual.flex_fields,
+            {
+                "pdu_field_1": {
+                    "1": {"value": 123.45, "collection_date": "2021-01-01"},
+                    "2": {"value": 234.56, "collection_date": "2021-01-01"},
+                    "3": {"value": None},
+                },
+                "pdu_field_2": {
+                    "1": {"value": None},
+                    "2": {"value": None},
+                    "3": {"value": None},
+                    "4": {"value": "Value D", "collection_date": "2021-01-01"},
                 },
             },
         )

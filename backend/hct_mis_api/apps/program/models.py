@@ -188,7 +188,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
     )
     data_collecting_type = models.ForeignKey(
-        "core.DataCollectingType", related_name="programs", on_delete=models.PROTECT, null=True, blank=True
+        "core.DataCollectingType", related_name="programs", on_delete=models.PROTECT
     )
     is_visible = models.BooleanField(default=True)
     household_count = models.PositiveIntegerField(default=0)
