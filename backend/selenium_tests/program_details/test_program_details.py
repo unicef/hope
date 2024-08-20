@@ -41,9 +41,13 @@ def get_program_with_dct_type_and_name(
     dct_type: str = DataCollectingType.Type.STANDARD,
     status: str = Program.DRAFT,
     program_cycle_status: str = ProgramCycle.FINISHED,
-    cycle_start_date: datetime = datetime.now() - relativedelta(days=25),
-    cycle_end_date: datetime = datetime.now() + relativedelta(days=10),
+    cycle_start_date: datetime | bool = False,
+    cycle_end_date: datetime | bool = False,
 ) -> Program:
+    if not cycle_start_date:
+        cycle_start_date = datetime.now() - relativedelta(days=25)
+    if not cycle_end_date:
+        cycle_end_date = datetime.now() + relativedelta(days=10)
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
     program = ProgramFactory(
@@ -84,8 +88,10 @@ def get_program_without_cycle_end_date(
     dct_type: str = DataCollectingType.Type.STANDARD,
     status: str = Program.ACTIVE,
     program_cycle_status: str = ProgramCycle.FINISHED,
-    cycle_start_date: datetime = datetime.now() - relativedelta(days=25),
+    cycle_start_date: datetime | bool = False,
 ) -> Program:
+    if not cycle_start_date:
+        cycle_start_date = datetime.now() - relativedelta(days=25)
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
     program = ProgramFactory(
