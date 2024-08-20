@@ -59,6 +59,9 @@ export const AllProgramsForChoices = gql`
             householdFiltersAvailable
             description
           }
+          pduFields {
+            id
+          }
         }
       }
     }
