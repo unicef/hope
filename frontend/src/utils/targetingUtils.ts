@@ -194,7 +194,7 @@ export function formatCriteriaFilters(filters) {
             break;
           case 'BOOL':
             comparisonMethod = 'EQUALS';
-            values = [each.value];
+            values = [each.value === 'True'];
             break;
           default:
             comparisonMethod = 'CONTAINS';
