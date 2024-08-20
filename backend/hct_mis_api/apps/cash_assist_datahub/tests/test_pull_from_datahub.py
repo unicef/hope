@@ -40,7 +40,10 @@ from hct_mis_api.apps.payment.models import (
     PaymentRecord,
     ServiceProvider,
 )
-from hct_mis_api.apps.program.fixtures import get_program_with_dct_type_and_name
+from hct_mis_api.apps.program.fixtures import (
+    ProgramFactory,
+    get_program_with_dct_type_and_name,
+)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
@@ -74,21 +77,21 @@ class TestPullDataFromDatahub(TestCase):
             business_area=cls.business_area,
         )
 
-        program = Program()
-        program.name = "Test Program"
-        program.status = Program.ACTIVE
-        program.start_date = timezone.now()
-        program.end_date = timezone.now() + timedelta(days=10)
-        program.description = "Test Program description"
-        program.business_area = BusinessArea.objects.first()
-        program.budget = 1000
-        program.frequency_of_payments = Program.REGULAR
-        program.sector = Program.CHILD_PROTECTION
-        program.scope = Program.SCOPE_UNICEF
-        program.cash_plus = True
-        program.population_goal = 1000
-        program.administrative_areas_of_implementation = "Test something"
-        program.save()
+        program = ProgramFactory(
+            name="Test Program",
+            status=Program.ACTIVE,
+            start_date=timezone.now(),
+            end_date=timezone.now() + timedelta(days=10),
+            description="Test Program description",
+            business_area=BusinessArea.objects.first(),
+            budget=1000,
+            frequency_of_payments=Program.REGULAR,
+            sector=Program.CHILD_PROTECTION,
+            scope=Program.SCOPE_UNICEF,
+            cash_plus=True,
+            population_goal=1000,
+            administrative_areas_of_implementation="Test something",
+        )
         (household, individuals) = create_household(household_args={"size": 1})
         cls.household = household
         cls.target_population = target_population
