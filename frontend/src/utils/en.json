@@ -892,5 +892,7 @@
   "Round Name is required": "Round Name is required",
   "Mark as Distinct": "Mark as Distinct",
   "Uniqueness": "Uniqueness",
-  "Are you sure you want to clear the selected ids? They won't be marked as a duplicate or distinct anymore.": "Are you sure you want to clear the selected ids? They won't be marked as a duplicate or distinct anymore."
+  "Are you sure you want to clear the selected ids? They won't be marked as a duplicate or distinct anymore.": "Are you sure you want to clear the selected ids? They won't be marked as a duplicate or distinct anymore.",
+  "Programme does not have defined fields for periodic updates.": "Programme does not have defined fields for periodic updates.",
+  "There are no records available": "There are no records available"
 }
