@@ -25,7 +25,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 
-@freezegun.freeze_time("2020-01-01")
+@freezegun.freeze_time("2019-01-01")
 class TestCreateProgram(APITestCase):
     CREATE_PROGRAM_MUTATION = """
     mutation CreateProgram($programData: CreateProgramInput!) {

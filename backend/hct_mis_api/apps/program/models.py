@@ -17,6 +17,7 @@ from django.db import models
 from django.db.models import Q, QuerySet, Sum
 from django.db.models.constraints import UniqueConstraint
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import SoftDeletableModel
@@ -320,14 +321,8 @@ class ProgramCycle(AdminUrlMixin, SoftDeletableModel, TimeStampedUUIDModel, Unic
         verbose_name = "ProgrammeCycle"
 
     def clean(self) -> None:
-        start_date = (
-            datetime.strptime(self.start_date, "%Y-%m-%d").date()
-            if isinstance(self.start_date, str)
-            else self.start_date
-        )
-        end_date = (
-            datetime.strptime(self.end_date, "%Y-%m-%d").date() if isinstance(self.end_date, str) else self.end_date
-        )
+        start_date = parse_date(self.start_date) if isinstance(self.start_date, str) else self.start_date
+        end_date = parse_date(self.end_date) if isinstance(self.end_date, str) else self.end_date
 
         if end_date and end_date < start_date:
             raise ValidationError("End date cannot be before start date.")
@@ -336,13 +331,7 @@ class ProgramCycle(AdminUrlMixin, SoftDeletableModel, TimeStampedUUIDModel, Unic
             raise ValidationError("Start date cannot be in the past.")
 
         # validate on create only
-        if self._state.adding and self.program.cycles.filter(start_date__gte=self.start_date).exists():
-            print(
-                "===> save",
-                start_date,
-                self.program.cycles.filter(start_date__gte=self.start_date),
-                self.program.cycles.first().start_date,
-            )
+        if self._state.adding and self.program.cycles.filter(end_date__gte=self.start_date).exists():
             raise ValidationError("Start date must be after the latest cycle.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:

@@ -3,7 +3,6 @@ from unittest.mock import patch
 
 from django.utils import timezone
 
-import freezegun
 from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
 from pytz import utc
