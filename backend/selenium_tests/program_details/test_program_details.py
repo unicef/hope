@@ -374,4 +374,4 @@ class TestProgrammeDetails:
         assert (datetime.now() + relativedelta(days=21)).strftime(
             "%-d %b %Y"
         ) in pageProgrammeDetails.getProgramCycleEndDate()[2].text
-        assert "123" in pageProgrammeDetails.getProgramCycleTitle()[2].text
+        assert "Test %$ What?" in pageProgrammeDetails.getProgramCycleTitle()[2].text
