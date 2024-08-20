@@ -184,33 +184,17 @@ export function SubField({
           />
         );
       case 'STRING':
-        if (field.pduData) {
-          return (
-            <Field
-              name={`${baseName}.value`}
-              label={`${field.fieldAttribute.labelEn}`}
-              choices={[
-                { value: 'exists', name: t('Exists') },
-                { value: 'does_not_exist', name: t("Doesn't Exist") },
-              ]}
-              component={FormikSelectField}
-              data-cy="string-existence-select"
-              disabled={isNullSelected}
-            />
-          );
-        } else {
-          return (
-            <Field
-              name={`${baseName}.value`}
-              label={`${field.fieldAttribute.labelEn}`}
-              fullWidth
-              variant="outlined"
-              component={FormikTextField}
-              data-cy="string-textfield"
-              disabled={isNullSelected}
-            />
-          );
-        }
+        return (
+          <Field
+            name={`${baseName}.value`}
+            label={`${field.fieldAttribute.labelEn}`}
+            fullWidth
+            variant="outlined"
+            component={FormikTextField}
+            data-cy="string-textfield"
+            disabled={isNullSelected}
+          />
+        );
       case 'BOOL':
         return (
           <Field
