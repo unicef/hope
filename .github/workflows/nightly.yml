@@ -5,10 +5,6 @@ on:
   schedule:
     # Run at 2:00 AM every day
     - cron: '0 2 * * *'
-  # temporary trigger for testing
-  pull_request:
-    branches:
-      - develop
 
 jobs:
   e2e_tests:
