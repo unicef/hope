@@ -57,7 +57,7 @@ snapshots['TestProgramQuery::test_single_program_query_0_with_permission 1'] = {
                             'Round A',
                             'Round B'
                         ],
-                        'subtype': 'BOOLEAN'
+                        'subtype': 'BOOL'
                     }
                 }
             ],
