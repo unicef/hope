@@ -1,4 +1,7 @@
-import { ProgramNode, ProgramPartnerAccess } from '../../src/__generated__/graphql';
+import {
+  ProgramNode,
+  ProgramPartnerAccess,
+} from '../../src/__generated__/graphql';
 
 export const fakeProgram = {
   id: 'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
