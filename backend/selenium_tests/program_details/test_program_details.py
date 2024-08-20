@@ -316,7 +316,12 @@ class TestProgrammeDetails:
         pageProgrammeDetails.getEndDateCycle().send_keys((datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d"))
         pageProgrammeDetails.getButtonCreateProgramCycle().click()
         pageProgrammeDetails.getProgramCycleRow()
-        assert 2 == len(pageProgrammeDetails.getProgramCycleRow())
+        for _ in range(50):
+            if 2 == len(pageProgrammeDetails.getProgramCycleRow()):
+                break
+            sleep(0.1)
+        else:
+            assert 2 == len(pageProgrammeDetails.getProgramCycleRow())
 
         assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[0].text
         assert datetime.now().strftime("%-d %b %Y") in pageProgrammeDetails.getProgramCycleEndDate()[0].text
