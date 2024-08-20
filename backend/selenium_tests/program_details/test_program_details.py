@@ -36,7 +36,10 @@ def standard_program() -> Program:
 
 
 def get_program_with_dct_type_and_name(
-    name: str, programme_code: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.DRAFT
+        name: str, programme_code: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.DRAFT,
+        program_cycle_status: str = ProgramCycle.FINISHED,
+        cycle_start_date: datetime = datetime.now() - relativedelta(days=25),
+        cycle_end_date: datetime = datetime.now() + relativedelta(days=10),
 ) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
@@ -47,9 +50,41 @@ def get_program_with_dct_type_and_name(
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
-        cycle__status=ProgramCycle.FINISHED,
-        cycle__start_date=datetime.now() - relativedelta(days=25),
-        cycle__end_date=datetime.now() + relativedelta(days=10),
+        cycle__status=program_cycle_status,
+        cycle__start_date=cycle_start_date,
+        cycle__end_date=cycle_end_date,
+    )
+    return program
+
+
+@pytest.fixture
+def standard_program_with_draft_programme_cycle() -> Program:
+    yield get_program_without_cycle_end_date("Active Programme", "9876", status=Program.ACTIVE,
+                                             program_cycle_status=ProgramCycle.DRAFT)
+
+@pytest.fixture
+def standard_active_program() -> Program:
+    yield get_program_with_dct_type_and_name("Active Programme", "9876", status=Program.ACTIVE,
+                                             program_cycle_status=ProgramCycle.FINISHED)
+
+def get_program_without_cycle_end_date(
+        name: str, programme_code: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE,
+        program_cycle_status: str = ProgramCycle.FINISHED,
+        cycle_start_date: datetime = datetime.now() - relativedelta(days=25),
+) -> Program:
+    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
+    dct = DataCollectingTypeFactory(type=dct_type)
+    program = ProgramFactory(
+        name=name,
+        programme_code=programme_code,
+        start_date=datetime.now() - relativedelta(months=1),
+        end_date=datetime.now() + relativedelta(months=1),
+        data_collecting_type=dct,
+        status=status,
+        cycle__title="Default Programme Cycle",
+        cycle__status=program_cycle_status,
+        cycle__start_date=cycle_start_date,
+        cycle__end_date=None,
     )
     return program
 
@@ -116,7 +151,7 @@ def create_programs() -> None:
 
 
 @pytest.mark.usefixtures("login")
-class TestProgrammeDetails:
+class TestSmokeProgrammeDetails:
     def test_program_details(self, standard_program: Program, pageProgrammeDetails: ProgrammeDetails) -> None:
         program = Program.objects.get(name="Test For Edit")
         # Go to Programme Details
@@ -140,8 +175,8 @@ class TestProgrammeDetails:
         assert program.sector.replace("_", " ").title() in pageProgrammeDetails.getLabelSelector().text
         assert program.data_collecting_type.label in pageProgrammeDetails.getLabelDataCollectingType().text
         assert (
-            program.frequency_of_payments.replace("_", "-").capitalize()
-            in pageProgrammeDetails.getLabelFreqOfPayment().text
+                program.frequency_of_payments.replace("_", "-").capitalize()
+                in pageProgrammeDetails.getLabelFreqOfPayment().text
         )
         assert program.administrative_areas_of_implementation in pageProgrammeDetails.getLabelAdministrativeAreas().text
         assert program.description in pageProgrammeDetails.getLabelDescription().text
@@ -151,10 +186,10 @@ class TestProgrammeDetails:
 
     @pytest.mark.skip("Unskip after fix bug")
     def test_edit_programme_from_details(
-        self,
-        create_programs: None,
-        pageProgrammeDetails: ProgrammeDetails,
-        pageProgrammeManagement: ProgrammeManagement,
+            self,
+            create_programs: None,
+            pageProgrammeDetails: ProgrammeDetails,
+            pageProgrammeManagement: ProgrammeManagement,
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("Test Programm")
         pageProgrammeDetails.getButtonEditProgram().click()
@@ -180,7 +215,7 @@ class TestProgrammeDetails:
         assert FormatTime(1, 10, 2022).date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
 
     def test_program_details_happy_path(
-        self, create_payment_plan: Program, pageProgrammeDetails: ProgrammeDetails
+            self, create_payment_plan: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("Test For Edit")
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
@@ -207,3 +242,78 @@ class TestProgrammeDetails:
         else:
             assert "FINISHED" in pageProgrammeDetails.getProgramStatus().text
         assert "1" in pageProgrammeDetails.getLabelProgramSize().text
+
+
+@pytest.mark.usefixtures("login")
+class TestProgrammeDetails:
+
+    def test_program_details_check_default_cycle(self, pageProgrammeManagement: ProgrammeManagement,
+                                                 pageProgrammeDetails: ProgrammeDetails
+                                                 ) -> None:
+        # Go to Programme Management
+        pageProgrammeManagement.getNavProgrammeManagement().click()
+        # Create Programme
+        pageProgrammeManagement.getButtonNewProgram().click()
+        pageProgrammeManagement.getInputProgrammeName().send_keys("Test 1234 Program")
+        pageProgrammeManagement.getInputStartDate().click()
+        pageProgrammeManagement.getInputStartDate().send_keys(FormatTime(1, 1, 2022).numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().click()
+        pageProgrammeManagement.getInputEndDate().send_keys(FormatTime(1, 2, 2032).numerically_formatted_date)
+        pageProgrammeManagement.chooseOptionSelector("Health")
+        pageProgrammeManagement.chooseOptionDataCollectingType("Partial")
+        pageProgrammeManagement.getButtonNext().click()
+        # 2nd step (Time Series Fields)
+        pageProgrammeManagement.getButtonAddTimeSeriesField()
+        pageProgrammeManagement.getButtonNext().click()
+        # 3rd step (Partners)
+        programme_creation_url = pageProgrammeManagement.driver.current_url
+        pageProgrammeManagement.getButtonSave().click()
+        # Check Details page
+        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
+        pageProgrammeDetails.getButtonActivateProgram().click()
+        pageProgrammeDetails.getButtonActivateProgramModal().click()
+        assert 1 == len(pageProgrammeDetails.getProgramCycleRow())
+        assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[0].text
+        assert "-" in pageProgrammeDetails.getProgramCycleEndDate()[0].text
+        assert "Default Programme Cycle" in pageProgrammeDetails.getProgramCycleTitle()[0].text
+
+    def test_program_details_edit_default_cycle_by_add_new(
+            self, standard_program_with_draft_programme_cycle: Program, pageProgrammeDetails: ProgrammeDetails
+    ) -> None:
+        pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
+        assert "ACTIVE" in pageProgrammeDetails.getProgramStatus().text
+        assert "0" in pageProgrammeDetails.getLabelProgramSize().text
+        assert "Programme Cycles" in pageProgrammeDetails.getTableTitle().text
+        pageProgrammeDetails.getButtonAddNewProgrammeCycle().click()
+        pageProgrammeDetails.getDataPickerFilter().click()
+        pageProgrammeDetails.getDataPickerFilter().send_keys(datetime.now().strftime("%Y-%m-%d"))
+        pageProgrammeDetails.getButtonNext().click()
+        pageProgrammeDetails.getInputTitle().send_keys("Test Title")
+        pageProgrammeDetails.getStartDateCycle().click()
+        pageProgrammeDetails.getStartDateCycle().send_keys(
+            (datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d"))
+        pageProgrammeDetails.getEndDateCycle().click()
+        pageProgrammeDetails.getEndDateCycle().send_keys(
+            (datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d"))
+        pageProgrammeDetails.getButtonCreateProgramCycle().click()
+        pageProgrammeDetails.getProgramCycleRow()
+        assert 2 == len(pageProgrammeDetails.getProgramCycleRow())
+
+        assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[0].text
+        assert datetime.now().strftime("%-d %b %Y") in pageProgrammeDetails.getProgramCycleEndDate()[0].text
+        assert "Default Programme Cycle" in pageProgrammeDetails.getProgramCycleTitle()[0].text
+
+        assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[1].text
+        assert (datetime.now() + relativedelta(days=1)).strftime("%-d %b %Y") in \
+               pageProgrammeDetails.getProgramCycleEndDate()[1].text
+        assert (datetime.now() + relativedelta(days=1)).strftime("%-d %b %Y") in \
+               pageProgrammeDetails.getProgramCycleStartDate()[1].text
+        assert "Test Title" in pageProgrammeDetails.getProgramCycleTitle()[1].text
+
+    def test_program_details_add_new_programme_cycle(
+            self, standard_active_program: Program, pageProgrammeDetails: ProgrammeDetails
+    ) -> None:
+        pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
+        assert "ACTIVE" in pageProgrammeDetails.getProgramStatus().text
+        pageProgrammeDetails.getButtonAddNewProgrammeCycle().click()
+        pageProgrammeDetails.screenshot("1")
