@@ -534,7 +534,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             collection_date_cell = row_dict.get(column_collection_date)
             subtype = flexible_attribute.pdu_data.subtype
             handle_subtype = handle_subtype_mapping[subtype]
-            value = handle_subtype(value_cell)
+            value = handle_subtype(value_cell, is_flex_field=True)
             if not collection_date_cell.value:
                 collection_date = self.registration_data_import.created_at.date()
             else:
