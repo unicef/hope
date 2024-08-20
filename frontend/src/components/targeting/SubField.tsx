@@ -245,6 +245,7 @@ export function SubField({
             <Grid item xs={12}>
               <Field
                 name={`${baseName}.roundNumber`}
+                required
                 component={FormikSelectField}
                 choices={
                   field.pduData?.numberOfRounds ||

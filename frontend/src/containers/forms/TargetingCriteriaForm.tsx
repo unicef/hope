@@ -56,11 +56,34 @@ const validationSchema = Yup.object().shape({
       individualBlockFilters: Yup.array().of(
         Yup.object().shape({
           fieldName: Yup.string().required('Field Type is required'),
+          fieldAttribute: Yup.object().shape({
+            type: Yup.string().required(),
+          }),
+          roundNumber: Yup.string()
+            .nullable()
+            .when(
+              ['fieldName', 'fieldAttribute'],
+              (fieldName, fieldAttribute, schema) => {
+                const parent = schema.parent;
+                console.log('Parent:', parent);
+                if (
+                  parent &&
+                  parent.fieldAttribute &&
+                  parent.fieldAttribute.type === 'PDU'
+                ) {
+                  console.log('Round Number is required');
+                  return Yup.string().required('Round Number is required');
+                }
+                console.log('Round Number is not required');
+                return Yup.string().notRequired();
+              },
+            ),
         }),
       ),
     }),
   ),
 });
+
 interface ArrayFieldWrapperProps {
   arrayHelpers;
   children: React.ReactNode;
@@ -145,7 +168,7 @@ export const TargetingCriteriaForm = ({
     individualsFiltersBlocks,
   }): { nonFieldErrors?: string[] } => {
     const filterNullOrNoSelections = (filter): boolean =>
-      filter.fieldAttribute?.type !== 'PDU' &&
+      !filter.isNull &&
       (filter.value === null ||
         filter.value === '' ||
         (filter?.fieldAttribute?.type === 'SELECT_MANY' &&
@@ -153,7 +176,7 @@ export const TargetingCriteriaForm = ({
           filter.value.length === 0));
 
     const filterEmptyFromTo = (filter): boolean =>
-      filter.fieldAttribute?.type !== 'PDU' &&
+      !filter.isNull &&
       typeof filter.value === 'object' &&
       filter.value !== null &&
       Object.prototype.hasOwnProperty.call(filter.value, 'from') &&
@@ -174,6 +197,7 @@ export const TargetingCriteriaForm = ({
 
     const hasIndividualsFiltersBlocksErrors = individualsFiltersBlocks.some(
       (block) => {
+        console.log('xxxblock', block);
         const hasNulls = block.individualBlockFilters.some(
           filterNullOrNoSelections,
         );
