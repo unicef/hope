@@ -229,6 +229,7 @@ class TestSmokeTargeting:
         assert expected_menu_items == [i.text for i in pageTargetingDetails.getTableLabel()]
 
 
+@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestCreateTargeting:
     def test_create_targeting_for_people(
@@ -313,6 +314,7 @@ class TestCreateTargeting:
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
 
 
+@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestTargeting:
     def test_targeting_create_use_ids_hh(

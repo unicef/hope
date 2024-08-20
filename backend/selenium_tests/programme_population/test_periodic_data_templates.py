@@ -145,6 +145,7 @@ class TestPeriodicDataTemplates:
             is True
         )
 
+    @pytest.mark.night
     def test_periodic_data_template_list(
         self,
         program: Program,
@@ -192,6 +193,7 @@ class TestPeriodicDataTemplates:
 
         assert "EXPORTED" in pagePeriodicDataUpdateTemplates.getTemplateStatus(index).text
 
+    @pytest.mark.night
     def test_periodic_data_template_details(
         self,
         program: Program,
@@ -237,6 +239,7 @@ class TestPeriodicDataTemplates:
             in pagePeriodicDataUpdateTemplates.getTemplateNumberOfIndividuals(0).text
         )
 
+    @pytest.mark.night
     def test_periodic_data_template_create_and_download(
         self,
         program: Program,
