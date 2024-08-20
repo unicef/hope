@@ -17,7 +17,7 @@ import {
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Box } from '@mui/material';
+import { Box, Fade } from '@mui/material';
 import { decodeIdString } from '@utils/utils';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
@@ -329,38 +329,50 @@ export const DuplicateProgramPage = (): ReactElement => {
               }
             >
               <Box p={3}>
-                {step === 0 && (
-                  <DetailsStep
-                    values={values}
-                    handleNext={handleNextStep}
-                    programId={id}
-                  />
-                )}
-                {step === 1 && (
-                  <ProgramFieldSeriesStep
-                    values={values}
-                    handleNext={handleNextStep}
-                    step={step}
-                    setStep={setStep}
-                    pdusubtypeChoicesData={pdusubtypeChoicesData}
-                    errors={errors}
-                    setErrors={setErrors}
-                    setFieldTouched={setFieldTouched}
-                    programId={id}
-                  />
-                )}
-                {step === 2 && (
-                  <PartnersStep
-                    values={values}
-                    allAreasTreeData={allAreasTree}
-                    partnerChoices={mappedPartnerChoices}
-                    step={step}
-                    setStep={setStep}
-                    submitForm={submitForm}
-                    setFieldValue={setFieldValue}
-                    programId={id}
-                  />
-                )}
+                <Fade in={step === 0} timeout={600}>
+                  <div>
+                    {step === 0 && (
+                      <DetailsStep
+                        values={values}
+                        handleNext={handleNextStep}
+                        programId={id}
+                      />
+                    )}
+                  </div>
+                </Fade>
+                <Fade in={step === 1} timeout={600}>
+                  <div>
+                    {step === 1 && (
+                      <ProgramFieldSeriesStep
+                        values={values}
+                        handleNext={handleNextStep}
+                        step={step}
+                        setStep={setStep}
+                        pdusubtypeChoicesData={pdusubtypeChoicesData}
+                        errors={errors}
+                        setErrors={setErrors}
+                        setFieldTouched={setFieldTouched}
+                        programId={id}
+                      />
+                    )}
+                  </div>
+                </Fade>
+                <Fade in={step === 2} timeout={600}>
+                  <div>
+                    {step === 2 && (
+                      <PartnersStep
+                        values={values}
+                        allAreasTreeData={allAreasTree}
+                        partnerChoices={mappedPartnerChoices}
+                        step={step}
+                        setStep={setStep}
+                        submitForm={submitForm}
+                        setFieldValue={setFieldValue}
+                        programId={id}
+                      />
+                    )}
+                  </div>
+                </Fade>
               </Box>
             </BaseSection>
           </>
