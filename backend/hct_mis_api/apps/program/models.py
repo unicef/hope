@@ -1,6 +1,6 @@
 import random
 import string
-from datetime import date, datetime
+from datetime import date
 from decimal import Decimal
 from typing import Any, Collection, Optional, Union
 
@@ -331,7 +331,7 @@ class ProgramCycle(AdminUrlMixin, SoftDeletableModel, TimeStampedUUIDModel, Unic
             raise ValidationError("Start date cannot be in the past.")
 
         # validate on create only
-        if self._state.adding and self.program.cycles.filter(end_date__gte=self.start_date).exists():
+        if self._state.adding and self.program.cycles.filter(end_date__gte=start_date).exists():
             raise ValidationError("Start date must be after the latest cycle.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:

@@ -1342,6 +1342,7 @@ type FinancialServiceProviderXlsxTemplateNode implements Node {
   name: String!
   columns: [String]
   coreFields: [String!]!
+  flexFields: [String!]!
   financialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
 }
 

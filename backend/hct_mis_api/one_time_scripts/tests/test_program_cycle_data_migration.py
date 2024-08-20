@@ -1,5 +1,7 @@
 from django.test.testcases import TestCase
 
+from freezegun import freeze_time
+
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
@@ -19,79 +21,80 @@ class TestProgramCycleDataMigration(TestCase):
         ba = create_afghanistan()
         start_date = "2022-10-10"
         end_date = "2023-10-10"
-        program_finished = ProgramFactory(
-            name="Finished 001",
-            business_area=ba,
-            start_date="2022-10-10",
-            end_date="2022-10-29",
-            status=Program.FINISHED,
-            cycle__title="Already Created Cycle for program_finished",
-            cycle__status=ProgramCycle.DRAFT,
-            cycle__start_date="2022-10-11",
-            cycle__end_date="2022-10-12",
-        )
-        program_finished2 = ProgramFactory(
-            name="Finished 002",
-            business_area=ba,
-            start_date="2022-11-10",
-            end_date="2022-11-30",
-            status=Program.FINISHED,
-            cycle__title="Cycle_program_finished2",
-            cycle__status=ProgramCycle.DRAFT,
-            cycle__start_date="2022-10-11",
-            cycle__end_date="2022-10-12",
-        )
-        # remove default program cycle for program_finished2
-        ProgramCycle.objects.filter(title="Cycle_program_finished2").delete()
-        tp_1 = TargetPopulationFactory(program=program_finished, program_cycle=None)
-        tp_2 = TargetPopulationFactory(program=program_finished2, program_cycle=None)
-        PaymentPlanFactory(
-            program=program_finished,
-            target_population=tp_1,
-            program_cycle=None,
-            start_date=start_date,
-            end_date=end_date,
-        )
-        PaymentPlanFactory(
-            program=program_finished2,
-            target_population=tp_2,
-            program_cycle=None,
-            start_date=start_date,
-            end_date=end_date,
-        )
+        with freeze_time("2020-10-10"):
+            program_finished = ProgramFactory(
+                name="Finished 001",
+                business_area=ba,
+                start_date="2022-10-10",
+                end_date="2022-10-29",
+                status=Program.FINISHED,
+                cycle__title="Already Created Cycle for program_finished",
+                cycle__status=ProgramCycle.DRAFT,
+                cycle__start_date="2022-10-11",
+                cycle__end_date="2022-10-12",
+            )
+            program_finished2 = ProgramFactory(
+                name="Finished 002",
+                business_area=ba,
+                start_date="2022-11-10",
+                end_date="2022-11-30",
+                status=Program.FINISHED,
+                cycle__title="Cycle_program_finished2",
+                cycle__status=ProgramCycle.DRAFT,
+                cycle__start_date="2022-10-11",
+                cycle__end_date="2022-10-12",
+            )
+            # remove default program cycle for program_finished2
+            ProgramCycle.objects.filter(title="Cycle_program_finished2").delete()
+            tp_1 = TargetPopulationFactory(program=program_finished, program_cycle=None)
+            tp_2 = TargetPopulationFactory(program=program_finished2, program_cycle=None)
+            PaymentPlanFactory(
+                program=program_finished,
+                target_population=tp_1,
+                program_cycle=None,
+                start_date=start_date,
+                end_date=end_date,
+            )
+            PaymentPlanFactory(
+                program=program_finished2,
+                target_population=tp_2,
+                program_cycle=None,
+                start_date=start_date,
+                end_date=end_date,
+            )
 
-        # active programs
-        program_active_001 = ProgramFactory(
-            name="Active 001",
-            business_area=ba,
-            start_date="2023-01-01",
-            end_date="2022-01-30",
-            status=Program.ACTIVE,
-            cycle__title="Cycle for program_active_001",
-            cycle__status=ProgramCycle.DRAFT,
-            cycle__start_date="2023-01-01",
-            cycle__end_date="2023-01-30",
-        )
-        program_active_002 = ProgramFactory(
-            name="Active 002",
-            business_area=ba,
-            start_date="2023-02-01",
-            end_date="2023-02-25",
-            status=Program.ACTIVE,
-            cycle__title="Cycle for program_active_002",
-            cycle__status=ProgramCycle.DRAFT,
-            cycle__start_date="2023-02-01",
-            cycle__end_date="2023-02-25",
-        )
-        ProgramCycle.objects.filter(title="Cycle for program_active_002").delete()
-        cls.tp_3 = TargetPopulationFactory(program=program_active_001, program_cycle=None)
-        cls.tp_4 = TargetPopulationFactory(program=program_active_002, program_cycle=None)
-        ProgramCycleFactory(
-            program=program_active_002,
-            title="Cycle 01",
-            start_date="2023-02-10",
-            end_date=None,
-        )
+            # active programs
+            program_active_001 = ProgramFactory(
+                name="Active 001",
+                business_area=ba,
+                start_date="2023-01-01",
+                end_date="2022-01-30",
+                status=Program.ACTIVE,
+                cycle__title="Cycle for program_active_001",
+                cycle__status=ProgramCycle.DRAFT,
+                cycle__start_date="2023-01-01",
+                cycle__end_date="2023-01-30",
+            )
+            program_active_002 = ProgramFactory(
+                name="Active 002",
+                business_area=ba,
+                start_date="2023-02-01",
+                end_date="2023-02-25",
+                status=Program.ACTIVE,
+                cycle__title="Cycle for program_active_002",
+                cycle__status=ProgramCycle.DRAFT,
+                cycle__start_date="2023-02-01",
+                cycle__end_date="2023-02-25",
+            )
+            ProgramCycle.objects.filter(title="Cycle for program_active_002").delete()
+            cls.tp_3 = TargetPopulationFactory(program=program_active_001, program_cycle=None)
+            cls.tp_4 = TargetPopulationFactory(program=program_active_002, program_cycle=None)
+            ProgramCycleFactory(
+                program=program_active_002,
+                title="Cycle 01",
+                start_date="2023-02-10",
+                end_date=None,
+            )
         household_1, inds = create_household_and_individuals(
             household_data={
                 "business_area": ba,
