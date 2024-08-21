@@ -55,12 +55,13 @@ class TargetingCreate(BaseComponents):
     datePickerFilter = 'div[data-cy="date-picker-filter"]'
     boolField = 'div[data-cy="bool-field"]'
     textField = 'div[data-cy="string-textfield"]'
-    selectOptionsIndividualsFiltersBlocksRoundNumber = 'div[data-cy="select-options-individualsFiltersBlocks[{}].individualBlockFilters[{}].roundNumber"]'
     selectIndividualsFiltersBlocksRoundNumber = 'div[data-cy="select-individualsFiltersBlocks[{}].individualBlockFilters[{}].roundNumber"]'
+    selectRoundOption = 'li[data-cy="select-option-{}"]'
     selectIndividualsFiltersBlocksIsNull = 'span[data-cy="input-individualsFiltersBlocks[{}].individualBlockFilters[{}].isNull"]'
     inputIndividualsFiltersBlocksValueFrom = 'input[data-cy="input-individualsFiltersBlocks[{}].individualBlockFilters[{}].value.from"]'
     inputIndividualsFiltersBlocksValueTo = 'input[data-cy="input-individualsFiltersBlocks[{}].individualBlockFilters[{}].value.to"]'
     inputIndividualsFiltersBlocksValue = 'input[data-cy="input-individualsFiltersBlocks[{}].individualBlockFilters[{}].value"]'
+    totalNumberOfHouseholdsCount = 'div[data-cy="total-number-of-households-count"]'
 
     # Texts
     textTargetingCriteria = "Targeting Criteria"
@@ -213,11 +214,11 @@ class TargetingCreate(BaseComponents):
     def getDatePickerFilter(self) -> WebElement:
         return self.wait_for(self.datePickerFilter)
 
-    def getSelectOptionsIndividualsFiltersBlocksRoundNumber(self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0) -> WebElement:
-        return self.wait_for(self.selectOptionsIndividualsFiltersBlocksRoundNumber.format(individuals_filters_blocks_number, individual_block_filters_number))
-
     def getSelectIndividualsiFltersBlocksRoundNumber(self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0) -> WebElement:
         return self.wait_for(self.selectIndividualsFiltersBlocksRoundNumber.format(individuals_filters_blocks_number, individual_block_filters_number))
+
+    def getSelectRoundOption(self, round_number: int = 0) -> WebElement:
+        return self.wait_for(self.selectRoundOption.format(round_number))
 
     def getSelectIndividualsiFltersBlocksIsNull(self) -> WebElement:
         return self.wait_for(self.selectIndividualsFiltersBlocksIsNull)
@@ -230,3 +231,6 @@ class TargetingCreate(BaseComponents):
 
     def getInputIndividualsFiltersBlocksValue(self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0) -> WebElement:
         return self.wait_for(self.inputIndividualsFiltersBlocksValue.format(individuals_filters_blocks_number, individual_block_filters_number))
+
+    def getTotalNumberOfHouseholdsCount(self) -> WebElement:
+        return self.wait_for(self.totalNumberOfHouseholdsCount)
