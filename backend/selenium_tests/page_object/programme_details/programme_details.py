@@ -45,12 +45,19 @@ class ProgrammeDetails(BaseComponents):
     dataPickerFilter = 'div[data-cy="date-picker-filter"]'
     endDateCycle = 'div[data-cy="end-date-cycle"]'
     buttonNext = 'button[data-cy="button-update-program-cycle-modal"]'
+    buttonSave = 'button[data-cy="button-save"]'
     buttonCreateProgramCycle = 'button[data-cy="button-create-program-cycle"]'
     inputTitle = 'input[data-cy="input-title"]'
+    deleteProgrammeCycle = 'button[data-cy="delete-programme-cycle"]'
+    buttonDelete = 'button[data-cy="button-delete"]'
 
     def getProgramCycleRow(self) -> WebElement:
         self.wait_for(self.programCycleRow)
         return self.get_elements(self.programCycleRow)
+
+    def getDeleteProgrammeCycle(self) -> WebElement:
+        self.wait_for(self.deleteProgrammeCycle)
+        return self.get_elements(self.deleteProgrammeCycle)
 
     def getProgramCycleId(self) -> WebElement:
         self.wait_for(self.programCycleId)
@@ -102,6 +109,9 @@ class ProgrammeDetails(BaseComponents):
 
     def getButtonNext(self) -> WebElement:
         return self.wait_for(self.buttonNext)
+
+    def getButtonSave(self) -> WebElement:
+        return self.wait_for(self.buttonSave)
 
     def getInputTitle(self) -> WebElement:
         return self.wait_for(self.inputTitle)
@@ -192,6 +202,9 @@ class ProgrammeDetails(BaseComponents):
 
     def getTablePagination(self) -> WebElement:
         return self.wait_for(self.tablePagination)
+
+    def getButtonDelete(self) -> WebElement:
+        return self.wait_for(self.buttonDelete)
 
     def clickButtonFinishProgramPopup(self) -> None:
         self.wait_for('[data-cy="dialog-actions-container"]')
