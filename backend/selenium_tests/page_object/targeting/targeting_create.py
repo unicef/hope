@@ -61,6 +61,7 @@ class TargetingCreate(BaseComponents):
     inputIndividualsFiltersBlocksValueFrom = 'input[data-cy="input-individualsFiltersBlocks[{}].individualBlockFilters[{}].value.from"]'
     inputIndividualsFiltersBlocksValueTo = 'input[data-cy="input-individualsFiltersBlocks[{}].individualBlockFilters[{}].value.to"]'
     inputIndividualsFiltersBlocksValue = 'input[data-cy="input-individualsFiltersBlocks[{}].individualBlockFilters[{}].value"]'
+    selectIndividualsFiltersBlocksValue = 'div[data-cy="select-individualsFiltersBlocks[{}].individualBlockFilters[{}].value"]'
     totalNumberOfHouseholdsCount = 'div[data-cy="total-number-of-households-count"]'
 
     # Texts
@@ -231,6 +232,9 @@ class TargetingCreate(BaseComponents):
 
     def getInputIndividualsFiltersBlocksValue(self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0) -> WebElement:
         return self.wait_for(self.inputIndividualsFiltersBlocksValue.format(individuals_filters_blocks_number, individual_block_filters_number))
+
+    def getSelectIndividualsFiltersBlocksValue(self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0) -> WebElement:
+        return self.wait_for(self.selectIndividualsFiltersBlocksValue.format(individuals_filters_blocks_number, individual_block_filters_number))
 
     def getTotalNumberOfHouseholdsCount(self) -> WebElement:
         return self.wait_for(self.totalNumberOfHouseholdsCount)
