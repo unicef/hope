@@ -125,7 +125,12 @@ export function mapCriteriaToInitialValues(criteria) {
     individualsFiltersBlocks: individualsFiltersBlocks.map((block) => ({
       individualBlockFilters: mapFiltersToInitialValues(
         block.individualBlockFilters,
-      ),
+      ).map((filter) => {
+        return {
+          ...filter,
+          isNull: filter.comparisonMethod === 'IS_NULL',
+        };
+      }),
     })),
   };
 }
