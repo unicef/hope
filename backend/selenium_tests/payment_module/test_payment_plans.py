@@ -200,7 +200,7 @@ class TestSmokePaymentModule:
         pageProgramCycle.getNavProgrammeCycles().click()
         pageProgramCycle.getProgramCycleRow()[0].find_element(
             By.CSS_SELECTOR, 'td[data-cy="program-cycle-title"]'
-        ).click()
+        ).find_element(By.TAG_NAME, "a").click()
         pageProgramCycleDetails.getButtonCreatePaymentPlan().click()
         assert "New Payment Plan" in pageNewPaymentPlan.getPageHeaderTitle().text
         assert "SAVE" in pageNewPaymentPlan.getButtonSavePaymentPlan().text
@@ -274,7 +274,9 @@ class TestSmokePaymentModule:
             .find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]')
             .text
         )
-        pageProgramCycle.getProgramCycleRow()[0].find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-id"]').click()
+        pageProgramCycle.getProgramCycleRow()[0].find_element(
+            By.CSS_SELECTOR, 'td[data-cy="program-cycle-title"]'
+        ).find_element(By.TAG_NAME, "a").click()
         pageProgramCycleDetails.getButtonCreatePaymentPlan().click()
         pageNewPaymentPlan.getInputTargetPopulation().click()
         pageNewPaymentPlan.select_listbox_element(targeting.name)
