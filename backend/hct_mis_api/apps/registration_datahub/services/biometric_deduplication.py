@@ -2,7 +2,7 @@ import logging
 import uuid
 from typing import List
 
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.api.dataclasses import SimilarityPair
@@ -132,6 +132,14 @@ class BiometricDeduplicationService:
         RegistrationDataImport.objects.filter(
             program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
         ).update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_ERROR)
+
+    def get_duplicates_for_rdi(self, rdi: RegistrationDataImport) -> QuerySet[DeduplicationEngineSimilarityPair]:
+        rdi_individuals = rdi.individuals.filter(is_removed=False).only("id")
+        return DeduplicationEngineSimilarityPair.objects.filter(
+            Q(individual1__in=rdi_individuals) | Q(individual2__in=rdi_individuals),
+            program=rdi.program,
+            is_duplicate=True,
+        ).distinct()
 
     def create_biometric_deduplication_grievance_tickets_for_already_merged_individuals(
         self, deduplication_set_id: str

@@ -1,5 +1,6 @@
 import os
 import uuid
+from decimal import Decimal
 from unittest import mock
 from unittest.mock import patch
 
@@ -235,3 +236,42 @@ class BiometricDeduplicationServiceTest(TestCase):
         assert self.program.deduplication_engine_similarity_pairs.filter(
             individual1=ind2, individual2=ind3, similarity_score=0.8
         ).exists()
+
+    def test_get_duplicates_for_rdi(self) -> None:
+        self.program.deduplication_set_id = uuid.uuid4()
+        self.program.biometric_deduplication_threshold = 0.6
+        self.program.save()
+
+        individuals = IndividualFactory.create_batch(3)
+        rdi = RegistrationDataImportFactory(
+            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING
+        )
+        ind1, ind2, ind3 = sorted(individuals, key=lambda x: x.id)
+        rdi.individuals.add(ind1, ind2, ind3)
+
+        service = BiometricDeduplicationService()
+        similarity_pairs = [
+            SimilarityPair(similarity_score=0.5, first=ind1.id, second=ind2.id),
+            SimilarityPair(
+                similarity_score=0.7,
+                first=ind1.id,
+                second=ind3.id,
+            ),
+            SimilarityPair(similarity_score=0.8, first=ind2.id, second=ind3.id),
+            SimilarityPair(
+                similarity_score=0.9,
+                first=ind1.id,
+                second=ind3.id,
+            ),
+        ]
+        service.store_results(str(self.program.deduplication_set_id), similarity_pairs)
+
+        duplicates = service.get_duplicates_for_rdi(rdi)
+
+        assert len(duplicates) == 2
+        assert list(
+            duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
+        ) == [
+            {"individual1": ind1.id, "individual2": ind3.id, "similarity_score": Decimal("0.7")},
+            {"individual1": ind2.id, "individual2": ind3.id, "similarity_score": Decimal("0.8")},
+        ]
