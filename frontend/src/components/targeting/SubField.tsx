@@ -36,7 +36,7 @@ interface SubFieldProps {
   choicesDict?: any; // Adjust the type of choicesDict as necessary
 }
 
-const SubField: React.FC<SubFieldProps> = ({
+export const SubField: React.FC<SubFieldProps> = ({
   baseName,
   blockIndex,
   index,
@@ -290,5 +290,3 @@ const SubField: React.FC<SubFieldProps> = ({
 
   return renderFieldByType(field.fieldAttribute.type);
 };
-
-export default SubField;
