@@ -170,15 +170,17 @@ const CriteriaField = ({ field, choicesDict }): React.ReactElement => {
       break;
   }
 
+  console.log('aaafield', field);
   return (
     <>
       {fieldElement}
-      {field.type === 'PDU' &&
-        field.pduData &&
-        field.round &&
-        field.pduData.roundsNames?.[field.round - 1] && (
-          <PduDataBox>
-            {field.round}-{field.pduData.roundsNames[field.round - 1]}
+      {field.fieldAttribute.type === 'PDU' &&
+        field.fieldAttribute.pduData &&
+        field.roundNumber &&
+        field.fieldAttribute.pduData.roundsNames?.[field.roundNumber - 1] && (
+          <PduDataBox data-cy="round-number-round-name-display">
+            Round {field.roundNumber}(
+            {field.fieldAttribute.pduData.roundsNames[field.roundNumber - 1]})
           </PduDataBox>
         )}
     </>
