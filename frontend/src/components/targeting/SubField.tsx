@@ -20,15 +20,32 @@ const InlineField = styled.div`
   width: 48%;
 `;
 
-export function SubField({
-  field,
-  blockIndex = undefined,
-  index,
+interface Values {
+  individualsFiltersBlocks?: {
+    individualBlockFilters?: {
+      isNull?: boolean;
+    }[];
+  }[];
+}
+
+interface SubFieldProps {
+  baseName: string;
+  blockIndex?: number;
+  index?: number;
+  field?: any; // Adjust the type of field as necessary
+  choicesDict?: any; // Adjust the type of choicesDict as necessary
+}
+
+const SubField: React.FC<SubFieldProps> = ({
   baseName,
+  blockIndex,
+  index,
+  field,
   choicesDict,
-}): React.ReactElement {
+}) => {
   const { t } = useTranslation();
-  const { values, setFieldValue } = useFormikContext();
+  const { values, setFieldValue } = useFormikContext<Values>();
+
   if (blockIndex === undefined) {
     const match = baseName.match(/block\[(\d+)\]/);
     if (match) {
@@ -54,7 +71,7 @@ export function SubField({
     return null;
   }
 
-  const renderFieldByType = (type) => {
+  const renderFieldByType = (type: string) => {
     switch (type) {
       case 'DECIMAL':
         return (
@@ -245,6 +262,7 @@ export function SubField({
                     : []
                 }
                 label="Round"
+                data-cy="input-round-number"
               />
             </Grid>
             <Grid item xs={12}>
@@ -271,4 +289,6 @@ export function SubField({
   };
 
   return renderFieldByType(field.fieldAttribute.type);
-}
+};
+
+export default SubField;

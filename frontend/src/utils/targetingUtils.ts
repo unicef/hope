@@ -232,14 +232,25 @@ export function formatCriteriaIndividualsFiltersBlocks(
   }));
 }
 
-function mapFilterToVariable(filter): {
+interface Filter {
+  isNull: boolean;
   comparisonMethod: string;
-  arguments;
+  arguments: any[];
   fieldName: string;
   flexFieldClassification: string;
   roundNumber?: number;
-} {
-  const result = {
+}
+
+interface Result {
+  comparisonMethod: string;
+  arguments: any[];
+  fieldName: string;
+  flexFieldClassification: string;
+  roundNumber?: number;
+}
+
+function mapFilterToVariable(filter: Filter): Result {
+  const result: Result = {
     comparisonMethod: filter.isNull ? 'IS_NULL' : filter.comparisonMethod,
     arguments: filter.isNull ? [null] : filter.arguments,
     fieldName: filter.fieldName,
