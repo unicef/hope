@@ -15,7 +15,7 @@ class BaseComponents(Common):
     navRegistrationDataImport = 'a[data-cy="nav-Registration Data Import"]'
     navProgrammePopulation = 'a[data-cy="nav-Program Population"]'
     navHouseholds = 'a[data-cy="nav-Households"]'
-    navIndividuals = 'a[data-cy="nav-Individuals"]'
+    navIndividuals = 'a[data-cy="nav-Household Members"]'
     navPeople = 'a[data-cy="nav-People"]'
     navProgrammeManagement = 'a[data-cy="nav-Programs"]'
     navManagerialConsole = 'a[data-cy="nav-Managerial Console"]'
@@ -186,11 +186,14 @@ class BaseComponents(Common):
     def getNavProgramLog(self) -> WebElement:
         return self.wait_for(self.navProgramLog)
 
+    def waitForRows(self) -> [WebElement]:
+        self.wait_for(self.rows)
+        return self.get_elements(self.rows)
+
     def getRows(self) -> [WebElement]:
         return self.get_elements(self.rows)
 
     def getAlert(self) -> WebElement:
-        self.wait_for(self.alert)
         return self.wait_for(self.alert)
 
     def checkAlert(self, text: str) -> None:

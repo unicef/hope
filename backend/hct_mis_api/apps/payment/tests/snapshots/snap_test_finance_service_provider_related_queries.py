@@ -43,9 +43,7 @@ snapshots['TestFSPRelatedSchema::test_query_all_financial_service_providers 1'] 
                 {
                     'node': {
                         'communicationChannel': 'XLSX',
-                        'deliveryMechanisms': [
-                            'Cash'
-                        ],
+                        'deliveryMechanisms': {'edges': [{'node': {'name': 'Cash'}}]},
                         'name': 'FSP_1',
                         'visionVendorNumber': '149-69-3686'
                     }
@@ -53,9 +51,7 @@ snapshots['TestFSPRelatedSchema::test_query_all_financial_service_providers 1'] 
                 {
                     'node': {
                         'communicationChannel': 'API',
-                        'deliveryMechanisms': [
-                            'Voucher'
-                        ],
+                        'deliveryMechanisms': {'edges': [{'node': {'name': 'Voucher'}}]},
                         'name': 'FSP_2',
                         'visionVendorNumber': '666-69-3686'
                     }

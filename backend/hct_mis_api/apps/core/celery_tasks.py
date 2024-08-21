@@ -29,6 +29,7 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.models import TargetPopulation
@@ -118,6 +119,7 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
                 number_of_households=0,
                 business_area=program.business_area,
                 data_source=RegistrationDataImport.EDOPOMOGA,
+                program=program,
             )
 
             business_area = storage_obj.business_area
@@ -166,6 +168,7 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
                         "sex": MALE,
                         "relationship": HEAD,
                         "rdi_merge_status": MergeStatusModel.MERGED,
+                        "flex_fields": populate_pdu_with_null_values(program),
                     }
                     if family_id in families:
                         individual = Individual(**individual_data, household_id=families.get(family_id))

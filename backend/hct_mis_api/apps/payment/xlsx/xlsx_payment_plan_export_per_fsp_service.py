@@ -13,6 +13,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from hct_mis_api.apps.core.models import FileTemp, FlexibleAttribute
 from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -74,7 +75,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         return wb, ws
 
     def get_template(
-        self, fsp: "FinancialServiceProvider", delivery_mechanism: str
+        self, fsp: "FinancialServiceProvider", delivery_mechanism: DeliveryMechanism
     ) -> FinancialServiceProviderXlsxTemplate:
         fsp_xlsx_template_per_delivery_mechanism = FspXlsxTemplatePerDeliveryMechanism.objects.filter(
             delivery_mechanism=delivery_mechanism,
@@ -187,7 +188,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
     ) -> None:
         for delivery_mechanism_per_payment_plan in delivery_mechanism_per_payment_plan_list:
             fsp: FinancialServiceProvider = delivery_mechanism_per_payment_plan.financial_service_provider
-            delivery_mechanism: str = delivery_mechanism_per_payment_plan.delivery_mechanism
+            delivery_mechanism: DeliveryMechanism = delivery_mechanism_per_payment_plan.delivery_mechanism
             wb, ws_fsp = self.open_workbook(fsp.name)
             fsp_xlsx_template = self.get_template(fsp, delivery_mechanism)
             payment_ids = list(
@@ -216,7 +217,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             delivery_mechanism_per_payment_plan_list.first()  # type: ignore
         )
         fsp: FinancialServiceProvider = delivery_mechanism_per_payment_plan.financial_service_provider
-        delivery_mechanism: str = delivery_mechanism_per_payment_plan.delivery_mechanism
+        delivery_mechanism: DeliveryMechanism = delivery_mechanism_per_payment_plan.delivery_mechanism
         for i, split in enumerate(self.payment_plan.splits.all().order_by("order")):
             wb, ws_fsp = self.open_workbook(f"{fsp.name}-chunk{i + 1}")
             fsp_xlsx_template = self.get_template(fsp, delivery_mechanism)

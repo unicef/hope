@@ -20,6 +20,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
 from hct_mis_api.aurora.services.base_flex_registration_service import (
@@ -90,13 +91,16 @@ class SriLankaRegistrationService(BaseRegistrationService):
         registration_data_import: Optional[RegistrationDataImport] = None,
         **kwargs: Any,
     ) -> Dict:
+        flex_fields_dict = build_flex_arg_dict_from_list_if_exists(
+            head_of_household_info, SriLankaRegistrationService.INDIVIDUAL_FLEX_FIELDS
+        )
+        populate_pdu_with_null_values(registration_data_import.program, flex_fields_dict)  # type: ignore
+
         individual_data = dict(
             **build_arg_dict_from_dict_if_exists(
                 head_of_household_info, SriLankaRegistrationService.INDIVIDUAL_MAPPING_DICT
             ),
-            flex_fields=build_flex_arg_dict_from_list_if_exists(
-                head_of_household_info, SriLankaRegistrationService.INDIVIDUAL_FLEX_FIELDS
-            ),
+            flex_fields=flex_fields_dict,
             program=registration_data_import.program,
             **kwargs,
         )
