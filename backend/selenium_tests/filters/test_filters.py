@@ -549,6 +549,7 @@ class TestSmokeFilters:
         filters.getButtonFiltersApply().click()
         assert filters.waitForNumberOfRows(1)
 
+    @pytest.mark.night
     @pytest.mark.skip("ToDo")
     def test_grievance_tickets_filters_of_households_and_individuals(
         self,

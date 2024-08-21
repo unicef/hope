@@ -6,6 +6,7 @@ from rest_framework.reverse import reverse
 from hct_mis_api.api.models import APIToken, Grant
 from hct_mis_api.api.tests.base import HOPEApiTestCase
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -31,6 +32,7 @@ class APIProgramTests(HOPEApiTestCase):
         cls.list_url = reverse("api:program-list", args=[cls.business_area.slug])
 
     def test_create_program(self) -> None:
+        data_collecting_type = DataCollectingTypeFactory()
         data = {
             "name": "Program #1",
             "start_date": "2022-09-27",
@@ -40,6 +42,7 @@ class APIProgramTests(HOPEApiTestCase):
             "sector": "CHILD_PROTECTION",
             "cash_plus": True,
             "population_goal": 101,
+            "data_collecting_type": data_collecting_type.id,
         }
         response = self.client.post(self.create_url, data, format="json")
         assert response.status_code == 403
@@ -69,6 +72,7 @@ class APIProgramTests(HOPEApiTestCase):
                 "population_goal": 101,
                 "sector": "CHILD_PROTECTION",
                 "start_date": "2022-09-27",
+                "data_collecting_type": data_collecting_type.id,
             },
         )
 
@@ -123,6 +127,7 @@ class APIProgramTests(HOPEApiTestCase):
                 "population_goal": program1.population_goal,
                 "sector": program1.sector,
                 "start_date": program1.start_date.strftime("%Y-%m-%d"),
+                "data_collecting_type": program1.data_collecting_type_id,
             },
             response.json(),
         )
@@ -137,6 +142,7 @@ class APIProgramTests(HOPEApiTestCase):
                 "population_goal": program2.population_goal,
                 "sector": program2.sector,
                 "start_date": program2.start_date.strftime("%Y-%m-%d"),
+                "data_collecting_type": program2.data_collecting_type_id,
             },
             response.json(),
         )

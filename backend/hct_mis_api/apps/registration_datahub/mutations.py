@@ -580,6 +580,7 @@ class SaveKoboProjectImportDataAsync(PermissionMutation):
         pull_pictures: bool,
     ) -> "SaveKoboProjectImportDataAsync":
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
+        program_id: str = decode_id_string_required(info.context.headers.get("Program"))
 
         import_data = KoboImportData.objects.create(
             data_type=ImportData.JSON,
@@ -590,7 +591,7 @@ class SaveKoboProjectImportDataAsync(PermissionMutation):
             created_by_id=info.context.user.id,
             pull_pictures=pull_pictures,
         )
-        pull_kobo_submissions_task.delay(import_data.id)
+        pull_kobo_submissions_task.delay(import_data.id, program_id)
         return SaveKoboProjectImportDataAsync(import_data=import_data)
 
 
