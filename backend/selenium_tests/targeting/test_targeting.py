@@ -430,13 +430,14 @@ class TestCreateTargeting:
         pageTargetingCreate.getSelectRoundOption(1).click()
         pageTargetingCreate.getInputIndividualsFiltersBlocksValue().send_keys("Text")
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
+        expected_criteria_text = "Test String Attribute: Text\nRound 1 (Test Round String 1)"
+        assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
         targeting_name = "Test Targeting PDU string"
         pageTargetingCreate.getFieldName().send_keys(targeting_name)
         pageTargetingCreate.getTargetPopulationSaveButton().click()
         pageTargetingDetails.getLockButton()
-
         assert pageTargetingDetails.getTitlePage().text == targeting_name
-        assert pageTargetingDetails.getCriteriaContainer().text == "Test String Attribute: Text"
+        assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
         assert Household.objects.count() == 3
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
@@ -472,8 +473,8 @@ class TestCreateTargeting:
         pageTargetingCreate.getSelectRoundOption(2).click()
         pageTargetingCreate.getSelectIndividualsFiltersBlocksValue().click()
         pageTargetingCreate.select_option_by_name("True")
-        bool_yes_expected_criteria_text = "Test Bool Attribute: Yes"
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
+        bool_yes_expected_criteria_text = "Test Bool Attribute: Yes\nRound 2 (Test Round Bool 2)"
         assert pageTargetingCreate.getCriteriaContainer().text == bool_yes_expected_criteria_text
 
         targeting_name = "Test Targeting PDU bool"
@@ -494,15 +495,13 @@ class TestCreateTargeting:
         pageTargetingDetails.getButtonIconEdit().click()
         pageTargetingCreate.getSelectIndividualsFiltersBlocksValue().click()
         pageTargetingCreate.select_option_by_name("False")
-        bool_no_expected_criteria_text = "Test Bool Attribute: No"
+        bool_no_expected_criteria_text = "Test Bool Attribute: No\nRound 2 (Test Round Bool 2)"
 
         pageTargetingCreate.get_elements(pageTargetingCreate.targetingCriteriaAddDialogSaveButton)[1].click()
 
         assert pageTargetingCreate.getCriteriaContainer().text == bool_no_expected_criteria_text
         pageTargetingCreate.getButtonSave().click()
         pageTargetingDetails.getLockButton()
-
-        pageTargetingDetails.screenshot("bool test after 122222211")
 
         assert pageTargetingDetails.getCriteriaContainer().text == bool_no_expected_criteria_text
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual2.household.unicef_id
