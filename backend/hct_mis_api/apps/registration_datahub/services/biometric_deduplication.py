@@ -117,8 +117,8 @@ class BiometricDeduplicationService:
             status=RegistrationDataImport.DEDUP_ENGINE_PENDING
         )
 
-    def create_duplicates(self, deduplication_set_id: str, similarity_pairs: List[SimilarityPair]) -> None:
-        DeduplicationEngineSimilarityPair.bulk_add_duplicates(deduplication_set_id, similarity_pairs)
+    def store_results(self, deduplication_set_id: str, similarity_pairs: List[SimilarityPair]) -> None:
+        DeduplicationEngineSimilarityPair.bulk_add_pairs(deduplication_set_id, similarity_pairs)
 
     def mark_rdis_as_deduplicated(self, deduplication_set_id: str) -> None:
         program = Program.objects.get(deduplication_set_id=deduplication_set_id)

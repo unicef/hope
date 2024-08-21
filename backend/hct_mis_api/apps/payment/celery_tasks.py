@@ -680,7 +680,7 @@ def fetch_biometric_deduplication_results_and_process(deduplication_set_id: str)
     data = service.get_deduplication_set_results(deduplication_set_id)
     similarity_pairs = [SimilarityPair(**item) for item in data]
     with transaction.atomic():
-        service.create_duplicates(deduplication_set_id, similarity_pairs)
+        service.store_results(deduplication_set_id, similarity_pairs)
         service.mark_rdis_as_deduplicated(deduplication_set_id)
         transaction.on_commit(
             lambda: create_biometric_deduplication_grievance_tickets_for_already_merged_individuals.delay(

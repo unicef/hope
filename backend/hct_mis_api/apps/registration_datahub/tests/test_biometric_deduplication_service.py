@@ -10,6 +10,7 @@ import pytest
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import IndividualFactory
+from hct_mis_api.apps.payment.api.dataclasses import SimilarityPair
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -198,10 +199,39 @@ class BiometricDeduplicationServiceTest(TestCase):
         assert rdi_1.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
         assert rdi_2.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
 
-    # def test_create_duplicates(self):
-    #     service = BiometricDeduplicationService()
-    #     similarity_pairs = [SimilarityPair(similarity_score='0.9', first_individual=None, second_individual=None)]
-    #
-    #     service.create_duplicates("test_set_id", similarity_pairs)
-    #
-    #     mock_bulk_add_duplicates.assert_called_once_with("test_set_id", similarity_pairs)
+    def test_store_results(self) -> None:
+        self.program.deduplication_set_id = uuid.uuid4()
+        self.program.save()
+
+        individuals = IndividualFactory.create_batch(3)
+        ind1, ind2, ind3 = sorted(individuals, key=lambda x: x.id)
+
+        service = BiometricDeduplicationService()
+        similarity_pairs = [
+            SimilarityPair(similarity_score=0.5, first=ind2.id, second=ind1.id),
+            SimilarityPair(similarity_score=0.5, first=ind1.id, second=ind2.id),
+            SimilarityPair(
+                similarity_score=0.7,
+                first=ind1.id,
+                second=ind3.id,
+            ),
+            SimilarityPair(similarity_score=0.8, first=ind3.id, second=ind2.id),
+            SimilarityPair(
+                similarity_score=0.9,
+                first=ind3.id,
+                second=ind3.id,
+            ),
+        ]
+
+        service.store_results(str(self.program.deduplication_set_id), similarity_pairs)
+
+        assert self.program.deduplication_engine_similarity_pairs.count() == 3
+        assert self.program.deduplication_engine_similarity_pairs.filter(
+            individual1=ind1, individual2=ind2, similarity_score=0.5
+        ).exists()
+        assert self.program.deduplication_engine_similarity_pairs.filter(
+            individual1=ind1, individual2=ind3, similarity_score=0.7
+        ).exists()
+        assert self.program.deduplication_engine_similarity_pairs.filter(
+            individual1=ind2, individual2=ind3, similarity_score=0.8
+        ).exists()

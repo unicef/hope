@@ -31,11 +31,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='deduplicationenginesimilaritypair',
-            constraint=models.CheckConstraint(check=models.Q(('individual1', django.db.models.expressions.F('individual2')), _negated=True), name='prevent_self_duplicates'),
-        ),
-        migrations.AddConstraint(
-            model_name='deduplicationenginesimilaritypair',
-            constraint=models.CheckConstraint(check=models.Q(('individual1__lt', django.db.models.expressions.F('individual2'))), name='individual1_lt_individual2'),
+            constraint=models.CheckConstraint(check=models.Q(('individual1__id__lt', django.db.models.expressions.F('individual2__id'))), name='individual1_lt_individual2'),
         ),
         migrations.AlterUniqueTogether(
             name='deduplicationenginesimilaritypair',
