@@ -198,7 +198,9 @@ class TestSmokePaymentModule:
         pagePaymentModule.selectGlobalProgramFilter("Test Program")
         pagePaymentModule.getNavPaymentModule().click()
         pageProgramCycle.getNavProgrammeCycles().click()
-        pageProgramCycle.getProgramCycleRow()[0].find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-id"]').click()
+        pageProgramCycle.getProgramCycleRow()[0].find_element(
+            By.CSS_SELECTOR, 'td[data-cy="program-cycle-title"]'
+        ).click()
         pageProgramCycleDetails.getButtonCreatePaymentPlan().click()
         assert "New Payment Plan" in pageNewPaymentPlan.getPageHeaderTitle().text
         assert "SAVE" in pageNewPaymentPlan.getButtonSavePaymentPlan().text

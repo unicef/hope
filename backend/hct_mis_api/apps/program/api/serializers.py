@@ -148,7 +148,11 @@ class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
 
     def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
         program = self.instance.program
-        start_date = data.get("start_date") or self.instance.start_date
+        program_start_date = (
+            parse_date(program.start_date) if isinstance(program.start_date, str) else program.start_date
+        )
+        program_end_date = parse_date(program.end_date) if isinstance(program.end_date, str) else program.end_date
+        start_date = data.get("start_date")
         end_date = data.get("end_date")
         if program.status != Program.ACTIVE:
             raise serializers.ValidationError("Update Programme Cycle is possible only for Active Programme.")
@@ -159,14 +163,13 @@ class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
                     "end_date": "Not possible leave the Programme Cycle end date empty if it was not empty upon starting the edit."
                 }
             )
-        if end_date and end_date < start_date:
+        if end_date and start_date and end_date < start_date:
             raise serializers.ValidationError({"end_date": "End date cannot be before start date."})
-        print("===>>> 2", start_date,  program.start_date)
-        if start_date and start_date < program.start_date:
+        if start_date and start_date < program_start_date:
             raise serializers.ValidationError(
                 {"start_date": "Programme Cycle start date cannot be earlier than programme start date."}
             )
-        if end_date and end_date > program.end_date:
+        if end_date and end_date is not None and end_date > program_end_date:
             raise serializers.ValidationError(
                 {"end_date": "Programme Cycle end date cannot be later than programme end date."}
             )
