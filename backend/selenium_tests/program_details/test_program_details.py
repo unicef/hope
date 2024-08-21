@@ -381,3 +381,59 @@ class TestProgrammeDetails:
             "%-d %b %Y"
         ) in pageProgrammeDetails.getProgramCycleEndDate()[2].text
         assert "Test %$ What?" in pageProgrammeDetails.getProgramCycleTitle()[2].text
+
+    def test_program_details_edit_programme_cycle(
+        self, standard_active_program: Program, pageProgrammeDetails: ProgrammeDetails
+    ) -> None:
+        pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
+
+    def test_program_details_delete_programme_cycle(
+        self, standard_active_program: Program, pageProgrammeDetails: ProgrammeDetails
+    ) -> None:
+        pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
+
+    def test_program_details_buttons_vs_programme_cycle_status(
+        self, standard_active_program: Program, pageProgrammeDetails: ProgrammeDetails
+    ) -> None:
+        pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
+        # Draft
+        # Active
+        # Finished
+
+    def test_program_details_add_new_cycle_with_wrong_date(
+            self, standard_active_program: Program, pageProgrammeDetails: ProgrammeDetails
+    ) -> None:
+        pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
+        # end date cycle vs end date program
+        # end date cycle vs end other cycle
+        # start date cycle vs start date program
+        # start date cycle vs other date cycle
+
+    def test_program_details_edit_cycle_with_wrong_date(
+            self, standard_active_program: Program, pageProgrammeDetails: ProgrammeDetails
+    ) -> None:
+        pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
+        # end date cycle vs end date program
+        # end date cycle vs end other cycle
+        # start date cycle vs start date program
+        # start date cycle vs other date cycle
+
+    def test_edit_program_details_with_wrong_date(
+            self, standard_active_program: Program, pageProgrammeDetails: ProgrammeDetails
+    ) -> None:
+        pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
+        # end date program vs end date cycle
+        # start date program vs start date cycle
+
+    def test_program_details_edit_default_cycle_by_add_new_cancel(
+        self, standard_program_with_draft_programme_cycle: Program, pageProgrammeDetails: ProgrammeDetails
+    ) -> None:
+        pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
+
+    def test_program_details_program_cycle_total_quantities(
+        self, standard_program_with_draft_programme_cycle: Program, pageProgrammeDetails: ProgrammeDetails
+    ) -> None:
+        pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
+        # Total Entitled Quantity
+        # Total Undelivered Quantity
+        # Total Delivered Quantity
