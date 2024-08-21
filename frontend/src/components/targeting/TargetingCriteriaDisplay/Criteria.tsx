@@ -170,7 +170,6 @@ const CriteriaField = ({ field, choicesDict }): React.ReactElement => {
       break;
   }
 
-  console.log('aaafield', field);
   return (
     <>
       {fieldElement}
