@@ -257,7 +257,15 @@ interface Result {
 function mapFilterToVariable(filter: Filter): Result {
   const result: Result = {
     comparisonMethod: filter.isNull ? 'IS_NULL' : filter.comparisonMethod,
-    arguments: filter.isNull ? [null] : filter.arguments,
+    arguments: filter.isNull
+      ? [null]
+      : filter.arguments.map((arg) =>
+          arg === 'True' || arg === 'Yes'
+            ? true
+            : arg === 'False' || arg === 'No'
+              ? false
+              : arg,
+        ),
     fieldName: filter.fieldName,
     flexFieldClassification: filter.flexFieldClassification,
   };
