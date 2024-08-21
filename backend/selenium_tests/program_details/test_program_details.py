@@ -204,7 +204,6 @@ class TestSmokeProgrammeDetails:
         assert "Only selected partners within the business area" in pageProgrammeDetails.getLabelPartnerAccess().text
         assert "0" in pageProgrammeDetails.getLabelProgramSize().text
 
-    @pytest.mark.skip("Unskip after fix bug")
     def test_edit_programme_from_details(
         self,
         create_programs: None,
@@ -221,13 +220,15 @@ class TestSmokeProgrammeDetails:
         pageProgrammeManagement.getInputStartDate().send_keys(Keys.CONTROL + "a")
         pageProgrammeManagement.getInputStartDate().send_keys(str(FormatTime(1, 1, 2022).numerically_formatted_date))
         pageProgrammeManagement.getInputEndDate().click()
-        pageProgrammeManagement.getInputStartDate().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.getInputEndDate().send_keys(Keys.CONTROL + "a")
         pageProgrammeManagement.getInputEndDate().send_keys(FormatTime(1, 10, 2022).numerically_formatted_date)
         pageProgrammeManagement.getButtonNext().click()
+        pageProgrammeManagement.getButtonAddTimeSeriesField()
+        pageProgrammeManagement.getButtonNext().click()
         programme_creation_url = pageProgrammeDetails.driver.current_url
-        pageProgrammeManagement.getButtonSave().click()
         pageProgrammeManagement.getAccessToProgram().click()
         pageProgrammeManagement.selectWhoAccessToProgram("None of the partners should have access")
+        pageProgrammeManagement.getButtonSave().click()
         # Check Details page
         assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
         assert "New name after Edit" in pageProgrammeDetails.getHeaderTitle().text
