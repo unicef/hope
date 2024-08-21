@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Callable
 from uuid import UUID
 
 from django.conf import settings
@@ -6,6 +7,9 @@ from django.core.management import call_command
 
 import pytest
 from dateutil.relativedelta import relativedelta
+
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values, field_label_to_field_name
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from page_object.targeting.targeting import Targeting
 from page_object.targeting.targeting_create import TargetingCreate
 from page_object.targeting.targeting_details import TargetingDetails
@@ -14,13 +18,13 @@ from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.household.fixtures import (
     create_household,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import HEARING, HOST, REFUGEE, SEEING, Household
+from hct_mis_api.apps.household.models import HEARING, HOST, REFUGEE, SEEING, Household, Individual
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
@@ -42,6 +46,98 @@ def non_sw_program() -> Program:
     yield get_program_with_dct_type_and_name(
         "Test Programm", dct_type=DataCollectingType.Type.STANDARD, status=Program.ACTIVE
     )
+
+@pytest.fixture
+def program() -> Program:
+    business_area = create_afghanistan()
+    return ProgramFactory(name="Test Program", status=Program.ACTIVE, business_area=business_area)
+
+
+@pytest.fixture
+def individual(program: Program) -> Individual:
+    def _individual():
+        business_area = create_afghanistan()
+        rdi = RegistrationDataImportFactory()
+        household, individuals = create_household_and_individuals(
+            household_data={
+                "business_area": business_area,
+                "program_id": program.pk,
+                "registration_data_import": rdi,
+            },
+            individuals_data=[
+                {
+                    "business_area": business_area,
+                    "program_id": program.pk,
+                    "registration_data_import": rdi,
+                },
+            ],
+        )
+        individual = individuals[0]
+        individual.flex_fields = populate_pdu_with_null_values(program, individual.flex_fields)
+        return individual
+    return _individual
+
+
+@pytest.fixture
+def string_attribute(program: Program) -> FlexibleAttribute:
+    return create_flexible_attribute(
+        label="Test String Attribute",
+        subtype=PeriodicFieldData.STRING,
+        number_of_rounds=1,
+        rounds_names=["Test Round"],
+        program=program,
+    )
+
+
+@pytest.fixture
+def date_attribute(program: Program) -> FlexibleAttribute:
+    return create_flexible_attribute(
+        label="Test Date Attribute",
+        subtype=PeriodicFieldData.DATE,
+        number_of_rounds=1,
+        rounds_names=["Test Round"],
+        program=program,
+    )
+
+
+@pytest.fixture
+def bool_attribute(program: Program) -> FlexibleAttribute:
+    return create_flexible_attribute(
+        label="Test Bool Attribute",
+        subtype=PeriodicFieldData.BOOL,
+        number_of_rounds=1,
+        rounds_names=["Test Round"],
+        program=program,
+    )
+
+
+@pytest.fixture
+def decimal_attribute(program: Program) -> FlexibleAttribute:
+    return create_flexible_attribute(
+        label="Test Decimal Attribute",
+        subtype=PeriodicFieldData.DECIMAL,
+        number_of_rounds=1,
+        rounds_names=["Test Round"],
+        program=program,
+    )
+
+
+def create_flexible_attribute(
+    label: str, subtype: str, number_of_rounds: int, rounds_names: list[str], program: Program
+) -> FlexibleAttribute:
+    name = field_label_to_field_name(label)
+    flexible_attribute = FlexibleAttribute.objects.create(
+        label={"English(EN)": label},
+        name=name,
+        type=FlexibleAttribute.PDU,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        program=program,
+    )
+    flexible_attribute.pdu_data = PeriodicFieldData.objects.create(
+        subtype=subtype, number_of_rounds=number_of_rounds, rounds_names=rounds_names
+    )
+    flexible_attribute.save()
+    return flexible_attribute
 
 
 def create_custom_household(observed_disability: list[str], residence_status: str = HOST) -> Household:
@@ -287,7 +383,10 @@ class TestCreateTargeting:
         pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
         pageTargetingCreate.getTargetingCriteriaValue().click()
         pageTargetingCreate.select_option_by_name(REFUGEE)
+        pageTargetingCreate.screenshot("po refugee")
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
+        pageTargetingCreate.screenshot("po refugee click")
+
         disability_expected_criteria_text = "Residence status: Displaced | Refugee / Asylum Seeker"
         assert pageTargetingCreate.getCriteriaContainer().text == disability_expected_criteria_text
         targeting_name = "Test targeting people"
@@ -301,6 +400,47 @@ class TestCreateTargeting:
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == household_refugee.unicef_id
         actions = ActionChains(pageTargetingDetails.driver)
         actions.move_to_element(pageTargetingDetails.getHouseholdTableCell(1, 1)).perform()  # type: ignore
+        assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
+
+    def test_create_targeting_with_pdu_string_criteria(
+        self,
+        program: Program,
+        pageTargeting: Targeting,
+        pageTargetingCreate: TargetingCreate,
+        pageTargetingDetails: TargetingDetails,
+        individual: Callable,
+        string_attribute: FlexibleAttribute,
+    ) -> None:
+        individual1 = individual()
+        individual1.flex_fields[string_attribute.name]["1"]["value"] = "Text"
+        individual1.save()
+        individual2 = individual()
+        individual2.flex_fields[string_attribute.name]["1"]["value"] = "Test"
+        individual()
+        pageTargeting.navigate_to_page("afghanistan", program.id)
+        pageTargeting.getButtonCreateNew().click()
+        pageTargeting.getButtonCreateNewByFilters().click()
+        assert "New Target Population" in pageTargetingCreate.getTitlePage().text
+        pageTargetingCreate.getAddCriteriaButton().click()
+        pageTargetingCreate.getAddIndividualRuleButton().click()
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys("Test String Attribute")
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ARROW_DOWN)
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
+        pageTargetingCreate.getSelectIndividualsiFltersBlocksRoundNumber().click()
+        pageTargetingCreate.getSelectRoundOption(1).click()
+        pageTargetingCreate.getInputIndividualsFiltersBlocksValue().send_keys("Text")
+        targeting_name = "Test Targeting PDU string"
+        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
+        pageTargetingCreate.getFieldName().send_keys(targeting_name)
+        pageTargetingCreate.getTargetPopulationSaveButton().click()
+        pageTargetingDetails.getLockButton()
+
+        assert pageTargetingDetails.getTitlePage().text == targeting_name
+        assert pageTargetingDetails.getCriteriaContainer().text == "Test String Attribute: Text"
+        assert Household.objects.count() == 2
+        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
+        assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
 
 
