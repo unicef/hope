@@ -113,18 +113,16 @@ const CriteriaField = ({ field, choicesDict }): React.ReactElement => {
       fieldElement = (
         <p>
           {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-          {field.arguments?.[0] != null ? (
-            typeof field.arguments[0] === 'boolean' ? (
-              field.arguments[0] ? (
-                t('Yes')
-              ) : (
-                t('No')
-              )
+          {field.isNull === true || field.comparisonMethod === 'IS_NULL' ? (
+            t('Empty')
+          ) : typeof field.arguments?.[0] === 'boolean' ? (
+            field.arguments[0] ? (
+              t('Yes')
             ) : (
-              <span>{extractChoiceLabel(field, field.arguments[0])}</span>
+              t('No')
             )
           ) : (
-            t('Empty')
+            <span>{extractChoiceLabel(field, field.arguments?.[0])}</span>
           )}
         </p>
       );
