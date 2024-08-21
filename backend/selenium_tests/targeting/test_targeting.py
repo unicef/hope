@@ -823,3 +823,12 @@ class TestTargeting:
             "Males age 0 - 5 with disability: 1 -10"
             in pageTargetingCreate.get_elements(pageTargetingCreate.criteriaContainer)[1].text
         )
+
+    @pytest.mark.skip("ToDo")
+    def test_targeting_edit_programme_cycle(
+        self,
+        pageTargeting: Targeting,
+        pageTargetingCreate: TargetingCreate,
+    ) -> None:
+        # Todo: write a test
+        pass

@@ -46,6 +46,17 @@ def program_with_three_cycles() -> Program:
     yield program
 
 
+@pytest.fixture
+def program_with_different_cycles() -> Program:
+    program = get_program_with_dct_type_and_name(
+        "ThreeCyclesProgramme", "cycl", status=Program.ACTIVE, program_cycle_status=ProgramCycle.DRAFT
+    )
+    ProgramCycleFactory(program=program, status=ProgramCycle.ACTIVE)
+    ProgramCycleFactory(program=program, status=ProgramCycle.FINISHED)
+    program.save()
+    yield program
+
+
 def get_program_with_dct_type_and_name(
     name: str,
     programme_code: str,
@@ -454,18 +465,15 @@ class TestProgrammeDetails:
 
         assert program_cycle_1 in pageProgrammeDetails.getProgramCycleId()[0].text
         assert program_cycle_3 in pageProgrammeDetails.getProgramCycleId()[1].text
-        from selenium_tests.tools.tag_name_finder import printing
-
-        printing("Mapping", pageProgrammeDetails.driver)
-        printing("Methods", pageProgrammeDetails.driver)
 
     def test_program_details_buttons_vs_programme_cycle_status(
         self, standard_active_program: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
-        # Draft
-        # Active
-        # Finished
+        from selenium_tests.tools.tag_name_finder import printing
+
+        printing("Mapping", pageProgrammeDetails.driver)
+        printing("Methods", pageProgrammeDetails.driver)
 
     def test_program_details_add_new_cycle_with_wrong_date(
         self, standard_active_program: Program, pageProgrammeDetails: ProgrammeDetails
