@@ -27,6 +27,7 @@ export const registrationMinimal = gql`
     refuseReason
     totalHouseholdsCountWithValidPhoneNo
     adminUrl
+    isDeduplicated
   }
 `;
 
@@ -196,11 +197,11 @@ export const importedIndividualDetailed = gql`
     household {
       id
       importId
-      admin1{
+      admin1 {
         pCode
         name
       }
-      admin2{
+      admin2 {
         pCode
         name
       }
