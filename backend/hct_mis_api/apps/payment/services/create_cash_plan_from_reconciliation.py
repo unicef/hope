@@ -189,7 +189,7 @@ class CreateCashPlanReconciliationService:
             self.column_mapping,
             self.cash_plan_form_data,
             self.currency,
-            self.delivery_type,
+            self.delivery_type.name,
             str(self.delivery_date),
             str(program_id),
             str(service_provider_id),

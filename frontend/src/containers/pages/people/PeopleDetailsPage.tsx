@@ -1,8 +1,22 @@
-import { Box, Grid, Paper, Typography } from '@mui/material';
-import * as React from 'react';
-import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
+import { fetchPeriodicFields } from '@api/periodicDataUpdateApi';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { PeopleBioData } from '@components/people/PeopleBioData/PeopleBioData';
+import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
+import { IndividualFlags } from '@components/population/IndividualFlags';
+import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
+import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
+import {
+  BigValue,
+  BigValueContainer,
+} from '@components/rdi/details/RegistrationDetails/RegistrationDetails';
+import { PaymentRecordAndPaymentPeopleTable } from '@containers/tables/payments/PaymentRecordAndPaymentPeopleTable';
+import { AdminButton } from '@core/AdminButton';
+import { LabelizedField } from '@core/LabelizedField';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 import {
   HouseholdNode,
   IndividualNode,
@@ -11,31 +25,20 @@ import {
   useHouseholdChoiceDataQuery,
   useIndividualQuery,
 } from '@generated/graphql';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { LoadingComponent } from '@components/core/LoadingComponent';
-import { PageHeader } from '@components/core/PageHeader';
-import { PermissionDenied } from '@components/core/PermissionDenied';
-import { IndividualFlags } from '@components/population/IndividualFlags';
-import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
-import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { Box, Grid, Paper, Typography } from '@mui/material';
+import { useQuery } from '@tanstack/react-query';
 import {
   formatCurrencyWithSymbol,
   isPermissionDeniedError,
 } from '@utils/utils';
+import * as React from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-import { AdminButton } from '@core/AdminButton';
-import { PeopleBioData } from '@components/people/PeopleBioData/PeopleBioData';
-import { Title } from '@core/Title';
-import { LabelizedField } from '@core/LabelizedField';
-import {
-  BigValue,
-  BigValueContainer,
-} from '@components/rdi/details/RegistrationDetails/RegistrationDetails';
-import { UniversalMoment } from '@core/UniversalMoment';
-import { PaymentRecordAndPaymentPeopleTable } from '@containers/tables/payments/PaymentRecordAndPaymentPeopleTable';
 
 const Container = styled.div`
   padding: 20px 20px 00px 20px;
@@ -59,10 +62,10 @@ const SubTitle = styled(Typography)`
   }
 `;
 
-export function PeopleDetailsPage(): React.ReactElement {
+export const PeopleDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
 
   const { data, loading, error } = useIndividualQuery({
@@ -81,11 +84,19 @@ export function PeopleDetailsPage(): React.ReactElement {
   const { data: grievancesChoices, loading: grievancesChoicesLoading } =
     useGrievancesChoiceDataQuery();
 
+  const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
+    useQuery({
+      queryKey: ['periodicFields', businessArea, programId],
+      queryFn: () =>
+        fetchPeriodicFields(businessArea, programId, { limit: 1000 }),
+    });
+
   if (
     loading ||
     choicesLoading ||
     flexFieldsDataLoading ||
-    grievancesChoicesLoading
+    grievancesChoicesLoading ||
+    periodicFieldsLoading
   )
     return <LoadingComponent />;
 
@@ -148,6 +159,12 @@ export function PeopleDetailsPage(): React.ReactElement {
           flexFieldsData={flexFieldsData}
           individual={individual as IndividualNode}
         />
+        <Box mb={4}>
+          <ProgrammeTimeSeriesFields
+            individual={individual as IndividualNode}
+            periodicFieldsData={periodicFieldsData}
+          />
+        </Box>
         <OverviewPaper>
           <Title>
             <Typography variant="h6">{t('Benefits')}</Typography>
@@ -276,4 +293,4 @@ export function PeopleDetailsPage(): React.ReactElement {
       )}
     </>
   );
-}
+};

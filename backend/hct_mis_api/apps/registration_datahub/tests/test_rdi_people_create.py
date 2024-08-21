@@ -11,8 +11,11 @@ from django_countries.fields import Country
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import DataCollectingType
+from hct_mis_api.apps.core.fixtures import (
+    create_afghanistan,
+    create_pdu_flexible_attribute,
+)
+from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData
 from hct_mis_api.apps.geo.models import Country as GeoCountry
 from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
@@ -20,6 +23,7 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
+from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
 from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -58,6 +62,14 @@ class TestRdiXlsxPeople(BaseElasticSearchTestCase):
         cls.registration_data_import = RegistrationDataImportFactory(
             business_area=cls.business_area, program=cls.program, import_data=cls.import_data
         )
+        cls.string_attribute = create_pdu_flexible_attribute(
+            label="PDU String Attribute",
+            subtype=PeriodicFieldData.STRING,
+            number_of_rounds=1,
+            rounds_names=["May"],
+            program=cls.program,
+        )
+        generate_delivery_mechanisms()
 
         super().setUpTestData()
 
@@ -84,7 +96,11 @@ class TestRdiXlsxPeople(BaseElasticSearchTestCase):
         matching_individuals = PendingIndividual.objects.filter(**individual_data)
 
         self.assertEqual(matching_individuals.count(), 1)
-
+        individual = matching_individuals.first()
+        self.assertEqual(
+            individual.flex_fields,
+            {"pdu_string_attribute": {"1": {"value": "Test PDU Value", "collection_date": "2020-01-08"}}},
+        )
         household_data = {
             "residence_status": "REFUGEE",
             "country": GeoCountry.objects.get(iso_code2=Country("IM").code).id,
@@ -116,21 +132,21 @@ class TestRdiXlsxPeople(BaseElasticSearchTestCase):
         self.assertEqual(dmd3.rdi_merge_status, MergeStatusModel.PENDING)
         self.assertEqual(
             json.loads(dmd1.data),
-            {"card_number_atm_card": "164260858", "card_expiry_date_atm_card": "1995-06-03T00:00:00"},
+            {"card_number__atm_card": "164260858", "card_expiry_date__atm_card": "1995-06-03T00:00:00"},
         )
         self.assertEqual(
             json.loads(dmd2.data),
             {
-                "card_number_atm_card": "1975549730",
-                "card_expiry_date_atm_card": "2022-02-17T00:00:00",
-                "name_of_cardholder_atm_card": "Name1",
+                "card_number__atm_card": "1975549730",
+                "card_expiry_date__atm_card": "2022-02-17T00:00:00",
+                "name_of_cardholder__atm_card": "Name1",
             },
         )
         self.assertEqual(
             json.loads(dmd3.data),
             {
-                "card_number_atm_card": "870567340",
-                "card_expiry_date_atm_card": "2016-06-27T00:00:00",
-                "name_of_cardholder_atm_card": "Name2",
+                "card_number__atm_card": "870567340",
+                "card_expiry_date__atm_card": "2016-06-27T00:00:00",
+                "name_of_cardholder__atm_card": "Name2",
             },
         )

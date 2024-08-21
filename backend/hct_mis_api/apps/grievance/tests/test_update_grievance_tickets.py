@@ -50,7 +50,11 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
 )
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory
+from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismDataFactory,
+    generate_delivery_mechanisms,
+)
+from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.models import MergeStatusModel
@@ -92,6 +96,7 @@ class TestUpdateGrievanceTickets(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
+        generate_delivery_mechanisms()
         cls.generate_document_types_for_all_countries()
         partner = PartnerFactory(name="Partner")
         cls.user = UserFactory(id="a5c44eeb-482e-49c2-b5ab-d769f83db116", partner=partner)
@@ -288,9 +293,10 @@ class TestUpdateGrievanceTickets(APITestCase):
             country=country_pl,
             rdi_merge_status=MergeStatusModel.MERGED,
         )
+        cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
         cls.dmd = DeliveryMechanismDataFactory(
             individual=cls.individuals[0],
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
+            delivery_mechanism=cls.dm_atm_card,
         )
 
     @parameterized.expand(
@@ -569,7 +575,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "delivery_mechanism_data_to_edit": [
                     {
                         "id": str(self.dmd.id),
-                        "label": self.dmd.delivery_mechanism,
+                        "label": self.dmd.delivery_mechanism.name,
                         "approve_status": False,
                         "data_fields": [
                             {

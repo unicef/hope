@@ -35,8 +35,11 @@ export const IndividualAdditionalRegistrationInformation = ({
     '*',
   );
 
-  const fields = Object.entries(individual?.flexFields || {}).map(
-    ([key, value]: [string, string | string[]]) => {
+  const fields = Object.entries(individual?.flexFields || {})
+    .filter(([key]) => {
+      return flexAttributesDict[key];
+    })
+    .map(([key, value]: [string, string | string[]]) => {
       if (flexAttributesDict[key]?.type === 'IMAGE') {
         return (
           <LabelizedField
@@ -79,8 +82,7 @@ export const IndividualAdditionalRegistrationInformation = ({
           value={value}
         />
       );
-    },
-  );
+    });
   return (
     <div>
       <Overview>

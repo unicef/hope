@@ -21,8 +21,10 @@ from hct_mis_api.apps.payment.fixtures import (
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     GenericPayment,
     PaymentPlan,
@@ -96,6 +98,12 @@ def base_setup(cls: Any) -> None:
             "Program": encode_id_base64(cls.program.id, "Program"),
         },
     }
+    generate_delivery_mechanisms()
+    cls.dm_cash = DeliveryMechanism.objects.get(code="cash")
+    cls.dm_transfer = DeliveryMechanism.objects.get(code="transfer")
+    cls.dm_transfer_to_digital_wallet = DeliveryMechanism.objects.get(code="transfer_to_digital_wallet")
+    cls.dm_voucher = DeliveryMechanism.objects.get(code="voucher")
+    cls.dm_mobile_money = DeliveryMechanism.objects.get(code="mobile_money")
 
 
 def payment_plan_setup(cls: Any) -> None:
@@ -118,62 +126,51 @@ def payment_plan_setup(cls: Any) -> None:
     cls.santander_fsp = FinancialServiceProviderFactory(
         name="Santander",
         distribution_limit=None,
-        delivery_mechanisms=[
-            DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
-            DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
-            DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
-        ],
         data_transfer_configuration=[
             {"key": "config_1", "label": "Config 1", "id": "1"},
             {"key": "config_11", "label": "Config 11", "id": "11"},
         ],
     )
+
+    cls.santander_fsp.delivery_mechanisms.set([cls.dm_transfer, cls.dm_cash, cls.dm_transfer_to_digital_wallet])
     cls.santander_fsp.allowed_business_areas.add(cls.business_area)
     cls.encoded_santander_fsp_id = encode_id_base64(cls.santander_fsp.id, "FinancialServiceProvider")
 
     cls.bank_of_america_fsp = FinancialServiceProviderFactory(
         name="Bank of America",
-        delivery_mechanisms=[
-            DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
-            DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
-            DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
-        ],
         distribution_limit=1000,
         data_transfer_configuration=[{"key": "config_2", "label": "Config 2", "id": "2"}],
     )
+    cls.bank_of_america_fsp.delivery_mechanisms.set([cls.dm_voucher, cls.dm_cash, cls.dm_transfer_to_digital_wallet])
     cls.bank_of_america_fsp.allowed_business_areas.add(cls.business_area)
     cls.encoded_bank_of_america_fsp_id = encode_id_base64(cls.bank_of_america_fsp.id, "FinancialServiceProvider")
 
     cls.bank_of_europe_fsp = FinancialServiceProviderFactory(
         name="Bank of Europe",
         distribution_limit=50000,
-        delivery_mechanisms=[
-            DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
-            DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
-            DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
-        ],
         data_transfer_configuration=[{"key": "config_3", "label": "Config 3", "id": "3"}],
     )
+    cls.bank_of_europe_fsp.delivery_mechanisms.set([cls.dm_voucher, cls.dm_transfer, cls.dm_cash])
     cls.bank_of_europe_fsp.allowed_business_areas.add(cls.business_area)
     cls.encoded_bank_of_europe_fsp_id = encode_id_base64(cls.bank_of_europe_fsp.id, "FinancialServiceProvider")
 
     FspXlsxTemplatePerDeliveryMechanismFactory(
-        financial_service_provider=cls.santander_fsp, delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER
+        financial_service_provider=cls.santander_fsp, delivery_mechanism=cls.dm_transfer
     )
     FspXlsxTemplatePerDeliveryMechanismFactory(
-        financial_service_provider=cls.santander_fsp, delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER
-    )
-    FspXlsxTemplatePerDeliveryMechanismFactory(
-        financial_service_provider=cls.bank_of_europe_fsp,
-        delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+        financial_service_provider=cls.santander_fsp, delivery_mechanism=cls.dm_voucher
     )
     FspXlsxTemplatePerDeliveryMechanismFactory(
         financial_service_provider=cls.bank_of_europe_fsp,
-        delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+        delivery_mechanism=cls.dm_transfer,
+    )
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=cls.bank_of_europe_fsp,
+        delivery_mechanism=cls.dm_voucher,
     )
     FspXlsxTemplatePerDeliveryMechanismFactory(
         financial_service_provider=cls.bank_of_america_fsp,
-        delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+        delivery_mechanism=cls.dm_voucher,
     )
 
 
@@ -287,15 +284,15 @@ class TestFSPSetup(APITestCase):
         assert "errors" in response_with_wrong_mechanism, response_with_wrong_mechanism
         self.assertEqual(
             response_with_wrong_mechanism["errors"][0]["message"],
-            "Delivery mechanism cannot be empty.",
+            "Delivery mechanism '' is not active/valid.",
         )
 
         choose_dms_mutation_variables_mutation_variables_with_delivery_mechanisms = dict(
             input=dict(
                 paymentPlanId=encoded_payment_plan_id,
                 deliveryMechanisms=[
-                    DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
-                    DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+                    self.dm_transfer.code,
+                    self.dm_voucher.code,
                 ],
             )
         )
@@ -331,8 +328,8 @@ class TestFSPSetup(APITestCase):
             input=dict(
                 paymentPlanId=encoded_payment_plan_id,
                 deliveryMechanisms=[
-                    DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
-                    DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+                    self.dm_transfer.code,
+                    self.dm_voucher.code,
                 ],
             )
         )
@@ -374,8 +371,8 @@ class TestFSPSetup(APITestCase):
             input=dict(
                 paymentPlanId=encoded_payment_plan_id,
                 deliveryMechanisms=[
-                    DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
-                    DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+                    self.dm_transfer.code,
+                    self.dm_transfer.code,
                 ],
             )
         )
@@ -409,8 +406,8 @@ class TestFSPAssignment(APITestCase):
             input=dict(
                 paymentPlanId=self.encoded_payment_plan_id,
                 deliveryMechanisms=[
-                    DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
-                    DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+                    self.dm_transfer.code,
+                    self.dm_voucher.code,
                 ],
             )
         )
@@ -434,10 +431,11 @@ class TestFSPAssignment(APITestCase):
         available_mechs_data = query_response["data"]["availableFspsForDeliveryMechanisms"]
         assert available_mechs_data is not None, query_response
         assert len(available_mechs_data) == 2
-        assert available_mechs_data[0]["deliveryMechanism"] == DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER
+        assert available_mechs_data[0]["deliveryMechanism"] == self.dm_transfer.name
         transfer_fsps_names = [x["name"] for x in available_mechs_data[0]["fsps"]]
-        assert all(name in transfer_fsps_names for name in ["Santander", "Bank of Europe"])
-        assert available_mechs_data[1]["deliveryMechanism"] == DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER
+        assert "Santander" in transfer_fsps_names
+        assert "Bank of Europe" in transfer_fsps_names
+        assert available_mechs_data[1]["deliveryMechanism"] == self.dm_voucher.name
         voucher_fsp_names = [f["name"] for f in available_mechs_data[1]["fsps"]]
         assert "Bank of America" in voucher_fsp_names
         assert "Bank of Europe" in voucher_fsp_names
@@ -449,7 +447,7 @@ class TestFSPAssignment(APITestCase):
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+                        "deliveryMechanism": self.dm_transfer.code,
                         "fspId": self.encoded_santander_fsp_id,
                         "order": 1,
                     }
@@ -479,13 +477,13 @@ class TestFSPAssignment(APITestCase):
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+                        "deliveryMechanism": self.dm_transfer.code,
                         "fspId": self.encoded_santander_fsp_id,
                         "order": 1,
                         "chosenConfiguration": "config_1",
                     },
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+                        "deliveryMechanism": self.dm_voucher.code,
                         "fspId": self.encoded_bank_of_america_fsp_id,
                         "order": 2,
                         "chosenConfiguration": "config_2",
@@ -515,8 +513,8 @@ class TestFSPAssignment(APITestCase):
             input=dict(
                 paymentPlanId=self.encoded_payment_plan_id,
                 deliveryMechanisms=[
-                    DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
-                    DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+                    self.dm_transfer.code,
+                    self.dm_voucher.code,
                 ],
             )
         )
@@ -534,13 +532,13 @@ class TestFSPAssignment(APITestCase):
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+                        "deliveryMechanism": self.dm_transfer.code,
                         "fspId": self.encoded_santander_fsp_id,
                         "order": 1,
                         "chosenConfiguration": "config_1",
                     },
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+                        "deliveryMechanism": self.dm_voucher.code,
                         "fspId": self.encoded_bank_of_america_fsp_id,
                         "order": 2,
                         "chosenConfiguration": "config_2",
@@ -566,12 +564,12 @@ class TestFSPAssignment(APITestCase):
         assert new_data["deliveryMechanisms"][1]["fsp"] is not None
 
         for fsp in [self.santander_fsp, self.bank_of_america_fsp, self.bank_of_europe_fsp]:
-            fsp.delivery_mechanisms.append(DeliveryMechanismChoices.DELIVERY_TYPE_MOBILE_MONEY)
+            fsp.delivery_mechanisms.add(self.dm_mobile_money)
         new_program_mutation_variables = dict(
             input=dict(
                 paymentPlanId=self.encoded_payment_plan_id,
                 deliveryMechanisms=[
-                    DeliveryMechanismChoices.DELIVERY_TYPE_MOBILE_MONEY,
+                    self.dm_mobile_money.code,
                 ],
             )
         )
@@ -598,8 +596,8 @@ class TestFSPAssignment(APITestCase):
                 input=dict(
                     paymentPlanId=self.encoded_payment_plan_id,
                     deliveryMechanisms=[
-                        DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
-                        DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+                        self.dm_transfer.code,
+                        self.dm_voucher.code,
                     ],
                 )
             ),
@@ -613,13 +611,13 @@ class TestFSPAssignment(APITestCase):
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+                        "deliveryMechanism": self.dm_transfer.code,
                         "fspId": self.encoded_santander_fsp_id,
                         "order": 1,
                         "chosenConfiguration": "config_1",
                     },
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+                        "deliveryMechanism": self.dm_voucher.code,
                         "fspId": self.encoded_bank_of_america_fsp_id,
                         "order": 2,
                         "chosenConfiguration": "config_2",
@@ -648,8 +646,8 @@ class TestFSPAssignment(APITestCase):
                 input=dict(
                     paymentPlanId=self.encoded_payment_plan_id,
                     deliveryMechanisms=[
-                        DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
-                        DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+                        self.dm_transfer.code,
+                        self.dm_voucher.code,
                     ],  # different order
                 )
             ),
@@ -676,9 +674,9 @@ class TestFSPAssignment(APITestCase):
                 input=dict(
                     paymentPlanId=self.encoded_payment_plan_id,
                     deliveryMechanisms=[
-                        DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
-                        DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
-                        DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+                        self.dm_transfer.code,
+                        self.dm_transfer.code,
+                        self.dm_voucher.code,
                     ],
                 )
             ),
@@ -692,17 +690,17 @@ class TestFSPAssignment(APITestCase):
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+                        "deliveryMechanism": self.dm_transfer.code,
                         "fspId": self.encoded_santander_fsp_id,
                         "order": 1,
                     },
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+                        "deliveryMechanism": self.dm_transfer.code,
                         "fspId": self.encoded_bank_of_america_fsp_id,  # doesn't support transfer
                         "order": 2,
                     },
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+                        "deliveryMechanism": self.dm_voucher.code,
                         "fspId": self.encoded_bank_of_america_fsp_id,
                         "order": 3,
                     },
@@ -718,17 +716,17 @@ class TestFSPAssignment(APITestCase):
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+                        "deliveryMechanism": self.dm_transfer.code,
                         "fspId": self.encoded_santander_fsp_id,
                         "order": 1,
                     },
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+                        "deliveryMechanism": self.dm_transfer.code,
                         "fspId": self.encoded_santander_fsp_id,  # already chosen
                         "order": 2,
                     },
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+                        "deliveryMechanism": self.dm_voucher.code,
                         "fspId": self.encoded_bank_of_america_fsp_id,
                         "order": 3,
                     },
@@ -748,17 +746,17 @@ class TestFSPAssignment(APITestCase):
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+                        "deliveryMechanism": self.dm_transfer.code,
                         "fspId": self.encoded_santander_fsp_id,
                         "order": 1,
                     },
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+                        "deliveryMechanism": self.dm_transfer.code,
                         "fspId": self.encoded_bank_of_europe_fsp_id,  # supports transfer
                         "order": 2,
                     },
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+                        "deliveryMechanism": self.dm_voucher.code,
                         "fspId": self.encoded_bank_of_america_fsp_id,
                         "order": 3,
                     },
@@ -787,7 +785,7 @@ class TestFSPAssignment(APITestCase):
                 input=dict(
                     paymentPlanId=self.encoded_payment_plan_id,
                     deliveryMechanisms=[
-                        DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+                        self.dm_transfer.code,
                     ],
                 )
             ),
@@ -801,7 +799,7 @@ class TestFSPAssignment(APITestCase):
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+                        "deliveryMechanism": self.dm_transfer.code,
                         "fspId": self.encoded_santander_fsp_id,  # no limit
                         "order": 1,
                     },
@@ -813,7 +811,7 @@ class TestFSPAssignment(APITestCase):
         assert self.payment_plan.delivery_mechanisms.filter(financial_service_provider=self.santander_fsp).count() == 1
         payment1.refresh_from_db()
         assert payment1.financial_service_provider == self.santander_fsp
-        assert payment1.delivery_type == DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER
+        assert payment1.delivery_type == self.dm_transfer
 
 
 class TestVolumeByDeliveryMechanism(APITestCase):
@@ -830,9 +828,9 @@ class TestVolumeByDeliveryMechanism(APITestCase):
                 input=dict(
                     paymentPlanId=self.encoded_payment_plan_id,
                     deliveryMechanisms=[
-                        DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
-                        DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
-                        DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+                        self.dm_transfer.code,
+                        self.dm_voucher.code,
+                        self.dm_cash.code,
                     ],
                 )
             ),
@@ -879,17 +877,17 @@ class TestVolumeByDeliveryMechanism(APITestCase):
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+                        "deliveryMechanism": self.dm_transfer.code,
                         "fspId": self.encoded_santander_fsp_id,
                         "order": 1,
                     },
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+                        "deliveryMechanism": self.dm_voucher.code,
                         "fspId": self.encoded_bank_of_europe_fsp_id,
                         "order": 2,
                     },
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+                        "deliveryMechanism": self.dm_cash.code,
                         "fspId": self.encoded_bank_of_america_fsp_id,
                         "order": 3,
                     },
@@ -932,7 +930,7 @@ class TestVolumeByDeliveryMechanism(APITestCase):
             collector=self.individuals_2[0],
             entitlement_quantity=500,
             entitlement_quantity_usd=100,
-            delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+            delivery_type=self.dm_cash,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_2,
             currency="PLN",
@@ -943,7 +941,7 @@ class TestVolumeByDeliveryMechanism(APITestCase):
             collector=self.individuals_3[0],
             entitlement_quantity=1000,
             entitlement_quantity_usd=200,
-            delivery_type=DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+            delivery_type=self.dm_transfer,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_3,
             currency="PLN",
@@ -981,14 +979,14 @@ class TestVolumeByDeliveryMechanism(APITestCase):
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
             financial_service_provider=self.santander_fsp,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+            delivery_mechanism=self.dm_cash,
             delivery_mechanism_order=1,
         )
 
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
             financial_service_provider=self.bank_of_america_fsp,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+            delivery_mechanism=self.dm_cash,
             delivery_mechanism_order=2,
         )
 
@@ -1005,12 +1003,12 @@ class TestVolumeByDeliveryMechanism(APITestCase):
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
+                        "deliveryMechanism": self.dm_cash.code,
                         "fspId": self.encoded_santander_fsp_id,
                         "order": 1,
                     },
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
+                        "deliveryMechanism": self.dm_transfer_to_digital_wallet.code,
                         "fspId": self.encoded_bank_of_america_fsp_id,
                         "order": 2,
                     },
@@ -1028,13 +1026,13 @@ class TestVolumeByDeliveryMechanism(APITestCase):
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
             financial_service_provider=self.santander_fsp,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
+            delivery_mechanism=self.dm_transfer_to_digital_wallet,
             delivery_mechanism_order=1,
         )
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
             financial_service_provider=self.bank_of_america_fsp,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
+            delivery_mechanism=self.dm_transfer_to_digital_wallet,
             delivery_mechanism_order=2,
         )
         mutation_response = self.graphql_request(
@@ -1044,12 +1042,12 @@ class TestVolumeByDeliveryMechanism(APITestCase):
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
+                        "deliveryMechanism": self.dm_transfer_to_digital_wallet.code,
                         "fspId": self.encoded_santander_fsp_id,
                         "order": 1,
                     },
                     {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER_TO_DIGITAL_WALLET,
+                        "deliveryMechanism": self.dm_transfer_to_digital_wallet.code,
                         "fspId": self.encoded_bank_of_america_fsp_id,
                         "order": 2,
                     },
@@ -1068,7 +1066,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
     def test_chosen_delivery_mechanism_not_supported_by_fsp(self) -> None:
         dm1 = DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+            delivery_mechanism=self.dm_voucher,
             financial_service_provider=self.santander_fsp,
             delivery_mechanism_order=1,
         )
@@ -1089,7 +1087,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
     def test_fsp_cannot_accept_any_volume(self) -> None:
         dm1 = DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+            delivery_mechanism=self.dm_voucher,
             financial_service_provider=self.bank_of_america_fsp,
             delivery_mechanism_order=1,
         )
@@ -1117,7 +1115,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
         new_payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED_FSP, program=self.program)
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=new_payment_plan,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_VOUCHER,
+            delivery_mechanism=self.dm_voucher,
             financial_service_provider=self.bank_of_america_fsp,
             delivery_mechanism_order=1,
         )
@@ -1169,13 +1167,13 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
 
         dm1 = DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+            delivery_mechanism=self.dm_transfer,
             financial_service_provider=self.santander_fsp,
             delivery_mechanism_order=1,
         )
         dm2 = DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+            delivery_mechanism=self.dm_transfer,
             financial_service_provider=self.bank_of_europe_fsp,
             delivery_mechanism_order=2,
         )
@@ -1198,15 +1196,15 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
         payment2.refresh_from_db()
         # santander_fsp has a limited value, so it could take only one transfer payment
         assert payment2.financial_service_provider == self.santander_fsp
-        assert payment2.delivery_type == DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER
+        assert payment2.delivery_type == self.dm_transfer
         payment3.refresh_from_db()
         # second transfer payment is covered by bank_of_europe_fsp
         assert payment3.financial_service_provider == self.bank_of_europe_fsp
-        assert payment3.delivery_type == DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER
+        assert payment3.delivery_type == self.dm_transfer
         payment1.refresh_from_db()
         # voucher payment is covered by bank_of_america_fsp
         assert payment1.financial_service_provider == self.bank_of_europe_fsp
-        assert payment1.delivery_type == DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER
+        assert payment1.delivery_type == self.dm_transfer
 
     def test_not_all_payments_covered_because_of_fsp_limit(self) -> None:
         PaymentFactory(
@@ -1236,7 +1234,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
 
         dm1 = DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
-            delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER,
+            delivery_mechanism=self.dm_transfer,
             financial_service_provider=self.bank_of_europe_fsp,
             delivery_mechanism_order=1,
         )

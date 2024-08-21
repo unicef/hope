@@ -36,7 +36,7 @@ export const programValidationSchema = (
             )
           : schema,
       )
-      .when('editMode', ([editMode], schema) => {
+      .when('editMode', (editMode, schema) => {
         return editMode
           ? schema
           : schema.min(today, t('End Date cannot be in the past'));
@@ -60,6 +60,24 @@ export const programValidationSchema = (
       Yup.object().shape({
         id: Yup.string().required(t('Partner ID is required')),
         areaAccess: Yup.string().required(t('Area Access is required')),
+      }),
+    ),
+    pduFields: Yup.array().of(
+      Yup.object().shape({
+        label: Yup.string()
+          .nullable()
+          .min(3, t('Too short'))
+          .max(150, t('Too long'))
+          .required(t('Label is required')),
+        pduData: Yup.object().shape({
+          subtype: Yup.string().nullable().required(t('Subtype is required')),
+          numberOfRounds: Yup.number()
+            .nullable()
+            .required(t('Number of rounds is required')),
+          roundsNames: Yup.array().of(
+            Yup.string().min(3, t('Too short')).max(150, t('Too long')),
+          ),
+        }),
       }),
     ),
   });

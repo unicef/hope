@@ -57,4 +57,12 @@ TASKS_SCHEDULES = {
         "task": "hct_mis_api.apps.payment.celery_tasks.periodic_sync_payment_gateway_records",
         "schedule": crontab(minute="*/30"),
     },
+    "periodic_sync_payment_gateway_delivery_mechanisms": {
+        "task": "hct_mis_api.apps.payment.celery_tasks.periodic_sync_payment_gateway_delivery_mechanisms",
+        "schedule": crontab(minute="*/30"),
+    },
+    "remove_old_pdu_template_files_task": {
+        "task": "hct_mis_api.apps.periodic_data_update.celery_tasks.remove_old_pdu_template_files_task",
+        "schedule": crontab(hour="*/24"),
+    },
 }

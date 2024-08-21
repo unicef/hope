@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
+from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db.models import JSONField, Q, UniqueConstraint
@@ -186,8 +187,6 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
 
 
 class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDModel):
-    ASSOCIATED_WITH_HOUSEHOLD = 0
-    ASSOCIATED_WITH_INDIVIDUAL = 1
     STRING = "STRING"
     IMAGE = "IMAGE"
     INTEGER = "INTEGER"
@@ -196,6 +195,7 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
     SELECT_MANY = "SELECT_MANY"
     DATE = "DATE"
     GEOPOINT = "GEOPOINT"
+    PDU = "PDU"
     TYPE_CHOICE = Choices(
         (DATE, _("Date")),
         (DECIMAL, _("Decimal")),
@@ -205,21 +205,63 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
         (SELECT_ONE, _("Select One")),
         (SELECT_MANY, _("Select Many")),
         (STRING, _("String")),
+        (PDU, _("PDU")),
     )
+
+    ASSOCIATED_WITH_HOUSEHOLD = 0
+    ASSOCIATED_WITH_INDIVIDUAL = 1
     ASSOCIATED_WITH_CHOICES: Any = (
         (ASSOCIATED_WITH_HOUSEHOLD, _("Household")),
         (ASSOCIATED_WITH_INDIVIDUAL, _("Individual")),
     )
 
     type = models.CharField(max_length=16, choices=TYPE_CHOICE)
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
     required = models.BooleanField(default=False)
+    program = models.ForeignKey(
+        "program.Program",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="pdu_fields",
+    )
+    pdu_data = models.OneToOneField(
+        "core.PeriodicFieldData",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="flex_field",
+    )
     label = JSONField(default=dict)
     hint = JSONField(default=dict)
     group = models.ForeignKey(
         "core.FlexibleAttributeGroup", on_delete=models.CASCADE, related_name="flex_attributes", null=True, blank=True
     )
     associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=("name", "program"), name="unique_name_program"),
+            models.UniqueConstraint(
+                fields=("name",), condition=Q(program__isnull=True), name="unique_name_without_program"
+            ),
+        ]
+
+    def clean(self) -> None:
+        if (
+            self.program
+            and FlexibleAttribute.objects.filter(name=self.name, program__isnull=True).exclude(id=self.id).exists()
+        ):
+            raise ValidationError(f'Flex field with name "{self.name}" already exists without a program.')
+        elif (
+            not self.program
+            and FlexibleAttribute.objects.filter(name=self.name, program__isnull=False).exclude(id=self.id).exists()
+        ):
+            raise ValidationError(f'Flex field with name "{self.name}" already exists inside a program.')
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        self.clean()
+        super().save(*args, **kwargs)
 
     @property
     def is_flex_field(self) -> bool:
@@ -272,6 +314,32 @@ class FlexibleAttributeChoice(SoftDeletableModel, NaturalKeyModel, TimeStampedUU
 
 
 mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
+
+
+class PeriodicFieldData(models.Model):
+    """
+    Additional data for PDU
+    """
+
+    STRING = "STRING"
+    DECIMAL = "DECIMAL"
+    DATE = "DATE"
+    BOOLEAN = "BOOLEAN"
+
+    TYPE_CHOICES = Choices(
+        (DATE, _("Date")),
+        (DECIMAL, _("Number")),
+        (STRING, _("Text")),
+        (BOOLEAN, _("Boolean (true/false)")),
+    )
+
+    subtype = models.CharField(max_length=16, choices=TYPE_CHOICES)
+    number_of_rounds = models.IntegerField()
+    rounds_names = ArrayField(models.CharField(max_length=255), default=list)
+
+    class Meta:
+        verbose_name = "Periodic Field Data"
+        verbose_name_plural = "Periodic Fields Data"
 
 
 class XLSXKoboTemplateManager(models.Manager):

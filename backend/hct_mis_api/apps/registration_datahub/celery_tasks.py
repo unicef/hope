@@ -10,6 +10,7 @@ from django.utils import timezone
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Document, Household
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.exceptions import (
     AlreadyRunningException,
@@ -307,17 +308,18 @@ def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def pull_kobo_submissions_task(self: Any, import_data_id: "UUID") -> Dict:
+def pull_kobo_submissions_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> Dict:
     from hct_mis_api.apps.registration_data.models import KoboImportData
 
     kobo_import_data = KoboImportData.objects.get(id=import_data_id)
+    program = Program.objects.get(id=program_id)
     set_sentry_business_area_tag(kobo_import_data.business_area_slug)
     from hct_mis_api.apps.registration_datahub.tasks.pull_kobo_submissions import (
         PullKoboSubmissions,
     )
 
     try:
-        return PullKoboSubmissions().execute(kobo_import_data)
+        return PullKoboSubmissions().execute(kobo_import_data, program)
     except Exception as e:  # pragma: no cover
         KoboImportData.objects.filter(
             id=kobo_import_data.id,
@@ -337,10 +339,9 @@ def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UU
 
     import_data = ImportData.objects.get(id=import_data_id)
     program = Program.objects.get(id=program_id)
-    is_social_worker_program = program.is_social_worker_program
     set_sentry_business_area_tag(import_data.business_area_slug)
     try:
-        return ValidateXlsxImport().execute(import_data, is_social_worker_program)
+        return ValidateXlsxImport().execute(import_data, program)
     except Exception as e:  # pragma: no cover
         ImportData.objects.filter(
             id=import_data.id,

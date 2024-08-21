@@ -1,10 +1,20 @@
+import random
 from typing import Any, List
 
 import factory
+from factory import fuzzy
 from factory.django import DjangoModelFactory
 from faker import Faker
 
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, StorageFile
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    DataCollectingType,
+    FlexibleAttribute,
+    PeriodicFieldData,
+    StorageFile,
+)
+from hct_mis_api.apps.periodic_data_update.utils import field_label_to_field_name
+from hct_mis_api.apps.program.models import Program
 
 faker = Faker()
 
@@ -107,3 +117,57 @@ class DataCollectingTypeFactory(DjangoModelFactory):
         if extracted:
             for business_area in extracted:
                 self.limit_to.add(business_area)
+
+
+class PeriodicFieldDataFactory(DjangoModelFactory):
+    subtype = fuzzy.FuzzyChoice([choice[0] for choice in PeriodicFieldData.TYPE_CHOICES])
+    rounds_names = factory.LazyAttribute(
+        lambda _: [factory.Faker("word").evaluate(None, None, {"locale": None}) for _ in range(random.randint(1, 10))]
+    )
+    number_of_rounds = factory.LazyAttribute(lambda o: len(o.rounds_names))
+
+    class Meta:
+        model = PeriodicFieldData
+
+
+class FlexibleAttributeForPDUFactory(DjangoModelFactory):
+    associated_with = FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
+    label = factory.Faker("word")
+    name = factory.LazyAttribute(lambda instance: field_label_to_field_name(instance.label))
+    type = FlexibleAttribute.PDU
+    pdu_data = factory.SubFactory(PeriodicFieldDataFactory)
+
+    @factory.lazy_attribute
+    def program(self) -> Any:
+        from hct_mis_api.apps.program.fixtures import ProgramFactory
+
+        return ProgramFactory()
+
+    @classmethod
+    def _create(cls, target_class: Any, *args: Any, **kwargs: Any) -> FlexibleAttribute:
+        label = kwargs.pop("label", None)
+        obj = super()._create(target_class, *args, **kwargs)
+        obj.label = {"English(EN)": label}
+        obj.save()
+        return obj
+
+    class Meta:
+        model = FlexibleAttribute
+
+
+def create_pdu_flexible_attribute(
+    label: str, subtype: str, number_of_rounds: int, rounds_names: list[str], program: Program
+) -> FlexibleAttribute:
+    name = field_label_to_field_name(label)
+    flexible_attribute = FlexibleAttribute.objects.create(
+        type=FlexibleAttribute.PDU,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        label={"English(EN)": label},
+        name=name,
+        program=program,
+    )
+    flexible_attribute.pdu_data = PeriodicFieldData.objects.create(
+        subtype=subtype, number_of_rounds=number_of_rounds, rounds_names=rounds_names
+    )
+    flexible_attribute.save()
+    return flexible_attribute
