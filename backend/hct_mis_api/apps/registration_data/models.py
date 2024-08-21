@@ -111,6 +111,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     DEDUP_ENGINE_UPLOADED = "UPLOADED"
     DEDUP_ENGINE_IN_PROGRESS = "IN_PROGRESS"
     DEDUP_ENGINE_FINISHED = "FINISHED"
+    DEDUP_ENGINE_UPLOAD_ERROR = "UPLOAD_ERROR"
     DEDUP_ENGINE_ERROR = "ERROR"
 
     DEDUP_ENGINE_STATUS_CHOICE = (
@@ -119,6 +120,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         (DEDUP_ENGINE_IN_PROGRESS, _("In Progress")),
         (DEDUP_ENGINE_FINISHED, _("Finished")),
         (DEDUP_ENGINE_ERROR, _("Error")),
+        (DEDUP_ENGINE_UPLOAD_ERROR, _("Upload Error")),
     )
     name = CICharField(
         max_length=255,
