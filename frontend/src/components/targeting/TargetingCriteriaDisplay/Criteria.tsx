@@ -122,7 +122,25 @@ const CriteriaField = ({ field, choicesDict }): React.ReactElement => {
               t('No')
             )
           ) : (
-            <span>{extractChoiceLabel(field, field.arguments?.[0])}</span>
+            <>
+              {field.arguments?.[0] != null ? (
+                typeof field.arguments[0] === 'boolean' ? (
+                  field.arguments[0] === true ? (
+                    t('Yes')
+                  ) : (
+                    t('No')
+                  )
+                ) : field.arguments[0] === 'True' ? (
+                  t('Yes')
+                ) : field.arguments[0] === 'False' ? (
+                  t('No')
+                ) : (
+                  <span>{extractChoiceLabel(field, field.arguments[0])}</span>
+                )
+              ) : (
+                <>{t('Empty')}</>
+              )}
+            </>
           )}
         </p>
       );
