@@ -6,7 +6,6 @@ from unittest import mock
 from django.utils import timezone
 
 import pytest
-from freezegun import freeze_time
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -68,12 +67,11 @@ class TestPaymentGatewayService(APITestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
 
-        with freeze_time("2021-06-10"):
-            cls.pp = PaymentPlanFactory(
-                program__cycle__start_date=timezone.datetime(2021, 6, 10, tzinfo=utc).date(),
-                program__cycle__end_date=timezone.datetime(2021, 7, 10, tzinfo=utc).date(),
-                status=PaymentPlan.Status.ACCEPTED,
-            )
+        cls.pp = PaymentPlanFactory(
+            program__cycle__start_date=timezone.datetime(2021, 6, 10, tzinfo=utc).date(),
+            program__cycle__end_date=timezone.datetime(2021, 7, 10, tzinfo=utc).date(),
+            status=PaymentPlan.Status.ACCEPTED,
+        )
         cls.pg_fsp = FinancialServiceProviderFactory(
             name="Western Union",
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,

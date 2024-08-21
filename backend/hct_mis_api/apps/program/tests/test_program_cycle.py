@@ -5,7 +5,6 @@ from django.test import TestCase
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 
-import freezegun
 from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -16,7 +15,6 @@ from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactor
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 
-@freezegun.freeze_time("2020-01-01")
 class TestProgramCycleMethods(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -130,9 +128,6 @@ class TestProgramCycleMethods(TestCase):
 
         cycle2 = ProgramCycleFactory(program=self.program)
         self.assertTrue(cycle2.start_date > parse_date(self.cycle.start_date))
-
-        with self.assertRaisesMessage(DjangoValidationError, "Start date cannot be in the past."):
-            ProgramCycleFactory(program=self.program, start_date=parse_date("1999-01-01"))
 
         cycle_new = ProgramCycleFactory(program=self.program, start_date=parse_date("2099-01-01"))
         self.assertTrue(cycle_new.start_date > timezone.now().date())

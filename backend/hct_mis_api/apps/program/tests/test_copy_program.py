@@ -1,6 +1,5 @@
 from typing import Any
 
-import freezegun
 from flaky import flaky
 from parameterized import parameterized
 
@@ -36,7 +35,6 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 
 
-@freezegun.freeze_time("2019-12-01")
 class TestCopyProgram(APITestCase):
     COPY_PROGRAM_MUTATION = """
     mutation CopyProgram($programData: CopyProgramInput!) {

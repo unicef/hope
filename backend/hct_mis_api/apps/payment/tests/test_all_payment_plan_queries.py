@@ -29,7 +29,6 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory
 
 
-@freeze_time("2020-01-01")
 def create_child_payment_plans(pp: PaymentPlan) -> None:
     fpp1 = PaymentPlanFactory(
         id="56aca38c-dc16-48a9-ace4-70d88b41d462",
@@ -220,7 +219,7 @@ class TestPaymentPlanQueries(APITestCase):
 
         with freeze_time("2020-10-10"):
             program = RealProgramFactory(
-                cycle__start_date=timezone.datetime(2020, 10, 10, tzinfo=utc).date(),
+                cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc).date(),
                 cycle__end_date=timezone.datetime(2020, 11, 10, tzinfo=utc).date(),
             )
             program_cycle = program.cycles.first()
@@ -437,7 +436,6 @@ class TestPaymentPlanQueries(APITestCase):
             context={"user": self.user},
         )
 
-    @freeze_time("2020-10-10")
     def test_payment_node_with_legacy_data(self) -> None:
         # test get snapshot data only
         program = RealProgramFactory(

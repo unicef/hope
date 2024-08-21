@@ -180,13 +180,6 @@ class CashPlanFactory(DjangoModelFactory):
 
         PaymentVerificationSummaryFactory(generic_fk_obj=self)
 
-    # TODO: cash plan doesn't has FK to cycle
-    # @factory.post_generation
-    # def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
-    #     if not create:
-    #         return
-    #     ProgramCycleFactory(program=self.program, **kwargs)
-
 
 class ServiceProviderFactory(DjangoModelFactory):
     class Meta:
@@ -779,7 +772,6 @@ def generate_real_cash_plans() -> None:
             program=program,
             status=TargetPopulation.STATUS_OPEN,
             targeting_criteria=targeting_criteria,
-            # program_cycle="",
         )
         full_rebuild(target_population)
         target_population.status = TargetPopulation.STATUS_READY_FOR_CASH_ASSIST

@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
-from freezegun import freeze_time
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
@@ -9,7 +8,6 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 
-@freeze_time("2020-01-01")
 def get_program_with_dct_type_and_name(
     name: str, programme_code: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
 ) -> Program:

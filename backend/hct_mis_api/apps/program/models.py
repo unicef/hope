@@ -16,7 +16,6 @@ from django.core.validators import (
 from django.db import models
 from django.db.models import Q, QuerySet, Sum
 from django.db.models.constraints import UniqueConstraint
-from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.utils.translation import gettext_lazy as _
 
@@ -327,11 +326,11 @@ class ProgramCycle(AdminUrlMixin, SoftDeletableModel, TimeStampedUUIDModel, Unic
         if end_date and end_date < start_date:
             raise ValidationError("End date cannot be before start date.")
 
-        if start_date < timezone.now().date():
-            raise ValidationError("Start date cannot be in the past.")
-
-        # validate on create only
-        if self._state.adding and self.program.cycles.filter(end_date__gte=start_date).exists():
+        qs = self.program.cycles
+        if self.pk:
+            print("\n=== Edit Cycle ", self.pk)
+            qs = qs.exclude(pk=self.pk)
+        if self._state.adding and qs.filter(end_date__gte=start_date).exists():
             raise ValidationError("Start date must be after the latest cycle.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:

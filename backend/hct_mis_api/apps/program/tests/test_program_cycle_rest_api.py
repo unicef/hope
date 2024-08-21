@@ -6,7 +6,6 @@ from typing import Any, Dict
 from django.test import TestCase
 from django.urls import reverse
 
-import freezegun
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIClient, APIRequestFactory
@@ -30,7 +29,6 @@ from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactor
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 
-@freezegun.freeze_time("2022-01-01")
 class ProgramCycleAPITestCase(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -233,7 +231,6 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
         self.assertEqual(self.cycle1.status, ProgramCycle.FINISHED)
 
 
-@freezegun.freeze_time("2022-01-01")
 class ProgramCycleCreateSerializerTest(TestCase):
     def setUp(self) -> None:
         BusinessAreaFactory(name="Afghanistan")
@@ -319,7 +316,6 @@ class ProgramCycleCreateSerializerTest(TestCase):
         self.assertIn("Programme Cycles' timeframes must not overlap with the provided end date.", str(error.exception))
 
 
-@freezegun.freeze_time("2022-01-01")
 class ProgramCycleUpdateSerializerTest(TestCase):
     def setUp(self) -> None:
         BusinessAreaFactory(name="Afghanistan")
@@ -370,7 +366,6 @@ class ProgramCycleUpdateSerializerTest(TestCase):
         )
 
 
-@freezegun.freeze_time("2022-01-01")
 class ProgramCycleViewSetTestCase(TestCase):
     def setUp(self) -> None:
         BusinessAreaFactory(name="Afghanistan")
@@ -380,8 +375,8 @@ class ProgramCycleViewSetTestCase(TestCase):
         program = ProgramFactory(
             status=Program.DRAFT,
             cycle__status=ProgramCycle.DRAFT,
-            cycle__start_date="2023-01-10",
-            cycle__end_date="2023-01-25",
+            # cycle__start_date="2023-01-10",
+            # cycle__end_date="2023-01-25",
         )
         cycle = program.cycles.first()
         with self.assertRaises(ValidationError) as context:
@@ -392,8 +387,8 @@ class ProgramCycleViewSetTestCase(TestCase):
         program = ProgramFactory(
             status=Program.ACTIVE,
             cycle__status=ProgramCycle.ACTIVE,
-            cycle__start_date="2023-01-10",
-            cycle__end_date="2023-01-25",
+            # cycle__start_date="2023-01-10",
+            # cycle__end_date="2023-01-25",
         )
         cycle = program.cycles.first()
         with self.assertRaises(ValidationError) as context:
@@ -404,8 +399,8 @@ class ProgramCycleViewSetTestCase(TestCase):
         program = ProgramFactory(
             status=Program.ACTIVE,
             cycle__status=ProgramCycle.DRAFT,
-            cycle__start_date="2023-01-10",
-            cycle__end_date="2023-01-25",
+            # cycle__start_date="2023-01-10",
+            # cycle__end_date="2023-01-25",
         )
         cycle = program.cycles.first()
         with self.assertRaises(ValidationError) as context:

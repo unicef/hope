@@ -2,7 +2,6 @@ from typing import Any, Dict, Optional
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 
 from rest_framework import serializers
 
@@ -106,9 +105,6 @@ class ProgramCycleCreateSerializer(EncodedIdSerializerMixin):
         if program.status != Program.ACTIVE:
             raise serializers.ValidationError("Create Programme Cycle is possible only for Active Programme.")
 
-        if start_date and start_date < timezone.now().date():
-            raise serializers.ValidationError("Start date must be today or in the future.")
-
         if end_date and end_date < start_date:
             raise serializers.ValidationError("End date must be after the start date.")
 
@@ -123,6 +119,9 @@ class ProgramCycleCreateSerializer(EncodedIdSerializerMixin):
 
         if program.cycles.filter(end_date__isnull=True).exists():
             raise serializers.ValidationError("All Programme Cycles should have end date for creation new one.")
+
+        if program.cycles.filter(end_date__gte=start_date).exists():
+            raise serializers.ValidationError({"start_date": "Start date must be after the latest cycle."})
 
         # timeframes overlapping
         validate_cycle_timeframes_overlapping(program, start_date, end_date)
@@ -150,6 +149,7 @@ class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
 
     def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
         program = self.instance.program
+        start_date = data.get("start_date")
         end_date = data.get("end_date")
         if program.status != Program.ACTIVE:
             raise serializers.ValidationError("Update Programme Cycle is possible only for Active Programme.")
@@ -160,11 +160,10 @@ class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
                     "end_date": "Not possible leave the Programme Cycle end date empty if it was not empty upon starting the edit."
                 }
             )
+        if start_date and program.cycles.filter(end_date__gte=start_date).exclude(pk=self.instance.pk).exists():
+            raise serializers.ValidationError({"start_date": "Start date must be after the latest cycle."})
 
-        if end_date and end_date < timezone.now().date():
-            raise serializers.ValidationError("Start date must be today or in the future.")
-
-        validate_cycle_timeframes_overlapping(program, data.get("start_date"), end_date, self.instance.pk)
+        validate_cycle_timeframes_overlapping(program, start_date, end_date, self.instance.pk)
         return data
 
 

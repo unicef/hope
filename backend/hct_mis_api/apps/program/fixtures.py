@@ -29,7 +29,7 @@ class ProgramCycleFactory(DjangoModelFactory):
         lambda o: (
             o.program.cycles.latest("start_date").end_date + timedelta(days=1)
             if o.program.cycles.exists()
-            else fake.date_time_this_decade(before_now=False, after_now=True, tzinfo=utc).date()
+            else fake.date_time_this_decade(before_now=True, after_now=True, tzinfo=utc).date()
         )
     )
 
