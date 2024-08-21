@@ -136,16 +136,16 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
         program=tp.program,
         title="Cycle for PaymentPlan",
         status=ProgramCycle.ACTIVE,
-        start_date=datetime.now(),
-        end_date=datetime.now() + relativedelta(days=14),
+        start_date=datetime.now() + relativedelta(days=10),
+        end_date=datetime.now() + relativedelta(days=15),
     )
     payment_plan = PaymentPlan.objects.update_or_create(
         business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
         target_population=tp,
         program_cycle=cycle,
         currency="USD",
-        dispersion_start_date=datetime.now(),
-        dispersion_end_date=datetime.now() + relativedelta(days=14),
+        dispersion_start_date=datetime.now() + relativedelta(days=10),
+        dispersion_end_date=datetime.now() + relativedelta(days=15),
         status_date=datetime.now(),
         status=PaymentPlan.Status.ACCEPTED,
         created_by=User.objects.first(),
@@ -221,10 +221,11 @@ class TestSmokePaymentModule:
         assert "EXPORT XLSX" in pagePaymentModuleDetails.getButtonExportXlsx().text
         assert "USD" in pagePaymentModuleDetails.getLabelCurrency().text
         assert (
-            str((datetime.now()).strftime("%-d %b %Y")) in pagePaymentModuleDetails.getLabelDispersionStartDate().text
+            str((datetime.now() + relativedelta(days=10)).strftime("%-d %b %Y"))
+            in pagePaymentModuleDetails.getLabelDispersionStartDate().text
         )
         assert (
-            str((datetime.now() + relativedelta(days=14)).strftime("%-d %b %Y"))
+            str((datetime.now() + relativedelta(days=15)).strftime("%-d %b %Y"))
             in pagePaymentModuleDetails.getLabelDispersionEndDate().text
         )
         assert "-" in pagePaymentModuleDetails.getLabelRelatedFollowUpPaymentPlans().text

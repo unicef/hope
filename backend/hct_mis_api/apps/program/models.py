@@ -326,11 +326,7 @@ class ProgramCycle(AdminUrlMixin, SoftDeletableModel, TimeStampedUUIDModel, Unic
         if end_date and end_date < start_date:
             raise ValidationError("End date cannot be before start date.")
 
-        qs = self.program.cycles
-        if self.pk:
-            print("\n=== Edit Cycle ", self.pk)
-            qs = qs.exclude(pk=self.pk)
-        if self._state.adding and qs.filter(end_date__gte=start_date).exists():
+        if self._state.adding and self.program.cycles.exclude(pk=self.pk).filter(end_date__gte=start_date).exists():
             raise ValidationError("Start date must be after the latest cycle.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
