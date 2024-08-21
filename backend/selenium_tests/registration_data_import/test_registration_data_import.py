@@ -202,6 +202,7 @@ class TestRegistrationDataImport:
         pageDetailsRegistrationDataImport.getImportedHouseholdsRow(0).find_elements("tag name", "td")[1].click()
         assert hausehold_id in pageHouseholdsDetails.getPageHeaderTitle().text
 
+    @pytest.mark.night
     @pytest.mark.skip(reason="Kobo form is not available. This is a external service, we cannot control it.")
     @pytest.mark.vcr(ignore_localhost=True)
     def test_import_empty_kobo_form(
@@ -228,6 +229,7 @@ class TestRegistrationDataImport:
         pageRegistrationDataImport.getButtonImportFile().click()
         pageRegistrationDataImport.checkAlert("Cannot import empty form")
 
+    @pytest.mark.night
     @pytest.mark.skip(reason="Kobo form is not available. This is a external service, we cannot control it.")
     @pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["elasticsearch"])
     def test_import_kobo_form(

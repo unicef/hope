@@ -12,6 +12,9 @@ from page_object.programme_management.programme_management import ProgrammeManag
 from selenium import webdriver
 from selenium.webdriver import Keys
 
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
@@ -206,6 +209,7 @@ class TestProgrammeManagement:
         assert "No" in pageProgrammeDetails.getLabelCashPlus().text
         assert "0" in pageProgrammeDetails.getLabelProgramSize().text
 
+    @pytest.mark.night
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -257,6 +261,7 @@ class TestProgrammeManagement:
         assert "Yes" in pageProgrammeDetails.getLabelCashPlus().text
         assert "0" in pageProgrammeDetails.getLabelProgramSize().text
 
+    @pytest.mark.night
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -385,6 +390,7 @@ class TestProgrammeManagement:
 
 
 # ToDo: Check Unicef partner! and delete classes
+@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestBusinessAreas:
     @pytest.mark.parametrize(
@@ -439,7 +445,6 @@ class TestBusinessAreas:
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
         assert "Business Area" in pageProgrammeDetails.getLabelAreaAccess().text
 
-    # @pytest.mark.skip(reason="Unstable test")
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -513,6 +518,7 @@ class TestBusinessAreas:
         assert "New Programme" in pageProgrammeDetails.getHeaderTitle().text
 
 
+@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestAdminAreas:
     @pytest.mark.parametrize(
@@ -573,6 +579,7 @@ class TestAdminAreas:
         assert "15" in pageProgrammeDetails.getLabelAdminArea2().text
 
 
+@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestComeBackScenarios:
     @pytest.mark.parametrize(
@@ -649,6 +656,7 @@ class TestComeBackScenarios:
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
 
 
+@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestManualCalendar:
     @pytest.mark.skip(reason="ToDo")
@@ -779,3 +787,113 @@ class TestManualCalendar:
         assert "New name after Edit" in pageProgrammeDetails.getHeaderTitle().text
         assert FormatTime(1, 1, 2022).date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
         assert FormatTime(1, 10, 2022).date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
+
+    @pytest.mark.parametrize(
+        "test_data",
+        [
+            pytest.param(
+                {
+                    "program_name": "New Programme - " + str(random.random()),
+                    "selector": "Health",
+                    "startDate": FormatTime(1, 1, 2022),
+                    "endDate": FormatTime(1, 2, 2032),
+                    "dataCollectingType": "Partial",
+                },
+                id="programme_management_page",
+            ),
+        ],
+    )
+    def test_edit_programme_with_rdi(
+        self,
+        pageProgrammeManagement: ProgrammeManagement,
+        pageProgrammeDetails: ProgrammeDetails,
+        test_data: dict,
+    ) -> None:
+        # Go to Programme Management
+        pageProgrammeManagement.getNavProgrammeManagement().click()
+        # Create Programme
+        pageProgrammeManagement.getButtonNewProgram().click()
+        # 1st step (Details)
+        pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
+        pageProgrammeManagement.getInputStartDate().click()
+        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().click()
+        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
+        pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
+        pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
+        pageProgrammeManagement.getInputCashPlus().click()
+        pageProgrammeManagement.getButtonNext().click()
+        # 2nd step (Time Series Fields)
+        pageProgrammeManagement.getButtonAddTimeSeriesField().click()
+        pageProgrammeManagement.getInputPduFieldsObjectLabel(0).send_keys("Time Series Field Name 1")
+        pageProgrammeManagement.getSelectPduFieldsObjectPduDataSubtype(0).click()
+        pageProgrammeManagement.select_listbox_element("Text").click()
+        pageProgrammeManagement.getSelectPduFieldsObjectPduDataNumberOfRounds(0).click()
+        pageProgrammeManagement.select_listbox_element("2").click()
+        pageProgrammeManagement.getInputPduFieldsRoundsNames(0, 0).send_keys("Round 1")
+        pageProgrammeManagement.getInputPduFieldsRoundsNames(0, 1).send_keys("Round 2")
+        pageProgrammeManagement.getButtonNext().click()
+        # 3rd step (Partners)
+        pageProgrammeManagement.getAccessToProgram().click()
+        pageProgrammeManagement.selectWhoAccessToProgram("All partners within the business area")
+        pageProgrammeManagement.getButtonSave().click()
+        pageProgrammeManagement.getButtonEditProgram()
+        program_name = pageProgrammeDetails.getHeaderTitle().text
+        # Create Registration Data Import for the program
+        RegistrationDataImportFactory(
+            program=Program.objects.get(name=program_name),
+        )
+        # Edit Programme
+        pageProgrammeManagement.getButtonEditProgram().click()
+        # 1st step (Details)
+        pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.getInputProgrammeName().send_keys("New name after Edit")
+        pageProgrammeManagement.getButtonNext().click()
+        # 2nd step (Time Series Fields)
+        is_disabled_add_time_series_field = pageProgrammeManagement.getButtonAddTimeSeriesField().get_attribute(
+            "disabled"
+        )
+        assert is_disabled_add_time_series_field == "true"
+
+        is_disabled_edit_time_series_field_name = pageProgrammeManagement.getInputPduFieldsObjectLabel(0).get_attribute(
+            "disabled"
+        )
+        assert is_disabled_edit_time_series_field_name == "true"
+
+        is_disabled_edit_time_series_field_subtype = pageProgrammeManagement.getSelectPduFieldsObjectPduDataSubtype(
+            0
+        ).get_attribute("aria-disabled")
+        assert is_disabled_edit_time_series_field_subtype == "true"
+
+        # only possible to increase number of rounds
+        pageProgrammeManagement.getSelectPduFieldsObjectPduDataNumberOfRounds(0).click()
+        is_disabled_decrease_round_number = pageProgrammeManagement.select_listbox_element("1").get_attribute(
+            "aria-disabled"
+        )
+        assert is_disabled_decrease_round_number == "true"
+        is_disabled_decrease_round_number = pageProgrammeManagement.select_listbox_element("2").get_attribute(
+            "aria-disabled"
+        )
+        assert is_disabled_decrease_round_number is None
+        is_disabled_decrease_round_number = pageProgrammeManagement.select_listbox_element("3").get_attribute(
+            "aria-disabled"
+        )
+        assert is_disabled_decrease_round_number is None
+        pageProgrammeManagement.select_listbox_element("3").click()
+
+        is_disabled_edit_time_series_existing_round_name_1 = pageProgrammeManagement.getInputPduFieldsRoundsNames(
+            0, 0
+        ).get_attribute("disabled")
+        assert is_disabled_edit_time_series_existing_round_name_1 == "true"
+        is_disabled_edit_time_series_existing_round_name_2 = pageProgrammeManagement.getInputPduFieldsRoundsNames(
+            0, 1
+        ).get_attribute("disabled")
+        assert is_disabled_edit_time_series_existing_round_name_2 == "true"
+
+        pageProgrammeManagement.getInputPduFieldsRoundsNames(0, 2).send_keys("Round 3")
+
+        pageProgrammeManagement.getButtonNext().click()
+        # 3rd step (Partners)
+        pageProgrammeManagement.getAccessToProgram()
+        pageProgrammeManagement.getButtonSave().click()
+        assert program_name in pageProgrammeDetails.getHeaderTitle().text

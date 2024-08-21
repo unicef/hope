@@ -14,7 +14,6 @@ from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.mis_datahub.models import Program
 from hct_mis_api.apps.payment.api.dataclasses import SimilarityPair
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
@@ -111,6 +110,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     DEDUP_ENGINE_UPLOADED = "UPLOADED"
     DEDUP_ENGINE_IN_PROGRESS = "IN_PROGRESS"
     DEDUP_ENGINE_FINISHED = "FINISHED"
+    DEDUP_ENGINE_UPLOAD_ERROR = "UPLOAD_ERROR"
     DEDUP_ENGINE_ERROR = "ERROR"
 
     DEDUP_ENGINE_STATUS_CHOICE = (
@@ -119,6 +119,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         (DEDUP_ENGINE_IN_PROGRESS, _("In Progress")),
         (DEDUP_ENGINE_FINISHED, _("Finished")),
         (DEDUP_ENGINE_ERROR, _("Error")),
+        (DEDUP_ENGINE_UPLOAD_ERROR, _("Upload Error")),
     )
     name = CICharField(
         max_length=255,
@@ -323,7 +324,10 @@ class DeduplicationEngineSimilarityPairManager(models.Manager):
             .annotate(
                 is_duplicate=ExpressionWrapper(
                     models.Case(
-                        models.When(similarity_score__gte=models.F("program__threshold"), then=models.Value(True)),
+                        models.When(
+                            similarity_score__gte=models.F("program__biometric_deduplication_threshold"),
+                            then=models.Value(True),
+                        ),
                         default=models.Value(False),
                         output_field=models.BooleanField(),
                     ),
@@ -357,9 +361,6 @@ class DeduplicationEngineSimilarityPair(models.Model):
         unique_together = ("individual1", "individual2")
         constraints = [
             # Prevent an Individual from being marked as a duplicate of itself
-            models.CheckConstraint(
-                check=~models.Q(individual1=models.F("individual2")), name="prevent_self_duplicates"
-            ),
             # Enforce a consistent ordering to avoid duplicate entries in reverse
             models.CheckConstraint(
                 check=models.Q(individual1__lt=models.F("individual2")), name="individual1_lt_individual2"
@@ -367,18 +368,24 @@ class DeduplicationEngineSimilarityPair(models.Model):
         ]
 
     @classmethod
-    def bulk_add_duplicates(cls, deduplication_set_id: str, duplicates_data: List[SimilarityPair]) -> None:
+    def bulk_add_pairs(cls, deduplication_set_id: str, duplicates_data: List[SimilarityPair]) -> None:
+        from hct_mis_api.apps.program.models import Program
+
         program = Program.objects.get(deduplication_set_id=deduplication_set_id)
         duplicates = []
         for pair in duplicates_data:
             # Ensure consistent ordering of individual1 and individual2
-            individual1, individual2 = sorted([pair.first, pair.second], key=lambda x: x.id)
+            individual1, individual2 = sorted([pair.first, pair.second])
+
+            if individual1 == individual2:
+                logger.warning(f"Skipping duplicate pair ({individual1}, {individual2})")
+                continue
 
             duplicates.append(
                 cls(
                     program=program,
-                    individual1_id=individual1.id,
-                    individual2_id=individual2.id,
+                    individual1_id=individual1,
+                    individual2_id=individual2,
                     similarity_score=pair.similarity_score,
                 )
             )

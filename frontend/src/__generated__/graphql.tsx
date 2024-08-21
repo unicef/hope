@@ -1230,18 +1230,6 @@ export type CreateProgram = {
   validationErrors?: Maybe<Scalars['Arg']['output']>;
 };
 
-export type CreateProgramCycle = {
-  __typename?: 'CreateProgramCycle';
-  program?: Maybe<ProgramNode>;
-  validationErrors?: Maybe<Scalars['Arg']['output']>;
-};
-
-export type CreateProgramCycleInput = {
-  endDate?: InputMaybe<Scalars['Date']['input']>;
-  startDate: Scalars['Date']['input'];
-  title: Scalars['String']['input'];
-};
-
 export type CreateProgramInput = {
   administrativeAreasOfImplementation?: InputMaybe<Scalars['String']['input']>;
   budget?: InputMaybe<Scalars['Decimal']['input']>;
@@ -1420,11 +1408,6 @@ export type DeleteProgram = {
   ok?: Maybe<Scalars['Boolean']['output']>;
 };
 
-export type DeleteProgramCycle = {
-  __typename?: 'DeleteProgramCycle';
-  program?: Maybe<ProgramNode>;
-};
-
 export type DeleteRegistrationDataImport = {
   __typename?: 'DeleteRegistrationDataImport';
   ok?: Maybe<Scalars['Boolean']['output']>;
@@ -1551,7 +1534,7 @@ export type DeliveryMechanismPerPaymentPlanNode = Node & {
   code?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   createdBy: UserNode;
-  deliveryMechanism: DeliveryMechanismNode;
+  deliveryMechanism?: Maybe<DeliveryMechanismNode>;
   deliveryMechanismChoice?: Maybe<DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice>;
   deliveryMechanismOrder: Scalars['Int']['output'];
   financialServiceProvider?: Maybe<FinancialServiceProviderNode>;
@@ -4019,7 +4002,6 @@ export type Mutations = {
   createPaymentPlan?: Maybe<CreatePaymentPlanMutation>;
   createPaymentVerificationPlan?: Maybe<CreateVerificationPlanMutation>;
   createProgram?: Maybe<CreateProgram>;
-  createProgramCycle?: Maybe<CreateProgramCycle>;
   createReport?: Maybe<CreateReport>;
   createSurvey?: Maybe<CreateSurveyMutation>;
   createTargetPopulation?: Maybe<CreateTargetPopulationMutation>;
@@ -4027,7 +4009,6 @@ export type Mutations = {
   deletePaymentPlan?: Maybe<DeletePaymentPlanMutation>;
   deletePaymentVerificationPlan?: Maybe<DeletePaymentVerificationPlan>;
   deleteProgram?: Maybe<DeleteProgram>;
-  deleteProgramCycle?: Maybe<DeleteProgramCycle>;
   deleteRegistrationDataImport?: Maybe<DeleteRegistrationDataImport>;
   deleteTargetPopulation?: Maybe<DeleteTargetPopulationMutationPayload>;
   discardPaymentVerificationPlan?: Maybe<DiscardPaymentVerificationPlan>;
@@ -4071,7 +4052,6 @@ export type Mutations = {
   updatePaymentVerificationReceivedAndReceivedAmount?: Maybe<UpdatePaymentVerificationReceivedAndReceivedAmount>;
   updatePaymentVerificationStatusAndReceivedAmount?: Maybe<UpdatePaymentVerificationStatusAndReceivedAmount>;
   updateProgram?: Maybe<UpdateProgram>;
-  updateProgramCycle?: Maybe<UpdateProgramCycle>;
   updateTargetPopulation?: Maybe<UpdateTargetPopulationMutation>;
   uploadImportDataXlsxFileAsync?: Maybe<UploadImportDataXlsxFileAsync>;
 };
@@ -4263,11 +4243,6 @@ export type MutationsCreateProgramArgs = {
 };
 
 
-export type MutationsCreateProgramCycleArgs = {
-  programCycleData: CreateProgramCycleInput;
-};
-
-
 export type MutationsCreateReportArgs = {
   reportData: CreateReportInput;
 };
@@ -4302,11 +4277,6 @@ export type MutationsDeletePaymentVerificationPlanArgs = {
 
 export type MutationsDeleteProgramArgs = {
   programId: Scalars['String']['input'];
-};
-
-
-export type MutationsDeleteProgramCycleArgs = {
-  programCycleId: Scalars['ID']['input'];
 };
 
 
@@ -4565,12 +4535,6 @@ export type MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs = {
 
 export type MutationsUpdateProgramArgs = {
   programData?: InputMaybe<UpdateProgramInput>;
-  version?: InputMaybe<Scalars['BigInt']['input']>;
-};
-
-
-export type MutationsUpdateProgramCycleArgs = {
-  programCycleData?: InputMaybe<UpdateProgramCycleInput>;
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
@@ -5718,6 +5682,8 @@ export type ProgramNode = Node & {
   adminAreas: AreaNodeConnection;
   adminUrl?: Maybe<Scalars['String']['output']>;
   administrativeAreasOfImplementation: Scalars['String']['output'];
+  biometricDeduplicationEnabled: Scalars['Boolean']['output'];
+  biometricDeduplicationThreshold: Scalars['Float']['output'];
   budget?: Maybe<Scalars['Decimal']['output']>;
   businessArea: UserBusinessAreaNode;
   caHashId?: Maybe<Scalars['String']['output']>;
@@ -5727,6 +5693,7 @@ export type ProgramNode = Node & {
   createdAt: Scalars['DateTime']['output'];
   cycles?: Maybe<ProgramCycleNodeConnection>;
   dataCollectingType?: Maybe<DataCollectingTypeNode>;
+  deduplicationSetId?: Maybe<Scalars['UUID']['output']>;
   description: Scalars['String']['output'];
   endDate: Scalars['Date']['output'];
   feedbackSet: FeedbackNodeConnection;
@@ -7377,6 +7344,14 @@ export type RegistrationDataImportDatahubNode = Node & {
   updatedAt: Scalars['DateTime']['output'];
 };
 
+export enum RegistrationDataImportDeduplicationEngineStatus {
+  Error = 'ERROR',
+  Finished = 'FINISHED',
+  InProgress = 'IN_PROGRESS',
+  Pending = 'PENDING',
+  Uploaded = 'UPLOADED'
+}
+
 export type RegistrationDataImportNode = Node & {
   __typename?: 'RegistrationDataImportNode';
   adminUrl?: Maybe<Scalars['String']['output']>;
@@ -7391,6 +7366,7 @@ export type RegistrationDataImportNode = Node & {
   createdAt: Scalars['DateTime']['output'];
   dataSource: RegistrationDataImportDataSource;
   datahubId?: Maybe<Scalars['UUID']['output']>;
+  deduplicationEngineStatus?: Maybe<RegistrationDataImportDeduplicationEngineStatus>;
   erased: Scalars['Boolean']['output'];
   errorMessage: Scalars['String']['output'];
   excluded: Scalars['Boolean']['output'];
@@ -7407,6 +7383,7 @@ export type RegistrationDataImportNode = Node & {
   importDate: Scalars['DateTime']['output'];
   importedBy?: Maybe<UserNode>;
   individuals: IndividualNodeConnection;
+  isDeduplicated?: Maybe<Scalars['String']['output']>;
   messages: CommunicationMessageNodeConnection;
   name: Scalars['String']['output'];
   numberOfHouseholds: Scalars['Int']['output'];
@@ -8917,19 +8894,6 @@ export type UpdateProgram = {
   validationErrors?: Maybe<Scalars['Arg']['output']>;
 };
 
-export type UpdateProgramCycle = {
-  __typename?: 'UpdateProgramCycle';
-  program?: Maybe<ProgramNode>;
-  validationErrors?: Maybe<Scalars['Arg']['output']>;
-};
-
-export type UpdateProgramCycleInput = {
-  endDate?: InputMaybe<Scalars['Date']['input']>;
-  programCycleId: Scalars['ID']['input'];
-  startDate?: InputMaybe<Scalars['Date']['input']>;
-  title?: InputMaybe<Scalars['String']['input']>;
-};
-
 export type UpdateProgramInput = {
   administrativeAreasOfImplementation?: InputMaybe<Scalars['String']['input']>;
   budget?: InputMaybe<Scalars['Decimal']['input']>;
@@ -9647,9 +9611,9 @@ export type PaymentRecordDetailsFragment = { __typename?: 'PaymentRecordNode', i
 
 export type ProgramDetailsFragment = { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null };
 
-export type RegistrationMinimalFragment = { __typename?: 'RegistrationDataImportNode', id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, numberOfIndividuals: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null };
+export type RegistrationMinimalFragment = { __typename?: 'RegistrationDataImportNode', id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, numberOfIndividuals: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, isDeduplicated?: string | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null };
 
-export type RegistrationDetailedFragment = { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, batchDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null };
+export type RegistrationDetailedFragment = { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, isDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null };
 
 export type ImportedHouseholdMinimalFragment = { __typename?: 'ImportedHouseholdNode', id: string, importId?: string | null, size?: number | null, flexFields?: any | null, deviceid: string, start?: any | null, detailId?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, hasDuplicates?: boolean | null, fchildHoh?: boolean | null, childHoh?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string } | null, admin1?: { __typename?: 'AreaNode', pCode?: string | null, name: string } | null, admin2?: { __typename?: 'AreaNode', pCode?: string | null, name: string } | null };
 
@@ -10161,7 +10125,7 @@ export type MergeRdiMutationVariables = Exact<{
 }>;
 
 
-export type MergeRdiMutation = { __typename?: 'Mutations', mergeRegistrationDataImport?: { __typename?: 'MergeRegistrationDataImportMutation', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, batchDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null } | null } | null };
+export type MergeRdiMutation = { __typename?: 'Mutations', mergeRegistrationDataImport?: { __typename?: 'MergeRegistrationDataImportMutation', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, isDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null } | null } | null };
 
 export type RefuseRdiMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -11110,7 +11074,7 @@ export type AllProgramsForChoicesQueryVariables = Exact<{
 }>;
 
 
-export type AllProgramsForChoicesQuery = { __typename?: 'Query', allPrograms?: { __typename?: 'ProgramNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'ProgramNodeEdge', cursor: string, node?: { __typename?: 'ProgramNode', id: string, name: string, status: ProgramStatus, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, type?: DataCollectingTypeType | null, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string } | null } | null } | null> } | null };
+export type AllProgramsForChoicesQuery = { __typename?: 'Query', allPrograms?: { __typename?: 'ProgramNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'ProgramNodeEdge', cursor: string, node?: { __typename?: 'ProgramNode', id: string, name: string, status: ProgramStatus, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, type?: DataCollectingTypeType | null, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string } | null, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string } | null> | null } | null } | null> } | null };
 
 export type ProgramQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -11215,7 +11179,7 @@ export type AllRegistrationDataImportsQueryVariables = Exact<{
 }>;
 
 
-export type AllRegistrationDataImportsQuery = { __typename?: 'Query', allRegistrationDataImports?: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'RegistrationDataImportNodeEdge', cursor: string, node?: { __typename?: 'RegistrationDataImportNode', id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, numberOfIndividuals: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null } | null } | null> } | null };
+export type AllRegistrationDataImportsQuery = { __typename?: 'Query', allRegistrationDataImports?: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'RegistrationDataImportNodeEdge', cursor: string, node?: { __typename?: 'RegistrationDataImportNode', id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, numberOfIndividuals: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, isDeduplicated?: string | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null } | null } | null> } | null };
 
 export type ImportedHouseholdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -11255,7 +11219,7 @@ export type RegistrationDataImportQueryVariables = Exact<{
 }>;
 
 
-export type RegistrationDataImportQuery = { __typename?: 'Query', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, batchDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null } | null };
+export type RegistrationDataImportQuery = { __typename?: 'Query', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, isDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null } | null };
 
 export type XlsxImportDataQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -12503,6 +12467,7 @@ export const RegistrationMinimalFragmentDoc = gql`
   refuseReason
   totalHouseholdsCountWithValidPhoneNo
   adminUrl
+  isDeduplicated
 }
     `;
 export const RegistrationDetailedFragmentDoc = gql`
@@ -21908,6 +21873,9 @@ export const AllProgramsForChoicesDocument = gql`
           householdFiltersAvailable
           description
         }
+        pduFields {
+          id
+        }
       }
     }
   }
@@ -24441,8 +24409,6 @@ export type ResolversTypes = {
   CreatePaymentPlanMutation: ResolverTypeWrapper<CreatePaymentPlanMutation>;
   CreatePaymentVerificationInput: CreatePaymentVerificationInput;
   CreateProgram: ResolverTypeWrapper<CreateProgram>;
-  CreateProgramCycle: ResolverTypeWrapper<CreateProgramCycle>;
-  CreateProgramCycleInput: CreateProgramCycleInput;
   CreateProgramInput: CreateProgramInput;
   CreateReport: ResolverTypeWrapper<CreateReport>;
   CreateReportInput: CreateReportInput;
@@ -24466,7 +24432,6 @@ export type ResolversTypes = {
   DeletePaymentPlanMutation: ResolverTypeWrapper<DeletePaymentPlanMutation>;
   DeletePaymentVerificationPlan: ResolverTypeWrapper<DeletePaymentVerificationPlan>;
   DeleteProgram: ResolverTypeWrapper<DeleteProgram>;
-  DeleteProgramCycle: ResolverTypeWrapper<DeleteProgramCycle>;
   DeleteRegistrationDataImport: ResolverTypeWrapper<DeleteRegistrationDataImport>;
   DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput;
   DeleteTargetPopulationMutationPayload: ResolverTypeWrapper<DeleteTargetPopulationMutationPayload>;
@@ -24716,6 +24681,7 @@ export type ResolversTypes = {
   RegistrationDataImportDataSource: RegistrationDataImportDataSource;
   RegistrationDataImportDatahubImportDone: RegistrationDataImportDatahubImportDone;
   RegistrationDataImportDatahubNode: ResolverTypeWrapper<RegistrationDataImportDatahubNode>;
+  RegistrationDataImportDeduplicationEngineStatus: RegistrationDataImportDeduplicationEngineStatus;
   RegistrationDataImportNode: ResolverTypeWrapper<RegistrationDataImportNode>;
   RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>;
   RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>;
@@ -24863,8 +24829,6 @@ export type ResolversTypes = {
   UpdatePaymentVerificationReceivedAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationReceivedAndReceivedAmount>;
   UpdatePaymentVerificationStatusAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationStatusAndReceivedAmount>;
   UpdateProgram: ResolverTypeWrapper<UpdateProgram>;
-  UpdateProgramCycle: ResolverTypeWrapper<UpdateProgramCycle>;
-  UpdateProgramCycleInput: UpdateProgramCycleInput;
   UpdateProgramInput: UpdateProgramInput;
   UpdateTargetPopulationInput: UpdateTargetPopulationInput;
   UpdateTargetPopulationMutation: ResolverTypeWrapper<UpdateTargetPopulationMutation>;
@@ -24974,8 +24938,6 @@ export type ResolversParentTypes = {
   CreatePaymentPlanMutation: CreatePaymentPlanMutation;
   CreatePaymentVerificationInput: CreatePaymentVerificationInput;
   CreateProgram: CreateProgram;
-  CreateProgramCycle: CreateProgramCycle;
-  CreateProgramCycleInput: CreateProgramCycleInput;
   CreateProgramInput: CreateProgramInput;
   CreateReport: CreateReport;
   CreateReportInput: CreateReportInput;
@@ -24998,7 +24960,6 @@ export type ResolversParentTypes = {
   DeletePaymentPlanMutation: DeletePaymentPlanMutation;
   DeletePaymentVerificationPlan: DeletePaymentVerificationPlan;
   DeleteProgram: DeleteProgram;
-  DeleteProgramCycle: DeleteProgramCycle;
   DeleteRegistrationDataImport: DeleteRegistrationDataImport;
   DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput;
   DeleteTargetPopulationMutationPayload: DeleteTargetPopulationMutationPayload;
@@ -25329,8 +25290,6 @@ export type ResolversParentTypes = {
   UpdatePaymentVerificationReceivedAndReceivedAmount: UpdatePaymentVerificationReceivedAndReceivedAmount;
   UpdatePaymentVerificationStatusAndReceivedAmount: UpdatePaymentVerificationStatusAndReceivedAmount;
   UpdateProgram: UpdateProgram;
-  UpdateProgramCycle: UpdateProgramCycle;
-  UpdateProgramCycleInput: UpdateProgramCycleInput;
   UpdateProgramInput: UpdateProgramInput;
   UpdateTargetPopulationInput: UpdateTargetPopulationInput;
   UpdateTargetPopulationMutation: UpdateTargetPopulationMutation;
@@ -25932,12 +25891,6 @@ export type CreateProgramResolvers<ContextType = any, ParentType extends Resolve
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type CreateProgramCycleResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateProgramCycle'] = ResolversParentTypes['CreateProgramCycle']> = {
-  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
-  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type CreateReportResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateReport'] = ResolversParentTypes['CreateReport']> = {
   report?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -26048,11 +26001,6 @@ export type DeleteProgramResolvers<ContextType = any, ParentType extends Resolve
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type DeleteProgramCycleResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteProgramCycle'] = ResolversParentTypes['DeleteProgramCycle']> = {
-  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type DeleteRegistrationDataImportResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteRegistrationDataImport'] = ResolversParentTypes['DeleteRegistrationDataImport']> = {
   ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -26108,7 +26056,7 @@ export type DeliveryMechanismPerPaymentPlanNodeResolvers<ContextType = any, Pare
   code?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>;
-  deliveryMechanism?: Resolver<ResolversTypes['DeliveryMechanismNode'], ParentType, ContextType>;
+  deliveryMechanism?: Resolver<Maybe<ResolversTypes['DeliveryMechanismNode']>, ParentType, ContextType>;
   deliveryMechanismChoice?: Resolver<Maybe<ResolversTypes['DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice']>, ParentType, ContextType>;
   deliveryMechanismOrder?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>;
@@ -27440,7 +27388,6 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   createPaymentPlan?: Resolver<Maybe<ResolversTypes['CreatePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsCreatePaymentPlanArgs, 'input'>>;
   createPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['CreateVerificationPlanMutation']>, ParentType, ContextType, RequireFields<MutationsCreatePaymentVerificationPlanArgs, 'input'>>;
   createProgram?: Resolver<Maybe<ResolversTypes['CreateProgram']>, ParentType, ContextType, RequireFields<MutationsCreateProgramArgs, 'programData'>>;
-  createProgramCycle?: Resolver<Maybe<ResolversTypes['CreateProgramCycle']>, ParentType, ContextType, RequireFields<MutationsCreateProgramCycleArgs, 'programCycleData'>>;
   createReport?: Resolver<Maybe<ResolversTypes['CreateReport']>, ParentType, ContextType, RequireFields<MutationsCreateReportArgs, 'reportData'>>;
   createSurvey?: Resolver<Maybe<ResolversTypes['CreateSurveyMutation']>, ParentType, ContextType, RequireFields<MutationsCreateSurveyArgs, 'input'>>;
   createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>;
@@ -27448,7 +27395,6 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   deletePaymentPlan?: Resolver<Maybe<ResolversTypes['DeletePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsDeletePaymentPlanArgs, 'paymentPlanId'>>;
   deletePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['DeletePaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsDeletePaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>;
   deleteProgram?: Resolver<Maybe<ResolversTypes['DeleteProgram']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramArgs, 'programId'>>;
-  deleteProgramCycle?: Resolver<Maybe<ResolversTypes['DeleteProgramCycle']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramCycleArgs, 'programCycleId'>>;
   deleteRegistrationDataImport?: Resolver<Maybe<ResolversTypes['DeleteRegistrationDataImport']>, ParentType, ContextType, RequireFields<MutationsDeleteRegistrationDataImportArgs, 'registrationDataImportId'>>;
   deleteTargetPopulation?: Resolver<Maybe<ResolversTypes['DeleteTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsDeleteTargetPopulationArgs, 'input'>>;
   discardPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['DiscardPaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsDiscardPaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>;
@@ -27492,7 +27438,6 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   updatePaymentVerificationReceivedAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationReceivedAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs, 'paymentVerificationId' | 'received' | 'receivedAmount'>>;
   updatePaymentVerificationStatusAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationStatusAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs, 'paymentVerificationId' | 'receivedAmount'>>;
   updateProgram?: Resolver<Maybe<ResolversTypes['UpdateProgram']>, ParentType, ContextType, Partial<MutationsUpdateProgramArgs>>;
-  updateProgramCycle?: Resolver<Maybe<ResolversTypes['UpdateProgramCycle']>, ParentType, ContextType, Partial<MutationsUpdateProgramCycleArgs>>;
   updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>;
   uploadImportDataXlsxFileAsync?: Resolver<Maybe<ResolversTypes['UploadImportDataXLSXFileAsync']>, ParentType, ContextType, RequireFields<MutationsUploadImportDataXlsxFileAsyncArgs, 'businessAreaSlug' | 'file'>>;
 };
@@ -28055,6 +28000,8 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   adminAreas?: Resolver<ResolversTypes['AreaNodeConnection'], ParentType, ContextType, Partial<ProgramNodeAdminAreasArgs>>;
   adminUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   administrativeAreasOfImplementation?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  biometricDeduplicationEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  biometricDeduplicationThreshold?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   budget?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>;
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>;
   caHashId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -28064,6 +28011,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   cycles?: Resolver<Maybe<ResolversTypes['ProgramCycleNodeConnection']>, ParentType, ContextType, Partial<ProgramNodeCyclesArgs>>;
   dataCollectingType?: Resolver<Maybe<ResolversTypes['DataCollectingTypeNode']>, ParentType, ContextType>;
+  deduplicationSetId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   endDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   feedbackSet?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, Partial<ProgramNodeFeedbackSetArgs>>;
@@ -28399,6 +28347,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   dataSource?: Resolver<ResolversTypes['RegistrationDataImportDataSource'], ParentType, ContextType>;
   datahubId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;
+  deduplicationEngineStatus?: Resolver<Maybe<ResolversTypes['RegistrationDataImportDeduplicationEngineStatus']>, ParentType, ContextType>;
   erased?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   errorMessage?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   excluded?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -28415,6 +28364,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   importDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   importedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, Partial<RegistrationDataImportNodeIndividualsArgs>>;
+  isDeduplicated?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, Partial<RegistrationDataImportNodeMessagesArgs>>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   numberOfHouseholds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -29407,12 +29357,6 @@ export type UpdateProgramResolvers<ContextType = any, ParentType extends Resolve
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type UpdateProgramCycleResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateProgramCycle'] = ResolversParentTypes['UpdateProgramCycle']> = {
-  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
-  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type UpdateTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateTargetPopulationMutation'] = ResolversParentTypes['UpdateTargetPopulationMutation']> = {
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>;
   validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
@@ -29684,7 +29628,6 @@ export type Resolvers<ContextType = any> = {
   CreateGrievanceTicketMutation?: CreateGrievanceTicketMutationResolvers<ContextType>;
   CreatePaymentPlanMutation?: CreatePaymentPlanMutationResolvers<ContextType>;
   CreateProgram?: CreateProgramResolvers<ContextType>;
-  CreateProgramCycle?: CreateProgramCycleResolvers<ContextType>;
   CreateReport?: CreateReportResolvers<ContextType>;
   CreateSurveyMutation?: CreateSurveyMutationResolvers<ContextType>;
   CreateTargetPopulationMutation?: CreateTargetPopulationMutationResolvers<ContextType>;
@@ -29702,7 +29645,6 @@ export type Resolvers<ContextType = any> = {
   DeletePaymentPlanMutation?: DeletePaymentPlanMutationResolvers<ContextType>;
   DeletePaymentVerificationPlan?: DeletePaymentVerificationPlanResolvers<ContextType>;
   DeleteProgram?: DeleteProgramResolvers<ContextType>;
-  DeleteProgramCycle?: DeleteProgramCycleResolvers<ContextType>;
   DeleteRegistrationDataImport?: DeleteRegistrationDataImportResolvers<ContextType>;
   DeleteTargetPopulationMutationPayload?: DeleteTargetPopulationMutationPayloadResolvers<ContextType>;
   DeliveredQuantityNode?: DeliveredQuantityNodeResolvers<ContextType>;
@@ -29979,7 +29921,6 @@ export type Resolvers<ContextType = any> = {
   UpdatePaymentVerificationReceivedAndReceivedAmount?: UpdatePaymentVerificationReceivedAndReceivedAmountResolvers<ContextType>;
   UpdatePaymentVerificationStatusAndReceivedAmount?: UpdatePaymentVerificationStatusAndReceivedAmountResolvers<ContextType>;
   UpdateProgram?: UpdateProgramResolvers<ContextType>;
-  UpdateProgramCycle?: UpdateProgramCycleResolvers<ContextType>;
   UpdateTargetPopulationMutation?: UpdateTargetPopulationMutationResolvers<ContextType>;
   Upload?: GraphQLScalarType;
   UploadImportDataXLSXFileAsync?: UploadImportDataXlsxFileAsyncResolvers<ContextType>;
