@@ -81,7 +81,13 @@ export function mapFiltersToInitialValues(filters): any[] {
         case 'EQUALS':
           return mappedFilters.push({
             ...each,
-            value: each.arguments[0],
+            value:
+              each.fieldAttribute.type === 'BOOL' ||
+              each.fieldAttribute?.pduData?.subtype
+                ? each.arguments[0]
+                  ? 'Yes'
+                  : 'No'
+                : each.arguments[0],
           });
         case 'CONTAINS':
           // eslint-disable-next-line no-case-declarations
