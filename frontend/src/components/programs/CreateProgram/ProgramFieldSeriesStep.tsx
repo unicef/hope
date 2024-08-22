@@ -34,6 +34,7 @@ export const ProgramFieldSeriesStep = ({
   setStep,
   step,
   programHasRdi,
+  programHasTp,
   pdusubtypeChoicesData,
   errors,
   programId: formProgramId,
@@ -57,7 +58,7 @@ export const ProgramFieldSeriesStep = ({
     'Are you sure you want to delete this field? This action cannot be reversed.',
   );
 
-  const fieldDisabled = programHasRdi;
+  const fieldDisabled = programHasRdi || programHasTp;
 
   return (
     <>
