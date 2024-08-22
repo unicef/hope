@@ -239,8 +239,14 @@ class TargetingCreate(BaseComponents):
     def getSelectRoundOption(self, round_number: int = 0) -> WebElement:
         return self.wait_for(self.selectRoundOption.format(round_number))
 
-    def getSelectIndividualsiFltersBlocksIsNull(self) -> WebElement:
-        return self.wait_for(self.selectIndividualsFiltersBlocksIsNull)
+    def getSelectIndividualsiFltersBlocksIsNull(
+        self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0
+    ) -> WebElement:
+        return self.wait_for(
+            self.selectIndividualsFiltersBlocksIsNull.format(
+                individuals_filters_blocks_number, individual_block_filters_number
+            )
+        )
 
     def getInputIndividualsFiltersBlocksValueFrom(
         self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0
