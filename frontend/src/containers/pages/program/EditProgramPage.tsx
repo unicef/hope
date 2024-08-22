@@ -95,10 +95,11 @@ export const EditProgramPage = (): ReactElement => {
     partnerAccess = ProgramPartnerAccess.AllPartnersAccess,
     registrationImports,
     pduFields,
-    targetpopulationSet,
+    targetPopulationsCount,
   } = data.program;
 
   const programHasRdi = registrationImports?.totalCount > 0;
+  const programHasTp = targetPopulationsCount > 0;
 
   const handleSubmit = async (values): Promise<void> => {
     const budgetValue = parseFloat(values.budget) ?? 0;
@@ -351,6 +352,7 @@ export const EditProgramPage = (): ReactElement => {
                         setErrors={setErrors}
                         setFieldTouched={setFieldTouched}
                         programHasRdi={programHasRdi}
+                        programHasTp={programHasTp}
                         programId={id}
                         program={data.program}
                         setFieldValue={setFieldValue}
