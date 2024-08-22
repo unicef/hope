@@ -7,9 +7,6 @@ from django.core.management import call_command
 
 import pytest
 from dateutil.relativedelta import relativedelta
-
-from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values, field_label_to_field_name
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from page_object.targeting.targeting import Targeting
 from page_object.targeting.targeting_create import TargetingCreate
 from page_object.targeting.targeting_details import TargetingDetails
@@ -19,14 +16,31 @@ from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, FlexibleAttribute, PeriodicFieldData
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    DataCollectingType,
+    FlexibleAttribute,
+    PeriodicFieldData,
+)
 from hct_mis_api.apps.household.fixtures import (
     create_household,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import HEARING, HOST, REFUGEE, SEEING, Household, Individual
+from hct_mis_api.apps.household.models import (
+    HEARING,
+    HOST,
+    REFUGEE,
+    SEEING,
+    Household,
+    Individual,
+)
+from hct_mis_api.apps.periodic_data_update.utils import (
+    field_label_to_field_name,
+    populate_pdu_with_null_values,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from selenium_tests.page_object.filters import Filters
@@ -47,6 +61,7 @@ def non_sw_program() -> Program:
         "Test Programm", dct_type=DataCollectingType.Type.STANDARD, status=Program.ACTIVE
     )
 
+
 @pytest.fixture
 def program() -> Program:
     business_area = create_afghanistan()
@@ -54,8 +69,8 @@ def program() -> Program:
 
 
 @pytest.fixture
-def individual(program: Program) -> Individual:
-    def _individual():
+def individual(program: Program) -> Callable:
+    def _individual() -> Individual:
         business_area = create_afghanistan()
         rdi = RegistrationDataImportFactory()
         household, individuals = create_household_and_individuals(
@@ -75,6 +90,7 @@ def individual(program: Program) -> Individual:
         individual = individuals[0]
         individual.flex_fields = populate_pdu_with_null_values(program, individual.flex_fields)
         return individual
+
     return _individual
 
 

@@ -1122,7 +1122,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RD
                     'line': 3
                 }
             ],
-            'message': 'It is not possible to change the names of existing rounds for a Program with RDI',
+            'message': 'It is not possible to change the names of existing rounds for a Program with RDI or TP',
             'path': [
                 'updateProgram'
             ]
@@ -1142,7 +1142,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RD
                     'line': 3
                 }
             ],
-            'message': 'It is not possible to decrease the number of rounds for a Program with RDI',
+            'message': 'It is not possible to decrease the number of rounds for a Program with RDI or TP',
             'path': [
                 'updateProgram'
             ]
