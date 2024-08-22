@@ -61,6 +61,7 @@ export const registrationDetailed = gql`
       count
       percentage
     }
+    canMerge
   }
 `;
 

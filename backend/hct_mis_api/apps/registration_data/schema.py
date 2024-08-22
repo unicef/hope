@@ -36,6 +36,8 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
     total_households_count_with_valid_phone_no = graphene.Int()
     is_deduplicated = graphene.String()
 
+    can_merge = graphene.Boolean()
+
     class Meta:
         model = RegistrationDataImport
         filter_fields = []
@@ -92,6 +94,18 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
         ]:
             return "YES"
         return "NO"
+
+    @staticmethod
+    def resolve_can_merge(parent: RegistrationDataImport, info: Any, **kwargs: Any) -> bool:
+        if not parent.program.is_active():
+            return False
+
+        is_still_processing = RegistrationDataImport.objects.filter(
+            program=parent.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+        ).exists()
+        if is_still_processing:
+            return False
+        return True
 
 
 class Query(graphene.ObjectType):
