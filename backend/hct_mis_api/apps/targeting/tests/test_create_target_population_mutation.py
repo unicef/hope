@@ -281,20 +281,3 @@ class TestCreateTargetPopulationMutation(APITestCase):
             "Not possible to assign Finished Program Cycle to Targeting",
             response_error["errors"][0]["message"],
         )
-
-    def test_create_targeting_if_program_cycle_without_end_date(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_CREATE], self.program.business_area)
-        self.program_cycle.end_date = None
-        self.program_cycle.save()
-
-        response_error = self.graphql_request(
-            request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
-            context={"user": self.user},
-            variables=self.variables,
-        )
-        self.assertEqual(TargetPopulation.objects.count(), 0)
-        assert "errors" in response_error
-        self.assertIn(
-            "Not possible to create Targeting with Programme Cycle without end date",
-            response_error["errors"][0]["message"],
-        )

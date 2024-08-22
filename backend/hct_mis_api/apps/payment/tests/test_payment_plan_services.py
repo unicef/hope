@@ -593,17 +593,8 @@ class TestPaymentPlanServices(APITestCase):
             cycle.save()
             PaymentPlanService.create(input_data=input_data, user=self.user)
 
-        with self.assertRaisesMessage(
-            GraphQLError,
-            "Impossible to create Payment Plan for Programme Cycle without end date",
-        ):
-            cycle.status = ProgramCycle.ACTIVE
-            cycle.end_date = None
-            cycle.save()
-            PaymentPlanService.create(input_data=input_data, user=self.user)
-
         cycle.status = ProgramCycle.DRAFT
-        cycle.end_date = parse_date("2021-11-25")
+        cycle.end_date = None
         cycle.save()
         PaymentPlanService.create(input_data=input_data, user=self.user)
         cycle.refresh_from_db()

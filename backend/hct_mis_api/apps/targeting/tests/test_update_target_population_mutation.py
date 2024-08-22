@@ -348,28 +348,3 @@ class TestUpdateTargetPopulationMutation(APITestCase):
 
         self.draft_target_population.refresh_from_db()
         self.assertEqual(str(self.draft_target_population.program_cycle.pk), str(program_cycle.pk))
-
-    def test_update_program_cycle_without_end_date(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_UPDATE], self.business_area)
-        self.program_cycle.end_date = None
-        self.program_cycle.save()
-
-        variables = copy.deepcopy(VARIABLES)
-        variables["updateTargetPopulationInput"]["id"] = self.id_to_base64(
-            self.draft_target_population.id, "TargetPopulationNode"
-        )
-        variables["updateTargetPopulationInput"]["name"] = "Some Random Name Here"
-        variables["updateTargetPopulationInput"]["programCycleId"] = self.id_to_base64(
-            self.program_cycle.id, "ProgramCycleNode"
-        )
-
-        response_error = self.graphql_request(
-            request_string=MUTATION_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables=variables,
-        )
-        assert "errors" in response_error
-        self.assertIn(
-            "Not possible to assign Programme Cycle without end date",
-            response_error["errors"][0]["message"],
-        )
