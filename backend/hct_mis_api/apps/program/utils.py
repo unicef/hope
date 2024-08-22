@@ -59,6 +59,7 @@ def copy_program_object(copy_from_program_id: str, program_data: dict, user: Use
         end_date=None,
         created_by=user,
     )
+    # create default rdi
     return program
 
 
@@ -306,13 +307,23 @@ class CopyProgramPopulation:
         return bank_accounts_info_list
 
 
-def copy_program_related_data(copy_from_program_id: str, new_program: Program, rdi: RegistrationDataImport) -> None:
+def copy_program_related_data(copy_from_program_id: str, new_program: Program) -> None:
     copy_from_individuals = Individual.objects.filter(program_id=copy_from_program_id, withdrawn=False, duplicate=False)
     copy_from_households = Household.objects.filter(
         program_id=copy_from_program_id,
         withdrawn=False,
     )
-
+    rdi = RegistrationDataImport.objects.create(
+        name=f"Default RDI for Programme: {new_program.name}",
+        status="MERGED",
+        imported_by=None,
+        data_source="XLS",
+        number_of_individuals=copy_from_individuals.count(),
+        number_of_households=copy_from_households.count(),
+        business_area=new_program.business_area,
+        program_id=new_program.id,
+        import_data=None,
+    )
     CopyProgramPopulation(
         copy_from_individuals,
         copy_from_households,

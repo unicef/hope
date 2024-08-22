@@ -60,7 +60,6 @@ class UpdateProgramInput(graphene.InputObjectType):
 
 class CopyProgramInput(graphene.InputObjectType):
     id = graphene.String(required=True)
-    rdi_id = graphene.String(required=True)
     name = graphene.String()
     start_date = graphene.Date()
     end_date = graphene.Date()
