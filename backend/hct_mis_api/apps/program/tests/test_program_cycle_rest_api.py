@@ -285,12 +285,19 @@ class ProgramCycleCreateSerializerTest(TestCase):
         self.assertIn("Create Programme Cycle is possible only for Active Programme.", str(error.exception))
 
     def test_validate_start_date(self) -> None:
+        # before program start date
         data = {"title": "Cycle 3", "start_date": parse_date("2022-01-01"), "end_date": parse_date("2023-01-01")}
         serializer = ProgramCycleCreateSerializer(data=data, context=self.get_serializer_context())
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
-        self.assertIn("Programme Cycle start date cannot be earlier than programme start date.", str(error.exception))
-
+        self.assertIn("Programme Cycle start date must be between programme start and end dates.", str(error.exception))
+        # after program end date
+        data = {"title": "Cycle 3", "start_date": parse_date("2100-01-01"), "end_date": parse_date("2100-01-11")}
+        serializer = ProgramCycleCreateSerializer(data=data, context=self.get_serializer_context())
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn("Programme Cycle start date must be between programme start and end dates.", str(error.exception))
+        # before latest cycle
         data = {"title": "Cycle 34567", "start_date": parse_date("2023-01-09"), "end_date": parse_date("2023-01-30")}
         serializer = ProgramCycleCreateSerializer(data=data, context=self.get_serializer_context())
         with self.assertRaises(ValidationError) as error:
@@ -298,13 +305,20 @@ class ProgramCycleCreateSerializerTest(TestCase):
         self.assertIn("Start date must be after the latest cycle.", str(error.exception))
 
     def test_validate_end_date(self) -> None:
-        data = {"title": "Cycle new", "start_date": parse_date("2098-01-01"), "end_date": parse_date("2111-01-01")}
+        # after program end date
+        data = {"title": "Cycle", "start_date": parse_date("2098-01-01"), "end_date": parse_date("2111-01-01")}
         serializer = ProgramCycleCreateSerializer(data=data, context=self.get_serializer_context())
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
-        self.assertIn("Programme Cycle end date cannot be later than programme end date", str(error.exception))
-
-        data = {"title": "Cycle new1234", "start_date": parse_date("2023-02-22"), "end_date": parse_date("2023-02-11")}
+        self.assertIn("Programme Cycle end date must be between programme start and end dates", str(error.exception))
+        # before program start date
+        data = {"title": "Cycle", "start_date": parse_date("2023-01-01"), "end_date": parse_date("2022-01-01")}
+        serializer = ProgramCycleCreateSerializer(data=data, context=self.get_serializer_context())
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn("Programme Cycle end date must be between programme start and end dates", str(error.exception))
+        # end before start date
+        data = {"title": "Cycle", "start_date": parse_date("2023-02-22"), "end_date": parse_date("2023-02-11")}
         serializer = ProgramCycleCreateSerializer(data=data, context=self.get_serializer_context())
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
@@ -365,13 +379,20 @@ class ProgramCycleUpdateSerializerTest(TestCase):
         self.assertIn(
             "Programme Cycles' timeframes must not overlap with the provided start date.", str(error.exception)
         )
-
+        # before program start date
         serializer = ProgramCycleUpdateSerializer(
             instance=cycle_2, data={"start_date": parse_date("1999-12-10")}, context=self.get_serializer_context()
         )
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
-        self.assertIn("Programme Cycle start date cannot be earlier than programme start date.", str(error.exception))
+        self.assertIn("Programme Cycle start date must be between programme start and end dates.", str(error.exception))
+        # after program end date
+        serializer = ProgramCycleUpdateSerializer(
+            instance=cycle_2, data={"start_date": parse_date("2100-01-01")}, context=self.get_serializer_context()
+        )
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn("Programme Cycle start date must be between programme start and end dates.", str(error.exception))
 
     def test_validate_end_date(self) -> None:
         self.cycle.end_date = datetime.strptime("2023-02-03", "%Y-%m-%d").date()
@@ -384,14 +405,24 @@ class ProgramCycleUpdateSerializerTest(TestCase):
             "This field may not be null.",
             str(error.exception),
         )
-
+        # end date before program start date
+        serializer = ProgramCycleUpdateSerializer(
+            instance=self.cycle, data={"end_date": parse_date("1999-10-10")}, context=self.get_serializer_context()
+        )
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn(
+            "Programme Cycle end date must be between programme start and end dates.",
+            str(error.exception),
+        )
+        # end date after program end date
         serializer = ProgramCycleUpdateSerializer(
             instance=self.cycle, data={"end_date": parse_date("2100-10-10")}, context=self.get_serializer_context()
         )
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
         self.assertIn(
-            "Programme Cycle end date cannot be later than programme end date.",
+            "Programme Cycle end date must be between programme start and end dates.",
             str(error.exception),
         )
 
