@@ -197,6 +197,7 @@ const CriteriaField = ({ field, choicesDict }): React.ReactElement => {
               field.roundNumber - 1
             ] && (
               <>
+                {' '}
                 (
                 {
                   (field.pduData || field.fieldAttribute.pduData).roundsNames[
