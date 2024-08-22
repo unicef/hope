@@ -13,20 +13,23 @@ def assign_individual_to_rdi(apps, schema_editor):
     for program in Program.objects.all():
         # create RDI only if exists any individual without RDI
         individual_qs = Individual.objects.filter(program=program, registration_data_import__isnull=True)
-
-        if individual_qs.exists():
-            rdi = RegistrationDataImport(
+        aggregated_data = individual_qs.aggregate(
+            individual_count=Count("id"),
+            household_count=Count("household", distinct=True)
+        )
+        if aggregated_data["individual_count"] > 0:
+            rdi = RegistrationDataImport.objects.create(
                 name=f"RDI for Individuals [data migration for Programme: {program.name}]",
                 status="MERGED",
                 imported_by=None,
                 data_source="XLS",
-                number_of_individuals=individual_qs.count(),
-                number_of_households=individual_qs.aggregate(household_count=Count("household", distinct=True))["household_count"],
+                number_of_individuals=aggregated_data["individual_count"],
+                number_of_households=aggregated_data["household_count"],
                 business_area=program.business_area,
                 program_id=program.id,
                 import_data=None,
             )
-            rdi.save()
+
             individual_qs.update(registration_data_import_id=rdi.id)
 
 

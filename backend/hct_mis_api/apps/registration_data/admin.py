@@ -285,13 +285,16 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             form = MassEnrollForm(request.POST, business_area_id=business_area_id, households=qs)
             if form.is_valid():
                 program_for_enroll = form.cleaned_data["program_for_enroll"]
+                rdi: RegistrationDataImport = form.cleaned_data["rdi"]
                 households_ids = list(qs.distinct("unicef_id").values_list("id", flat=True))
                 enroll_households_to_program_task.delay(
-                    households_ids=households_ids, program_for_enroll_id=str(program_for_enroll.id)
+                    households_ids=households_ids,
+                    program_for_enroll_id=str(program_for_enroll.id),
+                    rdi_id=str(rdi.id),
                 )
                 self.message_user(
                     request,
-                    f"Enrolling households to program: {program_for_enroll}",
+                    f"Enrolling households to program: {program_for_enroll} with RDI: {rdi.name}",
                     level=messages.SUCCESS,
                 )
                 return HttpResponseRedirect(url)

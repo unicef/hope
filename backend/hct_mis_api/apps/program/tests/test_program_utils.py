@@ -21,15 +21,17 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.utils import enroll_households_to_program
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
 class TestEnrolHouseholdToProgram(TestCase):
     """Test enroll household to program."""
 
     def setUp(self) -> None:
-        create_afghanistan()
+        afg = create_afghanistan()
         self.program1 = ProgramFactory()
         self.program2 = ProgramFactory()
+        self.rdi_program_1 = RegistrationDataImportFactory(program=self.program1, business_area=afg)
 
         # test for enrolment with existing repr
         self.household_original_already_enrolled = HouseholdFactory(
@@ -117,7 +119,9 @@ class TestEnrolHouseholdToProgram(TestCase):
         hh_count = Household.objects.count()
         ind_count = Individual.objects.count()
 
-        enroll_households_to_program(Household.objects.filter(id=self.household_already_enrolled.id), self.program2)
+        enroll_households_to_program(
+            Household.objects.filter(id=self.household_already_enrolled.id), self.program2, self.rdi_program_1
+        )
         self.assertEqual(hh_count, Household.objects.count())
         self.assertEqual(ind_count, Individual.objects.count())
 
@@ -126,7 +130,9 @@ class TestEnrolHouseholdToProgram(TestCase):
         ind_count = Individual.objects.count()
 
         enroll_households_to_program(
-            Household.objects.filter(id=self.household_original_already_enrolled.id), self.program2
+            Household.objects.filter(id=self.household_original_already_enrolled.id),
+            self.program2,
+            self.rdi_program_1,
         )
         self.assertEqual(hh_count, Household.objects.count())
         self.assertEqual(ind_count, Individual.objects.count())
@@ -141,6 +147,7 @@ class TestEnrolHouseholdToProgram(TestCase):
         enroll_households_to_program(
             Household.objects.filter(id=self.household.id),
             self.program2,
+            self.rdi_program_1,
         )
 
         self.individual_2_already_enrolled.refresh_from_db()
@@ -198,6 +205,7 @@ class TestEnrolHouseholdToProgram(TestCase):
         enroll_households_to_program(
             Household.objects.filter(id=self.household_external.id),
             self.program2,
+            self.rdi_program_1,
         )
         hh = Household.objects.order_by("created_at").last()
         self.assertEqual(hh_count + 1, Household.original_and_repr_objects.count())
@@ -239,6 +247,7 @@ class TestEnrolHouseholdToProgram(TestCase):
         enroll_households_to_program(
             Household.objects.filter(id=household_already_with_head_already_enrolled.id),
             self.program2,
+            self.rdi_program_1,
         )
         hh = Household.objects.order_by("created_at").last()
         self.assertEqual(hh_count + 1, Household.objects.count())

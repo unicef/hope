@@ -22,7 +22,9 @@ from hct_mis_api.apps.registration_data.api.serializers import (
     RegistrationDataImportListSerializer,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.celery_tasks import deduplication_engine_process
+from hct_mis_api.apps.registration_datahub.celery_tasks import (
+    deduplication_engine_process,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +50,7 @@ class RegistrationDataImportViewSet(
         return super().list(request, *args, **kwargs)
 
     @action(detail=False, methods=["POST"], url_path="run-deduplication")
-    def run_deduplication(self, request: Request, *args, **kwargs) -> Response:
+    def run_deduplication(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_program()
         deduplication_engine_process.delay(program.id)
         return Response({"message": "Deduplication process started"}, status=status.HTTP_200_OK)

@@ -14,6 +14,7 @@ from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.api.dataclasses import SimilarityPair
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
@@ -216,6 +217,11 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
 
     def can_be_merged(self) -> bool:
         return self.status in (self.IN_REVIEW, self.MERGE_ERROR)
+
+    def refresh_population_statistics(self) -> None:
+        self.number_of_individuals = Individual.objects.filter(registration_data_import=self).count()
+        self.number_of_households = Household.objects.filter(registration_data_import=self).count()
+        self.save(update_fields=("number_of_individuals", "number_of_households"))
 
 
 class ImportData(TimeStampedUUIDModel):

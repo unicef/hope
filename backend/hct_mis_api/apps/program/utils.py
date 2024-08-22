@@ -327,7 +327,9 @@ def copy_program_related_data(copy_from_program_id: str, new_program: Program, r
     populate_index(Household.objects.filter(program=new_program), HouseholdDocument)
 
 
-def create_roles_for_new_representation(new_household: Household, program: Program) -> None:
+def create_roles_for_new_representation(
+    new_household: Household, program: Program, rdi: RegistrationDataImport
+) -> None:
     old_roles = IndividualRoleInHousehold.objects.filter(
         household=new_household.copied_from,
     )
@@ -347,7 +349,7 @@ def create_roles_for_new_representation(new_household: Household, program: Progr
                 documents_to_create_batch,
                 identities_to_create_batch,
                 bank_account_info_to_create_batch,
-            ) = copy_individual(role.individual, program)
+            ) = copy_individual(role.individual, program, rdi)
 
             individuals_to_create.append(individual_representation)
             documents_to_create.extend(documents_to_create_batch)
@@ -366,8 +368,7 @@ def create_roles_for_new_representation(new_household: Household, program: Progr
     IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
 
 
-def enroll_households_to_program(households: QuerySet, program: Program) -> None:
-    # TODO MB create fake RDI?
+def enroll_households_to_program(households: QuerySet, program: Program, rdi: RegistrationDataImport) -> None:
     households_to_exclude = Household.objects.filter(
         program=program,
         unicef_id__in=households.values_list("unicef_id", flat=True),
@@ -405,7 +406,7 @@ def enroll_households_to_program(households: QuerySet, program: Program) -> None
                         documents_to_create_batch,
                         identities_to_create_batch,
                         bank_account_info_to_create_batch,
-                    ) = copy_individual(individual, program)
+                    ) = copy_individual(individual, program, rdi)
                     documents_to_create.extend(documents_to_create_batch)
                     identities_to_create.extend(identities_to_create_batch)
                     bank_account_info_to_create.extend(bank_account_info_to_create_batch)
@@ -423,7 +424,7 @@ def enroll_households_to_program(households: QuerySet, program: Program) -> None
                 household.pk = None
                 household.program = program
                 household.is_original = False
-                household.registration_data_import = None
+                household.registration_data_import = rdi
                 household.total_cash_received = None
                 household.total_cash_received_usd = None
 
@@ -440,7 +441,7 @@ def enroll_households_to_program(households: QuerySet, program: Program) -> None
                 ids_to_update = [x.pk for x in individuals_to_create] + external_collectors_id_to_update
                 Individual.objects.filter(id__in=ids_to_update).update(household=household)
 
-                create_roles_for_new_representation(household, program)
+                create_roles_for_new_representation(household, program, rdi)
         except Exception as e:
             error_message = str(e)
             if "unique_if_not_removed_and_valid_for_representations" in error_message:
@@ -454,11 +455,12 @@ def enroll_households_to_program(households: QuerySet, program: Program) -> None
                 if detail_index != -1:
                     error_message = error_message[:detail_index].strip()
             error_messages.append(f"{household.unicef_id}: {error_message}")
+    rdi.refresh_population_statistics()
     if error_messages:
         raise Exception("Following households failed to be enrolled: \n" + "\n".join(error_messages))
 
 
-def copy_individual(individual: Individual, program: Program) -> tuple:
+def copy_individual(individual: Individual, program: Program, rdi: RegistrationDataImport) -> tuple:
     documents = list(individual.documents.all())
     identities = list(individual.identities.all())
     bank_accounts_info = list(individual.bank_account_info.all())
@@ -473,7 +475,7 @@ def copy_individual(individual: Individual, program: Program) -> tuple:
     individual.flex_fields = populate_pdu_with_null_values(program, copied_flex_fields)
     individual.program = program
     individual.household = None
-    individual.registration_data_import = None
+    individual.registration_data_import = rdi
 
     documents_to_create = CopyProgramPopulation.copy_document_per_individual(documents, individual)
     identities_to_create = CopyProgramPopulation.copy_individual_identity_per_individual(identities, individual)

@@ -220,11 +220,16 @@ class MassEnrollForm(forms.Form):
             queryset=Program.objects.filter(business_area_id=self.business_area_id, status=Program.ACTIVE),
             label="Select a program to enroll households to",
         )
+        self.fields["rdi"] = forms.ModelChoiceField(
+            queryset=RegistrationDataImport.objects.filter(business_area_id=self.business_area_id),
+            label="Select a RDI to enroll households to",
+        )
 
     def clean(self) -> Optional[Dict[str, Any]]:
         cleaned_data = super().clean()
         if "apply" in self.data:
             program_for_enroll = cleaned_data.get("program_for_enroll")
+            rdi = cleaned_data.get("rdi")
             warning_message = None  # Initialize the warning message
 
             # Check each household in the queryset
@@ -242,6 +247,8 @@ class MassEnrollForm(forms.Form):
                     )
                     break  # Exit the loop after the first incompatible household
 
+            if rdi.program_id != program_for_enroll.id:
+                warning_message = f"RDI not belong to the program {program_for_enroll.name}"
             if warning_message:
                 # Add the warning message as a non-field error
                 self.add_error(None, warning_message)

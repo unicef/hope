@@ -904,6 +904,7 @@ def generate_payment_plan() -> None:
         full_name="Jan Kowalski",
         sex=MALE,
         program=program,
+        registration_data_import=rdi,
         defaults={"individual_collection": IndividualCollectionFactory()},
     )[0]
 
@@ -917,6 +918,7 @@ def generate_payment_plan() -> None:
         full_name="Adam Nowak",
         sex=MALE,
         program=program,
+        registration_data_import=rdi,
         defaults={"individual_collection": IndividualCollectionFactory()},
     )[0]
 
