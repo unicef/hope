@@ -44,40 +44,25 @@ export const FormikDateField = ({
             size: 'small',
             error: isInvalid,
             helperText: isInvalid && get(form.errors, field.name),
+            InputProps: {
+              startAdornment: decoratorStart && (
+                <InputAdornment position="start">
+                  {decoratorStart}
+                </InputAdornment>
+              ),
+              endAdornment: decoratorEnd && (
+                <InputAdornment position="end">{decoratorEnd}</InputAdornment>
+              ),
+            },
+            inputProps: {
+              'data-cy': `date-input-${field.name}`,
+            },
           },
         }}
         sx={{
           '& .MuiSvgIcon-root': {
             outline: 'none',
           },
-        }}
-        slots={{
-          TextField: (props) => (
-            <TextField
-              {...props}
-              variant="outlined"
-              size="small"
-              fullWidth
-              error={isInvalid}
-              helperText={isInvalid && get(form.errors, field.name)}
-              InputProps={{
-                startAdornment: decoratorStart && (
-                  <InputAdornment position="start">
-                    {decoratorStart}
-                  </InputAdornment>
-                ),
-                endAdornment: decoratorEnd && (
-                  <InputAdornment position="end">{decoratorEnd}</InputAdornment>
-                ),
-              }}
-              required={required}
-              // https://github.com/mui-org/material-ui/issues/12805
-              // eslint-disable-next-line react/jsx-no-duplicate-props
-              inputProps={{
-                'data-cy': `date-input-${field.name}`,
-              }}
-            />
-          ),
         }}
         value={formattedValue || null}
         onBlur={() => {
