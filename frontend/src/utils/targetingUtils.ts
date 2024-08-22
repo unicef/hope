@@ -128,7 +128,7 @@ export function mapCriteriaToInitialValues(criteria) {
       ).map((filter) => {
         return {
           ...filter,
-          isNull: filter.comparisonMethod === 'IS_NULL',
+          isNull: filter.comparisonMethod === 'IS_NULL' || filter.isNull,
         };
       }),
     })),
