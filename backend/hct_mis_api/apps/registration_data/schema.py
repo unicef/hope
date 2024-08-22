@@ -34,6 +34,7 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
     golden_record_possible_duplicates_count_and_percentage = graphene.Field(CountAndPercentageNode)
     golden_record_unique_count_and_percentage = graphene.Field(CountAndPercentageNode)
     total_households_count_with_valid_phone_no = graphene.Int()
+    is_deduplicated = graphene.String()
 
     class Meta:
         model = RegistrationDataImport
@@ -82,6 +83,12 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
             head_of_household__phone_no_valid=False,
             head_of_household__phone_no_alternative_valid=False,
         ).count()
+
+    @staticmethod
+    def resolve_is_deduplicated(parent: RegistrationDataImport, info: Any, **kwargs: Any) -> str:
+        if parent.deduplication_engine_status in [RegistrationDataImport.DEDUP_ENGINE_FINISHED, RegistrationDataImport.DEDUP_ENGINE_ERROR]:
+            return "YES"
+        return "NO"
 
 
 class Query(graphene.ObjectType):

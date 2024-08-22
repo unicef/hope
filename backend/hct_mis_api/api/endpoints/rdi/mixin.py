@@ -17,6 +17,7 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 logger = logging.getLogger(__name__)
@@ -53,6 +54,7 @@ class HouseholdUploadMixin:
         member_of = None
         if member_data["relationship"] not in (RELATIONSHIP_UNKNOWN, NON_BENEFICIARY):
             member_of = hh
+        member_data["flex_fields"] = populate_pdu_with_null_values(rdi.program, member_data.get("flex_fields", None))
         role = member_data.pop("role", None)
         ind = PendingIndividual.objects.create(
             household=member_of,

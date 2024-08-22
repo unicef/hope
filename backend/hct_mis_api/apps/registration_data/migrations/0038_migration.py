@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='registrationdataimport',
             name='deduplication_engine_status',
-            field=models.CharField(choices=[('PENDING', 'Pending'), ('UPLOADED', 'Uploaded'), ('IN_PROGRESS', 'In Progress'), ('FINISHED', 'Finished'), ('ERROR', 'Error')], default=None, max_length=255, blank=True, null=True),
+            field=models.CharField(blank=True, choices=[('PENDING', 'Pending'), ('UPLOADED', 'Uploaded'), ('IN_PROGRESS', 'In Progress'), ('FINISHED', 'Finished'), ('ERROR', 'Error'), ('UPLOAD_ERROR', 'Upload Error')], default=None, max_length=255, null=True),
         ),
         migrations.CreateModel(
             name='DeduplicationEngineSimilarityPair',
@@ -28,10 +28,6 @@ class Migration(migrations.Migration):
                 ('individual2', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='biometric_duplicates_2', to='household.individual')),
                 ('program', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='deduplication_engine_similarity_pairs', to='program.program')),
             ],
-        ),
-        migrations.AddConstraint(
-            model_name='deduplicationenginesimilaritypair',
-            constraint=models.CheckConstraint(check=models.Q(('individual1', django.db.models.expressions.F('individual2')), _negated=True), name='prevent_self_duplicates'),
         ),
         migrations.AddConstraint(
             model_name='deduplicationenginesimilaritypair',

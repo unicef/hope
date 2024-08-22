@@ -24,7 +24,10 @@ from hct_mis_api.apps.core.validators import (
 from hct_mis_api.apps.periodic_data_update.service.flexible_attribute_service import (
     FlexibleAttributeForPDUService,
 )
-from hct_mis_api.apps.program.celery_tasks import copy_program_task
+from hct_mis_api.apps.program.celery_tasks import (
+    copy_program_task,
+    populate_pdu_new_rounds_with_null_values_task,
+)
 from hct_mis_api.apps.program.inputs import (
     CopyProgramInput,
     CreateProgramInput,
@@ -211,7 +214,8 @@ class UpdateProgram(
             BiometricDeduplicationService().delete_deduplication_set(program)
 
         if pdu_fields is not None:
-            FlexibleAttributeForPDUService(program, pdu_fields).update_pdu_flex_attributes()
+            FlexibleAttributeForPDUService(program, pdu_fields).update_pdu_flex_attributes_in_program_update()
+            populate_pdu_new_rounds_with_null_values_task.delay(program_id)
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return UpdateProgram(program=program)

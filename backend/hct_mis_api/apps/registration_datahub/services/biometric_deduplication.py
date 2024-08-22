@@ -2,7 +2,7 @@ import logging
 import uuid
 from typing import List
 
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.api.dataclasses import SimilarityPair
@@ -55,7 +55,7 @@ class BiometricDeduplicationService:
 
         except DeduplicationEngineAPI.DeduplicationEngineAPIException:
             logging.exception(f"Failed to upload images for RDI {rdi} to deduplication set {deduplication_set_id}")
-            rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_ERROR
+            rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR
             rdi.save(update_fields=["deduplication_engine_status"])
 
     def process_deduplication_set(self, deduplication_set_id: str, rdis: QuerySet[RegistrationDataImport]) -> None:
@@ -66,6 +66,7 @@ class BiometricDeduplicationService:
             )
         elif status == 200:
             rdis.update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS)
+
         else:
             logging.error(
                 f"Failed to process deduplication set {deduplication_set_id}. Response[{status}]: {response_data}"
@@ -86,18 +87,22 @@ class BiometricDeduplicationService:
 
         deduplication_set_id = str(program.deduplication_set_id)
 
-        rdis = RegistrationDataImport.objects.filter(
-            program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING
+        pending_rdis = RegistrationDataImport.objects.filter(
+            program=program,
+            deduplication_engine_status__in=[
+                RegistrationDataImport.DEDUP_ENGINE_PENDING,
+                RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR,
+            ],
         )
-        for rdi in rdis:
+        for rdi in pending_rdis:
             self.upload_individuals(deduplication_set_id, rdi)
 
-        all_uploaded = (
-            rdis.count()
-            == rdis.filter(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_UPLOADED).count()
-        )
+        all_uploaded = not pending_rdis.all().exists()  # refetch qs
         if all_uploaded:
-            self.process_deduplication_set(deduplication_set_id, rdis)
+            uploaded_rdis = RegistrationDataImport.objects.filter(
+                deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_UPLOADED
+            )
+            self.process_deduplication_set(deduplication_set_id, uploaded_rdis)
         else:
             raise self.BiometricDeduplicationServiceException("Failed to upload images for all RDIs")
 
@@ -112,8 +117,8 @@ class BiometricDeduplicationService:
             status=RegistrationDataImport.DEDUP_ENGINE_PENDING
         )
 
-    def create_duplicates(self, deduplication_set_id: str, similarity_pairs: List[SimilarityPair]) -> None:
-        DeduplicationEngineSimilarityPair.bulk_add_duplicates(deduplication_set_id, similarity_pairs)
+    def store_results(self, deduplication_set_id: str, similarity_pairs: List[SimilarityPair]) -> None:
+        DeduplicationEngineSimilarityPair.bulk_add_pairs(deduplication_set_id, similarity_pairs)
 
     def mark_rdis_as_deduplicated(self, deduplication_set_id: str) -> None:
         program = Program.objects.get(deduplication_set_id=deduplication_set_id)
@@ -127,6 +132,14 @@ class BiometricDeduplicationService:
         RegistrationDataImport.objects.filter(
             program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
         ).update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_ERROR)
+
+    def get_duplicates_for_rdi(self, rdi: RegistrationDataImport) -> QuerySet[DeduplicationEngineSimilarityPair]:
+        rdi_individuals = rdi.individuals.filter(is_removed=False).only("id")
+        return DeduplicationEngineSimilarityPair.objects.filter(
+            Q(individual1__in=rdi_individuals) | Q(individual2__in=rdi_individuals),
+            program=rdi.program,
+            is_duplicate=True,
+        ).distinct()
 
     def create_biometric_deduplication_grievance_tickets_for_already_merged_individuals(
         self, deduplication_set_id: str
