@@ -5642,6 +5642,7 @@ export type ProgramNode = Node & {
   startDate: Scalars['Date']['output'];
   status: ProgramStatus;
   surveys: SurveyNodeConnection;
+  targetPopulationsCount?: Maybe<Scalars['Int']['output']>;
   targetpopulationSet: TargetPopulationNodeConnection;
   totalDeliveredQuantity?: Maybe<Scalars['Decimal']['output']>;
   totalEntitledQuantity?: Maybe<Scalars['Decimal']['output']>;
@@ -27901,6 +27902,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   status?: Resolver<ResolversTypes['ProgramStatus'], ParentType, ContextType>;
   surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, Partial<ProgramNodeSurveysArgs>>;
+  targetPopulationsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, Partial<ProgramNodeTargetpopulationSetArgs>>;
   totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>;
   totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>;
