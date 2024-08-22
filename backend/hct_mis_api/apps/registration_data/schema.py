@@ -86,7 +86,10 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
 
     @staticmethod
     def resolve_is_deduplicated(parent: RegistrationDataImport, info: Any, **kwargs: Any) -> str:
-        if parent.deduplication_engine_status in [RegistrationDataImport.DEDUP_ENGINE_FINISHED, RegistrationDataImport.DEDUP_ENGINE_ERROR]:
+        if parent.deduplication_engine_status in [
+            RegistrationDataImport.DEDUP_ENGINE_FINISHED,
+            RegistrationDataImport.DEDUP_ENGINE_ERROR,
+        ]:
             return "YES"
         return "NO"
 
