@@ -89,6 +89,7 @@ def individual(program: Program) -> Callable:
         )
         individual = individuals[0]
         individual.flex_fields = populate_pdu_with_null_values(program, individual.flex_fields)
+        individual.save()
         return individual
 
     return _individual
@@ -100,7 +101,7 @@ def string_attribute(program: Program) -> FlexibleAttribute:
         label="Test String Attribute",
         subtype=PeriodicFieldData.STRING,
         number_of_rounds=1,
-        rounds_names=["Test Round String"],
+        rounds_names=["Test Round String 1"],
         program=program,
     )
 
@@ -111,7 +112,7 @@ def date_attribute(program: Program) -> FlexibleAttribute:
         label="Test Date Attribute",
         subtype=PeriodicFieldData.DATE,
         number_of_rounds=1,
-        rounds_names=["Test Round Date"],
+        rounds_names=["Test Round Date 1"],
         program=program,
     )
 
@@ -133,7 +134,7 @@ def decimal_attribute(program: Program) -> FlexibleAttribute:
         label="Test Decimal Attribute",
         subtype=PeriodicFieldData.DECIMAL,
         number_of_rounds=1,
-        rounds_names=["Test Round Decimal"],
+        rounds_names=["Test Round Decimal 1"],
         program=program,
     )
 
@@ -521,6 +522,177 @@ class TestCreateTargeting:
 
         assert pageTargetingDetails.getCriteriaContainer().text == bool_no_expected_criteria_text
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual2.household.unicef_id
+        assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
+        assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
+
+    def test_create_targeting_with_pdu_decimal_criteria(
+        self,
+        program: Program,
+        pageTargeting: Targeting,
+        pageTargetingCreate: TargetingCreate,
+        pageTargetingDetails: TargetingDetails,
+        individual: Callable,
+        decimal_attribute: FlexibleAttribute,
+    ) -> None:
+        individual1 = individual()
+        individual1.flex_fields[decimal_attribute.name]["1"]["value"] = 2.5
+        individual1.save()
+        individual2 = individual()
+        individual2.flex_fields[decimal_attribute.name]["1"]["value"] = 5.0
+        individual2.save()
+        individual()
+        pageTargeting.navigate_to_page("afghanistan", program.id)
+        pageTargeting.getButtonCreateNew().click()
+        pageTargeting.getButtonCreateNewByFilters().click()
+        assert "New Target Population" in pageTargetingCreate.getTitlePage().text
+        pageTargetingCreate.getAddCriteriaButton().click()
+        pageTargetingCreate.getAddIndividualRuleButton().click()
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys("Test Decimal Attribute")
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ARROW_DOWN)
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
+        pageTargetingCreate.getSelectIndividualsiFltersBlocksRoundNumber().click()
+        pageTargetingCreate.getSelectRoundOption(1).click()
+        pageTargetingCreate.getInputIndividualsFiltersBlocksValueFrom().send_keys("2")
+        pageTargetingCreate.getInputIndividualsFiltersBlocksValueTo().send_keys("4")
+        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
+        expected_criteria_text = "Test Decimal Attribute: 2 - 4\nRound 1 (Test Round Decimal 1)"
+        assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
+        targeting_name = "Test Targeting PDU decimal"
+        pageTargetingCreate.getFieldName().send_keys(targeting_name)
+        pageTargetingCreate.getTargetPopulationSaveButton().click()
+        pageTargetingDetails.getLockButton()
+        assert pageTargetingDetails.getTitlePage().text == targeting_name
+        assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
+        assert Household.objects.count() == 3
+        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
+        assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
+        assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
+
+        # edit range
+        pageTargetingDetails.getButtonEdit().click()
+        pageTargetingDetails.getButtonIconEdit().click()
+        pageTargetingCreate.getInputIndividualsFiltersBlocksValueTo().send_keys(Keys.BACKSPACE)
+        pageTargetingCreate.getInputIndividualsFiltersBlocksValueTo().send_keys("5")
+        bool_no_expected_criteria_text = "Test Decimal Attribute: 2 - 5\nRound 1 (Test Round Decimal 1)"
+
+        pageTargetingCreate.get_elements(pageTargetingCreate.targetingCriteriaAddDialogSaveButton)[1].click()
+
+        assert pageTargetingCreate.getCriteriaContainer().text == bool_no_expected_criteria_text
+        pageTargetingCreate.getButtonSave().click()
+        pageTargetingDetails.getLockButton()
+
+        assert pageTargetingDetails.getCriteriaContainer().text == bool_no_expected_criteria_text
+        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
+        assert pageTargetingDetails.getHouseholdTableCell(2, 1).text == individual2.household.unicef_id
+        assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "2"
+        assert len(pageTargetingDetails.getHouseholdTableRows()) == 2
+
+    def test_create_targeting_with_pdu_date_criteria(
+        self,
+        program: Program,
+        pageTargeting: Targeting,
+        pageTargetingCreate: TargetingCreate,
+        pageTargetingDetails: TargetingDetails,
+        individual: Callable,
+        date_attribute: FlexibleAttribute,
+    ) -> None:
+        individual1 = individual()
+        individual1.flex_fields[date_attribute.name]["1"]["value"] = "2022-02-02"
+        individual1.save()
+        individual2 = individual()
+        individual2.flex_fields[date_attribute.name]["1"]["value"] = "2022-10-02"
+        individual2.save()
+        individual()
+        pageTargeting.navigate_to_page("afghanistan", program.id)
+        pageTargeting.getButtonCreateNew().click()
+        pageTargeting.getButtonCreateNewByFilters().click()
+        assert "New Target Population" in pageTargetingCreate.getTitlePage().text
+        pageTargetingCreate.getAddCriteriaButton().click()
+        pageTargetingCreate.getAddIndividualRuleButton().click()
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys("Test Date Attribute")
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ARROW_DOWN)
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
+        pageTargetingCreate.getSelectIndividualsiFltersBlocksRoundNumber().click()
+        pageTargetingCreate.getSelectRoundOption(1).click()
+        pageTargetingCreate.getInputIndividualsFiltersBlocksValueFrom().send_keys("2022-01-01")
+        pageTargetingCreate.getInputIndividualsFiltersBlocksValueTo().send_keys("2022-03-03")
+        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
+        expected_criteria_text = "Test Date Attribute: 2022-01-01 - 2022-03-03\nRound 1 (Test Round Date 1)"
+        assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
+        targeting_name = "Test Targeting PDU date"
+        pageTargetingCreate.getFieldName().send_keys(targeting_name)
+        pageTargetingCreate.getTargetPopulationSaveButton().click()
+        pageTargetingDetails.getLockButton()
+        assert pageTargetingDetails.getTitlePage().text == targeting_name
+        assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
+        assert Household.objects.count() == 3
+        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
+        assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
+        assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
+
+        # edit range
+        pageTargetingDetails.getButtonEdit().click()
+        pageTargetingDetails.getButtonIconEdit().click()
+        pageTargetingCreate.getInputIndividualsFiltersBlocksValueTo().send_keys(Keys.BACKSPACE)
+        pageTargetingCreate.getInputIndividualsFiltersBlocksValueTo().send_keys("5")
+        bool_no_expected_criteria_text = "Test Bool Attribute: 2 - 5\nRound 2 (Test Round Bool 2)"
+
+        pageTargetingCreate.get_elements(pageTargetingCreate.targetingCriteriaAddDialogSaveButton)[1].click()
+
+        assert pageTargetingCreate.getCriteriaContainer().text == bool_no_expected_criteria_text
+        pageTargetingCreate.getButtonSave().click()
+        pageTargetingDetails.getLockButton()
+
+        assert pageTargetingDetails.getCriteriaContainer().text == bool_no_expected_criteria_text
+        assert pageTargetingDetails.getHouseholdTableCell(2, 1).text == individual1.household.unicef_id
+        assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "2"
+        assert len(pageTargetingDetails.getHouseholdTableRows()) == 2
+
+    def test_create_targeting_with_pdu_null_criteria(
+        self,
+        program: Program,
+        pageTargeting: Targeting,
+        pageTargetingCreate: TargetingCreate,
+        pageTargetingDetails: TargetingDetails,
+        individual: Callable,
+        string_attribute: FlexibleAttribute,
+    ) -> None:
+        individual1 = individual()
+        individual1.flex_fields[string_attribute.name]["1"]["value"] = "Text"
+        individual1.save()
+        individual2 = individual()
+        individual2.flex_fields[string_attribute.name]["1"]["value"] = "Test"
+        individual2.save()
+        individual3 = individual()
+        pageTargeting.navigate_to_page("afghanistan", program.id)
+        pageTargeting.getButtonCreateNew().click()
+        pageTargeting.getButtonCreateNewByFilters().click()
+        assert "New Target Population" in pageTargetingCreate.getTitlePage().text
+        pageTargetingCreate.getAddCriteriaButton().click()
+        pageTargetingCreate.getAddIndividualRuleButton().click()
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys("Test String Attribute")
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ARROW_DOWN)
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
+        pageTargetingCreate.getSelectIndividualsiFltersBlocksRoundNumber().click()
+        pageTargetingCreate.getSelectRoundOption(1).click()
+        pageTargetingCreate.screenshot("if before click")
+        pageTargetingCreate.getSelectIndividualsiFltersBlocksIsNull().click()
+        pageTargetingCreate.screenshot("if click click")
+        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
+        expected_criteria_text = "Test String Attribute: Empty\nRound 1 (Test Round String 1)"
+        assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
+        targeting_name = "Test Targeting PDU null"
+        pageTargetingCreate.getFieldName().send_keys(targeting_name)
+        pageTargetingCreate.getTargetPopulationSaveButton().click()
+        pageTargetingDetails.getLockButton()
+        assert pageTargetingDetails.getTitlePage().text == targeting_name
+        assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
+        assert Household.objects.count() == 3
+
+        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual3.household.unicef_id
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
 
