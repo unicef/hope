@@ -1230,18 +1230,6 @@ export type CreateProgram = {
   validationErrors?: Maybe<Scalars['Arg']['output']>;
 };
 
-export type CreateProgramCycle = {
-  __typename?: 'CreateProgramCycle';
-  program?: Maybe<ProgramNode>;
-  validationErrors?: Maybe<Scalars['Arg']['output']>;
-};
-
-export type CreateProgramCycleInput = {
-  endDate?: InputMaybe<Scalars['Date']['input']>;
-  startDate: Scalars['Date']['input'];
-  title: Scalars['String']['input'];
-};
-
 export type CreateProgramInput = {
   administrativeAreasOfImplementation?: InputMaybe<Scalars['String']['input']>;
   budget?: InputMaybe<Scalars['Decimal']['input']>;
@@ -1420,11 +1408,6 @@ export type DeleteProgram = {
   ok?: Maybe<Scalars['Boolean']['output']>;
 };
 
-export type DeleteProgramCycle = {
-  __typename?: 'DeleteProgramCycle';
-  program?: Maybe<ProgramNode>;
-};
-
 export type DeleteRegistrationDataImport = {
   __typename?: 'DeleteRegistrationDataImport';
   ok?: Maybe<Scalars['Boolean']['output']>;
@@ -1551,7 +1534,7 @@ export type DeliveryMechanismPerPaymentPlanNode = Node & {
   code?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   createdBy: UserNode;
-  deliveryMechanism: DeliveryMechanismNode;
+  deliveryMechanism?: Maybe<DeliveryMechanismNode>;
   deliveryMechanismChoice?: Maybe<DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice>;
   deliveryMechanismOrder: Scalars['Int']['output'];
   financialServiceProvider?: Maybe<FinancialServiceProviderNode>;
@@ -1999,6 +1982,7 @@ export type FinancialServiceProviderXlsxTemplateNode = Node & {
   createdAt: Scalars['DateTime']['output'];
   createdBy?: Maybe<UserNode>;
   financialServiceProviders: FinancialServiceProviderNodeConnection;
+  flexFields: Array<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
@@ -4019,7 +4003,6 @@ export type Mutations = {
   createPaymentPlan?: Maybe<CreatePaymentPlanMutation>;
   createPaymentVerificationPlan?: Maybe<CreateVerificationPlanMutation>;
   createProgram?: Maybe<CreateProgram>;
-  createProgramCycle?: Maybe<CreateProgramCycle>;
   createReport?: Maybe<CreateReport>;
   createSurvey?: Maybe<CreateSurveyMutation>;
   createTargetPopulation?: Maybe<CreateTargetPopulationMutation>;
@@ -4027,7 +4010,6 @@ export type Mutations = {
   deletePaymentPlan?: Maybe<DeletePaymentPlanMutation>;
   deletePaymentVerificationPlan?: Maybe<DeletePaymentVerificationPlan>;
   deleteProgram?: Maybe<DeleteProgram>;
-  deleteProgramCycle?: Maybe<DeleteProgramCycle>;
   deleteRegistrationDataImport?: Maybe<DeleteRegistrationDataImport>;
   deleteTargetPopulation?: Maybe<DeleteTargetPopulationMutationPayload>;
   discardPaymentVerificationPlan?: Maybe<DiscardPaymentVerificationPlan>;
@@ -4071,7 +4053,6 @@ export type Mutations = {
   updatePaymentVerificationReceivedAndReceivedAmount?: Maybe<UpdatePaymentVerificationReceivedAndReceivedAmount>;
   updatePaymentVerificationStatusAndReceivedAmount?: Maybe<UpdatePaymentVerificationStatusAndReceivedAmount>;
   updateProgram?: Maybe<UpdateProgram>;
-  updateProgramCycle?: Maybe<UpdateProgramCycle>;
   updateTargetPopulation?: Maybe<UpdateTargetPopulationMutation>;
   uploadImportDataXlsxFileAsync?: Maybe<UploadImportDataXlsxFileAsync>;
 };
@@ -4263,11 +4244,6 @@ export type MutationsCreateProgramArgs = {
 };
 
 
-export type MutationsCreateProgramCycleArgs = {
-  programCycleData: CreateProgramCycleInput;
-};
-
-
 export type MutationsCreateReportArgs = {
   reportData: CreateReportInput;
 };
@@ -4302,11 +4278,6 @@ export type MutationsDeletePaymentVerificationPlanArgs = {
 
 export type MutationsDeleteProgramArgs = {
   programId: Scalars['String']['input'];
-};
-
-
-export type MutationsDeleteProgramCycleArgs = {
-  programCycleId: Scalars['ID']['input'];
 };
 
 
@@ -4565,12 +4536,6 @@ export type MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs = {
 
 export type MutationsUpdateProgramArgs = {
   programData?: InputMaybe<UpdateProgramInput>;
-  version?: InputMaybe<Scalars['BigInt']['input']>;
-};
-
-
-export type MutationsUpdateProgramCycleArgs = {
-  programCycleData?: InputMaybe<UpdateProgramCycleInput>;
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
@@ -5631,7 +5596,6 @@ export type ProgramCycleNode = Node & {
   endDate?: Maybe<Scalars['Date']['output']>;
   id: Scalars['ID']['output'];
   isRemoved: Scalars['Boolean']['output'];
-  lastSyncAt?: Maybe<Scalars['DateTime']['output']>;
   paymentPlans: PaymentPlanNodeConnection;
   program: ProgramNode;
   startDate: Scalars['Date']['output'];
@@ -5641,7 +5605,6 @@ export type ProgramCycleNode = Node & {
   totalDeliveredQuantityUsd?: Maybe<Scalars['Float']['output']>;
   totalEntitledQuantityUsd?: Maybe<Scalars['Float']['output']>;
   totalUndeliveredQuantityUsd?: Maybe<Scalars['Float']['output']>;
-  unicefId?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
   version: Scalars['BigInt']['output'];
 };
@@ -8915,19 +8878,6 @@ export type UpdateProgram = {
   __typename?: 'UpdateProgram';
   program?: Maybe<ProgramNode>;
   validationErrors?: Maybe<Scalars['Arg']['output']>;
-};
-
-export type UpdateProgramCycle = {
-  __typename?: 'UpdateProgramCycle';
-  program?: Maybe<ProgramNode>;
-  validationErrors?: Maybe<Scalars['Arg']['output']>;
-};
-
-export type UpdateProgramCycleInput = {
-  endDate?: InputMaybe<Scalars['Date']['input']>;
-  programCycleId: Scalars['ID']['input'];
-  startDate?: InputMaybe<Scalars['Date']['input']>;
-  title?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UpdateProgramInput = {
@@ -24444,8 +24394,6 @@ export type ResolversTypes = {
   CreatePaymentPlanMutation: ResolverTypeWrapper<CreatePaymentPlanMutation>;
   CreatePaymentVerificationInput: CreatePaymentVerificationInput;
   CreateProgram: ResolverTypeWrapper<CreateProgram>;
-  CreateProgramCycle: ResolverTypeWrapper<CreateProgramCycle>;
-  CreateProgramCycleInput: CreateProgramCycleInput;
   CreateProgramInput: CreateProgramInput;
   CreateReport: ResolverTypeWrapper<CreateReport>;
   CreateReportInput: CreateReportInput;
@@ -24469,7 +24417,6 @@ export type ResolversTypes = {
   DeletePaymentPlanMutation: ResolverTypeWrapper<DeletePaymentPlanMutation>;
   DeletePaymentVerificationPlan: ResolverTypeWrapper<DeletePaymentVerificationPlan>;
   DeleteProgram: ResolverTypeWrapper<DeleteProgram>;
-  DeleteProgramCycle: ResolverTypeWrapper<DeleteProgramCycle>;
   DeleteRegistrationDataImport: ResolverTypeWrapper<DeleteRegistrationDataImport>;
   DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput;
   DeleteTargetPopulationMutationPayload: ResolverTypeWrapper<DeleteTargetPopulationMutationPayload>;
@@ -24866,8 +24813,6 @@ export type ResolversTypes = {
   UpdatePaymentVerificationReceivedAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationReceivedAndReceivedAmount>;
   UpdatePaymentVerificationStatusAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationStatusAndReceivedAmount>;
   UpdateProgram: ResolverTypeWrapper<UpdateProgram>;
-  UpdateProgramCycle: ResolverTypeWrapper<UpdateProgramCycle>;
-  UpdateProgramCycleInput: UpdateProgramCycleInput;
   UpdateProgramInput: UpdateProgramInput;
   UpdateTargetPopulationInput: UpdateTargetPopulationInput;
   UpdateTargetPopulationMutation: ResolverTypeWrapper<UpdateTargetPopulationMutation>;
@@ -24977,8 +24922,6 @@ export type ResolversParentTypes = {
   CreatePaymentPlanMutation: CreatePaymentPlanMutation;
   CreatePaymentVerificationInput: CreatePaymentVerificationInput;
   CreateProgram: CreateProgram;
-  CreateProgramCycle: CreateProgramCycle;
-  CreateProgramCycleInput: CreateProgramCycleInput;
   CreateProgramInput: CreateProgramInput;
   CreateReport: CreateReport;
   CreateReportInput: CreateReportInput;
@@ -25001,7 +24944,6 @@ export type ResolversParentTypes = {
   DeletePaymentPlanMutation: DeletePaymentPlanMutation;
   DeletePaymentVerificationPlan: DeletePaymentVerificationPlan;
   DeleteProgram: DeleteProgram;
-  DeleteProgramCycle: DeleteProgramCycle;
   DeleteRegistrationDataImport: DeleteRegistrationDataImport;
   DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput;
   DeleteTargetPopulationMutationPayload: DeleteTargetPopulationMutationPayload;
@@ -25332,8 +25274,6 @@ export type ResolversParentTypes = {
   UpdatePaymentVerificationReceivedAndReceivedAmount: UpdatePaymentVerificationReceivedAndReceivedAmount;
   UpdatePaymentVerificationStatusAndReceivedAmount: UpdatePaymentVerificationStatusAndReceivedAmount;
   UpdateProgram: UpdateProgram;
-  UpdateProgramCycle: UpdateProgramCycle;
-  UpdateProgramCycleInput: UpdateProgramCycleInput;
   UpdateProgramInput: UpdateProgramInput;
   UpdateTargetPopulationInput: UpdateTargetPopulationInput;
   UpdateTargetPopulationMutation: UpdateTargetPopulationMutation;
@@ -25935,12 +25875,6 @@ export type CreateProgramResolvers<ContextType = any, ParentType extends Resolve
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type CreateProgramCycleResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateProgramCycle'] = ResolversParentTypes['CreateProgramCycle']> = {
-  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
-  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type CreateReportResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateReport'] = ResolversParentTypes['CreateReport']> = {
   report?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -26051,11 +25985,6 @@ export type DeleteProgramResolvers<ContextType = any, ParentType extends Resolve
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type DeleteProgramCycleResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteProgramCycle'] = ResolversParentTypes['DeleteProgramCycle']> = {
-  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type DeleteRegistrationDataImportResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteRegistrationDataImport'] = ResolversParentTypes['DeleteRegistrationDataImport']> = {
   ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -26111,7 +26040,7 @@ export type DeliveryMechanismPerPaymentPlanNodeResolvers<ContextType = any, Pare
   code?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>;
-  deliveryMechanism?: Resolver<ResolversTypes['DeliveryMechanismNode'], ParentType, ContextType>;
+  deliveryMechanism?: Resolver<Maybe<ResolversTypes['DeliveryMechanismNode']>, ParentType, ContextType>;
   deliveryMechanismChoice?: Resolver<Maybe<ResolversTypes['DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice']>, ParentType, ContextType>;
   deliveryMechanismOrder?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>;
@@ -26399,6 +26328,7 @@ export type FinancialServiceProviderXlsxTemplateNodeResolvers<ContextType = any,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
   financialServiceProviders?: Resolver<ResolversTypes['FinancialServiceProviderNodeConnection'], ParentType, ContextType, Partial<FinancialServiceProviderXlsxTemplateNodeFinancialServiceProvidersArgs>>;
+  flexFields?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
@@ -27443,7 +27373,6 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   createPaymentPlan?: Resolver<Maybe<ResolversTypes['CreatePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsCreatePaymentPlanArgs, 'input'>>;
   createPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['CreateVerificationPlanMutation']>, ParentType, ContextType, RequireFields<MutationsCreatePaymentVerificationPlanArgs, 'input'>>;
   createProgram?: Resolver<Maybe<ResolversTypes['CreateProgram']>, ParentType, ContextType, RequireFields<MutationsCreateProgramArgs, 'programData'>>;
-  createProgramCycle?: Resolver<Maybe<ResolversTypes['CreateProgramCycle']>, ParentType, ContextType, RequireFields<MutationsCreateProgramCycleArgs, 'programCycleData'>>;
   createReport?: Resolver<Maybe<ResolversTypes['CreateReport']>, ParentType, ContextType, RequireFields<MutationsCreateReportArgs, 'reportData'>>;
   createSurvey?: Resolver<Maybe<ResolversTypes['CreateSurveyMutation']>, ParentType, ContextType, RequireFields<MutationsCreateSurveyArgs, 'input'>>;
   createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>;
@@ -27451,7 +27380,6 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   deletePaymentPlan?: Resolver<Maybe<ResolversTypes['DeletePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsDeletePaymentPlanArgs, 'paymentPlanId'>>;
   deletePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['DeletePaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsDeletePaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>;
   deleteProgram?: Resolver<Maybe<ResolversTypes['DeleteProgram']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramArgs, 'programId'>>;
-  deleteProgramCycle?: Resolver<Maybe<ResolversTypes['DeleteProgramCycle']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramCycleArgs, 'programCycleId'>>;
   deleteRegistrationDataImport?: Resolver<Maybe<ResolversTypes['DeleteRegistrationDataImport']>, ParentType, ContextType, RequireFields<MutationsDeleteRegistrationDataImportArgs, 'registrationDataImportId'>>;
   deleteTargetPopulation?: Resolver<Maybe<ResolversTypes['DeleteTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsDeleteTargetPopulationArgs, 'input'>>;
   discardPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['DiscardPaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsDiscardPaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>;
@@ -27495,7 +27423,6 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   updatePaymentVerificationReceivedAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationReceivedAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs, 'paymentVerificationId' | 'received' | 'receivedAmount'>>;
   updatePaymentVerificationStatusAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationStatusAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs, 'paymentVerificationId' | 'receivedAmount'>>;
   updateProgram?: Resolver<Maybe<ResolversTypes['UpdateProgram']>, ParentType, ContextType, Partial<MutationsUpdateProgramArgs>>;
-  updateProgramCycle?: Resolver<Maybe<ResolversTypes['UpdateProgramCycle']>, ParentType, ContextType, Partial<MutationsUpdateProgramCycleArgs>>;
   updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>;
   uploadImportDataXlsxFileAsync?: Resolver<Maybe<ResolversTypes['UploadImportDataXLSXFileAsync']>, ParentType, ContextType, RequireFields<MutationsUploadImportDataXlsxFileAsyncArgs, 'businessAreaSlug' | 'file'>>;
 };
@@ -28023,7 +27950,6 @@ export type ProgramCycleNodeResolvers<ContextType = any, ParentType extends Reso
   endDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   paymentPlans?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, Partial<ProgramCycleNodePaymentPlansArgs>>;
   program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>;
   startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
@@ -28033,7 +27959,6 @@ export type ProgramCycleNodeResolvers<ContextType = any, ParentType extends Reso
   totalDeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   totalEntitledQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   totalUndeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -29410,12 +29335,6 @@ export type UpdateProgramResolvers<ContextType = any, ParentType extends Resolve
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type UpdateProgramCycleResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateProgramCycle'] = ResolversParentTypes['UpdateProgramCycle']> = {
-  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
-  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type UpdateTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateTargetPopulationMutation'] = ResolversParentTypes['UpdateTargetPopulationMutation']> = {
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>;
   validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
@@ -29687,7 +29606,6 @@ export type Resolvers<ContextType = any> = {
   CreateGrievanceTicketMutation?: CreateGrievanceTicketMutationResolvers<ContextType>;
   CreatePaymentPlanMutation?: CreatePaymentPlanMutationResolvers<ContextType>;
   CreateProgram?: CreateProgramResolvers<ContextType>;
-  CreateProgramCycle?: CreateProgramCycleResolvers<ContextType>;
   CreateReport?: CreateReportResolvers<ContextType>;
   CreateSurveyMutation?: CreateSurveyMutationResolvers<ContextType>;
   CreateTargetPopulationMutation?: CreateTargetPopulationMutationResolvers<ContextType>;
@@ -29705,7 +29623,6 @@ export type Resolvers<ContextType = any> = {
   DeletePaymentPlanMutation?: DeletePaymentPlanMutationResolvers<ContextType>;
   DeletePaymentVerificationPlan?: DeletePaymentVerificationPlanResolvers<ContextType>;
   DeleteProgram?: DeleteProgramResolvers<ContextType>;
-  DeleteProgramCycle?: DeleteProgramCycleResolvers<ContextType>;
   DeleteRegistrationDataImport?: DeleteRegistrationDataImportResolvers<ContextType>;
   DeleteTargetPopulationMutationPayload?: DeleteTargetPopulationMutationPayloadResolvers<ContextType>;
   DeliveredQuantityNode?: DeliveredQuantityNodeResolvers<ContextType>;
@@ -29982,7 +29899,6 @@ export type Resolvers<ContextType = any> = {
   UpdatePaymentVerificationReceivedAndReceivedAmount?: UpdatePaymentVerificationReceivedAndReceivedAmountResolvers<ContextType>;
   UpdatePaymentVerificationStatusAndReceivedAmount?: UpdatePaymentVerificationStatusAndReceivedAmountResolvers<ContextType>;
   UpdateProgram?: UpdateProgramResolvers<ContextType>;
-  UpdateProgramCycle?: UpdateProgramCycleResolvers<ContextType>;
   UpdateTargetPopulationMutation?: UpdateTargetPopulationMutationResolvers<ContextType>;
   Upload?: GraphQLScalarType;
   UploadImportDataXLSXFileAsync?: UploadImportDataXlsxFileAsyncResolvers<ContextType>;

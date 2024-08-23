@@ -120,8 +120,8 @@ class TestPaymentSignature(APITestCase):
             status=Program.ACTIVE,
             start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
             end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
-            cycle__start_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
-            cycle__end_date=timezone.datetime(2021, 12, 10, tzinfo=utc),
+            cycle__start_date=timezone.datetime(2021, 10, 10, tzinfo=utc).date(),
+            cycle__end_date=timezone.datetime(2021, 12, 10, tzinfo=utc).date(),
         )
 
         hoh1 = IndividualFactory(household=None)
