@@ -43,44 +43,59 @@ class TestIndividualRDIMigration(TestCase):
         )
         Household.objects.all().update(registration_data_import=None)
         Individual.objects.all().update(registration_data_import=None)
-        RegistrationDataImport.objects.all().delete()
 
     def test_assign_individual_to_rdi_migration(self) -> None:
         # add individual assigned to RDI
-        # program_3 = ProgramFactory(name="Program 333", business_area=self.ba_afghanistan)
-        # create_household_and_individuals(
-        #     household_data={
-        #         "business_area": self.ba_afghanistan,
-        #         "program": program_3,
-        #     },
-        #     individuals_data=[
-        #         {
-        #             "business_area": self.ba_afghanistan,
-        #             "program": program_3,
-        #         },
-        #     ],
-        # )
-        self.assertEqual(RegistrationDataImport.objects.count(), 1)
+        program_3 = ProgramFactory(name="Program 333", business_area=self.ba_afghanistan)
+        create_household_and_individuals(
+            household_data={
+                "business_area": self.ba_afghanistan,
+                "program": program_3,
+            },
+            individuals_data=[
+                {
+                    "business_area": self.ba_afghanistan,
+                    "program": program_3,
+                },
+                {
+                    "business_area": self.ba_afghanistan,
+                    "program": program_3,
+                },
+            ],
+        )
+        self.assertEqual(RegistrationDataImport.objects.count(), 3)
         self.assertEqual(Program.objects.count(), 3)
-        self.assertEqual(Individual.objects.count(), 3)
+        self.assertEqual(Individual.objects.count(), 4)
         self.assertEqual(Household.objects.count(), 3)
         self.assertEqual(Individual.objects.filter(program=self.program_1).count(), 1)
+        self.assertEqual(Individual.objects.filter(program=self.program_2).count(), 1)
         self.assertEqual(Individual.objects.filter(registration_data_import__isnull=True).count(), 2)
         self.assertEqual(Household.objects.filter(registration_data_import__isnull=True).count(), 2)
 
         call_command("migrate", "household", "0185_migration", verbosity=0)
 
-        self.assertEqual(RegistrationDataImport.objects.count(), 3)
-        self.assertEqual(Individual.objects.filter(registration_data_import__isnull=False).count(), 3)
+        # 3 old rdi and + 2 new created
+        self.assertEqual(RegistrationDataImport.objects.count(), 5)
+        # check new RDIs
+        self.assertEqual(
+            RegistrationDataImport.objects.filter(
+                name__startwith="RDI for Individuals [data migration for Programme"
+            ).count(),
+            5,
+        )
+        self.assertEqual(Individual.objects.filter(registration_data_import__isnull=False).count(), 4)
         self.assertEqual(Household.objects.filter(registration_data_import__isnull=True).count(), 3)
-        rdi = RegistrationDataImport.objects.filter(name__startswith="RDI for Individuals").first()
-        self.assertEqual(rdi.name, f"RDI for Individuals [data migration for Programme: {rdi.program.name}]")
-        self.assertEqual(rdi.status, "MERGED")
-        self.assertEqual(rdi.number_of_individuals, 1)
-        self.assertEqual(rdi.number_of_households, 1)
 
-        rdi_2 = RegistrationDataImport.objects.filter(name__startswith="RDI for Individuals").last()
-        self.assertEqual(rdi_2.name, f"RDI for Individuals [data migration for Programme: {rdi_2.program.name}]")
+        rdi_1 = RegistrationDataImport.objects.get(
+            name=f"RDI for Individuals [data migration for Programme: {self.program_1.name}]"
+        )
+        self.assertEqual(rdi_1.status, "MERGED")
+        self.assertEqual(rdi_1.number_of_individuals, 1)
+        self.assertEqual(rdi_1.number_of_households, 1)
+
+        rdi_2 = RegistrationDataImport.objects.get(
+            name=f"RDI for Individuals [data migration for Programme: {self.program_2.name}]"
+        )
         self.assertEqual(rdi_2.status, "MERGED")
         self.assertEqual(rdi_2.number_of_individuals, 1)
         self.assertEqual(rdi_2.number_of_households, 1)
