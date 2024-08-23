@@ -331,7 +331,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                                             "comparisonMethod": "CONTAINS",
                                             "arguments": ["Average"],
                                             "fieldName": "flex_field_1",
-                                            "flexFieldClassification": "FLEX_FIELD_NOT_PDU",
+                                            "flexFieldClassification": "FLEX_FIELD_BASIC",
                                         }
                                     ]
                                 }

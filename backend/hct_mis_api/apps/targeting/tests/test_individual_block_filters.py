@@ -152,7 +152,7 @@ class TestIndividualBlockFilter(TestCase):
             comparison_method="CONTAINS",
             field_name="flex_field_2",
             arguments=["Average"],
-            flex_field_classification=FlexFieldClassification.FLEX_FIELD_NOT_PDU,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_BASIC,
         )
         flex_field_filter.save()
 
@@ -186,7 +186,7 @@ class TestIndividualBlockFilter(TestCase):
             comparison_method="CONTAINS",
             field_name="flex_field_1",
             arguments=["Average"],
-            flex_field_classification=FlexFieldClassification.FLEX_FIELD_NOT_PDU,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_BASIC,
         )
         flex_field_filter.save()
         query = query.filter(tc.get_query())

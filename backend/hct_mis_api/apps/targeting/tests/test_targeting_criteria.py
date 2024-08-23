@@ -105,7 +105,7 @@ class TestTargetingCriteriaQuery(APITestCase):
                         "comparison_method": "EQUALS",
                         "arguments": ["0"],
                         "field_name": "unaccompanied_child_h_f",
-                        "flex_field_classification": "FLEX_FIELD_NOT_PDU",
+                        "flex_field_classification": "FLEX_FIELD_BASIC",
                     }
                 ).get_query()
             )
@@ -122,7 +122,7 @@ class TestTargetingCriteriaQuery(APITestCase):
                         "comparison_method": "CONTAINS",
                         "arguments": ["other_public", "pharmacy", "other_private"],
                         "field_name": "treatment_facility_h_f",
-                        "flex_field_classification": "FLEX_FIELD_NOT_PDU",
+                        "flex_field_classification": "FLEX_FIELD_BASIC",
                     }
                 ).get_query()
             )

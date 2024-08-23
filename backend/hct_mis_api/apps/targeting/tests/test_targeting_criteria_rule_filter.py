@@ -339,7 +339,7 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
             comparison_method="EQUALS",
             field_name="total_households_h_f",
             arguments=[4],
-            flex_field_classification=FlexFieldClassification.FLEX_FIELD_NOT_PDU,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_BASIC,
         )
         query = rule_filter.get_query()
         queryset = Household.objects.filter(query)
@@ -351,7 +351,7 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
             comparison_method="CONTAINS",
             field_name="treatment_facility_h_f",
             arguments=["other_public", "private_doctor"],
-            flex_field_classification=FlexFieldClassification.FLEX_FIELD_NOT_PDU,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_BASIC,
         )
         query = rule_filter.get_query()
         queryset = Household.objects.filter(query)
@@ -362,7 +362,7 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
             comparison_method="CONTAINS",
             field_name="treatment_facility_h_f",
             arguments=["other_public", "government_health_center"],
-            flex_field_classification=FlexFieldClassification.FLEX_FIELD_NOT_PDU,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_BASIC,
         )
         query = rule_filter.get_query()
         queryset = Household.objects.filter(query)
@@ -373,7 +373,7 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
             comparison_method="NOT_CONTAINS",
             field_name="treatment_facility_h_f",
             arguments=["other_public", "government_health_center"],
-            flex_field_classification=FlexFieldClassification.FLEX_FIELD_NOT_PDU,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_BASIC,
         )
         query = rule_filter.get_query()
         queryset = Household.objects.filter(query)
@@ -384,7 +384,7 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
             comparison_method="CONTAINS",
             field_name="other_treatment_facility_h_f",
             arguments=["other"],
-            flex_field_classification=FlexFieldClassification.FLEX_FIELD_NOT_PDU,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_BASIC,
         )
         query = rule_filter.get_query()
         queryset = Household.objects.filter(query)
