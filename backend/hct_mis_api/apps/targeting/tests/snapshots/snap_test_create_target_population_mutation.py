@@ -316,6 +316,9 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_flex_fi
                 'hasEmptyCriteria': False,
                 'hasEmptyIdsCriteria': True,
                 'name': 'Example name 5',
+                'programCycle': {
+                    'status': 'ACTIVE'
+                },
                 'status': 'OPEN',
                 'targetingCriteria': {
                     'householdIds': '',
@@ -356,6 +359,9 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_pdu_fle
                 'hasEmptyCriteria': False,
                 'hasEmptyIdsCriteria': True,
                 'name': 'Example name 5',
+                'programCycle': {
+                    'status': 'ACTIVE'
+                },
                 'status': 'OPEN',
                 'targetingCriteria': {
                     'householdIds': '',
