@@ -12,12 +12,8 @@ from hct_mis_api.apps.core.fixtures import (
 )
 from hct_mis_api.apps.core.models import BusinessArea, PeriodicFieldData
 from hct_mis_api.apps.household.fixtures import create_household
-<<<<<<< HEAD
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-=======
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
->>>>>>> origin
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.models import (
@@ -312,7 +308,6 @@ class TestTargetPopulationQuery(APITestCase):
             },
         )
 
-<<<<<<< HEAD
     @parameterized.expand(
         [
             (
@@ -336,7 +331,8 @@ class TestTargetPopulationQuery(APITestCase):
                     "TargetPopulationNode",
                 )
             },
-=======
+        )
+
     def test_all_targets_query_filter_by_cycle(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.TARGETING_VIEW_LIST], self.business_area, self.program
@@ -345,5 +341,4 @@ class TestTargetPopulationQuery(APITestCase):
             request_string=TestTargetPopulationQuery.ALL_TARGET_POPULATION_QUERY,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={"programCycle": self.id_to_base64(self.cycle_2.id, "ProgramCycleNode")},
->>>>>>> origin
         )

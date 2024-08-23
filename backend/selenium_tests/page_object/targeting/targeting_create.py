@@ -52,7 +52,6 @@ class TargetingCreate(BaseComponents):
     autocompleteTargetCriteriaValues = 'div[data-cy="autocomplete-target-criteria-values"]'
     selectMany = 'div[data-cy="select-many"]'
     buttonEdit = 'button[data-cy="button-edit"]'
-<<<<<<< HEAD
     datePickerFilter = 'div[data-cy="date-picker-filter"]'
     boolField = 'div[data-cy="bool-field"]'
     textField = 'div[data-cy="string-textfield"]'
@@ -82,10 +81,8 @@ class TargetingCreate(BaseComponents):
         'div[data-cy="select-individualsFiltersBlocks[{}].individualBlockFilters[{}].value"]'
     )
     totalNumberOfHouseholdsCount = 'div[data-cy="total-number-of-households-count"]'
-=======
     selectProgramCycleAutocomplete = 'div[data-cy="filters-program-cycle-autocomplete"]'
     programmeCycleInput = 'div[data-cy="Programme Cycle-input"]'
->>>>>>> origin
 
     # Texts
     textTargetingCriteria = "Targeting Criteria"
@@ -229,7 +226,6 @@ class TargetingCreate(BaseComponents):
     def getButtonEdit(self) -> WebElement:
         return self.wait_for(self.buttonEdit)
 
-<<<<<<< HEAD
     def getTextField(self) -> WebElement:
         return self.wait_for(self.textField)
 
@@ -316,10 +312,9 @@ class TargetingCreate(BaseComponents):
 
     def getTotalNumberOfHouseholdsCount(self) -> WebElement:
         return self.wait_for(self.totalNumberOfHouseholdsCount)
-=======
+
     def getFiltersProgramCycleAutocomplete(self) -> WebElement:
         return self.wait_for(self.selectProgramCycleAutocomplete)
 
     def getProgrammeCycleInput(self) -> WebElement:
         return self.wait_for(self.programmeCycleInput)
->>>>>>> origin

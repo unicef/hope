@@ -80,7 +80,6 @@ class TestCreateTargetPopulationMutation(APITestCase):
         create_household(
             {"size": 4, "residence_status": "HOST", "program": cls.program},
         )
-<<<<<<< HEAD
         FlexibleAttribute.objects.create(
             name="flex_field_1",
             type=FlexibleAttribute.STRING,
@@ -96,7 +95,6 @@ class TestCreateTargetPopulationMutation(APITestCase):
             label="PDU Field 1",
             pdu_data=pdu_data,
         )
-=======
         cls.variables = {
             "createTargetPopulationInput": {
                 "name": "Example name 5",
@@ -120,7 +118,6 @@ class TestCreateTargetPopulationMutation(APITestCase):
                 },
             }
         }
->>>>>>> origin
 
     @parameterized.expand(
         [
@@ -204,7 +201,6 @@ class TestCreateTargetPopulationMutation(APITestCase):
         self.program.status = Program.DRAFT
         self.program.save()
 
-<<<<<<< HEAD
         variables = {
             "createTargetPopulationInput": {
                 "name": "Example name 5",
@@ -228,8 +224,6 @@ class TestCreateTargetPopulationMutation(APITestCase):
             }
         }
 
-=======
->>>>>>> origin
         response_error = self.graphql_request(
             request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
             context={"user": self.user},
@@ -245,7 +239,6 @@ class TestCreateTargetPopulationMutation(APITestCase):
     def test_targeting_unique_constraints(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_CREATE], self.program.business_area)
 
-<<<<<<< HEAD
         variables = {
             "createTargetPopulationInput": {
                 "name": "Example name 5",
@@ -269,8 +262,6 @@ class TestCreateTargetPopulationMutation(APITestCase):
             }
         }
 
-=======
->>>>>>> origin
         self.assertEqual(TargetPopulation.objects.count(), 0)
 
         # First, response is ok and tp is created
@@ -352,7 +343,6 @@ class TestCreateTargetPopulationMutation(APITestCase):
                 variables=variables,
             )
 
-<<<<<<< HEAD
     def test_create_mutation_with_flex_field(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_CREATE], self.program.business_area)
 
@@ -424,7 +414,8 @@ class TestCreateTargetPopulationMutation(APITestCase):
             request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
             context={"user": self.user},
             variables=variables,
-=======
+        )
+
     def test_create_targeting_if_program_cycle_finished(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_CREATE], self.program.business_area)
         self.program_cycle.status = Program.FINISHED
@@ -440,5 +431,4 @@ class TestCreateTargetPopulationMutation(APITestCase):
         self.assertIn(
             "Not possible to assign Finished Program Cycle to Targeting",
             response_error["errors"][0]["message"],
->>>>>>> origin
         )
