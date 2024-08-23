@@ -313,6 +313,10 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query_pdu_0_with_permis
                                             'some'
                                         ],
                                         'comparisonMethod': 'EQUALS',
+                                        'fieldAttribute': {
+                                            'labelEn': 'PDU Field STRING',
+                                            'type': 'PDU'
+                                        },
                                         'fieldName': 'pdu_field_string',
                                         'flexFieldClassification': 'FLEX_FIELD_PDU',
                                         'roundNumber': 1
