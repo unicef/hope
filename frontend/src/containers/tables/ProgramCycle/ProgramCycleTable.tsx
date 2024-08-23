@@ -53,14 +53,13 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
       hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_DELETE, permissions);
     return (
       <ClickableTableRow key={row.id} data-cy={`program-cycle-row-${row.id}`}>
-        <TableCell data-cy={`program-cycle-id-${row.id}`}>
+        <TableCell data-cy={'program-cycle-title'}>
           {canViewDetails ? (
-            <BlackLink to={detailsUrl}>{row.unicef_id}</BlackLink>
+            <BlackLink to={detailsUrl}>{row.title}</BlackLink>
           ) : (
-            row.unicef_id
+            row.title
           )}
         </TableCell>
-        <TableCell data-cy="program-cycle-title">{row.title}</TableCell>
         <TableCell data-cy={`program-cycle-status-${row.id}`}>
           <StatusBox
             status={row.status}
