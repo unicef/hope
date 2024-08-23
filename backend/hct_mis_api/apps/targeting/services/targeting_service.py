@@ -248,7 +248,7 @@ class TargetingCriteriaFilterBase:
             "arguments": 1,
             "lookup": "",
             "negative": False,
-            "supported_types": ["PDU"],
+            "supported_types": ["DECIMAL", "DATE", "STRING", "BOOL"],
         },
     }
 
