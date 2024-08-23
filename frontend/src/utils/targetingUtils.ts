@@ -3,7 +3,7 @@ export const chooseFieldType = (fieldValue, arrayHelpers, index): void => {
   if (fieldValue.isFlexField === false) {
     flexFieldClassification = 'NOT_FLEX_FIELD';
   } else if (fieldValue.isFlexField === true && fieldValue.type !== 'PDU') {
-    flexFieldClassification = 'FLEX_FIELD_NOT_PDU';
+    flexFieldClassification = 'FLEX_FIELD_BASIC';
   } else if (fieldValue.isFlexField === true && fieldValue.type === 'PDU') {
     flexFieldClassification = 'FLEX_FIELD_PDU';
   }
@@ -298,7 +298,7 @@ export function getTargetingCriteriaVariables(values) {
 
 const flexFieldClassificationMap = {
   NOT_FLEX_FIELD: 'Not a Flex Field',
-  FLEX_FIELD_NOT_PDU: 'Flex Field Not PDU',
+  FLEX_FIELD_BASIC: 'Flex Field Basic',
   FLEX_FIELD_PDU: 'Flex Field PDU',
 };
 
