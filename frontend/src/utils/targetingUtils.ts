@@ -205,7 +205,7 @@ export function formatCriteriaFilters(filters) {
             break;
           case 'BOOL':
             comparisonMethod = 'EQUALS';
-            values = [each.value === 'True'];
+            values = [each.value === 'Yes'];
             break;
           default:
             comparisonMethod = 'CONTAINS';
@@ -260,11 +260,7 @@ function mapFilterToVariable(filter: Filter): Result {
     arguments: filter.isNull
       ? [null]
       : filter.arguments.map((arg) =>
-          arg === 'True' || arg === 'Yes'
-            ? true
-            : arg === 'False' || arg === 'No'
-              ? false
-              : arg,
+          arg === 'Yes' ? true : arg === 'No' ? false : arg,
         ),
     fieldName: filter.fieldName,
     flexFieldClassification: filter.flexFieldClassification,
