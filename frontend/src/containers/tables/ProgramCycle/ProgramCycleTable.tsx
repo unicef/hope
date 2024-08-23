@@ -55,9 +55,9 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
       <ClickableTableRow key={row.id} data-cy="program-cycle-row">
         <TableCell data-cy="program-cycle-id">
           {canViewDetails ? (
-            <BlackLink to={detailsUrl}>{row.unicef_id}</BlackLink>
+            <BlackLink to={detailsUrl}>{row.title}</BlackLink>
           ) : (
-            row.unicef_id
+            row.title
           )}
         </TableCell>
         <TableCell data-cy="program-cycle-title">{row.title}</TableCell>

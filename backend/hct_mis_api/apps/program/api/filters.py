@@ -43,7 +43,7 @@ class ProgramCycleFilter(filters.FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(Q(title__istartswith=value) | Q(unicef_id__istartswith=value))
+            q_obj |= Q(Q(title__istartswith=value))
         return qs.filter(q_obj)
 
     def filter_total_delivered_quantity_usd(self, queryset: QuerySet, name: str, value: Any) -> QuerySet:

@@ -56,7 +56,7 @@ export function CreatePaymentPlanHeader({
       to: '../../..',
     },
     {
-      title: `${programCycleData.title} (ID: ${programCycleData.unicef_id})`,
+      title: `${programCycleData.title}`,
       to: '../..',
     },
   ];
