@@ -120,7 +120,10 @@ class TargetingCriteriaRuleFilterInputValidator:
                 f"Comparison method '{rule_filter.comparison_method}' "
                 f"expected {args_count} arguments, {given_args_count} given"
             )
-        if get_attr_value("type", attribute) not in comparison_attribute.get("supported_types"):
+        type = get_attr_value("type", attribute, None)
+        if type == FlexibleAttribute.PDU:
+            type = attribute.pdu_data.subtype
+        if type not in comparison_attribute.get("supported_types"):
             raise ValidationError(
                 f"{rule_filter.field_name} is '{get_attr_value('type', attribute)}' type filter "
                 f"and does not accept '{rule_filter.comparison_method}' comparison method"
@@ -143,6 +146,10 @@ class TargetingCriteriaRuleInputValidator:
             raise ValidationError("There should be at least 1 filter or block in rules")
         for rule_filter in filters:
             TargetingCriteriaRuleFilterInputValidator.validate(rule_filter=rule_filter, program=program)
+        for individuals_filters_block in individuals_filters_blocks:
+            individual_block_filters = individuals_filters_block.get("individual_block_filters")
+            for individual_block_filter in individual_block_filters:
+                TargetingCriteriaRuleFilterInputValidator.validate(rule_filter=individual_block_filter, program=program)
 
 
 class TargetingCriteriaInputValidator:

@@ -245,7 +245,7 @@ class TestIndividualBlockFilter(TestCase):
         pdu_data = PeriodicFieldDataFactory(
             subtype=PeriodicFieldData.DECIMAL,
             number_of_rounds=2,
-            rounds_names=["Round 1", "Rounds 2"],
+            rounds_names=["Round 1", "Round 2"],
         )
         FlexibleAttributeForPDUFactory(
             program=self.program,
@@ -284,7 +284,7 @@ class TestIndividualBlockFilter(TestCase):
         pdu_data = PeriodicFieldDataFactory(
             subtype=PeriodicFieldData.DECIMAL,
             number_of_rounds=2,
-            rounds_names=["Round 1", "Rounds 2"],
+            rounds_names=["Round 1", "Round 2"],
         )
         FlexibleAttributeForPDUFactory(
             program=self.program,
@@ -324,7 +324,7 @@ class TestIndividualBlockFilter(TestCase):
         pdu_data = PeriodicFieldDataFactory(
             subtype=PeriodicFieldData.DECIMAL,
             number_of_rounds=2,
-            rounds_names=["Round 1", "Rounds 2"],
+            rounds_names=["Round 1", "Round 2"],
         )
         FlexibleAttributeForPDUFactory(
             program=self.program,
