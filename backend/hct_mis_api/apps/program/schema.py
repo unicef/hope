@@ -113,12 +113,8 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     data_collecting_type = graphene.Field(DataCollectingTypeNode, source="data_collecting_type")
     partners = graphene.List(PartnerNode)
     is_social_worker_program = graphene.Boolean()
-    pdu_fields = graphene.List(PeriodicFieldNode)
-<<<<<<< HEAD
     target_populations_count = graphene.Int()
-=======
     cycles = DjangoFilterConnectionField(ProgramCycleNode, filterset_class=ProgramCycleFilter)
->>>>>>> origin
 
     class Meta:
         model = Program
