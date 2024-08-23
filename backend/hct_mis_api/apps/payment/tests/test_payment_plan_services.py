@@ -113,8 +113,8 @@ class TestPaymentPlanServices(APITestCase):
             status=Program.ACTIVE,
             start_date=timezone.datetime(2019, 10, 12, tzinfo=utc).date(),
             end_date=timezone.datetime(2099, 12, 10, tzinfo=utc).date(),
-            cycle__start_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
-            cycle__end_date=timezone.datetime(2021, 12, 10, tzinfo=utc),
+            cycle__start_date=timezone.datetime(2021, 10, 10, tzinfo=utc).date(),
+            cycle__end_date=timezone.datetime(2021, 12, 10, tzinfo=utc).date(),
         )
         targeting = TargetPopulationFactory(program=program, program_cycle=program.cycles.first())
 
@@ -292,8 +292,8 @@ class TestPaymentPlanServices(APITestCase):
     def test_create_follow_up_pp(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(
             total_households_count=1,
-            program__cycle__start_date=timezone.datetime(2021, 6, 10, tzinfo=utc),
-            program__cycle__end_date=timezone.datetime(2021, 7, 10, tzinfo=utc),
+            program__cycle__start_date=timezone.datetime(2021, 6, 10, tzinfo=utc).date(),
+            program__cycle__end_date=timezone.datetime(2021, 7, 10, tzinfo=utc).date(),
         )
         new_targeting = TargetPopulationFactory(
             status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
@@ -414,8 +414,8 @@ class TestPaymentPlanServices(APITestCase):
         min_no_of_payments_in_chunk_mock.__get__ = mock.Mock(return_value=2)
 
         pp = PaymentPlanFactory(
-            program__cycle__start_date=timezone.datetime(2021, 6, 10, tzinfo=utc),
-            program__cycle__end_date=timezone.datetime(2021, 7, 10, tzinfo=utc),
+            program__cycle__start_date=timezone.datetime(2021, 6, 10, tzinfo=utc).date(),
+            program__cycle__end_date=timezone.datetime(2021, 7, 10, tzinfo=utc).date(),
         )
 
         with self.assertRaisesMessage(GraphQLError, "No payments to split"):
@@ -522,8 +522,8 @@ class TestPaymentPlanServices(APITestCase):
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_send_to_payment_gateway(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(
-            program__cycle__start_date=timezone.datetime(2021, 6, 10, tzinfo=utc),
-            program__cycle__end_date=timezone.datetime(2021, 7, 10, tzinfo=utc),
+            program__cycle__start_date=timezone.datetime(2021, 6, 10, tzinfo=utc).date(),
+            program__cycle__end_date=timezone.datetime(2021, 7, 10, tzinfo=utc).date(),
             status=PaymentPlan.Status.ACCEPTED,
         )
         pp.background_action_status_send_to_payment_gateway()
@@ -570,8 +570,8 @@ class TestPaymentPlanServices(APITestCase):
                 status=Program.ACTIVE,
                 start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
                 end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
-                cycle__start_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
-                cycle__end_date=timezone.datetime(2021, 12, 10, tzinfo=utc),
+                cycle__start_date=timezone.datetime(2021, 10, 10, tzinfo=utc).date(),
+                cycle__end_date=timezone.datetime(2021, 12, 10, tzinfo=utc).date(),
             ),
         )
         cycle = targeting.program.cycles.first()
@@ -587,23 +587,14 @@ class TestPaymentPlanServices(APITestCase):
 
         with self.assertRaisesMessage(
             GraphQLError,
-            "Impossible to create Payment Plan for Program Cycle within Finished status",
+            "Impossible to create Payment Plan for Programme Cycle within Finished status",
         ):
             cycle.status = ProgramCycle.FINISHED
             cycle.save()
             PaymentPlanService.create(input_data=input_data, user=self.user)
 
-        with self.assertRaisesMessage(
-            GraphQLError,
-            "Impossible to create Payment Plan for Program Cycle without start and/or end dates",
-        ):
-            cycle.status = ProgramCycle.ACTIVE
-            cycle.end_date = None
-            cycle.save()
-            PaymentPlanService.create(input_data=input_data, user=self.user)
-
         cycle.status = ProgramCycle.DRAFT
-        cycle.end_date = parse_date("2021-11-25")
+        cycle.end_date = None
         cycle.save()
         PaymentPlanService.create(input_data=input_data, user=self.user)
         cycle.refresh_from_db()
@@ -624,5 +615,5 @@ class TestPaymentPlanServices(APITestCase):
         )
 
         self.assertIsNone(targeting_without_cycle.program_cycle)
-        with self.assertRaisesMessage(GraphQLError, "Target Population should have assigned Program Cycle"):
+        with self.assertRaisesMessage(GraphQLError, "Target Population should have assigned Programme Cycle"):
             PaymentPlanService.create(input_data=input_data, user=self.user)

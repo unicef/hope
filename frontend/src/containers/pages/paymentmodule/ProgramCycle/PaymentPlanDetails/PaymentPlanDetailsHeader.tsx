@@ -72,7 +72,7 @@ export const PaymentPlanDetailsHeader = ({
       to: '../../..',
     });
     breadCrumbsItems.push({
-      title: `${programCycleData.title} (ID: ${programCycleData.unicef_id})`,
+      title: `${programCycleData.title}`,
       to: '../..',
     });
   } else {
