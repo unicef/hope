@@ -7,6 +7,7 @@ import GreaterThanEqual from '../../../assets/GreaterThanEqual.svg';
 import LessThanEqual from '../../../assets/LessThanEqual.svg';
 import { TargetingCriteriaRuleObjectType } from '@generated/graphql';
 import { Box } from '@mui/system';
+import { BlueText } from '@components/grievances/LookUps/LookUpStyles';
 
 interface CriteriaElementProps {
   alternative?: boolean;
@@ -114,31 +115,31 @@ const CriteriaField = ({ field, choicesDict }): React.ReactElement => {
         <p>
           {field.fieldAttribute.labelEn || field.fieldName}:{' '}
           {field.isNull === true || field.comparisonMethod === 'IS_NULL' ? (
-            t('Empty')
+            <BlueText>{t('Empty')}</BlueText>
           ) : typeof field.arguments?.[0] === 'boolean' ? (
             field.arguments[0] ? (
-              t('Yes')
+              <BlueText>{t('Yes')}</BlueText>
             ) : (
-              t('No')
+              <BlueText>{t('No')}</BlueText>
             )
           ) : (
             <>
               {field.arguments?.[0] != null ? (
                 typeof field.arguments[0] === 'boolean' ? (
                   field.arguments[0] === true ? (
-                    t('Yes')
+                    <BlueText>{t('Yes')}</BlueText>
                   ) : (
-                    t('No')
+                    <BlueText>{t('No')}</BlueText>
                   )
-                ) : field.arguments[0] === 'True' ? (
-                  t('Yes')
-                ) : field.arguments[0] === 'False' ? (
-                  t('No')
+                ) : field.arguments[0] === 'Yes' ? (
+                  <BlueText>{t('Yes')}</BlueText>
+                ) : field.arguments[0] === 'No' ? (
+                  <BlueText>{t('No')}</BlueText>
                 ) : (
                   <span>{extractChoiceLabel(field, field.arguments[0])}</span>
                 )
               ) : (
-                <>{t('Empty')}</>
+                <BlueText>{t('Empty')}</BlueText>
               )}
             </>
           )}

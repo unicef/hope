@@ -223,14 +223,14 @@ export const SubField: React.FC<SubFieldProps> = ({
                 labelEn: t('Yes'),
                 labels: [{ label: t('Yes'), language: 'English(EN)' }],
                 listName: null,
-                value: 'True',
+                value: 'Yes',
               },
               {
                 admin: null,
                 labelEn: t('No'),
                 labels: [{ label: t('No'), language: 'English(EN)' }],
                 listName: null,
-                value: 'False',
+                value: 'No',
               },
             ]}
             index={index}
