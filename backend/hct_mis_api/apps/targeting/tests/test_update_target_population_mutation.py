@@ -128,7 +128,7 @@ VARIABLES_UNKNOWN_FLEX_FIELD_NAME = {
                             "comparisonMethod": "EQUALS",
                             "fieldName": "foo_bar",
                             "arguments": [3],
-                            "flexFieldClassification": "FLEX_FIELD_NOT_PDU",
+                            "flexFieldClassification": "FLEX_FIELD_BASIC",
                         }
                     ]
                 }

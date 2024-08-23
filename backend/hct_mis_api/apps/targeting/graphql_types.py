@@ -58,7 +58,7 @@ def filter_choices(field: Optional[Dict], args: List) -> Optional[Dict]:
 
 class FlexFieldClassificationChoices(graphene.Enum):
     NOT_FLEX_FIELD = "NOT_FLEX_FIELD"
-    FLEX_FIELD_NOT_PDU = "FLEX_FIELD_NOT_PDU"
+    FLEX_FIELD_BASIC = "FLEX_FIELD_BASIC"
     FLEX_FIELD_PDU = "FLEX_FIELD_PDU"
 
 
@@ -80,7 +80,7 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
             )
 
         program = None
-        if parent.flex_field_classification == "FLEX_FIELD_PDU":
+        if parent.flex_field_classification == FlexFieldClassification.FLEX_FIELD_PDU:
             encoded_program_id = info.context.headers.get("Program")
             program = Program.objects.get(id=decode_id_string(encoded_program_id))
         return FlexibleAttribute.objects.get(name=parent.field_name, program=program)
@@ -97,7 +97,7 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
         return self.arguments
 
     def resolve_field_attribute(parent, info: Any) -> Any:
-        if parent.flex_field_classification == "NOT_FLEX_FIELD":
+        if parent.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             field_attribute = get_field_by_name(
                 parent.field_name,
                 parent.individuals_filters_block.targeting_criteria_rule.targeting_criteria.target_population,
@@ -105,7 +105,7 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
             return filter_choices(field_attribute, parent.arguments)  # type: ignore # can't convert graphene list to list
 
         program = None
-        if parent.flex_field_classification == "FLEX_FIELD_PDU":
+        if parent.flex_field_classification == FlexFieldClassification.FLEX_FIELD_PDU:
             encoded_program_id = info.context.headers.get("Program")
             program = Program.objects.get(id=decode_id_string(encoded_program_id))
         return FlexibleAttribute.objects.get(name=parent.field_name, program=program)

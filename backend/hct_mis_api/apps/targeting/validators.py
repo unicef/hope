@@ -85,7 +85,7 @@ class TargetingCriteriaRuleFilterInputValidator:
                 raise ValidationError(
                     f"Can't find any core field attribute associated with {rule_filter.field_name} field name"
                 )
-        elif flex_field_classification == FlexFieldClassification.FLEX_FIELD_NOT_PDU:
+        elif flex_field_classification == FlexFieldClassification.FLEX_FIELD_BASIC:
             try:
                 attribute = FlexibleAttribute.objects.get(name=rule_filter.field_name, program=None)
             except FlexibleAttribute.DoesNotExist:

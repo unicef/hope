@@ -312,7 +312,7 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_flex_fi
                                             ],
                                             'comparisonMethod': 'CONTAINS',
                                             'fieldName': 'flex_field_1',
-                                            'flexFieldClassification': 'FLEX_FIELD_NOT_PDU',
+                                            'flexFieldClassification': 'FLEX_FIELD_BASIC',
                                             'roundNumber': None
                                         }
                                     ]
