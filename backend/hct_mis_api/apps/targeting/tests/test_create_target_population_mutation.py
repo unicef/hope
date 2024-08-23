@@ -110,7 +110,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                                     "comparisonMethod": "EQUALS",
                                     "fieldName": "size",
                                     "arguments": [3],
-                                    "isFlexField": False,
+                                    "flexFieldClassification": "NOT_FLEX_FIELD",
                                 }
                             ]
                         }
@@ -306,6 +306,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                 "businessAreaSlug": "afghanistan",
                 "programId": self.id_to_base64(self.program.id, "ProgramNode"),
                 "excludedIds": "",
+                "programCycleId": self.id_to_base64(self.program_cycle.id, "ProgramCycleNode"),
                 "targetingCriteria": {
                     "rules": [
                         {
@@ -342,6 +343,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                 "businessAreaSlug": "afghanistan",
                 "programId": self.id_to_base64(self.program.id, "ProgramNode"),
                 "excludedIds": "",
+                "programCycleId": self.id_to_base64(self.program_cycle.id, "ProgramCycleNode"),
                 "targetingCriteria": {
                     "rules": [
                         {
