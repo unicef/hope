@@ -90,6 +90,11 @@ class TestTargetPopulationQuery(APITestCase):
                     arguments
                     flexFieldClassification
                     roundNumber
+                    fieldAttribute
+                    {
+                      labelEn
+                      type
+                    }
                   }
                 }
               }
@@ -324,7 +329,13 @@ class TestTargetPopulationQuery(APITestCase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
         self.snapshot_graphql_request(
             request_string=TestTargetPopulationQuery.TARGET_POPULATION_QUERY,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
             variables={
                 "id": self.id_to_base64(
                     self.target_population_with_pdu_filter.id,
