@@ -135,7 +135,7 @@ class TargetingCriteriaRuleInputValidator:
     def validate(rule: "Rule", program: "Program") -> None:
         total_len = 0
         filters = rule.get("filters")
-        individuals_filters_blocks = rule.get("individuals_filters_blocks")
+        individuals_filters_blocks = rule.get("individuals_filters_blocks", [])
         if filters is not None:
             total_len += len(filters)
         if individuals_filters_blocks is not None:
@@ -147,7 +147,7 @@ class TargetingCriteriaRuleInputValidator:
         for rule_filter in filters:
             TargetingCriteriaRuleFilterInputValidator.validate(rule_filter=rule_filter, program=program)
         for individuals_filters_block in individuals_filters_blocks:
-            individual_block_filters = individuals_filters_block.get("individual_block_filters")
+            individual_block_filters = individuals_filters_block.get("individual_block_filters", [])
             for individual_block_filter in individual_block_filters:
                 TargetingCriteriaRuleFilterInputValidator.validate(rule_filter=individual_block_filter, program=program)
 
