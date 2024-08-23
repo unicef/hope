@@ -61,7 +61,8 @@ snapshots['TestProgramQuery::test_single_program_query_0_with_permission 1'] = {
                     }
                 }
             ],
-            'status': 'ACTIVE'
+            'status': 'ACTIVE',
+            'targetPopulationsCount': 1
         }
     }
 }
