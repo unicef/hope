@@ -50,6 +50,7 @@ class ProgrammeDetails(BaseComponents):
     inputTitle = 'input[data-cy="input-title"]'
     deleteProgrammeCycle = 'button[data-cy="delete-programme-cycle"]'
     buttonDelete = 'button[data-cy="button-delete"]'
+    buttonCancel = 'button[data-cy="button-cancel"]'
 
     def getProgramCycleRow(self) -> WebElement:
         self.wait_for(self.programCycleRow)
@@ -121,6 +122,12 @@ class ProgrammeDetails(BaseComponents):
 
     def getEndDateCycle(self) -> WebElement:
         return self.wait_for(self.endDateCycle).find_elements("tag name", "input")[0]
+
+    def getStartDateCycleDiv(self) -> WebElement:
+        return self.wait_for(self.startDateCycle)
+
+    def getEndDateCycleDiv(self) -> WebElement:
+        return self.wait_for(self.endDateCycle)
 
     def getButtonCreateProgramCycle(self) -> WebElement:
         return self.wait_for(self.buttonCreateProgramCycle)
@@ -205,6 +212,9 @@ class ProgrammeDetails(BaseComponents):
 
     def getButtonDelete(self) -> WebElement:
         return self.wait_for(self.buttonDelete)
+
+    def getButtonCancel(self) -> WebElement:
+        return self.wait_for(self.buttonCancel)
 
     def clickButtonFinishProgramPopup(self) -> None:
         self.wait_for('[data-cy="dialog-actions-container"]')
