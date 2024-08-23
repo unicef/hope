@@ -75,6 +75,18 @@ snapshots['TestTargetPopulationQuery::test_all_targets_query_order_by_created_by
                         'totalHouseholdsCount': 1,
                         'totalIndividualsCount': 3
                     }
+                },
+                {
+                    'node': {
+                        'createdBy': {
+                            'firstName': 'Third',
+                            'lastName': 'User'
+                        },
+                        'name': 'target_population_with_individual_filter',
+                        'status': 'LOCKED',
+                        'totalHouseholdsCount': 1,
+                        'totalIndividualsCount': 3
+                    }
                 }
             ]
         }
@@ -112,6 +124,14 @@ snapshots['TestTargetPopulationQuery::test_simple_all_targets_query_0_with_permi
                 {
                     'node': {
                         'name': 'target_population_with_pdu_filter',
+                        'status': 'LOCKED',
+                        'totalHouseholdsCount': 1,
+                        'totalIndividualsCount': 3
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'target_population_with_individual_filter',
                         'status': 'LOCKED',
                         'totalHouseholdsCount': 1,
                         'totalIndividualsCount': 3
@@ -177,6 +197,14 @@ snapshots['TestTargetPopulationQuery::test_simple_all_targets_query_2_with_permi
                         'totalHouseholdsCount': 1,
                         'totalIndividualsCount': 3
                     }
+                },
+                {
+                    'node': {
+                        'name': 'target_population_with_individual_filter',
+                        'status': 'LOCKED',
+                        'totalHouseholdsCount': 1,
+                        'totalIndividualsCount': 3
+                    }
                 }
             ]
         }
@@ -219,6 +247,66 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query_0_with_permission
 }
 
 snapshots['TestTargetPopulationQuery::test_simple_target_query_1_without_permission 1'] = {
+    'data': {
+        'targetPopulation': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 11,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'targetPopulation'
+            ]
+        }
+    ]
+}
+
+snapshots['TestTargetPopulationQuery::test_simple_target_query_individual_filter_0_with_permission 1'] = {
+    'data': {
+        'targetPopulation': {
+            'hasEmptyCriteria': False,
+            'hasEmptyIdsCriteria': True,
+            'name': 'target_population_with_individual_filter',
+            'status': 'LOCKED',
+            'targetingCriteria': {
+                'rules': [
+                    {
+                        'filters': [
+                        ],
+                        'individualsFiltersBlocks': [
+                            {
+                                'individualBlockFilters': [
+                                    {
+                                        'arguments': [
+                                            'disabled'
+                                        ],
+                                        'comparisonMethod': 'EQUALS',
+                                        'fieldAttribute': {
+                                            'labelEn': 'Individual is disabled?',
+                                            'type': 'SELECT_ONE'
+                                        },
+                                        'fieldName': 'disability',
+                                        'flexFieldClassification': 'NOT_FLEX_FIELD',
+                                        'roundNumber': None
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            'totalHouseholdsCount': 1,
+            'totalIndividualsCount': 3
+        }
+    }
+}
+
+snapshots['TestTargetPopulationQuery::test_simple_target_query_individual_filter_1_without_permission 1'] = {
     'data': {
         'targetPopulation': None
     },
