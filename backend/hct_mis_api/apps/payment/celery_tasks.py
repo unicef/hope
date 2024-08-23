@@ -481,8 +481,8 @@ def payment_plan_exclude_beneficiaries(
                         parent__program_cycle_id=payment_plan.program_cycle_id
                     )  # check only Payments in the same program cycle
                     .filter(
-                        Q(parent__start_date__lte=payment_plan.end_date)
-                        & Q(parent__end_date__gte=payment_plan.start_date),
+                        Q(parent__program_cycle__start_date__lte=payment_plan.program_cycle.end_date)
+                        & Q(parent__program_cycle__end_date__gte=payment_plan.program_cycle.start_date),
                         ~Q(parent__status=PaymentPlan.Status.OPEN),
                         Q(household__unicef_id=hh_unicef_id) & Q(conflicted=False),
                     )

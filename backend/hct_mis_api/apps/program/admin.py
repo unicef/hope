@@ -30,10 +30,14 @@ from mptt.forms import TreeNodeMultipleChoiceField
 
 @admin.register(ProgramCycle)
 class ProgramCycleAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdminBase):
-    list_display = ("program", "iteration", "status", "start_date", "end_date")
-    date_hierarchy = "program__start_date"
-    list_filter = (("status", ChoicesFieldComboFilter),)
-    raw_id_fields = ("program",)
+    list_display = ("program", "status", "start_date", "end_date")
+    date_hierarchy = "start_date"
+    list_filter = (
+        ("status", ChoicesFieldComboFilter),
+        ("program", AutoCompleteFilter),
+    )
+    raw_id_fields = ("program", "created_by")
+    exclude = ("unicef_id",)
 
 
 class ProgramCycleAdminInline(admin.TabularInline):
@@ -43,6 +47,7 @@ class ProgramCycleAdminInline(admin.TabularInline):
         "created_at",
         "updated_at",
     )
+    exclude = ("unicef_id",)
 
 
 class PartnerAreaForm(forms.Form):

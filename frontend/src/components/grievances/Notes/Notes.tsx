@@ -62,13 +62,13 @@ export function Notes({
     description: string,
     noteId: string,
   ): React.ReactElement => (
-    <Grid container key={noteId}>
+    <Grid container key={noteId}  data-cy="note-row">
       <Grid item xs={2}>
         <Avatar alt={`${name} picture`} src="/static/images/avatar/1.jpg" />
       </Grid>
       <Grid item xs={10}>
         <Grid item xs={12}>
-          <Box display="flex" justifyContent="space-between">
+          <Box display="flex" justifyContent="space-between" data-cy="note-name">
             <Name>{name}</Name>
             <Date>
               <UniversalMoment withTime>{date}</UniversalMoment>

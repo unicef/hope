@@ -2,6 +2,8 @@ import uuid
 from typing import Any, Dict
 from unittest.mock import MagicMock
 
+from django.utils.dateparse import parse_date
+
 import hct_mis_api.apps.cash_assist_datahub.fixtures as ca_fixtures
 import hct_mis_api.apps.cash_assist_datahub.models as ca_models
 import hct_mis_api.apps.payment.fixtures as payment_fixtures
@@ -13,8 +15,10 @@ from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import (
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import CashPlanFactory
+from hct_mis_api.apps.program.models import ProgramCycle
 
 
 class TestRecalculatingCash(APITestCase):
@@ -39,6 +43,14 @@ class TestRecalculatingCash(APITestCase):
           cashPlus
           populationGoal
           administrativeAreasOfImplementation
+          cycles {
+            edges {
+              node {
+                id
+                status
+              }
+            }
+          }
         }
         validationErrors
       }
@@ -118,13 +130,14 @@ class TestRecalculatingCash(APITestCase):
             }
         }
 
-        cls.create_target_population_mutation_variables = lambda program_id: {
+        cls.create_target_population_mutation_variables = lambda program_id, program_cycle_id: {
             "createTargetPopulationInput": {
                 "programId": program_id,
                 "name": "asdasd",
                 "excludedIds": "",
                 "exclusionReason": "",
                 "businessAreaSlug": "afghanistan",
+                "programCycleId": program_cycle_id,
                 "targetingCriteria": {
                     "rules": [
                         {
@@ -169,11 +182,11 @@ class TestRecalculatingCash(APITestCase):
             variables=self.update_program_mutation_variables(program_id),
         )
 
-    def create_target_population(self, program_id: str) -> Dict:
+    def create_target_population(self, program_id: str, program_cycle_id: str) -> Dict:
         return self.send_successful_graphql_request(
             request_string=self.CREATE_TARGET_POPULATION_MUTATION,
             context={"user": self.user},
-            variables=self.create_target_population_mutation_variables(program_id),
+            variables=self.create_target_population_mutation_variables(program_id, program_cycle_id),
         )
 
     def lock_target_population(self, target_population_id: str) -> Dict:
@@ -224,10 +237,13 @@ class TestRecalculatingCash(APITestCase):
 
         program_response = self.create_program()
         program_id = program_response["data"]["createProgram"]["program"]["id"]
+        program_cycle_id = program_response["data"]["createProgram"]["program"]["cycles"]["edges"][0]["node"]["id"]
+
+        ProgramCycle.objects.filter(id=decode_id_string(program_cycle_id)).update(end_date=parse_date("2033-01-01"))
 
         self.activate_program(program_id)
 
-        target_population_response = self.create_target_population(program_id)
+        target_population_response = self.create_target_population(program_id, program_cycle_id)
         target_population_id = target_population_response["data"]["createTargetPopulation"]["targetPopulation"]["id"]
 
         self.lock_target_population(target_population_id)

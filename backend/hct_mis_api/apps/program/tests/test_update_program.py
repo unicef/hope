@@ -28,7 +28,7 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
+from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
@@ -1120,5 +1120,37 @@ class TestUpdateProgram(APITestCase):
                     "3": {"value": None},
                     "4": {"value": None},
                 },
+            },
+        )
+
+    def test_finish_active_program_with_not_finished_program_cycle(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_FINISH], self.business_area)
+        Program.objects.filter(id=self.program.id).update(status=Program.ACTIVE)
+        self.program.refresh_from_db()
+        self.assertEqual(self.program.status, Program.ACTIVE)
+        program_cycle = self.program.cycles.first()
+
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "status": Program.FINISHED,
+                },
+                "version": self.program.version,
+            },
+        )
+        program_cycle.status = ProgramCycle.FINISHED
+        program_cycle.save()
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "status": Program.FINISHED,
+                },
+                "version": self.program.version,
             },
         )

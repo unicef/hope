@@ -167,7 +167,7 @@ class TestPeriodicDataUpdateUpload:
             [["Test Value", "2021-05-02"]],
             program,
         )
-        pageIndividuals.selectGlobalProgramFilter(program.name).click()
+        pageIndividuals.selectGlobalProgramFilter(program.name)
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
@@ -185,7 +185,7 @@ class TestPeriodicDataUpdateUpload:
         assert individual.flex_fields[flexible_attribute.name]["1"]["collection_date"] == "2021-05-02"
         assert pageIndividuals.getUpdateStatus(periodic_data_update_upload.pk).text == "SUCCESSFUL"
 
-    # @flaky(max_runs=5, min_passes=1)
+    @pytest.mark.night
     def test_periodic_data_update_upload_form_error(
         self,
         clear_downloaded_files: None,
@@ -209,7 +209,7 @@ class TestPeriodicDataUpdateUpload:
             [["Test Value", "2021-05-02"]],
             program,
         )
-        pageIndividuals.selectGlobalProgramFilter(program.name).click()
+        pageIndividuals.selectGlobalProgramFilter(program.name)
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
@@ -227,6 +227,7 @@ class TestPeriodicDataUpdateUpload:
         error_text = "Row: 2\ntest_date_attribute__round_value\nEnter a valid date."
         assert pageIndividuals.getPduFormErrors().text == error_text
 
+    @pytest.mark.night
     def test_periodic_data_update_upload_error(
         self,
         clear_downloaded_files: None,
@@ -260,7 +261,7 @@ class TestPeriodicDataUpdateUpload:
         with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
             wb.save(tmp_file.name)
             tmp_file.seek(0)
-            pageIndividuals.selectGlobalProgramFilter(program.name).click()
+            pageIndividuals.selectGlobalProgramFilter(program.name)
             pageIndividuals.getNavProgrammePopulation().click()
             pageIndividuals.getNavIndividuals().click()
             pageIndividuals.getTabPeriodicDataUpdates().click()
@@ -271,6 +272,7 @@ class TestPeriodicDataUpdateUpload:
             error_text = pageIndividuals.getPduUploadError().text
             assert error_text == "Periodic Data Update Template with ID -1 not found"
 
+    @pytest.mark.night
     def test_periodic_data_uploads_list(
         self,
         clear_downloaded_files: None,
@@ -298,7 +300,7 @@ class TestPeriodicDataUpdateUpload:
             template=periodic_data_update_template,
             status=PeriodicDataUpdateUpload.Status.SUCCESSFUL,
         )
-        pageIndividuals.selectGlobalProgramFilter(program.name).click()
+        pageIndividuals.selectGlobalProgramFilter(program.name)
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()

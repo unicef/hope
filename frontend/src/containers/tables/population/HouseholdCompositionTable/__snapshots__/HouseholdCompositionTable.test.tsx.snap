@@ -70,6 +70,7 @@ exports[`components/population/HouseholdCompositionTable should render 1`] = `
       >
         <tr
           class="MuiTableRow-root css-n2dwpd-MuiTableRow-root"
+          data-cy="row05"
         >
           <td
             class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"

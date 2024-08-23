@@ -1,6 +1,7 @@
 from time import sleep
 
 from page_object.base_components import BaseComponents
+from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
 
@@ -11,7 +12,8 @@ class NewTicket(BaseComponents):
     issueType = 'div[data-cy="select-issueType"]'
     buttonNext = 'button[data-cy="button-submit"]'
     statusOptions = 'li[role="option"]'
-    lookUpTabs = 'button[role="tab"]'
+    lookUpIndividualTab = 'button[data-cy="look-up-individual"]'
+    lookUpHouseholdTab = 'button[data-cy="look-up-household"]'
     householdTableRow = 'tr[data-cy="household-table-row"]'
     individualTableRow = 'tr[data-cy="individual-table-row"]'
     tableRow = '[data-cy="table-row"]'
@@ -61,10 +63,91 @@ class NewTicket(BaseComponents):
     labelCategoryDescription = 'div[data-cy="label-Category Description"]'
     labelIssueTypeDescription = 'div[data-cy="label-Issue Type Description"]'
     selectFieldName = 'div[data-cy="select-householdDataUpdateFields[0].fieldName"]'
-    individualFieldName = 'div[data-cy="select-individualDataUpdateFields[0].fieldName"]'
+    individualFieldName = 'div[data-cy="select-individualDataUpdateFields[{}].fieldName"]'
     inputValue = 'input[data-cy="input-householdDataUpdateFields[0].fieldValue"]'
     partner = 'div[data-cy="select-partner"]'
     tablePagination = '[data-cy="table-pagination"]'
+    inputDescription = 'textarea[data-cy="input-description"]'
+    inputComments = 'textarea[data-cy="input-comments"]'
+    selectProgram = 'div[data-cy="select-program"]'
+    inputIndividualdataPhonenoalternative = 'input[data-cy="input-individualDataPhoneNoAlternative"]'
+    datePickerFilter = 'div[data-cy="date-picker-filter"]'
+    inputIndividualdataBlockchainname = 'input[data-cy="input-individualData.blockchainName"]'
+    selectIndividualdataSelfcaredisability = 'div[data-cy="select-individualData.selfcareDisability"]'
+    selectIndividualdataObserveddisability = 'div[data-cy="select-individualData.observedDisability"]'
+    selectIndividualdataWorkstatus = 'div[data-cy="select-individualData.workStatus"]'
+    selectIndividualdataEstimatedbirthdate = 'div[data-cy="select-individualData.estimatedBirthDate"]'
+    inputIndividualdataFamilyname = 'input[data-cy="input-individualData.familyName"]'
+    inputIndividualdataFullname = 'input[data-cy="input-individualData.fullName"]'
+    selectIndividualdataSex = 'div[data-cy="select-individualData.sex"]'
+    inputIndividualdataGivenname = 'input[data-cy="input-individualData.givenName"]'
+    selectIndividualdataCommsdisability = 'div[data-cy="select-individualData.commsDisability"]'
+    selectIndividualdataHearingdisability = 'div[data-cy="select-individualData.hearingDisability"]'
+    selectIndividualdataMemorydisability = 'div[data-cy="select-individualData.memoryDisability"]'
+    selectIndividualdataSeeingdisability = 'div[data-cy="select-individualData.seeingDisability"]'
+    selectIndividualdataPhysicaldisability = 'div[data-cy="select-individualData.physicalDisability"]'
+    inputIndividualdataEmail = 'input[data-cy="input-individualData.email"]'
+    selectIndividualdataDisability = 'div[data-cy="select-individualData.disability"]'
+    selectIndividualdataPregnant = 'div[data-cy="select-individualData.pregnant"]'
+    selectIndividualdataMaritalstatus = 'div[data-cy="select-individualData.maritalStatus"]'
+    inputIndividualdataMiddlename = 'input[data-cy="input-individualData.middleName"]'
+    inputIndividualdataPaymentdeliveryphoneno = 'input[data-cy="input-individualData.paymentDeliveryPhoneNo"]'
+    inputIndividualdataPhoneno = 'input[data-cy="input-individualData.phoneNo"]'
+    selectIndividualdataPreferredlanguage = 'div[data-cy="select-individualData.preferredLanguage"]'
+    selectIndividualdataRelationship = 'div[data-cy="select-individualData.relationship"]'
+    selectIndividualdataRole = 'div[data-cy="select-individualData.role"]'
+    inputIndividualdataWalletaddress = 'input[data-cy="input-individualData.walletAddress"]'
+    inputIndividualdataWalletname = 'input[data-cy="input-individualData.walletName"]'
+    inputIndividualdataWhoanswersaltphone = 'input[data-cy="input-individualData.whoAnswersAltPhone"]'
+    inputIndividualdataWhoanswersphone = 'input[data-cy="input-individualData.whoAnswersPhone"]'
+    selectHouseholddataupdatefieldsFieldname = 'div[data-cy="select-householdDataUpdateFields[{}].fieldName"]'
+    buttonAddNewField = 'button[data-cy="button-add-new-field"]'
+    inputIndividualData = 'div[data-cy="input-individual-data-{}"]'  # Gender
+    checkboxSelectAll = 'span[data-cy="checkbox-select-all"]'
+    buttonSubmit = 'button[data-cy="button-submit"]'
+    linkedTicketId = 'span[data-cy="linked-ticket-id"]'
+    linkedTicket = '[data-cy="linked-ticket"]'
+    buttonEdit = 'svg[data-cy="button-edit"]'
+    buttonDelete = 'svg[data-cy="button-delete"]'
+    addDocumentation = 'button[data-cy="add-documentation"]'
+    inputDocumentationName = 'input[data-cy="input-documentation[{}].name"]'
+    inputFile = 'input[type="file"]'
+    inputQuestionnaire_size = 'span[data-cy="input-questionnaire_size"]'
+    labelHouseholdSize = 'div[data-cy="label-Household Size"]'
+    inputQuestionnaire_malechildrencount = 'span[data-cy="input-questionnaire_maleChildrenCount"]'
+    labelNumberOfMaleChildren = 'div[data-cy="label-Number of Male Children"]'
+    inputQuestionnaire_femalechildrencount = 'span[data-cy="input-questionnaire_femaleChildrenCount"]'
+    labelNumberOfFemaleChildren = 'div[data-cy="label-Number of Female Children"]'
+    inputQuestionnaire_childrendisabledcount = 'span[data-cy="input-questionnaire_childrenDisabledCount"]'
+    labelNumberOfDisabledChildren = 'div[data-cy="label-Number of Disabled Children"]'
+    inputQuestionnaire_headofhousehold = 'span[data-cy="input-questionnaire_headOfHousehold"]'
+    labelHeadOfHousehold = 'div[data-cy="label-Head of Household"]'
+    inputQuestionnaire_countryorigin = 'span[data-cy="input-questionnaire_countryOrigin"]'
+    labelCountryOfOrigin = 'div[data-cy="label-Country of Origin"]'
+    inputQuestionnaire_address = 'span[data-cy="input-questionnaire_address"]'
+    labelAddress = 'div[data-cy="label-Address"]'
+    inputQuestionnaire_village = 'span[data-cy="input-questionnaire_village"]'
+    labelVillage = 'div[data-cy="label-Village"]'
+    inputQuestionnaire_admin1 = 'span[data-cy="input-questionnaire_admin1"]'
+    labelAdministrativeLevel1 = 'div[data-cy="label-Administrative Level 1"]'
+    inputQuestionnaire_admin2 = 'span[data-cy="input-questionnaire_admin2"]'
+    labelAdministrativeLevel2 = 'div[data-cy="label-Administrative Level 2"]'
+    inputQuestionnaire_admin3 = 'span[data-cy="input-questionnaire_admin3"]'
+    labelAdministrativeLevel3 = 'div[data-cy="label-Administrative Level 3"]'
+    inputQuestionnaire_admin4 = 'span[data-cy="input-questionnaire_admin4"]'
+    labelAdministrativeLevel4 = 'div[data-cy="label-Administrative Level 4"]'
+    inputQuestionnaire_months_displaced_h_f = 'span[data-cy="input-questionnaire_months_displaced_h_f"]'
+    labelLengthOfTimeSinceArrival = 'div[data-cy="label-LENGTH OF TIME SINCE ARRIVAL"]'
+    inputQuestionnaire_fullname = 'span[data-cy="input-questionnaire_fullName"]'
+    labelIndividualFullName = 'div[data-cy="label-Individual Full Name"]'
+    inputQuestionnaire_birthdate = 'span[data-cy="input-questionnaire_birthDate"]'
+    labelBirthDate = 'div[data-cy="label-Birth Date"]'
+    inputQuestionnaire_sex = 'span[data-cy="input-questionnaire_sex"]'
+    labelGender = 'div[data-cy="label-Gender"]'
+    inputQuestionnaire_phoneno = 'span[data-cy="input-questionnaire_phoneNo"]'
+    labelPhoneNumber = 'div[data-cy="label-Phone Number"]'
+    inputQuestionnaire_relationship = 'span[data-cy="input-questionnaire_relationship"]'
+    labelRelationshipToHoh = 'div[data-cy="label-Relationship to HOH"]'
 
     # Texts
     textLookUpHousehold = "LOOK UP HOUSEHOLD"
@@ -120,16 +203,18 @@ class NewTicket(BaseComponents):
         return self.wait_for(self.statusOptions)
 
     def getHouseholdTab(self) -> WebElement:
-        return self.wait_for(self.lookUpTabs)
+        return self.wait_for(self.lookUpHouseholdTab)
 
     def getIndividualTab(self) -> WebElement:
-        return self.wait_for(self.lookUpTabs)
+        return self.wait_for(self.lookUpIndividualTab)
 
     def getHouseholdTableRows(self, number: int) -> WebElement:
-        return self.wait_for(self.householdTableRow)[number]
+        self.wait_for(self.householdTableRow)
+        return self.get_elements(self.householdTableRow)[number]
 
     def getIndividualTableRows(self, number: int) -> WebElement:
-        return self.wait_for(self.individualTableRow)[number]
+        self.wait_for(self.individualTableRow)
+        return self.get_elements(self.individualTableRow)[number]
 
     def getReceivedConsent(self) -> WebElement:
         return self.wait_for(self.receivedConsent)
@@ -233,6 +318,9 @@ class NewTicket(BaseComponents):
     def getLookUpButton(self) -> WebElement:
         return self.wait_for(self.lookUpButton)
 
+    def getLookUpPaymentRecord(self) -> [WebElement]:
+        return self.get_elements(self.lookUpButton)[1]
+
     def getCheckbox(self) -> WebElement:
         return self.wait_for(self.checkbox)
 
@@ -272,8 +360,8 @@ class NewTicket(BaseComponents):
     def getInputValue(self) -> WebElement:
         return self.wait_for(self.inputValue)
 
-    def getIndividualFieldName(self) -> WebElement:
-        return self.wait_for(self.individualFieldName)
+    def getIndividualFieldName(self, index: int) -> WebElement:
+        return self.wait_for(self.individualFieldName.format(str(index)))
 
     def getPartner(self) -> WebElement:
         return self.wait_for(self.partner)
@@ -290,3 +378,241 @@ class NewTicket(BaseComponents):
                 return True
             sleep(1)
         return False
+
+    def getSelectProgram(self) -> WebElement:
+        return self.wait_for(self.selectProgram)
+
+    def getInputIndividualdataPhonenoalternative(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataPhonenoalternative)
+
+    def getDatePickerFilter(self) -> WebElement:
+        return self.wait_for(self.datePickerFilter).find_element("tag name", "input")
+
+    def getInputIndividualdataBlockchainname(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataBlockchainname)
+
+    def getSelectIndividualdataSelfcaredisability(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataSelfcaredisability)
+
+    def getSelectIndividualdataObserveddisability(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataObserveddisability)
+
+    def getSelectIndividualdataWorkstatus(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataWorkstatus)
+
+    def getSelectIndividualdataEstimatedbirthdate(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataEstimatedbirthdate)
+
+    def getInputIndividualdataFamilyname(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataFamilyname)
+
+    def getInputIndividualdataFullname(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataFullname)
+
+    def getSelectIndividualdataSex(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataSex)
+
+    def getInputIndividualdataGivenname(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataGivenname)
+
+    def getSelectIndividualdataCommsdisability(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataCommsdisability)
+
+    def getSelectIndividualdataHearingdisability(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataHearingdisability)
+
+    def getSelectIndividualdataMemorydisability(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataMemorydisability)
+
+    def getSelectIndividualdataSeeingdisability(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataSeeingdisability)
+
+    def getSelectIndividualdataPhysicaldisability(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataPhysicaldisability)
+
+    def getInputIndividualdataEmail(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataEmail)
+
+    def getSelectIndividualdataDisability(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataDisability)
+
+    def getSelectIndividualdataPregnant(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataPregnant)
+
+    def getSelectIndividualdataMaritalstatus(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataMaritalstatus)
+
+    def getInputIndividualdataMiddlename(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataMiddlename)
+
+    def getInputIndividualdataPaymentdeliveryphoneno(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataPaymentdeliveryphoneno)
+
+    def getInputIndividualdataPhoneno(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataPhoneno)
+
+    def getSelectIndividualdataPreferredlanguage(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataPreferredlanguage)
+
+    def getSelectIndividualdataRelationship(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataRelationship)
+
+    def getSelectIndividualdataRole(self) -> WebElement:
+        return self.wait_for(self.selectIndividualdataRole)
+
+    def getInputIndividualdataWalletaddress(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataWalletaddress)
+
+    def getInputIndividualdataWalletname(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataWalletname)
+
+    def getInputIndividualdataWhoanswersaltphone(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataWhoanswersaltphone)
+
+    def getInputIndividualdataWhoanswersphone(self) -> WebElement:
+        return self.wait_for(self.inputIndividualdataWhoanswersphone)
+
+    def getButtonAddNewField(self) -> WebElement:
+        return self.wait_for(self.buttonAddNewField)
+
+    def getSelectHouseholddataupdatefieldsFieldname(self, index: int) -> WebElement:
+        field = self.wait_for(self.selectHouseholddataupdatefieldsFieldname.format(index))
+        return field.find_element(By.XPATH, "./..")
+
+    def getInputIndividualData(self, type: str) -> WebElement:
+        return self.wait_for(self.inputIndividualData.format(type))
+
+    def getCheckboxSelectAll(self) -> WebElement:
+        return self.wait_for(self.checkboxSelectAll)
+
+    def getButtonSubmit(self) -> WebElement:
+        return self.get_elements(self.buttonSubmit)[1]
+
+    def getLinkedTicketId(self) -> WebElement:
+        return self.wait_for(self.linkedTicketId)
+
+    def getLinkedTicket(self) -> WebElement:
+        return self.wait_for(self.linkedTicket)
+
+    def getButtonEdit(self) -> WebElement:
+        return self.wait_for(self.buttonEdit)
+
+    def getButtonDelete(self) -> WebElement:
+        return self.wait_for(self.buttonDelete)
+
+    def getAddDocumentation(self) -> WebElement:
+        return self.wait_for(self.addDocumentation)
+
+    def getInputDocumentationName(self, index: int) -> WebElement:
+        return self.wait_for(self.inputDocumentationName.format(index))
+
+    def getInputFile(self) -> WebElement:
+        return self.wait_for(self.inputFile)
+
+    def getInputQuestionnaire_size(self) -> WebElement:
+        return self.wait_for(self.inputQuestionnaire_size)
+
+    def getLabelHouseholdSize(self) -> WebElement:
+        return self.wait_for(self.labelHouseholdSize)
+
+    def getInputQuestionnaire_malechildrencount(self) -> WebElement:
+        return self.wait_for(self.inputQuestionnaire_malechildrencount)
+
+    def getLabelNumberOfMaleChildren(self) -> WebElement:
+        return self.wait_for(self.labelNumberOfMaleChildren)
+
+    def getInputQuestionnaire_femalechildrencount(self) -> WebElement:
+        return self.wait_for(self.inputQuestionnaire_femalechildrencount)
+
+    def getLabelNumberOfFemaleChildren(self) -> WebElement:
+        return self.wait_for(self.labelNumberOfFemaleChildren)
+
+    def getInputQuestionnaire_childrendisabledcount(self) -> WebElement:
+        return self.wait_for(self.inputQuestionnaire_childrendisabledcount)
+
+    def getLabelNumberOfDisabledChildren(self) -> WebElement:
+        return self.wait_for(self.labelNumberOfDisabledChildren)
+
+    def getInputQuestionnaire_headofhousehold(self) -> WebElement:
+        return self.wait_for(self.inputQuestionnaire_headofhousehold)
+
+    def getLabelHeadOfHousehold(self) -> WebElement:
+        return self.wait_for(self.labelHeadOfHousehold)
+
+    def getInputQuestionnaire_countryorigin(self) -> WebElement:
+        return self.wait_for(self.inputQuestionnaire_countryorigin)
+
+    def getLabelCountryOfOrigin(self) -> WebElement:
+        return self.wait_for(self.labelCountryOfOrigin)
+
+    def getInputQuestionnaire_address(self) -> WebElement:
+        return self.wait_for(self.inputQuestionnaire_address)
+
+    def getLabelAddress(self) -> WebElement:
+        return self.wait_for(self.labelAddress)
+
+    def getInputQuestionnaire_village(self) -> WebElement:
+        return self.wait_for(self.inputQuestionnaire_village)
+
+    def getLabelVillage(self) -> WebElement:
+        return self.wait_for(self.labelVillage)
+
+    def getInputQuestionnaire_admin1(self) -> WebElement:
+        return self.wait_for(self.inputQuestionnaire_admin1)
+
+    def getLabelAdministrativeLevel1(self) -> WebElement:
+        return self.wait_for(self.labelAdministrativeLevel1)
+
+    def getInputQuestionnaire_admin2(self) -> WebElement:
+        return self.wait_for(self.inputQuestionnaire_admin2)
+
+    def getLabelAdministrativeLevel2(self) -> WebElement:
+        return self.wait_for(self.labelAdministrativeLevel2)
+
+    def getInputQuestionnaire_admin3(self) -> WebElement:
+        return self.wait_for(self.inputQuestionnaire_admin3)
+
+    def getLabelAdministrativeLevel3(self) -> WebElement:
+        return self.wait_for(self.labelAdministrativeLevel3)
+
+    def getInputQuestionnaire_admin4(self) -> WebElement:
+        return self.wait_for(self.inputQuestionnaire_admin4)
+
+    def getLabelAdministrativeLevel4(self) -> WebElement:
+        return self.wait_for(self.labelAdministrativeLevel4)
+
+    def getInputQuestionnaire_months_displaced_h_f(self) -> WebElement:
+        return self.wait_for(self.inputQuestionnaire_months_displaced_h_f)
+
+    def getLabelLengthOfTimeSinceArrival(self) -> WebElement:
+        return self.wait_for(self.labelLengthOfTimeSinceArrival)
+
+    def getInputQuestionnaire_fullname(self) -> WebElement:
+        return self.wait_for(self.inputQuestionnaire_fullname)
+
+    def getLabelIndividualFullName(self) -> WebElement:
+        return self.wait_for(self.labelIndividualFullName)
+
+    def getInputQuestionnaire_birthdate(self) -> WebElement:
+        return self.wait_for(self.inputQuestionnaire_birthdate)
+
+    def getLabelBirthDate(self) -> WebElement:
+        return self.wait_for(self.labelBirthDate)
+
+    def getInputQuestionnaire_sex(self) -> WebElement:
+        return self.wait_for(self.inputQuestionnaire_sex)
+
+    def getLabelGender(self) -> WebElement:
+        return self.wait_for(self.labelGender)
+
+    def getInputQuestionnaire_phoneno(self) -> WebElement:
+        return self.wait_for(self.inputQuestionnaire_phoneno)
+
+    def getLabelPhoneNumber(self) -> WebElement:
+        return self.wait_for(self.labelPhoneNumber)
+
+    def getInputQuestionnaire_relationship(self) -> WebElement:
+        return self.wait_for(self.inputQuestionnaire_relationship)
+
+    def getLabelRelationshipToHoh(self) -> WebElement:
+        return self.wait_for(self.labelRelationshipToHoh)

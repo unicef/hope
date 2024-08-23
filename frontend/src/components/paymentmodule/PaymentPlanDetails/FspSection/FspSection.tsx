@@ -19,7 +19,7 @@ export const FspSection = ({
   paymentPlan,
 }: FspSectionProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { id } = useParams();
+  const { paymentPlanId } = useParams();
   const { isActiveProgram } = useProgramContext();
 
   const { deliveryMechanisms, isFollowUp } = paymentPlan;
@@ -54,7 +54,7 @@ export const FspSection = ({
               component={Link}
               to={`/${baseUrl}/payment-module/${
                 isFollowUp ? 'followup-payment-plans' : 'payment-plans'
-              }/${id}/setup-fsp/edit`}
+              }/${paymentPlanId}/setup-fsp/edit`}
               disabled={!isActiveProgram}
             >
               {t('Edit FSP')}
@@ -100,7 +100,7 @@ export const FspSection = ({
             component={Link}
             to={`/${baseUrl}/payment-module/${
               isFollowUp ? 'followup-payment-plans' : 'payment-plans'
-            }/${id}/setup-fsp/create`}
+            }/${paymentPlanId}/setup-fsp/create`}
           >
             {t('Set up FSP')}
           </Button>
