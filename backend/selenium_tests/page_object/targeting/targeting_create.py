@@ -68,6 +68,12 @@ class TargetingCreate(BaseComponents):
     inputIndividualsFiltersBlocksValueTo = (
         'input[data-cy="input-individualsFiltersBlocks[{}].individualBlockFilters[{}].value.to"]'
     )
+    inputDateIndividualsFiltersBlocksValueFrom = (
+        'input[data-cy="date-input-individualsFiltersBlocks[{}].individualBlockFilters[{}].value.from"]'
+    )
+    inputDateIndividualsFiltersBlocksValueTo = (
+        'input[data-cy="date-input-individualsFiltersBlocks[{}].individualBlockFilters[{}].value.to"]'
+    )
     inputIndividualsFiltersBlocksValue = (
         'input[data-cy="input-individualsFiltersBlocks[{}].individualBlockFilters[{}].value"]'
     )
@@ -262,6 +268,24 @@ class TargetingCreate(BaseComponents):
     ) -> WebElement:
         return self.wait_for(
             self.inputIndividualsFiltersBlocksValueTo.format(
+                individuals_filters_blocks_number, individual_block_filters_number
+            )
+        )
+
+    def getInputDateIndividualsFiltersBlocksValueFrom(
+        self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0
+    ) -> WebElement:
+        return self.wait_for(
+            self.inputDateIndividualsFiltersBlocksValueFrom.format(
+                individuals_filters_blocks_number, individual_block_filters_number
+            )
+        )
+
+    def getInputDateIndividualsFiltersBlocksValueTo(
+        self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0
+    ) -> WebElement:
+        return self.wait_for(
+            self.inputDateIndividualsFiltersBlocksValueTo.format(
                 individuals_filters_blocks_number, individual_block_filters_number
             )
         )

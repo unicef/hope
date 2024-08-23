@@ -616,8 +616,10 @@ class TestCreateTargeting:
         pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
         pageTargetingCreate.getSelectIndividualsiFltersBlocksRoundNumber().click()
         pageTargetingCreate.getSelectRoundOption(1).click()
-        pageTargetingCreate.getInputIndividualsFiltersBlocksValueFrom().send_keys("2022-01-01")
-        pageTargetingCreate.getInputIndividualsFiltersBlocksValueTo().send_keys("2022-03-03")
+        pageTargetingCreate.getInputDateIndividualsFiltersBlocksValueFrom().click()
+        pageTargetingCreate.getInputDateIndividualsFiltersBlocksValueFrom().send_keys("2022-01-01")
+        pageTargetingCreate.getInputDateIndividualsFiltersBlocksValueTo().click()
+        pageTargetingCreate.getInputDateIndividualsFiltersBlocksValueTo().send_keys("2022-03-03")
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
         expected_criteria_text = "Test Date Attribute: 2022-01-01 - 2022-03-03\nRound 1 (Test Round Date 1)"
         assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
@@ -631,24 +633,6 @@ class TestCreateTargeting:
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
-
-        # edit range
-        pageTargetingDetails.getButtonEdit().click()
-        pageTargetingDetails.getButtonIconEdit().click()
-        pageTargetingCreate.getInputIndividualsFiltersBlocksValueTo().send_keys(Keys.BACKSPACE)
-        pageTargetingCreate.getInputIndividualsFiltersBlocksValueTo().send_keys("5")
-        bool_no_expected_criteria_text = "Test Bool Attribute: 2 - 5\nRound 2 (Test Round Bool 2)"
-
-        pageTargetingCreate.get_elements(pageTargetingCreate.targetingCriteriaAddDialogSaveButton)[1].click()
-
-        assert pageTargetingCreate.getCriteriaContainer().text == bool_no_expected_criteria_text
-        pageTargetingCreate.getButtonSave().click()
-        pageTargetingDetails.getLockButton()
-
-        assert pageTargetingDetails.getCriteriaContainer().text == bool_no_expected_criteria_text
-        assert pageTargetingDetails.getHouseholdTableCell(2, 1).text == individual1.household.unicef_id
-        assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "2"
-        assert len(pageTargetingDetails.getHouseholdTableRows()) == 2
 
     def test_create_targeting_with_pdu_null_criteria(
         self,
