@@ -201,29 +201,6 @@ class TestCreateTargetPopulationMutation(APITestCase):
         self.program.status = Program.DRAFT
         self.program.save()
 
-        variables = {
-            "createTargetPopulationInput": {
-                "name": "Example name 5",
-                "businessAreaSlug": "afghanistan",
-                "programId": self.id_to_base64(self.program.id, "ProgramNode"),
-                "excludedIds": "",
-                "targetingCriteria": {
-                    "rules": [
-                        {
-                            "filters": [
-                                {
-                                    "comparisonMethod": "EQUALS",
-                                    "fieldName": "size",
-                                    "arguments": [3],
-                                    "flexFieldClassification": "NOT_FLEX_FIELD",
-                                }
-                            ]
-                        }
-                    ]
-                },
-            }
-        }
-
         response_error = self.graphql_request(
             request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
             context={"user": self.user},
@@ -238,29 +215,6 @@ class TestCreateTargetPopulationMutation(APITestCase):
 
     def test_targeting_unique_constraints(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_CREATE], self.program.business_area)
-
-        variables = {
-            "createTargetPopulationInput": {
-                "name": "Example name 5",
-                "businessAreaSlug": "afghanistan",
-                "programId": self.id_to_base64(self.program.id, "ProgramNode"),
-                "excludedIds": "",
-                "targetingCriteria": {
-                    "rules": [
-                        {
-                            "filters": [
-                                {
-                                    "comparisonMethod": "EQUALS",
-                                    "fieldName": "size",
-                                    "arguments": [3],
-                                    "flexFieldClassification": "NOT_FLEX_FIELD",
-                                }
-                            ]
-                        }
-                    ]
-                },
-            }
-        }
 
         self.assertEqual(TargetPopulation.objects.count(), 0)
 
