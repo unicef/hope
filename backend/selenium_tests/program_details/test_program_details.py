@@ -644,7 +644,7 @@ class TestProgrammeDetails:
         pageProgrammeDetails.getStartDateCycle().send_keys(
             (datetime.now() - relativedelta(days=40)).strftime("%Y-%m-%d")
         )
-        pageProgrammeDetails.getButtonCreateProgramCycle().click()
+        pageProgrammeDetails.getButtonSave().click()
         for _ in range(50):
             if "Start Date cannot be before Programme Start Date" in pageProgrammeDetails.getStartDateCycleDiv().text:
                 break
@@ -658,7 +658,7 @@ class TestProgrammeDetails:
         pageProgrammeDetails.getEndDateCycle().click()
         pageProgrammeDetails.getEndDateCycle().send_keys(
             (datetime.now() + relativedelta(days=121)).strftime("%Y-%m-%d"))
-        pageProgrammeDetails.getButtonCreateProgramCycle().click()
+        pageProgrammeDetails.getButtonSave().click()
         for _ in range(50):
             if "End Date cannot be after Programme End Date" in pageProgrammeDetails.getEndDateCycleDiv().text:
                 break
@@ -668,7 +668,7 @@ class TestProgrammeDetails:
         pageProgrammeDetails.getEndDateCycle().send_keys(Keys.CONTROL + "a")
 
         pageProgrammeDetails.getEndDateCycle().send_keys((datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d"))
-        pageProgrammeDetails.getButtonCreateProgramCycle().click()
+        pageProgrammeDetails.getButtonSave().click()
 
         for _ in range(50):
             if "Programme Cycles' timeframes must not overlap with the provided start date." in pageProgrammeDetails.getStartDateCycleDiv().text:
@@ -679,7 +679,7 @@ class TestProgrammeDetails:
         pageProgrammeDetails.getStartDateCycle().send_keys(
             (datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d")
         )
-        pageProgrammeDetails.getButtonCreateProgramCycle().click()
+        pageProgrammeDetails.getButtonSave().click()
 
         pageProgrammeDetails.getButtonAddNewProgrammeCycle()
         pageProgrammeDetails.getProgramCycleRow()
