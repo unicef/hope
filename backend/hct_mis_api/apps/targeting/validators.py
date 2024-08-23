@@ -98,7 +98,7 @@ class TargetingCriteriaRuleFilterInputValidator:
         else:
             try:
                 attribute = FlexibleAttribute.objects.get(name=rule_filter.field_name, program=program)
-            except FlexibleAttribute.DoesNotExist:
+            except FlexibleAttribute.DoesNotExist:  # pragma: no cover
                 logger.exception(
                     f"Can't find PDU flex field attribute associated with {rule_filter.field_name} field name in program {program.name}",
                 )
