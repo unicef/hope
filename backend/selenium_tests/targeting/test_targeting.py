@@ -489,7 +489,7 @@ class TestCreateTargeting:
         pageTargetingCreate.getSelectIndividualsiFltersBlocksRoundNumber().click()
         pageTargetingCreate.getSelectRoundOption(2).click()
         pageTargetingCreate.getSelectIndividualsFiltersBlocksValue().click()
-        pageTargetingCreate.select_option_by_name("True")
+        pageTargetingCreate.select_option_by_name("Yes")
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
         bool_yes_expected_criteria_text = "Test Bool Attribute: Yes\nRound 2 (Test Round Bool 2)"
         assert pageTargetingCreate.getCriteriaContainer().text == bool_yes_expected_criteria_text
@@ -511,7 +511,7 @@ class TestCreateTargeting:
         pageTargetingDetails.getButtonEdit().click()
         pageTargetingDetails.getButtonIconEdit().click()
         pageTargetingCreate.getSelectIndividualsFiltersBlocksValue().click()
-        pageTargetingCreate.select_option_by_name("False")
+        pageTargetingCreate.select_option_by_name("No")
         bool_no_expected_criteria_text = "Test Bool Attribute: No\nRound 2 (Test Round Bool 2)"
 
         pageTargetingCreate.get_elements(pageTargetingCreate.targetingCriteriaAddDialogSaveButton)[1].click()
