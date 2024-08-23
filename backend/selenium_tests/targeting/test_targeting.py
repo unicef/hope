@@ -662,9 +662,7 @@ class TestCreateTargeting:
         pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
         pageTargetingCreate.getSelectIndividualsiFltersBlocksRoundNumber().click()
         pageTargetingCreate.getSelectRoundOption(1).click()
-        pageTargetingCreate.screenshot("if before click")
         pageTargetingCreate.getSelectIndividualsiFltersBlocksIsNull().click()
-        pageTargetingCreate.screenshot("if click click")
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
         expected_criteria_text = "Test String Attribute: Empty\nRound 1 (Test Round String 1)"
         assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
