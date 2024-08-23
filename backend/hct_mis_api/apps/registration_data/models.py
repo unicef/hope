@@ -325,7 +325,7 @@ class DeduplicationEngineSimilarityPairManager(models.Manager):
                 is_duplicate=ExpressionWrapper(
                     models.Case(
                         models.When(
-                            similarity_score__gte=models.F("program__biometric_deduplication_threshold"),
+                            similarity_score__gte=models.F("program__business_area__biometric_deduplication_threshold"),
                             then=models.Value(True),
                         ),
                         default=models.Value(False),
@@ -395,4 +395,4 @@ class DeduplicationEngineSimilarityPair(models.Model):
 
     @property
     def _is_duplicate(self) -> bool:
-        return self.similarity_score >= self.program.biometric_deduplication_threshold
+        return self.similarity_score >= self.program.business_area.biometric_deduplication_threshold

@@ -128,6 +128,9 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     )
     screen_beneficiary = models.BooleanField(default=False, help_text="Enable screen beneficiary against sanction list")
     deduplication_ignore_withdraw = models.BooleanField(default=False)
+    biometric_deduplication_threshold = models.FloatField(
+        default=0.0, help_text="Threshold for Face Image Deduplication"
+    )
 
     is_payment_plan_applicable = models.BooleanField(default=False)
     is_accountability_applicable = models.BooleanField(default=False)

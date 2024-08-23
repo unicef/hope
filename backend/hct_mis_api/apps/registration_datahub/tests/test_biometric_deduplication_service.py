@@ -239,7 +239,8 @@ class BiometricDeduplicationServiceTest(TestCase):
 
     def test_get_duplicates_for_rdi(self) -> None:
         self.program.deduplication_set_id = uuid.uuid4()
-        self.program.biometric_deduplication_threshold = 0.6
+        self.program.business_area.biometric_deduplication_threshold = 0.6
+        self.program.business_area.save()
         self.program.save()
 
         individuals = IndividualFactory.create_batch(3)
