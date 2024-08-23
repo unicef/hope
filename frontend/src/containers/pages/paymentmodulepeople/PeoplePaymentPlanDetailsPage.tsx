@@ -25,13 +25,13 @@ import { PeoplePaymentPlanDetailsResults } from '@components/paymentmodulepeople
 import { PeoplePaymentsTable } from '@containers/tables/paymentmodulePeople/PeoplePaymentsTable';
 
 export const PeoplePaymentPlanDetailsPage = (): React.ReactElement => {
-  const { id } = useParams();
+  const { paymentPlanId } = useParams();
   const permissions = usePermissions();
   const { baseUrl, businessArea } = useBaseUrl();
   const { data, loading, startPolling, stopPolling, error } =
     usePaymentPlanQuery({
       variables: {
-        id,
+        id: paymentPlanId,
       },
       fetchPolicy: 'cache-and-network',
     });

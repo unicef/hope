@@ -18,6 +18,7 @@ from django.db.models import (
 import graphene
 from graphene import Int, relay
 from graphene_django import DjangoObjectType
+from graphene_django.filter import DjangoFilterConnectionField
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import (
@@ -60,9 +61,40 @@ from hct_mis_api.apps.payment.schema import (
     PaymentVerificationSummaryNode,
 )
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
-from hct_mis_api.apps.program.filters import ProgramFilter
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.filters import ProgramCycleFilter, ProgramFilter
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
+
+
+class ProgramCycleNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (
+        hopePermissionClass(
+            Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS,
+        ),
+    )
+    total_delivered_quantity_usd = graphene.Float()
+    total_entitled_quantity_usd = graphene.Float()
+    total_undelivered_quantity_usd = graphene.Float()
+
+    def resolve_total_delivered_quantity_usd(self, info: Any, **kwargs: Any) -> graphene.Float:
+        return self.total_delivered_quantity_usd
+
+    def resolve_total_entitled_quantity_usd(self, info: Any, **kwargs: Any) -> graphene.Float:
+        return self.total_entitled_quantity_usd
+
+    def resolve_total_undelivered_quantity_usd(self, info: Any, **kwargs: Any) -> graphene.Float:
+        return self.total_undelivered_quantity_usd
+
+    class Meta:
+        model = ProgramCycle
+        filter_fields = [
+            "status",
+        ]
+        exclude = [
+            "unicef_id",
+        ]
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
@@ -82,7 +114,11 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     partners = graphene.List(PartnerNode)
     is_social_worker_program = graphene.Boolean()
     pdu_fields = graphene.List(PeriodicFieldNode)
+<<<<<<< HEAD
     target_populations_count = graphene.Int()
+=======
+    cycles = DjangoFilterConnectionField(ProgramCycleNode, filterset_class=ProgramCycleFilter)
+>>>>>>> origin
 
     class Meta:
         model = Program
@@ -200,6 +236,7 @@ class Query(graphene.ObjectType):
         ),
     )
     program_status_choices = graphene.List(ChoiceObject)
+    program_cycle_status_choices = graphene.List(ChoiceObject)
     program_frequency_of_payments_choices = graphene.List(ChoiceObject)
     program_sector_choices = graphene.List(ChoiceObject)
     program_scope_choices = graphene.List(ChoiceObject)
@@ -213,6 +250,8 @@ class Query(graphene.ObjectType):
             hopeOneOfPermissionClass(Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST, Permissions.RDI_IMPORT_DATA),
         ),
     )
+    # ProgramCycle
+    program_cycle = relay.Node.Field(ProgramCycleNode)
 
     def resolve_all_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
         user = info.context.user
@@ -236,6 +275,9 @@ class Query(graphene.ObjectType):
             )
             .order_by("custom_order", "start_date")
         )
+
+    def resolve_program_cycle_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(ProgramCycle.STATUS_CHOICE)
 
     def resolve_program_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Program.STATUS_CHOICE)

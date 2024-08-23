@@ -39,7 +39,7 @@ export function FollowUpPaymentPlanDetailsHeader({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module/`,
+      to: `/${baseUrl}/payment-module/payment-plans`,
     },
   ];
 
@@ -74,8 +74,8 @@ export function FollowUpPaymentPlanDetailsHeader({
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
     paymentPlan.canSendToPaymentGateway;
-  const canSplit = hasPermissions(PERMISSIONS.PM_SPLIT, permissions) &&
-    paymentPlan.canSplit;
+  const canSplit =
+    hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
 
   let buttons: React.ReactElement | null = null;
   switch (paymentPlan.status) {

@@ -3,29 +3,30 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
 import * as Yup from 'yup';
-import { LoadingComponent } from '@components/core/LoadingComponent';
-import { PermissionDenied } from '@components/core/PermissionDenied';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { PermissionDenied } from '@core/PermissionDenied';
 import { CreatePaymentPlanHeader } from '@components/paymentmodule/CreatePaymentPlan/CreatePaymentPlanHeader/CreatePaymentPlanHeader';
 import { PaymentPlanParameters } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanParameters';
 import { PaymentPlanTargeting } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
   useAllTargetPopulationsQuery,
   useCreatePpMutation,
 } from '@generated/graphql';
-import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 export const CreatePaymentPlanPage = (): React.ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [mutate, { loading: loadingCreate }] = useCreatePpMutation();
   const { showMessage } = useSnackbar();
-  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
+  const { programCycleId } = useParams();
 
   const { data: allTargetPopulationsData, loading: loadingTargetPopulations } =
     useAllTargetPopulationsQuery({
@@ -33,6 +34,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
         businessArea,
         paymentPlanApplicable: true,
         program: [programId],
+        programCycle: programCycleId,
       },
       fetchPolicy: 'network-only',
     });
@@ -45,20 +47,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
 
   const validationSchema = Yup.object().shape({
     targetingId: Yup.string().required(t('Target Population is required')),
-    startDate: Yup.date().required(t('Start Date is required')),
-    endDate: Yup.date()
-      .required(t('End Date is required'))
-      .when('startDate', (startDate: any, schema: Yup.DateSchema) =>
-        startDate && typeof startDate === 'string'
-          ? schema.min(
-              parseISO(startDate),
-              `${t('End date has to be greater than')} ${format(parseISO(startDate), 'yyyy-MM-dd')}`,
-            )
-          : schema,
-      ),
-    currency: Yup.string()
-      .nullable()
-      .required(t('Currency is required')),
+    currency: Yup.string().nullable().required(t('Currency is required')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
     ),
@@ -80,8 +69,6 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
   type FormValues = Yup.InferType<typeof validationSchema>;
   const initialValues: FormValues = {
     targetingId: '',
-    startDate: null,
-    endDate: null,
     currency: null,
     dispersionStartDate: null,
     dispersionEndDate: null,
@@ -89,36 +76,27 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
 
   const handleSubmit = async (values: FormValues): Promise<void> => {
     try {
-      const startDate = values.startDate
-        ? format(new Date(values.startDate), 'yyyy-MM-dd')
-        : null;
-      const endDate = values.endDate
-        ? format(new Date(values.endDate), 'yyyy-MM-dd')
-        : null;
       const dispersionStartDate = values.dispersionStartDate
         ? format(new Date(values.dispersionStartDate), 'yyyy-MM-dd')
         : null;
       const dispersionEndDate = values.dispersionEndDate
         ? format(new Date(values.dispersionEndDate), 'yyyy-MM-dd')
         : null;
+      const { currency, targetingId } = values;
 
       const res = await mutate({
         variables: {
-          //@ts-ignore
           input: {
             businessAreaSlug: businessArea,
-            ...values,
-            startDate,
-            endDate,
+            currency,
+            targetingId,
             dispersionStartDate,
             dispersionEndDate,
           },
         },
       });
       showMessage(t('Payment Plan Created'));
-      navigate(
-        `/${baseUrl}/payment-module/payment-plans/${res.data.createPaymentPlan.paymentPlan.id}`,
-      );
+      navigate(`../${res.data.createPaymentPlan.paymentPlan.id}`);
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
@@ -137,7 +115,6 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
           <AutoSubmitFormOnEnter />
           <CreatePaymentPlanHeader
             handleSubmit={submitForm}
-            baseUrl={baseUrl}
             permissions={permissions}
             loadingCreate={loadingCreate}
           />

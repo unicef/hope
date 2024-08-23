@@ -7,6 +7,94 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_program_cycle 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['You cannot finish program if program has not finished cycles']",
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_program_cycle 2'] = {
+    'data': {
+        'updateProgram': {
+            'program': {
+                'dataCollectingType': {
+                    'code': 'full_collection',
+                    'label': 'Full'
+                },
+                'name': 'initial name',
+                'partnerAccess': 'NONE_PARTNERS_ACCESS',
+                'partners': [
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF'
+                    }
+                ],
+                'pduFields': [
+                    {
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
+                        'pduData': {
+                            'numberOfRounds': 1,
+                            'roundsNames': [
+                                'Round To Be Preserved'
+                            ],
+                            'subtype': 'DATE'
+                        }
+                    },
+                    {
+                        'label': '{"English(EN)": "PDU Field To Be Removed"}',
+                        'name': 'pdu_field_to_be_removed',
+                        'pduData': {
+                            'numberOfRounds': 3,
+                            'roundsNames': [
+                                'Round 1 To Be Removed',
+                                'Round 2 To Be Removed',
+                                'Round 3 To Be Removed'
+                            ],
+                            'subtype': 'DECIMAL'
+                        }
+                    },
+                    {
+                        'label': '{"English(EN)": "PDU Field To Be Updated"}',
+                        'name': 'pdu_field_to_be_updated',
+                        'pduData': {
+                            'numberOfRounds': 2,
+                            'roundsNames': [
+                                'Round 1 To Be Updated',
+                                'Round 2 To Be Updated'
+                            ],
+                            'subtype': 'STRING'
+                        }
+                    }
+                ],
+                'status': 'FINISHED'
+            }
+        }
+    }
+}
+
 snapshots['TestUpdateProgram::test_update_active_program_with_dct 1'] = {
     'data': {
         'updateProgram': None

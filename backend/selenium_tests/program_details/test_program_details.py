@@ -19,7 +19,7 @@ from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
@@ -47,6 +47,9 @@ def get_program_with_dct_type_and_name(
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
+        cycle__status=ProgramCycle.FINISHED,
+        cycle__start_date=datetime.now() - relativedelta(days=25),
+        cycle__end_date=datetime.now() + relativedelta(days=10),
     )
     return program
 
@@ -77,12 +80,13 @@ def create_custom_household() -> Household:
 @pytest.fixture
 def create_payment_plan(standard_program: Program) -> PaymentPlan:
     targeting_criteria = TargetingCriteriaFactory()
-    TargetPopulationFactory(
+    cycle = standard_program.cycles.first()
+    tp = TargetPopulationFactory(
         program=standard_program,
         status=TargetPopulation.STATUS_OPEN,
         targeting_criteria=targeting_criteria,
+        program_cycle=cycle,
     )
-    tp = TargetPopulation.objects.first()
     payment_plan = PaymentPlan.objects.update_or_create(
         business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
         target_population=tp,
@@ -99,6 +103,7 @@ def create_payment_plan(standard_program: Program) -> PaymentPlan:
         total_entitled_quantity=2999,
         is_follow_up=False,
         program_id=tp.program.id,
+        program_cycle=cycle,
     )
     yield payment_plan[0]
 
@@ -115,7 +120,7 @@ class TestProgrammeDetails:
     def test_program_details(self, standard_program: Program, pageProgrammeDetails: ProgrammeDetails) -> None:
         program = Program.objects.get(name="Test For Edit")
         # Go to Programme Details
-        pageProgrammeDetails.selectGlobalProgramFilter("Test For Edit").click()
+        pageProgrammeDetails.selectGlobalProgramFilter("Test For Edit")
         # Check Details page
         assert "Test For Edit" in pageProgrammeDetails.getHeaderTitle().text
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
@@ -151,7 +156,7 @@ class TestProgrammeDetails:
         pageProgrammeDetails: ProgrammeDetails,
         pageProgrammeManagement: ProgrammeManagement,
     ) -> None:
-        pageProgrammeDetails.selectGlobalProgramFilter("Test Programm").click()
+        pageProgrammeDetails.selectGlobalProgramFilter("Test Programm")
         pageProgrammeDetails.getButtonEditProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.CONTROL + "a")
         pageProgrammeManagement.getInputProgrammeName().send_keys("New name after Edit")
@@ -177,7 +182,7 @@ class TestProgrammeDetails:
     def test_program_details_happy_path(
         self, create_payment_plan: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
-        pageProgrammeDetails.selectGlobalProgramFilter("Test For Edit").click()
+        pageProgrammeDetails.selectGlobalProgramFilter("Test For Edit")
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
         assert "0" in pageProgrammeDetails.getLabelProgramSize().text
         pageProgrammeDetails.getButtonActivateProgram().click()
@@ -191,7 +196,8 @@ class TestProgrammeDetails:
         create_custom_household()
         pageProgrammeDetails.driver.refresh()
         assert "1" in pageProgrammeDetails.getLabelProgramSize().text
-        assert 1 == len(pageProgrammeDetails.getCashPlanTableRow())
+        assert "Programme Cycles" in pageProgrammeDetails.getTableTitle().text
+        assert "Rows per page: 5 1–1 of 1" in pageProgrammeDetails.getTablePagination().text.replace("\n", " ")
         pageProgrammeDetails.getButtonFinishProgram().click()
         pageProgrammeDetails.clickButtonFinishProgramPopup()
         for _ in range(10):

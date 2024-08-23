@@ -7,6 +7,23 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots['TestTargetPopulationQuery::test_all_targets_query_filter_by_cycle 1'] = {
+    'data': {
+        'allTargetPopulation': {
+            'edges': [
+                {
+                    'node': {
+                        'name': 'target_population_residence_status',
+                        'status': 'OPEN',
+                        'totalHouseholdsCount': 1,
+                        'totalIndividualsCount': 2
+                    }
+                }
+            ]
+        }
+    }
+}
+
 snapshots['TestTargetPopulationQuery::test_all_targets_query_order_by_created_by 1'] = {
     'data': {
         'allTargetPopulation': {

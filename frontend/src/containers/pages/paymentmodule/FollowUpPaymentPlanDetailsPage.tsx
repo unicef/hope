@@ -20,13 +20,13 @@ import { ExcludeSection } from '@components/paymentmodule/PaymentPlanDetails/Exc
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export function FollowUpPaymentPlanDetailsPage(): React.ReactElement {
-  const { id } = useParams();
+  const { paymentPlanId } = useParams();
   const permissions = usePermissions();
   const { baseUrl, businessArea } = useBaseUrl();
   const { data, loading, startPolling, stopPolling, error } =
     usePaymentPlanQuery({
       variables: {
-        id,
+        id: paymentPlanId,
       },
       fetchPolicy: 'cache-and-network',
     });

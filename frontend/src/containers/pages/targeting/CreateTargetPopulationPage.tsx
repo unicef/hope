@@ -23,6 +23,7 @@ import { useProgramContext } from 'src/programContext';
 import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { TargetingCriteriaDisplay } from '@components/targeting/TargetingCriteriaDisplay/TargetingCriteriaDisplay';
+import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 
 export const CreateTargetPopulationPage = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -33,6 +34,10 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
     name: '',
     criterias: [],
     program: programId,
+    programCycleId: {
+      value: '',
+      name: '',
+    },
     excludedIds: '',
     exclusionReason: '',
     flagExcludeIfActiveAdjudicationTicket: false,
@@ -79,12 +84,16 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
 
   const validationSchema = Yup.object().shape({
     name: Yup.string()
-      .min(3, t('Targeting name should have at least 3 characters.'))
-      .max(255, t('Targeting name should have at most 255 characters.')),
+      .required(t('Targeting Name is required'))
+      .min(3, t('Targeting Name should have at least 3 characters.'))
+      .max(255, t('Targeting Name should have at most 255 characters.')),
     excludedIds: idValidation,
     householdIds: idValidation,
     individualIds: idValidation,
     exclusionReason: Yup.string().max(500, t('Too long')),
+    programCycleId: Yup.object().shape({
+      value: Yup.string().required('Program Cycle is required'),
+    }),
   });
 
   const handleSubmit = async (values): Promise<void> => {
@@ -93,6 +102,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
         variables: {
           input: {
             programId: values.program,
+            programCycleId: values.programCycleId.value,
             name: values.name,
             excludedIds: values.excludedIds,
             exclusionReason: values.exclusionReason,
@@ -116,170 +126,180 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ submitForm, values }) => {
-        return (
-          <Form>
-            <AutoSubmitFormOnEnter />
-            <CreateTargetPopulationHeader
-              handleSubmit={submitForm}
-              loading={loading}
-              values={values}
-              baseUrl={baseUrl}
-              permissions={permissions}
-              category={category}
-            />
-            <PaperContainer>
-              <Box pt={3} pb={3}>
-                <Typography variant="h6">{t('Targeting Criteria')}</Typography>
-              </Box>
-              <Grid container>
-                <Grid item xs={6}>
-                  <Field
-                    name="name"
-                    label={t('Target Population Name')}
-                    type="text"
-                    fullWidth
-                    required
-                    component={FormikTextField}
-                    variant="outlined"
-                    data-cy="input-name"
-                  />
-                </Grid>
-              </Grid>
-              <Box pt={6} pb={6}>
-                <Divider />
-              </Box>
-              {values.program && category === 'filters' ? (
-                <FieldArray
-                  name="criterias"
-                  render={(arrayHelpers) => (
-                    <TargetingCriteriaDisplay
-                      helpers={arrayHelpers}
-                      rules={values.criterias}
-                      screenBeneficiary={screenBeneficiary}
-                      isStandardDctType={isStandardDctType}
-                      isSocialDctType={isSocialDctType}
-                      category={category}
-                      isEdit
-                    />
-                  )}
+      {({ submitForm, values, setFieldValue, errors }) => (
+        <Form>
+          <AutoSubmitFormOnEnter />
+          <CreateTargetPopulationHeader
+            handleSubmit={submitForm}
+            loading={loading}
+            values={values}
+            baseUrl={baseUrl}
+            permissions={permissions}
+            category={category}
+          />
+          <PaperContainer>
+            <Box pt={3} pb={3}>
+              <Typography variant="h6">{t('Targeting Criteria')}</Typography>
+            </Box>
+            <Grid container mb={5}>
+              <Grid item xs={6}>
+                <ProgramCycleAutocompleteRest
+                  value={values.programCycleId}
+                  onChange={async (e) => {
+                    await setFieldValue('programCycleId', e);
+                  }}
+                  required
+                  // @ts-ignore
+                  error={errors.programCycleId?.value}
                 />
-              ) : null}
-              {category === 'ids' ? (
-                <>
-                  <Grid container spacing={3}>
-                    {householdFiltersAvailable && (
-                      <Grid item xs={12}>
+              </Grid>
+            </Grid>
+            <Grid container>
+              <Grid item xs={6}>
+                <Field
+                  name="name"
+                  label={t('Target Population Name')}
+                  type="text"
+                  fullWidth
+                  required
+                  component={FormikTextField}
+                  variant="outlined"
+                  data-cy="input-name"
+                />
+              </Grid>
+            </Grid>
+            <Box pt={6} pb={6}>
+              <Divider />
+            </Box>
+            {values.program && category === 'filters' ? (
+              <FieldArray
+                name="criterias"
+                render={(arrayHelpers) => (
+                  <TargetingCriteriaDisplay
+                    helpers={arrayHelpers}
+                    rules={values.criterias}
+                    screenBeneficiary={screenBeneficiary}
+                    isStandardDctType={isStandardDctType}
+                    isSocialDctType={isSocialDctType}
+                    category={category}
+                    isEdit
+                  />
+                )}
+              />
+            ) : null}
+            {category === 'ids' ? (
+              <>
+                <Grid container spacing={3}>
+                  {householdFiltersAvailable && (
+                    <Grid item xs={12}>
+                      <Field
+                        data-cy="input-included-household-ids"
+                        name="householdIds"
+                        fullWidth
+                        variant="outlined"
+                        label={t('Household IDs')}
+                        component={FormikTextField}
+                      />
+                    </Grid>
+                  )}
+                  {householdFiltersAvailable && individualFiltersAvailable && (
+                    <Grid item xs={12}>
+                      <AndDivider>
+                        <AndDividerLabel>OR</AndDividerLabel>
+                      </AndDivider>
+                    </Grid>
+                  )}
+                  {individualFiltersAvailable && (
+                    <Grid item xs={12}>
+                      <Box pb={3}>
                         <Field
-                          data-cy="input-included-household-ids"
-                          name="householdIds"
+                          data-cy="input-included-individual-ids"
+                          name="individualIds"
                           fullWidth
                           variant="outlined"
-                          label={t('Household IDs')}
+                          label={t('Individual IDs')}
                           component={FormikTextField}
+                        />
+                      </Box>
+                    </Grid>
+                  )}
+                </Grid>
+                <Box mt={3} p={3}>
+                  <Grid container spacing={3}>
+                    {isStandardDctType && (
+                      <Grid item xs={6}>
+                        <Field
+                          name="flagExcludeIfActiveAdjudicationTicket"
+                          label={t(
+                            'Exclude Households with Active Adjudication Ticket',
+                          )}
+                          color="primary"
+                          component={FormikCheckboxField}
+                          data-cy="input-active-households-adjudication-ticket"
                         />
                       </Grid>
                     )}
-                    {householdFiltersAvailable &&
-                      individualFiltersAvailable && (
-                        <Grid item xs={12}>
-                          <AndDivider>
-                            <AndDividerLabel>OR</AndDividerLabel>
-                          </AndDivider>
-                        </Grid>
-                      )}
-                    {individualFiltersAvailable && (
-                      <Grid item xs={12}>
-                        <Box pb={3}>
-                          <Field
-                            data-cy="input-included-individual-ids"
-                            name="individualIds"
-                            fullWidth
-                            variant="outlined"
-                            label={t('Individual IDs')}
-                            component={FormikTextField}
-                          />
-                        </Box>
+                    {isSocialDctType && (
+                      <Grid item xs={6}>
+                        <Field
+                          name="flagExcludeIfActiveAdjudicationTicket"
+                          label={t(
+                            'Exclude People with Active Adjudication Ticket',
+                          )}
+                          color="primary"
+                          component={FormikCheckboxField}
+                          data-cy="input-active-people-adjudication-ticket"
+                        />
+                      </Grid>
+                    )}
+                    {screenBeneficiary && isSocialDctType && (
+                      <Grid item xs={6}>
+                        <Field
+                          name="flagExcludeIfOnSanctionList"
+                          label={t(
+                            'Exclude People with an Active Sanction Screen Flag',
+                          )}
+                          color="primary"
+                          component={FormikCheckboxField}
+                          data-cy="input-active-people-sanction-flag"
+                        />
+                      </Grid>
+                    )}
+                    {screenBeneficiary && isStandardDctType && (
+                      <Grid item xs={6}>
+                        <Field
+                          name="flagExcludeIfOnSanctionList"
+                          label={t(
+                            'Exclude Households with an Active Sanction Screen Flag',
+                          )}
+                          color="primary"
+                          component={FormikCheckboxField}
+                          data-cy="input-active-sanction-flag"
+                        />
                       </Grid>
                     )}
                   </Grid>
-                  <Box mt={3} p={3}>
-                    <Grid container spacing={3}>
-                      {isStandardDctType && (
-                        <Grid item xs={6}>
-                          <Field
-                            name="flagExcludeIfActiveAdjudicationTicket"
-                            label={t(
-                              'Exclude Households with Active Adjudication Ticket',
-                            )}
-                            color="primary"
-                            component={FormikCheckboxField}
-                            data-cy="input-active-households-adjudication-ticket"
-                          />
-                        </Grid>
-                      )}
-                      {isSocialDctType && (
-                        <Grid item xs={6}>
-                          <Field
-                            name="flagExcludeIfActiveAdjudicationTicket"
-                            label={t(
-                              'Exclude People with Active Adjudication Ticket',
-                            )}
-                            color="primary"
-                            component={FormikCheckboxField}
-                            data-cy="input-active-people-adjudication-ticket"
-                          />
-                        </Grid>
-                      )}
-                      {screenBeneficiary && isSocialDctType && (
-                        <Grid item xs={6}>
-                          <Field
-                            name="flagExcludeIfOnSanctionList"
-                            label={t(
-                              'Exclude People with an Active Sanction Screen Flag',
-                            )}
-                            color="primary"
-                            component={FormikCheckboxField}
-                            data-cy="input-active-people-sanction-flag"
-                          />
-                        </Grid>
-                      )}
-                      {screenBeneficiary && isStandardDctType && (
-                        <Grid item xs={6}>
-                          <Field
-                            name="flagExcludeIfOnSanctionList"
-                            label={t(
-                              'Exclude Households with an Active Sanction Screen Flag',
-                            )}
-                            color="primary"
-                            component={FormikCheckboxField}
-                            data-cy="input-active-sanction-flag"
-                          />
-                        </Grid>
-                      )}
-                    </Grid>
-                  </Box>
-                </>
-              ) : null}
-            </PaperContainer>
-            {category === 'filters' && <Exclusions />}
-            <Box
-              pt={3}
-              pb={3}
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-            >
-              <Typography style={{ color: '#b1b1b5' }} variant="h6">
-                {t('Save to see the list of households')}
-              </Typography>
-              <Typography style={{ color: '#b1b1b5' }} variant="subtitle1">
-                {t('List of households will be available after saving')}
-              </Typography>
-            </Box>
-          </Form>
-        );
-      }}
+                </Box>
+              </>
+            ) : null}
+          </PaperContainer>
+          {category === 'filters' && <Exclusions />}
+          <Box
+            pt={3}
+            pb={3}
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+          >
+            <Typography style={{ color: '#b1b1b5' }} variant="h6">
+              {t('Save to see the list of households')}
+            </Typography>
+            <Typography style={{ color: '#b1b1b5' }} variant="subtitle1">
+              {t('List of households will be available after saving')}
+            </Typography>
+          </Box>
+        </Form>
+      )}
     </Formik>
   );
 };

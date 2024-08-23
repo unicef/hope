@@ -68,6 +68,11 @@ export const targetPopulationDetailed = gql`
       endDate
       isSocialWorkerProgram
     }
+    programCycle {
+      __typename
+      id
+      title
+    }
     createdBy {
       __typename
       id
