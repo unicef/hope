@@ -12,6 +12,7 @@ from hct_mis_api.apps.core.fixtures import (
 )
 from hct_mis_api.apps.core.models import BusinessArea, PeriodicFieldData
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.household.models import DISABLED
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -218,6 +219,40 @@ class TestTargetPopulationQuery(APITestCase):
         cls.target_population_with_pdu_filter = full_rebuild(cls.target_population_with_pdu_filter)
         cls.target_population_with_pdu_filter.save()
 
+        (household, individuals) = create_household(
+            {"size": 3, "residence_status": "HOST", "business_area": cls.business_area, "program": cls.program},
+        )
+        individual = individuals[0]
+        individual.disability = DISABLED
+        individual.save()
+        targeting_criteria = TargetingCriteria()
+        targeting_criteria.save()
+        rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
+        rule.save()
+        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+            targeting_criteria_rule=rule, target_only_hoh=False
+        )
+        individuals_filters_block.save()
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            individuals_filters_block=individuals_filters_block,
+            comparison_method="EQUALS",
+            field_name="disability",
+            arguments=["disabled"],
+            flex_field_classification=FlexFieldClassification.NOT_FLEX_FIELD,
+        )
+        rule_filter.save()
+        cls.target_population_with_individual_filter = TargetPopulation(
+            name="target_population_with_individual_filter",
+            created_by=user_third,
+            targeting_criteria=targeting_criteria,
+            status=TargetPopulation.STATUS_LOCKED,
+            business_area=cls.business_area,
+            program=cls.program,
+        )
+        cls.target_population_with_individual_filter.save()
+        cls.target_population_with_individual_filter = full_rebuild(cls.target_population_with_individual_filter)
+        cls.target_population_with_individual_filter.save()
+
     @staticmethod
     def get_targeting_criteria_for_rule(rule_filter: Dict) -> TargetingCriteria:
         targeting_criteria = TargetingCriteria()
@@ -340,6 +375,37 @@ class TestTargetPopulationQuery(APITestCase):
             variables={
                 "id": self.id_to_base64(
                     self.target_population_with_pdu_filter.id,
+                    "TargetPopulationNode",
+                )
+            },
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.TARGETING_VIEW_DETAILS],
+            ),
+            (
+                "without_permission",
+                [],
+            ),
+        ]
+    )
+    def test_simple_target_query_individual_filter(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
+        self.snapshot_graphql_request(
+            request_string=TestTargetPopulationQuery.TARGET_POPULATION_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
+            variables={
+                "id": self.id_to_base64(
+                    self.target_population_with_individual_filter.id,
                     "TargetPopulationNode",
                 )
             },
