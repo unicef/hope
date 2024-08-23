@@ -401,7 +401,7 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
         pdu_data_string = PeriodicFieldDataFactory(
             subtype=PeriodicFieldData.STRING,
             number_of_rounds=2,
-            rounds_names=["Round 1", "Rounds 2"],
+            rounds_names=["Round 1", "Round 2"],
         )
         cls.pdu_field_string = FlexibleAttributeForPDUFactory(
             program=cls.program,
