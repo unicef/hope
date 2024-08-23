@@ -826,9 +826,9 @@ class TestManualCalendar:
         pageProgrammeManagement.getButtonAddTimeSeriesField().click()
         pageProgrammeManagement.getInputPduFieldsObjectLabel(0).send_keys("Time Series Field Name 1")
         pageProgrammeManagement.getSelectPduFieldsObjectPduDataSubtype(0).click()
-        pageProgrammeManagement.select_listbox_element("Text").click()
+        pageProgrammeManagement.select_listbox_element("Text")
         pageProgrammeManagement.getSelectPduFieldsObjectPduDataNumberOfRounds(0).click()
-        pageProgrammeManagement.select_listbox_element("2").click()
+        pageProgrammeManagement.select_listbox_element("2")
         pageProgrammeManagement.getInputPduFieldsRoundsNames(0, 0).send_keys("Round 1")
         pageProgrammeManagement.getInputPduFieldsRoundsNames(0, 1).send_keys("Round 2")
         pageProgrammeManagement.getButtonNext().click()
@@ -866,19 +866,19 @@ class TestManualCalendar:
 
         # only possible to increase number of rounds
         pageProgrammeManagement.getSelectPduFieldsObjectPduDataNumberOfRounds(0).click()
-        is_disabled_decrease_round_number = pageProgrammeManagement.select_listbox_element("1").get_attribute(
+        is_disabled_decrease_round_number = pageProgrammeManagement.get_listbox_element("1").get_attribute(
             "aria-disabled"
         )
         assert is_disabled_decrease_round_number == "true"
-        is_disabled_decrease_round_number = pageProgrammeManagement.select_listbox_element("2").get_attribute(
+        is_disabled_decrease_round_number = pageProgrammeManagement.get_listbox_element("2").get_attribute(
             "aria-disabled"
         )
         assert is_disabled_decrease_round_number is None
-        is_disabled_decrease_round_number = pageProgrammeManagement.select_listbox_element("3").get_attribute(
+        is_disabled_decrease_round_number = pageProgrammeManagement.get_listbox_element("3").get_attribute(
             "aria-disabled"
         )
         assert is_disabled_decrease_round_number is None
-        pageProgrammeManagement.select_listbox_element("3").click()
+        pageProgrammeManagement.select_listbox_element("3")
 
         is_disabled_edit_time_series_existing_round_name_1 = pageProgrammeManagement.getInputPduFieldsRoundsNames(
             0, 0
