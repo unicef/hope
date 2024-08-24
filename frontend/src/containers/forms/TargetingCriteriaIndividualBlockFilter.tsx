@@ -3,7 +3,7 @@ import { SubField } from '@components/targeting/SubField';
 import { ImportedIndividualFieldsQuery } from '@generated/graphql';
 import { FieldChooser } from '@components/targeting/FieldChooser';
 
-export function TargetCriteriaBlockFilter({
+export function TargetingCriteriaIndividualBlockFilter({
   blockIndex,
   index,
   data,
@@ -35,6 +35,7 @@ export function TargetCriteriaBlockFilter({
         <div data-cy="autocomplete-target-criteria-values">
           <SubField
             field={each}
+            blockIndex={blockIndex}
             index={index}
             choicesDict={choicesDict}
             baseName={`individualsFiltersBlocks[${blockIndex}].individualBlockFilters[${index}]`}

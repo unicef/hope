@@ -114,6 +114,7 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     partners = graphene.List(PartnerNode)
     is_social_worker_program = graphene.Boolean()
     pdu_fields = graphene.List(PeriodicFieldNode)
+    target_populations_count = graphene.Int()
     cycles = DjangoFilterConnectionField(ProgramCycleNode, filterset_class=ProgramCycleFilter)
 
     class Meta:
@@ -150,6 +151,10 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     @staticmethod
     def resolve_pdu_fields(program: Program, info: Any, **kwargs: Any) -> QuerySet:
         return program.pdu_fields.order_by("name")
+
+    @staticmethod
+    def resolve_target_populations_count(program: Program, info: Any, **kwargs: Any) -> int:
+        return program.targetpopulation_set.count()
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):

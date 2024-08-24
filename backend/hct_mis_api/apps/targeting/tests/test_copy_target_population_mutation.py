@@ -33,7 +33,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
                         filters{
                           comparisonMethod
                           fieldName
-                          isFlexField
+                          flexFieldClassification
                           arguments
                         }
                       }

@@ -1,38 +1,51 @@
-export const chooseFieldType = (value, arrayHelpers, index): void => {
-  const values = {
-    isFlexField: value.isFlexField,
-    associatedWith: value.associatedWith,
+export const chooseFieldType = (fieldValue, arrayHelpers, index): void => {
+  let flexFieldClassification;
+  if (fieldValue.isFlexField === false) {
+    flexFieldClassification = 'NOT_FLEX_FIELD';
+  } else if (fieldValue.isFlexField === true && fieldValue.type !== 'PDU') {
+    flexFieldClassification = 'FLEX_FIELD_BASIC';
+  } else if (fieldValue.isFlexField === true && fieldValue.type === 'PDU') {
+    flexFieldClassification = 'FLEX_FIELD_PDU';
+  }
+
+  const updatedFieldValues = {
+    flexFieldClassification,
+    associatedWith: fieldValue.associatedWith,
     fieldAttribute: {
-      labelEn: value.labelEn,
-      type: value.type,
+      labelEn: fieldValue.labelEn,
+      type: fieldValue.type,
       choices: null,
     },
     value: null,
+    pduData: fieldValue.pduData,
   };
-  switch (value.type) {
+
+  switch (fieldValue.type) {
     case 'INTEGER':
-      values.value = { from: '', to: '' };
+      updatedFieldValues.value = { from: '', to: '' };
       break;
     case 'DATE':
-      values.value = { from: undefined, to: undefined };
+      updatedFieldValues.value = { from: undefined, to: undefined };
       break;
     case 'SELECT_ONE':
-      values.fieldAttribute.choices = value.choices;
+      updatedFieldValues.fieldAttribute.choices = fieldValue.choices;
       break;
     case 'SELECT_MANY':
-      values.value = [];
-      values.fieldAttribute.choices = value.choices;
+      updatedFieldValues.value = [];
+      updatedFieldValues.fieldAttribute.choices = fieldValue.choices;
       break;
     default:
-      values.value = null;
+      updatedFieldValues.value = null;
       break;
   }
+
   arrayHelpers.replace(index, {
-    ...values,
-    fieldName: value.name,
-    type: value.type,
+    ...updatedFieldValues,
+    fieldName: fieldValue.name,
+    type: fieldValue.type,
   });
 };
+
 export const clearField = (arrayHelpers, index): void =>
   arrayHelpers.replace(index, {});
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -68,7 +81,13 @@ export function mapFiltersToInitialValues(filters): any[] {
         case 'EQUALS':
           return mappedFilters.push({
             ...each,
-            value: each.arguments[0],
+            value:
+              each.fieldAttribute.type === 'BOOL' ||
+              each.fieldAttribute?.pduData?.subtype
+                ? each.arguments[0]
+                  ? 'Yes'
+                  : 'No'
+                : each.arguments[0],
           });
         case 'CONTAINS':
           // eslint-disable-next-line no-case-declarations
@@ -106,7 +125,12 @@ export function mapCriteriaToInitialValues(criteria) {
     individualsFiltersBlocks: individualsFiltersBlocks.map((block) => ({
       individualBlockFilters: mapFiltersToInitialValues(
         block.individualBlockFilters,
-      ),
+      ).map((filter) => {
+        return {
+          ...filter,
+          isNull: filter.comparisonMethod === 'IS_NULL' || filter.isNull,
+        };
+      }),
     })),
   };
 }
@@ -148,19 +172,61 @@ export function formatCriteriaFilters(filters) {
         comparisonMethod = 'EQUALS';
         values = [each.value];
         break;
+      case 'PDU':
+        switch (
+          each.pduData?.subtype ||
+          each.fieldAttribute?.pduData?.subtype
+        ) {
+          case 'SELECT_ONE':
+            comparisonMethod = 'EQUALS';
+            values = [each.value];
+            break;
+          case 'SELECT_MANY':
+            comparisonMethod = 'CONTAINS';
+            values = [...each.value];
+            break;
+          case 'STRING':
+            comparisonMethod = 'CONTAINS';
+            values = [each.value];
+            break;
+          case 'DECIMAL':
+          case 'INTEGER':
+          case 'DATE':
+            if (each.value.from && each.value.to) {
+              comparisonMethod = 'RANGE';
+              values = [each.value.from, each.value.to];
+            } else if (each.value.from && !each.value.to) {
+              comparisonMethod = 'GREATER_THAN';
+              values = [each.value.from];
+            } else {
+              comparisonMethod = 'LESS_THAN';
+              values = [each.value.to];
+            }
+            break;
+          case 'BOOL':
+            comparisonMethod = 'EQUALS';
+            values = [each.value === 'Yes'];
+            break;
+          default:
+            comparisonMethod = 'CONTAINS';
+            values = [each.value];
+        }
+        break;
       default:
         comparisonMethod = 'CONTAINS';
+        values = [each.value];
     }
+
     return {
+      ...each,
       comparisonMethod,
       arguments: values,
       fieldName: each.fieldName,
-      isFlexField: each.isFlexField,
       fieldAttribute: each.fieldAttribute,
+      flexFieldClassification: each.flexFieldClassification,
     };
   });
 }
-
 // TODO Marcin make Type to this function
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function formatCriteriaIndividualsFiltersBlocks(
@@ -171,18 +237,40 @@ export function formatCriteriaIndividualsFiltersBlocks(
   }));
 }
 
-function mapFilterToVariable(filter): {
+interface Filter {
+  isNull: boolean;
   comparisonMethod: string;
-  arguments;
+  arguments: any[];
   fieldName: string;
-  isFlexField: boolean;
-} {
-  return {
-    comparisonMethod: filter.comparisonMethod,
-    arguments: filter.arguments,
+  flexFieldClassification: string;
+  roundNumber?: number;
+}
+
+interface Result {
+  comparisonMethod: string;
+  arguments: any[];
+  fieldName: string;
+  flexFieldClassification: string;
+  roundNumber?: number;
+}
+
+function mapFilterToVariable(filter: Filter): Result {
+  const result: Result = {
+    comparisonMethod: filter.isNull ? 'IS_NULL' : filter.comparisonMethod,
+    arguments: filter.isNull
+      ? [null]
+      : filter.arguments.map((arg) =>
+          arg === 'Yes' ? true : arg === 'No' ? false : arg,
+        ),
     fieldName: filter.fieldName,
-    isFlexField: filter.isFlexField,
+    flexFieldClassification: filter.flexFieldClassification,
   };
+
+  if (filter.flexFieldClassification === 'FLEX_FIELD_PDU') {
+    result.roundNumber = filter.roundNumber;
+  }
+
+  return result;
 }
 
 // TODO Marcin make Type to this function
@@ -206,4 +294,14 @@ export function getTargetingCriteriaVariables(values) {
       })),
     },
   };
+}
+
+const flexFieldClassificationMap = {
+  NOT_FLEX_FIELD: 'Not a Flex Field',
+  FLEX_FIELD_BASIC: 'Flex Field Basic',
+  FLEX_FIELD_PDU: 'Flex Field PDU',
+};
+
+export function mapFlexFieldClassification(key: string): string {
+  return flexFieldClassificationMap[key] || 'Unknown Classification';
 }

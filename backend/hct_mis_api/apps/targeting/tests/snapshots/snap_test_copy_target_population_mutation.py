@@ -57,7 +57,7 @@ snapshots['TestCopyTargetPopulationMutation::test_copy_target_0_with_permission 
                                     ],
                                     'comparisonMethod': 'EQUALS',
                                     'fieldName': 'size',
-                                    'isFlexField': False
+                                    'flexFieldClassification': 'NOT_FLEX_FIELD'
                                 }
                             ]
                         }
