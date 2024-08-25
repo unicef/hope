@@ -1,6 +1,7 @@
 from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program_task
 from hct_mis_api.apps.household.fixtures import (
     BankAccountInfoFactory,
     DocumentFactory,
@@ -261,3 +262,12 @@ class TestEnrolHouseholdToProgram(TestCase):
             hh.program,
             self.program2,
         )
+
+    def test_enroll_households_to_program_task(self) -> None:
+        enroll_households_to_program_task(
+            [str(self.household_already_enrolled.id)], str(self.program2.pk), str(self.rdi_program_1.pk)
+        )
+        hh_count = Household.objects.count()
+        ind_count = Individual.objects.count()
+        self.assertEqual(hh_count, Household.objects.count())
+        self.assertEqual(ind_count, Individual.objects.count())
