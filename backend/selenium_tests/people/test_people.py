@@ -237,6 +237,9 @@ class TestSmokePeople:
         assert "DELIVERED FULLY" in pagePeopleDetails.getRows()[0].text
         assert add_people_with_payment_record.unicef_id in pagePeopleDetails.getRows()[0].text
 
+
+@pytest.mark.usefixtures("login")
+class TestPeople:
     @pytest.mark.skip(reason="ToDo")
     def test_check_data_after_grievance_ticket_processed(self) -> None:
         pass
