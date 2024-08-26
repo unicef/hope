@@ -777,7 +777,7 @@ class TestXLSXValidatorsMethods(APITestCase):
         [
             (PeriodicFieldData.STRING, ["Test", "2021-05-01"]),
             (PeriodicFieldData.DECIMAL, ["12.3", "2021-05-01"]),
-            (PeriodicFieldData.BOOLEAN, ["True", "2021-05-01"]),
+            (PeriodicFieldData.BOOL, ["True", "2021-05-01"]),
             (PeriodicFieldData.DATE, ["1996-06-21", "2021-05-01"]),
         ]
     )
@@ -801,7 +801,7 @@ class TestXLSXValidatorsMethods(APITestCase):
     @parameterized.expand(
         [
             (PeriodicFieldData.DECIMAL, ["foo", "2021-05-01"]),
-            (PeriodicFieldData.BOOLEAN, ["foo", "2021-05-01"]),
+            (PeriodicFieldData.BOOL, ["foo", "2021-05-01"]),
             (PeriodicFieldData.DATE, ["foo", "2021-05-01"]),
         ]
     )

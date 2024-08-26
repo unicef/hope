@@ -19,8 +19,8 @@ import * as Yup from 'yup';
 import { AndDivider, AndDividerLabel } from '../AndDivider';
 import { Exclusions } from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
-import { TargetingCriteria } from '../TargetingCriteria';
 import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
+import { TargetingCriteriaDisplay } from '../TargetingCriteriaDisplay/TargetingCriteriaDisplay';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 
 interface EditTargetPopulationProps {
@@ -193,7 +193,7 @@ export const EditTargetPopulation = ({
               <FieldArray
                 name="targetingCriteria"
                 render={(arrayHelpers) => (
-                  <TargetingCriteria
+                  <TargetingCriteriaDisplay
                     helpers={arrayHelpers}
                     rules={values.targetingCriteria}
                     isEdit

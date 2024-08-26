@@ -157,7 +157,7 @@ export function ResultsForHouseholds({
                 <Grid item xs={6}>
                   <SummaryBorder>
                     <LabelizedField label={t('Total Number of Households')}>
-                      <SummaryValue>
+                      <SummaryValue data-cy='total-number-of-households-count'>
                         {targetPopulation.totalHouseholdsCount || '0'}
                       </SummaryValue>
                     </LabelizedField>
