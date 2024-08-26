@@ -643,16 +643,10 @@ class TestProgrammeDetails:
         pageProgrammeDetails.getButtonCreateProgramCycle().click()
 
         for _ in range(50):
-            if (
-                    "Start date must be after the latest cycle."
-                    in pageProgrammeDetails.getStartDateCycleDiv().text
-            ):
+            if "Start date must be after the latest cycle." in pageProgrammeDetails.getStartDateCycleDiv().text:
                 break
             sleep(0.1)
-        assert (
-                "Start date must be after the latest cycle."
-                in pageProgrammeDetails.getStartDateCycleDiv().text
-        )
+        assert "Start date must be after the latest cycle." in pageProgrammeDetails.getStartDateCycleDiv().text
         pageProgrammeDetails.getStartDateCycle().click()
         pageProgrammeDetails.getStartDateCycle().send_keys(
             (datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d")
