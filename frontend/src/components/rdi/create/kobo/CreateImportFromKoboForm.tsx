@@ -78,7 +78,7 @@ export function CreateImportFromKoboForm({
       onlyActiveSubmissions: true,
       screenBeneficiary: false,
       allowDeliveryMechanismsValidationErrors: false,
-      pullPictures: false,
+      pullPictures: true,
     },
     validationSchema,
     onSubmit,
