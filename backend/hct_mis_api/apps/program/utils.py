@@ -559,6 +559,6 @@ def get_flex_fields_without_pdu_values(individual: Individual) -> dict:
 def generate_rdi_unique_name(program: Program) -> str:
     # add random 4 digits and check if exists
     while True:
-        rdi_name = f"RDI for enroll households to Programme: {program.name}] ({str(randint(1111, 9999))})"
+        rdi_name = f"RDI for enroll households to Programme: {program.name} ({str(randint(1111, 9999))})"
         if not RegistrationDataImport.objects.filter(business_area=program.business_area, name=rdi_name).exists():
             return rdi_name

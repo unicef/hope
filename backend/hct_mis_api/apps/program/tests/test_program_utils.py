@@ -287,16 +287,16 @@ class TestEnrolHouseholdToProgram(TestCase):
     def test_generate_rdi_unique_name_when_conflicts(self, mock_randint: Any) -> None:
         mock_randint.side_effect = [1111, 5555]
         RegistrationDataImportFactory(
-            business_area=self.program1.business_area, name="RDI for enroll households to Programme: Program 1] (5555)"
+            business_area=self.program1.business_area, name="RDI for enroll households to Programme: Program 1 (5555)"
         )
         result = generate_rdi_unique_name(self.program1)
-        expected_name = "RDI for enroll households to Programme: Program 1] (1111)"
+        expected_name = "RDI for enroll households to Programme: Program 1 (1111)"
         self.assertEqual(result, expected_name)
 
     @patch("hct_mis_api.apps.program.utils.randint")
     def test_generate_rdi_unique_name_no_conflicts(self, mock_randint: Any) -> None:
         mock_randint.return_value = 3333
         result = generate_rdi_unique_name(self.program1)
-        expected_name = "RDI for enroll households to Programme: Program 1] (3333)"
+        expected_name = "RDI for enroll households to Programme: Program 1 (3333)"
         self.assertEqual(result, expected_name)
         self.assertFalse(RegistrationDataImport.objects.filter(name=expected_name).exists())
