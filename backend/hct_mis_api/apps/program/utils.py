@@ -1,4 +1,5 @@
 import re
+from random import randint
 from typing import Dict, List, Optional
 
 from django.conf import settings
@@ -378,13 +379,24 @@ def create_roles_for_new_representation(
     IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
 
 
-def enroll_households_to_program(households: QuerySet, program: Program, rdi: RegistrationDataImport) -> None:
+def enroll_households_to_program(households: QuerySet, program: Program, user_id: str) -> None:
     households_to_exclude = Household.objects.filter(
         program=program,
         unicef_id__in=households.values_list("unicef_id", flat=True),
     ).values_list("unicef_id", flat=True)
     households = households.exclude(unicef_id__in=households_to_exclude).prefetch_related("entitlement_cards")
     error_messages = []
+    rdi = RegistrationDataImport.objects.create(
+        status=RegistrationDataImport.MERGED,
+        imported_by=User.objects.get(id=user_id),
+        data_source=RegistrationDataImport.PROGRAM_POPULATION,
+        number_of_individuals=0,
+        number_of_households=0,
+        business_area=program.business_area,
+        pull_pictures=False,
+        program_id=program.id,
+        name=generate_rdi_unique_name,
+    )
     for household in households:
         try:
             with transaction.atomic():
@@ -542,3 +554,11 @@ def get_flex_fields_without_pdu_values(individual: Individual) -> dict:
         else:
             flex_fields_without_pdu[flex_field] = flex_fields[flex_field]
     return flex_fields_without_pdu
+
+
+def generate_rdi_unique_name(program: Program) -> str:
+    # add random 4 digits and check if exists
+    while True:
+        rdi_name = f"RDI for enroll households to Programme: {program.name}] ({str(randint(1111, 9999))})"
+        if not RegistrationDataImport.objects.filter(business_area=program.business_area, name=rdi_name).exists():
+            return rdi_name

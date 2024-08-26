@@ -10,8 +10,7 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
-#
-class TestMigration0185(TransactionTestCase):
+class TestMigrationIndAssignToRDI(TransactionTestCase):
     def test_assign_individual_to_rdi_migration(self) -> None:
         call_command("migrate", "household", "0184_migration", verbosity=0)
 

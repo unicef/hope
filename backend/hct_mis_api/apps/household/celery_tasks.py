@@ -21,7 +21,6 @@ from hct_mis_api.apps.household.services.household_recalculate_data import (
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.program.utils import enroll_households_to_program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.phone import calculate_phone_numbers_validity
 from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
@@ -202,11 +201,10 @@ def revalidate_phone_number_task(individual_ids: List[UUID]) -> None:
 @app.task()
 @log_start_and_end
 @sentry_tags
-def enroll_households_to_program_task(households_ids: List, program_for_enroll_id: str, rdi_id: str) -> None:
+def enroll_households_to_program_task(households_ids: List, program_for_enroll_id: str, user_id: str) -> None:
     households = Household.objects.filter(pk__in=households_ids)
     program_for_enroll = Program.objects.get(id=program_for_enroll_id)
-    rdi = RegistrationDataImport.objects.get(id=rdi_id)
-    enroll_households_to_program(households, program_for_enroll, rdi)
+    enroll_households_to_program(households, program_for_enroll, user_id)
 
 
 @app.task()

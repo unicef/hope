@@ -1,5 +1,9 @@
+from typing import Any
+from unittest.mock import patch
+
 from django.test import TestCase
 
+from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program_task
 from hct_mis_api.apps.household.fixtures import (
@@ -21,8 +25,12 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.utils import enroll_households_to_program
+from hct_mis_api.apps.program.utils import (
+    enroll_households_to_program,
+    generate_rdi_unique_name,
+)
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 class TestEnrolHouseholdToProgram(TestCase):
@@ -30,7 +38,9 @@ class TestEnrolHouseholdToProgram(TestCase):
 
     def setUp(self) -> None:
         afg = create_afghanistan()
-        self.program1 = ProgramFactory()
+        user = UserFactory()
+        self.str_user_id = str(user.pk)
+        self.program1 = ProgramFactory(name="Program 1")
         self.program2 = ProgramFactory()
         self.rdi_program_1 = RegistrationDataImportFactory(program=self.program1, business_area=afg)
 
@@ -121,7 +131,9 @@ class TestEnrolHouseholdToProgram(TestCase):
         ind_count = Individual.objects.count()
 
         enroll_households_to_program(
-            Household.objects.filter(id=self.household_already_enrolled.id), self.program2, self.rdi_program_1
+            Household.objects.filter(id=self.household_already_enrolled.id),
+            self.program2,
+            self.str_user_id,
         )
         self.assertEqual(hh_count, Household.objects.count())
         self.assertEqual(ind_count, Individual.objects.count())
@@ -133,7 +145,7 @@ class TestEnrolHouseholdToProgram(TestCase):
         enroll_households_to_program(
             Household.objects.filter(id=self.household_original_already_enrolled.id),
             self.program2,
-            self.rdi_program_1,
+            self.str_user_id,
         )
         self.assertEqual(hh_count, Household.objects.count())
         self.assertEqual(ind_count, Individual.objects.count())
@@ -148,7 +160,7 @@ class TestEnrolHouseholdToProgram(TestCase):
         enroll_households_to_program(
             Household.objects.filter(id=self.household.id),
             self.program2,
-            self.rdi_program_1,
+            self.str_user_id,
         )
 
         self.individual_2_already_enrolled.refresh_from_db()
@@ -206,7 +218,7 @@ class TestEnrolHouseholdToProgram(TestCase):
         enroll_households_to_program(
             Household.objects.filter(id=self.household_external.id),
             self.program2,
-            self.rdi_program_1,
+            self.str_user_id,
         )
         hh = Household.objects.order_by("created_at").last()
         self.assertEqual(hh_count + 1, Household.original_and_repr_objects.count())
@@ -248,7 +260,7 @@ class TestEnrolHouseholdToProgram(TestCase):
         enroll_households_to_program(
             Household.objects.filter(id=household_already_with_head_already_enrolled.id),
             self.program2,
-            self.rdi_program_1,
+            self.str_user_id,
         )
         hh = Household.objects.order_by("created_at").last()
         self.assertEqual(hh_count + 1, Household.objects.count())
@@ -265,9 +277,27 @@ class TestEnrolHouseholdToProgram(TestCase):
 
     def test_enroll_households_to_program_task(self) -> None:
         enroll_households_to_program_task(
-            [str(self.household_already_enrolled.id)], str(self.program2.pk), str(self.rdi_program_1.pk)
+            [str(self.household_already_enrolled.id)], str(self.program2.pk), self.str_user_id
         )
         hh_count = Household.objects.count()
         ind_count = Individual.objects.count()
         self.assertEqual(hh_count, Household.objects.count())
         self.assertEqual(ind_count, Individual.objects.count())
+
+    @patch("hct_mis_api.apps.program.utils.randint")
+    def test_generate_rdi_unique_name_when_conflicts(self, mock_randint: Any) -> None:
+        mock_randint.side_effect = [1111, 5555]
+        RegistrationDataImportFactory(
+            business_area=self.program1.business_area, name="RDI for enroll households to Programme: Program 1] (5555)"
+        )
+        result = generate_rdi_unique_name(self.program1)
+        expected_name = "RDI for enroll households to Programme: Program 1] (1111)"
+        self.assertEqual(result, expected_name)
+
+    @patch("hct_mis_api.apps.program.utils.randint")
+    def test_generate_rdi_unique_name_no_conflicts(self, mock_randint: Any) -> None:
+        mock_randint.return_value = 3333
+        result = generate_rdi_unique_name(self.program1)
+        expected_name = "RDI for enroll households to Programme: Program 1] (3333)"
+        self.assertEqual(result, expected_name)
+        self.assertFalse(RegistrationDataImport.objects.filter(name=expected_name).exists())
