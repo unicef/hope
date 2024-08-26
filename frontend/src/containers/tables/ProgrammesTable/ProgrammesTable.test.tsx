@@ -3,10 +3,9 @@ import * as React from 'react';
 import { act } from '@testing-library/react';
 import wait from 'waait';
 import { ProgrammesTable } from '.';
-import { render, ApolloLoadingLink } from '../../../testUtils/testUtils';
+import { render } from '../../../testUtils/testUtils';
 import { fakeProgramChoices } from '../../../../fixtures/programs/fakeProgramChoices';
 import { fakeApolloAllPrograms } from '../../../../fixtures/programs/fakeApolloAllPrograms';
-import {ApolloLink} from "@apollo/client";
 
 describe('containers/tables/ProgrammesTable', () => {
   const initialFilter = {
@@ -39,10 +38,7 @@ describe('containers/tables/ProgrammesTable', () => {
 
   it('should render loading', () => {
     const { container } = render(
-      <MockedProvider
-        addTypename={false}
-        mocks={fakeApolloAllPrograms}
-      >
+      <MockedProvider addTypename={false} mocks={fakeApolloAllPrograms}>
         <ProgrammesTable
           businessArea="afghanistan"
           filter={initialFilter}
