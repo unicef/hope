@@ -59,7 +59,6 @@ def copy_program_object(copy_from_program_id: str, program_data: dict, user: Use
         end_date=None,
         created_by=user,
     )
-    # create default rdi
     return program
 
 
