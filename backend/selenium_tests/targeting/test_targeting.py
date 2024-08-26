@@ -65,7 +65,14 @@ def non_sw_program() -> Program:
 @pytest.fixture
 def program() -> Program:
     business_area = create_afghanistan()
-    return ProgramFactory(name="Test Program", status=Program.ACTIVE, business_area=business_area)
+    return ProgramFactory(
+        name="Test Program",
+        status=Program.ACTIVE,
+        business_area=business_area,
+        cycle__title="Cycle In Programme",
+        cycle__start_date=datetime.now() - relativedelta(days=5),
+        cycle__end_date=datetime.now() + relativedelta(months=5),
+    )
 
 
 @pytest.fixture
@@ -447,6 +454,8 @@ class TestCreateTargeting:
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getButtonCreateNewByFilters().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
+        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
+        pageTargetingCreate.select_listbox_element("Cycle In Programme")
         pageTargetingCreate.getAddCriteriaButton().click()
         pageTargetingCreate.getAddIndividualRuleButton().click()
         pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
@@ -490,6 +499,8 @@ class TestCreateTargeting:
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getButtonCreateNewByFilters().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
+        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
+        pageTargetingCreate.select_listbox_element("Cycle In Programme")
         pageTargetingCreate.getAddCriteriaButton().click()
         pageTargetingCreate.getAddIndividualRuleButton().click()
         pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
@@ -555,6 +566,8 @@ class TestCreateTargeting:
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getButtonCreateNewByFilters().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
+        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
+        pageTargetingCreate.select_listbox_element("Cycle In Programme")
         pageTargetingCreate.getAddCriteriaButton().click()
         pageTargetingCreate.getAddIndividualRuleButton().click()
         pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
@@ -618,6 +631,8 @@ class TestCreateTargeting:
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getButtonCreateNewByFilters().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
+        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
+        pageTargetingCreate.select_listbox_element("Cycle In Programme")
         pageTargetingCreate.getAddCriteriaButton().click()
         pageTargetingCreate.getAddIndividualRuleButton().click()
         pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
@@ -664,6 +679,8 @@ class TestCreateTargeting:
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getButtonCreateNewByFilters().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
+        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
+        pageTargetingCreate.select_listbox_element("Cycle In Programme")
         pageTargetingCreate.getAddCriteriaButton().click()
         pageTargetingCreate.getAddIndividualRuleButton().click()
         pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
