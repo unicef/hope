@@ -51,14 +51,18 @@ def program_with_different_cycles() -> Program:
     program = get_program_with_dct_type_and_name(
         "ThreeCyclesProgramme", "cycl", status=Program.ACTIVE, program_cycle_status=ProgramCycle.DRAFT
     )
-    ProgramCycleFactory(program=program,
-                        status=ProgramCycle.ACTIVE,
-                        start_date=datetime.now() + relativedelta(days=11),
-                        end_date=datetime.now() + relativedelta(days=17))
-    ProgramCycleFactory(program=program,
-                        status=ProgramCycle.FINISHED,
-                        start_date=datetime.now() + relativedelta(days=18),
-                        end_date=datetime.now() + relativedelta(days=20))
+    ProgramCycleFactory(
+        program=program,
+        status=ProgramCycle.ACTIVE,
+        start_date=datetime.now() + relativedelta(days=11),
+        end_date=datetime.now() + relativedelta(days=17),
+    )
+    ProgramCycleFactory(
+        program=program,
+        status=ProgramCycle.FINISHED,
+        start_date=datetime.now() + relativedelta(days=18),
+        end_date=datetime.now() + relativedelta(days=20),
+    )
     program.save()
     yield program
 
@@ -109,6 +113,7 @@ def standard_active_program() -> Program:
         cycle_end_date=datetime.now(),
     )
 
+
 @pytest.fixture
 def standard_active_program_cycle_draft() -> Program:
     yield get_program_with_dct_type_and_name(
@@ -118,6 +123,7 @@ def standard_active_program_cycle_draft() -> Program:
         program_cycle_status=ProgramCycle.ACTIVE,
         cycle_end_date=datetime.now(),
     )
+
 
 @pytest.fixture
 def standard_active_program_with_draft_program_cycle() -> Program:
@@ -545,7 +551,7 @@ class TestProgrammeDetails:
 
     @pytest.mark.skip(reason="Unskip after fix 211823")
     def test_program_details_edit_default_cycle_by_add_new_cancel(
-            self, standard_program_with_draft_programme_cycle: Program, pageProgrammeDetails: ProgrammeDetails
+        self, standard_program_with_draft_programme_cycle: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
         assert "ACTIVE" in pageProgrammeDetails.getProgramStatus().text
@@ -581,7 +587,7 @@ class TestProgrammeDetails:
         assert "Test %$ What?" in pageProgrammeDetails.getProgramCycleTitle()[2].text
 
     def test_program_details_add_new_cycle_with_wrong_date(
-            self, standard_active_program_cycle_draft: Program, pageProgrammeDetails: ProgrammeDetails
+        self, standard_active_program_cycle_draft: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
         assert "ACTIVE" in pageProgrammeDetails.getProgramStatus().text
@@ -604,7 +610,9 @@ class TestProgrammeDetails:
             (datetime.now() - relativedelta(days=24)).strftime("%Y-%m-%d")
         )
         pageProgrammeDetails.getEndDateCycle().click()
-        pageProgrammeDetails.getEndDateCycle().send_keys((datetime.now() + relativedelta(days=121)).strftime("%Y-%m-%d"))
+        pageProgrammeDetails.getEndDateCycle().send_keys(
+            (datetime.now() + relativedelta(days=121)).strftime("%Y-%m-%d")
+        )
         pageProgrammeDetails.getButtonCreateProgramCycle().click()
         for _ in range(50):
             if "End Date cannot be after Programme End Date" in pageProgrammeDetails.getEndDateCycleDiv().text:
@@ -618,10 +626,16 @@ class TestProgrammeDetails:
         pageProgrammeDetails.getButtonCreateProgramCycle().click()
 
         for _ in range(50):
-            if "Programme Cycles' timeframes must not overlap with the provided start date." in pageProgrammeDetails.getStartDateCycleDiv().text:
+            if (
+                "Programme Cycles' timeframes must not overlap with the provided start date."
+                in pageProgrammeDetails.getStartDateCycleDiv().text
+            ):
                 break
             sleep(0.1)
-        assert "Programme Cycles' timeframes must not overlap with the provided start date." in pageProgrammeDetails.getStartDateCycleDiv().text
+        assert (
+            "Programme Cycles' timeframes must not overlap with the provided start date."
+            in pageProgrammeDetails.getStartDateCycleDiv().text
+        )
         pageProgrammeDetails.getStartDateCycle().click()
         pageProgrammeDetails.getStartDateCycle().send_keys(
             (datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d")
@@ -665,7 +679,8 @@ class TestProgrammeDetails:
         )
         pageProgrammeDetails.getEndDateCycle().click()
         pageProgrammeDetails.getEndDateCycle().send_keys(
-            (datetime.now() + relativedelta(days=121)).strftime("%Y-%m-%d"))
+            (datetime.now() + relativedelta(days=121)).strftime("%Y-%m-%d")
+        )
         pageProgrammeDetails.getButtonSave().click()
         for _ in range(50):
             if "End Date cannot be after Programme End Date" in pageProgrammeDetails.getEndDateCycleDiv().text:
@@ -693,11 +708,17 @@ class TestProgrammeDetails:
 
         pageProgrammeDetails.getButtonAddNewProgrammeCycle()
         pageProgrammeDetails.getProgramCycleRow()
-
         assert "Active" in pageProgrammeDetails.getProgramCycleStatus()[1].text
-        assert (datetime.now() + relativedelta(days=12)).strftime(
-            "%-d %b %Y"
-        ) in pageProgrammeDetails.getProgramCycleStartDate()[1].text
+        for _ in range(50):
+            if (datetime.now() + relativedelta(days=12)).strftime(
+                "%-d %b %Y"
+            ) in pageProgrammeDetails.getProgramCycleStartDate()[1].text:
+                break
+            sleep(0.1)
+        else:
+            assert (datetime.now() + relativedelta(days=12)).strftime(
+                "%-d %b %Y"
+            ) in pageProgrammeDetails.getProgramCycleStartDate()[1].text
         assert (datetime.now() + relativedelta(days=12)).strftime(
             "%-d %b %Y"
         ) in pageProgrammeDetails.getProgramCycleEndDate()[1].text
