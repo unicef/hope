@@ -98,13 +98,15 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     FLEX_REGISTRATION = "FLEX_REGISTRATION"
     EDOPOMOGA = "EDOPOMOGA"
     PROGRAM_POPULATION = "PROGRAM_POPULATION"
+    ENROLL_FROM_PROGRAM = "ENROLL_FROM_PROGRAM"
     DATA_SOURCE_CHOICE = (
         (XLS, "Excel"),
         (KOBO, "KoBo"),
         (FLEX_REGISTRATION, "Flex Registration"),
         (API, "Flex API"),
         (EDOPOMOGA, "eDopomoga"),
-        (PROGRAM_POPULATION, "Program Population"),
+        (PROGRAM_POPULATION, "Programme Population"),
+        (ENROLL_FROM_PROGRAM, "Enroll From Programme"),
     )
 
     DEDUP_ENGINE_PENDING = "PENDING"

@@ -307,7 +307,7 @@ class CopyProgramPopulation:
         return bank_accounts_info_list
 
 
-def copy_program_related_data(copy_from_program_id: str, new_program: Program) -> None:
+def copy_program_related_data(copy_from_program_id: str, new_program: Program, user_id: str) -> None:
     copy_from_individuals = Individual.objects.filter(program_id=copy_from_program_id, withdrawn=False, duplicate=False)
     copy_from_households = Household.objects.filter(
         program_id=copy_from_program_id,
@@ -316,8 +316,8 @@ def copy_program_related_data(copy_from_program_id: str, new_program: Program) -
     rdi = RegistrationDataImport.objects.create(
         name=f"Default RDI for Programme: {new_program.name}",
         status="MERGED",
-        imported_by=None,
-        data_source="XLS",
+        imported_by=User.objects.get(id=user_id),
+        data_source=RegistrationDataImport.PROGRAM_POPULATION,
         number_of_individuals=copy_from_individuals.count(),
         number_of_households=copy_from_households.count(),
         business_area=new_program.business_area,
@@ -389,7 +389,7 @@ def enroll_households_to_program(households: QuerySet, program: Program, user_id
     rdi = RegistrationDataImport.objects.create(
         status=RegistrationDataImport.MERGED,
         imported_by=User.objects.get(id=user_id),
-        data_source=RegistrationDataImport.PROGRAM_POPULATION,
+        data_source=RegistrationDataImport.ENROLL_FROM_PROGRAM,
         number_of_individuals=0,
         number_of_households=0,
         business_area=program.business_area,
@@ -557,8 +557,8 @@ def get_flex_fields_without_pdu_values(individual: Individual) -> dict:
 
 
 def generate_rdi_unique_name(program: Program) -> str:
-    # add random 4 digits and check if exists
-    while True:
-        rdi_name = f"RDI for enroll households to Programme: {program.name} ({str(randint(1111, 9999))})"
-        if not RegistrationDataImport.objects.filter(business_area=program.business_area, name=rdi_name).exists():
-            return rdi_name
+    # add random 4 digits if needed and check if exists RDI name
+    default_name = f"RDI for enroll households to Programme: {program.name}"
+    while RegistrationDataImport.objects.filter(business_area=program.business_area, name=default_name).exists():
+        default_name = f"{default_name} ({randint(1000, 9999)})"
+    return default_name
