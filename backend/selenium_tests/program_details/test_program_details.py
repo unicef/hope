@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 from time import sleep
 
 from django.conf import settings
@@ -17,6 +18,7 @@ from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
@@ -89,6 +91,7 @@ def get_program_with_dct_type_and_name(
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
+        budget=100,
         cycle__status=program_cycle_status,
         cycle__start_date=cycle_start_date,
         cycle__end_date=cycle_end_date,
@@ -159,6 +162,14 @@ def get_program_without_cycle_end_date(
         cycle__status=program_cycle_status,
         cycle__start_date=cycle_start_date,
         cycle__end_date=None,
+    )
+    program_cycle = ProgramCycle.objects.get(program=program)
+    PaymentPlanFactory(
+        program=program,
+        program_cycle=program_cycle,
+        total_entitled_quantity_usd=Decimal(1234.99),
+        total_delivered_quantity_usd=Decimal(50.01),
+        total_undelivered_quantity_usd=Decimal(1184.98),
     )
     return program
 
@@ -526,7 +537,12 @@ class TestProgrammeDetails:
             assert 2 == len(pageProgrammeDetails.getProgramCycleTitle())
 
         assert program_cycle_1 in pageProgrammeDetails.getProgramCycleTitle()[0].text
-        assert program_cycle_3 in pageProgrammeDetails.getProgramCycleTitle()[1].text
+        for _ in range(50):
+            if program_cycle_3 in pageProgrammeDetails.getProgramCycleTitle()[1].text:
+                break
+            sleep(0.1)
+        else:
+            assert program_cycle_3 in pageProgrammeDetails.getProgramCycleTitle()[1].text
 
     def test_program_details_buttons_vs_programme_cycle_status(
         self, program_with_different_cycles: Program, pageProgrammeDetails: ProgrammeDetails
@@ -693,7 +709,7 @@ class TestProgrammeDetails:
         pageProgrammeDetails.getEndDateCycle().send_keys((datetime.now() + relativedelta(days=12)).strftime("%Y-%m-%d"))
         pageProgrammeDetails.getButtonSave().click()
 
-        # ToDo: Lack of information about wrong date
+        # ToDo: Lack of information about wrong date 212579
         # for _ in range(50):
         #     if "Programme Cycles' timeframes must not overlap with the provided start date." in pageProgrammeDetails.getStartDateCycleDiv().text:
         #         break
@@ -724,17 +740,39 @@ class TestProgrammeDetails:
         ) in pageProgrammeDetails.getProgramCycleEndDate()[1].text
         assert "New cycle with wrong date" in pageProgrammeDetails.getProgramCycleTitle()[1].text
 
+    @pytest.mark.skip("Unskip after fix: 212581")
     def test_edit_program_details_with_wrong_date(
-        self, standard_active_program: Program, pageProgrammeDetails: ProgrammeDetails
+        self,
+        program_with_different_cycles: Program,
+        pageProgrammeDetails: ProgrammeDetails,
+        pageProgrammeManagement: ProgrammeManagement,
     ) -> None:
-        pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
-        # end date program vs end date cycle
-        # start date program vs start date cycle
+        pageProgrammeDetails.selectGlobalProgramFilter("ThreeCyclesProgramme")
+        assert "ACTIVE" in pageProgrammeDetails.getProgramStatus().text
+        pageProgrammeDetails.getButtonEditProgram().click()
+        pageProgrammeManagement.getInputProgrammeName()
+        pageProgrammeManagement.getInputStartDate().click()
+        pageProgrammeManagement.getInputStartDate().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.getInputStartDate().send_keys(str(FormatTime(1, 1, 2022).numerically_formatted_date))
+        pageProgrammeManagement.getInputEndDate().click()
+        pageProgrammeManagement.getInputEndDate().send_keys(Keys.CONTROL + "a")
+        pageProgrammeManagement.getInputEndDate().send_keys(FormatTime(1, 10, 2022).numerically_formatted_date)
+        pageProgrammeManagement.getButtonNext().click()
+        pageProgrammeManagement.getButtonAddTimeSeriesField()
+        pageProgrammeManagement.getButtonNext().click()
+        programme_creation_url = pageProgrammeDetails.driver.current_url
+        pageProgrammeManagement.getAccessToProgram().click()
+        pageProgrammeManagement.selectWhoAccessToProgram("None of the partners should have access")
+        pageProgrammeManagement.getButtonSave().click()
+        # Check Details page
+        with pytest.raises(Exception):
+            assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
 
     def test_program_details_program_cycle_total_quantities(
         self, standard_program_with_draft_programme_cycle: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
-        # Total Entitled Quantity
-        # Total Undelivered Quantity
-        # Total Delivered Quantity
+        assert "ACTIVE" in pageProgrammeDetails.getProgramStatus().text
+        assert "1234.99" in pageProgrammeDetails.getProgramCycleTotalEntitledQuantity()[0].text
+        assert "1184.98" in pageProgrammeDetails.getProgramCycleTotalUndeliveredQuantity()[0].text
+        assert "50.01" in pageProgrammeDetails.getProgramCycleTotalDeliveredQuantity()[0].text
