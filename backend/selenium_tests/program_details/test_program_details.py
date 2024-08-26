@@ -622,8 +622,9 @@ class TestProgrammeDetails:
         assert "Start Date cannot be before Programme Start Date" in pageProgrammeDetails.getStartDateCycleDiv().text
 
         pageProgrammeDetails.getStartDateCycle().click()
+        pageProgrammeDetails.getStartDateCycle().send_keys(Keys.CONTROL + "a")
         pageProgrammeDetails.getStartDateCycle().send_keys(
-            (datetime.now() - relativedelta(days=24)).strftime("%Y-%m-%d")
+            (datetime.now() - relativedelta(days=1)).strftime("%Y-%m-%d")
         )
         pageProgrammeDetails.getEndDateCycle().click()
         pageProgrammeDetails.getEndDateCycle().send_keys(
@@ -643,14 +644,14 @@ class TestProgrammeDetails:
 
         for _ in range(50):
             if (
-                "Programme Cycles' timeframes must not overlap with the provided start date."
-                in pageProgrammeDetails.getStartDateCycleDiv().text
+                    "Start date must be after the latest cycle."
+                    in pageProgrammeDetails.getStartDateCycleDiv().text
             ):
                 break
             sleep(0.1)
         assert (
-            "Programme Cycles' timeframes must not overlap with the provided start date."
-            in pageProgrammeDetails.getStartDateCycleDiv().text
+                "Start date must be after the latest cycle."
+                in pageProgrammeDetails.getStartDateCycleDiv().text
         )
         pageProgrammeDetails.getStartDateCycle().click()
         pageProgrammeDetails.getStartDateCycle().send_keys(
@@ -660,6 +661,11 @@ class TestProgrammeDetails:
 
         pageProgrammeDetails.getButtonAddNewProgrammeCycle()
         pageProgrammeDetails.getProgramCycleRow()
+
+        for _ in range(50):
+            if 2 == len(pageProgrammeDetails.getProgramCycleStatus()):
+                break
+            sleep(0.1)
 
         assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[1].text
         assert (datetime.now() + relativedelta(days=1)).strftime(
