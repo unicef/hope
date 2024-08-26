@@ -5,8 +5,16 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import (
+    FlexibleAttributeForPDUFactory,
+    PeriodicFieldDataFactory,
+    create_afghanistan,
+)
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    FlexibleAttribute,
+    PeriodicFieldData,
+)
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -36,7 +44,16 @@ class TestCreateTargetPopulationMutation(APITestCase):
                 comparisonMethod
                 fieldName
                 arguments
-                isFlexField
+                flexFieldClassification
+              }
+              individualsFiltersBlocks{
+                individualBlockFilters{
+                    comparisonMethod
+                    fieldName
+                    arguments
+                    flexFieldClassification
+                    roundNumber
+                }
               }
             }
           }
@@ -63,6 +80,21 @@ class TestCreateTargetPopulationMutation(APITestCase):
         create_household(
             {"size": 4, "residence_status": "HOST", "program": cls.program},
         )
+        FlexibleAttribute.objects.create(
+            name="flex_field_1",
+            type=FlexibleAttribute.STRING,
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        )
+        pdu_data = PeriodicFieldDataFactory(
+            subtype=PeriodicFieldData.DECIMAL,
+            number_of_rounds=1,
+            rounds_names=["Round 1"],
+        )
+        FlexibleAttributeForPDUFactory(
+            program=cls.program,
+            label="PDU Field 1",
+            pdu_data=pdu_data,
+        )
         cls.variables = {
             "createTargetPopulationInput": {
                 "name": "Example name 5",
@@ -78,7 +110,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                                     "comparisonMethod": "EQUALS",
                                     "fieldName": "size",
                                     "arguments": [3],
-                                    "isFlexField": False,
+                                    "flexFieldClassification": "NOT_FLEX_FIELD",
                                 }
                             ]
                         }
@@ -111,7 +143,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                                     "comparisonMethod": "EQUALS",
                                     "fieldName": "size",
                                     "arguments": [3],
-                                    "isFlexField": False,
+                                    "flexFieldClassification": "NOT_FLEX_FIELD",
                                 }
                             ]
                         }
@@ -149,7 +181,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                                     "comparisonMethod": "CONTAINS",
                                     "arguments": [],
                                     "fieldName": "registration_data_import",
-                                    "isFlexField": False,
+                                    "flexFieldClassification": "NOT_FLEX_FIELD",
                                 }
                             ],
                             "individualsFiltersBlocks": [],
@@ -264,6 +296,81 @@ class TestCreateTargetPopulationMutation(APITestCase):
                 context={"user": self.user},
                 variables=variables,
             )
+
+    def test_create_mutation_with_flex_field(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_CREATE], self.program.business_area)
+
+        variables = {
+            "createTargetPopulationInput": {
+                "name": "Example name 5 ",
+                "businessAreaSlug": "afghanistan",
+                "programId": self.id_to_base64(self.program.id, "ProgramNode"),
+                "excludedIds": "",
+                "programCycleId": self.id_to_base64(self.program_cycle.id, "ProgramCycleNode"),
+                "targetingCriteria": {
+                    "rules": [
+                        {
+                            "filters": [],
+                            "individualsFiltersBlocks": [
+                                {
+                                    "individualBlockFilters": [
+                                        {
+                                            "comparisonMethod": "CONTAINS",
+                                            "arguments": ["Average"],
+                                            "fieldName": "flex_field_1",
+                                            "flexFieldClassification": "FLEX_FIELD_BASIC",
+                                        }
+                                    ]
+                                }
+                            ],
+                        }
+                    ]
+                },
+            }
+        }
+        self.snapshot_graphql_request(
+            request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
+            context={"user": self.user},
+            variables=variables,
+        )
+
+    def test_create_mutation_with_pdu_flex_field(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_CREATE], self.program.business_area)
+
+        variables = {
+            "createTargetPopulationInput": {
+                "name": "Example name 5 ",
+                "businessAreaSlug": "afghanistan",
+                "programId": self.id_to_base64(self.program.id, "ProgramNode"),
+                "excludedIds": "",
+                "programCycleId": self.id_to_base64(self.program_cycle.id, "ProgramCycleNode"),
+                "targetingCriteria": {
+                    "rules": [
+                        {
+                            "filters": [],
+                            "individualsFiltersBlocks": [
+                                {
+                                    "individualBlockFilters": [
+                                        {
+                                            "comparisonMethod": "RANGE",
+                                            "arguments": ["2", "3.5"],
+                                            "fieldName": "pdu_field_1",
+                                            "flexFieldClassification": "FLEX_FIELD_PDU",
+                                            "roundNumber": "1",
+                                        }
+                                    ]
+                                }
+                            ],
+                        }
+                    ]
+                },
+            }
+        }
+        self.snapshot_graphql_request(
+            request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
+            context={"user": self.user},
+            variables=variables,
+        )
 
     def test_create_targeting_if_program_cycle_finished(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_CREATE], self.program.business_area)

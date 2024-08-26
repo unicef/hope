@@ -1,4 +1,4 @@
-import { TargetCriteriaForm } from '@containers/forms/TargetCriteriaForm';
+import { TargetingCriteriaForm } from '@containers/forms/TargetingCriteriaForm';
 import {
   DataCollectingTypeType,
   TargetPopulationQuery,
@@ -15,8 +15,8 @@ import styled from 'styled-components';
 import { Criteria } from './Criteria';
 import {
   ContentWrapper,
-  TargetingCriteriaDisabled,
-} from './TargetingCriteriaDisabled';
+  TargetingCriteriaDisplayDisabled,
+} from './TargetingCriteriaDisplayDisabled';
 import { VulnerabilityScoreComponent } from './VulnerabilityScoreComponent';
 import { useProgramContext } from 'src/programContext';
 import { useCachedImportedIndividualFieldsQuery } from '@hooks/useCachedImportedIndividualFields';
@@ -77,7 +77,7 @@ const NoWrapCheckbox = styled(FormControlLabel)`
   white-space: nowrap;
 `;
 
-interface TargetingCriteriaProps {
+interface TargetingCriteriaDisplayProps {
   rules?;
   helpers?;
   targetPopulation?: TargetPopulationQuery['targetPopulation'];
@@ -88,7 +88,7 @@ interface TargetingCriteriaProps {
   category: string;
 }
 
-export const TargetingCriteria = ({
+export const TargetingCriteriaDisplay = ({
   rules,
   helpers,
   targetPopulation,
@@ -97,17 +97,19 @@ export const TargetingCriteria = ({
   isSocialDctType,
   isStandardDctType,
   category,
-}: TargetingCriteriaProps): React.ReactElement => {
+}: TargetingCriteriaDisplayProps): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
   const { businessArea, programId } = useBaseUrl();
+
   const { data: allCoreFieldsAttributesData, loading } =
     useCachedImportedIndividualFieldsQuery(businessArea, programId);
   const [isOpen, setOpen] = useState(false);
   const [criteriaIndex, setIndex] = useState(null);
   const [criteriaObject, setCriteria] = useState({});
   const [allDataChoicesDict, setAllDataChoicesDict] = useState(null);
+
   useEffect(() => {
     if (loading) return;
     const allDataChoicesDictTmp =
@@ -117,6 +119,7 @@ export const TargetingCriteria = ({
       }, {});
     setAllDataChoicesDict(allDataChoicesDictTmp);
   }, [allCoreFieldsAttributesData, loading]);
+
   const regex = /(create|edit-tp)/;
   const isDetailsPage = !regex.test(location.pathname);
   const openModal = (criteria): void => {
@@ -179,14 +182,13 @@ export const TargetingCriteria = ({
                   onClick={() => setOpen(true)}
                   data-cy="button-target-population-add-criteria"
                 >
-                  {t('Add')} &apos;Or&apos;
-                  {t('Filter')}
+                  {t('Add')} &apos;Or&apos; {t('Filter')}
                 </Button>
               )}
             </>
           )}
         </Title>
-        <TargetCriteriaForm
+        <TargetingCriteriaForm
           criteria={criteriaObject}
           open={isOpen}
           onClose={() => closeModal()}
@@ -199,7 +201,7 @@ export const TargetingCriteria = ({
           <Box display="flex" flexDirection="column">
             <Box display="flex" flexWrap="wrap">
               {rules.length
-                ? rules.map((criteria, index) => (
+                ? rules?.map((criteria, index) => (
                     // eslint-disable-next-line
                     <Fragment key={criteria.id || index}>
                       <Criteria
@@ -387,5 +389,5 @@ export const TargetingCriteria = ({
       </Box>
     );
   }
-  return <TargetingCriteriaDisabled showTooltip />;
+  return <TargetingCriteriaDisplayDisabled showTooltip />;
 };
