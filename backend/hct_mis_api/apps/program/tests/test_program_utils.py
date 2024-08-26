@@ -37,12 +37,11 @@ class TestEnrolHouseholdToProgram(TestCase):
     """Test enroll household to program."""
 
     def setUp(self) -> None:
-        afg = create_afghanistan()
+        create_afghanistan()
         user = UserFactory()
         self.str_user_id = str(user.pk)
         self.program1 = ProgramFactory(name="Program 1")
         self.program2 = ProgramFactory()
-        self.rdi_program_1 = RegistrationDataImportFactory(program=self.program1, business_area=afg)
 
         # test for enrolment with existing repr
         self.household_original_already_enrolled = HouseholdFactory(

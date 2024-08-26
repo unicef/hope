@@ -395,7 +395,7 @@ def enroll_households_to_program(households: QuerySet, program: Program, user_id
         business_area=program.business_area,
         pull_pictures=False,
         program_id=program.id,
-        name=generate_rdi_unique_name,
+        name=generate_rdi_unique_name(program),
     )
     for household in households:
         try:
