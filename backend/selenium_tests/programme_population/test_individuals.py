@@ -56,7 +56,7 @@ class TestSmokeIndividuals:
         assert "-" in pageIndividualsDetails.getLabelMiddleName().text
         assert "Kowalska" in pageIndividualsDetails.getLabelFamilyName().text
         assert "Female" in pageIndividualsDetails.getLabelGender().text
-        assert "82" in pageIndividualsDetails.getLabelAge().text
+        assert "83" in pageIndividualsDetails.getLabelAge().text
         assert "26 Aug 1941" in pageIndividualsDetails.getLabelDateOfBirth().text
         assert "No" in pageIndividualsDetails.getLabelEstimatedDateOfBirth().text
         assert "Married" in pageIndividualsDetails.getLabelMaritalStatus().text
