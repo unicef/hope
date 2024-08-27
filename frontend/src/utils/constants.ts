@@ -1,8 +1,8 @@
 import {
-  PaymentPlanBackgroundActionStatus,
-  PaymentPlanStatus,
-  ProgramStatus,
   TargetPopulationStatus,
+  ProgramStatus,
+  PaymentPlanStatus,
+  PaymentPlanBackgroundActionStatus,
 } from '@generated/graphql';
 
 export const TARGETING_STATES = {
@@ -77,7 +77,7 @@ export const GRIEVANCE_CATEGORIES = {
   NEGATIVE_FEEDBACK: '5',
   REFERRAL: '6',
   POSITIVE_FEEDBACK: '7',
-  DEDUPLICATION: '8',
+  NEEDS_ADJUDICATION: '8',
   SYSTEM_FLAGGING: '9',
 };
 

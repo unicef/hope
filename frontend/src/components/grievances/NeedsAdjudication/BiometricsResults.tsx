@@ -16,9 +16,10 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export interface Individual {
-  unicefId: string;
+  __typename?: 'IndividualNode';
+  unicefId?: string;
   fullName: string;
-  photo: string;
+  photo?: string;
 }
 
 export interface BiometricsResultsProps {
