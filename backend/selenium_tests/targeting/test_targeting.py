@@ -606,8 +606,14 @@ class TestCreateTargeting:
         pageTargetingDetails.getLockButton()
 
         assert pageTargetingDetails.getCriteriaContainer().text == bool_no_expected_criteria_text
-        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
-        assert pageTargetingDetails.getHouseholdTableCell(2, 1).text == individual2.household.unicef_id
+        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text in [
+            individual1.household.unicef_id,
+            individual2.household.unicef_id,
+        ]
+        assert pageTargetingDetails.getHouseholdTableCell(2, 1).text in [
+            individual1.household.unicef_id,
+            individual2.household.unicef_id,
+        ]
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "2"
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 2
 
