@@ -659,7 +659,6 @@ class TestComeBackScenarios:
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestManualCalendar:
-    @pytest.mark.skip(reason="ToDo")
     @pytest.mark.parametrize(
         "test_data",
         [
