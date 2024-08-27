@@ -7388,6 +7388,7 @@ export type RefuseRegistrationDataImportMutation = {
 export enum RegistrationDataImportDataSource {
   Api = 'API',
   Edopomoga = 'EDOPOMOGA',
+  EnrollFromProgram = 'ENROLL_FROM_PROGRAM',
   FlexRegistration = 'FLEX_REGISTRATION',
   Kobo = 'KOBO',
   ProgramPopulation = 'PROGRAM_POPULATION',
