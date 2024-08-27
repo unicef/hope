@@ -5,8 +5,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-//TODO MS: display errors
-// import { ImportErrors } from '@containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
 import { useSnackbar } from '@hooks/useSnackBar';
 
 import { DropzoneField } from '@core/DropzoneField';

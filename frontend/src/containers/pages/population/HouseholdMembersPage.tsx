@@ -135,8 +135,10 @@ export const HouseholdMembersPage = (): React.ReactElement => {
                 />
               </Box>
             </>
-          ) : (
+          ) : canViewPDUListAndDetails ? (
             <PeriodicDataUpdates />
+          ) : (
+            <PermissionDenied />
           )}
         </Box>
       </Fade>
