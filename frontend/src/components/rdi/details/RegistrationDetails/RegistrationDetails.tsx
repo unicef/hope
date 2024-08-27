@@ -10,10 +10,10 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { MiśTheme } from '../../../../theme';
 import { registrationDataImportStatusToColor } from '@utils/utils';
 import {
-  RegistrationDetailedFragment,
+  RegistrationDataImportQuery,
   RegistrationDataImportStatus,
 } from '@generated/graphql';
-import { DedupeBox } from '../DedupeBox';
+import { DedupeBox, OptionType } from '../DedupeBox';
 import { Title } from '@core/Title';
 
 export const BigValueContainer = styled.div`
@@ -36,8 +36,15 @@ const Error = styled.p`
   color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};
   font-size: 12px;
 `;
+
+const BoldGrey = styled.span`
+  font-weight: bold;
+  font-size: 14px;
+  color: rgba(37, 59, 70, 0.6);
+`;
+
 interface RegistrationDetailsProps {
-  registration: RegistrationDetailedFragment;
+  registration: RegistrationDataImportQuery['registrationDataImport'];
   isSocialWorkerProgram?: boolean;
 }
 
@@ -46,37 +53,28 @@ export function RegistrationDetails({
   isSocialWorkerProgram,
 }: RegistrationDetailsProps): React.ReactElement {
   const { t } = useTranslation();
-  const withinBatchOptions = [
+  const withinBatchOptions: OptionType[] = [
     {
       name: 'Unique',
-      percent: registration?.batchUniqueCountAndPercentage.percentage,
-      value: registration?.batchUniqueCountAndPercentage.count,
+      options: registration?.batchUniqueCountAndPercentage,
     },
     {
       name: 'Duplicates',
-      percent: registration?.batchDuplicatesCountAndPercentage.percentage,
-      value: registration?.batchDuplicatesCountAndPercentage.count,
+      options: registration?.batchDuplicatesCountAndPercentage,
     },
   ];
-  const populationOptions = [
+  const populationOptions: OptionType[] = [
     {
       name: 'Unique',
-      percent: registration?.goldenRecordUniqueCountAndPercentage.percentage,
-      value: registration?.goldenRecordUniqueCountAndPercentage.count,
+      options: registration?.goldenRecordUniqueCountAndPercentage,
     },
     {
       name: 'Duplicates',
-      percent:
-        registration?.goldenRecordDuplicatesCountAndPercentage.percentage,
-      value: registration?.goldenRecordDuplicatesCountAndPercentage.count,
+      options: registration?.goldenRecordDuplicatesCountAndPercentage,
     },
     {
       name: 'Need Adjudication',
-      percent:
-        registration?.goldenRecordPossibleDuplicatesCountAndPercentage
-          .percentage,
-      value:
-        registration?.goldenRecordPossibleDuplicatesCountAndPercentage.count,
+      options: registration?.goldenRecordPossibleDuplicatesCountAndPercentage,
     },
   ];
   const renderImportedBy = (): string => {
@@ -86,7 +84,7 @@ export function RegistrationDetails({
     return '-';
   };
 
-  let numbersComponent = null;
+  let numbersComponent: React.ReactElement;
   if (isSocialWorkerProgram) {
     numbersComponent = (
       <Grid item xs={4}>
@@ -106,7 +104,7 @@ export function RegistrationDetails({
     );
   } else {
     numbersComponent = (
-      <Grid item xs={4}>
+      <Grid item xs={'auto'}>
         <Grid container>
           <Grid item xs={6}>
             <BigValueContainer>
@@ -139,7 +137,7 @@ export function RegistrationDetails({
       </Title>
       <OverviewContainer>
         <Grid alignItems="center" container>
-          <Grid item xs={4}>
+          <Grid item xs={'auto'}>
             <Grid container spacing={3}>
               <Grid item xs={6}>
                 <Box display="flex" flexDirection="column">
@@ -189,8 +187,20 @@ export function RegistrationDetails({
           </Grid>
           {numbersComponent}
           {registration.status === 'DEDUPLICATION_FAILED' ? null : (
-            <Grid item xs={4}>
+            <Grid item xs={'auto'}>
               <Grid container direction="column">
+                <Grid container item xs={12} spacing={3}>
+                  <Grid item xs={3}></Grid>
+                  <Grid item xs={3}>
+                    <BoldGrey>{t('Identifiers')}</BoldGrey>
+                  </Grid>
+                  <Grid item xs={3}>
+                    <BoldGrey>{t('Biographical')}</BoldGrey>
+                  </Grid>
+                  <Grid item xs={3}>
+                    <BoldGrey>{t('Biometrics')}</BoldGrey>
+                  </Grid>
+                </Grid>
                 <DedupeBox label="Within Batch" options={withinBatchOptions} />
                 <DedupeBox label="In Population" options={populationOptions} />
               </Grid>
