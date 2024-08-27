@@ -1381,9 +1381,7 @@ export type DeduplicationEngineSimilarityPairNode = Node & {
   __typename?: 'DeduplicationEngineSimilarityPairNode';
   id: Scalars['ID']['output'];
   individual1: IndividualNode;
-  individual1Photo?: Maybe<Scalars['String']['output']>;
   individual2: IndividualNode;
-  individual2Photo?: Maybe<Scalars['String']['output']>;
   isDuplicate?: Maybe<Scalars['Boolean']['output']>;
   program: ProgramNode;
   similarityScore?: Maybe<Scalars['String']['output']>;
@@ -8644,7 +8642,6 @@ export type TicketNeedsAdjudicationDetailsNode = Node & {
   __typename?: 'TicketNeedsAdjudicationDetailsNode';
   createdAt: Scalars['DateTime']['output'];
   dedupEngineSimilarityPair?: Maybe<DeduplicationEngineSimilarityPairNode>;
-  deduplicationEngineSimilarityPair?: Maybe<DeduplicationEngineSimilarityPairNode>;
   extraData?: Maybe<TicketNeedsAdjudicationDetailsExtraDataNode>;
   goldenRecordsIndividual: IndividualNode;
   hasDuplicatedDocument?: Maybe<Scalars['Boolean']['output']>;
@@ -26211,9 +26208,7 @@ export interface DecimalScalarConfig extends GraphQLScalarTypeConfig<ResolversTy
 export type DeduplicationEngineSimilarityPairNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeduplicationEngineSimilarityPairNode'] = ResolversParentTypes['DeduplicationEngineSimilarityPairNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   individual1?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>;
-  individual1Photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   individual2?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>;
-  individual2Photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   isDuplicate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>;
   similarityScore?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -29383,7 +29378,6 @@ export type TicketNeedsAdjudicationDetailsExtraDataNodeResolvers<ContextType = a
 export type TicketNeedsAdjudicationDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketNeedsAdjudicationDetailsNode'] = ResolversParentTypes['TicketNeedsAdjudicationDetailsNode']> = {
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   dedupEngineSimilarityPair?: Resolver<Maybe<ResolversTypes['DeduplicationEngineSimilarityPairNode']>, ParentType, ContextType>;
-  deduplicationEngineSimilarityPair?: Resolver<Maybe<ResolversTypes['DeduplicationEngineSimilarityPairNode']>, ParentType, ContextType>;
   extraData?: Resolver<Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsExtraDataNode']>, ParentType, ContextType>;
   goldenRecordsIndividual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>;
   hasDuplicatedDocument?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
