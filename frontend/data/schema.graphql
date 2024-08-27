@@ -4174,12 +4174,11 @@ type RegistrationDataImportNode implements Node {
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   adminUrl: String
-  batchDuplicatesCountAndPercentage: CountAndPercentageNode
-  batchPossibleDuplicatesCountAndPercentage: CountAndPercentageNode
-  batchUniqueCountAndPercentage: CountAndPercentageNode
-  goldenRecordDuplicatesCountAndPercentage: CountAndPercentageNode
-  goldenRecordPossibleDuplicatesCountAndPercentage: CountAndPercentageNode
-  goldenRecordUniqueCountAndPercentage: CountAndPercentageNode
+  batchDuplicatesCountAndPercentage: [CountAndPercentageNode]
+  batchUniqueCountAndPercentage: [CountAndPercentageNode]
+  goldenRecordDuplicatesCountAndPercentage: [CountAndPercentageNode]
+  goldenRecordPossibleDuplicatesCountAndPercentage: [CountAndPercentageNode]
+  goldenRecordUniqueCountAndPercentage: [CountAndPercentageNode]
   totalHouseholdsCountWithValidPhoneNo: Int
   isDeduplicated: String
   canMerge: Boolean
