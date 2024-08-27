@@ -1982,6 +1982,7 @@ export type FinancialServiceProviderXlsxTemplateNode = Node & {
   createdAt: Scalars['DateTime']['output'];
   createdBy?: Maybe<UserNode>;
   financialServiceProviders: FinancialServiceProviderNodeConnection;
+  flexFields: Array<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
@@ -7349,7 +7350,8 @@ export enum RegistrationDataImportDeduplicationEngineStatus {
   Finished = 'FINISHED',
   InProgress = 'IN_PROGRESS',
   Pending = 'PENDING',
-  Uploaded = 'UPLOADED'
+  Uploaded = 'UPLOADED',
+  UploadError = 'UPLOAD_ERROR'
 }
 
 export type RegistrationDataImportNode = Node & {
@@ -7363,6 +7365,7 @@ export type RegistrationDataImportNode = Node & {
   batchUnique: Scalars['Int']['output'];
   batchUniqueCountAndPercentage?: Maybe<CountAndPercentageNode>;
   businessArea?: Maybe<UserBusinessAreaNode>;
+  canMerge?: Maybe<Scalars['Boolean']['output']>;
   createdAt: Scalars['DateTime']['output'];
   dataSource: RegistrationDataImportDataSource;
   datahubId?: Maybe<Scalars['UUID']['output']>;
@@ -9613,7 +9616,7 @@ export type ProgramDetailsFragment = { __typename?: 'ProgramNode', id: string, n
 
 export type RegistrationMinimalFragment = { __typename?: 'RegistrationDataImportNode', id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, numberOfIndividuals: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, isDeduplicated?: string | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null };
 
-export type RegistrationDetailedFragment = { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, isDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null };
+export type RegistrationDetailedFragment = { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, canMerge?: boolean | null, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, isDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null };
 
 export type ImportedHouseholdMinimalFragment = { __typename?: 'ImportedHouseholdNode', id: string, importId?: string | null, size?: number | null, flexFields?: any | null, deviceid: string, start?: any | null, detailId?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, hasDuplicates?: boolean | null, fchildHoh?: boolean | null, childHoh?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string } | null, admin1?: { __typename?: 'AreaNode', pCode?: string | null, name: string } | null, admin2?: { __typename?: 'AreaNode', pCode?: string | null, name: string } | null };
 
@@ -10125,7 +10128,7 @@ export type MergeRdiMutationVariables = Exact<{
 }>;
 
 
-export type MergeRdiMutation = { __typename?: 'Mutations', mergeRegistrationDataImport?: { __typename?: 'MergeRegistrationDataImportMutation', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, isDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null } | null } | null };
+export type MergeRdiMutation = { __typename?: 'Mutations', mergeRegistrationDataImport?: { __typename?: 'MergeRegistrationDataImportMutation', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, canMerge?: boolean | null, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, isDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null } | null } | null };
 
 export type RefuseRdiMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -11219,7 +11222,7 @@ export type RegistrationDataImportQueryVariables = Exact<{
 }>;
 
 
-export type RegistrationDataImportQuery = { __typename?: 'Query', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, isDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null } | null };
+export type RegistrationDataImportQuery = { __typename?: 'Query', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, canMerge?: boolean | null, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, isDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null } | null };
 
 export type XlsxImportDataQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -12500,6 +12503,7 @@ export const RegistrationDetailedFragmentDoc = gql`
     count
     percentage
   }
+  canMerge
 }
     ${RegistrationMinimalFragmentDoc}`;
 export const ImportedHouseholdMinimalFragmentDoc = gql`
@@ -26344,6 +26348,7 @@ export type FinancialServiceProviderXlsxTemplateNodeResolvers<ContextType = any,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
   financialServiceProviders?: Resolver<ResolversTypes['FinancialServiceProviderNodeConnection'], ParentType, ContextType, Partial<FinancialServiceProviderXlsxTemplateNodeFinancialServiceProvidersArgs>>;
+  flexFields?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
@@ -28344,6 +28349,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   batchUnique?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   batchUniqueCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>;
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>;
+  canMerge?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   dataSource?: Resolver<ResolversTypes['RegistrationDataImportDataSource'], ParentType, ContextType>;
   datahubId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;

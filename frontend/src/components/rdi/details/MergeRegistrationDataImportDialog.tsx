@@ -30,7 +30,7 @@ export function MergeRegistrationDataImportDialog({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { isActiveProgram, isSocialDctType } = useProgramContext();
+  const { isSocialDctType } = useProgramContext();
 
   const [mutate, { loading }] = useMergeRdiMutation({
     variables: { id: registration.id },
@@ -69,7 +69,7 @@ export function MergeRegistrationDataImportDialog({
         color="primary"
         variant="contained"
         onClick={() => setOpen(true)}
-        disabled={!isActiveProgram}
+        disabled={!registration.canMerge}
         data-cy="button-merge-rdi"
       >
         {t('Merge')}

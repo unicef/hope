@@ -279,6 +279,9 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
             )
         super(Program, self).validate_unique()
 
+    def is_active(self) -> bool:
+        return self.status == self.ACTIVE
+
 
 class ProgramCycle(
     AdminUrlMixin, SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedModel, AbstractSyncable, ConcurrencyModel
