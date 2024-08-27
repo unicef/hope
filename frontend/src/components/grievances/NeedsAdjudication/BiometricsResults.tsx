@@ -93,8 +93,8 @@ export const BiometricsResults = ({
                   <Placeholder />
                 )}
                 <Typography variant="subtitle2">
-                  Individual 1: {individual1?.fullName}
-                </Typography>{' '}
+                  Individual {individual1?.unicefId}: {individual1?.fullName}
+                </Typography>
               </Box>
               <Box display="flex" flexDirection="column">
                 {individual2?.photo ? (
@@ -112,8 +112,8 @@ export const BiometricsResults = ({
                   <Placeholder />
                 )}
                 <Typography variant="subtitle2">
-                  Individual 2: {individual2?.fullName}
-                </Typography>{' '}
+                  Individual {individual2?.unicefId}: {individual2?.fullName}
+                </Typography>
               </Box>
             </Box>
             <Box p={5} data-cy="results-info">
