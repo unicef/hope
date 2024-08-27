@@ -207,6 +207,12 @@ export const grievanceTicketDetailed = gql`
     }
     needsAdjudicationTicketDetails {
       id
+      dedupeEngineSimilarityPair {
+        isDuplicate
+        similarityScore
+        individual1Photo
+        individual2Photo
+      }
       hasDuplicatedDocument
       extraData {
         goldenRecords {

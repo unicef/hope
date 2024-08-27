@@ -88,8 +88,8 @@ export const NeedsAdjudicationActions: React.FC<
         <BiometricsResults
           similarityScore={0.5}
           faceMatchResult="duplicates"
-          image1="image1"
-          image2="image2"
+          image1=""
+          image2=""
         />
         {isEditable && canApprove && (
           <>

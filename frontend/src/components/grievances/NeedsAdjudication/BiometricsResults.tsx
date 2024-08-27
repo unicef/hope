@@ -1,14 +1,13 @@
-import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
-import ClearIcon from '@mui/icons-material/Clear';
-import PersonIcon from '@mui/icons-material/Person';
-import * as React from 'react';
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import PersonIcon from '@mui/icons-material/Person';
+import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface BiometricsResultsProps {
   similarityScore: number;
@@ -26,7 +25,7 @@ const Placeholder: React.FC = () => (
     height="200px"
     border="1px solid #ccc"
   >
-    <PersonIcon style={{ fontSize: 100 }} />
+    <PersonIcon color="primary" style={{ fontSize: 100 }} />
   </Box>
 );
 
@@ -43,7 +42,6 @@ export const BiometricsResults = ({
     <>
       <Box p={2}>
         <Button
-          startIcon={<ClearIcon />}
           onClick={() => setDialogOpen(true)}
           data-cy="button-open-biometrics-results"
         >
