@@ -106,7 +106,6 @@ class TestProgramQuery(APITestCase):
         ]
     )
     def test_single_program_query(self, _: Any, permissions: List[Permissions]) -> None:
-        print(self.program.targetpopulation_set.all())
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=PROGRAM_QUERY,
