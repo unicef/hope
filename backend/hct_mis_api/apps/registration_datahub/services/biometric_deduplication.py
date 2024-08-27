@@ -39,9 +39,9 @@ class BiometricDeduplicationService:
     def upload_individuals(self, deduplication_set_id: str, rdi: RegistrationDataImport) -> None:
         individuals = (
             Individual.objects.filter(is_removed=False, registration_data_import=rdi)
-            .exclude(photo="")
+            .exclude(Q(photo="") | Q(withdrawn=True) | Q(duplicate=True))
             .only("id", "photo")
-        )  # TODO MB exclude withdrawn/duplicate?
+        )
 
         images = DeduplicationImageSet(
             data=[
