@@ -289,6 +289,7 @@ class RdiMergeTask:
                             "duplicates",
                             obj_hct.business_area,
                             registration_data_import=obj_hct,
+                            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
                         )
                         logger.info(
                             f"RDI:{registration_data_import_id} Created tickets for {len(golden_record_duplicates)} duplicates"
@@ -306,6 +307,7 @@ class RdiMergeTask:
                             "possible_duplicates",
                             obj_hct.business_area,
                             registration_data_import=obj_hct,
+                            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
                         )
                         logger.info(
                             f"RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)} needs adjudication"

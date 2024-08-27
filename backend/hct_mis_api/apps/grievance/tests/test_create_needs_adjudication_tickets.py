@@ -66,10 +66,22 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
         individuals_queryset = Individual.objects.all()
         rdi = self.household.registration_data_import
 
-        create_needs_adjudication_tickets(individuals_queryset, "duplicates", self.business_area, rdi)
+        create_needs_adjudication_tickets(
+            individuals_queryset,
+            "duplicates",
+            self.business_area,
+            rdi,
+            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
+        )
         self.assertEqual(GrievanceTicket.objects.all().count(), 0)
 
-        create_needs_adjudication_tickets(individuals_queryset, "possible_duplicates", self.business_area, rdi)
+        create_needs_adjudication_tickets(
+            individuals_queryset,
+            "possible_duplicates",
+            self.business_area,
+            rdi,
+            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
+        )
         self.assertEqual(GrievanceTicket.objects.all().count(), 0)
 
         # ticket_have to be created
@@ -81,5 +93,11 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
         ind_2.deduplication_golden_record_results = {"duplicates": [], "possible_duplicates": []}
         ind.save()
         ind_2.save()
-        create_needs_adjudication_tickets(Individual.objects.all(), "duplicates", self.business_area, rdi)
+        create_needs_adjudication_tickets(
+            Individual.objects.all(),
+            "duplicates",
+            self.business_area,
+            rdi,
+            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
+        )
         self.assertEqual(GrievanceTicket.objects.all().count(), 1)

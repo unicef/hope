@@ -270,10 +270,11 @@ class TestGrievanceQuery(APITestCase):
                     "language": "Polish",
                     "consent": True,
                     "description": "Ticket with program, in admin area 1, new",
-                    "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+                    "category": GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
                     "status": GrievanceTicket.STATUS_NEW,
                     "created_by": cls.user,
                     "assigned_to": cls.user,
+                    "issue_type": GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
                 }
             ),
             GrievanceTicket(
