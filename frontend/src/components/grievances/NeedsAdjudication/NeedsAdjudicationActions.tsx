@@ -6,14 +6,14 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
-import {
-  GrievanceTicketDocument,
-  GrievanceTicketQuery,
-  useApproveNeedsAdjudicationMutation,
-} from '@generated/graphql';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { BiometricsResults } from './BiometricsResults';
+import {
+  GrievanceTicketQuery,
+  useApproveNeedsAdjudicationMutation,
+  GrievanceTicketDocument,
+} from '@generated/graphql';
 
 interface NeedsAdjudicationActionsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -94,8 +94,8 @@ export const NeedsAdjudicationActions: React.FC<
                 ? t('Duplicates')
                 : t('Uniqueness')
             }
-            image1={dedupEngineSimilarityPair.image1}
-            image2={dedupEngineSimilarityPair.image2}
+            individual1={dedupEngineSimilarityPair.individual1}
+            individual2={dedupEngineSimilarityPair.individual2}
           />
         )}
         {isEditable && canApprove && (

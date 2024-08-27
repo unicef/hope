@@ -4,16 +4,28 @@ import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import PersonIcon from '@mui/icons-material/Person';
-import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
+import {
+  Box,
+  Button,
+  DialogContent,
+  DialogTitle,
+  Typography,
+} from '@mui/material';
 import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+export interface Individual {
+  unicefId: string;
+  fullName: string;
+  photo: string;
+}
+
 export interface BiometricsResultsProps {
-  similarityScore: number;
+  similarityScore: string;
   faceMatchResult: 'Duplicates' | 'Uniqueness';
-  image1?: string;
-  image2?: string;
+  individual1?: Individual;
+  individual2?: Individual;
 }
 
 const Placeholder: React.FC = () => (
@@ -33,8 +45,8 @@ const Placeholder: React.FC = () => (
 export const BiometricsResults = ({
   similarityScore,
   faceMatchResult,
-  image1,
-  image2,
+  individual1,
+  individual2,
 }: BiometricsResultsProps): React.ReactElement => {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -65,26 +77,44 @@ export const BiometricsResults = ({
         <DialogContent data-cy="dialog-content">
           <DialogContainer>
             <Box display="flex" justifyContent="space-between" p={5}>
-              {image1 ? (
-                <img
-                  src={image1}
-                  alt="Image 1"
-                  style={{ width: '45%' }}
-                  data-cy="image1"
-                />
-              ) : (
-                <Placeholder />
-              )}
-              {image2 ? (
-                <img
-                  src={image2}
-                  alt="Image 2"
-                  style={{ width: '45%' }}
-                  data-cy="image2"
-                />
-              ) : (
-                <Placeholder />
-              )}
+              <Box display="flex" flexDirection="column">
+                {individual1?.photo ? (
+                  <img
+                    src={individual1?.photo}
+                    alt="Image 1"
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '300px',
+                      objectFit: 'cover',
+                    }}
+                    data-cy="image1"
+                  />
+                ) : (
+                  <Placeholder />
+                )}
+                <Typography variant="subtitle2">
+                  Individual 1: {individual1?.fullName}
+                </Typography>{' '}
+              </Box>
+              <Box display="flex" flexDirection="column">
+                {individual2?.photo ? (
+                  <img
+                    src={individual2?.photo}
+                    alt="Image 2"
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '300px',
+                      objectFit: 'cover',
+                    }}
+                    data-cy="image2"
+                  />
+                ) : (
+                  <Placeholder />
+                )}
+                <Typography variant="subtitle2">
+                  Individual 2: {individual2?.fullName}
+                </Typography>{' '}
+              </Box>
             </Box>
             <Box p={5} data-cy="results-info">
               <div>

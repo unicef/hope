@@ -210,8 +210,16 @@ export const grievanceTicketDetailed = gql`
       dedupEngineSimilarityPair {
         isDuplicate
         similarityScore
-        individual1Photo
-        individual2Photo
+        individual1 {
+          unicefId
+          fullName
+          photo
+        }
+        individual2 {
+          unicefId
+          fullName
+          photo
+        }
       }
       hasDuplicatedDocument
       extraData {
