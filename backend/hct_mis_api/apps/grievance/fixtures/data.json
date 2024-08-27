@@ -13,7 +13,7 @@
     "assigned_to": null,
     "status": 1,
     "category": 8,
-    "issue_type": null,
+    "issue_type": 24,
     "description": "",
     "admin2": "dec7c2eb-d488-484e-ad5b-56765c994aed",
     "area": "",
