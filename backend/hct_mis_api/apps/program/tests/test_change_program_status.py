@@ -12,7 +12,7 @@ from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 
 class TestChangeProgramStatus(APITestCase):
@@ -85,6 +85,7 @@ class TestChangeProgramStatus(APITestCase):
             data_collecting_type=data_collecting_type,
             partner_access=Program.SELECTED_PARTNERS_ACCESS,
         )
+        ProgramCycle.objects.filter(program=program).update(status=ProgramCycle.FINISHED)
 
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 

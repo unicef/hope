@@ -68,8 +68,8 @@ class TestPaymentGatewayService(APITestCase):
         cls.user = UserFactory.create()
 
         cls.pp = PaymentPlanFactory(
-            start_date=timezone.datetime(2021, 6, 10, tzinfo=utc),
-            end_date=timezone.datetime(2021, 7, 10, tzinfo=utc),
+            program__cycle__start_date=timezone.datetime(2021, 6, 10, tzinfo=utc).date(),
+            program__cycle__end_date=timezone.datetime(2021, 7, 10, tzinfo=utc).date(),
             status=PaymentPlan.Status.ACCEPTED,
         )
         cls.pg_fsp = FinancialServiceProviderFactory(

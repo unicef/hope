@@ -10,6 +10,7 @@ from hct_mis_api.apps.core.utils import get_attr_value
 from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetPopulation,
@@ -74,9 +75,9 @@ class FinalizeTargetPopulationValidator:
 
 class TargetingCriteriaRuleFilterInputValidator:
     @staticmethod
-    def validate(rule_filter: Any) -> None:
-        is_flex_field = rule_filter.is_flex_field
-        if not is_flex_field:
+    def validate(rule_filter: Any, program: Program) -> None:
+        flex_field_classification = rule_filter.flex_field_classification
+        if flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             attributes = FieldFactory.from_scope(Scope.TARGETING).to_dict_by("name")
             attribute = attributes.get(rule_filter.field_name)
             if attribute is None:
@@ -84,15 +85,25 @@ class TargetingCriteriaRuleFilterInputValidator:
                 raise ValidationError(
                     f"Can't find any core field attribute associated with {rule_filter.field_name} field name"
                 )
-        else:
+        elif flex_field_classification == FlexFieldClassification.FLEX_FIELD_BASIC:
             try:
-                attribute = FlexibleAttribute.objects.get(name=rule_filter.field_name)
+                attribute = FlexibleAttribute.objects.get(name=rule_filter.field_name, program=None)
             except FlexibleAttribute.DoesNotExist:
                 logger.exception(
                     f"Can't find any flex field attribute associated with {rule_filter.field_name} field name",
                 )
                 raise ValidationError(
                     f"Can't find any flex field attribute associated with {rule_filter.field_name} field name"
+                )
+        else:
+            try:
+                attribute = FlexibleAttribute.objects.get(name=rule_filter.field_name, program=program)
+            except FlexibleAttribute.DoesNotExist:  # pragma: no cover
+                logger.exception(
+                    f"Can't find PDU flex field attribute associated with {rule_filter.field_name} field name in program {program.name}",
+                )
+                raise ValidationError(
+                    f"Can't find PDU flex field attribute associated with {rule_filter.field_name} field name in program {program.name}",
                 )
         comparison_attribute = TargetingCriteriaRuleFilter.COMPARISON_ATTRIBUTES.get(rule_filter.comparison_method)
         if comparison_attribute is None:
@@ -109,7 +120,10 @@ class TargetingCriteriaRuleFilterInputValidator:
                 f"Comparison method '{rule_filter.comparison_method}' "
                 f"expected {args_count} arguments, {given_args_count} given"
             )
-        if get_attr_value("type", attribute) not in comparison_attribute.get("supported_types"):
+        type = get_attr_value("type", attribute, None)
+        if type == FlexibleAttribute.PDU:
+            type = attribute.pdu_data.subtype
+        if type not in comparison_attribute.get("supported_types"):
             raise ValidationError(
                 f"{rule_filter.field_name} is '{get_attr_value('type', attribute)}' type filter "
                 f"and does not accept '{rule_filter.comparison_method}' comparison method"
@@ -118,10 +132,10 @@ class TargetingCriteriaRuleFilterInputValidator:
 
 class TargetingCriteriaRuleInputValidator:
     @staticmethod
-    def validate(rule: "Rule") -> None:
+    def validate(rule: "Rule", program: "Program") -> None:
         total_len = 0
         filters = rule.get("filters")
-        individuals_filters_blocks = rule.get("individuals_filters_blocks")
+        individuals_filters_blocks = rule.get("individuals_filters_blocks", [])
         if filters is not None:
             total_len += len(filters)
         if individuals_filters_blocks is not None:
@@ -131,7 +145,11 @@ class TargetingCriteriaRuleInputValidator:
             logger.error("There should be at least 1 filter or block in rules")
             raise ValidationError("There should be at least 1 filter or block in rules")
         for rule_filter in filters:
-            TargetingCriteriaRuleFilterInputValidator.validate(rule_filter)
+            TargetingCriteriaRuleFilterInputValidator.validate(rule_filter=rule_filter, program=program)
+        for individuals_filters_block in individuals_filters_blocks:
+            individual_block_filters = individuals_filters_block.get("individual_block_filters", [])
+            for individual_block_filter in individual_block_filters:
+                TargetingCriteriaRuleFilterInputValidator.validate(rule_filter=individual_block_filter, program=program)
 
 
 class TargetingCriteriaInputValidator:
@@ -142,17 +160,17 @@ class TargetingCriteriaInputValidator:
         household_ids = targeting_criteria.get("household_ids")
         individual_ids = targeting_criteria.get("individual_ids")
         if rules and (household_ids or individual_ids):
-            logger.error("Target criteria can has only filters or ids, not possible to has both")
-            raise ValidationError("Target criteria can has only filters or ids, not possible to has both")
+            logger.error("Target criteria can only have filters or ids, not possible to have both")
+            raise ValidationError("Target criteria can only have filters or ids, not possible to have both")
 
         if household_ids and not (
             program_dct.household_filters_available or program_dct.type == DataCollectingType.Type.SOCIAL
         ):
-            logger.error("Target criteria can has only individual ids")
-            raise ValidationError("Target criteria can has only individual ids")
+            logger.error("Target criteria can only have individual ids")
+            raise ValidationError("Target criteria can only have individual ids")
         if individual_ids and not program_dct.individual_filters_available:
-            logger.error("Target criteria can has only household ids")
-            raise ValidationError("Target criteria can has only household ids")
+            logger.error("Target criteria can only have household ids")
+            raise ValidationError("Target criteria can only have household ids")
 
         if household_ids:
             ids_list = household_ids.split(",")
@@ -176,4 +194,4 @@ class TargetingCriteriaInputValidator:
 
         if not household_ids and not individual_ids:
             for rule in rules:
-                TargetingCriteriaRuleInputValidator.validate(rule)
+                TargetingCriteriaRuleInputValidator.validate(rule=rule, program=program)

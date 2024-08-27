@@ -13,12 +13,14 @@ from hct_mis_api.apps.core.fixtures import (
 from hct_mis_api.apps.core.models import PeriodicFieldData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
 PROGRAM_QUERY = """
     query Program($id: ID!) {
       program(id: $id) {
         name
         status
+        targetPopulationsCount
         pduFields {
           label
           name
@@ -72,7 +74,7 @@ class TestProgramQuery(APITestCase):
             pdu_data=pdu_data3,
         )
         pdu_data4 = PeriodicFieldDataFactory(
-            subtype=PeriodicFieldData.BOOLEAN,
+            subtype=PeriodicFieldData.BOOL,
             number_of_rounds=2,
             rounds_names=["Round A", "Round B"],
         )
@@ -95,6 +97,7 @@ class TestProgramQuery(APITestCase):
             label="PDU Field Other",
             pdu_data=pdu_data_other,
         )
+        TargetPopulationFactory(program=cls.program)
 
     @parameterized.expand(
         [
@@ -103,6 +106,7 @@ class TestProgramQuery(APITestCase):
         ]
     )
     def test_single_program_query(self, _: Any, permissions: List[Permissions]) -> None:
+        print(self.program.targetpopulation_set.all())
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=PROGRAM_QUERY,

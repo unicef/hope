@@ -303,6 +303,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             ("can_inspect", "Can inspect objects"),
             ("quick_links", "Can see quick links in admin"),
             ("restrict_help_desk", "Limit fields to be editable for help desk"),
+            ("can_reindex_programs", "Can reindex programs"),
         )
 
 
