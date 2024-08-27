@@ -98,6 +98,24 @@ class Common:
         else:
             raise AssertionError(f"Element: {name} is not in the list: {[item.text for item in items]}")
 
+    def get_listbox_element(
+        self,
+        name: str,
+        listbox: str = 'ul[role="listbox"]',
+        tag_name: str = "li",
+        delay_before: int = 2,
+        delay_between_checks: float = 0.5,
+    ) -> WebElement:
+        sleep(delay_before)
+        select_element = self.wait_for(listbox)
+        items = select_element.find_elements("tag name", tag_name)
+        for item in items:
+            sleep(delay_between_checks)
+            if name in item.text:
+                return item
+        else:
+            raise AssertionError(f"Element: {name} is not in the list: {[item.text for item in items]}")
+
     def check_page_after_click(self, button: WebElement, url_fragment: str) -> None:
         programme_creation_url = self.driver.current_url
         button.click()

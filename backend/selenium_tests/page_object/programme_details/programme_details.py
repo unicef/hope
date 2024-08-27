@@ -29,6 +29,108 @@ class ProgrammeDetails(BaseComponents):
     tableTitle = 'h6[data-cy="table-title"]'
     buttonAddNewProgrammeCycle = 'button[data-cy="button-add-new-programme-cycle"]'
     tablePagination = 'div[data-cy="table-pagination"]'
+    programCycleRow = 'tr[data-cy="program-cycle-row"]'
+    programCycleId = 'td[data-cy="program-cycle-id"]'
+    programCycleTitle = 'td[data-cy="program-cycle-title"]'
+    programCycleStatus = 'td[data-cy="program-cycle-status"]'
+    statusContainer = 'div[data-cy="status-container"]'
+    programCycleTotalEntitledQuantity = 'td[data-cy="program-cycle-total-entitled-quantity"]'
+    programCycleTotalUndeliveredQuantity = 'td[data-cy="program-cycle-total-undelivered-quantity"]'
+    programCycleTotalDeliveredQuantity = 'td[data-cy="program-cycle-total-delivered-quantity"]'
+    programCycleStartDate = 'td[data-cy="program-cycle-start-date"]'
+    programCycleEndDate = 'td[data-cy="program-cycle-end-date"]'
+    programCycleDetailsBtn = 'td[data-cy="program-cycle-details-btn"]'
+    buttonEditProgramCycle = 'button[data-cy="button-edit-program-cycle"]'
+    startDateCycle = 'div[data-cy="start-date-cycle"]'
+    dataPickerFilter = 'div[data-cy="date-picker-filter"]'
+    endDateCycle = 'div[data-cy="end-date-cycle"]'
+    buttonNext = 'button[data-cy="button-update-program-cycle-modal"]'
+    buttonSave = 'button[data-cy="button-save"]'
+    buttonCreateProgramCycle = 'button[data-cy="button-create-program-cycle"]'
+    inputTitle = 'input[data-cy="input-title"]'
+    deleteProgrammeCycle = 'button[data-cy="delete-programme-cycle"]'
+    buttonDelete = 'button[data-cy="button-delete"]'
+    buttonCancel = 'button[data-cy="button-cancel"]'
+
+    def getProgramCycleRow(self) -> WebElement:
+        self.wait_for(self.programCycleRow)
+        return self.get_elements(self.programCycleRow)
+
+    def getDeleteProgrammeCycle(self) -> WebElement:
+        self.wait_for(self.deleteProgrammeCycle)
+        return self.get_elements(self.deleteProgrammeCycle)
+
+    def getProgramCycleId(self) -> WebElement:
+        self.wait_for(self.programCycleId)
+        return self.get_elements(self.programCycleId)
+
+    def getProgramCycleTitle(self) -> WebElement:
+        self.wait_for(self.programCycleTitle)
+        return self.get_elements(self.programCycleTitle)
+
+    def getProgramCycleStatus(self) -> WebElement:
+        self.wait_for(self.programCycleStatus)
+        return self.get_elements(self.programCycleStatus)
+
+    def getStatusContainer(self) -> WebElement:
+        self.wait_for(self.statusContainer)
+        return self.get_elements(self.statusContainer)
+
+    def getProgramCycleTotalEntitledQuantity(self) -> WebElement:
+        self.wait_for(self.programCycleTotalEntitledQuantity)
+        return self.get_elements(self.programCycleTotalEntitledQuantity)
+
+    def getProgramCycleTotalUndeliveredQuantity(self) -> WebElement:
+        self.wait_for(self.programCycleTotalUndeliveredQuantity)
+        return self.get_elements(self.programCycleTotalUndeliveredQuantity)
+
+    def getProgramCycleTotalDeliveredQuantity(self) -> WebElement:
+        self.wait_for(self.programCycleTotalDeliveredQuantity)
+        return self.get_elements(self.programCycleTotalDeliveredQuantity)
+
+    def getProgramCycleStartDate(self) -> WebElement:
+        self.wait_for(self.programCycleStartDate)
+        return self.get_elements(self.programCycleStartDate)
+
+    def getProgramCycleEndDate(self) -> WebElement:
+        self.wait_for(self.programCycleEndDate)
+        return self.get_elements(self.programCycleEndDate)
+
+    def getProgramCycleDetailsBtn(self) -> WebElement:
+        self.wait_for(self.programCycleDetailsBtn)
+        return self.get_elements(self.programCycleDetailsBtn)
+
+    def getButtonEditProgramCycle(self) -> WebElement:
+        self.wait_for(self.buttonEditProgramCycle)
+        return self.get_elements(self.buttonEditProgramCycle)
+
+    def getDataPickerFilter(self) -> WebElement:
+        self.wait_for(self.dataPickerFilter)
+        return self.get_elements(self.dataPickerFilter)[0].find_elements("tag name", "input")[0]
+
+    def getButtonNext(self) -> WebElement:
+        return self.wait_for(self.buttonNext)
+
+    def getButtonSave(self) -> WebElement:
+        return self.wait_for(self.buttonSave)
+
+    def getInputTitle(self) -> WebElement:
+        return self.wait_for(self.inputTitle)
+
+    def getStartDateCycle(self) -> WebElement:
+        return self.wait_for(self.startDateCycle).find_elements("tag name", "input")[0]
+
+    def getEndDateCycle(self) -> WebElement:
+        return self.wait_for(self.endDateCycle).find_elements("tag name", "input")[0]
+
+    def getStartDateCycleDiv(self) -> WebElement:
+        return self.wait_for(self.startDateCycle)
+
+    def getEndDateCycleDiv(self) -> WebElement:
+        return self.wait_for(self.endDateCycle)
+
+    def getButtonCreateProgramCycle(self) -> WebElement:
+        return self.wait_for(self.buttonCreateProgramCycle)
 
     def getLabelPartnerName(self) -> WebElement:
         return self.wait_for(self.labelPartnerName)
@@ -107,6 +209,12 @@ class ProgrammeDetails(BaseComponents):
 
     def getTablePagination(self) -> WebElement:
         return self.wait_for(self.tablePagination)
+
+    def getButtonDelete(self) -> WebElement:
+        return self.wait_for(self.buttonDelete)
+
+    def getButtonCancel(self) -> WebElement:
+        return self.wait_for(self.buttonCancel)
 
     def clickButtonFinishProgramPopup(self) -> None:
         self.wait_for('[data-cy="dialog-actions-container"]')

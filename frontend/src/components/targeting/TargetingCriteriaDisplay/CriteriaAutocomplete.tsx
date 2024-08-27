@@ -31,7 +31,7 @@ export function CriteriaAutocomplete({
         index === self.findIndex((t) => t.name === choice.name),
     );
     setChoicesWithoutDuplicates(uniqueChoices);
-  }, [ otherProps.choices]);
+  }, [otherProps.choices]);
   const isInvalid =
     get(otherProps.form.errors, field.name) &&
     get(otherProps.form.touched, field.name);

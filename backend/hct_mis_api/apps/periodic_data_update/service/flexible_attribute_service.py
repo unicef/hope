@@ -61,8 +61,6 @@ class FlexibleAttributeForPDUService:
         increment_periodic_field_version_cache(business_area_slug, program_id)
 
     def update_pdu_flex_attributes(self) -> None:
-        if self.program.registration_imports.exists():
-            raise GraphQLError("Cannot update PDU fields for a program with RDIs.")
         self._populate_names_and_labels()
         self._validate_pdu_names_in_batch()
         flexible_attribute_ids_to_preserve = []
@@ -76,6 +74,31 @@ class FlexibleAttributeForPDUService:
 
         self.delete_pdu_flex_attributes(flexible_attribute_ids_to_preserve=flexible_attribute_ids_to_preserve)
 
+    def update_pdu_flex_attributes_in_program_update(self) -> None:
+        if self.program.registration_imports.exists() or self.program.targetpopulation_set.exists():
+            self.increase_pdu_rounds_for_program_with_rdi()
+        else:
+            self.update_pdu_flex_attributes()
+
+    def increase_pdu_rounds_for_program_with_rdi(self) -> None:
+        for pdu_field in self.pdu_fields:
+            if flexible_attribute_id_encoded := pdu_field.pop("id", None):
+                flexible_attribute_id = decode_id_string(flexible_attribute_id_encoded)
+                flexible_attribute_object = FlexibleAttribute.objects.get(id=flexible_attribute_id)
+                pdu_data_object = flexible_attribute_object.pdu_data
+
+                pdu_data = pdu_field.pop("pdu_data")
+
+                if pdu_data["number_of_rounds"] == pdu_data_object.number_of_rounds:
+                    continue
+
+                self._validate_pdu_data(pdu_data)
+                self._validate_pdu_data_for_program_with_rdi(pdu_data_object, pdu_data)
+
+                pdu_data_object.number_of_rounds = pdu_data["number_of_rounds"]
+                pdu_data_object.rounds_names = pdu_data["rounds_names"]
+                pdu_data_object.save()
+
     def _validate_pdu_names_in_batch(self) -> None:
         pdu_names = [pdu_field["name"] for pdu_field in self.pdu_fields]
         if len(pdu_names) != len(set(pdu_names)):
@@ -85,3 +108,14 @@ class FlexibleAttributeForPDUService:
         for pdu_field in self.pdu_fields:
             pdu_field["name"] = field_label_to_field_name(pdu_field["label"])
             pdu_field["label"] = {"English(EN)": pdu_field["label"]}
+
+    @staticmethod
+    def _validate_pdu_data_for_program_with_rdi(pdu_data_object: PeriodicFieldData, pdu_data: Dict) -> None:
+        current_number_of_rounds = pdu_data_object.number_of_rounds
+        current_rounds_names = pdu_data_object.rounds_names
+        new_number_of_rounds = pdu_data["number_of_rounds"]
+        new_rounds_names = pdu_data["rounds_names"]
+        if new_number_of_rounds <= current_number_of_rounds:
+            raise GraphQLError("It is not possible to decrease the number of rounds for a Program with RDI or TP")
+        if current_rounds_names != new_rounds_names[:current_number_of_rounds]:
+            raise GraphQLError("It is not possible to change the names of existing rounds for a Program with RDI or TP")

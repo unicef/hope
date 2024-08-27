@@ -273,3 +273,16 @@ class TestSmokePaymentVerification:
         pagePaymentRecord.getArrowBack().click()
 
         assert "FINISHED" in pagePaymentVerification.getCashPlanTableRow().text
+
+
+@pytest.mark.usefixtures("login")
+class TestPaymentVerification:
+    @pytest.mark.skip("ToDo: Old and same value - maybe parametrization with values")
+    def test_payment_verification_create_grievance_ticket_same_value(
+        self, active_program: Program, add_payment_verification: PV, pagePaymentVerification: PaymentVerification
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        # Upon resolving the Payment Verification grievance ticket,
+        # the received value changes with the new verified value.
+        # If the received value is 0, it should stay 0 even when a new verified value is provided in the ticket.
+        # Check conversation with Jakub

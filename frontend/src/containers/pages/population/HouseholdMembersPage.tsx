@@ -1,4 +1,4 @@
-import { Box, Fade } from '@mui/material';
+import { Box, Fade, Tooltip } from '@mui/material';
 import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -18,10 +18,12 @@ import { getFilterFromQueryParams } from '@utils/utils';
 import { IndividualsListTable } from '../../tables/population/IndividualsListTable';
 import { Tabs, Tab } from '@core/Tabs';
 import { PeriodicDataUpdates } from '@components/periodicDataUpdates/PeriodicDataUpdates';
+import { useProgramContext } from 'src/programContext';
 
 export const HouseholdMembersPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
+  const { programHasPdu } = useProgramContext();
   const { businessArea } = useBaseUrl();
   const isNewTemplateJustCreated =
     location.state?.isNewTemplateJustCreated || false;
@@ -82,10 +84,27 @@ export const HouseholdMembersPage = (): React.ReactElement => {
             }}
           >
             <Tab data-cy="tab-individuals" label="Individuals" />
-            <Tab
-              data-cy="tab-periodic-data-updates"
-              label="Periodic Data Updates"
-            />
+            {!programHasPdu ? (
+              <Tooltip
+                title={t(
+                  'Programme does not have defined fields for periodic updates',
+                )}
+              >
+                <span>
+                  <Tab
+                    disabled={!programHasPdu}
+                    data-cy="tab-periodic-data-updates"
+                    label="Periodic Data Updates"
+                  />
+                </span>
+              </Tooltip>
+            ) : (
+              <Tab
+                disabled={!programHasPdu}
+                data-cy="tab-periodic-data-updates"
+                label="Periodic Data Updates"
+              />
+            )}
           </Tabs>
         }
       />

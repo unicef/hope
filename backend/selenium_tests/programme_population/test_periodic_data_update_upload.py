@@ -26,7 +26,10 @@ from hct_mis_api.apps.periodic_data_update.models import (
 from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PeriodicDataUpdateExportTemplateService,
 )
-from hct_mis_api.apps.periodic_data_update.utils import field_label_to_field_name
+from hct_mis_api.apps.periodic_data_update.utils import (
+    field_label_to_field_name,
+    populate_pdu_with_null_values,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -149,6 +152,8 @@ class TestPeriodicDataUpdateUpload:
         string_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,
     ) -> None:
+        populate_pdu_with_null_values(program, individual.flex_fields)
+        individual.save()
         flexible_attribute = string_attribute
         tmp_file = prepare_xlsx_file(
             [
@@ -180,7 +185,7 @@ class TestPeriodicDataUpdateUpload:
         assert individual.flex_fields[flexible_attribute.name]["1"]["collection_date"] == "2021-05-02"
         assert pageIndividuals.getUpdateStatus(periodic_data_update_upload.pk).text == "SUCCESSFUL"
 
-    # @flaky(max_runs=5, min_passes=1)
+    @pytest.mark.night
     def test_periodic_data_update_upload_form_error(
         self,
         clear_downloaded_files: None,
@@ -189,6 +194,8 @@ class TestPeriodicDataUpdateUpload:
         date_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,
     ) -> None:
+        populate_pdu_with_null_values(program, individual.flex_fields)
+        individual.save()
         flexible_attribute = date_attribute
         tmp_file = prepare_xlsx_file(
             [
@@ -220,6 +227,7 @@ class TestPeriodicDataUpdateUpload:
         error_text = "Row: 2\ntest_date_attribute__round_value\nEnter a valid date."
         assert pageIndividuals.getPduFormErrors().text == error_text
 
+    @pytest.mark.night
     def test_periodic_data_update_upload_error(
         self,
         clear_downloaded_files: None,
@@ -228,6 +236,8 @@ class TestPeriodicDataUpdateUpload:
         string_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,
     ) -> None:
+        populate_pdu_with_null_values(program, individual.flex_fields)
+        individual.save()
         periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
             program=program,
             business_area=program.business_area,
@@ -262,6 +272,7 @@ class TestPeriodicDataUpdateUpload:
             error_text = pageIndividuals.getPduUploadError().text
             assert error_text == "Periodic Data Update Template with ID -1 not found"
 
+    @pytest.mark.night
     def test_periodic_data_uploads_list(
         self,
         clear_downloaded_files: None,

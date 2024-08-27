@@ -770,17 +770,6 @@ type CreateProgram {
   program: ProgramNode
 }
 
-type CreateProgramCycle {
-  validationErrors: Arg
-  program: ProgramNode
-}
-
-input CreateProgramCycleInput {
-  title: String!
-  startDate: Date!
-  endDate: Date
-}
-
 input CreateProgramInput {
   name: String
   startDate: Date
@@ -932,10 +921,6 @@ type DeleteProgram {
   ok: Boolean
 }
 
-type DeleteProgramCycle {
-  program: ProgramNode
-}
-
 type DeleteRegistrationDataImport {
   ok: Boolean
 }
@@ -1025,7 +1010,7 @@ type DeliveryMechanismPerPaymentPlanNode implements Node {
   sentBy: UserNode
   status: String!
   deliveryMechanismChoice: DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice
-  deliveryMechanism: DeliveryMechanismNode!
+  deliveryMechanism: DeliveryMechanismNode
   deliveryMechanismOrder: Int!
   sentToPaymentGateway: Boolean!
   chosenConfiguration: String
@@ -1357,6 +1342,7 @@ type FinancialServiceProviderXlsxTemplateNode implements Node {
   name: String!
   columns: [String]
   coreFields: [String!]!
+  flexFields: [String!]!
   financialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
 }
 
@@ -1374,6 +1360,12 @@ type FinancialServiceProviderXlsxTemplateNodeEdge {
 
 type FinishPaymentVerificationPlan {
   paymentPlan: GenericPaymentPlanNode
+}
+
+enum FlexFieldClassificationChoices {
+  NOT_FLEX_FIELD
+  FLEX_FIELD_BASIC
+  FLEX_FIELD_PDU
 }
 
 scalar FlexFieldsScalar
@@ -2862,9 +2854,6 @@ type Mutations {
   updateProgram(programData: UpdateProgramInput, version: BigInt): UpdateProgram
   deleteProgram(programId: String!): DeleteProgram
   copyProgram(programData: CopyProgramInput!): CopyProgram
-  createProgramCycle(programCycleData: CreateProgramCycleInput!): CreateProgramCycle
-  updateProgramCycle(programCycleData: UpdateProgramCycleInput, version: BigInt): UpdateProgramCycle
-  deleteProgramCycle(programCycleId: ID!): DeleteProgramCycle
   uploadImportDataXlsxFileAsync(businessAreaSlug: String!, file: Upload!): UploadImportDataXLSXFileAsync
   deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
   registrationXlsxImport(registrationDataImportData: RegistrationXlsxImportMutationInput!): RegistrationXlsxImportMutation
@@ -3667,7 +3656,7 @@ enum PeriodicFieldDataSubtype {
   DATE
   DECIMAL
   STRING
-  BOOLEAN
+  BOOL
 }
 
 type PeriodicFieldNode implements Node {
@@ -3687,9 +3676,7 @@ type ProgramCycleNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  lastSyncAt: DateTime
   version: BigInt!
-  unicefId: String
   title: String
   status: ProgramCycleStatus!
   startDate: Date!
@@ -3779,6 +3766,7 @@ type ProgramNode implements Node {
   totalNumberOfHouseholds: Int
   totalNumberOfHouseholdsWithTpInProgram: Int
   isSocialWorkerProgram: Boolean
+  targetPopulationsCount: Int
 }
 
 type ProgramNodeConnection {
@@ -4757,6 +4745,13 @@ enum TargetingCriteriaRuleFilterComparisonMethod {
   NOT_IN_RANGE
   GREATER_THAN
   LESS_THAN
+  IS_NULL
+}
+
+enum TargetingCriteriaRuleFilterFlexFieldClassification {
+  NOT_FLEX_FIELD
+  FLEX_FIELD_BASIC
+  FLEX_FIELD_PDU
 }
 
 type TargetingCriteriaRuleFilterNode {
@@ -4765,7 +4760,7 @@ type TargetingCriteriaRuleFilterNode {
   updatedAt: DateTime!
   comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod!
   targetingCriteriaRule: TargetingCriteriaRuleNode!
-  isFlexField: Boolean!
+  flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification!
   fieldName: String!
   arguments: [Arg]
   fieldAttribute: FieldAttributeNode
@@ -4773,9 +4768,10 @@ type TargetingCriteriaRuleFilterNode {
 
 input TargetingCriteriaRuleFilterObjectType {
   comparisonMethod: String!
-  isFlexField: Boolean!
+  flexFieldClassification: FlexFieldClassificationChoices!
   fieldName: String!
   arguments: [Arg]!
+  roundNumber: Int
 }
 
 type TargetingCriteriaRuleNode {
@@ -4801,6 +4797,13 @@ enum TargetingIndividualBlockRuleFilterComparisonMethod {
   NOT_IN_RANGE
   GREATER_THAN
   LESS_THAN
+  IS_NULL
+}
+
+enum TargetingIndividualBlockRuleFilterFlexFieldClassification {
+  NOT_FLEX_FIELD
+  FLEX_FIELD_BASIC
+  FLEX_FIELD_PDU
 }
 
 type TargetingIndividualBlockRuleFilterNode {
@@ -4809,9 +4812,10 @@ type TargetingIndividualBlockRuleFilterNode {
   updatedAt: DateTime!
   comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod!
   individualsFiltersBlock: TargetingIndividualRuleFilterBlockNode!
-  isFlexField: Boolean!
+  flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification!
   fieldName: String!
   arguments: [Arg]
+  roundNumber: Int
   fieldAttribute: FieldAttributeNode
 }
 
@@ -5267,18 +5271,6 @@ type UpdatePaymentVerificationStatusAndReceivedAmount {
 type UpdateProgram {
   validationErrors: Arg
   program: ProgramNode
-}
-
-type UpdateProgramCycle {
-  validationErrors: Arg
-  program: ProgramNode
-}
-
-input UpdateProgramCycleInput {
-  programCycleId: ID!
-  title: String
-  startDate: Date
-  endDate: Date
 }
 
 input UpdateProgramInput {

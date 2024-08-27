@@ -16,6 +16,7 @@ from django.core.validators import (
 from django.db import models
 from django.db.models import Q, QuerySet, Sum
 from django.db.models.constraints import UniqueConstraint
+from django.utils.dateparse import parse_date
 from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import SoftDeletableModel
@@ -186,7 +187,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
     )
     data_collecting_type = models.ForeignKey(
-        "core.DataCollectingType", related_name="programs", on_delete=models.PROTECT, null=True, blank=True
+        "core.DataCollectingType", related_name="programs", on_delete=models.PROTECT
     )
     is_visible = models.BooleanField(default=True)
     household_count = models.PositiveIntegerField(default=0)
@@ -275,7 +276,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         super(Program, self).validate_unique()
 
 
-class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedModel, AbstractSyncable, ConcurrencyModel):
+class ProgramCycle(AdminUrlMixin, SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedModel, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "title",
@@ -319,8 +320,14 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedMod
         verbose_name = "ProgrammeCycle"
 
     def clean(self) -> None:
-        if self.end_date and self.end_date < self.start_date:
+        start_date = parse_date(self.start_date) if isinstance(self.start_date, str) else self.start_date
+        end_date = parse_date(self.end_date) if isinstance(self.end_date, str) else self.end_date
+
+        if end_date and end_date < start_date:
             raise ValidationError("End date cannot be before start date.")
+
+        if self._state.adding and self.program.cycles.exclude(pk=self.pk).filter(end_date__gte=start_date).exists():
+            raise ValidationError("Start date must be after the latest cycle.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()

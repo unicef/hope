@@ -16,7 +16,10 @@ from hct_mis_api.apps.periodic_data_update.fixtures import (
     PeriodicDataUpdateTemplateFactory,
 )
 from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
-from hct_mis_api.apps.periodic_data_update.utils import field_label_to_field_name
+from hct_mis_api.apps.periodic_data_update.utils import (
+    field_label_to_field_name,
+    populate_pdu_with_null_values,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -110,6 +113,8 @@ class TestPeriodicDataTemplates:
         individual: Individual,
         clear_downloaded_files: None,
     ) -> None:
+        populate_pdu_with_null_values(program, individual.flex_fields)
+        individual.save()
         periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
             program=program,
             business_area=program.business_area,
@@ -145,6 +150,7 @@ class TestPeriodicDataTemplates:
             is True
         )
 
+    @pytest.mark.night
     def test_periodic_data_template_list(
         self,
         program: Program,
@@ -192,6 +198,7 @@ class TestPeriodicDataTemplates:
 
         assert "EXPORTED" in pagePeriodicDataUpdateTemplates.getTemplateStatus(index).text
 
+    @pytest.mark.night
     def test_periodic_data_template_details(
         self,
         program: Program,
@@ -200,6 +207,8 @@ class TestPeriodicDataTemplates:
         pagePeriodicDataUpdateTemplates: PeriodicDatUpdateTemplates,
         individual: Individual,
     ) -> None:
+        populate_pdu_with_null_values(program, individual.flex_fields)
+        individual.save()
         rounds_data = [
             {
                 "field": string_attribute.name,
@@ -237,6 +246,7 @@ class TestPeriodicDataTemplates:
             in pagePeriodicDataUpdateTemplates.getTemplateNumberOfIndividuals(0).text
         )
 
+    @pytest.mark.night
     def test_periodic_data_template_create_and_download(
         self,
         program: Program,
@@ -246,6 +256,8 @@ class TestPeriodicDataTemplates:
         pagePeriodicDataUpdateTemplatesDetails: PeriodicDatUpdateTemplatesDetails,
         individual: Individual,
     ) -> None:
+        populate_pdu_with_null_values(program, individual.flex_fields)
+        individual.save()
         pageIndividuals.selectGlobalProgramFilter(program.name)
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()

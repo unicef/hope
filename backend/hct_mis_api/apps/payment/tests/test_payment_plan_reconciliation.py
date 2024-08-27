@@ -352,6 +352,9 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
         program = Program.objects.get(id=decode_id_string_required(program_id))
+        cycle = program.cycles.first()
+        cycle.end_date = timezone.datetime(2022, 8, 24, tzinfo=utc).date()
+        cycle.save()
         program_cycle_id = create_programme_response["data"]["createProgram"]["program"]["cycles"]["edges"][0]["node"][
             "id"
         ]
@@ -376,7 +379,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                                         "comparisonMethod": "EQUALS",
                                         "arguments": ["True"],
                                         "fieldName": "consent",
-                                        "isFlexField": False,
+                                        "flexFieldClassification": "NOT_FLEX_FIELD",
                                     }
                                 ],
                                 "individualsFiltersBlocks": [],

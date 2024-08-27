@@ -27,7 +27,7 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
     limit: 5,
     ordering: 'created_at',
   });
-  const { businessArea, baseUrl } = useBaseUrl();
+  const { businessArea, baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
   const canCreateProgramCycle =
     program.status !== 'DRAFT' &&
@@ -40,6 +40,8 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
     },
   });
 
+  const canViewDetails = programId !== 'all';
+
   const renderRow = (row: ProgramCycle): ReactElement => {
     const detailsUrl = `/${baseUrl}/payment-module/program-cycles/${row.id}`;
     const canEditProgramCycle =
@@ -50,36 +52,39 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
       data.results.length > 1 &&
       hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_DELETE, permissions);
     return (
-      <ClickableTableRow key={row.id} data-cy={`program-cycle-row-${row.id}`}>
-        <TableCell data-cy={`program-cycle-id-${row.id}`}>
-          <BlackLink to={detailsUrl}>{row.unicef_id}</BlackLink>
+      <ClickableTableRow key={row.id} data-cy="program-cycle-row">
+        <TableCell data-cy="program-cycle-title">
+          {canViewDetails ? (
+            <BlackLink to={detailsUrl}>{row.title}</BlackLink>
+          ) : (
+            row.title
+          )}
         </TableCell>
-        <TableCell data-cy="program-cycle-title">{row.title}</TableCell>
-        <TableCell data-cy={`program-cycle-status-${row.id}`}>
+        <TableCell data-cy="program-cycle-status">
           <StatusBox
             status={row.status}
             statusToColor={programCycleStatusToColor}
           />
         </TableCell>
-        <TableCell data-cy={`program-cycle-total-entitled-quantity-${row.id}`}>
+        <TableCell data-cy="program-cycle-total-entitled-quantity">
           {row.total_entitled_quantity_usd || '-'}
         </TableCell>
         <TableCell
-          data-cy={`program-cycle-total-undelivered-quantity-${row.id}`}
+          data-cy="program-cycle-total-undelivered-quantity"
         >
           {row.total_undelivered_quantity_usd || '-'}
         </TableCell>
-        <TableCell data-cy={`program-cycle-total-delivered-quantity-${row.id}`}>
+        <TableCell data-cy="program-cycle-total-delivered-quantity">
           {row.total_delivered_quantity_usd || '-'}
         </TableCell>
-        <TableCell data-cy={`program-cycle-start-date-${row.id}`}>
+        <TableCell data-cy="program-cycle-start-date">
           <UniversalMoment>{row.start_date}</UniversalMoment>
         </TableCell>
-        <TableCell data-cy={`program-cycle-end-date-${row.id}`}>
+        <TableCell data-cy="program-cycle-end-date">
           <UniversalMoment>{row.end_date}</UniversalMoment>
         </TableCell>
 
-        <TableCell data-cy={`program-cycle-details-btn-${row.id}`}>
+        <TableCell data-cy="program-cycle-details-btn">
           {program.status === 'ACTIVE' && (
             <>
               {canEditProgramCycle && (
