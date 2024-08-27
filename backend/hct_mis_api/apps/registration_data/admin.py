@@ -15,7 +15,7 @@ from django.utils.safestring import mark_safe
 from admin_extra_buttons.api import confirm_action
 from admin_extra_buttons.decorators import button, link
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import ChoicesFieldComboFilter
+from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
 from adminfilters.mixin import AdminAutoCompleteSearchMixin
 from adminfilters.querystring import QueryStringFilter
 
@@ -25,7 +25,10 @@ from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.forms import MassEnrollForm
 from hct_mis_api.apps.household.models import Individual, PendingIndividual
 from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_data.models import (
+    DeduplicationEngineSimilarityPair,
+    RegistrationDataImport,
+)
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
 )
@@ -302,3 +305,16 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         context["action"] = "mass_enroll_to_another_program"
         context["enroll_from"] = "RDI"
         return TemplateResponse(request, "admin/household/household/enroll_households_to_program.html", context)
+
+
+@admin.register(DeduplicationEngineSimilarityPair)
+class DeduplicationEngineSimilarityPairAdmin(HOPEModelAdminBase):
+    list_display = ("program", "individual1", "individual2", "similarity_score", "is_duplicate")
+    list_filter = (("program__name", ValueFilter),)
+    raw_id_fields = ("program", "individual1", "individual2")
+    search_fields = ("individual1", "individual2")
+
+    def is_duplicate(self, obj: DeduplicationEngineSimilarityPair) -> bool:
+        return obj._is_duplicate
+
+    is_duplicate.boolean = True

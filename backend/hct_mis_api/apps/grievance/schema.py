@@ -75,6 +75,9 @@ from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordAndPaymentNode
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.program.schema import ProgramNode
+from hct_mis_api.apps.registration_data.schema import (
+    DeduplicationEngineSimilarityPairNode,
+)
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
@@ -409,6 +412,7 @@ class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
     possible_duplicates = graphene.List(IndividualNode)
     selected_duplicates = graphene.List(IndividualNode)
     selected_distinct = graphene.List(IndividualNode)
+    deduplication_engine_similarity_pair = graphene.Field(DeduplicationEngineSimilarityPairNode)
 
     class Meta:
         model = TicketNeedsAdjudicationDetails
