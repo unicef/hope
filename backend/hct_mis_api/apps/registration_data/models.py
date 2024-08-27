@@ -185,7 +185,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     )
     deduplication_engine_status = models.CharField(
         max_length=255, choices=DEDUP_ENGINE_STATUS_CHOICE, blank=True, null=True, default=None
-    )  # TODO MB on every RDI create set to PENDING if program flag enabled
+    )
 
     def __str__(self) -> str:
         return self.name
