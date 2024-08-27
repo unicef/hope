@@ -412,7 +412,7 @@ class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
     possible_duplicates = graphene.List(IndividualNode)
     selected_duplicates = graphene.List(IndividualNode)
     selected_distinct = graphene.List(IndividualNode)
-    deduplication_engine_similarity_pair = graphene.Field(DeduplicationEngineSimilarityPairNode)
+    dedup_engine_similarity_pair = graphene.Field(DeduplicationEngineSimilarityPairNode)
 
     class Meta:
         model = TicketNeedsAdjudicationDetails

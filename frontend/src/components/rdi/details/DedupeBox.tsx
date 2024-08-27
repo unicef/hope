@@ -1,7 +1,8 @@
 import * as React from 'react';
 import styled from 'styled-components';
-import { Grid, Box } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import { MiśTheme } from '../../../theme';
+import { CountAndPercentageNode } from '@generated/graphql';
 
 const GreyBox = styled.div`
   background-color: #f5f5f5;
@@ -28,47 +29,56 @@ const Small = styled.span`
 const Label = styled.span`
   ${({ theme }: { theme: MiśTheme }) => theme.styledMixins.label}
 `;
-export interface Props {
-  label: string;
-  options: {
-    name: string;
-    percent: number;
-    value: number;
-  }[];
+
+export interface OptionType {
+  name: string;
+  options: CountAndPercentageNode[];
 }
 
-export const DedupeBox = ({ label, options }: Props): React.ReactElement => {
+export interface DedupeBoxProps {
+  label: string;
+  options: OptionType[];
+}
+
+export const DedupeBox = ({
+  label,
+  options,
+}: DedupeBoxProps): React.ReactElement => {
   return (
     <GreyBox>
-      <Grid container>
-        <Grid item xs={3}>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
           <Box display="flex" alignItems="flex-start">
             <Label data-cy={`label-${label}`} color="textSecondary">
               {label}
             </Label>
           </Box>
         </Grid>
-        <Grid item xs={9}>
+        <Grid item xs={12}>
           <Grid container direction="column">
             {options.map((option) => (
               <Grid key={option.name} container>
-                <Grid item xs={4}>
+                <Grid item xs={3}>
                   <BoldGrey>
                     <Small data-cy={`label-${option.name}`}>
                       {option.name}
                     </Small>
                   </BoldGrey>
                 </Grid>
-                <Grid item xs={4}>
-                  <Bold data-cy={`percentage-${option.name}`}>
-                    {option.percent.toFixed(2)}%
-                  </Bold>
-                </Grid>
-                <Grid item xs={4}>
-                  <BoldGrey data-cy={`value-${option.name}`}>
-                    {option.value}
-                  </BoldGrey>
-                </Grid>
+                {option.options.map((item, index) => (
+                  <Grid key={option.name + index} container item xs={3}>
+                    <Grid item xs={6}>
+                      <Bold data-cy={`percentage-${option.name}`}>
+                        {item.percentage.toFixed(2)}%
+                      </Bold>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <BoldGrey data-cy={`value-${option.name}`}>
+                        ({item.count})
+                      </BoldGrey>
+                    </Grid>
+                  </Grid>
+                ))}
               </Grid>
             ))}
           </Grid>

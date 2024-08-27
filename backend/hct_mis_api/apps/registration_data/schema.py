@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 import graphene
 from graphene_django import DjangoObjectType
@@ -15,6 +15,7 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import get_count_and_percentage, to_choice_object
+from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.registration_data.filters import RegistrationDataImportFilter
 from hct_mis_api.apps.registration_data.models import (
     DeduplicationEngineSimilarityPair,
@@ -22,23 +23,25 @@ from hct_mis_api.apps.registration_data.models import (
 )
 
 
+class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
+    photo = graphene.String()
+    full_name = graphene.String()
+    unicef_id = graphene.String()
+
+    @staticmethod
+    def resolve_photo(individual: Individual, info: Any) -> Optional[str]:
+        return individual.photo and individual.photo.url
+
+
 class DeduplicationEngineSimilarityPairNode(DjangoObjectType):
     is_duplicate = graphene.Boolean()
-    individual1_photo = graphene.String()
-    individual2_photo = graphene.String()
+    individual1 = DeduplicationEngineSimilarityPairIndividualNode()
+    individual2 = DeduplicationEngineSimilarityPairIndividualNode()
     similarity_score = graphene.String()
 
     @staticmethod
     def resolve_is_duplicate(similarity_pair: DeduplicationEngineSimilarityPair, info: Any) -> bool:
         return similarity_pair._is_duplicate
-
-    @staticmethod
-    def resolve_individual1_photo(similarity_pair: DeduplicationEngineSimilarityPair, info: Any) -> str:
-        return similarity_pair.individual1.photo.url
-
-    @staticmethod
-    def resolve_individual2_photo(similarity_pair: DeduplicationEngineSimilarityPair, info: Any) -> str:
-        return similarity_pair.individual2.photo.url
 
     class Meta:
         model = DeduplicationEngineSimilarityPair
@@ -54,12 +57,11 @@ class CountAndPercentageNode(graphene.ObjectType):
 class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.RDI_VIEW_DETAILS),)
 
-    batch_duplicates_count_and_percentage = graphene.Field(CountAndPercentageNode)
-    batch_possible_duplicates_count_and_percentage = graphene.Field(CountAndPercentageNode)
-    batch_unique_count_and_percentage = graphene.Field(CountAndPercentageNode)
-    golden_record_duplicates_count_and_percentage = graphene.Field(CountAndPercentageNode)
-    golden_record_possible_duplicates_count_and_percentage = graphene.Field(CountAndPercentageNode)
-    golden_record_unique_count_and_percentage = graphene.Field(CountAndPercentageNode)
+    batch_duplicates_count_and_percentage = graphene.List(CountAndPercentageNode)
+    batch_unique_count_and_percentage = graphene.List(CountAndPercentageNode)
+    golden_record_duplicates_count_and_percentage = graphene.List(CountAndPercentageNode)
+    golden_record_possible_duplicates_count_and_percentage = graphene.List(CountAndPercentageNode)
+    golden_record_unique_count_and_percentage = graphene.List(CountAndPercentageNode)
     total_households_count_with_valid_phone_no = graphene.Int()
     is_deduplicated = graphene.String()
 
@@ -74,38 +76,64 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
     @staticmethod
     def resolve_batch_duplicates_count_and_percentage(
         parent: RegistrationDataImport, info: Any, **kwargs: Any
-    ) -> Dict[str, Union[int, float]]:
-        return get_count_and_percentage(parent.batch_duplicates, parent.number_of_individuals)
-
-    @staticmethod
-    def resolve_batch_possible_duplicates_count_and_percentage(
-        parent: RegistrationDataImport, info: Any, **kwargs: Any
-    ) -> Dict[str, Union[int, float]]:
-        return get_count_and_percentage(parent.batch_possible_duplicates, parent.number_of_individuals)
+    ) -> List[Dict[str, Union[int, float]]]:
+        return [
+            # TODO: add identifiers data from hard deduplication
+            get_count_and_percentage(0, 0),  # identifiers
+            get_count_and_percentage(parent.batch_duplicates, parent.number_of_individuals),  # biographical
+            # TODO add biometrics data from biometrics deduplication
+            get_count_and_percentage(0, 0),  # biometrics
+        ]
 
     @staticmethod
     def resolve_batch_unique_count_and_percentage(
         parent: RegistrationDataImport, info: Any, **kwargs: Any
-    ) -> Dict[str, Union[int, float]]:
-        return get_count_and_percentage(parent.batch_unique, parent.number_of_individuals)
+    ) -> List[Dict[str, Union[int, float]]]:
+        return [
+            # TODO: add identifiers data from hard deduplication
+            get_count_and_percentage(0, 0),  # identifiers
+            get_count_and_percentage(parent.batch_unique, parent.number_of_individuals),  # biographical
+            # TODO add biometrics data from biometrics deduplication
+            get_count_and_percentage(0, 0),  # biometrics
+        ]
 
     @staticmethod
     def resolve_golden_record_duplicates_count_and_percentage(
         parent: RegistrationDataImport, info: Any, **kwargs: Any
-    ) -> Dict[str, Union[int, float]]:
-        return get_count_and_percentage(parent.golden_record_duplicates, parent.number_of_individuals)
+    ) -> List[Dict[str, Union[int, float]]]:
+        return [
+            # TODO: add identifiers data from hard deduplication
+            get_count_and_percentage(0, 0),  # identifiers
+            get_count_and_percentage(parent.golden_record_duplicates, parent.number_of_individuals),  # biographical
+            # TODO add biometrics data from biometrics deduplication
+            get_count_and_percentage(0, 0),  # biometrics
+        ]
 
     @staticmethod
     def resolve_golden_record_possible_duplicates_count_and_percentage(
         parent: RegistrationDataImport, info: Any, **kwargs: Any
-    ) -> Dict[str, Union[int, float]]:
-        return get_count_and_percentage(parent.golden_record_possible_duplicates, parent.number_of_individuals)
+    ) -> List[Dict[str, Union[int, float]]]:
+        return [
+            # TODO: add identifiers data from hard deduplication
+            get_count_and_percentage(0, 0),  # identifiers
+            get_count_and_percentage(
+                parent.golden_record_possible_duplicates, parent.number_of_individuals
+            ),  # biographical
+            # TODO add biometrics data from biometrics deduplication
+            get_count_and_percentage(0, 0),  # biometrics
+        ]
 
     @staticmethod
     def resolve_golden_record_unique_count_and_percentage(
         parent: RegistrationDataImport, info: Any, **kwargs: Any
-    ) -> Dict[str, Union[int, float]]:
-        return get_count_and_percentage(parent.golden_record_unique, parent.number_of_individuals)
+    ) -> List[Dict[str, Union[int, float]]]:
+        return [
+            # TODO: add identifiers data from hard deduplication
+            get_count_and_percentage(0, 0),  # identifiers
+            get_count_and_percentage(parent.golden_record_unique, parent.number_of_individuals),  # biographical
+            # TODO add biometrics data from biometrics deduplication
+            get_count_and_percentage(0, 0),  # biometrics
+        ]
 
     def resolve_total_households_count_with_valid_phone_no(self, info: Any) -> int:
         return self.households.exclude(

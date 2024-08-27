@@ -903,8 +903,6 @@ type DeduplicationEngineSimilarityPairNode implements Node {
   similarityScore: String
   ticketneedsadjudicationdetailsSet(offset: Int, before: String, after: String, first: Int, last: Int): TicketNeedsAdjudicationDetailsNodeConnection!
   isDuplicate: Boolean
-  individual1Photo: String
-  individual2Photo: String
 }
 
 type DeduplicationEngineSimilarityPairNodeConnection {
@@ -4176,12 +4174,11 @@ type RegistrationDataImportNode implements Node {
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   adminUrl: String
-  batchDuplicatesCountAndPercentage: CountAndPercentageNode
-  batchPossibleDuplicatesCountAndPercentage: CountAndPercentageNode
-  batchUniqueCountAndPercentage: CountAndPercentageNode
-  goldenRecordDuplicatesCountAndPercentage: CountAndPercentageNode
-  goldenRecordPossibleDuplicatesCountAndPercentage: CountAndPercentageNode
-  goldenRecordUniqueCountAndPercentage: CountAndPercentageNode
+  batchDuplicatesCountAndPercentage: [CountAndPercentageNode]
+  batchUniqueCountAndPercentage: [CountAndPercentageNode]
+  goldenRecordDuplicatesCountAndPercentage: [CountAndPercentageNode]
+  goldenRecordPossibleDuplicatesCountAndPercentage: [CountAndPercentageNode]
+  goldenRecordUniqueCountAndPercentage: [CountAndPercentageNode]
   totalHouseholdsCountWithValidPhoneNo: Int
   isDeduplicated: String
   canMerge: Boolean
@@ -5037,7 +5034,6 @@ type TicketNeedsAdjudicationDetailsNode implements Node {
   possibleDuplicate: IndividualNode
   hasDuplicatedDocument: Boolean
   selectedDuplicates: [IndividualNode]
-  deduplicationEngineSimilarityPair: DeduplicationEngineSimilarityPairNode
 }
 
 type TicketNeedsAdjudicationDetailsNodeConnection {

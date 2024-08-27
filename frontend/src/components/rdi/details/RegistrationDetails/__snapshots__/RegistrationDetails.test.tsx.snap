@@ -21,7 +21,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
         class="MuiGrid-root MuiGrid-container css-1vam7s3-MuiGrid-root"
       >
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-auto css-1wrgmsj-MuiGrid-root"
         >
           <div
             class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-acctgf-MuiGrid-root"
@@ -134,7 +134,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-auto css-1wrgmsj-MuiGrid-root"
         >
           <div
             class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
@@ -206,19 +206,53 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-auto css-1wrgmsj-MuiGrid-root"
         >
           <div
             class="MuiGrid-root MuiGrid-container MuiGrid-direction-xs-column css-1vpwcmr-MuiGrid-root"
           >
             <div
+              class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-3 MuiGrid-grid-xs-12 css-1jerruy-MuiGrid-root"
+            >
+              <div
+                class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              />
+              <div
+                class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              >
+                <span
+                  class="sc-brSamD cjsIaH"
+                >
+                  Identifiers
+                </span>
+              </div>
+              <div
+                class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              >
+                <span
+                  class="sc-brSamD cjsIaH"
+                >
+                  Biographical
+                </span>
+              </div>
+              <div
+                class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              >
+                <span
+                  class="sc-brSamD cjsIaH"
+                >
+                  Biometrics
+                </span>
+              </div>
+            </div>
+            <div
               class="sc-gLLuof bnECSg"
             >
               <div
-                class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
+                class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-acctgf-MuiGrid-root"
               >
                 <div
-                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
                 >
                   <div
                     class="MuiBox-root css-1yp4ln"
@@ -233,7 +267,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                   </div>
                 </div>
                 <div
-                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-9 css-1qpzhgb-MuiGrid-root"
+                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
                 >
                   <div
                     class="MuiGrid-root MuiGrid-container MuiGrid-direction-xs-column css-1vpwcmr-MuiGrid-root"
@@ -242,7 +276,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                       class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
                     >
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
                       >
                         <span
                           class="sc-fsYfdN fYeQos"
@@ -256,32 +290,92 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </span>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-grid-xs-3 css-bm8k05-MuiGrid-root"
                       >
-                        <span
-                          class="sc-iBdnpw kmdfPc"
-                          data-cy="percentage-Unique"
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
                         >
-                          66.67
-                          %
-                        </span>
+                          <span
+                            class="sc-iBdnpw kmdfPc"
+                            data-cy="percentage-Unique"
+                          >
+                            66.67
+                            %
+                          </span>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                        >
+                          <span
+                            class="sc-fsYfdN fYeQos"
+                            data-cy="value-Unique"
+                          >
+                            (
+                            4
+                            )
+                          </span>
+                        </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-grid-xs-3 css-bm8k05-MuiGrid-root"
                       >
-                        <span
-                          class="sc-fsYfdN fYeQos"
-                          data-cy="value-Unique"
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
                         >
-                          4
-                        </span>
+                          <span
+                            class="sc-iBdnpw kmdfPc"
+                            data-cy="percentage-Unique"
+                          >
+                            66.67
+                            %
+                          </span>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                        >
+                          <span
+                            class="sc-fsYfdN fYeQos"
+                            data-cy="value-Unique"
+                          >
+                            (
+                            4
+                            )
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-grid-xs-3 css-bm8k05-MuiGrid-root"
+                      >
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                        >
+                          <span
+                            class="sc-iBdnpw kmdfPc"
+                            data-cy="percentage-Unique"
+                          >
+                            66.67
+                            %
+                          </span>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                        >
+                          <span
+                            class="sc-fsYfdN fYeQos"
+                            data-cy="value-Unique"
+                          >
+                            (
+                            4
+                            )
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <div
                       class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
                     >
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
                       >
                         <span
                           class="sc-fsYfdN fYeQos"
@@ -295,25 +389,85 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </span>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-grid-xs-3 css-bm8k05-MuiGrid-root"
                       >
-                        <span
-                          class="sc-iBdnpw kmdfPc"
-                          data-cy="percentage-Duplicates"
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
                         >
-                          33.33
-                          %
-                        </span>
+                          <span
+                            class="sc-iBdnpw kmdfPc"
+                            data-cy="percentage-Duplicates"
+                          >
+                            33.33
+                            %
+                          </span>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                        >
+                          <span
+                            class="sc-fsYfdN fYeQos"
+                            data-cy="value-Duplicates"
+                          >
+                            (
+                            2
+                            )
+                          </span>
+                        </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-grid-xs-3 css-bm8k05-MuiGrid-root"
                       >
-                        <span
-                          class="sc-fsYfdN fYeQos"
-                          data-cy="value-Duplicates"
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
                         >
-                          2
-                        </span>
+                          <span
+                            class="sc-iBdnpw kmdfPc"
+                            data-cy="percentage-Duplicates"
+                          >
+                            33.33
+                            %
+                          </span>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                        >
+                          <span
+                            class="sc-fsYfdN fYeQos"
+                            data-cy="value-Duplicates"
+                          >
+                            (
+                            2
+                            )
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-grid-xs-3 css-bm8k05-MuiGrid-root"
+                      >
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                        >
+                          <span
+                            class="sc-iBdnpw kmdfPc"
+                            data-cy="percentage-Duplicates"
+                          >
+                            33.33
+                            %
+                          </span>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                        >
+                          <span
+                            class="sc-fsYfdN fYeQos"
+                            data-cy="value-Duplicates"
+                          >
+                            (
+                            2
+                            )
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -324,10 +478,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
               class="sc-gLLuof bnECSg"
             >
               <div
-                class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
+                class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-acctgf-MuiGrid-root"
               >
                 <div
-                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
                 >
                   <div
                     class="MuiBox-root css-1yp4ln"
@@ -342,7 +496,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                   </div>
                 </div>
                 <div
-                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-9 css-1qpzhgb-MuiGrid-root"
+                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
                 >
                   <div
                     class="MuiGrid-root MuiGrid-container MuiGrid-direction-xs-column css-1vpwcmr-MuiGrid-root"
@@ -351,7 +505,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                       class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
                     >
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
                       >
                         <span
                           class="sc-fsYfdN fYeQos"
@@ -365,32 +519,92 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </span>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-grid-xs-3 css-bm8k05-MuiGrid-root"
                       >
-                        <span
-                          class="sc-iBdnpw kmdfPc"
-                          data-cy="percentage-Unique"
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
                         >
-                          100.00
-                          %
-                        </span>
+                          <span
+                            class="sc-iBdnpw kmdfPc"
+                            data-cy="percentage-Unique"
+                          >
+                            100.00
+                            %
+                          </span>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                        >
+                          <span
+                            class="sc-fsYfdN fYeQos"
+                            data-cy="value-Unique"
+                          >
+                            (
+                            6
+                            )
+                          </span>
+                        </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-grid-xs-3 css-bm8k05-MuiGrid-root"
                       >
-                        <span
-                          class="sc-fsYfdN fYeQos"
-                          data-cy="value-Unique"
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
                         >
-                          6
-                        </span>
+                          <span
+                            class="sc-iBdnpw kmdfPc"
+                            data-cy="percentage-Unique"
+                          >
+                            100.00
+                            %
+                          </span>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                        >
+                          <span
+                            class="sc-fsYfdN fYeQos"
+                            data-cy="value-Unique"
+                          >
+                            (
+                            6
+                            )
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-grid-xs-3 css-bm8k05-MuiGrid-root"
+                      >
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                        >
+                          <span
+                            class="sc-iBdnpw kmdfPc"
+                            data-cy="percentage-Unique"
+                          >
+                            100.00
+                            %
+                          </span>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                        >
+                          <span
+                            class="sc-fsYfdN fYeQos"
+                            data-cy="value-Unique"
+                          >
+                            (
+                            6
+                            )
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <div
                       class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
                     >
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
                       >
                         <span
                           class="sc-fsYfdN fYeQos"
@@ -404,32 +618,92 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </span>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-grid-xs-3 css-bm8k05-MuiGrid-root"
                       >
-                        <span
-                          class="sc-iBdnpw kmdfPc"
-                          data-cy="percentage-Duplicates"
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
                         >
-                          0.00
-                          %
-                        </span>
+                          <span
+                            class="sc-iBdnpw kmdfPc"
+                            data-cy="percentage-Duplicates"
+                          >
+                            0.00
+                            %
+                          </span>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                        >
+                          <span
+                            class="sc-fsYfdN fYeQos"
+                            data-cy="value-Duplicates"
+                          >
+                            (
+                            0
+                            )
+                          </span>
+                        </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-grid-xs-3 css-bm8k05-MuiGrid-root"
                       >
-                        <span
-                          class="sc-fsYfdN fYeQos"
-                          data-cy="value-Duplicates"
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
                         >
-                          0
-                        </span>
+                          <span
+                            class="sc-iBdnpw kmdfPc"
+                            data-cy="percentage-Duplicates"
+                          >
+                            0.00
+                            %
+                          </span>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                        >
+                          <span
+                            class="sc-fsYfdN fYeQos"
+                            data-cy="value-Duplicates"
+                          >
+                            (
+                            0
+                            )
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-grid-xs-3 css-bm8k05-MuiGrid-root"
+                      >
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                        >
+                          <span
+                            class="sc-iBdnpw kmdfPc"
+                            data-cy="percentage-Duplicates"
+                          >
+                            0.00
+                            %
+                          </span>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                        >
+                          <span
+                            class="sc-fsYfdN fYeQos"
+                            data-cy="value-Duplicates"
+                          >
+                            (
+                            0
+                            )
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <div
                       class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
                     >
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
                       >
                         <span
                           class="sc-fsYfdN fYeQos"
@@ -443,25 +717,85 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </span>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-grid-xs-3 css-bm8k05-MuiGrid-root"
                       >
-                        <span
-                          class="sc-iBdnpw kmdfPc"
-                          data-cy="percentage-Need Adjudication"
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
                         >
-                          0.00
-                          %
-                        </span>
+                          <span
+                            class="sc-iBdnpw kmdfPc"
+                            data-cy="percentage-Need Adjudication"
+                          >
+                            0.00
+                            %
+                          </span>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                        >
+                          <span
+                            class="sc-fsYfdN fYeQos"
+                            data-cy="value-Need Adjudication"
+                          >
+                            (
+                            0
+                            )
+                          </span>
+                        </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-grid-xs-3 css-bm8k05-MuiGrid-root"
                       >
-                        <span
-                          class="sc-fsYfdN fYeQos"
-                          data-cy="value-Need Adjudication"
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
                         >
-                          0
-                        </span>
+                          <span
+                            class="sc-iBdnpw kmdfPc"
+                            data-cy="percentage-Need Adjudication"
+                          >
+                            0.00
+                            %
+                          </span>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                        >
+                          <span
+                            class="sc-fsYfdN fYeQos"
+                            data-cy="value-Need Adjudication"
+                          >
+                            (
+                            0
+                            )
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-grid-xs-3 css-bm8k05-MuiGrid-root"
+                      >
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                        >
+                          <span
+                            class="sc-iBdnpw kmdfPc"
+                            data-cy="percentage-Need Adjudication"
+                          >
+                            0.00
+                            %
+                          </span>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                        >
+                          <span
+                            class="sc-fsYfdN fYeQos"
+                            data-cy="value-Need Adjudication"
+                          >
+                            (
+                            0
+                            )
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
