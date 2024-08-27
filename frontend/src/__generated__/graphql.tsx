@@ -439,6 +439,7 @@ export type BulkUpdateGrievanceTicketsUrgencyMutation = {
 export type BusinessAreaNode = Node & {
   __typename?: 'BusinessAreaNode';
   active: Scalars['Boolean']['output'];
+  biometricDeduplicationThreshold: Scalars['Float']['output'];
   businessAreaPartnerThrough: Array<PartnerRoleNode>;
   cashplanSet: CashPlanNodeConnection;
   children: UserBusinessAreaNodeConnection;
@@ -1375,6 +1376,42 @@ export enum DataCollectingTypeType {
   Social = 'SOCIAL',
   Standard = 'STANDARD'
 }
+
+export type DeduplicationEngineSimilarityPairNode = Node & {
+  __typename?: 'DeduplicationEngineSimilarityPairNode';
+  id: Scalars['ID']['output'];
+  individual1: IndividualNode;
+  individual1Photo?: Maybe<Scalars['String']['output']>;
+  individual2: IndividualNode;
+  individual2Photo?: Maybe<Scalars['String']['output']>;
+  isDuplicate?: Maybe<Scalars['Boolean']['output']>;
+  program: ProgramNode;
+  similarityScore?: Maybe<Scalars['String']['output']>;
+  ticketneedsadjudicationdetailsSet: TicketNeedsAdjudicationDetailsNodeConnection;
+};
+
+
+export type DeduplicationEngineSimilarityPairNodeTicketneedsadjudicationdetailsSetArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type DeduplicationEngineSimilarityPairNodeConnection = {
+  __typename?: 'DeduplicationEngineSimilarityPairNodeConnection';
+  edgeCount?: Maybe<Scalars['Int']['output']>;
+  edges: Array<Maybe<DeduplicationEngineSimilarityPairNodeEdge>>;
+  pageInfo: PageInfo;
+  totalCount?: Maybe<Scalars['Int']['output']>;
+};
+
+export type DeduplicationEngineSimilarityPairNodeEdge = {
+  __typename?: 'DeduplicationEngineSimilarityPairNodeEdge';
+  cursor: Scalars['String']['output'];
+  node?: Maybe<DeduplicationEngineSimilarityPairNode>;
+};
 
 export type DeduplicationResultNode = {
   __typename?: 'DeduplicationResultNode';
@@ -3397,6 +3434,8 @@ export type IndividualNode = Node & {
   age?: Maybe<Scalars['Int']['output']>;
   ageAtRegistration?: Maybe<Scalars['Int']['output']>;
   bankAccountInfo?: Maybe<BankAccountInfoNode>;
+  biometricDuplicates1: DeduplicationEngineSimilarityPairNodeConnection;
+  biometricDuplicates2: DeduplicationEngineSimilarityPairNodeConnection;
   birthDate: Scalars['Date']['output'];
   blockchainName: Scalars['String']['output'];
   businessArea: UserBusinessAreaNode;
@@ -3498,6 +3537,24 @@ export type IndividualNode = Node & {
   withdrawn: Scalars['Boolean']['output'];
   withdrawnDate?: Maybe<Scalars['DateTime']['output']>;
   workStatus: Scalars['String']['output'];
+};
+
+
+export type IndividualNodeBiometricDuplicates1Args = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type IndividualNodeBiometricDuplicates2Args = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -5684,7 +5741,6 @@ export type ProgramNode = Node & {
   adminUrl?: Maybe<Scalars['String']['output']>;
   administrativeAreasOfImplementation: Scalars['String']['output'];
   biometricDeduplicationEnabled: Scalars['Boolean']['output'];
-  biometricDeduplicationThreshold: Scalars['Float']['output'];
   budget?: Maybe<Scalars['Decimal']['output']>;
   businessArea: UserBusinessAreaNode;
   caHashId?: Maybe<Scalars['String']['output']>;
@@ -5694,6 +5750,7 @@ export type ProgramNode = Node & {
   createdAt: Scalars['DateTime']['output'];
   cycles?: Maybe<ProgramCycleNodeConnection>;
   dataCollectingType?: Maybe<DataCollectingTypeNode>;
+  deduplicationEngineSimilarityPairs: DeduplicationEngineSimilarityPairNodeConnection;
   deduplicationSetId?: Maybe<Scalars['UUID']['output']>;
   description: Scalars['String']['output'];
   endDate: Scalars['Date']['output'];
@@ -5778,6 +5835,15 @@ export type ProgramNodeCyclesArgs = {
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   totalDeliveredQuantityUsdFrom?: InputMaybe<Scalars['Float']['input']>;
   totalDeliveredQuantityUsdTo?: InputMaybe<Scalars['Float']['input']>;
+};
+
+
+export type ProgramNodeDeduplicationEngineSimilarityPairsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -8556,6 +8622,7 @@ export type TicketNeedsAdjudicationDetailsExtraDataNode = {
 export type TicketNeedsAdjudicationDetailsNode = Node & {
   __typename?: 'TicketNeedsAdjudicationDetailsNode';
   createdAt: Scalars['DateTime']['output'];
+  dedupEngineSimilarityPair?: Maybe<DeduplicationEngineSimilarityPairNode>;
   extraData?: Maybe<TicketNeedsAdjudicationDetailsExtraDataNode>;
   goldenRecordsIndividual: IndividualNode;
   hasDuplicatedDocument?: Maybe<Scalars['Boolean']['output']>;
@@ -8944,6 +9011,7 @@ export type UploadImportDataXlsxFileAsync = {
 export type UserBusinessAreaNode = Node & {
   __typename?: 'UserBusinessAreaNode';
   active: Scalars['Boolean']['output'];
+  biometricDeduplicationThreshold: Scalars['Float']['output'];
   businessAreaPartnerThrough: Array<PartnerRoleNode>;
   cashplanSet: CashPlanNodeConnection;
   children: UserBusinessAreaNodeConnection;
@@ -24320,7 +24388,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping of interface types */
 export type ResolversInterfaceTypes<RefType extends Record<string, unknown>> = {
-  Node: ( ApprovalProcessNode ) | ( AreaNode ) | ( AreaTypeNode ) | ( BankAccountInfoNode ) | ( BusinessAreaNode ) | ( CashPlanNode ) | ( CommunicationMessageNode ) | ( CommunicationMessageRecipientMapNode ) | ( DataCollectingTypeNode ) | ( DeliveryMechanismNode ) | ( DeliveryMechanismPerPaymentPlanNode ) | ( DocumentNode ) | ( FeedbackMessageNode ) | ( FeedbackNode ) | ( FinancialServiceProviderNode ) | ( FinancialServiceProviderXlsxTemplateNode ) | ( GrievanceDocumentNode ) | ( GrievanceTicketNode ) | ( HouseholdNode ) | ( ImportDataNode ) | ( ImportedDocumentNode ) | ( ImportedHouseholdNode ) | ( ImportedIndividualIdentityNode ) | ( ImportedIndividualNode ) | ( IndividualIdentityNode ) | ( IndividualNode ) | ( KoboImportDataNode ) | ( LogEntryNode ) | ( PaymentHouseholdSnapshotNode ) | ( PaymentNode ) | ( PaymentPlanNode ) | ( PaymentRecordNode ) | ( PaymentVerificationLogEntryNode ) | ( PaymentVerificationNode ) | ( PaymentVerificationPlanNode ) | ( PaymentVerificationSummaryNode ) | ( PeriodicFieldNode ) | ( ProgramCycleNode ) | ( ProgramNode ) | ( RecipientNode ) | ( RegistrationDataImportDatahubNode ) | ( RegistrationDataImportNode ) | ( ReportNode ) | ( RuleCommitNode ) | ( SanctionListIndividualAliasNameNode ) | ( SanctionListIndividualCountriesNode ) | ( SanctionListIndividualDateOfBirthNode ) | ( SanctionListIndividualDocumentNode ) | ( SanctionListIndividualNationalitiesNode ) | ( SanctionListIndividualNode ) | ( ServiceProviderNode ) | ( SteficonRuleNode ) | ( SurveyNode ) | ( TargetPopulationNode ) | ( TicketAddIndividualDetailsNode ) | ( TicketComplaintDetailsNode ) | ( TicketDeleteHouseholdDetailsNode ) | ( TicketDeleteIndividualDetailsNode ) | ( TicketHouseholdDataUpdateDetailsNode ) | ( TicketIndividualDataUpdateDetailsNode ) | ( TicketNeedsAdjudicationDetailsNode ) | ( TicketNegativeFeedbackDetailsNode ) | ( TicketNoteNode ) | ( TicketPaymentVerificationDetailsNode ) | ( TicketPositiveFeedbackDetailsNode ) | ( TicketReferralDetailsNode ) | ( TicketSensitiveDetailsNode ) | ( TicketSystemFlaggingDetailsNode ) | ( UserBusinessAreaNode ) | ( UserNode ) | ( VolumeByDeliveryMechanismNode );
+  Node: ( ApprovalProcessNode ) | ( AreaNode ) | ( AreaTypeNode ) | ( BankAccountInfoNode ) | ( BusinessAreaNode ) | ( CashPlanNode ) | ( CommunicationMessageNode ) | ( CommunicationMessageRecipientMapNode ) | ( DataCollectingTypeNode ) | ( DeduplicationEngineSimilarityPairNode ) | ( DeliveryMechanismNode ) | ( DeliveryMechanismPerPaymentPlanNode ) | ( DocumentNode ) | ( FeedbackMessageNode ) | ( FeedbackNode ) | ( FinancialServiceProviderNode ) | ( FinancialServiceProviderXlsxTemplateNode ) | ( GrievanceDocumentNode ) | ( GrievanceTicketNode ) | ( HouseholdNode ) | ( ImportDataNode ) | ( ImportedDocumentNode ) | ( ImportedHouseholdNode ) | ( ImportedIndividualIdentityNode ) | ( ImportedIndividualNode ) | ( IndividualIdentityNode ) | ( IndividualNode ) | ( KoboImportDataNode ) | ( LogEntryNode ) | ( PaymentHouseholdSnapshotNode ) | ( PaymentNode ) | ( PaymentPlanNode ) | ( PaymentRecordNode ) | ( PaymentVerificationLogEntryNode ) | ( PaymentVerificationNode ) | ( PaymentVerificationPlanNode ) | ( PaymentVerificationSummaryNode ) | ( PeriodicFieldNode ) | ( ProgramCycleNode ) | ( ProgramNode ) | ( RecipientNode ) | ( RegistrationDataImportDatahubNode ) | ( RegistrationDataImportNode ) | ( ReportNode ) | ( RuleCommitNode ) | ( SanctionListIndividualAliasNameNode ) | ( SanctionListIndividualCountriesNode ) | ( SanctionListIndividualDateOfBirthNode ) | ( SanctionListIndividualDocumentNode ) | ( SanctionListIndividualNationalitiesNode ) | ( SanctionListIndividualNode ) | ( ServiceProviderNode ) | ( SteficonRuleNode ) | ( SurveyNode ) | ( TargetPopulationNode ) | ( TicketAddIndividualDetailsNode ) | ( TicketComplaintDetailsNode ) | ( TicketDeleteHouseholdDetailsNode ) | ( TicketDeleteIndividualDetailsNode ) | ( TicketHouseholdDataUpdateDetailsNode ) | ( TicketIndividualDataUpdateDetailsNode ) | ( TicketNeedsAdjudicationDetailsNode ) | ( TicketNegativeFeedbackDetailsNode ) | ( TicketNoteNode ) | ( TicketPaymentVerificationDetailsNode ) | ( TicketPositiveFeedbackDetailsNode ) | ( TicketReferralDetailsNode ) | ( TicketSensitiveDetailsNode ) | ( TicketSystemFlaggingDetailsNode ) | ( UserBusinessAreaNode ) | ( UserNode ) | ( VolumeByDeliveryMechanismNode );
 };
 
 /** Mapping between all available schema types and the resolvers types */
@@ -24431,6 +24499,9 @@ export type ResolversTypes = {
   Date: ResolverTypeWrapper<Scalars['Date']['output']>;
   DateTime: ResolverTypeWrapper<Scalars['DateTime']['output']>;
   Decimal: ResolverTypeWrapper<Scalars['Decimal']['output']>;
+  DeduplicationEngineSimilarityPairNode: ResolverTypeWrapper<DeduplicationEngineSimilarityPairNode>;
+  DeduplicationEngineSimilarityPairNodeConnection: ResolverTypeWrapper<DeduplicationEngineSimilarityPairNodeConnection>;
+  DeduplicationEngineSimilarityPairNodeEdge: ResolverTypeWrapper<DeduplicationEngineSimilarityPairNodeEdge>;
   DeduplicationResultNode: ResolverTypeWrapper<DeduplicationResultNode>;
   DeleteHouseholdApproveMutation: ResolverTypeWrapper<DeleteHouseholdApproveMutation>;
   DeletePaymentPlanMutation: ResolverTypeWrapper<DeletePaymentPlanMutation>;
@@ -24959,6 +25030,9 @@ export type ResolversParentTypes = {
   Date: Scalars['Date']['output'];
   DateTime: Scalars['DateTime']['output'];
   Decimal: Scalars['Decimal']['output'];
+  DeduplicationEngineSimilarityPairNode: DeduplicationEngineSimilarityPairNode;
+  DeduplicationEngineSimilarityPairNodeConnection: DeduplicationEngineSimilarityPairNodeConnection;
+  DeduplicationEngineSimilarityPairNodeEdge: DeduplicationEngineSimilarityPairNodeEdge;
   DeduplicationResultNode: DeduplicationResultNode;
   DeleteHouseholdApproveMutation: DeleteHouseholdApproveMutation;
   DeletePaymentPlanMutation: DeletePaymentPlanMutation;
@@ -25531,6 +25605,7 @@ export type BulkUpdateGrievanceTicketsUrgencyMutationResolvers<ContextType = any
 
 export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['BusinessAreaNode'] = ResolversParentTypes['BusinessAreaNode']> = {
   active?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  biometricDeduplicationThreshold?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   businessAreaPartnerThrough?: Resolver<Array<ResolversTypes['PartnerRoleNode']>, ParentType, ContextType>;
   cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeCashplanSetArgs>>;
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeChildrenArgs>>;
@@ -25972,6 +26047,33 @@ export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversT
 export interface DecimalScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Decimal'], any> {
   name: 'Decimal';
 }
+
+export type DeduplicationEngineSimilarityPairNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeduplicationEngineSimilarityPairNode'] = ResolversParentTypes['DeduplicationEngineSimilarityPairNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  individual1?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>;
+  individual1Photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  individual2?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>;
+  individual2Photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  isDuplicate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>;
+  similarityScore?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  ticketneedsadjudicationdetailsSet?: Resolver<ResolversTypes['TicketNeedsAdjudicationDetailsNodeConnection'], ParentType, ContextType, Partial<DeduplicationEngineSimilarityPairNodeTicketneedsadjudicationdetailsSetArgs>>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type DeduplicationEngineSimilarityPairNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeduplicationEngineSimilarityPairNodeConnection'] = ResolversParentTypes['DeduplicationEngineSimilarityPairNodeConnection']> = {
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edges?: Resolver<Array<Maybe<ResolversTypes['DeduplicationEngineSimilarityPairNodeEdge']>>, ParentType, ContextType>;
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type DeduplicationEngineSimilarityPairNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeduplicationEngineSimilarityPairNodeEdge'] = ResolversParentTypes['DeduplicationEngineSimilarityPairNodeEdge']> = {
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  node?: Resolver<Maybe<ResolversTypes['DeduplicationEngineSimilarityPairNode']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
 
 export type DeduplicationResultNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeduplicationResultNode'] = ResolversParentTypes['DeduplicationResultNode']> = {
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -27084,6 +27186,8 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   ageAtRegistration?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   bankAccountInfo?: Resolver<Maybe<ResolversTypes['BankAccountInfoNode']>, ParentType, ContextType>;
+  biometricDuplicates1?: Resolver<ResolversTypes['DeduplicationEngineSimilarityPairNodeConnection'], ParentType, ContextType, Partial<IndividualNodeBiometricDuplicates1Args>>;
+  biometricDuplicates2?: Resolver<ResolversTypes['DeduplicationEngineSimilarityPairNodeConnection'], ParentType, ContextType, Partial<IndividualNodeBiometricDuplicates2Args>>;
   birthDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   blockchainName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>;
@@ -27453,7 +27557,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'ApprovalProcessNode' | 'AreaNode' | 'AreaTypeNode' | 'BankAccountInfoNode' | 'BusinessAreaNode' | 'CashPlanNode' | 'CommunicationMessageNode' | 'CommunicationMessageRecipientMapNode' | 'DataCollectingTypeNode' | 'DeliveryMechanismNode' | 'DeliveryMechanismPerPaymentPlanNode' | 'DocumentNode' | 'FeedbackMessageNode' | 'FeedbackNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'GrievanceDocumentNode' | 'GrievanceTicketNode' | 'HouseholdNode' | 'ImportDataNode' | 'ImportedDocumentNode' | 'ImportedHouseholdNode' | 'ImportedIndividualIdentityNode' | 'ImportedIndividualNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'KoboImportDataNode' | 'LogEntryNode' | 'PaymentHouseholdSnapshotNode' | 'PaymentNode' | 'PaymentPlanNode' | 'PaymentRecordNode' | 'PaymentVerificationLogEntryNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'PeriodicFieldNode' | 'ProgramCycleNode' | 'ProgramNode' | 'RecipientNode' | 'RegistrationDataImportDatahubNode' | 'RegistrationDataImportNode' | 'ReportNode' | 'RuleCommitNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualDateOfBirthNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualNode' | 'ServiceProviderNode' | 'SteficonRuleNode' | 'SurveyNode' | 'TargetPopulationNode' | 'TicketAddIndividualDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketNoteNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'UserBusinessAreaNode' | 'UserNode' | 'VolumeByDeliveryMechanismNode', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'ApprovalProcessNode' | 'AreaNode' | 'AreaTypeNode' | 'BankAccountInfoNode' | 'BusinessAreaNode' | 'CashPlanNode' | 'CommunicationMessageNode' | 'CommunicationMessageRecipientMapNode' | 'DataCollectingTypeNode' | 'DeduplicationEngineSimilarityPairNode' | 'DeliveryMechanismNode' | 'DeliveryMechanismPerPaymentPlanNode' | 'DocumentNode' | 'FeedbackMessageNode' | 'FeedbackNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'GrievanceDocumentNode' | 'GrievanceTicketNode' | 'HouseholdNode' | 'ImportDataNode' | 'ImportedDocumentNode' | 'ImportedHouseholdNode' | 'ImportedIndividualIdentityNode' | 'ImportedIndividualNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'KoboImportDataNode' | 'LogEntryNode' | 'PaymentHouseholdSnapshotNode' | 'PaymentNode' | 'PaymentPlanNode' | 'PaymentRecordNode' | 'PaymentVerificationLogEntryNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'PeriodicFieldNode' | 'ProgramCycleNode' | 'ProgramNode' | 'RecipientNode' | 'RegistrationDataImportDatahubNode' | 'RegistrationDataImportNode' | 'ReportNode' | 'RuleCommitNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualDateOfBirthNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualNode' | 'ServiceProviderNode' | 'SteficonRuleNode' | 'SurveyNode' | 'TargetPopulationNode' | 'TicketAddIndividualDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketNoteNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'UserBusinessAreaNode' | 'UserNode' | 'VolumeByDeliveryMechanismNode', ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
 };
 
@@ -28006,7 +28110,6 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   adminUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   administrativeAreasOfImplementation?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   biometricDeduplicationEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  biometricDeduplicationThreshold?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   budget?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>;
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>;
   caHashId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -28016,6 +28119,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   cycles?: Resolver<Maybe<ResolversTypes['ProgramCycleNodeConnection']>, ParentType, ContextType, Partial<ProgramNodeCyclesArgs>>;
   dataCollectingType?: Resolver<Maybe<ResolversTypes['DataCollectingTypeNode']>, ParentType, ContextType>;
+  deduplicationEngineSimilarityPairs?: Resolver<ResolversTypes['DeduplicationEngineSimilarityPairNodeConnection'], ParentType, ContextType, Partial<ProgramNodeDeduplicationEngineSimilarityPairsArgs>>;
   deduplicationSetId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   endDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
@@ -29118,6 +29222,7 @@ export type TicketNeedsAdjudicationDetailsExtraDataNodeResolvers<ContextType = a
 
 export type TicketNeedsAdjudicationDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketNeedsAdjudicationDetailsNode'] = ResolversParentTypes['TicketNeedsAdjudicationDetailsNode']> = {
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  dedupEngineSimilarityPair?: Resolver<Maybe<ResolversTypes['DeduplicationEngineSimilarityPairNode']>, ParentType, ContextType>;
   extraData?: Resolver<Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsExtraDataNode']>, ParentType, ContextType>;
   goldenRecordsIndividual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>;
   hasDuplicatedDocument?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
@@ -29381,6 +29486,7 @@ export type UploadImportDataXlsxFileAsyncResolvers<ContextType = any, ParentType
 
 export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserBusinessAreaNode'] = ResolversParentTypes['UserBusinessAreaNode']> = {
   active?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  biometricDeduplicationThreshold?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   businessAreaPartnerThrough?: Resolver<Array<ResolversTypes['PartnerRoleNode']>, ParentType, ContextType>;
   cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeCashplanSetArgs>>;
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeChildrenArgs>>;
@@ -29646,6 +29752,9 @@ export type Resolvers<ContextType = any> = {
   Date?: GraphQLScalarType;
   DateTime?: GraphQLScalarType;
   Decimal?: GraphQLScalarType;
+  DeduplicationEngineSimilarityPairNode?: DeduplicationEngineSimilarityPairNodeResolvers<ContextType>;
+  DeduplicationEngineSimilarityPairNodeConnection?: DeduplicationEngineSimilarityPairNodeConnectionResolvers<ContextType>;
+  DeduplicationEngineSimilarityPairNodeEdge?: DeduplicationEngineSimilarityPairNodeEdgeResolvers<ContextType>;
   DeduplicationResultNode?: DeduplicationResultNodeResolvers<ContextType>;
   DeleteHouseholdApproveMutation?: DeleteHouseholdApproveMutationResolvers<ContextType>;
   DeletePaymentPlanMutation?: DeletePaymentPlanMutationResolvers<ContextType>;

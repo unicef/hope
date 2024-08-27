@@ -16,7 +16,34 @@ from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import get_count_and_percentage, to_choice_object
 from hct_mis_api.apps.registration_data.filters import RegistrationDataImportFilter
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_data.models import (
+    DeduplicationEngineSimilarityPair,
+    RegistrationDataImport,
+)
+
+
+class DeduplicationEngineSimilarityPairNode(DjangoObjectType):
+    is_duplicate = graphene.Boolean()
+    individual1_photo = graphene.String()
+    individual2_photo = graphene.String()
+    similarity_score = graphene.String()
+
+    @staticmethod
+    def resolve_is_duplicate(similarity_pair: DeduplicationEngineSimilarityPair, info: Any) -> bool:
+        return similarity_pair._is_duplicate
+
+    @staticmethod
+    def resolve_individual1_photo(similarity_pair: DeduplicationEngineSimilarityPair, info: Any) -> str:
+        return similarity_pair.individual1.photo.url
+
+    @staticmethod
+    def resolve_individual2_photo(similarity_pair: DeduplicationEngineSimilarityPair, info: Any) -> str:
+        return similarity_pair.individual2.photo.url
+
+    class Meta:
+        model = DeduplicationEngineSimilarityPair
+        interfaces = (graphene.relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class CountAndPercentageNode(graphene.ObjectType):
