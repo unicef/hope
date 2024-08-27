@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Optional
 
 import graphene
 from graphene_django import DjangoObjectType
@@ -33,12 +33,12 @@ class DeduplicationEngineSimilarityPairNode(DjangoObjectType):
         return similarity_pair._is_duplicate
 
     @staticmethod
-    def resolve_individual1_photo(similarity_pair: DeduplicationEngineSimilarityPair, info: Any) -> str:
-        return similarity_pair.individual1.photo.url
+    def resolve_individual1_photo(similarity_pair: DeduplicationEngineSimilarityPair, info: Any) -> Optional[str]:
+        return similarity_pair.individual1.photo and similarity_pair.individual1.photo.url
 
     @staticmethod
-    def resolve_individual2_photo(similarity_pair: DeduplicationEngineSimilarityPair, info: Any) -> str:
-        return similarity_pair.individual2.photo.url
+    def resolve_individual2_photo(similarity_pair: DeduplicationEngineSimilarityPair, info: Any) -> Optional[str]:
+        return similarity_pair.individual2.photo and similarity_pair.individual1.photo.url
 
     class Meta:
         model = DeduplicationEngineSimilarityPair
