@@ -8644,6 +8644,7 @@ export type TicketNeedsAdjudicationDetailsNode = Node & {
   __typename?: 'TicketNeedsAdjudicationDetailsNode';
   createdAt: Scalars['DateTime']['output'];
   dedupEngineSimilarityPair?: Maybe<DeduplicationEngineSimilarityPairNode>;
+  deduplicationEngineSimilarityPair?: Maybe<DeduplicationEngineSimilarityPairNode>;
   extraData?: Maybe<TicketNeedsAdjudicationDetailsExtraDataNode>;
   goldenRecordsIndividual: IndividualNode;
   hasDuplicatedDocument?: Maybe<Scalars['Boolean']['output']>;
@@ -29382,6 +29383,7 @@ export type TicketNeedsAdjudicationDetailsExtraDataNodeResolvers<ContextType = a
 export type TicketNeedsAdjudicationDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketNeedsAdjudicationDetailsNode'] = ResolversParentTypes['TicketNeedsAdjudicationDetailsNode']> = {
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   dedupEngineSimilarityPair?: Resolver<Maybe<ResolversTypes['DeduplicationEngineSimilarityPairNode']>, ParentType, ContextType>;
+  deduplicationEngineSimilarityPair?: Resolver<Maybe<ResolversTypes['DeduplicationEngineSimilarityPairNode']>, ParentType, ContextType>;
   extraData?: Resolver<Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsExtraDataNode']>, ParentType, ContextType>;
   goldenRecordsIndividual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>;
   hasDuplicatedDocument?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
