@@ -116,6 +116,9 @@ export const GRIEVANCE_ISSUE_TYPES = {
   REGISTRATION_COMPLAINT: '20',
   OTHER_COMPLAINT: '21',
   PARTNER_COMPLAINT: '22',
+  UNIQUE_IDENTIFIERS_SIMILARITY: '23',
+  BIOGRAPHICAL_DATA_SIMILARITY: '24',
+  BIOMETRICS_SIMILARITY: '25',
 };
 
 export const GRIEVANCE_ISSUE_TYPES_NAMES = {
@@ -141,6 +144,9 @@ export const GRIEVANCE_ISSUE_TYPES_NAMES = {
   20: 'REGISTRATION_COMPLAINT',
   21: 'OTHER_COMPLAINT',
   22: 'PARTNER_COMPLAINT',
+  23: 'UNIQUE_IDENTIFIERS_SIMILARITY',
+  24: 'BIOGRAPHICAL_DATA_SIMILARITY',
+  25: 'BIOMETRICS_SIMILARITY',
 };
 
 export const GRIEVANCE_CATEGORY_DESCRIPTIONS = {
@@ -202,6 +208,7 @@ export const GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS = {
   SEXUAL_HARASSMENT:
     'Grievance on unwanted advances, abuse, or exploitation of a sexual nature',
   MISCELLANEOUS: 'Other issues not falling into specific predefined categories',
+  //TODO: Add descriptions for the new issue types
 };
 
 export const REPORT_TYPES = {
