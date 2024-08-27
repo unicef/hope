@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import Q, QuerySet
 
-from hct_mis_api.apps.account.models import Partner
+from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
@@ -28,7 +28,7 @@ from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
-def copy_program_object(copy_from_program_id: str, program_data: dict) -> Program:
+def copy_program_object(copy_from_program_id: str, program_data: dict, user: User) -> Program:
     program = Program.objects.get(id=copy_from_program_id)
     admin_areas = program.admin_areas.all()
     program.pk = None
@@ -51,6 +51,14 @@ def copy_program_object(copy_from_program_id: str, program_data: dict) -> Progra
     program.save()
     program.admin_areas.set(admin_areas)
     program.refresh_from_db()
+
+    # create default cycle
+    ProgramCycle.objects.create(
+        program_id=program.id,
+        start_date=program.start_date,
+        end_date=None,
+        created_by=user,
+    )
     return program
 
 
@@ -88,6 +96,7 @@ class CopyProgramPopulation:
             else:
                 individuals = self.copy_individuals_without_collections()
                 households = self.copy_households_without_collections(individuals)
+
             self.copy_household_related_data(households, individuals)
             self.copy_individual_related_data(individuals)
 
@@ -176,13 +185,8 @@ class CopyProgramPopulation:
             role.pk = None
             role.household = new_household
             role.rdi_merge_status = self.rdi_merge_status
-            role.individual = (
-                getattr(Individual, self.manager)
-                .filter(id__in=[ind.pk for ind in new_individuals])
-                .get(
-                    program=self.program,
-                    copied_from=role.individual,
-                )
+            role.individual = next(
+                filter(lambda ind: ind.program == self.program and ind.copied_from == role.individual, new_individuals)
             )
             roles_in_household.append(role)
         return roles_in_household
@@ -320,17 +324,6 @@ def copy_program_related_data(copy_from_program_id: str, new_program: Program) -
         get_individual_doc(new_program.business_area.slug),
     )
     populate_index(Household.objects.filter(program=new_program), HouseholdDocument)
-
-    create_program_cycle(new_program)
-
-
-def create_program_cycle(program: Program) -> None:
-    ProgramCycle.objects.create(
-        program=program,
-        start_date=program.start_date,
-        end_date=program.end_date,
-        status=ProgramCycle.ACTIVE,
-    )
 
 
 def create_roles_for_new_representation(new_household: Household, program: Program) -> None:
@@ -474,8 +467,8 @@ def copy_individual(individual: Individual, program: Program) -> tuple:
     original_individual_id = individual.id
     individual.copied_from_id = original_individual_id
     individual.pk = None
-    copied_flex_fields = get_flex_fields_without_pdu_values(individual)
-    individual.flex_fields = populate_pdu_with_null_values(program, copied_flex_fields)
+    individual.flex_fields = get_flex_fields_without_pdu_values(individual)
+    populate_pdu_with_null_values(program, individual.flex_fields)
     individual.program = program
     individual.household = None
     individual.registration_data_import = None

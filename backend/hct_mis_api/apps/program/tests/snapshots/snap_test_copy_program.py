@@ -321,7 +321,7 @@ snapshots['TestCopyProgram::test_copy_program_with_pdu_fields 1'] = {
                                 'Round 3C',
                                 'Round 4D'
                             ],
-                            'subtype': 'BOOLEAN'
+                            'subtype': 'BOOL'
                         }
                     }
                 ],

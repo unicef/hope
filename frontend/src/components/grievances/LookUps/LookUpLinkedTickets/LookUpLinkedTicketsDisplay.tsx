@@ -30,7 +30,7 @@ export const LookUpLinkedTicketsDisplay = ({
   const renderLinkedTickets = (): React.ReactElement => {
     if (values.selectedLinkedTickets.length) {
       return values.selectedLinkedTickets.map((id) => (
-        <LinkedTicketIdDisplay key={id} ticketId={id} />
+        <LinkedTicketIdDisplay key={id} ticketId={id} data-cy="linked-ticket" />
       ));
     }
     return <BlueText>-</BlueText>;

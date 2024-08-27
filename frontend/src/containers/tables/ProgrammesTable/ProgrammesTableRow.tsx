@@ -1,7 +1,10 @@
 import TableCell from '@mui/material/TableCell';
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AllProgramsQuery, ProgrammeChoiceDataQuery } from '@generated/graphql';
+import {
+  AllProgramsForTableQuery,
+  ProgrammeChoiceDataQuery,
+} from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
@@ -14,7 +17,7 @@ import {
 } from '@utils/utils';
 
 interface ProgrammesTableRowProps {
-  program: AllProgramsQuery['allPrograms']['edges'][number]['node'];
+  program: AllProgramsForTableQuery['allPrograms']['edges'][number]['node'];
   choicesData: ProgrammeChoiceDataQuery;
 }
 
