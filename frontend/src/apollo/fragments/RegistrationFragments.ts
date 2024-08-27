@@ -41,10 +41,6 @@ export const registrationDetailed = gql`
       count
       percentage
     }
-    batchPossibleDuplicatesCountAndPercentage {
-      count
-      percentage
-    }
     batchUniqueCountAndPercentage {
       count
       percentage
