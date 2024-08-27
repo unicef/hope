@@ -13,6 +13,7 @@ import {
 } from '@generated/graphql';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { BiometricsResults } from './BiometricsResults';
 
 interface NeedsAdjudicationActionsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -84,6 +85,12 @@ export const NeedsAdjudicationActions: React.FC<
             {t('Edit')}
           </Button>
         )}
+        <BiometricsResults
+          similarityScore={0.5}
+          faceMatchResult="duplicates"
+          image1="image1"
+          image2="image2"
+        />
         {isEditable && canApprove && (
           <>
             <Button
