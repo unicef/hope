@@ -798,12 +798,12 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
               >
-                TMT 3,683.40
+                3683,40 TMT
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
               >
-                TMT 3,326.00
+                3326,00 TMT
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"

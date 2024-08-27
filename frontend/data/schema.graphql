@@ -2280,7 +2280,7 @@ type ImportedIndividualNode implements Node {
   paymentDeliveryPhoneNo: String
   relationship: String
   household: HouseholdNode
-  registrationDataImport: RegistrationDataImportNode
+  registrationDataImport: RegistrationDataImportNode!
   workStatus: String!
   firstRegistrationDate: Date!
   lastRegistrationDate: Date!
@@ -2467,7 +2467,7 @@ type IndividualNode implements Node {
   paymentDeliveryPhoneNo: String
   relationship: IndividualRelationship
   household: HouseholdNode
-  registrationDataImport: RegistrationDataImportNode
+  registrationDataImport: RegistrationDataImportNode!
   workStatus: String!
   firstRegistrationDate: Date!
   lastRegistrationDate: Date!
@@ -4108,6 +4108,7 @@ enum RegistrationDataImportDataSource {
   API
   EDOPOMOGA
   PROGRAM_POPULATION
+  ENROLL_FROM_PROGRAM
 }
 
 enum RegistrationDataImportDatahubImportDone {
