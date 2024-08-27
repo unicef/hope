@@ -14,20 +14,20 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { FiltersSection } from '@core/FiltersSection';
 
-interface TargetPopulationFiltersProps {
+interface TargetPopulationTableFiltersProps {
   filter;
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export const TargetPopulationFilters = ({
+export const TargetPopulationTableFilters = ({
   filter,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: TargetPopulationFiltersProps): React.ReactElement => {
+}: TargetPopulationTableFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();

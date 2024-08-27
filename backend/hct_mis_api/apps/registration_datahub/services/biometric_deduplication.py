@@ -141,7 +141,22 @@ class BiometricDeduplicationService:
             is_duplicate=True,
         ).distinct()
 
-    def create_biometric_deduplication_grievance_tickets_for_already_merged_individuals(
-        self, deduplication_set_id: str
-    ) -> None:
-        pass
+    def create_grievance_tickets_for_duplicates(self, rdi: RegistrationDataImport) -> None:
+        # create tickets only against merged individuals
+        from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
+            create_needs_adjudication_tickets_for_biometrics,
+        )
+        from hct_mis_api.apps.utils.models import MergeStatusModel
+
+        deduplication_pairs = (
+            self.get_duplicates_for_rdi(rdi)
+            .filter(
+                Q(individual1__duplicate=False) & Q(individual2__duplicate=False),
+                Q(individual1__withdrawn=False) & Q(individual2__withdrawn=False),
+                Q(individual1__rdi_merge_status=MergeStatusModel.MERGED)
+                & Q(individual2__rdi_merge_status=MergeStatusModel.MERGED),
+            )
+            .distinct()
+        )
+
+        create_needs_adjudication_tickets_for_biometrics(deduplication_pairs, rdi)

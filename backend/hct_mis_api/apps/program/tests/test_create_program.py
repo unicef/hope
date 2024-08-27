@@ -1,5 +1,6 @@
 from typing import Any, List
 
+import freezegun
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import (
@@ -24,6 +25,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 
+@freezegun.freeze_time("2019-01-01")
 class TestCreateProgram(APITestCase):
     CREATE_PROGRAM_MUTATION = """
     mutation CreateProgram($programData: CreateProgramInput!) {
@@ -412,7 +414,7 @@ class TestCreateProgram(APITestCase):
             {
                 "label": "PDU Field 4",
                 "pduData": {
-                    "subtype": "BOOLEAN",
+                    "subtype": "BOOL",
                     "numberOfRounds": 4,
                     "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
                 },

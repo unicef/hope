@@ -1,9 +1,9 @@
-import { AllProgramsDocument } from '../../src/__generated__/graphql';
+import { AllProgramsForTableDocument } from '../../src/__generated__/graphql';
 
 export const fakeApolloAllPrograms = [
   {
     request: {
-      query: AllProgramsDocument,
+      query: AllProgramsForTableDocument,
       variables: {
         businessArea: 'afghanistan',
         search: '',
@@ -34,8 +34,7 @@ export const fakeApolloAllPrograms = [
             {
               cursor: 'YXJyYXljb25uZWN0aW9uOjA=',
               node: {
-                id:
-                  'UHJvZ3JhbU5vZGU6ZDM4YWI4MTQtOTQyNy00ZmJkLTg4ODctOGUyYzlkMzcxYjg2',
+                id: 'UHJvZ3JhbU5vZGU6ZDM4YWI4MTQtOTQyNy00ZmJkLTg4ODctOGUyYzlkMzcxYjg2',
                 name: 'Notice hair fall college enough perhaps.',
                 startDate: '2020-01-20',
                 endDate: '2020-08-19',
@@ -48,7 +47,6 @@ export const fakeApolloAllPrograms = [
                 populationGoal: 507376,
                 sector: 'EDUCATION',
                 totalNumberOfHouseholds: 12,
-                totalNumberOfHouseholdsWithTpInProgram: 12,
                 __typename: 'ProgramNode',
               },
               __typename: 'ProgramNodeEdge',

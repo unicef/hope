@@ -478,3 +478,11 @@ def remove_old_rdi_links_task(page_count: int = 100) -> None:
 def deduplication_engine_process(program_id: str) -> None:
     program = Program.objects.get(id=program_id)
     BiometricDeduplicationService().upload_and_process_deduplication_set(program)
+
+
+@app.task
+@sentry_tags
+@log_start_and_end
+def create_grievance_tickets_for_dedup_engine_results(rdi_id: str) -> None:
+    rdi = RegistrationDataImport.objects.get(id=rdi_id)
+    BiometricDeduplicationService().create_grievance_tickets_for_duplicates(rdi)

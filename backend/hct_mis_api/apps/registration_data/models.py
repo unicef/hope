@@ -1,4 +1,5 @@
 import logging
+from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
 from django.conf import settings
@@ -333,7 +334,7 @@ class DeduplicationEngineSimilarityPairManager(models.Manager):
                 is_duplicate=ExpressionWrapper(
                     models.Case(
                         models.When(
-                            similarity_score__gte=models.F("program__biometric_deduplication_threshold"),
+                            similarity_score__gte=models.F("program__business_area__biometric_deduplication_threshold"),
                             then=models.Value(True),
                         ),
                         default=models.Value(False),
@@ -403,4 +404,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
 
     @property
     def _is_duplicate(self) -> bool:
-        return self.similarity_score >= self.program.biometric_deduplication_threshold
+        from hct_mis_api.apps.registration_datahub.tasks.deduplicate import Thresholds
+
+        thresholds = Thresholds.from_business_area(self.program.business_area)
+        return self.similarity_score >= Decimal(thresholds.BIOMETRIC_DEDUPLICATION_THRESHOLD)

@@ -88,7 +88,7 @@ class TestPeriodicDataUpdateImportService(TestCase):
         )
         cls.boolean_attribute = create_pdu_flexible_attribute(
             label="Boolean Attribute",
-            subtype=PeriodicFieldData.BOOLEAN,
+            subtype=PeriodicFieldData.BOOL,
             number_of_rounds=1,
             rounds_names=["May"],
             program=cls.program,
@@ -164,7 +164,7 @@ class TestPeriodicDataUpdateImportService(TestCase):
         self.assertEqual(periodic_data_update_upload.status, PeriodicDataUpdateUpload.Status.SUCCESSFUL)
         self.assertEqual(periodic_data_update_upload.error_message, None)
         self.individual.refresh_from_db()
-        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], "20.456")
+        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], 20.456)
         self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
 
     def test_import_data_boolean(self) -> None:

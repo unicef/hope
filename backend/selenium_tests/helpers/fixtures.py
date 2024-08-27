@@ -21,7 +21,7 @@ def get_program_with_dct_type_and_name(
         data_collecting_type=dct,
         status=status,
         cycle__status=ProgramCycle.FINISHED,
-        cycle__start_date=datetime.now() - relativedelta(days=25),
-        cycle__end_date=datetime.now() + relativedelta(days=10),
+        cycle__start_date=(datetime.now() - relativedelta(days=25)).date(),
+        cycle__end_date=(datetime.now() + relativedelta(days=10)).date(),
     )
     return program

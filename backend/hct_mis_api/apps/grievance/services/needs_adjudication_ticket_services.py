@@ -28,7 +28,10 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_data.models import (
+    DeduplicationEngineSimilarityPair,
+    RegistrationDataImport,
+)
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
 )
@@ -118,6 +121,8 @@ def create_grievance_ticket_with_details(
     main_individual: Individual,
     possible_duplicate: Individual,
     business_area: BusinessArea,
+    issue_type: int,
+    dedup_engine_similarity_pair: Optional[DeduplicationEngineSimilarityPair] = None,
     possible_duplicates: Optional[List[Individual]] = None,
     registration_data_import: Optional[RegistrationDataImport] = None,
     is_multiple_duplicates_version: bool = False,
@@ -134,7 +139,11 @@ def create_grievance_ticket_with_details(
 
     ticket_already_exists = (
         TicketNeedsAdjudicationDetails.objects.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
-        .filter(golden_records_individual__in=ticket_all_individuals, possible_duplicates__in=ticket_all_individuals)
+        .filter(
+            golden_records_individual__in=ticket_all_individuals,
+            possible_duplicates__in=ticket_all_individuals,
+            ticket__issue_type=issue_type,
+        )
         .exists()
     )
 
@@ -151,6 +160,7 @@ def create_grievance_ticket_with_details(
         admin2=admin_level_2,
         area=area,
         registration_data_import=registration_data_import,
+        issue_type=issue_type,
     )
     ticket.programs.set([main_individual.program])
     golden_records = main_individual.get_deduplication_golden_record()
@@ -168,6 +178,7 @@ def create_grievance_ticket_with_details(
         extra_data=extra_data,
         score_min=score_min,
         score_max=score_max,
+        dedup_engine_similarity_pair=dedup_engine_similarity_pair,
     )
 
     ticket_details.possible_duplicates.add(*possible_duplicates)
@@ -182,6 +193,7 @@ def create_needs_adjudication_tickets(
     individuals_queryset: QuerySet[Individual],
     results_key: str,
     business_area: BusinessArea,
+    issue_type: int,
     registration_data_import: Optional[RegistrationDataImport] = None,
 ) -> None:
     from hct_mis_api.apps.household.models import Individual
@@ -208,6 +220,7 @@ def create_needs_adjudication_tickets(
                 registration_data_import=registration_data_import,
                 possible_duplicates=possible_duplicates,
                 is_multiple_duplicates_version=True,
+                issue_type=issue_type,
             )
 
             linked_tickets = []
@@ -225,6 +238,44 @@ def create_needs_adjudication_tickets(
     )
     doc = get_individual_doc(business_area.slug)
     remove_elasticsearch_documents_by_matching_ids(list(individuals_to_remove_from_es), doc)
+
+
+def create_needs_adjudication_tickets_for_biometrics(
+    deduplication_pairs: QuerySet[DeduplicationEngineSimilarityPair], rdi: RegistrationDataImport
+) -> None:
+    # if both individuals are from the same rdi mark second as duplicate
+    # if one of individuals is in already merged population mark it as original
+
+    if not deduplication_pairs.exists():
+        return None
+
+    new_tickets = []
+
+    for pair in deduplication_pairs:
+        if (
+            pair.individual1.registration_data_import == pair.individual2.registration_data_import
+        ) or pair.individual2.registration_data_import == rdi:
+            original_individual = pair.individual1
+            duplicate_individual = pair.individual2
+        else:
+            original_individual = pair.individual2
+            duplicate_individual = pair.individual1
+
+        ticket, ticket_details = create_grievance_ticket_with_details(
+            main_individual=original_individual,
+            possible_duplicate=duplicate_individual,
+            business_area=rdi.program.business_area,
+            registration_data_import=rdi,
+            possible_duplicates=[duplicate_individual],
+            is_multiple_duplicates_version=True,
+            issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
+            dedup_engine_similarity_pair=pair,
+        )
+        if ticket and ticket_details:
+            new_tickets.append(ticket)
+
+    for ticket in new_tickets:
+        ticket.linked_tickets.set([t for t in new_tickets if t != ticket])
 
 
 def mark_as_duplicate_individual_and_reassign_roles(
