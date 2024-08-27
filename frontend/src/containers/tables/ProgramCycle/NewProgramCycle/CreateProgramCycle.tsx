@@ -155,7 +155,7 @@ export const CreateProgramCycle = ({
                     <FormHelperText error>{error.data.title}</FormHelperText>
                   )}
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={6} data-cy="start-date-cycle">
                   <Field
                     name="start_date"
                     label={t('Start Date')}
@@ -170,7 +170,7 @@ export const CreateProgramCycle = ({
                     </FormHelperText>
                   )}
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={6} data-cy="end-date-cycle">
                   <Field
                     name="end_date"
                     label={t('End Date')}
