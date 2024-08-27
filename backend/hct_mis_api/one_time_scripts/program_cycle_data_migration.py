@@ -23,6 +23,9 @@ def adjust_cycles_start_and_end_dates_for_active_program(program: Program) -> No
     previous_cycle = None
     with transaction.atomic():
         for cycle in cycles_qs:
+            # skip validations for migration data
+            cycle.clean = lambda: None
+
             # probably it's not possible but to be sure that no any cycles without end_date
             if cycle.end_date is None:
                 cycle.end_date = cycle.start_date
@@ -51,7 +54,7 @@ def generate_unique_cycle_title(start_date: str) -> str:
 
 
 def create_new_program_cycle(program_id: str, status: str, start_date: date, end_date: date) -> ProgramCycle:
-    return ProgramCycle.objects.create(
+    cycle = ProgramCycle(
         title=generate_unique_cycle_title(str(start_date)),
         program_id=program_id,
         status=status,
@@ -59,6 +62,10 @@ def create_new_program_cycle(program_id: str, status: str, start_date: date, end
         end_date=end_date,
         created_by=None,
     )
+    # skip validations for migration data
+    cycle.clean = lambda: None  # type: ignore
+    cycle.save()
+    return ProgramCycle.objects.get(pk=cycle.pk)
 
 
 def processing_with_finished_program(program: Program) -> None:
@@ -67,6 +74,9 @@ def processing_with_finished_program(program: Program) -> None:
     program_id_str = str(program.id)
     # update if exists or create new cycle
     if cycle := ProgramCycle.objects.filter(program_id=program.id).first():
+        # skip validations for migration data
+        cycle.clean = lambda: None
+
         if cycle.start_date != start_date:
             cycle.start_date = start_date
         if cycle.end_date != end_date:

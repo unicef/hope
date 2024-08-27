@@ -1387,6 +1387,12 @@ type FinishPaymentVerificationPlan {
   paymentPlan: GenericPaymentPlanNode
 }
 
+enum FlexFieldClassificationChoices {
+  NOT_FLEX_FIELD
+  FLEX_FIELD_BASIC
+  FLEX_FIELD_PDU
+}
+
 scalar FlexFieldsScalar
 
 type FspChoice {
@@ -3677,7 +3683,7 @@ enum PeriodicFieldDataSubtype {
   DATE
   DECIMAL
   STRING
-  BOOLEAN
+  BOOL
 }
 
 type PeriodicFieldNode implements Node {
@@ -3697,9 +3703,7 @@ type ProgramCycleNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  lastSyncAt: DateTime
   version: BigInt!
-  unicefId: String
   title: String
   status: ProgramCycleStatus!
   startDate: Date!
@@ -3792,6 +3796,7 @@ type ProgramNode implements Node {
   totalNumberOfHouseholds: Int
   totalNumberOfHouseholdsWithTpInProgram: Int
   isSocialWorkerProgram: Boolean
+  targetPopulationsCount: Int
 }
 
 type ProgramNodeConnection {
@@ -4782,6 +4787,13 @@ enum TargetingCriteriaRuleFilterComparisonMethod {
   NOT_IN_RANGE
   GREATER_THAN
   LESS_THAN
+  IS_NULL
+}
+
+enum TargetingCriteriaRuleFilterFlexFieldClassification {
+  NOT_FLEX_FIELD
+  FLEX_FIELD_BASIC
+  FLEX_FIELD_PDU
 }
 
 type TargetingCriteriaRuleFilterNode {
@@ -4790,7 +4802,7 @@ type TargetingCriteriaRuleFilterNode {
   updatedAt: DateTime!
   comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod!
   targetingCriteriaRule: TargetingCriteriaRuleNode!
-  isFlexField: Boolean!
+  flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification!
   fieldName: String!
   arguments: [Arg]
   fieldAttribute: FieldAttributeNode
@@ -4798,9 +4810,10 @@ type TargetingCriteriaRuleFilterNode {
 
 input TargetingCriteriaRuleFilterObjectType {
   comparisonMethod: String!
-  isFlexField: Boolean!
+  flexFieldClassification: FlexFieldClassificationChoices!
   fieldName: String!
   arguments: [Arg]!
+  roundNumber: Int
 }
 
 type TargetingCriteriaRuleNode {
@@ -4826,6 +4839,13 @@ enum TargetingIndividualBlockRuleFilterComparisonMethod {
   NOT_IN_RANGE
   GREATER_THAN
   LESS_THAN
+  IS_NULL
+}
+
+enum TargetingIndividualBlockRuleFilterFlexFieldClassification {
+  NOT_FLEX_FIELD
+  FLEX_FIELD_BASIC
+  FLEX_FIELD_PDU
 }
 
 type TargetingIndividualBlockRuleFilterNode {
@@ -4834,9 +4854,10 @@ type TargetingIndividualBlockRuleFilterNode {
   updatedAt: DateTime!
   comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod!
   individualsFiltersBlock: TargetingIndividualRuleFilterBlockNode!
-  isFlexField: Boolean!
+  flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification!
   fieldName: String!
   arguments: [Arg]
+  roundNumber: Int
   fieldAttribute: FieldAttributeNode
 }
 

@@ -519,7 +519,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             PeriodicFieldData.DATE: self._handle_date_field,
             PeriodicFieldData.DECIMAL: self._handle_decimal_field,
             PeriodicFieldData.STRING: self._handle_string_field,
-            PeriodicFieldData.BOOLEAN: self._handle_bool_field,
+            PeriodicFieldData.BOOL: self._handle_bool_field,
         }
         for flexible_attribute in self.pdu_flexible_attributes:
             column_value = f"{flexible_attribute.name}_round_1_value"
@@ -534,7 +534,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             collection_date_cell = row_dict.get(column_collection_date)
             subtype = flexible_attribute.pdu_data.subtype
             handle_subtype = handle_subtype_mapping[subtype]
-            value = handle_subtype(value_cell)
+            value = handle_subtype(value_cell, is_flex_field=True)
             if not collection_date_cell.value:
                 collection_date = self.registration_data_import.created_at.date()
             else:
