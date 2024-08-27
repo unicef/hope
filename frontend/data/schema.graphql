@@ -903,8 +903,6 @@ type DeduplicationEngineSimilarityPairNode implements Node {
   similarityScore: String
   ticketneedsadjudicationdetailsSet(offset: Int, before: String, after: String, first: Int, last: Int): TicketNeedsAdjudicationDetailsNodeConnection!
   isDuplicate: Boolean
-  individual1Photo: String
-  individual2Photo: String
 }
 
 type DeduplicationEngineSimilarityPairNodeConnection {

@@ -1381,9 +1381,7 @@ export type DeduplicationEngineSimilarityPairNode = Node & {
   __typename?: 'DeduplicationEngineSimilarityPairNode';
   id: Scalars['ID']['output'];
   individual1: IndividualNode;
-  individual1Photo?: Maybe<Scalars['String']['output']>;
   individual2: IndividualNode;
-  individual2Photo?: Maybe<Scalars['String']['output']>;
   isDuplicate?: Maybe<Scalars['Boolean']['output']>;
   program: ProgramNode;
   similarityScore?: Maybe<Scalars['String']['output']>;
@@ -26216,9 +26214,7 @@ export interface DecimalScalarConfig extends GraphQLScalarTypeConfig<ResolversTy
 export type DeduplicationEngineSimilarityPairNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeduplicationEngineSimilarityPairNode'] = ResolversParentTypes['DeduplicationEngineSimilarityPairNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   individual1?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>;
-  individual1Photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   individual2?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>;
-  individual2Photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   isDuplicate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>;
   similarityScore?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
