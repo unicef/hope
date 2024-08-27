@@ -61,16 +61,21 @@ export const HouseholdMembersPage = (): React.ReactElement => {
     isNewTemplateJustCreated ? 1 : 0,
   );
 
+  const canViewPDUListAndDetails = hasPermissions(
+    PERMISSIONS.PDU_VIEW_LIST_AND_DETAILS,
+    permissions,
+  );
+
+  const canViewHouseholdMembersPage =
+    (PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST, permissions);
+
   if (householdChoicesLoading || individualChoicesLoading)
     return <LoadingComponent />;
 
   if (!individualChoicesData || !householdChoicesData || permissions === null)
     return null;
 
-  if (
-    !hasPermissions(PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST, permissions)
-  )
-    return <PermissionDenied />;
+  if (!canViewHouseholdMembersPage) return <PermissionDenied />;
 
   return (
     <>
@@ -84,27 +89,21 @@ export const HouseholdMembersPage = (): React.ReactElement => {
             }}
           >
             <Tab data-cy="tab-individuals" label="Individuals" />
-            {!programHasPdu ? (
-              <Tooltip
-                title={t(
-                  'Programme does not have defined fields for periodic updates',
-                )}
-              >
-                <span>
-                  <Tab
-                    disabled={!programHasPdu}
-                    data-cy="tab-periodic-data-updates"
-                    label="Periodic Data Updates"
-                  />
-                </span>
-              </Tooltip>
-            ) : (
-              <Tab
-                disabled={!programHasPdu}
-                data-cy="tab-periodic-data-updates"
-                label="Periodic Data Updates"
-              />
-            )}
+            <Tooltip
+              title={t(
+                !canViewPDUListAndDetails
+                  ? 'Programme does not have defined fields for periodic updates'
+                  : 'Permission Denied',
+              )}
+            >
+              <span>
+                <Tab
+                  disabled={!programHasPdu || !canViewPDUListAndDetails}
+                  data-cy="tab-periodic-data-updates"
+                  label="Periodic Data Updates"
+                />
+              </span>
+            </Tooltip>
           </Tabs>
         }
       />
