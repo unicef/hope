@@ -102,10 +102,9 @@ export const ProgramCyclesTable = ({
 
   const renderRow = (row: ProgramCycle): ReactElement => (
     <ClickableTableRow key={row.id} data-cy="program-cycle-row">
-      <TableCell data-cy="program-cycle-id">
-        <BlackLink to={`./${row.id}`}>{row.unicef_id}</BlackLink>
+      <TableCell data-cy="program-cycle-title">
+        <BlackLink to={`./${row.id}`}>{row.title}</BlackLink>
       </TableCell>
-      <TableCell data-cy="program-cycle-title">{row.title}</TableCell>
       <TableCell data-cy="program-cycle-status">
         <StatusBox
           status={row.status}

@@ -3,13 +3,6 @@ import { ProgramCycle } from '@api/programCycleApi';
 
 const headCells: HeadCell<ProgramCycle>[] = [
   {
-    id: 'unicef_id',
-    numeric: false,
-    disablePadding: false,
-    label: 'Programme Cycle ID',
-    dataCy: 'head-cell-id',
-  },
-  {
     id: 'title',
     numeric: false,
     disablePadding: false,

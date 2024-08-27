@@ -329,13 +329,13 @@ class PeriodicFieldData(models.Model):
     STRING = "STRING"
     DECIMAL = "DECIMAL"
     DATE = "DATE"
-    BOOLEAN = "BOOLEAN"
+    BOOL = "BOOL"
 
     TYPE_CHOICES = Choices(
         (DATE, _("Date")),
         (DECIMAL, _("Number")),
         (STRING, _("Text")),
-        (BOOLEAN, _("Boolean (true/false)")),
+        (BOOL, _("Boolean (true/false)")),
     )
 
     subtype = models.CharField(max_length=16, choices=TYPE_CHOICES)

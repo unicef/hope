@@ -5,15 +5,24 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import (
+    FlexibleAttributeForPDUFactory,
+    PeriodicFieldDataFactory,
+    create_afghanistan,
+)
+from hct_mis_api.apps.core.models import BusinessArea, PeriodicFieldData
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.household.models import DISABLED
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
+    TargetingIndividualBlockRuleFilter,
+    TargetingIndividualRuleFilterBlock,
     TargetPopulation,
 )
 from hct_mis_api.apps.targeting.services.targeting_stats_refresher import full_rebuild
@@ -68,11 +77,25 @@ class TestTargetPopulationQuery(APITestCase):
                 filters{
                   comparisonMethod
                   fieldName
-                  isFlexField
+                  flexFieldClassification
                   arguments
                   fieldAttribute{
                     labelEn
                     type
+                  }
+                }
+                individualsFiltersBlocks{
+                  individualBlockFilters{
+                    comparisonMethod
+                    fieldName
+                    arguments
+                    flexFieldClassification
+                    roundNumber
+                    fieldAttribute
+                    {
+                      labelEn
+                      type
+                    }
                   }
                 }
               }
@@ -106,6 +129,7 @@ class TestTargetPopulationQuery(APITestCase):
         cls.user = UserFactory(partner=cls.partner, first_name="Test", last_name="User")
         user_first = UserFactory(partner=cls.partner, first_name="First", last_name="User")
         user_second = UserFactory(partner=cls.partner, first_name="Second", last_name="User")
+        user_third = UserFactory(partner=cls.partner, first_name="Third", last_name="User")
         targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "size", "arguments": [2], "comparison_method": "EQUALS"}
         )
@@ -148,6 +172,86 @@ class TestTargetPopulationQuery(APITestCase):
         cls.target_population_size_1_approved.save()
         cls.target_population_size_1_approved = full_rebuild(cls.target_population_size_1_approved)
         cls.target_population_size_1_approved.save()
+
+        pdu_data_string = PeriodicFieldDataFactory(
+            subtype=PeriodicFieldData.STRING,
+            number_of_rounds=2,
+            rounds_names=["Round 1", "Round 2"],
+        )
+        cls.pdu_field_string = FlexibleAttributeForPDUFactory(
+            program=cls.program,
+            label="PDU Field STRING",
+            pdu_data=pdu_data_string,
+        )
+        (household, individuals) = create_household(
+            {"size": 3, "residence_status": "HOST", "business_area": cls.business_area, "program": cls.program},
+        )
+        individual_with_pdu_value = individuals[0]
+        populate_pdu_with_null_values(cls.program, individual_with_pdu_value.flex_fields)
+        individual_with_pdu_value.flex_fields[cls.pdu_field_string.name]["1"]["value"] = "some"
+        individual_with_pdu_value.save()
+        targeting_criteria = TargetingCriteria()
+        targeting_criteria.save()
+        rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
+        rule.save()
+        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+            targeting_criteria_rule=rule, target_only_hoh=False
+        )
+        individuals_filters_block.save()
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            individuals_filters_block=individuals_filters_block,
+            comparison_method="EQUALS",
+            field_name=cls.pdu_field_string.name,
+            arguments=["some"],
+            round_number=1,
+            flex_field_classification=FlexFieldClassification.FLEX_FIELD_PDU,
+        )
+        rule_filter.save()
+        cls.target_population_with_pdu_filter = TargetPopulation(
+            name="target_population_with_pdu_filter",
+            created_by=user_third,
+            targeting_criteria=targeting_criteria,
+            status=TargetPopulation.STATUS_LOCKED,
+            business_area=cls.business_area,
+            program=cls.program,
+        )
+        cls.target_population_with_pdu_filter.save()
+        cls.target_population_with_pdu_filter = full_rebuild(cls.target_population_with_pdu_filter)
+        cls.target_population_with_pdu_filter.save()
+
+        (household, individuals) = create_household(
+            {"size": 3, "residence_status": "HOST", "business_area": cls.business_area, "program": cls.program},
+        )
+        individual = individuals[0]
+        individual.disability = DISABLED
+        individual.save()
+        targeting_criteria = TargetingCriteria()
+        targeting_criteria.save()
+        rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
+        rule.save()
+        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+            targeting_criteria_rule=rule, target_only_hoh=False
+        )
+        individuals_filters_block.save()
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            individuals_filters_block=individuals_filters_block,
+            comparison_method="EQUALS",
+            field_name="disability",
+            arguments=["disabled"],
+            flex_field_classification=FlexFieldClassification.NOT_FLEX_FIELD,
+        )
+        rule_filter.save()
+        cls.target_population_with_individual_filter = TargetPopulation(
+            name="target_population_with_individual_filter",
+            created_by=user_third,
+            targeting_criteria=targeting_criteria,
+            status=TargetPopulation.STATUS_LOCKED,
+            business_area=cls.business_area,
+            program=cls.program,
+        )
+        cls.target_population_with_individual_filter.save()
+        cls.target_population_with_individual_filter = full_rebuild(cls.target_population_with_individual_filter)
+        cls.target_population_with_individual_filter.save()
 
     @staticmethod
     def get_targeting_criteria_for_rule(rule_filter: Dict) -> TargetingCriteria:
@@ -240,6 +344,68 @@ class TestTargetPopulationQuery(APITestCase):
             variables={
                 "id": self.id_to_base64(
                     self.target_population_residence_status.id,
+                    "TargetPopulationNode",
+                )
+            },
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.TARGETING_VIEW_DETAILS],
+            ),
+            (
+                "without_permission",
+                [],
+            ),
+        ]
+    )
+    def test_simple_target_query_pdu(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
+        self.snapshot_graphql_request(
+            request_string=TestTargetPopulationQuery.TARGET_POPULATION_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
+            variables={
+                "id": self.id_to_base64(
+                    self.target_population_with_pdu_filter.id,
+                    "TargetPopulationNode",
+                )
+            },
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.TARGETING_VIEW_DETAILS],
+            ),
+            (
+                "without_permission",
+                [],
+            ),
+        ]
+    )
+    def test_simple_target_query_individual_filter(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
+        self.snapshot_graphql_request(
+            request_string=TestTargetPopulationQuery.TARGET_POPULATION_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
+            variables={
+                "id": self.id_to_base64(
+                    self.target_population_with_individual_filter.id,
                     "TargetPopulationNode",
                 )
             },

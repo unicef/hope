@@ -468,8 +468,8 @@ def copy_individual(individual: Individual, program: Program) -> tuple:
     original_individual_id = individual.id
     individual.copied_from_id = original_individual_id
     individual.pk = None
-    copied_flex_fields = get_flex_fields_without_pdu_values(individual)
-    individual.flex_fields = populate_pdu_with_null_values(program, copied_flex_fields)
+    individual.flex_fields = get_flex_fields_without_pdu_values(individual)
+    populate_pdu_with_null_values(program, individual.flex_fields)
     individual.program = program
     individual.household = None
     individual.registration_data_import = None
