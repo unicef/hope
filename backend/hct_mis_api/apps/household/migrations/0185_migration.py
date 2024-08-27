@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-from django.db.models import Count
+from django.db.models import Count, F
 
 
 def assign_individual_to_rdi(apps, schema_editor):
@@ -12,7 +12,11 @@ def assign_individual_to_rdi(apps, schema_editor):
 
     for program in Program.objects.all():
         # create RDI only if exists any individual without RDI
-        individual_qs = Individual.objects.filter(program=program, registration_data_import__isnull=True)
+        individual_qs = Individual.objects.filter(
+            program=program,
+            registration_data_import__isnull=True,
+            household__registration_data_import__isnull=True
+        )
         aggregated_data = individual_qs.aggregate(
             individual_count=Count("id"),
             household_count=Count("household", distinct=True)
@@ -31,6 +35,20 @@ def assign_individual_to_rdi(apps, schema_editor):
             )
 
             individual_qs.update(registration_data_import_id=rdi.id)
+
+    # assign RDI from Household
+    individual_qs = Individual.objects.filter(
+        registration_data_import__isnull=True,
+        household__registration_data_import__isnull=False
+    ).annotate(
+        household_rdi_id=F("household__registration_data_import_id")
+    )
+    individual_qs.update(registration_data_import_id=F("household_rdi_id"))
+    rdi_ids = individual_qs.values_list("household_rdi_id", flat=True).distinct()
+
+    for rdi_id in rdi_ids:
+        rdi = RegistrationDataImport.objects.get(id=rdi_id)
+        rdi.refresh_population_statistics()
 
 
 class Migration(migrations.Migration):
