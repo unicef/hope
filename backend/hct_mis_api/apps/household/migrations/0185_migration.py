@@ -2,13 +2,14 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-from django.db.models import Count, F
+from django.db.models import Count, F, Subquery, OuterRef
 
 
 def assign_individual_to_rdi(apps, schema_editor):
     RegistrationDataImport = apps.get_model("registration_data", "RegistrationDataImport")
     Individual = apps.get_model("household", "Individual")
     Program = apps.get_model("program", "Program")
+    Household = apps.get_model("household", "Household")
 
     for program in Program.objects.all():
         # create RDI only if exists any individual without RDI
@@ -37,15 +38,20 @@ def assign_individual_to_rdi(apps, schema_editor):
             individual_qs.update(registration_data_import_id=rdi.id)
 
     # assign RDI from Household
+    household_rdi_subquery = Household.objects.filter(
+        id=OuterRef("household_id"),
+        registration_data_import__isnull=False
+    ).values("registration_data_import_id")[:1]
+
     individual_qs = Individual.objects.filter(
         registration_data_import__isnull=True,
         household__registration_data_import__isnull=False
     ).annotate(
-        household_rdi_id=F("household__registration_data_import_id")
+        household_rdi_id=Subquery(household_rdi_subquery)
     )
     individual_qs.update(registration_data_import_id=F("household_rdi_id"))
-    rdi_ids = individual_qs.values_list("household_rdi_id", flat=True).distinct()
 
+    rdi_ids = individual_qs.values_list("household_rdi_id", flat=True).distinct()
     for rdi_id in rdi_ids:
         rdi = RegistrationDataImport.objects.get(id=rdi_id)
         rdi.refresh_population_statistics()
