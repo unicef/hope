@@ -13,7 +13,7 @@ def migrate_needs_adjudication_tickets_issue_type(apps, schema_editor):
         TicketNeedsAdjudicationDetails,
     )  # need to use property has_duplicated_document
 
-    qs_tickets = TicketNeedsAdjudicationDetails.objects.filter(ticket__issue_type__isnull=False).select_related("ticket")
+    qs_tickets = TicketNeedsAdjudicationDetails.objects.filter(ticket__issue_type__isnull=False).select_related("ticket").order_by("id")
     gt_to_update = []
 
     paginator = Paginator(qs_tickets, 500)
