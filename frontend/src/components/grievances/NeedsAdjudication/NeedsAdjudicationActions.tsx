@@ -52,6 +52,7 @@ export const NeedsAdjudicationActions: React.FC<
   const { isActiveProgram } = useProgramContext();
   const actionsDisabled =
     !isTicketForApproval || !isActiveProgram || !selectedIndividualIds.length;
+  const { dedupEngineSimilarityPair } = ticket.needsAdjudicationTicketDetails;
 
   return (
     <Box
@@ -85,12 +86,18 @@ export const NeedsAdjudicationActions: React.FC<
             {t('Edit')}
           </Button>
         )}
-        <BiometricsResults
-          similarityScore={0.5}
-          faceMatchResult="duplicates"
-          image1=""
-          image2=""
-        />
+        {dedupEngineSimilarityPair && (
+          <BiometricsResults
+            similarityScore={dedupEngineSimilarityPair.similarityScore}
+            faceMatchResult={
+              dedupEngineSimilarityPair.isDuplicate
+                ? t('Duplicates')
+                : t('Uniqueness')
+            }
+            image1={dedupEngineSimilarityPair.image1}
+            image2={dedupEngineSimilarityPair.image2}
+          />
+        )}
         {isEditable && canApprove && (
           <>
             <Button

@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 export interface BiometricsResultsProps {
   similarityScore: number;
-  faceMatchResult: 'duplicates' | 'uniqueness';
+  faceMatchResult: 'Duplicates' | 'Uniqueness';
   image1?: string;
   image2?: string;
 }
@@ -24,6 +24,7 @@ const Placeholder: React.FC = () => (
     width="45%"
     height="200px"
     border="1px solid #ccc"
+    data-cy="placeholder"
   >
     <PersonIcon color="primary" style={{ fontSize: 100 }} />
   </Box>
@@ -54,25 +55,38 @@ export const BiometricsResults = ({
         scroll="paper"
         aria-labelledby="form-dialog-title"
         maxWidth="md"
+        data-cy="dialog-biometrics-results"
       >
         <DialogTitleWrapper>
-          <DialogTitle>{t('Biometrics Results')}</DialogTitle>
+          <DialogTitle data-cy="dialog-title">
+            {t('Biometrics Results')}
+          </DialogTitle>
         </DialogTitleWrapper>
-        <DialogContent>
+        <DialogContent data-cy="dialog-content">
           <DialogContainer>
             <Box display="flex" justifyContent="space-between" p={5}>
               {image1 ? (
-                <img src={image1} alt="Image 1" style={{ width: '45%' }} />
+                <img
+                  src={image1}
+                  alt="Image 1"
+                  style={{ width: '45%' }}
+                  data-cy="image1"
+                />
               ) : (
                 <Placeholder />
               )}
               {image2 ? (
-                <img src={image2} alt="Image 2" style={{ width: '45%' }} />
+                <img
+                  src={image2}
+                  alt="Image 2"
+                  style={{ width: '45%' }}
+                  data-cy="image2"
+                />
               ) : (
                 <Placeholder />
               )}
             </Box>
-            <Box p={5}>
+            <Box p={5} data-cy="results-info">
               <div>
                 <strong>
                   {t('Algorithm similarity score:')} {similarityScore}
@@ -86,7 +100,9 @@ export const BiometricsResults = ({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setDialogOpen(false)}>{t('CLOSE')}</Button>
+            <Button onClick={() => setDialogOpen(false)} data-cy="button-close">
+              {t('CLOSE')}
+            </Button>
           </DialogActions>
         </DialogFooter>
       </Dialog>

@@ -207,7 +207,7 @@ export const grievanceTicketDetailed = gql`
     }
     needsAdjudicationTicketDetails {
       id
-      dedupeEngineSimilarityPair {
+      dedupEngineSimilarityPair {
         isDuplicate
         similarityScore
         individual1Photo
