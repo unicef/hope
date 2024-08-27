@@ -36,8 +36,8 @@ def create_child_payment_plans(pp: PaymentPlan) -> None:
         dispersion_end_date=datetime(2020, 12, 10),
         is_follow_up=True,
         source_payment_plan=pp,
-        program__cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
-        program__cycle__end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
+        program__cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc).date(),
+        program__cycle__end_date=timezone.datetime(2020, 11, 10, tzinfo=utc).date(),
     )
     fpp1.unicef_id = "PP-0060-20-00000003"
     fpp1.save()
@@ -48,8 +48,8 @@ def create_child_payment_plans(pp: PaymentPlan) -> None:
         dispersion_end_date=datetime(2020, 12, 10),
         is_follow_up=True,
         source_payment_plan=pp,
-        program__cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
-        program__cycle__end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
+        program__cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc).date(),
+        program__cycle__end_date=timezone.datetime(2020, 11, 10, tzinfo=utc).date(),
     )
     fpp2.unicef_id = "PP-0060-20-00000004"
     fpp2.save()
@@ -219,8 +219,8 @@ class TestPaymentPlanQueries(APITestCase):
 
         with freeze_time("2020-10-10"):
             program = RealProgramFactory(
-                cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
-                cycle__end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
+                cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc).date(),
+                cycle__end_date=timezone.datetime(2020, 11, 10, tzinfo=utc).date(),
             )
             program_cycle = program.cycles.first()
             cls.pp = PaymentPlanFactory(
@@ -439,8 +439,8 @@ class TestPaymentPlanQueries(APITestCase):
     def test_payment_node_with_legacy_data(self) -> None:
         # test get snapshot data only
         program = RealProgramFactory(
-            cycle__start_date=timezone.datetime(2023, 9, 10, tzinfo=utc),
-            cycle__end_date=timezone.datetime(2023, 11, 10, tzinfo=utc),
+            cycle__start_date=timezone.datetime(2023, 9, 10, tzinfo=utc).date(),
+            cycle__end_date=timezone.datetime(2023, 11, 10, tzinfo=utc).date(),
         )
         new_pp = PaymentPlanFactory(
             program=program,

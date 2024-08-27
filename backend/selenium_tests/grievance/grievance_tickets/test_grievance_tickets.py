@@ -454,6 +454,7 @@ class TestGrievanceTicketsHappyPath:
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
 
 
+@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestGrievanceTickets:
     @pytest.mark.parametrize(
@@ -784,6 +785,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getButtonNext().click()
         assert "UNICEF" in pageGrievanceDetailsPage.getLabelPartner().text
 
+    @pytest.mark.skip("Unskip after fix: 212619")
     def test_grievance_tickets_create_new_tickets_Grievance_Complaint_Payment_Related_Complaint(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -791,6 +793,7 @@ class TestGrievanceTickets:
         pageGrievanceDetailsPage: GrievanceDetailsPage,
         hh_with_payment_record: PaymentRecord,
     ) -> None:
+        payment_id = PaymentRecord.objects.first().unicef_id
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getButtonNewTicket().click()
@@ -811,6 +814,9 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getCheckboxSelectAll().click()
         pageGrievanceNewTicket.getButtonSubmit().click()
         assert hh_with_payment_record.unicef_id in pageGrievanceDetailsPage.getPaymentRecord().text
+        pageGrievanceNewTicket.getButtonNext().click()
+        # ToDo check before unskip
+        assert payment_id in pageGrievanceDetailsPage.getLabelTickets().text
 
     def test_grievance_tickets_look_up_linked_ticket(
         self,

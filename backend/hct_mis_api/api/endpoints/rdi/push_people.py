@@ -29,6 +29,7 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 PEOPLE_TYPE_CHOICES = (
@@ -143,6 +144,9 @@ class PeopleUploadMixin:
         relationship = NON_BENEFICIARY if person_type is NON_BENEFICIARY else HEAD
         individual_data["phone_no"] = individual_data.get("phone_no") or ""
         individual_data["phone_no_alternative"] = individual_data.get("phone_no_alternative") or ""
+        individual_data["flex_fields"] = populate_pdu_with_null_values(
+            rdi.program, individual_data.get("flex_fields", None)
+        )
 
         ind = PendingIndividual.objects.create(
             business_area=rdi.business_area,

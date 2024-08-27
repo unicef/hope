@@ -30,7 +30,7 @@ const DividerLabel = styled.div`
   background-color: #fff;
 `;
 
-export function TargetingCriteriaFilter({
+export function TargetingCriteriaHouseholdFilter({
   index,
   data,
   each,

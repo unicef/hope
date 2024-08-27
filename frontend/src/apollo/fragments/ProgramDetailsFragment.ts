@@ -46,6 +46,7 @@ export const programDetails = gql`
     registrationImports {
       totalCount
     }
+    targetPopulationsCount
     pduFields {
       id
       label

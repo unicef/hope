@@ -24,7 +24,10 @@ from hct_mis_api.apps.core.validators import (
 from hct_mis_api.apps.periodic_data_update.service.flexible_attribute_service import (
     FlexibleAttributeForPDUService,
 )
-from hct_mis_api.apps.program.celery_tasks import copy_program_task
+from hct_mis_api.apps.program.celery_tasks import (
+    copy_program_task,
+    populate_pdu_new_rounds_with_null_values_task,
+)
 from hct_mis_api.apps.program.inputs import (
     CopyProgramInput,
     CreateProgramInput,
@@ -206,7 +209,8 @@ class UpdateProgram(
         program.save()
 
         if pdu_fields is not None:
-            FlexibleAttributeForPDUService(program, pdu_fields).update_pdu_flex_attributes()
+            FlexibleAttributeForPDUService(program, pdu_fields).update_pdu_flex_attributes_in_program_update()
+            populate_pdu_new_rounds_with_null_values_task.delay(program_id)
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return UpdateProgram(program=program)
@@ -272,7 +276,10 @@ class CopyProgram(
         # create partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
         if partner_access == Program.SELECTED_PARTNERS_ACCESS:
             create_program_partner_access(partners_data, program, partner_access)
-        copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
+
+        transaction.on_commit(
+            lambda: copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
+        )
 
         if pdu_fields is not None:
             FlexibleAttributeForPDUService(program, pdu_fields).create_pdu_flex_attributes()

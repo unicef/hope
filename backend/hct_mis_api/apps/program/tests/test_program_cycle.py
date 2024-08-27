@@ -1,6 +1,9 @@
 from decimal import Decimal
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.test import TestCase
+from django.utils import timezone
+from django.utils.dateparse import parse_date
 
 from rest_framework.exceptions import ValidationError
 
@@ -118,3 +121,18 @@ class TestProgramCycleMethods(TestCase):
         self.assertEqual(self.cycle.total_delivered_quantity_usd, Decimal("0.0"))
         PaymentPlanFactory(program=self.program, program_cycle=self.cycle, total_delivered_quantity_usd=Decimal(333.11))
         self.assertEqual(self.cycle.total_delivered_quantity_usd, Decimal("333.11"))
+
+    def test_cycle_validation_start_date(self) -> None:
+        with self.assertRaisesMessage(DjangoValidationError, "Start date must be after the latest cycle."):
+            ProgramCycleFactory(program=self.program, start_date=parse_date("2021-01-01"))
+
+        with self.assertRaisesMessage(DjangoValidationError, "End date cannot be before start date."):
+            ProgramCycleFactory(
+                program=self.program, start_date=parse_date("2021-01-05"), end_date=parse_date("2021-01-01")
+            )
+
+        cycle2 = ProgramCycleFactory(program=self.program)
+        self.assertTrue(cycle2.start_date > parse_date(self.cycle.start_date))
+
+        cycle_new = ProgramCycleFactory(program=self.program, start_date=parse_date("2099-01-01"))
+        self.assertTrue(cycle_new.start_date > timezone.now().date())

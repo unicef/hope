@@ -6,7 +6,7 @@ from django.db import transaction
 from django.db.models import Q, QuerySet
 
 from hct_mis_api.apps.account.models import Partner, User
-from hct_mis_api.apps.core.models import DataCollectingType
+from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
@@ -20,6 +20,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
 from hct_mis_api.apps.program.validators import validate_data_collecting_type
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -95,12 +96,15 @@ class CopyProgramPopulation:
             else:
                 individuals = self.copy_individuals_without_collections()
                 households = self.copy_households_without_collections(individuals)
+
             self.copy_household_related_data(households, individuals)
             self.copy_individual_related_data(individuals)
 
     def copy_individual(self, individual: Individual) -> Individual:
         copied_from_pk = individual.pk
         individual.pk = None
+        copied_flex_fields = get_flex_fields_without_pdu_values(individual)
+        individual.flex_fields = populate_pdu_with_null_values(self.program, copied_flex_fields)
         individual.program = self.program
         individual.copied_from_id = copied_from_pk
         individual.registration_data_import = self.rdi
@@ -181,13 +185,8 @@ class CopyProgramPopulation:
             role.pk = None
             role.household = new_household
             role.rdi_merge_status = self.rdi_merge_status
-            role.individual = (
-                getattr(Individual, self.manager)
-                .filter(id__in=[ind.pk for ind in new_individuals])
-                .get(
-                    program=self.program,
-                    copied_from=role.individual,
-                )
+            role.individual = next(
+                filter(lambda ind: ind.program == self.program and ind.copied_from == role.individual, new_individuals)
             )
             roles_in_household.append(role)
         return roles_in_household
@@ -468,6 +467,8 @@ def copy_individual(individual: Individual, program: Program) -> tuple:
     original_individual_id = individual.id
     individual.copied_from_id = original_individual_id
     individual.pk = None
+    individual.flex_fields = get_flex_fields_without_pdu_values(individual)
+    populate_pdu_with_null_values(program, individual.flex_fields)
     individual.program = program
     individual.household = None
     individual.registration_data_import = None
@@ -514,3 +515,16 @@ def remove_program_partner_access(partners_data: List, program: Program) -> None
         Q(partner_id__in=partner_ids) | Q(partner__name="UNICEF")
     )
     removed_partner_access.delete()
+
+
+def get_flex_fields_without_pdu_values(individual: Individual) -> dict:
+    flex_fields = individual.flex_fields
+    flex_fields_without_pdu = {}
+    for flex_field in flex_fields:
+        if FlexibleAttribute.objects.filter(
+            name=flex_field, program=individual.program, type=FlexibleAttribute.PDU
+        ).exists():
+            continue
+        else:
+            flex_fields_without_pdu[flex_field] = flex_fields[flex_field]
+    return flex_fields_without_pdu
