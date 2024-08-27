@@ -15,8 +15,8 @@ class TestMigrationIndAssignToRDI(TransactionTestCase):
         call_command("migrate", "household", "0184_migration", verbosity=0)
 
         ba_afghanistan = create_afghanistan()
-        program_1 = ProgramFactory(name="program_1", business_area=ba_afghanistan)
-        program_2 = ProgramFactory(name="program_2", business_area=ba_afghanistan)
+        program_1 = ProgramFactory(name="program_1", business_area=ba_afghanistan, biometric_deduplication_enabled=True)
+        program_2 = ProgramFactory(name="program_2", business_area=ba_afghanistan, biometric_deduplication_enabled=True)
         create_household_and_individuals(
             household_data={
                 "business_area": ba_afghanistan,
@@ -90,6 +90,7 @@ class TestMigrationIndAssignToRDI(TransactionTestCase):
                     business_area=program.business_area,
                     program_id=program.id,
                     import_data=None,
+                    deduplication_engine_status="PENDING" if program.biometric_deduplication_enabled else None,
                 )
 
                 individual_qs.update(registration_data_import_id=rdi.id)
@@ -103,6 +104,7 @@ class TestMigrationIndAssignToRDI(TransactionTestCase):
             name=f"RDI for Individuals [data migration for Programme: {program_1.name}]"
         )
         self.assertEqual(rdi_1.status, "MERGED")
+        self.assertEqual(rdi_1.deduplication_engine_status, "PENDING")
         self.assertEqual(rdi_1.number_of_individuals, 1)
         self.assertEqual(rdi_1.number_of_households, 1)
 
@@ -110,5 +112,6 @@ class TestMigrationIndAssignToRDI(TransactionTestCase):
             name=f"RDI for Individuals [data migration for Programme: {program_2.name}]"
         )
         self.assertEqual(rdi_2.status, "MERGED")
+        self.assertEqual(rdi_2.deduplication_engine_status, "PENDING")
         self.assertEqual(rdi_2.number_of_individuals, 1)
         self.assertEqual(rdi_2.number_of_households, 1)

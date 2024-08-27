@@ -70,8 +70,8 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
             individuals_queryset,
             "duplicates",
             self.business_area,
+            GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
             rdi,
-            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
         )
         self.assertEqual(GrievanceTicket.objects.all().count(), 0)
 
@@ -79,8 +79,8 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
             individuals_queryset,
             "possible_duplicates",
             self.business_area,
+            GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
             rdi,
-            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
         )
         self.assertEqual(GrievanceTicket.objects.all().count(), 0)
 
@@ -97,7 +97,7 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
             Individual.objects.all(),
             "duplicates",
             self.business_area,
+            GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
             rdi,
-            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
         )
         self.assertEqual(GrievanceTicket.objects.all().count(), 1)
