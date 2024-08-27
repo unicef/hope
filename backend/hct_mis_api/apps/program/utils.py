@@ -317,7 +317,7 @@ def copy_program_related_data(copy_from_program_id: str, new_program: Program, u
         name=f"Default RDI for Programme: {new_program.name}",
         status=RegistrationDataImport.MERGED,
         deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING
-        if program.biometric_deduplication_enabled
+        if new_program.biometric_deduplication_enabled
         else None,
         imported_by=User.objects.get(id=user_id),
         data_source=RegistrationDataImport.PROGRAM_POPULATION,
