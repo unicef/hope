@@ -24,8 +24,8 @@ from hct_mis_api.apps.registration_data.models import (
     RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.models import (
-    ImportedHousehold,
     ImportedIndividual,
+    PendingHousehold,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
@@ -67,7 +67,7 @@ class RegistrationDataImportDatahubAdmin(HOPEModelAdminBase):
         context["title"] = f"Import {obj.name} - {obj.import_done}"
         context["data"] = {}
         has_content = False
-        for model in [ImportedIndividual, ImportedHousehold]:
+        for model in [ImportedIndividual, PendingHousehold]:
             count = model.objects.filter(registration_data_import=obj).count()
             has_content = has_content or count
             context["data"][model] = {"count": count, "warnings": [], "errors": [], "meta": model._meta}
