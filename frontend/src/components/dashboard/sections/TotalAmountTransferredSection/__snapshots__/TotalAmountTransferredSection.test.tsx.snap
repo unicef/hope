@@ -36,7 +36,7 @@ exports[`components/dashboard/TotalAmountTransferredSection should render 1`] = 
             <div
               class="sc-hLQSwg ghfqgX"
             >
-              1719,00 USD
+              USD 1,719.00
             </div>
           </div>
           <div
