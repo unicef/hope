@@ -12,13 +12,8 @@ class DeduplicationSet:
 
 @dataclasses.dataclass
 class DeduplicationImage:
-    id: str  # individual.id
-    image_url: str  # individual.photo.name # filter out blank photos
-
-
-@dataclasses.dataclass
-class DeduplicationImageSet:
-    data: List[DeduplicationImage]
+    reference_pk: str  # individual.id
+    filename: str  # individual.photo.name
 
 
 class DeduplicationEngineAPI(BaseAPI):
@@ -54,10 +49,10 @@ class DeduplicationEngineAPI(BaseAPI):
         response_data, _ = self._post(self.Endpoints.CREATE_DEDUPLICATION_SET, dataclasses.asdict(deduplication_set))
         return response_data
 
-    def bulk_upload_images(self, deduplication_set_id: str, images: DeduplicationImageSet) -> dict:
+    def bulk_upload_images(self, deduplication_set_id: str, images: List[DeduplicationImage]) -> dict:
         response_data, _ = self._post(
             self.Endpoints.BULK_UPLOAD_IMAGES.format(deduplication_set_pk=deduplication_set_id),
-            dataclasses.asdict(images),
+            [dataclasses.asdict(image) for image in images],
         )
         return response_data
 

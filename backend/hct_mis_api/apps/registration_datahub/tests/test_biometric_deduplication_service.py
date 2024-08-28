@@ -18,7 +18,6 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
-    DeduplicationImageSet,
     DeduplicationSet,
 )
 from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
@@ -68,7 +67,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         service.upload_individuals(str(self.program.deduplication_set_id), rdi)
         mock_bulk_upload_images.assert_called_once_with(
             str(self.program.deduplication_set_id),
-            DeduplicationImageSet(data=[DeduplicationImage(id=str(individual.id), image_url="some_photo.jpg")]),
+            [DeduplicationImage(reference_pk=str(individual.id), filename="some_photo.jpg")],
         )
 
         rdi.refresh_from_db()

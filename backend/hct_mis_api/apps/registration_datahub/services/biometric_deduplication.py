@@ -14,7 +14,6 @@ from hct_mis_api.apps.registration_data.models import (
 from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
-    DeduplicationImageSet,
     DeduplicationSet,
 )
 
@@ -41,16 +40,21 @@ class BiometricDeduplicationService:
 
     def upload_individuals(self, deduplication_set_id: str, rdi: RegistrationDataImport) -> None:
         individuals = (
-            Individual.objects.filter(is_removed=False, registration_data_import=rdi)
+            Individual.all_objects.filter(is_removed=False, registration_data_import=rdi)
             .exclude(Q(photo="") | Q(withdrawn=True) | Q(duplicate=True))
             .only("id", "photo")
         )
 
-        images = DeduplicationImageSet(
-            data=[
-                DeduplicationImage(id=str(individual.id), image_url=individual.photo.name) for individual in individuals
-            ]
-        )
+        if not individuals.exists():
+            rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_FINISHED
+            rdi.save(update_fields=["deduplication_engine_status"])
+            return
+
+        images = [
+            DeduplicationImage(reference_pk=str(individual.id), filename=individual.photo.name)
+            for individual in individuals
+        ]
+
         try:
             self.api.bulk_upload_images(deduplication_set_id, images)
             rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_UPLOADED
@@ -96,6 +100,14 @@ class BiometricDeduplicationService:
                 RegistrationDataImport.DEDUP_ENGINE_PENDING,
                 RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR,
             ],
+        ).exclude(
+            status__in=[
+                RegistrationDataImport.MERGE_SCHEDULED,
+                RegistrationDataImport.MERGED,
+                RegistrationDataImport.MERGING,
+                RegistrationDataImport.MERGE_ERROR,
+                RegistrationDataImport.REFUSED_IMPORT,
+            ]
         )
         for rdi in pending_rdis:
             self.upload_individuals(deduplication_set_id, rdi)
@@ -104,6 +116,14 @@ class BiometricDeduplicationService:
         if all_uploaded:
             uploaded_rdis = RegistrationDataImport.objects.filter(
                 deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_UPLOADED
+            ).exclude(
+                status__in=[
+                    RegistrationDataImport.MERGE_SCHEDULED,
+                    RegistrationDataImport.MERGED,
+                    RegistrationDataImport.MERGING,
+                    RegistrationDataImport.MERGE_ERROR,
+                    RegistrationDataImport.REFUSED_IMPORT,
+                ]
             )
             self.process_deduplication_set(deduplication_set_id, uploaded_rdis)
         else:
