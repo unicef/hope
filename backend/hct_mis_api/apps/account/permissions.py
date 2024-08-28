@@ -188,6 +188,7 @@ class Permissions(Enum):
     GRIEVANCE_ASSIGN = auto()
     GRIEVANCE_DOCUMENTS_UPLOAD = auto()
     GRIEVANCES_CROSS_AREA_FILTER = auto()
+    GRIEVANCES_VIEW_BIOMETRIC_RESULTS = auto()
 
     # Feedback
     GRIEVANCES_FEEDBACK_VIEW_CREATE = auto()

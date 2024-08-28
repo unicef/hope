@@ -33,7 +33,9 @@ class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
         return individual.photo and individual.photo.url
 
 
-class DeduplicationEngineSimilarityPairNode(DjangoObjectType):
+class DeduplicationEngineSimilarityPairNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS),)
+
     is_duplicate = graphene.Boolean()
     individual1 = DeduplicationEngineSimilarityPairIndividualNode()
     individual2 = DeduplicationEngineSimilarityPairIndividualNode()
