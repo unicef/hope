@@ -8,10 +8,10 @@ from dateutil.relativedelta import relativedelta
 from django.db import transaction
 
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData, BusinessArea, DataCollectingType
 from hct_mis_api.apps.household.fixtures import create_individual_document, \
-    create_household
+    create_household, create_household_and_individuals
 from hct_mis_api.apps.household.models import Individual, SEEING, HOST
 from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
 from hct_mis_api.apps.payment.models import GenericPayment
@@ -24,6 +24,7 @@ from hct_mis_api.apps.periodic_data_update.utils import (
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
 from selenium_tests.page_object.people.people import People
 from selenium_tests.page_object.people.people_details import PeopleDetails
@@ -42,47 +43,15 @@ def clear_downloaded_files() -> None:
 
 @pytest.fixture
 def program() -> Program:
-    return get_program_with_dct_type_and_name("Test Program", "WORK", DataCollectingType.Type.SOCIAL, Program.ACTIVE)
-
-
-def get_program_with_dct_type_and_name(
-    name: str, programme_code: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.DRAFT
-) -> Program:
-    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
-    dct = DataCollectingTypeFactory(type=dct_type)
-    program = ProgramFactory(
-        name=name,
-        programme_code=programme_code,
-        start_date=datetime.now() - relativedelta(months=1),
-        end_date=datetime.now() + relativedelta(months=1),
-        data_collecting_type=dct,
-        status=status,
-    )
-    return program
+    business_area = create_afghanistan()
+    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
+    return ProgramFactory(name="Test Program", status=Program.ACTIVE, business_area=business_area,
+                          data_collecting_type=dct,
+                          )
 
 
 @pytest.fixture
-def add_people(program: Program) -> List:
-    ba = program.business_area
-    with transaction.atomic():
-        household, individuals = create_household(
-            household_args={"business_area": ba, "program": program, "residence_status": HOST},
-            individual_args={
-                "full_name": "Stacey Freeman",
-                "given_name": "Stacey",
-                "middle_name": "",
-                "family_name": "Freeman",
-                "business_area": ba,
-                "observed_disability": [SEEING],
-            },
-        )
-        individual = individuals[0]
-        create_individual_document(individual)
-    yield [individual, household]
-
-
-@pytest.fixture
-def individual(add_people: List) -> Individual:
+def individual(add_people: Individual) -> Individual:
     program = Program.objects.filter(name="Test Program").first()
 
     cash_plan = CashPlanFactory(
@@ -101,7 +70,7 @@ def individual(add_people: List) -> Individual:
         business_area=BusinessArea.objects.first(),
     )
     PaymentRecordFactory(
-        household=add_people[1],
+        household=add_people.household,
         parent=cash_plan,
         target_population=target_population,
         entitlement_quantity="21.36",
@@ -109,13 +78,38 @@ def individual(add_people: List) -> Individual:
         currency="PLN",
         status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
     )
-    add_people[1].total_cash_received_usd = "21.36"
-    add_people[1].save()
-    return add_people[1]
+    add_people.total_cash_received_usd = "21.36"
+    add_people.save()
+    return add_people
+
+
+@pytest.fixture
+def add_people(program: Program) -> Individual:
+    business_area = program.business_area
+    rdi = RegistrationDataImportFactory()
+    household, individuals = create_household_and_individuals(
+        household_data={
+            "business_area": business_area, "program": program, "residence_status": HOST,
+            "registration_data_import": rdi,
+
+        },
+        individuals_data=[
+            {
+                "full_name": "Stacey Freeman",
+                "given_name": "Stacey",
+                "middle_name": "",
+                "family_name": "Freeman",
+                "business_area": business_area,
+                "observed_disability": [SEEING],
+                "registration_data_import": rdi,
+            },
+        ],
+    )
+    yield individuals[0]
 
 
 def create_flexible_attribute(
-    label: str, subtype: str, number_of_rounds: int, rounds_names: list[str], program: Program
+        label: str, subtype: str, number_of_rounds: int, rounds_names: list[str], program: Program
 ) -> FlexibleAttribute:
     name = field_label_to_field_name(label)
     flexible_attribute = FlexibleAttribute.objects.create(
@@ -147,13 +141,13 @@ def string_attribute() -> FlexibleAttribute:
 @pytest.mark.usefixtures("login")
 class TestPeoplePeriodicDataUpdateUpload:
     def test_people_periodic_data_update_upload_success(
-        self,
-        clear_downloaded_files: None,
-        pagePeople: People,
-        pagePeopleDetails: PeopleDetails,
-        individual: Individual,
-        string_attribute: FlexibleAttribute,
-        pageIndividuals: Individuals,
+            self,
+            clear_downloaded_files: None,
+            pagePeople: People,
+            pagePeopleDetails: PeopleDetails,
+            individual: Individual,
+            string_attribute: FlexibleAttribute,
+            pageIndividuals: Individuals,
     ) -> None:
         program = Program.objects.filter(name="Test Program").first()
         populate_pdu_with_null_values(program, individual.flex_fields)
@@ -180,7 +174,7 @@ class TestPeoplePeriodicDataUpdateUpload:
         pageIndividuals.upload_file(tmp_file.name)
         pageIndividuals.getButtonImportSubmit().click()
         pageIndividuals.getPduUpdates().click()
-        for i in range(15):
+        for i in range(5):
             periodic_data_update_upload = PeriodicDataUpdateUpload.objects.first()
             if periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL:
                 break
@@ -193,3 +187,4 @@ class TestPeoplePeriodicDataUpdateUpload:
         assert individual.flex_fields[flexible_attribute.name]["1"]["value"] == "Test Value"
         assert individual.flex_fields[flexible_attribute.name]["1"]["collection_date"] == "2021-05-02"
         assert pageIndividuals.getUpdateStatus(periodic_data_update_upload.pk).text == "SUCCESSFUL"
+        pageIndividuals.screenshot("0")

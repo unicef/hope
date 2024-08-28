@@ -11,8 +11,8 @@ from page_object.programme_population.periodic_data_update_uploads import (
     PeriodicDataUpdateUploads,
 )
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
+from hct_mis_api.apps.core.fixtures import create_afghanistan, DataCollectingTypeFactory
+from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData, DataCollectingType
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.periodic_data_update.fixtures import (
@@ -48,7 +48,9 @@ def clear_downloaded_files() -> None:
 @pytest.fixture
 def program() -> Program:
     business_area = create_afghanistan()
-    return ProgramFactory(name="Test Program", status=Program.ACTIVE, business_area=business_area)
+    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
+    return ProgramFactory(name="Test Program", status=Program.ACTIVE, business_area=business_area, data_collecting_type=dct,
+)
 
 
 @pytest.fixture
@@ -168,8 +170,7 @@ class TestPeriodicDataUpdateUpload:
             program,
         )
         pageIndividuals.selectGlobalProgramFilter(program.name)
-        pageIndividuals.getNavProgrammePopulation().click()
-        pageIndividuals.getNavIndividuals().click()
+        pageIndividuals.getNavPeople().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
         pageIndividuals.getButtonImport().click()
         pageIndividuals.getDialogImport()
