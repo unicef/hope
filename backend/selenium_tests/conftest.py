@@ -10,6 +10,8 @@ from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from flags.models import FlagState
+# from selenium.webdriver.chrome.service import Service
+
 from page_object.accountability.communication import AccountabilityCommunication
 from page_object.accountability.comunication_details import (
     AccountabilityCommunicationDetails,
@@ -69,6 +71,9 @@ from requests import Session
 from selenium import webdriver
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service as ChromiumService
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.core.os_manager import ChromeType, OperationSystemManager
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
@@ -184,6 +189,8 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
 @pytest.fixture
 def driver() -> Chrome:
     chrome_options = Options()
+    # chrome_headless_path = "./chrome-headless-shell-linux64"
+    # chrome_options.binary_location = chrome_headless_path
     if not os.environ.get("STREAM"):
         chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
@@ -194,7 +201,15 @@ def driver() -> Chrome:
         os.makedirs("./report/downloads/")
     prefs = {"download.default_directory": "./report/downloads/"}
     chrome_options.add_experimental_option("prefs", prefs)
-    yield webdriver.Chrome(options=chrome_options)
+    from selenium.webdriver.chrome.service import Service as ChromeService
+    # driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_options)
+    # driver = webdriver.Chrome(service=ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM,
+    #                                                                       driver_version="128.0.6613.84").install()),
+    #                           options=chrome_options)
+    # ChromeDriverManager(os_system_manager=OperationSystemManager(os_type="linux-mips64")).install()
+    ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
+    driver = webdriver.Chrome(options=chrome_options)
+    yield driver
 
 
 @pytest.fixture(autouse=True)
