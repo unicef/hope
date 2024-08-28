@@ -66,8 +66,10 @@ export const HouseholdMembersPage = (): React.ReactElement => {
     permissions,
   );
 
-  const canViewHouseholdMembersPage =
-    (PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST, permissions);
+  const canViewHouseholdMembersPage = hasPermissions(
+    PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST,
+    permissions,
+  );
 
   if (householdChoicesLoading || individualChoicesLoading)
     return <LoadingComponent />;
@@ -89,21 +91,28 @@ export const HouseholdMembersPage = (): React.ReactElement => {
             }}
           >
             <Tab data-cy="tab-individuals" label="Individuals" />
-            <Tooltip
-              title={t(
-                !canViewPDUListAndDetails
-                  ? 'Programme does not have defined fields for periodic updates'
-                  : 'Permission Denied',
-              )}
-            >
-              <span>
-                <Tab
-                  disabled={!programHasPdu || !canViewPDUListAndDetails}
-                  data-cy="tab-periodic-data-updates"
-                  label="Periodic Data Updates"
-                />
-              </span>
-            </Tooltip>
+            {!programHasPdu || !canViewPDUListAndDetails ? (
+              <Tooltip
+                title={t(
+                  !canViewPDUListAndDetails
+                    ? 'Programme does not have defined fields for periodic updates'
+                    : 'Permission Denied',
+                )}
+              >
+                <span>
+                  <Tab
+                    disabled
+                    data-cy="tab-periodic-data-updates"
+                    label="Periodic Data Updates"
+                  />
+                </span>
+              </Tooltip>
+            ) : (
+              <Tab
+                data-cy="tab-periodic-data-updates"
+                label="Periodic Data Updates"
+              />
+            )}
           </Tabs>
         }
       />
