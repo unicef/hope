@@ -23,6 +23,29 @@ class TestRegistrationDataImportQuery(APITestCase):
             dataSource
             numberOfIndividuals
             numberOfHouseholds
+            batchDuplicatesCountAndPercentage{
+              count
+              percentage
+            }
+            batchUniqueCountAndPercentage{
+              count
+              percentage
+            }
+            goldenRecordDuplicatesCountAndPercentage{
+              count
+              percentage
+            }
+            goldenRecordPossibleDuplicatesCountAndPercentage{
+              count
+              percentage
+            }
+            goldenRecordUniqueCountAndPercentage{
+              count
+              percentage
+            }
+            totalHouseholdsCountWithValidPhoneNo
+            isDeduplicated
+            canMerge
           }
         }
       }
@@ -119,4 +142,17 @@ class TestRegistrationDataImportQuery(APITestCase):
                     "RegistrationDataImportNode",
                 )
             },
+        )
+
+    def test_registration_data_status_choices(self) -> None:
+        self.snapshot_graphql_request(
+            request_string="""
+            query registrationDataStatusChoices {
+              registrationDataStatusChoices {
+                name
+                value
+              }
+            }
+            """,
+            context={"user": self.user},
         )
