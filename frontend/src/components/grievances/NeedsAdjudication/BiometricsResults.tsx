@@ -3,6 +3,7 @@ import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { usePermissions } from '@hooks/usePermissions';
 import PersonIcon from '@mui/icons-material/Person';
 import {
   Box,
@@ -14,6 +15,7 @@ import {
 import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 
 export interface Individual {
   __typename?: 'IndividualNode';
@@ -51,17 +53,24 @@ export const BiometricsResults = ({
 }: BiometricsResultsProps): React.ReactElement => {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const permissions = usePermissions();
+  const canViewBiometricsResults = hasPermissions(
+    PERMISSIONS.GRIEVANCES_VIEW_BIOMETRIC_RESULTS,
+    permissions,
+  );
 
   return (
     <>
-      <Box p={2}>
-        <Button
-          onClick={() => setDialogOpen(true)}
-          data-cy="button-open-biometrics-results"
-        >
-          {t('Open Biometrics Results')}
-        </Button>
-      </Box>
+      {canViewBiometricsResults && (
+        <Box p={2}>
+          <Button
+            onClick={() => setDialogOpen(true)}
+            data-cy="button-open-biometrics-results"
+          >
+            {t('Open Biometrics Results')}
+          </Button>
+        </Box>
+      )}
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
