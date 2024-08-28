@@ -7433,6 +7433,7 @@ export type RegistrationDataImportNode = Node & {
   batchPossibleDuplicates: Scalars['Int']['output'];
   batchUnique: Scalars['Int']['output'];
   batchUniqueCountAndPercentage?: Maybe<Array<Maybe<CountAndPercentageNode>>>;
+  biometricDeduplicationEnabled?: Maybe<Scalars['Boolean']['output']>;
   businessArea?: Maybe<UserBusinessAreaNode>;
   canMerge?: Maybe<Scalars['Boolean']['output']>;
   createdAt: Scalars['DateTime']['output'];
@@ -11329,7 +11330,7 @@ export type RegistrationDataImportQueryVariables = Exact<{
 }>;
 
 
-export type RegistrationDataImportQuery = { __typename?: 'Query', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, canMerge?: boolean | null, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, isDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, batchUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordPossibleDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null } | null };
+export type RegistrationDataImportQuery = { __typename?: 'Query', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', biometricDeduplicationEnabled?: boolean | null, numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, canMerge?: boolean | null, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, isDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, batchUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordPossibleDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null } | null };
 
 export type XlsxImportDataQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -22923,6 +22924,7 @@ export const RegistrationDataImportDocument = gql`
     query RegistrationDataImport($id: ID!) {
   registrationDataImport(id: $id) {
     ...registrationDetailed
+    biometricDeduplicationEnabled
   }
 }
     ${RegistrationDetailedFragmentDoc}`;
@@ -28615,6 +28617,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   batchPossibleDuplicates?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   batchUnique?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   batchUniqueCountAndPercentage?: Resolver<Maybe<Array<Maybe<ResolversTypes['CountAndPercentageNode']>>>, ParentType, ContextType>;
+  biometricDeduplicationEnabled?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>;
   canMerge?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;

@@ -4183,6 +4183,7 @@ type RegistrationDataImportNode implements Node {
   totalHouseholdsCountWithValidPhoneNo: Int
   isDeduplicated: String
   canMerge: Boolean
+  biometricDeduplicationEnabled: Boolean
 }
 
 type RegistrationDataImportNodeConnection {

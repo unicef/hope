@@ -21,6 +21,9 @@ from hct_mis_api.apps.registration_data.models import (
     DeduplicationEngineSimilarityPair,
     RegistrationDataImport,
 )
+from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
+    BiometricDeduplicationService,
+)
 
 
 class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
@@ -68,6 +71,7 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
     is_deduplicated = graphene.String()
 
     can_merge = graphene.Boolean()
+    biometric_deduplication_enabled = graphene.Boolean()
 
     class Meta:
         model = RegistrationDataImport
@@ -79,66 +83,69 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
     def resolve_batch_duplicates_count_and_percentage(
         parent: RegistrationDataImport, info: Any, **kwargs: Any
     ) -> List[Dict[str, Union[int, float]]]:
-        return [
-            # TODO: add identifiers data from hard deduplication
-            get_count_and_percentage(0, 0),  # identifiers
+        result = [
             get_count_and_percentage(parent.batch_duplicates, parent.number_of_individuals),  # biographical
-            # TODO add biometrics data from biometrics deduplication
-            get_count_and_percentage(0, 0),  # biometrics
         ]
+        if parent.biometric_deduplication_enabled:
+            biometric_duplicates = BiometricDeduplicationService().get_duplicates_for_rdi_against_batch(parent).count()
+            result.append(get_count_and_percentage(biometric_duplicates, parent.number_of_individuals))
+        return result
 
     @staticmethod
     def resolve_batch_unique_count_and_percentage(
         parent: RegistrationDataImport, info: Any, **kwargs: Any
     ) -> List[Dict[str, Union[int, float]]]:
-        return [
-            # TODO: add identifiers data from hard deduplication
-            get_count_and_percentage(0, 0),  # identifiers
+        result = [
             get_count_and_percentage(parent.batch_unique, parent.number_of_individuals),  # biographical
-            # TODO add biometrics data from biometrics deduplication
-            get_count_and_percentage(0, 0),  # biometrics
         ]
+        if parent.biometric_deduplication_enabled:
+            biometric_duplicates = BiometricDeduplicationService().get_duplicates_for_rdi_against_batch(parent).count()
+            biometric_unique = parent.number_of_individuals - biometric_duplicates
+            result.append(get_count_and_percentage(biometric_unique, parent.number_of_individuals))
+        return result
 
     @staticmethod
     def resolve_golden_record_duplicates_count_and_percentage(
         parent: RegistrationDataImport, info: Any, **kwargs: Any
     ) -> List[Dict[str, Union[int, float]]]:
         return [
-            # TODO: add identifiers data from hard deduplication
-            get_count_and_percentage(0, 0),  # identifiers
             get_count_and_percentage(parent.golden_record_duplicates, parent.number_of_individuals),  # biographical
-            # TODO add biometrics data from biometrics deduplication
-            get_count_and_percentage(0, 0),  # biometrics
         ]
 
     @staticmethod
     def resolve_golden_record_possible_duplicates_count_and_percentage(
         parent: RegistrationDataImport, info: Any, **kwargs: Any
     ) -> List[Dict[str, Union[int, float]]]:
-        return [
-            # TODO: add identifiers data from hard deduplication
-            get_count_and_percentage(0, 0),  # identifiers
+        result = [
             get_count_and_percentage(
                 parent.golden_record_possible_duplicates, parent.number_of_individuals
             ),  # biographical
-            # TODO add biometrics data from biometrics deduplication
-            get_count_and_percentage(0, 0),  # biometrics
         ]
+        if parent.biometric_deduplication_enabled:
+            biometric_duplicates = (
+                BiometricDeduplicationService().get_duplicates_for_rdi_against_population(parent).count()
+            )
+            result.append(get_count_and_percentage(biometric_duplicates, parent.number_of_individuals))
+        return result
 
     @staticmethod
     def resolve_golden_record_unique_count_and_percentage(
         parent: RegistrationDataImport, info: Any, **kwargs: Any
     ) -> List[Dict[str, Union[int, float]]]:
-        return [
-            # TODO: add identifiers data from hard deduplication
-            get_count_and_percentage(0, 0),  # identifiers
+        result = [
             get_count_and_percentage(parent.golden_record_unique, parent.number_of_individuals),  # biographical
-            # TODO add biometrics data from biometrics deduplication
-            get_count_and_percentage(0, 0),  # biometrics
         ]
+        if parent.biometric_deduplication_enabled:
+            biometric_duplicates = (
+                BiometricDeduplicationService().get_duplicates_for_rdi_against_population(parent).count()
+            )
+            biometric_unique = parent.number_of_individuals - biometric_duplicates
+            result.append(get_count_and_percentage(biometric_unique, parent.number_of_individuals))
+        return result
 
-    def resolve_total_households_count_with_valid_phone_no(self, info: Any) -> int:
-        return self.households.exclude(
+    @staticmethod
+    def resolve_total_households_count_with_valid_phone_no(parent: RegistrationDataImport, info: Any) -> int:
+        return parent.households.exclude(
             head_of_household__phone_no_valid=False,
             head_of_household__phone_no_alternative_valid=False,
         ).count()
@@ -163,6 +170,10 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
         if is_still_processing:
             return False
         return True
+
+    @staticmethod
+    def resolve_biometric_deduplication_enabled(parent: RegistrationDataImport, info: Any) -> bool:
+        return parent.biometric_deduplication_enabled
 
 
 class Query(graphene.ObjectType):

@@ -57,8 +57,8 @@ export const DedupeBox = ({
         <Grid item xs={12}>
           <Grid container direction="column">
             {options.map((option) => (
-              <Grid key={option.name} container>
-                <Grid item xs={3}>
+              <Grid key={option.name} container spacing={4}>
+                <Grid item xs={4}>
                   <BoldGrey>
                     <Small data-cy={`label-${option.name}`}>
                       {option.name}
@@ -66,7 +66,13 @@ export const DedupeBox = ({
                   </BoldGrey>
                 </Grid>
                 {option.options.map((item, index) => (
-                  <Grid key={option.name + index} container item xs={3}>
+                  <Grid
+                    key={option.name + index}
+                    container
+                    item
+                    xs={4}
+                    spacing={4}
+                  >
                     <Grid item xs={6}>
                       <Bold data-cy={`percentage-${option.name}`}>
                         {item.percentage.toFixed(2)}%
