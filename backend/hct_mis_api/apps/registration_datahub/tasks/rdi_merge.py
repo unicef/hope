@@ -38,7 +38,10 @@ from hct_mis_api.apps.registration_data.models import (
     KoboImportedSubmission,
     RegistrationDataImport,
 )
-from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
+from hct_mis_api.apps.registration_datahub.celery_tasks import (
+    create_grievance_tickets_for_dedup_engine_results,
+    deduplicate_documents,
+)
 from hct_mis_api.apps.registration_datahub.signals import rdi_merged
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
@@ -358,7 +361,13 @@ class RdiMergeTask:
                     )
                     populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
                     logger.info(f"RDI:{registration_data_import_id} Saved registration data import")
+
                     transaction.on_commit(lambda: deduplicate_documents.delay())
+                    if obj_hct.program.biometric_deduplication_enabled:
+                        transaction.on_commit(
+                            lambda: create_grievance_tickets_for_dedup_engine_results.delay(obj_hct.id)
+                        )
+
                     rdi_merged.send(sender=obj_hct.__class__, instance=obj_hct)
                     log_create(
                         RegistrationDataImport.ACTIVITY_LOG_MAPPING,
