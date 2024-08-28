@@ -94,7 +94,7 @@ export const HouseholdMembersPage = (): React.ReactElement => {
             {!programHasPdu || !canViewPDUListAndDetails ? (
               <Tooltip
                 title={t(
-                  !canViewPDUListAndDetails
+                  !programHasPdu
                     ? 'Programme does not have defined fields for periodic updates'
                     : 'Permission Denied',
                 )}
