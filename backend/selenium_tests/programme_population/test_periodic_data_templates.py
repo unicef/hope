@@ -288,6 +288,7 @@ class TestPeriodicDataTemplates:
 
         pageIndividuals.getDownloadBtn(periodic_data_update_template.pk).click()
         periodic_data_update_template.refresh_from_db()
+
         assert (
             pageIndividuals.check_file_exists(f"./report/downloads/{periodic_data_update_template.file.file.name}")
             is True
