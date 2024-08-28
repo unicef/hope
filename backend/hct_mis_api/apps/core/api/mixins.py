@@ -50,7 +50,10 @@ class BaseAPI:
         response = self._client.post(f"{self.api_url}{endpoint}", json=data)
         if validate_response:
             response = self.validate_response(response)
-        return response.json(), response.status_code
+        try:
+            return response.json(), response.status_code
+        except ValueError:
+            return {}, response.status_code
 
     def _get(self, endpoint: str, params: Optional[Dict] = None) -> Tuple[Dict, int]:
         response = self._client.get(f"{self.api_url}{endpoint}", params=params)
@@ -60,7 +63,10 @@ class BaseAPI:
     def _delete(self, endpoint: str, params: Optional[Dict] = None) -> Tuple[Dict, int]:
         response = self._client.delete(f"{self.api_url}{endpoint}", params=params)
         response = self.validate_response(response)
-        return response.json(), response.status_code
+        try:
+            return response.json(), response.status_code
+        except ValueError:
+            return {}, response.status_code
 
 
 class BusinessAreaMixin:

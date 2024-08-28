@@ -6,8 +6,8 @@ from hct_mis_api.apps.core.api.mixins import BaseAPI
 
 @dataclasses.dataclass
 class DeduplicationSet:
-    name: str  # program.name
-    reference_id: str  # program.id
+    reference_pk: str  # program.id
+    notification_url: str  # webhook url
 
 
 @dataclasses.dataclass
@@ -68,7 +68,7 @@ class DeduplicationEngineAPI(BaseAPI):
         return response_data
 
     def get_duplicates(self, deduplication_set_id: str) -> dict:
-        response_data, _ = self._get(self.Endpoints.GET_DUPLICATES.format(pk=deduplication_set_id))
+        response_data, _ = self._get(self.Endpoints.GET_DUPLICATES.format(deduplication_set_pk=deduplication_set_id))
         return response_data
 
     def process_deduplication(self, deduplication_set_id: str) -> Tuple[dict, int]:

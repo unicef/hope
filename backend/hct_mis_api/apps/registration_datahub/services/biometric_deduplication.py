@@ -27,11 +27,14 @@ class BiometricDeduplicationService:
         self.api = DeduplicationEngineAPI()
 
     def create_deduplication_set(self, program: Program) -> None:
-        program.deduplication_set_id = uuid.uuid4()
+        deduplication_set = DeduplicationSet(
+            reference_pk=str(program.id),
+            notification_url=f"api/rest/{program.business_area.slug}/programs/{str(program.id)}/registration-data/webhookdeduplication/",
+            # notification_url=reverse("registration-data:webhook_deduplication", kwargs={"program_id": str(program.id), "business_area": program.business_area.slug}), # TODO MB why reverse is not working
+        )
+        response_data = self.api.create_deduplication_set(deduplication_set)
+        program.deduplication_set_id = uuid.UUID(response_data["id"])
         program.save(update_fields=["deduplication_set_id"])
-
-        deduplication_set = DeduplicationSet(name=program.name, reference_id=str(program.deduplication_set_id))
-        self.api.create_deduplication_set(deduplication_set)
 
     def get_deduplication_set_results(self, deduplication_set_id: str) -> dict:
         return self.api.get_duplicates(deduplication_set_id)

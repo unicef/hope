@@ -56,8 +56,3 @@ class PaymentPlanBulkActionSerializer(serializers.Serializer):
     ids = serializers.ListField(child=serializers.CharField())
     action = serializers.ChoiceField(PaymentPlan.Action.choices)
     comment = serializers.CharField(required=False, allow_blank=True)
-
-
-class DeduplicationEngineStatusSerializer(serializers.Serializer):
-    state = serializers.DecimalField(max_digits=5, decimal_places=2)
-    error = serializers.CharField(required=False, allow_blank=True)

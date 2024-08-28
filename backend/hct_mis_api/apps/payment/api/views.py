@@ -3,8 +3,6 @@ from typing import Any, Optional
 
 from django.db import transaction
 from django.db.models import QuerySet
-from django.http import HttpRequest
-from django.views.decorators.csrf import csrf_exempt
 
 from constance import config
 from django_filters import rest_framework as filters
@@ -15,7 +13,6 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
@@ -33,18 +30,11 @@ from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.api.caches import PaymentPlanKeyConstructor
 from hct_mis_api.apps.payment.api.filters import PaymentPlanFilter
 from hct_mis_api.apps.payment.api.serializers import (
-    DeduplicationEngineStatusSerializer,
     PaymentPlanBulkActionSerializer,
     PaymentPlanSerializer,
 )
-from hct_mis_api.apps.payment.celery_tasks import (
-    fetch_biometric_deduplication_results_and_process,
-)
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
-    BiometricDeduplicationService,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -173,24 +163,3 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
             PaymentPlan.Action.REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW.name,
         }
         return action_to_permissions_map.get(action_name)
-
-
-class WebhookDeduplicationView(APIView):
-    serializer_class = DeduplicationEngineStatusSerializer
-
-    @csrf_exempt
-    def post(self, request: HttpRequest, set_id: str) -> Response:
-        serializer = self.serializer_class(data=request.data)
-
-        if serializer.is_valid():
-            if serializer.validated_data["state"] == "CLEAN":
-                fetch_biometric_deduplication_results_and_process.delay(set_id)
-            else:
-                service = BiometricDeduplicationService()
-                service.mark_rdis_as_deduplication_error(set_id)
-                logger.error(f"Failed to process deduplication set {set_id} {serializer.validated_data}")
-
-            return Response(status=status.HTTP_200_OK)
-
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

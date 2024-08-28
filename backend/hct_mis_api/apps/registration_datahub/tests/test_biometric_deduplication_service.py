@@ -50,8 +50,8 @@ class BiometricDeduplicationServiceTest(TestCase):
         self.assertIsNotNone(self.program.deduplication_set_id)
         mock_create_deduplication_set.assert_called_once_with(
             DeduplicationSet(
-                name=self.program.name,
-                reference_id=str(self.program.deduplication_set_id),
+                reference_pk=str(self.program.deduplication_set_id),
+                notification_url="",
             )
         )
 
