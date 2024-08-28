@@ -83,7 +83,7 @@ COLLECT_TYPES = (
 )
 
 
-class PendingHousehold(TimeStampedUUIDModel):
+class ImportedHousehold(TimeStampedUUIDModel):
     class CollectType(models.TextChoices):
         STANDARD = "STANDARD", "Standard"
         SINGLE = "SINGLE", "Single"
@@ -239,7 +239,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     email = models.CharField(max_length=255, blank=True)
     payment_delivery_phone_no = PhoneNumberField(blank=True, default=BLANK)
     household = models.ForeignKey(
-        "hct_mis_api.apps.registration_datahub.models.PendingHousehold",
+        "ImportedHousehold",
         null=True,
         related_name="individuals",
         on_delete=models.CASCADE,
@@ -353,7 +353,7 @@ class ImportedIndividualRoleInHousehold(TimeStampedUUIDModel):
         related_name="households_and_roles",
     )
     household = models.ForeignKey(
-        "hct_mis_api.apps.registration_datahub.models.PendingHousehold",
+        "ImportedHousehold",
         on_delete=models.CASCADE,
         related_name="individuals_and_roles",
     )
@@ -517,7 +517,7 @@ class KoboImportedSubmission(models.Model):
     kobo_submission_time = models.DateTimeField()  # ImportedHousehold.kobo_submission_time
     # we use on_delete=models.SET_NULL because we want to be able to delete
     # ImportedHousehold without loosing track of importing
-    imported_household = models.ForeignKey(PendingHousehold, blank=True, null=True, on_delete=models.SET_NULL)
+    imported_household = models.ForeignKey(ImportedHousehold, blank=True, null=True, on_delete=models.SET_NULL)
     amended = models.BooleanField(default=False, blank=True)
 
     registration_data_import = models.ForeignKey(
