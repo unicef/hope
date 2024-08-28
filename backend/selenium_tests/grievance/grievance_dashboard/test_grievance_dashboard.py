@@ -1,4 +1,6 @@
 from datetime import timedelta
+from random import choice
+from typing import Optional
 
 from django.utils import timezone
 
@@ -82,9 +84,10 @@ def generate_grievance(
     unicef_id: str = "GRV-0000001",
     status: int = GrievanceTicket.STATUS_NEW,
     category: int = GrievanceTicket.CATEGORY_REFERRAL,
-    created_by: User | None = None,
-    assigned_to: User | None = None,
-    business_area: BusinessArea | None = None,
+    issue_type: Optional[int] = None,
+    created_by: Optional[User] = None,
+    assigned_to: Optional[User] = None,
+    business_area: Optional[BusinessArea] = None,
     priority: int = 1,
     urgency: int = 1,
     household_unicef_id: str = "HH-20-0000.0001",
@@ -94,6 +97,12 @@ def generate_grievance(
     created_by = User.objects.first() if created_by is None else created_by
     assigned_to = User.objects.first() if assigned_to is None else assigned_to
     business_area = BusinessArea.objects.filter(slug="afghanistan").first() if business_area is None else business_area
+    if issue_type is None:
+        issue_type = (
+            choice(list(GrievanceTicket.ISSUE_TYPES_CHOICES.get(category, {}).keys()))
+            if GrievanceTicket.ISSUE_TYPES_CHOICES.get(category)
+            else None
+        )
     grievance_ticket = GrievanceTicket.objects.create(
         **{
             "business_area": business_area,
@@ -102,6 +111,7 @@ def generate_grievance(
             "consent": True,
             "description": "grievance_ticket_1",
             "category": category,
+            "issue_type": issue_type,
             "status": status,
             "created_by": created_by,
             "assigned_to": assigned_to,
