@@ -11,24 +11,19 @@ from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
     DocumentTypeFactory,
+    PendingDocumentFactory,
+    PendingHouseholdFactory,
+    PendingIndividualFactory,
     create_household,
 )
 from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_TAX_ID,
     ROLE_NO_ROLE,
+    PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
-from hct_mis_api.apps.registration_datahub.fixtures import (
-    ImportedDocumentFactory,
-    ImportedDocumentTypeFactory,
-    ImportedHouseholdFactory,
-    ImportedIndividualFactory,
-    RegistrationDataImportDatahubFactory,
-)
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedIndividualRoleInHousehold,
-)
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 
@@ -73,19 +68,19 @@ class TestDetails(TestCase):
         self.assertEqual(response_nok.status_code, 404)
 
     def test_filtering_business_area_code_with_registration_id(self) -> None:
-        rdi_datahub = RegistrationDataImportDatahubFactory(business_area_slug=self.business_area.slug)
-        imported_household = ImportedHouseholdFactory(registration_data_import=rdi_datahub)
-        imported_individual = ImportedIndividualFactory(household=imported_household, relationship=HEAD)
-        imported_household.head_of_household = imported_individual
-        imported_household.detail_id = "HOPE-2022530111222"
-        imported_household.save()
-        ImportedIndividualRoleInHousehold.objects.create(
-            individual=imported_individual,
+        rdi = RegistrationDataImportFactory(business_area=self.business_area)
+        pending_household = PendingHouseholdFactory(registration_data_import=rdi)
+        pending_individual = PendingIndividualFactory(household=pending_household, relationship=HEAD)
+        pending_household.head_of_household = pending_individual
+        pending_household.detail_id = "HOPE-2022530111222"
+        pending_household.save()
+        PendingIndividualRoleInHousehold.objects.create(
+            individual=pending_individual,
             role=ROLE_NO_ROLE,
-            household=imported_household,
+            household=pending_household,
         )
 
-        registration_id = imported_household.detail_id
+        registration_id = pending_household.detail_id
 
         response_ok = self.api_client.get(
             f"/api/hh-status?registration_id={registration_id}&business_area_code={self.business_area.code}"
@@ -103,28 +98,26 @@ class TestDetails(TestCase):
         self.assertEqual(response.json()["status"], "not found")
 
     def test_getting_individual_with_status_imported(self) -> None:
-        imported_household = ImportedHouseholdFactory()
-        imported_individual = ImportedIndividualFactory(household=imported_household, relationship=HEAD)
-        imported_household.head_of_household = imported_individual
-        imported_household.save()
-        ImportedIndividualRoleInHousehold.objects.create(
-            individual=imported_individual,
+        pending_household = PendingHouseholdFactory()
+        pending_individual = PendingIndividualFactory(household=pending_household, relationship=HEAD)
+        pending_household.head_of_household = pending_individual
+        pending_household.save()
+        PendingIndividualRoleInHousehold.objects.create(
+            individual=pending_individual,
             role=ROLE_NO_ROLE,
-            household=imported_household,
+            household=pending_household,
         )
 
-        imported_document_type = ImportedDocumentTypeFactory(
-            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
-        )
-        imported_document = ImportedDocumentFactory(individual=imported_individual, type=imported_document_type)
-        tax_id = imported_document.document_number
+        document_type = DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
+        pending_document = PendingDocumentFactory(individual=pending_individual, type=document_type)
+        tax_id = pending_document.document_number
 
         response = self.api_client.get(f"/api/hh-status?tax_id={tax_id}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         info = data["info"]
         self.assertEqual(info["status"], "imported")
-        self.assertEqual(info["date"], _time(imported_household.updated_at))
+        self.assertEqual(info["date"], _time(pending_household.updated_at))
 
         individual = info["individual"]
         self.assertIsNotNone(individual)
@@ -209,23 +202,23 @@ class TestDetails(TestCase):
         self.assertEqual(response.json()["status"], "not found")
 
     def test_getting_household_with_status_imported(self) -> None:
-        imported_household = ImportedHouseholdFactory()
-        imported_individual = ImportedIndividualFactory(household=imported_household, relationship=HEAD)
-        imported_household.head_of_household = imported_individual
-        imported_household.detail_id = "HOPE-2022530111222"
-        imported_household.save()
-        ImportedIndividualRoleInHousehold.objects.create(
-            individual=imported_individual,
+        pending_household = PendingHouseholdFactory()
+        pending_individual = PendingIndividualFactory(household=pending_household, relationship=HEAD)
+        pending_household.head_of_household = pending_individual
+        pending_household.detail_id = "HOPE-2022530111222"
+        pending_household.save()
+        PendingIndividualRoleInHousehold.objects.create(
+            individual=pending_individual,
             role=ROLE_NO_ROLE,
-            household=imported_household,
+            household=pending_household,
         )
 
-        registration_id = imported_household.detail_id
+        registration_id = pending_household.detail_id
 
         response = self.api_client.get(f"/api/hh-status?registration_id={registration_id}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         info = data["info"]
         self.assertEqual(info["status"], "imported")
-        self.assertEqual(info["date"], _time(imported_household.updated_at))
+        self.assertEqual(info["date"], _time(pending_household.updated_at))
         self.assertTrue("individual" not in info)
