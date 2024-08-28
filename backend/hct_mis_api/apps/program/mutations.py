@@ -283,7 +283,9 @@ class CopyProgram(
             create_program_partner_access(partners_data, program, partner_access)
 
         transaction.on_commit(
-            lambda: copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
+            lambda: copy_program_task.delay(
+                copy_from_program_id=program_id, new_program_id=program.id, user_id=str(info.context.user.id)
+            )
         )
 
         if pdu_fields is not None:

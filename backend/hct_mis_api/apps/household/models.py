@@ -977,7 +977,6 @@ class Individual(
         "registration_data.RegistrationDataImport",
         related_name="individuals",
         on_delete=models.CASCADE,
-        null=True,
     )
     work_status = models.CharField(
         max_length=20,

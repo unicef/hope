@@ -290,7 +290,9 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                 program_for_enroll = form.cleaned_data["program_for_enroll"]
                 households_ids = list(qs.distinct("unicef_id").values_list("id", flat=True))
                 enroll_households_to_program_task.delay(
-                    households_ids=households_ids, program_for_enroll_id=str(program_for_enroll.id)
+                    households_ids=households_ids,
+                    program_for_enroll_id=str(program_for_enroll.id),
+                    user_id=str(request.user.id),
                 )
                 self.message_user(
                     request,

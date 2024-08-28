@@ -203,7 +203,6 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         cls.system_flagging_grievance_ticket = GrievanceTicketFactory(
             id="43c59eda-6664-41d6-9339-05efcb11da82",
             category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
-            issue_type=None,
             admin2=cls.admin_area_1,
             business_area=cls.business_area,
         )
@@ -218,7 +217,6 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         cls.needs_adjudication_grievance_ticket = GrievanceTicketFactory(
             id="2b419ce3-3297-47ee-a47f-43442abac73e",
             category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-            issue_type=None,
             admin2=cls.admin_area_1,
             business_area=cls.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
