@@ -22,9 +22,9 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
     ImportedDocument,
     ImportedDocumentType,
+    ImportedHousehold,
     ImportedIndividual,
     ImportedIndividualIdentity,
-    PendingHousehold,
     Record,
     RegistrationDataImportDatahub,
 )
@@ -48,7 +48,7 @@ class RegistrationDataImportDatahubFactory(DjangoModelFactory):
 
 class ImportedHouseholdFactory(DjangoModelFactory):
     class Meta:
-        model = PendingHousehold
+        model = ImportedHousehold
 
     consent_sign = factory.django.ImageField(color="blue")
     consent = True
@@ -138,7 +138,7 @@ class ImportedIndividualFactory(DjangoModelFactory):
 
 def create_imported_household(
     household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None
-) -> Tuple[PendingHousehold, ImportedIndividual]:
+) -> Tuple[ImportedHousehold, ImportedIndividual]:
     if household_args is None:
         household_args = {}
     if individual_args is None:
@@ -154,12 +154,12 @@ def create_imported_household(
 
 def create_imported_household_and_individuals(
     household_data: Optional[Dict] = None, individuals_data: Optional[List[Dict]] = None
-) -> Tuple[PendingHousehold, List[ImportedIndividual]]:
+) -> Tuple[ImportedHousehold, List[ImportedIndividual]]:
     if household_data is None:
         household_data = {}
     if individuals_data is None:
         individuals_data = []
-    household: PendingHousehold = ImportedHouseholdFactory.build(**household_data, size=len(individuals_data))
+    household: ImportedHousehold = ImportedHouseholdFactory.build(**household_data, size=len(individuals_data))
     individuals: List[ImportedIndividual] = [
         ImportedIndividualFactory(household=household, **individual_data) for individual_data in individuals_data
     ]
