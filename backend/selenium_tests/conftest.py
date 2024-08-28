@@ -203,8 +203,7 @@ def driver() -> Chrome:
     chrome_options.add_experimental_option("prefs", prefs)
     from selenium.webdriver.chrome.service import Service as ChromeService
     # driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_options)
-    driver = webdriver.Chrome(service=ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM,
-                                                                          driver_version="128.0.6613.84").install()),
+    driver = webdriver.Chrome(service=ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()),
                               options=chrome_options)
     # ChromeDriverManager(os_system_manager=OperationSystemManager(os_type="linux-mips64")).install()
     # ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
