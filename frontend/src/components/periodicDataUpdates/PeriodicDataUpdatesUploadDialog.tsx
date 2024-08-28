@@ -68,13 +68,7 @@ export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
     }
   };
   let errorMessage = null;
-  // @ts-ignore
-  if (error && error?.data?.error) {
-    // @ts-ignore
-    errorMessage = (
-      <Error data-cy="pdu-upload-error">{error?.data?.error}</Error>
-    );
-  } else if (error) {
+  if (error) {
     errorMessage = (
       <Error data-cy="pdu-upload-error">
         {t('Error uploading file:')} {error.message}
