@@ -27,6 +27,7 @@ from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
 from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 @pytest.fixture(autouse=True)
@@ -94,6 +95,18 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         rdi.refresh_from_db()
         assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR
+
+    def test_upload_individuals_no_individuals(self) -> None:
+        rdi = RegistrationDataImportFactory(
+            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING
+        )
+        IndividualFactory(registration_data_import=rdi, photo="some_photo.jpg", withdrawn=True)
+
+        service = BiometricDeduplicationService()
+        service.upload_individuals(str(self.program.deduplication_set_id), rdi)
+
+        rdi.refresh_from_db()
+        assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_FINISHED
 
     @patch(
         "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.process_deduplication"
@@ -247,42 +260,210 @@ class BiometricDeduplicationServiceTest(TestCase):
             individual1=ind2, individual2=ind3, similarity_score=0.8
         ).exists()
 
-    def test_get_duplicates_for_rdi(self) -> None:
+    def test_mark_rdis_as(self) -> None:
+        service = BiometricDeduplicationService()
+
+        self.program.deduplication_set_id = uuid.uuid4()
+        self.program.save()
+        rdi = RegistrationDataImportFactory(
+            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+        )
+
+        service.mark_rdis_as_deduplicated(str(self.program.deduplication_set_id))
+        rdi.refresh_from_db()
+        self.assertEqual(rdi.deduplication_engine_status, RegistrationDataImport.DEDUP_ENGINE_FINISHED)
+
+        rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+        rdi.save()
+
+        service.mark_rdis_as_deduplication_error(str(self.program.deduplication_set_id))
+        rdi.refresh_from_db()
+        self.assertEqual(rdi.deduplication_engine_status, RegistrationDataImport.DEDUP_ENGINE_ERROR)
+
+    def test_get_duplicates_for_rdi_against_population(self) -> None:
         self.program.deduplication_set_id = uuid.uuid4()
         self.program.business_area.biometric_deduplication_threshold = 0.6
         self.program.business_area.save()
         self.program.save()
 
-        individuals = IndividualFactory.create_batch(3)
-        rdi = RegistrationDataImportFactory(
-            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING
+        rdi1 = RegistrationDataImportFactory(
+            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
         )
-        ind1, ind2, ind3 = sorted(individuals, key=lambda x: x.id)
-        rdi.individuals.add(ind1, ind2, ind3)
+        rdi2 = RegistrationDataImportFactory(
+            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
+        )
+        rdi3 = RegistrationDataImportFactory(
+            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
+        )
+        individuals = IndividualFactory.create_batch(6, program=self.program)
+        ind1, ind2, ind3, ind4, ind5, ind6 = sorted(individuals, key=lambda x: x.id)
+
+        ind1.registration_data_import = rdi1
+        ind2.registration_data_import = rdi1
+        ind3.registration_data_import = rdi2
+        ind4.registration_data_import = rdi2
+        ind5.registration_data_import = rdi3
+        ind6.registration_data_import = rdi3
+        ind1.save()
+        ind2.save()
+        ind3.save()
+        ind4.save()
+        ind5.save()
+        ind6.save()
+
+        for ind in [ind1, ind2, ind3, ind4]:
+            ind.rdi_merge_status = MergeStatusModel.PENDING
+            ind.save()
 
         service = BiometricDeduplicationService()
         similarity_pairs = [
-            SimilarityPair(score=0.5, first=ind1.id, second=ind2.id),
-            SimilarityPair(
-                score=0.7,
-                first=ind1.id,
-                second=ind3.id,
-            ),
-            SimilarityPair(score=0.8, first=ind2.id, second=ind3.id),
-            SimilarityPair(
-                score=0.9,
-                first=ind1.id,
-                second=ind3.id,
-            ),
+            SimilarityPair(score=0.9, first=ind1.id, second=ind2.id),  # within rdi1
+            SimilarityPair(score=0.7, first=ind1.id, second=ind3.id),  # across rdi1 and rdi2
+            SimilarityPair(score=0.8, first=ind1.id, second=ind5.id),  # across rdi1 and population
+            SimilarityPair(score=0.9, first=ind2.id, second=ind6.id),  # across rdi1 and population
+            SimilarityPair(score=0.9, first=ind3.id, second=ind4.id),  # within rdi2
+            SimilarityPair(score=0.7, first=ind4.id, second=ind5.id),  # across rdi2 and population
+            SimilarityPair(score=0.8, first=ind5.id, second=ind6.id),  # within population
         ]
         service.store_results(str(self.program.deduplication_set_id), similarity_pairs)
 
-        duplicates = service.get_duplicates_for_rdi(rdi)
+        duplicates = service.get_duplicates_for_rdi_against_population(rdi1)
 
         assert len(duplicates) == 2
         assert list(
             duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
         ) == [
-            {"individual1": ind1.id, "individual2": ind3.id, "similarity_score": Decimal("0.7")},
-            {"individual1": ind2.id, "individual2": ind3.id, "similarity_score": Decimal("0.8")},
+            {"individual1": ind1.id, "individual2": ind5.id, "similarity_score": Decimal("0.8")},
+            {"individual1": ind2.id, "individual2": ind6.id, "similarity_score": Decimal("0.9")},
         ]
+
+    def test_get_duplicates_for_merged_rdi_against_population(self) -> None:
+        self.program.deduplication_set_id = uuid.uuid4()
+        self.program.business_area.biometric_deduplication_threshold = 0.6
+        self.program.business_area.save()
+        self.program.save()
+
+        rdi1 = RegistrationDataImportFactory(
+            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
+        )
+        rdi2 = RegistrationDataImportFactory(
+            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
+        )
+        rdi3 = RegistrationDataImportFactory(
+            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
+        )
+        individuals = IndividualFactory.create_batch(6, program=self.program)
+        ind1, ind2, ind3, ind4, ind5, ind6 = sorted(individuals, key=lambda x: x.id)
+
+        ind1.registration_data_import = rdi1
+        ind2.registration_data_import = rdi1
+        ind3.registration_data_import = rdi2
+        ind4.registration_data_import = rdi2
+        ind5.registration_data_import = rdi3
+        ind6.registration_data_import = rdi3
+        ind1.save()
+        ind2.save()
+        ind3.save()
+        ind4.save()
+        ind5.save()
+        ind6.save()
+
+        for ind in [ind3, ind4]:
+            ind.rdi_merge_status = MergeStatusModel.PENDING
+            ind.save()
+
+        service = BiometricDeduplicationService()
+        similarity_pairs = [
+            SimilarityPair(score=0.7, first=ind1.id, second=ind2.id),  # within merged rdi1
+            SimilarityPair(score=0.7, first=ind1.id, second=ind3.id),  # across merged rdi1 and pending rdi2
+            SimilarityPair(score=0.8, first=ind1.id, second=ind5.id),  # across merged rdi1 and population
+            SimilarityPair(score=0.9, first=ind2.id, second=ind6.id),  # across merged rdi1 and population
+            SimilarityPair(score=0.9, first=ind3.id, second=ind4.id),  # within pending rdi2
+            SimilarityPair(score=0.7, first=ind4.id, second=ind5.id),  # across pending rdi2 and population
+            SimilarityPair(score=0.8, first=ind5.id, second=ind6.id),  # within population
+        ]
+        service.store_results(str(self.program.deduplication_set_id), similarity_pairs)
+
+        duplicates = service.get_duplicates_for_merged_rdi_against_population(rdi1)
+
+        assert len(duplicates) == 3
+        assert list(
+            duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
+        ) == [
+            {"individual1": ind1.id, "individual2": ind2.id, "similarity_score": Decimal("0.7")},
+            {"individual1": ind1.id, "individual2": ind5.id, "similarity_score": Decimal("0.8")},
+            {"individual1": ind2.id, "individual2": ind6.id, "similarity_score": Decimal("0.9")},
+        ]
+
+    def test_get_duplicates_for_rdi_against_batch(self) -> None:
+        self.program.deduplication_set_id = uuid.uuid4()
+        self.program.business_area.biometric_deduplication_threshold = 0.6
+        self.program.business_area.save()
+        self.program.save()
+
+        rdi1 = RegistrationDataImportFactory(
+            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
+        )
+        rdi2 = RegistrationDataImportFactory(
+            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
+        )
+        rdi3 = RegistrationDataImportFactory(
+            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
+        )
+        individuals = IndividualFactory.create_batch(6, program=self.program)
+        ind1, ind2, ind3, ind4, ind5, ind6 = sorted(individuals, key=lambda x: x.id)
+
+        ind1.registration_data_import = rdi1
+        ind2.registration_data_import = rdi1
+        ind3.registration_data_import = rdi2
+        ind4.registration_data_import = rdi2
+        ind5.registration_data_import = rdi3
+        ind6.registration_data_import = rdi3
+        ind1.save()
+        ind2.save()
+        ind3.save()
+        ind4.save()
+        ind5.save()
+        ind6.save()
+
+        for ind in [ind1, ind2, ind3, ind4]:
+            ind.rdi_merge_status = MergeStatusModel.PENDING
+            ind.save()
+
+        service = BiometricDeduplicationService()
+        similarity_pairs = [
+            SimilarityPair(score=0.9, first=ind1.id, second=ind2.id),  # within rdi1
+            SimilarityPair(score=0.7, first=ind1.id, second=ind3.id),  # across rdi1 and rdi2
+            SimilarityPair(score=0.8, first=ind1.id, second=ind5.id),  # across rdi1 and population
+            SimilarityPair(score=0.9, first=ind2.id, second=ind6.id),  # across rdi1 and population
+            SimilarityPair(score=0.9, first=ind3.id, second=ind4.id),  # within rdi2
+            SimilarityPair(score=0.7, first=ind4.id, second=ind5.id),  # across rdi2 and population
+            SimilarityPair(score=0.8, first=ind5.id, second=ind6.id),  # within population
+        ]
+        service.store_results(str(self.program.deduplication_set_id), similarity_pairs)
+
+        duplicates = service.get_duplicates_for_rdi_against_batch(rdi1)
+
+        assert len(duplicates) == 1
+        assert list(
+            duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
+        ) == [
+            {"individual1": ind1.id, "individual2": ind2.id, "similarity_score": Decimal("0.9")},
+        ]
+
+    @patch(
+        "hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services.create_needs_adjudication_tickets_for_biometrics"
+    )
+    def test_create_grievance_tickets_for_duplicates(
+        self, create_needs_adjudication_tickets_for_biometrics_mock: mock.Mock
+    ) -> None:
+        rdi1 = RegistrationDataImportFactory(
+            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
+        )
+
+        service = BiometricDeduplicationService()
+        service.get_duplicates_for_merged_rdi_against_population = mock.MagicMock()
+        service.get_duplicates_for_merged_rdi_against_population.return_value = []
+
+        service.create_grievance_tickets_for_duplicates(rdi1)
+        create_needs_adjudication_tickets_for_biometrics_mock.assert_called_once_with([], rdi1)
